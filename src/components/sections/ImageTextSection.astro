@@ -5,7 +5,7 @@
  * Props:
  * - title: Section heading
  * - content: Array of text paragraphs or slot content
- * - image: Image URL
+ * - image: Image import (ImageMetadata) or URL string
  * - imageAlt: Image alt text
  * - imagePosition?: 'left' | 'right'
  * - ctaText?: CTA button text
@@ -13,12 +13,14 @@
  * - bgClass?: Background class (e.g., 'bg-alt')
  */
 
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import UnifiedButton from '../Buttons/UnifiedButton.astro';
 
 export interface Props {
   title: string;
   content?: string[];
-  image: string;
+  image: ImageMetadata | string;
   imageAlt: string;
   imagePosition?: 'left' | 'right';
   ctaText?: string;
@@ -36,6 +38,8 @@ const {
   ctaHref,
   bgClass = ''
 } = Astro.props;
+
+const isImageMetadata = typeof image !== 'string';
 ---
 
 <section class={`image-text-section section ${bgClass}`}>
@@ -43,7 +47,11 @@ const {
     <div class={`image-text-layout ${imagePosition === 'right' ? 'reverse' : ''}`}>
       <!-- Image -->
       <div class="image-container">
-        <img src={image} alt={imageAlt} />
+        {isImageMetadata ? (
+          <Image src={image as ImageMetadata} alt={imageAlt} />
+        ) : (
+          <img src={image as string} alt={imageAlt} />
+        )}
       </div>
 
       <!-- Text Content -->

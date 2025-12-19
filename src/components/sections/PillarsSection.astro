@@ -9,9 +9,12 @@
  * - bgClass?: Background class
  */
 
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
 export interface Pillar {
   icon?: string; // SVG string (optional)
-  image?: string; // Image path (optional)
+  image?: ImageMetadata | string; // Image import or path (optional)
   title: string;
   description: string;
 }
@@ -43,7 +46,11 @@ const {
         <div class="pillar-card">
           {pillar.image ? (
             <div class="pillar-image-container">
-              <img src={pillar.image} alt={pillar.title} class="pillar-image" />
+              {typeof pillar.image !== 'string' ? (
+                <Image src={pillar.image as ImageMetadata} alt={pillar.title} class="pillar-image" />
+              ) : (
+                <img src={pillar.image} alt={pillar.title} class="pillar-image" />
+              )}
             </div>
           ) : pillar.icon ? (
             <div class="pillar-icon" set:html={pillar.icon}></div>
