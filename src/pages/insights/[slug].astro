@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import Reader from '../../components/reader/Reader.astro';
 import ReaderNav from '../../components/reader/ReaderNav.astro';
@@ -18,9 +18,10 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 const { enableReader, readerSections, linkedAssets } = entry.data;
 
-// Get author data from authors collection
+// Get author data from authors collection (using getCollection for proper image processing)
 const authorSlug = entry.data.author;
-const authorEntry = await getEntry('authors', authorSlug);
+const allAuthors = await getCollection('authors');
+const authorEntry = allAuthors.find(a => a.slug === authorSlug);
 const author = authorEntry?.data;
 
 // Get suggested posts (same category, excluding current)

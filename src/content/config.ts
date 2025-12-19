@@ -131,13 +131,17 @@ const projectsCollection = defineCollection({
       downloadableResources: z.array(z.string()).optional(),
     }),
 
-    // Custom cards - manually add cards to the masonry grid
-    customCards: z.array(z.object({
-      type: z.enum(['text', 'stat', 'quote', 'highlight']),
-      title: z.string().optional(),
-      content: z.string(),
-      icon: z.string().optional(), // Phosphor icon (e.g., "ph:heart-duotone")
-      size: z.enum(['small', 'medium', 'large']).optional(),
+    // Specifications - label/value pairs for the grid (like "Focus: Process over Product")
+    specifications: z.array(z.object({
+      label: z.string(), // e.g., "Focus", "Duration", "Resources"
+      value: z.string(), // e.g., "Process over Product", "5-15 min", "4"
+      icon: z.string().optional(), // Phosphor icon (e.g., "ph:sparkle-duotone")
+    })).optional(),
+
+    // Highlights - standalone text callouts for the grid
+    highlights: z.array(z.object({
+      text: z.string(), // e.g., "No experience needed - creativity is for everyone"
+      icon: z.string().optional(),
     })).optional(),
   }),
 });
