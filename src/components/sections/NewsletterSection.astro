@@ -1,0 +1,114 @@
+---
+import LegacyButton from '../Buttons/LegacyButton.astro';
+
+/**
+ * NewsletterSection - Reusable newsletter signup section
+ *
+ * Props:
+ * - title: Newsletter heading
+ * - description: Newsletter description
+ * - placeholder?: Input placeholder text
+ * - buttonText?: Submit button text
+ * - formId?: Form ID for JavaScript targeting
+ * - bgClass?: Background class
+ */
+
+export interface Props {
+  title: string;
+  description: string;
+  placeholder?: string;
+  buttonText?: string;
+  formId?: string;
+  bgClass?: string;
+}
+
+const {
+  title,
+  description,
+  placeholder = 'Enter your email',
+  buttonText = 'Subscribe',
+  formId = 'newsletter-form',
+  bgClass = 'bg-alt'
+} = Astro.props;
+---
+
+<section class={`newsletter-section section ${bgClass}`}>
+  <div class="container container-5xl text-center">
+    <h2 class="newsletter-title">{title}</h2>
+    <p class="newsletter-description">{description}</p>
+
+    <form class="newsletter-form" id={formId}>
+      <input
+        type="email"
+        placeholder={placeholder}
+        class="newsletter-input"
+        required
+      />
+      <LegacyButton type="submit" variant="primary" size="md">
+        {buttonText}
+      </LegacyButton>
+    </form>
+
+    <slot />
+  </div>
+</section>
+
+<style>
+  .newsletter-section {
+    padding: var(--space-3xl) 0;
+  }
+
+  .newsletter-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-md);
+    color: var(--color-Text-700);
+  }
+
+  .newsletter-description {
+    font-size: var(--text-lg);
+    color: var(--color-Text-500);
+    margin-bottom: var(--space-xl);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .newsletter-input {
+    padding: var(--space-md);
+    border: 1px solid var(--color-Neutral-300);
+    border-radius: var(--border-radius);
+    font-size: var(--text-base);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .newsletter-input:focus {
+    outline: none;
+    border-color: var(--color-Primary-500);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-Primary-500) 10%, transparent);
+  }
+
+  @media (min-width: 640px) {
+    .newsletter-form {
+      flex-direction: row;
+    }
+
+    .newsletter-input {
+      flex: 1;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .newsletter-title {
+      font-size: var(--text-4xl);
+    }
+  }
+</style>

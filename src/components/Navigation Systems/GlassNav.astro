@@ -1,0 +1,1473 @@
+---
+// Glassmorphic Navigation Component
+import CartIcon from '../shop/CartIcon.astro';
+import { MAIN_NAV_LINKS } from '../../config/navigation';
+
+// Define expandable menu items with title, description, and optional icon
+const expandableMenus: Record<string, { title: string; description: string; href: string; icon?: string }[]> = {
+  'assets': [
+    { title: 'All Assets', description: 'Browse our complete collection of resources', href: '/assets' },
+    { title: 'Worksheets', description: 'Interactive worksheets for personal growth', href: '/assets?filter=worksheet' },
+    { title: 'Workbooks', description: 'Comprehensive workbooks for deeper learning', href: '/assets?filter=workbook' },
+    { title: 'Guides', description: 'Step-by-step guides for your journey', href: '/assets?filter=guide' },
+    { title: 'Toolkits', description: 'Complete toolkits with multiple resources', href: '/assets?filter=toolkit' },
+  ],
+  'insights': [
+    { title: 'All Insights', description: 'Browse all articles and blog posts', href: '/insights' },
+    { title: 'Latest Articles', description: 'Read our most recent publications', href: '/insights' },
+    { title: 'Featured Stories', description: 'Inspiring stories from our community', href: '/insights' },
+  ],
+  'services': [
+    { title: 'All Services', description: 'Explore our full range of services', href: '/services' },
+    { title: 'Workshops', description: 'Join our interactive group sessions', href: '/services#workshops' },
+    { title: 'Consultations', description: 'One-on-one personalized support', href: '/services#consultations' },
+  ],
+  'settings': [
+    { title: 'Contact', description: '', href: '/contact', icon: 'mail' },
+    { title: 'Share', description: '', href: '#share', icon: 'share' },
+    { title: 'Search', description: '', href: '#search', icon: 'search' },
+    { title: 'Accessibility', description: '', href: '#accessibility', icon: 'eye' },
+  ],
+};
+
+// Which nav items have expandable menus
+const navItemsWithMenus = ['Assets', 'Insights', 'Services'];
+---
+
+<nav class="nav-container" id="main-nav">
+  <div class="nav-content">
+    <!-- Mobile Hamburger Menu -->
+    <button class="hamburger-menu mobile-only" id="hamburger-btn" aria-label="Toggle menu">
+      <svg viewBox="0 0 64 48">
+        <path d="M19,15 L45,15 C70,15 58,-2 49.0177126,7 L19,37"></path>
+        <path d="M19,24 L45,24 C61.2371586,24 57,49 41,33 L32,24"></path>
+        <path d="M45,33 L19,33 C-8,33 6,-2 22,14 L45,37"></path>
+      </svg>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="nav-logo">
+      <img src="/Logo/WWAS NAV LOGO CAPS.png" alt="Walking With A Smile" class="logo-image" />
+    </a>
+
+    <!-- Mobile Cart Icon -->
+    <div class="mobile-nav-icons mobile-only">
+      <a href="/cart" class="mobile-icon-btn mobile-cart-btn" aria-label="Cart">
+        <img src="/allyicons/icons8-basket-50.png" alt="" class="mobile-basket-icon" aria-hidden="true" />
+      </a>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <div class="nav-links desktop-only">
+      {MAIN_NAV_LINKS.map(link => (
+        navItemsWithMenus.includes(link.text) ? (
+          <a
+            href={link.href}
+            class="nav-item-expandable"
+            data-expand={link.text.toLowerCase()}
+            data-color={link.color}
+          >
+            {link.text}
+          </a>
+        ) : (
+          <a href={link.href} data-color={link.color}>{link.text}</a>
+        )
+      ))}
+
+      <!-- Settings Gear Icon -->
+      <button class="nav-icon-btn" data-expand="settings" aria-label="Settings" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+
+      <CartIcon />
+    </div>
+  </div>
+
+  <!-- Expandable Mega Menus -->
+  {Object.entries(expandableMenus).map(([key, items]) => (
+    <div class={`expandable-menu expandable-menu-${key}`}>
+      <div class="expandable-menu-wrapper">
+        {items.map(item => (
+          <a
+            href={item.href}
+            class={`expandable-item ${item.icon ? 'expandable-item--icon' : ''}`}
+            data-action={
+              item.href === '#share' ? 'copy-link' :
+              item.href === '#search' ? 'open-search' :
+              item.href === '#accessibility' ? 'open-a11y-panel' :
+              null
+            }
+          >
+            {item.icon === 'mail' && (
+              <svg class="expandable-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M22 6l-10 7L2 6"/>
+              </svg>
+            )}
+            {item.icon === 'share' && (
+              <svg class="expandable-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"/>
+                <circle cx="6" cy="12" r="3"/>
+                <circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+            )}
+            {item.icon === 'search' && (
+              <svg class="expandable-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            )}
+            {item.icon === 'eye' && (
+              <svg class="expandable-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            )}
+            <h3>{item.title}</h3>
+            {item.description && <p>{item.description}</p>}
+          </a>
+        ))}
+      </div>
+    </div>
+  ))}
+
+  <!-- Mobile Menu Items -->
+  <ul class="mobile-menu-list mobile-only">
+    {MAIN_NAV_LINKS.map(link => (
+      <li><a href={link.href}>{link.text}</a></li>
+    ))}
+    <li class="mobile-settings">
+      <a href="/accessibility-settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        Settings
+      </a>
+    </li>
+  </ul>
+
+  <!-- Simple Menu Link for tiny screens -->
+  <a href="/menu" class="tiny-menu-btn">MENU</a>
+
+</nav>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    let menuOpen = false;
+
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const nav = document.getElementById('main-nav');
+
+    // Handle scroll to add/remove background
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const currentScroll = window.pageYOffset;
+
+      if (currentScroll > 50) {
+        nav?.classList.add('scrolled');
+      } else {
+        nav?.classList.remove('scrolled');
+      }
+
+      // Hide nav on scroll down, show on scroll up
+      if (currentScroll > lastScroll && currentScroll > 100) {
+        nav?.classList.add('nav-hidden');
+      } else {
+        nav?.classList.remove('nav-hidden');
+      }
+
+      lastScroll = currentScroll;
+    });
+
+    hamburgerBtn?.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+
+      if (menuOpen) {
+        // Calculate scrollbar width to prevent layout shift
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+        hamburgerBtn.classList.add('active');
+        nav?.classList.add('menu-opened');
+        document.body.style.overflow = 'hidden';
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      } else {
+        hamburgerBtn.classList.remove('active');
+        nav?.classList.remove('menu-opened');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
+    });
+
+    // Close menu when clicking on a link
+    const mobileLinks = document.querySelectorAll('.mobile-menu-list a');
+    mobileLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        menuOpen = false;
+        hamburgerBtn?.classList.remove('active');
+        nav?.classList.remove('menu-opened');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      });
+    });
+
+    // Handle resize to clean up menu state below 200px
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 200) {
+        menuOpen = false;
+        hamburgerBtn?.classList.remove('active');
+        nav?.classList.remove('menu-opened');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
+    });
+
+    // Expandable mega menu functionality - hover based
+    const expandButtons = document.querySelectorAll('[data-expand]');
+    const expandableMenus = document.querySelectorAll('.expandable-menu');
+    const menuTypes = ['assets', 'insights', 'services', 'settings'];
+    let currentExpanded: string | null = null;
+    let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    function closeAllMenus() {
+      menuTypes.forEach(type => {
+        nav?.classList.remove(`expanded-${type}`);
+      });
+      expandButtons.forEach(btn => {
+        btn.setAttribute('aria-expanded', 'false');
+        btn.classList.remove('active');
+      });
+      currentExpanded = null;
+    }
+
+    function openMenu(menuType: string, button: Element) {
+      if (currentExpanded === menuType) return;
+      closeAllMenus();
+      nav?.classList.add(`expanded-${menuType}`);
+      button.setAttribute('aria-expanded', 'true');
+      button.classList.add('active');
+      currentExpanded = menuType;
+    }
+
+    // Hover events for nav buttons
+    expandButtons.forEach(button => {
+      button.addEventListener('mouseenter', () => {
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+        const menuType = button.getAttribute('data-expand');
+        if (menuType) {
+          openMenu(menuType, button);
+        }
+      });
+
+      button.addEventListener('mouseleave', () => {
+        hoverTimeout = setTimeout(() => {
+          closeAllMenus();
+        }, 150);
+      });
+    });
+
+    // Keep menu open when hovering over the expandable menu area
+    expandableMenus.forEach(menu => {
+      menu.addEventListener('mouseenter', () => {
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+      });
+
+      menu.addEventListener('mouseleave', () => {
+        hoverTimeout = setTimeout(() => {
+          closeAllMenus();
+        }, 150);
+      });
+    });
+
+    // Keep menu open when hovering back to nav-content
+    const navContent = document.querySelector('.nav-content');
+    navContent?.addEventListener('mouseenter', () => {
+      // Don't close if we re-enter nav area
+    });
+
+    // Close menus when mouse leaves the entire nav container
+    nav?.addEventListener('mouseleave', () => {
+      hoverTimeout = setTimeout(() => {
+        closeAllMenus();
+      }, 150);
+    });
+
+    // Close menus on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAllMenus();
+      }
+    });
+
+    // Handle special actions in menu items
+
+    // Accessibility panel
+    const a11yLinks = document.querySelectorAll('[data-action="open-a11y-panel"]');
+    a11yLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeAllMenus();
+        // Open the accessibility panel
+        const panel = document.getElementById('a11y-panel');
+        const backdrop = document.querySelector('.a11y-panel__backdrop') as HTMLElement;
+        if (panel && backdrop) {
+          panel.classList.add('is-open');
+          backdrop.classList.add('is-visible');
+          panel.removeAttribute('hidden');
+          backdrop.removeAttribute('hidden');
+        }
+      });
+    });
+
+    // Copy link to clipboard
+    const copyLinks = document.querySelectorAll('[data-action="copy-link"]');
+    copyLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeAllMenus();
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+          if ((window as any).showToast) {
+            (window as any).showToast({
+              message: 'Link copied to clipboard!',
+              theme: 'professional',
+              animation: 'slide',
+              duration: 3000
+            });
+          }
+        }).catch(err => {
+          console.error('Failed to copy link:', err);
+        });
+      });
+    });
+
+    // Open search
+    const searchLinks = document.querySelectorAll('[data-action="open-search"]');
+    searchLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeAllMenus();
+        if ((window as any).openSearchOverlay) {
+          (window as any).openSearchOverlay();
+        }
+      });
+    });
+
+  });
+</script>
+
+<style>
+  .nav-container {
+    position: fixed;
+    top: var(--nav-top-offset, 0);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 0.25rem 2rem;
+    /* Glassmorphism */
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.5s cubic-bezier(0.4, 0.01, 0.165, 0.99);
+    overflow: hidden;
+  }
+
+  /* Scrolled state - more opaque background */
+  .nav-container.scrolled {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Hidden state - slide up */
+  .nav-container.nav-hidden {
+    transform: translateY(-100%);
+  }
+
+  .nav-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 70px;
+  }
+
+  /* Logo */
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    background: transparent;
+  }
+
+  .logo-image {
+    height: 64px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    background: transparent;
+  }
+
+  /* Desktop Navigation Links */
+  .nav-links {
+    display: flex;
+    gap: 3rem;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .nav-links a {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-Text-500);
+    text-decoration: none;
+    transition: color 0.2s ease, font-weight 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .nav-links a:hover {
+    color: var(--color-Primary-500);
+    font-weight: 700;
+  }
+
+  .nav-links a:active {
+    color: var(--color-Secondary-500);
+  }
+
+  /* Expandable nav item link */
+  .nav-item-expandable {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-Text-500);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease, font-weight 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .nav-item-expandable:hover {
+    color: var(--color-Primary-500);
+    font-weight: 700;
+  }
+
+  .nav-item-expandable:active {
+    color: var(--color-Secondary-500);
+  }
+
+  .nav-item-expandable.active {
+    color: var(--color-Primary-500);
+  }
+
+  .nav-item-expandable .expand-arrow {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.3s ease;
+  }
+
+  .nav-item-expandable.active .expand-arrow {
+    transform: rotate(180deg);
+  }
+
+  /* Settings icon button - matches nav link color behavior */
+  .nav-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: var(--color-Text-500);
+    transition: color 0.2s ease;
+  }
+
+  .nav-icon-btn:hover {
+    color: var(--color-Primary-500);
+  }
+
+  .nav-icon-btn:active {
+    color: var(--color-Secondary-500);
+  }
+
+  .nav-icon-btn.active {
+    color: var(--color-Primary-500);
+  }
+
+  .nav-icon-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Mobile settings link styles */
+  .mobile-settings a {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mobile-settings svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Mobile nav icons (cog and cart) - hidden on desktop */
+  .mobile-nav-icons {
+    display: none;
+  }
+
+  .mobile-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    color: var(--color-Text-500);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .mobile-icon-btn:hover {
+    color: var(--color-Primary-500);
+  }
+
+  .mobile-icon-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Mobile basket icon */
+  .mobile-basket-icon {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0);
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+
+  .mobile-cart-btn:hover .mobile-basket-icon {
+    opacity: 1;
+  }
+
+  /* Navbar Donate Button */
+  .nav-donate-btn {
+    background: var(--color-Primary-500) !important;
+    color: white !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: var(--border-radius) !important;
+    transition: all var(--transition-fast) !important;
+    box-shadow: 0 2px 8px color-mix(in oklch, var(--color-Primary-500) 30%, transparent);
+    position: relative;
+    z-index: 9999;
+  }
+
+  .nav-donate-btn:hover {
+    background: var(--color-Primary-600) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Primary-500) 40%, transparent);
+  }
+
+  /* Desktop Expandable Navbar */
+  .nav-item-expandable {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .expandable-menu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease, padding 0.5s ease;
+    width: 100%;
+  }
+
+  .expandable-menu-wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.4s ease 0.2s, transform 0.4s ease 0.2s;
+  }
+
+  .nav-container.expanded-assets,
+  .nav-container.expanded-insights,
+  .nav-container.expanded-services,
+  .nav-container.expanded-settings {
+    transition: all 0.5s ease;
+  }
+
+  .nav-container.expanded-assets .expandable-menu-assets,
+  .nav-container.expanded-insights .expandable-menu-insights,
+  .nav-container.expanded-services .expandable-menu-services,
+  .nav-container.expanded-settings .expandable-menu-settings {
+    max-height: 400px;
+    padding: 2rem 0;
+  }
+
+  .nav-container.expanded-assets .expandable-menu-assets .expandable-menu-wrapper,
+  .nav-container.expanded-insights .expandable-menu-insights .expandable-menu-wrapper,
+  .nav-container.expanded-services .expandable-menu-services .expandable-menu-wrapper,
+  .nav-container.expanded-settings .expandable-menu-settings .expandable-menu-wrapper {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Assets menu has 5 items - adjust grid */
+  .expandable-menu-assets .expandable-menu-wrapper {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Settings menu has 4 items - full width */
+  .expandable-menu-settings .expandable-menu-wrapper {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  /* Icon-based expandable items (for settings) */
+  .expandable-item--icon {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    min-height: auto;
+  }
+
+  .expandable-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--color-Text-500);
+    transition: color 0.2s ease;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .expandable-item--icon:hover .expandable-icon {
+    color: var(--color-Primary-500);
+  }
+
+  .expandable-item--icon h3 {
+    margin: 0;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  .expandable-item {
+    text-decoration: none;
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.5);
+    transition: background 0.2s ease;
+  }
+
+  .expandable-item:hover {
+    background: color-mix(in oklch, var(--color-Primary-500) 15%, transparent);
+  }
+
+  .expandable-item h3 {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-Text-600);
+    margin: 0 0 0.5rem 0;
+    transition: color 0.2s ease;
+  }
+
+  .expandable-item:hover h3 {
+    color: var(--color-Primary-500);
+  }
+
+  .expandable-item:active h3 {
+    color: var(--color-Secondary-500);
+  }
+
+  .expandable-item p {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.8rem;
+    color: var(--color-Text-400);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Mobile Hamburger Menu */
+  .hamburger-menu {
+    display: none;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    margin: 0;
+    outline: none;
+    position: relative;
+    border: none;
+    background: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .hamburger-menu svg {
+    width: 40px;
+    height: 30px;
+    stroke: var(--color-Text-600);
+    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    display: block;
+  }
+
+  .hamburger-menu svg path {
+    transition: stroke-dasharray 0.85s ease 0s,
+                stroke-dashoffset 0.85s ease 0s;
+    stroke-dasharray: 26px 100px;
+    stroke-dashoffset: 126px;
+    transform: translateZ(0);
+  }
+
+  .hamburger-menu svg path:nth-child(2) {
+    transition: stroke-dasharray 0.7s ease-in 0s,
+                stroke-dashoffset 0.7s ease-in 0s;
+    stroke-dashoffset: 100px;
+    stroke-dasharray: 26px 74px;
+  }
+
+  .hamburger-menu svg path:nth-child(3) {
+    stroke-dashoffset: 133px;
+    stroke-dasharray: 26px 107px;
+  }
+
+  .hamburger-menu.active svg path {
+    stroke-dashoffset: 57px;
+  }
+
+  .hamburger-menu.active svg path:nth-child(1),
+  .hamburger-menu.active svg path:nth-child(3) {
+    transition: stroke-dasharray 0.85s cubic-bezier(.2, .4, .2, 1.1) 0.15s,
+                stroke-dashoffset 0.85s cubic-bezier(.2, .4, .2, 1.1) 0.15s;
+  }
+
+  .hamburger-menu.active svg path:nth-child(2) {
+    transition: stroke-dasharray 0.4s ease 0s,
+                stroke-dashoffset 0.4s ease 0s;
+    stroke-dashoffset: 2px;
+    stroke-dasharray: 1px 74px;
+  }
+
+  .hamburger-menu.active svg path:nth-child(3) {
+    stroke-dashoffset: 58px;
+  }
+
+  /* Mobile Menu List - hidden by default */
+  .mobile-menu-list {
+    display: none;
+  }
+
+  /* Responsive */
+  .desktop-only {
+    display: flex;
+  }
+
+  .mobile-only {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .desktop-only {
+      display: none;
+    }
+
+    .mobile-only {
+      display: block;
+    }
+
+    .hamburger-menu {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+    }
+
+    /* Mobile nav is full width with hamburger left, logo right */
+    .nav-container {
+      position: fixed;
+      top: var(--nav-top-offset, 0);
+      left: 0;
+      right: 0;
+      bottom: auto;
+      padding: 0.5rem 1rem;
+      z-index: 1005;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      overflow: hidden;
+      max-height: 3.5rem;
+      height: 3.5rem;
+      transition: height 0.65s cubic-bezier(0.4, 0.0, 0.2, 1) 0.25s,
+                  max-height 0.65s cubic-bezier(0.4, 0.0, 0.2, 1) 0.25s,
+                  background 0.65s ease 0.25s,
+                  backdrop-filter 0.65s ease 0.25s;
+    }
+
+    .nav-content {
+      width: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 2.75rem;
+      height: 2.75rem;
+    }
+
+    .nav-logo {
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+      max-width: calc(100% - 50px);
+    }
+
+    .logo-image {
+      height: 36px;
+    }
+
+    /* Show mobile icons on mobile */
+    .mobile-nav-icons {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .mobile-icon-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .mobile-basket-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .hamburger-menu svg {
+      stroke: var(--color-Primary-500);
+    }
+
+    /* Prevent navbar from hiding on mobile */
+    .nav-container.nav-hidden {
+      transform: translateY(0) !important;
+    }
+
+    /* Mobile Menu List */
+    .mobile-menu-list {
+      display: block;
+      list-style: none;
+      padding: 80px 1rem 2rem;
+      margin: 0;
+      max-height: calc(100vh - 3.5rem);
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+
+    .mobile-menu-list::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    .mobile-menu-list li {
+      margin-bottom: 0.25rem;
+      padding-left: 0;
+      transform: translateX(-100%);
+      opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1),
+                  opacity 0.3s ease;
+    }
+
+    .mobile-menu-list li:nth-child(1) { transition-delay: 0.18s; }
+    .mobile-menu-list li:nth-child(2) { transition-delay: 0.15s; }
+    .mobile-menu-list li:nth-child(3) { transition-delay: 0.12s; }
+    .mobile-menu-list li:nth-child(4) { transition-delay: 0.09s; }
+    .mobile-menu-list li:nth-child(5) { transition-delay: 0.06s; }
+    .mobile-menu-list li:nth-child(6) { transition-delay: 0.03s; }
+    .mobile-menu-list li:nth-child(7) { transition-delay: 0s; }
+    .mobile-menu-list li:nth-child(8) { transition-delay: 0s; }
+
+    .mobile-menu-list > li > a {
+      display: block;
+      font-family: 'Quicksand', sans-serif;
+      font-size: clamp(1rem, 4vw, 1.2rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-Text-600);
+      text-decoration: none;
+      padding: 0.75rem 0 0.75rem 2.5rem;
+      transition: color 0.2s ease, font-weight 0.2s ease;
+    }
+
+    .mobile-menu-list a {
+      display: block;
+      font-family: 'Quicksand', sans-serif;
+      font-size: clamp(1rem, 4vw, 1.2rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-Text-600);
+      text-decoration: none;
+      padding: 0.75rem 0 0.75rem 2rem;
+      transition: color 0.2s ease, font-weight 0.2s ease;
+    }
+
+    .mobile-menu-list a:hover {
+      color: var(--color-Primary-500);
+      font-weight: 700;
+    }
+
+    .mobile-menu-list a:active {
+      color: var(--color-Secondary-500);
+    }
+
+    /* Mobile Donate Button */
+    .mobile-donate-btn {
+      display: inline-block !important;
+      background: var(--color-Primary-500) !important;
+      color: white !important;
+      padding: 0.75rem 1.5rem !important;
+      margin-top: var(--space-md);
+      margin-left: 2rem !important;
+      border-radius: var(--border-radius) !important;
+      text-align: center;
+      box-shadow: 0 2px 8px color-mix(in oklch, var(--color-Primary-500) 30%, transparent);
+      position: relative;
+      z-index: 9999;
+    }
+
+    .mobile-donate-btn:hover {
+      background: var(--color-Primary-600) !important;
+      color: white !important;
+    }
+
+    /* Submenu styles */
+    .has-submenu .menu-item-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding-left: 0.75rem;
+    }
+
+    .submenu-toggle {
+      position: absolute;
+      left: -0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+      color: var(--color-Primary-500);
+      font-size: 1.5rem;
+      font-weight: 300;
+      line-height: 1;
+      transition: color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .submenu-toggle:hover {
+      color: var(--color-Secondary-500);
+    }
+
+    .has-submenu.submenu-open .submenu-toggle {
+      color: var(--color-Secondary-500);
+    }
+
+    .has-submenu.submenu-open .menu-item-wrapper > a {
+      color: var(--color-Secondary-500);
+    }
+
+    .has-submenu .menu-item-wrapper > a:hover {
+      color: var(--color-Secondary-500);
+    }
+
+    .submenu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .has-submenu.submenu-open .submenu {
+      max-height: 500px;
+    }
+
+    .submenu li {
+      margin-top: 0;
+      padding-left: 0;
+      transform: none;
+      opacity: 1;
+      transition: none;
+    }
+
+    .submenu li a {
+      padding-left: 2rem;
+      font-size: clamp(0.875rem, 3.5vw, 1rem);
+      font-weight: 400;
+    }
+
+    /* Menu opened state */
+    .nav-container.menu-opened {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      max-height: 100vh;
+      margin: 0;
+      padding: 0.5rem 1rem;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      transition: height 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) 0s,
+                  max-height 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) 0s,
+                  background 0.6s ease 0s,
+                  backdrop-filter 0.6s ease 0s;
+    }
+
+    .nav-container.menu-opened .hamburger-menu svg {
+      stroke: var(--color-Secondary-500);
+    }
+
+    .nav-container.menu-opened .mobile-menu-list li {
+      transform: translateX(0) !important;
+      opacity: 1;
+      transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1),
+                  opacity 0.5s ease;
+    }
+
+    .nav-container.menu-opened .mobile-menu-list li:nth-child(1) { transition-delay: 0.1s; }
+    .nav-container.menu-opened .mobile-menu-list li:nth-child(2) { transition-delay: 0.17s; }
+    .nav-container.menu-opened .mobile-menu-list li:nth-child(3) { transition-delay: 0.24s; }
+    .nav-container.menu-opened .mobile-menu-list li:nth-child(4) { transition-delay: 0.31s; }
+    .nav-container.menu-opened .mobile-menu-list li:nth-child(5) { transition-delay: 0.38s; }
+    .nav-container.menu-opened .mobile-menu-list li:nth-child(6) { transition-delay: 0.45s; }
+    .nav-container.menu-opened .mobile-menu-list li:nth-child(7) { transition-delay: 0.52s; }
+    .nav-container.menu-opened .mobile-menu-list li:nth-child(8) { transition-delay: 0.59s; }
+  }
+
+  /* Extra large desktop - between 1250px and 1350px */
+  @media (min-width: 1250px) and (max-width: 1350px) {
+    .logo-image {
+      height: 56px;
+    }
+  }
+
+  /* Large desktop - full spacing */
+  @media (min-width: 1289px) {
+    .nav-links {
+      gap: 3rem;
+    }
+  }
+
+  /* Hide gear icon on 1400px+ screens */
+  @media (min-width: 1400px) {
+    .nav-icon-btn[data-expand="settings"] {
+      display: none;
+    }
+  }
+
+  /* Medium-large desktop: 1100px - 1288px */
+  @media (min-width: 1100px) and (max-width: 1288px) {
+    .nav-container {
+      padding: 0.25rem 1.5rem;
+    }
+
+    .nav-links {
+      gap: 1.75rem;
+    }
+
+    .nav-links a,
+    .nav-item-expandable {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+    }
+
+    .logo-image {
+      height: 35px;
+    }
+  }
+
+  /* Medium desktop: 1000px - 1099px */
+  @media (min-width: 1000px) and (max-width: 1099px) {
+    .nav-container {
+      padding: 0.25rem 1rem;
+    }
+
+    .nav-links {
+      gap: 1.25rem;
+    }
+
+    .nav-links a,
+    .nav-item-expandable {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+    }
+
+    .logo-image {
+      height: 32px;
+    }
+
+    .nav-icon-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  /* Tablet-desktop: 900px - 999px */
+  @media (min-width: 900px) and (max-width: 999px) {
+    .nav-container {
+      padding: 0.25rem 1rem;
+    }
+
+    .logo-image {
+      height: 28px;
+    }
+
+    .nav-links {
+      gap: 1rem;
+    }
+
+    .nav-links a,
+    .nav-item-expandable {
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+    }
+
+    .nav-icon-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .nav-item-expandable .expand-arrow {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  /* Tablet: 769px - 899px */
+  @media (min-width: 769px) and (max-width: 899px) {
+    .nav-container {
+      padding: 0.25rem 0.75rem;
+    }
+
+    .nav-content {
+      min-height: 60px;
+    }
+
+    .logo-image {
+      height: 24px;
+    }
+
+    .nav-links {
+      gap: 0.75rem;
+    }
+
+    .nav-links a,
+    .nav-item-expandable {
+      font-size: 0.55rem;
+      letter-spacing: 0.06em;
+    }
+
+    .nav-icon-btn {
+      padding: 0.35rem;
+    }
+
+    .nav-icon-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .nav-item-expandable .expand-arrow {
+      width: 10px;
+      height: 10px;
+    }
+  }
+
+  /* Small mobile screens */
+  @media (max-width: 500px) {
+    .nav-container {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .nav-content {
+      gap: 0.5rem;
+    }
+
+    .logo-image {
+      height: 32px;
+    }
+
+    .hamburger-menu {
+      width: 40px;
+      height: 40px;
+    }
+
+    .hamburger-menu svg {
+      width: 32px;
+      height: 24px;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .nav-container {
+      padding: 0.5rem 0.5rem;
+    }
+
+    .logo-image {
+      height: 28px;
+    }
+  }
+
+  @media (max-width: 350px) {
+    .nav-container {
+      padding: 0.5rem 0.25rem;
+    }
+
+    .logo-image {
+      height: 26px;
+    }
+
+    .hamburger-menu {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  /* Very small screens (200px and below) - hamburger only */
+  @media (max-width: 200px) {
+    .logo-image,
+    .mobile-nav-icons {
+      display: none !important;
+    }
+  }
+
+  /* Tiny screen menu link - hidden by default */
+  .tiny-menu-btn {
+    display: none !important;
+  }
+
+  /* Explicitly hide above 200px */
+  @media (min-width: 201px) {
+    .tiny-menu-btn {
+      display: none !important;
+    }
+  }
+
+  /* Only show at 200px and below */
+  @media (max-width: 200px) {
+    .nav-logo,
+    .hamburger-menu,
+    .mobile-menu-list {
+      display: none !important;
+    }
+
+    .tiny-menu-btn {
+      display: block;
+      position: fixed;
+      top: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      background: rgba(255, 255, 255, 0.9);
+      border: 2px solid var(--color-Primary-500);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-Primary-500);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .tiny-menu-btn:hover {
+      background: var(--color-Primary-500);
+      color: white;
+    }
+  }
+
+  /* =========================================================
+     ACCESSIBILITY OVERRIDES
+     - Solid background instead of glassmorphic
+     - Pinned position (no hide on scroll) for reduced motion
+     - Proper token colors for all a11y themes
+     ========================================================= */
+
+  /* Any accessibility setting active: solid background */
+  :global(body[class*="a11y-"]) .nav-container {
+    background: var(--color-Background-50) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: 1px solid var(--color-Background-300) !important;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-Text-900) 10%, transparent) !important;
+  }
+
+  :global(body[class*="a11y-"]) .nav-container.scrolled {
+    background: var(--color-Background-50) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Pinned nav for reduced motion - never hide on scroll */
+  :global(body.a11y-reduce-motion) .nav-container.nav-hidden {
+    transform: translateY(0) !important;
+  }
+
+  /* Remove transitions for reduced motion */
+  :global(body.a11y-reduce-motion) .nav-container {
+    transition: none !important;
+  }
+
+  :global(body.a11y-reduce-motion) .nav-container * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Logo containers stay transparent in all a11y modes */
+  :global(body[class*="a11y-"]) .nav-logo,
+  :global(body[class*="a11y-"]) .logo-image {
+    background: transparent !important;
+  }
+
+  /* Logo text uses proper tokens */
+  :global(body[class*="a11y-"]) .logo-text {
+    color: var(--color-Text-700) !important;
+  }
+
+  :global(body[class*="a11y-"]) .nav-logo:hover .logo-text {
+    color: var(--color-Primary-500) !important;
+  }
+
+  /* Nav links use proper tokens */
+  :global(body[class*="a11y-"]) .nav-links a,
+  :global(body[class*="a11y-"]) .nav-item-expandable,
+  :global(body[class*="a11y-"]) .nav-icon-btn {
+    color: var(--color-Text-600) !important;
+  }
+
+  :global(body[class*="a11y-"]) .nav-links a:hover,
+  :global(body[class*="a11y-"]) .nav-item-expandable:hover,
+  :global(body[class*="a11y-"]) .nav-icon-btn:hover {
+    color: var(--color-Primary-500) !important;
+  }
+
+  :global(body[class*="a11y-"]) .nav-item-expandable.active,
+  :global(body[class*="a11y-"]) .nav-icon-btn.active {
+    color: var(--color-Primary-500) !important;
+  }
+
+  /* Hamburger menu color */
+  :global(body[class*="a11y-"]) .hamburger-menu svg {
+    stroke: var(--color-Text-600) !important;
+  }
+
+  :global(body[class*="a11y-"]) .hamburger-menu.active svg {
+    stroke: var(--color-Primary-500) !important;
+  }
+
+  /* Mobile menu opened state - solid background */
+  :global(body[class*="a11y-"]) .nav-container.menu-opened {
+    background: var(--color-Background-50) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Mobile menu links */
+  :global(body[class*="a11y-"]) .mobile-menu-list a {
+    color: var(--color-Text-600) !important;
+  }
+
+  :global(body[class*="a11y-"]) .mobile-menu-list a:hover {
+    color: var(--color-Primary-500) !important;
+  }
+
+  /* Expandable menu items */
+  :global(body[class*="a11y-"]) .expandable-item {
+    background: var(--color-Background-100) !important;
+  }
+
+  :global(body[class*="a11y-"]) .expandable-item:hover {
+    background: var(--color-Background-200) !important;
+  }
+
+  :global(body[class*="a11y-"]) .expandable-item h3 {
+    color: var(--color-Text-700) !important;
+  }
+
+  :global(body[class*="a11y-"]) .expandable-item p {
+    color: var(--color-Text-500) !important;
+  }
+
+  /* Tiny menu button */
+  :global(body[class*="a11y-"]) .tiny-menu-btn {
+    background: var(--color-Background-50) !important;
+    color: var(--color-Text-700) !important;
+    border-color: var(--color-Text-400) !important;
+  }
+
+  /* High contrast specific - stronger borders */
+  :global(body.a11y-theme-high-contrast) .nav-container {
+    border-bottom: 2px solid var(--color-Text-900) !important;
+  }
+
+  :global(body.a11y-theme-high-contrast) .nav-links a {
+    text-decoration: underline !important;
+  }
+</style>
+
+<script>
+  import { initParticleBursts } from '../../scripts/svg-particle-burst';
+
+  // Initialize after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initParticleBursts);
+  } else {
+    initParticleBursts();
+  }
+</script>

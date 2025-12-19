@@ -1,0 +1,175 @@
+---
+// Download Button Component for PDF Products
+// Integrates with Supabase storage and toast notifications
+
+export interface Props {
+  productId: string;
+  productName: string;
+  pdfPath: string;
+  buttonText?: string;
+  buttonClass?: string;
+  requiresAuth?: boolean;
+}
+
+const {
+  productId,
+  productName,
+  pdfPath,
+  buttonText = 'Download',
+  buttonClass = 'btn btn-primary',
+  requiresAuth = false
+} = Astro.props;
+---
+
+<button
+  class={`download-pdf-btn ${buttonClass}`}
+  data-product-id={productId}
+  data-product-name={productName}
+  data-pdf-path={pdfPath}
+  data-requires-auth={requiresAuth}
+  type="button"
+>
+  <span class="btn-text">{buttonText}</span>
+  <span class="btn-loader" style="display: none;">
+    <svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="12" cy="12" r="10" stroke-width="3" stroke-linecap="round" opacity="0.25"/>
+      <path d="M12 2a10 10 0 0 1 10 10" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </span>
+</button>
+
+<style>
+  .download-pdf-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    transition: all 0.2s ease;
+  }
+
+  .download-pdf-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .btn-text {
+    display: inline-block;
+  }
+
+  .btn-loader {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .spinner {
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .download-pdf-btn.loading .btn-text {
+    display: none;
+  }
+
+  .download-pdf-btn.loading .btn-loader {
+    display: inline-flex !important;
+  }
+</style>
+
+<script>
+  import { getPDFDownloadUrl } from '../../lib/storage';
+
+  // Global handler for all download buttons
+  document.addEventListener('click', async function(e) {
+    const target = e.target as HTMLElement;
+    const button = target.closest('.download-pdf-btn') as HTMLButtonElement;
+
+    if (!button) return;
+
+    // Prevent double-clicks
+    if (button.disabled || button.classList.contains('loading')) return;
+
+    const productId = button.getAttribute('data-product-id');
+    const productName = button.getAttribute('data-product-name');
+    const pdfPath = button.getAttribute('data-pdf-path');
+    const requiresAuth = button.getAttribute('data-requires-auth') === 'true';
+
+    if (!pdfPath) {
+      console.error('No PDF path specified');
+      return;
+    }
+
+    // Check authentication if required
+    if (requiresAuth) {
+      // TODO: Add authentication check here
+      // For now, we'll show a toast message
+      if ((window as any).showToast) {
+        (window as any).showToast({
+          message: 'Please log in to download this file',
+          type: 'warning'
+        });
+      }
+      return;
+    }
+
+    // Show loading state
+    button.disabled = true;
+    button.classList.add('loading');
+    const btnText = button.querySelector('.btn-text');
+    const originalText = btnText?.textContent || 'Download';
+
+    try {
+      // Generate signed download URL
+      const result = await getPDFDownloadUrl(pdfPath, 3600); // 1 hour expiry
+
+      if (result.success && result.url) {
+        // Show success toast
+        if ((window as any).showToast) {
+          (window as any).showToast({
+            message: `Downloading ${productName}...`,
+            type: 'success'
+          });
+        }
+
+        // Trigger download
+        const link = document.createElement('a');
+        link.href = result.url;
+        link.download = productName || 'download';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Optional: Track download analytics
+        if (productId) {
+          console.log('Download tracked:', { productId, productName, timestamp: new Date() });
+          // TODO: Send to analytics or database
+        }
+      } else {
+        throw new Error(result.error || 'Failed to generate download link');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+
+      // Show error toast
+      if ((window as any).showToast) {
+        (window as any).showToast({
+          message: 'Failed to download file. Please try again.',
+          type: 'error'
+        });
+      }
+    } finally {
+      // Reset button state
+      button.disabled = false;
+      button.classList.remove('loading');
+      if (btnText) {
+        btnText.textContent = originalText;
+      }
+    }
+  });
+</script>

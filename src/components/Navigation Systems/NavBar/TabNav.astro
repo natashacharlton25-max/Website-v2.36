@@ -1,0 +1,59 @@
+---
+// Simple top-left hamburger navigation matching BottomNav pill design
+import { links } from './navItems';
+
+const currentPath = Astro.url.pathname;
+
+function isActive(href: string, currentPath: string): boolean {
+  if (href === '/') return currentPath === '/';
+  return currentPath.startsWith(href);
+}
+---
+
+<style>
+@import './styles/nav-base.css';
+@import './styles/nav-toggle.css';  
+@import './styles/nav-links.css';
+</style>
+
+
+<nav class="nav-tab" id="navTab" role="navigation" aria-label="Main navigation">
+  <!-- Expanded Menu -->
+  <ul class="nav-expanded" id="navExpanded" role="menu" aria-hidden="true">
+    {links.map((link) => (
+      <li class="nav-item" role="none">
+        <a
+          href={link.href}
+          class={`nav-link ${isActive(link.href, currentPath) ? 'active' : ''}`}
+          target={link.external ? '_blank' : undefined}
+          rel={link.external ? 'noopener noreferrer' : undefined}
+          role="menuitem"
+          aria-current={isActive(link.href, currentPath) ? 'page' : undefined}
+        >
+          {link.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+  
+  <!-- Hamburger Toggle -->
+  <button 
+    class="nav-toggle" 
+    id="navToggle" 
+    aria-label="Toggle navigation menu"
+    aria-expanded="false"
+    aria-controls="navExpanded"
+  >
+    <div class="nav-icon" aria-hidden="true">
+      <span class="nav-line"></span>
+      <span class="nav-line"></span>
+      <span class="nav-line"></span>
+    </div>
+  </button>
+</nav>
+
+
+<script>
+  // Navigation behavior is now handled by unified navigation system
+  console.log('✅ TabNav component loaded - all behavior handled by unified system');
+</script>

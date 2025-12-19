@@ -1,0 +1,114 @@
+---
+/**
+ * AccessibilityButton - Floating link to accessibility settings page
+ *
+ * A simple floating button that links to /accessibility-settings.
+ * Uses token system for styling.
+ *
+ * Usage:
+ * ```astro
+ * <AccessibilityButton position="bottom-right" />
+ * ```
+ */
+
+interface Props {
+  /**
+   * Position of the floating button
+   */
+  position?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
+
+  /**
+   * Link to accessibility settings page
+   */
+  href?: string;
+
+  /**
+   * Button size in pixels
+   */
+  size?: number;
+
+  /**
+   * Additional class
+   */
+  class?: string;
+}
+
+const {
+  position = 'bottom-right',
+  href = '/accessibility-settings',
+  size = 48,
+  class: className = ''
+} = Astro.props;
+
+const positionStyles: Record<string, string> = {
+  'bottom-right': 'bottom: 1.5rem; right: 1.5rem;',
+  'bottom-left': 'bottom: 1.5rem; left: 1.5rem;',
+  'top-right': 'top: 1.5rem; right: 1.5rem;',
+  'top-left': 'top: 1.5rem; left: 1.5rem;'
+};
+---
+
+<a
+  href={href}
+  class={`a11y-button ${className}`}
+  aria-label="Accessibility settings"
+  title="Accessibility settings"
+  style={`width: ${size}px; height: ${size}px; ${positionStyles[position]}`}
+>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="4.5" r="2.5"/>
+    <path d="M12 7v5"/>
+    <path d="M8 10l4 2 4-2"/>
+    <path d="M9 21l2-7 2 7"/>
+    <path d="M8 14l-2 7"/>
+    <path d="M16 14l2 7"/>
+  </svg>
+</a>
+
+<style>
+  .a11y-button {
+    position: fixed;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-BackgroundDark-800, #1e293b);
+    border: 2px solid var(--color-Primary-500);
+    border-radius: 50%;
+    color: var(--color-Background-50, #ffffff);
+    text-decoration: none;
+    padding: 0.625rem;
+    box-shadow: var(--shadow-lg, 0 10px 15px rgba(0,0,0,0.1));
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+
+  .a11y-button:hover {
+    background: var(--color-Primary-500);
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--color-Primary-500) 40%, transparent);
+  }
+
+  .a11y-button:focus-visible {
+    outline: 3px solid var(--color-Primary-300);
+    outline-offset: 3px;
+  }
+
+  .a11y-button svg {
+    width: 55%;
+    height: 55%;
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .a11y-button {
+      transition: none;
+    }
+  }
+
+  /* Hide under 1400px - mobile has cog icon in navbar */
+  @media (max-width: 1399px) {
+    .a11y-button {
+      display: none;
+    }
+  }
+</style>

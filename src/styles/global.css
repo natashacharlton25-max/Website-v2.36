@@ -1,0 +1,669 @@
+/* ===================================
+   GLOBAL STYLES
+   Import order: reset → theme → fonts → design tokens → confetti → utilities
+   =================================== */
+
+@import './reset.css';
+@import './themes/brand/BrandDefault.css';  /* Brand theme (default) */
+@import './fonts.css';                /* Font imports and definitions */
+@import './design-tokens.css';        /* Typography, spacing, layout, etc. */
+@import './confetti.css';             /* Confetti particle tokens */
+@import './utilities.css';
+@import './ButtonThemes.css';         /* Button theme switcher system */
+@import './a11y.css';                 /* Accessibility themes and tokens */
+/* A11y theme files (themes/a11y/*.css) are dynamically loaded by ThemeSwitcher.js */
+@import './plain-mode.css';           /* Plain mode overrides for .plain class */
+
+/* ========== BASE STYLES ========== */
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+/* Disable smooth scroll for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Smooth page load - prevents flash */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: var(--font-medium);  /* Medium (500) for body text - better readability */
+  color: var(--color-Text-700);
+  background-color: var(--page-bg, var(--color-Neutral-500));
+  line-height: var(--leading-normal);
+  /* Enable smooth transitions for scroll-triggered color changes */
+  transition: background-color 0.6s ease, color 0.6s ease;
+  /* Default padding for fixed nav (70px) - ticker removed */
+  padding-top: var(--body-top-padding, 70px);
+  /* Smooth fade in on page load */
+  animation: fadeIn 0.2s ease-out;
+  /* Prevent horizontal overflow on mobile */
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  position: relative;
+}
+
+/* Universal box-sizing and overflow prevention */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Prevent images and media from overflowing */
+img, picture, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Prevent long words from breaking layout */
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+/* Hide native scrollbar (use with CustomScrollbar component) */
+/* When custom scrollbar component is present, hide native scrollbar */
+body.hide-scrollbar,
+body.has-custom-scrollbar,
+html:has([data-scrollbar]) body {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE/Edge */
+  overflow-y: scroll; /* Keep scroll functionality */
+}
+
+body.hide-scrollbar::-webkit-scrollbar,
+body.has-custom-scrollbar::-webkit-scrollbar,
+html:has([data-scrollbar]) body::-webkit-scrollbar {
+  display: none !important; /* Chrome/Safari/Opera */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Also hide on html element for full coverage */
+html:has([data-scrollbar]) {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html:has([data-scrollbar])::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+}
+
+/* ========== TYPOGRAPHY ========== */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  color: var(--color-Primary-700);
+  margin-bottom: var(--space-md);
+}
+
+h1 { font-size: var(--text-4xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl); font-weight: var(--font-medium); }  /* Medium for smaller headings */
+h5 { font-size: var(--text-lg); font-weight: var(--font-medium); }
+h6 { font-size: var(--text-base); font-weight: var(--font-medium); }
+
+p {
+  margin-bottom: var(--space-md);
+  line-height: var(--leading-relaxed);
+}
+
+blockquote {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: var(--font-normal);
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  margin: var(--space-lg) 0;
+  padding-left: var(--space-lg);
+  border-left: 4px solid var(--color-Primary-500);
+  color: var(--color-Text-600);
+}
+
+a {
+  color: var(--color-Primary-500);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-Primary-600);
+}
+
+/* ========== BUTTONS ========== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm) var(--space-lg);
+  font-family: var(--font-body);
+  font-weight: var(--font-medium);  /* Nunito Sans Medium (500) for buttons */
+  border-radius: var(--border-radius);
+  transition: all var(--transition-base);
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--color-Primary-500);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-Primary-600);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+  background-color: var(--color-Secondary-500);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-Secondary-600);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid var(--color-Primary-500);
+  color: var(--color-Primary-500);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-Primary-500);
+  color: white;
+}
+
+.btn-lg {
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--text-lg);
+}
+
+.btn-sm {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-sm);
+}
+
+/* Button variants - ghost/text */
+.btn-ghost,
+.btn-text {
+  background-color: transparent;
+  border: none;
+  color: var(--color-Primary-500);
+}
+
+.btn-ghost:hover,
+.btn-text:hover {
+  background-color: var(--color-Primary-50);
+  color: var(--color-Primary-600);
+}
+
+/* Button text centering for small screens */
+@media (max-width: 400px) {
+  .btn,
+  button,
+  a[class*="button"],
+  a[class*="btn"],
+  [class*="button"],
+  .unified-btn,
+  .unified-btn > *,
+  .opb-button,
+  .rainbow-button {
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* ========== CARDS ========== */
+
+.card {
+  background-color: var(--color-Neutral-50);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.card-header {
+  margin-bottom: var(--space-md);
+}
+
+.card-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  margin-bottom: var(--space-sm);
+}
+
+.card-body {
+  margin-bottom: var(--space-md);
+}
+
+.card-footer {
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-Neutral-200);
+}
+
+/* ========== FORMS ========== */
+
+.form-group {
+  margin-bottom: var(--space-lg);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-Text-700);
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-Neutral-300);
+  border-radius: var(--border-radius);
+  font-size: var(--text-base);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-Primary-500);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-Primary-500) 10%, transparent);
+}
+
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-error {
+  color: var(--color-Danger);
+  font-size: var(--text-sm);
+  margin-top: var(--space-xs);
+}
+
+/* ========== SECTIONS ========== */
+
+.section {
+  padding: var(--space-3xl) 0;
+}
+
+.section-sm {
+  padding: var(--space-2xl) 0;
+}
+
+.section-lg {
+  padding: var(--space-4xl) 0;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .section {
+    padding: var(--space-4xl) 0;
+  }
+}
+
+/* ========== IMAGES ========== */
+
+.img-cover {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.img-contain {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
+
+/* ========== ACCESSIBILITY ========== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--color-Primary-500);
+  outline-offset: 2px;
+}
+
+/* ========== ANIMATIONS ========== */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-base);
+}
+
+.slide-up {
+  animation: slideUp var(--transition-base);
+}
+
+.slide-down {
+  animation: slideDown var(--transition-base);
+}
+
+/* ========== TOAST NOTIFICATIONS ========== */
+/* Enhanced with Lottie animations and CSS tokens */
+
+#toast-container {
+  position: fixed;
+  top: 100px;
+  right: var(--space-xl);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  pointer-events: none;
+}
+
+.toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--border-radius-lg);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  max-width: 320px;
+  background: var(--color-Neutral-800);
+  box-shadow: var(--shadow-2xl);
+  opacity: 1;
+  animation-fill-mode: both;
+  backdrop-filter: blur(4px);
+  font-family: var(--font-body);
+  overflow: hidden;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  color: var(--color-Text-50);
+}
+
+.toast:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2xl), 0 0 0 2px var(--color-Primary-500);
+}
+
+.toast .toast-lottie-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.toast .toast-lottie-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.toast .toast-lottie-icon svg path,
+.toast .toast-lottie-icon svg g,
+.toast .toast-lottie-icon svg * {
+  fill: black !important;
+  stroke: black !important;
+}
+
+.toast-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 20px;
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-Primary-500) 20%, transparent), transparent 70%);
+  pointer-events: none;
+  filter: blur(16px);
+  z-index: -1;
+}
+
+/* Toast Themes */
+.toast-arcade {
+  background: var(--color-Accent-500);
+  color: var(--color-BackgroundDark-950);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--text-sm);
+}
+
+.toast-arcade .toast-glow {
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-Accent-500) 20%, transparent), transparent 70%);
+}
+
+.toast-professional {
+  background: var(--color-Primary-500);
+  color: white;
+}
+
+.toast-brutalist {
+  background: var(--color-Neutral-50);
+  color: var(--color-Text-900);
+  font-family: monospace;
+  border: 2px solid var(--color-Neutral-900);
+}
+
+.toast-brutalist .toast-glow {
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-Neutral-900) 20%, transparent), transparent 70%);
+}
+
+.toast-glass {
+  background: color-mix(in oklch, var(--color-Background-50) 15%, transparent);
+  color: var(--color-Text-900);
+  border: 1px solid color-mix(in oklch, var(--color-Background-50) 25%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: var(--shadow-2xl);
+}
+
+.toast-glass .toast-glow {
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-Background-50) 18%, transparent), transparent 70%);
+}
+
+.toast-neon {
+  background: var(--color-BackgroundDark-950);
+  color: var(--color-Primary-500);
+  border: 1.5px solid var(--color-Primary-500);
+  text-shadow: 0 0 4px var(--color-Primary-500);
+  box-shadow: 0 0 6px color-mix(in oklch, var(--color-Primary-500) 15%, transparent),
+              0 0 12px color-mix(in oklch, var(--color-Primary-500) 10%, transparent);
+}
+
+.toast-neon .toast-lottie-icon svg path,
+.toast-neon .toast-lottie-icon svg circle,
+.toast-neon .toast-lottie-icon svg rect,
+.toast-neon .toast-lottie-icon svg ellipse,
+.toast-neon .toast-lottie-icon svg polygon,
+.toast-neon .toast-lottie-icon svg polyline {
+  fill: var(--color-Primary-500) !important;
+  stroke: var(--color-Primary-500) !important;
+}
+
+.toast-neon .toast-glow {
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-Primary-500) 25%, transparent), transparent 70%);
+}
+
+/* Toast Animations */
+@keyframes toast-slide {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-bounce {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  40% {
+    transform: translateY(-20%);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(10%);
+  }
+  80% {
+    transform: translateY(-4%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-zoom {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-flip {
+  0% {
+    transform: rotateX(90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+/* Apply animations with proper class names */
+.toast-slide-animation {
+  animation: toast-slide 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.toast-fade-animation {
+  animation: toast-fade 0.8s ease-out both;
+}
+
+.toast-bounce-animation {
+  animation: toast-bounce 1.2s cubic-bezier(0.25, 1.5, 0.5, 1) both;
+}
+
+.toast-zoom-animation {
+  animation: toast-zoom 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.toast-flip-animation {
+  animation: toast-flip 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+/* Toast Mobile Styles */
+@media (max-width: 600px) {
+  #toast-container {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 250px) {
+  #toast-container {
+    top: 80px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .toast {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-sm);
+    font-size: var(--text-sm);
+    max-width: 200px;
+    gap: var(--space-xs);
+  }
+
+  .toast .toast-lottie-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* ========== SCROLL ANIMATIONS ========== */
+/* Prevent flash of content before scroll animations initialize */
+[data-scroll-reveal]:not(.is-inview) {
+  visibility: hidden;
+}
+
+[data-text-animate]:not(.is-inview) {
+  visibility: hidden;
+}

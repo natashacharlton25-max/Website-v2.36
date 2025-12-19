@@ -1,0 +1,1151 @@
+---
+import Icon from './Icon.astro';
+
+interface Card {
+  type: 'image' | 'text' | 'mixed' | 'breadcrumb' | 'icon' | 'title' | 'summary' | 'tag';
+  image?: string;
+  alt?: string;
+  link?: string;
+  title?: string;
+  content?: string;
+  bgColor?: string;
+  textColor?: string;
+  size?: 'small' | 'medium' | 'large' | 'wide';
+  icon?: string;
+  badge?: string;
+  button?: { text: string; link: string };
+}
+
+interface Props {
+  cards: Card[];
+}
+
+const { cards } = Astro.props;
+
+// More uniform card sizes for cleaner look
+const getCardClass = (index: number, card: Card) => {
+  if (card.size) return card.size;
+  // Most cards are medium, occasional variety
+  const patterns = ['medium', 'medium', 'medium', 'medium', 'medium', 'large'];
+  return patterns[index % patterns.length];
+};
+
+// Calculate contrasting border color based on background
+// All cards use darkest token (800) from their color family
+// EXCEPT cards with dark backgrounds (700-800) which use 500 token
+const getHoverBorderColor = (bgColor?: string): string => {
+  if (!bgColor) return 'var(--color-Text-950)';
+
+  // Match pattern like var(--color-Primary-600) or var(--color-AccentOne-200)
+  const match = bgColor.match(/var\(--color-(\w+)-(\d+)\)/);
+  if (!match) return 'var(--color-Text-950)';
+
+  const [, colorName, shadeStr] = match;
+  const shade = parseInt(shadeStr, 10);
+
+  // If dark background (shade >= 700), use 500 token for contrast
+  // Otherwise, use darkest shade (800) from same color family
+  if (shade >= 700) {
+    return `var(--color-${colorName}-500)`;
+  }
+  return `var(--color-${colorName}-800)`;
+};
+---
+
+<div class="masonry-grid" data-scroll-reveal-group data-scroll-stagger="0.05">
+  {cards.map((card, index) => {
+    const sizeClass = getCardClass(index, card);
+    const cardClass = `masonry-card masonry-card--${sizeClass} masonry-card--${card.type}`;
+
+    if (card.type === 'breadcrumb') {
+      const bgColor = card.bgColor || 'var(--color-Neutral-700)';
+      return (
+        <div class={cardClass} data-scroll-reveal-item style={`background: ${bgColor}; color: ${card.textColor || 'white'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}>
+          <p class="breadcrumb-text">{card.content}</p>
+        </div>
+      );
+    }
+
+    if (card.type === 'icon') {
+      const bgColor = card.bgColor || 'var(--color-AccentOne-200)';
+      return (
+        <div class={cardClass} data-scroll-reveal-item style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)}; display: flex; align-items: center; justify-content: center;`}>
+          <p class="icon-text" style="text-align: center;">{card.title || 'Icon'}</p>
+        </div>
+      );
+    }
+
+    if (card.type === 'title') {
+      const bgColor = card.bgColor || 'var(--color-AccentOne-200)';
+      return (
+        <div class={cardClass} data-scroll-reveal-item style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}>
+          <h1 class="card-title">{card.title}</h1>
+        </div>
+      );
+    }
+
+    if (card.type === 'summary') {
+      const bgColor = card.bgColor || 'var(--color-Primary-300)';
+      return (
+        <div class={cardClass} data-scroll-reveal-item style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}>
+          <h3 class="summary-label">Summary</h3>
+          <p class="summary-text">{card.content}</p>
+        </div>
+      );
+    }
+
+    if (card.type === 'tag') {
+      const bgColor = card.bgColor || 'var(--color-Primary-200)';
+      return (
+        <div class={`${cardClass} masonry-card--tag`} data-scroll-reveal-item style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}>
+          {card.icon && (
+            <div class="tag-card-icon-wrapper">
+              <Icon name={card.icon} class="card-icon" size={48} />
+            </div>
+          )}
+          {card.title && <h3 class="tag-card-title">{card.title}</h3>}
+        </div>
+      );
+    }
+
+    if (card.type === 'text') {
+      const bgColor = card.bgColor || 'var(--color-Primary-200)';
+      if (card.link) {
+        return (
+          <a
+            href={card.link}
+            class={`${cardClass} masonry-card--link masonry-card--asset`}
+            data-scroll-reveal-item
+            style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}
+          >
+            <div class="asset-card-content">
+              {card.icon && (
+                <div class="asset-card-icon-wrapper">
+                  <Icon name={card.icon} class="card-icon" size={48} />
+                </div>
+              )}
+              {card.badge && <span class="asset-card-badge">{card.badge}</span>}
+              {card.title && <h3 class="asset-card-title">{card.title}</h3>}
+              {card.content && <p class="asset-card-text">{card.content}</p>}
+              {card.button && (
+                <a href={card.button.link} class="card-button">
+                  {card.button.text}
+                </a>
+              )}
+              <div class="asset-card-arrow">
+                <Icon name="ph:plus-circle-duotone" size={40} />
+              </div>
+            </div>
+          </a>
+        );
+      } else {
+        return (
+          <div class={cardClass} data-scroll-reveal-item style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}>
+            {card.icon && (
+              <div class="text-card-icon-wrapper">
+                <Icon name={card.icon} class="card-icon" size={48} />
+              </div>
+            )}
+            {card.title && <h3 class="text-card-title">{card.title}</h3>}
+            {card.content && <p class="text-card-content">{card.content}</p>}
+            {card.button && (
+              <a href={card.button.link} class="card-button">
+                {card.button.text}
+              </a>
+            )}
+          </div>
+        );
+      }
+    }
+
+    if (card.type === 'image' && card.link) {
+      return (
+        <a
+          href={card.link}
+          class={cardClass}
+          data-scroll-reveal-item
+          style="--card-hover-border: currentColor;"
+        >
+          <img
+            src={card.image}
+            alt={card.alt}
+            loading="lazy"
+          />
+          {card.title && <div class="image-card-overlay"><p>{card.title}</p></div>}
+        </a>
+      );
+    }
+
+    if (card.type === 'mixed' && card.link) {
+      const bgColor = card.bgColor || 'var(--color-Primary-200)';
+      return (
+        <a
+          href={card.link}
+          class={cardClass}
+          data-scroll-reveal-item
+          style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}
+        >
+          <div class="mixed-card-content">
+            {card.image && (
+              <div class="mixed-card-image">
+                <img src={card.image} alt={card.alt} loading="lazy" />
+              </div>
+            )}
+            {card.badge && <span class="mixed-card-badge">{card.badge}</span>}
+            {card.title && <h3 class="mixed-card-title">{card.title}</h3>}
+            {card.content && <p class="mixed-card-text">{card.content}</p>}
+            <div class="card-arrow">
+              <Icon name="ph:plus-circle-duotone" size={40} />
+            </div>
+          </div>
+        </a>
+      );
+    }
+
+    return null;
+  })}
+</div>
+
+<style>
+  .masonry-grid {
+    column-count: 4;
+    column-gap: var(--space-xl);
+    padding: var(--space-sm);
+    max-width: 100%;
+  }
+
+  .masonry-card {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: var(--space-xl);
+    break-inside: avoid;
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+    position: relative;
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.15));
+    border: 2px solid transparent;
+  }
+
+  .masonry-card:hover {
+    border-color: var(--card-hover-border, currentColor);
+  }
+
+  /* Breadcrumb Card */
+  .masonry-card--breadcrumb {
+    padding: var(--space-md) var(--space-lg);
+    cursor: default;
+  }
+
+  .breadcrumb-text {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-base);
+    margin: 0;
+    color: inherit;
+    line-height: 1.7;
+    letter-spacing: 0.03em;
+    text-align: left;
+  }
+
+  /* Icon Card */
+  .masonry-card--icon {
+    padding: var(--space-xl);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    aspect-ratio: 1;
+  }
+
+  .icon-text {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0;
+    color: inherit;
+    letter-spacing: 0.05em;
+    text-align: center !important;
+  }
+
+  /* Title Card */
+  .masonry-card--title {
+    padding: var(--space-2xl) var(--space-xl);
+  }
+
+  .card-title {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    text-transform: uppercase;
+    color: inherit;
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-align: left;
+  }
+
+  /* Summary Card */
+  .masonry-card--summary {
+    padding: var(--space-xl);
+  }
+
+  .summary-label {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 var(--space-md) 0;
+    color: inherit;
+    text-align: left;
+  }
+
+  .summary-text {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-base);
+    color: inherit;
+    line-height: 1.7;
+    margin: 0;
+    letter-spacing: 0.03em;
+    text-align: left;
+  }
+
+  /* Text Card */
+  .masonry-card--text {
+    padding: var(--space-xl);
+    cursor: default;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Clickable text card link */
+  .masonry-card--link {
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .masonry-card--link:hover {
+    text-decoration: none;
+  }
+
+  .text-card-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-md);
+  }
+
+  .card-icon {
+    flex-shrink: 0;
+    color: inherit;
+    opacity: 0.85;
+  }
+
+  .text-card-title {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0 0 var(--space-md) 0;
+    color: inherit;
+    letter-spacing: 0.08em;
+    text-align: left;
+  }
+
+  .text-card-content {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-base);
+    color: inherit;
+    line-height: 1.7;
+    margin: 0 0 var(--space-lg) 0;
+    letter-spacing: 0.03em;
+    text-align: left;
+  }
+
+  .text-card-content:empty {
+    display: none;
+  }
+
+  /* Tag Card (small cards with icon and tag name - center aligned) */
+  .masonry-card--tag {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-xl);
+  }
+
+  .tag-card-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-md);
+  }
+
+  .tag-card-title {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0;
+    color: inherit;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
+  /* Asset Card (linked text cards with icons) */
+  .masonry-card--asset {
+    padding: 0;
+  }
+
+  .asset-card-content {
+    padding: var(--space-lg);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .asset-card-icon-wrapper {
+    width: 100%;
+    margin-bottom: var(--space-md);
+    padding: var(--space-lg);
+    background: transparent;
+    border-radius: var(--border-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .asset-card-badge {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-md);
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-full);
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-sm);
+    width: fit-content;
+    align-self: center;
+  }
+
+  .asset-card-title {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0 0 var(--space-sm) 0;
+    color: inherit;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
+  .asset-card-text {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-base);
+    color: inherit;
+    opacity: 0.9;
+    line-height: 1.7;
+    margin: 0 0 var(--space-md) 0;
+    letter-spacing: 0.03em;
+    text-align: center;
+  }
+
+  .asset-card-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: inherit;
+    opacity: 0.7;
+    margin-top: auto;
+  }
+
+  .card-button {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-md);
+    background: white;
+    color: var(--color-Text-700);
+    text-decoration: none;
+    border-radius: var(--border-radius-full);
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-base);
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+    width: fit-content;
+    letter-spacing: 0.05em;
+  }
+
+  /* Image Card */
+  .masonry-card--image {
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .masonry-card--image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  }
+
+  .image-card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-md);
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    color: white;
+  }
+
+  .image-card-overlay p {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+  }
+
+  /* Mixed Card */
+  .masonry-card--mixed {
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .mixed-card-content {
+    padding: var(--space-lg);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mixed-card-image {
+    width: 100%;
+    margin-bottom: var(--space-md);
+    overflow: hidden;
+    border-radius: var(--border-radius-lg);
+  }
+
+  .mixed-card-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  }
+
+  .mixed-card-badge {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-md);
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-full);
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-sm);
+    width: fit-content;
+  }
+
+  .mixed-card-title {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0 0 var(--space-sm) 0;
+    color: inherit;
+    letter-spacing: 0.08em;
+    text-align: left;
+  }
+
+  .mixed-card-text {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-base);
+    color: inherit;
+    opacity: 0.9;
+    line-height: 1.7;
+    margin: 0 0 var(--space-md) 0;
+    letter-spacing: 0.03em;
+    text-align: left;
+  }
+
+  .card-arrow {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    color: inherit;
+    opacity: 0.7;
+    margin-top: auto;
+  }
+
+  /* Size variants */
+  .masonry-card--wide {
+    column-span: all;
+  }
+
+  .masonry-card--small img {
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .masonry-card--medium img {
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .masonry-card--large img {
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+  }
+
+  /* Tablet */
+  @media (max-width: 1024px) {
+    .masonry-grid {
+      column-count: 3;
+      column-gap: var(--space-md);
+    }
+
+    .masonry-card {
+      margin-bottom: var(--space-md);
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .masonry-grid {
+      column-count: 2;
+      column-gap: var(--space-sm);
+    }
+
+    .masonry-card {
+      margin-bottom: var(--space-sm);
+    }
+
+    .card-title {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+    }
+  }
+
+  /* Small mobile */
+  @media (max-width: 480px) {
+    .masonry-grid {
+      column-count: 1;
+      column-gap: 0;
+    }
+  }
+
+  /* =========================================================
+     ACCESSIBILITY THEME OVERRIDES
+     ========================================================= */
+
+  /* All accessibility modes: use theme-aware backgrounds */
+  :global(body[class*="a11y-"]) .masonry-card {
+    background: var(--color-Background-200) !important;
+    color: var(--color-Text-700, #1a1a1a) !important;
+    border: 1px solid var(--color-Background-300) !important;
+  }
+
+
+  /* Dark mode cards */
+  :global(body.a11y-theme-dark) .masonry-card {
+    background: var(--a11y-dark-bg) !important;
+    color: var(--a11y-dark-text) !important;
+    border: 1px solid var(--color-Background-300) !important;
+  }
+
+  :global(body.a11y-theme-dark) .masonry-card:hover {
+    background: var(--color-Background-200) !important;
+    border-color: var(--a11y-dark-accent) !important;
+  }
+
+  :global(body.a11y-theme-dark) .masonry-card a,
+  :global(body.a11y-theme-dark) .masonry-card p,
+  :global(body.a11y-theme-dark) .masonry-card h1,
+  :global(body.a11y-theme-dark) .masonry-card h2,
+  :global(body.a11y-theme-dark) .masonry-card h3,
+  :global(body.a11y-theme-dark) .masonry-card span:not(.icon):not(.card-icon) {
+    color: var(--a11y-dark-text) !important;
+  }
+
+  /* Dark mode buttons and icons */
+  :global(body.a11y-theme-dark) .card-button {
+    background: var(--a11y-dark-accent) !important;
+    color: var(--a11y-dark-bg) !important;
+    border: 1px solid var(--a11y-dark-accent) !important;
+  }
+
+  :global(body.a11y-theme-dark .masonry-card .card-icon),
+  :global(body.a11y-theme-dark .masonry-card .card-icon svg),
+  :global(body.a11y-theme-dark .masonry-card .asset-card-arrow),
+  :global(body.a11y-theme-dark .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-theme-dark .masonry-card .card-arrow),
+  :global(body.a11y-theme-dark .masonry-card .card-arrow svg),
+  :global(body.a11y-theme-dark .masonry-card .icon),
+  :global(body.a11y-theme-dark .masonry-card .icon svg) {
+    color: var(--a11y-dark-accent) !important;
+    fill: var(--a11y-dark-accent) !important;
+  }
+
+  :global(body.a11y-theme-dark .masonry-card .card-icon svg path),
+  :global(body.a11y-theme-dark .masonry-card .card-icon svg g),
+  :global(body.a11y-theme-dark .masonry-card .asset-card-arrow svg path),
+  :global(body.a11y-theme-dark .masonry-card .asset-card-arrow svg g),
+  :global(body.a11y-theme-dark .masonry-card .card-arrow svg path),
+  :global(body.a11y-theme-dark .masonry-card .card-arrow svg g),
+  :global(body.a11y-theme-dark .masonry-card .icon svg path),
+  :global(body.a11y-theme-dark .masonry-card .icon svg g) {
+    fill: var(--a11y-dark-accent) !important;
+  }
+
+  :global(body.a11y-theme-dark) .asset-card-icon-wrapper,
+  :global(body.a11y-theme-dark) .tag-card-icon-wrapper,
+  :global(body.a11y-theme-dark) .text-card-icon-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  :global(body.a11y-theme-dark) .asset-card-badge,
+  :global(body.a11y-theme-dark) .mixed-card-badge {
+    background: color-mix(in srgb, var(--color-Primary-500) 20%, transparent) !important;
+    color: var(--color-Text-800) !important;
+    border: 1px solid color-mix(in srgb, var(--color-Primary-500) 30%, transparent) !important;
+  }
+
+  /* High contrast cards */
+  :global(body.a11y-theme-high-contrast) .masonry-card {
+    background: var(--color-Background-50) !important;
+    color: var(--color-Text-900) !important;
+    border: 2px solid var(--color-Text-900) !important;
+  }
+
+  :global(body.a11y-theme-high-contrast) .masonry-card:hover {
+    border-color: var(--color-Primary-500) !important;
+    box-shadow: 0 0 0 2px var(--color-Primary-500) !important;
+  }
+
+  :global(body.a11y-theme-high-contrast) .masonry-card a,
+  :global(body.a11y-theme-high-contrast) .masonry-card p,
+  :global(body.a11y-theme-high-contrast) .masonry-card h1,
+  :global(body.a11y-theme-high-contrast) .masonry-card h2,
+  :global(body.a11y-theme-high-contrast) .masonry-card h3,
+  :global(body.a11y-theme-high-contrast) .masonry-card span:not(.icon):not(.card-icon) {
+    color: var(--color-Text-900) !important;
+  }
+
+  :global(body.a11y-theme-high-contrast) .card-button {
+    background: var(--color-Primary-500) !important;
+    color: var(--color-Background-50) !important;
+    border: 2px solid var(--color-Primary-500) !important;
+  }
+
+  /* High contrast icons */
+  :global(body.a11y-theme-high-contrast .masonry-card .card-icon),
+  :global(body.a11y-theme-high-contrast .masonry-card .card-icon svg),
+  :global(body.a11y-theme-high-contrast .masonry-card .asset-card-arrow),
+  :global(body.a11y-theme-high-contrast .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-theme-high-contrast .masonry-card .card-arrow),
+  :global(body.a11y-theme-high-contrast .masonry-card .card-arrow svg),
+  :global(body.a11y-theme-high-contrast .masonry-card .icon),
+  :global(body.a11y-theme-high-contrast .masonry-card .icon svg) {
+    color: var(--color-Primary-500) !important;
+    fill: var(--color-Primary-500) !important;
+  }
+
+  :global(body.a11y-theme-high-contrast .masonry-card .card-icon svg path),
+  :global(body.a11y-theme-high-contrast .masonry-card .card-icon svg g),
+  :global(body.a11y-theme-high-contrast .masonry-card .asset-card-arrow svg path),
+  :global(body.a11y-theme-high-contrast .masonry-card .asset-card-arrow svg g),
+  :global(body.a11y-theme-high-contrast .masonry-card .card-arrow svg path),
+  :global(body.a11y-theme-high-contrast .masonry-card .card-arrow svg g),
+  :global(body.a11y-theme-high-contrast .masonry-card .icon svg path),
+  :global(body.a11y-theme-high-contrast .masonry-card .icon svg g) {
+    fill: var(--color-Primary-500) !important;
+  }
+
+  :global(body.a11y-theme-high-contrast) .asset-card-icon-wrapper,
+  :global(body.a11y-theme-high-contrast) .tag-card-icon-wrapper,
+  :global(body.a11y-theme-high-contrast) .text-card-icon-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  :global(body.a11y-theme-high-contrast) .asset-card-badge,
+  :global(body.a11y-theme-high-contrast) .mixed-card-badge {
+    background: var(--color-Primary-500) !important;
+    color: var(--color-Background-50) !important;
+    border: 1px solid var(--color-Primary-500) !important;
+  }
+
+  /* Cream mode cards */
+  :global(body.a11y-theme-cream) .masonry-card {
+    background: var(--color-Background-50) !important;
+    color: var(--color-Text-800) !important;
+    border: 1px solid var(--color-Background-300) !important;
+  }
+
+  :global(body.a11y-theme-cream) .masonry-card:hover {
+    background: var(--color-Background-100) !important;
+    border-color: var(--color-Primary-500) !important;
+  }
+
+  :global(body.a11y-theme-cream) .masonry-card a,
+  :global(body.a11y-theme-cream) .masonry-card p,
+  :global(body.a11y-theme-cream) .masonry-card h1,
+  :global(body.a11y-theme-cream) .masonry-card h2,
+  :global(body.a11y-theme-cream) .masonry-card h3,
+  :global(body.a11y-theme-cream) .masonry-card span:not(.icon):not(.card-icon) {
+    color: var(--color-Text-800) !important;
+  }
+
+  /* Cream mode buttons and icons */
+  :global(body.a11y-theme-cream) .card-button {
+    background: var(--color-Primary-500) !important;
+    color: var(--color-Background-50) !important;
+    border: 1px solid var(--color-Primary-500) !important;
+  }
+
+  :global(body.a11y-theme-cream .masonry-card .card-icon),
+  :global(body.a11y-theme-cream .masonry-card .card-icon svg),
+  :global(body.a11y-theme-cream .masonry-card .asset-card-arrow),
+  :global(body.a11y-theme-cream .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-theme-cream .masonry-card .card-arrow),
+  :global(body.a11y-theme-cream .masonry-card .card-arrow svg),
+  :global(body.a11y-theme-cream .masonry-card .icon),
+  :global(body.a11y-theme-cream .masonry-card .icon svg) {
+    color: var(--color-Primary-500) !important;
+    fill: var(--color-Primary-500) !important;
+  }
+
+  :global(body.a11y-theme-cream .masonry-card .card-icon svg path),
+  :global(body.a11y-theme-cream .masonry-card .card-icon svg g),
+  :global(body.a11y-theme-cream .masonry-card .asset-card-arrow svg path),
+  :global(body.a11y-theme-cream .masonry-card .asset-card-arrow svg g),
+  :global(body.a11y-theme-cream .masonry-card .card-arrow svg path),
+  :global(body.a11y-theme-cream .masonry-card .card-arrow svg g),
+  :global(body.a11y-theme-cream .masonry-card .icon svg path),
+  :global(body.a11y-theme-cream .masonry-card .icon svg g) {
+    fill: var(--color-Primary-500) !important;
+  }
+
+  :global(body.a11y-theme-cream) .asset-card-icon-wrapper,
+  :global(body.a11y-theme-cream) .tag-card-icon-wrapper,
+  :global(body.a11y-theme-cream) .text-card-icon-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  :global(body.a11y-theme-cream) .asset-card-badge,
+  :global(body.a11y-theme-cream) .mixed-card-badge {
+    background: color-mix(in srgb, var(--color-Primary-500) 15%, transparent) !important;
+    color: var(--color-Text-800) !important;
+    border: 1px solid color-mix(in srgb, var(--color-Primary-500) 25%, transparent) !important;
+  }
+
+  /* Monochrome cards */
+  :global(body.a11y-theme-monochrome) .masonry-card,
+  :global(body.a11y-cvd-monochrome) .masonry-card {
+    background: var(--color-Background-100) !important;
+    color: var(--color-Text-800) !important;
+    border: 1px solid var(--color-Background-300) !important;
+  }
+
+  :global(body.a11y-theme-monochrome) .masonry-card:hover,
+  :global(body.a11y-cvd-monochrome) .masonry-card:hover {
+    background: var(--color-Background-200) !important;
+  }
+
+  /* Monochrome buttons and icons */
+  :global(body.a11y-theme-monochrome) .card-button,
+  :global(body.a11y-cvd-monochrome) .card-button {
+    background: #333333 !important;
+    color: white !important;
+    border: 1px solid #333333 !important;
+  }
+
+  :global(body.a11y-theme-monochrome .masonry-card .card-icon),
+  :global(body.a11y-theme-monochrome .masonry-card .card-icon svg),
+  :global(body.a11y-theme-monochrome .masonry-card .asset-card-arrow),
+  :global(body.a11y-theme-monochrome .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-theme-monochrome .masonry-card .card-arrow),
+  :global(body.a11y-theme-monochrome .masonry-card .card-arrow svg),
+  :global(body.a11y-theme-monochrome .masonry-card .icon),
+  :global(body.a11y-theme-monochrome .masonry-card .icon svg),
+  :global(body.a11y-cvd-monochrome .masonry-card .card-icon),
+  :global(body.a11y-cvd-monochrome .masonry-card .card-icon svg),
+  :global(body.a11y-cvd-monochrome .masonry-card .asset-card-arrow),
+  :global(body.a11y-cvd-monochrome .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-cvd-monochrome .masonry-card .card-arrow),
+  :global(body.a11y-cvd-monochrome .masonry-card .card-arrow svg),
+  :global(body.a11y-cvd-monochrome .masonry-card .icon),
+  :global(body.a11y-cvd-monochrome .masonry-card .icon svg) {
+    color: #333333 !important;
+    fill: #333333 !important;
+  }
+
+  :global(body.a11y-theme-monochrome .masonry-card .card-icon svg path),
+  :global(body.a11y-theme-monochrome .masonry-card .card-icon svg g),
+  :global(body.a11y-theme-monochrome .masonry-card .asset-card-arrow svg path),
+  :global(body.a11y-theme-monochrome .masonry-card .asset-card-arrow svg g),
+  :global(body.a11y-theme-monochrome .masonry-card .card-arrow svg path),
+  :global(body.a11y-theme-monochrome .masonry-card .card-arrow svg g),
+  :global(body.a11y-theme-monochrome .masonry-card .icon svg path),
+  :global(body.a11y-theme-monochrome .masonry-card .icon svg g),
+  :global(body.a11y-cvd-monochrome .masonry-card .card-icon svg path),
+  :global(body.a11y-cvd-monochrome .masonry-card .card-icon svg g),
+  :global(body.a11y-cvd-monochrome .masonry-card .asset-card-arrow svg path),
+  :global(body.a11y-cvd-monochrome .masonry-card .asset-card-arrow svg g),
+  :global(body.a11y-cvd-monochrome .masonry-card .card-arrow svg path),
+  :global(body.a11y-cvd-monochrome .masonry-card .card-arrow svg g),
+  :global(body.a11y-cvd-monochrome .masonry-card .icon svg path),
+  :global(body.a11y-cvd-monochrome .masonry-card .icon svg g) {
+    fill: #333333 !important;
+  }
+
+  :global(body.a11y-theme-monochrome) .asset-card-icon-wrapper,
+  :global(body.a11y-theme-monochrome) .tag-card-icon-wrapper,
+  :global(body.a11y-theme-monochrome) .text-card-icon-wrapper,
+  :global(body.a11y-cvd-monochrome) .asset-card-icon-wrapper,
+  :global(body.a11y-cvd-monochrome) .tag-card-icon-wrapper,
+  :global(body.a11y-cvd-monochrome) .text-card-icon-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  :global(body.a11y-theme-monochrome) .asset-card-badge,
+  :global(body.a11y-theme-monochrome) .mixed-card-badge,
+  :global(body.a11y-cvd-monochrome) .asset-card-badge,
+  :global(body.a11y-cvd-monochrome) .mixed-card-badge {
+    background: rgba(0, 0, 0, 0.1) !important;
+    color: #333333 !important;
+    border: 1px solid #aaaaaa !important;
+  }
+
+  /* Reduced motion - disable transitions */
+  :global(body.a11y-reduce-motion) .masonry-card {
+    transition: none !important;
+  }
+
+  /* Respect system prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .masonry-card {
+      transition: none !important;
+    }
+  }
+
+  /* =========================================================
+     IMAGE FILTERS FOR ACCESSIBILITY THEMES
+     ========================================================= */
+
+  /* Dark mode - reduce image brightness */
+  :global(body.a11y-theme-dark) .masonry-card img {
+    filter: brightness(0.86) saturate(0.90) contrast(0.98) !important;
+  }
+
+  :global(body.a11y-theme-dark) .mixed-card-image {
+    background: color-mix(in srgb, var(--color-Background-50) 50%, transparent);
+  }
+
+  /* High contrast - increase contrast on images */
+  :global(body.a11y-theme-high-contrast) .masonry-card img {
+    filter: contrast(1.15) brightness(1.05) !important;
+    border: 2px solid var(--color-Primary-500) !important;
+  }
+
+  /* Cream mode - warm tint on images */
+  :global(body.a11y-theme-cream) .masonry-card img {
+    filter: sepia(0.15) brightness(0.98) !important;
+  }
+
+  /* Monochrome - full grayscale on images */
+  :global(body.a11y-theme-monochrome) .masonry-card img,
+  :global(body.a11y-cvd-monochrome) .masonry-card img {
+    filter: grayscale(1) saturate(0) contrast(1.05) !important;
+  }
+
+  /* CVD themes - apply appropriate color adjustments */
+  :global(body.a11y-theme-protanopia) .masonry-card img,
+  :global(body.a11y-cvd-protanopia) .masonry-card img,
+  :global(body.a11y-theme-deuteranopia) .masonry-card img,
+  :global(body.a11y-cvd-deuteranopia) .masonry-card img,
+  :global(body.a11y-theme-tritanopia) .masonry-card img,
+  :global(body.a11y-cvd-tritanopia) .masonry-card img {
+    filter: saturate(0.85) contrast(1.05) !important;
+  }
+
+  /* =========================================================
+     CVD (COLORBLIND) THEME CARD STYLES
+     Uses --a11y-cvd-accent token from a11y.css
+     ========================================================= */
+
+  /* All CVD themes - card hover border */
+  :global(body.a11y-theme-protanopia) .masonry-card:hover,
+  :global(body.a11y-cvd-protanopia) .masonry-card:hover,
+  :global(body.a11y-theme-deuteranopia) .masonry-card:hover,
+  :global(body.a11y-cvd-deuteranopia) .masonry-card:hover,
+  :global(body.a11y-theme-tritanopia) .masonry-card:hover,
+  :global(body.a11y-cvd-tritanopia) .masonry-card:hover {
+    border-color: var(--a11y-cvd-accent) !important;
+  }
+
+  /* All CVD themes - buttons */
+  :global(body.a11y-theme-protanopia) .card-button,
+  :global(body.a11y-cvd-protanopia) .card-button,
+  :global(body.a11y-theme-deuteranopia) .card-button,
+  :global(body.a11y-cvd-deuteranopia) .card-button,
+  :global(body.a11y-theme-tritanopia) .card-button,
+  :global(body.a11y-cvd-tritanopia) .card-button {
+    background: var(--a11y-cvd-accent) !important;
+    color: white !important;
+    border: 1px solid var(--a11y-cvd-accent) !important;
+  }
+
+  /* All CVD themes - icons */
+  :global(body.a11y-theme-protanopia .masonry-card .card-icon),
+  :global(body.a11y-theme-protanopia .masonry-card .card-icon svg),
+  :global(body.a11y-theme-protanopia .masonry-card .asset-card-arrow),
+  :global(body.a11y-theme-protanopia .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-theme-protanopia .masonry-card .card-arrow),
+  :global(body.a11y-theme-protanopia .masonry-card .card-arrow svg),
+  :global(body.a11y-theme-protanopia .masonry-card .icon),
+  :global(body.a11y-theme-protanopia .masonry-card .icon svg),
+  :global(body.a11y-cvd-protanopia .masonry-card .card-icon),
+  :global(body.a11y-cvd-protanopia .masonry-card .card-icon svg),
+  :global(body.a11y-cvd-protanopia .masonry-card .asset-card-arrow),
+  :global(body.a11y-cvd-protanopia .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-cvd-protanopia .masonry-card .card-arrow),
+  :global(body.a11y-cvd-protanopia .masonry-card .card-arrow svg),
+  :global(body.a11y-cvd-protanopia .masonry-card .icon),
+  :global(body.a11y-cvd-protanopia .masonry-card .icon svg),
+  :global(body.a11y-theme-deuteranopia .masonry-card .card-icon),
+  :global(body.a11y-theme-deuteranopia .masonry-card .card-icon svg),
+  :global(body.a11y-theme-deuteranopia .masonry-card .asset-card-arrow),
+  :global(body.a11y-theme-deuteranopia .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-theme-deuteranopia .masonry-card .card-arrow),
+  :global(body.a11y-theme-deuteranopia .masonry-card .card-arrow svg),
+  :global(body.a11y-theme-deuteranopia .masonry-card .icon),
+  :global(body.a11y-theme-deuteranopia .masonry-card .icon svg),
+  :global(body.a11y-cvd-deuteranopia .masonry-card .card-icon),
+  :global(body.a11y-cvd-deuteranopia .masonry-card .card-icon svg),
+  :global(body.a11y-cvd-deuteranopia .masonry-card .asset-card-arrow),
+  :global(body.a11y-cvd-deuteranopia .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-cvd-deuteranopia .masonry-card .card-arrow),
+  :global(body.a11y-cvd-deuteranopia .masonry-card .card-arrow svg),
+  :global(body.a11y-cvd-deuteranopia .masonry-card .icon),
+  :global(body.a11y-cvd-deuteranopia .masonry-card .icon svg),
+  :global(body.a11y-theme-tritanopia .masonry-card .card-icon),
+  :global(body.a11y-theme-tritanopia .masonry-card .card-icon svg),
+  :global(body.a11y-theme-tritanopia .masonry-card .asset-card-arrow),
+  :global(body.a11y-theme-tritanopia .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-theme-tritanopia .masonry-card .card-arrow),
+  :global(body.a11y-theme-tritanopia .masonry-card .card-arrow svg),
+  :global(body.a11y-theme-tritanopia .masonry-card .icon),
+  :global(body.a11y-theme-tritanopia .masonry-card .icon svg),
+  :global(body.a11y-cvd-tritanopia .masonry-card .card-icon),
+  :global(body.a11y-cvd-tritanopia .masonry-card .card-icon svg),
+  :global(body.a11y-cvd-tritanopia .masonry-card .asset-card-arrow),
+  :global(body.a11y-cvd-tritanopia .masonry-card .asset-card-arrow svg),
+  :global(body.a11y-cvd-tritanopia .masonry-card .card-arrow),
+  :global(body.a11y-cvd-tritanopia .masonry-card .card-arrow svg),
+  :global(body.a11y-cvd-tritanopia .masonry-card .icon),
+  :global(body.a11y-cvd-tritanopia .masonry-card .icon svg) {
+    color: var(--a11y-cvd-accent) !important;
+    fill: var(--a11y-cvd-accent) !important;
+  }
+
+  :global(body.a11y-theme-protanopia .masonry-card .icon svg path),
+  :global(body.a11y-theme-protanopia .masonry-card .icon svg g),
+  :global(body.a11y-cvd-protanopia .masonry-card .icon svg path),
+  :global(body.a11y-cvd-protanopia .masonry-card .icon svg g),
+  :global(body.a11y-theme-deuteranopia .masonry-card .icon svg path),
+  :global(body.a11y-theme-deuteranopia .masonry-card .icon svg g),
+  :global(body.a11y-cvd-deuteranopia .masonry-card .icon svg path),
+  :global(body.a11y-cvd-deuteranopia .masonry-card .icon svg g),
+  :global(body.a11y-theme-tritanopia .masonry-card .icon svg path),
+  :global(body.a11y-theme-tritanopia .masonry-card .icon svg g),
+  :global(body.a11y-cvd-tritanopia .masonry-card .icon svg path),
+  :global(body.a11y-cvd-tritanopia .masonry-card .icon svg g) {
+    fill: var(--a11y-cvd-accent) !important;
+  }
+
+  /* All CVD themes - icon wrappers */
+  :global(body.a11y-theme-protanopia) .asset-card-icon-wrapper,
+  :global(body.a11y-theme-protanopia) .tag-card-icon-wrapper,
+  :global(body.a11y-theme-protanopia) .text-card-icon-wrapper,
+  :global(body.a11y-cvd-protanopia) .asset-card-icon-wrapper,
+  :global(body.a11y-cvd-protanopia) .tag-card-icon-wrapper,
+  :global(body.a11y-cvd-protanopia) .text-card-icon-wrapper,
+  :global(body.a11y-theme-deuteranopia) .asset-card-icon-wrapper,
+  :global(body.a11y-theme-deuteranopia) .tag-card-icon-wrapper,
+  :global(body.a11y-theme-deuteranopia) .text-card-icon-wrapper,
+  :global(body.a11y-cvd-deuteranopia) .asset-card-icon-wrapper,
+  :global(body.a11y-cvd-deuteranopia) .tag-card-icon-wrapper,
+  :global(body.a11y-cvd-deuteranopia) .text-card-icon-wrapper,
+  :global(body.a11y-theme-tritanopia) .asset-card-icon-wrapper,
+  :global(body.a11y-theme-tritanopia) .tag-card-icon-wrapper,
+  :global(body.a11y-theme-tritanopia) .text-card-icon-wrapper,
+  :global(body.a11y-cvd-tritanopia) .asset-card-icon-wrapper,
+  :global(body.a11y-cvd-tritanopia) .tag-card-icon-wrapper,
+  :global(body.a11y-cvd-tritanopia) .text-card-icon-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  /* All CVD themes - badges */
+  :global(body.a11y-theme-protanopia) .asset-card-badge,
+  :global(body.a11y-theme-protanopia) .mixed-card-badge,
+  :global(body.a11y-cvd-protanopia) .asset-card-badge,
+  :global(body.a11y-cvd-protanopia) .mixed-card-badge,
+  :global(body.a11y-theme-deuteranopia) .asset-card-badge,
+  :global(body.a11y-theme-deuteranopia) .mixed-card-badge,
+  :global(body.a11y-cvd-deuteranopia) .asset-card-badge,
+  :global(body.a11y-cvd-deuteranopia) .mixed-card-badge,
+  :global(body.a11y-theme-tritanopia) .asset-card-badge,
+  :global(body.a11y-theme-tritanopia) .mixed-card-badge,
+  :global(body.a11y-cvd-tritanopia) .asset-card-badge,
+  :global(body.a11y-cvd-tritanopia) .mixed-card-badge {
+    background: rgba(var(--a11y-cvd-accent-rgb), 0.15) !important;
+    color: var(--color-Text-700) !important;
+    border: 1px solid rgba(var(--a11y-cvd-accent-rgb), 0.3) !important;
+  }
+
+  /* =========================================================
+     PLAIN MODE OVERRIDES
+     ========================================================= */
+
+  /* Plain mode buttons - use Primary-500 color */
+  :global(body.plain) .card-button {
+    background: var(--color-Primary-500) !important;
+    color: white !important;
+    border: 1px solid var(--color-Primary-500) !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  /* Plain mode + any accessibility theme - still use Primary-500 */
+  :global(body.plain[class*="a11y-"]) .card-button,
+  :global(body.plain.a11y-theme-dark) .card-button,
+  :global(body.plain.a11y-theme-high-contrast) .card-button,
+  :global(body.plain.a11y-theme-cream) .card-button,
+  :global(body.plain.a11y-theme-monochrome) .card-button,
+  :global(body.plain.a11y-cvd-monochrome) .card-button,
+  :global(body.plain.a11y-theme-protanopia) .card-button,
+  :global(body.plain.a11y-cvd-protanopia) .card-button,
+  :global(body.plain.a11y-theme-deuteranopia) .card-button,
+  :global(body.plain.a11y-cvd-deuteranopia) .card-button,
+  :global(body.plain.a11y-theme-tritanopia) .card-button,
+  :global(body.plain.a11y-cvd-tritanopia) .card-button {
+    background: var(--color-Primary-500) !important;
+    color: white !important;
+    border: 1px solid var(--color-Primary-500) !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+</style>

@@ -1,0 +1,487 @@
+---
+// Hero Section with GSAP Scroll Reveal Animation
+// Metaphor for healing: morphing from sadness to happiness to vibrant color
+
+interface Props {
+  title: string;
+  subtitle: string;
+  ctaButtons?: Array<{
+    text: string;
+    href: string;
+    variant: 'primary' | 'secondary' | 'outline';
+  }>;
+}
+
+const { title, subtitle, ctaButtons = [] } = Astro.props;
+---
+
+<section class="hero-reveal-section" id="hero-reveal">
+  <div class="hero-container">
+    <!-- Text Content -->
+    <div class="hero-content">
+      <h1 class="hero-title">{title}</h1>
+      <p class="hero-subtitle">{subtitle}</p>
+    </div>
+
+    <!-- Image Stack with Scroll Reveal -->
+    <div class="hero-image-stack">
+      <!-- Layer 1: Happy face in colour (final reveal) -->
+      <img
+        src="/WWAS Hero/1.png"
+        alt="Healing complete"
+        class="hero-image layer-1"
+      />
+
+      <!-- Layer 2: Happy face B&W (second reveal) -->
+      <img
+        src="/WWAS Hero/2.png"
+        alt="Finding happiness"
+        class="hero-image layer-2"
+      />
+
+      <!-- Layer 3: Scribble cloud (transition fog) -->
+      <img
+        src="/WWAS Hero/3.png"
+        alt="Moving through confusion"
+        class="hero-image layer-3"
+      />
+
+      <!-- Layer 4: Sad face (starting state) -->
+      <img
+        src="/WWAS Hero/4.png"
+        alt="Before healing"
+        class="hero-image layer-4"
+      />
+    </div>
+
+    <!-- CTA Buttons - Below Image -->
+    {ctaButtons.length > 0 && (
+      <div class="hero-cta-buttons">
+        {ctaButtons.map(button => (
+          <a
+            href={button.href}
+            class={`btn btn-${button.variant}`}
+          >
+            {button.text}
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .hero-reveal-section {
+    min-height: 110vh; /* Reduced for tighter spacing with pinSpacing: true */
+    position: relative;
+    background-color: var(--color-Neutral-500);
+    overflow: hidden;
+  }
+
+  .hero-container {
+    position: relative;
+    min-height: 100vh;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem clamp(1rem, 3vw, 2rem);
+    padding-top: 100px; /* Account for navbar */
+    padding-bottom: 3rem; /* Space for buttons at bottom */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 2rem 4rem;
+    align-items: center;
+    align-content: center;
+  }
+
+  /* Text Content */
+  .hero-content {
+    z-index: 10;
+    width: 100%;
+    max-width: 100%;
+    overflow-wrap: normal;
+    word-wrap: normal;
+  }
+
+  .hero-title {
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 6vw, 4.5rem);
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-700);
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: normal;
+    hyphens: none;
+  }
+
+  .hero-subtitle {
+    font-family: var(--font-body);
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    font-weight: var(--font-light);
+    color: var(--color-Text-600);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
+  .hero-cta-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    z-index: 10;
+    grid-column: 1 / -1;
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
+  }
+
+  .hero-cta-buttons .btn {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  /* Image Stack */
+  .hero-image-stack {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-image {
+    position: absolute;
+    width: 100%;
+    height: auto;
+    max-width: 600px;
+    object-fit: contain;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  /* Layer ordering and initial states */
+  .layer-1 {
+    z-index: 1;
+    opacity: 0; /* Final reveal (color) - starts hidden */
+  }
+
+  .layer-2 {
+    z-index: 2;
+    opacity: 0; /* Happy B&W - starts hidden */
+  }
+
+  .layer-3 {
+    z-index: 3;
+    opacity: 0; /* Scribble cloud - transition fog, starts hidden */
+  }
+
+  .layer-4 {
+    z-index: 4;
+    opacity: 1; /* Sad face - starts visible */
+  }
+
+  /* Responsive */
+  @media (max-width: 968px) {
+    .hero-container {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 2rem;
+      padding: 1rem;
+    }
+
+    .hero-content {
+      text-align: center;
+    }
+
+    .hero-cta-buttons {
+      justify-content: center;
+      grid-column: 1;
+    }
+
+    .hero-image-stack {
+      height: 400px;
+    }
+  }
+
+  @media (max-width: 850px) {
+    .hero-cta-buttons {
+      flex-direction: column;
+      align-items: center;
+      padding: 0 2rem;
+    }
+
+    .hero-cta-buttons .btn {
+      width: 100%;
+      max-width: 320px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero-cta-buttons {
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero-reveal-section {
+      min-height: 130vh;
+    }
+
+    .hero-container {
+      padding: 1rem 0.75rem;
+      padding-top: 80px;
+    }
+
+    .hero-image-stack {
+      height: 300px;
+    }
+
+    .hero-image {
+      max-width: 400px;
+    }
+
+    .hero-title {
+      font-size: clamp(1.75rem, 7vw, 2.5rem);
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(0.875rem, 4vw, 1.125rem);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-cta-buttons {
+      flex-direction: column;
+      width: 100%;
+      align-items: center;
+    }
+
+    .hero-cta-buttons .btn {
+      width: 100%;
+      max-width: 280px;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .hero-reveal-section {
+      min-height: 120vh;
+    }
+
+    .hero-container {
+      padding: 0.75rem 0.5rem;
+      padding-top: 70px;
+      gap: 1.5rem;
+    }
+
+    .hero-image-stack {
+      height: 250px;
+    }
+
+    .hero-image {
+      max-width: 280px;
+    }
+
+    .hero-title {
+      font-size: 1.5rem;
+      line-height: 1.3;
+    }
+
+    .hero-subtitle {
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .hero-cta-buttons .btn {
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+    }
+  }
+
+  @media (max-width: 320px) {
+    .hero-container {
+      padding: 0.5rem;
+      padding-top: 70px;
+    }
+
+    .hero-image-stack {
+      height: 200px;
+    }
+
+    .hero-image {
+      max-width: 240px;
+    }
+
+    .hero-title {
+      font-size: 1.375rem;
+    }
+
+    .hero-subtitle {
+      font-size: 0.8125rem;
+    }
+
+    .hero-cta-buttons .btn {
+      max-width: 100%;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 250px) {
+    .hero-container {
+      padding: 0.5rem 0.25rem;
+      padding-top: 60px;
+      gap: 1rem;
+    }
+
+    .hero-content {
+      text-align: center;
+    }
+
+    .hero-title {
+      font-size: 1.25rem;
+      line-height: 1.4;
+    }
+
+    .hero-subtitle {
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+
+    .hero-image-stack {
+      height: 180px;
+    }
+
+    .hero-image {
+      max-width: 200px;
+    }
+
+    .hero-cta-buttons {
+      padding: 0 0.5rem;
+    }
+
+    .hero-cta-buttons .btn {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.7rem;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const section = document.querySelector('.hero-reveal-section');
+    if (!section) return;
+
+    const container = section.querySelector('.hero-container') as HTMLElement;
+    const layer4 = section.querySelector('.layer-4') as HTMLElement; // Sad face
+    const layer3 = section.querySelector('.layer-3') as HTMLElement; // Scribble cloud
+    const layer2 = section.querySelector('.layer-2') as HTMLElement; // Happy face B&W
+    const layer1 = section.querySelector('.layer-1') as HTMLElement; // Happy face in colour
+
+    // Set initial states explicitly
+    gsap.set(layer4, { opacity: 1, scale: 1 });
+    gsap.set(layer3, { opacity: 0, scale: 1, filter: 'blur(0px)' });
+    gsap.set(layer2, { opacity: 0, scale: 0.98 });
+    gsap.set(layer1, { opacity: 0 });
+
+    // Create timeline for the reveal animation
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 1.5, // Smooth scrubbing
+        pin: container, // Pin the container while animation plays
+        pinSpacing: true, // Add spacing to prevent overlap with next section
+      }
+    });
+
+    // Animation sequence:
+    // 1. Sad face blurs and fades out slowly
+    tl.to(layer4, {
+      opacity: 0,
+      scale: 0.92,
+      filter: 'blur(20px)',
+      duration: 0.6,
+      ease: 'power2.inOut'
+    }, 0);
+
+    // 2. Scribble cloud appears as gentle fog (slower, more gradual)
+    tl.fromTo(layer3,
+      {
+        opacity: 0,
+        scale: 1,
+        filter: 'blur(10px)'
+      },
+      {
+        opacity: 0.8,
+        scale: 1.03,
+        filter: 'blur(10px)',
+        duration: 0.6,
+        ease: 'power1.inOut'
+      },
+    0.15);
+
+    // 3. Scribble cloud stays visible longer, then slowly fades with gradual blur increase
+    tl.to(layer3, {
+      opacity: 0,
+      scale: 1.08,
+      filter: 'blur(20px)',
+      duration: 0.7,
+      ease: 'power1.inOut'
+    }, 0.65);
+
+    // 4. Happy B&W comes into focus (emerges from the fog)
+    tl.fromTo(layer2,
+      {
+        opacity: 0,
+        scale: 0.92,
+        filter: 'blur(20px)'
+      },
+      {
+        opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)',
+        duration: 0.6,
+        ease: 'power2.inOut'
+      },
+    0.8);
+
+    // 5. Slow, beautiful transition: B&W fades out as color fades in
+    // Fade in color image (layer 1)
+    tl.to(layer1, {
+      opacity: 1,
+      duration: 1.2, // Long, slow reveal
+      ease: 'power1.inOut'
+    }, 1.3);
+
+    // Fade out B&W image (layer 2) at the same time
+    tl.to(layer2, {
+      opacity: 0,
+      duration: 1.2, // Same duration as color fade in
+      ease: 'power1.inOut'
+    }, 1.3);
+
+    // 6. Add gentle scale to final colored image
+    tl.to(layer1, {
+      scale: 1.02,
+      duration: 0.6,
+      ease: 'power1.out'
+    }, 2.0);
+  });
+</script>

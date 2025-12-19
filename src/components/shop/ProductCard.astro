@@ -1,0 +1,168 @@
+---
+/**
+ * Product Card Component
+ * With Add to Cart functionality
+ */
+
+export interface Props {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image?: string;
+  images?: string[];
+}
+
+const {
+  id,
+  name,
+  description,
+  price,
+  image = 'https://placehold.co/200x100',
+  images = []
+} = Astro.props;
+---
+
+<div class="product-card" data-product-id={id}>
+  <img src={image} alt={name} class="product-image" />
+  <h2 class="product-name">{name}</h2>
+  <p class="product-description">{description}</p>
+  <p class="product-price">${price.toFixed(2)}</p>
+  <button class="btn-add-cart" data-product-id={id}>
+    Add to cart
+  </button>
+</div>
+
+<style>
+  .product-card {
+    position: relative;
+    overflow: hidden;
+    width: 200px;
+    height: 280px;
+    display: inline-block;
+    border-radius: 8px;
+    background: var(--color-Background-100);
+    margin: 20px;
+    padding: 15px;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .product-image {
+    position: relative;
+    top: -15px;
+    left: -15px;
+    width: calc(100% + 30px);
+    height: 120px;
+    object-fit: cover;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    transition: all 0.3s ease;
+    clip-path: polygon(0 100%, 0 0, 100% 0, 100% 70%);
+  }
+
+  .product-card:hover .product-image {
+    clip-path: polygon(0 100%, 0 0, 100% 0, 100% 100%);
+    transform: scale(1.05);
+  }
+
+  .product-name {
+    text-align: left;
+    color: var(--color-Text-700);
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  .product-description {
+    text-align: left;
+    font-size: 11px;
+    color: var(--color-Text-600);
+    max-height: 33px;
+    overflow: hidden;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .product-price {
+    text-align: right;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-Primary-500);
+    margin-top: 6px;
+    margin-bottom: 10px;
+  }
+
+  .btn-add-cart {
+    position: absolute;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: 2px solid var(--color-Primary-500);
+    border-radius: 20px;
+    bottom: 15px;
+    right: 15px;
+    background: transparent;
+    color: var(--color-Primary-500);
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .btn-add-cart:hover {
+    background: var(--color-Primary-500);
+    color: white;
+    padding-right: 28px;
+  }
+
+  .btn-add-cart:hover::after {
+    content: " 🛒";
+    margin-left: 4px;
+  }
+
+  .btn-add-cart.added {
+    background: var(--color-AccentTwo-500);
+    border-color: var(--color-AccentTwo-500);
+    color: white;
+  }
+
+  .btn-add-cart.added::after {
+    content: " ✓";
+    margin-left: 4px;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.btn-add-cart').forEach(button => {
+    button.addEventListener('click', function(this: HTMLElement) {
+      const card = this.closest('.product-card');
+      if (!card) return;
+
+      const id = card.getAttribute('data-product-id') || '';
+      const name = card.querySelector('.product-name')?.textContent || '';
+      const priceText = card.querySelector('.product-price')?.textContent || '$0';
+      const price = parseFloat(priceText.replace('$', ''));
+      const image = (card.querySelector('.product-image') as HTMLImageElement)?.src;
+
+      if (typeof (window as any).addToCart === 'function') {
+        (window as any).addToCart({
+          id,
+          name,
+          price,
+          image
+        });
+
+        // Visual feedback
+        this.classList.add('added');
+        setTimeout(() => {
+          this.classList.remove('added');
+        }, 1500);
+      }
+    });
+  });
+</script>

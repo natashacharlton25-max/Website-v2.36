@@ -1,0 +1,436 @@
+---
+/**
+ * Animated Shopping Cart Icon using Lottie
+ * Uses different animations for different states:
+ * - Idle: static (no animation)
+ * - Hover: hover-pinch animation
+ * - Add to cart: morph-fill animation
+ * - Initial load: in-reveal animation (optional)
+ */
+
+interface Props {
+  size?: number;
+  showOnReveal?: boolean;
+}
+
+const { size = 32, showOnReveal = false } = Astro.props;
+---
+
+<div class="cart-icon-wrapper" id="cart-icon" data-size={size} data-reveal={showOnReveal}>
+  <div class="lottie-container" id="lottie-basket"></div>
+  <img
+    src="/allyicons/icons8-basket-50.png"
+    alt=""
+    class="cart-icon__static"
+    width="32"
+    height="32"
+    aria-hidden="true"
+  />
+  <span class="cart-number">0</span>
+</div>
+
+<script>
+  import lottie from 'lottie-web';
+  import type { AnimationItem } from 'lottie-web';
+
+  // Wait for DOM to be ready
+  const initCartIcon = () => {
+    const cartIconWrapper = document.getElementById('cart-icon');
+    const lottieContainer = document.getElementById('lottie-basket');
+    const cartNumber = cartIconWrapper?.querySelector('.cart-number') as HTMLElement;
+
+    if (!lottieContainer || !cartIconWrapper) {
+      console.log('Cart icon elements not found');
+      return;
+    }
+
+    const showOnReveal = cartIconWrapper.dataset.reveal === 'true';
+
+    // Animation paths - URL encoded for spaces
+    const animations = {
+      reveal: '/Basket%20Icons/wired-outline-139-basket-in-reveal.json',
+      loop: '/Basket%20Icons/wired-outline-139-basket-loop-cycle.json',
+      hover: '/Basket%20Icons/wired-outline-139-basket-hover-pinch.json',
+      addToCart: '/Basket%20Icons/wired-outline-139-basket-morph-fill.json',
+    };
+
+    let currentAnimation: AnimationItem | null = null;
+    let currentState: 'idle' | 'hover' | 'adding' = 'idle';
+    let cartCount = 0;
+    let isInitialized = false;
+
+    // Load and play animation
+    const loadAnimation = (
+      type: keyof typeof animations,
+      loop: boolean = false,
+      autoplay: boolean = true,
+      onComplete?: () => void
+    ): AnimationItem | null => {
+      // Destroy previous animation
+      if (currentAnimation) {
+        currentAnimation.destroy();
+        currentAnimation = null;
+      }
+
+      try {
+        const anim = lottie.loadAnimation({
+          container: lottieContainer,
+          renderer: 'svg',
+          loop,
+          autoplay,
+          path: animations[type],
+        });
+
+        anim.addEventListener('DOMLoaded', () => {
+          console.log(`Animation ${type} loaded`);
+        });
+
+        anim.addEventListener('error', (e) => {
+          console.error(`Animation ${type} error:`, e);
+        });
+
+        if (onComplete) {
+          anim.addEventListener('complete', onComplete);
+        }
+
+        currentAnimation = anim;
+        return anim;
+      } catch (e) {
+        console.error('Failed to load animation:', e);
+        return null;
+      }
+    };
+
+    // Show static frame - use hover animation at last frame for neutral position
+    const showStatic = () => {
+      const anim = loadAnimation('hover', false, false);
+      if (anim) {
+        // Wait for animation to load, then go to last frame (neutral basket position)
+        anim.addEventListener('DOMLoaded', () => {
+          const totalFrames = anim.totalFrames;
+          anim.goToAndStop(totalFrames - 1, true);
+        });
+      }
+    };
+
+    // Initial state
+    if (showOnReveal) {
+      loadAnimation('reveal', false, true, () => {
+        showStatic();
+        isInitialized = true;
+      });
+    } else {
+      showStatic();
+      isInitialized = true;
+    }
+
+    // Hover handlers
+    cartIconWrapper.addEventListener('mouseenter', () => {
+      if (currentState === 'adding' || !isInitialized) return;
+      currentState = 'hover';
+
+      // Load hover animation and play from start
+      const anim = loadAnimation('hover', false, true);
+      if (anim) {
+        anim.addEventListener('complete', () => {
+          // After hover animation completes, stay at last frame (neutral)
+          if (currentState === 'hover') {
+            currentState = 'idle';
+            // Don't reload - just stay at last frame which is neutral position
+          }
+        });
+      }
+    });
+
+    cartIconWrapper.addEventListener('mouseleave', () => {
+      if (currentState === 'adding') return;
+      // On mouse leave, go back to static (last frame of hover = neutral)
+      currentState = 'idle';
+      showStatic();
+    });
+
+    // Listen for cart updates
+    const handleCartUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const newCount = customEvent.detail?.count || 0;
+
+      console.log('Cart updated:', newCount, 'previous:', cartCount);
+
+      // Only play add animation if count increased
+      if (newCount > cartCount) {
+        console.log('Playing add-to-cart animation');
+        currentState = 'adding';
+        loadAnimation('addToCart', false, true, () => {
+          console.log('Add animation complete');
+          currentState = 'idle';
+          showStatic();
+        });
+      }
+
+      cartCount = newCount;
+
+      if (cartNumber) {
+        cartNumber.textContent = cartCount.toString();
+
+        if (cartCount > 0) {
+          cartNumber.classList.add('visible');
+        } else {
+          cartNumber.classList.remove('visible');
+        }
+
+        // Pulse animation on number
+        cartNumber.classList.remove('pulse');
+        requestAnimationFrame(() => {
+          cartNumber.classList.add('pulse');
+        });
+      }
+    };
+
+    document.addEventListener('cart:updated', handleCartUpdate);
+
+    // Toggle mini cart on click
+    cartIconWrapper.addEventListener('click', () => {
+      const miniCart = document.getElementById('mini-cart');
+      miniCart?.classList.toggle('visible');
+    });
+
+    console.log('Cart icon initialized');
+  };
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCartIcon);
+  } else {
+    initCartIcon();
+  }
+
+  // Also check localStorage on load to sync cart count (handles race condition with MiniCart)
+  const syncCartCountFromStorage = () => {
+    const cartNumber = document.querySelector('.cart-number') as HTMLElement;
+    if (!cartNumber) return;
+
+    try {
+      const saved = localStorage.getItem('cartItems');
+      if (saved) {
+        const items = JSON.parse(saved);
+        const count = Array.isArray(items) ? items.length : 0;
+        if (count > 0) {
+          cartNumber.textContent = count.toString();
+          cartNumber.classList.add('visible');
+        }
+      }
+    } catch (e) {
+      console.error('Error syncing cart count:', e);
+    }
+  };
+
+  // Run sync after a short delay to ensure DOM is ready
+  setTimeout(syncCartCountFromStorage, 100);
+</script>
+
+<style>
+  .cart-icon-wrapper {
+    position: relative;
+    cursor: pointer;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-md);
+  }
+
+  .lottie-container {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Convert any color to grayscale first, then apply our color */
+    transition: filter 0.2s ease;
+  }
+
+  /* Default state: black icon */
+  .cart-icon-wrapper .lottie-container {
+    filter: brightness(0);
+    opacity: 0.7;
+  }
+
+  /* Hover state: slightly darker/more opaque */
+  .cart-icon-wrapper:hover .lottie-container {
+    filter: brightness(0);
+    opacity: 1;
+  }
+
+  .lottie-container svg {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Static fallback icon - hidden by default, shown when a11y settings active */
+  .cart-icon__static {
+    display: none !important;
+    width: 32px;
+    height: 32px;
+    filter: brightness(0) saturate(100%);
+    opacity: 0.7;
+    transition: filter 0.2s ease, opacity 0.2s ease;
+  }
+
+  .cart-icon-wrapper:hover .cart-icon__static {
+    opacity: 1;
+    filter: brightness(0) saturate(100%);
+  }
+
+  /* Show static icon and hide Lottie when any accessibility setting is enabled */
+  :global(body.a11y-reduce-motion) .lottie-container,
+  :global(body.a11y-text-only) .lottie-container,
+  :global(body.a11y-theme-dark) .lottie-container,
+  :global(body.a11y-theme-cream) .lottie-container,
+  :global(body.a11y-theme-high-contrast) .lottie-container,
+  :global(body.a11y-theme-protanopia) .lottie-container,
+  :global(body.a11y-theme-deuteranopia) .lottie-container,
+  :global(body.a11y-theme-tritanopia) .lottie-container,
+  :global(body.a11y-theme-monochrome) .lottie-container,
+  :global(body.a11y-enhanced-focus) .lottie-container {
+    display: none !important;
+  }
+
+  :global(body.a11y-reduce-motion) .cart-icon__static,
+  :global(body.a11y-text-only) .cart-icon__static,
+  :global(body.a11y-theme-dark) .cart-icon__static,
+  :global(body.a11y-theme-cream) .cart-icon__static,
+  :global(body.a11y-theme-high-contrast) .cart-icon__static,
+  :global(body.a11y-theme-protanopia) .cart-icon__static,
+  :global(body.a11y-theme-deuteranopia) .cart-icon__static,
+  :global(body.a11y-theme-tritanopia) .cart-icon__static,
+  :global(body.a11y-theme-monochrome) .cart-icon__static,
+  :global(body.a11y-enhanced-focus) .cart-icon__static {
+    display: block !important;
+  }
+
+  .cart-number {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-80%);
+    background-color: var(--color-Primary-500);
+    color: white;
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    border-radius: var(--border-radius-full);
+    min-width: 18px;
+    height: 18px;
+    padding: 0 var(--space-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .cart-number.visible {
+    opacity: 1;
+  }
+
+  .cart-number.pulse {
+    animation: numberPulse 0.4s ease;
+  }
+
+  @keyframes numberPulse {
+    0%, 100% {
+      transform: translateY(-80%) scale(1);
+    }
+    50% {
+      transform: translateY(-80%) scale(1.3);
+    }
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 768px) {
+    .lottie-container {
+      width: 28px;
+      height: 28px;
+    }
+
+    .cart-number {
+      min-width: 16px;
+      height: 16px;
+      font-size: 10px;
+    }
+  }
+
+  /* =========================================================
+     ACCESSIBILITY OVERRIDES
+     - Static icon uses semantic tokens for visibility
+     - Cart number badge uses proper contrast colors
+     ========================================================= */
+
+  /* Any accessibility setting: icon uses text color token */
+  :global(body[class*="a11y-"]) .cart-icon__static {
+    filter: brightness(0) saturate(100%) !important;
+    opacity: 0.8 !important;
+  }
+
+  :global(body[class*="a11y-"]) .cart-icon-wrapper:hover .cart-icon__static {
+    opacity: 1 !important;
+  }
+
+  /* Dark mode: white icon for visibility on dark background */
+  :global(body.a11y-theme-dark) .cart-icon__static {
+    filter: brightness(0) saturate(100%) invert(1) !important;
+    opacity: 0.9 !important;
+  }
+
+  /* Dark mode hover: use primary color (#962587 magenta) */
+  :global(body.a11y-theme-dark) .cart-icon-wrapper:hover .cart-icon__static {
+    filter: brightness(0) saturate(100%) invert(19%) sepia(57%) saturate(2619%) hue-rotate(287deg) brightness(92%) contrast(93%) !important;
+    opacity: 1 !important;
+  }
+
+  /* High contrast: white icon for visibility on dark background */
+  :global(body.a11y-theme-high-contrast) .cart-icon__static {
+    filter: brightness(0) saturate(100%) invert(1) !important;
+    opacity: 1 !important;
+  }
+
+  /* High contrast hover: use primary color (#00ff00 green) */
+  :global(body.a11y-theme-high-contrast) .cart-icon-wrapper:hover .cart-icon__static {
+    filter: brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%) !important;
+    opacity: 1 !important;
+  }
+
+  /* Cream theme: use primary color (#8b7355 brown) - matches nav links */
+  :global(body.a11y-theme-cream) .cart-icon__static {
+    filter: brightness(0) saturate(100%) invert(45%) sepia(15%) saturate(735%) hue-rotate(358deg) brightness(94%) contrast(91%) !important;
+    opacity: 1 !important;
+  }
+
+  /* Cart number badge with standard tokens for accessibility */
+  :global(body[class*="a11y-"]) .cart-number {
+    background-color: var(--color-Primary-500) !important;
+    color: var(--color-Background-50) !important;
+    box-shadow: none !important;
+  }
+
+  /* Dark mode: white text on primary background for visibility */
+  :global(body.a11y-theme-dark) .cart-number {
+    background-color: var(--color-Primary-500) !important;
+    color: #ffffff !important;
+  }
+
+  /* High contrast: white text, strong visible badge */
+  :global(body.a11y-theme-high-contrast) .cart-number {
+    background-color: var(--color-Primary-500) !important;
+    color: #000000 !important;
+    border: 2px solid var(--color-Text-900) !important;
+  }
+
+  /* Reduced motion: no pulse animation */
+  :global(body.a11y-reduce-motion) .cart-number {
+    animation: none !important;
+  }
+
+  :global(body.a11y-reduce-motion) .cart-number.pulse {
+    animation: none !important;
+  }
+</style>

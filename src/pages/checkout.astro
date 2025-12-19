@@ -1,0 +1,707 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import LegacyButton from '../components/Buttons/LegacyButton.astro';
+---
+
+<BaseLayout
+  title="Get Your Downloads | Walking with a Smile"
+  description="Sign up to get your free downloads"
+>
+  <section class="checkout-section section">
+    <div class="container container-7xl">
+      <div class="checkout-header">
+        <h1 class="checkout-title">Get Your Free Downloads</h1>
+        <p class="checkout-subtitle">Join our newsletter to access your selected resources</p>
+      </div>
+
+      <div class="checkout-content">
+        <!-- Left Column: Newsletter Signup Form -->
+        <div class="checkout-forms">
+          <div class="checkout-section-card card">
+            <h2 class="section-card-title">Your Information</h2>
+            <form id="newsletter-form" class="checkout-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="firstName" class="form-label">First Name *</label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    class="form-input"
+                    placeholder="Your first name"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="lastName" class="form-label">Last Name *</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    class="form-input"
+                    placeholder="Your last name"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="email" class="form-label">Email Address *</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  class="form-input"
+                  placeholder="you@example.com"
+                  required
+                />
+                <p class="form-hint">We'll send your download links to this email</p>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="newsletter" name="newsletter" checked />
+                  <span>Yes, I'd like to receive updates and resources from Walking with a Smile</span>
+                </label>
+              </div>
+
+              <div class="info-notice">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="16" x2="12" y2="12"/>
+                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+                <span>All resources are completely free. Your email is only used to send download links and optional updates.</span>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="checkout-actions">
+                <LegacyButton type="submit" variant="primary" size="lg" className="btn-block" id="submit-button">
+                  <span id="button-text">Get My Downloads</span>
+                  <span id="button-spinner" style="display: none;">Processing...</span>
+                </LegacyButton>
+                <p class="checkout-terms">
+                  By submitting, you agree to our
+                  <a href="/legal/terms">Terms of Service</a> and
+                  <a href="/legal/privacy">Privacy Policy</a>
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right Column: Download Summary -->
+        <div class="order-summary-container">
+          <div class="order-summary card">
+            <h2 class="order-summary-title">Your Downloads</h2>
+
+            <div id="order-items" class="order-items">
+              <!-- Items will be populated from cart -->
+              <div class="empty-cart-message">
+                <p>No downloads selected</p>
+                <a href="/assets" class="btn btn-outline btn-sm">Browse Resources</a>
+              </div>
+            </div>
+
+            <div class="order-divider"></div>
+
+            <div class="free-notice">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <div>
+                <p class="free-notice-title">100% Free</p>
+                <p class="free-notice-text">All resources are completely free. No credit card required.</p>
+              </div>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="trust-badges">
+              <div class="trust-badge">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Secure & Private</span>
+              </div>
+              <div class="trust-badge">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span>Instant Delivery</span>
+              </div>
+              <div class="trust-badge">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <span>No Spam Promise</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Load cart items and populate download summary
+  function loadCartItems() {
+    const cartData = localStorage.getItem('shopping_cart');
+    if (!cartData) return;
+
+    try {
+      const cart = JSON.parse(cartData);
+      if (!cart.items || cart.items.length === 0) return;
+
+      const orderItemsContainer = document.getElementById('order-items');
+      if (!orderItemsContainer) return;
+
+      // Clear empty message
+      orderItemsContainer.innerHTML = '';
+
+      // Populate items (no prices, just the items)
+      cart.items.forEach((item: any) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'order-item';
+        itemEl.innerHTML = `
+          <div class="order-item-info">
+            <div class="order-item-image">
+              <img src="${item.image || ''}" alt="${item.name}" />
+            </div>
+            <div class="order-item-details">
+              <h4 class="order-item-name">${item.name}</h4>
+              <p class="order-item-type">${item.format || 'Digital Download'}</p>
+            </div>
+          </div>
+          <div class="order-item-badge">
+            <span class="free-badge">FREE</span>
+          </div>
+        `;
+        orderItemsContainer.appendChild(itemEl);
+      });
+    } catch (error) {
+      console.error('Error loading cart:', error);
+    }
+  }
+
+  // Form submission - Newsletter signup
+  const newsletterForm = document.getElementById('newsletter-form');
+  const submitButton = document.getElementById('submit-button');
+  const buttonText = document.getElementById('button-text');
+  const buttonSpinner = document.getElementById('button-spinner');
+
+  if (newsletterForm) {
+    newsletterForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!submitButton || !buttonText || !buttonSpinner) return;
+
+      // Get form data
+      const formData = new FormData(newsletterForm as HTMLFormElement);
+      const data = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        email: formData.get('email'),
+        newsletter: formData.get('newsletter') === 'on',
+        downloads: JSON.parse(localStorage.getItem('shopping_cart') || '{"items":[]}').items
+      };
+
+      // Disable button and show loading state
+      submitButton.setAttribute('disabled', 'true');
+      buttonText.style.display = 'none';
+      buttonSpinner.style.display = 'inline';
+
+      try {
+        // TODO: Send to your newsletter/email service (Emaillit)
+        // For now, simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Success - clear cart and show success message
+        localStorage.removeItem('shopping_cart');
+
+        // Redirect to a thank you page or show success message
+        alert('Success! Check your email for download links.');
+        window.location.href = '/';
+
+      } catch (error) {
+        console.error('Newsletter signup error:', error);
+        alert('An error occurred. Please try again.');
+
+        // Reset button
+        submitButton.removeAttribute('disabled');
+        buttonText.style.display = 'inline';
+        buttonSpinner.style.display = 'none';
+      }
+    });
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    loadCartItems();
+  });
+</script>
+
+<style>
+  .checkout-section {
+    padding-top: var(--space-2xl);
+    padding-bottom: var(--space-4xl);
+  }
+
+  .checkout-header {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .checkout-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-md);
+    text-align: center;
+    color: var(--brand-text);
+  }
+
+  .checkout-subtitle {
+    text-align: center;
+    color: var(--brand-text-muted);
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .checkout-steps {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-xl);
+    margin: 0 auto;
+    max-width: 600px;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    opacity: 0.4;
+  }
+
+  .step.active {
+    opacity: 1;
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-full);
+    background: var(--brand-neutral-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-bold);
+    color: var(--brand-text);
+  }
+
+  .step.active .step-number {
+    background: var(--brand-primary);
+    color: white;
+  }
+
+  .step-label {
+    font-size: var(--text-sm);
+    color: var(--brand-text-muted);
+  }
+
+  .checkout-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+
+  /* Forms Column */
+  .checkout-forms {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+
+  .checkout-section-card {
+    padding: var(--space-2xl);
+  }
+
+  .section-card-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-xl);
+    color: var(--brand-text);
+  }
+
+  .form-section-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    margin: var(--space-xl) 0 var(--space-lg);
+    color: var(--brand-text);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    color: var(--brand-text);
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+
+  .form-hint {
+    font-size: var(--text-sm);
+    color: var(--brand-text-muted);
+    margin-top: var(--space-xs);
+  }
+
+  .info-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--brand-neutral-100);
+    border: 1px solid var(--brand-neutral-200);
+    border-radius: var(--border-radius-md);
+    margin-top: var(--space-lg);
+    font-size: var(--text-sm);
+    color: var(--brand-text-muted);
+  }
+
+  .info-notice svg {
+    flex-shrink: 0;
+    color: var(--brand-primary);
+    margin-top: 2px;
+  }
+
+  /* Payment Info Notice */
+  .payment-info-notice {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--brand-success-light);
+    border: 1px solid var(--brand-success);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--space-lg);
+    color: var(--brand-success-dark);
+    font-size: var(--text-sm);
+  }
+
+  .payment-info-notice svg {
+    flex-shrink: 0;
+    color: var(--brand-success);
+  }
+
+  /* Payment Placeholder */
+  .payment-placeholder {
+    padding: var(--space-2xl);
+    border: 2px dashed var(--brand-neutral-300);
+    border-radius: var(--border-radius-md);
+    text-align: center;
+  }
+
+  .placeholder-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-sm);
+    color: var(--brand-text);
+  }
+
+  .placeholder-description {
+    color: var(--brand-text-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  .placeholder-cards {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    margin-bottom: var(--space-lg);
+  }
+
+  .card-option {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--brand-neutral-100);
+    border-radius: var(--border-radius-md);
+    font-size: var(--text-sm);
+    color: var(--brand-text-muted);
+  }
+
+  .placeholder-note {
+    font-size: var(--text-sm);
+    color: var(--brand-text-muted);
+    font-style: italic;
+  }
+
+  .payment-errors {
+    color: var(--brand-danger);
+    font-size: var(--text-sm);
+    margin-top: var(--space-md);
+  }
+
+  .payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--brand-neutral-200);
+    font-size: var(--text-sm);
+    color: var(--brand-text-muted);
+  }
+
+  .payment-icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .payment-icon {
+    font-size: var(--text-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--brand-neutral-100);
+    border-radius: var(--border-radius-sm);
+  }
+
+  /* Checkout Actions */
+  .checkout-actions {
+    text-align: center;
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+
+  .checkout-terms {
+    margin-top: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--brand-text-muted);
+  }
+
+  .checkout-terms a {
+    color: var(--brand-primary);
+  }
+
+  /* Order Summary */
+  .order-summary-container {
+    position: relative;
+  }
+
+  .order-summary {
+    padding: var(--space-2xl);
+    position: sticky;
+    top: 100px;
+  }
+
+  .order-summary-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-lg);
+    color: var(--brand-text);
+  }
+
+  .order-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .empty-cart-message {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--brand-text-muted);
+  }
+
+  .order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .order-item-info {
+    display: flex;
+    gap: var(--space-md);
+    flex: 1;
+  }
+
+  .order-item-image {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    background: var(--brand-neutral-100);
+    flex-shrink: 0;
+  }
+
+  .order-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .order-item-details {
+    flex: 1;
+  }
+
+  .order-item-name {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-xs);
+    color: var(--brand-text);
+  }
+
+  .order-item-type {
+    font-size: var(--text-sm);
+    color: var(--brand-text-muted);
+    margin: 0;
+  }
+
+  .order-item-badge {
+    display: flex;
+    align-items: center;
+  }
+
+  .free-badge {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--brand-success-light);
+    color: var(--brand-success-dark);
+    border-radius: var(--border-radius-md);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .free-notice {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: var(--brand-success-light);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .free-notice svg {
+    flex-shrink: 0;
+    color: var(--brand-success);
+  }
+
+  .free-notice-title {
+    font-weight: var(--font-bold);
+    color: var(--brand-success-dark);
+    margin-bottom: var(--space-xs);
+  }
+
+  .free-notice-text {
+    font-size: var(--text-sm);
+    color: var(--brand-success-dark);
+    margin: 0;
+  }
+
+  .order-divider {
+    height: 1px;
+    background: var(--brand-neutral-200);
+    margin: var(--space-lg) 0;
+  }
+
+  /* Promo Code */
+  .promo-code-section {
+    margin-bottom: var(--space-lg);
+  }
+
+  .promo-code-input-group {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  .promo-code-input {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--brand-neutral-300);
+    border-radius: var(--border-radius-md);
+    font-size: var(--text-sm);
+  }
+
+  /* Order Totals */
+  .order-totals {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .order-total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-base);
+    color: var(--brand-text);
+  }
+
+  .discount-row {
+    color: var(--brand-success);
+  }
+
+  .discount-amount {
+    font-weight: var(--font-semibold);
+  }
+
+  .total-row {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    padding-top: var(--space-md);
+  }
+
+  /* Trust Badges */
+  .trust-badges {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--brand-neutral-200);
+  }
+
+  .trust-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--brand-text-muted);
+  }
+
+  .trust-badge svg {
+    color: var(--brand-success);
+    flex-shrink: 0;
+  }
+
+  /* Responsive: Tablet & Desktop */
+  @media (min-width: 768px) {
+    .form-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .checkout-content {
+      grid-template-columns: 2fr 1fr;
+    }
+
+    .checkout-title {
+      font-size: var(--text-5xl);
+    }
+  }
+</style>

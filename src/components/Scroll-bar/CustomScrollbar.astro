@@ -1,0 +1,92 @@
+---
+// Custom Scrollbar Component
+// This component provides a styled scrollbar that matches the brand design
+---
+
+<style is:global>
+  /* Custom Scrollbar Styles */
+  
+  /* WebKit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-background);
+    border-radius: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      var(--color-primary) 0%,
+      var(--color-secondary) 100%
+    );
+    border-radius: 6px;
+    border: 2px solid var(--color-background);
+    transition: all 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      var(--color-primary-light) 0%,
+      var(--color-secondary-light) 100%
+    );
+    transform: scale(1.1);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(
+      180deg,
+      var(--color-primary-dark) 0%,
+      var(--color-secondary-dark) 100%
+    );
+  }
+
+  /* Corner where horizontal and vertical scrollbars meet */
+  ::-webkit-scrollbar-corner {
+    background: var(--color-background);
+  }
+
+  /* Firefox scrollbar styling */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) var(--color-background);
+  }
+
+  /* Smooth scrolling behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    ::-webkit-scrollbar-thumb {
+      transition: none;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      transform: none;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* Mobile scrollbar adjustments */
+  @media (max-width: 768px) {
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      border: 1px solid var(--color-background);
+    }
+  }
+
+</style>

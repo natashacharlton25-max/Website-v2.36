@@ -1,0 +1,160 @@
+---
+/**
+ * ValuesSection - Reusable values/principles section with detailed cards
+ *
+ * Props:
+ * - title: Section heading
+ * - description?: Section description
+ * - values: Array of {icon, title, description, commitments: string[]}
+ * - bgClass?: Background class
+ */
+
+export interface Value {
+  icon: string; // SVG string
+  title: string;
+  description: string;
+  commitments?: string[];
+}
+
+export interface Props {
+  title: string;
+  description?: string;
+  values: Value[];
+  bgClass?: string;
+}
+
+const {
+  title,
+  description,
+  values,
+  bgClass = ''
+} = Astro.props;
+---
+
+<section class={`values-section section ${bgClass}`}>
+  <div class="container container-7xl">
+    <div class="values-header text-center">
+      <h2 class="section-title">{title}</h2>
+      {description && <p class="section-description">{description}</p>}
+    </div>
+
+    <div class="values-grid">
+      {values.map(value => (
+        <div class="value-card card">
+          <div class="value-icon" set:html={value.icon}></div>
+          <h3 class="value-title">{value.title}</h3>
+          <p class="value-description">{value.description}</p>
+
+          {value.commitments && value.commitments.length > 0 && (
+            <div class="value-commitment">
+              <strong>Our Commitment:</strong>
+              <ul>
+                {value.commitments.map(commitment => (
+                  <li>{commitment}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+    <slot />
+  </div>
+</section>
+
+<style>
+  .values-header {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .section-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-md);
+    color: var(--color-Text-700);
+  }
+
+  .section-description {
+    font-size: var(--text-lg);
+    color: var(--color-Text-500);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .values-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    margin-top: var(--space-3xl);
+  }
+
+  .value-card {
+    padding: var(--space-xl);
+  }
+
+  .value-icon {
+    color: var(--color-Primary-500);
+    margin-bottom: var(--space-lg);
+  }
+
+  .value-title {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-md);
+    font-weight: var(--font-bold);
+    color: var(--color-Text-700);
+  }
+
+  .value-description {
+    color: var(--color-Text-500);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-lg);
+  }
+
+  .value-commitment {
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-Neutral-200);
+  }
+
+  .value-commitment strong {
+    display: block;
+    margin-bottom: var(--space-sm);
+    color: var(--color-Primary-500);
+  }
+
+  .value-commitment ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .value-commitment li {
+    padding-left: var(--space-lg);
+    margin-bottom: var(--space-xs);
+    position: relative;
+    color: var(--color-Text-500);
+    font-size: var(--text-sm);
+  }
+
+  .value-commitment li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--color-Primary-500);
+  }
+
+  @media (min-width: 768px) {
+    .values-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .values-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .section-title {
+      font-size: var(--text-5xl);
+    }
+  }
+</style>

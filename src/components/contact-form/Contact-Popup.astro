@@ -1,0 +1,781 @@
+---
+// ContactPopup.astro
+---
+
+<!-- Popup Overlay (hidden by default) -->
+<div id="contactPopup" class="popup-overlay">
+  <div class="popup-container">
+    <!-- Header -->
+    <div class="popup-header">
+      <button id="closePopup" class="close-btn mobile-close-btn" aria-label="Close">
+        ✕
+      </button>
+      <div class="header-content">
+        <h2>Let's discuss something <span class="highlight">cool</span> together</h2>
+      </div>
+      <div class="contact-info">
+        <div class="contact-item">
+          <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+          </svg>
+          <span>hello@icthemoon.com</span>
+        </div>
+        <div class="contact-item">
+          <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+          </svg>
+          <span>+123 456 789</span>
+        </div>
+        <div class="contact-item">
+          <svg class="contact-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <span>Wherever the moon shines</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="popup-form-section">
+      <button id="closePopupDesktop" class="close-btn desktop-close-btn" aria-label="Close">
+        ✕
+      </button>
+      <div class="contact-form" id="contactForm">
+        <div class="form-section">
+          <h3>I want to chat about...</h3>
+          <div class="topic-buttons">
+            <button type="button" class="topic-btn" data-topic="This page">
+              This page
+            </button>
+            <button type="button" class="topic-btn" data-topic="General Message">
+              General Message
+            </button>
+            <button type="button" class="topic-btn" data-topic="Website settings">
+              Website settings
+            </button>
+            <button type="button" class="topic-btn" data-topic="Service Enquiry">
+              Service Enquiry
+            </button>
+            <button type="button" class="topic-btn" data-topic="Other">
+              Other
+            </button>
+          </div>
+        </div>
+
+        <div class="form-fields">
+          <div class="form-group">
+            <label for="contactName">Your name</label>
+            <input
+              type="text"
+              id="contactName"
+              name="name"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="contactEmail">Your email</label>
+            <input
+              type="email"
+              id="contactEmail"
+              name="email"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="contactMessage">Your message</label>
+            <textarea
+              id="contactMessage"
+              name="message"
+              rows="4"
+              class="form-textarea"
+            ></textarea>
+          </div>
+
+          <button id="submitContact" class="submit-btn" disabled>
+            Send Message
+          </button>
+        </div>
+      </div>
+
+      <!-- Success Message Section (hidden by default) -->
+      <div class="success-message" id="successMessage" style="display: none;">
+        <div class="success-content">
+          <div class="success-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h3>Message Sent!</h3>
+          <p>Thanks for reaching out! We'll get back to you soon.</p>
+          <button class="close-success-btn" onclick="closeContactPopup()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Contact Popup Styles */
+
+/* Popup Overlay */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 250, 246, 0.95);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.popup-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Popup Container */
+.popup-container {
+  background: var(--color-background);
+  border-radius: 24px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  transform: translateY(30px) scale(0.95);
+  transition: all 0.4s ease;
+}
+
+.popup-overlay.show .popup-container {
+  transform: translateY(0) scale(1);
+}
+
+/* Header Section */
+.popup-header {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-light) 100%);
+  color: var(--color-background);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.header-content {
+  display: block;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.popup-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+  max-width: 250px;
+  font-family: 'Poppins', sans-serif;
+  color: var(--color-background); /* Cream color for better readability */
+}
+
+.highlight {
+  color: var(--color-primary);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--color-secondary);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.close-btn:hover {
+  background: rgba(24, 78, 119, 0.1);
+  transform: scale(1.1);
+}
+
+.mobile-close-btn {
+  display: none;
+  color: var(--color-background);
+}
+
+.mobile-close-btn:hover {
+  background: rgba(255, 250, 246, 0.2);
+}
+
+@media (min-width: 769px) {
+  .desktop-close-btn {
+    display: flex;
+  }
+  
+  .mobile-close-btn {
+    display: none;
+  }
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.contact-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Form Section */
+.popup-form-section {
+  padding: 32px 32px 40px 32px;
+  background: var(--color-background);
+  overflow-y: auto;
+  position: relative;
+}
+
+.contact-form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-section h3 {
+  color: var(--color-secondary);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Topic Buttons */
+.topic-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.topic-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 2px solid var(--color-secondary);
+  color: var(--color-secondary);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: 'Poppins', sans-serif;
+}
+
+.topic-btn:hover {
+  background: var(--color-secondary);
+  color: var(--color-background);
+}
+
+.topic-btn.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-background);
+}
+
+/* Form Fields */
+.form-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  color: var(--color-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+}
+
+.form-input,
+.form-textarea {
+  padding: 12px 16px;
+  border: 2px solid #e5e5e5;
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.2s ease;
+  background: var(--color-background);
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(24, 78, 119, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Submit Button */
+.submit-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-light) 100%) !important;
+  color: var(--color-background) !important;
+  border: none !important;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 16px;
+  align-self: flex-start;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 4px 12px rgba(24, 78, 119, 0.3);
+  min-width: 120px;
+  text-transform: none;
+  letter-spacing: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(24, 78, 119, 0.4);
+  background: linear-gradient(135deg, #1e5f8c 0%, var(--color-secondary) 100%) !important;
+}
+
+.submit-btn:disabled {
+  opacity: 1 !important;
+  cursor: not-allowed !important;
+  background: var(--color-background) !important;
+  color: var(--color-primary) !important;
+  border: 2px solid var(--color-primary) !important;
+  box-shadow: none !important;
+}
+
+/* Success Message */
+.success-message {
+  padding: 32px;
+  background: var(--color-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+}
+
+.success-content {
+  text-align: center;
+  max-width: 300px;
+}
+
+.success-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #d63456 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-background);
+}
+
+.success-content h3 {
+  color: var(--color-secondary);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.success-content p {
+  color: #5c5b5b;
+  font-size: 16px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.close-success-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-light) 100%);
+  color: var(--color-background);
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.close-success-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(24, 78, 119, 0.4);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .popup-container {
+    grid-template-columns: 1fr;
+    max-height: 95vh;
+  }
+
+  .popup-header {
+    padding: 24px 20px;
+  }
+
+  .popup-header h2 {
+    font-size: 24px;
+    max-width: none;
+  }
+
+  .popup-form-section {
+    padding: 20px 20px 24px 20px;
+  }
+
+  .topic-buttons {
+    gap: 6px;
+  }
+
+  .topic-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .contact-info {
+    gap: 12px;
+  }
+
+  .header-content {
+    margin-bottom: 20px;
+  }
+
+  .desktop-close-btn {
+    display: none;
+  }
+  
+  .mobile-close-btn {
+    display: flex;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    color: var(--color-background);
+  }
+  
+  .mobile-close-btn:hover {
+    background: rgba(255, 250, 246, 0.2);
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-overlay {
+    padding: 10px;
+  }
+
+  .popup-container {
+    border-radius: 16px;
+  }
+
+  .contact-info {
+    display: none;
+  }
+}
+</style>
+
+<script>
+// Contact Popup JavaScript
+
+class ContactPopup {
+  private popup: HTMLElement | null;
+  private closeBtn: HTMLElement | null;
+  private submitBtn: HTMLButtonElement | null;
+  private topicBtns: NodeListOf<HTMLButtonElement>;
+  private formInputs: {
+    name: HTMLInputElement | null;
+    email: HTMLInputElement | null;
+    message: HTMLTextAreaElement | null;
+  };
+  private selectedTopic: string;
+  private formData: {
+    name: string;
+    email: string;
+    message: string;
+  };
+
+  constructor() {
+    this.popup = document.getElementById('contactPopup');
+    this.closeBtn = document.getElementById('closePopup');
+    this.submitBtn = document.getElementById('submitContact') as HTMLButtonElement;
+    this.topicBtns = document.querySelectorAll('.topic-btn');
+    this.formInputs = {
+      name: document.getElementById('contactName') as HTMLInputElement,
+      email: document.getElementById('contactEmail') as HTMLInputElement,
+      message: document.getElementById('contactMessage') as HTMLTextAreaElement
+    };
+    
+    this.selectedTopic = '';
+    this.formData = {
+      name: '',
+      email: '',
+      message: ''
+    };
+    
+    this.init();
+  }
+
+  init(): void {
+    // Close button events (both mobile and desktop)
+    this.closeBtn?.addEventListener('click', () => this.closePopup());
+    const desktopCloseBtn = document.getElementById('closePopupDesktop');
+    desktopCloseBtn?.addEventListener('click', () => this.closePopup());
+    
+    // Backdrop click to close
+    this.popup?.addEventListener('click', (e: Event) => {
+      if (e.target === this.popup) {
+        this.closePopup();
+      }
+    });
+    
+    // Topic button events
+    this.topicBtns.forEach((btn: HTMLButtonElement) => {
+      btn.addEventListener('click', () => this.selectTopic(btn));
+    });
+    
+    // Form input events
+    Object.entries(this.formInputs).forEach(([key, input]) => {
+      if (input) {
+        input.addEventListener('input', (e: Event) => {
+          const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+          this.handleInputChange(key as keyof typeof this.formData, target.value);
+        });
+      }
+    });
+    
+    // Submit button event
+    this.submitBtn?.addEventListener('click', () => this.handleSubmit());
+    
+    // Escape key to close
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && this.isOpen()) {
+        this.closePopup();
+      }
+    });
+    
+    // Expose global functions
+    (window as any).openContactPopup = () => this.openPopup();
+    (window as any).closeContactPopup = () => this.closePopup();
+  }
+
+  openPopup(): void {
+    this.popup?.classList.add('show');
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
+    
+    // Auto-select "This page" topic and set current page
+    const thisPageBtn = document.querySelector('[data-topic="This page"]') as HTMLButtonElement;
+    if (thisPageBtn) {
+      this.selectTopic(thisPageBtn);
+    }
+  }
+
+  closePopup(): void {
+    this.popup?.classList.remove('show');
+    document.body.style.overflow = ''; // Restore scroll
+    
+    // Reset to form view when closing
+    setTimeout(() => {
+      this.resetToFormView();
+    }, 300); // Wait for popup close animation
+  }
+
+  resetToFormView(): void {
+    const contactForm = document.getElementById('contactForm');
+    const successMessage = document.getElementById('successMessage');
+    
+    if (contactForm && successMessage) {
+      contactForm.style.display = 'flex';
+      successMessage.style.display = 'none';
+    }
+    
+    // Reset form data
+    this.resetForm();
+  }
+
+  isOpen(): boolean {
+    return this.popup?.classList.contains('show') ?? false;
+  }
+
+  selectTopic(btn: HTMLButtonElement): void {
+    // Remove selected from all buttons
+    this.topicBtns.forEach((b: HTMLButtonElement) => b.classList.remove('selected'));
+    
+    // Add selected to clicked button
+    btn.classList.add('selected');
+    
+    // Store selected topic
+    this.selectedTopic = btn.getAttribute('data-topic') || '';
+    
+    // Update submit button state
+    this.updateSubmitButton();
+  }
+
+  handleInputChange(field: keyof typeof this.formData, value: string): void {
+    this.formData[field] = value;
+    this.updateSubmitButton();
+  }
+
+  updateSubmitButton(): void {
+    const isValid = this.selectedTopic && 
+                   this.formData.name.trim() && 
+                   this.formData.email.trim() && 
+                   this.formData.message.trim();
+    
+    if (this.submitBtn) {
+      this.submitBtn.disabled = !isValid;
+    }
+  }
+
+  async handleSubmit(): Promise<void> {
+    // Validate form
+    if (!this.selectedTopic || !this.formData.name.trim() || 
+        !this.formData.email.trim() || !this.formData.message.trim()) {
+      alert('Please fill in all fields and select a topic.');
+      return;
+    }
+
+    // Disable submit button and show loading state
+    if (this.submitBtn) {
+      this.submitBtn.disabled = true;
+      this.submitBtn.textContent = 'Sending...';
+    }
+
+    try {
+      // Prepare submission data
+      const submissionData = {
+        topic: this.selectedTopic,
+        name: this.formData.name.trim(),
+        email: this.formData.email.trim(),
+        message: this.formData.message.trim(),
+      };
+
+      // Send email via API
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Show success message
+        this.showSuccessMessage();
+      } else {
+        throw new Error(result.error || 'Failed to send message');
+      }
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message. Please try again or contact us directly at hello@icthemoon.com');
+      
+      // Re-enable submit button
+      if (this.submitBtn) {
+        this.submitBtn.disabled = false;
+        this.submitBtn.textContent = 'Send Message';
+      }
+    }
+  }
+
+  showSuccessMessage(): void {
+    const contactForm = document.getElementById('contactForm');
+    const successMessage = document.getElementById('successMessage');
+    
+    if (contactForm && successMessage) {
+      contactForm.style.display = 'none';
+      successMessage.style.display = 'flex';
+    }
+
+    // Reset submit button state
+    if (this.submitBtn) {
+      this.submitBtn.disabled = true;
+      this.submitBtn.textContent = 'Send Message';
+    }
+  }
+
+  resetForm(): void {
+    // Clear form data
+    this.formData = { name: '', email: '', message: '' };
+    this.selectedTopic = '';
+
+    // Clear form inputs
+    Object.values(this.formInputs).forEach((input: HTMLInputElement | HTMLTextAreaElement | null) => {
+      if (input) input.value = '';
+    });
+
+    // Clear topic selection
+    this.topicBtns.forEach((btn: HTMLButtonElement) => btn.classList.remove('selected'));
+
+    // Disable submit button
+    if (this.submitBtn) {
+      this.submitBtn.disabled = true;
+    }
+  }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  new ContactPopup();
+});
+
+// Export for use in other files if needed
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = ContactPopup;
+}
+</script>

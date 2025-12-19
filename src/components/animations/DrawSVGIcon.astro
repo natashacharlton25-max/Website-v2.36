@@ -1,0 +1,327 @@
+---
+/**
+ * DrawSVGIcon - Pure animation component for DrawSVG-based effects
+ * Handles ONLY animation logic - parent controls size, colors, positioning
+ *
+ * Variants:
+ * - draw: Simple draw animation
+ * - drawcenter: Draw from center outward
+ * - chachaslide: Two-phase draw animation (token color → white)
+ * - flashgordon: Multi-color flash animation with overlapping waves
+ * - rainbowchase: Rainbow colored segments chase along the path
+ * - pulse: Pulse draw effect
+ */
+
+interface Props {
+  /**
+   * Animation variant
+   */
+  variant: 'draw' | 'drawcenter' | 'chachaslide' | 'flashgordon' | 'rainbowchase' | 'pulse';
+
+  /**
+   * SVG icon markup (required)
+   * Should contain <svg> with <path> elements for animation
+   */
+  svgIcon: string;
+
+  /**
+   * Trigger animation on hover (default: true)
+   * Set to false to trigger programmatically via CSS class or JS
+   */
+  animateOnHover?: boolean;
+
+  /**
+   * Primary color for animations (CSS variable or hex)
+   * Used as the main animation color in single-color variants
+   */
+  primaryColor?: string;
+
+  /**
+   * Additional CSS class for custom styling from parent
+   */
+  class?: string;
+}
+
+const {
+  variant,
+  svgIcon,
+  animateOnHover = true,
+  primaryColor,
+  class: className = ''
+} = Astro.props;
+
+const iconId = `draw-icon-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<span
+  class={`draw-svg-icon draw-svg-icon--${variant} ${className}`}
+  data-animation={variant}
+  data-animate-on-hover={animateOnHover}
+  data-primary-color={primaryColor}
+  id={iconId}
+  set:html={svgIcon}
+></span>
+
+<style>
+  .draw-svg-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .draw-svg-icon :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Parent controls these - we just ensure they're inheritable */
+  .draw-svg-icon :global(path) {
+    stroke: inherit;
+    fill: none;
+    stroke-width: inherit;
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
+
+  gsap.registerPlugin(DrawSVGPlugin);
+
+  function initDrawIcon(iconElement: HTMLElement) {
+    const animationType = iconElement.dataset.animation;
+    const animateOnHover = iconElement.dataset.animateOnHover !== 'false';
+    const primaryColor = iconElement.dataset.primaryColor;
+
+    const svg = iconElement.querySelector('svg');
+    if (!svg) return;
+
+    const paths = Array.from(svg.querySelectorAll('path')) as SVGPathElement[];
+    if (paths.length === 0) return;
+
+    const isDraw = animationType === 'draw';
+    const isDrawCenter = animationType === 'drawcenter';
+    const isChaChaSlide = animationType === 'chachaslide';
+    const isFlashGordon = animationType === 'flashgordon';
+    const isRainbowChase = animationType === 'rainbowchase';
+    const isPulse = animationType === 'pulse';
+
+    // Get computed colors from parent element
+    const computedStyle = getComputedStyle(iconElement);
+    const tokenColor = primaryColor || computedStyle.getPropertyValue('--icon-primary-color') || computedStyle.color || '#fff';
+
+    // Get CSS custom properties for multi-color animations
+    const gradientColors = [
+      computedStyle.getPropertyValue('--color-AccentTwo-600') || '#09f',
+      computedStyle.getPropertyValue('--color-AccentFour-600') || '#f09',
+      computedStyle.getPropertyValue('--color-AccentThree-600') || '#0f6',
+      computedStyle.getPropertyValue('--color-Primary-600') || '#fff',
+      computedStyle.getPropertyValue('--color-AccentOne-600') || '#f06'
+    ];
+
+    const rainbowColors = [
+      computedStyle.getPropertyValue('--color-Primary-400') || '#f00',
+      computedStyle.getPropertyValue('--color-AccentOne-400') || '#f60',
+      computedStyle.getPropertyValue('--color-AccentTwo-400') || '#ff0',
+      computedStyle.getPropertyValue('--color-AccentThree-400') || '#0f0',
+      computedStyle.getPropertyValue('--color-AccentFour-400') || '#0ff',
+      computedStyle.getPropertyValue('--color-AccentFive-400') || '#00f',
+      computedStyle.getPropertyValue('--color-Secondary-400') || '#f0f',
+      computedStyle.getPropertyValue('--color-Primary-500') || '#f88'
+    ];
+
+    // Get current stroke properties from parent CSS
+    const inheritedStroke = computedStyle.stroke || '#fff';
+    const inheritedStrokeWidth = computedStyle.strokeWidth || '1.5';
+
+    // Setup initial state with GSAP
+    paths.forEach(path => {
+      gsap.set(path, {
+        drawSVG: '100%',
+        stroke: inheritedStroke,
+        strokeWidth: inheritedStrokeWidth,
+        fill: 'none'
+      });
+    });
+
+    let timeline: gsap.core.Timeline | null = null;
+
+    // Animation trigger
+    const triggerAnimation = () => {
+      if (timeline) timeline.kill();
+      timeline = gsap.timeline();
+
+      paths.forEach((path, index) => {
+        const duration = 0.4;
+
+        if (isDraw) {
+          // Simple draw animation
+          timeline!
+            .fromTo(path,
+              { drawSVG: '0%', stroke: tokenColor, strokeWidth: 2 },
+              { drawSVG: '100%', duration: duration, ease: 'power2.inOut' },
+              0
+            )
+            .to(path, { stroke: inheritedStroke, strokeWidth: inheritedStrokeWidth, duration: 0.2 }, duration);
+
+        } else if (isDrawCenter) {
+          // Draw from center outward
+          timeline!
+            .fromTo(path,
+              { drawSVG: '50% 50%', stroke: tokenColor, strokeWidth: 2 },
+              { drawSVG: '0% 100%', duration: duration, ease: 'power2.inOut' },
+              0
+            )
+            .to(path, { stroke: inheritedStroke, strokeWidth: inheritedStrokeWidth, duration: 0.2 }, duration);
+
+        } else if (isPulse) {
+          // Pulse effect
+          timeline!
+            .fromTo(path,
+              { drawSVG: '0%', stroke: tokenColor, strokeWidth: 3, opacity: 0.8 },
+              { drawSVG: '100%', duration: duration * 0.5, ease: 'power2.out' },
+              0
+            )
+            .to(path, { strokeWidth: inheritedStrokeWidth, opacity: 1, duration: duration * 0.5, ease: 'power2.in' }, duration * 0.5)
+            .to(path, { stroke: inheritedStroke, duration: 0.2 }, duration);
+
+        } else if (isFlashGordon) {
+          // Multi-color flash with DrawSVG
+          const staggerDelay = duration / 4;
+
+          timeline!
+            .fromTo(path,
+              { drawSVG: '0%', stroke: gradientColors[0], strokeWidth: 2 },
+              { drawSVG: '100%', duration: staggerDelay, ease: 'none' },
+              0
+            )
+            .set(path, { stroke: gradientColors[1] }, staggerDelay)
+            .fromTo(path,
+              { drawSVG: '100% 100%' },
+              { drawSVG: '0% 0%', duration: staggerDelay, ease: 'none' },
+              staggerDelay
+            )
+            .set(path, { stroke: gradientColors[2] }, staggerDelay * 2)
+            .fromTo(path,
+              { drawSVG: '0% 0%' },
+              { drawSVG: '0% 100%', duration: staggerDelay, ease: 'none' },
+              staggerDelay * 2
+            )
+            .to(path, { stroke: inheritedStroke, strokeWidth: inheritedStrokeWidth, duration: 0.2 }, staggerDelay * 3);
+
+        } else if (isRainbowChase) {
+          // Rainbow chase with segments
+          if (path._rainbowAnimated) return;
+
+          path._rainbowAnimating = true;
+
+          // Create colored segments
+          if (!path._rainbowSegments) {
+            path._rainbowSegments = rainbowColors.map((color, i) => {
+              const segment = path.cloneNode(true) as SVGPathElement;
+              gsap.set(segment, {
+                stroke: color,
+                strokeWidth: 3,
+                drawSVG: '0% 20%',
+                opacity: 1
+              });
+              path.parentNode!.insertBefore(segment, path.nextSibling);
+              return segment;
+            });
+          }
+
+          // Animate base path
+          timeline!
+            .fromTo(path,
+              { drawSVG: '0%', stroke: inheritedStroke, strokeWidth: 2 },
+              { drawSVG: '100%', duration: duration * 2, ease: 'power1.in' },
+              0
+            );
+
+          // Animate rainbow segments
+          path._rainbowSegments.forEach((segment, i) => {
+            timeline!
+              .fromTo(segment,
+                { drawSVG: '0% 20%' },
+                { drawSVG: '80% 100%', duration: duration * 2, ease: 'linear' },
+                i * 0.1
+              )
+              .to(segment, { opacity: 0, duration: 0.3 }, duration * 2);
+          });
+
+          timeline!.call(() => {
+            path._rainbowAnimated = true;
+            path._rainbowAnimating = false;
+          });
+
+        } else if (isChaChaSlide) {
+          // Two-phase draw animation
+          timeline!
+            .fromTo(path,
+              { drawSVG: '0%', stroke: tokenColor, strokeWidth: 2 },
+              { drawSVG: '100%', duration: duration * 0.5, ease: 'power1.in' },
+              0
+            )
+            .set(path, { stroke: inheritedStroke }, duration * 0.5)
+            .fromTo(path,
+              { drawSVG: '100% 100%' },
+              { drawSVG: '0% 100%', duration: duration * 0.5, ease: 'power1.in' },
+              duration * 0.5
+            );
+        }
+      });
+    };
+
+    const resetAnimation = () => {
+      if (timeline) timeline.kill();
+
+      paths.forEach(path => {
+        if (path._rainbowAnimated) return;
+
+        gsap.to(path, {
+          drawSVG: '100%',
+          stroke: inheritedStroke,
+          strokeWidth: inheritedStrokeWidth,
+          duration: 0.3
+        });
+
+        if (path._rainbowSegments && path._rainbowAnimating) {
+          path._rainbowSegments.forEach(segment => {
+            gsap.to(segment, { opacity: 0, duration: 0.3 });
+          });
+        }
+      });
+    };
+
+    if (animateOnHover) {
+      const triggerElement = iconElement.closest('button, a') || iconElement;
+
+      triggerElement.addEventListener('mouseenter', triggerAnimation);
+      triggerElement.addEventListener('mouseleave', resetAnimation);
+      triggerElement.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerAnimation();
+      });
+    } else {
+      (iconElement as any).triggerAnimation = triggerAnimation;
+      (iconElement as any).resetAnimation = resetAnimation;
+    }
+  }
+
+  // Initialize all draw icons
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.draw-svg-icon').forEach(icon => {
+      initDrawIcon(icon as HTMLElement);
+    });
+  });
+
+  declare global {
+    interface SVGPathElement {
+      _rainbowAnimated?: boolean;
+      _rainbowAnimating?: boolean;
+      _rainbowSegments?: SVGPathElement[];
+    }
+  }
+</script>

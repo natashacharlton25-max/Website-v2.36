@@ -1,0 +1,160 @@
+---
+/**
+ * HeroSection - Reusable hero section component
+ *
+ * Props:
+ * - title: Main heading text
+ * - subtitle?: Subheading text
+ * - description?: Supporting text
+ * - image?: Hero image URL
+ * - ctaButtons?: Array of {text, href, variant} for CTA buttons
+ * - variant?: 'default' | 'centered' | 'full-height'
+ * - bgClass?: Additional background classes
+ */
+
+export interface Props {
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image?: string;
+  ctaButtons?: Array<{
+    text: string;
+    href: string;
+    variant?: 'primary' | 'outline' | 'secondary';
+  }>;
+  variant?: 'default' | 'centered' | 'full-height';
+  bgClass?: string;
+}
+
+const {
+  title,
+  subtitle,
+  description,
+  image,
+  ctaButtons = [],
+  variant = 'default',
+  bgClass = ''
+} = Astro.props;
+
+const sectionClass = variant === 'full-height' ? 'hero-section' : 'hero-section section-sm';
+---
+
+<section class={`${sectionClass} ${bgClass}`}>
+  <div class={`container ${variant === 'full-height' ? 'container-full' : 'container-7xl'}`}>
+    <div class={variant === 'centered' ? 'hero-content text-center' : 'hero-content'}>
+      <h1 class="hero-title">{title}</h1>
+      {subtitle && <p class="hero-subheading">{subtitle}</p>}
+      {description && <p class="hero-supporting-text">{description}</p>}
+
+      {ctaButtons.length > 0 && (
+        <div class="hero-cta">
+          {ctaButtons.map(button => (
+            <a
+              href={button.href}
+              class={`btn btn-${button.variant || 'primary'} btn-lg`}
+            >
+              {button.text}
+            </a>
+          ))}
+        </div>
+      )}
+
+      <slot name="extra" />
+    </div>
+
+    {image && (
+      <div class="hero-image">
+        <img src={image} alt={title} />
+      </div>
+    )}
+
+    <slot />
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    padding: var(--space-4xl) 0 var(--space-3xl);
+  }
+
+  .hero-section.section-sm {
+    padding: var(--space-3xl) 0 var(--space-2xl);
+  }
+
+  .hero-content {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .hero-content.text-center {
+    text-align: center;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-extrabold);
+    color: var(--color-Text-700);
+    margin-bottom: var(--space-lg);
+    line-height: var(--leading-tight);
+  }
+
+  .hero-subheading {
+    font-size: var(--text-xl);
+    color: var(--color-Text-700);
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-md);
+  }
+
+  .hero-supporting-text {
+    font-size: var(--text-lg);
+    color: var(--color-Text-500);
+    margin-bottom: var(--space-2xl);
+    line-height: var(--leading-relaxed);
+  }
+
+  .hero-cta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: flex-start;
+  }
+
+  .text-center .hero-cta {
+    align-items: center;
+  }
+
+  .hero-image {
+    max-width: 100%;
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-2xl);
+  }
+
+  .hero-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  @media (min-width: 768px) {
+    .hero-cta {
+      flex-direction: row;
+    }
+
+    .hero-title {
+      font-size: var(--text-5xl);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-title {
+      font-size: var(--text-6xl);
+    }
+
+    .hero-subheading {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

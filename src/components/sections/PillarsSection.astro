@@ -1,0 +1,209 @@
+---
+/**
+ * PillarsSection - Reusable three-column pillars/features section
+ *
+ * Props:
+ * - title: Section heading
+ * - description?: Section description
+ * - pillars: Array of {icon?, image?, title, description}
+ * - bgClass?: Background class
+ */
+
+export interface Pillar {
+  icon?: string; // SVG string (optional)
+  image?: string; // Image path (optional)
+  title: string;
+  description: string;
+}
+
+export interface Props {
+  title: string;
+  description?: string;
+  pillars: Pillar[];
+  bgClass?: string;
+}
+
+const {
+  title,
+  description,
+  pillars,
+  bgClass = 'bg-alt'
+} = Astro.props;
+---
+
+<section class={`pillars-section section ${bgClass}`}>
+  <div class="container container-7xl">
+    <div class="section-header text-center">
+      <h2 class="section-title">{title}</h2>
+      {description && <p class="section-description">{description}</p>}
+    </div>
+
+    <div class="pillars-grid">
+      {pillars.map(pillar => (
+        <div class="pillar-card">
+          {pillar.image ? (
+            <div class="pillar-image-container">
+              <img src={pillar.image} alt={pillar.title} class="pillar-image" />
+            </div>
+          ) : pillar.icon ? (
+            <div class="pillar-icon" set:html={pillar.icon}></div>
+          ) : null}
+          <h3 class="pillar-title">{pillar.title}</h3>
+          <p class="pillar-description">{pillar.description}</p>
+        </div>
+      ))}
+    </div>
+
+    <slot />
+  </div>
+</section>
+
+<style>
+  .pillars-section {
+    padding: var(--space-4xl) 0;
+  }
+
+  .section-header {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .section-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-md);
+    color: var(--color-Text-700);
+  }
+
+  .section-description {
+    font-size: var(--text-lg);
+    color: var(--color-Text-500);
+    max-width: 700px;
+    margin: 0 auto;
+    font-weight: var(--font-medium);
+  }
+
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3xl);
+  }
+
+  .pillar-card {
+    text-align: center;
+    transition: transform var(--transition-base);
+  }
+
+  .pillar-card:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Image styling */
+  .pillar-image-container {
+    margin-bottom: var(--space-xl);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .pillar-image {
+    width: 100%;
+    height: auto;
+    max-width: 300px;
+    object-fit: contain;
+    background: var(--color-Background-50);
+    padding: var(--space-md);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+  }
+
+  .pillar-card:hover .pillar-image {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+  }
+
+  /* Icon styling (fallback for SVG icons) */
+  .pillar-icon {
+    color: var(--color-Primary-500);
+    margin-bottom: var(--space-xl);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .pillar-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-md);
+    color: var(--color-Text-700);
+    font-family: var(--font-heading);
+  }
+
+  .pillar-description {
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+  }
+
+  @media (max-width: 767px) {
+    .pillars-section {
+      padding: var(--space-3xl) 0;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .pillars-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-3xl);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .section-title {
+      font-size: var(--text-5xl);
+    }
+  }
+
+  @media (max-width: 250px) {
+    .pillars-section {
+      padding: var(--space-2xl) 0.25rem;
+    }
+
+    .section-header {
+      margin-bottom: var(--space-lg);
+    }
+
+    .section-title {
+      font-size: var(--text-lg);
+      margin-bottom: var(--space-sm);
+    }
+
+    .section-description {
+      font-size: var(--text-xs);
+      line-height: 1.5;
+    }
+
+    .pillars-grid {
+      gap: var(--space-lg);
+    }
+
+    .pillar-image-container {
+      margin-bottom: var(--space-md);
+    }
+
+    .pillar-image {
+      max-width: 180px;
+    }
+
+    .pillar-title {
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-xs);
+    }
+
+    .pillar-description {
+      font-size: var(--text-xs);
+      line-height: 1.4;
+    }
+  }
+</style>

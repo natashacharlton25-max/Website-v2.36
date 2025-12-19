@@ -1,0 +1,697 @@
+---
+import type { ReaderSection, ReaderHeroSection, ReaderEndSection } from '../../types/reader';
+
+interface Props {
+  sections: ReaderSection[];
+  heroSection?: ReaderHeroSection;
+  endSection?: ReaderEndSection;
+}
+
+const { sections, heroSection, endSection } = Astro.props;
+---
+
+{/* Reader Wrapper - TRACKS all sections including optional hero/end */}
+<section class="reader-wrapper" data-reader-wrapper>
+  <div class="reader-container" data-reader-container>
+    {/* Optional Hero Section - TRACKED as first section */}
+    {heroSection && (
+      <div
+        class="reader-section reader-section--hero"
+        data-reader-section
+        data-section-id="hero"
+        data-section-index="0"
+        id="section-hero"
+      >
+        <div class="reader-hero-inner">
+          <div class="hero-image-container">
+            {heroSection.image && <img src={heroSection.image} alt={heroSection.title} />}
+          </div>
+          <div class="hero-overlay">
+            <div class="container container-6xl">
+              {(heroSection.category || heroSection.date) && (
+                <div class="hero-meta">
+                  {heroSection.category && (
+                    <span class="hero-category">{heroSection.category}</span>
+                  )}
+                  {heroSection.date && <span class="hero-date">{heroSection.date}</span>}
+                </div>
+              )}
+              <h1 class="hero-title">{heroSection.title}</h1>
+              {heroSection.description && (
+                <p class="hero-description">{heroSection.description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Main Content Sections - TRACKED */}
+    {sections.map((section, index) => {
+      const layout = section.layout || 'text-only';
+      const alignment = section.alignment || 'center';
+      const imagePosition = section.imagePosition || 'right';
+      const sectionIndex = heroSection ? index + 1 : index;
+
+      return (
+        <div
+          class={`reader-section reader-section--${layout}`}
+          data-reader-section
+          data-section-id={section.id}
+          data-section-index={sectionIndex}
+          id={`section-${section.id}`}
+        >
+          {/* Text-only layout */}
+          {layout === 'text-only' && (
+            <div class={`section-content section-content--${alignment}`}>
+              <h2 class="section-title">{section.title}</h2>
+              <div class="section-body" set:html={section.body} />
+            </div>
+          )}
+
+          {/* Image + Text layout */}
+          {layout === 'image-text' && (
+            <div class={`section-grid section-grid--${imagePosition}`}>
+              <div class="section-text">
+                <h2 class="section-title">{section.title}</h2>
+                <div class="section-body" set:html={section.body} />
+              </div>
+              <div class="section-image">
+                <img
+                  src={section.image}
+                  alt={section.title}
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Full-width image layout */}
+          {layout === 'full-width-image' && (
+            <div class="section-fullwidth">
+              <div class="section-image-bg">
+                <img
+                  src={section.image}
+                  alt={section.title}
+                  loading="lazy"
+                />
+              </div>
+              <div class="section-card-wrapper">
+                <div class="section-glass-card">
+                  <h2 class="section-title">{section.title}</h2>
+                  <div class="section-body" set:html={section.body} />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    })}
+
+    {/* Optional End Section - TRACKED as last section */}
+    {endSection && (
+      <div
+        class="reader-section reader-section--end"
+        data-reader-section
+        data-section-id="end"
+        data-section-index={(heroSection ? 1 : 0) + sections.length}
+        id="section-end"
+      >
+        <div class="reader-end-inner" set:html={endSection.html} />
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  /* ===== HERO & END SECTIONS (as reader sections) ===== */
+  .reader-section--hero,
+  .reader-section--end {
+    padding: 0; /* Override default padding */
+  }
+
+  .reader-hero-inner {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--color-Neutral-500);
+  }
+
+  .reader-hero-inner .hero-image-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .reader-hero-inner .hero-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .reader-hero-inner .hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.6) 50%,
+      transparent 100%
+    );
+    padding: var(--space-4xl) 0 var(--space-3xl);
+  }
+
+  .reader-hero-inner .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .reader-hero-inner .hero-category {
+    padding: var(--space-xs) var(--space-md);
+    background: var(--color-Primary-600);
+    color: white;
+    border-radius: var(--border-radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .reader-hero-inner .hero-date {
+    color: var(--color-Text-200);
+    font-size: var(--text-sm);
+  }
+
+  .reader-hero-inner .hero-title {
+    font-family: var(--font-heading);
+    font-size: var(--text-5xl);
+    font-weight: var(--font-extrabold);
+    color: var(--color-Text-50);
+    line-height: var(--leading-tight);
+    margin-bottom: var(--space-md);
+    max-width: 900px;
+  }
+
+  .reader-hero-inner .hero-description {
+    font-size: var(--text-xl);
+    color: var(--color-Text-200);
+    line-height: var(--leading-relaxed);
+    max-width: 700px;
+    font-style: italic;
+  }
+
+  /* ===== END SECTION ===== */
+  .reader-end-inner {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-Neutral-500);
+  }
+
+  /* ===== WRAPPER: Creates scroll space ===== */
+  .reader-wrapper {
+    position: relative;
+    /* Height: 1.5x viewport per section for smooth scrub */
+    min-height: calc(var(--section-count, 3) * 150vh);
+    background-color: var(--color-Neutral-500);
+  }
+
+  /* ===== CONTAINER: Pinned element ===== */
+  .reader-container {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-xl);
+  }
+
+  /* ===== SECTIONS: Overlapping full-viewport cards ===== */
+  .reader-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3xl) var(--space-xl);
+    opacity: 0; /* All start hidden except first */
+    will-change: opacity;
+    overflow: hidden; /* Ensure no scrollbars */
+  }
+
+  .reader-section:first-child {
+    opacity: 1; /* First section visible by default */
+  }
+
+  /* Z-index stacking - first on top, decreasing */
+  .reader-section:nth-child(1) { z-index: 100; }
+  .reader-section:nth-child(2) { z-index: 99; }
+  .reader-section:nth-child(3) { z-index: 98; }
+  .reader-section:nth-child(4) { z-index: 97; }
+  .reader-section:nth-child(5) { z-index: 96; }
+  .reader-section:nth-child(6) { z-index: 95; }
+  .reader-section:nth-child(7) { z-index: 94; }
+  .reader-section:nth-child(8) { z-index: 93; }
+  .reader-section:nth-child(9) { z-index: 92; }
+  .reader-section:nth-child(10) { z-index: 91; }
+
+  /* ===== TEXT-ONLY LAYOUT ===== */
+  .section-content {
+    max-width: 800px;
+    width: 100%;
+    max-height: 80vh; /* Constrain to viewport, no scrollbars */
+    overflow: hidden;
+  }
+
+  .section-content--left {
+    text-align: left;
+    margin-right: auto;
+  }
+
+  .section-content--right {
+    text-align: right;
+    margin-left: auto;
+  }
+
+  .section-content--center {
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  /* ===== IMAGE + TEXT LAYOUT ===== */
+  .section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+    align-items: center;
+    width: 100%;
+    max-width: 1100px;
+    max-height: 80vh;
+    overflow: hidden;
+  }
+
+  .section-grid--left {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .section-grid--left .section-image {
+    order: -1; /* Image on left */
+  }
+
+  .section-grid--right {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .section-text {
+    overflow: hidden; /* No scrollbars */
+  }
+
+  .section-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .section-image img {
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+    object-fit: cover;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+  }
+
+  /* ===== FULL-WIDTH IMAGE LAYOUT ===== */
+  .section-fullwidth {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .section-image-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .section-image-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .section-card-wrapper {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: var(--space-3xl);
+  }
+
+  .section-glass-card {
+    max-width: 800px;
+    padding: var(--space-3xl) var(--space-4xl);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(32px) saturate(180%);
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+    color: var(--color-Text-900);
+    text-align: center;
+  }
+
+  /* ===== TYPOGRAPHY ===== */
+  .section-title {
+    font-family: var(--font-heading);
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Text-700);
+    line-height: var(--leading-tight);
+    margin-bottom: var(--space-xl);
+  }
+
+  .section-fullwidth .section-title {
+    color: var(--color-Text-900);
+  }
+
+  .section-body {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    font-weight: var(--font-normal);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
+  }
+
+  .section-body p {
+    margin-bottom: var(--space-md);
+  }
+
+  .section-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-fullwidth .section-body {
+    color: var(--color-Text-900);
+  }
+
+  /* ===== RESPONSIVE BREAKPOINTS ===== */
+  @media (max-width: 968px) {
+    .reader-hero {
+      height: 80vh;
+    }
+
+    .reader-hero .hero-title {
+      font-size: var(--text-3xl);
+    }
+
+    .reader-hero .hero-description {
+      font-size: var(--text-lg);
+    }
+
+    .section-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xl);
+      max-height: none; /* Allow stacking */
+    }
+
+    .section-grid--left .section-image {
+      order: 0; /* Reset order on mobile */
+    }
+
+    .section-title {
+      font-size: var(--text-3xl);
+    }
+
+    .section-body {
+      font-size: var(--text-base);
+    }
+
+    .section-image img {
+      max-height: 50vh;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .reader-hero {
+      height: 70vh;
+    }
+
+    .reader-hero .hero-title {
+      font-size: var(--text-2xl);
+    }
+
+    .reader-hero .hero-description {
+      font-size: var(--text-base);
+    }
+
+    .reader-container {
+      padding: 0 var(--space-md);
+    }
+
+    .reader-section {
+      padding: var(--space-2xl) var(--space-md);
+    }
+
+    .section-title {
+      font-size: var(--text-2xl);
+      margin-bottom: var(--space-lg);
+    }
+
+    .section-body {
+      font-size: var(--text-sm);
+    }
+
+    .section-card-wrapper {
+      padding: var(--space-2xl);
+    }
+
+    .section-glass-card {
+      padding: var(--space-2xl) var(--space-3xl);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .reader-hero .hero-title {
+      font-size: var(--text-xl);
+    }
+
+    .section-title {
+      font-size: var(--text-xl);
+    }
+
+    .section-body {
+      font-size: var(--text-xs);
+    }
+
+    .section-card-wrapper {
+      padding: var(--space-lg);
+    }
+
+    .section-glass-card {
+      padding: var(--space-xl) var(--space-2xl);
+    }
+  }
+
+  /* ===== REDUCED MOTION ===== */
+  @media (prefers-reduced-motion: reduce) {
+    .reader-section {
+      will-change: auto;
+      transition: none !important;
+    }
+  }
+
+</style>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initReader() {
+    const wrapper = document.querySelector('[data-reader-wrapper]') as HTMLElement;
+    if (!wrapper) return;
+
+    // Skip GSAP animations in plain mode and force reset inline styles
+    if (document.body.classList.contains('plain')) {
+      // Kill any existing ScrollTriggers on this wrapper
+      ScrollTrigger.getAll().forEach(st => st.kill());
+
+      // Reset wrapper inline styles
+      wrapper.style.minHeight = '0';
+      wrapper.style.height = 'auto';
+      wrapper.style.position = 'static';
+
+      // Reset container inline styles (GSAP sets these)
+      const container = wrapper.querySelector('[data-reader-container]') as HTMLElement;
+      if (container) {
+        container.style.cssText = '';
+      }
+
+      // Reset all section inline styles
+      const sections = wrapper.querySelectorAll('[data-reader-section]') as NodeListOf<HTMLElement>;
+      sections.forEach(section => {
+        section.style.cssText = '';
+      });
+
+      // Remove pin-spacer if it exists
+      const pinSpacer = wrapper.closest('.pin-spacer');
+      if (pinSpacer && pinSpacer.parentNode) {
+        pinSpacer.parentNode.insertBefore(wrapper, pinSpacer);
+        pinSpacer.remove();
+      }
+      return;
+    }
+
+    const container = wrapper.querySelector('[data-reader-container]') as HTMLElement;
+    const sections = Array.from(
+      wrapper.querySelectorAll('[data-reader-section]')
+    ) as HTMLElement[];
+
+    if (sections.length === 0) return;
+
+    // Set CSS variable for dynamic height calculation
+    wrapper.style.setProperty('--section-count', sections.length.toString());
+
+    // Set initial states
+    sections.forEach((section, index) => {
+      if (index === 0) {
+        gsap.set(section, { opacity: 1 });
+      } else {
+        gsap.set(section, { opacity: 0 });
+      }
+    });
+
+    // Create master timeline with pin AND progress tracking
+    const masterTimeline = gsap.timeline({
+      scrollTrigger: {
+        trigger: wrapper,
+        start: 'top top',
+        end: `+=${sections.length * window.innerHeight * 1.5}`,
+        scrub: 1.5,
+        pin: container,
+        pinSpacing: true,
+        anticipatePin: 1,
+        markers: false,
+        onUpdate: (self) => {
+          // Track progress from the SAME ScrollTrigger as the animations
+          const progress = self.progress;
+          // Round to nearest section (changes at 50% through transition)
+          const currentIndex = Math.round(progress * (sections.length - 1));
+          const clampedIndex = Math.max(0, Math.min(currentIndex, sections.length - 1));
+          const currentSection = sections[clampedIndex];
+
+          // Dispatch progress event for ReaderNav
+          if (currentSection) {
+            const sectionId = currentSection.dataset.sectionId;
+
+            window.dispatchEvent(
+              new CustomEvent('reader:progress', {
+                detail: {
+                  index: clampedIndex,
+                  id: sectionId || '',
+                  progress: progress,
+                  totalProgress: progress * 100,
+                },
+              })
+            );
+          }
+
+          // Update window reference
+          (window as any).readerCurrentSection = {
+            index: clampedIndex,
+            id: currentSection?.dataset.sectionId || '',
+            progress: progress,
+            totalProgress: progress * 100,
+          };
+        },
+      },
+    });
+
+    // Animation sequence: staggered fades with NO overlap
+    // Fade-out: 0.3s, Gap: 0.05s, Fade-in: 0.5s
+    sections.forEach((section, index) => {
+      if (index === sections.length - 1) return; // Last section stays visible
+
+      const nextSection = sections[index + 1];
+      const sectionDuration = 1; // Total duration for this section's transition
+
+      // Fade out current section (fast: 0.3s)
+      masterTimeline.to(
+        section,
+        {
+          opacity: 0,
+          duration: 0.3,
+          ease: 'power2.inOut',
+        },
+        index * sectionDuration
+      );
+
+      // Fade in next section (slower: 0.5s, starts after fade-out + gap)
+      masterTimeline.fromTo(
+        nextSection,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power2.inOut',
+        },
+        index * sectionDuration + 0.35 // 0.35 = 0.3 (fade-out) + 0.05 (gap)
+      );
+    });
+
+    // Expose current section to window for debugging/external access
+    (window as any).readerCurrentSection = {
+      index: 0,
+      id: sections[0]?.dataset.sectionId,
+      progress: 0,
+      totalProgress: 0,
+    };
+  }
+
+  // Cleanup function
+  function cleanupReader() {
+    ScrollTrigger.getAll().forEach((trigger) => {
+      const triggerEl = trigger.vars.trigger;
+      if (triggerEl instanceof Element && triggerEl.classList?.contains('reader-wrapper')) {
+        trigger.kill();
+      }
+    });
+  }
+
+  // Initialize on load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initReader);
+  } else {
+    initReader();
+  }
+
+  // Support Astro page transitions
+  document.addEventListener('astro:page-load', initReader);
+  document.addEventListener('astro:before-preparation', cleanupReader);
+</script>

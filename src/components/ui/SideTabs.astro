@@ -1,0 +1,487 @@
+---
+/**
+ * SideTabs - Unified side panel with multiple action tabs
+ *
+ * A fixed-position side panel with vertically stacked tabs for:
+ * - Email contact
+ * - Share link
+ * - Search
+ * - Accessibility settings
+ *
+ * All tabs use Lottie animations that play on hover and stop when not hovering.
+ *
+ * Usage:
+ * ```astro
+ * <SideTabs />
+ * ```
+ */
+
+interface Props {
+  /**
+   * Additional class for styling
+   */
+  class?: string;
+}
+
+const {
+  class: className = ''
+} = Astro.props;
+---
+
+<!-- Side Tabs Panel - Right Edge -->
+<div class={`side-tabs ${className}`}>
+  <!-- Email Tab -->
+  <a
+    href="/contact"
+    class="side-tab side-tab--email"
+    aria-label="Contact us"
+  >
+    <lottie-player
+      src="/Animated Icons/Mail/mail.json"
+      background="transparent"
+      speed="0.6"
+      style="width: 28px; height: 28px;"
+      aria-hidden="true"
+      class="side-tab__lottie"
+    ></lottie-player>
+    <img
+      src="/allyicons/icons8-email-50.png"
+      alt=""
+      class="side-tab__static-icon"
+      width="28"
+      height="28"
+      aria-hidden="true"
+    />
+  </a>
+
+  <!-- Share Tab -->
+  <button
+    type="button"
+    class="side-tab side-tab--share"
+    data-share="copy"
+    aria-label="Copy link to clipboard"
+  >
+    <lottie-player
+      src="/Animated Icons/Share/share.json"
+      background="transparent"
+      speed="0.6"
+      style="width: 28px; height: 28px;"
+      aria-hidden="true"
+      class="side-tab__lottie"
+    ></lottie-player>
+    <img
+      src="/allyicons/icons8-link-48.png"
+      alt=""
+      class="side-tab__static-icon"
+      width="28"
+      height="28"
+      aria-hidden="true"
+    />
+  </button>
+
+  <!-- Search Tab -->
+  <button
+    type="button"
+    class="side-tab side-tab--search"
+    data-action="search"
+    aria-label="Search"
+  >
+    <lottie-player
+      src="/Animated Icons/icons8-search.json"
+      background="transparent"
+      speed="0.6"
+      style="width: 24px; height: 24px;"
+      aria-hidden="true"
+      class="side-tab__lottie"
+    ></lottie-player>
+    <img
+      src="/allyicons/icons8-search-50.png"
+      alt=""
+      class="side-tab__static-icon"
+      width="24"
+      height="24"
+      aria-hidden="true"
+    />
+  </button>
+
+  <!-- Accessibility Tab -->
+  <button
+    type="button"
+    class="side-tab side-tab--accessibility"
+    data-action="accessibility"
+    aria-label="Accessibility settings"
+    aria-controls="a11y-panel"
+  >
+    <lottie-player
+      src="/Animated Icons/Visibility V3/visibility-V3.json"
+      background="transparent"
+      speed="0.6"
+      style="width: 28px; height: 28px;"
+      aria-hidden="true"
+      class="side-tab__lottie"
+    ></lottie-player>
+    <img
+      src="/allyicons/icons8-web-accessibility-50.png"
+      alt=""
+      class="side-tab__static-icon"
+      width="28"
+      height="28"
+      aria-hidden="true"
+    />
+  </button>
+</div>
+
+<style>
+  /* Side Tabs Container - Right Edge */
+  .side-tabs {
+    position: fixed;
+    bottom: 80px;
+    right: 0;
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* Individual Tab */
+  .side-tab {
+    width: 48px;
+    height: 44px;
+    border: none;
+    background: var(--color-Background-100);
+    color: var(--color-Text-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    padding: 8px;
+    border-radius: var(--border-radius-md) 0 0 var(--border-radius-md);
+    text-decoration: none;
+  }
+
+  /* First tab - rounded corners */
+  .side-tab:first-child {
+    border-radius: var(--border-radius-md) 0 0 var(--border-radius-md);
+  }
+
+  /* Last tab - rounded corners */
+  .side-tab:last-child {
+    border-radius: var(--border-radius-md) 0 0 var(--border-radius-md);
+  }
+
+  .side-tab:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-lg);
+    z-index: 1;
+  }
+
+  .side-tab:active {
+    transform: scale(0.95);
+  }
+
+  /* Static fallback icons - hidden by default */
+  .side-tab__static-icon {
+    display: none;
+    filter: brightness(0) saturate(100%);
+    opacity: 0.8;
+  }
+
+  /* Show static icons and hide Lottie when any accessibility setting is enabled */
+  :global(body.a11y-reduce-motion) .side-tab__lottie,
+  :global(body.a11y-text-only) .side-tab__lottie,
+  :global(body.a11y-theme-dark) .side-tab__lottie,
+  :global(body.a11y-theme-cream) .side-tab__lottie,
+  :global(body.a11y-theme-high-contrast) .side-tab__lottie,
+  :global(body.a11y-theme-protanopia) .side-tab__lottie,
+  :global(body.a11y-theme-deuteranopia) .side-tab__lottie,
+  :global(body.a11y-theme-tritanopia) .side-tab__lottie,
+  :global(body.a11y-theme-monochrome) .side-tab__lottie,
+  :global(body.a11y-enhanced-focus) .side-tab__lottie {
+    display: none !important;
+  }
+
+  :global(body.a11y-reduce-motion) .side-tab__static-icon,
+  :global(body.a11y-text-only) .side-tab__static-icon,
+  :global(body.a11y-theme-dark) .side-tab__static-icon,
+  :global(body.a11y-theme-cream) .side-tab__static-icon,
+  :global(body.a11y-theme-high-contrast) .side-tab__static-icon,
+  :global(body.a11y-theme-protanopia) .side-tab__static-icon,
+  :global(body.a11y-theme-deuteranopia) .side-tab__static-icon,
+  :global(body.a11y-theme-tritanopia) .side-tab__static-icon,
+  :global(body.a11y-theme-monochrome) .side-tab__static-icon,
+  :global(body.a11y-enhanced-focus) .side-tab__static-icon {
+    display: block !important;
+  }
+
+  /* =========================================================
+     ACCESSIBILITY ICON OVERRIDES
+     - Dark mode: white/light icons
+     - High contrast: yellow icons
+     - Cream: warm tinted icons
+     ========================================================= */
+
+  /* Dark mode: invert icon to be light colored */
+  :global(body.a11y-theme-dark) .side-tab__static-icon {
+    filter: brightness(0) saturate(100%) invert(1) !important;
+    opacity: 0.9 !important;
+  }
+
+  /* High contrast: accent colored icon for visibility */
+  :global(body.a11y-theme-high-contrast) .side-tab__static-icon {
+    filter: brightness(0) invert(1) !important;
+    opacity: 1 !important;
+  }
+
+  /* Cream theme: slightly warm tint */
+  :global(body.a11y-theme-cream) .side-tab__static-icon {
+    filter: brightness(0) saturate(100%) sepia(20%) !important;
+    opacity: 0.85 !important;
+  }
+
+  /* Monochrome: ensure proper grayscale */
+  :global(body.a11y-theme-monochrome) .side-tab__static-icon {
+    filter: brightness(0) saturate(100%) !important;
+    opacity: 0.8 !important;
+  }
+
+  /* All tabs - unified hover state */
+  .side-tab--email:hover,
+  .side-tab--share:hover,
+  .side-tab--search:hover,
+  .side-tab--accessibility:hover {
+    background: var(--color-Primary-500);
+  }
+
+  /* Copy success state */
+  .side-tab--share.copied {
+    background: var(--color-AccentTwo-600);
+  }
+
+  /* SVG icon styling */
+  .side-tab svg {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+  }
+
+  /* Lottie player styling */
+  .side-tab lottie-player {
+    pointer-events: none;
+  }
+
+  /* Hide under 1400px */
+  @media (max-width: 1399px) {
+    .side-tabs {
+      display: none;
+    }
+  }
+
+  /* Print - Hide */
+  @media print {
+    .side-tabs {
+      display: none !important;
+    }
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .side-tab {
+      transition: none;
+    }
+  }
+
+  /* =========================================================
+     ACCESSIBILITY TAB CONTAINER OVERRIDES
+     - Backgrounds and borders for all themes
+     ========================================================= */
+
+  /* Any accessibility setting: use token backgrounds */
+  :global(body[class*="a11y-"]) .side-tab {
+    background: var(--color-Background-100) !important;
+    border: 1px solid var(--color-Text-300) !important;
+  }
+
+  /* All tabs unified hover - use primary color */
+  :global(body[class*="a11y-"]) .side-tab:hover {
+    background: var(--color-Primary-500) !important;
+  }
+
+  /* Dark mode tabs */
+  :global(body.a11y-theme-dark) .side-tab {
+    background: var(--color-Background-100) !important;
+    border: 1px solid var(--color-Background-300) !important;
+  }
+
+  :global(body.a11y-theme-dark) .side-tab:hover {
+    background: var(--color-Primary-500) !important;
+  }
+
+  /* High contrast tabs - accent color, white borders */
+  :global(body.a11y-theme-high-contrast) .side-tab {
+    background: var(--color-Background-50) !important;
+    border: 2px solid var(--color-Text-900) !important;
+  }
+
+  :global(body.a11y-theme-high-contrast) .side-tab:hover {
+    background: var(--color-Primary-500) !important;
+    border-color: var(--color-Primary-500) !important;
+  }
+
+  /* High contrast - icons turn black on hover */
+  :global(body.a11y-theme-high-contrast) .side-tab:hover .side-tab__static-icon {
+    filter: brightness(0) saturate(100%) !important;
+    opacity: 1 !important;
+  }
+
+  /* Cream mode tabs */
+  :global(body.a11y-theme-cream) .side-tab {
+    background: var(--color-Background-100) !important;
+    border: 1px solid var(--color-Primary-500) !important;
+  }
+
+  :global(body.a11y-theme-cream) .side-tab:hover {
+    background: var(--color-Primary-500) !important;
+  }
+
+  /* Reduced motion - no transforms */
+  :global(body.a11y-reduce-motion) .side-tab {
+    transition: none !important;
+  }
+
+  :global(body.a11y-reduce-motion) .side-tab:hover {
+    transform: none !important;
+  }
+</style>
+
+<script>
+  // Side Tabs Functionality
+  function initSideTabs() {
+    const sideTabs = document.querySelectorAll('.side-tab');
+    const shareButton = document.querySelector('[data-share="copy"]');
+    const accessibilityButton = document.querySelector('[data-action="accessibility"]');
+    const searchButton = document.querySelector('[data-action="search"]');
+
+    // Add hover animation for all Lottie players with 2-loop limit
+    sideTabs.forEach(tab => {
+      const lottiePlayer = tab.querySelector('lottie-player') as any;
+
+      if (lottiePlayer) {
+        let loopCount = 0;
+
+        // Listen for loop complete event
+        lottiePlayer.addEventListener('loop', () => {
+          loopCount++;
+          if (loopCount >= 2) {
+            lottiePlayer.stop();
+          }
+        });
+
+        tab.addEventListener('mouseenter', () => {
+          loopCount = 0; // Reset loop count
+          if (typeof lottiePlayer.play === 'function') {
+            lottiePlayer.play();
+          }
+        });
+
+        tab.addEventListener('mouseleave', () => {
+          loopCount = 0; // Reset loop count
+          if (typeof lottiePlayer.stop === 'function') {
+            lottiePlayer.stop();
+          }
+        });
+      }
+    });
+
+    // Share Button Functionality
+    if (shareButton) {
+      shareButton.addEventListener('click', () => {
+        const url = window.location.href;
+
+        navigator.clipboard.writeText(url).then(() => {
+          // Add copied state
+          shareButton.classList.add('copied');
+
+          // Show toast notification if available
+          if ((window as any).showToast) {
+            (window as any).showToast({
+              message: 'Link copied to clipboard!',
+              theme: 'professional',
+              animation: 'slide',
+              duration: 3000
+            });
+          }
+
+          // Remove copied state after 2 seconds
+          setTimeout(() => {
+            shareButton.classList.remove('copied');
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy link:', err);
+          if ((window as any).showToast) {
+            (window as any).showToast({
+              message: 'Failed to copy link',
+              theme: 'brutalist',
+              animation: 'slide',
+              duration: 3000
+            });
+          }
+        });
+      });
+    }
+
+    // Search Button Functionality
+    if (searchButton) {
+      searchButton.addEventListener('click', () => {
+        // Open the search overlay
+        if ((window as any).openSearchOverlay) {
+          (window as any).openSearchOverlay();
+        } else {
+          console.warn('Search overlay not initialized');
+        }
+      });
+    }
+
+    // Accessibility Button Functionality
+    if (accessibilityButton) {
+      accessibilityButton.addEventListener('click', () => {
+        // Directly open the accessibility panel (trigger button doesn't exist when hideButton=true)
+        const panel = document.getElementById('a11y-panel');
+        const backdrop = document.querySelector('.a11y-panel__backdrop') as HTMLElement;
+
+        if (panel && backdrop) {
+          // Check if panel is already open
+          const isOpen = panel.classList.contains('is-open');
+
+          if (isOpen) {
+            // Close panel
+            panel.classList.remove('is-open');
+            backdrop.classList.remove('is-visible');
+            panel.setAttribute('hidden', '');
+            backdrop.setAttribute('hidden', '');
+          } else {
+            // Open panel
+            panel.classList.add('is-open');
+            backdrop.classList.add('is-visible');
+            panel.removeAttribute('hidden');
+            backdrop.removeAttribute('hidden');
+          }
+        } else {
+          console.warn('Accessibility panel or backdrop not found');
+        }
+      });
+    }
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSideTabs);
+  } else {
+    initSideTabs();
+  }
+
+  // Support Astro page transitions
+  document.addEventListener('astro:page-load', initSideTabs);
+</script>

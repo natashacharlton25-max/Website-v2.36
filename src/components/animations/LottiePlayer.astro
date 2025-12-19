@@ -1,0 +1,116 @@
+---
+/**
+ * LottiePlayer Component
+ * Renders Lottie JSON animations with automatic fallback to SVG
+ *
+ * Props:
+ * - src: Path to the Lottie JSON file (relative to /public)
+ * - width: Width in pixels (default: 24)
+ * - height: Height in pixels (default: 24)
+ * - loop: Whether to loop animation (default: true)
+ * - autoplay: Whether to autoplay (default: false, hover will trigger)
+ * - className: Additional CSS classes
+ */
+
+export interface Props {
+  src: string;
+  width?: number;
+  height?: number;
+  loop?: boolean;
+  autoplay?: boolean;
+  className?: string;
+}
+
+const {
+  src,
+  width = 24,
+  height = 24,
+  loop = true,
+  autoplay = false,
+  className = ''
+} = Astro.props;
+
+// Generate unique ID for this player instance
+const playerId = `lottie-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div
+  id={playerId}
+  class={`lottie-player ${className}`}
+  data-src={src}
+  data-loop={loop}
+  data-autoplay={autoplay}
+  style={`width: ${width}px; height: ${height}px;`}
+></div>
+
+<script>
+  import lottie from 'lottie-web';
+
+  // Initialize all Lottie players on the page
+  function initLottiePlayers() {
+    const players = document.querySelectorAll('.lottie-player');
+
+    players.forEach((container) => {
+      const src = container.getAttribute('data-src');
+      const loop = container.getAttribute('data-loop') === 'true';
+      const autoplay = container.getAttribute('data-autoplay') === 'true';
+
+      if (!src) return;
+
+      try {
+        const animation = lottie.loadAnimation({
+          container: container as HTMLElement,
+          renderer: 'svg',
+          loop: loop,
+          autoplay: autoplay,
+          path: src
+        });
+
+        // If not autoplay, play on hover
+        if (!autoplay) {
+          container.addEventListener('mouseenter', () => {
+            animation.play();
+          });
+
+          container.addEventListener('mouseleave', () => {
+            animation.stop();
+          });
+        }
+
+        // Store animation instance for cleanup
+        (container as any)._lottieAnimation = animation;
+      } catch (error) {
+        console.error('Failed to load Lottie animation:', src, error);
+      }
+    });
+  }
+
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLottiePlayers);
+  } else {
+    initLottiePlayers();
+  }
+
+  // Cleanup on navigation (for SPAs)
+  document.addEventListener('astro:before-swap', () => {
+    document.querySelectorAll('.lottie-player').forEach((container) => {
+      const animation = (container as any)._lottieAnimation;
+      if (animation) {
+        animation.destroy();
+      }
+    });
+  });
+</script>
+
+<style>
+  .lottie-player {
+    display: inline-block;
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+  }
+
+  .lottie-player:hover {
+    transform: scale(1.1);
+  }
+</style>

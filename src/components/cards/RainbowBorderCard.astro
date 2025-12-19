@@ -1,0 +1,301 @@
+---
+/**
+ * RainbowBorderCard - Animated conic gradient border card
+ *
+ * Features:
+ * - Rotating conic gradient borders on hover
+ * - 3 variants: primary (solid→gradient), gradient (static→rotating), pulse (rotation + brightness)
+ * - Smooth fade-out when hover ends
+ * - Touch support
+ * - Reduced motion support
+ *
+ * Usage:
+ * ```astro
+ * <RainbowBorderCard variant="gradient">
+ *   <div class="your-card-content">
+ *     <h3>Card Title</h3>
+ *     <p>Card content goes here</p>
+ *   </div>
+ * </RainbowBorderCard>
+ * ```
+ */
+
+interface Props {
+  /**
+   * Animation variant
+   * - primary: Solid color → rotating gradient on hover
+   * - gradient: Static gradient → rotating on hover
+   * - pulse: Rotation + brightness pulse effect
+   */
+  variant?: 'primary' | 'gradient' | 'pulse';
+
+  /**
+   * Border radius (CSS value)
+   */
+  borderRadius?: string;
+
+  /**
+   * Border width (CSS value)
+   */
+  borderWidth?: string;
+
+  /**
+   * Rotation speed in ms (lower = faster)
+   */
+  rotationSpeed?: number;
+
+  /**
+   * Primary color (CSS variable or hex)
+   */
+  primaryColor?: string;
+
+  /**
+   * Secondary color (CSS variable or hex)
+   */
+  secondaryColor?: string;
+
+  /**
+   * Background/highlight color (CSS variable or hex)
+   */
+  highlightColor?: string;
+
+  /**
+   * Additional CSS class
+   */
+  class?: string;
+}
+
+const {
+  variant = 'gradient',
+  borderRadius = '1rem',
+  borderWidth = '3px',
+  rotationSpeed = 20,
+  primaryColor = '#4f46e5',
+  secondaryColor = '#ec4899',
+  highlightColor = '#f5f5dc',
+  class: className = ''
+} = Astro.props;
+
+const cardId = `rainbow-card-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<div
+  class={`rainbow-border-card rainbow-border-card--${variant} ${className}`}
+  id={cardId}
+  data-variant={variant}
+  data-rotation-speed={rotationSpeed}
+  style={`
+    --rb-border-radius: ${borderRadius};
+    --rb-border-width: ${borderWidth};
+    --rb-primary: ${primaryColor};
+    --rb-secondary: ${secondaryColor};
+    --rb-highlight: ${highlightColor};
+  `}
+>
+  <div class="rainbow-border-card__inner">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .rainbow-border-card {
+    position: relative;
+    border-radius: var(--rb-border-radius);
+    padding: var(--rb-border-width);
+    transition: background 0.3s ease-out, filter 0.3s ease-out;
+    --angle: 0deg;
+    --pulse-brightness: 1;
+  }
+
+  .rainbow-border-card__inner {
+    background: inherit;
+    border-radius: calc(var(--rb-border-radius) - var(--rb-border-width));
+    position: relative;
+    z-index: 1;
+    /* Let the slot content define its own background */
+  }
+
+  /* === Variant: Primary === */
+  /* Solid color → rotating gradient on hover */
+  .rainbow-border-card--primary {
+    background: var(--rb-primary);
+  }
+
+  .rainbow-border-card--primary.is-animating {
+    background: conic-gradient(
+      from var(--angle),
+      var(--rb-primary) 0%,
+      var(--rb-secondary) 33%,
+      var(--rb-highlight) 66%,
+      var(--rb-primary) 100%
+    );
+  }
+
+  /* === Variant: Gradient === */
+  /* Static gradient → rotating on hover */
+  .rainbow-border-card--gradient {
+    background: conic-gradient(
+      from 0deg,
+      var(--rb-secondary) 0%,
+      var(--rb-highlight) 33%,
+      var(--rb-primary) 66%,
+      var(--rb-secondary) 100%
+    );
+  }
+
+  .rainbow-border-card--gradient.is-animating {
+    background: conic-gradient(
+      from var(--angle),
+      var(--rb-secondary) 0%,
+      var(--rb-highlight) 33%,
+      var(--rb-primary) 66%,
+      var(--rb-secondary) 100%
+    );
+  }
+
+  /* === Variant: Pulse === */
+  /* Rotation + brightness pulse */
+  .rainbow-border-card--pulse {
+    background: var(--rb-primary);
+  }
+
+  .rainbow-border-card--pulse.is-animating {
+    background: conic-gradient(
+      from var(--angle),
+      var(--rb-primary) 0%,
+      var(--rb-secondary) 25%,
+      var(--rb-highlight) 50%,
+      var(--rb-secondary) 75%,
+      var(--rb-primary) 100%
+    );
+    filter: brightness(var(--pulse-brightness));
+  }
+
+  /* Fading state - gradual slow down */
+  .rainbow-border-card.is-fading {
+    background: conic-gradient(
+      from var(--angle),
+      var(--rb-secondary) 0%,
+      var(--rb-highlight) 33%,
+      var(--rb-primary) 66%,
+      var(--rb-secondary) 100%
+    );
+  }
+
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .rainbow-border-card.is-animating,
+    .rainbow-border-card.is-fading {
+      --angle: 45deg;
+      filter: brightness(1.05);
+    }
+  }
+</style>
+
+<script>
+  interface RainbowCardElement extends HTMLElement {
+    _animationFrame?: number;
+    _angle?: number;
+    _isAnimating?: boolean;
+    _rotationSpeed?: number;
+  }
+
+  function initRainbowCard(card: RainbowCardElement) {
+    const variant = card.dataset.variant || 'gradient';
+    const rotationSpeed = parseInt(card.dataset.rotationSpeed || '20', 10);
+
+    card._angle = 0;
+    card._isAnimating = false;
+    card._rotationSpeed = rotationSpeed;
+
+    let pulseDirection = 1;
+    let pulseBrightness = 1;
+
+    function animate() {
+      if (!card._isAnimating) return;
+
+      // Rotate angle
+      card._angle = ((card._angle || 0) + 2) % 360;
+      card.style.setProperty('--angle', `${card._angle}deg`);
+
+      // Pulse brightness for pulse variant
+      if (variant === 'pulse') {
+        pulseBrightness += 0.02 * pulseDirection;
+        if (pulseBrightness >= 1.3) pulseDirection = -1;
+        if (pulseBrightness <= 1) pulseDirection = 1;
+        card.style.setProperty('--pulse-brightness', pulseBrightness.toString());
+      }
+
+      card._animationFrame = requestAnimationFrame(animate);
+    }
+
+    function startAnimation() {
+      if (card._isAnimating) return;
+
+      card._isAnimating = true;
+      card.classList.add('is-animating');
+      card.classList.remove('is-fading');
+      animate();
+    }
+
+    function stopAnimation() {
+      card._isAnimating = false;
+      card.classList.remove('is-animating');
+      card.classList.add('is-fading');
+
+      if (card._animationFrame) {
+        cancelAnimationFrame(card._animationFrame);
+      }
+
+      // Gradual slow-down effect
+      let slowdownAngle = card._angle || 0;
+      let velocity = 2;
+
+      function slowdown() {
+        velocity *= 0.95; // Decelerate
+        slowdownAngle = (slowdownAngle + velocity) % 360;
+        card.style.setProperty('--angle', `${slowdownAngle}deg`);
+
+        if (velocity > 0.1) {
+          requestAnimationFrame(slowdown);
+        } else {
+          // Animation complete, reset
+          setTimeout(() => {
+            card.classList.remove('is-fading');
+            // Reset pulse brightness
+            card.style.setProperty('--pulse-brightness', '1');
+          }, 300);
+        }
+      }
+
+      slowdown();
+    }
+
+    // Event listeners
+    card.addEventListener('mouseenter', startAnimation);
+    card.addEventListener('mouseleave', stopAnimation);
+
+    // Touch support
+    card.addEventListener('touchstart', () => {
+      startAnimation();
+      setTimeout(stopAnimation, 2000);
+    }, { passive: true });
+  }
+
+  // Initialize all rainbow cards
+  function init() {
+    document.querySelectorAll('.rainbow-border-card').forEach(card => {
+      initRainbowCard(card as RainbowCardElement);
+    });
+  }
+
+  // Initialize on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // Re-initialize on Astro page transitions
+  document.addEventListener('astro:page-load', init);
+</script>

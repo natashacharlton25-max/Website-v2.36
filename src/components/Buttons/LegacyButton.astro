@@ -1,0 +1,555 @@
+---
+// LegacyButton - Legacy button component with classic styling variants
+import ThemedDropdown from './ThemedDropdown.astro';
+
+export interface Props {
+  variant?: 'primary' | 'secondary' | 'accent1' | 'accent2' | 'accent3' | 'accent4' | 'accent5' | 'glassmorphic' | 'neumorphic' | 'gradient' | 'glow' | 'ghost' |
+           'primary-gradient' | 'secondary-gradient' | 'accent1-gradient' | 'accent2-gradient' | 'accent3-gradient' | 'accent4-gradient' | 'accent5-gradient' |
+           'primary-glassmorphic' | 'secondary-glassmorphic' | 'accent1-glassmorphic' | 'accent2-glassmorphic' | 'accent3-glassmorphic' | 'accent4-glassmorphic' | 'accent5-glassmorphic' |
+           'primary-neumorphic' | 'secondary-neumorphic' | 'accent1-neumorphic' | 'accent2-neumorphic' | 'accent3-neumorphic' | 'accent4-neumorphic' | 'accent5-neumorphic' |
+           'primary-glow' | 'secondary-glow' | 'accent1-glow' | 'accent2-glow' | 'accent3-glow' | 'accent4-glow' | 'accent5-glow';
+  shape?: 'default' | 'circle' | 'square' | 'dropdown';
+  size?: 'sm' | 'md' | 'lg';
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  className?: string;
+  animatedIcon?: string;
+  dropdownItems?: Array<{label: string, href?: string}>;
+  id?: string;
+}
+
+const {
+  variant = 'primary',
+  shape = 'default',
+  size = 'md',
+  type = 'button',
+  disabled = false,
+  className = '',
+  animatedIcon,
+  dropdownItems = [
+    {label: 'Option 1', href: '#'},
+    {label: 'Option 2', href: '#'},
+    {label: 'Option 3', href: '#'}
+  ],
+  id
+} = Astro.props;
+
+// Handle combined variants (e.g., 'accent1-gradient' -> ['accent1', 'gradient'])
+const variantParts = variant.includes('-') ? variant.split('-') : [variant];
+const baseColor = variantParts[0];
+const effect = variantParts[1] || '';
+
+const variantClass = effect ? `btn-${baseColor} btn-${effect}` : `btn-${variant}`;
+const sizeClass = size !== 'md' ? `btn-${size}` : '';
+const buttonClass = `btn ${variantClass} btn-${shape} ${sizeClass} ${className}`.trim();
+const showIcon = (shape === 'circle' || shape === 'square') && animatedIcon;
+const iconPath = showIcon ? `/Animated Icons/${animatedIcon}` : '';
+const isDropdown = shape === 'dropdown';
+---
+
+{isDropdown ? (
+  <div class="dropdown-wrapper">
+    <button
+      class={`${buttonClass} btn-dropdown dropdown-btn`}
+      type={type}
+      disabled={disabled}
+      id={id}
+    >
+      <slot />
+      <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M7 10l5 5 5-5z"/>
+      </svg>
+    </button>
+    <ThemedDropdown
+      colorTheme={baseColor as any}
+      dropdownItems={dropdownItems}
+      borderStyle="1px solid"
+      colorShade="500"
+      hoverColorShade="100"
+    />
+  </div>
+) : (
+  <button
+    class={buttonClass}
+    type={type}
+    disabled={disabled}
+    id={id}
+  >
+    {showIcon ? (
+      <div class="btn-icon">
+        {animatedIcon === 'Star/star.svg' && (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        )}
+        {animatedIcon === 'Plus to X/plus.svg' && (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        )}
+      </div>
+    ) : (
+      <slot />
+    )}
+  </button>
+)}
+
+<style>
+  @import '../../styles/GlowTokens.css';
+  @import '../../styles/ButtonSizes.css';
+
+  .btn {
+    border: none;
+    border-radius: var(--radius-md);
+    padding: var(--btn-size-default-padding);
+    font-size: var(--btn-size-default-font-size);
+    min-height: var(--btn-size-default-min-height);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+    margin: 0.75rem 0.75rem 0.75rem 0;
+    font-family: var(--font-body, inherit);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.075em;
+    display: inline-block;
+    width: auto;
+    min-width: fit-content;
+  }
+
+
+  /* Modern glint effect */
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .btn:hover::before {
+    left: 100%;
+  }
+
+  .btn:hover,
+  .btn:focus-visible {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    outline: none;
+  }
+
+  .btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--color-Primary-500);
+    outline-offset: 2px;
+  }
+
+  /* Updated variants using 88-token system */
+  .btn-primary {
+    background-color: var(--color-Primary-500);
+    color: white;
+    --btn-color-500: var(--color-Primary-500);
+    --btn-color-600: var(--color-Primary-600);
+    --btn-gradient: var(--gradient-primary-soft);
+    --btn-gradient-glow: var(--gradient-primary-glow);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-Primary-600);
+  }
+
+  .btn-secondary {
+    background-color: var(--color-Secondary-500);
+    color: white;
+    --btn-color-500: var(--color-Secondary-500);
+    --btn-color-600: var(--color-Secondary-600);
+    --btn-gradient: var(--gradient-secondary-soft);
+    --btn-gradient-glow: var(--gradient-secondary-glow);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-Secondary-600);
+  }
+
+  /* Dark glint effect for secondary (light) variant */
+  .btn-secondary::before {
+    background: linear-gradient(90deg, transparent, var(--color-Primary-500), transparent);
+    opacity: 0.15;
+  }
+
+  .btn-accent1 {
+    background-color: var(--color-AccentOne-500);
+    color: white;
+    --btn-color-500: var(--color-AccentOne-500);
+    --btn-color-600: var(--color-AccentOne-600);
+    --btn-gradient: var(--gradient-accent1-soft);
+    --btn-gradient-glow: var(--gradient-accent1-glow);
+  }
+
+  .btn-accent1:hover:not(:disabled) {
+    background-color: var(--color-AccentOne-600);
+  }
+
+  .btn-accent2 {
+    background-color: var(--color-AccentTwo-500);
+    color: white;
+    --btn-color-500: var(--color-AccentTwo-500);
+    --btn-color-600: var(--color-AccentTwo-600);
+    --btn-gradient: var(--gradient-accent2-soft);
+    --btn-gradient-glow: var(--gradient-accent2-glow);
+  }
+
+  .btn-accent2:hover:not(:disabled) {
+    background-color: var(--color-AccentTwo-600);
+  }
+
+  .btn-accent3 {
+    background-color: var(--color-AccentThree-500);
+    color: white;
+    --btn-color-500: var(--color-AccentThree-500);
+    --btn-color-600: var(--color-AccentThree-600);
+    --btn-gradient: var(--gradient-accent3-soft);
+    --btn-gradient-glow: var(--gradient-accent3-glow);
+  }
+
+  .btn-accent3:hover:not(:disabled) {
+    background-color: var(--color-AccentThree-600);
+  }
+
+  .btn-accent4 {
+    background-color: var(--color-AccentFour-500);
+    color: white;
+    --btn-color-500: var(--color-AccentFour-500);
+    --btn-color-600: var(--color-AccentFour-600);
+    --btn-gradient: var(--gradient-accent4-soft);
+    --btn-gradient-glow: var(--gradient-accent4-glow);
+  }
+
+  .btn-accent4:hover:not(:disabled) {
+    background-color: var(--color-AccentFour-600);
+  }
+
+  .btn-accent5 {
+    background-color: var(--color-AccentFive-500);
+    color: white;
+    --btn-color-500: var(--color-AccentFive-500);
+    --btn-color-600: var(--color-AccentFive-600);
+    --btn-gradient: var(--gradient-accent5-soft);
+    --btn-gradient-glow: var(--gradient-accent5-glow);
+  }
+
+  .btn-accent5:hover:not(:disabled) {
+    background-color: var(--color-AccentFive-600);
+  }
+
+  /* Ghost variant - token-aware */
+  .btn-ghost {
+    background-color: color-mix(in oklch, var(--btn-color-500, var(--color-Primary-500)), transparent 95%);
+    color: var(--btn-color-500, var(--color-Primary-500));
+    border: 2px solid color-mix(in oklch, var(--btn-color-500, var(--color-Primary-500)), transparent 80%);
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background-color: color-mix(in oklch, var(--btn-color-500, var(--color-Primary-500)), transparent 90%);
+    color: var(--btn-color-500, var(--color-Primary-500));
+    border-color: var(--btn-color-500, var(--color-Primary-500));
+  }
+
+  .btn-ghost:active {
+    background-color: color-mix(in oklch, var(--btn-color-500, var(--color-Primary-500)), transparent 85%);
+    color: var(--btn-color-500, var(--color-Primary-500));
+    border-color: var(--btn-color-500, var(--color-Primary-500));
+  }
+
+  /* Glassmorphic variant */
+  .btn-glassmorphic {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-Text-700);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-glassmorphic:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Color-specific glint effects for glassmorphic variants */
+  .btn-primary.btn-glassmorphic::before {
+    background: linear-gradient(90deg, transparent, var(--color-Primary-500), transparent);
+    opacity: 0.3;
+  }
+
+  .btn-secondary.btn-glassmorphic::before {
+    background: linear-gradient(90deg, transparent, var(--color-Secondary-500), transparent);
+    opacity: 0.3;
+  }
+
+  .btn-accent1.btn-glassmorphic::before {
+    background: linear-gradient(90deg, transparent, var(--color-AccentOne-500), transparent);
+    opacity: 0.3;
+  }
+
+  .btn-accent2.btn-glassmorphic::before {
+    background: linear-gradient(90deg, transparent, var(--color-AccentTwo-500), transparent);
+    opacity: 0.3;
+  }
+
+  .btn-accent3.btn-glassmorphic::before {
+    background: linear-gradient(90deg, transparent, var(--color-AccentThree-500), transparent);
+    opacity: 0.3;
+  }
+
+  .btn-accent4.btn-glassmorphic::before {
+    background: linear-gradient(90deg, transparent, var(--color-AccentFour-500), transparent);
+    opacity: 0.3;
+  }
+
+  .btn-accent5.btn-glassmorphic::before {
+    background: linear-gradient(90deg, transparent, var(--color-AccentFive-500), transparent);
+    opacity: 0.3;
+  }
+
+  /* Default glassmorphic glint (no color variant specified) */
+  .btn-glassmorphic::before {
+    background: linear-gradient(90deg, transparent, var(--color-Primary-500), transparent);
+    opacity: 0.2;
+  }
+
+  /* Neumorphic variant */
+  .btn-neumorphic {
+    background: var(--btn-color-500, var(--color-AccentFive-500));
+    border: none;
+    box-shadow:
+      8px 8px 16px rgba(0, 0, 0, 0.2),
+      -8px -8px 16px rgba(255, 255, 255, 0.7);
+    color: white;
+  }
+
+  .btn-neumorphic:hover:not(:disabled) {
+    background: var(--btn-color-600, var(--color-AccentFive-600));
+    box-shadow:
+      inset 6px 6px 12px rgba(0, 0, 0, 0.3),
+      inset -6px -6px 12px rgba(255, 255, 255, 0.4);
+  }
+
+  /* Gradient variant */
+  .btn-gradient {
+    background: var(--btn-gradient, var(--gradient-hero));
+    color: white;
+    border: none;
+    position: relative;
+  }
+
+  .btn-gradient:hover:not(:disabled) {
+    background: var(--btn-gradient, var(--gradient-hero));
+    filter: brightness(1.1);
+  }
+
+  .btn-gradient:hover::before {
+    left: 100%;
+  }
+
+  /* Glow variant - styles imported from GlowTokens.css */
+
+  /* Shape variants */
+  .btn-circle {
+    border-radius: 50%;
+    width: var(--btn-icon-default-size);
+    height: var(--btn-icon-default-size);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-square {
+    border-radius: var(--radius-sm);
+    width: var(--btn-icon-default-size);
+    height: var(--btn-icon-default-size);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Icon styles */
+  .btn-icon {
+    width: var(--btn-icon-size-default);
+    height: var(--btn-icon-size-default);
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .btn-circle:hover .btn-icon {
+    transform: rotate(360deg) scale(1.1);
+  }
+
+  .btn-square:hover .btn-icon {
+    transform: scale(1.2) rotate(90deg);
+  }
+
+  /* Dropdown styles */
+  .dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+    z-index: 10;
+  }
+
+  .btn-dropdown {
+    padding-right: 2.5rem;
+    position: relative;
+  }
+
+  .dropdown-chevron {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.2s ease;
+  }
+
+  .dropdown-wrapper.open .dropdown-chevron {
+    transform: translateY(-50%) rotate(180deg);
+  }
+
+  /* Size variants */
+  .btn-sm {
+    padding: var(--btn-size-sm-padding);
+    font-size: var(--btn-size-sm-font-size);
+    min-height: var(--btn-size-sm-min-height);
+  }
+
+  .btn-sm.btn-circle,
+  .btn-sm.btn-square {
+    width: var(--btn-icon-sm-size);
+    height: var(--btn-icon-sm-size);
+    padding: 0;
+  }
+
+  .btn-sm .btn-icon {
+    width: var(--btn-icon-size-sm);
+    height: var(--btn-icon-size-sm);
+  }
+
+  .btn-lg {
+    padding: var(--btn-size-lg-padding);
+    font-size: var(--btn-size-lg-font-size);
+    min-height: var(--btn-size-lg-min-height);
+  }
+
+  .btn-lg.btn-circle,
+  .btn-lg.btn-square {
+    width: var(--btn-icon-lg-size);
+    height: var(--btn-icon-lg-size);
+    padding: 0;
+  }
+
+  .btn-lg .btn-icon {
+    width: var(--btn-icon-size-lg);
+    height: var(--btn-icon-size-lg);
+  }
+
+  /* Corner radius variants */
+  .btn-sharp {
+    border-radius: 0;
+  }
+
+  .btn-rounded {
+    border-radius: var(--radius-xl);
+  }
+
+  .btn-pill {
+    border-radius: var(--radius-full);
+  }
+
+  /* More rounded square variant */
+  .btn-square.btn-rounded {
+    border-radius: var(--radius-lg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn {
+      transition: none;
+    }
+
+    .btn:hover {
+      transform: none;
+    }
+  }
+
+
+</style>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle dropdown button interactions
+    const dropdownWrappers = document.querySelectorAll('.dropdown-wrapper');
+
+    dropdownWrappers.forEach((wrapper) => {
+      const dropdownBtn = wrapper.querySelector('.dropdown-btn');
+      const dropdownMenu = wrapper.querySelector('.dropdown-menu');
+
+      if (dropdownBtn && dropdownMenu) {
+        dropdownBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          // Close all other dropdowns first
+          dropdownWrappers.forEach(otherWrapper => {
+            if (otherWrapper !== wrapper) {
+              const otherMenu = otherWrapper.querySelector('.dropdown-menu');
+              if (otherMenu) {
+                otherMenu.classList.remove('show');
+                otherWrapper.classList.remove('open');
+              }
+            }
+          });
+
+          // Toggle current dropdown
+          const isShowing = dropdownMenu.classList.contains('show');
+
+          if (!isShowing) {
+            dropdownMenu.classList.add('show');
+            wrapper.classList.add('open');
+          } else {
+            dropdownMenu.classList.remove('show');
+            wrapper.classList.remove('open');
+          }
+        });
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown-wrapper')) {
+        dropdownWrappers.forEach(wrapper => {
+          const menu = wrapper.querySelector('.dropdown-menu');
+          if (menu) {
+            menu.classList.remove('show');
+            wrapper.classList.remove('open');
+          }
+        });
+      }
+    });
+  });
+</script>
