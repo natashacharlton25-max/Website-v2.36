@@ -2,7 +2,7 @@
 title: "Finding Your Way Back to You: Rebuilding Self-Worth After Trauma"
 description: "A gentle guide to rediscovering who you are, written by someone who's walked this path too"
 publishDate: "2025-01-15"
-author: "Walking with a Smile"
+author: "natasha-charlton"
 category: "Healing"
 image: "/WWAS HOMEPAGE GRAPHICS/2.png"
 tags: ["trauma", "healing", "self-worth", "compassion"]

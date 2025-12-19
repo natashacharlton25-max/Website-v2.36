@@ -2,7 +2,7 @@
 title: "Practicing Self-Compassion: Being Kind to Yourself"
 description: "Moving beyond self-criticism and learning to treat yourself with the kindness you deserve"
 publishDate: "2025-01-05"
-author: "Walking with a Smile"
+author: "natasha-charlton"
 category: "Wellbeing"
 image: "/WWAS HOMEPAGE GRAPHICS/4.png"
 tags: ["self-compassion", "mindfulness", "wellbeing"]

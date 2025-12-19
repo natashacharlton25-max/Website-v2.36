@@ -2,7 +2,7 @@
 title: "Setting Healthy Boundaries: A Practical Guide"
 description: "Learn how to set and maintain boundaries that protect your energy and honor your needs"
 publishDate: "2025-01-10"
-author: "Walking with a Smile"
+author: "natasha-charlton"
 category: "Boundaries"
 image: "/WWAS HOMEPAGE GRAPHICS/3.png"
 tags: ["boundaries", "self-care", "relationships"]

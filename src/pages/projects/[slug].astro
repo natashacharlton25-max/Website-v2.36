@@ -30,11 +30,30 @@ if (!project) {
   return Astro.redirect('/projects');
 }
 
-// Shuffle function for randomizing card order
-function shuffleArray<T>(array: T[]): T[] {
+// Seeded random number generator - produces consistent "random" results for same seed
+function seededRandom(seed: number): () => number {
+  return function() {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return seed / 0x7fffffff;
+  };
+}
+
+// Create seed from project slug - same slug always produces same order
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+// Shuffle function using seeded random - consistent order for same seed
+function shuffleArraySeeded<T>(array: T[], seed: number): T[] {
   const shuffled = [...array];
+  const random = seededRandom(seed);
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
@@ -251,11 +270,25 @@ const masonryCards = [
         size: 'medium' as const
       };
     }
+  }),
+  // Custom cards from frontmatter - dynamically added per-project
+  ...(project.customCards || []).map((card) => {
+    const customColor = getNextColor();
+    return {
+      type: card.type as 'text' | 'stat' | 'quote' | 'highlight',
+      title: card.title,
+      content: card.content,
+      icon: card.icon,
+      bgColor: customColor.bg,
+      textColor: customColor.text,
+      size: card.size || 'medium' as const
+    };
   })
 ];
 
-// Randomize card order for visual variety
-const shuffledMasonryCards = shuffleArray(masonryCards);
+// Randomize card order using seeded shuffle - consistent order for same project
+const projectSeed = hashString(project.slug);
+const shuffledMasonryCards = shuffleArraySeeded(masonryCards, projectSeed);
 ---
 
 <BaseLayout
