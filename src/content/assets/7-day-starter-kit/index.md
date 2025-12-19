@@ -113,21 +113,6 @@ specifications:
   - label: "Includes"
     value: "Professional Guide"
     icon: "ph:certificate-duotone"
-
-# Highlights for feature cards (no label, just statements)
-highlights:
-  - text: "Simple daily actions and reflective prompts"
-    icon: "ph:pencil-simple-duotone"
-  - text: "Grounding exercises for emotional steadiness"
-    icon: "ph:tree-duotone"
-  - text: "No pressure or perfectionism required"
-    icon: "ph:heart-duotone"
-  - text: "Builds lasting momentum toward intentional living"
-    icon: "ph:trend-up-duotone"
-  - text: "Evidence-based approaches including mindfulness and positive psychology"
-    icon: "ph:brain-duotone"
-  - text: "Suitable as standalone resource or part of therapeutic programme"
-    icon: "ph:puzzle-piece-duotone"
 ---
 
 <!-- Body content can go here if needed -->
