@@ -2,7 +2,7 @@
 title: "Finding Your Voice: Speaking Your Truth"
 description: "Learning to express what you really think and feel, even when it feels scary or uncomfortable"
 publishDate: "2024-12-28"
-author: "Walking with a Smile"
+author: "natasha-charlton"
 category: "Communication"
 image: "/WWAS HOMEPAGE GRAPHICS/5.png"
 tags: ["communication", "authenticity", "self-expression"]

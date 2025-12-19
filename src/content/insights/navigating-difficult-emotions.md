@@ -2,7 +2,7 @@
 title: "Navigating Difficult Emotions: A Practical Approach"
 description: "Simple, effective strategies for sitting with uncomfortable feelings without letting them take over"
 publishDate: "2024-12-20"
-author: "Walking with a Smile"
+author: "natasha-charlton"
 category: "Wellbeing"
 image: "/WWAS HOMEPAGE GRAPHICS/2.png"
 tags: ["emotions", "mindfulness", "wellbeing"]

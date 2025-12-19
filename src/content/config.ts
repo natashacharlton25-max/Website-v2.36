@@ -76,7 +76,7 @@ const insightsCollection = defineCollection({
     title: z.string(),
     description: z.string(),
     publishDate: z.string(),
-    author: z.string(),
+    author: z.string(), // Author slug (references authors collection folder name)
     category: z.string(),
     image: z.string(),
     tags: z.array(z.string()).optional(),
@@ -156,9 +156,32 @@ const resourcesCollection = defineCollection({
   }),
 });
 
+// Authors collection - one folder per author with data + image
+const authorsCollection = defineCollection({
+  type: 'content',
+  schema: ({ image }) => z.object({
+    name: z.string(),
+    role: z.string().optional(), // e.g., "Founder", "Guest Writer"
+    bio: z.string(), // Short bio for author cards
+    longBio: z.string().optional(), // Extended bio if needed
+    photo: image(), // Author photo in same folder
+
+    // Social/contact links (optional)
+    website: z.string().optional(),
+    linkedin: z.string().optional(),
+    twitter: z.string().optional(),
+    email: z.string().optional(),
+
+    // Professional credentials
+    credentials: z.array(z.string()).optional(), // e.g., ["MBACP", "Dip. Counselling"]
+    specialties: z.array(z.string()).optional(), // Areas of expertise
+  }),
+});
+
 export const collections = {
   'assets': assetsCollection,
   'insights': insightsCollection,
   'projects': projectsCollection,
   'resources': resourcesCollection,
+  'authors': authorsCollection,
 };
