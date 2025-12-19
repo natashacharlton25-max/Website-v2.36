@@ -6,7 +6,9 @@ import MasonryGrid from '../../components/ui/MasonryGrid.astro';
 
 // Get all assets from content collection
 const assetsEntries = await getCollection('assets');
-const assetsMap = new Map(assetsEntries.map(entry => [entry.slug, entry.data]));
+const assetsMap = new Map<string, typeof assetsEntries[number]['data']>(
+  assetsEntries.map(entry => [entry.slug, entry.data])
+);
 
 // Helper to get asset by slug
 const getAssetBySlug = (slug: string) => assetsMap.get(slug);
@@ -148,6 +150,34 @@ const info1Color = getNextColor();
 const info2Color = getNextColor();
 const info3Color = getNextColor();
 
+// Icon mapper for benefits (matches benefit text to appropriate icons)
+const getIconForBenefit = (benefit: string): string => {
+  const lower = benefit.toLowerCase();
+  if (lower.includes('emotion')) return 'ph:heart-duotone';
+  if (lower.includes('confidence') || lower.includes('agency')) return 'ph:star-duotone';
+  if (lower.includes('motor') || lower.includes('coordination')) return 'ph:hand-duotone';
+  if (lower.includes('language') || lower.includes('narrative')) return 'ph:chat-circle-text-duotone';
+  if (lower.includes('stress') || lower.includes('mood')) return 'ph:sun-duotone';
+  if (lower.includes('creative') || lower.includes('expression')) return 'ph:palette-duotone';
+  if (lower.includes('problem') || lower.includes('solving')) return 'ph:lightbulb-duotone';
+  if (lower.includes('regulation')) return 'ph:scales-duotone';
+  return 'ph:check-circle-duotone';
+};
+
+// Icon mapper for linked skills
+const getIconForSkill = (skill: string): string => {
+  const lower = skill.toLowerCase();
+  if (lower.includes('language')) return 'ph:chat-circle-text-duotone';
+  if (lower.includes('motor')) return 'ph:hand-duotone';
+  if (lower.includes('emotion') || lower.includes('regulation')) return 'ph:heart-duotone';
+  if (lower.includes('problem') || lower.includes('solving')) return 'ph:lightbulb-duotone';
+  if (lower.includes('social')) return 'ph:users-duotone';
+  if (lower.includes('cognitive') || lower.includes('thinking')) return 'ph:brain-duotone';
+  if (lower.includes('sensory')) return 'ph:hand-palm-duotone';
+  if (lower.includes('communication')) return 'ph:chats-duotone';
+  return 'ph:puzzle-piece-duotone';
+};
+
 const masonryCards = [
   // Tag cards first
   ...project.tags.map((tag) => {
@@ -161,6 +191,20 @@ const masonryCards = [
       icon: getIconForTag(tag)
     };
   }),
+
+  // Auto-generated resource count spec
+  (() => {
+    const specColor = getNextColor();
+    return {
+      type: 'spec' as const,
+      title: 'Resources',
+      content: String(project.resourceSlugs.length),
+      bgColor: specColor.bg,
+      textColor: specColor.text,
+      size: 'small' as const
+    };
+  })(),
+
   // Summary
   {
     type: 'summary' as const,
@@ -211,14 +255,32 @@ const masonryCards = [
     textColor: info2Color.text,
     size: 'medium' as const
   },
-  {
-    type: 'text' as const,
-    title: 'Benefits',
-    content: 'This project brings together carefully selected resources that work together. Everything is free to download and use. Take what helps, leave the rest.',
-    bgColor: info3Color.bg,
-    textColor: info3Color.text,
-    size: 'medium' as const
-  },
+
+  // Evidence-based benefits as individual highlight cards
+  ...(project.professional?.evidenceBasedBenefits || []).map((benefit) => {
+    const benefitColor = getNextColor();
+    return {
+      type: 'highlight' as const,
+      content: benefit,
+      icon: getIconForBenefit(benefit),
+      bgColor: benefitColor.bg,
+      textColor: benefitColor.text,
+      size: 'medium' as const
+    };
+  }),
+
+  // Linked skills as small tag-style cards
+  ...(project.professional?.linkedSkills || []).map((skill) => {
+    const skillColor = getNextColor();
+    return {
+      type: 'tag' as const,
+      title: skill,
+      icon: getIconForSkill(skill),
+      bgColor: skillColor.bg,
+      textColor: skillColor.text,
+      size: 'small' as const
+    };
+  }),
   // Asset/resource cards - pull from assets data
   ...project.resourceSlugs.map((slug, index) => {
     const asset = getAssetBySlug(slug);
