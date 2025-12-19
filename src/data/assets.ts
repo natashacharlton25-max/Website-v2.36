@@ -5,10 +5,15 @@ export interface Asset {
   slug: string;
   name: string;
   description: string;
+  longDescription?: string;
   type: 'worksheet' | 'workbook' | 'guide' | 'toolkit' | 'cards' | 'poster' | 'activity';
   category: string;
-  image: string; // Path relative to src/images/Assets/
   tags: string[];
+  features?: string[];
+  fileSize?: string;
+  pageCount?: number;
+  downloadPath?: string;
+  professionalGuidePath?: string;
   // Professional information
   professional?: {
     intention?: string;
@@ -17,15 +22,38 @@ export interface Asset {
   };
 }
 
+// Image path helpers - images live in src/images/Assets/{slug}/
+// Each asset folder has: 1.png, 2.png, 3.png, 4.png
+
 // All assets - add new assets here
+// Images are in src/images/Assets/{slug}/ with 1.png, 2.png, 3.png, 4.png
 export const assets: Asset[] = [
+  {
+    slug: '7-day-starter-kit',
+    name: '7-Day Self-Directed Living Starter Kit',
+    description: 'A practical, beautifully structured 7-day guide designed to help you regain clarity, strengthen emotional awareness, and make small, powerful shifts in how you live each day.',
+    longDescription: `<p>Walking With A Smile's 7-Day Self-Directed Living Starter Kit is a gentle and practical way for people to move away from automatic patterns and towards more intentional choices in everyday life.</p>
+<p>The kit breaks change into small, realistic steps that focus on awareness, intention, boundaries, connection, movement, gratitude and reflection. Each element supports stability, clarity and a stronger sense of direction without creating overwhelm.</p>`,
+    type: 'toolkit',
+    category: '7-Day Kit',
+    tags: ['starter', 'daily', 'clarity', 'emotions'],
+    features: [
+      '7 daily themes: awareness, intention, boundaries, connection, movement, gratitude, reflection',
+      'Simple daily actions and reflective prompts',
+      'Grounding exercises for emotional steadiness',
+      'Takes just a few minutes each day',
+    ],
+    fileSize: '36 MB',
+    pageCount: 28,
+    downloadPath: '/7Day/The 7-Day Self-Directed Living Starter Kit .pdf',
+    professionalGuidePath: '/7Day/The 7-Day Self-Directed Living Starter Kit  Professional Guide.pdf',
+  },
   {
     slug: 'clarity-worksheet',
     name: 'Clarity Worksheet',
     description: 'A practical guide to help you identify what matters most to you',
     type: 'worksheet',
     category: 'PDF Download',
-    image: 'clarity-worksheet.png',
     tags: ['clarity', 'self-reflection', 'values'],
   },
   {
@@ -34,7 +62,6 @@ export const assets: Asset[] = [
     description: 'Simple strategies for setting and maintaining healthy boundaries',
     type: 'guide',
     category: 'PDF Download',
-    image: 'boundaries-guide.png',
     tags: ['boundaries', 'relationships', 'self-care'],
   },
   {
@@ -43,17 +70,7 @@ export const assets: Asset[] = [
     description: 'Resources to help you make decisions that align with who you are',
     type: 'toolkit',
     category: 'PDF Download',
-    image: 'self-direction-toolkit.png',
     tags: ['decisions', 'autonomy', 'direction'],
-  },
-  {
-    slug: '7-day-starter-kit',
-    name: '7-Day Self-Directed Living Starter Kit',
-    description: 'A practical, beautifully structured 7-day guide designed to help you regain clarity, strengthen emotional awareness, and make small, powerful shifts in how you live each day.',
-    type: 'toolkit',
-    category: 'PDF Download',
-    image: '7-day-starter-kit.png',
-    tags: ['starter', 'daily', 'clarity', 'emotions'],
   },
   {
     slug: 'values-workbook',
@@ -61,7 +78,6 @@ export const assets: Asset[] = [
     description: 'Comprehensive exercises to help you identify and align with your core values',
     type: 'workbook',
     category: 'PDF Download',
-    image: 'values-workbook.png',
     tags: ['values', 'discovery', 'exercises'],
   },
   {
@@ -70,7 +86,6 @@ export const assets: Asset[] = [
     description: 'A simple daily practice to stay connected with yourself',
     type: 'worksheet',
     category: 'PDF Download',
-    image: 'daily-reflection-worksheet.png',
     tags: ['daily', 'reflection', 'practice'],
   },
   {
@@ -79,7 +94,6 @@ export const assets: Asset[] = [
     description: 'Learn to express yourself clearly and listen with presence',
     type: 'guide',
     category: 'PDF Download',
-    image: 'communication-guide.png',
     tags: ['communication', 'expression', 'listening'],
   },
   {
@@ -88,7 +102,6 @@ export const assets: Asset[] = [
     description: 'Set goals that actually align with who you want to be',
     type: 'workbook',
     category: 'PDF Download',
-    image: 'goal-setting-workbook.png',
     tags: ['goals', 'intention', 'planning'],
   },
   {
@@ -97,7 +110,6 @@ export const assets: Asset[] = [
     description: 'Identify what drains and what fuels your energy',
     type: 'worksheet',
     category: 'PDF Download',
-    image: 'energy-audit-worksheet.png',
     tags: ['energy', 'awareness', 'balance'],
   },
   // Project-specific assets (referenced by projects.ts resourceSlugs)
@@ -107,7 +119,6 @@ export const assets: Asset[] = [
     description: 'Visual cards with breathing exercises for calm and focus',
     type: 'cards',
     category: 'Printable Cards',
-    image: 'breathing-cards.png',
     tags: ['breathing', 'calm', 'mindfulness'],
   },
   {
@@ -116,7 +127,6 @@ export const assets: Asset[] = [
     description: 'A visual tool to help identify and name emotions',
     type: 'poster',
     category: 'Printable Poster',
-    image: 'emotion-wheel.png',
     tags: ['emotions', 'awareness', 'vocabulary'],
   },
   {
@@ -125,7 +135,6 @@ export const assets: Asset[] = [
     description: 'Simple guided meditations for beginners and beyond',
     type: 'guide',
     category: 'PDF Download',
-    image: 'meditation-guide.png',
     tags: ['meditation', 'mindfulness', 'calm'],
   },
   {
@@ -134,7 +143,6 @@ export const assets: Asset[] = [
     description: 'Prompts and pages for daily reflection practice',
     type: 'workbook',
     category: 'PDF Download',
-    image: 'reflection-journal.png',
     tags: ['reflection', 'journaling', 'awareness'],
   },
   {
@@ -143,7 +151,6 @@ export const assets: Asset[] = [
     description: 'Activity cards for sensory exploration and regulation',
     type: 'cards',
     category: 'Printable Cards',
-    image: 'sensory-cards.png',
     tags: ['sensory', 'regulation', 'activities'],
   },
   {
@@ -152,7 +159,6 @@ export const assets: Asset[] = [
     description: 'Quick movement activities for energy and focus',
     type: 'activity',
     category: 'Activity Guide',
-    image: 'movement-breaks.png',
     tags: ['movement', 'energy', 'breaks'],
   },
   {
@@ -161,7 +167,6 @@ export const assets: Asset[] = [
     description: 'Visual guide to different textures for sensory exploration',
     type: 'guide',
     category: 'PDF Download',
-    image: 'texture-guide.png',
     tags: ['texture', 'sensory', 'exploration'],
   },
   {
@@ -170,7 +175,6 @@ export const assets: Asset[] = [
     description: 'Guide to creating a calm space for regulation',
     type: 'guide',
     category: 'PDF Download',
-    image: 'calm-corner-setup.png',
     tags: ['calm', 'space', 'regulation'],
   },
   {
@@ -179,7 +183,6 @@ export const assets: Asset[] = [
     description: 'Creative prompts to inspire artistic expression',
     type: 'cards',
     category: 'Printable Cards',
-    image: 'art-prompts.png',
     tags: ['art', 'creativity', 'expression'],
   },
   {
@@ -188,7 +191,6 @@ export const assets: Asset[] = [
     description: 'Imaginative prompts to spark storytelling',
     type: 'cards',
     category: 'Printable Cards',
-    image: 'story-starters.png',
     tags: ['stories', 'imagination', 'creativity'],
   },
   {
@@ -197,7 +199,6 @@ export const assets: Asset[] = [
     description: 'Activities for exploring music and sound',
     type: 'activity',
     category: 'Activity Guide',
-    image: 'music-exploration.png',
     tags: ['music', 'sound', 'exploration'],
   },
   {
@@ -206,7 +207,6 @@ export const assets: Asset[] = [
     description: 'Movement activities for creative expression',
     type: 'activity',
     category: 'Activity Guide',
-    image: 'expressive-movement.png',
     tags: ['movement', 'expression', 'creativity'],
   },
 ];
@@ -228,7 +228,45 @@ export function getAssetsByType(type: Asset['type']): Asset[] {
   return assets.filter(a => a.type === type);
 }
 
-// Get image path for an asset (for use in templates)
+// Image path helpers - all images in src/images/Assets/{slug}/
+// card.png = 16:10 landscape for cards
+// 1-4.png = portrait for gallery
+
+// Returns path for card image (card.png - 16:10 landscape)
+export function getAssetCardImage(asset: Asset): string {
+  return `/images/Assets/${asset.slug}/card.png`;
+}
+
+// Alias for backward compatibility
 export function getAssetImagePath(asset: Asset): string {
-  return `/images/Assets/${asset.image}`;
+  return getAssetCardImage(asset);
+}
+
+// Returns array of all 4 gallery image paths (portrait)
+export function getAssetGalleryImages(asset: Asset): string[] {
+  return [
+    `/images/Assets/${asset.slug}/1.png`,
+    `/images/Assets/${asset.slug}/2.png`,
+    `/images/Assets/${asset.slug}/3.png`,
+    `/images/Assets/${asset.slug}/4.png`,
+  ];
+}
+
+// Alias for backward compatibility
+export function getAssetImages(asset: Asset): string[] {
+  return getAssetGalleryImages(asset);
+}
+
+// For convenience - get paths by slug directly
+export function getAssetCardImageBySlug(slug: string): string {
+  return `/images/Assets/${slug}/card.png`;
+}
+
+export function getAssetGalleryImagesBySlug(slug: string): string[] {
+  return [
+    `/images/Assets/${slug}/1.png`,
+    `/images/Assets/${slug}/2.png`,
+    `/images/Assets/${slug}/3.png`,
+    `/images/Assets/${slug}/4.png`,
+  ];
 }
