@@ -239,6 +239,21 @@ const getHoverBorderColor = (bgColor?: string): string => {
       );
     }
 
+    if (card.type === 'spec') {
+      const bgColor = card.bgColor || 'var(--color-AccentFive-200)';
+      return (
+        <div class={`${cardClass} masonry-card--spec`} data-scroll-reveal-item style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}>
+          {card.icon && (
+            <div class="spec-card-icon-wrapper">
+              <Icon name={card.icon} class="card-icon" size={32} />
+            </div>
+          )}
+          {card.content && <span class="spec-card-value">{card.content}</span>}
+          {card.title && <span class="spec-card-label">{card.title}</span>}
+        </div>
+      );
+    }
+
     return null;
   })}
 </div>
@@ -485,7 +500,6 @@ const getHoverBorderColor = (bgColor?: string): string => {
     font-family: 'Quicksand', sans-serif;
     font-size: var(--text-lg);
     font-weight: 600;
-    font-style: italic;
     margin: 0;
     color: inherit;
     line-height: 1.5;
@@ -520,6 +534,41 @@ const getHoverBorderColor = (bgColor?: string): string => {
     font-style: normal;
     color: inherit;
     opacity: 0.8;
+  }
+
+  /* Spec Card (label/value pairs like "Focus: Process over Product") */
+  .masonry-card--spec {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-xl);
+    gap: var(--space-xs);
+  }
+
+  .spec-card-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-sm);
+    opacity: 0.85;
+  }
+
+  .spec-card-value {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: inherit;
+    line-height: 1.1;
+  }
+
+  .spec-card-label {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: inherit;
   }
 
   /* Asset Card (linked text cards with icons) */

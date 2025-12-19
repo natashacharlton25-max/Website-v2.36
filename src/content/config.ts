@@ -66,6 +66,10 @@ const assetsCollection = defineCollection({
       text: z.string(), // e.g., "Simple daily actions and reflective prompts"
       icon: z.string().optional(), // Phosphor icon name
     })).optional(),
+
+    // SEO overrides (optional - falls back to name/description if not set)
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
   }),
 });
 
@@ -100,6 +104,10 @@ const insightsCollection = defineCollection({
       url: z.string(), // URL to asset page or download
       type: z.string().optional(), // "workbook", "guide", "template", etc.
     })).optional(),
+
+    // SEO overrides (optional - falls back to title/description if not set)
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
   }),
 });
 
@@ -128,6 +136,7 @@ const projectsCollection = defineCollection({
       summary: z.string(),
       guidanceNotes: z.string(),
       evidenceBasedBenefits: z.array(z.string()),
+      linkedSkills: z.array(z.string()).optional(), // e.g., ["Language development", "Fine motor skills"]
       downloadableResources: z.array(z.string()).optional(),
     }),
 
@@ -143,6 +152,10 @@ const projectsCollection = defineCollection({
       text: z.string(), // e.g., "No experience needed - creativity is for everyone"
       icon: z.string().optional(),
     })).optional(),
+
+    // SEO overrides (optional - falls back to title/description if not set)
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
   }),
 });
 

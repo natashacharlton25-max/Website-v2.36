@@ -46,6 +46,11 @@ professional:
 
     **Linking to Other Skills:**
     Creative expression supports language development, fine motor skills, emotional regulation, and problem-solving.
+  linkedSkills:
+    - "Language Development"
+    - "Fine Motor Skills"
+    - "Emotional Regulation"
+    - "Problem-Solving"
   evidenceBasedBenefits:
     - "Enhances emotional expression and processing through creative outlets"
     - "Builds self-confidence and sense of agency through creative success"
@@ -57,22 +62,12 @@ professional:
     - "Material Suggestions & Adaptations (PDF)"
     - "Portfolio Documentation Template (PDF)"
 
-# Custom cards - add your own cards to the masonry grid
-customCards:
-  - type: "stat"
-    title: "Resources"
-    content: "4"
-    icon: "ph:files-duotone"
-    size: "small"
-  - type: "stat"
-    title: "Focus"
-    content: "Process over product"
+# Highlights - standalone callouts for the grid
+highlights:
+  - text: "Focus on process, not product"
     icon: "ph:sparkle-duotone"
-    size: "small"
-  - type: "highlight"
-    content: "No experience needed - creativity is for everyone"
+  - text: "No experience needed - creativity is for everyone"
     icon: "ph:palette-duotone"
-    size: "medium"
 ---
 
 <!-- Body content can go here if needed -->

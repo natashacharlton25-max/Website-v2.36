@@ -1,37 +1,7 @@
 ---
 // Glassmorphic Navigation Component
 import CartIcon from '../shop/CartIcon.astro';
-import { MAIN_NAV_LINKS } from '../../config/navigation';
-
-// Define expandable menu items with title, description, and optional icon
-const expandableMenus: Record<string, { title: string; description: string; href: string; icon?: string }[]> = {
-  'assets': [
-    { title: 'All Assets', description: 'Browse our complete collection of resources', href: '/assets' },
-    { title: 'Worksheets', description: 'Interactive worksheets for personal growth', href: '/assets?filter=worksheet' },
-    { title: 'Workbooks', description: 'Comprehensive workbooks for deeper learning', href: '/assets?filter=workbook' },
-    { title: 'Guides', description: 'Step-by-step guides for your journey', href: '/assets?filter=guide' },
-    { title: 'Toolkits', description: 'Complete toolkits with multiple resources', href: '/assets?filter=toolkit' },
-  ],
-  'insights': [
-    { title: 'All Insights', description: 'Browse all articles and blog posts', href: '/insights' },
-    { title: 'Latest Articles', description: 'Read our most recent publications', href: '/insights' },
-    { title: 'Featured Stories', description: 'Inspiring stories from our community', href: '/insights' },
-  ],
-  'services': [
-    { title: 'All Services', description: 'Explore our full range of services', href: '/services' },
-    { title: 'Workshops', description: 'Join our interactive group sessions', href: '/services#workshops' },
-    { title: 'Consultations', description: 'One-on-one personalized support', href: '/services#consultations' },
-  ],
-  'settings': [
-    { title: 'Contact', description: '', href: '/contact', icon: 'mail' },
-    { title: 'Share', description: '', href: '#share', icon: 'share' },
-    { title: 'Search', description: '', href: '#search', icon: 'search' },
-    { title: 'Accessibility', description: '', href: '#accessibility', icon: 'eye' },
-  ],
-};
-
-// Which nav items have expandable menus
-const navItemsWithMenus = ['Assets', 'Insights', 'Services'];
+import { MAIN_NAV_LINKS, NAV_ITEMS_WITH_MENUS, MEGA_MENUS } from '../../functions/navigation';
 ---
 
 <nav class="nav-container" id="main-nav">
@@ -60,17 +30,16 @@ const navItemsWithMenus = ['Assets', 'Insights', 'Services'];
     <!-- Desktop Navigation Links -->
     <div class="nav-links desktop-only">
       {MAIN_NAV_LINKS.map(link => (
-        navItemsWithMenus.includes(link.text) ? (
+        NAV_ITEMS_WITH_MENUS.includes(link.text) ? (
           <a
             href={link.href}
             class="nav-item-expandable"
             data-expand={link.text.toLowerCase()}
-            data-color={link.color}
           >
             {link.text}
           </a>
         ) : (
-          <a href={link.href} data-color={link.color}>{link.text}</a>
+          <a href={link.href}>{link.text}</a>
         )
       ))}
 
@@ -87,7 +56,7 @@ const navItemsWithMenus = ['Assets', 'Insights', 'Services'];
   </div>
 
   <!-- Expandable Mega Menus -->
-  {Object.entries(expandableMenus).map(([key, items]) => (
+  {Object.entries(MEGA_MENUS).map(([key, items]) => (
     <div class={`expandable-menu expandable-menu-${key}`}>
       <div class="expandable-menu-wrapper">
         {items.map(item => (
@@ -151,9 +120,6 @@ const navItemsWithMenus = ['Assets', 'Insights', 'Services'];
       </a>
     </li>
   </ul>
-
-  <!-- Simple Menu Link for tiny screens -->
-  <a href="/menu" class="tiny-menu-btn">MENU</a>
 
 </nav>
 
@@ -1277,58 +1243,11 @@ const navItemsWithMenus = ['Assets', 'Insights', 'Services'];
     }
   }
 
-  /* Very small screens (200px and below) - hamburger only */
+  /* Very small screens (200px and below) */
   @media (max-width: 200px) {
     .logo-image,
     .mobile-nav-icons {
       display: none !important;
-    }
-  }
-
-  /* Tiny screen menu link - hidden by default */
-  .tiny-menu-btn {
-    display: none !important;
-  }
-
-  /* Explicitly hide above 200px */
-  @media (min-width: 201px) {
-    .tiny-menu-btn {
-      display: none !important;
-    }
-  }
-
-  /* Only show at 200px and below */
-  @media (max-width: 200px) {
-    .nav-logo,
-    .hamburger-menu,
-    .mobile-menu-list {
-      display: none !important;
-    }
-
-    .tiny-menu-btn {
-      display: block;
-      position: fixed;
-      top: 0.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2000;
-      background: rgba(255, 255, 255, 0.9);
-      border: 2px solid var(--color-Primary-500);
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-Primary-500);
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-
-    .tiny-menu-btn:hover {
-      background: var(--color-Primary-500);
-      color: white;
     }
   }
 
@@ -1442,13 +1361,6 @@ const navItemsWithMenus = ['Assets', 'Insights', 'Services'];
 
   :global(body[class*="a11y-"]) .expandable-item p {
     color: var(--color-Text-500) !important;
-  }
-
-  /* Tiny menu button */
-  :global(body[class*="a11y-"]) .tiny-menu-btn {
-    background: var(--color-Background-50) !important;
-    color: var(--color-Text-700) !important;
-    border-color: var(--color-Text-400) !important;
   }
 
   /* High contrast specific - stronger borders */
