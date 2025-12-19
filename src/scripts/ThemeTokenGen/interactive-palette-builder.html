@@ -1,0 +1,2488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Color Palette Builder</title>
+  <style>
+    :root {
+      /* Walking with a Smile Theme Tokens */
+      --color-Primary-500: oklch(0.699 0.048 140.05);
+      --color-Primary-600: oklch(0.591 0.041 140.19);
+      --color-Background-50: oklch(97.948% 0.01376 88.669);
+      --color-Background-100: oklch(0.948 0.011 95.09);
+      --color-Text-700: #373737;
+      --color-Text-800: #262626;
+      --color-Text-900: #181818;
+      --color-Neutral-300: oklch(0.992 0.003 67.83);
+      --color-Neutral-400: oklch(0.984 0.008 73.73);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--color-Background-50);
+      min-height: 100vh;
+      padding: 2rem;
+      line-height: 1.6;
+      color: var(--color-Text-800);
+    }
+
+    /* Main grid layout: Section 3 (left) | Section 1 (top right) + Section 2 (bottom right) */
+    .workflow {
+      display: grid;
+      grid-template-columns: 45% 1fr;
+      grid-template-rows: auto 1fr auto auto;
+      gap: 2rem;
+      max-width: 100%;
+      margin: 0 auto;
+      min-height: calc(100vh - 4rem);
+    }
+
+    .step {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid var(--color-Neutral-300);
+    }
+
+    .step-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .step-title {
+      font-size: 1.5rem;
+      color: var(--color-Text-900);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-description {
+      color: var(--color-Text-700);
+      font-size: 1rem;
+    }
+
+    /* Section 3: Base Colors (Left column, full height, NO SCROLL) */
+    #step3 {
+      grid-column: 1;
+      grid-row: 1 / 3;
+      display: flex;
+      flex-direction: column;
+      overflow: visible;
+    }
+
+    /* Section 1: Color Picker (Top right) */
+    #step1 {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    /* Section 2: Color Variations (Bottom right) - EXPANDED */
+    #step2 {
+      grid-column: 2;
+      grid-row: 2;
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: 75vh;
+    }
+
+    /* Step 4: Generated Tokens (left) and Step 5: Assignments (right) side by side */
+    #step4 {
+      grid-column: 1;
+      grid-row: 3;
+      overflow-y: auto;
+      max-height: 70vh;
+    }
+
+    #step5 {
+      grid-column: 2;
+      grid-row: 3;
+      overflow-y: auto;
+      max-height: 70vh;
+    }
+
+    /* Export below */
+    #exportSection {
+      grid-column: 1 / 3;
+      grid-row: 4;
+    }
+
+    /* Preview Section */
+    #previewSection {
+      grid-column: 1 / 3;
+      grid-row: 5;
+      overflow: visible;
+    }
+
+    .preview-container {
+      background: var(--color-Background-50);
+      padding: 2rem;
+      border-radius: 12px;
+    }
+
+    .preview-blog {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .preview-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 2px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preview-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .preview-nav {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    .preview-nav a {
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .preview-hero {
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .preview-hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .preview-hero p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .preview-cta {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .preview-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .preview-content {
+      padding: 3rem 2rem;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      background: var(--color-Background-50);
+    }
+
+    .preview-article h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--color-Text-900);
+    }
+
+    .preview-article p {
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+      color: var(--color-Text-700);
+    }
+
+    .preview-sidebar {
+      padding: 1.5rem;
+      border-radius: 12px;
+      height: fit-content;
+    }
+
+    .preview-sidebar h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .preview-sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .preview-sidebar li {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .preview-footer {
+      padding: 2rem;
+      text-align: center;
+      border-top: 2px solid rgba(255,255,255,0.1);
+      background: var(--color-Text-900);
+      color: var(--color-Background-50);
+    }
+
+    .preview-footer p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    /* Color Picker Section */
+    .color-input-section {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .color-picker-wrapper {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    #primaryColorPicker, #secondaryColorPicker {
+      width: 80px;
+      height: 80px;
+      border: 3px solid var(--color-Neutral-400);
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    #primaryColorHex, #secondaryColorHex {
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--color-Neutral-400);
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      width: 140px;
+    }
+
+    .generate-btn {
+      padding: 1rem 2rem;
+      background: var(--color-Primary-500);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+    }
+
+    .generate-btn:hover {
+      background: var(--color-Primary-600);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Color Theory Options - Simple Grid */
+    .theory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 0.75rem;
+      padding: 0;
+      width: 100%;
+    }
+
+    .color-chip {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 16px;
+      cursor: grab;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      border: 3px solid transparent;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .color-chip:hover {
+      transform: scale(1.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      border-color: var(--color-Primary-500);
+      z-index: 10;
+    }
+
+    .color-chip:active {
+      cursor: grabbing;
+    }
+
+    .color-chip.dragging {
+      opacity: 0.5;
+    }
+
+    /* Tooltip for color chips */
+    .color-chip::after {
+      content: attr(data-theory) " • " attr(data-color);
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.95);
+      color: white;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .color-chip:hover::after {
+      opacity: 1;
+    }
+
+    /* Base Color Selection - Compact Grid */
+    .base-color-slots {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      flex: 1;
+      overflow: visible;
+    }
+
+    .base-slot {
+      width: 100%;
+      height: 90px;
+      background: var(--color-Background-100);
+      border: 2px dashed var(--color-Neutral-400);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .base-slot:hover {
+      border-color: var(--color-Primary-500);
+      transform: scale(1.02);
+    }
+
+    .base-slot.has-color {
+      border-style: solid;
+      border-color: var(--color-Primary-500);
+    }
+
+    .base-slot.drag-over {
+      background: var(--color-Primary-500);
+      opacity: 0.2;
+      transform: scale(1.05);
+    }
+
+    .base-slot-label {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--color-Text-900);
+      background: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      z-index: 2;
+    }
+
+    .base-slot-color {
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .base-slot-color.filled {
+      color: white;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+    }
+
+    /* Tooltip for base slots */
+    .base-slot-color.filled::after {
+      content: attr(data-hex);
+      position: absolute;
+      bottom: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9);
+      color: white;
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: 'Courier New', monospace;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 3;
+    }
+
+    .base-slot:hover .base-slot-color.filled::after {
+      opacity: 1;
+    }
+
+    .clear-base {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      background: rgba(255,255,255,0.95);
+      color: var(--color-Text-800);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: all 0.2s;
+      font-weight: 600;
+      z-index: 2;
+    }
+
+    .base-slot.has-color:hover .clear-base {
+      opacity: 1;
+    }
+
+    .clear-base:hover {
+      background: white;
+      transform: scale(1.1);
+    }
+
+    .generate-scales-btn {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-Primary-500);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .generate-scales-btn:hover {
+      background: var(--color-Primary-600);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .generate-scales-btn:disabled {
+      background: var(--color-Neutral-400);
+      cursor: not-allowed;
+      transform: none;
+      opacity: 0.6;
+    }
+
+    /* Generated Scales */
+    .scales-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .scale-family {
+      background: var(--color-Background-100);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid var(--color-Neutral-300);
+    }
+
+    .scale-family-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-Text-900);
+      margin-bottom: 1rem;
+    }
+
+    .scale-tokens {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .token-chip {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      cursor: grab;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .token-chip:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+      border-color: var(--color-Primary-500);
+      z-index: 10;
+    }
+
+    .token-chip:active {
+      cursor: grabbing;
+    }
+
+    .token-chip.dragging {
+      opacity: 0.5;
+    }
+
+    .token-number {
+      background: rgba(255,255,255,0.95);
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-Text-900);
+    }
+
+    .token-hex {
+      background: rgba(0,0,0,0.9);
+      color: white;
+      padding: 0.25rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+    }
+
+    /* Final Assignments */
+    .assignment-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .assignment-slot {
+      background: var(--color-Background-100);
+      border: 2px dashed var(--color-Neutral-400);
+      border-radius: 6px;
+      padding: 0.4rem;
+      transition: all 0.2s;
+    }
+
+    .assignment-slot.has-color {
+      border-style: solid;
+      border-color: var(--color-Primary-500);
+    }
+
+    .assignment-slot.drag-over {
+      background: var(--color-Primary-500);
+      opacity: 0.2;
+      transform: scale(1.02);
+    }
+
+    .assignment-label {
+      font-weight: 600;
+      font-size: 0.7rem;
+      color: var(--color-Text-900);
+      margin-bottom: 0.3rem;
+    }
+
+    .assignment-color {
+      width: 100%;
+      height: 35px;
+      border-radius: 5px;
+      background: var(--color-Neutral-300);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: rgba(0,0,0,0.3);
+      margin-bottom: 0.3rem;
+      transition: all 0.2s;
+    }
+
+    .assignment-color.filled {
+      color: white;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      font-size: 0.65rem;
+    }
+
+    .assignment-token-info {
+      font-size: 0.6rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    .assignment-hex-info {
+      font-size: 0.55rem;
+      opacity: 0.9;
+    }
+
+    .clear-assignment {
+      padding: 0.25rem 0.4rem;
+      background: rgba(255,255,255,0.9);
+      color: var(--color-Text-800);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.6rem;
+      opacity: 0;
+      transition: all 0.2s;
+      width: 100%;
+      font-weight: 600;
+    }
+
+    .assignment-slot.has-color .clear-assignment {
+      opacity: 1;
+    }
+
+    .clear-assignment:hover {
+      background: white;
+      transform: scale(1.02);
+    }
+
+    /* Export Section */
+    .export-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .export-btn {
+      flex: 1;
+      min-width: 200px;
+      padding: 1rem 1.5rem;
+      background: var(--color-Primary-500);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .export-btn:hover {
+      background: var(--color-Primary-600);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .code-output {
+      background: var(--color-Text-900);
+      color: var(--color-Background-50);
+      padding: 1.5rem;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre;
+      border: 1px solid var(--color-Neutral-400);
+    }
+
+    .empty-state {
+      color: rgba(0,0,0,0.4);
+      font-style: italic;
+      text-align: center;
+      padding: 2rem;
+      background: var(--color-Background-100);
+      border-radius: 12px;
+      border: 2px dashed var(--color-Neutral-400);
+    }
+
+    @media (max-width: 1200px) {
+      .workflow {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        height: auto;
+      }
+
+      #step3, #step1, #step2, #step4, #step5, #exportSection {
+        grid-column: 1;
+      }
+
+      #step3 {
+        grid-row: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="workflow">
+    <!-- STEP 3: Base Colors (Left column, full height) -->
+    <div class="step" id="step3">
+      <div class="step-header">
+        <div class="step-title">Select 8 Base Colors</div>
+        <div class="step-description">Drag colors from the variations</div>
+      </div>
+      <div class="base-color-slots" id="baseColorSlots"></div>
+      <button class="generate-scales-btn" id="generateScalesBtn" onclick="generateScales()" disabled>
+        Generate Color Scales
+      </button>
+    </div>
+
+    <!-- STEP 1: Color Picker (Top right) -->
+    <div class="step" id="step1">
+      <div class="step-header">
+        <div class="step-title">Choose Brand Colors</div>
+        <div class="step-description">Pick 1-2 brand colors to generate a complete palette</div>
+      </div>
+      <div class="color-input-section" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; width: 100%;">
+          <div class="color-picker-wrapper">
+            <label style="font-size: 0.85rem; font-weight: 600; color: var(--color-Text-700); margin-bottom: 0.5rem; display: block;">Primary Brand Color</label>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+              <input type="color" id="primaryColorPicker" value="#8FA68A">
+              <input type="text" id="primaryColorHex" value="#8FA68A" placeholder="#8FA68A">
+            </div>
+          </div>
+          <div class="color-picker-wrapper">
+            <label style="font-size: 0.85rem; font-weight: 600; color: var(--color-Text-700); margin-bottom: 0.5rem; display: block;">Secondary Brand Color (Optional)</label>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+              <input type="color" id="secondaryColorPicker" value="#D4B98C">
+              <input type="text" id="secondaryColorHex" value="#D4B98C" placeholder="#D4B98C">
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap; align-items: center;">
+          <select id="designIntent" style="padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid var(--color-Neutral-400); font-size: 1rem; flex: 1; min-width: 200px;">
+            <option value="all">Complete Palette</option>
+            <option value="calm">Calm & Therapeutic</option>
+            <option value="bright">Bright & Hopeful</option>
+            <option value="editorial">Soft Editorial</option>
+            <option value="energetic">Energetic Startup</option>
+            <option value="luxury">Luxury Minimalist</option>
+            <option value="earthy">Muted Earthy</option>
+            <option value="modern">Modern UI</option>
+            <option value="random-bright">Random Bright Palette</option>
+            <option value="random-light">Random Light Palette</option>
+            <option value="random-beige">Random Beige/Grey Palette</option>
+            <option value="random">Random Pick</option>
+          </select>
+          <button class="generate-btn" onclick="generateCompletePalette()" style="flex: 1; min-width: 250px;">Generate Complete 8-Color Palette</button>
+        </div>
+        <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
+          <button class="generate-btn" onclick="generateColorTheories()" style="background: #999; flex: 1;">Or Generate Variations to Pick Manually</button>
+          <button class="generate-btn" onclick="chooseAgain()" style="background: #4A90E2; color: white; flex: 0.5; min-width: 150px;">Choose Again</button>
+          <button class="generate-btn" onclick="clearAll()" style="background: #E74C3C; color: white; flex: 0.5; min-width: 150px;">Clear All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Color Variations (Bottom right) -->
+    <div class="step" id="step2">
+      <div class="step-header">
+        <div class="step-title">Color Variations</div>
+      </div>
+      <div class="theory-grid" id="theoryOptions">
+        <div class="empty-state">Click "Generate Variations"</div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Generated Scales -->
+    <div class="step" id="step4">
+      <div class="step-header">
+        <div class="step-title">Generated Color Tokens</div>
+        <div class="step-description">Drag tokens to assign purposes below</div>
+      </div>
+      <div class="scales-container" id="scalesContainer">
+        <div class="empty-state">Select base colors and generate scales</div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Final Assignments -->
+    <div class="step" id="step5">
+      <div class="step-header">
+        <div class="step-title">Assign Tokens to Purposes</div>
+        <div class="step-description">Drag specific tokens from above</div>
+      </div>
+      <div class="assignment-grid" id="assignmentGrid"></div>
+    </div>
+
+    <!-- Export Section -->
+    <div class="step" id="exportSection">
+      <div class="step-header">
+        <div class="step-title">Export Your Theme</div>
+        <div class="step-description">Download or copy your theme</div>
+      </div>
+      <div class="export-buttons">
+        <button class="export-btn" onclick="exportToCSS()">Download CSS File</button>
+        <button class="export-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
+        <button class="export-btn" onclick="openLiveDemo()" style="background: #4A90E2;">Open Live Demo Page</button>
+      </div>
+      <div class="code-output" id="codeOutput">/* Your theme CSS will appear here */</div>
+    </div>
+
+    <!-- Preview Section -->
+    <div class="step" id="previewSection">
+      <div class="step-header">
+        <div class="step-title">Live Preview</div>
+        <div class="step-description">See your palette in action</div>
+      </div>
+      <div class="preview-container">
+        <div class="preview-blog">
+          <!-- Header (Light) -->
+          <div class="preview-header" id="previewHeader">
+            <div class="preview-logo" id="previewLogo">Walking with a Smile</div>
+            <nav class="preview-nav" id="previewNav">
+              <a href="#" id="navLink1">About</a>
+              <a href="#" id="navLink2">Services</a>
+              <a href="#" id="navLink3">Contact</a>
+            </nav>
+          </div>
+
+          <!-- Hero Section (Primary) -->
+          <div class="preview-hero" id="previewHero">
+            <h1 id="previewHeroTitle">Transform Your Journey</h1>
+            <p id="previewHeroText">Experience the power of thoughtful design and meaningful interactions</p>
+            <a href="#" class="preview-cta" id="previewCTA">Get Started</a>
+          </div>
+
+          <!-- Content Section (Light Background) -->
+          <div class="preview-content">
+            <div class="preview-article">
+              <h2 id="previewArticleTitle">Our Approach</h2>
+              <p id="previewArticleText">
+                We believe in creating experiences that resonate with your audience.
+                Through careful attention to detail and a deep understanding of your needs,
+                we craft solutions that are both beautiful and functional.
+              </p>
+              <p>
+                Our team combines expertise in design, development, and strategy to deliver
+                results that exceed expectations. Every project is an opportunity to create
+                something meaningful.
+              </p>
+            </div>
+            <div class="preview-sidebar" id="previewSidebar">
+              <h3 id="previewSidebarTitle">Featured Topics</h3>
+              <ul id="previewSidebarList">
+                <li>Design Principles</li>
+                <li>User Experience</li>
+                <li>Brand Identity</li>
+                <li>Development</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Footer (Dark) -->
+          <div class="preview-footer" id="previewFooter">
+            <p id="previewFooterText">&copy; 2025 Walking with a Smile. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
+  <script>
+    // State management
+    const state = {
+      primaryColor: '#8FA68A',
+      baseColors: {},
+      generatedScales: {},
+      finalAssignments: {}
+    };
+
+    // Base color slots (8 colors, all at 500)
+    const baseSlots = [
+      'primary',
+      'secondary',
+      'neutral',
+      'accent1',
+      'accent2',
+      'accent3',
+      'accent4',
+      'accent5'
+    ];
+
+    // Final assignment slots
+    const assignmentSlots = [
+      // Backgrounds
+      { id: 'bg-light-1', label: 'Background Light 1' },
+      { id: 'bg-light-2', label: 'Background Light 2' },
+      { id: 'bg-default', label: 'Background Default' },
+      { id: 'bg-dark-1', label: 'Background Dark 1' },
+      { id: 'bg-dark-2', label: 'Background Dark 2' },
+
+      // Text
+      { id: 'text-light', label: 'Text Light' },
+      { id: 'text-default', label: 'Text Default' },
+      { id: 'text-dark', label: 'Text Dark' },
+      { id: 'text-emphasis', label: 'Text Emphasis' },
+
+      // Primary (3 slots)
+      { id: 'primary-default', label: 'Primary Default' },
+      { id: 'primary-hover', label: 'Primary Hover' },
+      { id: 'primary-active', label: 'Primary Active' },
+
+      // Secondary (3 slots)
+      { id: 'secondary-default', label: 'Secondary Default' },
+      { id: 'secondary-hover', label: 'Secondary Hover' },
+      { id: 'secondary-active', label: 'Secondary Active' },
+
+      // Neutral (3 slots)
+      { id: 'neutral-default', label: 'Neutral Default' },
+      { id: 'neutral-border', label: 'Neutral Border' },
+      { id: 'neutral-hover', label: 'Neutral Hover' },
+
+      // Accent 1 (3 slots)
+      { id: 'accent1-default', label: 'Accent 1 Default' },
+      { id: 'accent1-hover', label: 'Accent 1 Hover' },
+      { id: 'accent1-active', label: 'Accent 1 Active' },
+
+      // Accent 2 (3 slots)
+      { id: 'accent2-default', label: 'Accent 2 Default' },
+      { id: 'accent2-hover', label: 'Accent 2 Hover' },
+      { id: 'accent2-active', label: 'Accent 2 Active' },
+
+      // Accent 3 (3 slots)
+      { id: 'accent3-default', label: 'Accent 3 Default' },
+      { id: 'accent3-hover', label: 'Accent 3 Hover' },
+      { id: 'accent3-active', label: 'Accent 3 Active' },
+
+      // Accent 4 (3 slots)
+      { id: 'accent4-default', label: 'Accent 4 Default' },
+      { id: 'accent4-hover', label: 'Accent 4 Hover' },
+      { id: 'accent4-active', label: 'Accent 4 Active' },
+
+      // Accent 5 (3 slots)
+      { id: 'accent5-default', label: 'Accent 5 Default' },
+      { id: 'accent5-hover', label: 'Accent 5 Hover' },
+      { id: 'accent5-active', label: 'Accent 5 Active' }
+    ];
+
+    // Initialize
+    initializeBaseSlots();
+    initializeAssignmentSlots();
+
+    document.getElementById('primaryColorPicker').addEventListener('input', (e) => {
+      document.getElementById('primaryColorHex').value = e.target.value;
+    });
+
+    document.getElementById('primaryColorHex').addEventListener('input', (e) => {
+      let value = e.target.value;
+      if (!value.startsWith('#')) value = '#' + value;
+      document.getElementById('primaryColorPicker').value = value;
+    });
+
+    document.getElementById('secondaryColorPicker').addEventListener('input', (e) => {
+      document.getElementById('secondaryColorHex').value = e.target.value;
+    });
+
+    document.getElementById('secondaryColorHex').addEventListener('input', (e) => {
+      let value = e.target.value;
+      if (!value.startsWith('#')) value = '#' + value;
+      document.getElementById('secondaryColorPicker').value = value;
+    });
+
+    // Initialize base color slots
+    function initializeBaseSlots() {
+      const container = document.getElementById('baseColorSlots');
+      container.innerHTML = baseSlots.map(slot => `
+        <div class="base-slot" data-slot-id="${slot}"
+             ondrop="dropBase(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+          <div class="base-slot-label">${capitalizeFirst(slot)}</div>
+          <div class="base-slot-color" id="base-${slot}">Drop</div>
+          <button class="clear-base" onclick="clearBase('${slot}')">×</button>
+        </div>
+      `).join('');
+    }
+
+    // Initialize assignment slots
+    function initializeAssignmentSlots() {
+      const container = document.getElementById('assignmentGrid');
+      container.innerHTML = assignmentSlots.map(slot => `
+        <div class="assignment-slot" data-slot-id="${slot.id}"
+             ondrop="dropAssignment(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+          <div class="assignment-label">${slot.label}</div>
+          <div class="assignment-color" id="assign-${slot.id}">Drop token</div>
+          <button class="clear-assignment" onclick="clearAssignment('${slot.id}')">Clear</button>
+        </div>
+      `).join('');
+    }
+
+    // Generate color theory variants
+    function generateColorTheoryVariant(baseColor, theory, index = 0) {
+      const base = chroma(baseColor);
+      const [h, s, l] = base.hsl();
+
+      const theories = {
+        complementary: () => chroma.hsl((h + 180) % 360, s, l),
+        analogous: () => {
+          const offset = index === 0 ? -30 : 30;
+          return chroma.hsl((h + offset + 360) % 360, s, l);
+        },
+        triadic: () => {
+          const offset = index === 0 ? 120 : 240;
+          return chroma.hsl((h + offset) % 360, s, l);
+        },
+        'split-complementary': () => {
+          const offset = index === 0 ? 150 : 210;
+          return chroma.hsl((h + offset) % 360, s, l);
+        },
+        tetradic: () => {
+          const offset = index === 0 ? 90 : index === 1 ? 180 : 270;
+          return chroma.hsl((h + offset) % 360, s, l);
+        },
+        square: () => {
+          const offset = index === 0 ? 90 : index === 1 ? 180 : 270;
+          return chroma.hsl((h + offset) % 360, s, l);
+        },
+        monochromatic: () => {
+          // Same hue, vary saturation and lightness
+          const satOffsets = [0.7, 0.5, 0.3];
+          const lightOffsets = [0.3, 0.5, 0.7];
+          const newS = Math.max(0, Math.min(1, s * satOffsets[index % 3]));
+          const newL = Math.max(0.1, Math.min(0.9, lightOffsets[index % 3]));
+          return chroma.hsl(h, newS, newL);
+        },
+        pastel: () => {
+          // Pastel: High lightness, lower saturation
+          const newS = Math.max(0.2, Math.min(0.5, s * 0.4));
+          const newL = Math.max(0.7, Math.min(0.85, 0.8));
+          return chroma.hsl(h, newS, newL);
+        },
+        chalk: () => {
+          // Chalk: Very desaturated, high lightness, slightly cool
+          const newS = Math.max(0.1, Math.min(0.3, s * 0.25));
+          const newL = Math.max(0.75, Math.min(0.9, 0.85));
+          return chroma.hsl(h, newS, newL);
+        },
+        bright: () => {
+          // Bright: High saturation, medium-high lightness
+          const newS = Math.max(0.7, Math.min(1, s * 1.3));
+          const newL = Math.max(0.5, Math.min(0.65, 0.6));
+          return chroma.hsl(h, newS, newL);
+        },
+        grey: () => {
+          // Grey: Very low saturation, same lightness
+          const newS = Math.max(0.05, Math.min(0.15, s * 0.1));
+          return chroma.hsl(h, newS, l);
+        },
+        cream: () => {
+          // Cream: Slightly warmed, low saturation, high lightness
+          const warmH = (h + 15) % 360; // Shift towards yellow/orange
+          const newS = Math.max(0.15, Math.min(0.3, s * 0.3));
+          const newL = Math.max(0.8, Math.min(0.92, 0.88));
+          return chroma.hsl(warmH, newS, newL);
+        }
+      };
+
+      return theories[theory] ? theories[theory]().hex() : baseColor;
+    }
+
+    // Advanced Color Generation Techniques
+    function generateAdvancedPalette(baseColor) {
+      const base = chroma(baseColor);
+      const colors = [];
+
+      // A. Soft Modern Accents (brighten/desaturate 20-60%)
+      colors.push({ color: base.brighten(0.5).desaturate(0.3).hex(), theory: 'Soft Modern' });
+      colors.push({ color: base.brighten(1).desaturate(0.5).hex(), theory: 'Soft Modern Light' });
+      colors.push({ color: base.brighten(0.3).desaturate(0.2).hex(), theory: 'Soft Modern Subtle' });
+
+      // B. Punchy Micro-Accents (saturation + hue shift)
+      colors.push({ color: base.set('hsl.h', '+30').saturate(2).hex(), theory: 'Punchy Warm' });
+      colors.push({ color: base.set('hsl.h', '-30').saturate(2).hex(), theory: 'Punchy Cool' });
+      colors.push({ color: base.set('hsl.h', '+45').saturate(1.5).hex(), theory: 'Punchy Bright' });
+
+      // C. Nature-Inspired (hue shift ±15-25°, reduce saturation)
+      colors.push({ color: base.set('hsl.h', '+20').saturate(-0.5).hex(), theory: 'Nature Warm' });
+      colors.push({ color: base.set('hsl.h', '-20').saturate(-0.5).hex(), theory: 'Nature Cool' });
+      colors.push({ color: base.set('hsl.h', '+15').saturate(-0.3).hex(), theory: 'Nature Earthy' });
+      colors.push({ color: base.set('hsl.h', '-25').saturate(-0.4).hex(), theory: 'Nature Sky' });
+
+      // D. Luxury/Elegant Accents (deep shades + metallic)
+      colors.push({ color: base.darken(1.5).hex(), theory: 'Luxury Deep' });
+      colors.push({ color: base.darken(2).saturate(0.5).hex(), theory: 'Luxury Shadow' });
+      colors.push({ color: '#D4B98C', theory: 'Metallic Gold' });
+      colors.push({ color: '#C0C0C0', theory: 'Metallic Silver' });
+
+      // E. Vibrance Offset (contrasting hue)
+      colors.push({ color: base.set('hsl.h', '+130').hex(), theory: 'Vibrant Offset' });
+      colors.push({ color: base.set('hsl.h', '+150').saturate(0.5).hex(), theory: 'Vibrant Complement' });
+
+      // Primary System
+      colors.push({ color: baseColor, theory: 'Base' });
+      colors.push({ color: base.darken(0.8).hex(), theory: 'Deep Shade' });
+      colors.push({ color: base.brighten(1.2).hex(), theory: 'Light Tint' });
+
+      // Neutral System
+      colors.push({ color: base.desaturate(2).hex(), theory: 'Warm Neutral' });
+      colors.push({ color: base.set('hsl.h', '-10').desaturate(2).hex(), theory: 'Cool Neutral' });
+      colors.push({ color: base.darken(3).desaturate(1).hex(), theory: 'Dark Anchor' });
+
+      return colors;
+    }
+
+    // Apply design intent filter
+    function applyDesignIntent(colors, intent) {
+      if (intent === 'all') return colors;
+
+      const filters = {
+        calm: (c) => c.theory.includes('Soft') || c.theory.includes('Nature') || c.theory.includes('Neutral'),
+        bright: (c) => c.theory.includes('Punchy') || c.theory.includes('Vibrant') || c.theory.includes('Light'),
+        editorial: (c) => c.theory.includes('Soft') || c.theory.includes('Elegant') || c.theory.includes('Luxury'),
+        energetic: (c) => c.theory.includes('Punchy') || c.theory.includes('Vibrant') || c.theory.includes('Bright'),
+        luxury: (c) => c.theory.includes('Luxury') || c.theory.includes('Metallic') || c.theory.includes('Deep'),
+        earthy: (c) => c.theory.includes('Nature') || c.theory.includes('Neutral') || c.theory.includes('Warm'),
+        modern: (c) => c.theory.includes('Modern') || c.theory.includes('Neutral') || c.theory.includes('Base'),
+        'random-bright': (c) => c.theory.includes('Punchy') || c.theory.includes('Vibrant'),
+        'random-light': (c) => c.theory.includes('Light') || c.theory.includes('Soft'),
+        'random-beige': (c) => c.theory.includes('Neutral') || c.theory.includes('Warm'),
+        'random': () => true  // Accept all colors for completely random
+      };
+
+      return filters[intent] ? colors.filter(filters[intent]) : colors;
+    }
+
+    // Generate random color with constraints
+    function randomColor(hueMin = 0, hueMax = 360, satMin = 0, satMax = 1, lightMin = 0, lightMax = 1) {
+      const hue = Math.floor(Math.random() * (hueMax - hueMin + 1)) + hueMin;
+      const sat = Math.random() * (satMax - satMin) + satMin;
+      const light = Math.random() * (lightMax - lightMin) + lightMin;
+      return chroma.hsl(hue, sat, light).hex();
+    }
+
+    // Get intent-based color suggestions
+    function getIntentBasedColors(intent, userPrimary) {
+      // Handle random intents with fresh random colors each time
+      if (intent === 'random-bright') {
+        // High saturation (70-100%), medium-high lightness (45-65%)
+        return {
+          primary: randomColor(0, 360, 0.7, 1.0, 0.45, 0.65),
+          secondary: randomColor(0, 360, 0.7, 1.0, 0.45, 0.65)
+        };
+      }
+
+      if (intent === 'random-light') {
+        // Any hue, lower saturation (20-60%), high lightness (70-90%)
+        return {
+          primary: randomColor(0, 360, 0.2, 0.6, 0.70, 0.90),
+          secondary: randomColor(0, 360, 0.2, 0.6, 0.70, 0.90)
+        };
+      }
+
+      if (intent === 'random-beige') {
+        // Warm hues (25-55°), very low saturation (5-20%), light (65-90%)
+        return {
+          primary: randomColor(25, 55, 0.05, 0.20, 0.65, 0.90),
+          secondary: randomColor(25, 55, 0.05, 0.20, 0.65, 0.90)
+        };
+      }
+
+      if (intent === 'random') {
+        // Completely random across all parameters
+        return {
+          primary: randomColor(0, 360, 0.3, 1.0, 0.35, 0.75),
+          secondary: randomColor(0, 360, 0.3, 1.0, 0.35, 0.75)
+        };
+      }
+
+      // Fixed presets
+      const presets = {
+        calm: {
+          primary: '#8FA68A',      // Soft sage green
+          secondary: '#B8A89D'     // Warm taupe
+        },
+        bright: {
+          primary: '#F7A072',      // Coral
+          secondary: '#FFD966'     // Sunny yellow
+        },
+        editorial: {
+          primary: '#7A8B99',      // Muted blue-grey
+          secondary: '#C9B8A8'     // Soft beige
+        },
+        energetic: {
+          primary: '#FF6B6B',      // Vibrant red
+          secondary: '#4ECDC4'     // Turquoise
+        },
+        luxury: {
+          primary: '#2C3E50',      // Deep navy
+          secondary: '#D4AF37'     // Gold
+        },
+        earthy: {
+          primary: '#A0826D',      // Terracotta
+          secondary: '#7D9D7C'     // Sage
+        },
+        modern: {
+          primary: '#5D6D7E',      // Cool grey
+          secondary: '#85929E'     // Light grey
+        }
+      };
+
+      return presets[intent] || { primary: userPrimary, secondary: userPrimary };
+    }
+
+    // Generate complete 8-color palette from 1-2 brand colors
+    function generateCompletePalette() {
+      let primary = document.getElementById('primaryColorHex').value.trim();
+      let secondary = document.getElementById('secondaryColorHex').value.trim();
+      const intent = document.getElementById('designIntent').value;
+
+      // Validate primary color
+      if (!primary || !primary.match(/^#?[0-9A-Fa-f]{6}$/)) {
+        alert('Please enter a valid primary color in hex format (e.g., #8FA68A)');
+        return;
+      }
+
+      // Ensure # prefix
+      if (!primary.startsWith('#')) primary = '#' + primary;
+      if (secondary && !secondary.startsWith('#')) secondary = '#' + secondary;
+
+      // Apply intent-based color suggestions if selected
+      if (intent !== 'all') {
+        const intentColors = getIntentBasedColors(intent, primary);
+        primary = intentColors.primary;
+        secondary = intentColors.secondary;
+
+        // Update the UI to show the preset colors
+        document.getElementById('primaryColorPicker').value = primary;
+        document.getElementById('primaryColorHex').value = primary;
+        document.getElementById('secondaryColorPicker').value = secondary;
+        document.getElementById('secondaryColorHex').value = secondary;
+      }
+
+      const primaryBase = chroma(primary);
+      const [h1, s1, l1] = primaryBase.hsl();
+
+      // Use secondary if provided, otherwise generate complementary
+      let secondaryColor;
+      let h2, s2, l2;
+
+      // Check if secondary is valid and different from primary
+      const hasValidSecondary = secondary &&
+                                secondary.match(/^#?[0-9A-Fa-f]{6}$/) &&
+                                secondary.toLowerCase() !== primary.toLowerCase();
+
+      if (hasValidSecondary) {
+        secondaryColor = secondary;
+        const secondaryBase = chroma(secondary);
+        [h2, s2, l2] = secondaryBase.hsl();
+        console.log('Using provided secondary color:', secondaryColor);
+      } else {
+        // Complementary color (opposite on color wheel)
+        secondaryColor = chroma.hsl((h1 + 180) % 360, s1 * 0.9, l1).hex();
+        [h2, s2, l2] = [((h1 + 180) % 360), s1 * 0.9, l1];
+        console.log('Generated complementary secondary:', secondaryColor);
+      }
+
+      const palette = [];
+
+      // 1. Primary (brand color)
+      palette.push(primary);
+
+      // 2. Secondary (from preset or generated)
+      palette.push(secondaryColor);
+
+      // 3. Analogous Warm (based on primary, 30° shift towards warm)
+      palette.push(chroma.hsl((h1 + 30) % 360, s1 * 0.95, l1 * 1.05).hex());
+
+      // 4. Analogous Cool (based on secondary, 30° shift towards cool)
+      palette.push(chroma.hsl((h2 - 30 + 360) % 360, s2 * 0.95, l2 * 1.05).hex());
+
+      // 5. Triadic 1 (120° shift from primary)
+      palette.push(chroma.hsl((h1 + 120) % 360, s1 * 0.85, l1 * 0.95).hex());
+
+      // 6. Triadic 2 (120° shift from secondary)
+      palette.push(chroma.hsl((h2 + 120) % 360, s2 * 0.85, l2 * 0.95).hex());
+
+      // 7. Neutral (always in the warm beige-grey range like #ede7de)
+      // Fixed hue range 35-45° (warm yellows), very low saturation, very high lightness
+      const neutralHue = 40; // Fixed warm beige hue (yellow-orange range)
+      const neutralSat = 0.12; // Very low saturation (10-15%)
+      const neutralLight = 0.92; // Very light (90-94%)
+      palette.push(chroma.hsl(neutralHue, neutralSat, neutralLight).hex()); // #ede7de range
+
+      // 8. Accent (blend between primary and secondary for harmony)
+      const avgHue = ((h1 + h2) / 2) % 360;
+      const avgSat = (s1 + s2) / 2;
+      const avgLight = (l1 + l2) / 2;
+      palette.push(chroma.hsl((avgHue + 45) % 360, avgSat * 1.05, avgLight).hex());
+
+      // Apply design intent adjustments
+      const adjustedPalette = applyIntentToPalette(palette, intent);
+
+      // Auto-populate base color slots with correct mapping
+      // Palette order: [primary, secondary, analogous-warm, analogous-cool, triadic1, triadic2, neutral, accent]
+      // Base slots order: [primary, secondary, neutral, accent1, accent2, accent3, accent4, accent5]
+      const slotMapping = {
+        'primary': adjustedPalette[0],
+        'secondary': adjustedPalette[1],
+        'neutral': adjustedPalette[6],    // neutral is at index 6 in palette
+        'accent1': adjustedPalette[2],    // analogous warm
+        'accent2': adjustedPalette[3],    // analogous cool
+        'accent3': adjustedPalette[4],    // triadic 1
+        'accent4': adjustedPalette[5],    // triadic 2
+        'accent5': adjustedPalette[7]     // split-complementary
+      };
+
+      baseSlots.forEach(slot => {
+        if (slotMapping[slot]) {
+          state.baseColors[slot] = slotMapping[slot];
+          updateBaseSlot(slot, slotMapping[slot]);
+        }
+      });
+
+      checkBaseColorsComplete();
+
+      // Auto-generate scales
+      generateScales();
+
+      // Auto-assign tokens to purposes
+      setTimeout(() => {
+        autoAssignTokens();
+      }, 100);
+
+      // Scroll to show results
+      document.getElementById('step4').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Auto-assign tokens to purposes based on best practices
+    function autoAssignTokens() {
+      // Clear existing assignments
+      state.finalAssignments = {};
+
+      // Background assignments (use neutral for light, secondary/accent for dark)
+      assignToken('bg-light-1', 'neutral', '100');
+      assignToken('bg-light-2', 'neutral', '50');
+      assignToken('bg-default', 'neutral', '200');
+      assignToken('bg-dark-1', 'primary', '900');
+      assignToken('bg-dark-2', 'secondary', '800');  // Secondary 800 for dark bg
+
+      // Text assignments (dark text uses 900, light text uses 100)
+      assignToken('text-light', 'neutral', '100');
+      assignToken('text-default', 'primary', '700');
+      assignToken('text-dark', 'primary', '900');
+      assignToken('text-emphasis', 'primary', '900');  // Same as text-dark
+
+      // Primary color assignments
+      assignToken('primary-default', 'primary', '500');
+      assignToken('primary-hover', 'primary', '600');
+      assignToken('primary-active', 'primary', '700');
+
+      // Secondary color assignments
+      assignToken('secondary-default', 'secondary', '500');
+      assignToken('secondary-hover', 'secondary', '600');
+      assignToken('secondary-active', 'secondary', '700');
+
+      // Neutral assignments
+      assignToken('neutral-default', 'neutral', '400');
+      assignToken('neutral-border', 'neutral', '300');
+      assignToken('neutral-hover', 'neutral', '500');
+
+      // Accent assignments
+      assignToken('accent1-default', 'accent1', '500');
+      assignToken('accent1-hover', 'accent1', '600');
+      assignToken('accent1-active', 'accent1', '700');
+
+      assignToken('accent2-default', 'accent2', '500');
+      assignToken('accent2-hover', 'accent2', '600');
+      assignToken('accent2-active', 'accent2', '700');
+
+      assignToken('accent3-default', 'accent3', '500');
+      assignToken('accent3-hover', 'accent3', '600');
+      assignToken('accent3-active', 'accent3', '700');
+
+      assignToken('accent4-default', 'accent4', '500');
+      assignToken('accent4-hover', 'accent4', '600');
+      assignToken('accent4-active', 'accent4', '700');
+
+      assignToken('accent5-default', 'accent5', '500');
+      assignToken('accent5-hover', 'accent5', '600');
+      assignToken('accent5-active', 'accent5', '700');
+
+      // Update UI for all assignments
+      assignmentSlots.forEach(slot => {
+        const assignment = state.finalAssignments[slot.id];
+        if (assignment) {
+          updateAssignmentSlot(slot.id, assignment);
+        }
+      });
+
+      checkAssignmentsComplete();
+    }
+
+    // Helper to assign a token
+    function assignToken(slotId, family, token) {
+      if (state.generatedScales[family] && state.generatedScales[family][token]) {
+        state.finalAssignments[slotId] = {
+          family: family,
+          token: token,
+          color: state.generatedScales[family][token]
+        };
+      }
+    }
+
+    // Apply design intent to entire palette
+    function applyIntentToPalette(palette, intent) {
+      if (intent === 'all') return palette;
+
+      return palette.map((color, index) => {
+        // Don't adjust neutral (index 6) - keep it as light beige-grey background
+        if (index === 6) return color;
+
+        const c = chroma(color);
+        const [h, s, l] = c.hsl();
+
+        switch(intent) {
+          case 'calm':
+            // Desaturate and lighten
+            return chroma.hsl(h, s * 0.6, Math.min(0.75, l * 1.15)).hex();
+
+          case 'bright':
+            // Increase saturation and adjust lightness to medium-high
+            return chroma.hsl(h, Math.min(1, s * 1.3), Math.max(0.5, Math.min(0.7, l))).hex();
+
+          case 'editorial':
+            // Soft, muted tones
+            return chroma.hsl(h, s * 0.5, Math.min(0.7, l * 1.1)).hex();
+
+          case 'energetic':
+            // High saturation, vibrant
+            return chroma.hsl(h, Math.min(1, s * 1.4), Math.max(0.45, Math.min(0.65, l))).hex();
+
+          case 'luxury':
+            // Deep, rich tones
+            return chroma.hsl(h, Math.min(0.9, s * 1.1), Math.max(0.3, l * 0.8)).hex();
+
+          case 'earthy':
+            // Warm, desaturated
+            return chroma.hsl((h + 10) % 360, s * 0.55, Math.min(0.65, l)).hex();
+
+          case 'modern':
+            // Clean, slightly desaturated
+            return chroma.hsl(h, s * 0.75, l).hex();
+
+          default:
+            return color;
+        }
+      });
+    }
+
+    // Generate all color theories
+    function generateColorTheories() {
+      let primaryColor = document.getElementById('primaryColorHex').value.trim();
+      let secondaryColor = document.getElementById('secondaryColorHex').value.trim();
+      const intent = document.getElementById('designIntent').value;
+
+      // Validate and fix primary
+      if (!primaryColor || !primaryColor.match(/^#?[0-9A-Fa-f]{6}$/)) {
+        alert('Please enter a valid primary color in hex format');
+        return;
+      }
+      if (!primaryColor.startsWith('#')) primaryColor = '#' + primaryColor;
+
+      // Fix secondary if provided
+      if (secondaryColor && !secondaryColor.startsWith('#')) secondaryColor = '#' + secondaryColor;
+
+      state.primaryColor = primaryColor;
+
+      // Generate advanced palette from primary
+      let advancedColors = generateAdvancedPalette(primaryColor);
+
+      // If secondary color provided and valid, also generate variations from it
+      if (secondaryColor && secondaryColor.match(/^#?[0-9A-Fa-f]{6}$/)) {
+        const secondaryVariations = generateAdvancedPalette(secondaryColor);
+        advancedColors = [...advancedColors, ...secondaryVariations];
+        console.log('Generated variations from both primary and secondary colors');
+      }
+
+      // Apply design intent filter
+      advancedColors = applyDesignIntent(advancedColors, intent);
+
+      renderTheoryOptions({ 'Generated Palette': advancedColors });
+    }
+
+    // Render color theory options
+    function renderTheoryOptions(theories) {
+      const container = document.getElementById('theoryOptions');
+      const allChips = [];
+
+      Object.entries(theories).forEach(([category, colors]) => {
+        colors.forEach(c => {
+          allChips.push(`
+            <div class="color-chip"
+                 style="background-color: ${c.color};"
+                 draggable="true"
+                 ondragstart="dragColor(event)"
+                 data-color="${c.color}"
+                 data-theory="${c.theory}">
+            </div>
+          `);
+        });
+      });
+
+      container.innerHTML = allChips.join('');
+    }
+
+    // Drag handlers for color chips
+    function dragColor(event) {
+      event.dataTransfer.setData('color', event.target.dataset.color);
+      event.target.classList.add('dragging');
+    }
+
+    function dragToken(event) {
+      const family = event.target.dataset.family;
+      const token = event.target.dataset.token;
+      const color = event.target.dataset.color;
+      event.dataTransfer.setData('tokenData', JSON.stringify({ family, token, color }));
+      event.target.classList.add('dragging');
+    }
+
+    function allowDrop(event) {
+      event.preventDefault();
+      event.currentTarget.classList.add('drag-over');
+    }
+
+    function dragLeave(event) {
+      event.currentTarget.classList.remove('drag-over');
+    }
+
+    // Drop base color
+    function dropBase(event) {
+      event.preventDefault();
+      event.currentTarget.classList.remove('drag-over');
+
+      const color = event.dataTransfer.getData('color');
+      const slotId = event.currentTarget.dataset.slotId;
+
+      if (color && slotId) {
+        state.baseColors[slotId] = color;
+        updateBaseSlot(slotId, color);
+        checkBaseColorsComplete();
+      }
+
+      document.querySelectorAll('.color-chip').forEach(chip => {
+        chip.classList.remove('dragging');
+      });
+    }
+
+    // Update base slot display
+    function updateBaseSlot(slotId, color) {
+      const slotColor = document.getElementById(`base-${slotId}`);
+      slotColor.style.backgroundColor = color;
+      slotColor.textContent = '';
+      slotColor.setAttribute('data-hex', color);
+      slotColor.classList.add('filled');
+      slotColor.parentElement.classList.add('has-color');
+    }
+
+    // Clear base slot
+    function clearBase(slotId) {
+      delete state.baseColors[slotId];
+      const slotColor = document.getElementById(`base-${slotId}`);
+      slotColor.style.backgroundColor = '';
+      slotColor.textContent = 'Drop';
+      slotColor.removeAttribute('data-hex');
+      slotColor.classList.remove('filled');
+      slotColor.parentElement.classList.remove('has-color');
+      checkBaseColorsComplete();
+    }
+
+    // Check if enough base colors are assigned
+    function checkBaseColorsComplete() {
+      const count = Object.keys(state.baseColors).length;
+      const btn = document.getElementById('generateScalesBtn');
+      btn.disabled = count === 0;
+      btn.textContent = count > 0
+        ? `Generate Scales (${count} colors)`
+        : 'Generate Color Scales';
+    }
+
+    // Generate scales from base colors
+    function generateScales() {
+      state.generatedScales = {};
+
+      Object.entries(state.baseColors).forEach(([family, color]) => {
+        state.generatedScales[family] = generateScaleFromBase(color, 500, family);
+      });
+
+      renderScales();
+      document.getElementById('step4').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Generate scale from base color
+    function generateScaleFromBase(baseColorHex, basePosition = 500, family = '') {
+      // Special handling for neutral - keep it in warm beige-grey range
+      if (family === 'neutral') {
+        return generateNeutralScale();
+      }
+
+      const color = chroma(baseColorHex);
+      const [l, c, h] = color.oklch();
+
+      const positions = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+      const lightnessMap = {
+        50: 0.98, 100: 0.95, 200: 0.88, 300: 0.78, 400: 0.68,
+        500: 0.58, 600: 0.48, 700: 0.38, 800: 0.28, 900: 0.20, 950: 0.13
+      };
+
+      const scale = {};
+
+      positions.forEach(pos => {
+        const targetLightness = lightnessMap[pos];
+        let adjustedChroma = c;
+
+        if (targetLightness > 0.85) {
+          adjustedChroma = c * 0.3;
+        } else if (targetLightness < 0.25) {
+          adjustedChroma = c * 0.7;
+        }
+
+        try {
+          const newColor = chroma.oklch(targetLightness, adjustedChroma, h || 0);
+          scale[pos] = newColor.hex();
+        } catch (e) {
+          scale[pos] = baseColorHex;
+        }
+      });
+
+      return scale;
+    }
+
+    // Generate neutral scale - always warm beige-grey like #ede7de
+    function generateNeutralScale() {
+      const positions = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+      const scale = {};
+
+      // Fixed hue for warm beige (40° = warm yellow-orange)
+      const neutralHue = 40;
+
+      positions.forEach(pos => {
+        let lightness, saturation;
+
+        // Lightness values for each position
+        if (pos === 50) {
+          lightness = 0.97;
+          saturation = 0.05;
+        } else if (pos === 100) {
+          lightness = 0.95;
+          saturation = 0.08;
+        } else if (pos === 200) {
+          lightness = 0.92;
+          saturation = 0.10;
+        } else if (pos === 300) {
+          lightness = 0.88;
+          saturation = 0.12;
+        } else if (pos === 400) {
+          lightness = 0.82;
+          saturation = 0.13;
+        } else if (pos === 500) {
+          lightness = 0.75;
+          saturation = 0.14;
+        } else if (pos === 600) {
+          lightness = 0.65;
+          saturation = 0.15;
+        } else if (pos === 700) {
+          lightness = 0.52;
+          saturation = 0.15;
+        } else if (pos === 800) {
+          lightness = 0.38;
+          saturation = 0.14;
+        } else if (pos === 900) {
+          lightness = 0.25;
+          saturation = 0.12;
+        } else { // 950
+          lightness = 0.18;
+          saturation = 0.10;
+        }
+
+        scale[pos] = chroma.hsl(neutralHue, saturation, lightness).hex();
+      });
+
+      return scale;
+    }
+
+    // Render generated scales
+    function renderScales() {
+      const container = document.getElementById('scalesContainer');
+      container.innerHTML = Object.entries(state.generatedScales).map(([family, scale]) => `
+        <div class="scale-family">
+          <div class="scale-family-title">${capitalizeFirst(family)}</div>
+          <div class="scale-tokens">
+            ${Object.entries(scale).map(([token, color]) => `
+              <div class="token-chip"
+                   style="background-color: ${color};"
+                   draggable="true"
+                   ondragstart="dragToken(event)"
+                   data-family="${family}"
+                   data-token="${token}"
+                   data-color="${color}">
+                <span class="token-number">${token}</span>
+                <span class="token-hex">${color}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Drop assignment
+    function dropAssignment(event) {
+      event.preventDefault();
+      event.currentTarget.classList.remove('drag-over');
+
+      const tokenDataStr = event.dataTransfer.getData('tokenData');
+      if (!tokenDataStr) return;
+
+      const tokenData = JSON.parse(tokenDataStr);
+      const slotId = event.currentTarget.dataset.slotId;
+
+      if (slotId) {
+        state.finalAssignments[slotId] = tokenData;
+        updateAssignmentSlot(slotId, tokenData);
+        checkAssignmentsComplete();
+      }
+
+      document.querySelectorAll('.token-chip').forEach(chip => {
+        chip.classList.remove('dragging');
+      });
+    }
+
+    // Update assignment slot
+    function updateAssignmentSlot(slotId, tokenData) {
+      const slotColor = document.getElementById(`assign-${slotId}`);
+      slotColor.style.backgroundColor = tokenData.color;
+      slotColor.innerHTML = `
+        <div class="assignment-token-info">${tokenData.family}-${tokenData.token}</div>
+        <div class="assignment-hex-info">${tokenData.color}</div>
+      `;
+      slotColor.classList.add('filled');
+      slotColor.parentElement.classList.add('has-color');
+    }
+
+    // Clear assignment
+    function clearAssignment(slotId) {
+      delete state.finalAssignments[slotId];
+      const slotColor = document.getElementById(`assign-${slotId}`);
+      slotColor.style.backgroundColor = '';
+      slotColor.textContent = 'Drop token';
+      slotColor.classList.remove('filled');
+      slotColor.parentElement.classList.remove('has-color');
+      checkAssignmentsComplete();
+    }
+
+    // Check if assignments are complete
+    function checkAssignmentsComplete() {
+      const count = Object.keys(state.finalAssignments).length;
+      if (count > 0) {
+        generateCSSOutput();
+        updatePreview();
+
+        // Scroll to preview after a moment
+        setTimeout(() => {
+          document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+      }
+    }
+
+    // Update preview with assigned colors
+    function updatePreview() {
+      const a = state.finalAssignments;
+
+      // Helper to get color safely
+      const getColor = (key) => a[key]?.color || '#888888';
+
+      // Header (Light background, dark text)
+      const header = document.getElementById('previewHeader');
+      header.style.backgroundColor = getColor('bg-light-1');
+      header.style.color = getColor('text-dark');
+      header.style.borderBottomColor = getColor('neutral-border');
+
+      document.getElementById('previewLogo').style.color = getColor('primary-default');
+
+      const navLinks = [
+        document.getElementById('navLink1'),
+        document.getElementById('navLink2'),
+        document.getElementById('navLink3')
+      ];
+      navLinks.forEach(link => {
+        link.style.color = getColor('text-default');
+      });
+
+      // Hero (Primary colors)
+      const hero = document.getElementById('previewHero');
+      hero.style.backgroundColor = getColor('bg-light-2');
+
+      document.getElementById('previewHeroTitle').style.color = getColor('text-emphasis');
+      document.getElementById('previewHeroText').style.color = getColor('text-default');
+
+      const cta = document.getElementById('previewCTA');
+      cta.style.backgroundColor = getColor('primary-default');
+      cta.style.color = '#ffffff';
+
+      // Content area (Default background)
+      const content = document.querySelector('.preview-content');
+      content.style.backgroundColor = getColor('bg-default');
+
+      document.getElementById('previewArticleTitle').style.color = getColor('text-emphasis');
+      document.getElementById('previewArticleText').style.color = getColor('text-default');
+
+      // Sidebar (Accent colors)
+      const sidebar = document.getElementById('previewSidebar');
+      sidebar.style.backgroundColor = getColor('accent1-default');
+      sidebar.style.color = '#ffffff';
+
+      document.getElementById('previewSidebarTitle').style.color = '#ffffff';
+
+      const listItems = document.querySelectorAll('#previewSidebarList li');
+      listItems.forEach((item, index) => {
+        const accentKey = `accent${(index % 3) + 2}-default`;
+        item.style.borderBottomColor = a[accentKey]?.color || 'rgba(255,255,255,0.2)';
+      });
+
+      // Footer (Dark background)
+      const footer = document.getElementById('previewFooter');
+      footer.style.backgroundColor = getColor('bg-dark-2');
+      footer.style.color = getColor('text-light');
+      footer.style.borderTopColor = getColor('neutral-border');
+    }
+
+    // Generate CSS output
+    function generateCSSOutput() {
+      // Helper function to convert hex to OKLCH format
+      const toOKLCH = (hexColor) => {
+        try {
+          const color = chroma(hexColor);
+          const [l, c, h] = color.oklch();
+          // Round to 3 decimal places for lightness and chroma, 2 for hue
+          return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${(h || 0).toFixed(2)})`;
+        } catch (e) {
+          return hexColor; // Fallback to hex if conversion fails
+        }
+      };
+
+      let css = ':root {\n';
+      css += '  /* Essential OKLCH Color Palette - Generated from Interactive Palette Builder */\n\n';
+
+      // Generate all color scales in the correct format to match walking-with-a-smile.css
+      const families = ['primary', 'secondary', 'neutral', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5'];
+
+      families.forEach(family => {
+        if (!state.generatedScales[family]) return;
+
+        // Map family names to match theme structure
+        let cssName = family.charAt(0).toUpperCase() + family.slice(1);
+        if (family === 'accent1') cssName = 'AccentOne';
+        if (family === 'accent2') cssName = 'AccentTwo';
+        if (family === 'accent3') cssName = 'AccentThree';
+        if (family === 'accent4') cssName = 'AccentFour';
+        if (family === 'accent5') cssName = 'AccentFive';
+
+        css += `  /* ${cssName} Colors */\n`;
+
+        const scale = state.generatedScales[family];
+        Object.entries(scale).sort((a, b) => parseInt(a[0]) - parseInt(b[0])).forEach(([token, color]) => {
+          css += `  --color-${cssName}-${token}: ${toOKLCH(color)};\n`;
+        });
+
+        css += '\n';
+      });
+
+      // Generate dynamic status colors based on palette tone
+      css += '  /* Status Colors - Generated based on palette tone */\n';
+
+      // Get primary color to determine lightness/tone
+      const primaryBase = state.generatedScales['primary'] ? state.generatedScales['primary']['500'] : '#48839e';
+      const baseColor = chroma(primaryBase);
+      const [baseL] = baseColor.hsl();
+
+      // Adjust saturation/lightness based on palette tone
+      const isLight = baseL > 0.6;
+      const satAdjust = isLight ? 0.8 : 1.0;
+      const lightAdjust = isLight ? 0.95 : 1.0;
+
+      // Success (Green) - hue around 140-150
+      css += `  --color-Success-100: ${toOKLCH(chroma.hsl(145, 0.3 * satAdjust, 0.92 * lightAdjust).hex())};\n`;
+      css += `  --color-Success-200: ${toOKLCH(chroma.hsl(145, 0.5 * satAdjust, 0.80 * lightAdjust).hex())};\n`;
+      css += `  --color-Success-500: ${toOKLCH(chroma.hsl(145, 0.6 * satAdjust, 0.50 * lightAdjust).hex())};\n`;
+
+      // Warning (Yellow/Orange) - hue around 40-50
+      css += `  --color-Warning-100: ${toOKLCH(chroma.hsl(45, 0.4 * satAdjust, 0.92 * lightAdjust).hex())};\n`;
+      css += `  --color-Warning-200: ${toOKLCH(chroma.hsl(45, 0.6 * satAdjust, 0.80 * lightAdjust).hex())};\n`;
+      css += `  --color-Warning-500: ${toOKLCH(chroma.hsl(45, 0.8 * satAdjust, 0.60 * lightAdjust).hex())};\n`;
+
+      // Error (Red) - hue around 10-20
+      css += `  --color-Error-100: ${toOKLCH(chroma.hsl(15, 0.4 * satAdjust, 0.92 * lightAdjust).hex())};\n`;
+      css += `  --color-Error-200: ${toOKLCH(chroma.hsl(15, 0.6 * satAdjust, 0.80 * lightAdjust).hex())};\n`;
+      css += `  --color-Error-500: ${toOKLCH(chroma.hsl(15, 0.8 * satAdjust, 0.55 * lightAdjust).hex())};\n`;
+
+      // Info (Blue) - hue around 210-220
+      css += `  --color-Info-100: ${toOKLCH(chroma.hsl(215, 0.4 * satAdjust, 0.92 * lightAdjust).hex())};\n`;
+      css += `  --color-Info-200: ${toOKLCH(chroma.hsl(215, 0.6 * satAdjust, 0.80 * lightAdjust).hex())};\n`;
+      css += `  --color-Info-500: ${toOKLCH(chroma.hsl(215, 0.7 * satAdjust, 0.55 * lightAdjust).hex())};\n`;
+
+      css += '}\n';
+
+      document.getElementById('codeOutput').textContent = css;
+      return css;
+    }
+
+    // Export to CSS file
+    function exportToCSS() {
+      const css = generateCSSOutput();
+      const blob = new Blob([css], { type: 'text/css' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'my-theme.css';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Copy to clipboard
+    function copyToClipboard() {
+      const css = generateCSSOutput();
+      navigator.clipboard.writeText(css).then(() => {
+        alert('CSS copied to clipboard!');
+      });
+    }
+
+    // Utility
+    function capitalizeFirst(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // Choose Again - regenerate with current settings
+    function chooseAgain() {
+      const intent = document.getElementById('designIntent').value;
+
+      // Check if we have a palette to regenerate
+      if (Object.keys(state.generatedScales).length === 0) {
+        alert('Please generate a palette first!');
+        return;
+      }
+
+      // For random options, this will generate completely new random colors
+      // For presets, this will regenerate the same preset
+      // For "Complete Palette", this will use the current manual inputs
+      generateCompletePalette();
+
+      // Visual feedback
+      console.log(`Regenerated ${intent} palette`);
+
+      // Scroll to show the changes
+      setTimeout(() => {
+        document.getElementById('step4').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+
+    // Clear All - reset to initial state
+    function clearAll() {
+      if (!confirm('This will clear all your work. Are you sure?')) {
+        return;
+      }
+
+      // Reset color inputs to defaults
+      document.getElementById('primaryColorPicker').value = '#8FA68A';
+      document.getElementById('primaryColorHex').value = '#8FA68A';
+      document.getElementById('secondaryColorPicker').value = '#D4B98C';
+      document.getElementById('secondaryColorHex').value = '#D4B98C';
+
+      // Reset dropdown to default
+      document.getElementById('designIntent').value = 'all';
+
+      // Clear state
+      state.primaryColor = '#8FA68A';
+      state.baseColors = {};
+      state.generatedScales = {};
+      state.finalAssignments = {};
+
+      // Clear UI
+      document.getElementById('theoryOptions').innerHTML = '<div class="empty-state">Click "Generate Variations"</div>';
+      document.getElementById('scalesContainer').innerHTML = '<div class="empty-state">Select base colors and click "Generate Color Scales"</div>';
+      document.getElementById('codeOutput').textContent = '/* Your theme CSS will appear here */';
+
+      // Reset base slots
+      initializeBaseSlots();
+
+      // Disable generate button
+      document.getElementById('generateScalesBtn').disabled = true;
+
+      console.log('All cleared - ready to start fresh!');
+    }
+
+    // Open Live Demo Page
+    function openLiveDemo() {
+      const a = state.finalAssignments;
+      if (Object.keys(a).length === 0) {
+        alert('Please generate a palette first!');
+        return;
+      }
+
+      const getColor = (key) => a[key]?.color || '#888888';
+
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Theme Demo - Walking with a Smile</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: ${getColor('bg-default')};
+      color: ${getColor('text-default')};
+      line-height: 1.6;
+    }
+
+    /* Glassmorphic Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: ${getColor('primary-default')};
+    }
+
+    .navbar-nav {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .navbar-nav a {
+      text-decoration: none;
+      color: ${getColor('text-dark')};
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .navbar-nav a:hover {
+      color: ${getColor('primary-hover')};
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, ${getColor('primary-default')} 0%, ${getColor('secondary-default')} 100%);
+      color: white;
+      padding: 8rem 2rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      margin-bottom: 2rem;
+      opacity: 0.95;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-cta {
+      display: inline-block;
+      background: white;
+      color: ${getColor('primary-default')};
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: ${getColor('text-emphasis')};
+      text-align: center;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: ${getColor('text-default')};
+      margin-bottom: 3rem;
+      font-size: 1.1rem;
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .card {
+      background: ${getColor('bg-light-1')};
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-icon {
+      width: 60px;
+      height: 60px;
+      background: ${getColor('accent1-default')};
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card:nth-child(2) .card-icon {
+      background: ${getColor('accent2-default')};
+    }
+
+    .card:nth-child(3) .card-icon {
+      background: ${getColor('accent3-default')};
+    }
+
+    .card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: ${getColor('text-emphasis')};
+    }
+
+    .card p {
+      color: ${getColor('text-default')};
+      line-height: 1.8;
+    }
+
+    /* Dark Section */
+    .dark-section {
+      background: ${getColor('bg-dark-1')};
+      color: ${getColor('text-light')};
+      padding: 6rem 2rem;
+    }
+
+    .dark-section .section-title {
+      color: ${getColor('text-light')};
+    }
+
+    .dark-section .section-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .feature-item {
+      text-align: center;
+      padding: 2rem;
+      background: ${getColor('bg-dark-2')};
+      border-radius: 12px;
+    }
+
+    .feature-item h4 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: ${getColor('text-light')};
+    }
+
+    .feature-item p {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Light Section */
+    .light-section {
+      background: ${getColor('bg-light-2')};
+      padding: 6rem 2rem;
+    }
+
+    /* CTA Section */
+    .cta-section {
+      background: ${getColor('secondary-default')};
+      padding: 5rem 2rem;
+      text-align: center;
+      color: white;
+    }
+
+    .cta-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .cta-section p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: white;
+      color: ${getColor('secondary-default')};
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 0.3s;
+    }
+
+    .cta-button:hover {
+      transform: scale(1.05);
+    }
+
+    /* Footer */
+    .footer {
+      background: ${getColor('bg-dark-1')};
+      color: ${getColor('text-light')};
+      padding: 3rem 2rem 2rem;
+    }
+
+    .footer-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 3rem;
+      margin-bottom: 2rem;
+    }
+
+    .footer-section h4 {
+      margin-bottom: 1rem;
+      color: ${getColor('primary-default')};
+    }
+
+    .footer-section ul {
+      list-style: none;
+    }
+
+    .footer-section ul li {
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-section a {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-section a:hover {
+      color: ${getColor('primary-hover')};
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <!-- Glassmorphic Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">Walking with a Smile</div>
+    <ul class="navbar-nav">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Transform Your Journey</h1>
+    <p>Experience the power of thoughtful design and meaningful interactions that resonate with your audience</p>
+    <a href="#services" class="hero-cta">Get Started</a>
+  </section>
+
+  <!-- Cards Section -->
+  <section class="container" id="services">
+    <h2 class="section-title">Our Services</h2>
+    <p class="section-subtitle">Comprehensive solutions tailored to your needs</p>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🎨</div>
+        <h3>Design Excellence</h3>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">💻</div>
+        <h3>Development</h3>
+        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🚀</div>
+        <h3>Launch Support</h3>
+        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dark Section -->
+  <section class="dark-section" id="about">
+    <h2 class="section-title">Why Choose Us</h2>
+    <p class="section-subtitle">Excellence in every detail</p>
+
+    <div class="feature-list">
+      <div class="feature-item">
+        <h4>Expert Team</h4>
+        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      </div>
+
+      <div class="feature-item">
+        <h4>Proven Results</h4>
+        <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+      </div>
+
+      <div class="feature-item">
+        <h4>24/7 Support</h4>
+        <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores.</p>
+      </div>
+
+      <div class="feature-item">
+        <h4>Innovation</h4>
+        <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Light Section -->
+  <section class="light-section">
+    <div class="container">
+      <h2 class="section-title">Our Approach</h2>
+      <p class="section-subtitle">Methodology that delivers results</p>
+
+      <p style="max-width: 800px; margin: 0 auto; text-align: center; font-size: 1.1rem; line-height: 1.8;">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section" id="contact">
+    <h2>Ready to Get Started?</h2>
+    <p>Join hundreds of satisfied clients who transformed their vision into reality</p>
+    <a href="#" class="cta-button">Contact Us Today</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-section">
+        <h4>About Us</h4>
+        <p>Walking with a Smile provides exceptional design and development services to help your business thrive.</p>
+      </div>
+
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#">Web Design</a></li>
+          <li><a href="#">Development</a></li>
+          <li><a href="#">Consulting</a></li>
+          <li><a href="#">Support</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Contact</h4>
+        <ul>
+          <li>Email: hello@example.com</li>
+          <li>Phone: (555) 123-4567</li>
+          <li>Address: 123 Main St</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 Walking with a Smile. All rights reserved. | Generated with Interactive Palette Builder</p>
+    </div>
+  </footer>
+</body>
+</html>`;
+
+      // Open in new window
+      const newWindow = window.open('', '_blank');
+      newWindow.document.write(html);
+      newWindow.document.close();
+    }
+  </script>
+</body>
+</html>

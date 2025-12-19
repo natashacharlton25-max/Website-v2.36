@@ -1,0 +1,99 @@
+---
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+
+// Example service data - in production, fetch from database/API
+export async function getStaticPaths() {
+  const services = [
+    {
+      slug: 'consultation',
+      title: 'Strategy Consultation',
+      category: 'Consulting',
+      tagline: 'Get expert guidance for your business goals',
+      description: 'Our strategy consultation service helps you identify opportunities, overcome challenges, and create a roadmap for success.',
+      price: '$299',
+      duration: '90 minutes',
+      features: [
+        'One-on-one session with expert consultant',
+        'Comprehensive business analysis',
+        'Actionable strategy recommendations',
+        'Follow-up email summary',
+        '30-day email support'
+      ],
+      benefits: [
+        'Gain clarity on your business direction',
+        'Identify untapped growth opportunities',
+        'Develop a concrete action plan',
+        'Make confident strategic decisions'
+      ],
+      process: [
+        {
+          step: 1,
+          title: 'Discovery Call',
+          description: 'We start with a brief call to understand your needs and objectives'
+        },
+        {
+          step: 2,
+          title: 'Research & Analysis',
+          description: 'Our team conducts thorough research and prepares for your session'
+        },
+        {
+          step: 3,
+          title: 'Consultation Session',
+          description: 'Deep dive strategy session with actionable insights and recommendations'
+        },
+        {
+          step: 4,
+          title: 'Follow-up Support',
+          description: 'Receive summary report and 30-day email support'
+        }
+      ],
+      faqs: [
+        {
+          question: 'What should I prepare before the consultation?',
+          answer: 'Please have your business goals, current challenges, and any relevant data ready to discuss. We\'ll send you a preparation guide after booking.'
+        },
+        {
+          question: 'Can I record the session?',
+          answer: 'Yes, you\'re welcome to record the session for your personal use. We also provide a written summary.'
+        },
+        {
+          question: 'What if I need more time?',
+          answer: 'You can book additional consultation sessions at a discounted rate. We\'ll discuss your needs during the first session.'
+        }
+      ],
+      bookingUrl: '/booking'
+    }
+  ];
+
+  return services.map(service => ({
+    params: { slug: service.slug },
+    props: { service }
+  }));
+}
+
+const { service } = Astro.props;
+
+// Related services
+const relatedServices = [
+  {
+    title: 'Brand Development',
+    slug: 'brand-development',
+    category: 'Branding',
+    tagline: 'Build a memorable brand identity'
+  },
+  {
+    title: 'Digital Marketing',
+    slug: 'digital-marketing',
+    category: 'Marketing',
+    tagline: 'Grow your online presence'
+  },
+  {
+    title: 'Content Creation',
+    slug: 'content-creation',
+    category: 'Content',
+    tagline: 'Engage your audience with quality content'
+  }
+];
+---
+
+<ServiceLayout service={service} relatedServices={relatedServices} />

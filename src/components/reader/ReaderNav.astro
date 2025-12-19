@@ -1,0 +1,1008 @@
+---
+import type { ReaderNavSection } from '../../types/reader';
+
+interface Props {
+  sections: ReaderNavSection[];
+  position?:
+    | 'top-left'
+    | 'top-center'
+    | 'top-right'
+    | 'middle-left'
+    | 'middle-center'
+    | 'middle-right'
+    | 'bottom-left'
+    | 'bottom-center'
+    | 'bottom-right';
+  variant?: 'minimal' | 'detailed';
+  background?: 'dark' | 'light' | 'glass';
+  foreground?: 'light' | 'dark';
+}
+
+const {
+  sections,
+  position = 'top-left',
+  variant = 'detailed',
+  background = 'glass',
+  foreground = 'light',
+} = Astro.props;
+---
+
+<nav
+  class={`reader-nav reader-nav--${position} reader-nav--${variant} reader-nav--bg-${background} reader-nav--fg-${foreground}`}
+  data-reader-nav
+  aria-label="Reader navigation"
+>
+  <div class="reader-nav-container">
+    {/* Prev/Next Navigation Buttons */}
+    <div class="nav-arrows">
+      <button
+        class="nav-arrow nav-arrow--prev"
+        data-nav-prev
+        aria-label="Previous section"
+        disabled
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        <span>Prev</span>
+      </button>
+      <button
+        class="nav-arrow nav-arrow--next"
+        data-nav-next
+        aria-label="Next section"
+      >
+        <span>Next</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 6 15 12 9 18"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    {/* Top row: Circle + Current Section */}
+    <div class="nav-header">
+      <!-- Progress Circle -->
+      <div class="progress-circle-wrapper" data-progress-wrapper>
+        <svg
+          class="progress-circle"
+          width="60"
+          height="60"
+          viewBox="0 0 60 60"
+          aria-hidden="true"
+        >
+          <!-- Background circle -->
+          <circle
+            cx="30"
+            cy="30"
+            r="27"
+            class="progress-bg"
+            stroke="var(--color-Neutral-300)"
+            stroke-width="3"
+            fill="none"
+          />
+          <!-- Progress circle -->
+          <circle
+            cx="30"
+            cy="30"
+            r="27"
+            class="progress-bar"
+            stroke="var(--color-Primary-500)"
+            stroke-width="3"
+            fill="none"
+            stroke-linecap="round"
+            data-progress-circle
+          />
+        </svg>
+
+        <!-- Percentage display -->
+        <div class="progress-percentage" aria-live="polite" aria-atomic="true">
+          <span data-percentage>0</span>%
+        </div>
+      </div>
+
+      {
+        variant === 'detailed' && (
+          <div class="reader-nav-content">
+            <!-- Current section title with dropdown toggle -->
+            <button
+              class="nav-toggle"
+              data-nav-toggle
+              aria-expanded="false"
+              aria-controls="section-dropdown"
+              aria-label="Toggle section menu"
+            >
+              <span class="current-section-title" data-current-title>
+                {sections[0]?.title || 'Introduction'}
+              </span>
+              <svg
+                class="toggle-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 6L8 10L12 6"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        )
+      }
+    </div>
+
+    {/* Expandable dropdown list */}
+    {
+      variant === 'detailed' && (
+        <div
+          class="section-dropdown"
+          id="section-dropdown"
+          data-dropdown
+          role="menu"
+        >
+          <ul class="section-list">
+            {sections.map((section, index) => (
+              <li role="none">
+                <button
+                  class="section-item"
+                  data-section-nav={section.id}
+                  data-section-index={index}
+                  role="menuitem"
+                  aria-label={`Navigate to ${section.title}`}
+                >
+                  <span class="section-number">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span class="section-name">{section.title}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+  </div>
+</nav>
+
+<style>
+  /* ===== BASE POSITIONING ===== */
+  .reader-nav {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+  }
+
+  .reader-nav-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    pointer-events: auto;
+  }
+
+  /* Header row: Circle + Current Section */
+  .nav-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  /* ===== PREV/NEXT ARROWS ===== */
+  .nav-arrows {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-sm);
+  }
+
+  .nav-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: transparent;
+    border: none;
+    border-radius: var(--border-radius-full);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+    opacity: 0.9;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+  }
+
+  .nav-arrow:hover:not(:disabled) {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+
+  .nav-arrow:focus-visible {
+    outline: 2px solid var(--color-Primary-500);
+    outline-offset: 2px;
+  }
+
+  .nav-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .nav-arrow svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Foreground variants for arrows */
+  .reader-nav--fg-light .nav-arrow {
+    color: var(--color-Text-50);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.3), 0 0 4px rgba(255, 255, 255, 0.2);
+  }
+
+  .reader-nav--fg-light .nav-arrow:hover:not(:disabled) {
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.5), 0 0 6px rgba(255, 255, 255, 0.3);
+  }
+
+  .reader-nav--fg-dark .nav-arrow {
+    color: var(--color-Text-900);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .reader-nav--fg-dark .nav-arrow:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  /* ===== BACKGROUND VARIANTS ===== */
+
+  /* Dark background */
+  .reader-nav--bg-dark .reader-nav-container {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Light background */
+  .reader-nav--bg-light .reader-nav-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--color-Neutral-200);
+  }
+
+  /* Glass background (glassmorphism) */
+  .reader-nav--bg-glass .reader-nav-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.15);
+  }
+
+  /* ===== FOREGROUND VARIANTS (Text & Visual Colors) ===== */
+
+  /* Light foreground (for dark backgrounds) */
+  .reader-nav--fg-light .reader-nav-container {
+    color: var(--color-Text-50);
+  }
+
+  .reader-nav--fg-light .progress-bg {
+    stroke: rgba(255, 255, 255, 0.3);
+  }
+
+  .reader-nav--fg-light .progress-bar {
+    stroke: var(--color-Primary-400);
+  }
+
+  .reader-nav--fg-light .progress-percentage {
+    color: var(--color-Text-50);
+  }
+
+  .reader-nav--fg-light .current-section-title {
+    color: var(--color-Text-50);
+  }
+
+  .reader-nav--fg-light .section-name {
+    color: var(--color-Text-50);
+  }
+
+  .reader-nav--fg-light .section-number {
+    color: var(--color-Primary-400);
+  }
+
+  .reader-nav--fg-light .toggle-icon {
+    color: var(--color-Text-300);
+  }
+
+  .reader-nav--fg-light .nav-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .reader-nav--fg-light .section-item:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .reader-nav--fg-light .section-item.is-active {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Dark foreground (for light backgrounds) */
+  .reader-nav--fg-dark .reader-nav-container {
+    color: var(--color-Text-900);
+  }
+
+  .reader-nav--fg-dark .progress-bg {
+    stroke: var(--color-Neutral-200);
+  }
+
+  .reader-nav--fg-dark .progress-bar {
+    stroke: var(--color-Primary-600);
+  }
+
+  .reader-nav--fg-dark .progress-percentage {
+    color: var(--color-Text-900);
+  }
+
+  .reader-nav--fg-dark .current-section-title {
+    color: var(--color-Text-900);
+  }
+
+  .reader-nav--fg-dark .section-name {
+    color: var(--color-Text-900);
+  }
+
+  .reader-nav--fg-dark .section-number {
+    color: var(--color-Primary-600);
+  }
+
+  .reader-nav--fg-dark .toggle-icon {
+    color: var(--color-Text-500);
+  }
+
+  .reader-nav--fg-dark .nav-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .reader-nav--fg-dark .section-item:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .reader-nav--fg-dark .section-item.is-active {
+    background-color: rgba(0, 0, 0, 0.12);
+  }
+
+  /* ===== POSITION VARIANTS (9 combinations) ===== */
+  .reader-nav--top-left {
+    top: 25vh;
+    left: var(--space-xl);
+  }
+
+  .reader-nav--top-center {
+    top: 25vh;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .reader-nav--top-right {
+    top: 25vh;
+    right: var(--space-xl);
+  }
+
+  .reader-nav--middle-left {
+    top: 50%;
+    left: var(--space-xl);
+    transform: translateY(-50%);
+  }
+
+  .reader-nav--middle-center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .reader-nav--middle-right {
+    top: 50%;
+    right: var(--space-xl);
+    transform: translateY(-50%);
+  }
+
+  .reader-nav--bottom-left {
+    bottom: var(--space-xl);
+    left: var(--space-xl);
+  }
+
+  .reader-nav--bottom-center {
+    bottom: var(--space-xl);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .reader-nav--bottom-right {
+    bottom: var(--space-xl);
+    right: var(--space-xl);
+  }
+
+  /* ===== PROGRESS CIRCLE ===== */
+  .progress-circle-wrapper {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+  }
+
+  .progress-circle {
+    transform: rotate(-90deg); /* Start from top */
+    width: 60px;
+    height: 60px;
+  }
+
+  .progress-bg {
+    opacity: 0.2;
+  }
+
+  .progress-bar {
+    stroke-dasharray: 169.64; /* 2 * π * 27 (smaller radius) */
+    stroke-dashoffset: 169.64; /* Start at 0% */
+    transition: stroke-dashoffset 0.3s ease-out;
+  }
+
+  .progress-percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    color: var(--color-Text-50);
+    text-align: center;
+    line-height: 1;
+  }
+
+  /* ===== NAVIGATION CONTENT ===== */
+  .reader-nav-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .nav-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-radius: var(--border-radius-md);
+    color: var(--color-Text-50);
+  }
+
+  .nav-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-toggle:focus-visible {
+    outline: 2px solid var(--color-Primary-500);
+    outline-offset: 2px;
+  }
+
+  .current-section-title {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-50);
+    white-space: nowrap;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .toggle-icon {
+    flex-shrink: 0;
+    color: var(--color-Text-300);
+    transition: transform 0.3s ease;
+  }
+
+  .nav-toggle[aria-expanded='true'] .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  /* ===== DROPDOWN MENU ===== */
+  .section-dropdown {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease, padding-top 0.3s ease, border-top 0.3s ease;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 1px solid transparent;
+  }
+
+  .section-dropdown.is-open {
+    max-height: 60vh;
+    overflow-y: auto;
+    opacity: 1;
+    margin-top: var(--space-sm);
+    padding-top: var(--space-sm);
+  }
+
+  /* Separator border colors */
+  .reader-nav--fg-light .section-dropdown.is-open {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .reader-nav--fg-dark .section-dropdown.is-open {
+    border-top-color: rgba(0, 0, 0, 0.1);
+  }
+
+  /* Hide scrollbar but keep scrolling functionality */
+  .section-dropdown {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .section-dropdown::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
+  }
+
+  .section-list {
+    list-style: none;
+    padding: 0 var(--space-sm) var(--space-sm);
+    margin: 0;
+  }
+
+  .section-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    padding: var(--space-md);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--border-radius-md);
+    transition: background-color 0.2s ease;
+    text-align: left;
+  }
+
+  .section-item:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .section-item:focus-visible {
+    outline: 2px solid var(--color-Primary-500);
+    outline-offset: -2px;
+  }
+
+  .section-item.is-active {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .section-number {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    color: var(--color-Primary-400);
+    flex-shrink: 0;
+  }
+
+  .section-name {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    color: var(--color-Text-50);
+  }
+
+  /* ===== MINIMAL VARIANT ===== */
+  .reader-nav--minimal .reader-nav-content {
+    display: none;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .reader-nav--top-left,
+    .reader-nav--top-center,
+    .reader-nav--top-right {
+      top: var(--space-md);
+    }
+
+    .reader-nav--bottom-left,
+    .reader-nav--bottom-center,
+    .reader-nav--bottom-right {
+      bottom: var(--space-md);
+    }
+
+    .reader-nav--top-left,
+    .reader-nav--middle-left,
+    .reader-nav--bottom-left {
+      left: var(--space-md);
+    }
+
+    .reader-nav--top-right,
+    .reader-nav--middle-right,
+    .reader-nav--bottom-right {
+      right: var(--space-md);
+    }
+
+    .progress-circle-wrapper {
+      width: 60px;
+      height: 60px;
+    }
+
+    .progress-circle {
+      width: 60px;
+      height: 60px;
+    }
+
+    .current-section-title {
+      max-width: 120px;
+      font-size: var(--text-xs);
+    }
+
+    .section-dropdown {
+      min-width: 240px;
+    }
+
+    .nav-arrows {
+      gap: var(--space-md);
+    }
+
+    .nav-arrow {
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 10px;
+    }
+
+    .nav-arrow svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  /* ===== ACCESSIBILITY: REDUCED MOTION ===== */
+  @media (prefers-reduced-motion: reduce) {
+    .progress-bar,
+    .section-dropdown,
+    .toggle-icon,
+    .nav-toggle,
+    .section-item,
+    .nav-arrow {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  class ReaderNav {
+    nav: HTMLElement;
+    progressCircle: SVGCircleElement;
+    progressText: HTMLElement;
+    currentTitleEl: HTMLElement | null;
+    toggleBtn: HTMLElement | null;
+    dropdown: HTMLElement | null;
+    sectionButtons: NodeListOf<HTMLElement>;
+    prevBtn: HTMLButtonElement | null;
+    nextBtn: HTMLButtonElement | null;
+    isOpen = false;
+    circumference = 169.64; // 2 * π * 27
+    sections: Array<{ id: string; title: string; element: HTMLElement | null }> = [];
+    currentIndex = 0;
+
+    constructor(nav: HTMLElement) {
+      this.nav = nav;
+      this.progressCircle = nav.querySelector('[data-progress-circle]') as SVGCircleElement;
+      this.progressText = nav.querySelector('[data-percentage]') as HTMLElement;
+      this.currentTitleEl = nav.querySelector('[data-current-title]');
+      this.toggleBtn = nav.querySelector('[data-nav-toggle]');
+      this.dropdown = nav.querySelector('[data-dropdown]');
+      this.sectionButtons = nav.querySelectorAll('[data-section-nav]');
+      this.prevBtn = nav.querySelector('[data-nav-prev]');
+      this.nextBtn = nav.querySelector('[data-nav-next]');
+
+      this.init();
+    }
+
+    init(): void {
+      // Build sections array
+      this.sectionButtons.forEach((btn) => {
+        const id = btn.dataset.sectionNav;
+        const title = btn.querySelector('.section-name')?.textContent || '';
+        const element = id ? document.getElementById(`section-${id}`) : null;
+
+        if (id) {
+          this.sections.push({ id, title, element });
+        }
+      });
+
+      // Set initial progress
+      this.updateProgress(0);
+
+      // Initialize prev/next button states
+      this.updateNavButtonStates();
+
+      // Setup glide in/out animation
+      this.setupGlideAnimation();
+
+      // Toggle dropdown
+      this.toggleBtn?.addEventListener('click', () => this.toggleDropdown());
+
+      // Section navigation
+      this.sectionButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const sectionId = btn.dataset.sectionNav;
+          if (sectionId) {
+            this.navigateToSection(sectionId);
+          }
+        });
+      });
+
+      // Prev/Next button navigation
+      this.prevBtn?.addEventListener('click', () => this.goToPrevSection());
+      this.nextBtn?.addEventListener('click', () => this.goToNextSection());
+
+      // Listen to reader progress events
+      window.addEventListener('reader:progress', ((e: CustomEvent) => {
+        const { index, totalProgress } = e.detail;
+
+        // Display RAW progress (0-100%)
+        this.updateProgress(totalProgress);
+
+        // Use the index directly from Reader (no offset)
+        this.updateActiveSection(index);
+      }) as EventListener);
+
+      // Close dropdown on outside click
+      document.addEventListener('click', (e) => {
+        if (!this.nav.contains(e.target as Node)) {
+          this.closeDropdown();
+        }
+      });
+
+      // Keyboard navigation
+      this.nav.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this.closeDropdown();
+        }
+      });
+    }
+
+    updateProgress(percentage: number): void {
+      const offset = this.circumference - (percentage / 100) * this.circumference;
+      this.progressCircle.style.strokeDashoffset = offset.toString();
+      this.progressText.textContent = Math.round(percentage).toString();
+    }
+
+    updateActiveSection(index: number): void {
+      this.currentIndex = index;
+      const section = this.sections[index];
+
+      if (section && this.currentTitleEl) {
+        this.currentTitleEl.textContent = section.title;
+      }
+
+      // Update active states in dropdown
+      this.sectionButtons.forEach((btn, i) => {
+        if (i === index) {
+          btn.classList.add('is-active');
+        } else {
+          btn.classList.remove('is-active');
+        }
+      });
+
+      // Update prev/next button states
+      this.updateNavButtonStates();
+    }
+
+    updateNavButtonStates(): void {
+      const isFirst = this.currentIndex === 0;
+      const isLast = this.currentIndex === this.sections.length - 1;
+
+      if (this.prevBtn) {
+        this.prevBtn.disabled = isFirst;
+      }
+      if (this.nextBtn) {
+        this.nextBtn.disabled = isLast;
+      }
+    }
+
+    goToPrevSection(): void {
+      if (this.currentIndex > 0) {
+        const prevSection = this.sections[this.currentIndex - 1];
+        if (prevSection) {
+          this.navigateToSection(prevSection.id);
+        }
+      }
+    }
+
+    goToNextSection(): void {
+      if (this.currentIndex < this.sections.length - 1) {
+        const nextSection = this.sections[this.currentIndex + 1];
+        if (nextSection) {
+          this.navigateToSection(nextSection.id);
+        }
+      }
+    }
+
+    navigateToSection(sectionId: string): void {
+      // Find the section index
+      const sectionIndex = this.sections.findIndex(s => s.id === sectionId);
+
+      if (sectionIndex === -1) {
+        this.closeDropdown();
+        return;
+      }
+
+      // Find the Reader wrapper
+      const readerWrapper = document.querySelector('[data-reader-wrapper]') as HTMLElement;
+      if (!readerWrapper) {
+        this.closeDropdown();
+        return;
+      }
+
+      // Calculate scroll position to activate this section
+      // Reader uses Math.round(progress * (sections.length - 1)) to determine active section
+      // So to activate section i, we need progress = i / (sections.length - 1)
+      const totalSections = this.sections.length;
+      const targetProgress = totalSections > 1 ? sectionIndex / (totalSections - 1) : 0;
+
+      // Total scroll distance for the Reader
+      const totalScrollHeight = totalSections * window.innerHeight * 1.5;
+
+      // Calculate scroll position
+      const wrapperTop = readerWrapper.offsetTop;
+      const targetScrollPosition = wrapperTop + (targetProgress * totalScrollHeight);
+
+      // Smooth scroll to calculated position
+      window.scrollTo({
+        top: targetScrollPosition,
+        behavior: 'smooth'
+      });
+
+      this.closeDropdown();
+    }
+
+    toggleDropdown(): void {
+      if (this.isOpen) {
+        this.closeDropdown();
+      } else {
+        this.openDropdown();
+      }
+    }
+
+    openDropdown(): void {
+      this.isOpen = true;
+      this.dropdown?.classList.add('is-open');
+      this.toggleBtn?.setAttribute('aria-expanded', 'true');
+
+      // Focus first menu item
+      const firstItem = this.dropdown?.querySelector('.section-item') as HTMLElement;
+      firstItem?.focus();
+    }
+
+    closeDropdown(): void {
+      this.isOpen = false;
+      this.dropdown?.classList.remove('is-open');
+      this.toggleBtn?.setAttribute('aria-expanded', 'false');
+    }
+
+    setupGlideAnimation(): void {
+      // Determine glide direction based on position class
+      const position = Array.from(this.nav.classList)
+        .find((cls) => cls.startsWith('reader-nav--'))
+        ?.replace('reader-nav--', '');
+
+      // Set initial hidden state based on position (horizontal only)
+      let initialX = 0;
+      let initialY = 0; // No vertical glide
+
+      if (position?.includes('left')) {
+        initialX = -100; // Glide in from left
+      } else if (position?.includes('right')) {
+        initialX = 100; // Glide in from right
+      }
+      // Center positions don't glide horizontally
+
+      // Animate the container to avoid transform conflicts with fixed positioning
+      const container = this.nav.querySelector('.reader-nav-container') as HTMLElement;
+      if (!container) return;
+
+      // Set initial hidden state immediately
+      gsap.set(container, {
+        opacity: 0,
+        x: initialX,
+        y: initialY,
+      });
+
+      // Wait for Reader wrapper to be in DOM
+      const waitForWrapper = () => {
+        const readerWrapper = document.querySelector('[data-reader-wrapper]');
+        if (!readerWrapper) {
+          setTimeout(waitForWrapper, 100);
+          return;
+        }
+
+        // Create ScrollTrigger for glide in/out
+        const glideScrollTrigger = ScrollTrigger.create({
+          trigger: readerWrapper,
+          start: 'top 80%',
+          end: 'bottom 20%',
+          markers: false,
+          onEnter: () => {
+            gsap.to(container, {
+              opacity: 1,
+              x: 0,
+              y: 0,
+              duration: 0.8,
+              ease: 'power3.out',
+            });
+          },
+          onLeave: () => {
+            gsap.to(container, {
+              opacity: 0,
+              x: initialX,
+              y: initialY,
+              duration: 0.6,
+              ease: 'power2.in',
+            });
+          },
+          onEnterBack: () => {
+            gsap.to(container, {
+              opacity: 1,
+              x: 0,
+              y: 0,
+              duration: 0.8,
+              ease: 'power3.out',
+            });
+          },
+          onLeaveBack: () => {
+            gsap.to(container, {
+              opacity: 0,
+              x: initialX,
+              y: initialY,
+              duration: 0.6,
+              ease: 'power2.in',
+            });
+          },
+        });
+
+        // Check initial state - if we're already in the trigger zone, show the nav
+        // This handles page refreshes mid-scroll
+        if (glideScrollTrigger.isActive) {
+          gsap.set(container, {
+            opacity: 1,
+            x: 0,
+            y: 0,
+          });
+        }
+      };
+
+      waitForWrapper();
+    }
+  }
+
+  function initReaderNav(): void {
+    const navs = document.querySelectorAll('[data-reader-nav]');
+    navs.forEach((nav) => new ReaderNav(nav as HTMLElement));
+  }
+
+  // Initialize on load and page transitions
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initReaderNav);
+  } else {
+    initReaderNav();
+  }
+
+  document.addEventListener('astro:page-load', initReaderNav);
+</script>

@@ -1,0 +1,522 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { projects } from '../data/projects';
+import FooterWithMask from '../components/sections/FooterWithMask.astro';
+import UnifiedButton from '../components/Buttons/UnifiedButton.astro';
+---
+
+<BaseLayout
+  title="Projects | Walking With A Smile"
+  description="Free curated resource collections. Each project brings together carefully selected resources for a specific purpose, available to everyone."
+  hideFooter={true}
+>
+  <!-- Fixed background layer for scroll-triggered color changes -->
+  <div class="scroll-bg-layer" id="scroll-bg-layer"></div>
+
+  <!-- Hero Section -->
+  <section class="projects-hero" data-scroll-bg="var(--color-Background-100)">
+    <div class="container container-6xl">
+      <div class="hero-content">
+        <h1 class="page-title">Projects</h1>
+        <p class="page-subtitle">
+          Sometimes what you need isn't just one resource. It's a collection that works together. Each project here is a carefully curated set of tools for a specific purpose: wellbeing, sensory needs, creative expression.
+        </p>
+        <p class="page-note">
+          Everything here is free. Take what helps. Leave the rest.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Sections -->
+  {projects.map((project, index) => {
+    const scrollBg = index === 0 ? 'var(--color-AccentOne-300)' : index === 1 ? 'var(--color-AccentTwo-400)' : 'var(--color-AccentThree-300)';
+    return (
+      <section
+        class={`project-section ${index % 2 === 0 ? 'image-left' : 'image-right'}`}
+        data-scroll-bg={scrollBg}
+      >
+        <div class="container container-7xl">
+          <div class="project-wrapper">
+            <div class="project-image-container">
+              <img src={project.image} alt={project.title} loading="lazy" />
+            </div>
+            <div class="project-text-content">
+              <span class="project-category">{project.category}</span>
+              <h2 class="project-title">{project.title}</h2>
+              <p class="project-description">{project.description}</p>
+              <div class="project-cta">
+                <UnifiedButton href={`/projects/${project.slug}`} variant="primary">
+                  View Project
+                </UnifiedButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  })}
+
+  <!-- Info Section -->
+  <section class="info-section" data-scroll-bg="var(--color-Background-100)">
+    <div class="container container-full">
+      <div class="info-content">
+        <h2 class="info-title">A note about these projects</h2>
+        <div class="info-text">
+          <p>
+            Each project is a curated collection: resources that work together for a specific purpose. We've put them together to save you time and energy.
+          </p>
+          <p>
+            You can download individual resources from each project, or add them all to your basket at once. Use what fits. Skip what doesn't.
+          </p>
+          <p>
+            If you're a professional (educator, therapist, practitioner), each project includes a separate section with guidance notes, implementation strategies, and evidence-based information.
+          </p>
+        </div>
+        <div class="info-cta">
+          <UnifiedButton href="/assets" variant="secondary">
+            Browse Individual Resources
+          </UnifiedButton>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <FooterWithMask
+    backgroundImage="/Footer/Footer Background.jpg"
+  />
+</BaseLayout>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Skip if a11y settings are active
+  const a11yClasses = [
+    'a11y-reduce-motion', 'a11y-text-only', 'a11y-theme-dark', 'a11y-theme-cream',
+    'a11y-theme-high-contrast', 'a11y-theme-protanopia', 'a11y-theme-deuteranopia',
+    'a11y-theme-tritanopia', 'a11y-theme-monochrome'
+  ];
+
+  // Convert any color (including OKLCH) to RGB
+  function toRGB(color: string): string {
+    const temp = document.createElement('div');
+    temp.style.backgroundColor = color;
+    temp.style.display = 'none';
+    document.body.appendChild(temp);
+    const computed = getComputedStyle(temp).backgroundColor;
+    document.body.removeChild(temp);
+    return computed;
+  }
+
+  // Resolve CSS variable to RGB color
+  function resolveColor(cssVar: string, fallback: string): string {
+    if (!cssVar) return fallback;
+    let rawColor = cssVar;
+    if (cssVar.startsWith('var(')) {
+      const varName = cssVar.match(/var\((.*?)\)/)?.[1];
+      if (varName) {
+        rawColor = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        if (!rawColor) return fallback;
+      }
+    }
+    return toRGB(rawColor);
+  }
+
+  function initScrollColors() {
+    // Skip if a11y settings active
+    if (a11yClasses.some(cls => document.body.classList.contains(cls))) return;
+
+    const bgLayer = document.getElementById('scroll-bg-layer');
+    if (!bgLayer) return;
+
+    const sections = document.querySelectorAll('[data-scroll-bg]');
+    if (sections.length === 0) return;
+
+    const fallbackColor = 'rgb(248, 245, 242)';
+    const initialColor = resolveColor('var(--color-Background-100)', fallbackColor);
+
+    // Set initial background
+    bgLayer.style.backgroundColor = initialColor;
+
+    // Build RGB color array
+    const sectionColors = Array.from(sections).map(section => ({
+      section,
+      color: resolveColor(section.getAttribute('data-scroll-bg') || '', initialColor)
+    }));
+
+    let currentColor = initialColor;
+
+    // Create ScrollTriggers for each section
+    sectionColors.forEach(({ section, color }, index) => {
+      const prevColor = index > 0 ? sectionColors[index - 1].color : initialColor;
+      const nextColor = index < sectionColors.length - 1 ? sectionColors[index + 1].color : initialColor;
+
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 60%',
+        end: 'bottom 40%',
+        onEnter: () => {
+          gsap.killTweensOf(bgLayer);
+          gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: color, duration: 0.5, ease: 'power2.out' });
+          currentColor = color;
+        },
+        onEnterBack: () => {
+          gsap.killTweensOf(bgLayer);
+          gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: color, duration: 0.5, ease: 'power2.out' });
+          currentColor = color;
+        },
+        onLeave: () => {
+          gsap.killTweensOf(bgLayer);
+          gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: nextColor, duration: 0.5, ease: 'power2.out' });
+          currentColor = nextColor;
+        },
+        onLeaveBack: () => {
+          gsap.killTweensOf(bgLayer);
+          gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: prevColor, duration: 0.5, ease: 'power2.out' });
+          currentColor = prevColor;
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollColors);
+  } else {
+    initScrollColors();
+  }
+</script>
+
+<style>
+  /* Fixed background layer for scroll-triggered colors */
+  .scroll-bg-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background-color: var(--color-Background-100);
+  }
+
+  /* Disable when a11y settings active */
+  :global(body[class*="a11y-"]) .scroll-bg-layer {
+    background-color: var(--bg, var(--color-Background-100)) !important;
+  }
+
+  /* Hero Section */
+  .projects-hero {
+    position: relative;
+    width: 100%;
+    padding-top: calc(100px + var(--space-3xl));
+    padding-bottom: var(--space-4xl);
+    background: transparent;
+  }
+
+  .hero-content {
+    text-align: left;
+    max-width: 800px;
+  }
+
+  .page-title {
+    font-family: var(--font-heading);
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: var(--font-extrabold);
+    color: var(--color-Text-700);
+    margin-bottom: var(--space-xl);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+
+  .page-subtitle {
+    font-family: var(--font-body);
+    font-size: var(--text-xl);
+    font-weight: var(--font-medium);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-lg);
+  }
+
+  .page-note {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+    color: var(--color-Text-500);
+  }
+
+  /* Projects Sections */
+  .project-section {
+    padding: var(--space-5xl) 0;
+    transition: opacity var(--transition-base);
+    background: transparent; /* Let body background show through for GSAP transitions */
+  }
+
+  .project-wrapper {
+    display: flex;
+    gap: var(--space-3xl);
+    align-items: center;
+  }
+
+  /* Image Left Layout */
+  .image-left .project-wrapper {
+    flex-direction: row;
+  }
+
+  /* Image Right Layout */
+  .image-right .project-wrapper {
+    flex-direction: row-reverse;
+  }
+
+  .project-image-container {
+    flex: 0 0 30%;
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.12));
+  }
+
+  .project-image-container img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .project-text-content {
+    flex: 1;
+  }
+
+  .image-left .project-text-content {
+    padding-left: var(--space-2xl);
+    text-align: left;
+  }
+
+  .image-right .project-text-content {
+    padding-right: var(--space-2xl);
+    text-align: right;
+  }
+
+  .project-category {
+    display: block;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-Primary-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-md);
+  }
+
+  .project-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-700);
+    margin-bottom: var(--space-lg);
+    line-height: 1.2;
+  }
+
+  .project-description {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 2vw, 1.125rem);
+    color: var(--color-Text-600);
+    line-height: 1.7;
+    margin-bottom: var(--space-xl);
+  }
+
+  .project-cta {
+    margin-top: var(--space-lg);
+  }
+
+  .image-right .project-cta {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* Info Section */
+  .info-section {
+    padding: var(--space-5xl) 0;
+    background: transparent;
+  }
+
+  .info-content {
+    text-align: left;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .info-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-700);
+    margin-bottom: var(--space-xl);
+  }
+
+  .info-text {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .info-text p {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--color-Text-600);
+    line-height: 1.8;
+    margin-bottom: var(--space-lg);
+  }
+
+  .info-text p:last-child {
+    margin-bottom: 0;
+  }
+
+  .info-cta {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .projects-hero {
+      padding-top: calc(80px + var(--space-2xl));
+      padding-bottom: var(--space-3xl);
+    }
+
+    .page-title {
+      font-size: clamp(2.5rem, 10vw, 3.5rem);
+    }
+
+    .page-subtitle {
+      font-size: var(--text-lg);
+    }
+
+    .page-note {
+      font-size: var(--text-base);
+    }
+
+    .project-wrapper {
+      flex-direction: column !important;
+      gap: var(--space-2xl);
+    }
+
+    .project-image-container {
+      flex: 0 0 auto;
+      width: 100%;
+    }
+
+    .image-left .project-text-content,
+    .image-right .project-text-content {
+      padding-left: 0;
+      padding-right: 0;
+      text-align: left;
+    }
+
+    .image-right .project-cta {
+      justify-content: flex-start;
+    }
+
+    .project-section {
+      padding: var(--space-4xl) 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .projects-hero {
+      padding-top: calc(80px + var(--space-xl));
+      padding-bottom: var(--space-2xl);
+    }
+
+    .page-title {
+      font-size: clamp(2rem, 12vw, 2.5rem);
+    }
+
+    .page-subtitle {
+      font-size: var(--text-base);
+    }
+
+    .page-note {
+      font-size: var(--text-sm);
+    }
+
+    .project-section {
+      padding: var(--space-3xl) 0;
+    }
+
+    .project-description {
+      margin-bottom: var(--space-lg);
+    }
+  }
+
+  /* Very small screens */
+  @media (max-width: 250px) {
+    .projects-hero {
+      padding-top: calc(70px + var(--space-lg));
+      padding-bottom: var(--space-xl);
+    }
+
+    .page-title {
+      font-size: var(--text-2xl);
+    }
+
+    .page-subtitle {
+      font-size: var(--text-sm);
+    }
+
+    .page-note {
+      font-size: var(--text-xs);
+    }
+
+    .project-section {
+      padding: var(--space-2xl) 0;
+    }
+
+    .project-title {
+      font-size: var(--text-xl);
+    }
+
+    .project-description {
+      font-size: var(--text-sm);
+    }
+
+    .info-title {
+      font-size: var(--text-xl);
+    }
+
+    .info-text p {
+      font-size: var(--text-sm);
+    }
+  }
+
+  /* Extra small screens */
+  @media (max-width: 210px) {
+    .projects-hero {
+      padding-top: calc(60px + var(--space-md));
+      padding-bottom: var(--space-lg);
+    }
+
+    .page-title {
+      font-size: var(--text-xl);
+    }
+
+    .page-subtitle,
+    .page-note {
+      font-size: var(--text-xs);
+    }
+
+    .project-title {
+      font-size: var(--text-lg);
+    }
+
+    .project-description {
+      font-size: var(--text-xs);
+    }
+
+    .info-title {
+      font-size: var(--text-lg);
+    }
+
+    .info-text p {
+      font-size: var(--text-xs);
+    }
+  }
+</style>

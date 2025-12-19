@@ -1,0 +1,53 @@
+/* ============================================
+   GLOW TOKENS - Shared glow effect for all buttons
+   ============================================ */
+
+/* Glow variant base styles */
+.btn-glow {
+  background-color: var(--btn-color-500, var(--color-Primary-500));
+  color: white;
+  position: relative;
+}
+
+.btn-glow:hover:not(:disabled) {
+  background: var(--btn-gradient-glow, var(--gradient-hero));
+  background-size: 200% 200%;
+  animation: glowloop 4s linear infinite;
+  color: white;
+}
+
+.btn-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--btn-gradient-glow, var(--gradient-hero));
+  background-size: 200% 200%;
+  opacity: 0;
+  z-index: -2;
+  transition: opacity .4s ease, filter .4s ease;
+  animation: glowloop 2s linear infinite;
+  pointer-events: none;
+}
+
+.btn-glow:hover:not(:disabled)::after {
+  opacity: 1;
+  filter: blur(clamp(16px, 3vw, 40px)) saturate(1.6) contrast(1.5);
+}
+
+@keyframes glowloop {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Accessibility - reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn-glow:hover:not(:disabled) {
+    animation: none;
+  }
+
+  .btn-glow::after {
+    animation: none;
+  }
+}

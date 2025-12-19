@@ -1,0 +1,404 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { projects } from '../../data/projects';
+import FooterWithMask from '../../components/sections/FooterWithMask.astro';
+import MasonryGrid from '../../components/ui/MasonryGrid.astro';
+
+// Export getStaticPaths for static site generation
+export async function getStaticPaths() {
+  return projects.map(project => ({
+    params: { slug: project.slug },
+    props: { project }
+  }));
+}
+
+const { project } = Astro.props;
+
+// Fallback if project not found
+if (!project) {
+  return Astro.redirect('/projects');
+}
+
+// Shuffle function for randomizing card order
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Select accent color based on project slug (each project gets a consistent accent color)
+const accentColors = ['AccentOne', 'AccentTwo', 'AccentThree', 'AccentFour', 'AccentFive'];
+const slugHash = project.slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+const selectedAccent = accentColors[slugHash % accentColors.length];
+
+// Monochrome color scheme generator - alternates shades to avoid same colors adjacent
+// Using full token range (100-800) for maximum variety
+const colorShades = [
+  { bg: `var(--color-${selectedAccent}-100)`, text: 'var(--color-Text-700)' },
+  { bg: `var(--color-${selectedAccent}-300)`, text: 'var(--color-Text-700)' },
+  { bg: `var(--color-${selectedAccent}-200)`, text: 'var(--color-Text-700)' },
+  { bg: `var(--color-${selectedAccent}-400)`, text: 'var(--color-Text-700)' },
+  { bg: `var(--color-${selectedAccent}-500)`, text: 'var(--color-Text-700)' },
+  { bg: `var(--color-${selectedAccent}-600)`, text: 'white' },
+  { bg: `var(--color-${selectedAccent}-700)`, text: 'white' },
+  { bg: `var(--color-${selectedAccent}-800)`, text: 'white' },
+];
+
+let colorIndex = 0;
+const getNextColor = () => {
+  const color = colorShades[colorIndex % colorShades.length];
+  colorIndex++;
+  return color;
+};
+
+// Top grid cards (title only, no breadcrumb)
+const titleColor = getNextColor();
+const topCards = [
+  {
+    type: 'breadcrumb' as const,
+    content: 'Home/Projects/' + project.title,
+    bgColor: 'var(--color-Neutral-700)',
+    textColor: 'white'
+  },
+  {
+    type: 'title' as const,
+    title: project.title,
+    bgColor: titleColor.bg,
+    textColor: titleColor.text
+  }
+];
+
+// Icon mapper function - matches tag names to appropriate icons (using Phosphor Duotone icons)
+const getIconForTag = (tag: string): string => {
+  const tagLower = tag.toLowerCase();
+
+  // Mindfulness & Meditation
+  if (tagLower.includes('mindful')) return 'ph:peace-duotone';
+  if (tagLower.includes('meditation')) return 'ph:flower-lotus-duotone';
+  if (tagLower.includes('breathing')) return 'ph:wind-duotone';
+
+  // Wellbeing & Health
+  if (tagLower.includes('wellbeing') || tagLower.includes('well-being')) return 'ph:heart-duotone';
+  if (tagLower.includes('health')) return 'ph:heartbeat-duotone';
+  if (tagLower.includes('wellness')) return 'ph:sparkle-duotone';
+
+  // Self-Care & Care
+  if (tagLower.includes('self-care') || tagLower.includes('selfcare')) return 'ph:hand-heart-duotone';
+  if (tagLower.includes('care')) return 'ph:hands-praying-duotone';
+
+  // Emotions
+  if (tagLower.includes('emotion')) return 'ph:smiley-duotone';
+  if (tagLower.includes('feeling')) return 'ph:heart-straight-duotone';
+  if (tagLower.includes('calm')) return 'ph:moon-stars-duotone';
+  if (tagLower.includes('stress')) return 'ph:brain-duotone';
+  if (tagLower.includes('anxiety')) return 'ph:butterfly-duotone';
+
+  // Activities
+  if (tagLower.includes('sensory')) return 'ph:hand-palm-duotone';
+  if (tagLower.includes('creative')) return 'ph:palette-duotone';
+  if (tagLower.includes('movement')) return 'ph:person-simple-walk-duotone';
+  if (tagLower.includes('nature')) return 'ph:leaf-duotone';
+  if (tagLower.includes('music')) return 'ph:music-notes-duotone';
+
+  // Default - use a variety of generic icons based on the tag name
+  const genericIcons = [
+    'ph:sparkle-duotone',
+    'ph:star-duotone',
+    'ph:circles-three-duotone',
+    'ph:squares-four-duotone',
+    'ph:flower-duotone',
+    'ph:sun-duotone',
+    'ph:placeholder-duotone',
+    'ph:chats-circle-duotone',
+    'ph:compass-duotone',
+    'ph:lightbulb-duotone'
+  ];
+
+  // Use a simple hash to consistently select the same icon for the same tag
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) {
+    hash = ((hash << 5) - hash) + tag.charCodeAt(i);
+    hash = hash & hash;
+  }
+
+  return genericIcons[Math.abs(hash) % genericIcons.length];
+};
+
+// Masonry cards (everything else)
+const summaryColor = getNextColor();
+const actionColor1 = getNextColor();
+const actionColor2 = getNextColor();
+const info1Color = getNextColor();
+const info2Color = getNextColor();
+const info3Color = getNextColor();
+
+const masonryCards = [
+  // Tag cards first
+  ...project.tags.map((tag) => {
+    const tagColor = getNextColor();
+    return {
+      type: 'tag' as const,
+      title: tag,
+      bgColor: tagColor.bg,
+      textColor: tagColor.text,
+      size: 'small' as const,
+      icon: getIconForTag(tag)
+    };
+  }),
+  // Summary
+  {
+    type: 'summary' as const,
+    content: project.description,
+    bgColor: summaryColor.bg,
+    textColor: summaryColor.text,
+    size: 'large' as const
+  },
+  // Action buttons
+  {
+    type: 'text' as const,
+    title: 'Project Package',
+    content: 'Add all ' + project.resourceSlugs.length + ' resources from this project to your basket.',
+    bgColor: actionColor1.bg,
+    textColor: actionColor1.text,
+    button: {
+      text: 'Add Resources',
+      link: '#add-all'
+    },
+    size: 'medium' as const
+  },
+  {
+    type: 'text' as const,
+    title: 'Resource Notes',
+    content: 'Download guidance notes and professional information for all resources in this project.',
+    bgColor: actionColor2.bg,
+    textColor: actionColor2.text,
+    button: {
+      text: 'Add All Notes',
+      link: '#add-notes'
+    },
+    size: 'medium' as const
+  },
+  // Info cards
+  {
+    type: 'text' as const,
+    title: 'Who its for',
+    content: project.whoItsFor,
+    bgColor: info1Color.bg,
+    textColor: info1Color.text,
+    size: 'medium' as const
+  },
+  {
+    type: 'text' as const,
+    title: 'What it is',
+    content: project.longDescription,
+    bgColor: info2Color.bg,
+    textColor: info2Color.text,
+    size: 'medium' as const
+  },
+  {
+    type: 'text' as const,
+    title: 'Benefits',
+    content: 'This project brings together carefully selected resources that work together. Everything is free to download and use. Take what helps, leave the rest.',
+    bgColor: info3Color.bg,
+    textColor: info3Color.text,
+    size: 'medium' as const
+  },
+  // Asset/resource cards - mix of image and text cards
+  ...project.resourceSlugs.map((slug, index) => {
+    const resourceName = slug.split('-').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+
+    const resourceColor = getNextColor();
+
+    // Determine resource type based on slug keywords (using Phosphor Duotone icons)
+    let resourceType = 'Resource';
+    let resourceIcon = 'ph:file-duotone';
+
+    if (slug.includes('worksheet') || slug.includes('workbook')) {
+      resourceType = 'Worksheet';
+      resourceIcon = 'ph:note-pencil-duotone';
+    } else if (slug.includes('activity') || slug.includes('game')) {
+      resourceType = 'Activity';
+      resourceIcon = 'ph:game-controller-duotone';
+    } else if (slug.includes('guide') || slug.includes('handbook')) {
+      resourceType = 'Guide';
+      resourceIcon = 'ph:book-open-duotone';
+    } else if (slug.includes('card') || slug.includes('flashcard')) {
+      resourceType = 'Cards';
+      resourceIcon = 'ph:cards-duotone';
+    } else if (slug.includes('poster') || slug.includes('display')) {
+      resourceType = 'Poster';
+      resourceIcon = 'ph:image-duotone';
+    } else if (slug.includes('chart') || slug.includes('visual')) {
+      resourceType = 'Visual Aid';
+      resourceIcon = 'ph:chart-bar-duotone';
+    }
+
+    // First 2 resources get image cards, rest are text-only
+    if (index < 2) {
+      // Cycle through placeholder images
+      const placeholderImages = ['ex2.jpg', 'ex3.jpg', 'ex4.jpg'];
+      const placeholderImage = placeholderImages[index % placeholderImages.length];
+
+      return {
+        type: 'mixed' as const,
+        image: `/Project placeholders/${placeholderImage}`,
+        alt: resourceName,
+        title: resourceName,
+        content: `Free ${resourceType.toLowerCase()} to download and use`,
+        link: `/assets/${slug}`,
+        bgColor: resourceColor.bg,
+        textColor: resourceColor.text,
+        badge: resourceType
+      };
+    } else {
+      return {
+        type: 'text' as const,
+        title: resourceName,
+        content: `Free ${resourceType.toLowerCase()} for wellbeing activities. Click to view, download and print.`,
+        link: `/assets/${slug}`,
+        bgColor: resourceColor.bg,
+        textColor: resourceColor.text,
+        icon: resourceIcon,
+        size: 'medium' as const
+      };
+    }
+  })
+];
+
+// Randomize card order for visual variety
+const shuffledMasonryCards = shuffleArray(masonryCards);
+---
+
+<BaseLayout
+  title={`${project.title} | Projects | Walking with a Smile`}
+  description={project.description}
+  hideFooter={true}
+>
+  <!-- Hybrid Grid + Masonry Layout -->
+  <section class="project-masonry-page bg-alt">
+    <div class="container container-6xl">
+      <!-- Title Section - Simple left-aligned -->
+      <header class="project-header">
+        <h1 class="project-title">{project.title}</h1>
+        <p class="project-description">{project.description}</p>
+      </header>
+
+      <!-- Masonry Section (Everything Else) -->
+      <MasonryGrid cards={shuffledMasonryCards} />
+    </div>
+  </section>
+
+  <FooterWithMask
+    backgroundImage="/Footer/Footer Background.jpg"
+    height="400px"
+  />
+</BaseLayout>
+
+
+<style>
+  /* Project page - uses .bg-alt class for accessibility theme support */
+  .project-masonry-page {
+    padding: calc(80px + var(--space-3xl)) 0 var(--space-5xl);
+    /* Background handled by .bg-alt class from utilities.css */
+  }
+
+  /* Project Header - Simple left-aligned */
+  .project-header {
+    margin-bottom: var(--space-4xl);
+  }
+
+  /* Page Title - uses global h1 settings */
+  .project-title {
+    font-family: var(--font-heading, 'Quicksand'), sans-serif;
+    font-size: var(--text-5xl, 3rem);
+    font-weight: var(--font-bold, 700);
+    color: var(--color-Text-700);
+    line-height: var(--leading-tight, 1.2);
+    margin: 0 0 var(--space-md) 0;
+    text-align: left;
+  }
+
+  /* Project Description / Subtext */
+  .project-description {
+    font-family: var(--font-body, 'Quicksand'), sans-serif;
+    font-size: var(--text-lg, 1.125rem);
+    font-weight: var(--font-normal, 400);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed, 1.6);
+    margin: 0;
+    max-width: 800px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .project-title {
+      font-size: var(--text-4xl, 2.25rem);
+    }
+
+    .project-description {
+      font-size: var(--text-base, 1rem);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .project-masonry-page {
+      padding: calc(80px + var(--space-2xl)) 0 var(--space-4xl);
+    }
+
+    .project-header {
+      margin-bottom: var(--space-3xl);
+    }
+
+    .project-title {
+      font-size: var(--text-3xl, 1.875rem);
+    }
+  }
+
+  /* =========================================================
+     ACCESSIBILITY THEME OVERRIDES - Project Page
+     ========================================================= */
+
+  /* Dark mode */
+  :global(body.a11y-theme-dark) .project-title {
+    color: var(--a11y-dark-text) !important;
+  }
+
+  :global(body.a11y-theme-dark) .project-description {
+    color: var(--a11y-dark-text) !important;
+  }
+
+  /* High contrast */
+  :global(body.a11y-theme-high-contrast) .project-title {
+    color: var(--a11y-hc-text, #ffffff) !important;
+  }
+
+  :global(body.a11y-theme-high-contrast) .project-description {
+    color: var(--a11y-hc-text, #ffffff) !important;
+  }
+
+  /* Cream mode */
+  :global(body.a11y-theme-cream) .project-title {
+    color: var(--a11y-cream-text, #4a3f2f) !important;
+  }
+
+  :global(body.a11y-theme-cream) .project-description {
+    color: #5d4f3a !important;
+  }
+
+  /* Monochrome */
+  :global(body.a11y-theme-monochrome) .project-title,
+  :global(body.a11y-cvd-monochrome) .project-title {
+    color: #1a1a1a !important;
+  }
+
+  :global(body.a11y-theme-monochrome) .project-description,
+  :global(body.a11y-cvd-monochrome) .project-description {
+    color: #4a4a4a !important;
+  }
+</style>
+

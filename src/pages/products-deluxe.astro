@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductCardDeluxe from '../components/cards/ProductCardDeluxe.astro';
+import { PLACEHOLDER_IMAGES } from '../constants/placeholderImages';
+
+const products = [
+  {
+    id: 'apple-1',
+    name: 'Delicious Apples',
+    code: '45999',
+    description: 'Fresh, crispy, and juicy apples picked at peak ripeness. Perfect for snacking, baking, or adding to your favorite recipes.',
+    price: 7.93,
+    image: 'https://res.cloudinary.com/john-mantas/image/upload/v1537291846/codepen/delicious-apples/green-apple-with-slice.png',
+    images: [
+      'https://res.cloudinary.com/john-mantas/image/upload/v1537302064/codepen/delicious-apples/green-apple2.png',
+      'https://res.cloudinary.com/john-mantas/image/upload/v1537303532/codepen/delicious-apples/half-apple.png',
+      'https://res.cloudinary.com/john-mantas/image/upload/v1537303160/codepen/delicious-apples/green-apple-flipped.png',
+      'https://res.cloudinary.com/john-mantas/image/upload/v1537303708/codepen/delicious-apples/apple-top.png'
+    ],
+    variants: [
+      { image: 'https://res.cloudinary.com/john-mantas/image/upload/v1537302064/codepen/delicious-apples/green-apple2.png', color: 'green' },
+      { image: 'https://res.cloudinary.com/john-mantas/image/upload/v1537302752/codepen/delicious-apples/yellow-apple.png', color: 'yellow' },
+      { image: 'https://res.cloudinary.com/john-mantas/image/upload/v1537302427/codepen/delicious-apples/orange-apple.png', color: 'orange' },
+      { image: 'https://res.cloudinary.com/john-mantas/image/upload/v1537302285/codepen/delicious-apples/red-apple.png', color: 'red' }
+    ],
+    benefits: [
+      'Apples are nutritious',
+      'Apples may be good for weight loss',
+      'Apples may be good for bone health',
+      'They\'re linked to a lower risk of diabetes'
+    ]
+  },
+  {
+    id: 'orange-1',
+    name: 'Fresh Oranges',
+    code: '45678',
+    description: 'Sweet, juicy oranges bursting with vitamin C. Hand-picked for optimal flavor and freshness.',
+    price: 5.99,
+    image: PLACEHOLDER_IMAGES.food1,
+    images: [
+      PLACEHOLDER_IMAGES.food1,
+      PLACEHOLDER_IMAGES.product1,
+      PLACEHOLDER_IMAGES.product2,
+      PLACEHOLDER_IMAGES.lifestyle1
+    ],
+    benefits: [
+      'High in vitamin C',
+      'Supports immune system',
+      'Good source of fiber',
+      'May help prevent kidney stones'
+    ]
+  },
+  {
+    id: '7day-starter-kit',
+    name: '7-Day Self-Directed Living Starter Kit',
+    code: '7DAY001',
+    description: 'A practical, beautifully structured 7-day guide designed to help you regain clarity, strengthen emotional awareness, and make small, powerful shifts in how you live each day. This kit offers simple daily actions, reflective prompts, and grounding exercises that build confidence and inner steadiness.',
+    price: 19.99,
+    image: '/7Day/7Day Product Images/1.png',
+    images: [
+      '/7Day/7Day Product Images/1.png',
+      '/7Day/7Day Product Images/2.png',
+      '/7Day/7Day Product Images/5.png',
+      '/7Day/7Day Product Images/8.png'
+    ],
+    benefits: [
+      'Build emotional steadiness and self-awareness',
+      'Practice boundaries that protect your energy',
+      'Strengthen relationships through meaningful connection',
+      'Develop confidence through small, achievable daily steps'
+    ]
+  }
+];
+---
+
+<BaseLayout title="Deluxe Products">
+  <div style="padding: 80px 20px; min-height: 100vh;">
+    <h1 style="text-align: center; color: var(--color-Text-700); font-size: 2.5em; margin-bottom: 20px;">
+      Deluxe Product Cards
+    </h1>
+    <p style="text-align: center; color: var(--color-Text-600); margin-bottom: 60px; max-width: 600px; margin-left: auto; margin-right: auto;">
+      Explore our premium products with interactive galleries, variant selection, and quick view functionality.
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 40px;">
+      {products.map(product => (
+        <ProductCardDeluxe {...product} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Global page styling */
+  body {
+    background: linear-gradient(135deg, var(--color-Background-50) 0%, var(--color-Background-100) 100%);
+  }
+</style>

@@ -1,0 +1,242 @@
+---
+// Announcement Ticker - Scrolling text banner for announcements
+// Can be positioned at top or bottom of page
+interface TickerItem {
+  text: string;
+  icon?: 'info' | 'alert' | 'heart' | 'star' | 'gift' | 'calendar' | 'megaphone' | 'sparkle' | 'none';
+  link?: string;
+}
+
+interface Props {
+  items?: TickerItem[];
+  position?: 'top' | 'bottom';
+  speed?: number; // seconds for one complete cycle
+  backgroundColor?: 'primary' | 'secondary' | 'accent' | 'dark' | 'light';
+  pauseOnHover?: boolean;
+  enabled?: boolean;
+}
+
+const {
+  items = [
+    { text: 'Welcome to our website!', icon: 'sparkle' },
+    { text: 'Free shipping on orders over $50', icon: 'gift' },
+    { text: 'New arrivals just dropped', icon: 'star' },
+  ],
+  position = 'top',
+  speed = 25,
+  backgroundColor = 'primary',
+  pauseOnHover = true,
+  enabled = true
+} = Astro.props;
+
+// Generate icons based on type
+const icons: Record<string, string> = {
+  info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+  alert: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  heart: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`,
+  star: `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  gift: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>`,
+  calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  megaphone: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>`,
+  sparkle: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/></svg>`,
+};
+
+// Background color classes
+const bgColors: Record<string, string> = {
+  primary: 'bg-primary',
+  secondary: 'bg-secondary',
+  accent: 'bg-accent',
+  dark: 'bg-dark',
+  light: 'bg-light',
+};
+---
+
+{enabled && (
+  <div
+    class={`announcement-ticker ${position === 'bottom' ? 'ticker-bottom' : 'ticker-top'} ${bgColors[backgroundColor]} ${pauseOnHover ? 'pause-on-hover' : ''}`}
+    data-speed={speed}
+  >
+    <div class="ticker-track">
+      <!-- Duplicate content for seamless loop -->
+      {[0, 1].map(() => (
+        <div class="ticker-segment">
+          {items.map((item) => (
+            item.link ? (
+              <a href={item.link} class="ticker-item">
+                {item.icon && item.icon !== 'none' && (
+                  <span class="ticker-icon" set:html={icons[item.icon]} />
+                )}
+                <span class="ticker-text">{item.text}</span>
+              </a>
+            ) : (
+              <span class="ticker-item">
+                {item.icon && item.icon !== 'none' && (
+                  <span class="ticker-icon" set:html={icons[item.icon]} />
+                )}
+                <span class="ticker-text">{item.text}</span>
+              </span>
+            )
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+<script>
+  import { gsap } from 'gsap';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tickers = document.querySelectorAll('.announcement-ticker');
+
+    tickers.forEach((ticker) => {
+      const track = ticker.querySelector('.ticker-track') as HTMLElement;
+      const segment = ticker.querySelector('.ticker-segment') as HTMLElement;
+
+      if (!track || !segment) return;
+
+      const speed = parseFloat(ticker.getAttribute('data-speed') || '25');
+      const segmentWidth = segment.offsetWidth;
+
+      // Animate the track
+      const animation = gsap.to(track, {
+        x: -segmentWidth,
+        duration: speed,
+        ease: 'none',
+        repeat: -1,
+      });
+
+      // Pause on hover if enabled
+      if (ticker.classList.contains('pause-on-hover')) {
+        ticker.addEventListener('mouseenter', () => animation.pause());
+        ticker.addEventListener('mouseleave', () => animation.resume());
+      }
+    });
+  });
+</script>
+
+<style>
+  .announcement-ticker {
+    width: 100%;
+    overflow: hidden;
+    z-index: 10000;
+    padding: var(--space-sm) 0;
+    height: 36px; /* Fixed height to prevent layout shift */
+    display: flex;
+    align-items: center;
+  }
+
+  .ticker-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .ticker-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  /* Background color variants */
+  .bg-primary {
+    background: var(--color-Primary-500);
+    color: white;
+  }
+
+  .bg-secondary {
+    background: var(--color-Secondary-500);
+    color: white;
+  }
+
+  .bg-accent {
+    background: var(--color-Accent-500);
+    color: white;
+  }
+
+  .bg-dark {
+    background: var(--color-Neutral-900);
+    color: white;
+  }
+
+  .bg-light {
+    background: var(--color-Background-100);
+    color: var(--color-Text-800);
+    border-bottom: 1px solid var(--color-Neutral-200);
+  }
+
+  .ticker-bottom.bg-light {
+    border-bottom: none;
+    border-top: 1px solid var(--color-Neutral-200);
+  }
+
+  .ticker-track {
+    display: flex;
+    width: fit-content;
+  }
+
+  .ticker-segment {
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--space-3xl);
+    padding-right: var(--space-3xl);
+  }
+
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    white-space: nowrap;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity var(--transition-fast);
+  }
+
+  a.ticker-item:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+
+  .ticker-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .ticker-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ticker-text {
+    letter-spacing: 0.02em;
+  }
+
+  /* Separator dots between items */
+  .ticker-item:not(:last-child)::after {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+    border-radius: 50%;
+    margin-left: var(--space-3xl);
+    opacity: 0.5;
+  }
+
+  /* Pause cursor on hover */
+  .pause-on-hover:hover {
+    cursor: default;
+  }
+
+  .pause-on-hover a.ticker-item:hover {
+    cursor: pointer;
+  }
+</style>

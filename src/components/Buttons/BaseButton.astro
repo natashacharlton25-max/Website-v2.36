@@ -1,0 +1,645 @@
+---
+// BaseButton - Main button component with multiple variants and styles
+import '../../styles/ButtonSizes.css';
+import ThemedDropdown from './ThemedDropdown.astro';
+export interface Props {
+  variant?: 'primary' | 'secondary' | 'accent1' | 'accent2' | 'accent3' | 'accent4' | 'accent5' | 'outline' | 'ghost' | 'glass' | 'neumorphic' | 'dropdown' | 'glow' | 'gradient' |
+           'primary-outline' | 'secondary-outline' | 'accent1-outline' | 'accent2-outline' | 'accent3-outline' | 'accent4-outline' | 'accent5-outline' |
+           'primary-outline-gradient' | 'secondary-outline-gradient' | 'accent1-outline-gradient' | 'accent2-outline-gradient' | 'accent3-outline-gradient' | 'accent4-outline-gradient' | 'accent5-outline-gradient' |
+           'primary-glass' | 'secondary-glass' | 'accent1-glass' | 'accent2-glass' | 'accent3-glass' | 'accent4-glass' | 'accent5-glass' |
+           'primary-neumorphic' | 'secondary-neumorphic' | 'accent1-neumorphic' | 'accent2-neumorphic' | 'accent3-neumorphic' | 'accent4-neumorphic' | 'accent5-neumorphic' |
+           'primary-glow' | 'secondary-glow' | 'accent1-glow' | 'accent2-glow' | 'accent3-glow' | 'accent4-glow' | 'accent5-glow' |
+           'primary-gradient' | 'secondary-gradient' | 'accent1-gradient' | 'accent2-gradient' | 'accent3-gradient' | 'accent4-gradient' | 'accent5-gradient' |
+           'primary-dropdown' | 'secondary-dropdown' | 'accent1-dropdown' | 'accent2-dropdown' | 'accent3-dropdown' | 'accent4-dropdown' | 'accent5-dropdown';
+  size?: 'sm' | 'md' | 'lg';
+  shape?: 'default' | 'circle' | 'square';
+  disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  className?: string;
+  animatedIcon?: string;
+  dropdownItems?: Array<{label: string, href?: string}>;
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  shape = 'default',
+  disabled = false,
+  type = 'button',
+  className = '',
+  animatedIcon,
+  dropdownItems = [
+    {label: 'Option 1', href: '#'},
+    {label: 'Option 2', href: '#'},
+    {label: 'Option 3', href: '#'}
+  ]
+} = Astro.props;
+
+// Handle combined variants (e.g., 'accent1-outline' -> ['accent1', 'outline'])
+const variantParts = variant.includes('-') ? variant.split('-') : [variant];
+const baseColor = variantParts[0];
+const effect = variantParts[1] || '';
+
+const variantClass = effect ? `btn-${baseColor} btn-${effect}` : `btn-${variant}`;
+const sizeClass = `btn-${size}`;
+const shapeClass = shape !== 'default' ? `btn-${shape}` : '';
+const classes = ['btn', variantClass, sizeClass, shapeClass, className].filter(Boolean).join(' ');
+const isDropdown = variant === 'dropdown' || effect === 'dropdown';
+const isGlow = variant === 'glow' || effect === 'glow';
+const showIcon = (shape === 'circle' || shape === 'square') && animatedIcon;
+const iconPath = showIcon ? `/Animated Icons/${animatedIcon}` : '';
+---
+
+{isDropdown ? (
+  <div class="dropdown-wrapper">
+    <button
+      class={`${classes} btn-dropdown dropdown-btn`}
+      type={type}
+      disabled={disabled}
+    >
+      <slot />
+      <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M7 10l5 5 5-5z"/>
+      </svg>
+    </button>
+    <ThemedDropdown
+      colorTheme={baseColor as any}
+      dropdownItems={dropdownItems}
+      borderStyle="1px solid"
+      colorShade="500"
+      hoverColorShade="100"
+    />
+  </div>
+) : (
+  <button
+    class={classes}
+    type={type}
+    disabled={disabled}
+  >
+    {showIcon ? (
+      <div class="btn-icon">
+        {animatedIcon === 'Star/star.svg' && (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        )}
+        {animatedIcon === 'Plus to X/plus.svg' && (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        )}
+      </div>
+    ) : (
+      <slot />
+    )}
+  </button>
+)}
+
+<style>
+  @import '../../styles/GlowTokens.css';
+  @import '../../styles/ButtonSizes.css';
+
+  .btn {
+    /* Base button styles using 88-token system */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: var(--btn-size-default-padding);
+    font-size: var(--btn-size-default-font-size);
+    min-height: var(--btn-size-default-min-height);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-family: var(--font-body, inherit);
+    text-transform: uppercase;
+    letter-spacing: 0.075em;
+    margin: 0.75rem 0.75rem 0.75rem 0;
+    width: auto;
+    min-width: fit-content;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--color-Primary-500);
+    outline-offset: 2px;
+  }
+
+  /* Sizes */
+  .btn-sm {
+    padding: var(--btn-size-sm-padding);
+    font-size: var(--btn-size-sm-font-size);
+    min-height: var(--btn-size-sm-min-height);
+  }
+
+  .btn-md {
+    padding: var(--btn-size-default-padding);
+    font-size: var(--btn-size-default-font-size);
+    min-height: var(--btn-size-default-min-height);
+  }
+
+  .btn-lg {
+    padding: var(--btn-size-lg-padding);
+    font-size: var(--btn-size-lg-font-size);
+    min-height: var(--btn-size-lg-min-height);
+  }
+
+  /* Variants using direct token references */
+  .btn-primary {
+    background-color: var(--color-Primary-500);
+    color: white;
+    box-shadow: var(--shadow-md);
+    --btn-color-100: var(--color-Primary-100);
+    --btn-color-100: var(--color-Primary-100);
+    --btn-color-500: var(--color-Primary-500);
+    --btn-color-600: var(--color-Primary-600);
+    --btn-color-700: var(--color-Primary-700);
+    --btn-gradient-glow: var(--gradient-primary-glow);
+    --btn-gradient: var(--gradient-primary-soft);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-Primary-600);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-primary:active {
+    background-color: var(--color-Primary-700);
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-secondary {
+    background-color: var(--color-Secondary-500);
+    color: white;
+    box-shadow: var(--shadow-md);
+    --btn-color-100: var(--color-Secondary-100);
+    --btn-color-100: var(--color-Secondary-100);
+    --btn-color-500: var(--color-Secondary-500);
+    --btn-color-600: var(--color-Secondary-600);
+    --btn-color-700: var(--color-Secondary-700);
+    --btn-gradient-glow: var(--gradient-secondary-glow);
+    --btn-gradient: var(--gradient-secondary-soft);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-Secondary-600);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-secondary:active {
+    background-color: var(--color-Secondary-700);
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-accent1 {
+    background-color: var(--color-AccentOne-500);
+    color: white;
+    box-shadow: var(--shadow-md);
+    --btn-color-100: var(--color-AccentOne-100);
+    --btn-color-100: var(--color-AccentOne-100);
+    --btn-color-500: var(--color-AccentOne-500);
+    --btn-color-600: var(--color-AccentOne-600);
+    --btn-color-700: var(--color-AccentOne-700);
+    --btn-gradient-glow: var(--gradient-accent1-glow);
+    --btn-gradient: var(--gradient-accent1-soft);
+  }
+
+  .btn-accent1:hover:not(:disabled) {
+    background-color: var(--color-AccentOne-600);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-accent2 {
+    background-color: var(--color-AccentTwo-500);
+    color: white;
+    box-shadow: var(--shadow-md);
+    --btn-color-100: var(--color-AccentTwo-100);
+    --btn-color-100: var(--color-AccentTwo-100);
+    --btn-color-500: var(--color-AccentTwo-500);
+    --btn-color-600: var(--color-AccentTwo-600);
+    --btn-color-700: var(--color-AccentTwo-700);
+    --btn-gradient-glow: var(--gradient-accent2-glow);
+    --btn-gradient: var(--gradient-accent2-soft);
+  }
+
+  .btn-accent2:hover:not(:disabled) {
+    background-color: var(--color-AccentTwo-600);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-accent3 {
+    background-color: var(--color-AccentThree-500);
+    color: white;
+    box-shadow: var(--shadow-md);
+    --btn-color-100: var(--color-AccentThree-100);
+    --btn-color-100: var(--color-AccentThree-100);
+    --btn-color-500: var(--color-AccentThree-500);
+    --btn-color-600: var(--color-AccentThree-600);
+    --btn-color-700: var(--color-AccentThree-700);
+    --btn-gradient-glow: var(--gradient-accent3-glow);
+    --btn-gradient: var(--gradient-accent3-soft);
+  }
+
+  .btn-accent3:hover:not(:disabled) {
+    background-color: var(--color-AccentThree-600);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-accent4 {
+    background-color: var(--color-AccentFour-500);
+    color: white;
+    box-shadow: var(--shadow-md);
+    --btn-color-100: var(--color-AccentFour-100);
+    --btn-color-100: var(--color-AccentFour-100);
+    --btn-color-500: var(--color-AccentFour-500);
+    --btn-color-600: var(--color-AccentFour-600);
+    --btn-color-700: var(--color-AccentFour-700);
+    --btn-gradient-glow: var(--gradient-accent4-glow);
+    --btn-gradient: var(--gradient-accent4-soft);
+  }
+
+  .btn-accent4:hover:not(:disabled) {
+    background-color: var(--color-AccentFour-600);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-accent5 {
+    background-color: var(--color-AccentFive-500);
+    color: white;
+    box-shadow: var(--shadow-md);
+    --btn-color-100: var(--color-AccentFive-100);
+    --btn-color-100: var(--color-AccentFive-100);
+    --btn-color-500: var(--color-AccentFive-500);
+    --btn-color-600: var(--color-AccentFive-600);
+    --btn-color-700: var(--color-AccentFive-700);
+    --btn-gradient-glow: var(--gradient-accent5-glow);
+    --btn-gradient: var(--gradient-accent5-soft);
+  }
+
+  .btn-accent5:hover:not(:disabled) {
+    background-color: var(--color-AccentFive-600);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    color: var(--btn-color-600, var(--color-Primary-600));
+    border: 2px solid var(--btn-color-500, var(--color-Primary-500));
+  }
+
+  .btn.btn-outline:hover:not(:disabled) {
+    background-color: var(--btn-color-100, var(--color-Primary-100)) !important;
+    border-color: var(--btn-color-600, var(--color-Primary-600));
+    color: var(--btn-color-700, var(--color-Primary-700)) !important;
+  }
+
+  /* Outline gradient variant */
+  .btn-outline.btn-gradient {
+    background: transparent;
+    border: 2px solid transparent;
+    background-image: var(--btn-gradient, var(--gradient-hero));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    position: relative;
+  }
+
+  .btn-outline.btn-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: var(--btn-gradient, var(--gradient-hero));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .btn-outline.btn-gradient:hover:not(:disabled) {
+    background-color: var(--btn-color-100, var(--color-Primary-100)) !important;
+  }
+
+  .btn-ghost {
+    background-color: var(--color-Neutral-100);
+    color: var(--color-Text-300);
+    border: 1px solid var(--color-Neutral-200);
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background-color: var(--btn-color-100, var(--color-Neutral-200));
+    color: var(--btn-color-700, var(--color-Text-300));
+    border-color: var(--btn-color-100, var(--color-Neutral-300));
+    transform: translateY(-1px);
+  }
+
+  /* Glass variant */
+  .btn-glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(var(--glass-blur, 12px));
+    -webkit-backdrop-filter: blur(var(--glass-blur, 12px));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-Text-700);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-glass:hover:not(:disabled) {
+    background: var(--btn-color-600, var(--color-Primary-600));
+    color: var(--color-Background-50);
+    border-color: var(--btn-color-500, var(--color-Primary-500));
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-glass:active {
+    background: var(--btn-color-700, var(--color-Primary-700));
+    color: var(--color-Background-50);
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Neumorphic variant */
+  .btn-neumorphic {
+    background-color: var(--btn-color-500, var(--color-AccentFour-500));
+    color: white;
+    border: none;
+    box-shadow:
+      8px 8px 16px rgba(0, 0, 0, 0.2),
+      -8px -8px 16px rgba(255, 255, 255, 0.7);
+  }
+
+  .btn-neumorphic:hover:not(:disabled) {
+    background-color: var(--btn-color-600, var(--color-AccentFour-600));
+    transform: translateY(-1px);
+    box-shadow:
+      inset 6px 6px 12px rgba(0, 0, 0, 0.3),
+      inset -6px -6px 12px rgba(255, 255, 255, 0.4);
+  }
+
+  .btn-neumorphic:active {
+    background-color: var(--btn-color-700, var(--color-AccentFour-700));
+    transform: translateY(0);
+    box-shadow:
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      inset -8px -8px 16px rgba(255, 255, 255, 0.3);
+  }
+
+  /* Dropdown variant */
+  .btn-dropdown {
+    background-color: var(--btn-color-500, var(--color-Primary-500));
+    color: white;
+    box-shadow: var(--shadow-md);
+    padding-right: 2.5rem;
+    position: relative;
+  }
+
+  .btn-dropdown:hover:not(:disabled) {
+    background-color: var(--btn-color-600, var(--color-Primary-600));
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-dropdown:active {
+    background-color: var(--btn-color-700, var(--color-Primary-700));
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+    z-index: 10;
+  }
+
+  .dropdown-chevron {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.2s ease;
+  }
+
+  .dropdown-wrapper.open .dropdown-chevron {
+    transform: translateY(-50%) rotate(180deg);
+  }
+
+
+
+  /* Shape variants */
+  .btn-circle {
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-circle.btn-sm {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .btn-circle.btn-lg {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .btn-square {
+    border-radius: var(--radius-md);
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-square.btn-sm {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .btn-square.btn-lg {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  /* Icon styles */
+  .btn-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .btn-sm .btn-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .btn-lg .btn-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .btn-circle:hover .btn-icon {
+    transform: rotate(360deg) scale(1.1);
+  }
+
+  .btn-square:hover .btn-icon {
+    transform: scale(1.2) rotate(90deg);
+  }
+
+  /* Corner radius variants */
+  .btn-sharp {
+    border-radius: 0;
+  }
+
+  .btn-rounded {
+    border-radius: var(--radius-xl);
+  }
+
+  .btn-pill {
+    border-radius: var(--radius-full);
+  }
+
+  /* More rounded square variant */
+  .btn-square.btn-rounded {
+    border-radius: var(--radius-lg);
+  }
+
+  /* Glow variant - styles imported from GlowTokens.css */
+  .btn-glow {
+    color: var(--color-Background-50);
+  }
+
+  /* Gradient variant */
+  .btn-gradient {
+    background: var(--btn-gradient, var(--gradient-hero));
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-gradient:hover:not(:disabled) {
+    background: var(--btn-gradient, var(--gradient-hero));
+    filter: brightness(1.1) saturate(1.1);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-gradient:active {
+    filter: brightness(0.9);
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+  }
+
+
+  .btn-glow:hover:not(:disabled) {
+    color: var(--color-Background-50);
+  }
+
+
+
+
+  /* Accessibility - reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .btn {
+      transition: none;
+    }
+
+    .btn:hover {
+      transform: none;
+    }
+
+    .btn-icon {
+      transition: none;
+    }
+
+    .btn-circle:hover .btn-icon,
+    .btn-square:hover .btn-icon {
+      transform: none;
+    }
+
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dropdown script loaded');
+    // Handle all dropdown buttons on the page
+    const dropdownWrappers = document.querySelectorAll('.dropdown-wrapper');
+    console.log('Found dropdown wrappers:', dropdownWrappers);
+
+    dropdownWrappers.forEach((wrapper) => {
+      const dropdownBtn = wrapper.querySelector('.dropdown-btn');
+      const dropdownMenu = wrapper.querySelector('.themed-dropdown-menu');
+      console.log('Adding click listener to:', dropdownBtn);
+
+      if (dropdownBtn && dropdownMenu) {
+        dropdownBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log('Button clicked:', e.target);
+          console.log('Toggling dropdown:', dropdownMenu);
+
+          // Close all other dropdowns first
+          dropdownWrappers.forEach(otherWrapper => {
+            if (otherWrapper !== wrapper) {
+              const otherMenu = otherWrapper.querySelector('.themed-dropdown-menu');
+              if (otherMenu) {
+                otherMenu.classList.remove('show');
+                otherWrapper.classList.remove('open');
+              }
+            }
+          });
+
+          // Toggle current dropdown
+          const isShowing = dropdownMenu.classList.contains('show');
+
+          if (!isShowing) {
+            // Simple toggle - let CSS handle positioning
+            dropdownMenu.classList.add('show');
+            wrapper.classList.add('open');
+          } else {
+            dropdownMenu.classList.remove('show');
+            wrapper.classList.remove('open');
+          }
+        });
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown-wrapper')) {
+        dropdownWrappers.forEach(wrapper => {
+          const menu = wrapper.querySelector('.themed-dropdown-menu');
+          if (menu) {
+            menu.classList.remove('show');
+            wrapper.classList.remove('open');
+          }
+        });
+      }
+    });
+  });
+</script>

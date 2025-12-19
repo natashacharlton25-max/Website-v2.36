@@ -1,0 +1,377 @@
+---
+/**
+ * Mini Cart Dropdown - Clean Order Summary Style
+ */
+---
+
+<div class="mini-cart" id="mini-cart">
+  <div class="mc-header">
+    <span class="mc-title">ORDER</span>
+    <a href="/cart" class="mc-edit">EDIT CART</a>
+  </div>
+
+  <div class="mc-items" id="mc-items">
+    <!-- Items rendered by JS -->
+  </div>
+
+  <div class="mc-summary" id="mc-summary">
+    <div class="mc-row">
+      <span>Subtotal</span>
+      <span id="mc-subtotal">Free</span>
+    </div>
+    <div class="mc-row">
+      <span>Shipping</span>
+      <span id="mc-shipping">Instant</span>
+    </div>
+    <div class="mc-row mc-total">
+      <span>Total</span>
+      <span id="mc-total">Free</span>
+    </div>
+  </div>
+
+  <a href="/cart" class="mc-checkout">PROCEED TO CHECKOUT</a>
+</div>
+
+<style is:global>
+  .mini-cart {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 320px;
+    background: var(--color-Background-50);
+    border-radius: 8px;
+    box-shadow: var(--shadow-2xl);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .mini-cart.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* Header */
+  .mc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-Background-200);
+  }
+
+  .mc-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-Text-800);
+    letter-spacing: 0.5px;
+  }
+
+  .mc-edit {
+    font-size: 11px;
+    color: var(--color-Text-400);
+    text-decoration: none;
+    letter-spacing: 0.3px;
+  }
+
+  .mc-edit:hover {
+    color: var(--color-Primary-500);
+  }
+
+  /* Items */
+  .mc-items {
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .mc-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--color-Background-100);
+    gap: 12px;
+  }
+
+  .mc-item:last-child {
+    border-bottom: none;
+  }
+
+  .mc-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--color-Background-100);
+  }
+
+  .mc-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mc-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mc-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-Text-800);
+    margin: 0 0 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mc-meta {
+    font-size: 11px;
+    color: var(--color-Text-400);
+  }
+
+  /* Remove Button */
+  .mc-remove {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-Text-400);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .mc-remove:hover {
+    background: var(--color-Secondary-50);
+    color: var(--color-Secondary-500);
+  }
+
+  .mc-remove svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Summary */
+  .mc-summary {
+    padding: 16px 20px;
+    background: var(--color-Background-100);
+    border-top: 1px solid var(--color-Background-200);
+  }
+
+  .mc-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--color-Text-500);
+    padding: 4px 0;
+  }
+
+  .mc-row.mc-total {
+    font-weight: 700;
+    color: var(--color-Text-800);
+    font-size: 15px;
+    padding-top: 8px;
+    margin-top: 4px;
+    border-top: 1px solid var(--color-Background-200);
+  }
+
+  /* Checkout Button */
+  .mc-checkout {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: var(--color-Primary-500);
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+  }
+
+  .mc-checkout:hover {
+    background: var(--color-Primary-600);
+  }
+
+  /* Empty State */
+  .mc-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--color-Text-400);
+  }
+
+  .mc-empty svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  .mc-empty p {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  /* Mobile */
+  @media (max-width: 400px) {
+    .mini-cart {
+      right: 10px;
+      left: 10px;
+      width: auto;
+    }
+  }
+</style>
+
+<script>
+  interface CartItem {
+    id: string;
+    name: string;
+    price: number;
+    image?: string;
+    quantity?: number;
+  }
+
+  let cartItems: CartItem[] = [];
+  const SHIPPING = 0;
+
+  const mcItems = document.getElementById('mc-items');
+  const mcSubtotal = document.getElementById('mc-subtotal');
+  const mcShipping = document.getElementById('mc-shipping');
+  const mcTotal = document.getElementById('mc-total');
+  const mcSummary = document.getElementById('mc-summary');
+
+  function loadFromStorage() {
+    const saved = localStorage.getItem('cartItems');
+    if (saved) {
+      cartItems = JSON.parse(saved);
+    }
+  }
+
+  function saveToStorage() {
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    document.dispatchEvent(new CustomEvent('cart:updated', {
+      detail: { count: cartItems.length }
+    }));
+  }
+
+  function render() {
+    if (!mcItems) return;
+
+    if (cartItems.length === 0) {
+      mcItems.innerHTML = `
+        <div class="mc-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
+          </svg>
+          <p>Your cart is empty</p>
+        </div>
+      `;
+      if (mcSummary) mcSummary.style.display = 'none';
+      return;
+    }
+
+    if (mcSummary) mcSummary.style.display = 'block';
+
+    mcItems.innerHTML = cartItems.map((item, idx) => `
+      <div class="mc-item">
+        <div class="mc-img">
+          <img src="${item.image || ''}" alt="${item.name}">
+        </div>
+        <div class="mc-info">
+          <div class="mc-name">${item.name}</div>
+          <div class="mc-meta">${item.price === 0 ? 'Free' : `$${item.price.toFixed(2)}`}</div>
+        </div>
+        <button class="mc-remove" data-idx="${idx}" title="Remove from cart">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    `).join('');
+
+    // Update totals
+    const subtotal = cartItems.reduce((sum, i) => sum + ((i.quantity || 1) * i.price), 0);
+    const total = subtotal + SHIPPING;
+
+    if (mcSubtotal) mcSubtotal.textContent = subtotal === 0 ? 'Free' : `$${subtotal.toFixed(2)}`;
+    if (mcShipping) mcShipping.textContent = 'Instant';
+    if (mcTotal) mcTotal.textContent = total === 0 ? 'Free' : `$${total.toFixed(2)}`;
+
+    // Attach remove events
+    mcItems.querySelectorAll('.mc-remove').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const el = e.currentTarget as HTMLElement;
+        const idx = parseInt(el.dataset.idx || '0');
+        cartItems.splice(idx, 1);
+        saveToStorage();
+        render();
+      });
+    });
+  }
+
+  function addToCart(item: CartItem) {
+    const existing = cartItems.findIndex(i => i.id === item.id);
+    if (existing >= 0) {
+      // Item already in cart, show toast
+      if (typeof (window as any).showToast === 'function') {
+        (window as any).showToast({
+          message: `${item.name} is already in your cart!`,
+          theme: 'professional',
+          animation: 'flip',
+          lottieUrl: '/Basket Icons/wired-outline-139-basket-loop-cycle.json'
+        });
+      }
+      return;
+    } else {
+      cartItems.push({ ...item, quantity: 1 });
+    }
+    saveToStorage();
+    render();
+
+    if (typeof (window as any).showToast === 'function') {
+      (window as any).showToast({
+        message: `${item.name} added to cart!`,
+        theme: 'professional',
+        animation: 'flip',
+        lottieUrl: '/Basket Icons/wired-outline-139-basket-morph-fill.json'
+      });
+    }
+  }
+
+  // Make global
+  (window as any).addToCart = addToCart;
+  (window as any).cartItems = cartItems;
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    const miniCart = document.getElementById('mini-cart');
+    const cartIcon = document.getElementById('cart-icon');
+    if (!miniCart || !cartIcon) return;
+
+    if (!miniCart.contains(e.target as Node) && !cartIcon.contains(e.target as Node)) {
+      miniCart.classList.remove('visible');
+    }
+  });
+
+  // Init
+  loadFromStorage();
+  render();
+
+  // Sync cart count on initial load
+  if (cartItems.length > 0) {
+    document.dispatchEvent(new CustomEvent('cart:updated', {
+      detail: { count: cartItems.length }
+    }));
+  }
+</script>

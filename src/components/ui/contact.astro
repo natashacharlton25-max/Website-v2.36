@@ -1,0 +1,756 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Contact Us | Mind The Box">
+  <main class="contact-page">
+    <!-- Contact Hero Section -->
+    <section class="contact-hero">
+      <div class="hero-wrapper">
+        <!-- Magenta Rounded Rectangle Container -->
+        <div class="magenta-container">
+          <span class="border-text" data-mobile-text="HELLO@MINDTHEBOX.CO.UK">MIND THE BOX.</span>
+
+          <!-- Content Area -->
+          <div class="content-area">
+            <h1 class="contact-title">WE ARE HERE TO SUPPORT YOUR JOURNEY.</h1>
+
+            <p class="contact-intro">Reach out today and let's work together to create a safer, more supportive environment for you or your loved ones.</p>
+
+            <a href="mailto:HELLO@MINDTHEBOX.CO.UK" class="email-link">HELLO@MINDTHEBOX.CO.UK</a>
+
+            <p class="contact-message">Whether you're seeking information, resources, or someone to talk to, we're just an email away. Together, we can navigate challenges and foster a community of care and resilience.</p>
+
+            <div class="crisis-link">
+              <span>LOOKING FOR ADDITIONAL CRISIS PLANNING RESOURCES?</span>
+              <button class="arrow-button" aria-label="Learn more">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#E91E8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" fill="#E91E8C" stroke="none"/>
+                  <path d="M12 8l4 4-4 4M8 12h8" stroke="white"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flower Image - Overlapping right edge (hidden until image is available) -->
+        <div class="flower-overlay" style="display: none;">
+          <!-- Add flower image when available -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section class="contact-form-section">
+      <div class="contact-form-wrapper">
+        <h2 class="form-title">Contact Form</h2>
+        <form class="contact-form" id="contact-form">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email address</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+
+          <div class="form-group">
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="subject" placeholder="What's this about?" />
+          </div>
+
+          <div class="form-group">
+            <label for="message">Leave a message</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+          </div>
+
+          <button type="submit" class="submit-button" id="submit-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            Submit
+          </button>
+
+          <div id="form-message" class="form-message" style="display: none;"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .contact-page {
+    background: var(--color-bg);
+    min-height: 100vh;
+  }
+
+  .contact-hero {
+    padding: 120px 2rem 4rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-wrapper {
+    width: 100%;
+    max-width: 1600px;
+    position: relative;
+    margin: 0 auto;
+  }
+
+  /* Magenta Rounded Rectangle Container */
+  .magenta-container {
+    background: transparent;
+    border: 4px solid #E91E8C;
+    border-left: 80px solid #E91E8C;
+    border-radius: 9px;
+    min-height: 500px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    margin-right: 160px;
+  }
+
+  .border-text {
+    font-family: 'Genty Sans', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 0.05em;
+    position: absolute;
+    left: -70px;
+    top: 3rem;
+    transform: rotate(0deg);
+    transform-origin: center;
+  }
+
+  /* Content Area - Takes up remaining space */
+  .content-area {
+    flex: 1;
+    padding: 4rem;
+    padding-right: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .contact-title {
+    font-family: 'Genty Sans', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    color: #1DB5D3;
+    margin: 0 0 2rem 0;
+    line-height: 1.2;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .contact-intro {
+    font-family: 'Quicksand', sans-serif;
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    line-height: 1.6;
+    color: #E91E8C;
+    margin: 0 0 2rem 0;
+    text-align: left;
+  }
+
+  .email-link {
+    font-family: 'Genty Sans', sans-serif;
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+    font-weight: 700;
+    color: #1DB5D3;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    display: inline-block;
+    margin: 0 0 2rem 0;
+    text-transform: uppercase;
+    width: fit-content;
+  }
+
+  .email-link:hover {
+    color: #E91E8C;
+  }
+
+  .contact-message {
+    font-family: 'Quicksand', sans-serif;
+    font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+    line-height: 1.7;
+    color: #666;
+    margin: 0 0 3rem 0;
+    text-align: left;
+  }
+
+  .crisis-link {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .crisis-link span {
+    font-family: 'Genty Sans', sans-serif;
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    font-weight: 700;
+    color: #E91E8C;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .arrow-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .arrow-button img {
+    width: 60px;
+    height: 60px;
+    filter: none;
+  }
+
+  .arrow-button:hover {
+    transform: translateX(5px);
+  }
+
+  /* Flower Overlay - Positioned to overlap right edge */
+  .flower-overlay {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .flower-overlay img {
+    width: 100%;
+    max-width: 550px;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* Contact Form Section */
+  .contact-form-section {
+    padding: 4rem 2rem;
+    background: var(--color-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .contact-form-wrapper {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    margin-right: calc(50% - 50% + 160px);
+    padding: 2.5rem;
+    background: white;
+    border: 4px solid #E91E8C;
+    border-radius: 9px;
+  }
+
+  .form-title {
+    font-family: 'Quicksand', sans-serif;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 400;
+    color: #888;
+    margin: 0 0 2rem 0;
+  }
+
+  .contact-form {
+    width: 100%;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #888;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 1rem;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1rem;
+    color: #333;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-main-2);
+    background: white;
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 150px;
+  }
+
+  .submit-button {
+    width: 100%;
+    padding: 1rem 2rem;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: white;
+    background: var(--color-main-3);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .submit-button:hover:not(:disabled) {
+    background: var(--color-main-2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .submit-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .submit-button svg {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+  }
+
+  .form-message {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .form-message.success {
+    background: rgba(132, 220, 198, 0.2);
+    color: #23a5c2;
+    border: 2px solid #84dcc6;
+  }
+
+  .form-message.error {
+    background: rgba(255, 66, 139, 0.1);
+    color: #ff428b;
+    border: 2px solid #ff428b;
+  }
+
+  /* Mobile - up to 767px */
+  @media (max-width: 767px) {
+    .contact-hero {
+      padding: 100px 1rem 3rem;
+    }
+
+    .hero-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .magenta-container {
+      border-left: 60px solid #E91E8C;
+      min-height: 320px;
+      margin-right: 0;
+      margin-top: -5rem;
+      width: 100%;
+      order: 2;
+    }
+
+    .border-text {
+      font-size: 0;
+      left: -54px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .border-text::before {
+      content: attr(data-mobile-text);
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+    }
+
+    .content-area {
+      padding: 3rem 1.5rem 2rem 1.5rem;
+    }
+
+    .contact-intro {
+      display: none;
+    }
+
+    .email-link {
+      display: none;
+    }
+
+    .contact-message {
+      margin-bottom: 1rem;
+    }
+
+    .crisis-link {
+      display: flex;
+      justify-content: flex-start;
+      margin-top: 0.5rem;
+    }
+
+    .crisis-link span {
+      display: none;
+    }
+
+    .flower-overlay {
+      position: relative;
+      right: auto;
+      left: auto;
+      top: auto;
+      transform: none;
+      z-index: 2;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .flower-overlay img {
+      max-width: 350px;
+      transform: rotate(90deg);
+      display: block;
+    }
+
+    .contact-form-section {
+      padding: 3rem 1.5rem;
+    }
+
+    .contact-form-wrapper {
+      padding: 2rem;
+      border-width: 3px;
+      margin-right: 0;
+    }
+  }
+
+  /* Small screens - 280px and below */
+  @media (max-width: 280px) {
+    .contact-hero {
+      padding: 90px 0.5rem 2rem;
+    }
+
+    .hero-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .magenta-container {
+      border: 3px solid #E91E8C;
+      border-left: 3px solid #E91E8C;
+      min-height: 280px;
+      margin-right: 0;
+      margin-top: -5rem;
+      width: 100%;
+      order: 2;
+    }
+
+    .border-text {
+      display: none;
+    }
+
+    .content-area {
+      padding: 2.5rem 1rem 1.5rem 1rem;
+    }
+
+    .contact-title {
+      text-align: center;
+    }
+
+    .contact-message {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .crisis-link {
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .crisis-link span {
+      display: none;
+    }
+
+    .arrow-button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .arrow-button svg {
+      width: 60px;
+      height: 60px;
+    }
+
+    .flower-overlay {
+      position: relative;
+      left: auto;
+      top: auto;
+      transform: none;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .flower-overlay img {
+      max-width: 280px;
+      transform: rotate(90deg);
+      display: block;
+    }
+
+    .contact-form-wrapper {
+      padding: 1.5rem;
+      margin-right: 0;
+    }
+
+    .form-title {
+      font-size: 1.2rem;
+    }
+
+    .submit-button {
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+    }
+  }
+
+  /* Extra small screens - 250px and below */
+  @media (max-width: 250px) {
+    .contact-hero {
+      padding: 80px 0.5rem 2rem;
+    }
+
+    .hero-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .magenta-container {
+      border: 3px solid #E91E8C;
+      border-left: 3px solid #E91E8C;
+      min-height: 250px;
+      margin-right: 0;
+      margin-top: -4rem;
+      width: 100%;
+      order: 2;
+    }
+
+    .border-text {
+      display: none;
+    }
+
+    .content-area {
+      padding: 2rem 0.75rem 1.5rem 0.75rem;
+    }
+
+    .contact-title {
+      text-align: center;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+    }
+
+    .contact-message {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .crisis-link {
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .crisis-link span {
+      display: none;
+    }
+
+    .arrow-button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .arrow-button svg {
+      width: 50px;
+      height: 50px;
+    }
+
+    .flower-overlay {
+      position: relative;
+      left: auto;
+      top: auto;
+      transform: none;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .flower-overlay img {
+      max-width: 250px;
+      transform: rotate(90deg);
+      display: block;
+    }
+
+    .contact-form-wrapper {
+      padding: 1.25rem;
+      margin-right: 0;
+    }
+
+    .form-title {
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .submit-button {
+      padding: 0.7rem 1rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Desktop - 768px and above */
+  @media (min-width: 768px) {
+    .submit-button {
+      width: auto;
+      padding: 1rem 2.5rem;
+    }
+  }
+
+  /* Medium screens - 768px to 1149px */
+  @media (min-width: 768px) and (max-width: 1149px) {
+    .magenta-container {
+      border-left: 60px solid #E91E8C;
+      min-height: 450px;
+      margin-right: 100px;
+    }
+
+    .border-text {
+      font-size: 1.5rem;
+      left: -52px;
+      top: 2.5rem;
+    }
+
+    .content-area {
+      padding: 3rem;
+      padding-right: 150px;
+    }
+
+    .flower-overlay {
+      right: 0;
+      left: auto;
+      top: -120px;
+      transform: none;
+    }
+
+    .flower-overlay img {
+      max-width: 300px;
+    }
+
+    .contact-form-wrapper {
+      margin-right: calc(50% - 50% + 100px);
+    }
+  }
+
+  /* Large Desktop - 1200px and above */
+  @media (min-width: 1200px) {
+    .content-area {
+      padding: 5rem;
+      padding-right: 500px;
+    }
+
+    .magenta-container {
+      min-height: 600px;
+    }
+
+    .flower-overlay img {
+      max-width: 650px;
+    }
+  }
+</style>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const formMessage = document.getElementById('form-message') as HTMLDivElement;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      subject: formData.get('subject') || 'Contact Form Submission',
+      message: formData.get('message'),
+    };
+
+    // Disable button and show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Sending...';
+
+    try {
+      // Call API endpoint
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        // Success
+        formMessage.style.display = 'block';
+        formMessage.className = 'form-message success';
+        formMessage.textContent = 'Message sent! We\'ll get back to you soon.';
+        form.reset();
+      } else {
+        throw new Error('Failed to send');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      formMessage.style.display = 'block';
+      formMessage.className = 'form-message error';
+      formMessage.textContent = 'Failed to send message. Please try again.';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+        Submit
+      `;
+    }
+  });
+</script>

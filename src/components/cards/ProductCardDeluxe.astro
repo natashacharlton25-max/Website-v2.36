@@ -1,0 +1,435 @@
+---
+/**
+ * Deluxe Product Card Component
+ * Based on dribbble design with photo gallery and variant selection
+ */
+
+export interface Props {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  price: number;
+  image: string;
+  images?: string[];
+  variants?: { image: string; color: string }[];
+  benefits?: string[];
+}
+
+const {
+  id,
+  name,
+  code,
+  description,
+  price,
+  image,
+  images = [],
+  variants = [],
+  benefits = []
+} = Astro.props;
+
+const allImages = images.length > 0 ? images : [image];
+---
+
+<div class="product-deluxe" data-product-id={id}>
+  <div class="product__photo">
+    <div class="photo-container">
+      <div class="photo-main">
+        <div class="controls">
+          <svg class="control-icon favorite-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <img src={image} alt={name} class="product-image-main" />
+      </div>
+      <div class="photo-album">
+        <ul>
+          {allImages.slice(0, 4).map((img) => (
+            <li><img src={img} alt={name} class="album-thumb" /></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="product__info">
+    <div class="title">
+      <h1>{name}</h1>
+      <span>COD: {code}</span>
+    </div>
+    <div class="price">
+      $ <span>{price.toFixed(2)}</span>
+    </div>
+    {variants.length > 0 && (
+      <div class="variant">
+        <h3>SELECT A COLOR</h3>
+        <ul>
+          {variants.map((variant) => (
+            <li data-color={variant.color}>
+              <img src={variant.image} alt={variant.color} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+    <div class="description">
+      <h3>DESCRIPTION</h3>
+      <p>{description}</p>
+      {benefits.length > 0 && (
+        <>
+          <h3 style="margin-top: 1em;">BENEFITS</h3>
+          <ul>
+            {benefits.map((benefit) => (
+              <li>{benefit}</li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+    <button class="buy-btn" data-product-id={id}>
+      ADD TO CART
+    </button>
+  </div>
+</div>
+
+<style>
+  .product-deluxe {
+    display: grid;
+    grid-template-columns: 0.9fr 1fr;
+    margin: 20px auto;
+    padding: 2.5em 0;
+    min-width: 600px;
+    max-width: 800px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow-xl);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .product-deluxe:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Photo Section */
+  .product__photo {
+    position: relative;
+  }
+
+  .photo-container {
+    position: absolute;
+    left: -2.5em;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    box-shadow: 4px 4px 25px -2px rgba(0, 0, 0, 0.3);
+  }
+
+  .photo-main {
+    position: relative;
+    border-radius: 8px 8px 0 0;
+    background: radial-gradient(circle, var(--color-Primary-200), var(--color-Primary-500));
+    padding: 0.8em;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    z-index: 10;
+  }
+
+  .control-icon {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
+  .control-icon:hover {
+    transform: scale(1.2);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
+
+  .favorite-icon:hover {
+    fill: var(--color-Secondary-400);
+  }
+
+  .product-image-main {
+    position: absolute;
+    left: -3.5em;
+    top: 2em;
+    max-width: 110%;
+    height: auto;
+    filter: saturate(150%) contrast(120%) drop-shadow(1px 20px 10px rgba(0, 0, 0, 0.3));
+    transition: transform 0.4s ease;
+  }
+
+  .product-deluxe:hover .product-image-main {
+    transform: scale(1.05) rotate(2deg);
+  }
+
+  .photo-album {
+    padding: 0.7em 1em;
+    border-radius: 0 0 8px 8px;
+    background-color: white;
+  }
+
+  .photo-album ul {
+    display: flex;
+    justify-content: space-around;
+    gap: 8px;
+  }
+
+  .photo-album li {
+    float: left;
+    width: 55px;
+    height: 55px;
+    padding: 7px;
+    border: 2px solid var(--color-Neutral-300);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .photo-album li:hover,
+  .photo-album li:first-child {
+    border-color: var(--color-Primary-500);
+    transform: translateY(-2px);
+  }
+
+  .album-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Info Section */
+  .product__info {
+    padding: 0.8em 2em 0.8em 0;
+  }
+
+  .title h1 {
+    margin-bottom: 0.1em;
+    color: var(--color-Text-700);
+    font-size: 1.8em;
+    font-weight: 900;
+  }
+
+  .title span {
+    font-size: 0.7em;
+    color: var(--color-Text-500);
+    letter-spacing: 1.2px;
+  }
+
+  .price {
+    margin: 1.5em 0;
+    color: var(--color-Primary-600);
+    font-size: 1.2em;
+    font-weight: 600;
+  }
+
+  .price span {
+    padding-left: 0.15em;
+    font-size: 2.4em;
+    font-weight: 700;
+  }
+
+  .variant {
+    overflow: visible;
+    margin-bottom: 1.5em;
+  }
+
+  .variant h3 {
+    margin-bottom: 1em;
+    font-size: 0.7em;
+    letter-spacing: 1.2px;
+    color: var(--color-Text-600);
+  }
+
+  .variant ul {
+    display: flex;
+    gap: 0.5em;
+    flex-wrap: wrap;
+  }
+
+  .variant li {
+    width: 45px;
+    height: 45px;
+    padding: 3px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    list-style: none;
+  }
+
+  .variant li:first-child,
+  .variant li:hover {
+    border-color: var(--color-Primary-500);
+    transform: scale(1.05);
+  }
+
+  .variant li img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .description {
+    clear: left;
+    margin: 2em 0;
+  }
+
+  .description h3 {
+    margin-bottom: 0.8em;
+    font-size: 0.7em;
+    letter-spacing: 1.2px;
+    color: var(--color-Text-600);
+  }
+
+  .description p {
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: var(--color-Text-600);
+    margin-bottom: 1em;
+  }
+
+  .description ul {
+    font-size: 0.85em;
+    list-style: disc;
+    margin-left: 1.2em;
+    color: var(--color-Text-600);
+  }
+
+  .description li {
+    text-indent: -0.6em;
+    margin-bottom: 0.5em;
+    padding-left: 0.6em;
+  }
+
+  .buy-btn {
+    padding: 1.2em 3em;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+    color: white;
+    background: var(--color-Primary-500);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .buy-btn:hover {
+    background: var(--color-Primary-600);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .buy-btn:active {
+    transform: scale(0.98);
+  }
+
+  .buy-btn.added {
+    background: var(--color-AccentTwo-500);
+  }
+
+  .buy-btn.added::after {
+    content: " ✓";
+  }
+
+  @media (max-width: 768px) {
+    .product-deluxe {
+      grid-template-columns: 1fr;
+      min-width: 100%;
+      padding: 1em;
+    }
+
+    .photo-container {
+      position: relative;
+      left: 0;
+      margin-bottom: 2em;
+    }
+
+    .product-image-main {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .product__info {
+      padding: 0.8em;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.buy-btn').forEach(button => {
+    button.addEventListener('click', function(this: HTMLElement) {
+      const card = this.closest('.product-deluxe');
+      if (!card) return;
+
+      const id = card.getAttribute('data-product-id') || '';
+      const name = card.querySelector('.title h1')?.textContent || '';
+      const priceText = card.querySelector('.price span')?.textContent || '0';
+      const price = parseFloat(priceText);
+      const image = (card.querySelector('.product-image-main') as HTMLImageElement)?.src;
+
+      if (typeof (window as any).addToCart === 'function') {
+        (window as any).addToCart({
+          id,
+          name,
+          price,
+          image
+        });
+
+        // Visual feedback
+        this.classList.add('added');
+        setTimeout(() => {
+          this.classList.remove('added');
+        }, 1500);
+      }
+    });
+  });
+
+  // Album image switcher
+  document.querySelectorAll('.album-thumb').forEach(thumb => {
+    thumb.addEventListener('click', function(this: HTMLElement) {
+      const card = this.closest('.product-deluxe');
+      if (!card) return;
+
+      const mainImage = card.querySelector('.product-image-main') as HTMLImageElement;
+      if (mainImage && this instanceof HTMLImageElement) {
+        mainImage.src = this.src;
+      }
+    });
+  });
+
+  // Variant selector
+  document.querySelectorAll('.variant li').forEach(variant => {
+    variant.addEventListener('click', function(this: HTMLElement) {
+      const card = this.closest('.product-deluxe');
+      if (!card) return;
+
+      // Remove active class from siblings
+      this.parentElement?.querySelectorAll('li').forEach(li => {
+        li.style.borderColor = 'transparent';
+      });
+
+      // Add active class to clicked variant
+      this.style.borderColor = 'var(--color-Primary-500)';
+
+      // Update main image if variant has image
+      const variantImage = this.querySelector('img') as HTMLImageElement;
+      const mainImage = card.querySelector('.product-image-main') as HTMLImageElement;
+      if (variantImage && mainImage) {
+        mainImage.src = variantImage.src;
+      }
+    });
+  });
+</script>

@@ -1,0 +1,753 @@
+---
+/**
+ * Reusable Product Template Layout
+ *
+ * Usage:
+ * import ProductLayout from '../layouts/ProductLayout.astro';
+ * <ProductLayout product={productData} relatedProducts={related} />
+ */
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  product: {
+    name: string;
+    slug: string;
+    category: string;
+    description: string;
+    price: number | string;
+    currency?: string;
+    type?: 'physical' | 'digital' | 'service';
+    image?: string;
+    images?: string[];
+    features?: string[];
+    specifications?: Array<{ label: string; value: string }>;
+    includes?: string[];
+    reviews?: Array<{
+      author: string;
+      rating: number;
+      comment: string;
+      date?: string;
+    }>;
+    tags?: string[];
+    stock?: number;
+    sku?: string;
+  };
+  relatedProducts?: Array<{
+    name: string;
+    slug: string;
+    price: number | string;
+    image?: string;
+    category: string;
+  }>;
+}
+
+const { product, relatedProducts = [] } = Astro.props;
+const mainImage = product.image || product.images?.[0] || 'https://placehold.co/600x600/e2e8f0/94a3b8?text=Product';
+---
+
+<BaseLayout
+  title={`${product.name} | Products`}
+  description={product.description}
+>
+  <!-- Breadcrumbs -->
+  <section class="breadcrumbs-section">
+    <div class="container container-7xl">
+      <nav class="breadcrumbs">
+        <a href="/">Home</a>
+        <span class="separator">›</span>
+        <a href="/products">Products</a>
+        <span class="separator">›</span>
+        <span class="current">{product.name}</span>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Product Details -->
+  <section class="product-section section">
+    <div class="container container-7xl">
+      <div class="product-grid">
+        <!-- Product Images -->
+        <div class="product-images">
+          <div class="main-image">
+            <img src={mainImage} alt={product.name} loading="eager" />
+          </div>
+          {product.images && product.images.length > 1 && (
+            <div class="thumbnail-grid">
+              {product.images.map((image, index) => (
+                <button class="thumbnail" data-image={image}>
+                  <img src={image} alt={`${product.name} view ${index + 1}`} loading="lazy" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info">
+          <div class="product-meta">
+            <span class="product-category">{product.category}</span>
+            {product.type && (
+              <span class="product-type">{product.type}</span>
+            )}
+            {product.sku && (
+              <span class="product-sku">SKU: {product.sku}</span>
+            )}
+          </div>
+
+          <h1 class="product-title">{product.name}</h1>
+
+          <p class="product-description">{product.description}</p>
+
+          <div class="product-price-section">
+            <div class="price-display">
+              <span class="price">${product.price}</span>
+              {product.currency && (
+                <span class="currency">{product.currency}</span>
+              )}
+            </div>
+            {typeof product.stock === 'number' && (
+              <div class="stock-status" class:list={[product.stock > 0 ? 'in-stock' : 'out-of-stock']}>
+                {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+              </div>
+            )}
+          </div>
+
+          <div class="product-actions">
+            <button
+              class="btn btn-primary btn-lg add-to-cart-btn"
+              data-product-id={product.slug}
+              data-product-name={product.name}
+              data-product-price={product.price}
+              data-product-image={mainImage}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+              Add to Cart
+            </button>
+            <a href="/contact" class="btn btn-outline btn-lg">
+              Ask Question
+            </a>
+          </div>
+
+          {product.tags && product.tags.length > 0 && (
+            <div class="product-tags">
+              {product.tags.map(tag => (
+                <span class="tag">{tag}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  {product.features && product.features.length > 0 && (
+    <section class="features-section section bg-alt">
+      <div class="container container-7xl">
+        <h2 class="section-title">Key Features</h2>
+        <div class="features-grid">
+          {product.features.map(feature => (
+            <div class="feature-item card">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <p>{feature}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Specifications -->
+  {product.specifications && product.specifications.length > 0 && (
+    <section class="specifications-section section">
+      <div class="container container-6xl">
+        <h2 class="section-title">Specifications</h2>
+        <div class="specifications-table card">
+          {product.specifications.map((spec) => (
+            <div class="spec-row">
+              <dt class="spec-label">{spec.label}</dt>
+              <dd class="spec-value">{spec.value}</dd>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- What's Included -->
+  {product.includes && product.includes.length > 0 && (
+    <section class="includes-section section bg-alt">
+      <div class="container container-6xl">
+        <h2 class="section-title">What's Included</h2>
+        <div class="includes-list">
+          {product.includes.map(item => (
+            <div class="include-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Reviews -->
+  {product.reviews && product.reviews.length > 0 && (
+    <section class="reviews-section section">
+      <div class="container container-7xl">
+        <h2 class="section-title">Customer Reviews</h2>
+        <div class="reviews-grid">
+          {product.reviews.map(review => (
+            <div class="review-card card">
+              <div class="review-header">
+                <div class="review-rating">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill={i < review.rating ? 'currentColor' : 'none'}
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                  ))}
+                </div>
+                {review.date && (
+                  <span class="review-date">{review.date}</span>
+                )}
+              </div>
+              <p class="review-comment">{review.comment}</p>
+              <div class="review-author">— {review.author}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Related Products -->
+  {relatedProducts.length > 0 && (
+    <section class="related-products-section section bg-alt">
+      <div class="container container-7xl">
+        <h2 class="section-title">You May Also Like</h2>
+        <div class="related-grid">
+          {relatedProducts.map(related => (
+            <article class="product-card card">
+              <a href={`/products/${related.slug}`} class="product-link">
+                <div class="product-image">
+                  <img src={related.image || 'https://placehold.co/400x400/e2e8f0/94a3b8?text=Product'} alt={related.name} loading="lazy" />
+                </div>
+                <div class="product-content">
+                  <span class="product-category">{related.category}</span>
+                  <h3 class="product-name">{related.name}</h3>
+                  <div class="product-price">${related.price}</div>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA -->
+  <section class="product-cta section">
+    <div class="container container-6xl">
+      <div class="cta-box card">
+        <h2 class="cta-title">Have Questions?</h2>
+        <p class="cta-description">
+          Our team is here to help you find the perfect product for your needs
+        </p>
+        <div class="cta-buttons">
+          <a href="/contact" class="btn btn-primary btn-lg">Contact Us</a>
+          <a href="/products" class="btn btn-outline btn-lg">Browse All Products</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Breadcrumbs */
+  .breadcrumbs-section {
+    padding: var(--space-lg) 0;
+    background: var(--color-Neutral-50);
+  }
+
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    flex-wrap: wrap;
+  }
+
+  .breadcrumbs a {
+    color: var(--color-Text-500);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--color-Primary-500);
+  }
+
+  .breadcrumbs .separator {
+    color: var(--color-Text-400);
+  }
+
+  .breadcrumbs .current {
+    color: var(--color-Text-700);
+    font-weight: var(--font-semibold);
+  }
+
+  /* Product Grid */
+  .product-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3xl);
+  }
+
+  .product-images {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .main-image {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--color-Neutral-50);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .main-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .thumbnail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .thumbnail {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 2px solid var(--color-Neutral-200);
+    background: var(--color-Neutral-50);
+    cursor: pointer;
+    transition: border-color var(--transition-fast);
+    padding: 0;
+  }
+
+  .thumbnail:hover {
+    border-color: var(--color-Primary-500);
+  }
+
+  .thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 1;
+    display: block;
+  }
+
+  /* Product Info */
+  .product-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .product-category,
+  .product-type,
+  .product-sku {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+  }
+
+  .product-category {
+    background: var(--color-Primary-100);
+    color: var(--color-Primary-700);
+  }
+
+  .product-type {
+    background: var(--color-Neutral-100);
+    color: var(--color-Text-600);
+  }
+
+  .product-sku {
+    background: var(--color-Neutral-100);
+    color: var(--color-Text-500);
+    font-size: var(--text-xs);
+  }
+
+  .product-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-lg);
+    color: var(--color-Text-800);
+    line-height: var(--leading-tight);
+  }
+
+  .product-description {
+    font-size: var(--text-lg);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-xl);
+  }
+
+  .product-price-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xl);
+    background: var(--color-Neutral-50);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .price-display {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+  }
+
+  .price {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Primary-500);
+  }
+
+  .currency {
+    font-size: var(--text-lg);
+    color: var(--color-Text-500);
+  }
+
+  .stock-status {
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+  }
+
+  .stock-status.in-stock {
+    background: var(--color-Success);
+    color: white;
+  }
+
+  .stock-status.out-of-stock {
+    background: var(--color-Danger);
+    color: white;
+  }
+
+  .product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+  }
+
+  .add-to-cart-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+  }
+
+  .product-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .tag {
+    padding: var(--space-xs) var(--space-md);
+    background: var(--color-Neutral-100);
+    color: var(--color-Text-600);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+  }
+
+  /* Sections - .bg-alt uses global class from utilities.css */
+
+  .section-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-3xl);
+    color: var(--color-Text-800);
+  }
+
+  /* Features */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+  }
+
+  .feature-item svg {
+    color: var(--color-Primary-500);
+    flex-shrink: 0;
+  }
+
+  .feature-item p {
+    margin: 0;
+    color: var(--color-Text-700);
+  }
+
+  /* Specifications */
+  .specifications-table {
+    padding: var(--space-xl);
+  }
+
+  .spec-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--space-lg);
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--color-Neutral-200);
+  }
+
+  .spec-row:last-child {
+    border-bottom: none;
+  }
+
+  .spec-label {
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-700);
+  }
+
+  .spec-value {
+    color: var(--color-Text-600);
+    margin: 0;
+  }
+
+  /* Includes */
+  .includes-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .include-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    color: var(--color-Text-700);
+  }
+
+  .include-item svg {
+    color: var(--color-Primary-500);
+    flex-shrink: 0;
+  }
+
+  /* Reviews */
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  .review-card {
+    padding: var(--space-xl);
+  }
+
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+  }
+
+  .review-rating {
+    display: flex;
+    gap: var(--space-xs);
+    color: var(--color-Warning);
+  }
+
+  .review-date {
+    font-size: var(--text-sm);
+    color: var(--color-Text-500);
+  }
+
+  .review-comment {
+    margin-bottom: var(--space-md);
+    color: var(--color-Text-700);
+    line-height: var(--leading-relaxed);
+  }
+
+  .review-author {
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-600);
+    font-size: var(--text-sm);
+  }
+
+  /* Related Products */
+  .related-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  .product-card {
+    transition: all var(--transition-base);
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .product-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .product-card .product-image {
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--color-Neutral-50);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .product-card .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-base);
+  }
+
+  .product-card:hover .product-image img {
+    transform: scale(1.1);
+  }
+
+  .product-card .product-content {
+    padding: var(--space-xl);
+  }
+
+  .product-card .product-category {
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-sm);
+  }
+
+  .product-card .product-name {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-sm);
+    color: var(--color-Text-800);
+  }
+
+  .product-card .product-price {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Primary-500);
+  }
+
+  /* CTA */
+  .cta-box {
+    padding: var(--space-3xl);
+    text-align: center;
+  }
+
+  .cta-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-md);
+    color: var(--color-Text-800);
+  }
+
+  .cta-description {
+    font-size: var(--text-lg);
+    color: var(--color-Text-600);
+    margin-bottom: var(--space-2xl);
+    line-height: var(--leading-relaxed);
+  }
+
+  .cta-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Responsive: Tablet */
+  @media (min-width: 768px) {
+    .product-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .features-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .reviews-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .related-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .product-actions,
+    .cta-buttons {
+      flex-direction: row;
+    }
+  }
+
+  /* Responsive: Desktop */
+  @media (min-width: 1024px) {
+    .features-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .related-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .product-title {
+      font-size: var(--text-5xl);
+    }
+
+    .cta-title {
+      font-size: var(--text-5xl);
+    }
+  }
+</style>
+
+<script>
+  // Image gallery functionality
+  document.querySelectorAll('.thumbnail').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      const newImage = thumb.getAttribute('data-image');
+      const mainImage = document.querySelector('.main-image img');
+      if (newImage && mainImage) {
+        mainImage.setAttribute('src', newImage);
+      }
+    });
+  });
+</script>

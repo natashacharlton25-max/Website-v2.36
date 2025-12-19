@@ -1,0 +1,363 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { allProducts, getProductBySlug } from '../../data/products';
+
+export async function getStaticPaths() {
+  return allProducts.map(product => ({
+    params: { slug: product.slug },
+    props: { product }
+  }));
+}
+
+const { product } = Astro.props;
+
+if (!product) {
+  return Astro.redirect('/products');
+}
+
+const isService = product.type === 'service';
+const isPDF = product.type === 'pdf_download';
+---
+
+<BaseLayout
+  title={`${product.name} | Products`}
+  description={product.description}
+>
+  <article class="product-detail">
+    <!-- Breadcrumbs -->
+    <section class="breadcrumbs-section">
+      <div class="container container-7xl">
+        <nav class="breadcrumbs">
+          <a href="/">Home</a>
+          <span class="separator">›</span>
+          <a href="/products">Products</a>
+          <span class="separator">›</span>
+          <span class="current">{product.name}</span>
+        </nav>
+      </div>
+    </section>
+
+    <!-- Product Header -->
+    <section class="product-header section">
+      <div class="container container-7xl">
+        <div class="product-grid">
+          <!-- Product Image -->
+          <div class="product-image-container" data-scroll-reveal="fade">
+            <div class="product-image">
+              <img src={product.image || 'https://placehold.co/600x600/e2e8f0/94a3b8?text=Product'} alt={product.name} />
+            </div>
+          </div>
+
+          <!-- Product Info -->
+          <div class="product-info" data-scroll-reveal="slide-left">
+            <div class="product-meta">
+              <span class="product-category">{product.category}</span>
+              <span class="product-type">{isService ? 'Service' : 'Digital Download'}</span>
+            </div>
+
+            <h1 class="product-title">{product.name}</h1>
+
+            <p class="product-description">{product.description}</p>
+
+            <div class="product-price">
+              <span class="price">${product.price}</span>
+              {product.currency && <span class="currency">{product.currency}</span>}
+            </div>
+
+            {isService && product.duration && (
+              <div class="product-duration">
+                <strong>Duration:</strong> {product.duration}
+              </div>
+            )}
+
+            {isPDF && product.fileSize && (
+              <div class="product-file-info">
+                <span><strong>Format:</strong> {product.format || 'PDF'}</span>
+                <span><strong>Size:</strong> {product.fileSize}</span>
+                {product.pageCount && <span><strong>Pages:</strong> {product.pageCount}</span>}
+              </div>
+            )}
+
+            <div class="product-actions">
+              {isService ? (
+                <a href={product.bookingUrl || '/contact'} class="btn btn-primary btn-lg">
+                  Book Now
+                </a>
+              ) : (
+                <button class="btn btn-primary btn-lg add-to-cart" data-product-id={product.id}>
+                  Add to Cart
+                </button>
+              )}
+            </div>
+
+            {product.tags && (
+              <div class="product-tags">
+                {product.tags.map(tag => (
+                  <span class="tag">{tag}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features / Includes -->
+    {(isService && product.includes) && (
+      <section class="features-section section bg-alt">
+        <div class="container container-6xl">
+          <h2 class="section-title" data-scroll-reveal="fade">What's Included</h2>
+          <div class="features-grid">
+            {product.includes.map((item, index) => (
+              <div class="feature-item" data-scroll-reveal="slide-up" data-scroll-delay={index * 0.1}>
+                <div class="feature-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Requirements (for services) -->
+    {(isService && product.requirements) && (
+      <section class="requirements-section section">
+        <div class="container container-6xl">
+          <h2 class="section-title" data-scroll-reveal="fade">Requirements</h2>
+          <div class="requirements-list">
+            {product.requirements.map((item, index) => (
+              <div class="requirement-item" data-scroll-reveal="slide-up" data-scroll-delay={index * 0.1}>
+                <span class="number">{index + 1}</span>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- CTA Section -->
+    <section class="product-cta section bg-alt">
+      <div class="container container-5xl text-center">
+        <h2 data-scroll-reveal="fade">Ready to Get Started?</h2>
+        <p data-scroll-reveal="slide-up">Have questions? We're here to help.</p>
+        <a href="/contact" class="btn btn-outline btn-lg" data-scroll-reveal="scale">
+          Contact Us
+        </a>
+      </div>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .breadcrumbs-section {
+    padding: var(--space-lg) 0;
+    background: var(--color-Background-100);
+  }
+
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+  }
+
+  .breadcrumbs a {
+    color: var(--color-Text-500);
+    text-decoration: none;
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--color-Primary-500);
+  }
+
+  .breadcrumbs .current {
+    color: var(--color-Text-800);
+    font-weight: var(--font-medium);
+  }
+
+  .product-grid {
+    display: grid;
+    gap: var(--space-3xl);
+  }
+
+  @media (min-width: 768px) {
+    .product-grid {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+  }
+
+  .product-image {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--color-Background-100);
+  }
+
+  .product-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .product-meta {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+
+  .product-category {
+    background: var(--color-Primary-100);
+    color: var(--color-Primary-700);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+  }
+
+  .product-type {
+    background: var(--color-Neutral-100);
+    color: var(--color-Text-600);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+  }
+
+  .product-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-lg);
+    color: var(--color-Text-900);
+  }
+
+  .product-description {
+    font-size: var(--text-lg);
+    color: var(--color-Text-600);
+    line-height: 1.7;
+    margin-bottom: var(--space-xl);
+  }
+
+  .product-price {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Primary-500);
+    margin-bottom: var(--space-lg);
+  }
+
+  .product-duration,
+  .product-file-info {
+    background: var(--color-Background-100);
+    padding: var(--space-md);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
+  }
+
+  .product-file-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-lg);
+  }
+
+  .product-actions {
+    margin-bottom: var(--space-xl);
+  }
+
+  .product-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .tag {
+    background: var(--color-Neutral-100);
+    color: var(--color-Text-600);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+  }
+
+  /* .bg-alt uses global class from utilities.css */
+
+  .section-title {
+    font-size: var(--text-2xl);
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+  }
+
+  .features-grid {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  @media (min-width: 768px) {
+    .features-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: white;
+    border-radius: var(--radius-lg);
+  }
+
+  .feature-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--color-Primary-500);
+    flex-shrink: 0;
+  }
+
+  .feature-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .requirements-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .requirement-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--color-Background-100);
+    border-radius: var(--radius-lg);
+  }
+
+  .requirement-item .number {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-Primary-500);
+    color: white;
+    border-radius: 50%;
+    font-weight: var(--font-bold);
+    font-size: var(--text-sm);
+    flex-shrink: 0;
+  }
+
+  .product-cta h2 {
+    font-size: var(--text-3xl);
+    margin-bottom: var(--space-md);
+  }
+
+  .product-cta p {
+    color: var(--color-Text-600);
+    margin-bottom: var(--space-xl);
+  }
+</style>

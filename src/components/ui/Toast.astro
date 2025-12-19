@@ -1,0 +1,64 @@
+---
+/**
+ * Toast Notification Component
+ * Enhanced with Lottie animations
+ *
+ * Features:
+ * - Lottie animation plays 3 times or max 10 seconds
+ * - Toast displays for 30 seconds
+ * - Click to dismiss instantly
+ * - Uses CSS token system (styles in global.css)
+ *
+ * @param theme - Visual theme (arcade, professional, brutalist, glass, neon)
+ * @param animation - Animation style (slide, bounce, fade, flip, zoom)
+ * @param message - Message to display
+ * @param duration - How long to show the toast (ms), default 30000
+ * @param lottieUrl - Optional custom Lottie animation URL
+ */
+
+import LottiePlayer from '../animations/LottiePlayer.astro';
+
+export interface Props {
+  theme?: 'arcade' | 'professional' | 'brutalist' | 'glass' | 'neon';
+  animation?: 'slide' | 'bounce' | 'fade' | 'flip' | 'zoom';
+  message: string;
+  duration?: number;
+  lottieUrl?: string;
+}
+
+const {
+  theme = 'professional',
+  animation = 'slide',
+  message,
+  duration = 30000,
+  lottieUrl
+} = Astro.props;
+
+const themeLottieUrls: Record<string, string> = {
+  arcade: '/Animated Icons/Toast Icons/Activity/activity.json',
+  professional: '/Animated Icons/Toast Icons/NotificationV3/notification-V3.json',
+  brutalist: '/Animated Icons/Toast Icons/Alert triangle/alertTriangle.json',
+  glass: '/Animated Icons/Toast Icons/Info/info.json',
+  neon: '/Animated Icons/Toast Icons/Thumb up/thumbUp.json'
+};
+
+const iconUrl = lottieUrl || themeLottieUrls[theme];
+---
+
+<div
+  class={`toast toast-${theme} toast-${animation}-animation`}
+  data-duration={duration}
+  role="alert"
+  aria-live="polite"
+>
+  <LottiePlayer
+    src={iconUrl}
+    width={32}
+    height={32}
+    loop={false}
+    autoplay={true}
+    className="toast-lottie-icon"
+  />
+  <span class="toast-message">{message}</span>
+  <div class="toast-glow"></div>
+</div>

@@ -1,0 +1,2671 @@
+---
+interface Props {
+  variant?: 'default' | 'tray' | 'teatray' | 'gradient' | 'glass' | 'bastile' | 'hilltop' | 'glassic';
+  size?: 'sm' | 'md' | 'lg';
+  shape?: 'button' | 'circle' | 'square';
+  animatedIcon?: string;
+  href?: string;
+  target?: '_blank' | '_self' | '_parent' | '_top';
+  disabled?: boolean;
+  class?: string;
+  cornerRadius?: 'sharp' | 'soft' | 'pill';
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  shape = 'button',
+  animatedIcon,
+  href = '#',
+  target = '_self',
+  disabled = false,
+  class: className = '',
+  cornerRadius,
+} = Astro.props;
+
+const Component = href ? 'a' : 'button';
+---
+
+<Component
+  class={`empower-button empower-button--${variant} empower-button--${size} empower-button--${shape} ${cornerRadius ? `empower-button--${cornerRadius}` : ''} ${className}`}
+  href={href}
+  target={target}
+  disabled={disabled}
+  aria-disabled={disabled}
+>
+  {shape === 'circle' || shape === 'square' ? (
+    animatedIcon ? (
+      <div class="empower-icon-container" data-animation={animatedIcon}></div>
+    ) : null
+  ) : (
+    <slot>Empower</slot>
+  )}
+</Component>
+
+<script>
+  class EmpowerButtonAnimations {
+    constructor() {
+      this.animations = new Map<HTMLElement, any>();
+      this.initializeAnimations();
+    }
+
+    initializeAnimations() {
+      const iconContainers = document.querySelectorAll('.empower-icon-container[data-animation]');
+
+      iconContainers.forEach(container => {
+        const animationType = container.dataset.animation;
+        const button = container.closest('.empower-button');
+        if (!button) return;
+
+        let animationPath;
+
+        // Map icon names to paths
+        if (animationType.includes('star')) {
+          animationPath = '/Animated Icons/Star/star.json';
+        } else if (animationType.includes('plus') || animationType.includes('Plus')) {
+          animationPath = '/Animated Icons/Plus to X/plusToX.json';
+        } else {
+          return;
+        }
+
+        if (typeof (window as any).lottie === 'undefined') return;
+
+        const animation = window.lottie.loadAnimation({
+          container: container,
+          renderer: 'svg',
+          loop: false,
+          autoplay: false,
+          path: animationPath
+        });
+
+        this.animations.set(container, animation);
+
+        // Set icon color to white after animation loads
+        animation.addEventListener('DOMLoaded', () => {
+          animation.goToAndStop(0, true);
+
+          setTimeout(() => {
+            const svgElements = container.querySelectorAll('svg *');
+            svgElements.forEach(el => {
+              if (el.getAttribute('fill') && el.getAttribute('fill') !== 'none') {
+                el.style.fill = 'white';
+                el.setAttribute('fill', 'white');
+              }
+              if (el.getAttribute('stroke') && el.getAttribute('stroke') !== 'none') {
+                el.style.stroke = 'white';
+                el.setAttribute('stroke', 'white');
+                el.style.strokeWidth = '3';
+                el.setAttribute('stroke-width', '3');
+              }
+            });
+          }, 100);
+        });
+
+        // Add hover handlers
+        button.addEventListener('mouseenter', () => {
+          animation.setDirection(1);
+          animation.play();
+        });
+
+        button.addEventListener('mouseleave', () => {
+          animation.setDirection(-1);
+          animation.play();
+        });
+      });
+    }
+  }
+
+  // Initialize on DOMContentLoaded and also on window load (in case lottie loads late)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      new EmpowerButtonAnimations();
+    });
+  } else {
+    new EmpowerButtonAnimations();
+  }
+
+  // Also initialize on window load to catch late-loading Lottie
+  window.addEventListener('load', () => {
+    if (typeof (window as any).lottie !== 'undefined') {
+      new EmpowerButtonAnimations();
+    }
+  });
+</script>
+
+<style>
+  .empower-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition-base);
+    box-shadow: var(--shadow-sm);
+
+    /* Remove browser button defaults */
+    background: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  /* Size variants with typography tokens */
+  .empower-button--sm {
+    padding: var(--space-md) var(--space-2xl);
+    /* Use Body Small Caps typography token */
+    font-family: var(--font-body);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-normal);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+
+  .empower-button--md {
+    padding: var(--space-lg) var(--space-3xl);
+    /* Use Body 2 Caps typography token */
+    font-family: var(--font-body);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  .empower-button--lg {
+    padding: var(--space-xl) var(--space-4xl);
+    /* Use Body 2 Caps typography token */
+    font-family: var(--font-body);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  /* Tray variant - 3D Enhanced with Inner Shadows like a tray */
+  .empower-button--tray {
+    background-color: var(--color-Primary-500);
+    color: var(--color-Background-50);
+    text-shadow: 0 0.0625em 0 var(--color-Primary-800);
+    transition: var(--transition-fast);
+    box-shadow:
+      /* Inner highlight */
+      inset 0 0.0625em 0 0 var(--color-Primary-400),
+      /* Inner shadow top and left */
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      /* 3D Layers using neutral colors - same as hover */
+      0 0.0625em 0 0 #999999,
+      0 0.125em 0 0 #888888,
+      0 0.25em 0 0 #777777,
+      0 0.3125em 0 0 #666666,
+      0 0.375em 0 0 #555555,
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      /* Final shadow with blur */
+      0 0.425em 0.5em 0 #666666,
+      /* Darker drop shadow bottom and right */
+      8px 8px 16px rgba(0, 0, 0, 0.6);
+  }
+
+  .empower-button--tray:hover {
+    background-color: var(--color-Primary-600);
+    color: var(--color-Background-50);
+    text-shadow: 0 0.0625em 0 var(--color-Primary-800);
+    transform: translateY(0.125em);
+    box-shadow:
+      /* Inner shadows for pressed effect - same as neumorphic */
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      /* Neumorphic surface shadows - same as neumorphic */
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      /* Compressed layers - darker neutral colors */
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #666666,
+      0 0.0625em 0 0 #555555,
+      0 0.125em 0 0 #444444,
+      0 0.125em 0 0 #333333,
+      0 0.2em 0 0 #222222,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      /* Reduced final shadow */
+      0 0.225em 0.375em 0 #333333;
+  }
+
+  .empower-button--tray:active {
+    transform: translateY(0.225em);
+    box-shadow:
+      /* Very compressed layers */
+      inset 0 0.03em 0 0 var(--color-Primary-400),
+      0 0.03em 0 0 var(--color-Primary-700),
+      0 0.0625em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.2em 0 0 var(--color-Primary-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      /* Minimal final shadow */
+      0 0.225em 0.375em 0 var(--color-Primary-800);
+  }
+
+  .empower-button--tray:focus {
+    box-shadow:
+      /* Maintain 3D layers - pure primary colors */
+      inset 0 0.0625em 0 0 var(--color-Primary-400),
+      0 0.0625em 0 0 var(--color-Primary-600),
+      0 0.125em 0 0 var(--color-Primary-700),
+      0 0.25em 0 0 var(--color-Primary-800),
+      0 0.3125em 0 0 var(--color-Primary-800),
+      0 0.375em 0 0 var(--color-Primary-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-Primary-800),
+      /* Add focus ring */
+      0 0 0 2px var(--color-Primary-200);
+  }
+
+  .empower-button--tray:focus-visible {
+    box-shadow:
+      /* Maintain 3D layers - pure primary colors */
+      inset 0 0.0625em 0 0 var(--color-Primary-400),
+      0 0.0625em 0 0 var(--color-Primary-600),
+      0 0.125em 0 0 var(--color-Primary-700),
+      0 0.25em 0 0 var(--color-Primary-800),
+      0 0.3125em 0 0 var(--color-Primary-800),
+      0 0.375em 0 0 var(--color-Primary-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-Primary-800),
+      /* Stronger focus ring */
+      0 0 0 2px var(--color-Primary-400);
+  }
+
+  /* Default variant - 3D Enhanced - Pure Secondary Colors */
+  .empower-button--default {
+    background-color: var(--color-Secondary-500);
+    color: var(--color-Background-50);
+    text-shadow: 0 0.0625em 0 var(--color-Secondary-800);
+    transition: var(--transition-fast);
+    box-shadow:
+      /* Inner highlight */
+      inset 0 0.0625em 0 0 var(--color-Secondary-400),
+      /* 3D Layers using ONLY secondary color variants */
+      0 0.0625em 0 0 var(--color-Secondary-600),
+      0 0.125em 0 0 var(--color-Secondary-700),
+      0 0.25em 0 0 var(--color-Secondary-800),
+      0 0.3125em 0 0 var(--color-Secondary-800),
+      0 0.375em 0 0 var(--color-Secondary-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      /* Final shadow with blur */
+      0 0.425em 0.5em 0 var(--color-Secondary-800);
+  }
+
+  .empower-button--default:hover {
+    background-color: var(--color-Secondary-600);
+    color: var(--color-Background-50);
+    text-shadow: 0 0.0625em 0 var(--color-Secondary-800);
+    transform: translateY(0.125em);
+    box-shadow:
+      /* Compressed layers - pure secondary */
+      inset 0 0.03em 0 0 var(--color-Secondary-400),
+      0 0.03em 0 0 var(--color-Secondary-700),
+      0 0.0625em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.2em 0 0 var(--color-Secondary-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      /* Reduced final shadow */
+      0 0.225em 0.375em 0 var(--color-Secondary-800);
+  }
+
+  .empower-button--default:active {
+    transform: translateY(0.225em);
+    box-shadow:
+      /* Very compressed layers */
+      inset 0 0.03em 0 0 var(--color-Secondary-400),
+      0 0.03em 0 0 var(--color-Secondary-700),
+      0 0.0625em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.2em 0 0 var(--color-Secondary-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      /* Minimal final shadow */
+      0 0.225em 0.375em 0 var(--color-Secondary-800);
+  }
+
+  .empower-button--default:focus {
+    box-shadow:
+      /* Maintain 3D layers - pure secondary colors */
+      inset 0 0.0625em 0 0 var(--color-Secondary-400),
+      0 0.0625em 0 0 var(--color-Secondary-600),
+      0 0.125em 0 0 var(--color-Secondary-700),
+      0 0.25em 0 0 var(--color-Secondary-800),
+      0 0.3125em 0 0 var(--color-Secondary-800),
+      0 0.375em 0 0 var(--color-Secondary-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-Secondary-800),
+      /* Add focus ring */
+      0 0 0 2px var(--color-Secondary-200);
+  }
+
+  .empower-button--default:focus-visible {
+    box-shadow:
+      /* Maintain 3D layers - pure secondary colors */
+      inset 0 0.0625em 0 0 var(--color-Secondary-400),
+      0 0.0625em 0 0 var(--color-Secondary-600),
+      0 0.125em 0 0 var(--color-Secondary-700),
+      0 0.25em 0 0 var(--color-Secondary-800),
+      0 0.3125em 0 0 var(--color-Secondary-800),
+      0 0.375em 0 0 var(--color-Secondary-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-Secondary-800),
+      /* Stronger focus ring */
+      0 0 0 2px var(--color-Secondary-400);
+  }
+
+  /* Accent variant - 3D Enhanced */
+  .empower-button--accent {
+    background-color: var(--color-AccentTwo-600);
+    color: var(--color-Background-50);
+    text-shadow: 0 0.0625em 0 var(--color-AccentTwo-800);
+    transition: var(--transition-fast);
+    box-shadow:
+      /* Inner highlight */
+      inset 0 0.0625em 0 0 var(--color-AccentTwo-500),
+      /* 3D Layers using only AccentTwo color variants */
+      0 0.0625em 0 0 var(--color-AccentTwo-700),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.25em 0 0 var(--color-AccentTwo-800),
+      0 0.3125em 0 0 var(--color-AccentTwo-800),
+      0 0.375em 0 0 var(--color-AccentTwo-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      /* Final shadow with blur */
+      0 0.425em 0.5em 0 var(--color-AccentTwo-800);
+  }
+
+  .empower-button--accent:hover {
+    background-color: var(--color-AccentOne-600);
+    color: var(--color-Background-50);
+    text-shadow: 0 0.0625em 0 var(--color-AccentOne-800);
+    transform: translateY(0.125em);
+    box-shadow:
+      /* Compressed layers */
+      inset 0 0.03em 0 0 var(--color-AccentOne-500),
+      0 0.03em 0 0 var(--color-AccentOne-700),
+      0 0.0625em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentTwo-700),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.2em 0 0 var(--color-Primary-800),
+      0 0.225em 0 0 var(--color-Primary-900),
+      /* Reduced final shadow */
+      0 0.225em 0.375em 0 var(--color-AccentOne-800);
+  }
+
+  .empower-button--accent:active {
+    transform: translateY(0.225em);
+    box-shadow:
+      /* Very compressed layers */
+      inset 0 0.03em 0 0 var(--color-AccentOne-500),
+      0 0.03em 0 0 var(--color-AccentOne-700),
+      0 0.0625em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentTwo-700),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.2em 0 0 var(--color-Primary-800),
+      0 0.225em 0 0 var(--color-Primary-900),
+      /* Minimal final shadow */
+      0 0.225em 0.375em 0 var(--color-AccentOne-800);
+  }
+
+  .empower-button--accent:focus {
+    box-shadow:
+      /* Maintain 3D layers */
+      inset 0 0.0625em 0 0 var(--color-AccentTwo-500),
+      0 0.0625em 0 0 var(--color-AccentTwo-700),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.25em 0 0 var(--color-AccentOne-600),
+      0 0.3125em 0 0 var(--color-AccentOne-700),
+      0 0.375em 0 0 var(--color-AccentOne-800),
+      0 0.425em 0 0 var(--color-Primary-800),
+      0 0.425em 0.5em 0 var(--color-AccentTwo-800),
+      /* Add focus ring */
+      0 0 0 2px var(--color-AccentTwo-300);
+  }
+
+  .empower-button--accent:focus-visible {
+    box-shadow:
+      /* Maintain 3D layers */
+      inset 0 0.0625em 0 0 var(--color-AccentTwo-500),
+      0 0.0625em 0 0 var(--color-AccentTwo-700),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.25em 0 0 var(--color-AccentOne-600),
+      0 0.3125em 0 0 var(--color-AccentOne-700),
+      0 0.375em 0 0 var(--color-AccentOne-800),
+      0 0.425em 0 0 var(--color-Primary-800),
+      0 0.425em 0.5em 0 var(--color-AccentTwo-800),
+      /* Stronger focus ring */
+      0 0 0 2px var(--color-AccentTwo-500);
+  }
+
+
+  /* Gradient variant - uses gradient tokens from Gradient.css */
+  .empower-button--gradient {
+    background: var(--gradient-hero);
+    color: var(--color-Background-50);
+    text-shadow: 0 0.0625em 0 var(--color-Primary-900);
+    transition: var(--transition-fast);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    box-shadow:
+      /* Inner highlight */
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.2),
+      /* 3D Layers using only Primary colors for consistent foundation */
+      0 0.0625em 0 0 var(--color-Primary-700),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.25em 0 0 var(--color-Primary-800),
+      0 0.3125em 0 0 var(--color-Primary-900),
+      0 0.375em 0 0 var(--color-Primary-900),
+      0 0.425em 0 0 var(--color-black-t-15),
+      /* Final shadow with blur */
+      0 0.425em 0.5em 0 var(--color-Primary-900);
+  }
+
+  .empower-button--gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--gradient:hover::before {
+    left: 100%;
+  }
+
+  .empower-button--gradient:hover {
+    background: var(--gradient-hero);
+    transform: translateY(0.125em);
+    box-shadow:
+      /* Compressed 3D layers */
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.03em 0 0 var(--color-Primary-700),
+      0 0.0625em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.2em 0 0 var(--color-Primary-900),
+      0 0.225em 0 0 var(--color-black-t-15),
+      /* Reduced final shadow */
+      0 0.225em 0.375em 0 var(--color-Primary-900);
+  }
+
+  .empower-button--gradient:active {
+    transform: translateY(0.225em);
+    box-shadow:
+      /* Very compressed layers */
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.03em 0 0 var(--color-Primary-700),
+      0 0.0625em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Secondary-700),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.2em 0 0 var(--color-Primary-900),
+      0 0.225em 0 0 var(--color-black-t-15),
+      /* Minimal final shadow */
+      0 0.225em 0.375em 0 var(--color-Primary-900);
+  }
+
+  .empower-button--gradient:focus {
+    box-shadow:
+      /* Maintain 3D layers */
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.0625em 0 0 var(--color-Primary-700),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.25em 0 0 var(--color-Secondary-700),
+      0 0.3125em 0 0 var(--color-Secondary-800),
+      0 0.375em 0 0 var(--color-Primary-900),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-Primary-900),
+      /* Add focus ring */
+      0 0 0 2px var(--color-Background-50);
+  }
+
+  .empower-button--gradient:focus-visible {
+    box-shadow:
+      /* Maintain 3D layers */
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.0625em 0 0 var(--color-Primary-700),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.25em 0 0 var(--color-Secondary-700),
+      0 0.3125em 0 0 var(--color-Secondary-800),
+      0 0.375em 0 0 var(--color-Primary-900),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-Primary-900),
+      /* Stronger focus ring */
+      0 0 0 2px var(--color-AccentOne-400);
+  }
+
+  /* Gradient variant color modifiers - uses gradient tokens */
+  .empower-button--gradient.empower-button--primary {
+    background: var(--gradient-primary) !important;
+    text-shadow: 0 0.0625em 0 var(--color-Primary-900) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.0625em 0 0 var(--color-Primary-700),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.25em 0 0 var(--color-Primary-800),
+      0 0.3125em 0 0 var(--color-Primary-900),
+      0 0.375em 0 0 var(--color-Primary-900),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-Primary-900) !important;
+  }
+
+  .empower-button--gradient.empower-button--primary:hover {
+    background: var(--gradient-primary-intense) !important;
+    transform: translateY(0.125em) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.03em 0 0 var(--color-Primary-700),
+      0 0.0625em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.2em 0 0 var(--color-Primary-900),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-Primary-900) !important;
+  }
+
+  .empower-button--gradient.empower-button--secondary {
+    background: var(--gradient-secondary) !important;
+    text-shadow: 0 0.0625em 0 var(--color-Secondary-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.0625em 0 0 var(--color-Secondary-700),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.25em 0 0 var(--color-Secondary-800),
+      0 0.3125em 0 0 var(--color-Secondary-800),
+      0 0.375em 0 0 var(--color-Secondary-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-Secondary-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--secondary:hover {
+    background: var(--gradient-secondary-intense) !important;
+    transform: translateY(0.125em) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.03em 0 0 var(--color-Secondary-700),
+      0 0.0625em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.2em 0 0 var(--color-Secondary-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-Secondary-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--accent1 {
+    background: var(--gradient-accent1) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentOne-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.0625em 0 0 var(--color-AccentOne-700),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.25em 0 0 var(--color-AccentOne-800),
+      0 0.3125em 0 0 var(--color-AccentOne-800),
+      0 0.375em 0 0 var(--color-AccentOne-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentOne-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--accent1:hover {
+    background: var(--gradient-accent1-intense) !important;
+    transform: translateY(0.125em) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.03em 0 0 var(--color-AccentOne-700),
+      0 0.0625em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.2em 0 0 var(--color-AccentOne-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentOne-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--accent2 {
+    background: var(--gradient-accent2) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentTwo-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.0625em 0 0 var(--color-AccentTwo-700),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.25em 0 0 var(--color-AccentTwo-800),
+      0 0.3125em 0 0 var(--color-AccentTwo-800),
+      0 0.375em 0 0 var(--color-AccentTwo-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentTwo-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--accent2:hover {
+    background: var(--gradient-accent2-intense) !important;
+    transform: translateY(0.125em) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.03em 0 0 var(--color-AccentTwo-700),
+      0 0.0625em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.2em 0 0 var(--color-AccentTwo-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentTwo-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--accent3 {
+    background: var(--gradient-accent3) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentThree-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.0625em 0 0 var(--color-AccentThree-700),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.25em 0 0 var(--color-AccentThree-800),
+      0 0.3125em 0 0 var(--color-AccentThree-800),
+      0 0.375em 0 0 var(--color-AccentThree-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentThree-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--accent3:hover {
+    background: var(--gradient-accent3-intense) !important;
+    transform: translateY(0.125em) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.03em 0 0 var(--color-AccentThree-700),
+      0 0.0625em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.2em 0 0 var(--color-AccentThree-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentThree-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--accent4 {
+    background: var(--gradient-accent4) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentFour-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.0625em 0 0 var(--color-AccentFour-700),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.25em 0 0 var(--color-AccentFour-800),
+      0 0.3125em 0 0 var(--color-AccentFour-800),
+      0 0.375em 0 0 var(--color-AccentFour-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentFour-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--accent4:hover {
+    background: var(--gradient-accent4-intense) !important;
+    transform: translateY(0.125em) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.03em 0 0 var(--color-AccentFour-700),
+      0 0.0625em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.2em 0 0 var(--color-AccentFour-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentFour-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--accent5 {
+    background: var(--gradient-accent5) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentFive-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.0625em 0 0 var(--color-AccentFive-700),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.25em 0 0 var(--color-AccentFive-800),
+      0 0.3125em 0 0 var(--color-AccentFive-800),
+      0 0.375em 0 0 var(--color-AccentFive-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentFive-800) !important;
+  }
+
+  .empower-button--gradient.empower-button--accent5:hover {
+    background: var(--gradient-accent5-intense) !important;
+    transform: translateY(0.125em) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.2),
+      0 0.03em 0 0 var(--color-AccentFive-700),
+      0 0.0625em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.2em 0 0 var(--color-AccentFive-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentFive-800) !important;
+  }
+
+  /* Letter spacing stays consistent - no expansion on hover for 3D effect */
+
+  /* Color modifier classes - ONLY for default variant */
+  /* All shadows, layers, and glows use the same color token */
+
+  .empower-button--default.empower-button--primary {
+    background-color: var(--color-Primary-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-Primary-800) !important;
+    box-shadow:
+      /* Inner highlight */
+      inset 0 0.0625em 0 0 var(--color-Primary-400),
+      /* 3D Layers using primary color variants */
+      0 0.0625em 0 0 var(--color-Primary-600),
+      0 0.125em 0 0 var(--color-Primary-700),
+      0 0.25em 0 0 var(--color-Primary-800),
+      0 0.3125em 0 0 var(--color-Primary-800),
+      0 0.375em 0 0 var(--color-Primary-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      /* Final shadow with blur */
+      0 0.425em 0.5em 0 var(--color-Primary-800) !important;
+  }
+
+  .empower-button--default.empower-button--primary:hover {
+    background-color: var(--color-Primary-600) !important;
+    transform: translateY(0.125em);
+    box-shadow:
+      /* Compressed layers - primary colors */
+      inset 0 0.03em 0 0 var(--color-Primary-400),
+      0 0.03em 0 0 var(--color-Primary-700),
+      0 0.0625em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.2em 0 0 var(--color-Primary-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      /* Reduced final shadow */
+      0 0.225em 0.375em 0 var(--color-Primary-800) !important;
+  }
+
+  .empower-button--default.empower-button--secondary {
+    background-color: var(--color-Secondary-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-Secondary-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-Secondary-400),
+      0 0.0625em 0 0 var(--color-Secondary-600),
+      0 0.125em 0 0 var(--color-Secondary-700),
+      0 0.25em 0 0 var(--color-Secondary-800),
+      0 0.3125em 0 0 var(--color-Secondary-800),
+      0 0.375em 0 0 var(--color-Secondary-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-Secondary-800) !important;
+  }
+
+  .empower-button--default.empower-button--secondary:hover {
+    background-color: var(--color-Secondary-600) !important;
+    transform: translateY(0.125em);
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-Secondary-400),
+      0 0.03em 0 0 var(--color-Secondary-700),
+      0 0.0625em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.2em 0 0 var(--color-Secondary-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-Secondary-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent1 {
+    background-color: var(--color-AccentOne-600) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentOne-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-AccentOne-400),
+      0 0.0625em 0 0 var(--color-AccentOne-600),
+      0 0.125em 0 0 var(--color-AccentOne-700),
+      0 0.25em 0 0 var(--color-AccentOne-800),
+      0 0.3125em 0 0 var(--color-AccentOne-800),
+      0 0.375em 0 0 var(--color-AccentOne-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentOne-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent1:hover {
+    background-color: var(--color-AccentOne-700) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-AccentOne-400),
+      0 0.03em 0 0 var(--color-AccentOne-700),
+      0 0.0625em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.2em 0 0 var(--color-AccentOne-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentOne-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent2 {
+    background-color: var(--color-AccentTwo-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentTwo-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-AccentTwo-400),
+      0 0.0625em 0 0 var(--color-AccentTwo-700),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.25em 0 0 var(--color-AccentTwo-800),
+      0 0.3125em 0 0 var(--color-AccentTwo-800),
+      0 0.375em 0 0 var(--color-AccentTwo-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentTwo-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent2:hover {
+    background-color: var(--color-AccentTwo-600) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-AccentTwo-400),
+      0 0.03em 0 0 var(--color-AccentTwo-700),
+      0 0.0625em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.2em 0 0 var(--color-AccentTwo-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentTwo-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent3 {
+    background-color: var(--color-AccentThree-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentThree-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-AccentThree-400),
+      0 0.0625em 0 0 var(--color-AccentThree-700),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.25em 0 0 var(--color-AccentThree-800),
+      0 0.3125em 0 0 var(--color-AccentThree-800),
+      0 0.375em 0 0 var(--color-AccentThree-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentThree-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent3:hover {
+    background-color: var(--color-AccentThree-600) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-AccentThree-400),
+      0 0.03em 0 0 var(--color-AccentThree-700),
+      0 0.0625em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.2em 0 0 var(--color-AccentThree-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentThree-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent4 {
+    background-color: var(--color-AccentFour-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentFour-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-AccentFour-400),
+      0 0.0625em 0 0 var(--color-AccentFour-700),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.25em 0 0 var(--color-AccentFour-800),
+      0 0.3125em 0 0 var(--color-AccentFour-800),
+      0 0.375em 0 0 var(--color-AccentFour-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentFour-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent4:hover {
+    background-color: var(--color-AccentFour-600) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-AccentFour-400),
+      0 0.03em 0 0 var(--color-AccentFour-700),
+      0 0.0625em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.2em 0 0 var(--color-AccentFour-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentFour-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent5 {
+    background-color: var(--color-AccentFive-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentFive-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-AccentFive-400),
+      0 0.0625em 0 0 var(--color-AccentFive-700),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.25em 0 0 var(--color-AccentFive-800),
+      0 0.3125em 0 0 var(--color-AccentFive-800),
+      0 0.375em 0 0 var(--color-AccentFive-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentFive-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent5:hover {
+    background-color: var(--color-AccentFive-600) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-AccentFive-400),
+      0 0.03em 0 0 var(--color-AccentFive-700),
+      0 0.0625em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.2em 0 0 var(--color-AccentFive-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentFive-800) !important;
+  }
+
+  /* Tray variant - white/neutral 3D layers for ALL colors */
+  .empower-button--tray.empower-button--primary,
+  .empower-button--tray.empower-button--secondary,
+  .empower-button--tray.empower-button--accent1,
+  .empower-button--tray.empower-button--accent2,
+  .empower-button--tray.empower-button--accent3,
+  .empower-button--tray.empower-button--accent4,
+  .empower-button--tray.empower-button--accent5 {
+    box-shadow:
+      /* Inner highlight */
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.3),
+      /* Inner shadow top and left */
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      /* 3D Layers using neutral colors - white/cream */
+      0 0.0625em 0 0 #999999,
+      0 0.125em 0 0 #888888,
+      0 0.25em 0 0 #777777,
+      0 0.3125em 0 0 #666666,
+      0 0.375em 0 0 #555555,
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      /* Final shadow with blur */
+      0 0.425em 0.5em 0 #666666,
+      /* Darker drop shadow bottom and right */
+      8px 8px 16px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  .empower-button--tray.empower-button--primary:hover,
+  .empower-button--tray.empower-button--secondary:hover,
+  .empower-button--tray.empower-button--accent1:hover,
+  .empower-button--tray.empower-button--accent2:hover,
+  .empower-button--tray.empower-button--accent3:hover,
+  .empower-button--tray.empower-button--accent4:hover,
+  .empower-button--tray.empower-button--accent5:hover {
+    box-shadow:
+      /* Inner shadows for pressed effect */
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      /* Neumorphic surface shadows */
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      /* Compressed layers - white/neutral colors */
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #666666,
+      0 0.0625em 0 0 #555555,
+      0 0.125em 0 0 #444444,
+      0 0.125em 0 0 #333333,
+      0 0.2em 0 0 #222222,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      /* Reduced final shadow */
+      0 0.225em 0.375em 0 #333333 !important;
+  }
+
+  .empower-button--tray.empower-button--primary {
+    background-color: var(--color-Primary-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-Primary-800) !important;
+  }
+
+  .empower-button--tray.empower-button--primary:hover {
+    background-color: var(--color-Primary-600) !important;
+  }
+
+  .empower-button--tray.empower-button--secondary {
+    background-color: var(--color-Secondary-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-Secondary-800) !important;
+  }
+
+  .empower-button--tray.empower-button--secondary:hover {
+    background-color: var(--color-Secondary-600) !important;
+  }
+
+  .empower-button--tray.empower-button--accent1 {
+    background-color: var(--color-AccentOne-600) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentOne-800) !important;
+  }
+
+  .empower-button--tray.empower-button--accent1:hover {
+    background-color: var(--color-AccentOne-700) !important;
+  }
+
+  .empower-button--tray.empower-button--accent2 {
+    background-color: var(--color-AccentTwo-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentTwo-800) !important;
+  }
+
+  .empower-button--tray.empower-button--accent2:hover {
+    background-color: var(--color-AccentTwo-600) !important;
+  }
+
+  .empower-button--tray.empower-button--accent3 {
+    background-color: var(--color-AccentThree-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentThree-800) !important;
+  }
+
+  .empower-button--tray.empower-button--accent3:hover {
+    background-color: var(--color-AccentThree-600) !important;
+  }
+
+  .empower-button--tray.empower-button--accent4 {
+    background-color: var(--color-AccentFour-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentFour-800) !important;
+  }
+
+  .empower-button--tray.empower-button--accent4:hover {
+    background-color: var(--color-AccentFour-600) !important;
+  }
+
+  .empower-button--tray.empower-button--accent5 {
+    background-color: var(--color-AccentFive-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentFive-800) !important;
+  }
+
+  .empower-button--tray.empower-button--accent5:hover {
+    background-color: var(--color-AccentFive-600) !important;
+  }
+
+  /* Teatray variant - default style with inner shadows on static, tray hover */
+  .empower-button--teatray.empower-button--primary {
+    background-color: var(--color-Primary-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-Primary-800) !important;
+    box-shadow:
+      /* Inner highlight */
+      inset 0 0.0625em 0 0 var(--color-Primary-400),
+      /* 3D Layers using primary color variants */
+      0 0.0625em 0 0 var(--color-Primary-600),
+      0 0.125em 0 0 var(--color-Primary-700),
+      0 0.25em 0 0 var(--color-Primary-800),
+      0 0.3125em 0 0 var(--color-Primary-800),
+      0 0.375em 0 0 var(--color-Primary-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      /* Final shadow with blur */
+      0 0.425em 0.5em 0 var(--color-Primary-800) !important;
+  }
+
+  .empower-button--teatray.empower-button--primary:hover {
+    background-color: var(--color-Primary-600) !important;
+    transform: translateY(0.125em);
+    box-shadow:
+      /* Inner shadows for pressed effect */
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      /* Neumorphic surface shadows */
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      /* Compressed layers - white/neutral colors */
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #666666,
+      0 0.0625em 0 0 #555555,
+      0 0.125em 0 0 #444444,
+      0 0.125em 0 0 #333333,
+      0 0.2em 0 0 #222222,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      /* Reduced final shadow */
+      0 0.225em 0.375em 0 #333333 !important;
+  }
+
+  .empower-button--teatray.empower-button--secondary {
+    background-color: var(--color-Secondary-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-Secondary-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-Secondary-400),
+      0 0.0625em 0 0 var(--color-Secondary-600),
+      0 0.125em 0 0 var(--color-Secondary-700),
+      0 0.25em 0 0 var(--color-Secondary-800),
+      0 0.3125em 0 0 var(--color-Secondary-800),
+      0 0.375em 0 0 var(--color-Secondary-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-Secondary-800) !important;
+  }
+
+  .empower-button--teatray.empower-button--secondary:hover {
+    background-color: var(--color-Secondary-600) !important;
+    transform: translateY(0.125em);
+    box-shadow:
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #666666,
+      0 0.0625em 0 0 #555555,
+      0 0.125em 0 0 #444444,
+      0 0.125em 0 0 #333333,
+      0 0.2em 0 0 #222222,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 #333333 !important;
+  }
+
+  .empower-button--teatray.empower-button--accent1 {
+    background-color: var(--color-AccentOne-600) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentOne-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-AccentOne-400),
+      0 0.0625em 0 0 var(--color-AccentOne-600),
+      0 0.125em 0 0 var(--color-AccentOne-700),
+      0 0.25em 0 0 var(--color-AccentOne-800),
+      0 0.3125em 0 0 var(--color-AccentOne-800),
+      0 0.375em 0 0 var(--color-AccentOne-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentOne-800) !important;
+  }
+
+  .empower-button--teatray.empower-button--accent1:hover {
+    background-color: var(--color-AccentOne-700) !important;
+    box-shadow:
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #666666,
+      0 0.0625em 0 0 #555555,
+      0 0.125em 0 0 #444444,
+      0 0.125em 0 0 #333333,
+      0 0.2em 0 0 #222222,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 #333333 !important;
+  }
+
+  .empower-button--teatray.empower-button--accent2 {
+    background-color: var(--color-AccentTwo-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentTwo-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-AccentTwo-400),
+      0 0.0625em 0 0 var(--color-AccentTwo-700),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.25em 0 0 var(--color-AccentTwo-800),
+      0 0.3125em 0 0 var(--color-AccentTwo-800),
+      0 0.375em 0 0 var(--color-AccentTwo-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentTwo-800) !important;
+  }
+
+  .empower-button--teatray.empower-button--accent2:hover {
+    background-color: var(--color-AccentTwo-600) !important;
+    box-shadow:
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #666666,
+      0 0.0625em 0 0 #555555,
+      0 0.125em 0 0 #444444,
+      0 0.125em 0 0 #333333,
+      0 0.2em 0 0 #222222,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 #333333 !important;
+  }
+
+  .empower-button--teatray.empower-button--accent3 {
+    background-color: var(--color-AccentThree-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentThree-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-AccentThree-400),
+      0 0.0625em 0 0 var(--color-AccentThree-700),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.25em 0 0 var(--color-AccentThree-800),
+      0 0.3125em 0 0 var(--color-AccentThree-800),
+      0 0.375em 0 0 var(--color-AccentThree-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentThree-800) !important;
+  }
+
+  .empower-button--teatray.empower-button--accent3:hover {
+    background-color: var(--color-AccentThree-600) !important;
+    box-shadow:
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #666666,
+      0 0.0625em 0 0 #555555,
+      0 0.125em 0 0 #444444,
+      0 0.125em 0 0 #333333,
+      0 0.2em 0 0 #222222,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 #333333 !important;
+  }
+
+  .empower-button--teatray.empower-button--accent4 {
+    background-color: var(--color-AccentFour-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentFour-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-AccentFour-400),
+      0 0.0625em 0 0 var(--color-AccentFour-700),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.25em 0 0 var(--color-AccentFour-800),
+      0 0.3125em 0 0 var(--color-AccentFour-800),
+      0 0.375em 0 0 var(--color-AccentFour-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentFour-800) !important;
+  }
+
+  .empower-button--teatray.empower-button--accent4:hover {
+    background-color: var(--color-AccentFour-600) !important;
+    box-shadow:
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #666666,
+      0 0.0625em 0 0 #555555,
+      0 0.125em 0 0 #444444,
+      0 0.125em 0 0 #333333,
+      0 0.2em 0 0 #222222,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 #333333 !important;
+  }
+
+  .empower-button--teatray.empower-button--accent5 {
+    background-color: var(--color-AccentFive-500) !important;
+    text-shadow: 0 0.0625em 0 var(--color-AccentFive-800) !important;
+    box-shadow:
+      inset 0 0.0625em 0 0 var(--color-AccentFive-400),
+      0 0.0625em 0 0 var(--color-AccentFive-700),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.25em 0 0 var(--color-AccentFive-800),
+      0 0.3125em 0 0 var(--color-AccentFive-800),
+      0 0.375em 0 0 var(--color-AccentFive-800),
+      0 0.425em 0 0 var(--color-black-t-15),
+      0 0.425em 0.5em 0 var(--color-AccentFive-800) !important;
+  }
+
+  .empower-button--teatray.empower-button--accent5:hover {
+    background-color: var(--color-AccentFive-600) !important;
+    box-shadow:
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #666666,
+      0 0.0625em 0 0 #555555,
+      0 0.125em 0 0 #444444,
+      0 0.125em 0 0 #333333,
+      0 0.2em 0 0 #222222,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 #333333 !important;
+  }
+
+  /* Disabled state - locked in hover design with reduced opacity across all states */
+  .empower-button:disabled,
+  .empower-button[aria-disabled="true"],
+  .empower-button:disabled:hover,
+  .empower-button[aria-disabled="true"]:hover,
+  .empower-button:disabled:active,
+  .empower-button[aria-disabled="true"]:active {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    transform: translateY(0.125em) !important;
+  }
+
+  /* Default variant disabled - uses Primary tokens */
+  .empower-button--default.empower-button--primary:disabled,
+  .empower-button--default.empower-button--primary[aria-disabled="true"],
+  .empower-button--default.empower-button--primary:disabled:hover,
+  .empower-button--default.empower-button--primary:disabled:active {
+    background-color: var(--color-Primary-600) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-Primary-400),
+      0 0.03em 0 0 var(--color-Primary-700),
+      0 0.0625em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.2em 0 0 var(--color-Primary-900),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-Primary-900) !important;
+  }
+
+  .empower-button--default.empower-button--secondary:disabled,
+  .empower-button--default.empower-button--secondary[aria-disabled="true"],
+  .empower-button--default.empower-button--secondary:disabled:hover,
+  .empower-button--default.empower-button--secondary:disabled:active,
+  .empower-button--default:disabled,
+  .empower-button--default[aria-disabled="true"],
+  .empower-button--default:disabled:hover,
+  .empower-button--default:disabled:active {
+    background-color: var(--color-Secondary-600) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-Secondary-400),
+      0 0.03em 0 0 var(--color-Secondary-700),
+      0 0.0625em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.2em 0 0 var(--color-Secondary-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-Secondary-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent1:disabled,
+  .empower-button--default.empower-button--accent1[aria-disabled="true"],
+  .empower-button--default.empower-button--accent1:disabled:hover,
+  .empower-button--default.empower-button--accent1:disabled:active {
+    background-color: var(--color-AccentOne-700) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-AccentOne-400),
+      0 0.03em 0 0 var(--color-AccentOne-700),
+      0 0.0625em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.2em 0 0 var(--color-AccentOne-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentOne-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent2:disabled,
+  .empower-button--default.empower-button--accent2[aria-disabled="true"],
+  .empower-button--default.empower-button--accent2:disabled:hover,
+  .empower-button--default.empower-button--accent2:disabled:active {
+    background-color: var(--color-AccentTwo-600) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-AccentTwo-400),
+      0 0.03em 0 0 var(--color-AccentTwo-700),
+      0 0.0625em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.2em 0 0 var(--color-AccentTwo-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentTwo-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent3:disabled,
+  .empower-button--default.empower-button--accent3[aria-disabled="true"],
+  .empower-button--default.empower-button--accent3:disabled:hover,
+  .empower-button--default.empower-button--accent3:disabled:active {
+    background-color: var(--color-AccentThree-600) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-AccentThree-400),
+      0 0.03em 0 0 var(--color-AccentThree-700),
+      0 0.0625em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.2em 0 0 var(--color-AccentThree-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentThree-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent4:disabled,
+  .empower-button--default.empower-button--accent4[aria-disabled="true"],
+  .empower-button--default.empower-button--accent4:disabled:hover,
+  .empower-button--default.empower-button--accent4:disabled:active {
+    background-color: var(--color-AccentFour-600) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-AccentFour-400),
+      0 0.03em 0 0 var(--color-AccentFour-700),
+      0 0.0625em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.2em 0 0 var(--color-AccentFour-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentFour-800) !important;
+  }
+
+  .empower-button--default.empower-button--accent5:disabled,
+  .empower-button--default.empower-button--accent5[aria-disabled="true"],
+  .empower-button--default.empower-button--accent5:disabled:hover,
+  .empower-button--default.empower-button--accent5:disabled:active {
+    background-color: var(--color-AccentFive-600) !important;
+    box-shadow:
+      inset 0 0.03em 0 0 var(--color-AccentFive-400),
+      0 0.03em 0 0 var(--color-AccentFive-700),
+      0 0.0625em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.2em 0 0 var(--color-AccentFive-800),
+      0 0.225em 0 0 var(--color-black-t-15),
+      0 0.225em 0.375em 0 var(--color-AccentFive-800) !important;
+  }
+
+  /* Disabled states maintain consistent styling with no transform */
+
+  /* Focus states handled by individual variants */
+
+  /* Accessibility enhanced focus (when focus indicators are enabled) */
+  html[data-accessibility-focus="enhanced"] .empower-button:focus,
+  html[data-accessibility-focus="high-contrast"] .empower-button:focus {
+    outline: 3px solid var(--color-Primary-600);
+    outline-offset: 2px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Active state - handled by individual variants */
+
+  /* Shape variants */
+  .empower-button--circle,
+  .empower-button--square {
+    padding: 0;
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    min-height: 64px;
+    max-width: 64px;
+    max-height: 64px;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+    position: relative;
+  }
+
+  .empower-button--circle {
+    border-radius: 50%;
+  }
+
+  .empower-button--square {
+    border-radius: var(--radius-lg);
+  }
+
+  /* Icon container */
+  .empower-icon-container {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+  }
+
+  .empower-icon-container svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Set icon colors to white/light to match button text */
+  .empower-icon-container svg path,
+  .empower-icon-container svg circle,
+  .empower-icon-container svg rect,
+  .empower-icon-container svg polygon,
+  .empower-icon-container svg polyline,
+  .empower-icon-container svg ellipse,
+  .empower-icon-container svg line {
+    fill: var(--color-Background-50);
+    stroke: var(--color-Background-50);
+  }
+
+  .empower-icon-container svg *[fill="none"] {
+    fill: none !important;
+  }
+
+  .empower-icon-container svg *[stroke="none"] {
+    stroke: none !important;
+  }
+
+  /* Small size for shapes */
+  .empower-button--circle.empower-button--sm,
+  .empower-button--square.empower-button--sm {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    max-width: 48px;
+    max-height: 48px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .empower-button--circle.empower-button--sm .empower-icon-container,
+  .empower-button--square.empower-button--sm .empower-icon-container {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Large size for shapes */
+  .empower-button--circle.empower-button--lg,
+  .empower-button--square.empower-button--lg {
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+    min-height: 80px;
+    max-width: 80px;
+    max-height: 80px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .empower-button--circle.empower-button--lg .empower-icon-container,
+  .empower-button--square.empower-button--lg .empower-icon-container {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* ============================================
+     NEUMORPHIC VARIANTS
+     ============================================ */
+
+  /* Glass variant - glassmorphism effect, inner shadows AND 3D layers are color token aware */
+  .empower-button--glass {
+    background: var(--glass-surface-bg) !important;
+    backdrop-filter: blur(var(--glass-surface-blur));
+    -webkit-backdrop-filter: blur(var(--glass-surface-blur));
+    border: 1px solid var(--glass-surface-border);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    box-shadow:
+      /* Inner shadows for pressed effect */
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      /* Neumorphic surface shadows */
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      /* Inner highlight */
+      inset 0 0.0625em 0 0 var(--color-Background-50),
+      /* 3D Layers using darker colors for visibility */
+      0 0.0625em 0 0 #999999,
+      0 0.125em 0 0 #888888,
+      0 0.25em 0 0 #777777,
+      0 0.3125em 0 0 #666666,
+      0 0.375em 0 0 #555555,
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      /* Final shadow with blur */
+      0 0.425em 0.5em 0 #666666;
+  }
+
+  /* Glint effect for glass variant */
+  /* Glass glint - color token aware */
+  .empower-button--glass.empower-button--primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-Primary-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glass.empower-button--secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-Secondary-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glass.empower-button--accent1::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-AccentOne-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glass.empower-button--accent2::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-AccentTwo-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glass.empower-button--accent3::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-AccentThree-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glass.empower-button--accent4::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-AccentFour-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glass.empower-button--accent5::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-AccentFive-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glass:hover::before {
+    left: 100%;
+  }
+
+  /* Glass with Primary color - ALL shadows use primary tokens */
+  .empower-button--glass.empower-button--primary {
+    box-shadow:
+      /* Inner shadows use primary color with transparency */
+      inset 8px 8px 16px color-mix(in srgb, var(--color-Primary-800) 40%, transparent),
+      /* Neumorphic surface shadows use primary color */
+      8px 8px 16px color-mix(in srgb, var(--color-Primary-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-Primary-200) 50%, transparent),
+      /* Inner highlight uses primary lighter shade */
+      inset 0 0.0625em 0 0 color-mix(in srgb, var(--color-Primary-300) 30%, transparent),
+      /* 3D Layers use primary color tokens */
+      0 0.0625em 0 0 var(--color-Primary-600),
+      0 0.125em 0 0 var(--color-Primary-700),
+      0 0.25em 0 0 var(--color-Primary-800),
+      0 0.3125em 0 0 var(--color-Primary-800),
+      0 0.375em 0 0 var(--color-Primary-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.425em 0.5em 0 var(--color-Primary-800);
+  }
+
+  .empower-button--glass.empower-button--secondary {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-Secondary-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-Secondary-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-Secondary-200) 50%, transparent),
+      inset 0 0.0625em 0 0 color-mix(in srgb, var(--color-Secondary-300) 30%, transparent),
+      0 0.0625em 0 0 var(--color-Secondary-600),
+      0 0.125em 0 0 var(--color-Secondary-700),
+      0 0.25em 0 0 var(--color-Secondary-800),
+      0 0.3125em 0 0 var(--color-Secondary-800),
+      0 0.375em 0 0 var(--color-Secondary-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.425em 0.5em 0 var(--color-Secondary-800);
+  }
+
+  .empower-button--glass.empower-button--accent1 {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentOne-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-AccentOne-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-AccentOne-200) 50%, transparent),
+      inset 0 0.0625em 0 0 color-mix(in srgb, var(--color-AccentOne-300) 30%, transparent),
+      0 0.0625em 0 0 var(--color-AccentOne-600),
+      0 0.125em 0 0 var(--color-AccentOne-700),
+      0 0.25em 0 0 var(--color-AccentOne-800),
+      0 0.3125em 0 0 var(--color-AccentOne-800),
+      0 0.375em 0 0 var(--color-AccentOne-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.425em 0.5em 0 var(--color-AccentOne-800);
+  }
+
+  .empower-button--glass.empower-button--accent2 {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentTwo-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-AccentTwo-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-AccentTwo-200) 50%, transparent),
+      inset 0 0.0625em 0 0 color-mix(in srgb, var(--color-AccentTwo-300) 30%, transparent),
+      0 0.0625em 0 0 var(--color-AccentTwo-600),
+      0 0.125em 0 0 var(--color-AccentTwo-700),
+      0 0.25em 0 0 var(--color-AccentTwo-800),
+      0 0.3125em 0 0 var(--color-AccentTwo-800),
+      0 0.375em 0 0 var(--color-AccentTwo-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.425em 0.5em 0 var(--color-AccentTwo-800);
+  }
+
+  .empower-button--glass.empower-button--accent3 {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentThree-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-AccentThree-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-AccentThree-200) 50%, transparent),
+      inset 0 0.0625em 0 0 color-mix(in srgb, var(--color-AccentThree-300) 30%, transparent),
+      0 0.0625em 0 0 var(--color-AccentThree-600),
+      0 0.125em 0 0 var(--color-AccentThree-700),
+      0 0.25em 0 0 var(--color-AccentThree-800),
+      0 0.3125em 0 0 var(--color-AccentThree-800),
+      0 0.375em 0 0 var(--color-AccentThree-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.425em 0.5em 0 var(--color-AccentThree-800);
+  }
+
+  .empower-button--glass.empower-button--accent4 {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentFour-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-AccentFour-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-AccentFour-200) 50%, transparent),
+      inset 0 0.0625em 0 0 color-mix(in srgb, var(--color-AccentFour-300) 30%, transparent),
+      0 0.0625em 0 0 var(--color-AccentFour-600),
+      0 0.125em 0 0 var(--color-AccentFour-700),
+      0 0.25em 0 0 var(--color-AccentFour-800),
+      0 0.3125em 0 0 var(--color-AccentFour-800),
+      0 0.375em 0 0 var(--color-AccentFour-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.425em 0.5em 0 var(--color-AccentFour-800);
+  }
+
+  .empower-button--glass.empower-button--accent5 {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentFive-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-AccentFive-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-AccentFive-200) 50%, transparent),
+      inset 0 0.0625em 0 0 color-mix(in srgb, var(--color-AccentFive-300) 30%, transparent),
+      0 0.0625em 0 0 var(--color-AccentFive-600),
+      0 0.125em 0 0 var(--color-AccentFive-700),
+      0 0.25em 0 0 var(--color-AccentFive-800),
+      0 0.3125em 0 0 var(--color-AccentFive-800),
+      0 0.375em 0 0 var(--color-AccentFive-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.425em 0.5em 0 var(--color-AccentFive-800);
+  }
+
+  .empower-button--glass:hover {
+    background: var(--glass-surface-bg) !important;
+    backdrop-filter: blur(var(--glass-surface-blur));
+    -webkit-backdrop-filter: blur(var(--glass-surface-blur));
+    border: 1px solid var(--glass-surface-border);
+    transform: translateY(0.125em);
+  }
+
+  .empower-button--glass.empower-button--primary:hover {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-Primary-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-Primary-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-Primary-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-Primary-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-Primary-700),
+      0 0.0625em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.2em 0 0 var(--color-Primary-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-Primary-800);
+  }
+
+  .empower-button--glass.empower-button--secondary:hover {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-Secondary-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-Secondary-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-Secondary-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-Secondary-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-Secondary-700),
+      0 0.0625em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.2em 0 0 var(--color-Secondary-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-Secondary-800);
+  }
+
+  .empower-button--glass.empower-button--accent1:hover {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentOne-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-AccentOne-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-AccentOne-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-AccentOne-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-AccentOne-700),
+      0 0.0625em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.2em 0 0 var(--color-AccentOne-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-AccentOne-800);
+  }
+
+  .empower-button--glass.empower-button--accent2:hover {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentTwo-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-AccentTwo-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-AccentTwo-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-AccentTwo-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-AccentTwo-700),
+      0 0.0625em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.2em 0 0 var(--color-AccentTwo-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-AccentTwo-800);
+  }
+
+  .empower-button--glass.empower-button--accent3:hover {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentThree-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-AccentThree-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-AccentThree-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-AccentThree-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-AccentThree-700),
+      0 0.0625em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.2em 0 0 var(--color-AccentThree-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-AccentThree-800);
+  }
+
+  .empower-button--glass.empower-button--accent4:hover {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentFour-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-AccentFour-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-AccentFour-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-AccentFour-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-AccentFour-700),
+      0 0.0625em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.2em 0 0 var(--color-AccentFour-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-AccentFour-800);
+  }
+
+  .empower-button--glass.empower-button--accent5:hover {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentFive-800) 40%, transparent),
+      8px 8px 16px color-mix(in srgb, var(--color-AccentFive-700) 30%, transparent),
+      -8px -8px 16px color-mix(in srgb, var(--color-AccentFive-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-AccentFive-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-AccentFive-700),
+      0 0.0625em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.2em 0 0 var(--color-AccentFive-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-AccentFive-800);
+  }
+
+  .empower-button--glass:active {
+    background: var(--glass-surface-bg) !important;
+    backdrop-filter: blur(var(--glass-surface-blur));
+    -webkit-backdrop-filter: blur(var(--glass-surface-blur));
+    border: 1px solid var(--glass-surface-border);
+    transform: translateY(0.225em);
+  }
+
+  .empower-button--glass.empower-button--primary:active {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-Primary-800) 40%, transparent),
+      4px 4px 8px color-mix(in srgb, var(--color-Primary-700) 30%, transparent),
+      -4px -4px 8px color-mix(in srgb, var(--color-Primary-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-Primary-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-Primary-700),
+      0 0.0625em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.2em 0 0 var(--color-Primary-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-Primary-800);
+  }
+
+  .empower-button--glass.empower-button--secondary:active {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-Secondary-800) 40%, transparent),
+      4px 4px 8px color-mix(in srgb, var(--color-Secondary-700) 30%, transparent),
+      -4px -4px 8px color-mix(in srgb, var(--color-Secondary-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-Secondary-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-Secondary-700),
+      0 0.0625em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.2em 0 0 var(--color-Secondary-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-Secondary-800);
+  }
+
+  .empower-button--glass.empower-button--accent1:active {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentOne-800) 40%, transparent),
+      4px 4px 8px color-mix(in srgb, var(--color-AccentOne-700) 30%, transparent),
+      -4px -4px 8px color-mix(in srgb, var(--color-AccentOne-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-AccentOne-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-AccentOne-700),
+      0 0.0625em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.2em 0 0 var(--color-AccentOne-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-AccentOne-800);
+  }
+
+  .empower-button--glass.empower-button--accent2:active {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentTwo-800) 40%, transparent),
+      4px 4px 8px color-mix(in srgb, var(--color-AccentTwo-700) 30%, transparent),
+      -4px -4px 8px color-mix(in srgb, var(--color-AccentTwo-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-AccentTwo-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-AccentTwo-700),
+      0 0.0625em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.2em 0 0 var(--color-AccentTwo-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-AccentTwo-800);
+  }
+
+  .empower-button--glass.empower-button--accent3:active {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentThree-800) 40%, transparent),
+      4px 4px 8px color-mix(in srgb, var(--color-AccentThree-700) 30%, transparent),
+      -4px -4px 8px color-mix(in srgb, var(--color-AccentThree-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-AccentThree-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-AccentThree-700),
+      0 0.0625em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.2em 0 0 var(--color-AccentThree-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-AccentThree-800);
+  }
+
+  .empower-button--glass.empower-button--accent4:active {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentFour-800) 40%, transparent),
+      4px 4px 8px color-mix(in srgb, var(--color-AccentFour-700) 30%, transparent),
+      -4px -4px 8px color-mix(in srgb, var(--color-AccentFour-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-AccentFour-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-AccentFour-700),
+      0 0.0625em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.2em 0 0 var(--color-AccentFour-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-AccentFour-800);
+  }
+
+  .empower-button--glass.empower-button--accent5:active {
+    box-shadow:
+      inset 8px 8px 16px color-mix(in srgb, var(--color-AccentFive-800) 40%, transparent),
+      4px 4px 8px color-mix(in srgb, var(--color-AccentFive-700) 30%, transparent),
+      -4px -4px 8px color-mix(in srgb, var(--color-AccentFive-200) 50%, transparent),
+      inset 0 0.03em 0 0 color-mix(in srgb, var(--color-AccentFive-300) 30%, transparent),
+      0 0.03em 0 0 var(--color-AccentFive-700),
+      0 0.0625em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.2em 0 0 var(--color-AccentFive-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 var(--color-AccentFive-800);
+  }
+
+  /* Bastile variant - background color token aware (200 light variants) */
+  .empower-button--bastile {
+    background-color: var(--color-Background-200);
+    color: var(--color-Text-700);
+    text-shadow: 0 -0.0625em 0 var(--color-Background-50), 0 0.0625em 0 rgba(0, 0, 0, 0.3);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.2),
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.0625em 0 0 var(--color-Background-50),
+      0 0.0625em 0 0 #999999,
+      0 0.125em 0 0 #888888,
+      0 0.25em 0 0 #777777,
+      0 0.3125em 0 0 #666666,
+      0 0.375em 0 0 #555555,
+      0 0.425em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.425em 0.5em 0 #666666;
+  }
+
+  .empower-button--bastile.empower-button--primary {
+    background-color: var(--color-Primary-200);
+  }
+
+  .empower-button--bastile.empower-button--secondary {
+    background-color: var(--color-Secondary-200);
+  }
+
+  .empower-button--bastile.empower-button--accent1 {
+    background-color: var(--color-AccentOne-200);
+  }
+
+  .empower-button--bastile.empower-button--accent2 {
+    background-color: var(--color-AccentTwo-200);
+  }
+
+  .empower-button--bastile.empower-button--accent3 {
+    background-color: var(--color-AccentThree-200);
+  }
+
+  .empower-button--bastile.empower-button--accent4 {
+    background-color: var(--color-AccentFour-200);
+  }
+
+  .empower-button--bastile.empower-button--accent5 {
+    background-color: var(--color-AccentFive-200);
+  }
+
+  .empower-button--bastile:hover {
+    background-color: var(--color-Background-300);
+    transform: translateY(0.125em);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.2),
+      8px 8px 16px var(--color-Neutral-400),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #888888,
+      0 0.0625em 0 0 #777777,
+      0 0.125em 0 0 #666666,
+      0 0.125em 0 0 #555555,
+      0 0.2em 0 0 #444444,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 #555555;
+  }
+
+  .empower-button--bastile.empower-button--primary:hover {
+    background-color: var(--color-Primary-300);
+  }
+
+  .empower-button--bastile.empower-button--secondary:hover {
+    background-color: var(--color-Secondary-300);
+  }
+
+  .empower-button--bastile.empower-button--accent1:hover {
+    background-color: var(--color-AccentOne-300);
+  }
+
+  .empower-button--bastile.empower-button--accent2:hover {
+    background-color: var(--color-AccentTwo-300);
+  }
+
+  .empower-button--bastile.empower-button--accent3:hover {
+    background-color: var(--color-AccentThree-300);
+  }
+
+  .empower-button--bastile.empower-button--accent4:hover {
+    background-color: var(--color-AccentFour-300);
+  }
+
+  .empower-button--bastile.empower-button--accent5:hover {
+    background-color: var(--color-AccentFive-300);
+  }
+
+  .empower-button--bastile:active {
+    transform: translateY(0.225em);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      4px 4px 8px var(--color-Neutral-400),
+      -4px -4px 8px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Background-50),
+      0 0.03em 0 0 #888888,
+      0 0.0625em 0 0 #777777,
+      0 0.125em 0 0 #666666,
+      0 0.125em 0 0 #555555,
+      0 0.2em 0 0 #444444,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 #555555;
+  }
+
+  /* Hilltop variant - background AND 3D layers are color token aware */
+  .empower-button--hilltop {
+    background-color: var(--color-Primary-500);
+    color: var(--color-Background-50);
+    text-shadow: 0 0.0625em 0 var(--color-Primary-800);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.0625em 0 0 var(--color-Primary-400),
+      0 0.0625em 0 0 var(--color-Primary-600),
+      0 0.125em 0 0 var(--color-Primary-700),
+      0 0.25em 0 0 var(--color-Primary-800),
+      0 0.3125em 0 0 var(--color-Primary-800),
+      0 0.375em 0 0 var(--color-Primary-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.425em 0.5em 0 var(--color-Primary-800);
+  }
+
+  .empower-button--hilltop.empower-button--secondary {
+    background-color: var(--color-Secondary-500);
+    text-shadow: 0 0.0625em 0 var(--color-Secondary-800);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.0625em 0 0 var(--color-Secondary-400),
+      0 0.0625em 0 0 var(--color-Secondary-600),
+      0 0.125em 0 0 var(--color-Secondary-700),
+      0 0.25em 0 0 var(--color-Secondary-800),
+      0 0.3125em 0 0 var(--color-Secondary-800),
+      0 0.375em 0 0 var(--color-Secondary-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.425em 0.5em 0 var(--color-Secondary-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent1 {
+    background-color: var(--color-AccentOne-600);
+    text-shadow: 0 0.0625em 0 var(--color-AccentOne-800);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.0625em 0 0 var(--color-AccentOne-400),
+      0 0.0625em 0 0 var(--color-AccentOne-600),
+      0 0.125em 0 0 var(--color-AccentOne-700),
+      0 0.25em 0 0 var(--color-AccentOne-800),
+      0 0.3125em 0 0 var(--color-AccentOne-800),
+      0 0.375em 0 0 var(--color-AccentOne-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.425em 0.5em 0 var(--color-AccentOne-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent2 {
+    background-color: var(--color-AccentTwo-500);
+    text-shadow: 0 0.0625em 0 var(--color-AccentTwo-800);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.0625em 0 0 var(--color-AccentTwo-400),
+      0 0.0625em 0 0 var(--color-AccentTwo-600),
+      0 0.125em 0 0 var(--color-AccentTwo-700),
+      0 0.25em 0 0 var(--color-AccentTwo-800),
+      0 0.3125em 0 0 var(--color-AccentTwo-800),
+      0 0.375em 0 0 var(--color-AccentTwo-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.425em 0.5em 0 var(--color-AccentTwo-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent3 {
+    background-color: var(--color-AccentThree-500);
+    text-shadow: 0 0.0625em 0 var(--color-AccentThree-800);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.0625em 0 0 var(--color-AccentThree-400),
+      0 0.0625em 0 0 var(--color-AccentThree-600),
+      0 0.125em 0 0 var(--color-AccentThree-700),
+      0 0.25em 0 0 var(--color-AccentThree-800),
+      0 0.3125em 0 0 var(--color-AccentThree-800),
+      0 0.375em 0 0 var(--color-AccentThree-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.425em 0.5em 0 var(--color-AccentThree-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent4 {
+    background-color: var(--color-AccentFour-500);
+    text-shadow: 0 0.0625em 0 var(--color-AccentFour-800);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.0625em 0 0 var(--color-AccentFour-400),
+      0 0.0625em 0 0 var(--color-AccentFour-600),
+      0 0.125em 0 0 var(--color-AccentFour-700),
+      0 0.25em 0 0 var(--color-AccentFour-800),
+      0 0.3125em 0 0 var(--color-AccentFour-800),
+      0 0.375em 0 0 var(--color-AccentFour-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.425em 0.5em 0 var(--color-AccentFour-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent5 {
+    background-color: var(--color-AccentFive-500);
+    text-shadow: 0 0.0625em 0 var(--color-AccentFive-800);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.0625em 0 0 var(--color-AccentFive-400),
+      0 0.0625em 0 0 var(--color-AccentFive-600),
+      0 0.125em 0 0 var(--color-AccentFive-700),
+      0 0.25em 0 0 var(--color-AccentFive-800),
+      0 0.3125em 0 0 var(--color-AccentFive-800),
+      0 0.375em 0 0 var(--color-AccentFive-800),
+      0 0.425em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.425em 0.5em 0 var(--color-AccentFive-800);
+  }
+
+  .empower-button--hilltop:hover {
+    background-color: var(--color-Primary-600);
+    transform: translateY(0.125em);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Primary-400),
+      0 0.03em 0 0 var(--color-Primary-700),
+      0 0.0625em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.2em 0 0 var(--color-Primary-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 var(--color-Primary-800);
+  }
+
+  .empower-button--hilltop.empower-button--secondary:hover {
+    background-color: var(--color-Secondary-600);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Secondary-400),
+      0 0.03em 0 0 var(--color-Secondary-700),
+      0 0.0625em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.125em 0 0 var(--color-Secondary-800),
+      0 0.2em 0 0 var(--color-Secondary-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 var(--color-Secondary-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent1:hover {
+    background-color: var(--color-AccentOne-700);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-AccentOne-400),
+      0 0.03em 0 0 var(--color-AccentOne-700),
+      0 0.0625em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.125em 0 0 var(--color-AccentOne-800),
+      0 0.2em 0 0 var(--color-AccentOne-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 var(--color-AccentOne-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent2:hover {
+    background-color: var(--color-AccentTwo-600);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-AccentTwo-400),
+      0 0.03em 0 0 var(--color-AccentTwo-700),
+      0 0.0625em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.125em 0 0 var(--color-AccentTwo-800),
+      0 0.2em 0 0 var(--color-AccentTwo-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 var(--color-AccentTwo-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent3:hover {
+    background-color: var(--color-AccentThree-600);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-AccentThree-400),
+      0 0.03em 0 0 var(--color-AccentThree-700),
+      0 0.0625em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.125em 0 0 var(--color-AccentThree-800),
+      0 0.2em 0 0 var(--color-AccentThree-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 var(--color-AccentThree-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent4:hover {
+    background-color: var(--color-AccentFour-600);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-AccentFour-400),
+      0 0.03em 0 0 var(--color-AccentFour-700),
+      0 0.0625em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.125em 0 0 var(--color-AccentFour-800),
+      0 0.2em 0 0 var(--color-AccentFour-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 var(--color-AccentFour-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent5:hover {
+    background-color: var(--color-AccentFive-600);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(0, 0, 0, 0.3),
+      -8px -8px 16px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-AccentFive-400),
+      0 0.03em 0 0 var(--color-AccentFive-700),
+      0 0.0625em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.125em 0 0 var(--color-AccentFive-800),
+      0 0.2em 0 0 var(--color-AccentFive-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 var(--color-AccentFive-800);
+  }
+
+  .empower-button--hilltop:active {
+    background-color: var(--color-Primary-700);
+    transform: translateY(0.225em);
+    box-shadow:
+      inset -8px -8px 16px rgba(0, 0, 0, 0.4),
+      4px 4px 8px var(--color-Neutral-400),
+      -4px -4px 8px var(--color-Background-50),
+      inset 0 0.03em 0 0 var(--color-Primary-400),
+      0 0.03em 0 0 var(--color-Primary-700),
+      0 0.0625em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.125em 0 0 var(--color-Primary-800),
+      0 0.2em 0 0 var(--color-Primary-800),
+      0 0.225em 0 0 rgba(0, 0, 0, 0.25),
+      0 0.225em 0.375em 0 var(--color-Primary-800);
+  }
+
+  .empower-button--hilltop.empower-button--secondary:active {
+    background-color: var(--color-Secondary-700);
+  }
+
+  .empower-button--hilltop.empower-button--accent1:active {
+    background-color: var(--color-AccentOne-800);
+  }
+
+  .empower-button--hilltop.empower-button--accent2:active {
+    background-color: var(--color-AccentTwo-700);
+  }
+
+  .empower-button--hilltop.empower-button--accent3:active {
+    background-color: var(--color-AccentThree-700);
+  }
+
+  .empower-button--hilltop.empower-button--accent4:active {
+    background-color: var(--color-AccentFour-700);
+  }
+
+  .empower-button--hilltop.empower-button--accent5:active {
+    background-color: var(--color-AccentFive-700);
+  }
+
+  /* Glassic variant - glass without color token awareness (except border and glint) */
+  .empower-button--glassic {
+    background: var(--glass-surface-bg) !important;
+    backdrop-filter: blur(var(--glass-surface-blur));
+    -webkit-backdrop-filter: blur(var(--glass-surface-blur));
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    box-shadow:
+      /* Inner shadows for pressed effect */
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      /* Neumorphic surface shadows */
+      8px 8px 16px rgba(100, 100, 100, 0.3),
+      -8px -8px 16px rgba(255, 255, 255, 0.5),
+      /* Inner highlight */
+      inset 0 0.0625em 0 0 rgba(255, 255, 255, 0.3),
+      /* 3D Layers using grey colors */
+      0 0.0625em 0 0 #999999,
+      0 0.125em 0 0 #888888,
+      0 0.25em 0 0 #777777,
+      0 0.3125em 0 0 #666666,
+      0 0.375em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.425em 0.5em 0 #666666;
+  }
+
+  .empower-button--glassic.empower-button--primary {
+    border: 2px solid var(--color-Primary-600);
+  }
+
+  .empower-button--glassic.empower-button--secondary {
+    border: 2px solid var(--color-Secondary-600);
+  }
+
+  .empower-button--glassic.empower-button--accent1 {
+    border: 2px solid var(--color-AccentOne-600);
+  }
+
+  .empower-button--glassic.empower-button--accent2 {
+    border: 2px solid var(--color-AccentTwo-600);
+  }
+
+  .empower-button--glassic.empower-button--accent3 {
+    border: 2px solid var(--color-AccentThree-600);
+  }
+
+  .empower-button--glassic.empower-button--accent4 {
+    border: 2px solid var(--color-AccentFour-600);
+  }
+
+  .empower-button--glassic.empower-button--accent5 {
+    border: 2px solid var(--color-AccentFive-600);
+  }
+
+  /* Glassic glint - color token aware */
+  .empower-button--glassic.empower-button--primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-Primary-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glassic.empower-button--secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-Secondary-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glassic.empower-button--accent1::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-AccentOne-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glassic.empower-button--accent2::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-AccentTwo-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glassic.empower-button--accent3::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-AccentThree-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glassic.empower-button--accent4::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-AccentFour-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glassic.empower-button--accent5::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-AccentFive-500),
+      transparent
+    );
+    opacity: 0.3;
+    transition: left 0.6s ease;
+    z-index: -1;
+  }
+
+  .empower-button--glassic:hover::before {
+    left: 100%;
+  }
+
+  .empower-button--glassic:hover {
+    background: var(--glass-surface-bg) !important;
+    backdrop-filter: blur(var(--glass-surface-blur));
+    -webkit-backdrop-filter: blur(var(--glass-surface-blur));
+    transform: translateY(0.125em);
+    box-shadow:
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      8px 8px 16px rgba(100, 100, 100, 0.3),
+      -8px -8px 16px rgba(255, 255, 255, 0.5),
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.3),
+      0 0.03em 0 0 #777777,
+      0 0.0625em 0 0 #888888,
+      0 0.125em 0 0 #888888,
+      0 0.125em 0 0 #888888,
+      0 0.2em 0 0 #888888,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 #888888;
+  }
+
+  .empower-button--glassic.empower-button--primary:hover {
+    border: 2px solid var(--color-Primary-600);
+  }
+
+  .empower-button--glassic.empower-button--secondary:hover {
+    border: 2px solid var(--color-Secondary-600);
+  }
+
+  .empower-button--glassic.empower-button--accent1:hover {
+    border: 2px solid var(--color-AccentOne-600);
+  }
+
+  .empower-button--glassic.empower-button--accent2:hover {
+    border: 2px solid var(--color-AccentTwo-600);
+  }
+
+  .empower-button--glassic.empower-button--accent3:hover {
+    border: 2px solid var(--color-AccentThree-600);
+  }
+
+  .empower-button--glassic.empower-button--accent4:hover {
+    border: 2px solid var(--color-AccentFour-600);
+  }
+
+  .empower-button--glassic.empower-button--accent5:hover {
+    border: 2px solid var(--color-AccentFive-600);
+  }
+
+  .empower-button--glassic:active {
+    background: var(--glass-surface-bg) !important;
+    backdrop-filter: blur(var(--glass-surface-blur));
+    -webkit-backdrop-filter: blur(var(--glass-surface-blur));
+    transform: translateY(0.225em);
+    box-shadow:
+      inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+      4px 4px 8px rgba(100, 100, 100, 0.3),
+      -4px -4px 8px rgba(255, 255, 255, 0.5),
+      inset 0 0.03em 0 0 rgba(255, 255, 255, 0.3),
+      0 0.03em 0 0 #777777,
+      0 0.0625em 0 0 #888888,
+      0 0.125em 0 0 #888888,
+      0 0.125em 0 0 #888888,
+      0 0.2em 0 0 #888888,
+      0 0.225em 0 0 rgba(0, 0, 0, 0.15),
+      0 0.225em 0.375em 0 #888888;
+  }
+
+  /* Corner radius variants */
+  .empower-button--sharp {
+    border-radius: var(--radius-sm);
+  }
+
+  .empower-button--soft {
+    border-radius: var(--radius-xl);
+  }
+
+  .empower-button--pill {
+    border-radius: var(--radius-full);
+  }
+
+</style>

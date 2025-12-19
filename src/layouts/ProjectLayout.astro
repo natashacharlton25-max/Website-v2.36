@@ -1,0 +1,658 @@
+---
+/**
+ * Reusable Project Template Layout
+ *
+ * Usage:
+ * import ProjectLayout from '../layouts/ProjectLayout.astro';
+ * <ProjectLayout project={projectData} relatedProjects={related} />
+ */
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  project: {
+    title: string;
+    slug: string;
+    category: string;
+    year: string;
+    client: string;
+    overview: string;
+    challenge: string;
+    solution: string;
+    results: Array<{ metric: string; description: string }>;
+    services: string[];
+    technologies: string[];
+    images: string[];
+    testimonial?: {
+      quote: string;
+      author: string;
+      role: string;
+    };
+  };
+  relatedProjects?: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    category: string;
+    image: string;
+  }>;
+}
+
+const { project, relatedProjects = [] } = Astro.props;
+---
+
+<BaseLayout
+  title={`${project.title} | Projects`}
+  description={project.overview}
+>
+  <!-- Breadcrumbs -->
+  <section class="breadcrumbs-section">
+    <div class="container container-7xl">
+      <nav class="breadcrumbs">
+        <a href="/">Home</a>
+        <span class="separator">›</span>
+        <a href="/projects">Projects</a>
+        <span class="separator">›</span>
+        <span class="current">{project.title}</span>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Project Header -->
+  <section class="project-header section-sm">
+    <div class="container container-7xl">
+      <div class="project-header-content">
+        <div class="project-meta">
+          <span class="project-category">{project.category}</span>
+          <span class="project-year">{project.year}</span>
+        </div>
+        <h1 class="project-title">{project.title}</h1>
+        <p class="project-overview">{project.overview}</p>
+
+        <!-- Project Info Grid -->
+        <div class="project-info-grid">
+          <div class="info-item">
+            <h3 class="info-label">Client</h3>
+            <p class="info-value">{project.client}</p>
+          </div>
+          <div class="info-item">
+            <h3 class="info-label">Services</h3>
+            <p class="info-value">{project.services.join(', ')}</p>
+          </div>
+          <div class="info-item">
+            <h3 class="info-label">Year</h3>
+            <p class="info-value">{project.year}</p>
+          </div>
+          <div class="info-item">
+            <h3 class="info-label">Technologies</h3>
+            <p class="info-value">{project.technologies.join(', ')}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Image -->
+  <section class="project-image-section">
+    <div class="container container-full">
+      <div class="featured-image">
+        <img src={project.images[0]} alt={project.title} loading="eager" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Challenge & Solution -->
+  <section class="challenge-solution-section section">
+    <div class="container container-6xl">
+      <div class="content-grid">
+        <!-- Challenge -->
+        <div class="content-block card">
+          <div class="block-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <h2 class="block-title">The Challenge</h2>
+          <p class="block-content">{project.challenge}</p>
+        </div>
+
+        <!-- Solution -->
+        <div class="content-block card">
+          <div class="block-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h2 class="block-title">Our Solution</h2>
+          <p class="block-content">{project.solution}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Project Gallery -->
+  {project.images.length > 1 && (
+    <section class="project-gallery-section section-sm bg-alt">
+      <div class="container container-7xl">
+        <h2 class="section-title text-center">Project Gallery</h2>
+        <div class="gallery-grid">
+          {project.images.slice(1).map((image, index) => (
+            <div class="gallery-item">
+              <img src={image} alt={`${project.title} view ${index + 2}`} loading="lazy" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Results -->
+  <section class="results-section section">
+    <div class="container container-7xl">
+      <h2 class="section-title text-center">Results & Impact</h2>
+      <div class="results-grid">
+        {project.results.map(result => (
+          <div class="result-card card">
+            <div class="result-metric">{result.metric}</div>
+            <p class="result-description">{result.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonial -->
+  {project.testimonial && (
+    <section class="testimonial-section section bg-alt">
+      <div class="container container-6xl">
+        <div class="testimonial-card card">
+          <div class="testimonial-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+            </svg>
+          </div>
+          <blockquote class="testimonial-quote">
+            {project.testimonial.quote}
+          </blockquote>
+          <div class="testimonial-author">
+            <strong>{project.testimonial.author}</strong>
+            <span>{project.testimonial.role}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Related Projects -->
+  {relatedProjects.length > 0 && (
+    <section class="related-projects-section section">
+      <div class="container container-7xl">
+        <h2 class="section-title">More Projects</h2>
+        <div class="related-grid">
+          {relatedProjects.map(relatedProject => (
+            <article class="project-card">
+              <div class="project-image">
+                <img src={relatedProject.image} alt={relatedProject.title} loading="lazy" />
+                <div class="project-overlay">
+                  <a href={`/projects/${relatedProject.slug}`} class="project-link">
+                    View Project
+                  </a>
+                </div>
+              </div>
+              <div class="project-content">
+                <span class="project-category">{relatedProject.category}</span>
+                <h3 class="project-title">
+                  <a href={`/projects/${relatedProject.slug}`}>{relatedProject.title}</a>
+                </h3>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA Section -->
+  <section class="project-cta-section section bg-alt">
+    <div class="container container-6xl">
+      <div class="cta-content text-center">
+        <h2 class="cta-title">Have a Project in Mind?</h2>
+        <p class="cta-description">
+          Let's discuss how we can help bring your vision to life
+        </p>
+        <div class="cta-buttons">
+          <a href="/contact" class="btn btn-primary btn-lg">Start a Conversation</a>
+          <a href="/projects" class="btn btn-outline btn-lg">View All Projects</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Breadcrumbs */
+  .breadcrumbs-section {
+    padding: var(--space-lg) 0;
+    background: var(--color-Neutral-50);
+  }
+
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    flex-wrap: wrap;
+  }
+
+  .breadcrumbs a {
+    color: var(--color-Text-500);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--color-Primary-500);
+  }
+
+  .breadcrumbs .separator {
+    color: var(--color-Text-400);
+  }
+
+  .breadcrumbs .current {
+    color: var(--color-Text-700);
+    font-weight: var(--font-semibold);
+  }
+
+  /* Project Header */
+  .project-header-content {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .project-meta {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+    font-size: var(--text-sm);
+  }
+
+  .project-category {
+    color: var(--color-Primary-500);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .project-year {
+    color: var(--color-Text-500);
+  }
+
+  .project-title {
+    font-size: var(--text-5xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-lg);
+    line-height: var(--leading-tight);
+    color: var(--color-Text-800);
+  }
+
+  .project-overview {
+    font-size: var(--text-xl);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-3xl);
+  }
+
+  .project-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    padding: var(--space-2xl);
+    background: var(--color-Neutral-50);
+    border-radius: var(--radius-xl);
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .info-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .info-value {
+    font-size: var(--text-base);
+    color: var(--color-Text-700);
+    margin: 0;
+  }
+
+  /* Featured Image */
+  .featured-image {
+    width: 100%;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-2xl);
+  }
+
+  .featured-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Challenge & Solution */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .content-block {
+    padding: var(--space-2xl);
+  }
+
+  .block-icon {
+    color: var(--color-Primary-500);
+    margin-bottom: var(--space-lg);
+  }
+
+  .block-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-md);
+    color: var(--color-Text-800);
+  }
+
+  .block-content {
+    font-size: var(--text-lg);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
+    margin: 0;
+  }
+
+  /* Gallery - .bg-alt uses global class from utilities.css */
+
+  .section-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-3xl);
+    color: var(--color-Text-800);
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  .gallery-item {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform var(--transition-base);
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Results */
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  .result-card {
+    padding: var(--space-2xl);
+    text-align: center;
+    transition: all var(--transition-base);
+  }
+
+  .result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .result-metric {
+    font-size: var(--text-6xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Primary-500);
+    margin-bottom: var(--space-md);
+    line-height: 1;
+  }
+
+  .result-description {
+    font-size: var(--text-lg);
+    color: var(--color-Text-700);
+    margin: 0;
+  }
+
+  /* Testimonial */
+  .testimonial-card {
+    padding: var(--space-3xl);
+    text-align: center;
+  }
+
+  .testimonial-icon {
+    color: var(--color-Primary-500);
+    opacity: 0.2;
+    margin-bottom: var(--space-lg);
+    display: flex;
+    justify-content: center;
+  }
+
+  .testimonial-quote {
+    font-size: var(--text-2xl);
+    font-style: italic;
+    color: var(--color-Text-700);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-xl);
+  }
+
+  .testimonial-author {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .testimonial-author strong {
+    font-size: var(--text-lg);
+    color: var(--color-Text-800);
+  }
+
+  .testimonial-author span {
+    font-size: var(--text-base);
+    color: var(--color-Text-500);
+  }
+
+  /* Related Projects */
+  .related-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .project-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+  }
+
+  .project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .project-card .project-image {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-Neutral-100);
+  }
+
+  .project-card .project-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-base);
+  }
+
+  .project-card:hover .project-image img {
+    transform: scale(1.1);
+  }
+
+  .project-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  .project-card:hover .project-overlay {
+    opacity: 1;
+  }
+
+  .project-link {
+    padding: var(--space-md) var(--space-xl);
+    background: white;
+    color: var(--color-Text-700);
+    text-decoration: none;
+    border-radius: var(--radius-full);
+    font-weight: var(--font-semibold);
+    transition: all var(--transition-fast);
+  }
+
+  .project-link:hover {
+    background: var(--color-Primary-500);
+    color: white;
+  }
+
+  .project-card .project-content {
+    padding: var(--space-xl);
+  }
+
+  .project-card .project-category {
+    font-size: var(--text-xs);
+    color: var(--color-Primary-500);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: var(--space-sm);
+  }
+
+  .project-card .project-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    margin: 0;
+  }
+
+  .project-card .project-title a {
+    color: var(--color-Text-700);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+
+  .project-card .project-title a:hover {
+    color: var(--color-Primary-500);
+  }
+
+  /* CTA Section */
+  .cta-content {
+    padding: var(--space-3xl) var(--space-lg);
+  }
+
+  .cta-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-md);
+    color: var(--color-Text-800);
+  }
+
+  .cta-description {
+    font-size: var(--text-lg);
+    color: var(--color-Text-600);
+    margin-bottom: var(--space-2xl);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: center;
+  }
+
+  /* Responsive: Tablet */
+  @media (min-width: 768px) {
+    .project-info-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .content-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .gallery-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .results-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .related-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cta-buttons {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+
+  /* Responsive: Desktop */
+  @media (min-width: 1024px) {
+    .project-title {
+      font-size: var(--text-6xl);
+    }
+
+    .project-info-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .results-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .related-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .cta-title {
+      font-size: var(--text-5xl);
+    }
+  }
+</style>
