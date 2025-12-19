@@ -1,7 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import IsotopeFilterSwitcher from '../components/ui/IsotopeFilterSwitcher.astro';
-import { assets, getAssetImagePath } from '../data/assets';
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+
+// Get all assets from content collection
+const assetsEntries = await getCollection('assets');
+const assets = assetsEntries.map(entry => ({
+  ...entry.data,
+  slug: entry.slug,
+}));
 
 // Filter categories - match asset types
 const filterCategories = [
@@ -60,316 +68,47 @@ const badgeClasses: Record<string, string> = {
           />
         </div>
 
-          <!-- Products Grid -->
+          <!-- Products Grid - Dynamic from assets data -->
           <div class="products-grid" id="products-grid">
             <!-- Grid sizer for Isotope column width calculation -->
             <div class="grid__sizer"></div>
 
-            <!-- Product Card 1 - Isotope uses CSS classes for filtering -->
-            <a href="/assets/product-1" class="product-card card worksheet" data-type="worksheet">
-              <div class="product-image">
-                <img src="/Project placeholders/ex2.jpg" alt="Clarity Worksheet" />
-                <div class="product-badge badge-worksheet">Worksheet</div>
-              </div>
-              <div class="product-info">
-                <div class="product-category">PDF Download</div>
-                <h3 class="product-name">
-                  Clarity Worksheet
-                </h3>
-                <p class="product-description">
-                  A practical guide to help you identify what matters most to you
-                </p>
-                <div class="product-footer">
-                  <div class="product-price">
-                    <span class="price-current">Free</span>
+            {assets.map((asset, index) => (
+              <a href={`/assets/${asset.slug}`} class={`product-card card ${asset.type}`} data-type={asset.type}>
+                <div class="product-image">
+                  <Image src={asset.cardImage} alt={asset.name} width={800} height={500} />
+                  <div class={`product-badge ${badgeClasses[asset.type] || 'badge-worksheet'}`}>
+                    {asset.type.charAt(0).toUpperCase() + asset.type.slice(1)}
                   </div>
-                  <button
-                    class="btn btn-sm btn-primary add-to-cart-btn"
-                    data-product-id="1"
-                    data-product-name="Clarity Worksheet"
-                    data-product-price="0"
-                    data-product-image=""
-                    onclick="event.preventDefault(); event.stopPropagation();"
-                    aria-label="Add to cart"
-                  >
-                    <span class="add-to-cart-text">Add to Cart</span>
-                    <span class="add-to-cart-icon">+</span>
-                  </button>
                 </div>
-              </div>
-            </a>
-
-            <!-- Product Card 2 -->
-            <a href="/assets/product-2" class="product-card card guide" data-type="guide">
-              <div class="product-image">
-                <img src="/Project placeholders/ex3.jpg" alt="Boundaries Guide" />
-                <div class="product-badge badge-guide">Guide</div>
-              </div>
-              <div class="product-info">
-                <div class="product-category">PDF Download</div>
-                <h3 class="product-name">
-                  Boundaries Guide
-                </h3>
-                <p class="product-description">
-                  Simple strategies for setting and maintaining healthy boundaries
-                </p>
-                <div class="product-footer">
-                  <div class="product-price">
-                    <span class="price-current">Free</span>
+                <div class="product-info">
+                  <div class="product-category">{asset.category}</div>
+                  <h3 class="product-name">
+                    {asset.name}
+                  </h3>
+                  <p class="product-description">
+                    {asset.description}
+                  </p>
+                  <div class="product-footer">
+                    <div class="product-price">
+                      <span class="price-current">Free</span>
+                    </div>
+                    <button
+                      class="btn btn-sm btn-primary add-to-cart-btn"
+                      data-product-id={asset.slug}
+                      data-product-name={asset.name}
+                      data-product-price="0"
+                      data-product-image={asset.cardImage.src}
+                      onclick="event.preventDefault(); event.stopPropagation();"
+                      aria-label="Add to cart"
+                    >
+                      <span class="add-to-cart-text">Add to Cart</span>
+                      <span class="add-to-cart-icon">+</span>
+                    </button>
                   </div>
-                  <button
-                    class="btn btn-sm btn-primary add-to-cart-btn"
-                    data-product-id="2"
-                    data-product-name="Boundaries Guide"
-                    data-product-price="0"
-                    data-product-image=""
-                    onclick="event.preventDefault(); event.stopPropagation();"
-                    aria-label="Add to cart"
-                  >
-                    <span class="add-to-cart-text">Add to Cart</span>
-                    <span class="add-to-cart-icon">+</span>
-                  </button>
                 </div>
-              </div>
-            </a>
-
-            <!-- Product Card 3 -->
-            <a href="/assets/product-3" class="product-card card toolkit" data-type="toolkit">
-              <div class="product-image">
-                <img src="/Project placeholders/ex4.jpg" alt="Self-Direction Toolkit" />
-                <div class="product-badge badge-toolkit">Toolkit</div>
-              </div>
-              <div class="product-info">
-                <div class="product-category">PDF Download</div>
-                <h3 class="product-name">
-                  Self-Direction Toolkit
-                </h3>
-                <p class="product-description">
-                  Resources to help you make decisions that align with who you are
-                </p>
-                <div class="product-footer">
-                  <div class="product-price">
-                    <span class="price-current">Free</span>
-                  </div>
-                  <button
-                    class="btn btn-sm btn-primary add-to-cart-btn"
-                    data-product-id="3"
-                    data-product-name="Self-Direction Toolkit"
-                    data-product-price="0"
-                    data-product-image=""
-                    onclick="event.preventDefault(); event.stopPropagation();"
-                    aria-label="Add to cart"
-                  >
-                    <span class="add-to-cart-text">Add to Cart</span>
-                    <span class="add-to-cart-icon">+</span>
-                  </button>
-                </div>
-              </div>
-            </a>
-
-            <!-- Product Card 4 - 7 Day Starter Kit -->
-            <a href="/assets/product-1" class="product-card card toolkit" data-type="toolkit">
-              <div class="product-image">
-                <img src="/7Day/7Days Card Image.png" alt="7-Day Self-Directed Living Starter Kit" />
-                <div class="product-badge badge-toolkit">Toolkit</div>
-              </div>
-              <div class="product-info">
-                <div class="product-category">PDF Download</div>
-                <h3 class="product-name">
-                  7-Day Self-Directed Living Starter Kit
-                </h3>
-                <p class="product-description">
-                  A practical, beautifully structured 7-day guide designed to help you regain clarity, strengthen emotional awareness, and make small, powerful shifts in how you live each day.
-                </p>
-                <div class="product-footer">
-                  <div class="product-price">
-                    <span class="price-current">Free</span>
-                  </div>
-                  <button
-                    class="btn btn-sm btn-primary add-to-cart-btn"
-                    data-product-id="4"
-                    data-product-name="7-Day Self-Directed Living Starter Kit"
-                    data-product-price="0"
-                    data-product-image="/7Day/7Days MiniKart.png"
-                    onclick="event.preventDefault(); event.stopPropagation();"
-                    aria-label="Add to cart"
-                  >
-                    <span class="add-to-cart-text">Add to Cart</span>
-                    <span class="add-to-cart-icon">+</span>
-                  </button>
-                </div>
-              </div>
-            </a>
-
-            <!-- Product Card 5 -->
-            <a href="/assets/product-5" class="product-card card workbook" data-type="workbook">
-              <div class="product-image">
-                <img src="/Project placeholders/ex2.jpg" alt="Values Workbook" />
-                <div class="product-badge badge-workbook">Workbook</div>
-              </div>
-              <div class="product-info">
-                <div class="product-category">PDF Download</div>
-                <h3 class="product-name">
-                  Values Discovery Workbook
-                </h3>
-                <p class="product-description">
-                  Comprehensive exercises to help you identify and align with your core values
-                </p>
-                <div class="product-footer">
-                  <div class="product-price">
-                    <span class="price-current">Free</span>
-                  </div>
-                  <button
-                    class="btn btn-sm btn-primary add-to-cart-btn"
-                    data-product-id="5"
-                    data-product-name="Values Discovery Workbook"
-                    data-product-price="0"
-                    data-product-image=""
-                    onclick="event.preventDefault(); event.stopPropagation();"
-                    aria-label="Add to cart"
-                  >
-                    <span class="add-to-cart-text">Add to Cart</span>
-                    <span class="add-to-cart-icon">+</span>
-                  </button>
-                </div>
-              </div>
-            </a>
-
-            <!-- Product Card 6 -->
-            <a href="/assets/product-6" class="product-card card worksheet" data-type="worksheet">
-              <div class="product-image">
-                <img src="/Project placeholders/ex3.jpg" alt="Daily Reflection Worksheet" />
-                <div class="product-badge badge-worksheet">Worksheet</div>
-              </div>
-              <div class="product-info">
-                <div class="product-category">PDF Download</div>
-                <h3 class="product-name">
-                  Daily Reflection Worksheet
-                </h3>
-                <p class="product-description">
-                  A simple daily practice to stay connected with yourself
-                </p>
-                <div class="product-footer">
-                  <div class="product-price">
-                    <span class="price-current">Free</span>
-                  </div>
-                  <button
-                    class="btn btn-sm btn-primary add-to-cart-btn"
-                    data-product-id="6"
-                    data-product-name="Daily Reflection Worksheet"
-                    data-product-price="0"
-                    data-product-image=""
-                    onclick="event.preventDefault(); event.stopPropagation();"
-                    aria-label="Add to cart"
-                  >
-                    <span class="add-to-cart-text">Add to Cart</span>
-                    <span class="add-to-cart-icon">+</span>
-                  </button>
-                </div>
-              </div>
-            </a>
-
-            <!-- Product Card 7 -->
-            <a href="/assets/product-7" class="product-card card guide" data-type="guide">
-              <div class="product-image">
-                <img src="/Project placeholders/ex4.jpg" alt="Communication Guide" />
-                <div class="product-badge badge-guide">Guide</div>
-              </div>
-              <div class="product-info">
-                <div class="product-category">PDF Download</div>
-                <h3 class="product-name">
-                  Authentic Communication Guide
-                </h3>
-                <p class="product-description">
-                  Learn to express yourself clearly and listen with presence
-                </p>
-                <div class="product-footer">
-                  <div class="product-price">
-                    <span class="price-current">Free</span>
-                  </div>
-                  <button
-                    class="btn btn-sm btn-primary add-to-cart-btn"
-                    data-product-id="7"
-                    data-product-name="Authentic Communication Guide"
-                    data-product-price="0"
-                    data-product-image=""
-                    onclick="event.preventDefault(); event.stopPropagation();"
-                    aria-label="Add to cart"
-                  >
-                    <span class="add-to-cart-text">Add to Cart</span>
-                    <span class="add-to-cart-icon">+</span>
-                  </button>
-                </div>
-              </div>
-            </a>
-
-            <!-- Product Card 8 -->
-            <a href="/assets/product-8" class="product-card card workbook" data-type="workbook">
-              <div class="product-image">
-                <img src="/Project placeholders/ex2.jpg" alt="Goal Setting Workbook" />
-                <div class="product-badge badge-workbook">Workbook</div>
-              </div>
-              <div class="product-info">
-                <div class="product-category">PDF Download</div>
-                <h3 class="product-name">
-                  Intentional Goal Setting Workbook
-                </h3>
-                <p class="product-description">
-                  Set goals that actually align with who you want to be
-                </p>
-                <div class="product-footer">
-                  <div class="product-price">
-                    <span class="price-current">Free</span>
-                  </div>
-                  <button
-                    class="btn btn-sm btn-primary add-to-cart-btn"
-                    data-product-id="8"
-                    data-product-name="Intentional Goal Setting Workbook"
-                    data-product-price="0"
-                    data-product-image=""
-                    onclick="event.preventDefault(); event.stopPropagation();"
-                    aria-label="Add to cart"
-                  >
-                    <span class="add-to-cart-text">Add to Cart</span>
-                    <span class="add-to-cart-icon">+</span>
-                  </button>
-                </div>
-              </div>
-            </a>
-
-            <!-- Product Card 9 -->
-            <a href="/assets/product-9" class="product-card card worksheet" data-type="worksheet">
-              <div class="product-image">
-                <img src="/Project placeholders/ex3.jpg" alt="Energy Audit Worksheet" />
-                <div class="product-badge badge-worksheet">Worksheet</div>
-              </div>
-              <div class="product-info">
-                <div class="product-category">PDF Download</div>
-                <h3 class="product-name">
-                  Energy Audit Worksheet
-                </h3>
-                <p class="product-description">
-                  Identify what drains and what fuels your energy
-                </p>
-                <div class="product-footer">
-                  <div class="product-price">
-                    <span class="price-current">Free</span>
-                  </div>
-                  <button
-                    class="btn btn-sm btn-primary add-to-cart-btn"
-                    data-product-id="9"
-                    data-product-name="Energy Audit Worksheet"
-                    data-product-price="0"
-                    data-product-image=""
-                    onclick="event.preventDefault(); event.stopPropagation();"
-                    aria-label="Add to cart"
-                  >
-                    <span class="add-to-cart-text">Add to Cart</span>
-                    <span class="add-to-cart-icon">+</span>
-                  </button>
-                </div>
-              </div>
-            </a>
+              </a>
+            ))}
           </div>
         </div>
       </div>

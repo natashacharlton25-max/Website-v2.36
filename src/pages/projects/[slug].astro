@@ -1,9 +1,19 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { projects } from '../../data/projects';
-import { getAssetBySlug, getAssetImagePath } from '../../data/assets';
+import { getCollection } from 'astro:content';
 import FooterWithMask from '../../components/sections/FooterWithMask.astro';
 import MasonryGrid from '../../components/ui/MasonryGrid.astro';
+
+// Get all assets from content collection
+const assetsEntries = await getCollection('assets');
+const assetsMap = new Map(assetsEntries.map(entry => [entry.slug, entry.data]));
+
+// Helper to get asset by slug
+const getAssetBySlug = (slug: string) => assetsMap.get(slug);
+
+// Helper to get asset card image path
+const getAssetImagePath = (asset: any) => asset?.cardImage?.src || `/images/Assets/${asset?.slug}/card.png`;
 
 // Export getStaticPaths for static site generation
 export async function getStaticPaths() {
