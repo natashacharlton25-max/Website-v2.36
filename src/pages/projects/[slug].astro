@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { projects } from '../../data/projects';
+import { getAssetBySlug, getAssetImagePath } from '../../data/assets';
 import FooterWithMask from '../../components/sections/FooterWithMask.astro';
 import MasonryGrid from '../../components/ui/MasonryGrid.astro';
 
@@ -53,23 +54,6 @@ const getNextColor = () => {
   colorIndex++;
   return color;
 };
-
-// Top grid cards (title only, no breadcrumb)
-const titleColor = getNextColor();
-const topCards = [
-  {
-    type: 'breadcrumb' as const,
-    content: 'Home/Projects/' + project.title,
-    bgColor: 'var(--color-Neutral-700)',
-    textColor: 'white'
-  },
-  {
-    type: 'title' as const,
-    title: project.title,
-    bgColor: titleColor.bg,
-    textColor: titleColor.text
-  }
-];
 
 // Icon mapper function - matches tag names to appropriate icons (using Phosphor Duotone icons)
 const getIconForTag = (tag: string): string => {
@@ -206,50 +190,40 @@ const masonryCards = [
     textColor: info3Color.text,
     size: 'medium' as const
   },
-  // Asset/resource cards - mix of image and text cards
+  // Asset/resource cards - pull from assets data
   ...project.resourceSlugs.map((slug, index) => {
-    const resourceName = slug.split('-').map(word =>
+    const asset = getAssetBySlug(slug);
+    const resourceColor = getNextColor();
+
+    // Use asset data if available, fallback to slug-based name
+    const resourceName = asset?.name || slug.split('-').map(word =>
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
 
-    const resourceColor = getNextColor();
+    const resourceDescription = asset?.description || 'Free resource to download and use';
 
-    // Determine resource type based on slug keywords (using Phosphor Duotone icons)
-    let resourceType = 'Resource';
-    let resourceIcon = 'ph:file-duotone';
+    // Map asset type to display type and icon
+    const typeConfig: Record<string, { label: string; icon: string }> = {
+      'worksheet': { label: 'Worksheet', icon: 'ph:note-pencil-duotone' },
+      'workbook': { label: 'Workbook', icon: 'ph:book-duotone' },
+      'guide': { label: 'Guide', icon: 'ph:book-open-duotone' },
+      'toolkit': { label: 'Toolkit', icon: 'ph:toolbox-duotone' },
+      'cards': { label: 'Cards', icon: 'ph:cards-duotone' },
+      'poster': { label: 'Poster', icon: 'ph:image-duotone' },
+      'activity': { label: 'Activity', icon: 'ph:game-controller-duotone' },
+    };
 
-    if (slug.includes('worksheet') || slug.includes('workbook')) {
-      resourceType = 'Worksheet';
-      resourceIcon = 'ph:note-pencil-duotone';
-    } else if (slug.includes('activity') || slug.includes('game')) {
-      resourceType = 'Activity';
-      resourceIcon = 'ph:game-controller-duotone';
-    } else if (slug.includes('guide') || slug.includes('handbook')) {
-      resourceType = 'Guide';
-      resourceIcon = 'ph:book-open-duotone';
-    } else if (slug.includes('card') || slug.includes('flashcard')) {
-      resourceType = 'Cards';
-      resourceIcon = 'ph:cards-duotone';
-    } else if (slug.includes('poster') || slug.includes('display')) {
-      resourceType = 'Poster';
-      resourceIcon = 'ph:image-duotone';
-    } else if (slug.includes('chart') || slug.includes('visual')) {
-      resourceType = 'Visual Aid';
-      resourceIcon = 'ph:chart-bar-duotone';
-    }
+    const resourceType = asset?.type ? typeConfig[asset.type]?.label || 'Resource' : 'Resource';
+    const resourceIcon = asset?.type ? typeConfig[asset.type]?.icon || 'ph:file-duotone' : 'ph:file-duotone';
 
-    // First 2 resources get image cards, rest are text-only
-    if (index < 2) {
-      // Cycle through placeholder images
-      const placeholderImages = ['ex2.jpg', 'ex3.jpg', 'ex4.jpg'];
-      const placeholderImage = placeholderImages[index % placeholderImages.length];
-
+    // First 2 resources get image cards (if asset has image), rest are text-only
+    if (index < 2 && asset) {
       return {
         type: 'mixed' as const,
-        image: `/Project placeholders/${placeholderImage}`,
+        image: getAssetImagePath(asset),
         alt: resourceName,
         title: resourceName,
-        content: `Free ${resourceType.toLowerCase()} to download and use`,
+        content: resourceDescription,
         link: `/assets/${slug}`,
         bgColor: resourceColor.bg,
         textColor: resourceColor.text,
@@ -259,7 +233,7 @@ const masonryCards = [
       return {
         type: 'text' as const,
         title: resourceName,
-        content: `Free ${resourceType.toLowerCase()} for wellbeing activities. Click to view, download and print.`,
+        content: resourceDescription,
         link: `/assets/${slug}`,
         bgColor: resourceColor.bg,
         textColor: resourceColor.text,
@@ -294,8 +268,7 @@ const shuffledMasonryCards = shuffleArray(masonryCards);
   </section>
 
   <FooterWithMask
-    backgroundImage="/Footer/Footer Background.jpg"
-    height="400px"
+    backgroundImage="/Footer/Footer-Reveal.png"
   />
 </BaseLayout>
 

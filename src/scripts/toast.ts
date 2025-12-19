@@ -24,11 +24,11 @@ export interface ToastOptions {
 }
 
 const themeLottieUrls: Record<string, string> = {
-  arcade: '/Animated Icons/Toast Icons/Activity/Lottie-toast-activity.json',
-  professional: '/Animated Icons/Toast Icons/NotificationV3/Lottie-toast-notification-v3.json',
-  brutalist: '/Animated Icons/Toast Icons/Alert triangle/Lottie-toast-alert-triangle.json',
-  glass: '/Animated Icons/Toast Icons/Info/Lottie-toast-info.json',
-  neon: '/Animated Icons/Toast Icons/Thumb up/Lottie-toast-thumb-up.json'
+  arcade: '/Icons/Animated Icons/Toast Icons/Activity/Lottie-toast-activity.json',
+  professional: '/Icons/Animated Icons/Toast Icons/NotificationV3/Lottie-toast-notification-v3.json',
+  brutalist: '/Icons/Animated Icons/Toast Icons/Alert triangle/Lottie-toast-alert-triangle.json',
+  glass: '/Icons/Animated Icons/Toast Icons/Info/Lottie-toast-info.json',
+  neon: '/Icons/Animated Icons/Toast Icons/Thumb up/Lottie-toast-thumb-up.json'
 };
 
 export function showToast(options: ToastOptions): void {
