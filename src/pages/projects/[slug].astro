@@ -271,17 +271,29 @@ const masonryCards = [
       };
     }
   }),
-  // Custom cards from frontmatter - dynamically added per-project
-  ...(project.customCards || []).map((card) => {
-    const customColor = getNextColor();
+  // Specifications from frontmatter - label/value pairs
+  ...(project.specifications || []).map((spec) => {
+    const specColor = getNextColor();
     return {
-      type: card.type as 'text' | 'stat' | 'quote' | 'highlight',
-      title: card.title,
-      content: card.content,
-      icon: card.icon,
-      bgColor: customColor.bg,
-      textColor: customColor.text,
-      size: card.size || 'medium' as const
+      type: 'spec' as const,
+      title: spec.label,
+      content: spec.value,
+      icon: spec.icon,
+      bgColor: specColor.bg,
+      textColor: specColor.text,
+      size: 'small' as const
+    };
+  }),
+  // Highlights from frontmatter - standalone callouts
+  ...(project.highlights || []).map((highlight) => {
+    const highlightColor = getNextColor();
+    return {
+      type: 'highlight' as const,
+      content: highlight.text,
+      icon: highlight.icon,
+      bgColor: highlightColor.bg,
+      textColor: highlightColor.text,
+      size: 'medium' as const
     };
   })
 ];

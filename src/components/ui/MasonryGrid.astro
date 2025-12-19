@@ -2,7 +2,7 @@
 import Icon from './Icon.astro';
 
 interface Card {
-  type: 'image' | 'text' | 'mixed' | 'breadcrumb' | 'icon' | 'title' | 'summary' | 'tag';
+  type: 'image' | 'text' | 'mixed' | 'breadcrumb' | 'icon' | 'title' | 'summary' | 'tag' | 'stat' | 'highlight' | 'quote' | 'spec';
   image?: string;
   alt?: string;
   link?: string;
@@ -202,6 +202,43 @@ const getHoverBorderColor = (bgColor?: string): string => {
       );
     }
 
+    if (card.type === 'stat') {
+      const bgColor = card.bgColor || 'var(--color-AccentTwo-200)';
+      return (
+        <div class={`${cardClass} masonry-card--stat`} data-scroll-reveal-item style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}>
+          {card.content && <p class="stat-card-value">{card.content}</p>}
+          {card.title && <h3 class="stat-card-label">{card.title}</h3>}
+        </div>
+      );
+    }
+
+    if (card.type === 'highlight') {
+      const bgColor = card.bgColor || 'var(--color-AccentThree-200)';
+      return (
+        <div class={`${cardClass} masonry-card--highlight`} data-scroll-reveal-item style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}>
+          {card.icon && (
+            <div class="highlight-card-icon-wrapper">
+              <Icon name={card.icon} class="card-icon" size={40} />
+            </div>
+          )}
+          {card.content && <p class="highlight-card-text">{card.content}</p>}
+        </div>
+      );
+    }
+
+    if (card.type === 'quote') {
+      const bgColor = card.bgColor || 'var(--color-AccentFour-200)';
+      return (
+        <div class={`${cardClass} masonry-card--quote`} data-scroll-reveal-item style={`background: ${bgColor}; color: ${card.textColor || 'var(--color-Text-700)'}; --card-hover-border: ${getHoverBorderColor(bgColor)};`}>
+          <div class="quote-card-icon">
+            <Icon name="ph:quotes-duotone" class="card-icon" size={32} />
+          </div>
+          {card.content && <blockquote class="quote-card-text">{card.content}</blockquote>}
+          {card.title && <cite class="quote-card-author">— {card.title}</cite>}
+        </div>
+      );
+    }
+
     return null;
   })}
 </div>
@@ -393,6 +430,96 @@ const getHoverBorderColor = (bgColor?: string): string => {
     color: inherit;
     letter-spacing: 0.08em;
     text-align: center;
+  }
+
+  /* Stat Card (centered with large value) */
+  .masonry-card--stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-xl);
+  }
+
+  .stat-card-value {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    margin: 0 0 var(--space-xs) 0;
+    color: inherit;
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .stat-card-label {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0;
+    color: inherit;
+    opacity: 0.8;
+  }
+
+  /* Highlight Card (centered text with optional icon) */
+  .masonry-card--highlight {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-xl);
+  }
+
+  .highlight-card-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-md);
+    opacity: 0.85;
+  }
+
+  .highlight-card-text {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-lg);
+    font-weight: 600;
+    font-style: italic;
+    margin: 0;
+    color: inherit;
+    line-height: 1.5;
+  }
+
+  /* Quote Card */
+  .masonry-card--quote {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-xl);
+  }
+
+  .quote-card-icon {
+    margin-bottom: var(--space-sm);
+    opacity: 0.5;
+  }
+
+  .quote-card-text {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-lg);
+    font-style: italic;
+    margin: 0 0 var(--space-md) 0;
+    color: inherit;
+    line-height: 1.6;
+    quotes: none;
+  }
+
+  .quote-card-author {
+    font-family: 'Quicksand', sans-serif;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    font-style: normal;
+    color: inherit;
+    opacity: 0.8;
   }
 
   /* Asset Card (linked text cards with icons) */
