@@ -103,19 +103,42 @@ const insightsCollection = defineCollection({
   }),
 });
 
-// Projects collection
+// Projects collection - one folder per project with data + images
 const projectsCollection = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
-    description: z.string(),
+    description: z.string(), // Short description for cards
+    longDescription: z.string(), // Full description
     category: z.string(),
-    year: z.string(),
-    client: z.string(),
-    services: z.array(z.string()),
-    technologies: z.array(z.string()),
-    image: z.string(),
-    images: z.array(z.string()).optional(),
+    date: z.string(),
+    tags: z.array(z.string()),
+    whoItsFor: z.string(),
+
+    // Images in same folder
+    cardImage: image(),
+    titleCardImage: image().optional(), // Hero/banner image
+
+    // Resources - slugs that reference assets in content collection
+    resourceSlugs: z.array(z.string()),
+
+    // Professional information
+    professional: z.object({
+      intention: z.string(),
+      summary: z.string(),
+      guidanceNotes: z.string(),
+      evidenceBasedBenefits: z.array(z.string()),
+      downloadableResources: z.array(z.string()).optional(),
+    }),
+
+    // Custom cards - manually add cards to the masonry grid
+    customCards: z.array(z.object({
+      type: z.enum(['text', 'stat', 'quote', 'highlight']),
+      title: z.string().optional(),
+      content: z.string(),
+      icon: z.string().optional(), // Phosphor icon (e.g., "ph:heart-duotone")
+      size: z.enum(['small', 'medium', 'large']).optional(),
+    })).optional(),
   }),
 });
 

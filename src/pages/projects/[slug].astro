@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { projects } from '../../data/projects';
 import { getCollection } from 'astro:content';
 import FooterWithMask from '../../components/sections/FooterWithMask.astro';
 import MasonryGrid from '../../components/ui/MasonryGrid.astro';
@@ -17,9 +16,10 @@ const getAssetImagePath = (asset: any) => asset?.cardImage?.src || `/images/Asse
 
 // Export getStaticPaths for static site generation
 export async function getStaticPaths() {
-  return projects.map(project => ({
-    params: { slug: project.slug },
-    props: { project }
+  const projectEntries = await getCollection('projects');
+  return projectEntries.map(entry => ({
+    params: { slug: entry.slug },
+    props: { project: { slug: entry.slug, ...entry.data } }
   }));
 }
 

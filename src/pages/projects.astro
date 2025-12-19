@@ -1,22 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
-import { projects } from '../data/projects';
+import { getCollection } from 'astro:content';
 import FooterWithMask from '../components/sections/FooterWithMask.astro';
 import UnifiedButton from '../components/Buttons/UnifiedButton.astro';
 
-// Import project images for Astro optimization
-import mindfulMomentsImage from '../images/Projects/Mindful-Moments.png';
-import sensoryExplorationImage from '../images/Projects/Sensory-Exploration.png';
-import creativeExpressionImage from '../images/Projects/Creative-Expression.png';
-
-// Map project slugs to imported images
-const projectImages: Record<string, ImageMetadata> = {
-  'mindful-moments': mindfulMomentsImage,
-  'sensory-exploration': sensoryExplorationImage,
-  'creative-expression': creativeExpressionImage,
-};
+// Get projects from content collection
+const projectEntries = await getCollection('projects');
+const projects = projectEntries.map(entry => ({
+  slug: entry.slug,
+  ...entry.data,
+}));
 ---
 
 <BaseLayout
@@ -53,11 +47,7 @@ const projectImages: Record<string, ImageMetadata> = {
         <div class="container container-7xl">
           <div class="project-wrapper">
             <div class="project-image-container">
-              {projectImages[project.slug] ? (
-                <Image src={projectImages[project.slug]} alt={project.title} loading="lazy" />
-              ) : (
-                <img src={project.image} alt={project.title} loading="lazy" />
-              )}
+              <Image src={project.cardImage} alt={project.title} loading="lazy" />
             </div>
             <div class="project-text-content">
               <span class="project-category">{project.category}</span>

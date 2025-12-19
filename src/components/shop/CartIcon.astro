@@ -83,6 +83,8 @@ const { size = 32, showOnReveal = false } = Astro.props;
 
         anim.addEventListener('DOMLoaded', () => {
           console.log(`Animation ${type} loaded`);
+          // Mark as loaded to hide static fallback
+          cartIconWrapper?.classList.add('lottie-loaded');
         });
 
         anim.addEventListener('error', (e) => {
@@ -188,20 +190,35 @@ const { size = 32, showOnReveal = false } = Astro.props;
 
     document.addEventListener('cart:updated', handleCartUpdate);
 
-    // Toggle mini cart on click
-    cartIconWrapper.addEventListener('click', () => {
-      const miniCart = document.getElementById('mini-cart');
-      miniCart?.classList.toggle('visible');
-    });
-
     console.log('Cart icon initialized');
+  };
+
+  // Toggle mini cart on click - separate from Lottie init to always work
+  const setupCartToggle = () => {
+    const cartIconWrapper = document.getElementById('cart-icon');
+    if (!cartIconWrapper) return;
+
+    cartIconWrapper.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent outside-click handler from immediately closing
+      const miniCart = document.getElementById('mini-cart');
+      if (miniCart) {
+        miniCart.classList.toggle('visible');
+        console.log('Mini cart toggled:', miniCart.classList.contains('visible'));
+      } else {
+        console.error('Mini cart element not found');
+      }
+    });
   };
 
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCartIcon);
+    document.addEventListener('DOMContentLoaded', () => {
+      initCartIcon();
+      setupCartToggle();
+    });
   } else {
     initCartIcon();
+    setupCartToggle();
   }
 
   // Also check localStorage on load to sync cart count (handles race condition with MiniCart)
@@ -265,14 +282,19 @@ const { size = 32, showOnReveal = false } = Astro.props;
     height: 100% !important;
   }
 
-  /* Static fallback icon - hidden by default, shown when a11y settings active */
+  /* Static fallback icon - visible by default as fallback, Lottie overlays when loaded */
   .cart-icon__static {
-    display: none !important;
+    position: absolute;
     width: 32px;
     height: 32px;
     filter: brightness(0) saturate(100%);
     opacity: 0.7;
     transition: filter 0.2s ease, opacity 0.2s ease;
+  }
+
+  /* Hide static when Lottie successfully loads */
+  .cart-icon-wrapper.lottie-loaded .cart-icon__static {
+    display: none !important;
   }
 
   .cart-icon-wrapper:hover .cart-icon__static {
@@ -294,6 +316,7 @@ const { size = 32, showOnReveal = false } = Astro.props;
     display: none !important;
   }
 
+  /* Force show static icon in accessibility modes (override lottie-loaded hiding) */
   :global(body.a11y-reduce-motion) .cart-icon__static,
   :global(body.a11y-text-only) .cart-icon__static,
   :global(body.a11y-theme-dark) .cart-icon__static,
@@ -305,6 +328,7 @@ const { size = 32, showOnReveal = false } = Astro.props;
   :global(body.a11y-theme-monochrome) .cart-icon__static,
   :global(body.a11y-enhanced-focus) .cart-icon__static {
     display: block !important;
+    position: relative !important;
   }
 
   .cart-number {
