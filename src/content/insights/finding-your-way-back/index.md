@@ -4,7 +4,7 @@ description: "A gentle guide to rediscovering who you are, written by someone wh
 publishDate: "2025-01-15"
 author: "natasha-charlton"
 category: "Healing"
-image: "/WWAS HOMEPAGE GRAPHICS/2.png"
+image: "/_Unused Images/1.png"
 tags: ["trauma", "healing", "self-worth", "compassion"]
 enableReader: true
 linkedAssets:
@@ -33,7 +33,7 @@ readerSections:
     title: "Permission"
     body: "<p>You don't need to be fully healed to start healing. You don't need to have figured it all out before you take the first step.</p><p>Your healing doesn't need to look productive or inspirational or palatable to anyone else. It just needs to be real. It just needs to be yours.</p>"
     layout: "image-text"
-    image: "/WWAS HOMEPAGE GRAPHICS/3.png"
+    image: "/_Unused Images/3.jpg"
     imagePosition: "right"
 
   - id: "belonging"
@@ -46,7 +46,7 @@ readerSections:
     title: "Compassion"
     body: "<p>If a friend came to you and shared what you've been through, how would you respond? You'd probably feel a rush of tenderness.</p><p>So why is it so hard to offer ourselves the same?</p>"
     layout: "image-text"
-    image: "/WWAS HOMEPAGE GRAPHICS/4.png"
+    image: "/_Unused Images/6.png"
     imagePosition: "left"
 
   - id: "boundaries"
@@ -59,7 +59,7 @@ readerSections:
     title: "Stories"
     body: "<p>We all carry stories about who we are. Trauma writes some brutal stories.</p><p>Rewriting your story isn't denying your pain. It's expanding beyond it. It's leaving room for chapters that haven't been written yet.</p>"
     layout: "full-width-image"
-    image: "/WWAS HOMEPAGE GRAPHICS/5.png"
+    image: "/_Unused Images/7.jpg"
 
   - id: "practice"
     title: "Practice"
@@ -71,7 +71,7 @@ readerSections:
     title: "Together"
     body: "<p>You don't have to do this alone. When someone who's walked through fire sits with someone who's currently burning, something profound happens.</p><p>Wherever you are, you belong here. Your experience matters.</p>"
     layout: "image-text"
-    image: "/WWAS HOMEPAGE GRAPHICS/2.png"
+    image: "/_Unused Images/1.png"
     imagePosition: "right"
 
   - id: "onwards"

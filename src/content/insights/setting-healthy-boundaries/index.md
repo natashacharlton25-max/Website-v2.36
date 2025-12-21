@@ -4,7 +4,7 @@ description: "Learn how to set and maintain boundaries that protect your energy 
 publishDate: "2025-01-10"
 author: "natasha-charlton"
 category: "Boundaries"
-image: "/WWAS HOMEPAGE GRAPHICS/3.png"
+image: "/_Unused Images/3.jpg"
 tags: ["boundaries", "self-care", "relationships"]
 enableReader: false
 ---
