@@ -4,7 +4,7 @@ description: "Moving beyond self-criticism and learning to treat yourself with t
 publishDate: "2025-01-05"
 author: "natasha-charlton"
 category: "Wellbeing"
-image: "/WWAS HOMEPAGE GRAPHICS/4.png"
+image: "/_Unused Images/6.png"
 tags: ["self-compassion", "mindfulness", "wellbeing"]
 enableReader: false
 ---
