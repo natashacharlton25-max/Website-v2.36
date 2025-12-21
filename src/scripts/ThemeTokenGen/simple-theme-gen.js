@@ -8,13 +8,8 @@ import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import chroma from 'chroma-js';
 
-// Universal status colors (same across all brands) - generate full palettes
-const UNIVERSAL_STATUS_COLORS = {
-  Success: '22c55e',    // Green
-  Warning: 'f59e0b',    // Amber
-  Error: 'ef4444',      // Red (renamed from Danger)
-  Info: '3b82f6'        // Blue
-};
+// Note: Status colors (Success, Warning, Error, Info) and base colors (Black, White)
+// are now defined globally in src/styles/tokens/status.css - not generated per theme
 
 // Rainbow colors are defined in Allcoloursrainbow.css using theme tokens
 // They map to accent colors and change with each theme
@@ -386,15 +381,8 @@ function generateThemeCSS(palettes) {
     }
   }
 
-  // Status Colors - Full palettes
-  css += `  /* Status Colors - Universal across all themes */\n`;
-  for (const statusName of ['Success', 'Warning', 'Error', 'Info']) {
-    if (palettes[statusName]) {
-      for (const [weight, color] of Object.entries(palettes[statusName])) {
-        css += `  --color-${statusName}-${weight}: ${color};\n`;
-      }
-    }
-  }
+  // Note: Status colors (Success, Warning, Error, Info) and base colors (Black, White)
+  // are defined globally in src/styles/tokens/status.css - not per theme
 
   css += '}\n';
   return css;
@@ -595,12 +583,8 @@ async function generateTheme(themeName = 'brand-theme', customTemplatePath = nul
     }
   }
 
-  // Generate status color palettes using new system
-  for (const [statusName, hexValue] of Object.entries(UNIVERSAL_STATUS_COLORS)) {
-    console.log(`🎨 Generating ${statusName} palette from #${hexValue} (base: 500)...`);
-    const fullScale = generateScaleFromBase(`#${hexValue}`, 500);
-    palettes[statusName] = extractEssentialTokens({ [statusName]: fullScale }, statusName);
-  }
+  // Note: Status colors and Black/White are now global (src/styles/tokens/status.css)
+  // They are no longer generated per-theme
 
   // Generate CSS
   console.log('📝 Generating CSS...');

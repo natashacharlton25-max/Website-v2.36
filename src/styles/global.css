@@ -1,15 +1,13 @@
 /* ===================================
    GLOBAL STYLES
-   Import order: reset → theme → fonts → design tokens → confetti → utilities
+   Import order: reset → tokens → theme → confetti → utilities → a11y
    =================================== */
 
 @import './reset.css';
-@import './themes/brand/BrandDefault.css';  /* Brand theme (default) */
-@import './fonts.css';                /* Font imports and definitions */
-@import './design-tokens.css';        /* Typography, spacing, layout, etc. */
+@import './tokens/index.css';         /* All design tokens (typography, spacing, colors, shadows, gradients) */
+@import './themes/brand/BrandDefault.css';  /* Default theme - loaded first, overridden by ThemeSwitcher */
 @import './confetti.css';             /* Confetti particle tokens */
 @import './utilities.css';
-@import './ButtonThemes.css';         /* Button theme switcher system */
 @import './a11y.css';                 /* Accessibility themes and tokens */
 /* A11y theme files (themes/a11y/*.css) are dynamically loaded by ThemeSwitcher.js */
 @import './plain-mode.css';           /* Plain mode overrides for .plain class */
@@ -101,25 +99,83 @@ html:has([data-scrollbar])::-webkit-scrollbar {
 }
 
 /* ========== TYPOGRAPHY ========== */
+/* Font sizes set on actual HTML tags - components inherit, don't override */
 
-h1, h2, h3, h4, h5, h6 {
+h1 {
   font-family: var(--font-heading);
-  font-weight: var(--font-semibold);
+  font-size: clamp(2rem, 5vw + 1rem, 3.75rem);
+  font-weight: var(--font-bold);
   line-height: var(--leading-tight);
-  color: var(--color-Primary-700);
+  color: var(--color-Text-700);
   margin-bottom: var(--space-md);
 }
 
-h1 { font-size: var(--text-4xl); }
-h2 { font-size: var(--text-3xl); }
-h3 { font-size: var(--text-2xl); }
-h4 { font-size: var(--text-xl); font-weight: var(--font-medium); }  /* Medium for smaller headings */
-h5 { font-size: var(--text-lg); font-weight: var(--font-medium); }
-h6 { font-size: var(--text-base); font-weight: var(--font-medium); }
+h2 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3vw + 0.5rem, 2.5rem);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  color: var(--color-Text-700);
+  margin-bottom: var(--space-md);
+}
+
+h3 {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-snug);
+  color: var(--color-Text-700);
+  margin-bottom: var(--space-md);
+}
+
+h4 {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-snug);
+  color: var(--color-Text-600);
+  margin-bottom: var(--space-sm);
+}
+
+h5 {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-snug);
+  color: var(--color-Text-600);
+  margin-bottom: var(--space-sm);
+}
+
+h6 {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-snug);
+  color: var(--color-Text-600);
+  margin-bottom: var(--space-sm);
+}
 
 p {
-  margin-bottom: var(--space-md);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
   line-height: var(--leading-relaxed);
+  color: var(--color-Text-600);
+  margin-bottom: var(--space-md);
+}
+
+/* Lead paragraph - larger intro text */
+.lead,
+p.lead {
+  font-size: var(--text-lg);
+  color: var(--color-Text-500);
+  line-height: var(--leading-relaxed);
+}
+
+/* Small text */
+small,
+.text-sm {
+  font-size: var(--text-sm);
+  color: var(--color-Text-500);
 }
 
 blockquote {

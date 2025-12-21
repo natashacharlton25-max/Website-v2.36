@@ -1,58 +1,66 @@
 /**
- * ThemePreviewTokens - Dynamically extracts theme colors from CSS files
+ * ThemePreviewTokens - Extracts theme colors from CSS files
  *
- * Fetches each theme CSS file and extracts the core color tokens
- * (--a11y-*-bg, --a11y-*-accent, --a11y-*-text) to create preview tokens
- * for the accessibility panel theme cards.
- *
- * No hardcoded colors - all values come from the theme CSS files.
+ * Each theme file defines the same tokens with different hex values.
+ * This script fetches each CSS file and extracts the actual color values
+ * for the accessibility panel theme preview cards.
  */
 
-// Theme files to parse
+// Theme CSS files - paths relative to site root
 const themeFiles = {
-  // Brand theme (default)
-  default: '/src/styles/themes/brand/BrandDefault.css',
-  // Accessibility themes
-  dark: '/src/styles/themes/a11y/a11y-dark.css',
-  cream: '/src/styles/themes/a11y/a11y-cream.css',
-  hc: '/src/styles/themes/a11y/a11y-high-contrast.css',
-  protanopia: '/src/styles/themes/a11y/a11y-protanopia.css',
-  deuteranopia: '/src/styles/themes/a11y/a11y-deuteranopia.css',
-  tritanopia: '/src/styles/themes/a11y/a11y-tritanopia.css',
-  mono: '/src/styles/themes/a11y/a11y-monochrome.css',
+  default: '/styles/themes/brand/BrandDefault.css',
+  dark: '/styles/themes/a11y/a11y-dark.css',
+  cream: '/styles/themes/a11y/a11y-cream.css',
+  'high-contrast': '/styles/themes/a11y/a11y-high-contrast.css',
+  protanopia: '/styles/themes/a11y/a11y-protanopia.css',
+  deuteranopia: '/styles/themes/a11y/a11y-deuteranopia.css',
+  tritanopia: '/styles/themes/a11y/a11y-tritanopia.css',
+  monochrome: '/styles/themes/a11y/a11y-monochrome.css',
 };
 
-// Token patterns to extract from each theme
-// Maps theme name to the CSS variable names to extract [bg, primary, text, accent]
-const tokenPatterns = {
-  // Brand theme uses standard color tokens
-  default: ['--color-Background-50', '--color-Primary-500', '--color-Text-800', '--color-Secondary-500'],
-  // A11y themes use their specific tokens (each has unique namespace)
+// Tokens to extract - same for all themes
+// These are the standard token names that every theme defines
+const PREVIEW_TOKENS = [
+  '--color-Background-50',
+  '--color-Primary-500',
+  '--color-Text-800',
+  '--color-Secondary-500'
+];
+
+// Each theme has 4 core tokens with hex values
+// Order: [bg, primary, text, accent]
+const themeBaseTokens = {
+  default: ['--brand-bg', '--brand-primary', '--brand-text', '--brand-accent'],
   dark: ['--a11y-dark-bg', '--a11y-dark-primary', '--a11y-dark-text', '--a11y-dark-accent'],
   cream: ['--a11y-cream-bg', '--a11y-cream-primary', '--a11y-cream-text', '--a11y-cream-accent'],
-  hc: ['--a11y-hc-bg', '--a11y-hc-primary', '--a11y-hc-text', '--a11y-hc-accent'],
+  'high-contrast': ['--a11y-hc-bg', '--a11y-hc-primary', '--a11y-hc-text', '--a11y-hc-accent'],
   protanopia: ['--a11y-proto-bg', '--a11y-proto-primary', '--a11y-proto-text', '--a11y-proto-accent'],
   deuteranopia: ['--a11y-deuter-bg', '--a11y-deuter-primary', '--a11y-deuter-text', '--a11y-deuter-accent'],
   tritanopia: ['--a11y-trit-bg', '--a11y-trit-primary', '--a11y-trit-text', '--a11y-trit-accent'],
-  mono: ['--a11y-mono-bg', '--a11y-mono-primary', '--a11y-mono-text', '--a11y-mono-accent'],
+  monochrome: ['--a11y-mono-bg', '--a11y-mono-primary', '--a11y-mono-text', '--a11y-mono-accent'],
 };
 
 /**
- * Parse CSS text to extract custom property values
+ * Parse CSS text to extract custom property values (hex colors only)
  * @param {string} cssText - Raw CSS text
  * @param {string[]} properties - Array of CSS custom property names to extract
- * @returns {object} Map of property name to value
+ * @returns {object} Map of property name to hex value
  */
 function extractTokens(cssText, properties) {
   const tokens = {};
 
   properties.forEach(prop => {
-    // Match pattern: --prop-name: value; (handles multiline and various formats)
-    const regex = new RegExp(`${prop.replace(/[-]/g, '\\-')}\\s*:\\s*([^;]+);`, 'i');
+    // Match pattern: --prop-name: #hexvalue or rgb() etc
+    const escapedProp = prop.replace(/[-]/g, '\\-');
+    const regex = new RegExp(`${escapedProp}\\s*:\\s*([^;]+);`, 'i');
     const match = cssText.match(regex);
 
     if (match) {
-      tokens[prop] = match[1].trim();
+      const value = match[1].trim();
+      // Only keep actual color values, not var() references
+      if (!value.startsWith('var(')) {
+        tokens[prop] = value;
+      }
     }
   });
 
@@ -82,7 +90,6 @@ async function fetchAndExtract(url, properties) {
 
 /**
  * Set preview tokens on :root by fetching and parsing all theme CSS files
- * This extracts actual values from the CSS files - no hardcoding needed
  */
 export async function setPreviewTokens() {
   const root = document.documentElement;
@@ -90,19 +97,20 @@ export async function setPreviewTokens() {
   // Fetch all theme files in parallel
   const results = await Promise.all(
     Object.entries(themeFiles).map(async ([theme, url]) => {
-      const patterns = tokenPatterns[theme];
-      const tokens = await fetchAndExtract(url, patterns);
+      const tokensToExtract = themeBaseTokens[theme] || PREVIEW_TOKENS;
+      const tokens = await fetchAndExtract(url, tokensToExtract);
       return { theme, tokens };
     })
   );
 
   // Set preview tokens on :root
-  results.forEach(({ theme, tokens }) => {
-    const patterns = tokenPatterns[theme];
-    // Map by array position: [0]=bg, [1]=primary, [2]=text, [3]=accent
-    const tokenTypes = ['bg', 'primary', 'text', 'accent'];
+  // Map by position: [0]=bg, [1]=primary, [2]=text, [3]=accent
+  const tokenTypes = ['bg', 'primary', 'text', 'accent'];
 
-    patterns.forEach((prop, index) => {
+  results.forEach(({ theme, tokens }) => {
+    const tokensToExtract = themeBaseTokens[theme] || PREVIEW_TOKENS;
+
+    tokensToExtract.forEach((prop, index) => {
       const value = tokens[prop];
       if (value) {
         const previewName = `--theme-preview-${theme}-${tokenTypes[index]}`;
