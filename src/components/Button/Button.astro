@@ -1,0 +1,175 @@
+---
+/**
+ * Button Component
+ * Styles in button.css, dropdown in ThemedDropdown.astro
+ *
+ * Usage:
+ *   <Button variant="primary" icon="/icons/star.svg">Click Me</Button>
+ *   <Button variant="accent1" shape="circle" icon="/icons/plus.svg" />
+ *   <Button variant="secondary"><MyIcon slot="icon" />Text</Button>
+ */
+import './button.css';
+import ThemedDropdown from './ThemedDropdown.astro';
+
+export interface Props {
+  variant?: 'primary' | 'secondary' | 'accent1' | 'accent2' | 'accent3' | 'accent4' | 'accent5' | 'ghost' | 'glassmorphic' | 'neumorphic' | 'gradient';
+  shape?: 'default' | 'circle' | 'square' | 'dropdown' | 'pill' | 'sharp' | 'rounded';
+  size?: 'sm' | 'md' | 'lg';
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  className?: string;
+  dropdownItems?: Array<{label: string, href?: string}>;
+  id?: string;
+  href?: string;
+  target?: string;
+  icon?: string;
+  iconPosition?: 'left' | 'right';
+  textColor?: string;
+  textHoverColor?: string;
+  iconColor?: string;
+  iconHoverColor?: string;
+  ariaLabel?: string;
+}
+
+const {
+  variant = 'primary',
+  shape = 'default',
+  size = 'md',
+  type = 'button',
+  disabled = false,
+  className = '',
+  dropdownItems = [],
+  id,
+  href,
+  target,
+  icon,
+  iconPosition = 'left',
+  textColor,
+  textHoverColor,
+  iconColor,
+  iconHoverColor,
+  ariaLabel
+} = Astro.props;
+
+const isLink = !!href;
+const isDropdown = shape === 'dropdown';
+const hasIcon = !!icon || Astro.slots.has('icon');
+
+// Build class list
+const sizeClass = size !== 'md' ? `btn-${size}` : '';
+const iconPosClass = hasIcon ? `btn-icon-${iconPosition}` : '';
+const buttonClass = `btn btn-${variant} btn-${shape} ${sizeClass} ${iconPosClass} ${className}`.trim().replace(/\s+/g, ' ');
+
+// Build custom style with CSS variables for hover states
+const styleProps = [
+  textColor && `--btn-text-color: ${textColor}`,
+  textHoverColor && `--btn-text-hover: ${textHoverColor}`,
+  iconColor && `--btn-icon-color: ${iconColor}`,
+  iconHoverColor && `--btn-icon-hover: ${iconHoverColor}`,
+  textColor && `color: var(--btn-text-color)`
+].filter(Boolean).join('; ');
+const customStyle = styleProps ? `${styleProps};` : '';
+---
+
+{isDropdown ? (
+  <div class="dropdown-wrapper">
+    <button
+      class={`${buttonClass} btn-dropdown dropdown-btn`}
+      type={type}
+      disabled={disabled}
+      id={id}
+      style={customStyle}
+      aria-label={ariaLabel}
+    >
+      {iconPosition === 'left' && hasIcon && (
+        icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
+      )}
+      <slot />
+      {iconPosition === 'right' && hasIcon && (
+        icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
+      )}
+      <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M7 10l5 5 5-5z"/>
+      </svg>
+    </button>
+    <ThemedDropdown
+      colorTheme={variant as any}
+      dropdownItems={dropdownItems}
+    />
+  </div>
+) : isLink ? (
+  <a
+    href={href}
+    target={target}
+    class={buttonClass}
+    id={id}
+    style={customStyle}
+    aria-disabled={disabled}
+    aria-label={ariaLabel}
+  >
+    {iconPosition === 'left' && hasIcon && (
+      icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
+    )}
+    <slot />
+    {iconPosition === 'right' && hasIcon && (
+      icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
+    )}
+  </a>
+) : (
+  <button
+    class={buttonClass}
+    type={type}
+    disabled={disabled}
+    id={id}
+    style={customStyle}
+    aria-label={ariaLabel}
+  >
+    {iconPosition === 'left' && hasIcon && (
+      icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
+    )}
+    <slot />
+    {iconPosition === 'right' && hasIcon && (
+      icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
+    )}
+  </button>
+)}
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function() {
+    const dropdownWrappers = document.querySelectorAll('.dropdown-wrapper');
+
+    dropdownWrappers.forEach((wrapper) => {
+      const dropdownBtn = wrapper.querySelector('.dropdown-btn');
+      const dropdownMenu = wrapper.querySelector('.dropdown-menu');
+
+      if (dropdownBtn && dropdownMenu) {
+        dropdownBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          dropdownWrappers.forEach(otherWrapper => {
+            if (otherWrapper !== wrapper) {
+              const otherMenu = otherWrapper.querySelector('.dropdown-menu');
+              if (otherMenu) {
+                otherMenu.classList.remove('show');
+                otherWrapper.classList.remove('open');
+              }
+            }
+          });
+          dropdownMenu.classList.toggle('show');
+          wrapper.classList.toggle('open');
+        });
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown-wrapper')) {
+        dropdownWrappers.forEach(wrapper => {
+          const menu = wrapper.querySelector('.dropdown-menu');
+          if (menu) {
+            menu.classList.remove('show');
+            wrapper.classList.remove('open');
+          }
+        });
+      }
+    });
+  });
+</script>

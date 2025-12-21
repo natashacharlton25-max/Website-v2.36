@@ -7,7 +7,7 @@ import { setPreviewTokens } from './ThemePreviewTokens.js';
 export class ThemeSwitcher {
   constructor() {
     this.themes = {
-      // Brand theme (default)
+// Brand theme (default)
       'default': '/src/styles/themes/brand/BrandDefault.css',
       // Accessibility themes
       'a11y-dark': '/src/styles/themes/a11y/a11y-dark.css',
@@ -17,6 +17,8 @@ export class ThemeSwitcher {
       'a11y-protanopia': '/src/styles/themes/a11y/a11y-protanopia.css',
       'a11y-deuteranopia': '/src/styles/themes/a11y/a11y-deuteranopia.css',
       'a11y-tritanopia': '/src/styles/themes/a11y/a11y-tritanopia.css',
+      'brand/BrandDefault': '/src/styles/themes/brand/BrandDefault.css',
+      'BrandDefault': '/src/styles/themes/BrandDefault.css'
     };
 
     this.currentTheme = null;  // Start as null so first switchTheme always loads CSS
