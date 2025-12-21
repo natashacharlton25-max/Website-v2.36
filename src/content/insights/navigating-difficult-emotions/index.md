@@ -4,7 +4,7 @@ description: "Simple, effective strategies for sitting with uncomfortable feelin
 publishDate: "2024-12-20"
 author: "natasha-charlton"
 category: "Wellbeing"
-image: "/_Unused Images/9.jpg"
+cardImage: ./card.png
 tags: ["emotions", "mindfulness", "wellbeing"]
 enableReader: false
 ---

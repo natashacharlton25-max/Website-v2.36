@@ -4,11 +4,17 @@ import IsotopeFilterSwitcher from '../components/ui/IsotopeFilterSwitcher.astro'
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 
+// Helper to get folder slug from entry.id (handles index.md suffix and path separators)
+const getSlug = (id: string) => {
+  const normalized = id.replace(/[\\/]index\.md$/, '');
+  return normalized.split(/[\\/]/).pop() || id;
+};
+
 // Get all assets from content collection
 const assetsEntries = await getCollection('assets');
 const assets = assetsEntries.map(entry => ({
   ...entry.data,
-  slug: entry.slug,
+  slug: getSlug(entry.id),
 }));
 
 // Filter categories - match asset types

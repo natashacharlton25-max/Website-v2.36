@@ -73,29 +73,17 @@ const assetsCollection = defineCollection({
   }),
 });
 
-// Blog/Insights collection
+// Blog/Insights collection - one folder per insight with data + images (standard blog posts)
 const insightsCollection = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     description: z.string(),
     publishDate: z.string(),
     author: z.string(), // Author slug (references authors collection folder name)
     category: z.string(),
-    image: z.string(),
+    cardImage: image(), // Card image in same folder
     tags: z.array(z.string()).optional(),
-
-    // Reader mode configuration
-    enableReader: z.boolean().optional(), // Enable scroll-driven Reader component
-    readerSections: z.array(z.object({
-      id: z.string(), // Unique section ID for URL hash anchors
-      title: z.string(), // Section title
-      body: z.string(), // HTML content (50-100 words, fits viewport)
-      alignment: z.enum(['left', 'right', 'center']).optional(), // Text alignment
-      layout: z.enum(['text-only', 'image-text', 'full-width-image']).optional(), // Layout type
-      image: z.string().optional(), // Image path
-      imagePosition: z.enum(['left', 'right']).optional(), // Image position for image-text
-    })).optional(),
 
     // Linked assets (workbooks, resources, etc.)
     linkedAssets: z.array(z.object({
@@ -106,6 +94,64 @@ const insightsCollection = defineCollection({
     })).optional(),
 
     // SEO overrides (optional - falls back to title/description if not set)
+    seoTitle: z.string().optional(),
+    seoDescription: z.string().optional(),
+  }),
+});
+
+// Presentations collection - scroll-driven Reader experiences
+// These are separate from blog posts and use the Reader component
+const presentationsCollection = defineCollection({
+  type: 'content',
+  schema: ({ image }) => z.object({
+    title: z.string(),
+    description: z.string(),
+    publishDate: z.string().optional(),
+    author: z.string().optional(), // Author slug (references authors collection)
+    category: z.string(),
+    cardImage: image(), // Card image in same folder
+    tags: z.array(z.string()).optional(),
+
+    // Where this presentation appears in listing grids
+    showIn: z.array(z.enum(['insights', 'assets', 'projects'])).optional(),
+
+    // Hero section - first page of the presentation
+    // Uses title/description/cardImage by default, can override here
+    hero: z.object({
+      title: z.string().optional(), // Override title
+      description: z.string().optional(), // Override description
+      image: image().optional(), // Override image (co-located in same folder, e.g., ./hero.png)
+      showCategory: z.boolean().optional(), // Show category badge (default: true)
+      showDate: z.boolean().optional(), // Show publish date (default: true)
+    }).optional(),
+
+    // Reader sections - the scroll-driven content
+    sections: z.array(z.object({
+      id: z.string(), // Unique section ID for URL hash anchors
+      title: z.string(), // Section title
+      body: z.string(), // HTML content (50-100 words, fits viewport)
+      alignment: z.enum(['left', 'right', 'center']).optional(), // Text alignment
+      layout: z.enum(['text-only', 'image-text', 'full-width-image']).optional(), // Layout type
+      image: image().optional(), // Image in same folder (e.g., ./permission.png)
+      imagePosition: z.enum(['left', 'right']).optional(), // Image position for image-text layout
+    })),
+
+    // End section - last page of the presentation
+    endSection: z.object({
+      showAuthor: z.boolean().optional(), // Show author bio (default: true if author set)
+      showRecommended: z.boolean().optional(), // Show recommended presentations (default: true)
+      customHtml: z.string().optional(), // Custom HTML content for end section
+    }).optional(),
+
+    // Linked assets shown at end of presentation
+    linkedAssets: z.array(z.object({
+      title: z.string(),
+      description: z.string().optional(),
+      url: z.string(),
+      type: z.string().optional(),
+    })).optional(),
+
+    // SEO overrides
     seoTitle: z.string().optional(),
     seoDescription: z.string().optional(),
   }),
@@ -129,6 +175,12 @@ const projectsCollection = defineCollection({
 
     // Resources - slugs that reference assets in content collection
     resourceSlugs: z.array(z.string()),
+
+    // Insights - slugs that reference insights in content collection
+    insightSlugs: z.array(z.string()).optional(),
+
+    // Presentations - slugs that reference presentations in content collection
+    presentationSlugs: z.array(z.string()).optional(),
 
     // Professional information
     professional: z.object({
@@ -198,6 +250,7 @@ const authorsCollection = defineCollection({
 export const collections = {
   'assets': assetsCollection,
   'insights': insightsCollection,
+  'presentations': presentationsCollection,
   'projects': projectsCollection,
   'resources': resourcesCollection,
   'authors': authorsCollection,

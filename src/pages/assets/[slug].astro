@@ -5,19 +5,31 @@ import Icon from '../../components/ui/Icon.astro';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 
+// Helper to get folder slug from entry.id (handles index.md suffix and path separators)
+const getSlug = (id: string) => {
+  const normalized = id.replace(/[\\/]index\.md$/, '');
+  return normalized.split(/[\\/]/).pop() || id;
+};
+
 // Generate static paths from content collection
 export async function getStaticPaths() {
+  // Helper to get folder slug from entry.id (handles index.md suffix and path separators)
+  const getSlugFromId = (id: string) => {
+    const normalized = id.replace(/[\\/]index\.md$/, '');
+    return normalized.split(/[\\/]/).pop() || id;
+  };
+
   const assetEntries = await getCollection('assets');
 
   return assetEntries.map(entry => ({
-    params: { slug: entry.slug },
+    params: { slug: getSlugFromId(entry.id) },
     props: { entry }
   }));
 }
 
 const { entry } = Astro.props;
 const asset = entry.data;
-const slug = entry.slug;
+const slug = getSlug(entry.id);
 
 // Fallback if asset not found
 if (!asset) {
@@ -53,12 +65,12 @@ const allAssets = await getCollection('assets');
 
 // Get related products (same type, excluding current)
 const relatedProducts = allAssets
-  .filter(a => a.data.type === asset.type && a.slug !== slug)
+  .filter(a => a.data.type === asset.type && getSlug(a.id) !== slug)
   .slice(0, 2)
   .map(a => ({
-    id: a.slug,
+    id: getSlug(a.id),
     name: a.data.name,
-    slug: a.slug,
+    slug: getSlug(a.id),
     category: a.data.category,
     type: a.data.type,
     description: a.data.description,
