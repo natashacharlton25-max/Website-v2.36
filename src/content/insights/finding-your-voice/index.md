@@ -4,7 +4,7 @@ description: "Learning to express what you really think and feel, even when it f
 publishDate: "2024-12-28"
 author: "natasha-charlton"
 category: "Communication"
-image: "/_Unused Images/7.jpg"
+cardImage: ./card.png
 tags: ["communication", "authenticity", "self-expression"]
 enableReader: false
 ---

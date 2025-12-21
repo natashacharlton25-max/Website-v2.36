@@ -4,25 +4,65 @@ import { getCollection } from 'astro:content';
 import FooterWithMask from '../../components/sections/FooterWithMask.astro';
 import MasonryGrid from '../../components/ui/MasonryGrid.astro';
 
+// Helper to get folder slug from entry.id (handles index.md suffix and path separators)
+const getSlugFromId = (id: string) => {
+  // Remove /index.md or \index.md suffix, then get folder name
+  const normalized = id.replace(/[\\/]index\.md$/, '');
+  return normalized.split(/[\\/]/).pop() || id;
+};
+
 // Get all assets from content collection
 const assetsEntries = await getCollection('assets');
 const assetsMap = new Map<string, typeof assetsEntries[number]['data']>(
-  assetsEntries.map(entry => [entry.slug, entry.data])
+  assetsEntries.map(entry => [getSlugFromId(entry.id), entry.data])
+);
+
+// Get all insights from content collection
+const insightsEntries = await getCollection('insights');
+const insightsMap = new Map<string, typeof insightsEntries[number]['data']>(
+  insightsEntries.map(entry => [getSlugFromId(entry.id), entry.data])
+);
+
+// Get all presentations from content collection
+const presentationsEntries = await getCollection('presentations');
+const presentationsMap = new Map<string, typeof presentationsEntries[number]['data']>(
+  presentationsEntries.map(entry => [getSlugFromId(entry.id), entry.data])
 );
 
 // Helper to get asset by slug
 const getAssetBySlug = (slug: string) => assetsMap.get(slug);
 
+// Helper to get insight by slug
+const getInsightBySlug = (slug: string) => insightsMap.get(slug);
+
+// Helper to get presentation by slug
+const getPresentationBySlug = (slug: string) => presentationsMap.get(slug);
+
 // Helper to get asset card image path
 const getAssetImagePath = (asset: any) => asset?.cardImage?.src || `/images/Assets/${asset?.slug}/card.png`;
 
+// Helper to get insight card image path
+const getInsightImagePath = (insight: any) => insight?.cardImage?.src || null;
+
+// Helper to get presentation card image path
+const getPresentationImagePath = (presentation: any) => presentation?.cardImage?.src || null;
+
 // Export getStaticPaths for static site generation
 export async function getStaticPaths() {
+  // Helper to get folder slug from entry.id (handles index.md suffix and path separators)
+  const getSlug = (id: string) => {
+    const normalized = id.replace(/[\\/]index\.md$/, '');
+    return normalized.split(/[\\/]/).pop() || id;
+  };
+
   const projectEntries = await getCollection('projects');
-  return projectEntries.map(entry => ({
-    params: { slug: entry.slug },
-    props: { project: { slug: entry.slug, ...entry.data } }
-  }));
+  return projectEntries.map(entry => {
+    const slug = getSlug(entry.id);
+    return {
+      params: { slug },
+      props: { project: { slug, ...entry.data } }
+    };
+  });
 }
 
 const { project } = Astro.props;
@@ -329,6 +369,84 @@ const masonryCards = [
         bgColor: resourceColor.bg,
         textColor: resourceColor.text,
         icon: resourceIcon,
+        size: 'medium' as const
+      };
+    }
+  }),
+  // Insight cards - pull from insights data (differentiated with 'Article' badge and article icon)
+  ...(project.insightSlugs || []).map((slug, index) => {
+    const insight = getInsightBySlug(slug);
+    const insightColor = getNextColor();
+
+    // Use insight data if available, fallback to slug-based name
+    const insightTitle = insight?.title || slug.split('-').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+
+    const insightDescription = insight?.description || 'Read this article';
+    const insightCategory = insight?.category || 'Article';
+
+    // First insight gets image card, rest are text-only
+    if (index < 1 && insight) {
+      return {
+        type: 'mixed' as const,
+        image: getInsightImagePath(insight),
+        alt: insightTitle,
+        title: insightTitle,
+        content: insightDescription,
+        link: `/insights/${slug}`,
+        bgColor: insightColor.bg,
+        textColor: insightColor.text,
+        badge: insightCategory
+      };
+    } else {
+      return {
+        type: 'text' as const,
+        title: insightTitle,
+        content: insightDescription,
+        link: `/insights/${slug}`,
+        bgColor: insightColor.bg,
+        textColor: insightColor.text,
+        icon: 'ph:article-duotone',
+        size: 'medium' as const
+      };
+    }
+  }),
+  // Presentation cards - pull from presentations data (differentiated with 'Presentation' badge and slideshow icon)
+  ...(project.presentationSlugs || []).map((slug, index) => {
+    const presentation = getPresentationBySlug(slug);
+    const presentationColor = getNextColor();
+
+    // Use presentation data if available, fallback to slug-based name
+    const presentationTitle = presentation?.title || slug.split('-').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+
+    const presentationDescription = presentation?.description || 'View this presentation';
+    const presentationCategory = presentation?.category || 'Presentation';
+
+    // First presentation gets image card, rest are text-only
+    if (index < 1 && presentation) {
+      return {
+        type: 'mixed' as const,
+        image: getPresentationImagePath(presentation),
+        alt: presentationTitle,
+        title: presentationTitle,
+        content: presentationDescription,
+        link: `/presentations/${slug}`,
+        bgColor: presentationColor.bg,
+        textColor: presentationColor.text,
+        badge: presentationCategory
+      };
+    } else {
+      return {
+        type: 'text' as const,
+        title: presentationTitle,
+        content: presentationDescription,
+        link: `/presentations/${slug}`,
+        bgColor: presentationColor.bg,
+        textColor: presentationColor.text,
+        icon: 'ph:presentation-chart-duotone',
         size: 'medium' as const
       };
     }

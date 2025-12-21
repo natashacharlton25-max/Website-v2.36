@@ -4,7 +4,7 @@ description: "A gentle guide to rediscovering who you are, written by someone wh
 publishDate: "2025-01-15"
 author: "natasha-charlton"
 category: "Healing"
-image: "/_Unused Images/1.png"
+cardImage: ./card.png
 tags: ["trauma", "healing", "self-worth", "compassion"]
 enableReader: true
 linkedAssets:

@@ -1,0 +1,41 @@
+Image Sizes for Presentations
+==============================
+Each presentation has its own folder with co-located images.
+
+Image specs:
+- card.png/card.jpg: 1200x630 (1.91:1 landscape) - for grid cards in insights/assets/projects listings
+- hero.png/hero.jpg: 1920x1080 (16:9 landscape) - optional hero background (falls back to card if not set)
+- Section images: 1920x1080 (16:9 landscape) - named by section ID (e.g., permission.png, compassion.png)
+
+Folder structure:
+src/content/presentations/
+├── {presentation-slug}/
+│   ├── index.md (frontmatter + sections)
+│   ├── card.png or card.jpg
+│   ├── hero.png (optional - uses card if not set)
+│   └── {section-id}.png (for image-text and full-width-image layouts)
+
+Example for "finding-your-way-back" presentation:
+src/content/presentations/finding-your-way-back/
+├── index.md
+├── card.png         (1200x630 - grid cards)
+├── hero.png         (1920x1080 - hero background)
+├── permission.png   (1920x1080 - section with id="permission")
+├── compassion.png   (1920x1080 - section with id="compassion")
+├── stories.png      (1920x1080 - section with id="stories")
+└── together.png     (1920x1080 - section with id="together")
+
+Referencing images in frontmatter:
+hero:
+  image: ./hero.png
+
+sections:
+  - id: "permission"
+    layout: "image-text"
+    image: ./permission.png
+
+Layout types that use images:
+- "image-text": Image appears beside text (1920x1080 recommended)
+- "full-width-image": Image as background with text overlay (1920x1080 or larger)
+- "text-only": No image needed
+

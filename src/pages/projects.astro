@@ -5,10 +5,16 @@ import { getCollection } from 'astro:content';
 import FooterWithMask from '../components/sections/FooterWithMask.astro';
 import UnifiedButton from '../components/Buttons/UnifiedButton.astro';
 
+// Helper to get folder slug from entry.id (handles index.md suffix and path separators)
+const getSlug = (id: string) => {
+  const normalized = id.replace(/[\\/]index\.md$/, '');
+  return normalized.split(/[\\/]/).pop() || id;
+};
+
 // Get projects from content collection
 const projectEntries = await getCollection('projects');
 const projects = projectEntries.map(entry => ({
-  slug: entry.slug,
+  slug: getSlug(entry.id),
   ...entry.data,
 }));
 ---

@@ -4,28 +4,60 @@ import FooterWithMask from '../components/sections/FooterWithMask.astro';
 import IsotopeFilterSwitcher from '../components/ui/IsotopeFilterSwitcher.astro';
 import { getCollection } from 'astro:content';
 
+// Helper to get folder slug from entry.id (handles index.md suffix and path separators)
+const getSlug = (id: string) => {
+  const normalized = id.replace(/[\\/]index\.md$/, '');
+  return normalized.split(/[\\/]/).pop() || id;
+};
+
 // Get all published insights posts
 const allInsights = await getCollection('insights');
 
-// Sort by publish date (newest first)
-const articles = allInsights
-  .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime())
-  .map((entry) => {
-    // Calculate approximate read time based on content length
-    const wordsPerMinute = 200;
-    const wordCount = entry.body.split(/\s+/).length;
-    const readTime = Math.ceil(wordCount / wordsPerMinute);
+// Get presentations that should show in insights listing
+const allPresentations = await getCollection('presentations');
+const insightPresentations = allPresentations.filter(
+  entry => entry.data.showIn?.includes('insights')
+);
 
-    return {
-      slug: entry.slug,
-      title: entry.data.title,
-      excerpt: entry.data.description,
-      image: entry.data.image,
-      category: entry.data.category,
-      readTime: `${readTime} min read`,
-      publishDate: entry.data.publishDate,
-    };
-  });
+// Map insights to article format
+const insightArticles = allInsights.map((entry) => {
+  // Calculate approximate read time based on content length
+  const wordsPerMinute = 200;
+  const wordCount = entry.body.split(/\s+/).length;
+  const readTime = Math.ceil(wordCount / wordsPerMinute);
+
+  return {
+    slug: getSlug(entry.id),
+    title: entry.data.title,
+    excerpt: entry.data.description,
+    cardImage: entry.data.cardImage,
+    category: entry.data.category,
+    readTime: `${readTime} min read`,
+    publishDate: entry.data.publishDate,
+    type: 'insight' as const,
+  };
+});
+
+// Map presentations to article format
+const presentationArticles = insightPresentations.map((entry) => {
+  // Presentations don't have traditional read time, show section count instead
+  const sectionCount = entry.data.sections?.length || 0;
+
+  return {
+    slug: getSlug(entry.id),
+    title: entry.data.title,
+    excerpt: entry.data.description,
+    cardImage: entry.data.cardImage,
+    category: entry.data.category,
+    readTime: `${sectionCount} sections`,
+    publishDate: entry.data.publishDate || '',
+    type: 'presentation' as const,
+  };
+});
+
+// Merge and sort by publish date (newest first)
+const articles = [...insightArticles, ...presentationArticles]
+  .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
 
 // Get unique categories for filter
 const categories = ['all', ...new Set(articles.map(a => a.category))];
@@ -77,12 +109,12 @@ const filterCategories = categories.map(cat => ({
 
         {articles.map((article) => (
           <a
-            href={`/insights/${article.slug}`}
+            href={article.type === 'presentation' ? `/presentations/${article.slug}` : `/insights/${article.slug}`}
             class={`article-card ${article.category.toLowerCase().replace(/\s+/g, '-')}`}
             data-category={article.category.toLowerCase().replace(/\s+/g, '-')}
           >
             <div class="article-image">
-              <img src={article.image} alt={article.title} loading="lazy" />
+              <img src={article.cardImage.src} alt={article.title} loading="lazy" />
               <div class="article-category-badge">{article.category}</div>
             </div>
             <div class="article-content">
@@ -92,7 +124,7 @@ const filterCategories = categories.map(cat => ({
               <h2 class="article-title">{article.title}</h2>
               <p class="article-excerpt">{article.excerpt}</p>
               <span class="read-more">
-                Read Article
+                {article.type === 'presentation' ? 'View Presentation' : 'Read Article'}
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                   <polyline points="12 5 19 12 12 19"></polyline>
