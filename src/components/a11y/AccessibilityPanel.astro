@@ -1,120 +1,32 @@
 ---
 /**
  * AccessibilityPanel - Complete Accessibility Solution (All-in-One)
- *
- * Combines all accessibility features into one self-contained component:
- *
- * PANEL SETTINGS:
- * - Text-only mode (hides images/decorations)
- * - Dyslexia-friendly font toggle (OpenDyslexic)
- * - Font size adjustment (50% - 200%)
- * - Letter & word spacing adjustment
- * - Line height adjustment
- * - Color theme switcher (color blindness modes)
- * - PDF download
- *
- * A11Y UTILITIES:
- * - Reduced Motion toggle (override system preference)
- * - Enhanced Focus toggle (stronger focus indicators)
- * - Screen Reader mode (announcements on interactions)
- * - Highlight Links toggle (underline all links)
- * - Skip links for keyboard navigation
- * - Focus trap utility for modals
- * - Screen reader announcer (live regions)
- *
- * CSS UTILITIES (global):
- * - .sr-only (screen reader only)
- * - .sr-only-focusable
- * - Focus visible styles
- * - Touch target sizes
- * - High contrast support
- *
- * JS API (window.a11y):
- * - announce(message, priority) - Screen reader announcements
- * - FocusTrap - Focus trap class for modals
- * - prefersReducedMotion() - Check motion preference
- *
- * Usage:
- * ```astro
- * <AccessibilityPanel mainContentId="main" position="bottom-right" />
- * ```
  */
 
 interface Props {
   /**
-   * Display mode: 'modal' (floating button + overlay) or 'page' (standalone page)
+   * Display mode: 'modal' (overlay) or 'page' (standalone page)
    */
   mode?: 'modal' | 'page';
-
-  /**
-   * Position of the floating button (modal mode only)
-   */
-  position?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
-
-  /**
-   * Button size in pixels (modal mode only)
-   */
-  buttonSize?: number;
-
-  /**
-   * Hide the floating button (useful when using external trigger)
-   */
-  hideButton?: boolean;
-
-  /**
-   * ID of the main content area for skip link
-   */
-  mainContentId?: string;
-
-  /**
-   * ID of the navigation for skip link
-   */
-  navId?: string;
-
-  /**
-   * Custom skip links (in addition to defaults)
-   */
-  skipLinks?: Array<{ href: string; label: string }>;
-
-  /**
-   * Additional class for the button
-   */
-  class?: string;
 }
 
-const {
-  mode = 'modal',
-  position = 'bottom-right',
-  buttonSize = 48,
-  hideButton = false,
-  mainContentId = 'main-content',
-  navId = 'main-nav',
-  skipLinks = [],
-  class: className = ''
-} = Astro.props;
+const { mode = 'modal' } = Astro.props;
 
-// Build skip links array
-const allSkipLinks = [
-  { href: `#${mainContentId}`, label: 'Skip to main content' },
-  { href: `#${navId}`, label: 'Skip to navigation' },
-  ...skipLinks
+// Import components
+import ButtonDropdown from '../Button/ButtonDropdown.astro';
+import Icon from '../ui/Icon.astro';
+
+// Font options for dropdown
+const fontOptions = [
+  { label: 'Default Font', value: 'default' },
+  { label: 'OpenDyslexic (Dyslexia)', value: 'opendyslexic', fontFamily: "'OpenDyslexic', sans-serif" },
+  { label: 'Atkinson Hyperlegible (Low Vision)', value: 'atkinson', fontFamily: "'Atkinson Hyperlegible', sans-serif" },
+  { label: 'Comic Sans MS (Easy Read)', value: 'comic-sans', fontFamily: "'Comic Sans MS', 'Comic Sans', cursive" },
+  { label: 'Verdana (Screen Optimized)', value: 'verdana', fontFamily: "Verdana, Geneva, sans-serif" },
+  { label: 'Arial (Clean & Simple)', value: 'arial', fontFamily: "Arial, Helvetica, sans-serif" },
+  { label: 'Tahoma (High Legibility)', value: 'tahoma', fontFamily: "Tahoma, Geneva, sans-serif" }
 ];
-
-// Position classes
-const positionStyles: Record<string, string> = {
-  'bottom-right': 'bottom: 1.5rem; right: 1.5rem;',
-  'bottom-left': 'bottom: 1.5rem; left: 1.5rem;',
-  'top-right': 'top: 1.5rem; right: 1.5rem;',
-  'top-left': 'top: 1.5rem; left: 1.5rem;'
-};
 ---
-
-<!-- Skip Links -->
-<nav class="a11y-skip-links" aria-label="Skip links">
-  {allSkipLinks.map(link => (
-    <a href={link.href} class="a11y-skip-link">{link.label}</a>
-  ))}
-</nav>
 
 <!-- Live Region for Announcements -->
 <div
@@ -133,23 +45,6 @@ const positionStyles: Record<string, string> = {
   aria-atomic="true"
 ></div>
 
-{mode === 'modal' && !hideButton && (
-  <!-- Accessibility Button (Floating) -->
-  <button
-    class={`a11y-panel-trigger ${className}`}
-    aria-label="Accessibility settings"
-    aria-expanded="false"
-    aria-controls="a11y-panel"
-    style={`width: ${buttonSize}px; height: ${buttonSize}px; ${positionStyles[position]}`}
-  >
-    <svg viewBox="0 0 132 132" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="66" cy="33.46" r="9.46" fill="currentColor"/>
-      <path d="m97.66,36.72c-.6.33-1.19.65-1.79.97-.32.17-.63.33-.95.49-.32.16-.64.33-.96.48-.36.18-.73.35-1.09.52-.27.13-.55.26-.82.39-.39.18-.77.35-1.16.52-.25.11-.5.22-.75.33-.4.17-.8.34-1.2.5-.24.1-.48.19-.71.29-.41.16-.81.32-1.22.47-.23.09-.46.17-.69.26-.41.15-.82.29-1.23.43-.23.08-.46.15-.68.23-.41.13-.82.27-1.23.39-.23.07-.46.14-.68.2-.41.12-.82.24-1.23.35-.23.06-.45.12-.68.18-.41.11-.82.21-1.23.31-.23.05-.46.1-.68.16-.41.09-.82.18-1.23.27-.23.05-.45.09-.68.13-.41.08-.82.16-1.23.23-.22.04-.45.07-.67.11-.42.07-.83.13-1.25.19-.21.03-.42.05-.64.08-.43.05-.85.11-1.28.15-.19.02-.39.03-.58.05-.44.04-.89.08-1.33.11-.14,0-.27.01-.41.02-2.24.14-4.49.14-6.73,0-.14,0-.27-.01-.41-.02-.44-.03-.89-.07-1.33-.11-.19-.02-.39-.03-.58-.05-.42-.04-.85-.1-1.27-.15-.21-.03-.43-.05-.64-.08-.41-.06-.83-.12-1.24-.19-.22-.04-.45-.07-.67-.11-.41-.07-.82-.15-1.23-.23-.23-.04-.46-.09-.69-.13-.41-.08-.82-.17-1.23-.27-.23-.05-.46-.1-.68-.16-.41-.1-.82-.2-1.23-.31-.23-.06-.46-.12-.68-.18-.41-.11-.82-.23-1.23-.35-.23-.07-.46-.13-.68-.2-.41-.13-.82-.26-1.23-.39-.23-.08-.46-.15-.69-.23-.41-.14-.82-.28-1.23-.43-.23-.08-.46-.17-.7-.26-.41-.15-.81-.31-1.22-.47-.24-.09-.47-.19-.71-.29-.4-.16-.8-.33-1.2-.5-.25-.11-.5-.22-.75-.33-.39-.17-.77-.34-1.16-.52-.27-.13-.55-.26-.82-.39-.36-.17-.73-.35-1.09-.53-.31-.16-.63-.32-.95-.48-.32-.16-.64-.33-.96-.49-.6-.31-1.19-.63-1.79-.97-1.93-1.08-4.37-.39-5.44,1.54-1.08,1.93-.38,4.37,1.54,5.44.58.32,1.16.63,1.74.94h0c.09.05.17.09.26.14.3.16.6.31.9.46.42.22.85.43,1.27.64.3.15.6.29.9.43.42.2.85.4,1.27.6.3.14.6.27.91.4.42.19.84.37,1.26.55.31.13.61.25.92.38.42.17.83.34,1.25.5.31.12.63.24.94.36.41.15.82.3,1.23.45.32.11.64.22.96.33.4.14.8.27,1.2.4.33.11.66.21.99.31.39.12.78.23,1.17.35.34.1.67.19,1.01.28.38.1.77.2,1.15.3.34.09.69.17,1.03.26.37.09.75.17,1.12.25.35.08.71.16,1.06.23.36.07.73.14,1.09.21.16.03.33.06.49.09l1.44,15.12v4.58l-11.71,33.02c-.95,2.68.45,5.62,3.13,6.57.57.2,1.15.3,1.72.3,2.12,0,4.1-1.32,4.85-3.43l10.53-29.72h2.94l10.53,29.72c.75,2.11,2.73,3.43,4.85,3.43.57,0,1.15-.1,1.72-.3,2.68-.95,4.08-3.89,3.13-6.57l-11.7-33.02v-4.58l1.44-15.12c.17-.03.33-.06.5-.09.36-.07.72-.13,1.08-.21.36-.07.72-.15,1.08-.23.37-.08.74-.16,1.11-.25.35-.08.7-.17,1.05-.26.38-.1.76-.19,1.14-.3.34-.09.68-.19,1.02-.29.39-.11.78-.23,1.17-.34.33-.1.66-.21,1-.31.4-.13.79-.26,1.19-.39.32-.11.65-.22.97-.34.41-.14.81-.29,1.22-.44.32-.12.63-.24.95-.36.41-.16.83-.33,1.24-.5.31-.13.61-.25.92-.38.42-.18.84-.36,1.27-.55.3-.13.6-.27.9-.4.43-.19.85-.4,1.28-.6.3-.14.6-.28.89-.43.43-.21.85-.43,1.28-.65.3-.15.6-.3.89-.46.09-.05.17-.09.26-.13h0c.58-.31,1.16-.62,1.74-.94,1.93-1.08,2.62-3.51,1.54-5.44-1.08-1.93-3.51-2.62-5.44-1.54Z" fill="currentColor"/>
-      <path d="m66,2C30.65,2,2,30.65,2,66s28.65,64,64,64,64-28.65,64-64S101.35,2,66,2Zm0,124c-33.08,0-60-26.92-60-60S32.92,6,66,6s60,26.92,60,60-26.92,60-60,60Z" fill="currentColor"/>
-    </svg>
-  </button>
-)}
-
 <!-- Accessibility Panel -->
 <div
   class={mode === 'page' ? 'a11y-panel a11y-panel--page' : 'a11y-panel'}
@@ -161,24 +56,16 @@ const positionStyles: Record<string, string> = {
 >
   <div class="a11y-panel__header" data-mode={mode}>
     <h2 class="a11y-panel__title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="m11.5 5.5v5h-7v-5zm0 7v3h-7v-3zm7-7v10h-5v-10zm-16-1v12c0 .553.448 1 1 1h2v3l4-3h10c.552 0 1-.447 1-1v-12c0-.553-.448-1-1-1h-16c-.552 0-1 .447-1 1z"/>
-      </svg>
       Accessibility
     </h2>
     <div class="a11y-panel__header-actions">
-      <button class="a11y-reset-btn-header" id="a11y-reset" aria-label="Reset all settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-          <path d="M3 3v5h5"/>
-        </svg>
+      <button class="btn btn-sm btn-ghost" id="a11y-reset" aria-label="Reset all settings">
+        <Icon name="a11y-panel/arrow-counter-clockwise-fill" size={18} />
         Reset All
       </button>
       {mode === 'modal' && (
-        <button class="a11y-panel__close" aria-label="Close accessibility panel">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
+        <button class="a11y-panel__close" type="button" aria-label="Close accessibility panel">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><rect width="256" height="256" fill="none"/><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM181.66,170.34a8,8,0,0,1-11.32,11.32L128,139.31,85.66,181.66a8,8,0,0,1-11.32-11.32L116.69,128,74.34,85.66A8,8,0,0,1,85.66,74.34L128,116.69l42.34-42.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
         </button>
       )}
     </div>
@@ -231,18 +118,30 @@ const positionStyles: Record<string, string> = {
       <!-- Accessible Font Selector -->
       <div class="a11y-setting a11y-setting--font">
         <div class="a11y-setting__header">
-          <label for="a11y-font-family" class="a11y-setting__label">Accessible Font</label>
+          <label id="a11y-font-label-text" class="a11y-setting__label">Accessible Font</label>
           <span class="a11y-setting__desc">Choose an easy-to-read font</span>
         </div>
-        <select id="a11y-font-family" class="a11y-select" data-setting="fontFamily">
-          <option value="default">Default Font</option>
-          <option value="opendyslexic">OpenDyslexic (Dyslexia)</option>
-          <option value="atkinson">Atkinson Hyperlegible (Low Vision)</option>
-          <option value="comic-sans">Comic Sans MS (Easy Read)</option>
-          <option value="verdana">Verdana (Screen Optimized)</option>
-          <option value="arial">Arial (Clean & Simple)</option>
-          <option value="tahoma">Tahoma (High Legibility)</option>
-        </select>
+        <div class="a11y-font-dropdown" data-setting="fontFamily">
+          <button
+            type="button"
+            class="btn btn-sm a11y-font-trigger"
+            id="a11y-font-trigger"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-labelledby="a11y-font-label-text a11y-font-current"
+          >
+            <span id="a11y-font-current">Default Font</span>
+            <Icon name="a11y-panel/arrow-left-fill" size={16} class="a11y-font-chevron" />
+          </button>
+          <ButtonDropdown
+            mode="selection"
+            id="a11y-font-dropdown"
+            name="fontFamily"
+            selectedValue="default"
+            dropdownItems={fontOptions}
+            colorTheme="primary"
+          />
+        </div>
       </div>
 
       <!-- Font Size -->
@@ -364,12 +263,8 @@ const positionStyles: Record<string, string> = {
 
       <!-- PDF Download -->
       <div class="a11y-setting a11y-setting--pdf">
-        <button class="a11y-pdf-btn-compact" id="a11y-download-pdf" aria-label="Download page as PDF">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
+        <button class="btn btn-sm btn-primary" id="a11y-download-pdf" aria-label="Download page as PDF">
+          <Icon name="a11y-panel/download-fill" size={18} />
           <span>Download PDF</span>
         </button>
       </div>
@@ -381,9 +276,7 @@ const positionStyles: Record<string, string> = {
       <h3 class="a11y-sidebar__title">Quick Presets</h3>
       <div class="a11y-preset-list">
         <button class="a11y-preset-btn" data-preset="dyslexia" aria-label="Dyslexia optimized settings">
-          <svg class="a11y-preset-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m8.5 16.5-3-6-3 6m5-2h-4m17 2-5-10-5 10m8-4h-6"/>
-          </svg>
+          <Icon name="a11y-panel/text-aa-fill" size={24} class="a11y-preset-btn__icon" />
           <div class="a11y-preset-btn__text">
             <span class="a11y-preset-btn__title">Dyslexia</span>
             <span class="a11y-preset-btn__subtitle">Font + spacing</span>
@@ -391,10 +284,7 @@ const positionStyles: Record<string, string> = {
         </button>
 
         <button class="a11y-preset-btn" data-preset="low-vision" aria-label="Low vision optimized settings">
-          <svg class="a11y-preset-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M12 5c-4.4 0-8 3-8 7s3.6 7 8 7 8-3 8-7-3.6-7-8-7z"/>
-          </svg>
+          <Icon name="a11y-panel/eye-fill" size={24} class="a11y-preset-btn__icon" />
           <div class="a11y-preset-btn__text">
             <span class="a11y-preset-btn__title">Low Vision</span>
             <span class="a11y-preset-btn__subtitle">Large text</span>
@@ -402,10 +292,7 @@ const positionStyles: Record<string, string> = {
         </button>
 
         <button class="a11y-preset-btn" data-preset="color-blind" aria-label="Color blind optimized settings">
-          <svg class="a11y-preset-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 2v20M2 12h20"/>
-          </svg>
+          <Icon name="a11y-panel/palette-fill" size={24} class="a11y-preset-btn__icon" />
           <div class="a11y-preset-btn__text">
             <span class="a11y-preset-btn__title">Color Blind</span>
             <span class="a11y-preset-btn__subtitle">Adapted colors</span>
@@ -413,10 +300,7 @@ const positionStyles: Record<string, string> = {
         </button>
 
         <button class="a11y-preset-btn" data-preset="motor" aria-label="Motor impairment optimized settings">
-          <svg class="a11y-preset-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
+          <Icon name="a11y-panel/hand-palm-fill" size={24} class="a11y-preset-btn__icon" />
           <div class="a11y-preset-btn__text">
             <span class="a11y-preset-btn__title">Motor</span>
             <span class="a11y-preset-btn__subtitle">Enhanced focus</span>
@@ -424,12 +308,7 @@ const positionStyles: Record<string, string> = {
         </button>
 
         <button class="a11y-preset-btn" data-preset="cognitive" aria-label="Cognitive optimized settings">
-          <svg class="a11y-preset-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-            <line x1="9" y1="9" x2="9.01" y2="9"/>
-            <line x1="15" y1="9" x2="15.01" y2="9"/>
-          </svg>
+          <Icon name="a11y-panel/brain-fill" size={24} class="a11y-preset-btn__icon" />
           <div class="a11y-preset-btn__text">
             <span class="a11y-preset-btn__title">Cognitive</span>
             <span class="a11y-preset-btn__subtitle">Reduced motion</span>
@@ -437,11 +316,7 @@ const positionStyles: Record<string, string> = {
         </button>
 
         <button class="a11y-preset-btn" data-preset="easyread" aria-label="Easy read preset">
-          <svg class="a11y-preset-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
-            <path d="M8 7h6"/>
-            <path d="M8 11h8"/>
-          </svg>
+          <Icon name="a11y-panel/book-open-fill" size={24} class="a11y-preset-btn__icon" />
           <div class="a11y-preset-btn__text">
             <span class="a11y-preset-btn__title">Easy Read</span>
             <span class="a11y-preset-btn__subtitle">Simple layout</span>
@@ -458,148 +333,10 @@ const positionStyles: Record<string, string> = {
 )}
 
 <style>
-  /* OpenDyslexic Font - Self-hosted */
-  @font-face {
-    font-family: 'OpenDyslexic';
-    src: url('/Fonts/A11y Fonts/opendyslexic/OpenDyslexic-Regular.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'OpenDyslexic';
-    src: url('/Fonts/A11y Fonts/opendyslexic/OpenDyslexic-Bold.woff2') format('woff2');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'OpenDyslexic';
-    src: url('/Fonts/A11y Fonts/opendyslexic/OpenDyslexic-Italic.woff2') format('woff2');
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'OpenDyslexic';
-    src: url('/Fonts/A11y Fonts/opendyslexic/OpenDyslexic-Bold-Italic.woff2') format('woff2');
-    font-weight: bold;
-    font-style: italic;
-    font-display: swap;
-  }
-
-  /* Atkinson Hyperlegible Font (Braille Institute) */
-  @font-face {
-    font-family: 'Atkinson Hyperlegible';
-    src: url('https://fonts.gstatic.com/s/atkinsonhyperlegible/v11/9Bt23C1KxNDXMspQ1lPyU89-1h6ONRlW45GE5ZgpewSSbQ.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Atkinson Hyperlegible';
-    src: url('https://fonts.gstatic.com/s/atkinsonhyperlegible/v11/9Bt73C1KxNDXMspQ1lPyU89-1h6ONRlW45G055ImcFYTYbvKbA.woff2') format('woff2');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  /* ===================================
-   * TOKEN-BASED PANEL VARIABLES
-   * Uses global --color-* tokens directly - themes set these automatically
-   * =================================== */
-  .a11y-panel,
-  .a11y-panel-trigger,
-  .a11y-skip-links {
-    --a11y-bg: var(--color-Background-50);
-    --a11y-bg-darker: var(--color-Background-100);
-    --a11y-bg-hover: color-mix(in srgb, var(--color-Primary-500) 12%, var(--color-Background-50));
-    --a11y-primary: var(--color-Primary-500);
-    --a11y-primary-light: color-mix(in srgb, var(--color-Primary-500) 20%, var(--color-Background-50));
-    --a11y-primary-hover: var(--color-Primary-600);
-    --a11y-text: var(--color-Text-900);
-    --a11y-text-muted: var(--color-Text-600);
-    --a11y-text-subtle: var(--color-Text-500);
-    --a11y-border: color-mix(in srgb, var(--color-Primary-500) 35%, var(--color-Background-300));
-    --a11y-border-strong: var(--color-Primary-500);
-    --a11y-success: var(--color-Success-500);
-    --a11y-danger: var(--color-Error-500);
-  }
-
-  /* ===================================
-   * SKIP LINKS
-   * =================================== */
-  .a11y-skip-links {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 99999;
-    display: flex;
-    gap: 0.5rem;
-    padding: 0.5rem;
-  }
-
-  .a11y-skip-link {
-    position: absolute;
-    left: -9999px;
-    top: 0;
-    padding: 0.75rem 1.5rem;
-    background: var(--a11y-bg);
-    color: var(--a11y-text);
-    font-weight: 700;
-    font-size: 0.8125rem;
-    text-decoration: none;
-    border-radius: 0 0 0.5rem 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border: 1px solid var(--a11y-border);
-    transition: none;
-  }
-
-  .a11y-skip-link:focus {
-    left: 0;
-    outline: 2px solid var(--a11y-primary);
-    outline-offset: 2px;
-  }
-
-  /* ===================================
-   * TRIGGER BUTTON (FLOATING) - Clean Style
-   * =================================== */
-  .a11y-panel-trigger {
-    position: fixed;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--a11y-bg);
-    border: none;
-    border-radius: 50%;
-    color: var(--a11y-primary);
-    cursor: pointer;
-    padding: 0.75rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
-  }
-
-  .a11y-panel-trigger:hover {
-    background: var(--a11y-primary);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-  }
-
-  .a11y-panel-trigger[aria-expanded="true"] {
-    background: var(--a11y-primary);
-    color: white;
-  }
-
-  .a11y-panel-trigger svg {
-    width: 28px;
-    height: 28px;
-  }
+  /* Font faces defined in src/styles/a11y/typography/
+   * - dyslexia.css: OpenDyslexic
+   * - accessible-fonts.css: Atkinson Hyperlegible, etc.
+   */
 
   /* ===================================
    * PANEL - Centered Modal Overlay
@@ -613,8 +350,8 @@ const positionStyles: Record<string, string> = {
     max-width: 1400px;
     height: 90vh;
     max-height: 900px;
-    background: var(--a11y-bg);
-    color: var(--a11y-text);
+    background: var(--color-Background-50);
+    color: var(--color-Text-900);
     z-index: 10001;
     border-radius: 12px;
     box-shadow: 0 20px 60px var(--color-Black-30);
@@ -625,20 +362,6 @@ const positionStyles: Record<string, string> = {
     flex-direction: column;
     overflow: hidden;
     font-family: var(--font-body);
-  }
-
-  /* Force body font on ALL panel elements */
-  .a11y-panel,
-  .a11y-panel *,
-  .a11y-panel h1,
-  .a11y-panel h2,
-  .a11y-panel h3,
-  .a11y-panel h4,
-  .a11y-panel label,
-  .a11y-panel button,
-  .a11y-panel input,
-  .a11y-panel select {
-    font-family: var(--font-body) !important;
   }
 
   .a11y-panel[hidden] {
@@ -679,8 +402,8 @@ const positionStyles: Record<string, string> = {
     align-items: center;
     justify-content: space-between;
     padding: 12px 24px;
-    border-bottom: 2px solid var(--a11y-border);
-    background: var(--a11y-bg);
+    border-bottom: 2px solid color-mix(in srgb, var(--color-Primary-500) 35%, var(--color-Background-300));
+    background: var(--color-Background-50);
   }
 
   .a11y-panel__title {
@@ -690,36 +413,31 @@ const positionStyles: Record<string, string> = {
     font-size: 20px;
     font-weight: 700;
     margin: 0;
-    color: var(--color-Text-900) !important;
+    color: var(--color-Text-900) ;
     letter-spacing: 0.3px;
   }
 
-  .a11y-panel__title svg {
-    display: none;
-  }
+  
 
   .a11y-panel__close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: transparent;
+    display: block;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: none;
     border: none;
-    color: var(--a11y-text-subtle);
+    color: var(--color-Primary-500);
     cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.2s;
-  }
-
-  .a11y-panel__close:hover {
-    color: var(--a11y-primary);
-    background: var(--a11y-bg-hover);
+    transition: color 0.2s;
   }
 
   .a11y-panel__close svg {
-    width: 20px;
-    height: 20px;
+    width: 100%;
+    height: 100%;
+  }
+
+  .a11y-panel__close:hover {
+    color: var(--color-Primary-700);
   }
 
   /* Header Actions */
@@ -727,32 +445,6 @@ const positionStyles: Record<string, string> = {
     display: flex;
     align-items: center;
     gap: 12px;
-  }
-
-  /* Reset Button in Header */
-  .a11y-reset-btn-header {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 5px 10px;
-    background: var(--a11y-primary);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .a11y-reset-btn-header:hover {
-    background: var(--a11y-primary-hover);
-    transform: translateY(-1px);
-  }
-
-  .a11y-reset-btn-header svg {
-    width: 12px;
-    height: 12px;
   }
 
   /* ===================================
@@ -768,8 +460,8 @@ const positionStyles: Record<string, string> = {
   .a11y-panel__sidebar {
     width: 240px;
     min-width: 240px;
-    background: var(--a11y-bg);
-    border-right: 1px solid var(--a11y-border);
+    background: var(--color-Background-50);
+    border-right: 1px solid color-mix(in srgb, var(--color-Primary-500) 35%, var(--color-Background-300));
     padding: 20px 14px;
     overflow-y: auto;
     display: flex;
@@ -780,10 +472,10 @@ const positionStyles: Record<string, string> = {
     font-size: 16px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    color: var(--a11y-text) !important;
+    color: var(--color-Text-900) !important;
     margin: 0 0 12px 0;
     padding: 0 0 12px 0;
-    border-bottom: 2px solid var(--a11y-border);
+    border-bottom: 2px solid color-mix(in srgb, var(--color-Primary-500) 35%, var(--color-Background-300));
   }
 
   .a11y-theme-list {
@@ -796,8 +488,8 @@ const positionStyles: Record<string, string> = {
   .a11y-panel__sidebar-right {
     width: 200px;
     min-width: 200px;
-    background: var(--a11y-bg);
-    border-left: 1px solid var(--a11y-border);
+    background: var(--color-Background-50);
+    border-left: 1px solid color-mix(in srgb, var(--color-Primary-500) 35%, var(--color-Background-300));
     padding: 20px 14px;
     overflow-y: auto;
     display: flex;
@@ -850,43 +542,31 @@ const positionStyles: Record<string, string> = {
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    background: var(--a11y-bg);
-    border: 2px solid rgba(0,0,0,0.08);
+    background: var(--color-Background-100);
+    color: var(--color-Primary-500);
+    border: 2px solid var(--color-Background-300);
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: left;
     width: 100%;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
 
   .a11y-preset-btn:hover {
     transform: translateX(3px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-color: var(--a11y-border-strong);
+    background: var(--color-Background-200);
+    border-color: var(--color-Primary-300);
   }
 
   .a11y-preset-btn:focus-visible {
-    outline: 2px solid var(--a11y-primary);
+    outline: 2px solid var(--color-Primary-500);
     outline-offset: 2px;
   }
 
   .a11y-preset-btn:active,
   .a11y-preset-btn.active {
-    border-color: var(--a11y-primary);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--a11y-primary) 20%, transparent);
-  }
-
-  .a11y-preset-btn__icon {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-    color: var(--a11y-primary);
-    stroke-width: 2;
-  }
-
-  .a11y-preset-btn:hover .a11y-preset-btn__icon {
-    color: var(--a11y-primary-hover);
+    border-color: var(--color-Primary-500);
+    background: var(--color-Primary-100);
   }
 
   .a11y-preset-btn__text {
@@ -902,24 +582,23 @@ const positionStyles: Record<string, string> = {
     font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.01em;
-    color: var(--a11y-text);
+    color: var(--color-Text-900);
   }
 
   .a11y-preset-btn__subtitle {
     font-size: 10px;
     line-height: 1.3;
-    opacity: 0.65;
-    color: var(--a11y-text-muted);
+    color: var(--color-Text-500);
   }
 
   .a11y-section__title {
     font-size: 16px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    color: var(--a11y-text) !important;
+    color: var(--color-Text-900) !important;
     margin: 0 0 12px 0;
     padding: 0 0 12px 0;
-    border-bottom: 2px solid var(--a11y-border);
+    border-bottom: 2px solid color-mix(in srgb, var(--color-Primary-500) 35%, var(--color-Background-300));
   }
 
   .a11y-section__title svg {
@@ -934,7 +613,7 @@ const positionStyles: Record<string, string> = {
     align-items: center;
     justify-content: space-between;
     padding: 12px;
-    background: var(--a11y-bg);
+    background: var(--color-Background-50);
     border-radius: 6px;
     margin-bottom: 10px;
   }
@@ -986,7 +665,7 @@ const positionStyles: Record<string, string> = {
 
   .a11y-setting__value {
     font-size: 14px;
-    color: var(--a11y-primary);
+    color: var(--color-Primary-500);
     font-weight: 600;
   }
 
@@ -1032,7 +711,7 @@ const positionStyles: Record<string, string> = {
   }
 
   .a11y-toggle input:checked + .a11y-toggle__slider {
-    background: var(--a11y-primary);
+    background: var(--color-Primary-500);
   }
 
   .a11y-toggle input:checked + .a11y-toggle__slider::before {
@@ -1040,39 +719,51 @@ const positionStyles: Record<string, string> = {
   }
 
   .a11y-toggle input:focus-visible + .a11y-toggle__slider {
-    outline: 2px solid var(--a11y-primary);
+    outline: 2px solid var(--color-Primary-500);
     outline-offset: 2px;
   }
 
   /* ===================================
-   * SELECT DROPDOWN - Clean Style
+   * FONT DROPDOWN - Custom Dropdown
    * =================================== */
-  .a11y-select {
+  .a11y-font-dropdown {
+    position: relative;
     width: 100%;
+  }
+
+  .a11y-font-trigger {
+    width: 100%;
+    justify-content: space-between;
     padding: 10px 12px;
-    background: var(--a11y-bg);
-    border: 2px solid var(--a11y-border);
+    background: var(--color-Background-50);
+    border: 2px solid color-mix(in srgb, var(--color-Primary-500) 35%, var(--color-Background-300));
     border-radius: 6px;
-    color: var(--a11y-text);
+    color: var(--color-Text-900);
     font-size: 13px;
     font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
   }
 
-  .a11y-select:hover {
-    border-color: var(--a11y-primary);
+  .a11y-font-trigger:hover {
+    border-color: var(--color-Primary-500);
   }
 
-  .a11y-select:focus {
-    outline: 2px solid var(--a11y-primary);
-    outline-offset: 2px;
-    border-color: var(--a11y-primary);
+  .a11y-font-trigger[aria-expanded="true"] {
+    border-color: var(--color-Primary-500);
+  }
+
+  .a11y-font-trigger[aria-expanded="true"] .a11y-font-chevron {
+    transform: rotate(-90deg);
+  }
+
+  .a11y-font-chevron {
+    transform: rotate(180deg);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .a11y-font-dropdown .dropdown-menu {
+    width: 100%;
+    margin-top: 4px;
   }
 
   /* ===================================
@@ -1116,7 +807,7 @@ const positionStyles: Record<string, string> = {
   }
 
   .a11y-slider:focus-visible {
-    outline: 2px solid var(--a11y-primary);
+    outline: 2px solid var(--color-Primary-500);
     outline-offset: 2px;
   }
 
@@ -1124,113 +815,10 @@ const positionStyles: Record<string, string> = {
     display: flex;
     justify-content: space-between;
     margin-top: 6px;
-    color: var(--a11y-text-subtle);
+    color: var(--color-Text-500);
     font-size: 11px;
   }
 
-  /* ===================================
-   * BUTTONS - Clean Mini Cart Style
-   * =================================== */
-  .a11y-reset-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    width: 100%;
-    padding: 12px;
-    background: var(--a11y-bg);
-    border: 1px solid var(--a11y-border);
-    border-radius: 6px;
-    color: var(--a11y-text-muted);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .a11y-reset-btn:hover {
-    border-color: var(--a11y-danger);
-    color: var(--a11y-danger);
-  }
-
-  .a11y-reset-btn svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  /* PDF Download Section - Big Button */
-  .a11y-section--pdf {
-    background: linear-gradient(135deg, var(--a11y-primary) 0%, var(--a11y-primary-hover) 100%);
-    border: none;
-    padding: 0;
-    overflow: hidden;
-  }
-
-  .a11y-pdf-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    width: 100%;
-    padding: 24px;
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .a11y-pdf-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .a11y-pdf-btn svg {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-  }
-
-  .a11y-pdf-text {
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    line-height: 1.2;
-  }
-
-  /* Compact PDF Button in Navigation Section */
-  .a11y-pdf-btn-compact {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    padding: 6px 10px;
-    margin-top: 10px;
-    background: var(--a11y-primary);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .a11y-pdf-btn-compact:hover {
-    background: var(--a11y-primary-hover);
-    transform: translateY(-1px);
-  }
-
-  .a11y-pdf-btn-compact svg {
-    width: 13px;
-    height: 13px;
-    flex-shrink: 0;
-  }
-
-  /* Font preview in select dropdown */
-  .a11y-select {
-    font-size: 14px;
-  }
 
   /* ===================================
    * BACKDROP - Modal Overlay
@@ -1287,11 +875,6 @@ const positionStyles: Record<string, string> = {
       justify-content: space-between;
     }
 
-    .a11y-reset-btn-header {
-      font-size: 12px;
-      padding: 6px 12px;
-    }
-
     /* Stack sidebar and content vertically on mobile */
     .a11y-panel__body {
       flex-direction: column;
@@ -1302,7 +885,7 @@ const positionStyles: Record<string, string> = {
       min-width: 100%;
       max-height: 200px;
       border-right: none;
-      border-bottom: 1px solid var(--a11y-border);
+      border-bottom: 1px solid color-mix(in srgb, var(--color-Primary-500) 35%, var(--color-Background-300));
       padding: 12px;
     }
 
@@ -1352,1579 +935,25 @@ const positionStyles: Record<string, string> = {
       grid-template-columns: repeat(3, 1fr);
     }
   }
-
-  /* =========================================================
-     PANEL SELF-ACCESSIBILITY OVERRIDES
-     The panel should respect its own theme settings
-     ========================================================= */
-
-  /* Dark mode - uses --color-* tokens set by a11y-dark.css automatically */
-
-  /* Dark mode - force ALL text to be bright and readable */
-  :global(body.a11y-theme-dark) .a11y-panel * {
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-panel__title {
-    color: var(--color-Primary-500) !important;
-    font-size: 26px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-section__title {
-    color: var(--color-Primary-500) !important;
-    font-size: 18px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-toggle-label {
-    color: var(--color-Text-900) !important;
-    font-size: 16px !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-toggle-description {
-    color: var(--color-Text-900) !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-panel p,
-  :global(body.a11y-theme-dark) .a11y-panel label,
-  :global(body.a11y-theme-dark) .a11y-panel span:not(.a11y-toggle-track):not(.a11y-toggle-thumb) {
-    color: var(--color-Text-900) !important;
-    font-weight: 600 !important;
-  }
-
-  /* Dark mode - preset buttons */
-  :global(body.a11y-theme-dark) .a11y-preset-btn {
-    background: var(--a11y-bg) !important;
-    border: 2px solid var(--a11y-border-strong) !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-preset-btn:hover {
-    background: var(--a11y-primary-light) !important;
-    border-color: var(--a11y-border-strong) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-preset-btn:active,
-  :global(body.a11y-theme-dark) .a11y-preset-btn.active {
-    background: color-mix(in srgb, var(--a11y-primary) 35%, var(--a11y-bg)) !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-preset-btn__title,
-  :global(body.a11y-theme-dark) .a11y-preset-btn__subtitle {
-    color: var(--a11y-text) !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-preset-btn__icon {
-    color: var(--a11y-primary) !important;
-  }
-
-  /* Dark mode - section dividers */
-  :global(body.a11y-theme-dark) .a11y-section__title {
-    border-bottom: 2px solid var(--a11y-border-strong) !important;
-  }
-
-  /* Dark mode - slider labels */
-  :global(body.a11y-theme-dark) .a11y-slider-label {
-    color: var(--color-Text-900) !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-slider-value {
-    color: var(--color-Primary-500) !important;
-    font-weight: 700 !important;
-  }
-
-  /* Dark mode - select dropdown */
-  :global(body.a11y-theme-dark) .a11y-select {
-    color: var(--color-Text-900) !important;
-    font-weight: 600 !important;
-    background: var(--color-Background-100) !important;
-    border-color: var(--color-Background-300) !important;
-  }
-
-  /* Dark mode - helper text */
-  :global(body.a11y-theme-dark) small,
-  :global(body.a11y-theme-dark) .a11y-helper-text {
-    color: var(--color-Text-900) !important;
-    font-weight: 500 !important;
-  }
-
-  /* Dark mode - close button */
-  :global(body.a11y-theme-dark) .a11y-panel__close {
-    color: var(--color-Text-900) !important;
-  }
-
-  /* Dark mode - panel border */
-  :global(body.a11y-theme-dark) .a11y-panel {
-    border: 2px solid var(--color-Primary-500) !important;
-  }
-
-  /* Dark mode - sliders track */
-  :global(body.a11y-theme-dark) .a11y-slider {
-    background: var(--color-Primary-500) !important;
-  }
-
-  /* Dark mode - slider thumb */
-  :global(body.a11y-theme-dark) .a11y-slider::-webkit-slider-thumb {
-    background: var(--color-Primary-500) !important;
-    border: 2px solid var(--color-Text-900) !important;
-  }
-
-  :global(body.a11y-theme-dark) .a11y-slider::-moz-range-thumb {
-    background: var(--color-Primary-500) !important;
-    border: 2px solid var(--color-Text-900) !important;
-  }
-
-  /* Dark mode - PDF button */
-  :global(body.a11y-theme-dark) .a11y-pdf-btn {
-    background: var(--color-Primary-500) !important;
-    color: var(--color-Background-50) !important;
-    font-weight: 700 !important;
-  }
-
-  /* High contrast mode - uses --color-* tokens set by a11y-high-contrast.css automatically */
-
-  /* High contrast - main panel border only */
-  :global(body.a11y-theme-high-contrast) .a11y-panel {
-    border: 3px solid var(--color-Primary-500) !important;
-  }
-
-  /* High contrast - remove confusing section borders */
-  :global(body.a11y-theme-high-contrast) .a11y-section {
-    border: none !important;
-    background: transparent !important;
-  }
-
-  /* High contrast - larger, bolder text throughout */
-  :global(body.a11y-theme-high-contrast) .a11y-panel__title {
-    color: var(--color-Primary-500) !important;
-    font-size: 28px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-section__title {
-    color: var(--color-Primary-500) !important;
-    font-size: 20px !important;
-    font-weight: 700 !important;
-    border-bottom: 2px solid var(--color-Primary-500) !important;
-    padding-bottom: 8px !important;
-    margin-bottom: 16px !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-toggle-label {
-    color: var(--color-Text-50) !important;
-    font-size: 18px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-toggle-description {
-    color: var(--color-Text-50) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-  }
-
-  /* High contrast - force ALL text to be white and bold */
-  :global(body.a11y-theme-high-contrast) .a11y-panel * {
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-panel p,
-  :global(body.a11y-theme-high-contrast) .a11y-panel label,
-  :global(body.a11y-theme-high-contrast) .a11y-panel span:not(.a11y-toggle-track):not(.a11y-toggle-thumb) {
-    color: var(--color-Text-50) !important;
-    font-weight: 700 !important;
-    font-size: 15px !important;
-  }
-
-  /* High contrast - slider labels */
-  :global(body.a11y-theme-high-contrast) .a11y-slider-label {
-    color: var(--color-Text-50) !important;
-    font-weight: 700 !important;
-    font-size: 16px !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-slider-value {
-    color: var(--color-Primary-500) !important;
-    font-weight: 700 !important;
-    font-size: 16px !important;
-  }
-
-  /* High contrast - small text helper */
-  :global(body.a11y-theme-high-contrast) .a11y-helper-text,
-  :global(body.a11y-theme-high-contrast) small {
-    color: var(--color-Text-50) !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-  }
-
-  /* High contrast - preset buttons */
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn {
-    border: 2px solid var(--color-Primary-500) !important;
-    background: var(--color-Background-50) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn__icon {
-    color: var(--color-Primary-500) !important;
-    stroke: var(--color-Primary-500) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn:hover,
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn:focus {
-    background: var(--color-Primary-500) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn:hover .a11y-preset-btn__icon,
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn:focus .a11y-preset-btn__icon {
-    color: var(--color-Background-50) !important;
-    stroke: var(--color-Background-50) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn__title,
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn__subtitle {
-    color: var(--color-Text-50) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn:hover .a11y-preset-btn__title,
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn:hover .a11y-preset-btn__subtitle,
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn:focus .a11y-preset-btn__title,
-  :global(body.a11y-theme-high-contrast) .a11y-preset-btn:focus .a11y-preset-btn__subtitle {
-    color: var(--color-Background-50) !important;
-  }
-
-  /* High contrast - button icons on hover turn black */
-  :global(body.a11y-theme-high-contrast) .a11y-reset-btn-header svg {
-    color: var(--color-Background-50) !important;
-    stroke: var(--color-Background-50) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-pdf-btn svg {
-    color: var(--color-Primary-500) !important;
-    stroke: var(--color-Primary-500) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-pdf-btn:hover svg {
-    color: var(--color-Background-50) !important;
-    stroke: var(--color-Background-50) !important;
-  }
-
-  /* High contrast - toggle switches */
-  :global(body.a11y-theme-high-contrast) .a11y-toggle-track {
-    border: 2px solid var(--color-Primary-500) !important;
-  }
-
-  /* High contrast - sliders */
-  :global(body.a11y-theme-high-contrast) .a11y-slider {
-    background: var(--color-Neutral-500) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-slider::-webkit-slider-thumb {
-    background: var(--color-Primary-500) !important;
-    border: 2px solid var(--color-Text-50) !important;
-  }
-
-  /* High contrast - select dropdowns */
-  :global(body.a11y-theme-high-contrast) .a11y-select {
-    border: 2px solid var(--color-Primary-500) !important;
-    background: var(--color-Background-50) !important;
-    color: var(--color-Text-50) !important;
-    font-size: 16px !important;
-    font-weight: 600 !important;
-  }
-
-  /* High contrast - reset button */
-  :global(body.a11y-theme-high-contrast) .a11y-reset-btn-header {
-    background: var(--color-Primary-500) !important;
-    color: var(--color-Background-50) !important;
-    font-weight: 700 !important;
-    border: 2px solid var(--color-Text-50) !important;
-  }
-
-  /* High contrast - close button */
-  :global(body.a11y-theme-high-contrast) .a11y-panel__close {
-    color: var(--color-Primary-500) !important;
-    border: 2px solid var(--color-Primary-500) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-panel__close:hover {
-    background: var(--color-Primary-500) !important;
-    color: var(--color-Background-50) !important;
-  }
-
-  /* High contrast - PDF download button */
-  :global(body.a11y-theme-high-contrast) .a11y-pdf-btn {
-    border: 2px solid var(--color-Primary-500) !important;
-    background: var(--color-Background-50) !important;
-    color: var(--color-Text-50) !important;
-    font-weight: 700 !important;
-    font-size: 16px !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .a11y-pdf-btn:hover {
-    background: var(--color-Primary-500) !important;
-    color: var(--color-Background-50) !important;
-  }
-
-  /* Cream mode - override panel variables using global tokens */
-  :global(body.a11y-theme-cream) .a11y-panel,
-  :global(body.a11y-theme-cream) .a11y-panel-trigger,
-  :global(body.a11y-theme-cream) .a11y-skip-links {
-    --a11y-bg: var(--color-Background-50);
-    --a11y-bg-darker: var(--color-Background-100);
-    --a11y-bg-hover: var(--color-Background-200);
-    --a11y-text: var(--color-Text-800);
-    --a11y-text-muted: var(--color-Text-600);
-    --a11y-text-subtle: var(--color-Text-400);
-    --a11y-border: var(--color-Neutral-300);
-    --a11y-primary: var(--color-Primary-500);
-    --a11y-primary-light: var(--color-Background-100);
-    --a11y-primary-hover: var(--color-Primary-600);
-  }
-
-  :global(body.a11y-theme-cream) .a11y-panel__title {
-    color: var(--color-Text-900) !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-section__title {
-    color: var(--color-Text-900) !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-toggle-label {
-    color: var(--color-Text-900) !important;
-  }
-
-  /* =========================================================
-     DEFAULT STATE - Darker, bolder text for better readability
-     ========================================================= */
-
-  /* Default - force ALL text to be dark and readable */
-  .a11y-panel * {
-    font-weight: 500;
-  }
-
-  .a11y-panel__title {
-    color: var(--color-Text-900) !important;
-    font-size: 24px !important;
-    font-weight: 700 !important;
-  }
-
-  .a11y-section__title {
-    color: var(--color-Text-900) !important;
-    font-size: 17px !important;
-    font-weight: 700 !important;
-  }
-
-  .a11y-toggle-label {
-    color: var(--color-Text-900) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-  }
-
-  .a11y-toggle-description {
-    color: var(--color-Text-600) !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-  }
-
-  .a11y-panel p,
-  .a11y-panel label,
-  .a11y-panel span:not(.a11y-toggle-track):not(.a11y-toggle-thumb) {
-    color: var(--color-Text-600) !important;
-    font-weight: 500 !important;
-  }
-
-  /* Force green buttons to always have white text - higher specificity */
-  .a11y-panel .a11y-reset-btn-header,
-  .a11y-panel .a11y-pdf-btn-compact {
-    color: white !important;
-  }
-
-  .a11y-panel button.a11y-reset-btn-header span,
-  .a11y-panel button.a11y-pdf-btn-compact span {
-    color: white !important;
-    font-weight: 600 !important;
-  }
-
-  .a11y-slider-label {
-    color: var(--color-Text-900) !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-  }
-
-  .a11y-slider-value {
-    color: var(--color-Primary-500) !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-  }
-
-  .a11y-helper-text,
-  .a11y-panel small {
-    color: var(--color-Text-600) !important;
-    font-weight: 500 !important;
-    font-size: 12px !important;
-  }
-
-  .a11y-preset-btn__title {
-    color: var(--color-Text-900) !important;
-  }
-
-  .a11y-preset-btn__subtitle {
-    color: var(--color-Text-600) !important;
-  }
-
-  .a11y-theme-card span {
-    color: var(--color-Text-900) !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-  }
-
-  /* Reset button and PDF button - white text on green background */
-  .a11y-reset-btn-header,
-  .a11y-pdf-btn-compact {
-    color: white !important;
-    font-weight: 600 !important;
-  }
-
-  .a11y-reset-btn-header span,
-  .a11y-pdf-btn-compact span {
-    color: white !important;
-    font-weight: 600 !important;
-  }
-
-  /* Universal: any a11y mode - green buttons ALWAYS have white text */
-  :global(body[class*="a11y-"]) .a11y-panel .a11y-reset-btn-header,
-  :global(body[class*="a11y-"]) .a11y-panel .a11y-pdf-btn-compact {
-    color: white !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body[class*="a11y-"]) .a11y-panel button.a11y-reset-btn-header span,
-  :global(body[class*="a11y-"]) .a11y-panel button.a11y-pdf-btn-compact span {
-    color: white !important;
-    font-weight: 600 !important;
-  }
-
-  /* =========================================================
-     CREAM MODE - Enhanced bolder text for warm backgrounds
-     ========================================================= */
-
-  /* Cream mode - force ALL text to be dark and readable */
-  :global(body.a11y-theme-cream) .a11y-panel * {
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-panel__title {
-    color: var(--color-Text-950) !important;
-    font-size: 24px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-section__title {
-    color: var(--color-Text-950) !important;
-    font-size: 17px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-toggle-label {
-    color: var(--color-Text-950) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-toggle-description {
-    color: var(--color-Text-800) !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-panel p,
-  :global(body.a11y-theme-cream) .a11y-panel label,
-  :global(body.a11y-theme-cream) .a11y-panel span:not(.a11y-toggle-track):not(.a11y-toggle-thumb) {
-    color: var(--color-Text-800) !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-slider-label {
-    color: var(--color-Text-950) !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-slider-value {
-    color: var(--color-Primary-500) !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-helper-text,
-  :global(body.a11y-theme-cream) .a11y-panel small {
-    color: var(--color-Text-600) !important;
-    font-weight: 500 !important;
-    font-size: 12px !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-preset-btn__title,
-  :global(body.a11y-theme-cream) .a11y-preset-btn__subtitle {
-    color: var(--color-Text-950) !important;
-  }
-
-  /* Cream mode - green buttons keep white text */
-  :global(body.a11y-theme-cream) .a11y-reset-btn-header,
-  :global(body.a11y-theme-cream) .a11y-pdf-btn-compact {
-    color: var(--btn-filled-text) !important;
-  }
-
-  :global(body.a11y-theme-cream) .a11y-reset-btn-header span,
-  :global(body.a11y-theme-cream) .a11y-pdf-btn-compact span {
-    color: white !important;
-  }
-
-  /* =========================================================
-     PROTANOPIA MODE - Bolder text for CVD accessibility
-     ========================================================= */
-
-  :global(body.a11y-theme-protanopia) .a11y-panel * {
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-protanopia) .a11y-panel__title {
-    color: var(--color-Text-900) !important;
-    font-size: 24px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-protanopia) .a11y-section__title {
-    color: var(--color-Text-900) !important;
-    font-size: 17px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-protanopia) .a11y-toggle-label {
-    color: var(--color-Text-900) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-protanopia) .a11y-toggle-description {
-    color: var(--color-Text-600) !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-protanopia) .a11y-panel p,
-  :global(body.a11y-theme-protanopia) .a11y-panel label,
-  :global(body.a11y-theme-protanopia) .a11y-panel span:not(.a11y-toggle-track):not(.a11y-toggle-thumb) {
-    color: var(--color-Text-600) !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-protanopia) .a11y-slider-label {
-    color: var(--color-Text-900) !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-protanopia) .a11y-preset-btn__title,
-  :global(body.a11y-theme-protanopia) .a11y-preset-btn__subtitle {
-    color: var(--color-Text-900) !important;
-    font-weight: 600 !important;
-  }
-
-  /* Protanopia - green buttons keep white text */
-  :global(body.a11y-theme-protanopia) .a11y-reset-btn-header,
-  :global(body.a11y-theme-protanopia) .a11y-pdf-btn-compact,
-  :global(body.a11y-theme-protanopia) .a11y-reset-btn-header span,
-  :global(body.a11y-theme-protanopia) .a11y-pdf-btn-compact span {
-    color: white !important;
-  }
-
-  /* =========================================================
-     DEUTERANOPIA MODE - Bolder text for CVD accessibility
-     ========================================================= */
-
-  :global(body.a11y-theme-deuteranopia) .a11y-panel * {
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-deuteranopia) .a11y-panel__title {
-    color: var(--color-Text-900) !important;
-    font-size: 24px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-deuteranopia) .a11y-section__title {
-    color: var(--color-Text-900) !important;
-    font-size: 17px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-deuteranopia) .a11y-toggle-label {
-    color: var(--color-Text-900) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-deuteranopia) .a11y-toggle-description {
-    color: var(--color-Text-600) !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-deuteranopia) .a11y-panel p,
-  :global(body.a11y-theme-deuteranopia) .a11y-panel label,
-  :global(body.a11y-theme-deuteranopia) .a11y-panel span:not(.a11y-toggle-track):not(.a11y-toggle-thumb) {
-    color: var(--color-Text-600) !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-deuteranopia) .a11y-slider-label {
-    color: var(--color-Text-900) !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-deuteranopia) .a11y-preset-btn__title,
-  :global(body.a11y-theme-deuteranopia) .a11y-preset-btn__subtitle {
-    color: var(--color-Text-900) !important;
-    font-weight: 600 !important;
-  }
-
-  /* Deuteranopia - green buttons keep white text */
-  :global(body.a11y-theme-deuteranopia) .a11y-reset-btn-header,
-  :global(body.a11y-theme-deuteranopia) .a11y-pdf-btn-compact,
-  :global(body.a11y-theme-deuteranopia) .a11y-reset-btn-header span,
-  :global(body.a11y-theme-deuteranopia) .a11y-pdf-btn-compact span {
-    color: white !important;
-  }
-
-  /* =========================================================
-     TRITANOPIA MODE - Bolder text for CVD accessibility
-     ========================================================= */
-
-  :global(body.a11y-theme-tritanopia) .a11y-panel * {
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-tritanopia) .a11y-panel__title {
-    color: var(--color-Text-900) !important;
-    font-size: 24px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-tritanopia) .a11y-section__title {
-    color: var(--color-Text-900) !important;
-    font-size: 17px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-tritanopia) .a11y-toggle-label {
-    color: var(--color-Text-900) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-tritanopia) .a11y-toggle-description {
-    color: var(--color-Text-600) !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-tritanopia) .a11y-panel p,
-  :global(body.a11y-theme-tritanopia) .a11y-panel label,
-  :global(body.a11y-theme-tritanopia) .a11y-panel span:not(.a11y-toggle-track):not(.a11y-toggle-thumb) {
-    color: var(--color-Text-600) !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-tritanopia) .a11y-slider-label {
-    color: var(--color-Text-900) !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-tritanopia) .a11y-preset-btn__title,
-  :global(body.a11y-theme-tritanopia) .a11y-preset-btn__subtitle {
-    color: var(--color-Text-900) !important;
-    font-weight: 600 !important;
-  }
-
-  /* Tritanopia - green buttons keep white text */
-  :global(body.a11y-theme-tritanopia) .a11y-reset-btn-header,
-  :global(body.a11y-theme-tritanopia) .a11y-pdf-btn-compact,
-  :global(body.a11y-theme-tritanopia) .a11y-reset-btn-header span,
-  :global(body.a11y-theme-tritanopia) .a11y-pdf-btn-compact span {
-    color: white !important;
-  }
-
-  /* =========================================================
-     MONOCHROME MODE - Bolder text for grayscale accessibility
-     ========================================================= */
-
-  :global(body.a11y-theme-monochrome) .a11y-panel * {
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-monochrome) .a11y-panel__title {
-    color: var(--color-Text-950) !important;
-    font-size: 24px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-monochrome) .a11y-section__title {
-    color: var(--color-Text-950) !important;
-    font-size: 17px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-theme-monochrome) .a11y-toggle-label {
-    color: var(--color-Text-950) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-monochrome) .a11y-toggle-description {
-    color: var(--color-Text-800) !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-monochrome) .a11y-panel p,
-  :global(body.a11y-theme-monochrome) .a11y-panel label,
-  :global(body.a11y-theme-monochrome) .a11y-panel span:not(.a11y-toggle-track):not(.a11y-toggle-thumb) {
-    color: var(--color-Text-800) !important;
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-theme-monochrome) .a11y-slider-label {
-    color: var(--color-Text-950) !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-theme-monochrome) .a11y-preset-btn__title,
-  :global(body.a11y-theme-monochrome) .a11y-preset-btn__subtitle {
-    color: var(--color-Text-950) !important;
-    font-weight: 600 !important;
-  }
-
-  /* Monochrome - green buttons keep white text */
-  :global(body.a11y-theme-monochrome) .a11y-reset-btn-header,
-  :global(body.a11y-theme-monochrome) .a11y-pdf-btn-compact,
-  :global(body.a11y-theme-monochrome) .a11y-reset-btn-header span,
-  :global(body.a11y-theme-monochrome) .a11y-pdf-btn-compact span {
-    color: var(--btn-filled-text) !important;
-  }
-
-  /* =========================================================
-     REDUCE MOTION & TEXT ONLY - Bolder text for readability
-     ========================================================= */
-
-  :global(body.a11y-reduce-motion) .a11y-panel *,
-  :global(body.a11y-text-only) .a11y-panel * {
-    font-weight: 500 !important;
-  }
-
-  :global(body.a11y-reduce-motion) .a11y-panel__title,
-  :global(body.a11y-text-only) .a11y-panel__title {
-    color: var(--color-Text-900) !important;
-    font-size: 24px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-reduce-motion) .a11y-section__title,
-  :global(body.a11y-text-only) .a11y-section__title {
-    color: var(--color-Text-900) !important;
-    font-size: 17px !important;
-    font-weight: 700 !important;
-  }
-
-  :global(body.a11y-reduce-motion) .a11y-toggle-label,
-  :global(body.a11y-text-only) .a11y-toggle-label {
-    color: var(--color-Text-900) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-  }
-
-  :global(body.a11y-reduce-motion) .a11y-toggle-description,
-  :global(body.a11y-text-only) .a11y-toggle-description {
-    color: var(--color-Text-600) !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-  }
-
-  /* Reduce motion & text only - green buttons keep white text */
-  :global(body.a11y-reduce-motion) .a11y-reset-btn-header,
-  :global(body.a11y-reduce-motion) .a11y-pdf-btn-compact,
-  :global(body.a11y-text-only) .a11y-reset-btn-header,
-  :global(body.a11y-text-only) .a11y-pdf-btn-compact,
-  :global(body.a11y-reduce-motion) .a11y-reset-btn-header span,
-  :global(body.a11y-reduce-motion) .a11y-pdf-btn-compact span,
-  :global(body.a11y-text-only) .a11y-reset-btn-header span,
-  :global(body.a11y-text-only) .a11y-pdf-btn-compact span {
-    color: white !important;
-  }
-
-  /* Reduced motion - no transitions */
-  :global(body.a11y-reduce-motion) .a11y-panel,
-  :global(body.a11y-reduce-motion) .a11y-panel *,
-  :global(body.a11y-reduce-motion) .a11y-panel-trigger,
-  :global(body.a11y-reduce-motion) .a11y-panel__backdrop {
-    transition: none !important;
-    animation: none !important;
-  }
 </style>
 
 <style is:global>
-  /* ===================================
-   * THEME CARDS - MUST BE GLOBAL (for dynamically created elements)
-   * =================================== */
-  .a11y-theme-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 14px;
-    border: 2px solid rgba(0,0,0,0.08);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: left;
-    width: 100%;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-
-  .a11y-theme-card:hover {
-    transform: translateX(3px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
-
-  .a11y-theme-card:focus-visible {
-    outline: 2px solid var(--a11y-primary);
-    outline-offset: 2px;
-  }
-
-  .a11y-theme-card[aria-pressed="true"] {
-    border-color: currentColor;
-    box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 20%, transparent);
-  }
-
-  .a11y-theme-card__logo {
-    width: 32px;
-    height: 32px;
+  /* Preset button icons - panel-specific global styles */
+  .a11y-preset-btn__icon {
+    width: 24px;
+    height: 24px;
     flex-shrink: 0;
   }
 
-  .a11y-theme-card__text {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-    flex: 1;
+  .a11y-preset-btn__icon svg {
+    fill: var(--color-Primary-500);
   }
 
-  .a11y-theme-card__title {
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-  }
-
-  .a11y-theme-card__sample {
-    font-size: 11px;
-    line-height: 1.3;
-    opacity: 0.65;
-  }
-
-  /* Color Swatches */
-  .a11y-theme-card__swatches {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex-shrink: 0;
-  }
-
-  .a11y-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.12);
-    box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);
-  }
-
-  /* Theme Card Colors - Use core tokens from coretokens.css (auto-generated at build) */
-  .a11y-theme-card--default {
-    background: var(--brand-c-bg) !important;
-    color: var(--brand-c-text) !important;
-  }
-  .a11y-theme-card--default .a11y-theme-card__logo { fill: var(--brand-c-primary) !important; }
-  .a11y-theme-card--default .a11y-swatch--primary { background: var(--brand-c-primary) !important; }
-  .a11y-theme-card--default .a11y-swatch--secondary { background: var(--brand-c-accent) !important; }
-
-  .a11y-theme-card--dark {
-    background: var(--a11y-dark-c-bg) !important;
-    color: var(--a11y-dark-c-text) !important;
-  }
-  .a11y-theme-card--dark .a11y-theme-card__logo { fill: var(--a11y-dark-c-primary) !important; }
-  .a11y-theme-card--dark .a11y-swatch--primary { background: var(--a11y-dark-c-primary) !important; }
-  .a11y-theme-card--dark .a11y-swatch--secondary { background: var(--a11y-dark-c-accent) !important; }
-
-  .a11y-theme-card--cream {
-    background: var(--a11y-cream-c-bg) !important;
-    color: var(--a11y-cream-c-text) !important;
-  }
-  .a11y-theme-card--cream .a11y-theme-card__logo { fill: var(--a11y-cream-c-primary) !important; }
-  .a11y-theme-card--cream .a11y-swatch--primary { background: var(--a11y-cream-c-primary) !important; }
-  .a11y-theme-card--cream .a11y-swatch--secondary { background: var(--a11y-cream-c-accent) !important; }
-
-  .a11y-theme-card--high-contrast {
-    background: var(--a11y-high-contrast-c-bg) !important;
-    color: var(--a11y-high-contrast-c-text) !important;
-  }
-  .a11y-theme-card--high-contrast .a11y-theme-card__logo { fill: var(--a11y-high-contrast-c-primary) !important; }
-  .a11y-theme-card--high-contrast .a11y-swatch--primary { background: var(--a11y-high-contrast-c-primary) !important; }
-  .a11y-theme-card--high-contrast .a11y-swatch--secondary { background: var(--a11y-high-contrast-c-accent) !important; }
-
-  .a11y-theme-card--protanopia {
-    background: var(--a11y-protanopia-c-bg) !important;
-    color: var(--a11y-protanopia-c-text) !important;
-  }
-  .a11y-theme-card--protanopia .a11y-theme-card__logo { fill: var(--a11y-protanopia-c-primary) !important; }
-  .a11y-theme-card--protanopia .a11y-swatch--primary { background: var(--a11y-protanopia-c-primary) !important; }
-  .a11y-theme-card--protanopia .a11y-swatch--secondary { background: var(--a11y-protanopia-c-accent) !important; }
-
-  .a11y-theme-card--deuteranopia {
-    background: var(--a11y-deuteranopia-c-bg) !important;
-    color: var(--a11y-deuteranopia-c-text) !important;
-  }
-  .a11y-theme-card--deuteranopia .a11y-theme-card__logo { fill: var(--a11y-deuteranopia-c-primary) !important; }
-  .a11y-theme-card--deuteranopia .a11y-swatch--primary { background: var(--a11y-deuteranopia-c-primary) !important; }
-  .a11y-theme-card--deuteranopia .a11y-swatch--secondary { background: var(--a11y-deuteranopia-c-accent) !important; }
-
-  .a11y-theme-card--tritanopia {
-    background: var(--a11y-tritanopia-c-bg) !important;
-    color: var(--a11y-tritanopia-c-text) !important;
-  }
-  .a11y-theme-card--tritanopia .a11y-theme-card__logo { fill: var(--a11y-tritanopia-c-primary) !important; }
-  .a11y-theme-card--tritanopia .a11y-swatch--primary { background: var(--a11y-tritanopia-c-primary) !important; }
-  .a11y-theme-card--tritanopia .a11y-swatch--secondary { background: var(--a11y-tritanopia-c-accent) !important; }
-
-  .a11y-theme-card--monochrome {
-    background: var(--a11y-monochrome-c-bg) !important;
-    color: var(--a11y-monochrome-c-text) !important;
-  }
-  .a11y-theme-card--monochrome .a11y-theme-card__logo { fill: var(--a11y-monochrome-c-primary) !important; }
-  .a11y-theme-card--monochrome .a11y-swatch--primary { background: var(--a11y-monochrome-c-primary) !important; }
-  .a11y-theme-card--monochrome .a11y-swatch--secondary { background: var(--a11y-monochrome-c-accent) !important; }
-
-  /* Theme Card Responsive Styles */
-  @media (max-width: 768px) {
-    .a11y-theme-card {
-      width: auto;
-      flex: 0 0 auto;
-      padding: 8px 12px;
-    }
-
-    .a11y-theme-card__logo {
-      width: 24px;
-      height: 24px;
-    }
-
-    .a11y-theme-card__text {
-      display: none;
-    }
-
-    .a11y-theme-card__swatches {
-      flex-direction: row;
-      gap: 3px;
-    }
-
-    .a11y-swatch {
-      width: 10px;
-      height: 10px;
-    }
-  }
-
-  /* ===================================
-   * SCREEN READER ONLY UTILITY
-   * =================================== */
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .sr-only-focusable:focus,
-  .sr-only-focusable:active {
-    position: static;
-    width: auto;
-    height: auto;
-    padding: inherit;
-    margin: inherit;
-    overflow: visible;
-    clip: auto;
-    clip-path: none;
-    white-space: normal;
-  }
-
-  /* ===================================
-   * FOCUS VISIBLE STYLES
-   * =================================== */
-  :focus:not(:focus-visible) {
-    outline: none;
-  }
-
-  :focus-visible {
-    outline: 3px solid var(--color-Primary-500);
-    outline-offset: 2px;
-  }
-
-  a:focus-visible,
-  button:focus-visible,
-  [role="button"]:focus-visible {
-    outline: 3px solid var(--color-Primary-500);
-    outline-offset: 2px;
-    border-radius: 2px;
-  }
-
-  input:focus-visible,
-  textarea:focus-visible,
-  select:focus-visible {
-    outline: 3px solid var(--color-Primary-500);
-    outline-offset: 0;
-    border-color: var(--color-Primary-500);
-  }
-
-  /* ===================================
-   * TOUCH TARGET SIZES
-   * =================================== */
-  @media (pointer: coarse) {
-    button,
-    [role="button"],
-    a,
-    input[type="checkbox"],
-    input[type="radio"],
-    select {
-      min-height: 44px;
-      min-width: 44px;
-    }
-
-    a:not([class]) {
-      min-height: auto;
-      min-width: auto;
-      padding: 0.5rem 0;
-      margin: -0.5rem 0;
-    }
-  }
-
-  /* ===================================
-   * TEXT ONLY MODE
-   * =================================== */
-  body.a11y-text-only img:not([role="presentation"]):not(.side-tab__static-icon):not(.cart-icon__static),
-  body.a11y-text-only video,
-  body.a11y-text-only svg:not(.a11y-panel svg):not(.a11y-panel-trigger svg):not(.a11y-skip-link svg),
-  body.a11y-text-only [aria-hidden="true"]:not(.a11y-panel [aria-hidden="true"]):not(.side-tab__static-icon):not(.cart-icon__static),
-  body.a11y-text-only .decorative,
-  body.a11y-text-only [data-decorative] {
-    display: none !important;
-  }
-
-  body.a11y-text-only *::before,
-  body.a11y-text-only *::after {
-    background-image: none !important;
-  }
-
-  /* ===================================
-   * HIGHLIGHT LINKS
-   * =================================== */
-  body.a11y-highlight-links a {
-    text-decoration: underline !important;
-    text-underline-offset: 3px !important;
-  }
-
-  body.a11y-highlight-links a:hover {
-    text-decoration-thickness: 2px !important;
-  }
-
-  /* ===================================
-   * SIMPLE FOOTER MODE (Reduce Motion / Text Only)
-   * =================================== */
-  /* Hide footer canvas/reveal effect when reduce motion or text-only is enabled */
-  body.a11y-reduce-motion #footer-canvas,
-  body.a11y-text-only #footer-canvas {
-    display: none !important;
-  }
-
-  /* Add solid background when canvas is hidden */
-  body.a11y-reduce-motion .footer-mask-section,
-  body.a11y-text-only .footer-mask-section {
-    background-color: var(--color-Background-900) !important;
-  }
-
-  /* Adjust text colors for dark background */
-  body.a11y-reduce-motion .footer-mask-section .footer-content-overlay,
-  body.a11y-text-only .footer-mask-section .footer-content-overlay {
-    color: var(--color-Text-100) !important;
-  }
-
-  body.a11y-reduce-motion .footer-mask-section .footer-brand-text,
-  body.a11y-text-only .footer-mask-section .footer-brand-text {
-    color: var(--color-Text-100) !important;
-    text-shadow: none !important;
-  }
-
-  body.a11y-reduce-motion .footer-mask-section .footer-description,
-  body.a11y-reduce-motion .footer-mask-section .footer-copyright,
-  body.a11y-text-only .footer-mask-section .footer-description,
-  body.a11y-text-only .footer-mask-section .footer-copyright {
-    color: var(--color-Text-400) !important;
-    text-shadow: none !important;
-  }
-
-  body.a11y-reduce-motion .footer-mask-section .footer-bottom,
-  body.a11y-text-only .footer-mask-section .footer-bottom {
-    border-top-color: var(--color-Background-800) !important;
-  }
-
-  /* ===================================
-   * DYSLEXIA FONT
-   * =================================== */
-  /* Accessible Font Classes */
-  body.a11y-font-opendyslexic,
-  body.a11y-font-opendyslexic * {
-    font-family: 'OpenDyslexic', sans-serif !important;
-  }
-
-  body.a11y-font-atkinson,
-  body.a11y-font-atkinson * {
-    font-family: 'Atkinson Hyperlegible', sans-serif !important;
-  }
-
-  body.a11y-font-comic-sans,
-  body.a11y-font-comic-sans * {
-    font-family: 'Comic Sans MS', 'Comic Sans', cursive !important;
-  }
-
-  body.a11y-font-verdana,
-  body.a11y-font-verdana * {
-    font-family: Verdana, Geneva, sans-serif !important;
-  }
-
-  body.a11y-font-arial,
-  body.a11y-font-arial * {
-    font-family: Arial, Helvetica, sans-serif !important;
-  }
-
-  body.a11y-font-tahoma,
-  body.a11y-font-tahoma * {
-    font-family: Tahoma, Geneva, sans-serif !important;
-  }
-
-  /* Font Preview in Dropdown */
-  #a11y-font-family option[value="opendyslexic"] {
-    font-family: 'OpenDyslexic', sans-serif;
-  }
-
-  #a11y-font-family option[value="atkinson"] {
-    font-family: 'Atkinson Hyperlegible', sans-serif;
-  }
-
-  #a11y-font-family option[value="comic-sans"] {
-    font-family: 'Comic Sans MS', 'Comic Sans', cursive;
-  }
-
-  #a11y-font-family option[value="verdana"] {
-    font-family: Verdana, Geneva, sans-serif;
-  }
-
-  #a11y-font-family option[value="arial"] {
-    font-family: Arial, Helvetica, sans-serif;
-  }
-
-  #a11y-font-family option[value="tahoma"] {
-    font-family: Tahoma, Geneva, sans-serif;
-  }
-
-  /* ===================================
-   * REDUCED MOTION
-   * =================================== */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-
-  body.a11y-reduce-motion *,
-  body.a11y-reduce-motion *::before,
-  body.a11y-reduce-motion *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  /* ===================================
-   * ENHANCED FOCUS
-   * =================================== */
-  body.a11y-enhanced-focus :focus-visible {
-    outline: 4px solid var(--color-Warning, #f59e0b) !important;
-    outline-offset: 4px !important;
-    box-shadow: 0 0 0 8px color-mix(in oklch, var(--color-Warning, #f59e0b) 25%, transparent) !important;
-  }
-
-  body.a11y-enhanced-focus a:focus-visible,
-  body.a11y-enhanced-focus button:focus-visible {
-    outline: 4px solid var(--color-Warning, #f59e0b) !important;
-    outline-offset: 4px !important;
-    box-shadow: 0 0 0 8px color-mix(in oklch, var(--color-Warning, #f59e0b) 25%, transparent) !important;
-  }
-
-  /* ===================================
-   * SCREEN READER MODE (visual indicator)
-   * =================================== */
-  body.a11y-screen-reader-mode::after {
-    content: 'Screen Reader Mode Active';
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--color-Primary-500);
-    color: var(--color-white, white);
-    text-align: center;
-    padding: 0.25rem;
-    font-size: 0.75rem;
-    z-index: 9998;
-  }
-
-  /* =========================================================
-     A11Y THEMES — Upgraded Token System
-     - Base themes: dark, cream, high-contrast
-     - Modifiers: cvd-protanopia, cvd-deuteranopia, cvd-tritanopia, cvd-monochrome
-     - Semantic tokens added for maintainability
-     ========================================================= */
-
-  /* --- Semantic aliases (components should prefer these long-term) --- */
-  body[class*="a11y-"] {
-    --bg: var(--color-Background-50);
-    --surface: var(--color-Background-100);
-    --surface2: var(--color-Background-200);
-    --surface3: var(--color-Background-300);
-
-    --text: var(--color-Text-900);
-    --textMuted: var(--color-Text-600);
-
-    --link: var(--color-Secondary-500);
-    --linkHover: var(--color-Secondary-400);
-    --focusRing: var(--color-Info-500);
-
-    /* Status (support both vocabularies) */
-    --success: var(--color-Success, var(--color-Success-500));
-    --warning: var(--color-Warning, var(--color-Warning-500));
-    --error: var(--color-Error, var(--color-Error-500));
-    --danger: var(--color-Danger, var(--color-Error-500));
-
-    /* Polish tokens: visited, selection, disabled */
-    --linkVisited: color-mix(in oklch, var(--link) 60%, var(--text) 40%);
-    --selectionBg: color-mix(in oklch, var(--focusRing) 25%, transparent);
-    --selectionText: var(--text);
-    --disabledBg: color-mix(in oklch, var(--surface) 92%, var(--text) 8%);
-    --disabledText: color-mix(in oklch, var(--text) 45%, transparent);
-
-    /* Helpful defaults */
-    background: var(--bg) !important;
-    color: var(--text) !important;
-  }
-
-  body[class*="a11y-"] a {
-    color: var(--link) !important;
-    text-underline-offset: 0.18em;
-    text-decoration-thickness: 0.08em;
-  }
-  body[class*="a11y-"] a:hover {
-    color: var(--linkHover) !important;
-  }
-  body[class*="a11y-"] a:visited {
-    color: var(--linkVisited) !important;
-  }
-  body[class*="a11y-"] :focus-visible {
-    outline: 3px solid var(--focusRing) !important;
-    outline-offset: 3px !important;
-  }
-  body[class*="a11y-"] ::selection {
-    background: var(--selectionBg);
-    color: var(--selectionText);
-  }
-  body[class*="a11y-"] :disabled,
-  body[class*="a11y-"] [aria-disabled="true"] {
-    background: var(--disabledBg) !important;
-    color: var(--disabledText) !important;
-    cursor: not-allowed;
-    opacity: 1; /* keep text legible */
-  }
-
-  /* =========================================================
-     CVD THEMES - Button text contrast fix
-     - FILLED buttons: white text on dark Primary backgrounds
-     - OUTLINE/GHOST buttons: dark text using Primary color
-     ========================================================= */
-
-  /* FILLED buttons - white text (btn-primary, btn-filled, btn-solid) */
-  body.a11y-cvd-protanopia .btn-primary,
-  body.a11y-theme-protanopia .btn-primary,
-  body.a11y-cvd-deuteranopia .btn-primary,
-  body.a11y-theme-deuteranopia .btn-primary,
-  body.a11y-cvd-tritanopia .btn-primary,
-  body.a11y-theme-tritanopia .btn-primary,
-  body.a11y-cvd-monochrome .btn-primary,
-  body.a11y-theme-monochrome .btn-primary,
-  body.a11y-cvd-protanopia .btn-filled,
-  body.a11y-theme-protanopia .btn-filled,
-  body.a11y-cvd-deuteranopia .btn-filled,
-  body.a11y-theme-deuteranopia .btn-filled,
-  body.a11y-cvd-tritanopia .btn-filled,
-  body.a11y-theme-tritanopia .btn-filled,
-  body.a11y-cvd-monochrome .btn-filled,
-  body.a11y-theme-monochrome .btn-filled,
-  body.a11y-cvd-protanopia .btn-solid,
-  body.a11y-theme-protanopia .btn-solid,
-  body.a11y-cvd-deuteranopia .btn-solid,
-  body.a11y-theme-deuteranopia .btn-solid,
-  body.a11y-cvd-tritanopia .btn-solid,
-  body.a11y-theme-tritanopia .btn-solid,
-  body.a11y-cvd-monochrome .btn-solid,
-  body.a11y-theme-monochrome .btn-solid {
-    color: white !important;
-  }
-
-  /* Filled button spans also get white text */
-  body.a11y-cvd-protanopia .btn-primary span,
-  body.a11y-theme-protanopia .btn-primary span,
-  body.a11y-cvd-deuteranopia .btn-primary span,
-  body.a11y-theme-deuteranopia .btn-primary span,
-  body.a11y-cvd-tritanopia .btn-primary span,
-  body.a11y-theme-tritanopia .btn-primary span,
-  body.a11y-cvd-monochrome .btn-primary span,
-  body.a11y-theme-monochrome .btn-primary span,
-  body.a11y-cvd-protanopia .btn-filled span,
-  body.a11y-theme-protanopia .btn-filled span,
-  body.a11y-cvd-deuteranopia .btn-filled span,
-  body.a11y-theme-deuteranopia .btn-filled span,
-  body.a11y-cvd-tritanopia .btn-filled span,
-  body.a11y-theme-tritanopia .btn-filled span,
-  body.a11y-cvd-monochrome .btn-filled span,
-  body.a11y-theme-monochrome .btn-filled span {
-    color: white !important;
-  }
-
-  /* OUTLINE/GHOST buttons - dark text using Primary-600 */
-  body.a11y-cvd-protanopia .btn-outline,
-  body.a11y-theme-protanopia .btn-outline,
-  body.a11y-cvd-deuteranopia .btn-outline,
-  body.a11y-theme-deuteranopia .btn-outline,
-  body.a11y-cvd-tritanopia .btn-outline,
-  body.a11y-theme-tritanopia .btn-outline,
-  body.a11y-cvd-monochrome .btn-outline,
-  body.a11y-theme-monochrome .btn-outline,
-  body.a11y-cvd-protanopia .btn-ghost,
-  body.a11y-theme-protanopia .btn-ghost,
-  body.a11y-cvd-deuteranopia .btn-ghost,
-  body.a11y-theme-deuteranopia .btn-ghost,
-  body.a11y-cvd-tritanopia .btn-ghost,
-  body.a11y-theme-tritanopia .btn-ghost,
-  body.a11y-cvd-monochrome .btn-ghost,
-  body.a11y-theme-monochrome .btn-ghost,
-  body.a11y-cvd-protanopia .btn-text,
-  body.a11y-theme-protanopia .btn-text,
-  body.a11y-cvd-deuteranopia .btn-text,
-  body.a11y-theme-deuteranopia .btn-text,
-  body.a11y-cvd-tritanopia .btn-text,
-  body.a11y-theme-tritanopia .btn-text,
-  body.a11y-cvd-monochrome .btn-text,
-  body.a11y-theme-monochrome .btn-text,
-  body.a11y-cvd-protanopia .btn-link,
-  body.a11y-theme-protanopia .btn-link,
-  body.a11y-cvd-deuteranopia .btn-link,
-  body.a11y-theme-deuteranopia .btn-link,
-  body.a11y-cvd-tritanopia .btn-link,
-  body.a11y-theme-tritanopia .btn-link,
-  body.a11y-cvd-monochrome .btn-link,
-  body.a11y-theme-monochrome .btn-link,
-  body.a11y-cvd-protanopia .btn-secondary,
-  body.a11y-theme-protanopia .btn-secondary,
-  body.a11y-cvd-deuteranopia .btn-secondary,
-  body.a11y-theme-deuteranopia .btn-secondary,
-  body.a11y-cvd-tritanopia .btn-secondary,
-  body.a11y-theme-tritanopia .btn-secondary,
-  body.a11y-cvd-monochrome .btn-secondary,
-  body.a11y-theme-monochrome .btn-secondary {
-    color: var(--color-Primary-600) !important;
-  }
-
-  /* Outline/ghost button spans also get dark text */
-  body.a11y-cvd-protanopia .btn-outline span,
-  body.a11y-theme-protanopia .btn-outline span,
-  body.a11y-cvd-deuteranopia .btn-outline span,
-  body.a11y-theme-deuteranopia .btn-outline span,
-  body.a11y-cvd-tritanopia .btn-outline span,
-  body.a11y-theme-tritanopia .btn-outline span,
-  body.a11y-cvd-monochrome .btn-outline span,
-  body.a11y-theme-monochrome .btn-outline span,
-  body.a11y-cvd-protanopia .btn-ghost span,
-  body.a11y-theme-protanopia .btn-ghost span,
-  body.a11y-cvd-deuteranopia .btn-ghost span,
-  body.a11y-theme-deuteranopia .btn-ghost span,
-  body.a11y-cvd-tritanopia .btn-ghost span,
-  body.a11y-theme-tritanopia .btn-ghost span,
-  body.a11y-cvd-monochrome .btn-ghost span,
-  body.a11y-theme-monochrome .btn-ghost span,
-  body.a11y-cvd-protanopia .btn-secondary span,
-  body.a11y-theme-protanopia .btn-secondary span,
-  body.a11y-cvd-deuteranopia .btn-secondary span,
-  body.a11y-theme-deuteranopia .btn-secondary span,
-  body.a11y-cvd-tritanopia .btn-secondary span,
-  body.a11y-theme-tritanopia .btn-secondary span,
-  body.a11y-cvd-monochrome .btn-secondary span,
-  body.a11y-theme-monochrome .btn-secondary span {
-    color: var(--color-Primary-600) !important;
-  }
-
-  /* ===================================
-   * HIGH CONTRAST MEDIA QUERY
-   * =================================== */
-  @media (prefers-contrast: high) {
-    :root {
-      --focus-ring-color: CanvasText;
-      --focus-ring-width: 3px;
-    }
-
-    :focus-visible {
-      outline: var(--focus-ring-width) solid var(--focus-ring-color);
-      outline-offset: 2px;
-    }
-
-    a {
-      text-decoration: underline;
-    }
-
-    button,
-    [role="button"] {
-      border: 2px solid currentColor;
-    }
-  }
-
-  /* ===================================
-   * DARK MODE FOCUS
-   * =================================== */
-  @media (prefers-color-scheme: dark) {
-    :focus-visible {
-      outline-color: var(--color-Primary-300);
-    }
-  }
-
-  /* ===================================
-   * PRINT STYLES FOR PDF
-   * =================================== */
-  @media print {
-    .a11y-panel,
-    .a11y-panel__backdrop,
-    .a11y-panel-trigger,
-    .a11y-skip-links,
-    nav,
-    header:not(article header),
-    footer,
-    aside,
-    .sidebar,
-    .navigation,
-    .menu,
-    .social-links,
-    .comments,
-    .related-posts,
-    button:not(.print-include),
-    [role="navigation"],
-    [aria-hidden="true"] {
-      display: none !important;
-    }
-
-    body {
-      background: white !important;
-      color: black !important;
-      font-size: 12pt !important;
-      line-height: 1.5 !important;
-      filter: none !important;
-    }
-
-    body::after {
-      display: none !important;
-    }
-
-    main, article, .content, [role="main"] {
-      width: 100% !important;
-      max-width: none !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-
-    h1 { font-size: 24pt !important; margin-bottom: 12pt !important; }
-    h2 { font-size: 18pt !important; margin-top: 18pt !important; margin-bottom: 8pt !important; }
-    h3 { font-size: 14pt !important; margin-top: 14pt !important; margin-bottom: 6pt !important; }
-    p { margin-bottom: 8pt !important; }
-
-    a {
-      color: black !important;
-      text-decoration: underline !important;
-    }
-
-    a[href^="http"]:after {
-      content: " (" attr(href) ")";
-      font-size: 10pt;
-      color: #666;
-    }
-
-    img {
-      max-width: 100% !important;
-      page-break-inside: avoid;
-    }
-
-    h1, h2, h3 {
-      page-break-after: avoid;
-    }
-
-    p, li, blockquote {
-      orphans: 3;
-      widows: 3;
-    }
-
-    pre, code {
-      background: #f5f5f5 !important;
-      border: 1px solid #ddd !important;
-      font-size: 10pt !important;
-      white-space: pre-wrap !important;
-      word-wrap: break-word !important;
-    }
-
-    table {
-      border-collapse: collapse !important;
-      width: 100% !important;
-    }
-
-    th, td {
-      border: 1px solid #ddd !important;
-      padding: 8pt !important;
-    }
-
-    @page {
-      margin: 2cm;
-    }
-  }
+  /* External CSS files:
+   * - Theme cards: src/styles/themes/Preview/theme-cards.css
+   * - Print styles: src/styles/a11y/base/print.css
+   * - Global a11y: src/styles/a11y/
+   */
 </style>
 
 <script>
@@ -3289,19 +1318,58 @@ const positionStyles: Record<string, string> = {
       }
     });
 
-    // Font Family Select
-    const fontSelect = document.getElementById('a11y-font-family') as HTMLSelectElement;
-    if (fontSelect) {
-      fontSelect.addEventListener('change', () => {
-        settings.fontFamily = fontSelect.value;
-        saveSettings(settings);
-        applySettings(settings);
+    // Font Family Dropdown
+    const fontTrigger = document.getElementById('a11y-font-trigger');
+    const fontDropdown = document.getElementById('a11y-font-dropdown');
+    const fontCurrentLabel = document.getElementById('a11y-font-current');
 
-        if (settings.screenReaderMode) {
-          announce(`Font changed to ${fontSelect.options[fontSelect.selectedIndex].text}`);
-        }
+    // Toggle dropdown
+    fontTrigger?.addEventListener('click', () => {
+      const isOpen = fontDropdown?.classList.contains('show');
+      fontDropdown?.classList.toggle('show');
+      fontTrigger.setAttribute('aria-expanded', (!isOpen).toString());
+    });
+
+    // Handle font selection
+    fontDropdown?.addEventListener('click', (e) => {
+      const item = (e.target as HTMLElement).closest('.dropdown-item') as HTMLButtonElement;
+      if (!item) return;
+
+      const value = item.dataset.value || 'default';
+      const label = item.textContent || 'Default Font';
+
+      // Update selection state
+      fontDropdown.querySelectorAll('.dropdown-item').forEach(btn => {
+        btn.classList.remove('is-selected');
+        btn.setAttribute('aria-selected', 'false');
       });
-    }
+      item.classList.add('is-selected');
+      item.setAttribute('aria-selected', 'true');
+
+      // Update trigger label
+      if (fontCurrentLabel) fontCurrentLabel.textContent = label;
+
+      // Close dropdown
+      fontDropdown.classList.remove('show');
+      fontTrigger?.setAttribute('aria-expanded', 'false');
+
+      // Save and apply
+      settings.fontFamily = value;
+      saveSettings(settings);
+      applySettings(settings);
+
+      if (settings.screenReaderMode) {
+        announce(`Font changed to ${label}`);
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!fontTrigger?.contains(e.target as Node) && !fontDropdown?.contains(e.target as Node)) {
+        fontDropdown?.classList.remove('show');
+        fontTrigger?.setAttribute('aria-expanded', 'false');
+      }
+    });
 
     // Theme buttons - use event delegation for dynamically generated cards
     themeList?.addEventListener('click', (e) => {
@@ -3482,10 +1550,19 @@ const positionStyles: Record<string, string> = {
         if (toggle) toggle.checked = (s as any)[key];
       });
 
-      // Font Family Dropdown
-      const fontSelect = document.getElementById('a11y-font-family') as HTMLSelectElement;
-      if (fontSelect && s.fontFamily) {
-        fontSelect.value = s.fontFamily;
+      // Font Family Dropdown - restore selection state
+      const fontDropdown = document.getElementById('a11y-font-dropdown');
+      const fontCurrentLabel = document.getElementById('a11y-font-current');
+      if (fontDropdown && s.fontFamily) {
+        // Update dropdown items
+        fontDropdown.querySelectorAll('.dropdown-item').forEach(btn => {
+          const isSelected = btn.getAttribute('data-value') === s.fontFamily;
+          btn.classList.toggle('is-selected', isSelected);
+          btn.setAttribute('aria-selected', isSelected.toString());
+          if (isSelected && fontCurrentLabel) {
+            fontCurrentLabel.textContent = btn.textContent || 'Default Font';
+          }
+        });
       }
 
       // Sliders

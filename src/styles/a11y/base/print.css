@@ -1,0 +1,112 @@
+/**
+ * ============================================
+ * PRINT STYLES FOR PDF
+ * ============================================
+ *
+ * Optimized print styles for PDF download feature
+ * Used by AccessibilityPanel's "Download PDF" button
+ */
+
+@media print {
+  /* Hide non-essential elements */
+  .a11y-panel,
+  .a11y-panel__backdrop,
+  .a11y-skip-links,
+  nav,
+  header:not(article header),
+  footer,
+  aside,
+  .sidebar,
+  .navigation,
+  .menu,
+  .social-links,
+  .comments,
+  .related-posts,
+  button:not(.print-include),
+  [role="navigation"],
+  [aria-hidden="true"] {
+    display: none !important;
+  }
+
+  /* Reset body styles for print */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+    filter: none !important;
+  }
+
+  body::after {
+    display: none !important;
+  }
+
+  /* Full width content */
+  main, article, .content, [role="main"] {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Typography for print */
+  h1 { font-size: 24pt !important; margin-bottom: 12pt !important; }
+  h2 { font-size: 18pt !important; margin-top: 18pt !important; margin-bottom: 8pt !important; }
+  h3 { font-size: 14pt !important; margin-top: 14pt !important; margin-bottom: 6pt !important; }
+  p { margin-bottom: 8pt !important; }
+
+  /* Links */
+  a {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+
+  /* Show URLs for external links */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #666;
+  }
+
+  /* Images */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Prevent page breaks after headings */
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  /* Orphans and widows */
+  p, li, blockquote {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Code blocks */
+  pre, code {
+    background: #f5f5f5 !important;
+    border: 1px solid #ddd !important;
+    font-size: 10pt !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  th, td {
+    border: 1px solid #ddd !important;
+    padding: 8pt !important;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 2cm;
+  }
+}
