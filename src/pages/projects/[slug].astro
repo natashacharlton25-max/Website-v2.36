@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import FooterWithMask from '../../components/sections/FooterWithMask.astro';
 import MasonryGrid from '../../components/ui/MasonryGrid.astro';
+import { getIconForTag, getIconForBenefit, getIconForSkill, getIconForAssetType } from '../../utils/iconMapper';
 
 // Helper to get folder slug from entry.id (handles index.md suffix and path separators)
 const getSlugFromId = (id: string) => {
@@ -126,62 +127,6 @@ const getNextColor = () => {
   return color;
 };
 
-// Icon mapper function - matches tag names to appropriate icons (using Phosphor Duotone icons)
-const getIconForTag = (tag: string): string => {
-  const tagLower = tag.toLowerCase();
-
-  // Mindfulness & Meditation
-  if (tagLower.includes('mindful')) return 'ph:peace-duotone';
-  if (tagLower.includes('meditation')) return 'ph:flower-lotus-duotone';
-  if (tagLower.includes('breathing')) return 'ph:wind-duotone';
-
-  // Wellbeing & Health
-  if (tagLower.includes('wellbeing') || tagLower.includes('well-being')) return 'ph:heart-duotone';
-  if (tagLower.includes('health')) return 'ph:heartbeat-duotone';
-  if (tagLower.includes('wellness')) return 'ph:sparkle-duotone';
-
-  // Self-Care & Care
-  if (tagLower.includes('self-care') || tagLower.includes('selfcare')) return 'ph:hand-heart-duotone';
-  if (tagLower.includes('care')) return 'ph:hands-praying-duotone';
-
-  // Emotions
-  if (tagLower.includes('emotion')) return 'ph:smiley-duotone';
-  if (tagLower.includes('feeling')) return 'ph:heart-straight-duotone';
-  if (tagLower.includes('calm')) return 'ph:moon-stars-duotone';
-  if (tagLower.includes('stress')) return 'ph:brain-duotone';
-  if (tagLower.includes('anxiety')) return 'ph:butterfly-duotone';
-
-  // Activities
-  if (tagLower.includes('sensory')) return 'ph:hand-palm-duotone';
-  if (tagLower.includes('creative')) return 'ph:palette-duotone';
-  if (tagLower.includes('movement')) return 'ph:person-simple-walk-duotone';
-  if (tagLower.includes('nature')) return 'ph:leaf-duotone';
-  if (tagLower.includes('music')) return 'ph:music-notes-duotone';
-
-  // Default - use a variety of generic icons based on the tag name
-  const genericIcons = [
-    'ph:sparkle-duotone',
-    'ph:star-duotone',
-    'ph:circles-three-duotone',
-    'ph:squares-four-duotone',
-    'ph:flower-duotone',
-    'ph:sun-duotone',
-    'ph:placeholder-duotone',
-    'ph:chats-circle-duotone',
-    'ph:compass-duotone',
-    'ph:lightbulb-duotone'
-  ];
-
-  // Use a simple hash to consistently select the same icon for the same tag
-  let hash = 0;
-  for (let i = 0; i < tag.length; i++) {
-    hash = ((hash << 5) - hash) + tag.charCodeAt(i);
-    hash = hash & hash;
-  }
-
-  return genericIcons[Math.abs(hash) % genericIcons.length];
-};
-
 // Masonry cards (everything else)
 const summaryColor = getNextColor();
 const actionColor1 = getNextColor();
@@ -189,34 +134,6 @@ const actionColor2 = getNextColor();
 const info1Color = getNextColor();
 const info2Color = getNextColor();
 const info3Color = getNextColor();
-
-// Icon mapper for benefits (matches benefit text to appropriate icons)
-const getIconForBenefit = (benefit: string): string => {
-  const lower = benefit.toLowerCase();
-  if (lower.includes('emotion')) return 'ph:heart-duotone';
-  if (lower.includes('confidence') || lower.includes('agency')) return 'ph:star-duotone';
-  if (lower.includes('motor') || lower.includes('coordination')) return 'ph:hand-duotone';
-  if (lower.includes('language') || lower.includes('narrative')) return 'ph:chat-circle-text-duotone';
-  if (lower.includes('stress') || lower.includes('mood')) return 'ph:sun-duotone';
-  if (lower.includes('creative') || lower.includes('expression')) return 'ph:palette-duotone';
-  if (lower.includes('problem') || lower.includes('solving')) return 'ph:lightbulb-duotone';
-  if (lower.includes('regulation')) return 'ph:scales-duotone';
-  return 'ph:check-circle-duotone';
-};
-
-// Icon mapper for linked skills
-const getIconForSkill = (skill: string): string => {
-  const lower = skill.toLowerCase();
-  if (lower.includes('language')) return 'ph:chat-circle-text-duotone';
-  if (lower.includes('motor')) return 'ph:hand-duotone';
-  if (lower.includes('emotion') || lower.includes('regulation')) return 'ph:heart-duotone';
-  if (lower.includes('problem') || lower.includes('solving')) return 'ph:lightbulb-duotone';
-  if (lower.includes('social')) return 'ph:users-duotone';
-  if (lower.includes('cognitive') || lower.includes('thinking')) return 'ph:brain-duotone';
-  if (lower.includes('sensory')) return 'ph:hand-palm-duotone';
-  if (lower.includes('communication')) return 'ph:chats-duotone';
-  return 'ph:puzzle-piece-duotone';
-};
 
 const masonryCards = [
   // Tag cards first
@@ -334,18 +251,18 @@ const masonryCards = [
     const resourceDescription = asset?.description || 'Free resource to download and use';
 
     // Map asset type to display type and icon
-    const typeConfig: Record<string, { label: string; icon: string }> = {
-      'worksheet': { label: 'Worksheet', icon: 'ph:note-pencil-duotone' },
-      'workbook': { label: 'Workbook', icon: 'ph:book-duotone' },
-      'guide': { label: 'Guide', icon: 'ph:book-open-duotone' },
-      'toolkit': { label: 'Toolkit', icon: 'ph:toolbox-duotone' },
-      'cards': { label: 'Cards', icon: 'ph:cards-duotone' },
-      'poster': { label: 'Poster', icon: 'ph:image-duotone' },
-      'activity': { label: 'Activity', icon: 'ph:game-controller-duotone' },
+    const typeLabels: Record<string, string> = {
+      'worksheet': 'Worksheet',
+      'workbook': 'Workbook',
+      'guide': 'Guide',
+      'toolkit': 'Toolkit',
+      'cards': 'Cards',
+      'poster': 'Poster',
+      'activity': 'Activity',
     };
 
-    const resourceType = asset?.type ? typeConfig[asset.type]?.label || 'Resource' : 'Resource';
-    const resourceIcon = asset?.type ? typeConfig[asset.type]?.icon || 'ph:file-duotone' : 'ph:file-duotone';
+    const resourceType = asset?.type ? typeLabels[asset.type] || 'Resource' : 'Resource';
+    const resourceIcon = asset?.type ? getIconForAssetType(asset.type) : 'objects/file-fill';
 
     // First 2 resources get image cards (if asset has image), rest are text-only
     if (index < 2 && asset) {
@@ -407,7 +324,7 @@ const masonryCards = [
         link: `/insights/${slug}`,
         bgColor: insightColor.bg,
         textColor: insightColor.text,
-        icon: 'ph:article-duotone',
+        icon: 'objects/article-fill',
         size: 'medium' as const
       };
     }
@@ -446,7 +363,7 @@ const masonryCards = [
         link: `/presentations/${slug}`,
         bgColor: presentationColor.bg,
         textColor: presentationColor.text,
-        icon: 'ph:presentation-chart-duotone',
+        icon: 'objects/presentation-chart-fill',
         size: 'medium' as const
       };
     }
