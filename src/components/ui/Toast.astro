@@ -1,7 +1,7 @@
 ---
 /**
  * Toast Notification Component
- * Enhanced with Lottie animations
+ * Enhanced with Lottie animations using @lottiefiles/lottie-player web component
  *
  * Features:
  * - Lottie animation plays 3 times or max 10 seconds
@@ -15,8 +15,6 @@
  * @param duration - How long to show the toast (ms), default 30000
  * @param lottieUrl - Optional custom Lottie animation URL
  */
-
-import LottiePlayer from '../animations/LottiePlayer.astro';
 
 export interface Props {
   theme?: 'arcade' | 'professional' | 'brutalist' | 'glass' | 'neon';
@@ -51,14 +49,22 @@ const iconUrl = lottieUrl || themeLottieUrls[theme];
   role="alert"
   aria-live="polite"
 >
-  <LottiePlayer
+  <lottie-player
     src={iconUrl}
-    width={32}
-    height={32}
-    loop={false}
-    autoplay={true}
-    className="toast-lottie-icon"
-  />
+    background="transparent"
+    speed="1"
+    style="width: 32px; height: 32px;"
+    autoplay
+    loop
+    count="3"
+    class="toast-lottie-icon"
+  ></lottie-player>
   <span class="toast-message">{message}</span>
   <div class="toast-glow"></div>
 </div>
+
+<style>
+  .toast-lottie-icon {
+    flex-shrink: 0;
+  }
+</style>

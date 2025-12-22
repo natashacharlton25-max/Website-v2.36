@@ -1,0 +1,106 @@
+/**
+ * ============================================
+ * A11Y MOTION - Reduced Motion
+ * ============================================
+ *
+ * Reduces or removes animations for users with
+ * vestibular disorders or motion sensitivity.
+ *
+ * Applied via:
+ * - Body class: a11y-reduce-motion
+ * - System preference: prefers-reduced-motion: reduce
+ */
+
+/* ============================================
+   CLASS-BASED REDUCED MOTION
+   ============================================ */
+
+body.a11y-reduce-motion *,
+body.a11y-reduce-motion *::before,
+body.a11y-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Disable transforms on hover/focus */
+body.a11y-reduce-motion *:hover,
+body.a11y-reduce-motion *:focus {
+  transform: none !important;
+}
+
+/* Disable parallax */
+body.a11y-reduce-motion [data-parallax],
+body.a11y-reduce-motion .parallax {
+  transform: none !important;
+}
+
+/* Disable Lottie animations */
+body.a11y-reduce-motion lottie-player {
+  display: none !important;
+}
+
+/* Show static alternatives to Lottie */
+body.a11y-reduce-motion .lottie-static-fallback {
+  display: block !important;
+}
+
+/* Disable slider auto-play */
+body.a11y-reduce-motion .slider,
+body.a11y-reduce-motion .carousel,
+body.a11y-reduce-motion [data-autoplay] {
+  --autoplay: paused !important;
+}
+
+/* Disable video autoplay */
+body.a11y-reduce-motion video[autoplay] {
+  autoplay: false !important;
+}
+
+/* ============================================
+   SYSTEM PREFERENCE REDUCED MOTION
+   ============================================
+   Respects user's OS-level motion preference */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable transforms on hover/focus */
+  *:hover,
+  *:focus {
+    transform: none !important;
+  }
+
+  /* Disable Lottie animations */
+  lottie-player {
+    display: none !important;
+  }
+
+  /* Show static alternatives */
+  .lottie-static-fallback {
+    display: block !important;
+  }
+}
+
+/* ============================================
+   SAFE MOTION - Elements that can animate
+   ============================================
+   Use .motion-safe class for essential animations */
+
+body.a11y-reduce-motion .motion-safe,
+body.a11y-reduce-motion .motion-safe *,
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe,
+  .motion-safe * {
+    /* Allow essential animations like focus indicators */
+    transition-duration: 0.15s !important;
+  }
+}
