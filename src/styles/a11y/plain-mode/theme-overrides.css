@@ -1,0 +1,175 @@
+/**
+ * ============================================
+ * PLAIN MODE + ACCESSIBILITY THEME OVERRIDES
+ * ============================================
+ *
+ * When plain mode is active, it should override
+ * all accessibility theme card styling (borders,
+ * backgrounds, etc.) to maintain the simplified view.
+ * Uses html prefix for maximum specificity.
+ */
+
+/* ============================================
+   PLAIN MODE TEXT - Standard text color
+   ============================================ */
+
+html body.plain h1,
+html body.plain h2,
+html body.plain h3,
+html body.plain h4,
+html body.plain h5,
+html body.plain h6,
+html body.plain p,
+html body.plain span:not(.icon):not(.card-icon),
+html body.plain a:not(.btn):not(.card-button),
+html body.plain li,
+html body.plain label,
+html body.plain .text-card-title,
+html body.plain .text-card-content,
+html body.plain .tag-card-title,
+html body.plain .asset-card-title,
+html body.plain .asset-card-text,
+html body.plain .mixed-card-title,
+html body.plain .mixed-card-text,
+html body.plain .summary-content,
+html body.plain .project-title,
+html body.plain .project-description {
+  color: var(--color-Text-700) !important;
+}
+
+/* ============================================
+   PLAIN MODE BUTTONS - Primary color, clickable
+   ============================================ */
+
+html body.plain .btn,
+html body.plain .btn-primary,
+html body.plain .btn-secondary,
+html body.plain button:not(.a11y-panel button):not(.nav-toggle),
+html body.plain a.btn,
+html body.plain a.btn-primary,
+html body.plain a.btn-secondary {
+  background: var(--color-Primary-500) !important;
+  color: white !important;
+  border-color: var(--color-Primary-500) !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Card buttons need extra specificity */
+html body.plain .masonry-card .card-button,
+html body.plain .masonry-grid .card-button,
+html body.plain a.card-button,
+html body.plain .card-button {
+  background: var(--color-Primary-500) !important;
+  color: white !important;
+  border: 1px solid var(--color-Primary-500) !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* ============================================
+   MASONRY CARDS - Override ALL a11y themes
+   ============================================ */
+
+html body.plain.a11y-theme-dark .masonry-card,
+html body.plain.a11y-theme-high-contrast .masonry-card,
+html body.plain.a11y-theme-cream .masonry-card,
+html body.plain.a11y-theme-monochrome .masonry-card,
+html body.plain.a11y-cvd-monochrome .masonry-card,
+html body.plain.a11y-theme-protanopia .masonry-card,
+html body.plain.a11y-cvd-protanopia .masonry-card,
+html body.plain.a11y-theme-deuteranopia .masonry-card,
+html body.plain.a11y-cvd-deuteranopia .masonry-card,
+html body.plain.a11y-theme-tritanopia .masonry-card,
+html body.plain.a11y-cvd-tritanopia .masonry-card,
+html body.plain[class*="a11y-"] .masonry-card,
+html body.plain[class*="a11y-"] .masonry-grid .masonry-card {
+  background: transparent !important;
+  border: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  outline: none !important;
+}
+
+/* Hide any pseudo-element borders/accents on cards */
+html body.plain[class*="a11y-"] .masonry-card::before,
+html body.plain[class*="a11y-"] .masonry-card::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Masonry card hover - no effects in plain mode */
+html body.plain.a11y-theme-dark .masonry-card:hover,
+html body.plain.a11y-theme-high-contrast .masonry-card:hover,
+html body.plain.a11y-theme-cream .masonry-card:hover,
+html body.plain.a11y-theme-monochrome .masonry-card:hover,
+html body.plain.a11y-cvd-monochrome .masonry-card:hover,
+html body.plain.a11y-theme-protanopia .masonry-card:hover,
+html body.plain.a11y-cvd-protanopia .masonry-card:hover,
+html body.plain.a11y-theme-deuteranopia .masonry-card:hover,
+html body.plain.a11y-cvd-deuteranopia .masonry-card:hover,
+html body.plain.a11y-theme-tritanopia .masonry-card:hover,
+html body.plain.a11y-cvd-tritanopia .masonry-card:hover,
+html body.plain[class*="a11y-"] .masonry-card:hover {
+  background: transparent !important;
+  border: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Icon wrappers - transparent in plain mode + a11y themes */
+html body.plain[class*="a11y-"] .asset-card-icon-wrapper,
+html body.plain[class*="a11y-"] .tag-card-icon-wrapper,
+html body.plain[class*="a11y-"] .text-card-icon-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Badges - hide in plain mode regardless of a11y theme */
+html body.plain[class*="a11y-"] .asset-card-badge,
+html body.plain[class*="a11y-"] .mixed-card-badge {
+  display: none !important;
+}
+
+/* Card buttons in plain mode + a11y themes */
+html body.plain[class*="a11y-"] .masonry-card .card-button,
+html body.plain[class*="a11y-"] .masonry-grid .card-button,
+html body.plain[class*="a11y-"] a.card-button,
+html body.plain[class*="a11y-"] .card-button,
+html body.plain.a11y-theme-dark .card-button,
+html body.plain.a11y-theme-high-contrast .card-button,
+html body.plain.a11y-theme-cream .card-button,
+html body.plain.a11y-theme-monochrome .card-button,
+html body.plain.a11y-cvd-monochrome .card-button,
+html body.plain.a11y-theme-protanopia .card-button,
+html body.plain.a11y-cvd-protanopia .card-button,
+html body.plain.a11y-theme-deuteranopia .card-button,
+html body.plain.a11y-cvd-deuteranopia .card-button,
+html body.plain.a11y-theme-tritanopia .card-button,
+html body.plain.a11y-cvd-tritanopia .card-button {
+  background: var(--color-Primary-500) !important;
+  color: white !important;
+  border: 1px solid var(--color-Primary-500) !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Project page background - transparent in plain mode */
+html body.plain[class*="a11y-"] .project-masonry-page,
+html body.plain.a11y-theme-dark .project-masonry-page,
+html body.plain.a11y-theme-high-contrast .project-masonry-page,
+html body.plain.a11y-theme-cream .project-masonry-page,
+html body.plain.a11y-theme-monochrome .project-masonry-page {
+  background: transparent !important;
+}

@@ -1,0 +1,179 @@
+/**
+ * ============================================
+ * PLAIN MODE - Core Rules
+ * ============================================
+ *
+ * Base rules for plain/simplified view mode.
+ * Activates when body has .plain class.
+ *
+ * - Hides images and image containers
+ * - Flattens grids to single column
+ * - Strips card backgrounds and shadows
+ * - Left aligns text
+ * - Disables animations
+ */
+
+/* ============================================
+   HIDE IMAGES AND IMAGE CONTAINERS
+   ============================================ */
+body.plain .image-container,
+body.plain .pillar-image-container,
+body.plain img:not(.keep-in-plain):not([data-keep-plain]):not(.nav-container img):not(.side-tab img):not(.side-tab__static-icon):not([class*="icon"]):not([src*="/icons/"]):not([src*="/Logo/"]),
+body.plain picture:not(.keep-in-plain):not(.nav-container picture):not(.side-tab picture),
+body.plain figure:not(.keep-in-plain),
+body.plain video:not(.keep-in-plain),
+body.plain svg.decorative,
+body.plain [class*="image-wrapper"],
+body.plain [class*="img-wrapper"],
+body.plain .hero-image,
+body.plain .background-image,
+body.plain .card-image,
+body.plain .thumbnail {
+  display: none !important;
+}
+
+/* ============================================
+   FLATTEN GRIDS TO SINGLE COLUMN
+   ============================================ */
+body.plain .pillars-grid,
+body.plain .image-text-layout,
+body.plain [class*="grid"]:not(.a11y-preset-grid):not(.a11y-theme-grid),
+body.plain .card-grid,
+body.plain .project-grid,
+body.plain .gallery-grid,
+body.plain .masonry-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: 1fr !important;
+  gap: var(--space-lg, 1.5rem) !important;
+}
+
+/* Reset grid children to full width */
+body.plain .pillars-grid > *,
+body.plain .image-text-layout > *,
+body.plain .card-grid > *,
+body.plain .project-grid > *,
+body.plain .gallery-grid > *,
+body.plain .masonry-grid > * {
+  width: 100% !important;
+  max-width: 100% !important;
+  grid-column: auto !important;
+}
+
+/* ============================================
+   STRIP CARD BACKGROUNDS AND SHADOWS
+   ============================================ */
+body.plain .pillar-card,
+body.plain .project-card,
+body.plain .asset-card,
+body.plain .card,
+body.plain [class*="-card"] {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Remove hover effects on cards */
+body.plain .pillar-card:hover,
+body.plain .project-card:hover,
+body.plain .asset-card:hover,
+body.plain .card:hover,
+body.plain [class*="-card"]:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ============================================
+   LEFT ALIGN TEXT
+   ============================================ */
+body.plain .section-header,
+body.plain .text-container,
+body.plain h1,
+body.plain h2,
+body.plain h3,
+body.plain h4,
+body.plain h5,
+body.plain h6,
+body.plain p,
+body.plain .heading,
+body.plain .title,
+body.plain .subtitle,
+body.plain .description,
+body.plain [class*="header"],
+body.plain [class*="title"],
+body.plain [class*="heading"],
+body.plain section > * {
+  text-align: left !important;
+}
+
+/* Reset any centered containers */
+body.plain .text-center,
+body.plain .center,
+body.plain [class*="centered"] {
+  text-align: left !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+/* ============================================
+   ADDITIONAL SIMPLIFICATIONS
+   ============================================ */
+
+/* Remove decorative borders and gradients */
+body.plain .gradient-border,
+body.plain .decorative-border,
+body.plain [class*="gradient"] {
+  background: transparent !important;
+  border-image: none !important;
+}
+
+/* Simplify sections - remove background images */
+body.plain section {
+  background-image: none !important;
+}
+
+/* Remove parallax effects */
+body.plain [data-parallax],
+body.plain .parallax {
+  transform: none !important;
+}
+
+/* Disable animations in plain mode */
+body.plain *,
+body.plain *::before,
+body.plain *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* ============================================
+   UNIFIED LEFT MARGIN FOR ALL SECTIONS
+   ============================================ */
+
+/* All sections - match hero padding */
+body.plain section,
+body.plain .section {
+  padding-left: var(--space-md) !important;
+  padding-right: var(--space-md) !important;
+}
+
+/* Containers - same max-width as hero, centered */
+body.plain .container,
+body.plain [class*="container-"] {
+  max-width: 1400px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* ============================================
+   OPT-OUT CLASSES
+   ============================================ */
+/* Use these classes to keep specific elements visible in plain mode */
+body.plain .keep-in-plain,
+body.plain [data-keep-plain] {
+  display: initial !important;
+}

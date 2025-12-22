@@ -1,0 +1,71 @@
+/**
+ * ============================================
+ * A11Y MEDIA FILTERS
+ * ============================================
+ *
+ * Image/video filter adjustments for accessibility themes.
+ * Applies brightness, saturation, and contrast filters
+ * based on the active color theme.
+ *
+ * Opt-out classes:
+ * - data-keep-colour attribute
+ * - .no-theme-filter class
+ * - .keep-colour class
+ */
+
+/* ============================================
+   GLOBAL MEDIA FILTERS
+   ============================================
+   Apply token-driven filters to images/video.
+   Use data-keep-colour or .no-theme-filter to opt-out */
+
+/* Apply media filters globally (uses tokens set per-theme) */
+/* Excludes: icons, logos, and elements with opt-out attributes/classes */
+:where(img, picture > img, video):not([data-keep-colour]):not(.no-theme-filter):not(.keep-colour):not([class*="icon"]):not([src*="/icons/"]):not([src*="/Icons/phosphor/"]):not(.side-tab__static-icon) {
+  filter: brightness(var(--media-brightness))
+          saturate(var(--media-saturation))
+          contrast(var(--media-contrast));
+}
+
+/* ============================================
+   DARK MODE - Media filters
+   ============================================ */
+
+/* Dark mode: apply brightness filter with higher specificity */
+body.a11y-theme-dark img:not([data-keep-colour]):not(.no-theme-filter):not(.keep-colour):not([class*="icon"]):not([src*="/icons/"]):not([src*="/Icons/phosphor/"]):not(.side-tab__static-icon),
+body.a11y-theme-dark picture > img:not([data-keep-colour]):not(.no-theme-filter):not(.keep-colour):not([class*="icon"]):not([src*="/icons/"]):not([src*="/Icons/phosphor/"]):not(.side-tab__static-icon),
+body.a11y-theme-dark video:not([data-keep-colour]):not(.no-theme-filter):not(.keep-colour) {
+  filter: brightness(0.86) saturate(0.90) contrast(0.98);
+}
+
+/* Dark mode: subtle background for transparent PNGs (excludes icons) */
+body.a11y-theme-dark img:not([data-keep-colour]):not(.no-theme-filter):not([class*="icon"]):not([src*="/icons/"]):not([src*="/Icons/phosphor/"]):not(.side-tab__static-icon),
+body.a11y-theme-dark picture > img:not([data-keep-colour]):not(.no-theme-filter):not([class*="icon"]):not([src*="/icons/"]):not([src*="/Icons/phosphor/"]):not(.side-tab__static-icon) {
+  background: color-mix(in srgb, var(--color-Background-100) 70%, transparent);
+}
+
+/* ============================================
+   CREAM THEME - Sepia filter for warm aesthetic
+   ============================================ */
+body.a11y-theme-cream :where(img, picture, video, canvas):not([data-keep-colour]):not(.no-theme-filter):not(.keep-colour):not([class*="icon"]):not([src*="/icons/"]):not([src*="/Icons/phosphor/"]):not(.side-tab__static-icon):not(.cart-icon__static) {
+  filter: sepia(0.25) saturate(0.9) brightness(1.02) !important;
+}
+
+/* ============================================
+   MONOCHROME - Media grayscale filter
+   ============================================ */
+body.a11y-theme-monochrome :where(img, picture, video, canvas, svg):not([data-keep-colour]):not(.no-theme-filter),
+body.a11y-cvd-monochrome :where(img, picture, video, canvas, svg):not([data-keep-colour]):not(.no-theme-filter) {
+  filter: grayscale(1) saturate(0) contrast(1.05) !important;
+}
+
+/* ============================================
+   OPT-OUT CLASSES
+   ============================================ */
+
+/* Opt-out: Keep specific elements in colour */
+[data-keep-colour],
+.no-theme-filter,
+.keep-colour {
+  filter: none !important;
+}
