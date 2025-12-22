@@ -1,11 +1,27 @@
 ---
 // ButtonDropdown - Dropdown menu for Button component
+// Supports both navigation (links) and selection (buttons) modes
 // Tokens loaded globally via tokens/index.css
 
+export interface DropdownItem {
+  label: string;
+  value?: string;  // For selection mode
+  href?: string;   // For navigation mode
+  fontFamily?: string; // Optional custom font for preview
+}
+
 export interface Props {
+  /** Mode: 'navigation' for links, 'selection' for selectable options */
+  mode?: 'navigation' | 'selection';
   colorTheme?: 'primary' | 'secondary' | 'accent1' | 'accent2' | 'accent3' | 'accent4' | 'accent5';
-  dropdownItems?: Array<{label: string, href?: string}>;
+  dropdownItems?: DropdownItem[];
   isOpen?: boolean;
+  /** Currently selected value (selection mode only) */
+  selectedValue?: string;
+  /** ID for the dropdown (used for JS event handling) */
+  id?: string;
+  /** Name attribute for form submission */
+  name?: string;
   borderStyle?: string; // e.g., '1px solid', '2px dashed', 'none'
   backgroundColor?: string; // CSS variable or color value
   colorShade?: string; // e.g., '100', '500', '700'
@@ -13,13 +29,17 @@ export interface Props {
 }
 
 const {
+  mode = 'navigation',
   colorTheme = 'primary',
   dropdownItems = [
-    {label: 'Option 1', href: '#'},
-    {label: 'Option 2', href: '#'},
-    {label: 'Option 3', href: '#'}
+    {label: 'Option 1', value: 'option1', href: '#'},
+    {label: 'Option 2', value: 'option2', href: '#'},
+    {label: 'Option 3', value: 'option3', href: '#'}
   ],
   isOpen = false,
+  selectedValue = '',
+  id,
+  name,
   borderStyle = '1px solid',
   backgroundColor,
   colorShade = '500',
@@ -27,9 +47,10 @@ const {
 } = Astro.props;
 
 const themeClass = `dropdown-theme-${colorTheme}`;
+const modeClass = `dropdown-mode-${mode}`;
 
 // Convert color theme name to proper case for CSS variables
-const colorThemeMap = {
+const colorThemeMap: Record<string, string> = {
   'primary': 'Primary',
   'secondary': 'Secondary',
   'accent1': 'AccentOne',
@@ -46,21 +67,42 @@ const hoverTextColor = `var(--color-${colorName}-800)`;
 ---
 
 <div
-  class={`dropdown-menu themed-dropdown-menu ${themeClass} ${isOpen ? 'show' : ''}`}
+  class={`dropdown-menu themed-dropdown-menu ${themeClass} ${modeClass} ${isOpen ? 'show' : ''}`}
+  id={id}
+  data-name={name}
+  data-mode={mode}
+  data-selected={selectedValue}
+  role={mode === 'selection' ? 'listbox' : 'menu'}
   style={`
     ${borderStyle !== 'none' ? `border: ${borderStyle} ${borderColor};` : 'border: none;'}
     ${backgroundColor ? `background: ${backgroundColor};` : ''}
   `.trim()}
 >
   {dropdownItems.map((item) => (
-    <a
-      href={item.href}
-      class="dropdown-item"
-      style={`
-        --hover-bg-color: ${hoverBgColor};
-        --hover-text-color: ${hoverTextColor};
-      `.trim()}
-    >{item.label}</a>
+    mode === 'selection' ? (
+      <button
+        type="button"
+        class={`dropdown-item ${item.value === selectedValue ? 'is-selected' : ''}`}
+        data-value={item.value}
+        role="option"
+        aria-selected={item.value === selectedValue ? 'true' : 'false'}
+        style={`
+          --hover-bg-color: ${hoverBgColor};
+          --hover-text-color: ${hoverTextColor};
+          ${item.fontFamily ? `font-family: ${item.fontFamily};` : ''}
+        `.trim()}
+      >{item.label}</button>
+    ) : (
+      <a
+        href={item.href}
+        class="dropdown-item"
+        role="menuitem"
+        style={`
+          --hover-bg-color: ${hoverBgColor};
+          --hover-text-color: ${hoverTextColor};
+        `.trim()}
+      >{item.label}</a>
+    )
   ))}
 </div>
 
@@ -69,11 +111,11 @@ const hoverTextColor = `var(--color-${colorName}-800)`;
     position: absolute;
     top: 100%;
     left: 0;
-    background: var(--glass-surface-bg);
-    backdrop-filter: blur(var(--glass-surface-blur));
-    -webkit-backdrop-filter: blur(var(--glass-surface-blur));
-    border-radius: var(--radius-md);
-    box-shadow: var(--glass-surface-shadow);
+    background: var(--glass-surface-bg, var(--color-Background-50));
+    backdrop-filter: blur(var(--glass-surface-blur, 8px));
+    -webkit-backdrop-filter: blur(var(--glass-surface-blur, 8px));
+    border-radius: var(--radius-md, 0.5rem);
+    box-shadow: var(--glass-surface-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
     z-index: 9999;
     min-width: var(--space-5xl, 120px);
     margin-top: var(--space-sm, 0.5rem);
@@ -90,28 +132,59 @@ const hoverTextColor = `var(--color-${colorName}-800)`;
   .dropdown-menu.show {
     max-height: 300px;
     opacity: 1;
+    overflow-y: auto;
   }
 
   .dropdown-item {
     display: block;
+    width: 100%;
     padding: var(--space-md, 0.75rem) var(--space-lg, 1rem);
     color: var(--color-Text-700);
     text-decoration: none !important;
     font-family: var(--font-body, inherit);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-sm, 0.875rem);
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.075em;
+    text-align: left;
+    cursor: pointer;
     transition: background-color 0.1s ease, color 0.1s ease;
     margin: 0;
     border: none;
-    border-bottom: none;
+    background: transparent;
+  }
+
+  /* Navigation mode - uppercase labels */
+  .dropdown-mode-navigation .dropdown-item {
+    text-transform: uppercase;
+    letter-spacing: 0.075em;
+  }
+
+  /* Selection mode - normal case for readability */
+  .dropdown-mode-selection .dropdown-item {
+    text-transform: none;
+    letter-spacing: normal;
   }
 
   .dropdown-item:hover {
     text-decoration: none !important;
     background-color: var(--hover-bg-color);
     color: var(--hover-text-color);
+  }
+
+  .dropdown-item:focus-visible {
+    outline: 2px solid var(--color-Primary-500);
+    outline-offset: -2px;
+  }
+
+  /* Selected state for selection mode */
+  .dropdown-item.is-selected {
+    background-color: var(--color-Primary-100);
+    color: var(--color-Primary-800);
+    font-weight: 600;
+  }
+
+  .dropdown-item.is-selected::before {
+    content: '✓ ';
+    font-weight: bold;
   }
 
   .dropdown-item:last-child {
@@ -129,16 +202,14 @@ const hoverTextColor = `var(--color-${colorName}-800)`;
   @media (max-width: 767px) {
     .dropdown-menu {
       min-width: var(--space-5xl, 120px);
-      /* Ensure dropdown appears over other elements on mobile */
       z-index: 99999;
-      /* Make dropdown wider to extend beyond grid boundaries */
       left: 0;
       right: auto;
       min-width: 200px;
     }
 
     .dropdown-menu.show {
-      max-height: 180px; /* Smaller height on mobile */
+      max-height: 180px;
     }
   }
 </style>

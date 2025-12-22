@@ -1,0 +1,135 @@
+/**
+ * ============================================
+ * A11Y SEMANTIC TOKENS
+ * ============================================
+ *
+ * Global semantic token aliases for a11y themes.
+ * Applied when any a11y theme is active.
+ *
+ * These provide shorthand tokens for common use cases:
+ * - --bg, --surface, --text
+ * - --link, --linkHover, --focusRing
+ * - --success, --warning, --error
+ */
+
+/* ============================================
+   SEMANTIC ALIASES
+   ============================================
+   Applied when any a11y class is active on body */
+
+body[class*="a11y-"] {
+  /* Background surfaces */
+  --bg: var(--color-Background-50);
+  --surface: var(--color-Background-100);
+  --surface2: var(--color-Background-200);
+  --surface3: var(--color-Background-300);
+
+  /* Text colors */
+  --text: var(--color-Text-900);
+  --textMuted: var(--color-Text-600);
+
+  /* Link colors */
+  --link: var(--color-Secondary-500);
+  --linkHover: var(--color-Secondary-400);
+  --focusRing: var(--color-Info-500);
+
+  /* Status colors */
+  --success: var(--color-Success, var(--color-Success-500));
+  --warning: var(--color-Warning, var(--color-Warning-500));
+  --error: var(--color-Error, var(--color-Error-500));
+  --danger: var(--color-Danger, var(--color-Error-500));
+
+  /* Polish tokens */
+  --linkVisited: color-mix(in oklch, var(--link) 60%, var(--text) 40%);
+  --selectionBg: color-mix(in oklch, var(--focusRing) 25%, transparent);
+  --selectionText: var(--text);
+  --disabledBg: color-mix(in oklch, var(--surface) 92%, var(--text) 8%);
+  --disabledText: color-mix(in oklch, var(--text) 45%, transparent);
+
+  /* Apply defaults */
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+/* ============================================
+   LINK STYLES
+   ============================================ */
+
+body[class*="a11y-"] a {
+  color: var(--link) !important;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 0.08em;
+}
+
+body[class*="a11y-"] a:hover {
+  color: var(--linkHover) !important;
+}
+
+body[class*="a11y-"] a:visited {
+  color: var(--linkVisited) !important;
+}
+
+/* ============================================
+   FOCUS STYLES
+   ============================================ */
+
+body[class*="a11y-"] :focus-visible {
+  outline: 3px solid var(--focusRing) !important;
+  outline-offset: 3px !important;
+}
+
+/* ============================================
+   SELECTION STYLES
+   ============================================ */
+
+body[class*="a11y-"] ::selection {
+  background: var(--selectionBg);
+  color: var(--selectionText);
+}
+
+/* ============================================
+   DISABLED STATE
+   ============================================ */
+
+body[class*="a11y-"] :disabled,
+body[class*="a11y-"] [aria-disabled="true"] {
+  background: var(--disabledBg) !important;
+  color: var(--disabledText) !important;
+  cursor: not-allowed;
+  opacity: 1; /* keep text legible */
+}
+
+/* ============================================
+   HIGH CONTRAST MEDIA QUERY
+   ============================================ */
+
+@media (prefers-contrast: high) {
+  :root {
+    --focus-ring-color: CanvasText;
+    --focus-ring-width: 3px;
+  }
+
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: 2px;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  button,
+  [role="button"] {
+    border: 2px solid currentColor;
+  }
+}
+
+/* ============================================
+   DARK MODE FOCUS
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  :focus-visible {
+    outline-color: var(--color-Primary-300);
+  }
+}

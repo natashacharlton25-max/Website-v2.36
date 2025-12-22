@@ -24,10 +24,17 @@ body.a11y-reduce-motion *::after {
   scroll-behavior: auto !important;
 }
 
-/* Disable transforms on hover/focus */
-body.a11y-reduce-motion *:hover,
-body.a11y-reduce-motion *:focus {
+/* Disable decorative transforms on hover/focus
+   Exclude elements using transform for positioning (modals, tooltips) */
+body.a11y-reduce-motion *:hover:not(.a11y-panel):not([data-position-transform]),
+body.a11y-reduce-motion *:focus:not(.a11y-panel):not([data-position-transform]) {
   transform: none !important;
+}
+
+/* Preserve positioning transforms for modals/tooltips */
+body.a11y-reduce-motion .a11y-panel,
+body.a11y-reduce-motion .a11y-panel.is-open {
+  transform: translate(-50%, -50%) !important;
 }
 
 /* Disable parallax */
@@ -73,10 +80,17 @@ body.a11y-reduce-motion video[autoplay] {
     scroll-behavior: auto !important;
   }
 
-  /* Disable transforms on hover/focus */
-  *:hover,
-  *:focus {
+  /* Disable decorative transforms on hover/focus
+     Exclude elements using transform for positioning */
+  *:hover:not(.a11y-panel):not([data-position-transform]),
+  *:focus:not(.a11y-panel):not([data-position-transform]) {
     transform: none !important;
+  }
+
+  /* Preserve positioning transforms for modals/tooltips */
+  .a11y-panel,
+  .a11y-panel.is-open {
+    transform: translate(-50%, -50%) !important;
   }
 
   /* Disable Lottie animations */
@@ -103,4 +117,36 @@ body.a11y-reduce-motion .motion-safe *,
     /* Allow essential animations like focus indicators */
     transition-duration: 0.15s !important;
   }
+}
+
+/* ============================================
+   FOOTER FALLBACKS
+   ============================================
+   Provide solid background when canvas effects are hidden */
+
+body.a11y-reduce-motion #footer-canvas {
+  display: none !important;
+}
+
+body.a11y-reduce-motion .footer-mask-section {
+  background-color: var(--color-Background-900) !important;
+}
+
+body.a11y-reduce-motion .footer-mask-section .footer-content-overlay {
+  color: var(--color-Text-100) !important;
+}
+
+body.a11y-reduce-motion .footer-mask-section .footer-brand-text {
+  color: var(--color-Text-100) !important;
+  text-shadow: none !important;
+}
+
+body.a11y-reduce-motion .footer-mask-section .footer-description,
+body.a11y-reduce-motion .footer-mask-section .footer-copyright {
+  color: var(--color-Text-400) !important;
+  text-shadow: none !important;
+}
+
+body.a11y-reduce-motion .footer-mask-section .footer-bottom {
+  border-top-color: var(--color-Background-800) !important;
 }

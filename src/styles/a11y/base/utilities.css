@@ -3,8 +3,12 @@
  * A11Y UTILITIES
  * ============================================
  *
- * Core accessibility utility classes.
- * Screen reader only, skip links, focus management.
+ * Core accessibility utility classes:
+ * - Screen reader only
+ * - Skip links
+ * - Focus management
+ * - Touch targets
+ * - Screen reader mode indicator
  */
 
 /* ============================================
@@ -43,23 +47,35 @@
    ============================================
    Allow keyboard users to skip to main content */
 
+.skip-links {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
 .skip-link {
   position: absolute;
-  top: -40px;
-  left: 0;
-  background: var(--color-Primary-600);
-  color: white;
-  padding: var(--space-sm) var(--space-md);
-  z-index: 10000;
+  left: -9999px;
+  top: 0;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-Background-50);
+  color: var(--color-Text-900);
+  font-weight: 700;
+  font-size: 0.8125rem;
   text-decoration: none;
-  font-weight: var(--font-semibold);
-  border-radius: 0 0 var(--border-radius) 0;
-  transition: top var(--transition-fast);
+  border-radius: 0 0 0.5rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid color-mix(in srgb, var(--color-Primary-500) 35%, var(--color-Background-300));
+  z-index: 99999;
 }
 
 .skip-link:focus {
-  top: 0;
-  outline: 3px solid var(--color-Primary-300);
+  left: 0;
+  outline: 2px solid var(--color-Primary-500);
   outline-offset: 2px;
 }
 
@@ -108,4 +124,48 @@
   a {
     text-decoration: underline;
   }
+}
+
+/* ============================================
+   TOUCH TARGET SIZES
+   ============================================
+   Ensure minimum touch target sizes for mobile */
+
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Inline links don't need full touch target */
+  a:not([class]) {
+    min-height: auto;
+    min-width: auto;
+    padding: 0.5rem 0;
+    margin: -0.5rem 0;
+  }
+}
+
+/* ============================================
+   SCREEN READER MODE INDICATOR
+   ============================================
+   Visual indicator when screen reader mode is active */
+
+body.a11y-screen-reader-mode::after {
+  content: 'Screen Reader Mode Active';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-Primary-500);
+  color: var(--color-Text-50);
+  text-align: center;
+  padding: 0.25rem;
+  font-size: var(--text-xs, 0.75rem);
+  z-index: 9998;
 }
