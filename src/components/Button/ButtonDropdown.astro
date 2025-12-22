@@ -1,0 +1,144 @@
+---
+// ButtonDropdown - Dropdown menu for Button component
+// Tokens loaded globally via tokens/index.css
+
+export interface Props {
+  colorTheme?: 'primary' | 'secondary' | 'accent1' | 'accent2' | 'accent3' | 'accent4' | 'accent5';
+  dropdownItems?: Array<{label: string, href?: string}>;
+  isOpen?: boolean;
+  borderStyle?: string; // e.g., '1px solid', '2px dashed', 'none'
+  backgroundColor?: string; // CSS variable or color value
+  colorShade?: string; // e.g., '100', '500', '700'
+  hoverColorShade?: string; // e.g., '100', '200', '300'
+}
+
+const {
+  colorTheme = 'primary',
+  dropdownItems = [
+    {label: 'Option 1', href: '#'},
+    {label: 'Option 2', href: '#'},
+    {label: 'Option 3', href: '#'}
+  ],
+  isOpen = false,
+  borderStyle = '1px solid',
+  backgroundColor,
+  colorShade = '500',
+  hoverColorShade = '100'
+} = Astro.props;
+
+const themeClass = `dropdown-theme-${colorTheme}`;
+
+// Convert color theme name to proper case for CSS variables
+const colorThemeMap = {
+  'primary': 'Primary',
+  'secondary': 'Secondary',
+  'accent1': 'AccentOne',
+  'accent2': 'AccentTwo',
+  'accent3': 'AccentThree',
+  'accent4': 'AccentFour',
+  'accent5': 'AccentFive'
+};
+
+const colorName = colorThemeMap[colorTheme];
+const borderColor = `var(--color-${colorName}-${colorShade})`;
+const hoverBgColor = `var(--color-${colorName}-${hoverColorShade})`;
+const hoverTextColor = `var(--color-${colorName}-800)`;
+---
+
+<div
+  class={`dropdown-menu themed-dropdown-menu ${themeClass} ${isOpen ? 'show' : ''}`}
+  style={`
+    ${borderStyle !== 'none' ? `border: ${borderStyle} ${borderColor};` : 'border: none;'}
+    ${backgroundColor ? `background: ${backgroundColor};` : ''}
+  `.trim()}
+>
+  {dropdownItems.map((item) => (
+    <a
+      href={item.href}
+      class="dropdown-item"
+      style={`
+        --hover-bg-color: ${hoverBgColor};
+        --hover-text-color: ${hoverTextColor};
+      `.trim()}
+    >{item.label}</a>
+  ))}
+</div>
+
+<style is:global>
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--glass-surface-bg);
+    backdrop-filter: blur(var(--glass-surface-blur));
+    -webkit-backdrop-filter: blur(var(--glass-surface-blur));
+    border-radius: var(--radius-md);
+    box-shadow: var(--glass-surface-shadow);
+    z-index: 9999;
+    min-width: var(--space-5xl, 120px);
+    margin-top: var(--space-sm, 0.5rem);
+    list-style: none;
+    padding: 0;
+
+    /* Height-based visibility */
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .dropdown-menu.show {
+    max-height: 300px;
+    opacity: 1;
+  }
+
+  .dropdown-item {
+    display: block;
+    padding: var(--space-md, 0.75rem) var(--space-lg, 1rem);
+    color: var(--color-Text-700);
+    text-decoration: none !important;
+    font-family: var(--font-body, inherit);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.075em;
+    transition: background-color 0.1s ease, color 0.1s ease;
+    margin: 0;
+    border: none;
+    border-bottom: none;
+  }
+
+  .dropdown-item:hover {
+    text-decoration: none !important;
+    background-color: var(--hover-bg-color);
+    color: var(--hover-text-color);
+  }
+
+  .dropdown-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Desktop responsive */
+  @media (min-width: 768px) {
+    .dropdown-menu {
+      min-width: 180px;
+    }
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 767px) {
+    .dropdown-menu {
+      min-width: var(--space-5xl, 120px);
+      /* Ensure dropdown appears over other elements on mobile */
+      z-index: 99999;
+      /* Make dropdown wider to extend beyond grid boundaries */
+      left: 0;
+      right: auto;
+      min-width: 200px;
+    }
+
+    .dropdown-menu.show {
+      max-height: 180px; /* Smaller height on mobile */
+    }
+  }
+</style>

@@ -1,13 +1,18 @@
 ---
 /**
- * Icon component - Fetches icons from Iconify API
+ * Icon component - Loads SVG icons from local Phosphor icons folder
  *
  * Usage:
- * <Icon name="mdi:tag" size={20} />
- * <Icon name="heroicons:heart" size={24} />
+ * <Icon name="sparkle-fill" size={24} />
+ * <Icon name="wellness/heart-fill" size={20} />
+ * <Icon name="ph:heart-duotone" size={20} /> (legacy - maps to fill)
  *
- * Browse icons at: https://icon-sets.iconify.design/
+ * Icons stored in: /public/Icons/phosphor/[category]/
+ * Categories: nature, wellness, objects, interface, communication, people, creative, shapes, a11y, a11y-panel
+ * Download from: https://phosphoricons.com/
  */
+import fs from 'node:fs';
+import path from 'node:path';
 
 interface Props {
   name: string;
@@ -17,64 +22,51 @@ interface Props {
 
 const { name, size = 24, class: className = '' } = Astro.props;
 
-// Split icon name into collection and icon
-const [collection, iconName] = name.split(':');
+// Strip 'ph:' prefix if present (for backwards compatibility)
+let iconName = name.startsWith('ph:') ? name.slice(3) : name;
 
-// Fetch icon data from Iconify API at build time
-let iconData: any = null;
+// Convert duotone/regular to fill style (we use fill for better a11y)
+iconName = iconName.replace(/-duotone$/, '-fill').replace(/-regular$/, '-fill');
 
-try {
-  const response = await fetch(`https://api.iconify.design/${collection}/${iconName}.svg?height=${size}`);
-  if (response.ok) {
-    iconData = await response.text();
+// Icon categories to search through
+const categories = ['nature', 'wellness', 'objects', 'interface', 'communication', 'people', 'creative', 'shapes', 'a11y', 'a11y-panel'];
+
+// Try to load local SVG
+let iconContent: string | null = null;
+
+// Function to try loading from a path
+const tryLoadIcon = (iconPath: string): string | null => {
+  try {
+    const fullPath = path.join(process.cwd(), 'public', iconPath);
+    if (fs.existsSync(fullPath)) {
+      return fs.readFileSync(fullPath, 'utf-8');
+    }
+  } catch {
+    // Silent fail
   }
-} catch (error) {
-  console.error(`Failed to fetch icon: ${name}`, error);
-}
-
-// Multiple fallback icons for variety
-const fallbackIcons = [
-  // Circle
-  `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`,
-  // Star
-  `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
-  // Heart
-  `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`,
-  // Square
-  `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>`,
-  // Diamond
-  `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor"><path d="M12 2L2 12l10 10 10-10L12 2z"/></svg>`,
-  // Bookmark
-  `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>`,
-  // Folder
-  `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>`,
-  // Grid
-  `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor"><path d="M4 4h7v7H4V4zm0 9h7v7H4v-7zm9-9h7v7h-7V4zm0 9h7v7h-7v-7z"/></svg>`,
-  // Hexagon
-  `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor"><path d="M21 16V8c0-.35-.19-.68-.49-.86l-7-4a1 1 0 0 0-1.02 0l-7 4A1 1 0 0 0 3 8v8c0 .35.19.68.49.86l7 4a1 1 0 0 0 1.02 0l7-4c.3-.18.49-.51.49-.86z"/></svg>`,
-  // Tag
-  `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>`
-];
-
-// Use a simple hash function to consistently select the same fallback for the same icon name
-const hashCode = (str: string) => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash);
+  return null;
 };
 
-const fallbackIcon = fallbackIcons[hashCode(name) % fallbackIcons.length];
+// If path already includes a folder (e.g., "wellness/heart-fill"), use directly
+if (iconName.includes('/')) {
+  iconContent = tryLoadIcon(`/Icons/phosphor/${iconName}.svg`);
+} else {
+  // Search through categories
+  for (const category of categories) {
+    iconContent = tryLoadIcon(`/Icons/phosphor/${category}/${iconName}.svg`);
+    if (iconContent) break;
+  }
+}
+
+// Fallback icon (simple circle)
+const fallbackIcon = `<svg viewBox="0 0 256 256" width="${size}" height="${size}" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.2"/><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-width="16"/></svg>`;
 ---
 
-{iconData ? (
-  <span class={`icon ${className}`} style={`width: ${size}px; height: ${size}px;`} set:html={iconData} />
-) : (
-  <span class={`icon ${className}`} style={`width: ${size}px; height: ${size}px;`} set:html={fallbackIcon} />
-)}
+<span
+  class={`icon ${className}`}
+  style={`width: ${size}px; height: ${size}px;`}
+  set:html={iconContent || fallbackIcon}
+/>
 
 <style>
   .icon {
@@ -87,7 +79,5 @@ const fallbackIcon = fallbackIcons[hashCode(name) % fallbackIcons.length];
   .icon :global(svg) {
     width: 100%;
     height: 100%;
-    stroke: currentColor;
-    fill: currentColor;
   }
 </style>
