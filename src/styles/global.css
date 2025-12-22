@@ -1,16 +1,18 @@
 /* ===================================
    GLOBAL STYLES
-   Import order: reset → tokens → theme → confetti → utilities → a11y
+   Import order: reset → tokens → theme → design → utilities → a11y
    =================================== */
 
-@import './reset.css';
+@import './base/reset.css';
 @import './tokens/index.css';         /* All design tokens (typography, spacing, colors, shadows, gradients) */
 @import './themes/brand/BrandDefault.css';  /* Default theme - loaded first, overridden by ThemeSwitcher */
-@import './confetti.css';             /* Confetti particle tokens */
-@import './utilities.css';
-@import './a11y.css';                 /* Accessibility themes and tokens */
+@import './buttons/basic-button.css'; /* Global button fallback (a11y) */
+@import './buttons/styled-button.css'; /* Pretty button styles (overrides basic) */
+@import './design/confetti.css';      /* Confetti particle tokens */
+@import './base/utilities.css';
+@import './a11y/a11y.css';            /* Accessibility themes and tokens */
 /* A11y theme files (themes/a11y/*.css) are dynamically loaded by ThemeSwitcher.js */
-@import './plain-mode.css';           /* Plain mode overrides for .plain class */
+@import './a11y/plain-mode.css';      /* Plain mode overrides for .plain class */
 
 /* ========== BASE STYLES ========== */
 
@@ -106,7 +108,7 @@ h1 {
   font-size: clamp(2rem, 5vw + 1rem, 3.75rem);
   font-weight: var(--font-bold);
   line-height: var(--leading-tight);
-  color: var(--color-Text-700);
+  color: var(--color-Primary-700);
   margin-bottom: var(--space-md);
 }
 
@@ -198,93 +200,6 @@ a {
 
 a:hover {
   color: var(--color-Primary-600);
-}
-
-/* ========== BUTTONS ========== */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-sm) var(--space-lg);
-  font-family: var(--font-body);
-  font-weight: var(--font-medium);  /* Nunito Sans Medium (500) for buttons */
-  border-radius: var(--border-radius);
-  transition: all var(--transition-base);
-  cursor: pointer;
-  border: none;
-  text-decoration: none;
-}
-
-.btn-primary {
-  background-color: var(--color-Primary-500);
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: var(--color-Primary-600);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.btn-secondary {
-  background-color: var(--color-Secondary-500);
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: var(--color-Secondary-600);
-}
-
-.btn-outline {
-  background-color: transparent;
-  border: 2px solid var(--color-Primary-500);
-  color: var(--color-Primary-500);
-}
-
-.btn-outline:hover {
-  background-color: var(--color-Primary-500);
-  color: white;
-}
-
-.btn-lg {
-  padding: var(--space-md) var(--space-xl);
-  font-size: var(--text-lg);
-}
-
-.btn-sm {
-  padding: var(--space-xs) var(--space-md);
-  font-size: var(--text-sm);
-}
-
-/* Button variants - ghost/text */
-.btn-ghost,
-.btn-text {
-  background-color: transparent;
-  border: none;
-  color: var(--color-Primary-500);
-}
-
-.btn-ghost:hover,
-.btn-text:hover {
-  background-color: var(--color-Primary-50);
-  color: var(--color-Primary-600);
-}
-
-/* Button text centering for small screens */
-@media (max-width: 400px) {
-  .btn,
-  button,
-  a[class*="button"],
-  a[class*="btn"],
-  [class*="button"],
-  .unified-btn,
-  .unified-btn > *,
-  .opb-button,
-  .rainbow-button {
-    text-align: center !important;
-    justify-content: center !important;
-  }
 }
 
 /* ========== CARDS ========== */

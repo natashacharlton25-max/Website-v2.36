@@ -1,4 +1,12 @@
-import { setPreviewTokens } from './ThemePreviewTokens.js';
+// Import theme CSS files as URLs
+import brandDefaultUrl from '../styles/themes/brand/BrandDefault.css?url';
+import a11yDarkUrl from '../styles/themes/a11y/a11y-dark.css?url';
+import a11yHighContrastUrl from '../styles/themes/a11y/a11y-high-contrast.css?url';
+import a11yCreamUrl from '../styles/themes/a11y/a11y-cream.css?url';
+import a11yMonochromeUrl from '../styles/themes/a11y/a11y-monochrome.css?url';
+import a11yProtanopiaUrl from '../styles/themes/a11y/a11y-protanopia.css?url';
+import a11yDeuteranopiaUrl from '../styles/themes/a11y/a11y-deuteranopia.css?url';
+import a11yTritanopiaUrl from '../styles/themes/a11y/a11y-tritanopia.css?url';
 
 /**
  * ThemeSwitcher - Dynamic CSS File Theme Switching
@@ -7,18 +15,18 @@ import { setPreviewTokens } from './ThemePreviewTokens.js';
 export class ThemeSwitcher {
   constructor() {
     this.themes = {
-// Brand theme (default)
-      'default': '/src/styles/themes/brand/BrandDefault.css',
+      // Brand theme (default)
+      'default': brandDefaultUrl,
       // Accessibility themes
-      'a11y-dark': '/src/styles/themes/a11y/a11y-dark.css',
-      'a11y-high-contrast': '/src/styles/themes/a11y/a11y-high-contrast.css',
-      'a11y-cream': '/src/styles/themes/a11y/a11y-cream.css',
-      'a11y-monochrome': '/src/styles/themes/a11y/a11y-monochrome.css',
-      'a11y-protanopia': '/src/styles/themes/a11y/a11y-protanopia.css',
-      'a11y-deuteranopia': '/src/styles/themes/a11y/a11y-deuteranopia.css',
-      'a11y-tritanopia': '/src/styles/themes/a11y/a11y-tritanopia.css',
-      'brand/BrandDefault': '/src/styles/themes/brand/BrandDefault.css',
-      'BrandDefault': '/src/styles/themes/BrandDefault.css'
+      'a11y-dark': a11yDarkUrl,
+      'a11y-high-contrast': a11yHighContrastUrl,
+      'a11y-cream': a11yCreamUrl,
+      'a11y-monochrome': a11yMonochromeUrl,
+      'a11y-protanopia': a11yProtanopiaUrl,
+      'a11y-deuteranopia': a11yDeuteranopiaUrl,
+      'a11y-tritanopia': a11yTritanopiaUrl,
+      'brand/BrandDefault': brandDefaultUrl,
+      'BrandDefault': brandDefaultUrl
     };
 
     this.currentTheme = null;  // Start as null so first switchTheme always loads CSS
@@ -42,9 +50,6 @@ export class ThemeSwitcher {
       // Theme CSS must override BrandDefault.css and all component styles
       document.head.appendChild(this.themeLink);
     }
-
-    // Set preview tokens for accessibility panel theme cards
-    setPreviewTokens();
 
     // Create accessibility announcer
     this.createAnnouncer();
