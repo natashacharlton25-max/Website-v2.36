@@ -249,80 +249,79 @@ import Button from '../Button/Button.astro';
 
   // Initialize after DOM is ready
   document.addEventListener('DOMContentLoaded', () => {
-    // Check if user has already given consent
+    // Accept All Cookies
+    document.getElementById('cookieAccept')?.addEventListener('click', () => {
+      const preferences = {
+        essential: true,
+        analytics: true,
+        marketing: true,
+        timestamp: new Date().toISOString()
+      };
+      setCookieConsent(preferences);
+      hideCookieBanner();
+
+      // Show toast notification
+      (window as any).showToast?.({
+        message: 'Cookie preferences saved',
+        type: 'success'
+      });
+    });
+
+    // Reject All Cookies
+    document.getElementById('cookieReject')?.addEventListener('click', () => {
+      const preferences = {
+        essential: true,
+        analytics: false,
+        marketing: false,
+        timestamp: new Date().toISOString()
+      };
+      setCookieConsent(preferences);
+      hideCookieBanner();
+
+      (window as any).showToast?.({
+        message: 'Cookie preferences saved',
+        type: 'success'
+      });
+    });
+
+    // Show Customize Panel
+    document.getElementById('cookieCustomize')?.addEventListener('click', () => {
+      showCustomizePanel();
+    });
+
+    // Cancel Customization
+    document.getElementById('cookiePanelCancel')?.addEventListener('click', () => {
+      hideCustomizePanel();
+    });
+
+    // Save Custom Preferences
+    document.getElementById('cookiePanelSave')?.addEventListener('click', () => {
+      const analytics = (document.getElementById('analyticsConsent') as HTMLInputElement)?.checked || false;
+      const marketing = (document.getElementById('marketingConsent') as HTMLInputElement)?.checked || false;
+
+      const preferences = {
+        essential: true,
+        analytics,
+        marketing,
+        timestamp: new Date().toISOString()
+      };
+
+      setCookieConsent(preferences);
+      hideCustomizePanel();
+      hideCookieBanner();
+
+      (window as any).showToast?.({
+        message: 'Cookie preferences saved',
+        type: 'success'
+      });
+    });
+
+    // Check if user has already given consent and hide banner if so
     const existingConsent = getCookieConsent();
     if (existingConsent) {
       hideCookieBanner();
-      return;
     }
-
-    // Accept All Cookies
-    document.getElementById('cookieAccept')?.addEventListener('click', () => {
-    const preferences = {
-      essential: true,
-      analytics: true,
-      marketing: true,
-      timestamp: new Date().toISOString()
-    };
-    setCookieConsent(preferences);
-    hideCookieBanner();
-
-    // Show toast notification
-    (window as any).showToast?.({
-      message: 'Cookie preferences saved',
-      type: 'success'
-    });
   });
-
-  // Reject All Cookies
-  document.getElementById('cookieReject')?.addEventListener('click', () => {
-    const preferences = {
-      essential: true,
-      analytics: false,
-      marketing: false,
-      timestamp: new Date().toISOString()
-    };
-    setCookieConsent(preferences);
-    hideCookieBanner();
-
-    (window as any).showToast?.({
-      message: 'Cookie preferences saved',
-      type: 'success'
-    });
-  });
-
-  // Show Customize Panel
-  document.getElementById('cookieCustomize')?.addEventListener('click', () => {
-    showCustomizePanel();
-  });
-
-  // Cancel Customization
-  document.getElementById('cookiePanelCancel')?.addEventListener('click', () => {
-    hideCustomizePanel();
-  });
-
-  // Save Custom Preferences
-  document.getElementById('cookiePanelSave')?.addEventListener('click', () => {
-    const analytics = (document.getElementById('analyticsConsent') as HTMLInputElement)?.checked || false;
-    const marketing = (document.getElementById('marketingConsent') as HTMLInputElement)?.checked || false;
-
-    const preferences = {
-      essential: true,
-      analytics,
-      marketing,
-      timestamp: new Date().toISOString()
-    };
-
-    setCookieConsent(preferences);
-    hideCustomizePanel();
-    hideCookieBanner();
-
-    (window as any).showToast?.({
-      message: 'Cookie preferences saved',
-      type: 'success'
-    });
-  });
-});
 
 // Export function to get consent status (available globally)
 (window as any).getCookieConsent = getCookieConsent;

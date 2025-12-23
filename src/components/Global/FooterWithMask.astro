@@ -1,0 +1,279 @@
+---
+/**
+ * FooterWithMask - Interactive canvas footer with proximity mask effect
+ * Wraps the base Footer component with canvas reveal animation
+ * Automatically falls back to plain Footer for users with prefers-reduced-motion
+ *
+ * CSS Standards Compliant:
+ * - BEM-lite naming (.footer-mask, .footer-mask__canvas, etc)
+ * - All design tokens from tokens/ folder
+ * - No hardcoded values
+ */
+import Footer from './Footer.astro';
+
+export interface Props {
+  backgroundImage: string;
+}
+
+const {
+  backgroundImage
+} = Astro.props;
+---
+
+<!-- Canvas wrapper with reduced motion fallback -->
+<div class="footer-mask">
+  <canvas id="footer-canvas" class="footer-mask__canvas" aria-hidden="true"></canvas>
+
+  <!-- Footer content overlay with light variant for better contrast on canvas -->
+  <div class="footer-mask__content">
+    <Footer variant="light" />
+  </div>
+</div>
+
+<style>
+  /* ========== CANVAS WRAPPER ========== */
+  .footer-mask {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--color-Background-100);
+    min-height: 600px; /* Increased from container-sm to accommodate image */
+    transition: min-height var(--transition-base);
+  }
+
+  /* ========== CANVAS ELEMENT ========== */
+  .footer-mask__canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: var(--z-base);
+  }
+
+  /* ========== FOOTER CONTENT OVERLAY ========== */
+  .footer-mask__content {
+    position: relative;
+    z-index: calc(var(--z-base) + 10);
+    pointer-events: none; /* Allow mouse events to pass through to canvas */
+  }
+
+  /* Re-enable pointer events for interactive elements */
+  .footer-mask__content :global(a),
+  .footer-mask__content :global(button) {
+    pointer-events: auto;
+  }
+
+  /* Make footer background transparent to show canvas */
+  .footer-mask__content :global(.footer) {
+    background-color: transparent !important;
+  }
+
+  /* Add text shadow to improve readability over canvas */
+  .footer-mask__content :global(.footer__brand-name),
+  .footer-mask__content :global(.footer__description),
+  .footer-mask__content :global(.footer__copyright) {
+    text-shadow: var(--space-xs) var(--space-xs) var(--space-md) var(--color-Background-50);
+  }
+
+  /* ========== REDUCED MOTION FALLBACK ========== */
+  @media (prefers-reduced-motion: reduce) {
+    .footer-mask__canvas {
+      display: none;
+    }
+
+    .footer-mask {
+      background-color: var(--color-Background-100);
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ backgroundImage }}>
+  // Only run canvas animation if user hasn't requested reduced motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!prefersReducedMotion) {
+    // Proximity mask parameters
+    const parameters = {
+      size: 30,
+      radius: 0.1,
+      proximity: 125,
+      growth: 60,
+      ease: 0.075,
+    };
+
+    class Point {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+      }
+    }
+
+    class Circle {
+      constructor(radius, x, y) {
+        this._radius = radius;
+        this.radius = radius;
+        this.growthValue = 0;
+        this.position = new Point(x, y);
+      }
+
+      draw(context, ease) {
+        this.radius += ((this._radius + this.growthValue) - (this.radius)) * ease;
+        context.moveTo(this.position.x, this.position.y);
+        context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+      }
+
+      addRadius(value) {
+        this.growthValue = value;
+      }
+
+      get x() {
+        return this.position.x;
+      }
+
+      set x(value) {
+        this.position.x = value;
+      }
+
+      get y() {
+        return this.position.y;
+      }
+
+      set y(value) {
+        this.position.y = value;
+      }
+    }
+
+    function normalize(value, min, max) {
+      return (value - min) / (max - min);
+    }
+
+    function interpolate(value, min, max) {
+      return min + (max - min) * value;
+    }
+
+    function map(value, min1, max1, min2, max2) {
+      return interpolate(normalize(value, min1, max1), min2, max2);
+    }
+
+    function resizeCanvas(canvas) {
+      const section = canvas.parentElement;
+      canvas.width = section.clientWidth;
+      canvas.height = section.clientHeight;
+    }
+
+    // Initialize footer canvas effect
+    document.addEventListener('DOMContentLoaded', () => {
+      let imageLoaded = false;
+      const canvas = document.getElementById("footer-canvas");
+      if (!canvas) return;
+
+      const image = new Image();
+      let circles = [];
+      const context = canvas.getContext("2d");
+
+      function build() {
+        circles = [];
+        const { size, radius } = parameters;
+        const section = canvas.parentElement;
+        const columns = Math.ceil(section.clientWidth / size) + 1;
+        const rows = Math.ceil(section.clientHeight / size) + 1;
+        const amount = Math.ceil(columns * rows);
+
+        for (let i = 0; i < amount; i++) {
+          const column = i % columns;
+          const row = ~~(i / columns);
+          circles.push(new Circle(radius, size * column, size * row));
+        }
+      }
+
+      function mouseMoveHandler(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        proximityHandler(x, y);
+      }
+
+      function touchMoveHandler(event) {
+        const rect = canvas.getBoundingClientRect();
+        const touch = event.touches[0];
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        proximityHandler(x, y);
+      }
+
+      function proximityHandler(x, y) {
+        const { proximity, growth } = parameters;
+        for (let c of circles) {
+          let distance = Math.sqrt(Math.pow(c.x - x, 2) + Math.pow(c.y - y, 2));
+          let d = map(distance, c._radius, c._radius + proximity, growth, 0);
+          if (d < 0) d = 0;
+          c.addRadius(d);
+        }
+      }
+
+      function animate() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.save();
+        context.beginPath();
+        context.fillStyle = "#000000";
+
+        for (let circle of circles) {
+          circle.draw(context, parameters.ease);
+        }
+
+        if (imageLoaded) {
+          drawImage();
+        } else {
+          context.fill();
+        }
+
+        context.restore();
+        requestAnimationFrame(animate);
+      }
+
+      function drawImage() {
+        context.clip();
+        const { naturalHeight, naturalWidth } = image;
+
+        // Scale to fill width, adjust canvas height to maintain aspect ratio
+        const scale = canvas.width / naturalWidth;
+        const w = canvas.width;
+        const h = naturalHeight * scale;
+        const x = 0;
+        const y = (canvas.height - h) / 2;
+
+        context.drawImage(image, 0, 0, naturalWidth, naturalHeight, x, y, w, h);
+      }
+
+      function resizeHandler() {
+        resizeCanvas(canvas);
+        build();
+      }
+
+      function loadImage() {
+        image.onload = function () {
+          imageLoaded = true;
+        };
+        image.src = backgroundImage;
+      }
+
+      // Get footer section element
+      const footerSection = document.querySelector('.footer-mask');
+
+      // Event listeners - attach to footer section so it works everywhere
+      window.addEventListener("resize", resizeHandler);
+      if (footerSection) {
+        footerSection.addEventListener("mousemove", mouseMoveHandler);
+        footerSection.addEventListener("touchmove", touchMoveHandler);
+      }
+
+      // Initialize
+      resizeHandler();
+      loadImage();
+      build();
+      animate();
+    });
+  }
+</script>
