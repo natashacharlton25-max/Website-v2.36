@@ -44,9 +44,9 @@ const isImageMetadata = typeof image !== 'string';
 
 <section class={`image-text-section section ${bgClass}`}>
   <div class="container container-7xl">
-    <div class={`image-text-layout ${imagePosition === 'right' ? 'reverse' : ''}`}>
+    <div class={`image-text-section__layout ${imagePosition === 'right' ? 'image-text-section__layout--reverse' : ''}`}>
       <!-- Image -->
-      <div class="image-container">
+      <div class="image-text-section__image">
         {isImageMetadata ? (
           <Image src={image as ImageMetadata} alt={imageAlt} />
         ) : (
@@ -55,11 +55,11 @@ const isImageMetadata = typeof image !== 'string';
       </div>
 
       <!-- Text Content -->
-      <div class="text-container">
-        <h2 class="section-title">{title}</h2>
+      <div class="image-text-section__content">
+        <h2 class="image-text-section__title">{title}</h2>
 
         {content.length > 0 && (
-          <div class="text-body">
+          <div class="image-text-section__body">
             {content.map(paragraph => (
               <p>{paragraph}</p>
             ))}
@@ -79,19 +79,19 @@ const isImageMetadata = typeof image !== 'string';
 <style>
   .image-text-section {
     padding: var(--space-4xl) 0;
-    padding-top: var(--space-5xl); /* Extra top padding to prevent overlap with hero */
+    padding-top: var(--space-5xl);
     position: relative;
     z-index: 1;
   }
 
-  .image-text-layout {
+  .image-text-section__layout {
     display: flex;
     flex-direction: column;
     gap: var(--space-3xl);
     align-items: center;
   }
 
-  .image-container {
+  .image-text-section__image {
     width: 100%;
     max-width: 500px;
     aspect-ratio: 1;
@@ -101,42 +101,44 @@ const isImageMetadata = typeof image !== 'string';
     transition: box-shadow var(--transition-base), transform var(--transition-base);
   }
 
-  .image-container:hover {
+  .image-text-section__image:hover {
     box-shadow: var(--shadow-xl);
     transform: scale(1.02);
   }
 
-  .image-container img {
+  .image-text-section__image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
   }
 
-  .text-container {
+  .image-text-section__content {
     flex: 1 1 70%;
   }
 
-  .section-title {
+  .image-text-section__title {
     font-size: var(--text-4xl);
     font-weight: var(--font-bold);
     margin-bottom: var(--space-xl);
     color: var(--color-Text-700);
+    font-family: var(--font-heading);
   }
 
-  .text-body {
+  .image-text-section__body {
     margin-bottom: var(--space-xl);
   }
 
-  .text-body p {
+  .image-text-section__body p {
     font-size: var(--text-xl);
     color: var(--color-Text-500);
     line-height: var(--leading-relaxed);
     margin-bottom: var(--space-lg);
     font-weight: var(--font-medium);
+    font-family: var(--font-body);
   }
 
-  .text-body p:last-child {
+  .image-text-section__body p:last-child {
     margin-bottom: 0;
   }
 
@@ -147,20 +149,20 @@ const isImageMetadata = typeof image !== 'string';
   }
 
   @media (min-width: 768px) {
-    .image-text-layout {
+    .image-text-section__layout {
       flex-direction: row;
     }
 
-    .image-text-layout.reverse {
+    .image-text-section__layout--reverse {
       flex-direction: row-reverse;
     }
 
-    .image-container {
+    .image-text-section__image {
       flex: 0 0 30%;
       max-width: 350px;
     }
 
-    .section-title {
+    .image-text-section__title {
       font-size: var(--text-5xl);
     }
   }
@@ -171,42 +173,41 @@ const isImageMetadata = typeof image !== 'string';
       padding-top: var(--space-3xl);
     }
 
-    .text-container {
+    .image-text-section__content {
       text-align: center;
     }
 
-    .section-title {
+    .image-text-section__title {
       font-size: var(--text-xl);
       margin-bottom: var(--space-md);
     }
 
-    .text-body p {
+    .image-text-section__body p {
       font-size: var(--text-base);
       line-height: var(--leading-relaxed);
       margin-bottom: var(--space-sm);
     }
 
-    .image-container {
+    .image-text-section__image {
       max-width: 180px;
     }
   }
 
-  /* Extra small screens - under 210px */
   @media (max-width: 210px) {
     .image-text-section {
       padding: var(--space-lg) 0.125rem;
       padding-top: var(--space-2xl);
     }
 
-    .section-title {
+    .image-text-section__title {
       font-size: var(--text-lg);
     }
 
-    .text-body p {
+    .image-text-section__body p {
       font-size: var(--text-sm);
     }
 
-    .image-container {
+    .image-text-section__image {
       max-width: 140px;
     }
   }

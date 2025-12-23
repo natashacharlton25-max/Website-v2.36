@@ -4,12 +4,12 @@
 import Button from '../Button/Button.astro';
 ---
 
-<div class="shopping-cart-overlay" id="cartOverlay">
-  <div class="shopping-cart-panel" id="cartPanel">
+<div class="shopping-cart__overlay" id="cartOverlay">
+  <div class="shopping-cart__panel" id="cartPanel">
     <!-- Cart Header -->
-    <div class="cart-header">
-      <h2 class="cart-title">Shopping Cart</h2>
-      <button class="cart-close" id="cartClose" aria-label="Close cart">
+    <div class="shopping-cart__header">
+      <h2 class="shopping-cart__title">Shopping Cart</h2>
+      <button class="shopping-cart__close" id="cartClose" aria-label="Close cart">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
@@ -18,9 +18,9 @@ import Button from '../Button/Button.astro';
     </div>
 
     <!-- Cart Items -->
-    <div class="cart-items" id="cartItems">
+    <div class="shopping-cart__items" id="cartItems">
       <!-- Cart items will be dynamically inserted here -->
-      <div class="cart-empty" id="cartEmpty">
+      <div class="shopping-cart__empty" id="cartEmpty">
         <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="9" cy="21" r="1"/>
           <circle cx="20" cy="21" r="1"/>
@@ -32,9 +32,9 @@ import Button from '../Button/Button.astro';
     </div>
 
     <!-- Cart Footer -->
-    <div class="cart-footer" id="cartFooter" style="display: none;">
+    <div class="shopping-cart__footer" id="cartFooter" style="display: none;">
       <!-- Subtotal -->
-      <div class="cart-subtotal">
+      <div class="shopping-cart__subtotal">
         <span>Subtotal:</span>
         <strong id="cartSubtotal">$0.00</strong>
       </div>
@@ -55,22 +55,21 @@ import Button from '../Button/Button.astro';
 </div>
 
 <!-- Cart Toggle Button (Fixed) -->
-<button class="cart-toggle" id="cartToggle" aria-label="Open shopping cart">
+<button class="shopping-cart__toggle" id="cartToggle" aria-label="Open shopping cart">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
     <circle cx="9" cy="21" r="1"/>
     <circle cx="20" cy="21" r="1"/>
     <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
   </svg>
-  <span class="cart-count" id="cartCount">0</span>
+  <span class="shopping-cart__count" id="cartCount">0</span>
 </button>
 
 <style>
-  /* ========== CART TOGGLE BUTTON ========== */
-
-  .cart-toggle {
+  /* Toggle Button */
+  .shopping-cart__toggle {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
     width: 56px;
     height: 56px;
     background: var(--color-Primary-500);
@@ -86,12 +85,12 @@ import Button from '../Button/Button.astro';
     transition: all var(--transition-base);
   }
 
-  .cart-toggle:hover {
+  .shopping-cart__toggle:hover {
     transform: scale(1.05);
     box-shadow: var(--shadow-2xl);
   }
 
-  .cart-count {
+  .shopping-cart__count {
     position: absolute;
     top: -4px;
     right: -4px;
@@ -99,22 +98,22 @@ import Button from '../Button/Button.astro';
     color: white;
     font-size: var(--text-xs);
     font-weight: var(--font-bold);
+    font-family: var(--font-body);
     min-width: 20px;
     height: 20px;
     border-radius: var(--border-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 6px;
+    padding: 0 var(--space-xs);
   }
 
-  .cart-count:empty {
+  .shopping-cart__count:empty {
     display: none;
   }
 
-  /* ========== CART OVERLAY ========== */
-
-  .shopping-cart-overlay {
+  /* Overlay */
+  .shopping-cart__overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -127,21 +126,20 @@ import Button from '../Button/Button.astro';
     transition: all var(--transition-base);
   }
 
-  .shopping-cart-overlay.active {
+  .shopping-cart__overlay.active {
     opacity: 1;
     visibility: visible;
   }
 
-  /* ========== CART PANEL ========== */
-
-  .shopping-cart-panel {
+  /* Panel */
+  .shopping-cart__panel {
     position: fixed;
     top: 0;
     right: 0;
     width: 100%;
     max-width: 400px;
     height: 100vh;
-    background: white;
+    background: var(--color-Background-50);
     box-shadow: var(--shadow-2xl);
     display: flex;
     flex-direction: column;
@@ -149,13 +147,12 @@ import Button from '../Button/Button.astro';
     transition: transform var(--transition-base);
   }
 
-  .shopping-cart-overlay.active .shopping-cart-panel {
+  .shopping-cart__overlay.active .shopping-cart__panel {
     transform: translateX(0);
   }
 
-  /* ========== CART HEADER ========== */
-
-  .cart-header {
+  /* Header */
+  .shopping-cart__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -163,13 +160,15 @@ import Button from '../Button/Button.astro';
     border-bottom: 1px solid var(--color-Neutral-200);
   }
 
-  .cart-title {
+  .shopping-cart__title {
     font-size: var(--text-xl);
     font-weight: var(--font-bold);
+    font-family: var(--font-heading);
+    color: var(--color-Text-700);
     margin: 0;
   }
 
-  .cart-close {
+  .shopping-cart__close {
     background: transparent;
     border: none;
     color: var(--color-Text-500);
@@ -178,19 +177,18 @@ import Button from '../Button/Button.astro';
     transition: color var(--transition-fast);
   }
 
-  .cart-close:hover {
+  .shopping-cart__close:hover {
     color: var(--color-Text-700);
   }
 
-  /* ========== CART ITEMS ========== */
-
-  .cart-items {
+  /* Items */
+  .shopping-cart__items {
     flex: 1;
     overflow-y: auto;
     padding: var(--space-lg);
   }
 
-  .cart-empty {
+  .shopping-cart__empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -200,17 +198,18 @@ import Button from '../Button/Button.astro';
     color: var(--color-Text-500);
   }
 
-  .cart-empty svg {
+  .shopping-cart__empty svg {
     margin-bottom: var(--space-lg);
     opacity: 0.5;
   }
 
-  .cart-empty p {
+  .shopping-cart__empty p {
     margin-bottom: var(--space-lg);
     font-size: var(--text-lg);
+    font-family: var(--font-body);
   }
 
-  .cart-item {
+  .shopping-cart__item {
     display: flex;
     gap: var(--space-md);
     padding: var(--space-md);
@@ -219,7 +218,7 @@ import Button from '../Button/Button.astro';
     margin-bottom: var(--space-md);
   }
 
-  .cart-item-image {
+  .shopping-cart__item-image {
     width: 80px;
     height: 80px;
     border-radius: var(--border-radius);
@@ -228,38 +227,40 @@ import Button from '../Button/Button.astro';
     background: var(--color-Neutral-100);
   }
 
-  .cart-item-image img {
+  .shopping-cart__item-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .cart-item-details {
+  .shopping-cart__item-details {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
   }
 
-  .cart-item-name {
+  .shopping-cart__item-name {
     font-weight: var(--font-semibold);
     font-size: var(--text-base);
+    font-family: var(--font-body);
+    color: var(--color-Text-700);
     margin: 0;
   }
 
-  .cart-item-price {
+  .shopping-cart__item-price {
     color: var(--color-Primary-500);
     font-weight: var(--font-bold);
   }
 
-  .cart-item-quantity {
+  .shopping-cart__item-quantity {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
     margin-top: auto;
   }
 
-  .quantity-btn {
+  .shopping-cart__quantity-btn {
     width: 24px;
     height: 24px;
     background: var(--color-Neutral-200);
@@ -272,17 +273,17 @@ import Button from '../Button/Button.astro';
     transition: background var(--transition-fast);
   }
 
-  .quantity-btn:hover {
+  .shopping-cart__quantity-btn:hover {
     background: var(--color-Neutral-300);
   }
 
-  .quantity-value {
+  .shopping-cart__quantity-value {
     font-weight: var(--font-medium);
     min-width: 30px;
     text-align: center;
   }
 
-  .cart-item-remove {
+  .shopping-cart__item-remove {
     background: transparent;
     border: none;
     color: var(--color-Danger);
@@ -290,11 +291,16 @@ import Button from '../Button/Button.astro';
     padding: var(--space-xs);
     margin-left: auto;
     align-self: flex-start;
+    transition: color var(--transition-fast);
   }
 
-  /* ========== CART FOOTER ========== */
+  .shopping-cart__item-remove:hover {
+    color: var(--color-Danger);
+    opacity: 0.8;
+  }
 
-  .cart-footer {
+  /* Footer */
+  .shopping-cart__footer {
     border-top: 1px solid var(--color-Neutral-200);
     padding: var(--space-lg);
     display: flex;
@@ -302,23 +308,22 @@ import Button from '../Button/Button.astro';
     gap: var(--space-md);
   }
 
-  .cart-subtotal {
+  .shopping-cart__subtotal {
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: var(--text-lg);
+    font-family: var(--font-body);
     padding: var(--space-md) 0;
   }
 
-  .cart-subtotal strong {
+  .shopping-cart__subtotal strong {
     color: var(--color-Primary-500);
     font-size: var(--text-2xl);
   }
 
-  /* ========== MOBILE RESPONSIVE ========== */
-
   @media (max-width: 767px) {
-    .shopping-cart-panel {
+    .shopping-cart__panel {
       max-width: 100%;
     }
   }
@@ -467,24 +472,24 @@ import Button from '../Button/Button.astro';
 
       // Render cart items
       const itemsHTML = this.items.map(item => `
-        <div class="cart-item">
-          <div class="cart-item-image">
+        <div class="shopping-cart__item">
+          <div class="shopping-cart__item-image">
             <img src="${item.image}" alt="${item.name}" />
           </div>
-          <div class="cart-item-details">
-            <h3 class="cart-item-name">${item.name}</h3>
-            <div class="cart-item-price">$${item.price.toFixed(2)}</div>
-            <div class="cart-item-quantity">
-              <button class="quantity-btn" onclick="cart.updateQuantity('${item.id}', ${item.quantity - 1})">
+          <div class="shopping-cart__item-details">
+            <h3 class="shopping-cart__item-name">${item.name}</h3>
+            <div class="shopping-cart__item-price">$${item.price.toFixed(2)}</div>
+            <div class="shopping-cart__item-quantity">
+              <button class="shopping-cart__quantity-btn" onclick="cart.updateQuantity('${item.id}', ${item.quantity - 1})">
                 −
               </button>
-              <span class="quantity-value">${item.quantity}</span>
-              <button class="quantity-btn" onclick="cart.updateQuantity('${item.id}', ${item.quantity + 1})">
+              <span class="shopping-cart__quantity-value">${item.quantity}</span>
+              <button class="shopping-cart__quantity-btn" onclick="cart.updateQuantity('${item.id}', ${item.quantity + 1})">
                 +
               </button>
             </div>
           </div>
-          <button class="cart-item-remove" onclick="cart.removeItem('${item.id}')" aria-label="Remove item">
+          <button class="shopping-cart__item-remove" onclick="cart.removeItem('${item.id}')" aria-label="Remove item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
@@ -494,10 +499,10 @@ import Button from '../Button/Button.astro';
       `).join('');
 
       // Find or create items wrapper
-      let itemsWrapper = cartItemsContainer.querySelector('.cart-items-wrapper') as HTMLElement;
+      let itemsWrapper = cartItemsContainer.querySelector('.shopping-cart__items-wrapper') as HTMLElement;
       if (!itemsWrapper) {
         itemsWrapper = document.createElement('div');
-        itemsWrapper.className = 'cart-items-wrapper';
+        itemsWrapper.className = 'shopping-cart__items-wrapper';
         cartItemsContainer.appendChild(itemsWrapper);
       }
 

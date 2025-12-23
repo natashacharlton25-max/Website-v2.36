@@ -53,8 +53,8 @@ In `src/pages/insights/[slug].astro`:
 
 ```astro
 ---
-import Reader from '../../components/reader/Reader.astro';
-import ReaderNav from '../../components/reader/ReaderNav.astro';
+import Reader from '../../components/Presentation/Reader.astro';
+import ReaderNav from '../../components/Presentation/ReaderNav.astro';
 
 const { entry } = Astro.props;
 const { enableReader, readerSections } = entry.data;
@@ -417,7 +417,7 @@ You can have multiple Reader components on the same page, each with their own Re
 
 ## File Locations
 
-- **Components:** `src/components/reader/Reader.astro`, `src/components/reader/ReaderNav.astro`
+- **Components:** `src/components/Presentation/Reader.astro`, `src/components/Presentation/ReaderNav.astro`
 - **Types:** `src/types/reader.ts`
 - **Schema:** `src/content/config.ts` (insights collection)
 - **Example:** `src/content/insights/finding-your-way-back.md`

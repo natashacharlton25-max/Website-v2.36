@@ -24,11 +24,11 @@ const {
 ---
 
 <div class="product-card" data-product-id={id}>
-  <img src={image} alt={name} class="product-image" />
-  <h2 class="product-name">{name}</h2>
-  <p class="product-description">{description}</p>
-  <p class="product-price">${price.toFixed(2)}</p>
-  <button class="btn-add-cart" data-product-id={id}>
+  <img src={image} alt={name} class="product-card__image" />
+  <h2 class="product-card__name">{name}</h2>
+  <p class="product-card__description">{description}</p>
+  <p class="product-card__price">${price.toFixed(2)}</p>
+  <button class="product-card__add-btn" data-product-id={id}>
     Add to cart
   </button>
 </div>
@@ -40,12 +40,12 @@ const {
     width: 200px;
     height: 280px;
     display: inline-block;
-    border-radius: 8px;
+    border-radius: var(--border-radius-lg);
     background: var(--color-Background-100);
-    margin: 20px;
-    padding: 15px;
-    box-shadow: var(--shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin: var(--space-lg);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
   }
 
   .product-card:hover {
@@ -53,101 +53,103 @@ const {
     box-shadow: var(--shadow-xl);
   }
 
-  .product-image {
+  .product-card__image {
     position: relative;
-    top: -15px;
-    left: -15px;
-    width: calc(100% + 30px);
+    top: calc(-1 * var(--space-md));
+    left: calc(-1 * var(--space-md));
+    width: calc(100% + var(--space-lg) + var(--space-md));
     height: 120px;
     object-fit: cover;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    transition: all 0.3s ease;
+    border-top-left-radius: var(--border-radius-lg);
+    border-top-right-radius: var(--border-radius-lg);
+    transition: all var(--transition-base);
     clip-path: polygon(0 100%, 0 0, 100% 0, 100% 70%);
   }
 
-  .product-card:hover .product-image {
+  .product-card:hover .product-card__image {
     clip-path: polygon(0 100%, 0 0, 100% 0, 100% 100%);
     transform: scale(1.05);
   }
 
-  .product-name {
+  .product-card__name {
     text-align: left;
     color: var(--color-Text-700);
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 4px;
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    font-family: var(--font-heading);
+    margin-bottom: var(--space-xs);
   }
 
-  .product-description {
+  .product-card__description {
     text-align: left;
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: var(--color-Text-600);
+    font-family: var(--font-body);
     max-height: 33px;
     overflow: hidden;
-    line-height: 1.5;
-    margin-bottom: 8px;
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-sm);
   }
 
-  .product-price {
+  .product-card__price {
     text-align: right;
-    font-size: 18px;
-    font-weight: bold;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
     color: var(--color-Primary-500);
-    margin-top: 6px;
-    margin-bottom: 10px;
+    margin-top: var(--space-sm);
+    margin-bottom: var(--space-md);
   }
 
-  .btn-add-cart {
+  .product-card__add-btn {
     position: absolute;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 8px 16px;
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    padding: var(--space-sm) var(--space-lg);
     border: 2px solid var(--color-Primary-500);
-    border-radius: 20px;
-    bottom: 15px;
-    right: 15px;
+    border-radius: var(--border-radius-full);
+    bottom: var(--space-md);
+    right: var(--space-md);
     background: transparent;
     color: var(--color-Primary-500);
     cursor: pointer;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
   }
 
-  .btn-add-cart:hover {
+  .product-card__add-btn:hover {
     background: var(--color-Primary-500);
     color: white;
-    padding-right: 28px;
+    padding-right: var(--space-xl);
   }
 
-  .btn-add-cart:hover::after {
+  .product-card__add-btn:hover::after {
     content: " 🛒";
-    margin-left: 4px;
+    margin-left: var(--space-xs);
   }
 
-  .btn-add-cart.added {
+  .product-card__add-btn--added {
     background: var(--color-AccentTwo-500);
     border-color: var(--color-AccentTwo-500);
     color: white;
   }
 
-  .btn-add-cart.added::after {
+  .product-card__add-btn--added::after {
     content: " ✓";
-    margin-left: 4px;
+    margin-left: var(--space-xs);
   }
 </style>
 
 <script>
-  document.querySelectorAll('.btn-add-cart').forEach(button => {
+  document.querySelectorAll('.product-card__add-btn').forEach(button => {
     button.addEventListener('click', function(this: HTMLElement) {
       const card = this.closest('.product-card');
       if (!card) return;
 
       const id = card.getAttribute('data-product-id') || '';
-      const name = card.querySelector('.product-name')?.textContent || '';
-      const priceText = card.querySelector('.product-price')?.textContent || '$0';
+      const name = card.querySelector('.product-card__name')?.textContent || '';
+      const priceText = card.querySelector('.product-card__price')?.textContent || '$0';
       const price = parseFloat(priceText.replace('$', ''));
-      const image = (card.querySelector('.product-image') as HTMLImageElement)?.src;
+      const image = (card.querySelector('.product-card__image') as HTMLImageElement)?.src;
 
       if (typeof (window as any).addToCart === 'function') {
         (window as any).addToCart({
@@ -158,9 +160,9 @@ const {
         });
 
         // Visual feedback
-        this.classList.add('added');
+        this.classList.add('product-card__add-btn--added');
         setTimeout(() => {
-          this.classList.remove('added');
+          this.classList.remove('product-card__add-btn--added');
         }, 1500);
       }
     });

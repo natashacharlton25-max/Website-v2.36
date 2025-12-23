@@ -5,46 +5,46 @@
 ---
 
 <div class="mini-cart" id="mini-cart">
-  <div class="mc-header">
-    <span class="mc-title">ORDER</span>
-    <a href="/cart" class="mc-edit">EDIT CART</a>
+  <div class="mini-cart__header">
+    <span class="mini-cart__title">ORDER</span>
+    <a href="/cart" class="mini-cart__edit">EDIT CART</a>
   </div>
 
-  <div class="mc-items" id="mc-items">
+  <div class="mini-cart__items" id="mini-cart-items">
     <!-- Items rendered by JS -->
   </div>
 
-  <div class="mc-summary" id="mc-summary">
-    <div class="mc-row">
+  <div class="mini-cart__summary" id="mini-cart-summary">
+    <div class="mini-cart__row">
       <span>Subtotal</span>
-      <span id="mc-subtotal">Free</span>
+      <span id="mini-cart-subtotal">Free</span>
     </div>
-    <div class="mc-row">
+    <div class="mini-cart__row">
       <span>Shipping</span>
-      <span id="mc-shipping">Instant</span>
+      <span id="mini-cart-shipping">Instant</span>
     </div>
-    <div class="mc-row mc-total">
+    <div class="mini-cart__row mini-cart__row--total">
       <span>Total</span>
-      <span id="mc-total">Free</span>
+      <span id="mini-cart-total">Free</span>
     </div>
   </div>
 
-  <a href="/cart" class="mc-checkout">PROCEED TO CHECKOUT</a>
+  <a href="/cart" class="mini-cart__checkout">PROCEED TO CHECKOUT</a>
 </div>
 
 <style is:global>
   .mini-cart {
     position: fixed;
     top: 80px;
-    right: 20px;
+    right: var(--space-lg);
     width: 320px;
     background: var(--color-Background-50);
-    border-radius: 8px;
+    border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-2xl);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
-    transition: all 0.2s ease;
+    transition: all var(--transition-base);
     z-index: 99999;
     overflow: hidden;
   }
@@ -55,74 +55,75 @@
     transform: translateY(0);
   }
 
-  /* Header */
-  .mc-header {
+  .mini-cart__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
+    padding: var(--space-lg) var(--space-lg);
     border-bottom: 1px solid var(--color-Background-200);
   }
 
-  .mc-title {
-    font-size: 14px;
-    font-weight: 700;
+  .mini-cart__title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    font-family: var(--font-heading);
     color: var(--color-Text-800);
     letter-spacing: 0.5px;
   }
 
-  .mc-edit {
-    font-size: 11px;
+  .mini-cart__edit {
+    font-size: var(--text-xs);
     color: var(--color-Text-400);
     text-decoration: none;
     letter-spacing: 0.3px;
+    transition: color var(--transition-fast);
   }
 
-  .mc-edit:hover {
+  .mini-cart__edit:hover {
     color: var(--color-Primary-500);
   }
 
-  /* Items */
-  .mc-items {
+  .mini-cart__items {
     max-height: 280px;
     overflow-y: auto;
   }
 
-  .mc-item {
+  .mini-cart__item {
     display: flex;
     align-items: center;
-    padding: 12px 20px;
+    padding: var(--space-md) var(--space-lg);
     border-bottom: 1px solid var(--color-Background-100);
-    gap: 12px;
+    gap: var(--space-md);
   }
 
-  .mc-item:last-child {
+  .mini-cart__item:last-child {
     border-bottom: none;
   }
 
-  .mc-img {
+  .mini-cart__item-image {
     width: 50px;
     height: 50px;
-    border-radius: 6px;
+    border-radius: var(--border-radius);
     overflow: hidden;
     flex-shrink: 0;
     background: var(--color-Background-100);
   }
 
-  .mc-img img {
+  .mini-cart__item-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .mc-info {
+  .mini-cart__item-info {
     flex: 1;
     min-width: 0;
   }
 
-  .mc-name {
-    font-size: 13px;
-    font-weight: 600;
+  .mini-cart__item-name {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    font-family: var(--font-body);
     color: var(--color-Text-800);
     margin: 0 0 2px 0;
     white-space: nowrap;
@@ -130,13 +131,12 @@
     text-overflow: ellipsis;
   }
 
-  .mc-meta {
-    font-size: 11px;
+  .mini-cart__item-meta {
+    font-size: var(--text-xs);
     color: var(--color-Text-400);
   }
 
-  /* Remove Button */
-  .mc-remove {
+  .mini-cart__remove {
     width: 28px;
     height: 28px;
     border: none;
@@ -146,88 +146,87 @@
     align-items: center;
     justify-content: center;
     color: var(--color-Text-400);
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
     flex-shrink: 0;
   }
 
-  .mc-remove:hover {
+  .mini-cart__remove:hover {
     background: var(--color-Secondary-50);
     color: var(--color-Secondary-500);
   }
 
-  .mc-remove svg {
+  .mini-cart__remove svg {
     width: 16px;
     height: 16px;
   }
 
-  /* Summary */
-  .mc-summary {
-    padding: 16px 20px;
+  .mini-cart__summary {
+    padding: var(--space-lg);
     background: var(--color-Background-100);
     border-top: 1px solid var(--color-Background-200);
   }
 
-  .mc-row {
+  .mini-cart__row {
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
     color: var(--color-Text-500);
-    padding: 4px 0;
+    padding: var(--space-xs) 0;
   }
 
-  .mc-row.mc-total {
-    font-weight: 700;
+  .mini-cart__row--total {
+    font-weight: var(--font-bold);
     color: var(--color-Text-800);
-    font-size: 15px;
-    padding-top: 8px;
-    margin-top: 4px;
+    font-size: var(--text-base);
+    padding-top: var(--space-sm);
+    margin-top: var(--space-xs);
     border-top: 1px solid var(--color-Background-200);
   }
 
-  /* Checkout Button */
-  .mc-checkout {
+  .mini-cart__checkout {
     display: block;
     width: 100%;
-    padding: 14px;
+    padding: var(--space-md);
     background: var(--color-Primary-500);
     color: white;
     text-align: center;
     text-decoration: none;
-    font-size: 13px;
-    font-weight: 700;
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    font-family: var(--font-body);
     letter-spacing: 0.5px;
-    transition: background 0.2s;
+    transition: background var(--transition-fast);
   }
 
-  .mc-checkout:hover {
+  .mini-cart__checkout:hover {
     background: var(--color-Primary-600);
   }
 
-  /* Empty State */
-  .mc-empty {
-    padding: 40px 20px;
+  .mini-cart__empty {
+    padding: var(--space-4xl) var(--space-lg);
     text-align: center;
     color: var(--color-Text-400);
   }
 
-  .mc-empty svg {
+  .mini-cart__empty svg {
     width: 48px;
     height: 48px;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-md);
     opacity: 0.5;
   }
 
-  .mc-empty p {
+  .mini-cart__empty p {
     margin: 0;
-    font-size: 13px;
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
   }
 
-  /* Mobile */
   @media (max-width: 400px) {
     .mini-cart {
-      right: 10px;
-      left: 10px;
+      right: var(--space-md);
+      left: var(--space-md);
       width: auto;
     }
   }
@@ -245,11 +244,11 @@
   let cartItems: CartItem[] = [];
   const SHIPPING = 0;
 
-  const mcItems = document.getElementById('mc-items');
-  const mcSubtotal = document.getElementById('mc-subtotal');
-  const mcShipping = document.getElementById('mc-shipping');
-  const mcTotal = document.getElementById('mc-total');
-  const mcSummary = document.getElementById('mc-summary');
+  const mcItems = document.getElementById('mini-cart-items');
+  const mcSubtotal = document.getElementById('mini-cart-subtotal');
+  const mcShipping = document.getElementById('mini-cart-shipping');
+  const mcTotal = document.getElementById('mini-cart-total');
+  const mcSummary = document.getElementById('mini-cart-summary');
 
   function loadFromStorage() {
     const saved = localStorage.getItem('cartItems');
@@ -270,7 +269,7 @@
 
     if (cartItems.length === 0) {
       mcItems.innerHTML = `
-        <div class="mc-empty">
+        <div class="mini-cart__empty">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
           </svg>
@@ -284,15 +283,15 @@
     if (mcSummary) mcSummary.style.display = 'block';
 
     mcItems.innerHTML = cartItems.map((item, idx) => `
-      <div class="mc-item">
-        <div class="mc-img">
+      <div class="mini-cart__item">
+        <div class="mini-cart__item-image">
           <img src="${item.image || ''}" alt="${item.name}" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='/MiniKart/MiniKart-Fallback-'+Math.ceil(Math.random()*10)+'.png';}">
         </div>
-        <div class="mc-info">
-          <div class="mc-name">${item.name}</div>
-          <div class="mc-meta">${item.price === 0 ? 'Free' : `$${item.price.toFixed(2)}`}</div>
+        <div class="mini-cart__item-info">
+          <div class="mini-cart__item-name">${item.name}</div>
+          <div class="mini-cart__item-meta">${item.price === 0 ? 'Free' : `$${item.price.toFixed(2)}`}</div>
         </div>
-        <button class="mc-remove" data-idx="${idx}" title="Remove from cart">
+        <button class="mini-cart__remove" data-idx="${idx}" title="Remove from cart">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M6 18L18 6M6 6l12 12"/>
           </svg>
@@ -309,7 +308,7 @@
     if (mcTotal) mcTotal.textContent = total === 0 ? 'Free' : `$${total.toFixed(2)}`;
 
     // Attach remove events
-    mcItems.querySelectorAll('.mc-remove').forEach(btn => {
+    mcItems.querySelectorAll('.mini-cart__remove').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const el = e.currentTarget as HTMLElement;
         const idx = parseInt(el.dataset.idx || '0');
