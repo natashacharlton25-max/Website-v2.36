@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import FooterWithMask from '../components/Global/FooterWithMask.astro';
+import FooterWithMask from '../components/Footer/FooterWithMask.astro';
 import IsotopeFilterSwitcher from '../components/ui/IsotopeFilterSwitcher.astro';
+import HeroSection from '../components/sections/HeroSection.astro';
 import { getCollection } from 'astro:content';
 
 // Helper to get folder slug from entry.id (handles index.md suffix and path separators)
@@ -73,22 +74,14 @@ const filterCategories = categories.map(cat => ({
   hideFooter={true}
 >
   <!-- Hero Section -->
-  <section class="insights-hero bg-alt">
-    <div class="container container-6xl">
-      <div class="hero-content">
-        <h1 class="hero-title">Insights</h1>
-        <p class="hero-subtitle">Honest perspectives on building a life that feels like yours.</p>
-        <div class="hero-text">
-          <p>
-            No fluff. No empty positivity. Just practical insights and honest perspectives on building a life that actually feels like yours.
-          </p>
-          <p>
-            These articles explore boundaries, self-direction, emotional wellbeing, and what it really takes to show up for yourself. Take what resonates. Leave what doesn't.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
+  <HeroSection
+    title="Insights"
+    subtitle="Honest perspectives on building a life that feels like yours."
+    description="No fluff. No empty positivity. Just practical insights and honest perspectives on building a life that actually feels like yours."
+    extraText="These articles explore boundaries, self-direction, emotional wellbeing, and what it really takes to show up for yourself. Take what resonates. Leave what doesn't."
+    variant="simple"
+    bgClass="bg-alt"
+  />
 
   <!-- Filter Tags -->
   <section class="filter-section bg-alt">
@@ -147,48 +140,6 @@ const filterCategories = categories.map(cat => ({
   /* Common styles */
   .section {
     padding: var(--space-5xl) 0;
-  }
-
-  /* Hero Section - uses bg-alt class for background */
-  .insights-hero {
-    position: relative;
-    width: 100%;
-    padding-top: calc(100px + var(--space-3xl));
-    padding-bottom: var(--space-4xl);
-  }
-
-  .hero-content {
-    text-align: left;
-    max-width: 800px;
-  }
-
-  .hero-title {
-    font-size: clamp(3rem, 8vw, 8rem);
-    font-weight: var(--font-extrabold);
-    margin-bottom: var(--space-lg);
-    font-family: var(--font-heading);
-    line-height: 0.95;
-    letter-spacing: -0.02em;
-  }
-
-  .hero-subtitle {
-    font-size: var(--text-2xl);
-    color: var(--color-Text-600);
-    font-style: italic;
-    font-family: var(--font-heading);
-    font-weight: var(--font-medium);
-    margin-bottom: var(--space-xl);
-  }
-
-  .hero-text {
-    max-width: 700px;
-  }
-
-  .hero-text p {
-    font-size: var(--text-base);
-    color: var(--color-Text-600);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-md);
   }
 
   /* Filter Section - uses bg-alt class for background */
@@ -369,24 +320,6 @@ const filterCategories = categories.map(cat => ({
       padding: var(--space-3xl) 0 var(--space-xl);
     }
 
-    .insights-hero {
-      padding-top: calc(80px + var(--space-2xl));
-      padding-bottom: var(--space-3xl);
-    }
-
-    .hero-title {
-      font-size: clamp(2.5rem, 10vw, 4rem);
-      line-height: 1;
-    }
-
-    .hero-subtitle {
-      font-size: var(--text-lg);
-    }
-
-    .hero-text p {
-      font-size: var(--text-sm);
-    }
-
     .grid__sizer {
       width: 100%;
     }
@@ -403,23 +336,6 @@ const filterCategories = categories.map(cat => ({
     .filter-section {
       padding: var(--space-2xl) 0 var(--space-lg);
     }
-
-    .insights-hero {
-      padding-top: calc(80px + var(--space-xl));
-      padding-bottom: var(--space-2xl);
-    }
-
-    .hero-title {
-      font-size: clamp(2rem, 12vw, 2.5rem);
-    }
-
-    .hero-subtitle {
-      font-size: var(--text-base);
-    }
-
-    .hero-text p {
-      font-size: var(--text-sm);
-    }
   }
 
   @media (max-width: 480px) {
@@ -433,23 +349,6 @@ const filterCategories = categories.map(cat => ({
   }
 
   @media (max-width: 250px) {
-    .insights-hero {
-      padding-top: calc(70px + var(--space-lg));
-      padding-bottom: var(--space-xl);
-    }
-
-    .hero-title {
-      font-size: var(--text-2xl);
-    }
-
-    .hero-subtitle {
-      font-size: var(--text-sm);
-    }
-
-    .hero-text p {
-      font-size: var(--text-xs);
-    }
-
     .article-content {
       padding: var(--space-sm);
     }

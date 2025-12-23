@@ -2,8 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import FooterWithMask from '../components/Global/FooterWithMask.astro';
+import FooterWithMask from '../components/Footer/FooterWithMask.astro';
 import Button from '../components/Button/Button.astro';
+import HeroSection from '../components/sections/HeroSection.astro';
 
 // Helper to get folder slug from entry.id (handles index.md suffix and path separators)
 const getSlug = (id: string) => {
@@ -28,19 +29,14 @@ const projects = projectEntries.map(entry => ({
   <div class="scroll-bg-layer" id="scroll-bg-layer"></div>
 
   <!-- Hero Section -->
-  <section class="projects-hero" data-scroll-bg="var(--color-Background-100)">
-    <div class="container container-6xl">
-      <div class="hero-content">
-        <h1 class="page-title">Projects</h1>
-        <p class="page-subtitle">
-          Sometimes what you need isn't just one resource. It's a collection that works together. Each project here is a carefully curated set of tools for a specific purpose: wellbeing, sensory needs, creative expression.
-        </p>
-        <p class="page-note">
-          Everything here is free. Take what helps. Leave the rest.
-        </p>
-      </div>
-    </div>
-  </section>
+  <div data-scroll-bg="var(--color-Background-100)">
+    <HeroSection
+      title="Projects"
+      subtitle="Sometimes what you need isn't just one resource. It's a collection that works together. Each project here is a carefully curated set of tools for a specific purpose: wellbeing, sensory needs, creative expression."
+      extraText="Everything here is free. Take what helps. Leave the rest."
+      variant="simple"
+    />
+  </div>
 
   <!-- Projects Sections -->
   {projects.map((project, index) => {
@@ -220,46 +216,6 @@ const projects = projectEntries.map(entry => ({
     background-color: var(--bg, var(--color-Background-100)) !important;
   }
 
-  /* Hero Section */
-  .projects-hero {
-    position: relative;
-    width: 100%;
-    padding-top: calc(100px + var(--space-3xl));
-    padding-bottom: var(--space-4xl);
-    background: transparent;
-  }
-
-  .hero-content {
-    text-align: left;
-    max-width: 800px;
-  }
-
-  .page-title {
-    font-family: var(--font-heading);
-    font-size: clamp(3rem, 8vw, 5rem);
-    font-weight: var(--font-extrabold);
-    color: var(--color-Text-700);
-    margin-bottom: var(--space-xl);
-    line-height: 0.95;
-    letter-spacing: -0.02em;
-  }
-
-  .page-subtitle {
-    font-family: var(--font-body);
-    font-size: var(--text-xl);
-    font-weight: var(--font-medium);
-    color: var(--color-Text-600);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-lg);
-  }
-
-  .page-note {
-    font-family: var(--font-body);
-    font-size: var(--text-lg);
-    font-weight: var(--font-medium);
-    color: var(--color-Text-500);
-  }
-
   /* Projects Sections */
   .project-section {
     padding: var(--space-5xl) 0;
@@ -391,23 +347,6 @@ const projects = projectEntries.map(entry => ({
 
   /* Responsive */
   @media (max-width: 768px) {
-    .projects-hero {
-      padding-top: calc(80px + var(--space-2xl));
-      padding-bottom: var(--space-3xl);
-    }
-
-    .page-title {
-      font-size: clamp(2.5rem, 10vw, 3.5rem);
-    }
-
-    .page-subtitle {
-      font-size: var(--text-lg);
-    }
-
-    .page-note {
-      font-size: var(--text-base);
-    }
-
     .project-wrapper {
       flex-direction: column !important;
       gap: var(--space-2xl);
@@ -435,23 +374,6 @@ const projects = projectEntries.map(entry => ({
   }
 
   @media (max-width: 640px) {
-    .projects-hero {
-      padding-top: calc(80px + var(--space-xl));
-      padding-bottom: var(--space-2xl);
-    }
-
-    .page-title {
-      font-size: clamp(2rem, 12vw, 2.5rem);
-    }
-
-    .page-subtitle {
-      font-size: var(--text-base);
-    }
-
-    .page-note {
-      font-size: var(--text-sm);
-    }
-
     .project-section {
       padding: var(--space-3xl) 0;
     }
@@ -463,23 +385,6 @@ const projects = projectEntries.map(entry => ({
 
   /* Very small screens */
   @media (max-width: 250px) {
-    .projects-hero {
-      padding-top: calc(70px + var(--space-lg));
-      padding-bottom: var(--space-xl);
-    }
-
-    .page-title {
-      font-size: var(--text-2xl);
-    }
-
-    .page-subtitle {
-      font-size: var(--text-sm);
-    }
-
-    .page-note {
-      font-size: var(--text-xs);
-    }
-
     .project-section {
       padding: var(--space-2xl) 0;
     }
@@ -503,20 +408,6 @@ const projects = projectEntries.map(entry => ({
 
   /* Extra small screens */
   @media (max-width: 210px) {
-    .projects-hero {
-      padding-top: calc(60px + var(--space-md));
-      padding-bottom: var(--space-lg);
-    }
-
-    .page-title {
-      font-size: var(--text-xl);
-    }
-
-    .page-subtitle,
-    .page-note {
-      font-size: var(--text-xs);
-    }
-
     .project-title {
       font-size: var(--text-lg);
     }

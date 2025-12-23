@@ -73,12 +73,13 @@ import Button from '../Button/Button.astro';
 </div>
 
 <style>
+  /* ========== COOKIE BANNER BASE ========== */
   .cookie-banner {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    background: white;
+    background: var(--color-Background-50);
     box-shadow: var(--shadow-2xl);
     z-index: var(--z-modal);
     transform: translateY(100%);
@@ -96,6 +97,7 @@ import Button from '../Button/Button.astro';
     display: none;
   }
 
+  /* ========== BANNER CONTENT ========== */
   .cookie-banner-content {
     display: flex;
     flex-direction: column;
@@ -106,21 +108,20 @@ import Button from '../Button/Button.astro';
   }
 
   .cookie-banner-title {
-    font-size: var(--text-lg);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
     margin-bottom: var(--space-xs);
   }
 
   .cookie-banner-description {
     color: var(--color-Text-500);
-    font-size: var(--text-sm);
-    line-height: var(--leading-relaxed);
   }
 
   .cookie-link {
     color: var(--color-Primary-500);
     text-decoration: underline;
+  }
+
+  .cookie-link:hover {
+    color: var(--color-Primary-600);
   }
 
   .cookie-banner-actions {
@@ -129,17 +130,15 @@ import Button from '../Button/Button.astro';
     gap: var(--space-sm);
   }
 
-  /* Cookie Customization Panel */
+  /* ========== CUSTOMIZE PANEL ========== */
   .cookie-customize-panel {
-    border-top: 1px solid var(--color-Neutral-200);
+    border-top: var(--border-width) solid var(--color-Neutral-200);
     padding: var(--space-xl);
     max-width: var(--container-full);
     margin: 0 auto;
   }
 
   .cookie-panel-title {
-    font-size: var(--text-xl);
-    font-weight: var(--font-bold);
     margin-bottom: var(--space-lg);
   }
 
@@ -152,8 +151,9 @@ import Button from '../Button/Button.astro';
 
   .cookie-option {
     padding: var(--space-md);
-    border: 1px solid var(--color-Neutral-200);
-    border-radius: var(--border-radius);
+    border: var(--border-width) solid var(--color-Neutral-200);
+    border-radius: var(--radius-md);
+    background: var(--color-Background-100);
   }
 
   .cookie-option-header {
@@ -174,10 +174,12 @@ import Button from '../Button/Button.astro';
     width: 20px;
     height: 20px;
     cursor: pointer;
+    accent-color: var(--color-Primary-500);
   }
 
   .cookie-option-title {
     font-weight: var(--font-semibold);
+    color: var(--color-Text-700);
   }
 
   .cookie-required {
@@ -188,7 +190,6 @@ import Button from '../Button/Button.astro';
 
   .cookie-option-description {
     color: var(--color-Text-500);
-    font-size: var(--text-sm);
     margin-left: 28px;
   }
 
@@ -198,7 +199,7 @@ import Button from '../Button/Button.astro';
     justify-content: flex-end;
   }
 
-  /* Tablet and up */
+  /* ========== RESPONSIVE ========== */
   @media (min-width: 768px) {
     .cookie-banner-content {
       flex-direction: row;
@@ -209,6 +210,14 @@ import Button from '../Button/Button.astro';
     .cookie-banner-actions {
       flex-direction: row;
       flex-shrink: 0;
+    }
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  @media (prefers-reduced-motion: reduce) {
+    .cookie-banner {
+      animation: none;
+      transform: translateY(0);
     }
   }
 </style>

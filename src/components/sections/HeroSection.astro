@@ -1,160 +1,508 @@
 ---
 /**
- * HeroSection - Reusable hero section component
+ * HeroSection - Unified hero section component
+ *
+ * Variants:
+ * - simple: Plain background with text content (insights, services, projects, assets)
+ * - image: Background image with overlay (about)
+ * - gradient: Gradient background using theme tokens
  *
  * Props:
- * - title: Main heading text
- * - subtitle?: Subheading text
- * - description?: Supporting text
- * - image?: Hero image URL
- * - ctaButtons?: Array of {text, href, variant} for CTA buttons
- * - variant?: 'default' | 'centered' | 'full-height'
- * - bgClass?: Additional background classes
+ * @param title - Main heading (required)
+ * @param subtitle - Subheading text
+ * @param description - Supporting paragraph text
+ * @param extraText - Additional paragraph (for longer intros)
+ * @param image - Background image for 'image' variant (use Astro Image import)
+ * @param imageAlt - Alt text for background image
+ * @param imagePosition - 'full' | 'left' | 'right' for image variant (default: 'full')
+ * @param variant - 'simple' | 'image' | 'gradient' (default: 'simple')
+ * @param gradient - Gradient token name for 'gradient' variant (default: 'hero')
+ * @param alignment - 'left' | 'center' (default: 'left')
+ * @param bgClass - Additional background class like 'bg-alt'
+ * @param containerSize - Container width: '6xl' | '7xl' | 'full' (default: '6xl')
+ * @param buttons - Array of CTA buttons [{text, href, variant}]
+ * @param overlayOpacity - Overlay opacity for image variant (default: 0.6)
  */
+import { Image } from 'astro:assets';
+import Button from '../Button/Button.astro';
 
-export interface Props {
+interface Props {
   title: string;
   subtitle?: string;
   description?: string;
-  image?: string;
-  ctaButtons?: Array<{
+  extraText?: string;
+  image?: ImageMetadata;
+  imageAlt?: string;
+  imagePosition?: 'full' | 'left' | 'right';
+  variant?: 'simple' | 'image' | 'gradient';
+  gradient?: 'hero' | 'primary' | 'primary-soft' | 'primary-light' | 'secondary' | 'secondary-soft' | 'accent1' | 'accent2';
+  alignment?: 'left' | 'center';
+  bgClass?: string;
+  containerSize?: '6xl' | '7xl' | 'full';
+  buttons?: Array<{
     text: string;
     href: string;
-    variant?: 'primary' | 'outline' | 'secondary';
+    variant?: 'primary' | 'secondary' | 'outline';
   }>;
-  variant?: 'default' | 'centered' | 'full-height';
-  bgClass?: string;
+  overlayOpacity?: number;
 }
 
 const {
   title,
   subtitle,
   description,
+  extraText,
   image,
-  ctaButtons = [],
-  variant = 'default',
-  bgClass = ''
+  imageAlt = '',
+  imagePosition = 'full',
+  variant = 'simple',
+  gradient = 'hero',
+  alignment = 'left',
+  bgClass = '',
+  containerSize = '6xl',
+  buttons = [],
+  overlayOpacity = 0.6,
 } = Astro.props;
 
-const sectionClass = variant === 'full-height' ? 'hero-section' : 'hero-section section-sm';
+const containerClass = `container container-${containerSize}`;
+const alignmentClass = alignment === 'center' ? 'hero-section--centered' : '';
 ---
 
-<section class={`${sectionClass} ${bgClass}`}>
-  <div class={`container ${variant === 'full-height' ? 'container-full' : 'container-7xl'}`}>
-    <div class={variant === 'centered' ? 'hero-content text-center' : 'hero-content'}>
-      <h1 class="hero-title">{title}</h1>
-      {subtitle && <p class="hero-subheading">{subtitle}</p>}
-      {description && <p class="hero-supporting-text">{description}</p>}
-
-      {ctaButtons.length > 0 && (
-        <div class="hero-cta">
-          {ctaButtons.map(button => (
-            <a
-              href={button.href}
-              class={`btn btn-${button.variant || 'primary'} btn-lg`}
-            >
-              {button.text}
-            </a>
-          ))}
+{variant === 'image' && image && imagePosition === 'full' ? (
+  <!-- Image Variant: Full-width background image with overlay -->
+  <section class={`hero-section hero-section--image ${alignmentClass} ${bgClass}`}>
+    <div class="hero-section__image-wrapper">
+      <Image src={image} alt={imageAlt} class="hero-section__image" />
+      <div class="hero-section__overlay" style={`--overlay-opacity: ${overlayOpacity}`}></div>
+      <div class="hero-section__fade"></div>
+      <div class={containerClass}>
+        <div class="hero-section__content">
+          <h1 class="hero-section__title">{title}</h1>
+          {subtitle && <p class="hero-section__subtitle">{subtitle}</p>}
+          {description && <p class="hero-section__description">{description}</p>}
+          {extraText && <p class="hero-section__extra">{extraText}</p>}
+          {buttons.length > 0 && (
+            <div class="hero-section__buttons">
+              {buttons.map(button => (
+                <Button href={button.href} variant={button.variant || 'primary'}>
+                  {button.text}
+                </Button>
+              ))}
+            </div>
+          )}
+          <slot />
         </div>
-      )}
-
-      <slot name="extra" />
-    </div>
-
-    {image && (
-      <div class="hero-image">
-        <img src={image} alt={title} />
       </div>
-    )}
-
-    <slot />
-  </div>
-</section>
+    </div>
+  </section>
+) : variant === 'image' && image && (imagePosition === 'left' || imagePosition === 'right') ? (
+  <!-- Image Variant: Split layout with image on left or right -->
+  <section class={`hero-section hero-section--image-split hero-section--image-${imagePosition} ${bgClass}`}>
+    <div class={containerClass}>
+      <div class="hero-section__split-wrapper">
+        <div class="hero-section__split-image">
+          <Image src={image} alt={imageAlt} class="hero-section__image" />
+        </div>
+        <div class="hero-section__split-content">
+          <h1 class="hero-section__title">{title}</h1>
+          {subtitle && <p class="hero-section__subtitle">{subtitle}</p>}
+          {description && <p class="hero-section__description">{description}</p>}
+          {extraText && <p class="hero-section__extra">{extraText}</p>}
+          {buttons.length > 0 && (
+            <div class="hero-section__buttons">
+              {buttons.map(button => (
+                <Button href={button.href} variant={button.variant || 'primary'}>
+                  {button.text}
+                </Button>
+              ))}
+            </div>
+          )}
+          <slot />
+        </div>
+      </div>
+    </div>
+  </section>
+) : variant === 'gradient' ? (
+  <!-- Gradient Variant: Gradient background -->
+  <section
+    class={`hero-section hero-section--gradient hero-section--gradient-${gradient} ${alignmentClass} ${bgClass}`}
+  >
+    <div class={containerClass}>
+      <div class="hero-section__content">
+        <h1 class="hero-section__title">{title}</h1>
+        {subtitle && <p class="hero-section__subtitle">{subtitle}</p>}
+        {description && <p class="hero-section__description">{description}</p>}
+        {extraText && <p class="hero-section__extra">{extraText}</p>}
+        {buttons.length > 0 && (
+          <div class="hero-section__buttons">
+            {buttons.map(button => (
+              <Button href={button.href} variant={button.variant || 'primary'}>
+                {button.text}
+              </Button>
+            ))}
+          </div>
+        )}
+        <slot />
+      </div>
+    </div>
+  </section>
+) : (
+  <!-- Simple Variant: Plain background -->
+  <section class={`hero-section hero-section--simple ${alignmentClass} ${bgClass}`}>
+    <div class={containerClass}>
+      <div class="hero-section__content">
+        <h1 class="hero-section__title">{title}</h1>
+        {subtitle && <p class="hero-section__subtitle">{subtitle}</p>}
+        {description && <p class="hero-section__description">{description}</p>}
+        {extraText && <p class="hero-section__extra">{extraText}</p>}
+        {buttons.length > 0 && (
+          <div class="hero-section__buttons">
+            {buttons.map(button => (
+              <Button href={button.href} variant={button.variant || 'primary'}>
+                {button.text}
+              </Button>
+            ))}
+          </div>
+        )}
+        <slot />
+      </div>
+    </div>
+  </section>
+)}
 
 <style>
+  /* =========================================================
+     HERO SECTION
+     Unified hero component with multiple variants
+     ========================================================= */
+
+  /* ========== BASE STYLES ========== */
   .hero-section {
-    padding: var(--space-4xl) 0 var(--space-3xl);
+    position: relative;
+    width: 100%;
   }
 
-  .hero-section.section-sm {
-    padding: var(--space-3xl) 0 var(--space-2xl);
+  .hero-section__content {
+    position: relative;
+    z-index: 2;
   }
 
-  .hero-content {
-    margin-bottom: var(--space-2xl);
+  .hero-section__title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Text-900);
+    margin-bottom: var(--space-md);
+    line-height: var(--leading-tight);
   }
 
-  .hero-content.text-center {
+  .hero-section__subtitle {
+    font-size: var(--text-xl);
+    font-weight: var(--font-medium);
+    color: var(--color-Text-700);
+    margin-bottom: var(--space-md);
+    line-height: var(--leading-relaxed);
+  }
+
+  .hero-section__description {
+    font-size: var(--text-lg);
+    color: var(--color-Text-600);
+    margin-bottom: var(--space-sm);
+    line-height: var(--leading-relaxed);
+    max-width: 65ch;
+  }
+
+  .hero-section__extra {
+    font-size: var(--text-base);
+    color: var(--color-Text-500);
+    line-height: var(--leading-relaxed);
+    max-width: 65ch;
+  }
+
+  .hero-section__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+  }
+
+  /* Centered alignment */
+  .hero-section--centered .hero-section__content {
     text-align: center;
-    max-width: 800px;
+  }
+
+  .hero-section--centered .hero-section__description,
+  .hero-section--centered .hero-section__extra {
     margin-left: auto;
     margin-right: auto;
   }
 
-  .hero-title {
-    font-size: var(--text-4xl);
-    font-weight: var(--font-extrabold);
-    color: var(--color-Primary-700);
-    margin-bottom: var(--space-lg);
-    line-height: var(--leading-tight);
+  .hero-section--centered .hero-section__buttons {
+    justify-content: center;
   }
 
-  .hero-subheading {
-    font-size: var(--text-xl);
-    color: var(--color-Text-700);
-    font-weight: var(--font-semibold);
-    margin-bottom: var(--space-md);
+  /* ========== SIMPLE VARIANT ========== */
+  .hero-section--simple {
+    padding: var(--space-4xl) 0 var(--space-3xl);
   }
 
-  .hero-supporting-text {
-    font-size: var(--text-lg);
-    color: var(--color-Text-500);
-    margin-bottom: var(--space-2xl);
-    line-height: var(--leading-relaxed);
+  /* ========== IMAGE VARIANT ========== */
+  .hero-section--image {
+    padding: 0;
+    min-height: 60vh;
   }
 
-  .hero-cta {
+  .hero-section__image-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 60vh;
+    overflow: hidden;
     display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    align-items: flex-start;
+    align-items: flex-end;
   }
 
-  .text-center .hero-cta {
+  .hero-section__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 1;
+  }
+
+  .hero-section__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(
+      to right,
+      color-mix(in oklch, var(--color-Text-900) calc(var(--overlay-opacity, 0.6) * 100%), transparent) 0%,
+      color-mix(in oklch, var(--color-Text-900) calc(var(--overlay-opacity, 0.6) * 70%), transparent) 50%,
+      color-mix(in oklch, var(--color-Text-900) calc(var(--overlay-opacity, 0.6) * 30%), transparent) 100%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in oklch, var(--color-Text-900) calc(var(--overlay-opacity, 0.6) * 100%), transparent) 0%,
+      color-mix(in oklch, var(--color-Text-900) calc(var(--overlay-opacity, 0.6) * 50%), transparent) 50%,
+      transparent 100%
+    );
+  }
+
+  .hero-section__fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 150px;
+    z-index: 3;
+    background: linear-gradient(
+      to top,
+      var(--color-Background-50) 0%,
+      color-mix(in oklch, var(--color-Background-50) 60%, transparent) 40%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  .hero-section--image .hero-section__content {
+    padding: var(--space-4xl) 0 var(--space-3xl);
+  }
+
+  .hero-section--image .hero-section__title {
+    color: var(--color-White);
+    text-shadow: 0 2px 4px color-mix(in oklch, var(--color-Black) 30%, transparent);
+  }
+
+  .hero-section--image .hero-section__subtitle {
+    color: color-mix(in oklch, var(--color-White) 90%, transparent);
+  }
+
+  .hero-section--image .hero-section__description,
+  .hero-section--image .hero-section__extra {
+    color: color-mix(in oklch, var(--color-White) 80%, transparent);
+  }
+
+  /* ========== GRADIENT VARIANT ========== */
+  .hero-section--gradient {
+    padding: var(--space-4xl) 0 var(--space-3xl);
+  }
+
+  .hero-section--gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .hero-section--gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .hero-section--gradient-primary-soft {
+    background: var(--gradient-primary-soft);
+  }
+
+  .hero-section--gradient-primary-light {
+    background: var(--gradient-primary-light);
+  }
+
+  .hero-section--gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+
+  .hero-section--gradient-secondary-soft {
+    background: var(--gradient-secondary-soft);
+  }
+
+  .hero-section--gradient-accent1 {
+    background: var(--gradient-accent1);
+  }
+
+  .hero-section--gradient-accent2 {
+    background: var(--gradient-accent2);
+  }
+
+  /* Light gradient text adjustment */
+  .hero-section--gradient-primary-light .hero-section__title,
+  .hero-section--gradient-primary-soft .hero-section__title {
+    color: var(--color-Text-900);
+  }
+
+  /* Dark gradient text adjustment */
+  .hero-section--gradient-hero .hero-section__title,
+  .hero-section--gradient-primary .hero-section__title,
+  .hero-section--gradient-secondary .hero-section__title,
+  .hero-section--gradient-accent1 .hero-section__title,
+  .hero-section--gradient-accent2 .hero-section__title {
+    color: var(--color-White);
+  }
+
+  .hero-section--gradient-hero .hero-section__subtitle,
+  .hero-section--gradient-primary .hero-section__subtitle,
+  .hero-section--gradient-secondary .hero-section__subtitle {
+    color: color-mix(in oklch, var(--color-White) 90%, transparent);
+  }
+
+  .hero-section--gradient-hero .hero-section__description,
+  .hero-section--gradient-primary .hero-section__description,
+  .hero-section--gradient-secondary .hero-section__description {
+    color: color-mix(in oklch, var(--color-White) 80%, transparent);
+  }
+
+  /* ========== SPLIT IMAGE VARIANT ========== */
+  .hero-section--image-split {
+    padding: var(--space-4xl) 0;
+  }
+
+  .hero-section__split-wrapper {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2xl);
     align-items: center;
   }
 
-  .hero-image {
-    max-width: 100%;
-    border-radius: var(--border-radius-xl);
+  .hero-section__split-image {
+    position: relative;
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: var(--shadow-2xl);
+    aspect-ratio: 4/3;
   }
 
-  .hero-image img {
+  .hero-section__split-image .hero-section__image {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: auto;
-    display: block;
+    height: 100%;
+    object-fit: cover;
   }
 
+  .hero-section__split-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Image position - mobile first (image on top) */
+  .hero-section--image-left .hero-section__split-image {
+    order: 1;
+  }
+
+  .hero-section--image-left .hero-section__split-content {
+    order: 2;
+  }
+
+  .hero-section--image-right .hero-section__split-image {
+    order: 1;
+  }
+
+  .hero-section--image-right .hero-section__split-content {
+    order: 2;
+  }
+
+  /* ========== RESPONSIVE ========== */
   @media (min-width: 768px) {
-    .hero-cta {
-      flex-direction: row;
+    .hero-section__title {
+      font-size: var(--text-5xl);
     }
 
-    .hero-title {
-      font-size: var(--text-5xl);
+    .hero-section__subtitle {
+      font-size: var(--text-2xl);
+    }
+
+    .hero-section--image .hero-section__image-wrapper {
+      min-height: 70vh;
+    }
+
+    /* Split layout on tablet+ */
+    .hero-section__split-wrapper {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .hero-section__split-image {
+      aspect-ratio: 3/4;
+    }
+
+    /* Image on left */
+    .hero-section--image-left .hero-section__split-image {
+      order: 1;
+    }
+
+    .hero-section--image-left .hero-section__split-content {
+      order: 2;
+    }
+
+    /* Image on right */
+    .hero-section--image-right .hero-section__split-image {
+      order: 2;
+    }
+
+    .hero-section--image-right .hero-section__split-content {
+      order: 1;
     }
   }
 
   @media (min-width: 1024px) {
-    .hero-title {
+    .hero-section__title {
       font-size: var(--text-6xl);
     }
 
-    .hero-subheading {
-      font-size: var(--text-2xl);
+    .hero-section--simple {
+      padding: var(--space-5xl) 0 var(--space-4xl);
+    }
+
+    .hero-section--image .hero-section__image-wrapper {
+      min-height: 80vh;
+    }
+
+    .hero-section__split-image {
+      aspect-ratio: 1/1;
+    }
+  }
+
+  /* A11Y theme overrides in: src/styles/a11y/components/hero-section.css */
+
+  /* ========== REDUCED MOTION ========== */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-section__image {
+      transition: none;
     }
   }
 </style>

@@ -1,0 +1,99 @@
+---
+/**
+ * Custom Scrollbar Component
+ * Styles the native browser scrollbar with brand colors
+ *
+ * Features:
+ * - Gradient thumb (Primary → Secondary)
+ * - Hover and active states
+ * - Reduced motion support
+ * - Mobile optimizations
+ * - Firefox support
+ *
+ * Usage: Add <CustomScrollbar /> to BaseLayout
+ */
+---
+
+<style is:global>
+  /* =========================================================
+     CUSTOM SCROLLBAR
+     Native browser scrollbar with brand styling
+     ========================================================= */
+
+  /* ========== WebKit (Chrome, Safari, Edge) ========== */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-Background-100);
+    border-radius: var(--radius-md);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      var(--color-Primary-500) 0%,
+      var(--color-Secondary-500) 100%
+    );
+    border-radius: var(--radius-md);
+    border: var(--border-width-2) solid var(--color-Background-100);
+    transition: background var(--transition-fast);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      var(--color-Primary-400) 0%,
+      var(--color-Secondary-400) 100%
+    );
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(
+      180deg,
+      var(--color-Primary-600) 0%,
+      var(--color-Secondary-600) 100%
+    );
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: var(--color-Background-100);
+  }
+
+  /* ========== Firefox ========== */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-Primary-500) var(--color-Background-100);
+  }
+
+  /* ========== Smooth Scrolling ========== */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* ========== Reduced Motion ========== */
+  @media (prefers-reduced-motion: reduce) {
+    ::-webkit-scrollbar-thumb {
+      transition: none;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* ========== Mobile ========== */
+  @media (max-width: 768px) {
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      border-radius: var(--radius-sm);
+      border-width: var(--border-width);
+    }
+  }
+</style>

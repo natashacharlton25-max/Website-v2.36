@@ -28,25 +28,25 @@ const shapeSequence = [
 ---
 
 <section class="hero-morph">
-  <div class="hero-container">
+  <div class="hero-morph__container">
     <!-- Animated Title (spans full width above everything) -->
-    <div class="title-stage">
-      <h1 class="morph-text" data-morph-text></h1>
+    <div class="hero-morph__title-stage">
+      <h1 class="hero-morph__title" data-morph-text></h1>
     </div>
 
     <!-- Left Side: Text -->
-    <div class="hero-content">
+    <div class="hero-morph__content">
       <!-- Static Subtitle -->
-      <p class="hero-subtitle">
+      <p class="hero-morph__subtitle">
         Your past shaped you. It does not have to define you.<br><br>
         You have survived more than most people will ever fully understand. And now you might be wondering if life can feel different. Lighter. More yours.<br><br>
-        <strong class="you-can">YOU CAN.</strong><br><br>
+        <strong class="hero-morph__emphasis">YOU CAN.</strong><br><br>
         Not because you forget what happened, or pretend it did not matter, but because you get to choose what happens next. You get to decide what healing looks like for you. At your pace. In your way.
       </p>
 
       <!-- CTA Buttons -->
       {ctaButtons.length > 0 && (
-        <div class="hero-cta">
+        <div class="hero-morph__cta">
           {ctaButtons.map((button) => (
             <Button
               href={button.href}
@@ -60,8 +60,8 @@ const shapeSequence = [
     </div>
 
     <!-- Right Side: SVG Morph Animation -->
-    <div class="morph-stage">
-      <div class="svg-container" data-morph-container>
+    <div class="hero-morph__stage">
+      <div class="hero-morph__svg-container" data-morph-container>
         <!-- SVG will be injected here by JS -->
       </div>
     </div>
@@ -82,62 +82,58 @@ const shapeSequence = [
     align-items: flex-start;
     justify-content: center;
     background-color: var(--color-Background-100);
-    padding: var(--space-lg) var(--space-xl) var(--space-4xl) var(--space-md); /* Reduced left padding */
+    padding: var(--space-lg) var(--space-xl) var(--space-4xl) var(--space-md);
     position: relative;
     overflow: hidden;
   }
 
-  .hero-container {
-    max-width: 1400px; /* Increased for more text width */
+  .hero-morph__container {
+    max-width: 1400px;
     width: 100%;
     display: grid;
-    grid-template-columns: 1fr 400px; /* Left content, right SVG */
-    grid-template-rows: auto 1fr; /* Title row, content row */
-    align-items: center; /* Center align items */
-    gap: var(--space-md) var(--space-sm); /* Reduced horizontal gap between columns */
+    grid-template-columns: 1fr 400px;
+    grid-template-rows: auto 1fr;
+    align-items: center;
+    gap: var(--space-md) var(--space-sm);
     z-index: 1;
     position: relative;
     margin-top: var(--space-3xl);
   }
 
-  /* Title spans both columns */
-  .title-stage {
-    grid-column: 1 / -1; /* Span all columns */
-    min-height: 140px; /* Min height for larger screens */
-    height: auto; /* Allow to grow with content */
-    width: 100%; /* Full width of container */
-    max-width: none; /* Remove width constraints */
+  .hero-morph__title-stage {
+    grid-column: 1 / -1;
+    min-height: 140px;
+    height: auto;
+    width: 100%;
+    max-width: none;
     z-index: 10;
-    margin-bottom: 4rem; /* Increase gap between title and body text */
+    margin-bottom: 4rem;
   }
 
-  /* Left Content Area */
-  .hero-content {
+  .hero-morph__content {
     display: flex;
     flex-direction: column;
     gap: var(--space-xl);
     grid-column: 1;
     grid-row: 2;
-    max-width: 600px; /* Constrain width for tighter wrapping */
+    max-width: 600px;
   }
 
-  .hero-subtitle {
-    font-family: var(--font-body, 'Inter'), sans-serif;
-    font-size: var(--text-lg, 1.125rem);
-    line-height: var(--leading-relaxed, 1.625);
+  .hero-morph__subtitle {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
     color: var(--color-Text-600);
     margin: 0;
   }
 
-  /* "YOU CAN." emphasis styling */
-  .you-can {
+  .hero-morph__emphasis {
     color: var(--color-Text-700);
-    font-weight: var(--font-bold, 700);
+    font-weight: var(--font-bold);
     font-size: var(--text-xl);
   }
 
-  /* SVG Morph Stage */
-  .morph-stage {
+  .hero-morph__stage {
     width: 400px;
     height: 400px;
     display: flex;
@@ -146,50 +142,48 @@ const shapeSequence = [
     flex-shrink: 0;
     grid-column: 2;
     grid-row: 2;
-    justify-self: center; /* Center instead of end to move it left */
+    justify-self: center;
     align-self: center;
   }
 
-  .svg-container {
+  .hero-morph__svg-container {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: visible; /* Don't clip the circles */
+    overflow: visible;
   }
 
-  .svg-container :global(svg) {
+  .hero-morph__svg-container :global(svg) {
     width: 100%;
     height: 100%;
-    fill: var(--color-Primary-600, #8B9D83);
-    overflow: visible; /* Allow circles to extend beyond viewBox */
+    fill: var(--color-Primary-600);
+    overflow: visible;
   }
 
-  .svg-container :global(path) {
+  .hero-morph__svg-container :global(path) {
     fill: inherit;
     stroke: none;
   }
 
-  /* Animated Title Text */
-  h1.morph-text {
-    font-family: var(--font-body, 'Quicksand'), sans-serif !important;
-    font-size: clamp(1.5rem, 4vw + 1rem, 3.75rem) !important; /* Fluid responsive font */
-    font-weight: var(--font-bold, 700) !important;
+  .hero-morph__title {
+    font-family: var(--font-body) !important;
+    font-size: clamp(1.5rem, 4vw + 1rem, 3.75rem) !important;
+    font-weight: var(--font-bold) !important;
     color: var(--color-Text-700) !important;
-    line-height: 1.4 !important; /* Better for wrapping */
-    text-align: left !important; /* Left align to match subtitle */
+    line-height: 1.4 !important;
+    text-align: left !important;
     margin: 0 !important;
-    padding-top: var(--space-2xl) !important; /* Adjusted title position */
+    padding-top: var(--space-2xl) !important;
     white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
-    transition: opacity 0.2s ease-in-out; /* Quick smooth fade */
+    transition: opacity 0.2s ease-in-out;
   }
 
-  /* CTA Buttons */
-  .hero-cta {
+  .hero-morph__cta {
     display: flex;
     gap: var(--space-md);
     flex-wrap: wrap;
@@ -197,65 +191,61 @@ const shapeSequence = [
     margin-top: var(--space-xl);
   }
 
-  /* =============================================
-     RESPONSIVE DESIGN
-     ============================================= */
-
-  /* Large screens - better margins (1500px - 1200px) */
+  /* Responsive: Large screens (1500px - 1200px) */
   @media (max-width: 1500px) {
     .hero-morph {
       padding: var(--space-lg) var(--space-3xl) var(--space-4xl) var(--space-2xl);
     }
 
-    .hero-container {
+    .hero-morph__container {
       max-width: 1200px;
       grid-template-columns: 1fr 310px;
     }
 
-    .morph-stage {
+    .hero-morph__stage {
       width: 310px;
       height: 310px;
     }
   }
 
-  /* Medium-large screens (1200px - 968px) */
+  /* Responsive: Medium-large screens (1200px - 968px) */
   @media (max-width: 1200px) {
     .hero-morph {
       padding: var(--space-lg) var(--space-2xl) var(--space-3xl) var(--space-xl);
     }
 
-    .hero-container {
+    .hero-morph__container {
       max-width: 1000px;
       grid-template-columns: 1fr 250px;
       gap: var(--space-lg) var(--space-lg);
     }
 
-    .morph-stage {
+    .hero-morph__stage {
       width: 250px;
       height: 250px;
     }
 
-    .hero-content {
+    .hero-morph__content {
       max-width: 550px;
     }
 
-    .title-stage {
+    .hero-morph__title-stage {
       min-height: 120px;
       margin-bottom: 2.5rem;
     }
 
-    h1.morph-text {
+    .hero-morph__title {
       font-size: clamp(2.5rem, 4vw, 3rem) !important;
     }
   }
 
-  /* Tablets (iPad portrait, etc.) */
+  /* Responsive: Tablets */
   @media (max-width: 968px) {
     .hero-morph {
       padding: var(--space-xl) var(--space-lg) var(--space-3xl);
     }
 
-    .hero-container {
+    .hero-morph__container {
       grid-template-columns: 1fr;
       grid-template-rows: auto auto auto;
       gap: var(--space-xl);
@@ -263,7 +253,7 @@ const shapeSequence = [
       text-align: center;
     }
 
-    .title-stage {
+    .hero-morph__title-stage {
       grid-column: 1;
       grid-row: 1;
       height: auto;
@@ -271,13 +261,13 @@ const shapeSequence = [
       margin-bottom: var(--space-md);
     }
 
-    h1.morph-text {
+    .hero-morph__title {
       text-align: center !important;
       font-size: clamp(2rem, 5vw, 3rem) !important;
       padding-top: var(--space-xl) !important;
     }
 
-    .hero-content {
+    .hero-morph__content {
       grid-column: 1;
       grid-row: 2;
       max-width: 600px;
@@ -285,15 +275,15 @@ const shapeSequence = [
       text-align: center;
     }
 
-    .hero-subtitle {
+    .hero-morph__subtitle {
       text-align: center;
     }
 
-    .hero-cta {
+    .hero-morph__cta {
       justify-content: center;
     }
 
-    .morph-stage {
+    .hero-morph__stage {
       grid-column: 1;
       grid-row: 3;
       width: 100%;
@@ -304,119 +294,118 @@ const shapeSequence = [
     }
   }
 
-  /* Large phones / Small tablets */
+  /* Responsive: Large phones / Small tablets */
   @media (max-width: 768px) {
     .hero-morph {
       min-height: auto;
       padding: var(--space-lg) var(--space-md) var(--space-2xl);
     }
 
-    .hero-container {
+    .hero-morph__container {
       margin-top: var(--space-lg);
       gap: var(--space-lg);
     }
 
-    .title-stage {
+    .hero-morph__title-stage {
       min-height: 80px;
       margin-bottom: 0;
     }
 
-    h1.morph-text {
+    .hero-morph__title {
       font-size: clamp(1.5rem, 6vw, 2.25rem) !important;
       padding-top: var(--space-lg) !important;
       line-height: 1.3 !important;
     }
 
-    .hero-subtitle {
-      font-size: var(--text-base, 1rem);
-      line-height: var(--leading-relaxed, 1.6);
+    .hero-morph__subtitle {
+      font-size: var(--text-base);
+      line-height: var(--leading-relaxed);
     }
 
-    .morph-stage {
+    .hero-morph__stage {
       max-width: 320px;
       height: 320px;
     }
 
-    .hero-cta {
+    .hero-morph__cta {
       flex-direction: column;
       align-items: center;
       width: 100%;
       gap: var(--space-sm);
     }
 
-    /* Make buttons full width on mobile */
-    .hero-cta :global(.unified-btn) {
+    .hero-morph__cta :global(.unified-btn) {
       width: 100%;
       max-width: 280px;
     }
 
-    .hero-cta :global(.unified-btn > *) {
+    .hero-morph__cta :global(.unified-btn > *) {
       width: 100%;
     }
   }
 
-  /* Small phones */
+  /* Responsive: Small phones */
   @media (max-width: 480px) {
     .hero-morph {
       padding: var(--space-md) var(--space-sm) var(--space-xl);
     }
 
-    .hero-container {
+    .hero-morph__container {
       gap: var(--space-md);
     }
 
-    .title-stage {
+    .hero-morph__title-stage {
       min-height: 70px;
     }
 
-    h1.morph-text {
+    .hero-morph__title {
       font-size: clamp(1.25rem, 7vw, 1.875rem) !important;
       padding-top: var(--space-md) !important;
       line-height: 1.25 !important;
     }
 
-    .hero-subtitle {
-      font-size: var(--text-sm, 0.875rem);
+    .hero-morph__subtitle {
+      font-size: var(--text-sm);
     }
 
-    .morph-stage {
+    .hero-morph__stage {
       max-width: 260px;
       height: 260px;
     }
 
-    .hero-cta :global(.unified-btn) {
+    .hero-morph__cta :global(.unified-btn) {
       max-width: 100%;
     }
   }
 
-  /* Very small screens */
+  /* Responsive: Very small screens */
   @media (max-width: 360px) {
     .hero-morph {
       padding: var(--space-sm) var(--space-xs) var(--space-lg);
     }
 
-    .title-stage {
+    .hero-morph__title-stage {
       min-height: 60px;
     }
 
-    h1.morph-text {
+    .hero-morph__title {
       font-size: clamp(1rem, 8vw, 1.5rem) !important;
       line-height: 1.2 !important;
     }
 
-    .hero-subtitle {
-      font-size: var(--text-xs, 0.75rem);
+    .hero-morph__subtitle {
+      font-size: var(--text-xs);
     }
 
-    .morph-stage {
+    .hero-morph__stage {
       max-width: 220px;
       height: 220px;
     }
   }
 
-  /* Ultra small screens - hide SVG animation */
+  /* Responsive: Ultra small screens - hide SVG animation */
   @media (max-width: 200px) {
-    .morph-stage {
+    .hero-morph__stage {
       display: none;
     }
   }
@@ -466,8 +455,8 @@ const shapeSequence = [
   }
 
   async function initHeroMorph() {
-    const container = document.querySelector('[data-morph-container]') as HTMLElement;
-    const textElement = document.querySelector('[data-morph-text]') as HTMLElement;
+    const container = document.querySelector('.hero-morph__svg-container') as HTMLElement;
+    const textElement = document.querySelector('.hero-morph__title') as HTMLElement;
     const storage = document.querySelector('[data-svg-storage]');
 
     if (!container || !textElement || !storage) return;

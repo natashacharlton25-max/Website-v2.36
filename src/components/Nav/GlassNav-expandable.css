@@ -1,0 +1,131 @@
+/* =========================================================
+   GLASSNAV EXPANDABLE MENU STYLES
+   Desktop mega menu / expandable dropdown styles
+   ========================================================= */
+
+/* ========== EXPANDABLE MENU BASE ========== */
+.expandable-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, padding 0.5s ease;
+  width: 100%;
+}
+
+.expandable-menu-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2xl);
+  max-width: var(--container-7xl, 1400px);
+  margin: 0 auto;
+  padding: 0 var(--space-2xl);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.4s ease 0.2s, transform 0.4s ease 0.2s;
+}
+
+/* ========== EXPANDED STATES ========== */
+.nav-container.expanded-assets,
+.nav-container.expanded-insights,
+.nav-container.expanded-services,
+.nav-container.expanded-settings {
+  transition: all 0.5s ease;
+}
+
+.nav-container.expanded-assets .expandable-menu-assets,
+.nav-container.expanded-insights .expandable-menu-insights,
+.nav-container.expanded-services .expandable-menu-services,
+.nav-container.expanded-settings .expandable-menu-settings {
+  max-height: 400px;
+  padding: var(--space-2xl) 0;
+}
+
+.nav-container.expanded-assets .expandable-menu-assets .expandable-menu-wrapper,
+.nav-container.expanded-insights .expandable-menu-insights .expandable-menu-wrapper,
+.nav-container.expanded-services .expandable-menu-services .expandable-menu-wrapper,
+.nav-container.expanded-settings .expandable-menu-settings .expandable-menu-wrapper {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== MENU GRID VARIANTS ========== */
+/* Assets menu has 5 items - 3 column grid */
+.expandable-menu-assets .expandable-menu-wrapper {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Settings menu has 4 items - full width */
+.expandable-menu-settings .expandable-menu-wrapper {
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+}
+
+/* ========== EXPANDABLE ITEMS ========== */
+.expandable-item {
+  text-decoration: none;
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  background: color-mix(in oklch, var(--color-White) 50%, transparent);
+  transition: background var(--transition-fast);
+}
+
+.expandable-item:hover {
+  background: color-mix(in oklch, var(--color-Primary-500) 15%, transparent);
+}
+
+.expandable-item h3 {
+  font-family: var(--font-heading, 'Quicksand', sans-serif);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-Text-600);
+  margin: 0 0 var(--space-sm) 0;
+  transition: color var(--transition-fast);
+}
+
+.expandable-item:hover h3 {
+  color: var(--color-Primary-500);
+}
+
+.expandable-item:active h3 {
+  color: var(--color-Secondary-500);
+}
+
+.expandable-item p {
+  font-family: var(--font-body, 'Quicksand', sans-serif);
+  font-size: var(--text-sm);
+  color: var(--color-Text-400);
+  margin: 0;
+  line-height: var(--leading-relaxed);
+}
+
+/* ========== ICON-BASED ITEMS (Settings) ========== */
+.expandable-item--icon {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  min-height: auto;
+}
+
+.expandable-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-Text-500);
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+  display: block;
+}
+
+.expandable-item--icon:hover .expandable-icon {
+  color: var(--color-Primary-500);
+}
+
+.expandable-item--icon h3 {
+  margin: 0;
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  line-height: 1;
+}

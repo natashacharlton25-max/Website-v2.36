@@ -1,8 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ImageTextSection from '../components/sections/ImageTextSection.astro';
-import FooterWithMask from '../components/Global/FooterWithMask.astro';
+import FooterWithMask from '../components/Footer/FooterWithMask.astro';
 import Button from '../components/Button/Button.astro';
+import HeroSection from '../components/sections/HeroSection.astro';
 import { Image } from 'astro:assets';
 
 // Image imports from src/PageImages for Astro optimization
@@ -45,19 +46,14 @@ const ctaButtons = [
   hideFooter={true}
 >
   <!-- Hero with Full-Width Image -->
-  <section class="hero-with-image">
-    <div class="hero-image-wrapper">
-      <Image src={heroImage} alt="About Walking With A Smile" class="hero-image" />
-      <div class="hero-overlay"></div>
-      <div class="hero-fade"></div>
-      <div class="container container-6xl">
-        <div class="hero-content">
-          <h1 class="hero-title">About Us</h1>
-          <p class="hero-subtitle">We've walked parts of this journey too.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+  <HeroSection
+    title="About Us"
+    subtitle="We've walked parts of this journey too."
+    variant="image"
+    image={heroImage}
+    imageAlt="About Walking With A Smile"
+    imagePosition="full"
+  />
 
   <!-- Introduction -->
   <section class="intro-section section bg-alt">
@@ -288,96 +284,6 @@ const ctaButtons = [
 </BaseLayout>
 
 <style>
-  /* Hero with Full-Width Image */
-  .hero-with-image {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-    background-color: var(--hero-overlay-color);
-  }
-
-  .hero-image-wrapper {
-    position: relative;
-    width: 100%;
-    height: 600px;
-    display: flex;
-    align-items: flex-start;
-    padding-top: var(--space-3xl);
-  }
-
-  .hero-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    z-index: 0;
-  }
-
-  .hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background:
-      linear-gradient(to right,
-        color-mix(in srgb, var(--hero-overlay-color) 70%, transparent) 0%,
-        color-mix(in srgb, var(--hero-overlay-color) 45%, transparent) 50%,
-        color-mix(in srgb, var(--hero-overlay-color) 20%, transparent) 100%
-      ),
-      linear-gradient(to bottom,
-        color-mix(in srgb, var(--hero-overlay-color) 0%, transparent) 0%,
-        color-mix(in srgb, var(--hero-overlay-color) 30%, transparent) 70%,
-        color-mix(in srgb, var(--hero-overlay-color) 80%, transparent) 100%
-      );
-    z-index: 1;
-  }
-
-  .hero-fade {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 200px;
-    background: linear-gradient(to bottom,
-      transparent 0%,
-      color-mix(in srgb, var(--hero-overlay-color) 60%, transparent) 40%,
-      var(--hero-overlay-color) 100%
-    );
-    z-index: 2;
-  }
-
-  .hero-image-wrapper .container {
-    position: relative;
-    z-index: 3;
-  }
-
-  .hero-content {
-    text-align: left;
-    max-width: 800px;
-    padding: var(--space-2xl) 0;
-  }
-
-  .hero-title {
-    font-size: clamp(3rem, 8vw, 8rem);
-    font-weight: var(--font-extrabold);
-    color: var(--color-Text-700);
-    margin-bottom: var(--space-lg);
-    font-family: var(--font-heading);
-    line-height: 0.95;
-    letter-spacing: -0.02em;
-  }
-
-  .hero-subtitle {
-    font-size: var(--text-2xl);
-    color: var(--color-Text-600);
-    font-family: var(--font-heading);
-    font-weight: var(--font-medium);
-  }
-
   /* Common styles - .bg-alt uses global class from utilities.css */
 
   .section {
@@ -821,28 +727,6 @@ const ctaButtons = [
   }
 
   @media (max-width: 767px) {
-    .hero-image-wrapper {
-      height: 500px;
-      padding-top: var(--space-2xl);
-    }
-
-    .hero-content {
-      padding: var(--space-xl) 0;
-    }
-
-    .hero-title {
-      font-size: clamp(2.5rem, 10vw, 4rem);
-      line-height: 1;
-    }
-
-    .hero-subtitle {
-      font-size: var(--text-lg);
-    }
-
-    .hero-fade {
-      height: 150px;
-    }
-
     .section {
       padding: var(--space-3xl) 0;
     }
@@ -900,28 +784,6 @@ const ctaButtons = [
   }
 
   @media (max-width: 250px) {
-    .hero-image-wrapper {
-      height: 400px;
-      padding-top: var(--space-xl);
-    }
-
-    .hero-content {
-      padding: var(--space-md) 0;
-    }
-
-    .hero-title {
-      font-size: var(--text-3xl);
-      line-height: 1.1;
-    }
-
-    .hero-subtitle {
-      font-size: var(--text-sm);
-    }
-
-    .hero-fade {
-      height: 120px;
-    }
-
     .section {
       padding: var(--space-2xl) 0.25rem;
     }
@@ -1036,18 +898,6 @@ const ctaButtons = [
       padding: var(--space-lg) 0.125rem;
     }
 
-    .hero-image-wrapper {
-      height: 300px;
-    }
-
-    .hero-title {
-      font-size: var(--text-2xl);
-    }
-
-    .hero-subtitle {
-      font-size: var(--text-xs);
-    }
-
     .section-title,
     .philosophy-title,
     .meaning-title,
@@ -1089,21 +939,8 @@ const ctaButtons = [
     }
   }
 
-  /* Accessibility theme overrides - dark mode hero uses Background-100 to match page */
-  :global(body.a11y-theme-dark) .hero-with-image {
-    background-color: var(--color-Background-100);
-  }
+  /* A11y hero overrides now in: src/styles/a11y/components/hero-section.css */
 
-  :global(body.a11y-theme-dark) .hero-fade {
-    background: linear-gradient(to bottom,
-      transparent 0%,
-      color-mix(in srgb, var(--color-Background-100) 60%, transparent) 40%,
-      var(--color-Background-100) 100%
-    );
-  }
-
-  :global(body.a11y-theme-dark) .hero-title,
-  :global(body.a11y-theme-dark) .hero-subtitle,
   :global(body.a11y-theme-dark) .story-image-title {
     color: var(--a11y-dark-text);
   }
