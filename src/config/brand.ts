@@ -7,6 +7,11 @@ export const BRAND_CONFIG = {
   name: 'Walking with a Smile',
   description: 'Supporting trauma recovery and healing. Resources to help you move from survival to living, at your own pace.',
 
+  contact: {
+    email: 'hello@walkingwithasmile.com',
+    responseTime: 'We aim to respond within 2 working days'
+  },
+
   urls: {
     domain: 'walkingwithasmile.com'
   },

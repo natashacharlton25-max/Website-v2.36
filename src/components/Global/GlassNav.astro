@@ -1,0 +1,341 @@
+---
+// Glassmorphic Navigation Component
+import CartIcon from '../shop/CartIcon.astro';
+import { MAIN_NAV_LINKS, NAV_ITEMS_WITH_MENUS, MEGA_MENUS } from '../../config/navigation';
+---
+
+<nav class="nav-container" id="main-nav">
+  <div class="nav-content">
+    <!-- Mobile Hamburger Menu -->
+    <button class="hamburger-menu mobile-only" id="hamburger-btn" aria-label="Toggle menu">
+      <svg viewBox="0 0 64 48">
+        <path d="M19,15 L45,15 C70,15 58,-2 49.0177126,7 L19,37"></path>
+        <path d="M19,24 L45,24 C61.2371586,24 57,49 41,33 L32,24"></path>
+        <path d="M45,33 L19,33 C-8,33 6,-2 22,14 L45,37"></path>
+      </svg>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="nav-logo">
+      <img src="/Logo/Nav-Logo.png" alt="Walking With A Smile" class="logo-image" />
+    </a>
+
+    <!-- Mobile Cart Icon -->
+    <div class="mobile-nav-icons mobile-only">
+      <a href="/cart" class="mobile-icon-btn mobile-cart-btn" aria-label="Cart">
+        <img src="/Icons/phosphor/a11y/basket-fill.svg" alt="" class="mobile-basket-icon" aria-hidden="true" />
+      </a>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <div class="nav-links desktop-only">
+      {MAIN_NAV_LINKS.map(link => (
+        NAV_ITEMS_WITH_MENUS.includes(link.text) ? (
+          <a
+            href={link.href}
+            class="nav-item-expandable"
+            data-expand={link.text.toLowerCase()}
+          >
+            {link.text}
+          </a>
+        ) : (
+          <a href={link.href}>{link.text}</a>
+        )
+      ))}
+
+      <!-- Settings Gear Icon -->
+      <button class="nav-icon-btn" data-expand="settings" aria-label="Settings" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+
+      <CartIcon />
+    </div>
+  </div>
+
+  <!-- Expandable Mega Menus -->
+  {Object.entries(MEGA_MENUS).map(([key, items]) => (
+    <div class={`expandable-menu expandable-menu-${key}`}>
+      <div class="expandable-menu-wrapper">
+        {items.map(item => (
+          <a
+            href={item.href}
+            class={`expandable-item ${item.icon ? 'expandable-item--icon' : ''}`}
+            data-action={
+              item.href === '#share' ? 'copy-link' :
+              item.href === '#search' ? 'open-search' :
+              item.href === '#accessibility' ? 'open-a11y-panel' :
+              null
+            }
+          >
+            {item.icon === 'mail' && (
+              <svg class="expandable-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M22 6l-10 7L2 6"/>
+              </svg>
+            )}
+            {item.icon === 'share' && (
+              <svg class="expandable-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"/>
+                <circle cx="6" cy="12" r="3"/>
+                <circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+            )}
+            {item.icon === 'search' && (
+              <svg class="expandable-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            )}
+            {item.icon === 'eye' && (
+              <svg class="expandable-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            )}
+            <h3>{item.title}</h3>
+            {item.description && <p>{item.description}</p>}
+          </a>
+        ))}
+      </div>
+    </div>
+  ))}
+
+  <!-- Mobile Menu Items -->
+  <ul class="mobile-menu-list mobile-only">
+    {MAIN_NAV_LINKS.map(link => (
+      <li><a href={link.href}>{link.text}</a></li>
+    ))}
+    <li class="mobile-settings">
+      <a href="/accessibility-settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        Settings
+      </a>
+    </li>
+  </ul>
+
+</nav>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    let menuOpen = false;
+
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const nav = document.getElementById('main-nav');
+
+    // Handle scroll to add/remove background
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const currentScroll = window.pageYOffset;
+
+      if (currentScroll > 50) {
+        nav?.classList.add('scrolled');
+      } else {
+        nav?.classList.remove('scrolled');
+      }
+
+      // Hide nav on scroll down, show on scroll up
+      if (currentScroll > lastScroll && currentScroll > 100) {
+        nav?.classList.add('nav-hidden');
+      } else {
+        nav?.classList.remove('nav-hidden');
+      }
+
+      lastScroll = currentScroll;
+    });
+
+    hamburgerBtn?.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+
+      if (menuOpen) {
+        // Calculate scrollbar width to prevent layout shift
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+        hamburgerBtn.classList.add('active');
+        nav?.classList.add('menu-opened');
+        document.body.style.overflow = 'hidden';
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      } else {
+        hamburgerBtn.classList.remove('active');
+        nav?.classList.remove('menu-opened');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
+    });
+
+    // Close menu when clicking on a link
+    const mobileLinks = document.querySelectorAll('.mobile-menu-list a');
+    mobileLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        menuOpen = false;
+        hamburgerBtn?.classList.remove('active');
+        nav?.classList.remove('menu-opened');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      });
+    });
+
+    // Handle resize to clean up menu state below 200px
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 200) {
+        menuOpen = false;
+        hamburgerBtn?.classList.remove('active');
+        nav?.classList.remove('menu-opened');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
+    });
+
+    // Expandable mega menu functionality - hover based
+    const expandButtons = document.querySelectorAll('[data-expand]');
+    const expandableMenus = document.querySelectorAll('.expandable-menu');
+    const menuTypes = ['assets', 'insights', 'services', 'settings'];
+    let currentExpanded: string | null = null;
+    let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    function closeAllMenus() {
+      menuTypes.forEach(type => {
+        nav?.classList.remove(`expanded-${type}`);
+      });
+      expandButtons.forEach(btn => {
+        btn.setAttribute('aria-expanded', 'false');
+        btn.classList.remove('active');
+      });
+      currentExpanded = null;
+    }
+
+    function openMenu(menuType: string, button: Element) {
+      if (currentExpanded === menuType) return;
+      closeAllMenus();
+      nav?.classList.add(`expanded-${menuType}`);
+      button.setAttribute('aria-expanded', 'true');
+      button.classList.add('active');
+      currentExpanded = menuType;
+    }
+
+    // Hover events for nav buttons
+    expandButtons.forEach(button => {
+      button.addEventListener('mouseenter', () => {
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+        const menuType = button.getAttribute('data-expand');
+        if (menuType) {
+          openMenu(menuType, button);
+        }
+      });
+
+      button.addEventListener('mouseleave', () => {
+        hoverTimeout = setTimeout(() => {
+          closeAllMenus();
+        }, 150);
+      });
+    });
+
+    // Keep menu open when hovering over the expandable menu area
+    expandableMenus.forEach(menu => {
+      menu.addEventListener('mouseenter', () => {
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+      });
+
+      menu.addEventListener('mouseleave', () => {
+        hoverTimeout = setTimeout(() => {
+          closeAllMenus();
+        }, 150);
+      });
+    });
+
+    // Keep menu open when hovering back to nav-content
+    const navContent = document.querySelector('.nav-content');
+    navContent?.addEventListener('mouseenter', () => {
+      // Don't close if we re-enter nav area
+    });
+
+    // Close menus when mouse leaves the entire nav container
+    nav?.addEventListener('mouseleave', () => {
+      hoverTimeout = setTimeout(() => {
+        closeAllMenus();
+      }, 150);
+    });
+
+    // Close menus on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAllMenus();
+      }
+    });
+
+    // Handle special actions in menu items
+
+    // Accessibility panel
+    const a11yLinks = document.querySelectorAll('[data-action="open-a11y-panel"]');
+    a11yLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeAllMenus();
+        // Open the accessibility panel
+        const panel = document.getElementById('a11y-panel');
+        const backdrop = document.querySelector('.a11y-panel__backdrop') as HTMLElement;
+        if (panel && backdrop) {
+          panel.classList.add('is-open');
+          backdrop.classList.add('is-visible');
+          panel.removeAttribute('hidden');
+          backdrop.removeAttribute('hidden');
+        }
+      });
+    });
+
+    // Copy link to clipboard
+    const copyLinks = document.querySelectorAll('[data-action="copy-link"]');
+    copyLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeAllMenus();
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+          if ((window as any).showToast) {
+            (window as any).showToast({
+              message: 'Link copied to clipboard!',
+              theme: 'professional',
+              animation: 'slide',
+              duration: 3000
+            });
+          }
+        }).catch(err => {
+          console.error('Failed to copy link:', err);
+        });
+      });
+    });
+
+    // Open search
+    const searchLinks = document.querySelectorAll('[data-action="open-search"]');
+    searchLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeAllMenus();
+        if ((window as any).openSearchOverlay) {
+          (window as any).openSearchOverlay();
+        }
+      });
+    });
+
+  });
+</script>
+
+<link rel="stylesheet" href="./GlassNav.css">
+
+<script>
+  import { initParticleBursts } from '../../scripts/svg-particle-burst';
+
+  // Initialize after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initParticleBursts);
+  } else {
+    initParticleBursts();
+  }
+</script>

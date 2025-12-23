@@ -1,7 +1,7 @@
 /* ===================================
-   BUTTON BASE - Global Fallback
-   Simple, accessible outlined buttons
-   Used as a11y fallback & global default
+   BUTTON SYSTEM - Complete Button Styles
+   All variants, sizes, shapes defined here
+   styled-button.css adds fancy effects only
    =================================== */
 
 /* ========== BASE BUTTON ========== */
@@ -9,32 +9,31 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5em;
-  padding: 0.625rem 1.25rem;
-  min-height: 2.5rem;
-  font-family: var(--font-body, system-ui, sans-serif);
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.2;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  min-height: 2.75rem;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
   text-decoration: none;
   text-align: center;
   cursor: pointer;
-  border: 2px solid currentColor;
-  border-radius: 0.25rem;
-  background: transparent;
-  color: var(--color-Primary-600, #2563eb);
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-Primary-500);
+  color: var(--color-White);
+  transition: var(--transition-fast);
 }
 
 .btn:hover {
-  background: var(--color-Primary-600, #2563eb);
-  border-color: var(--color-Primary-600, #2563eb);
-  color: white;
+  background-color: var(--color-Primary-600);
+  color: var(--color-White);
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--color-Primary-500, #3b82f6);
-  outline-offset: 2px;
+  outline: var(--border-width-2) solid var(--color-Primary-500);
+  outline-offset: var(--border-width-2);
 }
 
 .btn:active {
@@ -49,123 +48,133 @@
 }
 
 /* ========== COLOR VARIANTS ========== */
-/* All outlined by default - fill on hover */
+/* Filled buttons - solid background, white text */
 
 .btn-primary {
-  color: var(--color-Primary-600, #2563eb);
-  border-color: var(--color-Primary-600, #2563eb);
+  background-color: var(--color-Primary-500);
+  color: var(--color-White);
 }
 
 .btn-primary:hover {
-  background: var(--color-Primary-600, #2563eb);
-  color: white;
+  background-color: var(--color-Primary-600);
+  color: var(--color-White);
 }
 
 .btn-secondary {
-  color: var(--color-Secondary-600, #4b5563);
-  border-color: var(--color-Secondary-600, #4b5563);
+  background-color: var(--color-Secondary-500);
+  color: var(--color-White);
 }
 
 .btn-secondary:hover {
-  background: var(--color-Secondary-600, #4b5563);
-  color: white;
+  background-color: var(--color-Secondary-600);
+  color: var(--color-White);
 }
 
-/* Accent variants */
 .btn-accent1 {
-  color: var(--color-AccentOne-600, #059669);
-  border-color: var(--color-AccentOne-600, #059669);
+  background-color: var(--color-AccentOne-500);
+  color: var(--color-White);
 }
 
 .btn-accent1:hover {
-  background: var(--color-AccentOne-600, #059669);
-  color: white;
+  background-color: var(--color-AccentOne-600);
+  color: var(--color-White);
 }
 
 .btn-accent2 {
-  color: var(--color-AccentTwo-600, #d97706);
-  border-color: var(--color-AccentTwo-600, #d97706);
+  background-color: var(--color-AccentTwo-500);
+  color: var(--color-White);
 }
 
 .btn-accent2:hover {
-  background: var(--color-AccentTwo-600, #d97706);
-  color: white;
+  background-color: var(--color-AccentTwo-600);
+  color: var(--color-White);
 }
 
 .btn-accent3 {
-  color: var(--color-AccentThree-600, #7c3aed);
-  border-color: var(--color-AccentThree-600, #7c3aed);
+  background-color: var(--color-AccentThree-500);
+  color: var(--color-White);
 }
 
 .btn-accent3:hover {
-  background: var(--color-AccentThree-600, #7c3aed);
-  color: white;
+  background-color: var(--color-AccentThree-600);
+  color: var(--color-White);
 }
 
 .btn-accent4 {
-  color: var(--color-AccentFour-600, #dc2626);
-  border-color: var(--color-AccentFour-600, #dc2626);
+  background-color: var(--color-AccentFour-500);
+  color: var(--color-White);
 }
 
 .btn-accent4:hover {
-  background: var(--color-AccentFour-600, #dc2626);
-  color: white;
+  background-color: var(--color-AccentFour-600);
+  color: var(--color-White);
 }
 
 .btn-accent5 {
-  color: var(--color-AccentFive-600, #0891b2);
-  border-color: var(--color-AccentFive-600, #0891b2);
+  background-color: var(--color-AccentFive-500);
+  color: var(--color-White);
 }
 
 .btn-accent5:hover {
-  background: var(--color-AccentFive-600, #0891b2);
-  color: white;
+  background-color: var(--color-AccentFive-600);
+  color: var(--color-White);
+}
+
+/* ========== OUTLINE VARIANT ========== */
+/* Transparent background, colored border, fills on hover */
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-Primary-600);
+  border: var(--border-width-2) solid var(--color-Primary-600);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-Primary-600);
+  color: var(--color-White);
+  border-color: var(--color-Primary-600);
+}
+
+/* ========== GHOST VARIANT ========== */
+/* No border, subtle hover */
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-Primary-600);
+  border: none;
+}
+
+.btn-ghost:hover {
+  background-color: var(--color-Primary-100);
+  color: var(--color-Primary-700);
 }
 
 /* ========== SIZE VARIANTS ========== */
 
 .btn-sm {
-  padding: 0.375rem 0.875rem;
+  padding: var(--space-sm) var(--space-md);
   min-height: 2rem;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
 }
 
 .btn-lg {
-  padding: 0.875rem 1.75rem;
-  min-height: 3rem;
-  font-size: 1.125rem;
+  padding: var(--space-lg) var(--space-2xl);
+  min-height: 3.5rem;
+  font-size: var(--text-lg);
 }
 
 /* ========== SHAPE VARIANTS ========== */
 
 .btn-pill {
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
 }
 
 .btn-rounded {
-  border-radius: 0.5rem;
+  border-radius: var(--radius-xl);
 }
 
 .btn-sharp {
   border-radius: 0;
-}
-
-/* ========== STYLE VARIANTS ========== */
-/* Ghost - no border, just text */
-.btn-ghost {
-  border-color: transparent;
-  background: transparent;
-}
-
-.btn-ghost:hover {
-  background: var(--color-Primary-100, #dbeafe);
-  border-color: transparent;
-  color: var(--color-Primary-700, #1d4ed8);
-}
-
-/* Outline is default - explicit class for clarity */
-.btn-outline {
-  background: transparent;
 }
 
 /* ========== ICON SUPPORT ========== */
@@ -187,8 +196,8 @@
 /* Icon-only buttons */
 .btn-circle,
 .btn-square {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   padding: 0;
   justify-content: center;
 }
@@ -205,8 +214,49 @@
 
 .btn-lg.btn-circle,
 .btn-lg.btn-square {
-  width: 3rem;
-  height: 3rem;
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+/* ========== SPECIAL STYLE VARIANTS ========== */
+
+.btn-glassmorphic {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: var(--border-width) solid var(--glass-border);
+  color: var(--color-Text-700);
+  box-shadow: var(--glass-shadow);
+}
+
+.btn-glassmorphic:hover {
+  background: var(--glass-bg-hover, var(--glass-bg));
+  box-shadow: var(--glass-shadow-hover, var(--glass-shadow));
+}
+
+.btn-neumorphic {
+  background: var(--color-Background-100);
+  border: none;
+  color: var(--color-Text-700);
+  box-shadow: 6px 6px 12px var(--color-Background-300), -6px -6px 12px var(--color-White);
+}
+
+.btn-neumorphic:hover {
+  box-shadow: 4px 4px 8px var(--color-Background-300), -4px -4px 8px var(--color-White);
+}
+
+.btn-neumorphic:active {
+  box-shadow: inset 4px 4px 8px var(--color-Background-300), inset -4px -4px 8px var(--color-White);
+}
+
+.btn-gradient {
+  background: var(--gradient-hero);
+  color: var(--color-White);
+  border: none;
+}
+
+.btn-gradient:hover {
+  opacity: 0.9;
+  color: var(--color-White);
 }
 
 /* ========== ACCESSIBILITY ========== */
@@ -217,10 +267,9 @@
   }
 }
 
-/* High contrast mode support */
 @media (prefers-contrast: more) {
   .btn {
-    border-width: 3px;
+    border: 2px solid currentColor;
   }
 
   .btn:focus-visible {

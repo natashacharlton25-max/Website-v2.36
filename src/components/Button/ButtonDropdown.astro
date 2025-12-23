@@ -1,7 +1,7 @@
 ---
 // ButtonDropdown - Dropdown menu for Button component
 // Supports both navigation (links) and selection (buttons) modes
-// Tokens loaded globally via tokens/index.css
+// Tokens loaded globally via tokens/index.css and buttons/dropdown-tokens.css
 
 export interface DropdownItem {
   label: string;
@@ -22,10 +22,7 @@ export interface Props {
   id?: string;
   /** Name attribute for form submission */
   name?: string;
-  borderStyle?: string; // e.g., '1px solid', '2px dashed', 'none'
   backgroundColor?: string; // CSS variable or color value
-  colorShade?: string; // e.g., '100', '500', '700'
-  hoverColorShade?: string; // e.g., '100', '200', '300'
 }
 
 const {
@@ -40,30 +37,11 @@ const {
   selectedValue = '',
   id,
   name,
-  borderStyle = '1px solid',
-  backgroundColor,
-  colorShade = '500',
-  hoverColorShade = '100'
+  backgroundColor
 } = Astro.props;
 
 const themeClass = `dropdown-theme-${colorTheme}`;
 const modeClass = `dropdown-mode-${mode}`;
-
-// Convert color theme name to proper case for CSS variables
-const colorThemeMap: Record<string, string> = {
-  'primary': 'Primary',
-  'secondary': 'Secondary',
-  'accent1': 'AccentOne',
-  'accent2': 'AccentTwo',
-  'accent3': 'AccentThree',
-  'accent4': 'AccentFour',
-  'accent5': 'AccentFive'
-};
-
-const colorName = colorThemeMap[colorTheme];
-const borderColor = `var(--color-${colorName}-${colorShade})`;
-const hoverBgColor = `var(--color-${colorName}-${hoverColorShade})`;
-const hoverTextColor = `var(--color-${colorName}-800)`;
 ---
 
 <div
@@ -73,10 +51,7 @@ const hoverTextColor = `var(--color-${colorName}-800)`;
   data-mode={mode}
   data-selected={selectedValue}
   role={mode === 'selection' ? 'listbox' : 'menu'}
-  style={`
-    ${borderStyle !== 'none' ? `border: ${borderStyle} ${borderColor};` : 'border: none;'}
-    ${backgroundColor ? `background: ${backgroundColor};` : ''}
-  `.trim()}
+  style={backgroundColor ? `background: ${backgroundColor};` : undefined}
 >
   {dropdownItems.map((item) => (
     mode === 'selection' ? (
@@ -86,67 +61,79 @@ const hoverTextColor = `var(--color-${colorName}-800)`;
         data-value={item.value}
         role="option"
         aria-selected={item.value === selectedValue ? 'true' : 'false'}
-        style={`
-          --hover-bg-color: ${hoverBgColor};
-          --hover-text-color: ${hoverTextColor};
-          ${item.fontFamily ? `font-family: ${item.fontFamily};` : ''}
-        `.trim()}
+        style={item.fontFamily ? `--a11y-font-preview: ${item.fontFamily}; font-family: ${item.fontFamily};` : undefined}
       >{item.label}</button>
     ) : (
       <a
         href={item.href}
         class="dropdown-item"
         role="menuitem"
-        style={`
-          --hover-bg-color: ${hoverBgColor};
-          --hover-text-color: ${hoverTextColor};
-        `.trim()}
       >{item.label}</a>
     )
   ))}
 </div>
 
 <style is:global>
+  /* ===================================
+   * DROPDOWN MENU
+   * Uses global tokens from tokens/index.css
+   * and buttons/dropdown-tokens.css
+   * =================================== */
   .dropdown-menu {
     position: absolute;
     top: 100%;
     left: 0;
-    background: var(--glass-surface-bg, var(--color-Background-50));
-    backdrop-filter: blur(var(--glass-surface-blur, 8px));
-    -webkit-backdrop-filter: blur(var(--glass-surface-blur, 8px));
-    border-radius: var(--radius-md, 0.5rem);
-    box-shadow: var(--glass-surface-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
-    z-index: 9999;
-    min-width: var(--space-5xl, 120px);
-    margin-top: var(--space-sm, 0.5rem);
+    background: var(--color-Background-50);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-dropdown-md);
+    z-index: var(--z-dropdown);
+    min-width: var(--container-xs);
+    margin-top: var(--space-sm);
     list-style: none;
     padding: 0;
+    border: var(--border-width) solid var(--dropdown-border-color);
 
     /* Height-based visibility */
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: var(--transition-base);
   }
 
   .dropdown-menu.show {
-    max-height: 300px;
+    max-height: var(--container-sm);
     opacity: 1;
     overflow-y: auto;
   }
 
+  /* ===================================
+   * DROPDOWN THEME BORDERS
+   * =================================== */
+  .dropdown-theme-primary { border-color: var(--dropdown-primary-border); }
+  .dropdown-theme-secondary { border-color: var(--dropdown-secondary-border); }
+  .dropdown-theme-accent1 { border-color: var(--dropdown-accent1-border); }
+  .dropdown-theme-accent2 { border-color: var(--dropdown-accent2-border); }
+  .dropdown-theme-accent3 { border-color: var(--dropdown-accent3-border); }
+  .dropdown-theme-accent4 { border-color: var(--dropdown-accent4-border); }
+  .dropdown-theme-accent5 { border-color: var(--dropdown-accent5-border); }
+
+  /* ===================================
+   * DROPDOWN ITEM
+   * =================================== */
   .dropdown-item {
     display: block;
     width: 100%;
-    padding: var(--space-md, 0.75rem) var(--space-lg, 1rem);
+    padding: var(--space-md) var(--space-lg);
     color: var(--color-Text-700);
-    text-decoration: none !important;
-    font-family: var(--font-body, inherit);
-    font-size: var(--font-size-sm, 0.875rem);
-    font-weight: 500;
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
     text-align: left;
     cursor: pointer;
-    transition: background-color 0.1s ease, color 0.1s ease;
+    transition: var(--transition-fast);
     margin: 0;
     border: none;
     background: transparent;
@@ -155,61 +142,100 @@ const hoverTextColor = `var(--color-${colorName}-800)`;
   /* Navigation mode - uppercase labels */
   .dropdown-mode-navigation .dropdown-item {
     text-transform: uppercase;
-    letter-spacing: 0.075em;
+    letter-spacing: var(--letter-spacing-wide);
   }
 
   /* Selection mode - normal case for readability */
   .dropdown-mode-selection .dropdown-item {
     text-transform: none;
-    letter-spacing: normal;
+    letter-spacing: var(--letter-spacing-normal);
   }
 
+  /* ===================================
+   * DROPDOWN STATES - HOVER BY THEME
+   * =================================== */
   .dropdown-item:hover {
-    text-decoration: none !important;
-    background-color: var(--hover-bg-color);
-    color: var(--hover-text-color);
+    text-decoration: none;
+  }
+
+  /* Primary theme hover */
+  .dropdown-theme-primary .dropdown-item:hover {
+    background-color: var(--dropdown-primary-hover-bg);
+    color: var(--dropdown-primary-hover-text);
+  }
+
+  /* Secondary theme hover */
+  .dropdown-theme-secondary .dropdown-item:hover {
+    background-color: var(--dropdown-secondary-hover-bg);
+    color: var(--dropdown-secondary-hover-text);
+  }
+
+  /* Accent theme hovers */
+  .dropdown-theme-accent1 .dropdown-item:hover {
+    background-color: var(--dropdown-accent1-hover-bg);
+    color: var(--dropdown-accent1-hover-text);
+  }
+
+  .dropdown-theme-accent2 .dropdown-item:hover {
+    background-color: var(--dropdown-accent2-hover-bg);
+    color: var(--dropdown-accent2-hover-text);
+  }
+
+  .dropdown-theme-accent3 .dropdown-item:hover {
+    background-color: var(--dropdown-accent3-hover-bg);
+    color: var(--dropdown-accent3-hover-text);
+  }
+
+  .dropdown-theme-accent4 .dropdown-item:hover {
+    background-color: var(--dropdown-accent4-hover-bg);
+    color: var(--dropdown-accent4-hover-text);
+  }
+
+  .dropdown-theme-accent5 .dropdown-item:hover {
+    background-color: var(--dropdown-accent5-hover-bg);
+    color: var(--dropdown-accent5-hover-text);
   }
 
   .dropdown-item:focus-visible {
-    outline: 2px solid var(--color-Primary-500);
-    outline-offset: -2px;
+    outline: var(--border-width-2) solid var(--color-Primary-500);
+    outline-offset: calc(-1 * var(--border-width-2));
   }
 
   /* Selected state for selection mode */
   .dropdown-item.is-selected {
-    background-color: var(--color-Primary-100);
-    color: var(--color-Primary-800);
-    font-weight: 600;
+    background-color: var(--dropdown-selected-bg);
+    color: var(--dropdown-selected-text);
+    font-weight: var(--font-semibold);
   }
 
   .dropdown-item.is-selected::before {
     content: '✓ ';
-    font-weight: bold;
+    font-weight: var(--font-bold);
   }
 
   .dropdown-item:last-child {
     border-bottom: none;
   }
 
-  /* Desktop responsive */
+  /* ===================================
+   * RESPONSIVE
+   * =================================== */
   @media (min-width: 768px) {
     .dropdown-menu {
-      min-width: 180px;
+      min-width: var(--container-md);
     }
   }
 
-  /* Mobile responsive */
   @media (max-width: 767px) {
     .dropdown-menu {
-      min-width: var(--space-5xl, 120px);
-      z-index: 99999;
+      z-index: var(--z-modal);
       left: 0;
       right: auto;
-      min-width: 200px;
+      min-width: var(--container-sm);
     }
 
     .dropdown-menu.show {
-      max-height: 180px;
+      max-height: var(--container-md);
     }
   }
 </style>

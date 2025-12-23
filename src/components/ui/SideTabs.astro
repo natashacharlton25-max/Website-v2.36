@@ -30,10 +30,11 @@ const {
 
 <!-- Side Tabs Panel - Right Edge -->
 <div class={`side-tabs ${className}`}>
-  <!-- Email Tab -->
-  <a
-    href="/contact"
+  <!-- Email Tab - Opens Contact Popup -->
+  <button
+    type="button"
     class="side-tab side-tab--email"
+    data-action="contact"
     aria-label="Contact us"
   >
     <lottie-player
@@ -52,7 +53,7 @@ const {
       height="28"
       aria-hidden="true"
     />
-  </a>
+  </button>
 
   <!-- Share Tab -->
   <button
@@ -363,6 +364,7 @@ const {
     const shareButton = document.querySelector('[data-share="copy"]');
     const accessibilityButton = document.querySelector('[data-action="accessibility"]');
     const searchButton = document.querySelector('[data-action="search"]');
+    const contactButton = document.querySelector('[data-action="contact"]');
 
     // Add hover animation for all Lottie players with 2-loop limit
     sideTabs.forEach(tab => {
@@ -440,6 +442,17 @@ const {
           (window as any).openSearchOverlay();
         } else {
           console.warn('Search overlay not initialized');
+        }
+      });
+    }
+
+    // Contact Button Functionality - Opens Contact Popup
+    if (contactButton) {
+      contactButton.addEventListener('click', () => {
+        if ((window as any).openContactPopup) {
+          (window as any).openContactPopup();
+        } else {
+          console.warn('Contact popup not initialized');
         }
       });
     }

@@ -1,0 +1,244 @@
+---
+/**
+ * Announcement Ticker - Scrolling text banner for announcements
+ * Can be positioned at top or bottom of page
+ *
+ * CSS Standards Compliant:
+ * - BEM-lite naming (.announcement-ticker, .announcement-ticker__track, etc)
+ * - Global typography - no font overrides
+ * - All design tokens from tokens/ folder
+ * - No hardcoded values
+ */
+import Icon from '../ui/Icon.astro';
+
+interface TickerItem {
+  text: string;
+  icon?: 'info' | 'warning' | 'heart' | 'star' | 'gift' | 'calendar' | 'megaphone' | 'sparkle' | 'none';
+  link?: string;
+}
+
+interface Props {
+  items?: TickerItem[];
+  position?: 'top' | 'bottom';
+  speed?: number; // seconds for one complete cycle
+  backgroundColor?: 'primary' | 'secondary' | 'accent' | 'dark' | 'light';
+  pauseOnHover?: boolean;
+  enabled?: boolean;
+}
+
+const {
+  items = [
+    { text: 'Welcome to our website!', icon: 'sparkle' },
+    { text: 'Free shipping on orders over $50', icon: 'gift' },
+    { text: 'New arrivals just dropped', icon: 'star' },
+  ],
+  position = 'top',
+  speed = 25,
+  backgroundColor = 'primary',
+  pauseOnHover = true,
+  enabled = true
+} = Astro.props;
+
+// Map icon names to Phosphor icon paths
+const iconMap: Record<string, string> = {
+  info: 'announcement-ticker/info-fill',
+  warning: 'announcement-ticker/warning-fill',
+  heart: 'announcement-ticker/heart-fill',
+  star: 'announcement-ticker/star-fill',
+  gift: 'announcement-ticker/gift-fill',
+  calendar: 'announcement-ticker/calendar-fill',
+  megaphone: 'announcement-ticker/megaphone-fill',
+  sparkle: 'announcement-ticker/sparkle-fill',
+};
+---
+
+{enabled && (
+  <div
+    class={`announcement-ticker announcement-ticker--${position} announcement-ticker--${backgroundColor} ${pauseOnHover ? 'announcement-ticker--pause-hover' : ''}`}
+    data-speed={speed}
+  >
+    <div class="announcement-ticker__track">
+      <!-- Duplicate content for seamless loop -->
+      {[0, 1].map(() => (
+        <div class="announcement-ticker__segment">
+          {items.map((item) => (
+            item.link ? (
+              <a href={item.link} class="announcement-ticker__item announcement-ticker__item--link">
+                {item.icon && item.icon !== 'none' && iconMap[item.icon] && (
+                  <Icon name={iconMap[item.icon]} size={16} class="announcement-ticker__icon" />
+                )}
+                <span class="announcement-ticker__text">{item.text}</span>
+              </a>
+            ) : (
+              <span class="announcement-ticker__item">
+                {item.icon && item.icon !== 'none' && iconMap[item.icon] && (
+                  <Icon name={iconMap[item.icon]} size={16} class="announcement-ticker__icon" />
+                )}
+                <span class="announcement-ticker__text">{item.text}</span>
+              </span>
+            )
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+<script>
+  import { gsap } from 'gsap';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const tickers = document.querySelectorAll('.announcement-ticker');
+
+    tickers.forEach((ticker) => {
+      const track = ticker.querySelector('.announcement-ticker__track') as HTMLElement;
+      const segment = ticker.querySelector('.announcement-ticker__segment') as HTMLElement;
+
+      if (!track || !segment) return;
+
+      const speed = parseFloat(ticker.getAttribute('data-speed') || '25');
+      const segmentWidth = segment.offsetWidth;
+
+      // Animate the track
+      const animation = gsap.to(track, {
+        x: -segmentWidth,
+        duration: speed,
+        ease: 'none',
+        repeat: -1,
+      });
+
+      // Pause on hover if enabled
+      if (ticker.classList.contains('announcement-ticker--pause-hover')) {
+        ticker.addEventListener('mouseenter', () => animation.pause());
+        ticker.addEventListener('mouseleave', () => animation.resume());
+      }
+    });
+  });
+</script>
+
+<style>
+  /* ========== TICKER BASE ========== */
+  .announcement-ticker {
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: var(--space-3xl);
+    padding: var(--space-sm) 0;
+    overflow: hidden;
+    z-index: var(--z-sticky);
+    display: flex;
+    align-items: center;
+  }
+
+  /* ========== POSITION VARIANTS ========== */
+  .announcement-ticker--top {
+    top: 0;
+  }
+
+  .announcement-ticker--bottom {
+    bottom: 0;
+  }
+
+  /* ========== BACKGROUND COLOR VARIANTS ========== */
+  .announcement-ticker--primary {
+    background: var(--color-Primary-500);
+    color: var(--color-White);
+  }
+
+  .announcement-ticker--secondary {
+    background: var(--color-Secondary-500);
+    color: var(--color-White);
+  }
+
+  .announcement-ticker--accent {
+    background: var(--color-AccentOne-500);
+    color: var(--color-White);
+  }
+
+  .announcement-ticker--dark {
+    background: var(--color-Neutral-900);
+    color: var(--color-White);
+  }
+
+  .announcement-ticker--light {
+    background: var(--color-Background-100);
+    color: var(--color-Text-800);
+    border-bottom: var(--border-width) solid var(--color-Neutral-200);
+  }
+
+  .announcement-ticker--bottom.announcement-ticker--light {
+    border-bottom: none;
+    border-top: var(--border-width) solid var(--color-Neutral-200);
+  }
+
+  /* ========== TRACK & SEGMENT ========== */
+  .announcement-ticker__track {
+    display: flex;
+    width: fit-content;
+  }
+
+  .announcement-ticker__segment {
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--space-3xl);
+    padding-right: var(--space-3xl);
+  }
+
+  /* ========== TICKER ITEMS ========== */
+  .announcement-ticker__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    white-space: nowrap;
+    color: inherit;
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+  }
+
+  .announcement-ticker__item--link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* ========== ICON ========== */
+  .announcement-ticker__icon {
+    flex-shrink: 0;
+  }
+
+  /* ========== TEXT ========== */
+  .announcement-ticker__text {
+    letter-spacing: 0.02em;
+  }
+
+  /* ========== SEPARATOR DOTS ========== */
+  .announcement-ticker__item:not(:last-child)::after {
+    content: '';
+    display: inline-block;
+    width: var(--space-xs);
+    height: var(--space-xs);
+    background: currentColor;
+    border-radius: var(--radius-full);
+    margin-left: var(--space-3xl);
+    opacity: 0.5;
+  }
+
+  /* ========== PAUSE ON HOVER ========== */
+  .announcement-ticker--pause-hover:hover {
+    cursor: default;
+  }
+
+  .announcement-ticker--pause-hover .announcement-ticker__item--link:hover {
+    cursor: pointer;
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  @media (prefers-reduced-motion: reduce) {
+    .announcement-ticker__track {
+      animation: none;
+    }
+  }
+</style>
