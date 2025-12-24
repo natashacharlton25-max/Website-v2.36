@@ -18,7 +18,6 @@
  * @param variant - 'simple' | 'image' | 'gradient' (default: 'simple')
  * @param gradient - Gradient token name for 'gradient' variant (default: 'hero')
  * @param alignment - 'left' | 'center' (default: 'left')
- * @param bgClass - Additional background class like 'bg-alt'
  * @param containerSize - Container width: '6xl' | '7xl' | 'full' (default: '6xl')
  * @param buttons - Array of CTA buttons [{text, href, variant}]
  * @param overlayOpacity - Overlay opacity for image variant (default: 0.6)
@@ -37,7 +36,6 @@ interface Props {
   variant?: 'simple' | 'image' | 'gradient';
   gradient?: 'hero' | 'primary' | 'primary-soft' | 'primary-light' | 'secondary' | 'secondary-soft' | 'accent1' | 'accent2';
   alignment?: 'left' | 'center';
-  bgClass?: string;
   containerSize?: '6xl' | '7xl' | 'full';
   buttons?: Array<{
     text: string;
@@ -58,7 +56,6 @@ const {
   variant = 'simple',
   gradient = 'hero',
   alignment = 'left',
-  bgClass = '',
   containerSize = '6xl',
   buttons = [],
   overlayOpacity = 0.6,
@@ -70,7 +67,7 @@ const alignmentClass = alignment === 'center' ? 'hero-section--centered' : '';
 
 {variant === 'image' && image && imagePosition === 'full' ? (
   <!-- Image Variant: Full-width background image with overlay -->
-  <section class={`hero-section hero-section--image ${alignmentClass} ${bgClass}`}>
+  <section class={`hero-section hero-section--image ${alignmentClass}`}>
     <div class="hero-section__image-wrapper">
       <Image src={image} alt={imageAlt} class="hero-section__image" />
       <div class="hero-section__overlay" style={`--overlay-opacity: ${overlayOpacity}`}></div>
@@ -97,7 +94,7 @@ const alignmentClass = alignment === 'center' ? 'hero-section--centered' : '';
   </section>
 ) : variant === 'image' && image && (imagePosition === 'left' || imagePosition === 'right') ? (
   <!-- Image Variant: Split layout with image on left or right -->
-  <section class={`hero-section hero-section--image-split hero-section--image-${imagePosition} ${bgClass}`}>
+  <section class={`hero-section hero-section--image-split hero-section--image-${imagePosition}`}>
     <div class={containerClass}>
       <div class="hero-section__split-wrapper">
         <div class="hero-section__split-image">
@@ -125,7 +122,7 @@ const alignmentClass = alignment === 'center' ? 'hero-section--centered' : '';
 ) : variant === 'gradient' ? (
   <!-- Gradient Variant: Gradient background -->
   <section
-    class={`hero-section hero-section--gradient hero-section--gradient-${gradient} ${alignmentClass} ${bgClass}`}
+    class={`hero-section hero-section--gradient hero-section--gradient-${gradient} ${alignmentClass}`}
   >
     <div class={containerClass}>
       <div class="hero-section__content">
@@ -148,7 +145,7 @@ const alignmentClass = alignment === 'center' ? 'hero-section--centered' : '';
   </section>
 ) : (
   <!-- Simple Variant: Plain background -->
-  <section class={`hero-section hero-section--simple ${alignmentClass} ${bgClass}`}>
+  <section class={`hero-section hero-section--simple ${alignmentClass}`}>
     <div class={containerClass}>
       <div class="hero-section__content">
         <h1 class="hero-section__title">{title}</h1>

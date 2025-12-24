@@ -1,0 +1,181 @@
+---
+import Button from '../Button/Button.astro';
+import TrustBadges from '../Common/TrustBadges.astro';
+import FreeNotice from './FreeNotice.astro';
+
+interface Props {
+  emptyMessage?: string;
+  browseHref?: string;
+  browseText?: string;
+}
+
+const {
+  emptyMessage = "No downloads selected",
+  browseHref = "/assets",
+  browseText = "Browse Resources"
+} = Astro.props;
+---
+
+<div class="download-summary">
+  <h2 class="download-summary__title">Your Downloads</h2>
+
+  <div id="order-items" class="download-summary__items">
+    <!-- Items will be populated from cart -->
+    <div class="download-summary__empty">
+      <p>{emptyMessage}</p>
+      <Button href={browseHref} variant="outline" size="sm">{browseText}</Button>
+    </div>
+  </div>
+
+  <div class="download-summary__divider"></div>
+
+  <FreeNotice />
+
+  <TrustBadges />
+</div>
+
+<script>
+  // Load cart items and populate download summary
+  function loadDownloadItems() {
+    const cartData = localStorage.getItem('shopping_cart');
+    if (!cartData) return;
+
+    try {
+      const cart = JSON.parse(cartData);
+      if (!cart.items || cart.items.length === 0) return;
+
+      const orderItemsContainer = document.getElementById('order-items');
+      if (!orderItemsContainer) return;
+
+      // Clear empty message
+      orderItemsContainer.innerHTML = '';
+
+      // Populate items (no prices, just the items)
+      cart.items.forEach((item: any) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'download-summary__item';
+        itemEl.innerHTML = `
+          <div class="download-summary__item-info">
+            <div class="download-summary__item-image">
+              <img src="${item.image || ''}" alt="${item.name}" />
+            </div>
+            <div class="download-summary__item-details">
+              <h4 class="download-summary__item-name">${item.name}</h4>
+              <p class="download-summary__item-type">${item.format || 'Digital Download'}</p>
+            </div>
+          </div>
+          <div class="download-summary__item-badge">
+            <span class="download-summary__badge">FREE</span>
+          </div>
+        `;
+        orderItemsContainer.appendChild(itemEl);
+      });
+    } catch (error) {
+      console.error('Error loading cart:', error);
+    }
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    loadDownloadItems();
+  });
+</script>
+
+<style>
+  .download-summary {
+    padding: var(--space-2xl);
+    position: sticky;
+    top: 100px;
+  }
+
+  .download-summary__title {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-lg);
+    color: var(--brand-text);
+  }
+
+  .download-summary__items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .download-summary__empty {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--brand-text-muted);
+  }
+
+  .download-summary__empty p {
+    margin-bottom: var(--space-md);
+  }
+
+  .download-summary__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .download-summary__item-info {
+    display: flex;
+    gap: var(--space-md);
+    flex: 1;
+  }
+
+  .download-summary__item-image {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    background-color: var(--brand-neutral-100);
+    flex-shrink: 0;
+  }
+
+  .download-summary__item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .download-summary__item-details {
+    flex: 1;
+  }
+
+  .download-summary__item-name {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    margin-bottom: var(--space-xs);
+    color: var(--brand-text);
+  }
+
+  .download-summary__item-type {
+    font-size: var(--text-sm);
+    color: var(--brand-text-muted);
+    margin: 0;
+  }
+
+  .download-summary__item-badge {
+    display: flex;
+    align-items: center;
+  }
+
+  .download-summary__badge {
+    padding: var(--space-xs) var(--space-sm);
+    background-color: var(--brand-success-light);
+    color: var(--brand-success-dark);
+    border-radius: var(--border-radius-md);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .download-summary__divider {
+    height: 1px;
+    background-color: var(--brand-neutral-200);
+    margin: var(--space-lg) 0;
+  }
+</style>

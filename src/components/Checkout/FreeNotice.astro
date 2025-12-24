@@ -1,0 +1,58 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "100% Free",
+  description = "All resources are completely free. No credit card required."
+} = Astro.props;
+---
+
+<div class="free-notice">
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    aria-hidden="true"
+  >
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </svg>
+  <div>
+    <p class="free-notice__title">{title}</p>
+    <p class="free-notice__text">{description}</p>
+  </div>
+</div>
+
+<style>
+  .free-notice {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background-color: var(--brand-success-light);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .free-notice svg {
+    flex-shrink: 0;
+    color: var(--brand-success);
+  }
+
+  .free-notice__title {
+    font-weight: var(--font-bold);
+    color: var(--brand-success-dark);
+    margin-bottom: var(--space-xs);
+  }
+
+  .free-notice__text {
+    font-size: var(--text-sm);
+    color: var(--brand-success-dark);
+    margin: 0;
+  }
+</style>

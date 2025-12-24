@@ -1,0 +1,100 @@
+---
+/**
+ * Badge - Reusable badge/tag component with consistent type-to-color mapping
+ *
+ * Used across product cards, insight cards, project cards, and anywhere else badges are needed
+ * For unknown types (like dynamic insight categories), uses default primary color
+ *
+ * Props:
+ * @param type - The badge type (worksheet, workbook, guide, toolkit, cards, poster, activity, etc.)
+ * @param label - Optional custom label (defaults to capitalized type)
+ */
+
+interface Props {
+  type: string;
+  label?: string;
+}
+
+const { type, label } = Astro.props;
+
+// Global badge type to CSS class mapping
+// This ensures consistent colors across all cards site-wide
+// For unknown types (like dynamic insight categories), falls back to badge-default
+const badgeClasses: Record<string, string> = {
+  // Product types
+  worksheet: 'badge-worksheet',
+  workbook: 'badge-workbook',
+  guide: 'badge-guide',
+  toolkit: 'badge-toolkit',
+  cards: 'badge-cards',
+  poster: 'badge-poster',
+  activity: 'badge-activity',
+  // Status types
+  hot: 'badge-hot',
+  free: 'badge-free',
+  // Add more predefined types as needed
+};
+
+const badgeClass = badgeClasses[type.toLowerCase()] || 'badge-default';
+const displayLabel = label || type.charAt(0).toUpperCase() + type.slice(1);
+---
+
+<span class={`badge ${badgeClass}`}>
+  {displayLabel}
+</span>
+
+<style>
+  /* ========== BASE BADGE STYLES ========== */
+  .badge {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    color: var(--color-White);
+  }
+
+  /* ========== BADGE TYPE COLORS ========== */
+  .badge-default {
+    background-color: var(--color-Primary-500);
+  }
+
+  .badge-worksheet {
+    background-color: var(--color-Primary-600);
+  }
+
+  .badge-workbook {
+    background-color: var(--color-Secondary-600);
+  }
+
+  .badge-guide {
+    background-color: var(--color-AccentOne-600);
+  }
+
+  .badge-toolkit {
+    background-color: var(--color-AccentTwo-600);
+  }
+
+  .badge-cards {
+    background-color: var(--color-AccentThree-600);
+  }
+
+  .badge-poster {
+    background-color: var(--color-AccentFour-600);
+  }
+
+  .badge-activity {
+    background-color: var(--color-AccentFive-600);
+  }
+
+  .badge-hot {
+    background-color: var(--color-Error-500);
+  }
+
+  .badge-free {
+    background-color: var(--color-Primary-600);
+  }
+
+  /* A11Y theme overrides in: src/styles/a11y/components/badge.css */
+</style>

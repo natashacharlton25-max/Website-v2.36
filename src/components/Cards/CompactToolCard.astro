@@ -1,0 +1,130 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  href: string;
+  name: string;
+  category: string;
+  description: string;
+  image: ImageMetadata;
+}
+
+const { href, name, category, description, image } = Astro.props;
+---
+
+<a href={href} class="compact-tool-card">
+  <div class="compact-image">
+    <Image src={image} alt={name} />
+  </div>
+  <div class="compact-content">
+    <div class="compact-category">{category}</div>
+    <h3 class="compact-title">{name}</h3>
+    <p class="compact-description">{description}</p>
+    <span class="compact-arrow" aria-hidden="true">→</span>
+  </div>
+</a>
+
+<style>
+  .compact-tool-card {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background-color: var(--color-Background-50);
+    border: 1px solid var(--color-Neutral-200);
+    border-radius: var(--border-radius-lg);
+    text-decoration: none;
+    transition: all var(--transition-base);
+    position: relative;
+  }
+
+  .compact-tool-card:hover {
+    border-color: var(--color-Primary-400);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .compact-tool-card:focus-visible {
+    outline: 2px solid var(--color-Primary-600);
+    outline-offset: 2px;
+  }
+
+  .compact-image {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    background-color: var(--color-Background-100);
+  }
+
+  .compact-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .compact-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .compact-category {
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-Primary-600);
+  }
+
+  .compact-title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--color-Text-800);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .compact-description {
+    font-size: var(--text-sm);
+    color: var(--color-Text-600);
+    margin: 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .compact-arrow {
+    position: absolute;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+    font-size: var(--text-xl);
+    color: var(--color-Primary-600);
+    transition: transform var(--transition-base);
+  }
+
+  .compact-tool-card:hover .compact-arrow {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 640px) {
+    .compact-tool-card {
+      flex-direction: column;
+    }
+
+    .compact-image {
+      width: 100%;
+      height: 120px;
+    }
+
+    .compact-arrow {
+      position: static;
+      align-self: flex-end;
+    }
+  }
+</style>

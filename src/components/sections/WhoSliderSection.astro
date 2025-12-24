@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import Button from '../Button/Button.astro';
+
+interface Slide {
+  id: string;
+  title: string;
+  image: string;
+  imageAlt: string;
+  content: string;
+}
+
+interface Props {
+  title: string;
+  subtitle: string;
+  titleImage: ImageMetadata;
+  slides: Slide[];
+  slideImages: ImageMetadata[];
+}
+
+const { title, subtitle, titleImage, slides, slideImages } = Astro.props;
+---
+
+<section class="who-slider">
+  <div class="who-slider__wrapper">
+    <div class="who-slider__track js-who-slider">
+      <!-- Slide 1: Title Card -->
+      <div class="who-slider__slide">
+        <div class="who-slider__title-card">
+          <div class="who-slider__title-image">
+            <Image src={titleImage} alt="Contemplative figure looking toward hope" loading="lazy" />
+          </div>
+          <div class="who-slider__title-content">
+            <h2 class="who-slider__title">{title}</h2>
+            <p class="who-slider__subtitle" set:html={subtitle}></p>
+            <div class="who-slider__card-nav">
+              <Button href="#" variant="primary" className="js-who-next">Explore Further</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Slides -->
+      {slides.map((slide, index) => (
+        <div class="who-slider__slide">
+          <div class="who-slider__card">
+            <div class="who-slider__card-image">
+              <Image src={slideImages[index]} alt={slide.imageAlt} loading="lazy" />
+            </div>
+            <div class="who-slider__card-content">
+              <h3 class="who-slider__card-title">{slide.title}</h3>
+              <p class="who-slider__card-text">{slide.content}</p>
+              <div class="who-slider__card-nav">
+                <button class="who-slider__nav-btn js-who-prev" aria-label="Previous slide">&lt;</button>
+                <button class="who-slider__nav-btn js-who-next" aria-label="Next slide">&gt;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Slider Navigation -->
+    <button class="who-slider__controls who-slider__controls--prev js-who-prev" aria-label="Previous slide">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <button class="who-slider__controls who-slider__controls--next js-who-next" aria-label="Next slide">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    </button>
+
+    <!-- Slider Indicators -->
+    <div class="who-slider__indicators">
+      <button class="who-slider__dot is-active js-who-dot" data-slide="0" aria-label="Go to slide 1"></button>
+      {slides.map((_, index) => (
+        <button class="who-slider__dot js-who-dot" data-slide={index + 1} aria-label={`Go to slide ${index + 2}`}></button>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script src="../../scripts/who-slider.ts"></script>

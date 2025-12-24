@@ -3,10 +3,9 @@ import BaseLayout from '../Layouts/BaseLayout.astro';
 import HeroMorphAnimation from '../components/Sections/HeroMorphAnimation.astro';
 import ImageTextSection from '../components/Sections/ImageTextSection.astro';
 import PillarsSection from '../components/Sections/PillarsSection.astro';
+import WhoSliderSection from '../components/Sections/WhoSliderSection.astro';
 import CTASection from '../components/Sections/CTASection.astro';
 import FooterWithMask from '../components/Footer/FooterWithMask.astro';
-import Button from '../components/Button/Button.astro';
-import { Image } from 'astro:assets';
 
 // Image imports from src/PageImages for Astro optimization
 import bridgeImage from '../PageImages/Home/Bridge/Bridge.png';
@@ -22,53 +21,47 @@ import slider4Image from '../PageImages/Home/Who/Slider-4.png';
 import slider5Image from '../PageImages/Home/Who/Slider-5.png';
 import slider6Image from '../PageImages/Home/Who/Slider-6.png';
 
-// Hero section data
-const heroButtons = [
-  { text: 'Explore Resources', href: '/assets', variant: 'primary' as const },
-  { text: 'Start Here', href: '/about', variant: 'outline' as const }
-];
+// Import JSON data
+import heroDataRaw from '../data/home/hero.json';
+import bridgeDataRaw from '../data/home/bridge.json';
+import pillarsDataRaw from '../data/home/pillars.json';
+import whoSliderDataRaw from '../data/home/who-slider.json';
+import approachDataRaw from '../data/home/approach.json';
+import ctaDataRaw from '../data/home/cta.json';
 
-// The Bridge section data
-const philosophyContent = [
-  "You're not broken. You never were.",
-  "What happened to you left marks: on how you see yourself, how you move through the world, how you protect your heart. That's not weakness. That's survival.",
-  "But survival mode wasn't meant to be permanent. And somewhere in you, there's a knowing that there's more available. More ease. More joy. More you.",
-  "Walking with a Smile exists to help you find your way there, at your pace, on your terms."
-];
+// Type assertions for proper typing
+const heroData = heroDataRaw as { buttons: Array<{ text: string; href: string; variant: 'primary' | 'outline' }> };
+const bridgeData = bridgeDataRaw as {
+  title: string;
+  content: string[];
+  image: string;
+  imageAlt: string;
+  imagePosition: 'left' | 'right';
+  ctaText: string;
+  ctaHref: string;
+};
+const pillarsData = pillarsDataRaw as typeof pillarsDataRaw;
+const whoSliderData = whoSliderDataRaw as typeof whoSliderDataRaw;
+const approachData = approachDataRaw as {
+  title: string;
+  content: string[];
+  image: string;
+  imageAlt: string;
+  imagePosition: 'left' | 'right';
+  ctaText: string;
+  ctaHref: string;
+};
+const ctaData = ctaDataRaw as { title: string; description: string[]; buttons: Array<{ text: string; href: string; variant: 'primary' | 'outline' }> };
 
-// What We Offer - Three pillars data
-const pillars = [
-  {
-    image: pillar1Image,
-    title: 'Clear, honest information',
-    description: 'Understand what you\'re experiencing without the jargon or overwhelm'
-  },
-  {
-    image: pillar2Image,
-    title: 'Practical tools',
-    description: 'Small, doable steps you can take today, not someday'
-  },
-  {
-    image: pillar3Image,
-    title: 'A space that respects your pace',
-    description: 'No pressure, no performance, no "shoulds"'
-  }
-];
+// Map pillar images
+const pillarImages = [pillar1Image, pillar2Image, pillar3Image];
+const pillarsWithImages = pillarsData.pillars.map((pillar, index) => ({
+  ...pillar,
+  image: pillarImages[index]
+}));
 
-// Our Approach data
-const approachContent = [
-  "We believe you already have what you need.",
-  "Our role isn't to rescue or direct. It's to offer tools, information, and encouragement while you lead the way.",
-  "Because healing isn't about becoming someone new. It's about coming home to who you've always been: underneath the protection, behind the walls, beyond the wound.",
-  "You are whole. You are capable. And you are the expert on your own life.",
-  "We hope to remind you, that you are still you."
-];
-
-// Final CTA data
-const ctaButtons = [
-  { text: 'Explore Resources', href: '/assets', variant: 'primary' as const },
-  { text: 'Read More', href: '/insights', variant: 'outline' as const }
-];
+// Map who slider images
+const whoSliderImages = [slider1Image, slider2Image, slider3Image, slider4Image, slider5Image, slider6Image];
 ---
 
 <BaseLayout
@@ -78,198 +71,52 @@ const ctaButtons = [
 >
   <!-- Hero Section with Morphing SVG Animation -->
   <HeroMorphAnimation
-    ctaButtons={heroButtons}
+    ctaButtons={heroData.buttons}
   />
 
   <!-- The Bridge Section -->
   <ImageTextSection
-    title="This isn't about 'fixing' you."
-    content={philosophyContent}
+    title={bridgeData.title}
+    content={bridgeData.content}
     image={bridgeImage}
-    imageAlt="A path forward"
-    imagePosition="left"
-    ctaText=""
-    ctaHref=""
-    bgClass="bg-alt"
+    imageAlt={bridgeData.imageAlt}
+    imagePosition={bridgeData.imagePosition}
+    ctaText={bridgeData.ctaText}
+    ctaHref={bridgeData.ctaHref}
   />
 
   <!-- What We Offer Section -->
   <PillarsSection
-    title="What We Offer"
-    description="Practical support for real life. We're not here to tell you who to be or how to heal. We're here to walk alongside you with resources that actually help:"
-    pillars={pillars}
-    bgClass="bg-alt"
+    title={pillarsData.title}
+    description={pillarsData.description}
+    pillars={pillarsWithImages}
   />
 
   <!-- Who This Is For Section -->
-  <section class="who-section bg-alt">
-    <div class="who-slider-wrapper">
-      <div class="who-slider">
-        <!-- Slide 1: Title Card -->
-        <div class="who-slide">
-          <div class="who-title-card">
-            <div class="who-title-image">
-              <Image src={sliderTitleImage} alt="Contemplative figure looking toward hope" loading="lazy" />
-            </div>
-            <div class="who-title-content">
-              <h2 class="section-title">Who This Is For</h2>
-              <p class="section-subtitle">Healing from trauma isn't linear.<br />See if you recognise yourself here.</p>
-              <div class="who-card-nav who-title-nav">
-                <Button href="#" variant="primary" className="who-card-next">Explore Further</Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 2: The Survivor -->
-        <div class="who-slide">
-          <div class="who-card">
-            <div class="who-card-image">
-              <Image src={slider1Image} alt="Soft morning light through a window" loading="lazy" />
-            </div>
-            <div class="who-card-content">
-              <h3 class="who-card-title">The Survivor</h3>
-              <p class="who-card-text">If this sounds familiar... You've done the hard work of surviving. Maybe you've had therapy, read the books, tried the things. But something still feels stuck. You know the language of healing, but the felt sense of it remains just out of reach. Your body still holds what your mind has processed. If you're ready to shift from getting through life to living it, you belong here.</p>
-              <div class="who-card-nav">
-                <button class="who-card-nav-btn who-card-prev" aria-label="Previous slide">&lt;</button>
-                <button class="who-card-nav-btn who-card-next" aria-label="Next slide">&gt;</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 3: The Beginner -->
-        <div class="who-slide">
-          <div class="who-card">
-            <div class="who-card-image">
-              <Image src={slider2Image} alt="A quiet journal and cup of tea, suggesting the beginning of something" loading="lazy" />
-            </div>
-            <div class="who-card-content">
-              <h3 class="who-card-title">The Beginner</h3>
-              <p class="who-card-text">Or maybe... You're just starting to connect the dots. Something in your past is affecting your present, but you're not quite sure what or how. The pieces are beginning to surface, and you need somewhere gentle to begin. A place that meets you exactly where you are, without needing you to have it all figured out first. You don't need a perfect trauma narrative to deserve support.</p>
-              <div class="who-card-nav">
-                <button class="who-card-nav-btn who-card-prev" aria-label="Previous slide">&lt;</button>
-                <button class="who-card-nav-btn who-card-next" aria-label="Next slide">&gt;</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 4: The Cycle-Breaker -->
-        <div class="who-slide">
-          <div class="who-card">
-            <div class="who-card-image">
-              <Image src={slider3Image} alt="A path through trees, clearly walked but not overgrown" loading="lazy" />
-            </div>
-            <div class="who-card-content">
-              <h3 class="who-card-title">The Cycle-Breaker</h3>
-              <p class="who-card-text">Perhaps you've noticed... The same patterns keep showing up. You react in ways that don't match the situation. Your nervous system fires alarms when you're actually safe. You're working to break cycles, whether from your family, your past, or patterns you developed just to survive. You need tools that go deeper than 'think positive' and 'let it go.' You're ready to rewire, not just cope.</p>
-              <div class="who-card-nav">
-                <button class="who-card-nav-btn who-card-prev" aria-label="Previous slide">&lt;</button>
-                <button class="who-card-nav-btn who-card-next" aria-label="Next slide">&gt;</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 5: The Invisible Wound -->
-        <div class="who-slide">
-          <div class="who-card">
-            <div class="who-card-image">
-              <Image src={slider4Image} alt="Water surface with light filtering through" loading="lazy" />
-            </div>
-            <div class="who-card-content">
-              <h3 class="who-card-title">The Invisible Wound</h3>
-              <p class="who-card-text">Maybe your story is... There are no visible scars. Nothing 'bad enough' to count, or so you've been told. But you lived through something that left marks on your nervous system, your self-trust, your sense of safety in the world. What happened to you was real, even if others couldn't see it. You don't need to justify your pain to deserve healing.</p>
-              <div class="who-card-nav">
-                <button class="who-card-nav-btn who-card-prev" aria-label="Previous slide">&lt;</button>
-                <button class="who-card-nav-btn who-card-next" aria-label="Next slide">&gt;</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 6: The Rebuilder -->
-        <div class="who-slide">
-          <div class="who-card">
-            <div class="who-card-image">
-              <Image src={slider5Image} alt="Hands gently holding seeds or small plant" loading="lazy" />
-            </div>
-            <div class="who-card-content">
-              <h3 class="who-card-title">The Rebuilder</h3>
-              <p class="who-card-text">You might be... Finally stable but not quite *you* yet. The crisis has passed but you're left wondering who you are underneath all the survival strategies. You're safe now, but your body doesn't quite believe it. You want to trust yourself again, to feel at home in your own life. You're ready to move from 'not broken' to actually whole.</p>
-              <div class="who-card-nav">
-                <button class="who-card-nav-btn who-card-prev" aria-label="Previous slide">&lt;</button>
-                <button class="who-card-nav-btn who-card-next" aria-label="Next slide">&gt;</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 7: The Uncertain -->
-        <div class="who-slide">
-          <div class="who-card">
-            <div class="who-card-image">
-              <Image src={slider6Image} alt="Space for uncertainty and questions" loading="lazy" />
-            </div>
-            <div class="who-card-content">
-              <h3 class="who-card-title">The Uncertain</h3>
-              <p class="who-card-text">Perhaps the truth is... You're not sure where you fit. And here's the thing: knowing yourself isn't about finding the right box to climb into. Sometimes the most powerful knowing comes from recognising what you're not. What doesn't fit. What never did. You don't have to be everything, but you can be anything you want to be. You're welcome here without needing the perfect words or the right story. Questions, uncertainty, and all the space in between. Sometimes healing starts with 'I don't know who I am yet, but I'm learning what I'm not,' and that's exactly enough.</p>
-              <div class="who-card-nav">
-                <button class="who-card-nav-btn who-card-prev" aria-label="Previous slide">&lt;</button>
-                <button class="who-card-nav-btn who-card-next" aria-label="Next slide">&gt;</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Slider Navigation -->
-      <button class="slider-nav slider-nav-prev" aria-label="Previous slide">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-      </button>
-      <button class="slider-nav slider-nav-next" aria-label="Next slide">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="9 18 15 12 9 6"/>
-        </svg>
-      </button>
-
-      <!-- Slider Indicators -->
-      <div class="slider-indicators">
-        <button class="slider-dot active" aria-label="Go to slide 1"></button>
-        <button class="slider-dot" aria-label="Go to slide 2"></button>
-        <button class="slider-dot" aria-label="Go to slide 3"></button>
-        <button class="slider-dot" aria-label="Go to slide 4"></button>
-        <button class="slider-dot" aria-label="Go to slide 5"></button>
-        <button class="slider-dot" aria-label="Go to slide 6"></button>
-        <button class="slider-dot" aria-label="Go to slide 7"></button>
-      </div>
-    </div>
-  </section>
+  <WhoSliderSection
+    title={whoSliderData.title}
+    subtitle={whoSliderData.subtitle}
+    titleImage={sliderTitleImage}
+    slides={whoSliderData.slides}
+    slideImages={whoSliderImages}
+  />
 
   <!-- Our Approach Section -->
   <ImageTextSection
-    title="Our Approach"
-    content={approachContent}
+    title={approachData.title}
+    content={approachData.content}
     image={approachImage}
-    imageAlt="Your journey"
-    imagePosition="right"
-    ctaText=""
-    ctaHref=""
-    bgClass="bg-alt"
+    imageAlt={approachData.imageAlt}
+    imagePosition={approachData.imagePosition}
+    ctaText={approachData.ctaText}
+    ctaHref={approachData.ctaHref}
   />
 
   <!-- Final CTA -->
   <CTASection
-    title="A Note Before You Begin"
-    description={[
-      "This isn't therapy. It's not a replacement for professional support when you need it. Think of it more like a companion resource, something to reach for when you're ready to explore what's possible.",
-      "Start wherever feels right. Browse our resources, take what resonates, leave what doesn't. There's no correct order, no steps you have to complete, no one checking up on whether you've done the homework.",
-      "There's no right way to do this. Only your way."
-    ]}
-    buttons={ctaButtons}
+    title={ctaData.title}
+    description={ctaData.description}
+    buttons={ctaData.buttons}
   />
 
   <!-- Footer with Interactive Mask -->
@@ -277,695 +124,3 @@ const ctaButtons = [
     backgroundImage="/Footer/Footer-Reveal.png"
   />
 </BaseLayout>
-
-<style>
-  /* Who This Is For Section - uses global .bg-alt class */
-  .who-section {
-    padding: var(--space-4xl) 0;
-  }
-
-  /* Title Card - First Slide */
-  .who-title-card {
-    display: flex;
-    gap: var(--space-2xl);
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 300px;
-    padding: var(--space-2xl) var(--space-3xl);
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
-    transition: all var(--transition-base);
-  }
-
-  .who-title-image {
-    flex: 0 0 30%;
-    max-width: 300px;
-    aspect-ratio: 1;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-  }
-
-  .who-title-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-  }
-
-  .who-title-content {
-    flex: 1 1 70%;
-    text-align: left;
-  }
-
-  .who-title-card .section-title {
-    font-size: var(--text-3xl);
-    font-weight: var(--font-semibold);
-    margin-bottom: var(--space-md);
-    color: var(--color-Text-700);
-  }
-
-  .who-title-card .section-subtitle {
-    font-size: var(--text-xl);
-    color: var(--color-Text-600);
-    font-family: var(--font-heading);
-    margin-bottom: var(--space-xl);
-    font-weight: var(--font-medium);
-  }
-
-  .who-title-nav {
-    margin-top: var(--space-md);
-  }
-
-  .who-card {
-    display: flex;
-    gap: var(--space-2xl);
-    align-items: center;
-    padding: var(--space-2xl);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
-    transition: all var(--transition-base);
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .who-card-image {
-    flex: 0 0 30%;
-    max-width: 300px;
-    aspect-ratio: 1;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-  }
-
-  .who-card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-  }
-
-  .who-card-content {
-    flex: 1 1 70%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-  }
-
-  .who-card-title {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    font-family: var(--font-heading);
-    margin: 0;
-  }
-
-  .who-card-text {
-    font-size: var(--text-base);
-    color: var(--color-Text-600);
-    line-height: var(--leading-relaxed);
-    margin: 0;
-    font-weight: var(--font-medium);
-  }
-
-  .who-card-nav {
-    display: flex;
-    gap: var(--space-md);
-    margin-top: var(--space-lg);
-  }
-
-  .who-card-nav-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid var(--color-Primary-500);
-    background: var(--color-Background-100);
-    color: var(--color-Primary-500);
-    font-size: var(--text-lg);
-    font-weight: var(--font-bold);
-    cursor: pointer;
-    transition: all var(--transition-base);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .who-card-nav-btn:hover {
-    background: var(--color-Primary-500);
-    color: var(--color-Background-50);
-    transform: scale(1.1);
-    box-shadow: var(--shadow-md);
-  }
-
-  .who-card-nav-btn:active {
-    transform: scale(0.95);
-  }
-
-  @media (max-width: 1200px) {
-    .who-slider-wrapper {
-      padding: var(--space-2xl) var(--space-md);
-    }
-
-    .who-slide {
-      padding: 0 var(--space-sm);
-    }
-
-    .who-card {
-      max-width: 95%;
-      padding: var(--space-xl);
-    }
-
-    .who-card-image {
-      width: 280px;
-      height: 280px;
-    }
-
-    .who-title-card {
-      max-width: 95%;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    .who-slider-wrapper {
-      padding: var(--space-xl) var(--space-md);
-    }
-
-    .who-card {
-      flex-direction: column;
-      max-width: 600px;
-      padding: var(--space-xl);
-    }
-
-    .who-card-image {
-      width: 100%;
-      max-width: 400px;
-      height: 300px;
-    }
-
-    .who-card-content {
-      text-align: center;
-    }
-
-    .who-card-nav {
-      justify-content: center;
-    }
-
-    .who-title-card {
-      max-width: 600px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .who-section {
-      padding: var(--space-3xl) 0;
-    }
-
-    .who-title-card {
-      flex-direction: column;
-      min-height: 300px;
-      gap: var(--space-lg);
-    }
-
-    .who-title-image {
-      width: 100%;
-      height: 250px;
-    }
-
-    .who-title-content {
-      text-align: center;
-    }
-
-    .who-title-card .section-subtitle {
-      font-size: var(--text-lg);
-    }
-
-    .who-card-nav-btn {
-      width: 36px;
-      height: 36px;
-      font-size: var(--text-base);
-    }
-
-    .who-card {
-      gap: var(--space-lg);
-      padding: var(--space-lg);
-      max-width: 100%;
-    }
-
-    .who-card-image {
-      max-width: 100%;
-      height: 250px;
-    }
-
-    .who-card-title {
-      font-size: var(--text-xl);
-    }
-
-    .who-card-text {
-      font-size: var(--text-sm);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .who-title-card .section-title {
-      font-size: var(--text-4xl);
-    }
-
-    .who-card-title {
-      font-size: var(--text-3xl);
-    }
-
-    .who-card-text {
-      font-size: var(--text-lg);
-    }
-  }
-
-  /* Slider Styles */
-  .who-slider-wrapper {
-    position: relative;
-    width: 100%;
-    max-width: 100vw;
-    overflow: hidden;
-    padding: var(--space-2xl) 0;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
-
-  .who-slider {
-    display: flex;
-    transition: transform 0.8s ease-in-out;
-    width: 100%;
-  }
-
-  .who-slide {
-    min-width: 100%;
-    width: 100%;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 var(--space-md);
-    box-sizing: border-box;
-  }
-
-  /* Navigation Buttons - Hidden since cards have their own navigation */
-  .slider-nav {
-    display: none; /* Cards have their own navigation buttons */
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 48px;
-    height: 48px;
-    background: var(--glass-surface-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid var(--color-Neutral-200);
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    z-index: 10;
-    color: var(--color-Primary-600);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .slider-nav:hover {
-    background: var(--color-Primary-500);
-    color: var(--color-Background-50);
-    border-color: var(--color-Primary-500);
-    transform: translateY(-50%) scale(1.1);
-  }
-
-  .slider-nav:active {
-    transform: translateY(-50%) scale(0.95);
-  }
-
-  .slider-nav-prev {
-    left: -60px;
-  }
-
-  .slider-nav-next {
-    right: -60px;
-  }
-
-  /* Dot Indicators */
-  .slider-indicators {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-sm);
-    margin-top: var(--space-xl);
-  }
-
-  .slider-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--color-Text-300);
-    border: none;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    padding: 0;
-  }
-
-  .slider-dot:hover {
-    background: var(--color-Primary-400);
-    transform: scale(1.2);
-  }
-
-  .slider-dot.active {
-    background: var(--color-Primary-500);
-    width: 32px;
-    border-radius: 6px;
-  }
-
-  /* Mobile adjustments for slider */
-  @media (max-width: 1100px) {
-    .slider-nav-prev {
-      left: -20px;
-    }
-
-    .slider-nav-next {
-      right: -20px;
-    }
-
-    .slider-nav {
-      width: 40px;
-      height: 40px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .slider-nav-prev {
-      left: 10px;
-    }
-
-    .slider-nav-next {
-      right: 10px;
-    }
-
-    .slider-nav {
-      width: 36px;
-      height: 36px;
-      background: var(--glass-surface-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-  }
-
-  @media (max-width: 600px) {
-    /* Convert slider to static stacked cards */
-    .who-slider-wrapper {
-      overflow: visible;
-      padding: var(--space-xl) var(--space-md);
-    }
-
-    .who-slider {
-      display: block;
-      transform: none !important;
-      transition: none;
-    }
-
-    .who-slide {
-      flex: none;
-      width: 100%;
-      margin-bottom: var(--space-2xl);
-      opacity: 1 !important;
-    }
-
-    .who-slide:last-child {
-      margin-bottom: 0;
-    }
-
-    /* Hide slider navigation on mobile */
-    .slider-nav {
-      display: none;
-    }
-
-    .slider-indicators {
-      display: none;
-    }
-
-    /* Adjust card navigation buttons positioning */
-    .who-card-nav {
-      display: none; /* Hide individual card nav buttons since all cards are visible */
-    }
-
-    /* Better card styling for stacked layout */
-    .who-card,
-    .who-title-card {
-      box-shadow: var(--shadow-sm);
-      border-radius: var(--border-radius-lg);
-      background: var(--color-Background-100);
-      padding: var(--space-lg);
-    }
-
-    .who-card-image,
-    .who-title-image {
-      border-radius: var(--border-radius);
-    }
-  }
-
-  @media (max-width: 250px) {
-    .who-section {
-      padding: var(--space-2xl) 0.25rem;
-    }
-
-    /* Slider Wrapper */
-    .who-slider-wrapper {
-      padding: var(--space-lg) 0.5rem;
-    }
-
-    .who-slide {
-      margin-bottom: var(--space-xl);
-    }
-
-    /* Who Title Card */
-    .who-title-card {
-      padding: var(--space-md) 0.5rem;
-      min-height: 220px;
-      gap: var(--space-sm);
-    }
-
-    .who-title-image {
-      height: 160px;
-    }
-
-    .who-title-card .section-title {
-      font-size: var(--text-base);
-      margin-bottom: var(--space-xs);
-      line-height: 1.3;
-    }
-
-    .who-title-card .section-subtitle {
-      font-size: var(--text-xs);
-      line-height: 1.5;
-    }
-
-    /* Who Cards */
-    .who-card {
-      padding: var(--space-md) 0.5rem;
-      gap: var(--space-sm);
-    }
-
-    .who-card-image {
-      height: 160px;
-    }
-
-    .who-card-title {
-      font-size: var(--text-sm);
-      margin-bottom: var(--space-xs);
-      line-height: 1.3;
-    }
-
-    .who-card-text {
-      font-size: var(--text-xs);
-      line-height: 1.4;
-    }
-
-    /* Center align content */
-    .who-title-content,
-    .who-card-content {
-      text-align: center;
-    }
-  }
-
-  /* Extra small screens - under 210px */
-  @media (max-width: 210px) {
-    .who-section {
-      padding: var(--space-lg) 0.125rem;
-    }
-
-    .who-slider-wrapper {
-      padding: var(--space-md) 0.25rem;
-    }
-
-    .who-title-card {
-      padding: var(--space-sm) 0.25rem;
-      min-height: 180px;
-    }
-
-    .who-title-image {
-      height: 120px;
-    }
-
-    .who-title-card .section-title {
-      font-size: var(--text-sm);
-    }
-
-    .who-title-card .section-subtitle {
-      font-size: var(--text-xs);
-    }
-
-    .who-card {
-      padding: var(--space-sm) 0.25rem;
-    }
-
-    .who-card-image {
-      height: 120px;
-    }
-
-    .who-card-title {
-      font-size: var(--text-xs);
-    }
-
-    .who-card-text {
-      font-size: var(--text-xs);
-    }
-  }
-</style>
-
-<script>
-  // Who This Is For Slider
-  document.addEventListener('DOMContentLoaded', () => {
-    const slider = document.querySelector('.who-slider') as HTMLElement;
-    const slides = document.querySelectorAll('.who-slide');
-    const prevBtn = document.querySelector('.slider-nav-prev') as HTMLButtonElement;
-    const nextBtn = document.querySelector('.slider-nav-next') as HTMLButtonElement;
-    const dots = document.querySelectorAll('.slider-dot') as NodeListOf<HTMLButtonElement>;
-
-    if (!slider || slides.length === 0) return;
-
-    let currentSlide = 0;
-    const totalSlides = slides.length;
-
-    // Check if slider should be enabled (only above 600px)
-    function isSliderEnabled() {
-      return window.innerWidth > 600;
-    }
-
-    function updateSlider() {
-      // Only apply slider transform if above 600px
-      if (!isSliderEnabled()) {
-        slider.style.transform = 'none';
-        return;
-      }
-
-      // Move slider
-      slider.style.transform = `translateX(-${currentSlide * 100}%)`;
-
-      // Update dots
-      dots.forEach((dot, index) => {
-        if (index === currentSlide) {
-          dot.classList.add('active');
-        } else {
-          dot.classList.remove('active');
-        }
-      });
-    }
-
-    function goToSlide(index: number) {
-      currentSlide = index;
-      if (currentSlide < 0) currentSlide = totalSlides - 1;
-      if (currentSlide >= totalSlides) currentSlide = 0;
-      updateSlider();
-    }
-
-    function nextSlide() {
-      goToSlide(currentSlide + 1);
-    }
-
-    function prevSlide() {
-      goToSlide(currentSlide - 1);
-    }
-
-    // Event listeners
-    prevBtn?.addEventListener('click', prevSlide);
-    nextBtn?.addEventListener('click', nextSlide);
-
-    dots.forEach((dot, index) => {
-      dot.addEventListener('click', () => goToSlide(index));
-    });
-
-    // Card navigation buttons (can be buttons or anchor elements)
-    const cardPrevBtns = document.querySelectorAll('.who-card-prev') as NodeListOf<HTMLElement>;
-    const cardNextBtns = document.querySelectorAll('.who-card-next') as NodeListOf<HTMLElement>;
-
-    cardPrevBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        prevSlide();
-      });
-    });
-
-    cardNextBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        nextSlide();
-      });
-    });
-
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') prevSlide();
-      if (e.key === 'ArrowRight') nextSlide();
-    });
-
-    // Touch/swipe support
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    slider.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    slider.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      handleSwipe();
-    }, { passive: true });
-
-    function handleSwipe() {
-      const swipeThreshold = 50;
-      if (!isSliderEnabled()) return; // Don't handle swipes on mobile stacked view
-
-      if (touchEndX < touchStartX - swipeThreshold) {
-        nextSlide();
-      }
-      if (touchEndX > touchStartX + swipeThreshold) {
-        prevSlide();
-      }
-    }
-
-    // Handle window resize
-    let resizeTimer: ReturnType<typeof setTimeout>;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        updateSlider();
-      }, 250);
-    });
-
-    // Initialize
-    updateSlider();
-  });
-</script>

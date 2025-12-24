@@ -1,10 +1,31 @@
 ---
 import BaseLayout from '../Layouts/BaseLayout.astro';
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import FooterWithMask from '../components/Footer/FooterWithMask.astro';
 import Button from '../components/Button/Button.astro';
 import HeroSection from '../components/Sections/HeroSection.astro';
+import ScrollColorBackground from '../components/Scroll/ScrollColorBackground.astro';
+import ProjectCard from '../components/Cards/ProjectCard.astro';
+
+// Import data
+import heroDataRaw from '../data/projects/hero.json';
+import infoDataRaw from '../data/projects/info.json';
+
+// Type assertions for JSON imports
+const heroData = heroDataRaw as {
+  title: string;
+  subtitle: string;
+  extraText: string;
+  variant: 'simple' | 'image' | 'gradient';
+};
+
+const infoData = infoDataRaw as {
+  title: string;
+  paragraphs: string[];
+  ctaText: string;
+  ctaHref: string;
+  ctaVariant: 'primary' | 'secondary';
+};
 
 // Helper to get folder slug from entry.id (handles index.md suffix and path separators)
 const getSlug = (id: string) => {
@@ -18,6 +39,13 @@ const projects = projectEntries.map(entry => ({
   slug: getSlug(entry.id),
   ...entry.data,
 }));
+
+// Define scroll background colors for each project
+const scrollColors = [
+  'var(--color-AccentOne-300)',
+  'var(--color-AccentTwo-400)',
+  'var(--color-AccentThree-300)',
+];
 ---
 
 <BaseLayout
@@ -25,45 +53,33 @@ const projects = projectEntries.map(entry => ({
   description="Free curated resource collections. Each project brings together carefully selected resources for a specific purpose, available to everyone."
   hideFooter={true}
 >
-  <!-- Fixed background layer for scroll-triggered color changes -->
-  <div class="scroll-bg-layer" id="scroll-bg-layer"></div>
+  <!-- Scroll-triggered background color component -->
+  <ScrollColorBackground />
 
   <!-- Hero Section -->
   <div data-scroll-bg="var(--color-Background-100)">
     <HeroSection
-      title="Projects"
-      subtitle="Sometimes what you need isn't just one resource. It's a collection that works together. Each project here is a carefully curated set of tools for a specific purpose: wellbeing, sensory needs, creative expression."
-      extraText="Everything here is free. Take what helps. Leave the rest."
-      variant="simple"
+      title={heroData.title}
+      subtitle={heroData.subtitle}
+      extraText={heroData.extraText}
+      variant={heroData.variant}
     />
   </div>
 
   <!-- Projects Sections -->
   {projects.map((project, index) => {
-    const scrollBg = index === 0 ? 'var(--color-AccentOne-300)' : index === 1 ? 'var(--color-AccentTwo-400)' : 'var(--color-AccentThree-300)';
+    const scrollBg = scrollColors[index % scrollColors.length];
+    const imagePosition = index % 2 === 0 ? 'left' : 'right';
     return (
-      <section
-        class={`project-section ${index % 2 === 0 ? 'image-left' : 'image-right'}`}
-        data-scroll-bg={scrollBg}
-      >
-        <div class="container container-7xl">
-          <div class="project-wrapper">
-            <div class="project-image-container">
-              <Image src={project.cardImage} alt={project.title} loading="lazy" />
-            </div>
-            <div class="project-text-content">
-              <span class="project-category">{project.category}</span>
-              <h2 class="project-title">{project.title}</h2>
-              <p class="project-description">{project.description}</p>
-              <div class="project-cta">
-                <Button href={`/projects/${project.slug}`} variant="primary">
-                  View Project
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ProjectCard
+        slug={project.slug}
+        title={project.title}
+        description={project.description}
+        category={project.category}
+        cardImage={project.cardImage}
+        scrollBg={scrollBg}
+        imagePosition={imagePosition}
+      />
     );
   })}
 
@@ -71,357 +87,23 @@ const projects = projectEntries.map(entry => ({
   <section class="info-section" data-scroll-bg="var(--color-Background-100)">
     <div class="container container-full">
       <div class="info-content">
-        <h2 class="info-title">A note about these projects</h2>
+        <h2 class="info-title">{infoData.title}</h2>
         <div class="info-text">
-          <p>
-            Each project is a curated collection: resources that work together for a specific purpose. We've put them together to save you time and energy.
-          </p>
-          <p>
-            You can download individual resources from each project, or add them all to your basket at once. Use what fits. Skip what doesn't.
-          </p>
-          <p>
-            If you're a professional (educator, therapist, practitioner), each project includes a separate section with guidance notes, implementation strategies, and evidence-based information.
-          </p>
+          {infoData.paragraphs.map((paragraph) => (
+            <p>{paragraph}</p>
+          ))}
         </div>
         <div class="info-cta">
-          <Button href="/assets" variant="secondary">
-            Browse Individual Resources
+          <Button href={infoData.ctaHref} variant={infoData.ctaVariant}>
+            {infoData.ctaText}
           </Button>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Footer with Interactive Mask -->
   <FooterWithMask
     backgroundImage="/Footer/Footer-Reveal.png"
   />
 </BaseLayout>
-
-<script>
-  import { gsap } from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-  gsap.registerPlugin(ScrollTrigger);
-
-  // Skip if a11y settings are active
-  const a11yClasses = [
-    'a11y-reduce-motion', 'a11y-text-only', 'a11y-theme-dark', 'a11y-theme-cream',
-    'a11y-theme-high-contrast', 'a11y-theme-protanopia', 'a11y-theme-deuteranopia',
-    'a11y-theme-tritanopia', 'a11y-theme-monochrome'
-  ];
-
-  // Convert any color (including OKLCH) to RGB
-  function toRGB(color: string): string {
-    const temp = document.createElement('div');
-    temp.style.backgroundColor = color;
-    temp.style.display = 'none';
-    document.body.appendChild(temp);
-    const computed = getComputedStyle(temp).backgroundColor;
-    document.body.removeChild(temp);
-    return computed;
-  }
-
-  // Resolve CSS variable to RGB color
-  function resolveColor(cssVar: string, fallback: string): string {
-    if (!cssVar) return fallback;
-    let rawColor = cssVar;
-    if (cssVar.startsWith('var(')) {
-      const varName = cssVar.match(/var\((.*?)\)/)?.[1];
-      if (varName) {
-        rawColor = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-        if (!rawColor) return fallback;
-      }
-    }
-    return toRGB(rawColor);
-  }
-
-  function initScrollColors() {
-    // Skip if a11y settings active
-    if (a11yClasses.some(cls => document.body.classList.contains(cls))) return;
-
-    const bgLayer = document.getElementById('scroll-bg-layer');
-    if (!bgLayer) return;
-
-    const sections = document.querySelectorAll('[data-scroll-bg]');
-    if (sections.length === 0) return;
-
-    const fallbackColor = 'rgb(248, 245, 242)';
-    const initialColor = resolveColor('var(--color-Background-100)', fallbackColor);
-
-    // Set initial background
-    bgLayer.style.backgroundColor = initialColor;
-
-    // Build RGB color array
-    const sectionColors = Array.from(sections).map(section => ({
-      section,
-      color: resolveColor(section.getAttribute('data-scroll-bg') || '', initialColor)
-    }));
-
-    let currentColor = initialColor;
-
-    // Create ScrollTriggers for each section
-    sectionColors.forEach(({ section, color }, index) => {
-      const prevColor = index > 0 ? sectionColors[index - 1].color : initialColor;
-      const nextColor = index < sectionColors.length - 1 ? sectionColors[index + 1].color : initialColor;
-
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top 60%',
-        end: 'bottom 40%',
-        onEnter: () => {
-          gsap.killTweensOf(bgLayer);
-          gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: color, duration: 0.5, ease: 'power2.out' });
-          currentColor = color;
-        },
-        onEnterBack: () => {
-          gsap.killTweensOf(bgLayer);
-          gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: color, duration: 0.5, ease: 'power2.out' });
-          currentColor = color;
-        },
-        onLeave: () => {
-          gsap.killTweensOf(bgLayer);
-          gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: nextColor, duration: 0.5, ease: 'power2.out' });
-          currentColor = nextColor;
-        },
-        onLeaveBack: () => {
-          gsap.killTweensOf(bgLayer);
-          gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: prevColor, duration: 0.5, ease: 'power2.out' });
-          currentColor = prevColor;
-        }
-      });
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initScrollColors);
-  } else {
-    initScrollColors();
-  }
-</script>
-
-<style>
-  /* Fixed background layer for scroll-triggered colors */
-  .scroll-bg-layer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: -1;
-    background-color: var(--color-Background-100);
-  }
-
-  /* Disable when a11y settings active */
-  :global(body[class*="a11y-"]) .scroll-bg-layer {
-    background-color: var(--bg, var(--color-Background-100)) !important;
-  }
-
-  /* Projects Sections */
-  .project-section {
-    padding: var(--space-5xl) 0;
-    transition: opacity var(--transition-base);
-    background: transparent; /* Let body background show through for GSAP transitions */
-  }
-
-  .project-wrapper {
-    display: flex;
-    gap: var(--space-3xl);
-    align-items: center;
-  }
-
-  /* Image Left Layout */
-  .image-left .project-wrapper {
-    flex-direction: row;
-  }
-
-  /* Image Right Layout */
-  .image-right .project-wrapper {
-    flex-direction: row-reverse;
-  }
-
-  .project-image-container {
-    flex: 0 0 30%;
-    border-radius: var(--border-radius-xl);
-    overflow: hidden;
-    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.12));
-  }
-
-  .project-image-container img {
-    width: 100%;
-    height: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-  }
-
-  .project-text-content {
-    flex: 1;
-  }
-
-  .image-left .project-text-content {
-    padding-left: var(--space-2xl);
-    text-align: left;
-  }
-
-  .image-right .project-text-content {
-    padding-right: var(--space-2xl);
-    text-align: right;
-  }
-
-  .project-category {
-    display: block;
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    color: var(--color-Primary-600);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: var(--space-md);
-  }
-
-  .project-title {
-    font-family: var(--font-heading);
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
-    font-weight: var(--font-semibold);
-    color: var(--color-Text-700);
-    margin-bottom: var(--space-lg);
-    line-height: 1.2;
-  }
-
-  .project-description {
-    font-family: var(--font-body);
-    font-size: clamp(1rem, 2vw, 1.125rem);
-    color: var(--color-Text-600);
-    line-height: 1.7;
-    margin-bottom: var(--space-xl);
-  }
-
-  .project-cta {
-    margin-top: var(--space-lg);
-  }
-
-  .image-right .project-cta {
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  /* Info Section */
-  .info-section {
-    padding: var(--space-5xl) 0;
-    background: transparent;
-  }
-
-  .info-content {
-    text-align: left;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .info-title {
-    font-family: var(--font-heading);
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
-    font-weight: var(--font-semibold);
-    color: var(--color-Text-700);
-    margin-bottom: var(--space-xl);
-  }
-
-  .info-text {
-    margin-bottom: var(--space-2xl);
-  }
-
-  .info-text p {
-    font-family: var(--font-body);
-    font-size: var(--text-lg);
-    color: var(--color-Text-600);
-    line-height: 1.8;
-    margin-bottom: var(--space-lg);
-  }
-
-  .info-text p:last-child {
-    margin-bottom: 0;
-  }
-
-  .info-cta {
-    display: flex;
-    justify-content: flex-start;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .project-wrapper {
-      flex-direction: column !important;
-      gap: var(--space-2xl);
-    }
-
-    .project-image-container {
-      flex: 0 0 auto;
-      width: 100%;
-    }
-
-    .image-left .project-text-content,
-    .image-right .project-text-content {
-      padding-left: 0;
-      padding-right: 0;
-      text-align: left;
-    }
-
-    .image-right .project-cta {
-      justify-content: flex-start;
-    }
-
-    .project-section {
-      padding: var(--space-4xl) 0;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .project-section {
-      padding: var(--space-3xl) 0;
-    }
-
-    .project-description {
-      margin-bottom: var(--space-lg);
-    }
-  }
-
-  /* Very small screens */
-  @media (max-width: 250px) {
-    .project-section {
-      padding: var(--space-2xl) 0;
-    }
-
-    .project-title {
-      font-size: var(--text-xl);
-    }
-
-    .project-description {
-      font-size: var(--text-sm);
-    }
-
-    .info-title {
-      font-size: var(--text-xl);
-    }
-
-    .info-text p {
-      font-size: var(--text-sm);
-    }
-  }
-
-  /* Extra small screens */
-  @media (max-width: 210px) {
-    .project-title {
-      font-size: var(--text-lg);
-    }
-
-    .project-description {
-      font-size: var(--text-xs);
-    }
-
-    .info-title {
-      font-size: var(--text-lg);
-    }
-
-    .info-text p {
-      font-size: var(--text-xs);
-    }
-  }
-</style>

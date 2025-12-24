@@ -1,0 +1,210 @@
+---
+/**
+ * InsightCard - Reusable insight/article card component
+ *
+ * Used on insights page for both insights and presentations
+ *
+ * Props:
+ * @param slug - Article slug for URL
+ * @param title - Article title
+ * @param excerpt - Article excerpt/description
+ * @param cardImage - Article card image (ImageMetadata)
+ * @param category - Article category
+ * @param readTime - Read time or section count
+ * @param type - Content type (insight, presentation) - used for URL routing and filtering
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Badge from '../Badge/Badge.astro';
+import Button from '../Button/Button.astro';
+
+interface Props {
+  slug: string;
+  title: string;
+  excerpt: string;
+  cardImage: ImageMetadata;
+  category: string;
+  readTime: string;
+  type: 'insight' | 'presentation';
+}
+
+const {
+  slug,
+  title,
+  excerpt,
+  cardImage,
+  category,
+  readTime,
+  type
+} = Astro.props;
+
+const href = type === 'presentation' ? `/presentations/${slug}` : `/insights/${slug}`;
+const categoryId = category.toLowerCase().replace(/\s+/g, '-');
+const ctaText = type === 'presentation' ? 'View Presentation' : 'Read Article';
+---
+
+<a href={href} class={`insight-card ${categoryId}`} data-category={categoryId}>
+  <div class="insight-card__image">
+    <Image src={cardImage} alt={title} width={800} height={500} loading="lazy" />
+    <div class="insight-card__badge">
+      <Badge type={category} label={category} />
+    </div>
+  </div>
+
+  <div class="insight-card__content">
+    <div class="insight-card__meta">
+      <span class="insight-card__read-time">{readTime}</span>
+    </div>
+    <h2 class="insight-card__title">{title}</h2>
+    <p class="insight-card__excerpt">{excerpt}</p>
+    <div class="insight-card__cta">
+      <Button variant="link" size="sm">
+        {ctaText}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </Button>
+    </div>
+  </div>
+</a>
+
+<style>
+  /* Insight Card - BEM naming */
+  /* Float-based layout for Isotope masonry */
+  .insight-card {
+    float: left;
+    width: calc(33.333% - 1.5em - 4px); /* Subtract 4px for 2px border on each side */
+    margin: 0.75em;
+    padding: var(--space-md);
+    padding-bottom: 0; /* Content section has its own padding */
+    box-sizing: border-box;
+    overflow: hidden;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    color: inherit;
+    background-color: var(--color-Secondary-100);
+    border-radius: var(--radius-lg);
+    border: 2px solid transparent; /* Transparent border so all cards have same dimensions */
+    transition: box-shadow var(--transition-base);
+  }
+
+  .insight-card:hover {
+    box-shadow: inset 0 0 20px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .insight-card__image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background-color: var(--color-Neutral-100);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .insight-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .insight-card__badge {
+    position: absolute;
+    top: var(--space-md);
+    left: var(--space-md);
+  }
+
+  .insight-card__content {
+    padding: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .insight-card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+
+  .insight-card__read-time {
+    font-size: var(--text-sm);
+    color: var(--color-Text-500);
+  }
+
+  .insight-card__title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Text-700);
+    margin-bottom: var(--space-md);
+    font-family: var(--font-heading);
+    line-height: 1.3;
+  }
+
+  .insight-card__excerpt {
+    font-size: var(--text-base);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-lg);
+    flex: 1;
+  }
+
+  .insight-card__cta {
+    display: flex;
+  }
+
+  /* SVG arrow animation on hover */
+  .insight-card:hover svg {
+    transform: translateX(4px);
+  }
+
+  /* Hover states */
+  .insight-card:hover .insight-card__image {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ========== RESPONSIVE ========== */
+
+  /* Tablet: 2 columns */
+  @media (max-width: 1023px) {
+    .insight-card {
+      width: calc(50% - 1.5em - 4px); /* Account for borders */
+    }
+  }
+
+  /* Mobile: 1 column */
+  @media (max-width: 767px) {
+    .insight-card {
+      width: calc(100% - 1.5em - 4px); /* Account for borders */
+    }
+
+    .insight-card__content {
+      padding: var(--space-lg);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .insight-card__content {
+      padding: var(--space-md);
+    }
+  }
+
+  @media (max-width: 250px) {
+    .insight-card__content {
+      padding: var(--space-sm);
+    }
+
+    .insight-card__title {
+      font-size: var(--text-lg);
+    }
+
+    .insight-card__excerpt {
+      font-size: var(--text-sm);
+    }
+  }
+
+  /* A11Y theme overrides in: src/styles/a11y/components/insight-card.css */
+</style>

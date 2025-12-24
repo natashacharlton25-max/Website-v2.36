@@ -1,0 +1,61 @@
+---
+import { Image } from 'astro:assets';
+
+interface Pillar {
+  id: string;
+  title: string;
+  image: string;
+  imageAlt: string;
+  description: string;
+}
+
+interface Props {
+  title: string;
+  intro: string[];
+  pillars: Pillar[];
+  pillarImages: ImageMetadata[];
+}
+
+const { title, intro, pillars, pillarImages } = Astro.props;
+---
+
+<section class="philosophy-flip">
+  <div class="container container-6xl">
+    <div class="philosophy-flip__content">
+      <h2 class="philosophy-flip__title">{title}</h2>
+
+      <div class="philosophy-flip__intro">
+        {intro.map((line, index) => (
+          <p class={`philosophy-flip__intro-line ${index === intro.length - 1 ? 'philosophy-flip__intro-line--last' : ''}`}>
+            {line}
+          </p>
+        ))}
+      </div>
+
+      <!-- Pillar Cards with Hover Flip -->
+      <div class="philosophy-flip__cards">
+        {pillars.map((pillar, index) => (
+          <div class="philosophy-flip__card">
+            <div class="philosophy-flip__card-inner">
+              <!-- Front -->
+              <div class="philosophy-flip__card-front">
+                <Image src={pillarImages[index]} alt={pillar.imageAlt} loading="lazy" />
+                <div class="philosophy-flip__card-title-overlay">
+                  <h3>{pillar.title}</h3>
+                </div>
+              </div>
+
+              <!-- Back -->
+              <div class="philosophy-flip__card-back">
+                <div class="philosophy-flip__card-back-content">
+                  <h3>{pillar.title}</h3>
+                  <p>{pillar.description}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

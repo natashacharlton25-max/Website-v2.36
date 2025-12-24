@@ -3,7 +3,21 @@ import BaseLayout from '../Layouts/BaseLayout.astro';
 import FooterWithMask from '../components/Footer/FooterWithMask.astro';
 import IsotopeFilterSwitcher from '../components/Switcher/IsotopeFilterSwitcher.astro';
 import HeroSection from '../components/Sections/HeroSection.astro';
+import InsightCard from '../components/Cards/InsightCard.astro';
 import { getCollection } from 'astro:content';
+
+// Import data
+import heroDataRaw from '../data/insights/hero.json';
+import filterCategoriesBase from '../data/insights/filters.json';
+
+// Type assertions for JSON imports
+const heroData = heroDataRaw as {
+  title: string;
+  subtitle: string;
+  description: string;
+  extraText: string;
+  variant: 'simple' | 'image' | 'gradient';
+};
 
 // Helper to get folder slug from entry.id (handles index.md suffix and path separators)
 const getSlug = (id: string) => {
@@ -60,12 +74,13 @@ const presentationArticles = insightPresentations.map((entry) => {
 const articles = [...insightArticles, ...presentationArticles]
   .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
 
-// Get unique categories for filter
-const categories = ['all', ...new Set(articles.map(a => a.category))];
-const filterCategories = categories.map(cat => ({
-  id: cat === 'all' ? 'all' : cat.toLowerCase().replace(/\s+/g, '-'),
-  label: cat === 'all' ? 'All' : cat,
+// Get unique categories from articles and merge with base filters
+const categories = [...new Set(articles.map(a => a.category))];
+const dynamicFilters = categories.map(cat => ({
+  id: cat.toLowerCase().replace(/\s+/g, '-'),
+  label: cat,
 }));
+const filterCategories = [...filterCategoriesBase, ...dynamicFilters];
 ---
 
 <BaseLayout
@@ -75,56 +90,40 @@ const filterCategories = categories.map(cat => ({
 >
   <!-- Hero Section -->
   <HeroSection
-    title="Insights"
-    subtitle="Honest perspectives on building a life that feels like yours."
-    description="No fluff. No empty positivity. Just practical insights and honest perspectives on building a life that actually feels like yours."
-    extraText="These articles explore boundaries, self-direction, emotional wellbeing, and what it really takes to show up for yourself. Take what resonates. Leave what doesn't."
-    variant="simple"
-    bgClass="bg-alt"
+    title={heroData.title}
+    subtitle={heroData.subtitle}
+    description={heroData.description}
+    extraText={heroData.extraText}
+    variant={heroData.variant}
   />
 
   <!-- Filter Tags -->
-  <section class="filter-section bg-alt">
+  <section class="filter-section">
     <IsotopeFilterSwitcher
       tabs={filterCategories}
       defaultActive="all"
-      gridSelector="#articles-grid"
-      itemSelector=".article-card"
+      gridSelector="#insights-grid"
+      itemSelector=".insight-card"
     />
   </section>
 
-  <!-- Articles Grid Section -->
-  <section class="articles-section section bg-alt">
+  <!-- Insights Grid Section -->
+  <section class="insights-section section">
     <div class="container container-7xl">
-      <div class="articles-grid" id="articles-grid">
+      <div class="insights-grid" id="insights-grid">
         <!-- Grid sizer for Isotope column width calculation -->
         <div class="grid__sizer"></div>
 
         {articles.map((article) => (
-          <a
-            href={article.type === 'presentation' ? `/presentations/${article.slug}` : `/insights/${article.slug}`}
-            class={`article-card ${article.category.toLowerCase().replace(/\s+/g, '-')}`}
-            data-category={article.category.toLowerCase().replace(/\s+/g, '-')}
-          >
-            <div class="article-image">
-              <img src={article.cardImage.src} alt={article.title} loading="lazy" />
-              <div class="article-category-badge">{article.category}</div>
-            </div>
-            <div class="article-content">
-              <div class="article-meta">
-                <span class="read-time">{article.readTime}</span>
-              </div>
-              <h2 class="article-title">{article.title}</h2>
-              <p class="article-excerpt">{article.excerpt}</p>
-              <span class="read-more">
-                {article.type === 'presentation' ? 'View Presentation' : 'Read Article'}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </span>
-            </div>
-          </a>
+          <InsightCard
+            slug={article.slug}
+            title={article.title}
+            excerpt={article.excerpt}
+            cardImage={article.cardImage}
+            category={article.category}
+            readTime={article.readTime}
+            type={article.type}
+          />
         ))}
       </div>
     </div>
@@ -135,232 +134,3 @@ const filterCategories = categories.map(cat => ({
     backgroundImage="/Footer/Footer-Reveal.png"
   />
 </BaseLayout>
-
-<style>
-  /* Common styles */
-  .section {
-    padding: var(--space-5xl) 0;
-  }
-
-  /* Filter Section - uses bg-alt class for background */
-  .filter-section {
-    padding: var(--space-4xl) 0 var(--space-2xl);
-    display: flex;
-    justify-content: center;
-  }
-
-  /* Articles Section */
-  .articles-section {
-    padding: var(--space-2xl) 0 var(--space-5xl);
-    width: 100%;
-    overflow-x: hidden; /* Prevent horizontal scrollbar during Isotope animations */
-  }
-
-  /* Articles Grid - Isotope masonry layout */
-  .articles-grid {
-    margin-bottom: 0;
-    position: relative;
-    width: 100%;
-    opacity: 1;
-    transition: opacity 0.3s ease-in-out;
-    overflow-x: hidden; /* Prevent horizontal scrollbar during filtering */
-  }
-
-  /* Loading state - hide grid while images load */
-  .articles-grid.grid--loading {
-    opacity: 0;
-  }
-
-  /* Clear floats after grid */
-  .articles-grid::after {
-    content: '';
-    display: block;
-    clear: both;
-  }
-
-  /* Grid sizer for Isotope column width calculation */
-  .grid__sizer {
-    width: 33.333%;
-    height: 0;
-    visibility: hidden;
-  }
-
-  /* Article Card - float-based layout for Isotope masonry */
-  .article-card {
-    float: left;
-    width: calc(33.333% - 1.5em - 4px); /* Subtract 4px for 2px border on each side */
-    margin: 0.75em;
-    padding: var(--space-md);
-    padding-bottom: 0; /* Content section has its own padding */
-    box-sizing: border-box;
-    overflow: hidden;
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    color: inherit;
-    background: var(--color-Secondary-100);
-    border-radius: var(--border-radius-lg);
-    border: 2px solid transparent; /* Transparent border so all cards have same dimensions */
-    transition: box-shadow var(--transition-base);
-  }
-
-  .article-card:hover {
-    box-shadow: inset 0 0 20px 8px rgba(0, 0, 0, 0.06);
-  }
-
-  .article-image {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 10;
-    overflow: hidden;
-    background: var(--color-Neutral-100);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .article-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-
-  .article-category-badge {
-    position: absolute;
-    top: var(--space-md);
-    left: var(--space-md);
-    padding: var(--space-xs) var(--space-md);
-    background: var(--color-Primary-600);
-    color: white;
-    font-size: var(--text-xs);
-    font-weight: var(--font-semibold);
-    border-radius: var(--border-radius-full);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .article-content {
-    padding: var(--space-xl);
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-
-  .article-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    margin-bottom: var(--space-sm);
-  }
-
-  .read-time {
-    font-size: var(--text-sm);
-    color: var(--color-Text-500);
-  }
-
-  .article-title {
-    font-size: var(--text-xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    margin-bottom: var(--space-md);
-    font-family: var(--font-heading);
-    line-height: 1.3;
-  }
-
-  .article-excerpt {
-    font-size: var(--text-base);
-    color: var(--color-Text-600);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-lg);
-    flex: 1;
-  }
-
-  .read-more {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-sm);
-    font-size: var(--text-base);
-    font-weight: var(--font-semibold);
-    color: var(--color-Primary-600);
-    transition: color var(--transition-fast);
-  }
-
-  .read-more svg {
-    transition: transform var(--transition-fast);
-  }
-
-  .article-card:hover .article-image {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .article-card:hover .read-more {
-    color: var(--color-Primary-700);
-  }
-
-  .article-card:hover .read-more svg {
-    transform: translateX(4px);
-  }
-
-  /* Responsive: 2 columns on tablet */
-  @media (max-width: 1200px) {
-    .grid__sizer {
-      width: 50%;
-    }
-    .article-card {
-      width: calc(50% - 1.5em - 4px); /* Account for borders */
-    }
-  }
-
-  @media (max-width: 767px) {
-    .section {
-      padding: var(--space-3xl) 0;
-    }
-
-    .filter-section {
-      padding: var(--space-3xl) 0 var(--space-xl);
-    }
-
-    .grid__sizer {
-      width: 100%;
-    }
-    .article-card {
-      width: calc(100% - 1.5em - 4px); /* Account for borders */
-    }
-
-    .article-content {
-      padding: var(--space-lg);
-    }
-  }
-
-  @media (max-width: 640px) {
-    .filter-section {
-      padding: var(--space-2xl) 0 var(--space-lg);
-    }
-  }
-
-  @media (max-width: 480px) {
-    .filter-section {
-      padding: var(--space-xl) 0 var(--space-md);
-    }
-
-    .article-content {
-      padding: var(--space-md);
-    }
-  }
-
-  @media (max-width: 250px) {
-    .article-content {
-      padding: var(--space-sm);
-    }
-
-    .article-title {
-      font-size: var(--text-lg);
-    }
-
-    .article-excerpt {
-      font-size: var(--text-sm);
-    }
-  }
-
-  /* A11y theme overrides moved to src/Styles/a11y/base/theme-overrides.css */
-</style>

@@ -1,0 +1,65 @@
+---
+interface BreadcrumbItem {
+  label: string;
+  href?: string; // If no href, it's the current page
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<section class="breadcrumbs-section">
+  <div class="container container-7xl">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      {items.map((item, index) => (
+        <>
+          {item.href ? (
+            <a href={item.href}>{item.label}</a>
+          ) : (
+            <span class="current" aria-current="page">{item.label}</span>
+          )}
+          {index < items.length - 1 && <span class="separator" aria-hidden="true">›</span>}
+        </>
+      ))}
+    </nav>
+  </div>
+</section>
+
+<style>
+  .breadcrumbs-section {
+    padding: var(--space-lg) 0;
+    background-color: var(--color-Background-100);
+  }
+
+  .breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    flex-wrap: wrap;
+  }
+
+  .breadcrumbs a {
+    color: var(--color-Primary-600);
+    text-decoration: none;
+    transition: color var(--transition-base);
+  }
+
+  .breadcrumbs a:hover {
+    color: var(--color-Primary-700);
+    text-decoration: underline;
+  }
+
+  .breadcrumbs .separator {
+    color: var(--color-Text-400);
+    user-select: none;
+  }
+
+  .breadcrumbs .current {
+    color: var(--color-Text-700);
+    font-weight: var(--font-medium);
+  }
+</style>

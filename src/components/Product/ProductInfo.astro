@@ -1,0 +1,216 @@
+---
+import Button from '../Button/Button.astro';
+
+interface InfoItem {
+  icon: string; // SVG markup
+  label: string;
+}
+
+interface Props {
+  category: string;
+  name: string;
+  sku?: string;
+  price?: string;
+  description: string;
+  infoItems: InfoItem[];
+  productId: string;
+  productImage: string;
+  hasProfessionalGuide?: boolean;
+  cartNote?: string;
+}
+
+const {
+  category,
+  name,
+  sku,
+  price = "Free",
+  description,
+  infoItems,
+  productId,
+  productImage,
+  hasProfessionalGuide = false,
+  cartNote = "Email required for download link.<br />No payment needed.<br />We believe healing should be unconditional."
+} = Astro.props;
+---
+
+<div class="product-details">
+  <div class="product-header">
+    <div class="product-category">{category}</div>
+    <h1 class="product-title">{name}</h1>
+
+    {sku && (
+      <div class="product-sku">
+        SKU: {sku}
+      </div>
+    )}
+
+    <div class="product-pricing">
+      <span class="price-current">{price}</span>
+    </div>
+
+    <p class="product-description">{description}</p>
+
+    <p class="cart-note-inline" set:html={cartNote} />
+  </div>
+
+  <!-- Product Info Row -->
+  <div class="product-info-row">
+    {infoItems.map((item, index) => (
+      <>
+        <div class="info-item-inline">
+          <Fragment set:html={item.icon} />
+          <span>{item.label}</span>
+        </div>
+        {index < infoItems.length - 1 && <span class="separator">•</span>}
+      </>
+    ))}
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <!-- Add to Cart Button -->
+    <div
+      class="cart-btn-wrapper add-to-cart-btn-product"
+      data-product-id={productId}
+      data-product-name={name}
+      data-product-price="0"
+      data-product-image={productImage}
+    >
+      <Button variant="primary" size="md" className="cart-button-full">
+        Add PDF
+      </Button>
+    </div>
+
+    <!-- Professional Guide Button -->
+    {hasProfessionalGuide && (
+      <div
+        class="cart-btn-wrapper add-to-cart-btn-product"
+        data-product-id={`${productId}-guide`}
+        data-product-name={`${name} - Guidance Notes`}
+        data-product-price="0"
+        data-product-image={productImage}
+      >
+        <Button variant="secondary" size="md" className="cart-button-full">
+          Add Professional Guide
+        </Button>
+      </div>
+    )}
+  </div>
+</div>
+
+<style>
+  .product-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+
+  .product-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .product-category {
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-Primary-600);
+  }
+
+  .product-title {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Text-900);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .product-sku {
+    font-size: var(--text-sm);
+    color: var(--color-Text-500);
+  }
+
+  .product-pricing {
+    margin: var(--space-sm) 0;
+  }
+
+  .price-current {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Primary-600);
+  }
+
+  .product-description {
+    font-size: var(--text-base);
+    color: var(--color-Text-700);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .cart-note-inline {
+    font-size: var(--text-sm);
+    color: var(--color-Text-600);
+    font-style: italic;
+    padding: var(--space-md);
+    background-color: var(--color-Background-100);
+    border-left: 3px solid var(--color-Primary-500);
+    border-radius: var(--border-radius-sm);
+    margin: var(--space-md) 0;
+    line-height: 1.6;
+  }
+
+  .product-info-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    padding: var(--space-md) 0;
+    border-top: 1px solid var(--color-Neutral-200);
+    border-bottom: 1px solid var(--color-Neutral-200);
+  }
+
+  .info-item-inline {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+    color: var(--color-Text-700);
+  }
+
+  .info-item-inline :global(svg) {
+    width: 16px;
+    height: 16px;
+    color: var(--color-Primary-600);
+  }
+
+  .separator {
+    color: var(--color-Text-300);
+    user-select: none;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .cart-btn-wrapper {
+    width: 100%;
+  }
+
+  .cart-btn-wrapper :global(.cart-button-full) {
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .product-title {
+      font-size: var(--text-3xl);
+    }
+
+    .price-current {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

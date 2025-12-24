@@ -2,8 +2,20 @@
 import BaseLayout from '../Layouts/BaseLayout.astro';
 import IsotopeFilterSwitcher from '../components/Switcher/IsotopeFilterSwitcher.astro';
 import HeroSection from '../components/Sections/HeroSection.astro';
+import ProductCard from '../components/Cards/ProductCard.astro';
 import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
+
+// Import data
+import heroDataRaw from '../data/assets/hero.json';
+import filterCategoriesBase from '../data/assets/filters.json';
+
+// Type assertions for JSON imports
+const heroData = heroDataRaw as {
+  title: string;
+  subtitle: string;
+  extraText: string;
+  variant: 'simple' | 'image' | 'gradient';
+};
 
 // Helper to get folder slug from entry.id (handles index.md suffix and path separators)
 const getSlug = (id: string) => {
@@ -18,27 +30,13 @@ const assets = assetsEntries.map(entry => ({
   slug: getSlug(entry.id),
 }));
 
-// Filter categories - match asset types
-const filterCategories = [
-  { id: 'all', label: 'All' },
-  { id: 'worksheet', label: 'Worksheet' },
-  { id: 'workbook', label: 'Workbook' },
-  { id: 'guide', label: 'Guide' },
-  { id: 'toolkit', label: 'Toolkit' },
-  { id: 'cards', label: 'Cards' },
-  { id: 'activity', label: 'Activity' },
-];
-
-// Badge class mapping
-const badgeClasses: Record<string, string> = {
-  worksheet: 'badge-worksheet',
-  workbook: 'badge-workbook',
-  guide: 'badge-guide',
-  toolkit: 'badge-toolkit',
-  cards: 'badge-cards',
-  poster: 'badge-poster',
-  activity: 'badge-activity',
-};
+// Get unique types from assets and merge with base filters
+const types = [...new Set(assets.map(a => a.type))];
+const dynamicFilters = types.map(type => ({
+  id: type.toLowerCase().replace(/\s+/g, '-'),
+  label: type.charAt(0).toUpperCase() + type.slice(1),
+}));
+const filterCategories = [...filterCategoriesBase, ...dynamicFilters];
 ---
 
 <BaseLayout
@@ -47,15 +45,14 @@ const badgeClasses: Record<string, string> = {
 >
   <!-- Hero Section -->
   <HeroSection
-    title="Tools you can use."
-    subtitle="We've gathered practical resources to support your clarity, boundaries, and self-direction. These aren't about fixing you. They're about giving you something useful when you need it."
-    extraText="Take what resonates. Leave what doesn't. Come back when you're ready."
-    variant="simple"
-    bgClass="bg-alt"
+    title={heroData.title}
+    subtitle={heroData.subtitle}
+    extraText={heroData.extraText}
+    variant={heroData.variant}
   />
 
   <!-- Products Section -->
-  <section class="assets-content section bg-alt">
+  <section class="assets-content section">
     <div class="container container-7xl">
       <div class="products-section">
 
@@ -69,48 +66,21 @@ const badgeClasses: Record<string, string> = {
           />
         </div>
 
-          <!-- Products Grid - Dynamic from assets data -->
-          <div class="products-grid" id="products-grid">
-            <!-- Grid sizer for Isotope column width calculation -->
-            <div class="grid__sizer"></div>
+        <!-- Products Grid - Dynamic from assets data -->
+        <div class="products-grid" id="products-grid">
+          <!-- Grid sizer for Isotope column width calculation -->
+          <div class="grid__sizer"></div>
 
-            {assets.map((asset, index) => (
-              <a href={`/assets/${asset.slug}`} class={`product-card card ${asset.type}`} data-type={asset.type}>
-                <div class="product-image">
-                  <Image src={asset.cardImage} alt={asset.name} width={800} height={500} />
-                  <div class={`product-badge ${badgeClasses[asset.type] || 'badge-worksheet'}`}>
-                    {asset.type.charAt(0).toUpperCase() + asset.type.slice(1)}
-                  </div>
-                </div>
-                <div class="product-info">
-                  <div class="product-category">{asset.category}</div>
-                  <h3 class="product-name">
-                    {asset.name}
-                  </h3>
-                  <p class="product-description">
-                    {asset.description}
-                  </p>
-                  <div class="product-footer">
-                    <div class="product-price">
-                      <span class="price-current">Free</span>
-                    </div>
-                    <button
-                      class="btn btn-sm btn-primary add-to-cart-btn"
-                      data-product-id={asset.slug}
-                      data-product-name={asset.name}
-                      data-product-price="0"
-                      data-product-image={asset.cardImage.src}
-                      onclick="event.preventDefault(); event.stopPropagation();"
-                      aria-label="Add to cart"
-                    >
-                      <span class="add-to-cart-text">Add to Cart</span>
-                      <span class="add-to-cart-icon">+</span>
-                    </button>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
+          {assets.map((asset) => (
+            <ProductCard
+              slug={asset.slug}
+              name={asset.name}
+              category={asset.category}
+              description={asset.description}
+              cardImage={asset.cardImage}
+              type={asset.type}
+            />
+          ))}
         </div>
       </div>
     </div>
@@ -119,564 +89,5 @@ const badgeClasses: Record<string, string> = {
 </BaseLayout>
 
 <script>
-  // Add to cart button handlers - use global cart system from MiniCart
-  document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-    button.addEventListener('click', (e) => {
-      const btn = e.currentTarget as HTMLElement;
-      const productData = {
-        id: btn.dataset.productId,
-        name: btn.dataset.productName,
-        price: parseFloat(btn.dataset.productPrice || '0'),
-        image: btn.dataset.productImage
-      };
-
-      // Use the global addToCart function from MiniCart
-      if ((window as any).addToCart) {
-        (window as any).addToCart(productData);
-      } else {
-        console.warn('Cart system not initialized');
-      }
-    });
-  });
+  import '../scripts/add-to-cart-handler.ts';
 </script>
-
-<style>
-  .page-description {
-    font-size: var(--text-lg);
-    color: var(--color-Text-600);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-lg);
-  }
-
-  .page-description:last-child {
-    color: var(--color-Text-500);
-    margin-bottom: 0;
-    margin-top: var(--space-xl);
-  }
-
-  @media (max-width: 768px) {
-    .page-description {
-      font-size: var(--text-base);
-    }
-  }
-
-  /* Assets Layout */
-  .assets-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-2xl);
-  }
-
-  /* Filters Sidebar */
-  .filters-sidebar {
-    display: none; /* Hidden on mobile, shown on desktop */
-  }
-
-  .filters-card {
-    padding: var(--space-xl);
-    position: sticky;
-    top: 100px;
-  }
-
-  .filters-title {
-    font-size: var(--text-xl);
-    font-weight: var(--font-bold);
-    margin-bottom: var(--space-lg);
-    color: var(--color-Text-700);
-  }
-
-  .filter-group {
-    margin-bottom: var(--space-xl);
-    padding-bottom: var(--space-lg);
-    border-bottom: 1px solid var(--color-Neutral-200);
-  }
-
-  .filter-group:last-of-type {
-    border-bottom: none;
-  }
-
-  .filter-group-title {
-    font-size: var(--text-base);
-    font-weight: var(--font-semibold);
-    margin-bottom: var(--space-md);
-    color: var(--color-Text-700);
-  }
-
-  .filter-options {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-
-  .filter-option {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    cursor: pointer;
-    color: var(--color-Text-700);
-  }
-
-  .filter-option input {
-    cursor: pointer;
-  }
-
-  .filter-select {
-    width: 100%;
-    padding: var(--space-sm) var(--space-md);
-    border: 1px solid var(--color-Neutral-300);
-    border-radius: var(--border-radius-md);
-    background: var(--color-Background-50);
-    color: var(--color-Text-700);
-    font-size: var(--text-base);
-  }
-
-  /* Assets Content */
-  .assets-content {
-    max-width: 100vw;
-    overflow-x: hidden; /* Prevent horizontal scrollbar during filtering */
-    padding-top: var(--space-3xl) !important;
-    padding-bottom: var(--space-md) !important; /* Minimal gap - page flexes with grid */
-    min-height: 100vh; /* Push footer below viewport so resizing happens off-screen */
-  }
-
-  .assets-content .container {
-    overflow-x: hidden; /* Prevent horizontal scrollbar */
-  }
-
-  /* Filter Section */
-  .filter-section-assets {
-    margin-bottom: var(--space-xl); /* Compact space between filter and grid */
-    padding: 0;
-  }
-
-  .products-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-xl);
-    padding: var(--space-md);
-    background: var(--color-Background-100);
-    border-radius: var(--border-radius-md);
-  }
-
-  .products-count {
-    font-size: var(--text-sm);
-    color: var(--color-Text-500);
-  }
-
-  .products-count #product-count {
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-  }
-
-  .view-toggle {
-    display: flex;
-    gap: var(--space-xs);
-  }
-
-  .view-btn {
-    padding: var(--space-sm);
-    border: 1px solid var(--color-Neutral-300);
-    background: var(--color-Background-50);
-    border-radius: var(--border-radius-md);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    color: var(--color-Text-500);
-  }
-
-  .view-btn:hover,
-  .view-btn.active {
-    background: var(--color-Primary-500);
-    border-color: var(--color-Primary-500);
-    color: var(--color-Background-50);
-  }
-
-  /* Products Section */
-  .products-section {
-    width: 100%;
-    overflow-x: hidden; /* Prevent horizontal scrollbar during Isotope animations */
-  }
-
-  /* Products Grid - Isotope masonry layout */
-  .products-grid {
-    margin-bottom: 0; /* Remove bottom margin - section handles spacing */
-    position: relative;
-    width: 100%;
-    opacity: 1;
-    transition: opacity 0.3s ease-in-out;
-    overflow-x: hidden; /* Prevent horizontal scrollbar during filtering */
-  }
-
-  /* Loading state - hide grid while images load */
-  .products-grid.grid--loading {
-    opacity: 0;
-  }
-
-  /* Clear floats after grid */
-  .products-grid::after {
-    content: '';
-    display: block;
-    clear: both;
-  }
-
-  /* Grid sizer for Isotope column width calculation */
-  .grid__sizer {
-    width: 33.333%;
-    height: 0;
-    visibility: hidden;
-  }
-
-  /* Product Card - float-based layout for Isotope masonry */
-  .product-card {
-    float: left;
-    width: calc(33.333% - 1.5em - 4px); /* Subtract 4px for 2px border on each side */
-    margin: 0.75em;
-    box-sizing: border-box;
-    overflow: hidden;
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    color: inherit;
-    background: var(--color-Secondary-100);
-    border-radius: var(--border-radius-lg);
-    border: 2px solid transparent; /* Transparent border so all cards have same dimensions */
-    transition: box-shadow var(--transition-base);
-  }
-
-  /* A11y theme overrides moved to src/Styles/a11y/base/theme-overrides.css */
-
-  /* Responsive: 2 columns on tablet */
-  @media (max-width: 1023px) {
-    .grid__sizer {
-      width: 50%;
-    }
-    .product-card {
-      width: calc(50% - 1.5em - 4px); /* Account for borders */
-    }
-  }
-
-  /* Responsive: 1 column on mobile */
-  @media (max-width: 767px) {
-    .grid__sizer {
-      width: 100%;
-    }
-    .product-card {
-      width: calc(100% - 1.5em - 4px); /* Account for borders */
-    }
-  }
-
-  .product-card:hover {
-    transform: translateY(-5px);
-    /* Keep box-shadow the same - no change on hover */
-  }
-
-  .product-card .product-name {
-    color: var(--color-Text-700);
-  }
-
-  .product-card:hover .product-name {
-    color: var(--color-Primary-500);
-  }
-
-  .product-image {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 10;
-    overflow: hidden;
-    background: var(--color-Neutral-100);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .product-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform var(--transition-base);
-  }
-
-  .product-card:hover .product-image img {
-    transform: scale(1.05);
-  }
-
-  .product-badge {
-    position: absolute;
-    top: var(--space-md);
-    left: var(--space-md);
-    padding: var(--space-xs) var(--space-sm);
-    background: var(--color-Primary-500);
-    color: var(--color-Background-50);
-    font-size: var(--text-xs);
-    font-weight: var(--font-bold);
-    border-radius: var(--border-radius-sm);
-    text-transform: uppercase;
-  }
-
-  .product-badge.badge-hot {
-    background: var(--color-Error-500);
-  }
-
-  .product-badge.badge-free {
-    background: var(--color-Primary-600);
-  }
-
-  .product-badge.badge-worksheet {
-    background: var(--color-Primary-600);
-  }
-
-  .product-badge.badge-workbook {
-    background: var(--color-Secondary-600);
-  }
-
-  .product-badge.badge-guide {
-    background: var(--color-AccentOne-600);
-  }
-
-  .product-badge.badge-toolkit {
-    background: var(--color-AccentTwo-600);
-  }
-
-  .product-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity var(--transition-base);
-  }
-
-  .product-card:hover .product-overlay {
-    opacity: 1;
-  }
-
-  .product-info {
-    padding: var(--space-lg);
-  }
-
-  @media (max-width: 768px) {
-    .product-info {
-      padding: var(--space-md);
-    }
-  }
-
-  @media (max-width: 480px) {
-    .product-info {
-      padding: var(--space-sm);
-    }
-  }
-
-  @media (max-width: 350px) {
-    .product-info {
-      padding: var(--space-xs) var(--space-sm);
-    }
-  }
-
-  .product-category {
-    font-size: var(--text-xs);
-    color: var(--color-Primary-500);
-    font-weight: var(--font-semibold);
-    text-transform: uppercase;
-    margin-bottom: var(--space-xs);
-  }
-
-  .product-name {
-    font-size: var(--text-lg);
-    font-weight: var(--font-bold);
-    margin-bottom: var(--space-sm);
-  }
-
-  .product-description {
-    font-size: var(--text-sm);
-    color: var(--color-Text-500);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-md);
-  }
-
-  .product-rating {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    margin-bottom: var(--space-md);
-    font-size: var(--text-sm);
-  }
-
-  .stars {
-    color: var(--color-Warning-500);
-  }
-
-  .reviews {
-    color: var(--color-Text-500);
-  }
-
-  .product-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-md);
-    padding-top: var(--space-md);
-  }
-
-  .product-price {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-sm);
-  }
-
-  .price-current {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Primary-500);
-  }
-
-  /* Add to Cart Button */
-  .add-to-cart-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-xs);
-    white-space: nowrap;
-  }
-
-  .add-to-cart-icon {
-    display: none;
-    font-size: var(--text-xl);
-    font-weight: var(--font-bold);
-  }
-
-  .add-to-cart-text {
-    display: inline;
-  }
-
-  /* Responsive Product Cards */
-  @media (max-width: 480px) {
-    .product-footer {
-      flex-direction: column;
-      align-items: stretch;
-      gap: var(--space-sm);
-    }
-
-    .price-current {
-      font-size: var(--text-xl);
-    }
-
-    .add-to-cart-btn {
-      width: 100%;
-    }
-  }
-
-  @media (max-width: 350px) {
-    .price-current {
-      font-size: var(--text-lg);
-    }
-
-    .add-to-cart-btn .add-to-cart-text {
-      display: none;
-    }
-
-    .add-to-cart-btn .add-to-cart-icon {
-      display: inline;
-    }
-
-    .add-to-cart-btn {
-      width: auto;
-      min-width: 44px;
-      padding: var(--space-sm);
-    }
-
-    .product-footer {
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-    }
-  }
-
-  @media (max-width: 250px) {
-    .product-footer {
-      flex-direction: column;
-      align-items: center;
-      gap: var(--space-xs);
-    }
-
-    .price-current {
-      font-size: var(--text-base);
-    }
-
-    .add-to-cart-btn {
-      width: 100%;
-      min-width: auto;
-    }
-  }
-
-  .price-original {
-    font-size: var(--text-base);
-    color: var(--color-Text-500);
-    text-decoration: line-through;
-  }
-
-  /* Load More */
-  .load-more-section {
-    text-align: center;
-  }
-
-  /* Newsletter CTA - .bg-alt uses global class from utilities.css */
-
-  .cta-title {
-    font-size: var(--text-3xl);
-    font-weight: var(--font-bold);
-    margin-bottom: var(--space-md);
-    color: var(--color-Text-700);
-  }
-
-  .cta-description {
-    font-size: var(--text-lg);
-    color: var(--color-Text-500);
-    margin-bottom: var(--space-xl);
-  }
-
-  .newsletter-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    max-width: 500px;
-    margin: 0 auto;
-  }
-
-  .newsletter-input {
-    padding: var(--space-md);
-    border: 1px solid var(--color-Neutral-300);
-    border-radius: var(--border-radius-md);
-    font-size: var(--text-base);
-  }
-
-  /* Responsive: Tablet */
-  @media (min-width: 768px) {
-    .newsletter-form {
-      flex-direction: row;
-    }
-
-    .newsletter-input {
-      flex: 1;
-    }
-  }
-
-  /* Responsive: Desktop */
-  @media (min-width: 1024px) {
-    .page-title {
-      font-size: var(--text-6xl);
-    }
-
-    .assets-layout {
-      grid-template-columns: 280px 1fr;
-    }
-
-    .filters-sidebar {
-      display: block;
-    }
-
-    .cta-title {
-      font-size: var(--text-4xl);
-    }
-  }
-</style>
