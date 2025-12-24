@@ -1,0 +1,32 @@
+---
+interface Value {
+  number: string;
+  title: string;
+  description: string;
+}
+
+interface Props {
+  title: string;
+  values: Value[];
+}
+
+const { title, values } = Astro.props;
+---
+
+<section class="values-section">
+  <div class="container container-6xl">
+    <h2 class="values-section__title">{title}</h2>
+
+    <div class="values-section__list">
+      {values.map((value) => (
+        <div class="values-section__item">
+          <div class="values-section__number">{value.number}</div>
+          <div class="values-section__content">
+            <h3 class="values-section__item-title">{value.title}</h3>
+            <p class="values-section__item-text">{value.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

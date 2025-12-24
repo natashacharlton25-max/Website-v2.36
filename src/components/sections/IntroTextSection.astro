@@ -1,0 +1,74 @@
+---
+interface Props {
+  lead: string;
+  subtitles: string[];
+}
+
+const { lead, subtitles } = Astro.props;
+---
+
+<section class="intro-text">
+  <div class="container container-6xl">
+    <div class="intro-text__content">
+      <p class="intro-text__lead">{lead}</p>
+      {subtitles.map((subtitle) => (
+        <p class="intro-text__subtitle">{subtitle}</p>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .intro-text {
+    padding: var(--space-4xl) 0;
+  }
+
+  .intro-text__content {
+    max-width: 1400px;
+    text-align: left;
+  }
+
+  .intro-text__lead {
+    font-size: var(--text-xl);
+    font-weight: var(--font-medium);
+    color: var(--color-Text-700);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-xl);
+  }
+
+  .intro-text__subtitle {
+    font-size: var(--text-xl);
+    font-weight: var(--font-medium);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-sm);
+  }
+
+  .intro-text__subtitle:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 767px) {
+    .intro-text {
+      padding: var(--space-2xl) 0;
+    }
+  }
+
+  @media (max-width: 250px) {
+    .intro-text__content {
+      text-align: center;
+    }
+
+    .intro-text__lead,
+    .intro-text__subtitle {
+      font-size: var(--text-base);
+    }
+  }
+
+  @media (max-width: 210px) {
+    .intro-text__lead,
+    .intro-text__subtitle {
+      font-size: var(--text-sm);
+    }
+  }
+</style>

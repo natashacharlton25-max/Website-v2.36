@@ -1,0 +1,80 @@
+---
+/**
+ * StepCard - How it works step card component
+ *
+ * Used on services page to display numbered steps
+ *
+ * Props:
+ * @param number - Step number
+ * @param title - Step title
+ * @param text - Step description text
+ */
+
+interface Props {
+  number: string;
+  title: string;
+  text: string;
+}
+
+const { number, title, text } = Astro.props;
+---
+
+<div class="step-card">
+  <div class="step-card__number">{number}</div>
+  <h3 class="step-card__title">{title}</h3>
+  <p class="step-card__text">{text}</p>
+</div>
+
+<style>
+  /* ========== STEP CARD ========== */
+  .step-card {
+    background-color: var(--color-Background-50);
+    border: 2px solid var(--color-Primary-200);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-2xl);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+  }
+
+  .step-card:hover {
+    border-color: var(--color-Primary-400);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ========== NUMBER ========== */
+  .step-card__number {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--color-Primary-500);
+    color: white;
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--space-lg) auto;
+  }
+
+  /* ========== TITLE ========== */
+  .step-card__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Text-700);
+    margin: 0 0 var(--space-md) 0;
+  }
+
+  /* ========== TEXT ========== */
+  .step-card__text {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-Text-600);
+    margin: 0;
+    line-height: var(--leading-relaxed);
+  }
+
+  /* A11Y theme overrides in: src/styles/a11y/components/step-card.css */
+</style>

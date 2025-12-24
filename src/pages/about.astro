@@ -1,10 +1,13 @@
 ---
 import BaseLayout from '../Layouts/BaseLayout.astro';
-import ImageTextSection from '../components/Sections/ImageTextSection.astro';
-import FooterWithMask from '../components/Footer/FooterWithMask.astro';
-import Button from '../components/Button/Button.astro';
 import HeroSection from '../components/Sections/HeroSection.astro';
-import { Image } from 'astro:assets';
+import IntroTextSection from '../components/Sections/IntroTextSection.astro';
+import StorySection from '../components/Sections/StorySection.astro';
+import ImageTextSection from '../components/Sections/ImageTextSection.astro';
+import PhilosophyFlipCardsSection from '../components/Sections/PhilosophyFlipCardsSection.astro';
+import ValuesSection from '../components/Sections/ValuesSection.astro';
+import CTASection from '../components/Sections/CTASection.astro';
+import FooterWithMask from '../components/Footer/FooterWithMask.astro';
 
 // Image imports from src/PageImages for Astro optimization
 import heroImage from '../PageImages/About/Hero/Hero.png';
@@ -14,30 +17,55 @@ import youFirstImage from '../PageImages/About/Philosophy/You-First.png';
 import yourChoicesImage from '../PageImages/About/Philosophy/Your-Choices.png';
 import actuallyWorksImage from '../PageImages/About/Philosophy/Actually-Works.png';
 
-// Our Story content
-const storyContent = [
-  "I spent most of my life thinking that constant stress, fear, and anxiety were just part of who I was. Like some people are tall, some people are funny, and I was just... anxious. Heavy. Always waiting for the next bad thing.",
-  "The weight of trauma felt like something I'd carry forever. I wasn't living, really. I was surviving. Keeping my head above water and calling it a life.",
-  "Then one day, I got tired of it. Not in a dramatic, lightning-bolt kind of way. Just quietly fed up. I thought: what if I stopped letting this thing run the show? What have I actually got to lose?",
-  "So I started pushing back. Slowly. Messily. Not perfectly. And something shifted.",
-  "When I finally stopped letting trauma be the first thing I introduced about myself, the whole world got bigger. I found out I actually liked who I was underneath all that weight. I could breathe. I could be curious about life instead of just bracing for it.",
-  "I didn't need to be \"the person who went through that thing\" anymore. I was just... me. And that was enough.",
-  "That's when I knew I wanted to create something for other people who might be ready for the same shift. Not a programme that tells you what to do. Not advice from someone who thinks they've got it all figured out. Just a space with useful stuff in it, for people to take what helps and leave the rest.",
-  "Because everyone deserves to feel lighter. Everyone deserves to walk with a smile."
-];
+// Import JSON data
+import heroDataRaw from '../data/about/hero.json';
+import introDataRaw from '../data/about/introduction.json';
+import storyDataRaw from '../data/about/story.json';
+import purposeDataRaw from '../data/about/purpose.json';
+import philosophyDataRaw from '../data/about/philosophy.json';
+import valuesDataRaw from '../data/about/values.json';
+import finalCTADataRaw from '../data/about/final-cta.json';
 
-// What We're Here To Do content
-const purposeContent = [
-  "Walking with a Smile is about helping trauma survivors move from a life centred on pain to one centred on themselves.",
-  "That sounds big. But really, it's practical. It's resources you can actually use. A community that gets it. And a general philosophy of: you're in charge here, we're just offering tools.",
-  "We're not here to rescue anyone. We're not here to tell you how your healing should go. We're just here to open a few doors and let you decide which ones to walk through."
-];
+// Type assertions
+const heroData = heroDataRaw as {
+  title: string;
+  subtitle: string;
+  image: string;
+  imageAlt: string;
+  imagePosition: 'full';
+};
 
-// CTA buttons
-const ctaButtons = [
-  { text: 'Explore Resources', href: '/assets', variant: 'primary' as const },
-  { text: 'Discover Pathways', href: '/for-you', variant: 'secondary' as const }
-];
+const introData = introDataRaw as {
+  lead: string;
+  subtitles: string[];
+};
+
+const storyData = storyDataRaw as {
+  title: string;
+  image: string;
+  imageAlt: string;
+  content: string[];
+};
+
+const purposeData = purposeDataRaw as {
+  title: string;
+  content: string[];
+  image: string;
+  imageAlt: string;
+  imagePosition: 'left';
+};
+
+const philosophyData = philosophyDataRaw as typeof philosophyDataRaw;
+const valuesData = valuesDataRaw as typeof valuesDataRaw;
+
+const finalCTAData = finalCTADataRaw as {
+  title: string;
+  content: string[];
+  buttons: Array<{ text: string; href: string; variant: 'primary' | 'secondary' }>;
+};
+
+// Map philosophy pillar images
+const philosophyImages = [youFirstImage, yourChoicesImage, actuallyWorksImage];
 ---
 
 <BaseLayout
@@ -47,915 +75,60 @@ const ctaButtons = [
 >
   <!-- Hero with Full-Width Image -->
   <HeroSection
-    title="About Us"
-    subtitle="We've walked parts of this journey too."
+    title={heroData.title}
+    subtitle={heroData.subtitle}
     variant="image"
     image={heroImage}
-    imageAlt="About Walking With A Smile"
-    imagePosition="full"
+    imageAlt={heroData.imageAlt}
+    imagePosition={heroData.imagePosition}
   />
 
   <!-- Introduction -->
-  <section class="intro-section section bg-alt">
-    <div class="container container-6xl">
-      <div class="intro-content">
-        <p class="intro-lead">
-          Walking with a Smile wasn't built from a textbook. It came from real life, from knowing what it's like when your past takes up more room than your present, and from figuring out that it doesn't have to stay that way.
-        </p>
-        <p class="intro-subtitle">
-          We're not here to tell you what healing should look like. We've learned the hard way that everyone's path is different.
-        </p>
-        <p class="intro-subtitle">
-          And the only real expert on your life? That's you.
-        </p>
-      </div>
-    </div>
-  </section>
+  <IntroTextSection
+    lead={introData.lead}
+    subtitles={introData.subtitles}
+  />
 
   <!-- Our Story -->
-  <section class="story-section section bg-alt">
-    <div class="container container-6xl">
-      <div class="story-content">
-        <!-- Image Card with Title -->
-        <div class="story-image-card">
-          <Image src={storyImage} alt="Our journey" />
-          <div class="story-image-overlay">
-            <h2 class="story-image-title">Our Story</h2>
-          </div>
-        </div>
-
-        <!-- Story Text -->
-        <div class="story-text">
-          {storyContent.map(paragraph => (
-            <p>{paragraph}</p>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
+  <StorySection
+    title={storyData.title}
+    image={storyImage}
+    imageAlt={storyData.imageAlt}
+    content={storyData.content}
+  />
 
   <!-- What We're Here To Do -->
   <ImageTextSection
-    title="What We're Here To Do"
-    content={purposeContent}
+    title={purposeData.title}
+    content={purposeData.content}
     image={purposeImage}
-    imageAlt="What we do"
-    imagePosition="left"
-    bgClass="bg-alt"
+    imageAlt={purposeData.imageAlt}
+    imagePosition={purposeData.imagePosition}
   />
 
-  <!-- How We See Things -->
-  <section class="philosophy-section section bg-alt">
-    <div class="container container-6xl">
-      <div class="philosophy-content">
-        <h2 class="philosophy-title">How We See Things</h2>
-        <div class="philosophy-intro">
-          <p class="philosophy-subtitle philosophy-line">
-            We start with who you are, not what happened to you.
-          </p>
-          <p class="philosophy-subtitle philosophy-line">
-            Trauma might have shaped parts of your story, but it's not the whole book.
-          </p>
-          <p class="philosophy-subtitle philosophy-line philosophy-line-last">
-            Our approach comes down to three things:
-          </p>
-        </div>
+  <!-- How We See Things - Philosophy Flip Cards -->
+  <PhilosophyFlipCardsSection
+    title={philosophyData.title}
+    intro={philosophyData.intro}
+    pillars={philosophyData.pillars}
+    pillarImages={philosophyImages}
+  />
 
-        <!-- Pillar Cards with Hover Flip -->
-        <div class="pillar-cards">
-          <div class="pillar-card">
-            <div class="pillar-card-inner">
-              <div class="pillar-card-front">
-                <Image src={youFirstImage} alt="You first" />
-                <div class="pillar-card-title-overlay">
-                  <h3>You first</h3>
-                </div>
-              </div>
-              <div class="pillar-card-back">
-                <div class="pillar-card-back-content">
-                  <h3>You first</h3>
-                  <p>You're more than your worst experiences. Way more. We're here to help you reconnect with that, with the person underneath all the weight.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+  <!-- What Matters To Us - Values -->
+  <ValuesSection
+    title={valuesData.title}
+    values={valuesData.values}
+  />
 
-          <div class="pillar-card">
-            <div class="pillar-card-inner">
-              <div class="pillar-card-front">
-                <Image src={yourChoicesImage} alt="Your choices" />
-                <div class="pillar-card-title-overlay">
-                  <h3>Your choices</h3>
-                </div>
-              </div>
-              <div class="pillar-card-back">
-                <div class="pillar-card-back-content">
-                  <h3>Your choices</h3>
-                  <p>Everything here is optional. We offer things that might help. You decide what actually does. No prescriptions, no "you should really try this." Just options.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="pillar-card">
-            <div class="pillar-card-inner">
-              <div class="pillar-card-front">
-                <Image src={actuallyWorksImage} alt="Actually works" />
-                <div class="pillar-card-title-overlay">
-                  <h3>Actually works</h3>
-                </div>
-              </div>
-              <div class="pillar-card-back">
-                <div class="pillar-card-back-content">
-                  <h3>Actually works</h3>
-                  <p>Real tools for real life. Not abstract concepts or things that only make sense in a therapy room. Small, doable things you can try today.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- What Matters To Us -->
-  <section class="values-section section bg-alt">
-    <div class="container container-6xl">
-      <h2 class="section-title">What Matters To Us</h2>
-
-      <div class="values-list">
-        <div class="value-item">
-          <div class="value-number">01</div>
-          <div class="value-content">
-            <h3 class="value-title">Empowerment</h3>
-            <p class="value-text">
-              You have more power than you probably think. We're here to remind you of that, not to swoop in and take over.
-            </p>
-          </div>
-        </div>
-
-        <div class="value-item">
-          <div class="value-number">02</div>
-          <div class="value-content">
-            <h3 class="value-title">Being real</h3>
-            <p class="value-text">
-              No performing. No pretending you're further along than you are. You can show up here exactly as you are, messy bits and all.
-            </p>
-          </div>
-        </div>
-
-        <div class="value-item">
-          <div class="value-number">03</div>
-          <div class="value-content">
-            <h3 class="value-title">Resilience</h3>
-            <p class="value-text">
-              Healing isn't a straight line. Some days are harder than others. We're not just here for the breakthroughs. We're here for the whole thing.
-            </p>
-          </div>
-        </div>
-
-        <div class="value-item">
-          <div class="value-number">04</div>
-          <div class="value-content">
-            <h3 class="value-title">Hope</h3>
-            <p class="value-text">
-              Not toxic positivity. Not pretending everything's fine. Just a genuine belief that things can be different, and that you're capable of getting there.
-            </p>
-          </div>
-        </div>
-
-        <div class="value-item">
-          <div class="value-number">05</div>
-          <div class="value-content">
-            <h3 class="value-title">Kindness</h3>
-            <p class="value-text">
-              We meet you where you are. No judgement, no timelines, no "you should be over this by now." Everyone's path looks different. That's fine.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- What This Means For You - Combined Section -->
-  <section class="combined-final-section section bg-alt">
-    <div class="container container-6xl">
-      <div class="combined-content">
-        <h2 class="combined-title">What This Means For You</h2>
-
-        <p class="combined-text">
-          When you use our resources or hang out in our community, you're still the one driving. We're not going to chase you up, guilt you into doing more, or make you feel like you're falling behind.
-        </p>
-
-        <p class="combined-text">
-          Take what's useful. Leave what isn't. Come back when you want to.
-        </p>
-
-        <p class="combined-text">
-          No pressure. No performance. Just support that respects you're a whole person who knows what they need.
-        </p>
-
-        <p class="combined-text">
-          We'll support you without trying to own your journey. We'll respect your pace, your choices, and your right to decide what progress means for you.
-        </p>
-
-        <p class="combined-text combined-emphasis">
-          Your life. Your terms. We're just glad to be part of the journey for a bit.
-        </p>
-
-        <div class="combined-cta-buttons">
-          {ctaButtons.map(button => (
-            <Button
-              href={button.href}
-              variant={button.variant}
-            >
-              {button.text}
-            </Button>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- What This Means For You - Final CTA -->
+  <CTASection
+    title={finalCTAData.title}
+    description={finalCTAData.content}
+    buttons={finalCTAData.buttons}
+  />
 
   <!-- Footer with Interactive Mask -->
   <FooterWithMask
     backgroundImage="/Footer/Footer-Reveal.png"
   />
 </BaseLayout>
-
-<style>
-  /* Common styles - .bg-alt uses global class from utilities.css */
-
-  .section {
-    padding: var(--space-5xl) 0;
-  }
-
-  .section-title {
-    font-size: var(--text-4xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    font-family: var(--font-heading);
-    text-align: center;
-    margin-bottom: var(--space-2xl);
-  }
-
-  /* Introduction Section */
-  .intro-section {
-    padding: var(--space-4xl) 0;
-  }
-
-  .intro-content {
-    max-width: 1400px;
-    text-align: left;
-  }
-
-  .intro-lead {
-    font-size: var(--text-xl);
-    font-weight: var(--font-medium);
-    color: var(--color-Text-700);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-xl);
-  }
-
-  .intro-subtitle {
-    font-size: var(--text-xl);
-    font-weight: var(--font-medium);
-    color: var(--color-Text-600);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-sm);
-  }
-
-  .intro-subtitle:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Story Section */
-  .story-content {
-    max-width: 1400px;
-    text-align: left;
-  }
-
-  .story-image-card {
-    position: relative;
-    width: 100%;
-    margin-bottom: var(--space-2xl);
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-xl);
-  }
-
-  .story-image-card img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  .story-image-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: flex-end;
-    padding: var(--space-2xl);
-  }
-
-  .story-image-title {
-    font-size: var(--text-4xl);
-    font-weight: var(--font-extrabold);
-    color: var(--color-Text-700);
-    font-family: var(--font-heading);
-    margin: 0;
-    text-shadow:
-      0 0 20px rgba(255, 255, 255, 0.8),
-      0 0 40px rgba(255, 255, 255, 0.6),
-      0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  .story-text {
-    max-width: 1400px;
-  }
-
-  .story-text p {
-    font-size: var(--text-xl);
-    font-weight: var(--font-medium);
-    color: var(--color-Text-600);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-lg);
-  }
-
-  .story-text p:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Philosophy Section */
-  .philosophy-section {
-    isolation: isolate;
-  }
-
-  .philosophy-content {
-    max-width: 1400px;
-    text-align: left;
-  }
-
-  .philosophy-title {
-    font-size: var(--text-4xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    font-family: var(--font-heading);
-    margin-bottom: var(--space-2xl);
-  }
-
-  .philosophy-intro {
-    margin-bottom: var(--space-3xl);
-  }
-
-  .philosophy-lead {
-    font-size: var(--text-xl);
-    font-weight: var(--font-semibold);
-    color: var(--color-Primary-600);
-    margin-bottom: var(--space-lg);
-  }
-
-  .philosophy-subtitle {
-    font-size: var(--text-xl);
-    font-weight: var(--font-medium);
-    color: var(--color-Text-600);
-    line-height: var(--leading-relaxed);
-  }
-
-  .philosophy-line {
-    margin-bottom: var(--space-xs);
-  }
-
-  .philosophy-line-last {
-    margin-bottom: 0;
-  }
-
-  /* Pillar Cards with Hover Flip */
-  .pillar-cards {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-2xl);
-    margin-bottom: var(--space-3xl);
-  }
-
-  .pillar-card {
-    perspective: 1000px;
-    height: 400px;
-  }
-
-  .pillar-card-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-  }
-
-  .pillar-card-front,
-  .pillar-card-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    top: 0;
-    left: 0;
-  }
-
-  .pillar-card-front {
-    z-index: 2;
-    transform: rotateY(0deg);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .pillar-card-front img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .pillar-card-title-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: var(--space-xl);
-    background: linear-gradient(to top,
-      var(--hero-overlay-color) 0%,
-      color-mix(in srgb, var(--hero-overlay-color) 85%, transparent) 60%,
-      transparent 100%
-    );
-  }
-
-  .pillar-card-title-overlay h3 {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Primary-600);
-    font-family: var(--font-heading);
-    margin: 0;
-  }
-
-  .pillar-card-back {
-    background: linear-gradient(135deg, var(--color-Primary-500) 0%, var(--color-Primary-700) 100%);
-    transform: rotateY(180deg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-lg) var(--space-md);
-    box-shadow: var(--shadow-lg);
-    overflow: hidden;
-  }
-
-  .pillar-card-back-content {
-    text-align: center;
-    width: 100%;
-    max-width: 90%;
-  }
-
-  .pillar-card-back-content h3 {
-    font-size: var(--text-xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Background-50);
-    font-family: var(--font-heading);
-    margin-bottom: var(--space-sm);
-    line-height: 1.2;
-  }
-
-  .pillar-card-back-content p {
-    font-size: var(--text-xl);
-    font-weight: var(--font-medium);
-    color: var(--color-Background-50);
-    line-height: var(--leading-relaxed);
-    margin: 0;
-  }
-
-  /* Desktop hover flip effect */
-  @media (min-width: 768px) {
-    .pillar-cards {
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--space-xl);
-    }
-
-    .pillar-card:hover .pillar-card-inner {
-      transform: rotateY(180deg);
-    }
-  }
-
-  /* Mobile: Show as stacked cards (no flip) */
-  @media (max-width: 767px) {
-    .pillar-card {
-      height: auto;
-      perspective: none;
-    }
-
-    .pillar-card-inner {
-      transform-style: flat;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .pillar-card-front,
-    .pillar-card-back {
-      position: relative;
-      backface-visibility: visible;
-      transform: none !important;
-      box-shadow: none;
-    }
-
-    .pillar-card-front {
-      border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-      height: 250px;
-      flex-shrink: 0;
-    }
-
-    .pillar-card-front img {
-      height: 100%;
-      width: 100%;
-      object-fit: cover;
-    }
-
-    .pillar-card-title-overlay {
-      display: none;
-    }
-
-    .pillar-card-back {
-      background: var(--color-Background-100);
-      border: 1px solid var(--color-Neutral-200);
-      border-top: none;
-      border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-      padding: var(--space-lg);
-      transform: none !important;
-      height: auto;
-    }
-
-    .pillar-card-back-content {
-      text-align: left;
-    }
-
-    .pillar-card-back-content h3 {
-      color: var(--color-Text-700);
-      margin-bottom: var(--space-md);
-      font-size: var(--text-xl);
-    }
-
-    .pillar-card-back-content p {
-      color: var(--color-Text-600);
-      font-size: var(--text-xl);
-    }
-
-    .pillar-card-inner {
-      box-shadow: var(--shadow-md);
-      border-radius: var(--border-radius-lg);
-    }
-  }
-
-  /* Values Section - Numbered List Style */
-  .values-list {
-    max-width: 900px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2xl);
-  }
-
-  .value-item {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--space-xl);
-    align-items: start;
-    padding-bottom: var(--space-2xl);
-    border-bottom: 1px solid var(--color-Neutral-200);
-  }
-
-  .value-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  .value-number {
-    font-size: var(--text-5xl);
-    font-weight: var(--font-extrabold);
-    color: var(--color-Primary-500);
-    opacity: 0.3;
-    line-height: 1;
-    font-family: var(--font-heading);
-  }
-
-  .value-content {
-    padding-top: var(--space-xs);
-  }
-
-  .value-title {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    margin-bottom: var(--space-sm);
-    font-family: var(--font-heading);
-  }
-
-  .value-text {
-    font-size: var(--text-xl);
-    font-weight: var(--font-medium);
-    color: var(--color-Text-600);
-    line-height: var(--leading-relaxed);
-    margin: 0;
-  }
-
-  /* Combined Final Section - Left Aligned */
-  .combined-content {
-    max-width: 1400px;
-    text-align: left;
-  }
-
-  .combined-title {
-    font-size: var(--text-4xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    font-family: var(--font-heading);
-    margin-bottom: var(--space-2xl);
-  }
-
-  .combined-text {
-    font-size: var(--text-xl);
-    font-weight: var(--font-medium);
-    color: var(--color-Text-600);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-sm);
-  }
-
-  .combined-emphasis {
-    font-weight: var(--font-semibold);
-    color: var(--color-Primary-600);
-    margin-bottom: var(--space-3xl) !important;
-  }
-
-  .combined-cta-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    align-items: flex-start;
-  }
-
-  /* Responsive Design */
-  @media (min-width: 1024px) {
-    .section-title {
-      font-size: var(--text-5xl);
-    }
-
-    .story-image-title {
-      font-size: var(--text-5xl);
-    }
-
-    .philosophy-title {
-      font-size: var(--text-5xl);
-    }
-
-    .philosophy-lead {
-      font-size: var(--text-2xl);
-    }
-
-    .meaning-title,
-    .promise-title {
-      font-size: var(--text-5xl);
-    }
-  }
-
-  @media (max-width: 767px) {
-    .section {
-      padding: var(--space-3xl) 0;
-    }
-
-    .intro-section {
-      padding: var(--space-2xl) 0;
-    }
-
-    .section-title {
-      font-size: var(--text-3xl);
-    }
-
-    .story-image-title {
-      font-size: var(--text-3xl);
-    }
-
-    .story-image-overlay {
-      padding: var(--space-lg);
-    }
-
-    .philosophy-title {
-      font-size: var(--text-3xl);
-      margin-bottom: var(--space-lg);
-    }
-
-    .philosophy-lead {
-      font-size: var(--text-lg);
-    }
-
-    .value-item {
-      gap: var(--space-md);
-      padding-bottom: var(--space-lg);
-    }
-
-    .value-number {
-      font-size: var(--text-4xl);
-    }
-
-    .value-title {
-      font-size: var(--text-xl);
-    }
-
-    .meaning-title,
-    .promise-title {
-      font-size: var(--text-3xl);
-    }
-
-    .meaning-emphasis {
-      font-size: var(--text-lg) !important;
-    }
-
-    .promise-tagline {
-      font-size: var(--text-xl);
-    }
-  }
-
-  @media (max-width: 250px) {
-    .section {
-      padding: var(--space-2xl) 0.25rem;
-    }
-
-    .section-title,
-    .meaning-title,
-    .promise-title {
-      font-size: var(--text-xl);
-      margin-bottom: var(--space-md);
-    }
-
-    .philosophy-title {
-      font-size: var(--text-xl);
-      margin-bottom: var(--space-md);
-    }
-
-    .philosophy-lead {
-      font-size: var(--text-base);
-      margin-bottom: var(--space-md);
-    }
-
-    .story-image-card {
-      margin-bottom: var(--space-lg);
-    }
-
-    .story-image-title {
-      font-size: var(--text-xl);
-    }
-
-    .story-image-overlay {
-      padding: var(--space-md);
-    }
-
-    .value-item {
-      grid-template-columns: 1fr;
-      gap: var(--space-sm);
-      padding-bottom: var(--space-md);
-    }
-
-    .value-number {
-      font-size: var(--text-2xl);
-    }
-
-    .value-title {
-      font-size: var(--text-base);
-      margin-bottom: var(--space-xs);
-    }
-
-    .meaning-text,
-    .promise-text {
-      font-size: var(--text-base);
-      line-height: var(--leading-relaxed);
-    }
-
-    .meaning-emphasis {
-      font-size: var(--text-base) !important;
-      margin-top: var(--space-md) !important;
-    }
-
-    .promise-tagline {
-      font-size: var(--text-base);
-    }
-
-    /* Center align all sections */
-    .intro-content,
-    .story-content,
-    .story-text,
-    .philosophy-content,
-    .combined-content {
-      text-align: center;
-    }
-
-    /* Pillar cards - compact for very small screens */
-    .pillar-cards {
-      gap: var(--space-lg);
-    }
-
-    .pillar-card-front {
-      height: 150px;
-    }
-
-    .pillar-card-back {
-      padding: var(--space-md);
-    }
-
-    .pillar-card-back-content h3 {
-      font-size: var(--text-base);
-      margin-bottom: var(--space-sm);
-    }
-
-    .pillar-card-back-content p {
-      font-size: var(--text-sm);
-    }
-
-    /* Body text reduced for very small screens */
-    .intro-lead,
-    .intro-subtitle,
-    .story-text p,
-    .philosophy-subtitle,
-    .combined-text {
-      font-size: var(--text-base);
-    }
-
-    .value-text {
-      font-size: var(--text-sm);
-    }
-  }
-
-  /* Extra small screens - under 210px */
-  @media (max-width: 210px) {
-    .section {
-      padding: var(--space-lg) 0.125rem;
-    }
-
-    .section-title,
-    .philosophy-title,
-    .meaning-title,
-    .promise-title,
-    .combined-title {
-      font-size: var(--text-lg);
-    }
-
-    .intro-lead,
-    .intro-subtitle,
-    .story-text p,
-    .philosophy-subtitle,
-    .combined-text {
-      font-size: var(--text-sm);
-    }
-
-    .pillar-card-front {
-      height: 120px;
-    }
-
-    .pillar-card-back-content h3 {
-      font-size: var(--text-sm);
-    }
-
-    .pillar-card-back-content p {
-      font-size: var(--text-xs);
-    }
-
-    .value-number {
-      font-size: var(--text-xl);
-    }
-
-    .value-title {
-      font-size: var(--text-sm);
-    }
-
-    .value-text {
-      font-size: var(--text-xs);
-    }
-  }
-
-  /* A11y hero overrides now in: src/Styles/a11y/components/hero-section.css */
-
-  :global(body.a11y-theme-dark) .story-image-title {
-    color: var(--a11y-dark-text);
-  }
-
-  /* Accessibility theme overrides - solid overlays for better contrast */
-  :global(body.a11y-theme-dark) .pillar-card-title-overlay,
-  :global(body.a11y-theme-high-contrast) .pillar-card-title-overlay {
-    background: rgba(0, 0, 0, 0.85);
-  }
-
-  :global(body.a11y-theme-cream) .pillar-card-title-overlay {
-    background: rgba(250, 248, 244, 0.9);
-  }
-
-  :global(body.a11y-theme-monochrome) .pillar-card-title-overlay {
-    background: rgba(255, 255, 255, 0.9);
-  }
-</style>

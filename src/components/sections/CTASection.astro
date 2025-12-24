@@ -7,7 +7,6 @@
  * - description?: CTA description/body text
  * - buttons: Array of {text, href, variant}
  * - trustSignals?: Array of {icon, value, label}
- * - bgClass?: Background class
  */
 
 import Button from '../Button/Button.astro';
@@ -29,21 +28,19 @@ export interface Props {
   description?: string | string[];
   buttons: CTAButton[];
   trustSignals?: TrustSignal[];
-  bgClass?: string;
 }
 
 const {
   title,
   description,
   buttons,
-  trustSignals = [],
-  bgClass = 'bg-alt'
+  trustSignals = []
 } = Astro.props;
 
 const descriptionArray = Array.isArray(description) ? description : description ? [description] : [];
 ---
 
-<section class={`cta-section section ${bgClass}`}>
+<section class="cta-section section">
   <div class="container container-6xl">
     <div class="cta-section__content">
       <h2 class="cta-section__title">{title}</h2>

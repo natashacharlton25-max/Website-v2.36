@@ -1,9 +1,12 @@
 ---
 import BaseLayout from '../Layouts/BaseLayout.astro';
 import FooterWithMask from '../components/Footer/FooterWithMask.astro';
-import Button from '../components/Button/Button.astro';
 import HeroSection from '../components/Sections/HeroSection.astro';
-import { Image } from 'astro:assets';
+import IntroTextSection from '../components/Sections/IntroTextSection.astro';
+import CTASection from '../components/Sections/CTASection.astro';
+import OfferingCard from '../components/Cards/OfferingCard.astro';
+import WhyCard from '../components/Cards/WhyCard.astro';
+import StepCard from '../components/Cards/StepCard.astro';
 
 // Import offering images from src/PageImages
 import offering1 from '../PageImages/Services/offering-1-resources.png';
@@ -11,111 +14,66 @@ import offering2 from '../PageImages/Services/offering-2-whitelabel.png';
 import offering3 from '../PageImages/Services/offering-3-custom.png';
 import offering4 from '../PageImages/Services/offering-4-training.png';
 
+// Import data
+import heroDataRaw from '../data/services/hero.json';
+import introDataRaw from '../data/services/intro.json';
+import offeringsDataRaw from '../data/services/offerings.json';
+import whyDataRaw from '../data/services/why.json';
+import howItWorksDataRaw from '../data/services/how-it-works.json';
+import ctaDataRaw from '../data/services/cta.json';
+
+// Type assertions for JSON imports
+const heroData = heroDataRaw as {
+  title: string;
+  subtitle: string;
+  description: string;
+  variant: 'simple' | 'image' | 'gradient';
+};
+
+const introData = introDataRaw as {
+  title: string;
+  lead: string;
+  subtitles: string[];
+};
+
+const offeringsData = offeringsDataRaw as Array<{
+  title: string;
+  description: string;
+  image: string;
+  suitable?: string[];
+  areas?: string[];
+  includes?: string[];
+  includesTitle?: string;
+  cta: { text: string; href: string };
+}>;
+
+const whyData = whyDataRaw as {
+  title: string;
+  reasons: Array<{ title: string; text: string }>;
+};
+
+const howItWorksData = howItWorksDataRaw as {
+  title: string;
+  steps: Array<{ number: string; title: string; text: string }>;
+};
+
+const ctaData = ctaDataRaw as {
+  title: string;
+  description: string;
+  footer: string;
+  buttons: Array<{
+    text: string;
+    href: string;
+    variant: 'primary' | 'secondary';
+  }>;
+};
+
+// Map image filenames to imported images
 const offeringImages = [offering1, offering2, offering3, offering4];
-
-// Service offerings
-const offerings = [
-  {
-    title: 'Ready-to-Use Resources',
-    description: 'Practical tools, worksheets, and frameworks you can use directly with clients or service users. Everything is designed to be accessible, warm in tone, and focused on building agency and self-direction.',
-    suitable: [
-      'Therapists and counsellors',
-      'Coaches working with trauma-affected clients',
-      'Support workers and case managers',
-      'Community organisations and charities'
-    ],
-    areas: [
-      'Identity and values exploration',
-      'Boundary setting and communication',
-      'Daily grounding and stability practices',
-      'Goal-setting and future planning',
-      'Self-directed decision-making'
-    ],
-    cta: { text: 'Browse Professional Resources', href: '/assets' }
-  },
-  {
-    title: 'White-Label Packages',
-    description: 'Use our materials under your own brand. We provide the content; you provide the identity. All materials are professionally designed, easy to customise, and built on trauma-informed principles. You receive full usage rights for your practice or organisation.',
-    includes: [
-      'Worksheet collections on specific themes',
-      'Programme materials for group work',
-      'Client handouts and take-home tools',
-      'Digital downloads ready for your platform'
-    ],
-    cta: { text: 'Enquire About White-Label Options', href: '/contact' }
-  },
-  {
-    title: 'Custom Resource Development',
-    description: 'Looking for something specific? We create bespoke resources tailored to your client group, service model, or organisational approach. We work collaboratively, ensuring the final product reflects your expertise and serves your clients well.',
-    includes: [
-      'Worksheets and workbooks designed around your methodology',
-      'Programme materials for specific interventions or pathways',
-      'Client-facing content that matches your tone and values',
-      'Visual resources, planners, and tracking tools'
-    ],
-    cta: { text: 'Request a Custom Quote', href: '/contact' }
-  },
-  {
-    title: 'Training and Licensing',
-    description: 'Want to embed our approach more deeply into your practice? We offer training sessions and licensing arrangements for organisations who want to use our frameworks consistently across their teams.',
-    includes: [
-      'Staff training on using our methods effectively',
-      'Trainer consultation sessions for larger organisations',
-      'Licensing agreements for ongoing use of materials',
-      'Consultation on adapting resources for specific populations'
-    ],
-    cta: { text: 'Get in Touch to Discuss', href: '/contact' }
-  }
-];
-
-// Why work with us
-const whyWorkWithUs = [
-  {
-    title: 'We understand the work you do.',
-    text: "Our resources are built from lived experience and grounded in what actually helps. We know that the people you support benefit from tools that respect their autonomy, meet them where they are, and work in the context of real, complicated lives."
-  },
-  {
-    title: 'We keep it practical.',
-    text: 'Accessible language and real-world application. Everything we create is designed to be used, to feel approachable, and to support genuine progress.'
-  },
-  {
-    title: 'We respect your expertise.',
-    text: 'You know your clients. We provide materials that support your work and complement your judgement. Our role is to save you time and offer quality resources, while you remain the expert in the room.'
-  },
-  {
-    title: 'We share your values.',
-    text: 'Empowerment. Choice. Agency. Dignity. If these matter to you, we\'re aligned.'
-  }
-];
-
-// How it works
-const howItWorks = [
-  {
-    number: '1',
-    title: 'Get in Touch',
-    text: "Tell us what you're looking for. Whether it's a specific resource type, a theme, or a broader need, we'd love to hear about your work and the people you support."
-  },
-  {
-    number: '2',
-    title: 'Explore Options',
-    text: "We'll share what's available and discuss what might work best for your practice. If custom development makes sense, we'll scope it out together."
-  },
-  {
-    number: '3',
-    title: 'Receive and Use',
-    text: 'You receive professionally designed, ready-to-use materials. Use them directly, adapt them for your context, or integrate them into your existing programmes.'
-  },
-  {
-    number: '4',
-    title: 'Ongoing Support',
-    text: "We're here if you need additional resources, want to expand a collection, or have feedback on how things are working. This is a relationship, and we value the professionals who choose to work with us."
-  }
-];
-
-const ctaButtons = [
-  { text: 'Contact Us', href: '/contact', variant: 'primary' as const },
-  { text: 'Browse Resources', href: '/assets', variant: 'secondary' as const }
-];
+const offerings = offeringsData.map((offering, index) => ({
+  ...offering,
+  imageObj: offeringImages[index],
+}));
 ---
 
 <BaseLayout
@@ -125,551 +83,84 @@ const ctaButtons = [
 >
   <!-- Hero Section -->
   <HeroSection
-    title="Services for Professionals"
-    subtitle="Quality resources to support the people you work with."
-    description="You're already doing meaningful work with trauma survivors, helping them rebuild, find stability, and move forward. We're here to make that work a little easier."
-    variant="simple"
-    bgClass="bg-alt"
+    title={heroData.title}
+    subtitle={heroData.subtitle}
+    description={heroData.description}
+    variant={heroData.variant}
   />
 
-  <!-- Introduction -->
-  <section class="intro-section section bg-alt">
+  <!-- Introduction Section -->
+  <section class="intro-section section">
     <div class="container container-6xl">
-      <div class="intro-content">
-        <h2 class="section-title">What We Offer</h2>
-        <p class="intro-lead">
-          Walking with a Smile offers practical, trauma-informed resources designed for professionals who share our values: empowerment over dependency, choice over prescription, and tools that work in real life.
-        </p>
-        <p class="intro-subtitle">
-          Whether you're looking for ready-made resources, something tailored to your practice, or materials you can offer under your own brand, we can help.
-        </p>
-      </div>
+      <h2 class="section-title">{introData.title}</h2>
+      <IntroTextSection
+        lead={introData.lead}
+        subtitles={introData.subtitles}
+      />
     </div>
   </section>
 
-  <!-- Offerings -->
-  <section class="offerings-section section bg-alt">
+  <!-- Offerings Section -->
+  <section class="offerings-section">
     <div class="container container-6xl">
-
       {offerings.map((offering, index) => (
-        <div class="offering-section">
-          <Image
-            src={offeringImages[index]}
-            alt={offering.title}
-            class="offering-image"
-            loading="lazy"
+        <>
+          <OfferingCard
+            title={offering.title}
+            description={offering.description}
+            image={offering.imageObj}
+            suitable={offering.suitable}
+            areas={offering.areas}
+            includes={offering.includes}
+            includesTitle={offering.includesTitle}
+            cta={offering.cta}
           />
-
-          <div class="offering-content">
-            <h3 class="offering-title">{offering.title}</h3>
-            <p class="offering-description">{offering.description}</p>
-
-            {offering.suitable && (
-              <div class="offering-detail">
-                <h4>Suitable for:</h4>
-                <ul>
-                  {offering.suitable.map(item => <li>{item}</li>)}
-                </ul>
-              </div>
-            )}
-
-            {offering.areas && (
-              <div class="offering-detail">
-                <h4>Resources cover areas including:</h4>
-                <ul>
-                  {offering.areas.map(item => <li>{item}</li>)}
-                </ul>
-              </div>
-            )}
-
-            {offering.includes && (
-              <div class="offering-detail">
-                <h4>{offering.title === 'White-Label Packages' ? 'White-label packages include:' : offering.title === 'Training and Licensing' ? 'This can include:' : 'Custom work can include:'}</h4>
-                <ul>
-                  {offering.includes.map(item => <li>{item}</li>)}
-                </ul>
-              </div>
-            )}
-
-            <Button
-              href={offering.cta.href}
-              variant="primary"
-              size="md"
-              className="offering-cta"
-            >
-              {offering.cta.text}
-            </Button>
-          </div>
-
           {index < offerings.length - 1 && <hr class="offering-divider" />}
-        </div>
+        </>
       ))}
     </div>
   </section>
 
-  <!-- Why Work With Us -->
-  <section class="why-section section bg-alt">
+  <!-- Why Work With Us Section -->
+  <section class="why-section section">
     <div class="container container-6xl">
-      <h2 class="section-title">Why Work With Us</h2>
-
+      <h2 class="section-title">{whyData.title}</h2>
       <div class="why-grid">
-        {whyWorkWithUs.map(reason => (
-          <div class="why-card">
-            <h3 class="why-title">{reason.title}</h3>
-            <p class="why-text">{reason.text}</p>
-          </div>
+        {whyData.reasons.map(reason => (
+          <WhyCard
+            title={reason.title}
+            text={reason.text}
+          />
         ))}
       </div>
     </div>
   </section>
 
-  <!-- How It Works -->
-  <section class="how-section section bg-alt">
+  <!-- How It Works Section -->
+  <section class="how-section section">
     <div class="container container-6xl">
-      <h2 class="section-title">How It Works</h2>
-
+      <h2 class="section-title">{howItWorksData.title}</h2>
       <div class="steps-grid">
-        {howItWorks.map(step => (
-          <div class="step-card">
-            <div class="step-number">{step.number}</div>
-            <h3 class="step-title">{step.title}</h3>
-            <p class="step-text">{step.text}</p>
-          </div>
+        {howItWorksData.steps.map(step => (
+          <StepCard
+            number={step.number}
+            title={step.title}
+            text={step.text}
+          />
         ))}
       </div>
     </div>
   </section>
 
   <!-- CTA Section -->
-  <section class="cta-section section bg-alt">
-    <div class="container container-6xl">
-      <div class="cta-content">
-        <h2 class="cta-title">Let's Talk</h2>
-        <p class="cta-text">
-          Whether you have a clear idea of what you need or just want to explore the possibilities, we'd love to hear from you.
-        </p>
-        <div class="cta-buttons">
-          {ctaButtons.map(button => (
-            <Button
-              href={button.href}
-              variant={button.variant}
-              size="md"
-            >
-              {button.text}
-            </Button>
-          ))}
-        </div>
-        <p class="cta-footer">
-          Walking with a Smile works with individuals, businesses and professionals across the UK and beyond. All resources are designed to support those who have experienced trauma in moving from survival to self-directed, valued lives.
-        </p>
-      </div>
-    </div>
-  </section>
+  <CTASection
+    title={ctaData.title}
+    description={ctaData.description}
+    buttons={ctaData.buttons}
+  >
+    <p class="cta-footer">{ctaData.footer}</p>
+  </CTASection>
 
   <!-- Footer -->
   <FooterWithMask backgroundImage="/Footer/Footer-Reveal.png" />
 </BaseLayout>
-
-<style>
-  /* Section Styles */
-  .section {
-    padding: var(--space-4xl) var(--space-md);
-  }
-
-  .bg-alt {
-    background-color: var(--color-Background-100);
-  }
-
-  .section-title {
-    font-family: var(--font-heading);
-    font-size: var(--text-4xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    text-align: left;
-    margin: 0 0 var(--space-3xl) 0;
-  }
-
-  /* Introduction Section */
-  .intro-content {
-    max-width: 900px;
-    margin: 0;
-    text-align: left;
-  }
-
-  .intro-lead {
-    font-family: var(--font-body);
-    font-size: var(--text-xl);
-    font-weight: var(--font-medium);
-    color: var(--color-Text-700);
-    margin: 0 0 var(--space-lg) 0;
-    line-height: var(--leading-relaxed);
-  }
-
-  .intro-subtitle {
-    font-family: var(--font-body);
-    font-size: var(--text-lg);
-    color: var(--color-Text-600);
-    margin: 0;
-    line-height: var(--leading-relaxed);
-  }
-
-  /* Offering Sections */
-  .offering-section {
-    margin-bottom: var(--space-4xl);
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: var(--space-3xl);
-    align-items: start;
-  }
-
-  .offering-section:last-child {
-    margin-bottom: 0;
-  }
-
-  .offering-divider {
-    grid-column: 1 / -1;
-    border: none;
-    border-top: 1px solid var(--color-Text-200);
-    margin: var(--space-3xl) 0;
-  }
-
-  .offering-image {
-    width: 250px;
-    height: 250px;
-    border-radius: var(--border-radius-lg);
-    object-fit: cover;
-    box-shadow: var(--shadow-md);
-  }
-
-  @media (max-width: 968px) {
-    .offering-section {
-      grid-template-columns: 1fr;
-    }
-
-    .offering-image {
-      width: 200px;
-      height: 200px;
-      margin: 0 auto;
-    }
-
-    .offering-divider {
-      grid-column: 1;
-    }
-  }
-
-  .offering-title {
-    font-family: var(--font-heading);
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    margin: 0 0 var(--space-lg) 0;
-  }
-
-  .offering-description {
-    font-family: var(--font-body);
-    font-size: var(--text-base);
-    color: var(--color-Text-600);
-    margin: 0 0 var(--space-xl) 0;
-    line-height: var(--leading-relaxed);
-    max-width: 50%;
-  }
-
-  @media (max-width: 968px) {
-    .offering-description {
-      max-width: 100%;
-    }
-  }
-
-  .offering-detail {
-    margin-top: var(--space-lg);
-    margin-bottom: var(--space-xl);
-  }
-
-  .offering-detail h4 {
-    font-family: var(--font-heading);
-    font-size: var(--text-sm);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0 0 var(--space-md) 0;
-  }
-
-  .offering-detail ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .offering-detail ul li {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-Text-600);
-    padding: var(--space-xs) 0 var(--space-xs) var(--space-lg);
-    position: relative;
-    line-height: var(--leading-normal);
-  }
-
-  .offering-detail ul li::before {
-    content: '';
-    position: absolute;
-    left: var(--space-sm);
-    top: 50%;
-    transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--color-Primary-500);
-  }
-
-  .offering-cta {
-    margin-top: var(--space-4xl);
-  }
-
-  /* Why Grid */
-  .why-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-3xl);
-    max-width: 1100px;
-  }
-
-  .why-card {
-    text-align: left;
-    padding: var(--space-2xl);
-    background: var(--color-Background-50);
-    border-left: 4px solid var(--color-Primary-500);
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Primary-500) 15%, rgba(0, 0, 0, 0.08));
-    transition: all var(--transition-base);
-  }
-
-  .why-card:hover {
-    transform: translateX(8px);
-    box-shadow: 0 6px 16px color-mix(in oklch, var(--color-Primary-500) 20%, rgba(0, 0, 0, 0.12));
-    border-left-color: var(--color-Secondary-500);
-  }
-
-  .why-title {
-    font-family: var(--font-heading);
-    font-size: var(--text-lg);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    margin: 0 0 var(--space-md) 0;
-  }
-
-  .why-text {
-    font-family: var(--font-body);
-    font-size: var(--text-base);
-    color: var(--color-Text-600);
-    margin: 0;
-    line-height: var(--leading-relaxed);
-  }
-
-  /* Steps Grid */
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--space-2xl);
-  }
-
-  .step-card {
-    background: var(--color-Background-50);
-    border: 2px solid var(--color-Primary-200);
-    border-radius: var(--border-radius-lg);
-    padding: var(--space-2xl);
-    text-align: center;
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-base);
-  }
-
-  .step-card:hover {
-    border-color: var(--color-Primary-400);
-    box-shadow: var(--shadow-md);
-  }
-
-  .step-number {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: var(--color-Primary-500);
-    color: white;
-    font-family: var(--font-heading);
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto var(--space-lg) auto;
-  }
-
-  .step-title {
-    font-family: var(--font-heading);
-    font-size: var(--text-xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    margin: 0 0 var(--space-md) 0;
-  }
-
-  .step-text {
-    font-family: var(--font-body);
-    font-size: var(--text-base);
-    color: var(--color-Text-600);
-    margin: 0;
-    line-height: var(--leading-relaxed);
-  }
-
-  /* CTA Section */
-  .cta-content {
-    max-width: 800px;
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  .cta-title {
-    font-family: var(--font-heading);
-    font-size: var(--text-4xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Text-700);
-    margin: 0 0 var(--space-lg) 0;
-  }
-
-  .cta-text {
-    font-family: var(--font-body);
-    font-size: var(--text-xl);
-    color: var(--color-Text-600);
-    margin: 0 0 var(--space-2xl) 0;
-    line-height: var(--leading-relaxed);
-  }
-
-  .cta-buttons {
-    display: flex;
-    gap: var(--space-md);
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: var(--space-2xl);
-  }
-
-  .cta-footer {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-Text-500);
-    font-style: italic;
-    margin: var(--space-2xl) 0 0 0;
-    line-height: var(--leading-relaxed);
-  }
-
-  /* Container Sizes */
-  .container {
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 var(--space-md);
-  }
-
-  .container-6xl {
-    max-width: 1280px;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .section-title {
-      font-size: var(--text-3xl);
-    }
-
-    .offerings-grid,
-    .why-grid,
-    .steps-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .cta-buttons {
-      flex-direction: column;
-      align-items: stretch;
-    }
-  }
-
-  /* =========================================================
-     ACCESSIBILITY THEME OVERRIDES
-     ========================================================= */
-
-  /* Dark mode */
-  :global(body.a11y-theme-dark) .hero-title,
-  :global(body.a11y-theme-dark) .section-title,
-  :global(body.a11y-theme-dark) .offering-title,
-  :global(body.a11y-theme-dark) .why-title,
-  :global(body.a11y-theme-dark) .step-title,
-  :global(body.a11y-theme-dark) .cta-title {
-    color: var(--a11y-dark-text) !important;
-  }
-
-  :global(body.a11y-theme-dark) .step-card {
-    background: transparent !important;
-    border: 2px solid var(--a11y-dark-accent) !important;
-  }
-
-  :global(body.a11y-theme-dark) .offering-detail ul li::before {
-    background-color: var(--a11y-dark-accent) !important;
-  }
-
-  :global(body.a11y-theme-dark) .why-card {
-    border-left-color: var(--a11y-dark-accent) !important;
-  }
-
-  :global(body.a11y-theme-dark) .step-number {
-    background: var(--a11y-dark-accent) !important;
-  }
-
-  /* High contrast */
-  :global(body.a11y-theme-high-contrast) .hero-title,
-  :global(body.a11y-theme-high-contrast) .section-title,
-  :global(body.a11y-theme-high-contrast) .offering-title,
-  :global(body.a11y-theme-high-contrast) .why-title,
-  :global(body.a11y-theme-high-contrast) .step-title,
-  :global(body.a11y-theme-high-contrast) .cta-title {
-    color: var(--a11y-hc-text, #ffffff) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .step-card {
-    background: transparent !important;
-    border: 2px solid var(--a11y-hc-accent) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .step-number {
-    background: var(--a11y-hc-accent) !important;
-    color: #000000 !important;
-  }
-
-  /* Cream mode */
-  :global(body.a11y-theme-cream) .hero-title,
-  :global(body.a11y-theme-cream) .section-title,
-  :global(body.a11y-theme-cream) .offering-title,
-  :global(body.a11y-theme-cream) .why-title,
-  :global(body.a11y-theme-cream) .step-title,
-  :global(body.a11y-theme-cream) .cta-title {
-    color: var(--a11y-cream-text, #4a3f2f) !important;
-  }
-
-  :global(body.a11y-theme-cream) .step-card {
-    background: transparent !important;
-    border: 2px solid var(--a11y-cream-accent, #8b6914) !important;
-  }
-
-  /* Monochrome */
-  :global(body.a11y-theme-monochrome) .step-card,
-  :global(body.a11y-cvd-monochrome) .step-card {
-    background: transparent !important;
-    border: 2px solid #666666 !important;
-  }
-
-  /* CVD modes */
-  :global(body.a11y-theme-protanopia) .step-card,
-  :global(body.a11y-theme-deuteranopia) .step-card,
-  :global(body.a11y-theme-tritanopia) .step-card,
-  :global(body.a11y-cvd-protanopia) .step-card,
-  :global(body.a11y-cvd-deuteranopia) .step-card,
-  :global(body.a11y-cvd-tritanopia) .step-card {
-    background: transparent !important;
-    border: 2px solid var(--color-Primary-600) !important;
-  }
-
-</style>

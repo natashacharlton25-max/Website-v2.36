@@ -1,0 +1,67 @@
+---
+import CompactToolCard from '../Cards/CompactToolCard.astro';
+import type { ImageMetadata } from 'astro';
+
+interface Product {
+  slug: string;
+  name: string;
+  category: string;
+  description: string;
+  cardImage: ImageMetadata;
+}
+
+interface Props {
+  products: Product[];
+  title?: string;
+}
+
+const { products, title = "Recommended for You" } = Astro.props;
+---
+
+{products.length > 0 && (
+  <section class="related-products-section section">
+    <div class="container container-7xl">
+      <h2 class="section-title">{title}</h2>
+      <div class="related-grid">
+        {products.map(product => (
+          <CompactToolCard
+            href={`/assets/${product.slug}`}
+            name={product.name}
+            category={product.category}
+            description={product.description}
+            image={product.cardImage}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .related-products-section {
+    padding: var(--space-4xl) 0;
+    background-color: var(--color-Background-100);
+  }
+
+  .section-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Text-800);
+    margin-bottom: var(--space-2xl);
+    text-align: center;
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 768px) {
+    .related-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

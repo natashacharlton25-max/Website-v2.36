@@ -1,0 +1,278 @@
+---
+/**
+ * ProductCard - Reusable product/asset card component
+ *
+ * Props:
+ * @param slug - Product slug for URL
+ * @param name - Product name
+ * @param category - Product category
+ * @param description - Product description
+ * @param cardImage - Product card image (ImageMetadata)
+ * @param type - Product type (worksheet, workbook, etc.) - used for filtering
+ * @param price - Product price (default: "Free")
+ */
+
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Badge from '../Badge/Badge.astro';
+import Button from '../Button/Button.astro';
+
+interface Props {
+  slug: string;
+  name: string;
+  category: string;
+  description: string;
+  cardImage: ImageMetadata;
+  type: string;
+  price?: string;
+}
+
+const {
+  slug,
+  name,
+  category,
+  description,
+  cardImage,
+  type,
+  price = 'Free'
+} = Astro.props;
+---
+
+<a href={`/assets/${slug}`} class={`product-card card ${type}`} data-type={type}>
+  <div class="product-card__image">
+    <Image src={cardImage} alt={name} width={800} height={500} />
+    <div class="product-card__badge">
+      <Badge type={type} />
+    </div>
+  </div>
+
+  <div class="product-card__info">
+    <div class="product-card__category">{category}</div>
+    <h3 class="product-card__name">{name}</h3>
+    <p class="product-card__description">{description}</p>
+
+    <div class="product-card__footer">
+      <div class="product-card__price">
+        <span class="price-current">{price}</span>
+      </div>
+      <div class="product-card__cta">
+        <Button
+          variant="primary"
+          size="sm"
+          class="js-add-to-cart"
+          data-product-id={slug}
+          data-product-name={name}
+          data-product-price="0"
+          data-product-image={cardImage.src}
+          onclick="event.preventDefault(); event.stopPropagation();"
+          aria-label="Add to cart"
+        >
+          <span class="add-to-cart-text">Add to Cart</span>
+          <span class="add-to-cart-icon">+</span>
+        </Button>
+      </div>
+    </div>
+  </div>
+</a>
+
+<style>
+  /* Product Card - BEM naming */
+  /* Inherits background, border-radius, padding, box-shadow from global .card class */
+  .product-card {
+    float: left;
+    width: calc(33.333% - 1.5em - 4px);
+    margin: 0.75em;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    color: inherit;
+    border: 2px solid transparent;
+    padding: 0; /* Override .card padding for custom layout */
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .product-card:hover .product-card__name {
+    color: var(--color-Primary-500);
+  }
+
+  .product-card__image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background-color: var(--color-Neutral-100);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .product-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-base);
+  }
+
+  .product-card:hover .product-card__image img {
+    transform: scale(1.05);
+  }
+
+  .product-card__badge {
+    position: absolute;
+    top: var(--space-md);
+    left: var(--space-md);
+  }
+
+  .product-card__info {
+    padding: var(--space-lg);
+  }
+
+  .product-card__category {
+    font-size: var(--text-xs);
+    color: var(--color-Primary-500);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    margin-bottom: var(--space-xs);
+  }
+
+  .product-card__name {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-sm);
+    color: var(--color-Text-700);
+  }
+
+  .product-card__description {
+    font-size: var(--text-sm);
+    color: var(--color-Text-500);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-md);
+  }
+
+  .product-card__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    padding-top: var(--space-md);
+  }
+
+  .product-card__price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+  }
+
+  .price-current {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Primary-500);
+  }
+
+  .product-card__cta {
+    display: flex;
+  }
+
+  /* Add to Cart Button Content */
+  .add-to-cart-text {
+    display: inline;
+  }
+
+  .add-to-cart-icon {
+    display: none;
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+  }
+
+  /* ========== RESPONSIVE ========== */
+
+  /* Tablet: 2 columns */
+  @media (max-width: 1023px) {
+    .product-card {
+      width: calc(50% - 1.5em - 4px);
+    }
+  }
+
+  /* Mobile: 1 column */
+  @media (max-width: 767px) {
+    .product-card {
+      width: calc(100% - 1.5em - 4px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .product-card__info {
+      padding: var(--space-md);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .product-card__info {
+      padding: var(--space-sm);
+    }
+
+    .product-card__footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-sm);
+    }
+
+    .price-current {
+      font-size: var(--text-xl);
+    }
+
+    .product-card__cta {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 350px) {
+    .product-card__info {
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    .price-current {
+      font-size: var(--text-lg);
+    }
+
+    .add-to-cart-text {
+      display: none;
+    }
+
+    .add-to-cart-icon {
+      display: inline;
+    }
+
+    .product-card__cta {
+      width: auto;
+    }
+
+    .product-card__footer {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+
+  @media (max-width: 250px) {
+    .product-card__footer {
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .price-current {
+      font-size: var(--text-base);
+    }
+
+    .product-card__cta {
+      width: 100%;
+    }
+  }
+
+  /* A11Y theme overrides in: src/styles/a11y/components/product-card.css */
+</style>

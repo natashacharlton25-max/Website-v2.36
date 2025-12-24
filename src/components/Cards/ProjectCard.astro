@@ -1,0 +1,229 @@
+---
+/**
+ * ProjectCard - Project showcase section with alternating image/text layout
+ *
+ * Displays project information with image on left or right
+ * Used on projects page to showcase curated resource collections
+ *
+ * Props:
+ * @param slug - Project URL slug
+ * @param title - Project title
+ * @param description - Project description
+ * @param category - Project category label
+ * @param cardImage - Project image (imported from astro:assets)
+ * @param scrollBg - Optional background color for scroll trigger (e.g., 'var(--color-AccentOne-300)')
+ * @param imagePosition - 'left' or 'right' (default: 'left')
+ */
+
+import { Image } from 'astro:assets';
+import Button from '../Button/Button.astro';
+
+interface Props {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  cardImage: ImageMetadata;
+  scrollBg?: string;
+  imagePosition?: 'left' | 'right';
+}
+
+const {
+  slug,
+  title,
+  description,
+  category,
+  cardImage,
+  scrollBg,
+  imagePosition = 'left'
+} = Astro.props;
+
+const layoutClass = imagePosition === 'left' ? 'image-left' : 'image-right';
+---
+
+<section
+  class={`project-card ${layoutClass}`}
+  data-scroll-bg={scrollBg}
+>
+  <div class="container container-7xl">
+    <div class="project-card__wrapper">
+      <div class="project-card__image">
+        <Image src={cardImage} alt={title} loading="lazy" />
+      </div>
+      <div class="project-card__content">
+        <span class="project-card__category">{category}</span>
+        <h2 class="project-card__title">{title}</h2>
+        <p class="project-card__description">{description}</p>
+        <div class="project-card__cta">
+          <Button href={`/projects/${slug}`} variant="primary">
+            View Project
+          </Button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ========== PROJECT CARD SECTION ========== */
+  .project-card {
+    padding: var(--space-5xl) 0;
+    transition: opacity var(--transition-base);
+    background-color: transparent; /* Let ScrollColorBackground show through */
+  }
+
+  /* ========== PROJECT WRAPPER ========== */
+  .project-card__wrapper {
+    display: flex;
+    gap: var(--space-3xl);
+    align-items: center;
+  }
+
+  /* ========== IMAGE LEFT LAYOUT ========== */
+  .image-left .project-card__wrapper {
+    flex-direction: row;
+  }
+
+  /* ========== IMAGE RIGHT LAYOUT ========== */
+  .image-right .project-card__wrapper {
+    flex-direction: row-reverse;
+  }
+
+  /* ========== IMAGE CONTAINER ========== */
+  .project-card__image {
+    flex: 0 0 30%;
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.12));
+  }
+
+  .project-card__image img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  /* ========== TEXT CONTENT ========== */
+  .project-card__content {
+    flex: 1;
+  }
+
+  .image-left .project-card__content {
+    padding-left: var(--space-2xl);
+    text-align: left;
+  }
+
+  .image-right .project-card__content {
+    padding-right: var(--space-2xl);
+    text-align: right;
+  }
+
+  /* ========== CATEGORY LABEL ========== */
+  .project-card__category {
+    display: block;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-Primary-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-md);
+  }
+
+  /* ========== TITLE ========== */
+  .project-card__title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-700);
+    margin-bottom: var(--space-lg);
+    line-height: 1.2;
+  }
+
+  /* ========== DESCRIPTION ========== */
+  .project-card__description {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 2vw, 1.125rem);
+    color: var(--color-Text-600);
+    line-height: 1.7;
+    margin-bottom: var(--space-xl);
+  }
+
+  /* ========== CTA BUTTON ========== */
+  .project-card__cta {
+    margin-top: var(--space-lg);
+  }
+
+  .image-right .project-card__cta {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* ========== RESPONSIVE - TABLET ========== */
+  @media (max-width: 768px) {
+    .project-card__wrapper {
+      flex-direction: column !important;
+      gap: var(--space-2xl);
+    }
+
+    .project-card__image {
+      flex: 0 0 auto;
+      width: 100%;
+    }
+
+    .image-left .project-card__content,
+    .image-right .project-card__content {
+      padding-left: 0;
+      padding-right: 0;
+      text-align: left;
+    }
+
+    .image-right .project-card__cta {
+      justify-content: flex-start;
+    }
+
+    .project-card {
+      padding: var(--space-4xl) 0;
+    }
+  }
+
+  /* ========== RESPONSIVE - MOBILE ========== */
+  @media (max-width: 640px) {
+    .project-card {
+      padding: var(--space-3xl) 0;
+    }
+
+    .project-card__description {
+      margin-bottom: var(--space-lg);
+    }
+  }
+
+  /* ========== RESPONSIVE - VERY SMALL ========== */
+  @media (max-width: 250px) {
+    .project-card {
+      padding: var(--space-2xl) 0;
+    }
+
+    .project-card__title {
+      font-size: var(--text-xl);
+    }
+
+    .project-card__description {
+      font-size: var(--text-sm);
+    }
+  }
+
+  /* ========== RESPONSIVE - EXTRA SMALL ========== */
+  @media (max-width: 210px) {
+    .project-card__title {
+      font-size: var(--text-lg);
+    }
+
+    .project-card__description {
+      font-size: var(--text-xs);
+    }
+  }
+
+  /* A11Y theme overrides in: src/styles/a11y/components/project-card.css */
+</style>

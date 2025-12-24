@@ -1,0 +1,48 @@
+---
+import SpecCard from '../Cards/SpecCard.astro';
+
+interface SpecItem {
+  iconName: string; // Icon name (e.g., 'file-pdf-fill' or 'spec-cards/file-pdf-fill')
+  label: string;
+  value: string;
+  variant?: 'primary' | 'secondary' | 'accent';
+}
+
+interface Props {
+  specs: SpecItem[];
+}
+
+const { specs } = Astro.props;
+---
+
+<div class="spec-masonry">
+  {specs.map(spec => (
+    <SpecCard
+      iconName={spec.iconName}
+      label={spec.label}
+      value={spec.value}
+      variant={spec.variant}
+    />
+  ))}
+</div>
+
+<style>
+  .spec-masonry {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+  }
+
+  @media (max-width: 640px) {
+    .spec-masonry {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .spec-masonry {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

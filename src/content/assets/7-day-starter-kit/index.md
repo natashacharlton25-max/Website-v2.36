@@ -95,21 +95,9 @@ forProfessionals:
 
 # Specifications for masonry grid
 specifications:
-  - label: "Format"
-    value: "PDF"
-    icon: "ph:file-pdf-duotone"
-  - label: "Pages"
-    value: "28"
-    icon: "ph:book-open-duotone"
-  - label: "File Size"
-    value: "36 MB"
-    icon: "ph:database-duotone"
   - label: "Duration"
     value: "7 Days"
     icon: "ph:calendar-check-duotone"
-  - label: "Time per Day"
-    value: "10-15 mins"
-    icon: "ph:timer-duotone"
   - label: "Includes"
     value: "Professional Guide"
     icon: "ph:certificate-duotone"

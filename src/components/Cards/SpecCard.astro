@@ -1,0 +1,102 @@
+---
+import Icon from '../Icons/Icon.astro';
+
+interface Props {
+  iconName: string; // Icon name (e.g., 'file-pdf-fill' or 'spec-cards/file-pdf-fill')
+  label: string;
+  value: string;
+  variant?: 'primary' | 'secondary' | 'accent';
+}
+
+const { iconName, label, value, variant = 'primary' } = Astro.props;
+---
+
+<div class={`spec-card spec-card--${variant}`}>
+  <div class="spec-card__icon">
+    <Icon name={iconName} size={20} />
+  </div>
+  <div class="spec-card__content">
+    <span class="spec-card__label">{label}</span>
+    <span class="spec-card__value">{value}</span>
+  </div>
+</div>
+
+<style>
+  .spec-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background-color: var(--color-Background-50);
+    border: 1px solid var(--color-Neutral-200);
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-base);
+  }
+
+  .spec-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .spec-card__icon {
+    flex-shrink: 0;
+    color: var(--color-Primary-600);
+  }
+
+  .spec-card__icon :global(.icon) {
+    width: 20px;
+    height: 20px;
+  }
+
+  .spec-card__icon :global(svg) {
+    width: 20px;
+    height: 20px;
+  }
+
+  .spec-card__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    text-align: left;
+  }
+
+  .spec-card__label {
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-Text-500);
+  }
+
+  .spec-card__value {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-Text-700);
+    line-height: var(--leading-normal);
+  }
+
+  /* Reset accent text colors to match others */
+  .spec-card--accent .spec-card__label {
+    color: var(--color-Text-500);
+  }
+
+  .spec-card--accent .spec-card__value {
+    color: var(--color-Text-700);
+  }
+
+  @media (max-width: 640px) {
+    .spec-card {
+      padding: var(--space-md);
+    }
+
+    .spec-card__icon :global(.icon) {
+      width: 16px;
+      height: 16px;
+    }
+
+    .spec-card__icon :global(svg) {
+      width: 16px;
+      height: 16px;
+    }
+  }
+</style>
