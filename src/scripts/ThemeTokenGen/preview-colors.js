@@ -179,10 +179,10 @@ if (!themePath) {
 🎨 Color Preview Generator
 
 Usage:
-  node src/scripts/ThemeTokenGen/preview-colors.js <path-to-theme.css>
+  node src/Scripts/ThemeTokenGen/preview-colors.js <path-to-theme.css>
 
 Example:
-  node src/scripts/ThemeTokenGen/preview-colors.js src/styles/themes/theory-preview.css
+  node src/Scripts/ThemeTokenGen/preview-colors.js src/Styles/themes/theory-preview.css
   `);
   process.exit(0);
 }

@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import chroma from 'chroma-js';
 
 // Note: Status colors (Success, Warning, Error, Info) and base colors (Black, White)
-// are now defined globally in src/styles/tokens/status.css - not generated per theme
+// are now defined globally in src/Styles/tokens/status.css - not generated per theme
 
 // Rainbow colors are defined in Allcoloursrainbow.css using theme tokens
 // They map to accent colors and change with each theme
@@ -382,7 +382,7 @@ function generateThemeCSS(palettes) {
   }
 
   // Note: Status colors (Success, Warning, Error, Info) and base colors (Black, White)
-  // are defined globally in src/styles/tokens/status.css - not per theme
+  // are defined globally in src/Styles/tokens/status.css - not per theme
 
   css += '}\n';
   return css;
@@ -420,7 +420,7 @@ function updateThemeSwitcher(themeName) {
     }
 
     // Add new theme
-    const newThemeEntry = `      '${themeName}': '/src/styles/themes/${themeName}.css'`;
+    const newThemeEntry = `      '${themeName}': '/src/Styles/themes/${themeName}.css'`;
 
     // Add comma to existing content if needed
     const trimmedContent = themesContent.trim();
@@ -583,7 +583,7 @@ async function generateTheme(themeName = 'brand-theme', customTemplatePath = nul
     }
   }
 
-  // Note: Status colors and Black/White are now global (src/styles/tokens/status.css)
+  // Note: Status colors and Black/White are now global (src/Styles/tokens/status.css)
   // They are no longer generated per-theme
 
   // Generate CSS
@@ -600,7 +600,7 @@ async function generateTheme(themeName = 'brand-theme', customTemplatePath = nul
 
   console.log('');
   console.log('🎉 Theme generation complete!');
-  console.log(`📁 Theme file: src/styles/themes/${themeName}.css`);
+  console.log(`📁 Theme file: src/Styles/themes/${themeName}.css`);
   console.log(`🌐 Theme is now available in the theme switcher`);
 
   // Show statistics
@@ -633,11 +633,11 @@ Options:
 Steps:
   1. Edit scripts/brand-template.css with your brand colors
   2. Run this script to generate a complete theme
-  3. Your theme will be created in src/styles/themes/
+  3. Your theme will be created in src/Styles/themes/
 
 Example:
   node scripts/simple-theme-gen.js my-brand-2024
-  node scripts/simple-theme-gen.js test-theme --template src/scripts/ThemeTokenGen/test-color-theory.css
+  node scripts/simple-theme-gen.js test-theme --template src/Scripts/ThemeTokenGen/test-color-theory.css
     `);
     process.exit(0);
   }

@@ -141,7 +141,7 @@ const {
     z-index: 900;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   /* Individual Tab */
@@ -190,63 +190,7 @@ const {
     opacity: 0.8;
   }
 
-  /* Show static icons and hide Lottie when any accessibility setting is enabled */
-  :global(body.a11y-reduce-motion) .side-tab__lottie,
-  :global(body.a11y-text-only) .side-tab__lottie,
-  :global(body.a11y-theme-dark) .side-tab__lottie,
-  :global(body.a11y-theme-cream) .side-tab__lottie,
-  :global(body.a11y-theme-high-contrast) .side-tab__lottie,
-  :global(body.a11y-theme-protanopia) .side-tab__lottie,
-  :global(body.a11y-theme-deuteranopia) .side-tab__lottie,
-  :global(body.a11y-theme-tritanopia) .side-tab__lottie,
-  :global(body.a11y-theme-monochrome) .side-tab__lottie,
-  :global(body.a11y-enhanced-focus) .side-tab__lottie {
-    display: none !important;
-  }
-
-  :global(body.a11y-reduce-motion) .side-tab__static-icon,
-  :global(body.a11y-text-only) .side-tab__static-icon,
-  :global(body.a11y-theme-dark) .side-tab__static-icon,
-  :global(body.a11y-theme-cream) .side-tab__static-icon,
-  :global(body.a11y-theme-high-contrast) .side-tab__static-icon,
-  :global(body.a11y-theme-protanopia) .side-tab__static-icon,
-  :global(body.a11y-theme-deuteranopia) .side-tab__static-icon,
-  :global(body.a11y-theme-tritanopia) .side-tab__static-icon,
-  :global(body.a11y-theme-monochrome) .side-tab__static-icon,
-  :global(body.a11y-enhanced-focus) .side-tab__static-icon {
-    display: block !important;
-  }
-
-  /* =========================================================
-     ACCESSIBILITY ICON OVERRIDES
-     - Dark mode: white/light icons
-     - High contrast: yellow icons
-     - Cream: warm tinted icons
-     ========================================================= */
-
-  /* Dark mode: invert icon to be light colored */
-  :global(body.a11y-theme-dark) .side-tab__static-icon {
-    filter: brightness(0) saturate(100%) invert(1) !important;
-    opacity: 0.9 !important;
-  }
-
-  /* High contrast: accent colored icon for visibility */
-  :global(body.a11y-theme-high-contrast) .side-tab__static-icon {
-    filter: brightness(0) invert(1) !important;
-    opacity: 1 !important;
-  }
-
-  /* Cream theme: slightly warm tint */
-  :global(body.a11y-theme-cream) .side-tab__static-icon {
-    filter: brightness(0) saturate(100%) sepia(20%) !important;
-    opacity: 0.85 !important;
-  }
-
-  /* Monochrome: ensure proper grayscale */
-  :global(body.a11y-theme-monochrome) .side-tab__static-icon {
-    filter: brightness(0) saturate(100%) !important;
-    opacity: 0.8 !important;
-  }
+  /* A11y overrides in: src/Styles/a11y/components/side-tabs.css */
 
   /* All tabs - unified hover state */
   .side-tab--email:hover,
@@ -292,68 +236,6 @@ const {
     .side-tab {
       transition: none;
     }
-  }
-
-  /* =========================================================
-     ACCESSIBILITY TAB CONTAINER OVERRIDES
-     - Backgrounds and borders for all themes
-     ========================================================= */
-
-  /* Any accessibility setting: use token backgrounds */
-  :global(body[class*="a11y-"]) .side-tab {
-    background: var(--color-Background-100) !important;
-    border: 1px solid var(--color-Text-300) !important;
-  }
-
-  /* All tabs unified hover - use primary color */
-  :global(body[class*="a11y-"]) .side-tab:hover {
-    background: var(--color-Primary-500) !important;
-  }
-
-  /* Dark mode tabs */
-  :global(body.a11y-theme-dark) .side-tab {
-    background: var(--color-Background-100) !important;
-    border: 1px solid var(--color-Background-300) !important;
-  }
-
-  :global(body.a11y-theme-dark) .side-tab:hover {
-    background: var(--color-Primary-500) !important;
-  }
-
-  /* High contrast tabs - accent color, white borders */
-  :global(body.a11y-theme-high-contrast) .side-tab {
-    background: var(--color-Background-50) !important;
-    border: 2px solid var(--color-Text-900) !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .side-tab:hover {
-    background: var(--color-Primary-500) !important;
-    border-color: var(--color-Primary-500) !important;
-  }
-
-  /* High contrast - icons turn black on hover */
-  :global(body.a11y-theme-high-contrast) .side-tab:hover .side-tab__static-icon {
-    filter: brightness(0) saturate(100%) !important;
-    opacity: 1 !important;
-  }
-
-  /* Cream mode tabs */
-  :global(body.a11y-theme-cream) .side-tab {
-    background: var(--color-Background-100) !important;
-    border: 1px solid var(--color-Primary-500) !important;
-  }
-
-  :global(body.a11y-theme-cream) .side-tab:hover {
-    background: var(--color-Primary-500) !important;
-  }
-
-  /* Reduced motion - no transforms */
-  :global(body.a11y-reduce-motion) .side-tab {
-    transition: none !important;
-  }
-
-  :global(body.a11y-reduce-motion) .side-tab:hover {
-    transform: none !important;
   }
 </style>
 

@@ -9,9 +9,9 @@ const path = require('path');
  * from a single primary color for easy comparison.
  *
  * USAGE:
- * node src/scripts/ThemeTokenGen/color-theory-comparison.js #8FA68A
+ * node src/Scripts/ThemeTokenGen/color-theory-comparison.js #8FA68A
  *
- * This will generate: src/styles/themes/color-theory-comparison.html
+ * This will generate: src/Styles/themes/color-theory-comparison.html
  */
 
 // Generate color variants using different color theories
@@ -382,7 +382,7 @@ function generateComparisonPage(primaryColor) {
       <p><strong>Next Steps:</strong></p>
       <p>1. Choose the color theory that best matches your design vision</p>
       <p>2. Update your color-input.css with the theory you like</p>
-      <p>3. Generate your final theme using: <code>node src/scripts/ThemeTokenGen/simple-theme-gen.js my-theme --template src/scripts/ThemeTokenGen/color-input.css</code></p>
+      <p>3. Generate your final theme using: <code>node src/Scripts/ThemeTokenGen/simple-theme-gen.js my-theme --template src/Scripts/ThemeTokenGen/color-input.css</code></p>
     </div>
   </div>
 </body>
@@ -412,12 +412,12 @@ function main() {
   console.log(`Generating color theory comparison for: ${primaryColor}`);
 
   const html = generateComparisonPage(primaryColor);
-  const outputPath = path.join(__dirname, '../../styles/themes/color-theory-comparison.html');
+  const outputPath = path.join(__dirname, '../../Styles/themes/color-theory-comparison.html');
 
   fs.writeFileSync(outputPath, html, 'utf8');
 
   console.log(`\n✓ Comparison page generated: ${outputPath}`);
-  console.log(`\nTo view: start src/styles/themes/color-theory-comparison.html`);
+  console.log(`\nTo view: start src/Styles/themes/color-theory-comparison.html`);
 }
 
 main();

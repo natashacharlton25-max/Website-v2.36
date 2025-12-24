@@ -9,7 +9,7 @@
  * - Uses CSS token system
  *
  * Usage:
- * import { showToast } from './scripts/toast';
+ * import { showToast } from './Scripts/toast';
  * showToast({ message: 'Hello!', theme: 'professional', animation: 'slide' });
  */
 

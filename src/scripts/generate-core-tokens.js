@@ -10,8 +10,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const themesDir = path.join(__dirname, '../src/styles/themes');
-const outputDir = path.join(__dirname, '../src/styles/themes/Preview');
+const themesDir = path.join(__dirname, '../src/Styles/themes');
+const outputDir = path.join(__dirname, '../src/Styles/themes/Preview');
 const outputPath = path.join(outputDir, 'coretokens.css');
 
 /**

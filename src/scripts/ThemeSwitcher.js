@@ -1,12 +1,12 @@
 // Import theme CSS files as URLs
-import brandDefaultUrl from '../styles/themes/brand/BrandDefault.css?url';
-import a11yDarkUrl from '../styles/themes/a11y/a11y-dark.css?url';
-import a11yHighContrastUrl from '../styles/themes/a11y/a11y-high-contrast.css?url';
-import a11yCreamUrl from '../styles/themes/a11y/a11y-cream.css?url';
-import a11yMonochromeUrl from '../styles/themes/a11y/a11y-monochrome.css?url';
-import a11yProtanopiaUrl from '../styles/themes/a11y/a11y-protanopia.css?url';
-import a11yDeuteranopiaUrl from '../styles/themes/a11y/a11y-deuteranopia.css?url';
-import a11yTritanopiaUrl from '../styles/themes/a11y/a11y-tritanopia.css?url';
+import brandDefaultUrl from '../Styles/themes/brand/BrandDefault.css?url';
+import a11yDarkUrl from '../Styles/themes/a11y/a11y-dark.css?url';
+import a11yHighContrastUrl from '../Styles/themes/a11y/a11y-high-contrast.css?url';
+import a11yCreamUrl from '../Styles/themes/a11y/a11y-cream.css?url';
+import a11yMonochromeUrl from '../Styles/themes/a11y/a11y-monochrome.css?url';
+import a11yProtanopiaUrl from '../Styles/themes/a11y/a11y-protanopia.css?url';
+import a11yDeuteranopiaUrl from '../Styles/themes/a11y/a11y-deuteranopia.css?url';
+import a11yTritanopiaUrl from '../Styles/themes/a11y/a11y-tritanopia.css?url';
 
 /**
  * ThemeSwitcher - Dynamic CSS File Theme Switching

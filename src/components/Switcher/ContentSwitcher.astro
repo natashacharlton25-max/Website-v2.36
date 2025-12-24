@@ -1,0 +1,82 @@
+---
+/**
+ * Content Switcher Component (Tab Panels)
+ *
+ * Uses BaseSwitcher for visual design, adds tab panel show/hide logic.
+ * Use this for content tabs (description, specs, etc.).
+ *
+ * Props:
+ * - tabs: Array of { id: string, label: string, icon?: string }
+ * - defaultActive?: string (id of default active tab)
+ * - panelSelector?: string (CSS selector for panels, defaults to '.tab-panel')
+ * - panelAttribute?: string (Attribute name for panel matching, defaults to 'data-panel')
+ */
+import BaseSwitcher from './BaseSwitcher.astro';
+import type { SwitcherTab } from './BaseSwitcher.astro';
+
+export interface ContentTab extends SwitcherTab {}
+
+interface Props {
+  tabs: ContentTab[];
+  defaultActive?: string;
+  panelSelector?: string;
+  panelAttribute?: string;
+}
+
+const {
+  tabs,
+  defaultActive,
+  panelSelector = '.tab-panel',
+  panelAttribute = 'data-panel'
+} = Astro.props;
+const switcherId = `content-switcher-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<BaseSwitcher
+  tabs={tabs}
+  defaultActive={defaultActive}
+  id={switcherId}
+  dataAttributes={{
+    'data-panel-selector': panelSelector,
+    'data-panel-attribute': panelAttribute
+  }}
+/>
+
+<script>
+  function initContentSwitchers() {
+    // Find all content switchers
+    const switcherContainers = document.querySelectorAll('[data-switcher-id^="content-switcher-"]');
+
+    switcherContainers.forEach(container => {
+      const switcherId = container.getAttribute('data-switcher-id');
+      const switcherNav = container.querySelector(`[data-switcher-nav="${switcherId}"]`) as HTMLElement;
+      if (!switcherNav) return;
+
+      const panelSelector = switcherNav.getAttribute('data-panel-selector') || '.tab-panel';
+      const panelAttribute = switcherNav.getAttribute('data-panel-attribute') || 'data-panel';
+      const tabPanels = document.querySelectorAll(panelSelector);
+
+      // Listen for tab changes from BaseSwitcher
+      container.addEventListener('switcher:change', ((e: CustomEvent) => {
+        const { tabId } = e.detail;
+
+        // Hide all panels, show target panel
+        tabPanels.forEach(panel => {
+          const panelId = panel.getAttribute(panelAttribute);
+          if (panelId === tabId) {
+            panel.classList.add('active');
+          } else {
+            panel.classList.remove('active');
+          }
+        });
+      }) as EventListener);
+    });
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initContentSwitchers);
+  } else {
+    initContentSwitchers();
+  }
+</script>

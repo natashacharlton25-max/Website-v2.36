@@ -1,0 +1,317 @@
+---
+/**
+ * Base Switcher Component
+ *
+ * Shared visual component for tab/filter navigation with sliding indicator.
+ * This component handles ONLY the visual design - parent components handle the logic.
+ *
+ * Usage:
+ * ```astro
+ * <BaseSwitcher tabs={tabs} defaultActive="all" id="my-switcher" />
+ *
+ * <script>
+ *   document.addEventListener('switcher:change', (e) => {
+ *     const { tabId, switcherId } = e.detail;
+ *     // Handle the tab change
+ *   });
+ * </script>
+ * ```
+ *
+ * Props:
+ * - tabs: Array of { id: string, label: string, icon?: string }
+ * - defaultActive?: string (id of default active tab)
+ * - id?: string (unique identifier for multiple switchers on same page)
+ * - dataAttributes?: Record<string, string> (custom data attributes for nav)
+ */
+
+export interface SwitcherTab {
+  id: string;
+  label: string;
+  icon?: string; // SVG icon as string
+}
+
+interface Props {
+  tabs: SwitcherTab[];
+  defaultActive?: string;
+  id?: string;
+  dataAttributes?: Record<string, string>;
+}
+
+const { tabs, defaultActive, id, dataAttributes = {} } = Astro.props;
+const activeTab = defaultActive || tabs[0]?.id;
+const switcherId = id || `switcher-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<div class="switcher-container" data-switcher-id={switcherId}>
+  <div
+    class="switcher-nav"
+    data-switcher-nav={switcherId}
+    {...dataAttributes}
+  >
+    {tabs.map((tab) => (
+      <button
+        class={`switcher-btn ${tab.id === activeTab ? 'active' : ''}`}
+        data-tab={tab.id}
+        data-switcher={switcherId}
+      >
+        {tab.icon && <span class="switcher-btn__icon" set:html={tab.icon} />}
+        <span class="switcher-btn__label">{tab.label}</span>
+      </button>
+    ))}
+  </div>
+</div>
+
+<script>
+  // Base Switcher functionality - handles visual state only
+  function initBaseSwitcher() {
+    const switcherContainers = document.querySelectorAll('[data-switcher-id]');
+
+    switcherContainers.forEach(container => {
+      const switcherId = container.getAttribute('data-switcher-id');
+      const switcherNav = container.querySelector(`[data-switcher-nav="${switcherId}"]`) as HTMLElement;
+      const tabButtons = container.querySelectorAll(`[data-switcher="${switcherId}"]`);
+
+      if (!switcherNav || tabButtons.length === 0) return;
+
+      // Function to update selector position
+      function updateSelector(activeButton: HTMLElement) {
+        const activeWidth = activeButton.offsetWidth;
+        const activeLeft = activeButton.offsetLeft;
+        switcherNav.style.setProperty('--selector-width', `${activeWidth}px`);
+        switcherNav.style.setProperty('--selector-left', `${activeLeft}px`);
+      }
+
+      // Initialize selector position
+      const activeButton = container.querySelector('.switcher-btn.active') as HTMLElement;
+      if (activeButton) {
+        const initSelector = () => updateSelector(activeButton);
+        if (document.fonts?.ready) {
+          document.fonts.ready.then(() => requestAnimationFrame(initSelector));
+        } else {
+          requestAnimationFrame(initSelector);
+        }
+        window.addEventListener('load', () => requestAnimationFrame(initSelector), { once: true });
+      }
+
+      // Handle tab clicks
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const targetTab = (button as HTMLElement).dataset.tab;
+
+          // Update visual state
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          updateSelector(button as HTMLElement);
+
+          // Dispatch custom event for parent to handle logic
+          const event = new CustomEvent('switcher:change', {
+            detail: { tabId: targetTab, switcherId },
+            bubbles: true
+          });
+          button.dispatchEvent(event);
+        });
+      });
+
+      // Update selector on resize
+      window.addEventListener('resize', () => {
+        const activeBtn = container.querySelector('.switcher-btn.active') as HTMLElement;
+        if (activeBtn) updateSelector(activeBtn);
+      });
+    });
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBaseSwitcher);
+  } else {
+    initBaseSwitcher();
+  }
+</script>
+
+<style is:global>
+  /* ============================================
+     BASE SWITCHER - Shared Visual Styles
+     BEM-lite naming, CSS design tokens
+     A11y overrides in: src/Styles/a11y/components/switcher.css
+     ============================================ */
+
+  .switcher-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .switcher-nav {
+    font-size: var(--text-sm);
+    padding: var(--space-xs) var(--space-md);
+    list-style: none;
+    background: var(--color-AccentOne-100);
+    box-shadow: var(--shadow-lg);
+    display: inline-flex;
+    border-radius: var(--border-radius-full);
+    position: relative;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .switcher-nav::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
+
+  .switcher-btn {
+    text-decoration: none;
+    color: var(--color-Text-600);
+    text-transform: uppercase;
+    padding: var(--space-md) var(--space-lg);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    position: relative;
+    z-index: 2;
+    transition: color var(--transition-base);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
+  }
+
+  .switcher-btn__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .switcher-btn__icon svg,
+  .switcher-btn svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  .switcher-btn.active {
+    color: var(--color-Background-50);
+  }
+
+  .switcher-btn:hover:not(.active) {
+    color: var(--color-Primary-600);
+  }
+
+  /* Sliding Selector Background */
+  .switcher-nav::before {
+    content: '';
+    height: 75%;
+    display: inline-block;
+    position: absolute;
+    left: var(--selector-left, 0);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    border-radius: var(--border-radius-full);
+    width: var(--selector-width, 0);
+    transition: left 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+                width 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    background: var(--color-AccentOne-500);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ============================================
+     RESPONSIVE STYLES
+     ============================================ */
+
+  @media (max-width: 768px) {
+    .switcher-container {
+      padding: 0;
+    }
+
+    .switcher-nav {
+      flex-direction: column;
+      align-items: stretch;
+      padding: var(--space-sm);
+      overflow-x: visible;
+      gap: var(--space-xs);
+      display: flex;
+      border-radius: var(--border-radius-md);
+    }
+
+    .switcher-btn {
+      width: 100%;
+      justify-content: flex-start;
+      padding: var(--space-md) var(--space-lg);
+      text-align: left;
+      display: inline-flex;
+    }
+
+    .switcher-btn__label {
+      display: inline;
+    }
+
+    .switcher-nav::before {
+      display: none;
+    }
+
+    .switcher-btn.active {
+      background: var(--color-AccentOne-500);
+      border-radius: var(--border-radius-md);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .switcher-btn {
+      padding: var(--space-xs) var(--space-sm);
+    }
+  }
+
+  @media (max-width: 300px) {
+    .switcher-nav {
+      padding: var(--space-xs);
+      gap: var(--space-xs);
+      border-radius: var(--border-radius-md);
+    }
+
+    .switcher-btn {
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--text-xs);
+      gap: var(--space-xs);
+    }
+
+    .switcher-btn__icon svg,
+    .switcher-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .switcher-btn.active {
+      border-radius: var(--border-radius-sm);
+    }
+  }
+
+  @media (max-width: 200px) {
+    .switcher-nav {
+      padding: var(--space-xs);
+      align-items: center;
+      border-radius: var(--border-radius-md);
+    }
+
+    .switcher-btn {
+      padding: var(--space-xs);
+      justify-content: center;
+    }
+
+    .switcher-btn__label {
+      display: none;
+    }
+
+    .switcher-btn__icon svg,
+    .switcher-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .switcher-btn.active {
+      border-radius: var(--border-radius-sm);
+    }
+  }
+</style>

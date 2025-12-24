@@ -1,0 +1,154 @@
+---
+/**
+ * Isotope Filter Switcher Component
+ *
+ * Uses BaseSwitcher for visual design, adds Isotope.js filtering logic.
+ *
+ * Props:
+ * - tabs: Array of { id: string, label: string, icon?: string }
+ * - defaultActive?: string (id of default active tab)
+ * - gridSelector: CSS selector for the grid container (e.g., '.products-grid')
+ * - itemSelector: CSS selector for grid items (e.g., '.product-card')
+ */
+import BaseSwitcher from './BaseSwitcher.astro';
+import type { SwitcherTab } from './BaseSwitcher.astro';
+
+export interface FilterTab extends SwitcherTab {}
+
+interface Props {
+  tabs: FilterTab[];
+  defaultActive?: string;
+  gridSelector: string;
+  itemSelector: string;
+}
+
+const { tabs, defaultActive, gridSelector, itemSelector } = Astro.props;
+const switcherId = `isotope-filter-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<BaseSwitcher
+  tabs={tabs}
+  defaultActive={defaultActive}
+  id={switcherId}
+  dataAttributes={{
+    'data-grid-selector': gridSelector,
+    'data-item-selector': itemSelector
+  }}
+/>
+
+<script>
+  import Isotope from 'isotope-layout';
+  import imagesLoaded from 'imagesloaded';
+
+  function initIsotopeFilters() {
+    // Find all isotope filter switchers
+    const switcherContainers = document.querySelectorAll('[data-switcher-id^="isotope-filter-"]');
+
+    switcherContainers.forEach(container => {
+      const switcherId = container.getAttribute('data-switcher-id');
+      const switcherNav = container.querySelector(`[data-switcher-nav="${switcherId}"]`) as HTMLElement;
+      if (!switcherNav) return;
+
+      const gridSelector = switcherNav.getAttribute('data-grid-selector');
+      const itemSelector = switcherNav.getAttribute('data-item-selector') || '.product-card';
+      if (!gridSelector) return;
+
+      const gridElement = document.querySelector(gridSelector) as HTMLElement;
+      if (!gridElement) return;
+
+      // Initialize Isotope
+      let iso: Isotope | null = null;
+      gridElement.classList.add('grid--loading');
+
+      try {
+        iso = new Isotope(gridElement, {
+          itemSelector: itemSelector,
+          percentPosition: true,
+          masonry: { columnWidth: '.grid__sizer' },
+          transitionDuration: '0.6s'
+        });
+
+        // @ts-ignore
+        imagesLoaded(gridElement, () => {
+          if (iso) iso.layout();
+          gridElement.classList.remove('grid--loading');
+        });
+      } catch (error) {
+        gridElement.classList.remove('grid--loading');
+        return;
+      }
+
+      // Listen for tab changes from BaseSwitcher
+      container.addEventListener('switcher:change', ((e: CustomEvent) => {
+        const { tabId } = e.detail;
+        const filterValue = tabId === 'all' ? '*' : `.${tabId}`;
+
+        if (!iso || !filterValue) return;
+
+        // Prevent horizontal overflow during transition
+        document.body.style.overflowX = 'hidden';
+        document.documentElement.style.overflowX = 'hidden';
+
+        const allItems = gridElement.querySelectorAll(itemSelector);
+        const currentlyVisible = Array.from(allItems).filter(
+          item => getComputedStyle(item as HTMLElement).display !== 'none'
+        ).length;
+
+        let willBeVisible = filterValue === '*' ? allItems.length :
+          Array.from(allItems).filter(item =>
+            item.classList.contains(filterValue.replace('.', ''))
+          ).length;
+
+        const multiplier = willBeVisible > currentlyVisible ? 4.0 : 2.5;
+        const lockedHeight = Math.ceil(gridElement.offsetHeight * multiplier);
+        const originalOverflow = gridElement.style.overflow;
+
+        gridElement.style.height = `${lockedHeight}px`;
+        gridElement.style.minHeight = `${lockedHeight}px`;
+        gridElement.style.maxHeight = `${lockedHeight}px`;
+        gridElement.style.overflow = 'hidden';
+
+        iso.arrange({ filter: filterValue });
+        requestAnimationFrame(() => iso?.layout());
+
+        iso.once('arrangeComplete', () => {
+          requestAnimationFrame(() => {
+            const items = iso!.getFilteredItemElements();
+            let maxBottom = 0;
+            const gridRect = gridElement.getBoundingClientRect();
+
+            items.forEach(item => {
+              const bottom = item.getBoundingClientRect().bottom - gridRect.top;
+              if (bottom > maxBottom) maxBottom = bottom;
+            });
+
+            const finalHeight = Math.ceil(maxBottom + 100) || gridElement.offsetHeight;
+            gridElement.style.transition = 'height 0.3s ease-out';
+            gridElement.style.height = `${finalHeight}px`;
+
+            setTimeout(() => {
+              gridElement.style.minHeight = '';
+              gridElement.style.maxHeight = '';
+              gridElement.style.overflow = originalOverflow;
+              gridElement.style.transition = '';
+            }, 350);
+          });
+        });
+      }) as EventListener);
+
+      // Handle resize for Isotope layout
+      let resizeRAF = 0;
+      window.addEventListener('resize', () => {
+        cancelAnimationFrame(resizeRAF);
+        resizeRAF = requestAnimationFrame(() => iso?.layout());
+      });
+    });
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initIsotopeFilters);
+  } else {
+    initIsotopeFilters();
+  }
+</script>
