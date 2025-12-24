@@ -1,0 +1,103 @@
+---
+/**
+ * MasonryGrid - Container for masonry card layouts
+ *
+ * Uses MasonryCard sub-component for individual card rendering.
+ * This component handles only the grid layout and size distribution.
+ *
+ * @param cards - Array of card objects with type and content
+ */
+import MasonryCard from './MasonryCards/MasonryCard.astro';
+import type { CardVariant, CardSize } from './MasonryCards/MasonryCard.astro';
+
+interface Card {
+  type: CardVariant;
+  image?: string;
+  alt?: string;
+  link?: string;
+  title?: string;
+  content?: string;
+  bgColor?: string;
+  textColor?: string;
+  size?: CardSize;
+  icon?: string;
+  badge?: string;
+  label?: string;
+  value?: string;
+  author?: string;
+  button?: { text: string; link: string };
+}
+
+interface Props {
+  cards: Card[];
+}
+
+const { cards } = Astro.props;
+
+// Determine card size based on index pattern if not explicitly set
+const getCardSize = (index: number, card: Card): CardSize => {
+  if (card.size) return card.size;
+  const patterns: CardSize[] = ['medium', 'medium', 'medium', 'medium', 'medium', 'large'];
+  return patterns[index % patterns.length];
+};
+---
+
+<div class="masonry-grid" data-scroll-reveal-group data-scroll-stagger="0.05">
+  {cards.map((card, index) => (
+    <MasonryCard
+      variant={card.type}
+      size={getCardSize(index, card)}
+      bgColor={card.bgColor}
+      textColor={card.textColor}
+      title={card.title}
+      content={card.content}
+      label={card.label}
+      value={card.value}
+      author={card.author}
+      icon={card.icon}
+      image={card.image}
+      alt={card.alt}
+      badge={card.badge}
+      link={card.link}
+      button={card.button}
+    />
+  ))}
+</div>
+
+<style>
+  /* ========== GRID LAYOUT ========== */
+  .masonry-grid {
+    column-count: 4;
+    column-gap: var(--space-xl);
+    padding: var(--space-sm);
+    max-width: 100%;
+  }
+
+  /* ========== RESPONSIVE ========== */
+
+  /* Tablet */
+  @media (max-width: 1024px) {
+    .masonry-grid {
+      column-count: 3;
+      column-gap: var(--space-md);
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .masonry-grid {
+      column-count: 2;
+      column-gap: var(--space-sm);
+    }
+  }
+
+  /* Small mobile */
+  @media (max-width: 480px) {
+    .masonry-grid {
+      column-count: 1;
+      column-gap: 0;
+    }
+  }
+
+  /* A11y overrides in: src/Styles/a11y/components/masonry-grid.css */
+</style>

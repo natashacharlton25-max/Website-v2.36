@@ -1,0 +1,287 @@
+/**
+ * ============================================
+ * TOAST NOTIFICATIONS
+ * ============================================
+ *
+ * Enhanced with Lottie animations and CSS tokens.
+ * Component: src/components/ui/Toast.astro
+ */
+
+/* ========== CONTAINER ========== */
+
+#toast-container {
+  position: fixed;
+  top: 100px;
+  right: var(--space-xl);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  pointer-events: none;
+}
+
+/* ========== BASE TOAST ========== */
+
+.toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--border-radius-lg);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  max-width: 320px;
+  background: var(--color-Neutral-800);
+  box-shadow: var(--shadow-2xl);
+  opacity: 1;
+  animation-fill-mode: both;
+  backdrop-filter: blur(4px);
+  font-family: var(--font-body);
+  overflow: hidden;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  color: var(--color-Text-50);
+}
+
+.toast:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2xl), 0 0 0 2px var(--color-Primary-500);
+}
+
+/* ========== LOTTIE ICON ========== */
+
+.toast .toast__lottie {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.toast .toast__lottie svg {
+  width: 100%;
+  height: 100%;
+}
+
+.toast .toast__lottie svg path,
+.toast .toast__lottie svg g,
+.toast .toast__lottie svg * {
+  fill: black !important;
+  stroke: black !important;
+}
+
+/* ========== STATIC ICON (A11Y FALLBACK) ========== */
+
+.toast .toast__static-icon {
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+/* ========== GLOW EFFECT ========== */
+
+.toast-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 20px;
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-Primary-500) 20%, transparent), transparent 70%);
+  pointer-events: none;
+  filter: blur(16px);
+  z-index: -1;
+}
+
+/* ========== TOAST THEMES ========== */
+
+/* Arcade Theme */
+.toast-arcade {
+  background: var(--color-Accent-500);
+  color: var(--color-BackgroundDark-950);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--text-sm);
+}
+
+.toast-arcade .toast-glow {
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-Accent-500) 20%, transparent), transparent 70%);
+}
+
+/* Professional Theme */
+.toast-professional {
+  background: var(--color-Primary-500);
+  color: var(--color-White);
+}
+
+/* Brutalist Theme */
+.toast-brutalist {
+  background: var(--color-Neutral-50);
+  color: var(--color-Text-900);
+  font-family: monospace;
+  border: 2px solid var(--color-Neutral-900);
+}
+
+.toast-brutalist .toast-glow {
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-Neutral-900) 20%, transparent), transparent 70%);
+}
+
+/* Glass Theme */
+.toast-glass {
+  background: color-mix(in oklch, var(--color-Background-50) 15%, transparent);
+  color: var(--color-Text-900);
+  border: 1px solid color-mix(in oklch, var(--color-Background-50) 25%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: var(--shadow-2xl);
+}
+
+.toast-glass .toast-glow {
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-Background-50) 18%, transparent), transparent 70%);
+}
+
+/* Neon Theme */
+.toast-neon {
+  background: var(--color-BackgroundDark-950);
+  color: var(--color-Primary-500);
+  border: 1.5px solid var(--color-Primary-500);
+  text-shadow: 0 0 4px var(--color-Primary-500);
+  box-shadow: 0 0 6px color-mix(in oklch, var(--color-Primary-500) 15%, transparent),
+              0 0 12px color-mix(in oklch, var(--color-Primary-500) 10%, transparent);
+}
+
+.toast-neon .toast__lottie svg path,
+.toast-neon .toast__lottie svg circle,
+.toast-neon .toast__lottie svg rect,
+.toast-neon .toast__lottie svg ellipse,
+.toast-neon .toast__lottie svg polygon,
+.toast-neon .toast__lottie svg polyline {
+  fill: var(--color-Primary-500) !important;
+  stroke: var(--color-Primary-500) !important;
+}
+
+.toast-neon .toast-glow {
+  background: radial-gradient(circle, color-mix(in oklch, var(--color-Primary-500) 25%, transparent), transparent 70%);
+}
+
+/* ========== ANIMATIONS ========== */
+
+@keyframes toast-slide {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-bounce {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  40% {
+    transform: translateY(-20%);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(10%);
+  }
+  80% {
+    transform: translateY(-4%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-zoom {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-flip {
+  0% {
+    transform: rotateX(90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+/* Animation Classes */
+.toast-slide-animation {
+  animation: toast-slide 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.toast-fade-animation {
+  animation: toast-fade 0.8s ease-out both;
+}
+
+.toast-bounce-animation {
+  animation: toast-bounce 1.2s cubic-bezier(0.25, 1.5, 0.5, 1) both;
+}
+
+.toast-zoom-animation {
+  animation: toast-zoom 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.toast-flip-animation {
+  animation: toast-flip 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 600px) {
+  #toast-container {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 250px) {
+  #toast-container {
+    top: 80px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .toast {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-sm);
+    font-size: var(--text-sm);
+    max-width: 200px;
+    gap: var(--space-xs);
+  }
+
+  .toast .toast__lottie {
+    width: 24px;
+    height: 24px;
+  }
+
+  .toast .toast__static-icon {
+    width: 20px;
+    height: 20px;
+  }
+}

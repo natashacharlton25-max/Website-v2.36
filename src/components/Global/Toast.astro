@@ -1,0 +1,124 @@
+---
+/**
+ * Toast Notification Component
+ * Enhanced with Lottie animations using @lottiefiles/lottie-player web component
+ *
+ * Features:
+ * - Lottie animation plays 3 times or max 10 seconds
+ * - Toast displays for 30 seconds
+ * - Click to dismiss instantly
+ * - Static Phosphor icon fallback for a11y modes
+ * - Uses CSS token system (styles in src/Styles/components/toast.css)
+ *
+ * Lottie icons from: public/Icons/Animated Icons/Toast Icons/
+ * Static icons from: public/Icons/phosphor/toast/
+ *
+ * @param theme - Visual theme (arcade, professional, brutalist, glass, neon)
+ * @param icon - Lottie icon (activity, notification, alert, info, thumbup)
+ * @param staticIcon - Phosphor icon name for a11y fallback (e.g., "check-circle-fill")
+ * @param animation - Animation style (slide, bounce, fade, flip, zoom)
+ * @param message - Message to display
+ * @param duration - How long to show the toast (ms), default 30000
+ *
+ * Usage:
+ * <Toast message="Success!" theme="professional" icon="thumbup" staticIcon="check-circle-fill" />
+ * <Toast message="Warning!" theme="brutalist" icon="alert" staticIcon="warning-fill" />
+ * <Toast message="Info" theme="neon" icon="info" staticIcon="info-fill" animation="bounce" />
+ */
+import Icon from '../Icons/Icon.astro';
+
+export type ToastTheme = 'arcade' | 'professional' | 'brutalist' | 'glass' | 'neon';
+export type ToastIcon = 'activity' | 'notification' | 'alert' | 'info' | 'thumbup';
+export type ToastAnimation = 'slide' | 'bounce' | 'fade' | 'flip' | 'zoom';
+
+export interface Props {
+  theme?: ToastTheme;
+  icon?: ToastIcon;
+  staticIcon?: string;
+  animation?: ToastAnimation;
+  message: string;
+  duration?: number;
+}
+
+const {
+  theme = 'professional',
+  icon = 'notification',
+  staticIcon,
+  animation = 'slide',
+  message,
+  duration = 30000
+} = Astro.props;
+
+// Lottie icon presets from public/Icons/Animated Icons/Toast Icons/
+const lottiePresets: Record<ToastIcon, string> = {
+  activity: '/Icons/Animated Icons/Toast Icons/Activity/Lottie-toast-activity.json',
+  notification: '/Icons/Animated Icons/Toast Icons/NotificationV3/Lottie-toast-notification-v3.json',
+  alert: '/Icons/Animated Icons/Toast Icons/Alert triangle/Lottie-toast-alert-triangle.json',
+  info: '/Icons/Animated Icons/Toast Icons/Info/Lottie-toast-info.json',
+  thumbup: '/Icons/Animated Icons/Toast Icons/Thumb up/Lottie-toast-thumb-up.json'
+};
+
+// Default static icon fallbacks for each Lottie icon (from public/Icons/phosphor/toast/)
+const staticFallbacks: Record<ToastIcon, string> = {
+  activity: 'toast/circle-notch-fill',
+  notification: 'toast/bell-ringing-fill',
+  alert: 'toast/warning-fill',
+  info: 'toast/info-fill',
+  thumbup: 'toast/thumbs-up-fill'
+};
+
+const lottieUrl = lottiePresets[icon];
+const fallbackIcon = staticIcon || staticFallbacks[icon];
+---
+
+<div
+  class={`toast toast-${theme} toast-${animation}-animation`}
+  data-duration={duration}
+  role="alert"
+  aria-live="polite"
+>
+  <lottie-player
+    src={lottieUrl}
+    background="transparent"
+    speed="1"
+    style="width: 32px; height: 32px;"
+    autoplay
+    loop
+    count="3"
+    class="toast__lottie"
+  ></lottie-player>
+  <Icon name={fallbackIcon} size={24} class="toast__static-icon" />
+  <span class="toast-message">{message}</span>
+  <div class="toast-glow"></div>
+</div>
+
+<style>
+  .toast__lottie {
+    flex-shrink: 0;
+  }
+
+  /* Static icon hidden by default */
+  .toast :global(.toast__static-icon) {
+    display: none;
+    flex-shrink: 0;
+  }
+
+  /* A11y modes: hide Lottie, show static icon */
+  :global(body.a11y-reduce-motion) .toast__lottie,
+  :global(body.a11y-text-only) .toast__lottie,
+  :global(body.a11y-theme-dark) .toast__lottie,
+  :global(body.a11y-theme-cream) .toast__lottie,
+  :global(body.a11y-theme-high-contrast) .toast__lottie,
+  :global(body.a11y-theme-monochrome) .toast__lottie {
+    display: none !important;
+  }
+
+  :global(body.a11y-reduce-motion) .toast :global(.toast__static-icon),
+  :global(body.a11y-text-only) .toast :global(.toast__static-icon),
+  :global(body.a11y-theme-dark) .toast :global(.toast__static-icon),
+  :global(body.a11y-theme-cream) .toast :global(.toast__static-icon),
+  :global(body.a11y-theme-high-contrast) .toast :global(.toast__static-icon),
+  :global(body.a11y-theme-monochrome) .toast :global(.toast__static-icon) {
+    display: block !important;
+  }
+</style>

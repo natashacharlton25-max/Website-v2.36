@@ -1,0 +1,77 @@
+---
+/**
+ * Basic Filter Switcher Component (No Animations)
+ *
+ * Uses BaseSwitcher for visual design, adds simple show/hide filtering logic.
+ * Use this as an a11y fallback when you don't need Isotope animations.
+ *
+ * Props:
+ * - tabs: Array of { id: string, label: string, icon?: string }
+ * - defaultActive?: string (id of default active tab)
+ * - targetSelector: CSS selector for elements to filter (e.g., '.product-card')
+ * - filterAttribute: Attribute name to match against (e.g., 'data-type')
+ */
+import BaseSwitcher from './BaseSwitcher.astro';
+import type { SwitcherTab } from './BaseSwitcher.astro';
+
+export interface FilterTab extends SwitcherTab {}
+
+interface Props {
+  tabs: FilterTab[];
+  defaultActive?: string;
+  targetSelector: string;
+  filterAttribute: string;
+}
+
+const { tabs, defaultActive, targetSelector, filterAttribute } = Astro.props;
+const switcherId = `basic-filter-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<BaseSwitcher
+  tabs={tabs}
+  defaultActive={defaultActive}
+  id={switcherId}
+  dataAttributes={{
+    'data-target-selector': targetSelector,
+    'data-filter-attribute': filterAttribute
+  }}
+/>
+
+<script>
+  function initBasicFilters() {
+    // Find all basic filter switchers
+    const switcherContainers = document.querySelectorAll('[data-switcher-id^="basic-filter-"]');
+
+    switcherContainers.forEach(container => {
+      const switcherId = container.getAttribute('data-switcher-id');
+      const switcherNav = container.querySelector(`[data-switcher-nav="${switcherId}"]`) as HTMLElement;
+      if (!switcherNav) return;
+
+      const targetSelector = switcherNav.getAttribute('data-target-selector');
+      const filterAttribute = switcherNav.getAttribute('data-filter-attribute');
+      if (!targetSelector || !filterAttribute) return;
+
+      const targetElements = document.querySelectorAll(targetSelector);
+
+      // Listen for tab changes from BaseSwitcher
+      container.addEventListener('switcher:change', ((e: CustomEvent) => {
+        const { tabId } = e.detail;
+
+        // BASIC FILTERING - Just show/hide elements
+        // Grid will automatically rearrange with CSS
+        targetElements.forEach(element => {
+          const elementValue = element.getAttribute(filterAttribute);
+          const shouldShow = tabId === 'all' || elementValue === tabId;
+          (element as HTMLElement).style.display = shouldShow ? '' : 'none';
+        });
+      }) as EventListener);
+    });
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBasicFilters);
+  } else {
+    initBasicFilters();
+  }
+</script>

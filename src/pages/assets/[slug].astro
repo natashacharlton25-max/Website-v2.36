@@ -1,7 +1,8 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from '../../Layouts/BaseLayout.astro';
 import Button from '../../components/Button/Button.astro';
-import Icon from '../../components/ui/Icon.astro';
+import Icon from '../../components/Icons/Icon.astro';
+import ContentSwitcher from '../../components/Switcher/ContentSwitcher.astro';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 
@@ -226,42 +227,16 @@ const relatedProducts = allAssets
   <section class="product-content-section section-sm bg-alt">
     <div class="container container-7xl">
       <div class="content-wrapper">
-        <!-- Modern Switcher Navigation -->
-        <div class="switcher-container">
-          <div class="switcher-nav">
-            <button class="switcher-btn active" data-tab="description">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              </svg>
-              <span>Description</span>
-            </button>
-            <button class="switcher-btn" data-tab="specification">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="9" y1="9" x2="15" y2="9"></line>
-                <line x1="9" y1="15" x2="15" y2="15"></line>
-              </svg>
-              <span>Specification</span>
-            </button>
-            <button class="switcher-btn" data-tab="individuals">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              <span>For Individuals</span>
-            </button>
-            <button class="switcher-btn" data-tab="professionals">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-              <span>For Professionals</span>
-            </button>
-          </div>
-        </div>
+        <!-- Content Tabs Navigation -->
+        <ContentSwitcher
+          tabs={[
+            { id: 'description', label: 'Description', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>' },
+            { id: 'specification', label: 'Specification', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>' },
+            { id: 'individuals', label: 'For Individuals', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>' },
+            { id: 'professionals', label: 'For Professionals', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>' }
+          ]}
+          defaultActive="description"
+        />
 
         <!-- Tab Content -->
         <div class="tabs-content">
@@ -811,49 +786,6 @@ const relatedProducts = allAssets
     }
   });
 
-  // Elastic Tab/Switcher functionality
-  const tabButtons = document.querySelectorAll('.switcher-btn');
-  const tabPanels = document.querySelectorAll('.tab-panel');
-  const switcherNav = document.querySelector('.switcher-nav') as HTMLElement;
-
-  // Function to update selector position
-  function updateSelector(activeButton: HTMLElement) {
-    if (!switcherNav) return;
-
-    const activeWidth = activeButton.offsetWidth;
-    const activeLeft = activeButton.offsetLeft;
-
-    // Update CSS custom properties for the selector
-    switcherNav.style.setProperty('--selector-width', `${activeWidth}px`);
-    switcherNav.style.setProperty('--selector-left', `${activeLeft}px`);
-  }
-
-  // Initialize selector on page load
-  const activeButton = document.querySelector('.switcher-btn.active') as HTMLElement;
-  if (activeButton && switcherNav) {
-    updateSelector(activeButton);
-  }
-
-  // Handle tab clicks
-  tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const targetTab = (button as HTMLElement).dataset.tab;
-
-      // Remove active class from all buttons and panels
-      tabButtons.forEach(btn => btn.classList.remove('active'));
-      tabPanels.forEach(panel => panel.classList.remove('active'));
-
-      // Add active class to clicked button and corresponding panel
-      button.classList.add('active');
-      updateSelector(button as HTMLElement);
-
-      const targetPanel = document.querySelector(`.tab-panel[data-panel="${targetTab}"]`);
-      if (targetPanel) {
-        targetPanel.classList.add('active');
-      }
-    });
-  });
-
   // Thumbnail gallery functionality
   const thumbnails = document.querySelectorAll('.thumbnail');
   const mainImage = document.getElementById('main-product-image') as HTMLImageElement;
@@ -1233,79 +1165,6 @@ const relatedProducts = allAssets
   .content-wrapper {
     max-width: 1400px;
     margin: 0 auto;
-  }
-
-  /* Elastic Tabs Navigation */
-  .switcher-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: var(--space-3xl);
-  }
-
-  .switcher-nav {
-    font-size: var(--text-sm);
-    padding: var(--space-xs) var(--space-md);
-    list-style: none;
-    background: var(--color-AccentOne-100);
-    box-shadow: var(--shadow-lg);
-    display: inline-flex;
-    border-radius: 50px;
-    position: relative;
-    overflow-x: auto;
-    scrollbar-width: none; /* Firefox */
-  }
-
-  .switcher-nav::-webkit-scrollbar {
-    display: none; /* Chrome, Safari */
-  }
-
-  .switcher-btn {
-    text-decoration: none;
-    color: var(--color-Text-600);
-    text-transform: uppercase;
-    padding: var(--space-md) var(--space-lg);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xs);
-    position: relative;
-    z-index: 2;
-    transition: color 0.6s;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    white-space: nowrap;
-    font-weight: var(--font-semibold);
-    font-size: var(--text-sm);
-  }
-
-  .switcher-btn svg {
-    flex-shrink: 0;
-  }
-
-  .switcher-btn.active {
-    color: white;
-  }
-
-  .switcher-btn:hover:not(.active) {
-    color: var(--color-Primary-600);
-  }
-
-  /* Sliding Selector Background */
-  .switcher-nav::before {
-    content: '';
-    height: 75%;
-    display: inline-block;
-    position: absolute;
-    left: var(--selector-left, 0);
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1;
-    border-radius: 50px;
-    width: var(--selector-width, 0);
-    transition: left 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55),
-                width 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    background: var(--color-AccentOne-500);
-    box-shadow: var(--shadow-md);
   }
 
   /* Tab Panels */
@@ -1694,41 +1553,6 @@ const relatedProducts = allAssets
       font-size: var(--text-xl);
     }
 
-    .switcher-container {
-      padding: 0 !important;
-    }
-
-    .switcher-nav {
-      flex-direction: column !important;
-      align-items: stretch !important;
-      padding: var(--space-sm) !important;
-      overflow-x: visible !important;
-      gap: var(--space-xs) !important;
-      display: flex !important;
-      border-radius: 6px !important;
-    }
-
-    .switcher-btn {
-      width: 100% !important;
-      justify-content: flex-start !important;
-      padding: var(--space-md) var(--space-lg) !important;
-      text-align: left !important;
-      display: inline-flex !important;
-    }
-
-    .switcher-btn span {
-      display: inline !important; /* Show text labels */
-    }
-
-    .switcher-nav::before {
-      display: none !important; /* Hide horizontal sliding selector */
-    }
-
-    .switcher-btn.active {
-      background: var(--color-AccentOne-500) !important;
-      border-radius: 6px !important;
-    }
-
     .spec-grid {
       grid-template-columns: 1fr;
     }
@@ -1749,10 +1573,6 @@ const relatedProducts = allAssets
 
     .price-current {
       font-size: var(--text-lg);
-    }
-
-    .switcher-btn {
-      padding: var(--space-xs) var(--space-sm);
     }
 
     .product-card .product-info {
@@ -1780,55 +1600,6 @@ const relatedProducts = allAssets
 
     .spec-card__value {
       font-size: var(--text-xs);
-    }
-  }
-
-  @media (max-width: 300px) {
-    .switcher-nav {
-      padding: var(--space-xs) !important;
-      gap: 4px !important;
-      border-radius: 6px !important;
-    }
-
-    .switcher-btn {
-      padding: var(--space-xs) var(--space-sm) !important;
-      font-size: 11px !important;
-      gap: 6px !important;
-    }
-
-    .switcher-btn svg {
-      width: 16px !important;
-      height: 16px !important;
-    }
-
-    .switcher-btn.active {
-      border-radius: 4px !important;
-    }
-  }
-
-  @media (max-width: 200px) {
-    .switcher-nav {
-      padding: var(--space-xs) !important;
-      align-items: center !important;
-      border-radius: 6px !important;
-    }
-
-    .switcher-btn {
-      padding: var(--space-xs) !important;
-      justify-content: center !important;
-    }
-
-    .switcher-btn span {
-      display: none !important; /* Hide text, show only icons */
-    }
-
-    .switcher-btn svg {
-      width: 16px !important;
-      height: 16px !important;
-    }
-
-    .switcher-btn.active {
-      border-radius: 4px !important;
     }
   }
 
@@ -2071,155 +1842,6 @@ const relatedProducts = allAssets
   :global(body.a11y-theme-monochrome) .features-list svg,
   :global(body.a11y-cvd-monochrome) .features-list svg {
     color: #333333 !important;
-  }
-
-  /* =========================================================
-     TAB SWITCHER ACCESSIBILITY OVERRIDES
-     ========================================================= */
-
-  /* Dark mode & High Contrast: Transparent background with accent border */
-  :global(body.a11y-theme-dark) .switcher-nav,
-  :global(body.a11y-theme-high-contrast) .switcher-nav {
-    background: transparent !important;
-    border: 2px solid var(--a11y-hc-accent, var(--a11y-dark-accent, var(--color-Primary-500))) !important;
-  }
-
-  :global(body.a11y-theme-dark) .switcher-btn {
-    color: var(--a11y-dark-text) !important;
-    border: none !important;
-    background: transparent !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .switcher-btn {
-    color: var(--a11y-hc-text) !important;
-    border: none !important;
-    background: transparent !important;
-  }
-
-  /* Active button uses highlight accent color */
-  :global(body.a11y-theme-dark) .switcher-btn.active {
-    color: var(--a11y-dark-bg) !important;
-    border: none !important;
-    background: transparent !important;
-  }
-
-  :global(body.a11y-theme-high-contrast) .switcher-btn.active {
-    color: var(--a11y-hc-bg) !important;
-    border: none !important;
-    background: transparent !important;
-  }
-
-  :global(body.a11y-theme-dark) .switcher-nav::before,
-  :global(body.a11y-theme-high-contrast) .switcher-nav::before {
-    background: var(--a11y-hc-accent, var(--a11y-dark-accent, var(--color-Primary-500))) !important;
-  }
-
-  /* Cream theme */
-  :global(body.a11y-theme-cream) .switcher-nav {
-    background: var(--a11y-cream-bg) !important;
-    border: 2px solid var(--a11y-cream-accent) !important;
-  }
-
-  :global(body.a11y-theme-cream) .switcher-btn {
-    color: var(--a11y-cream-text) !important;
-  }
-
-  :global(body.a11y-theme-cream) .switcher-btn.active {
-    color: var(--color-Background-50) !important;
-  }
-
-  :global(body.a11y-theme-cream) .switcher-nav::before {
-    background: var(--a11y-cream-accent) !important;
-  }
-
-  /* Monochrome theme */
-  :global(body.a11y-theme-monochrome) .switcher-nav,
-  :global(body.a11y-cvd-monochrome) .switcher-nav {
-    background: transparent !important;
-    border: 2px solid #333333 !important;
-  }
-
-  :global(body.a11y-theme-monochrome) .switcher-btn,
-  :global(body.a11y-cvd-monochrome) .switcher-btn {
-    color: #333333 !important;
-  }
-
-  :global(body.a11y-theme-monochrome) .switcher-btn.active,
-  :global(body.a11y-cvd-monochrome) .switcher-btn.active {
-    color: #ffffff !important;
-  }
-
-  :global(body.a11y-theme-monochrome) .switcher-nav::before,
-  :global(body.a11y-cvd-monochrome) .switcher-nav::before {
-    background: #333333 !important;
-  }
-
-  /* CVD Color Blind modes (Protanopia, Deuteranopia, Tritanopia) */
-  :global(body.a11y-theme-protanopia) .switcher-nav,
-  :global(body.a11y-theme-deuteranopia) .switcher-nav,
-  :global(body.a11y-theme-tritanopia) .switcher-nav,
-  :global(body.a11y-cvd-protanopia) .switcher-nav,
-  :global(body.a11y-cvd-deuteranopia) .switcher-nav,
-  :global(body.a11y-cvd-tritanopia) .switcher-nav {
-    background: transparent !important;
-    border: 2px solid var(--color-Primary-600) !important;
-  }
-
-  :global(body.a11y-theme-protanopia) .switcher-btn,
-  :global(body.a11y-theme-deuteranopia) .switcher-btn,
-  :global(body.a11y-theme-tritanopia) .switcher-btn,
-  :global(body.a11y-cvd-protanopia) .switcher-btn,
-  :global(body.a11y-cvd-deuteranopia) .switcher-btn,
-  :global(body.a11y-cvd-tritanopia) .switcher-btn {
-    color: var(--color-Text-700) !important;
-    border: none !important;
-    background: transparent !important;
-  }
-
-  :global(body.a11y-theme-protanopia) .switcher-btn.active,
-  :global(body.a11y-theme-deuteranopia) .switcher-btn.active,
-  :global(body.a11y-theme-tritanopia) .switcher-btn.active,
-  :global(body.a11y-cvd-protanopia) .switcher-btn.active,
-  :global(body.a11y-cvd-deuteranopia) .switcher-btn.active,
-  :global(body.a11y-cvd-tritanopia) .switcher-btn.active {
-    color: #ffffff !important;
-    border: none !important;
-    background: transparent !important;
-  }
-
-  :global(body.a11y-theme-protanopia) .switcher-nav::before,
-  :global(body.a11y-theme-deuteranopia) .switcher-nav::before,
-  :global(body.a11y-theme-tritanopia) .switcher-nav::before,
-  :global(body.a11y-cvd-protanopia) .switcher-nav::before,
-  :global(body.a11y-cvd-deuteranopia) .switcher-nav::before,
-  :global(body.a11y-cvd-tritanopia) .switcher-nav::before {
-    background: var(--color-Primary-600) !important;
-  }
-
-  /* Mobile: Active button background */
-  @media (max-width: 768px) {
-    :global(body.a11y-theme-dark) .switcher-btn.active,
-    :global(body.a11y-theme-high-contrast) .switcher-btn.active {
-      background: var(--a11y-hc-accent, var(--a11y-dark-accent, var(--color-Primary-500))) !important;
-    }
-
-    :global(body.a11y-theme-cream) .switcher-btn.active {
-      background: var(--a11y-cream-accent) !important;
-    }
-
-    :global(body.a11y-theme-monochrome) .switcher-btn.active,
-    :global(body.a11y-cvd-monochrome) .switcher-btn.active {
-      background: #333333 !important;
-    }
-
-    :global(body.a11y-theme-protanopia) .switcher-btn.active,
-    :global(body.a11y-theme-deuteranopia) .switcher-btn.active,
-    :global(body.a11y-theme-tritanopia) .switcher-btn.active,
-    :global(body.a11y-cvd-protanopia) .switcher-btn.active,
-    :global(body.a11y-cvd-deuteranopia) .switcher-btn.active,
-    :global(body.a11y-cvd-tritanopia) .switcher-btn.active {
-      background: var(--color-Primary-600) !important;
-    }
   }
 
   /* =========================================================

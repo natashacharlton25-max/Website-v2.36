@@ -7,7 +7,7 @@
  * - GSAP-powered scroll animations
  *
  * Usage:
- * import { scrollTo } from '../scripts/smooth-scroll';
+ * import { scrollTo } from '../Scripts/smooth-scroll';
  * scrollTo('#section', { duration: 1.2 });
  */
 
