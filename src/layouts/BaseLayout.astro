@@ -1,6 +1,6 @@
 ---
-import '../Styles/global.css';
-import '../Styles/themes/Preview/coretokens.css';
+import '../styles/global.css';
+import '../styles/themes/Preview/coretokens.css';
 import GlassNav from '../components/Nav/NavBar/GlassNav.astro';
 import FooterWithMask from '../components/Footer/FooterWithMask.astro';
 import CookieBanner from '../components/Global/CookieBanner.astro';
@@ -10,7 +10,7 @@ import SideTabs from '../components/Nav/Tabs/SideTabs.astro';
 import SearchOverlay from '../components/Search/SearchOverlay.astro';
 import ContactPopup from '../components/ContactForm/Contact-Popup.astro';
 import CustomScrollbar from '../components/Global/CustomScrollbar.astro';
-import { BRAND_CONFIG } from '../Config/brand';
+import { BRAND_CONFIG } from '../lib/config/brand';
 
 interface Props {
   title?: string;
@@ -78,9 +78,7 @@ const {
 
   <!-- Footer -->
   {!hideFooter && (
-    <FooterWithMask
-      backgroundImage="/Footer/Footer-Reveal.png"
-    />
+    <FooterWithMask />
   )}
 
   <!-- Cookie Consent Banner -->
@@ -107,50 +105,18 @@ const {
   <!-- Global Scripts -->
   <script>
     // Import toast notification system
-    import { showToast } from '../Scripts/toast';
+    import { showToast } from '../lib/ui/toast';
     // Import scroll animations (GSAP ScrollTrigger)
-    import '../Scripts/scroll-animations';
+    import '../lib/animation/scroll-animations';
+    // Import smooth scroll (handles anchor links)
+    import '../lib/ui/smooth-scroll';
     // Import theme switcher for accessibility themes
-    import '../Scripts/ThemeSwitcher.js';
+    import '../scripts/ThemeSwitcher.js';
     // Import theme preview card renderer
-    import '../Styles/themes/Preview/ThemePreviewTokens.js';
+    import '../styles/themes/Preview/ThemePreviewTokens.js';
 
     // Make showToast globally available
     (window as any).showToast = showToast;
-
-    // Add padding to body to account for fixed navbar
-    const navbar = document.querySelector('.nav-container') as HTMLElement | null;
-    if (navbar) {
-      const navbarHeight = navbar.offsetHeight;
-      // Use CSS variable for smooth transitions
-      document.documentElement.style.setProperty('--body-top-padding', `${navbarHeight}px`);
-    }
-
-    // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', (e) => {
-        e.preventDefault();
-        const href = (anchor as HTMLAnchorElement).getAttribute('href');
-        if (href) {
-          const target = document.querySelector(href);
-          if (target) {
-            target.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
-            });
-          }
-        }
-      });
-    });
-
-    // Add active class to current nav link
-    const currentPath = window.location.pathname;
-    document.querySelectorAll('.nav-link').forEach(link => {
-      const linkPath = (link as HTMLAnchorElement).getAttribute('href');
-      if (linkPath === currentPath) {
-        link.classList.add('active');
-      }
-    });
 
     // Global add-to-cart handler
     document.addEventListener('click', function(e) {
@@ -188,305 +154,3 @@ const {
   </script>
 </body>
 </html>
-
-<style is:global>
-  /* Active nav link styling */
-  .nav-link.active {
-    color: var(--color-Primary-500);
-    font-weight: var(--font-bold);
-  }
-
-  /* Ensure main content is below fixed navbar */
-  #main-content {
-    /* Removed min-height to allow page to flex with content */
-    overflow-x: hidden;
-    max-width: 100vw;
-    width: 100%;
-  }
-
-  /* Prevent scrollbar from jerking during page height changes */
-  html {
-    overflow-y: scroll; /* Always show scrollbar to prevent width changes */
-    scroll-behavior: smooth; /* Smooth scroll for better UX */
-  }
-
-  /* Smooth body height transitions when content changes */
-  body {
-    transition: min-height 0.3s ease-out;
-  }
-
-  /* Smooth scrollbar appearance */
-  ::-webkit-scrollbar {
-    width: 12px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: var(--color-Background-100);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-Neutral-300);
-    border-radius: 6px;
-    transition: background 0.2s ease, transform 0.3s ease;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-Neutral-400);
-  }
-
-  /* Firefox scrollbar styling */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-Neutral-300) var(--color-Background-100);
-  }
-
-  /* Prevent all sections from causing horizontal overflow */
-  section {
-    overflow-x: hidden;
-    max-width: 100vw;
-  }
-
-  /* Scroll margin for anchor links (accounts for fixed navbar) */
-  :target {
-    scroll-margin-top: 100px;
-  }
-
-  /* Toast notification styles are in global.css */
-
-  /* ===================================
-   * PRINT STYLES - Clean PDF Output
-   * =================================== */
-  @media print {
-    /* Hide non-content elements */
-    .nav-container,
-    footer,
-    .cookie-banner,
-    #toast-container,
-    .mini-cart,
-    .quick-view,
-    .a11y-panel-trigger,
-    .a11y-panel,
-    .a11y-panel__backdrop,
-    button,
-    .btn,
-    video,
-    audio,
-    iframe,
-    .social-links,
-    .cta-buttons,
-    nav,
-    aside,
-    .sidebar,
-    .related-articles,
-    [class*="related"],
-    [class*="share"],
-    [class*="author"],
-    [class*="comment"],
-    [class*="newsletter"],
-    [class*="subscribe"],
-    .blog-sidebar,
-    .post-navigation,
-    .post-footer,
-    .article-footer,
-    .tags,
-    form,
-    input,
-    textarea,
-    select {
-      display: none !important;
-    }
-
-    /* Hide all images */
-    img,
-    svg:not(.print-keep),
-    picture,
-    figure img {
-      display: none !important;
-    }
-
-    /* Reset body and main content */
-    body {
-      background: white !important;
-      color: black !important;
-      margin: 0;
-      padding: 10mm;
-      font-family: Georgia, 'Times New Roman', serif !important;
-      font-size: 11pt !important;
-      line-height: 1.4 !important;
-    }
-
-    /* Remove all backgrounds and shadows */
-    * {
-      background: transparent !important;
-      box-shadow: none !important;
-      text-shadow: none !important;
-      border: none !important;
-    }
-
-    /* Main content full width */
-    #main-content {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      min-height: auto !important;
-    }
-
-    /* Container full width */
-    .container,
-    [class*="container-"] {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-
-    /* Typography - Headers */
-    h1, h2, h3, h4, h5, h6 {
-      color: black !important;
-      page-break-after: avoid;
-      page-break-inside: avoid;
-      font-weight: bold !important;
-      margin-top: 8pt;
-      margin-bottom: 4pt;
-    }
-
-    h1 {
-      font-size: 18pt !important;
-      border-bottom: 2pt solid black !important;
-      padding-bottom: 2pt;
-    }
-
-    h2 {
-      font-size: 15pt !important;
-      border-bottom: 1pt solid black !important;
-      padding-bottom: 2pt;
-    }
-
-    h3 {
-      font-size: 13pt !important;
-    }
-
-    h4 {
-      font-size: 12pt !important;
-    }
-
-    /* Paragraphs and text */
-    p, li, td, th {
-      color: black !important;
-      font-size: 11pt !important;
-      line-height: 1.4 !important;
-      orphans: 3;
-      widows: 3;
-    }
-
-    p {
-      margin: 4pt 0;
-    }
-
-    /* Lists */
-    ul, ol {
-      margin: 4pt 0;
-      padding-left: 15pt;
-    }
-
-    li {
-      margin: 2pt 0;
-    }
-
-    /* Links - show URL after link text */
-    a {
-      color: black !important;
-      text-decoration: underline !important;
-    }
-
-    /* Only show URLs for external links (http/https) */
-    a[href^="http://"]:after,
-    a[href^="https://"]:after {
-      content: " (" attr(href) ")";
-      font-size: 9pt;
-      font-style: italic;
-      word-break: break-all;
-    }
-
-    /* Hide URLs for internal and anchor links */
-    a[href^="/"]:after,
-    a[href^="#"]:after,
-    a[href^="javascript:"]:after {
-      content: "";
-    }
-
-    /* Tables */
-    table {
-      width: 100% !important;
-      border-collapse: collapse !important;
-      margin: 4pt 0;
-    }
-
-    th, td {
-      border: 1pt solid black !important;
-      padding: 3pt !important;
-      text-align: left;
-    }
-
-    th {
-      font-weight: bold !important;
-      background: #f0f0f0 !important;
-    }
-
-    /* Blockquotes */
-    blockquote {
-      margin: 4pt 15pt;
-      padding-left: 8pt;
-      border-left: 2pt solid black !important;
-      font-style: italic;
-    }
-
-    /* Code blocks */
-    code, pre {
-      font-family: 'Courier New', monospace !important;
-      font-size: 10pt !important;
-      color: black !important;
-    }
-
-    pre {
-      border: 1pt solid black !important;
-      padding: 3pt;
-      overflow: visible;
-      white-space: pre-wrap;
-    }
-
-    /* Page breaks */
-    section,
-    article,
-    .print-section {
-      page-break-inside: avoid;
-    }
-
-    /* Ensure accessibility panel content is hidden */
-    .a11y-panel,
-    .a11y-panel *,
-    .accessibility-page__info {
-      display: none !important;
-    }
-
-    /* Print main accessibility content if on accessibility page */
-    .accessibility-page__header,
-    .accessibility-page__content {
-      display: block !important;
-    }
-
-    /* Force black text everywhere */
-    * {
-      color: black !important;
-    }
-
-    /* Remove animations and transitions */
-    *,
-    *::before,
-    *::after {
-      animation: none !important;
-      transition: none !important;
-    }
-  }
-</style>

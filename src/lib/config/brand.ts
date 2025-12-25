@@ -1,6 +1,6 @@
 /**
  * Brand Configuration
- * Only includes properties that are actually used in the codebase.
+ * Central config for brand assets, SEO, and component defaults.
  */
 
 export const BRAND_CONFIG = {
@@ -20,5 +20,14 @@ export const BRAND_CONFIG = {
     defaultTitle: 'Walking with a Smile | Your Tagline',
     defaultDescription: 'Supporting trauma recovery and healing.',
     defaultImage: '/Logo/SEO Image.png',
+  },
+
+  social: {
+    ogType: 'website',
+    twitterCard: 'summary_large_image',
+  },
+
+  footer: {
+    defaultImage: '/Footer/Footer-Reveal.png',
   }
 };
