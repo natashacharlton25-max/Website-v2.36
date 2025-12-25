@@ -1,7 +1,7 @@
 ---
 import Button from '../Button/Button.astro';
 import TrustBadges from '../Common/TrustBadges.astro';
-import FreeNotice from './FreeNotice.astro';
+import Badge from '../Badge/Badge.astro';
 
 interface Props {
   emptyMessage?: string;
@@ -29,7 +29,17 @@ const {
 
   <div class="download-summary__divider"></div>
 
-  <FreeNotice />
+  <div class="download-summary__notice">
+    <Badge
+      type="free"
+      label="100% Free"
+      icon="user-fill"
+      iconCollection="interface"
+      variant="soft"
+      size="lg"
+    />
+    <p class="download-summary__notice-text">All resources are completely free. No credit card required.</p>
+  </div>
 
   <TrustBadges />
 </div>
@@ -177,5 +187,21 @@ const {
     height: 1px;
     background-color: var(--brand-neutral-200);
     margin: var(--space-lg) 0;
+  }
+
+  .download-summary__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background-color: var(--brand-success-light);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .download-summary__notice-text {
+    font-size: var(--text-sm);
+    color: var(--brand-success-dark);
+    margin: 0;
   }
 </style>

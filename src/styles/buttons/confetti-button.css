@@ -1,0 +1,63 @@
+/* ===================================
+   CONFETTI BUTTON - Particle Effects Variant
+   Adds particle burst on click to buttons
+   Use with basic-button.css and styled-button.css
+   =================================== */
+
+/* Confetti button needs higher z-index so particles appear behind cursor */
+.btn-confetti {
+  position: relative;
+  z-index: 10;
+}
+
+/* Visual hint that button has special effect */
+.btn-confetti::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: var(--confetti-gold, #e9bc88);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0);
+  transition: var(--transition-fast);
+}
+
+/* Show sparkle indicator on hover */
+.btn-confetti:hover::after {
+  opacity: 0.8;
+  transform: scale(1);
+  animation: confetti-sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes confetti-sparkle {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Hearts variant - pink tint */
+.btn-confetti-hearts::after {
+  background: var(--confetti-pink, #FF99C8);
+}
+
+/* Celebration variant - multiple sparkles */
+.btn-confetti-celebration::after {
+  box-shadow:
+    12px 4px 0 0 var(--confetti-purple, #AE88BF),
+    -8px 8px 0 0 var(--confetti-teal, #80E1CC);
+}
+
+/* ========== REDUCED MOTION ========== */
+@media (prefers-reduced-motion: reduce) {
+  .btn-confetti::after {
+    display: none;
+  }
+}

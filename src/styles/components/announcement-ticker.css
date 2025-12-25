@@ -1,0 +1,130 @@
+/* =========================================================
+   ANNOUNCEMENT TICKER
+   Scrolling text banner for announcements
+   BEM-lite naming, CSS design tokens
+   ========================================================= */
+
+/* ========== TICKER BASE ========== */
+.announcement-ticker {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: var(--space-3xl);
+  padding: var(--space-sm) 0;
+  overflow: hidden;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+}
+
+/* ========== POSITION VARIANTS ========== */
+.announcement-ticker--top {
+  top: 0;
+}
+
+.announcement-ticker--bottom {
+  bottom: 0;
+}
+
+/* ========== BACKGROUND COLOR VARIANTS ========== */
+.announcement-ticker--primary {
+  background: var(--color-Primary-500);
+  color: var(--color-White);
+}
+
+.announcement-ticker--secondary {
+  background: var(--color-Secondary-500);
+  color: var(--color-White);
+}
+
+.announcement-ticker--accent {
+  background: var(--color-AccentOne-500);
+  color: var(--color-White);
+}
+
+.announcement-ticker--dark {
+  background: var(--color-Neutral-900);
+  color: var(--color-White);
+}
+
+.announcement-ticker--light {
+  background: var(--color-Background-100);
+  color: var(--color-Text-800);
+  border-bottom: var(--border-width) solid var(--color-Neutral-200);
+}
+
+.announcement-ticker--bottom.announcement-ticker--light {
+  border-bottom: none;
+  border-top: var(--border-width) solid var(--color-Neutral-200);
+}
+
+/* ========== TRACK & SEGMENT ========== */
+.announcement-ticker__track {
+  display: flex;
+  width: fit-content;
+}
+
+.announcement-ticker__segment {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-3xl);
+  padding-right: var(--space-3xl);
+}
+
+/* ========== TICKER ITEMS ========== */
+.announcement-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.announcement-ticker__item--link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ========== ICON ========== */
+.announcement-ticker__icon {
+  flex-shrink: 0;
+}
+
+/* ========== TEXT ========== */
+.announcement-ticker__text {
+  letter-spacing: 0.02em;
+}
+
+/* ========== SEPARATOR DOTS ========== */
+.announcement-ticker__item:not(:last-child)::after {
+  content: '';
+  display: inline-block;
+  width: var(--space-xs);
+  height: var(--space-xs);
+  background: currentColor;
+  border-radius: var(--radius-full);
+  margin-left: var(--space-3xl);
+  opacity: 0.5;
+}
+
+/* ========== PAUSE ON HOVER ========== */
+.announcement-ticker--pause-hover:hover {
+  cursor: default;
+}
+
+.announcement-ticker--pause-hover .announcement-ticker__item--link:hover {
+  cursor: pointer;
+}
+
+/* ========== REDUCED MOTION ========== */
+@media (prefers-reduced-motion: reduce) {
+  .announcement-ticker__track {
+    animation: none;
+  }
+}

@@ -1,0 +1,66 @@
+---
+/**
+ * ConfettiButton - Button with particle burst effect
+ * Extends Button component with confetti/hearts/celebration effects
+ *
+ * Usage:
+ *   <ConfettiButton variant="primary" effect="confetti">Donate</ConfettiButton>
+ *   <ConfettiButton variant="accent1" effect="hearts">Support Us</ConfettiButton>
+ *   <ConfettiButton effect="celebration" trigger="hover">Celebrate!</ConfettiButton>
+ */
+import Button from './Button.astro';
+import type { Props as ButtonProps } from './Button.astro';
+import '../../styles/buttons/confetti-button.css';
+
+interface Props extends Omit<ButtonProps, 'className'> {
+  effect?: 'confetti' | 'hearts' | 'celebration' | 'mixed';
+  trigger?: 'click' | 'hover';
+  particleCount?: number;
+  spread?: number;
+  class?: string;
+}
+
+const {
+  effect = 'confetti',
+  trigger = 'click',
+  particleCount = 30,
+  spread = 150,
+  class: className = '',
+  ...buttonProps
+} = Astro.props;
+
+// Map effect to particle type
+const particleType = effect === 'celebration' ? 'mixed' : effect;
+
+// Build class with effect variant
+const effectClass = effect === 'hearts' ? 'btn-confetti-hearts' :
+                   effect === 'celebration' ? 'btn-confetti-celebration' :
+                   '';
+const fullClass = `btn-confetti ${effectClass} ${className}`.trim();
+---
+
+<Button
+  {...buttonProps}
+  className={fullClass}
+  data-particle-burst
+  data-particle-type={particleType}
+  data-particle-trigger={trigger}
+  data-particle-count={particleCount}
+  data-particle-spread={spread}
+>
+  <slot />
+</Button>
+
+<script>
+  import { initParticleBurst } from '../../scripts/particle-burst';
+
+  // Initialize on load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initParticleBurst);
+  } else {
+    initParticleBurst();
+  }
+
+  // Support Astro page transitions
+  document.addEventListener('astro:page-load', initParticleBurst);
+</script>

@@ -2,7 +2,7 @@
 import BaseLayout from '../Layouts/BaseLayout.astro';
 import Button from '../components/Button/Button.astro';
 import DownloadSummary from '../components/Checkout/DownloadSummary.astro';
-import InfoNotice from '../components/Checkout/InfoNotice.astro';
+import Badge from '../components/Badge/Badge.astro';
 ---
 
 <BaseLayout
@@ -67,9 +67,17 @@ import InfoNotice from '../components/Checkout/InfoNotice.astro';
                 </label>
               </div>
 
-              <InfoNotice type="info">
-                All resources are completely free. Your email is only used to send download links and optional updates.
-              </InfoNotice>
+              <div class="info-notice">
+                <Badge
+                  type="trust"
+                  label="Info"
+                  icon="info-fill"
+                  iconCollection="interface"
+                  variant="soft"
+                  size="sm"
+                />
+                <span>All resources are completely free. Your email is only used to send download links and optional updates.</span>
+              </div>
 
               <!-- Submit Button -->
               <div class="checkout-actions">
@@ -102,3 +110,17 @@ import InfoNotice from '../components/Checkout/InfoNotice.astro';
   import '../scripts/checkout-form.ts';
 </script>
 
+<style>
+  .info-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: color-mix(in oklch, var(--color-Primary-500) 10%, transparent);
+    border: 1px solid color-mix(in oklch, var(--color-Primary-500) 20%, transparent);
+    border-radius: var(--border-radius-md);
+    margin-top: var(--space-lg);
+    font-size: var(--text-sm);
+    color: var(--color-Text-600);
+  }
+</style>
