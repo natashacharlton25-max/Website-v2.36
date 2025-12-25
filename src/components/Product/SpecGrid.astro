@@ -1,14 +1,16 @@
 ---
 import SpecCard from '../Cards/SpecCard.astro';
+import type { GridLayoutProperties } from '../../Utils/grid-layout';
 
-interface SpecItem {
+interface BaseSpecItem {
   iconName: string; // Icon name (e.g., 'file-pdf-fill' or 'spec-cards/file-pdf-fill')
   label: string;
   value: string;
   variant?: 'primary' | 'secondary' | 'accent';
-  gridColumn?: string;
-  gridRow?: string;
 }
+
+// SpecItem can be base or with grid layout properties
+type SpecItem = BaseSpecItem & Partial<GridLayoutProperties>;
 
 interface Props {
   specs: SpecItem[];

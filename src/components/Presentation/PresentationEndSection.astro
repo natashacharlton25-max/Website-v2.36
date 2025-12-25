@@ -2,10 +2,10 @@
 /**
  * PresentationEndSection - End section for presentations
  * Displays author, linked assets, and recommended content
+ * Now uses unified RelatedGrid component
  */
 import AuthorCard from './AuthorCard.astro';
-import LinkedAssetsGrid from './LinkedAssetsGrid.astro';
-import RecommendedGrid from './RecommendedGrid.astro';
+import RelatedGrid from '../Grids/RelatedGrid.astro';
 import type { ImageMetadata } from 'astro';
 
 interface Author {
@@ -33,6 +33,7 @@ interface Props {
   author?: Author;
   linkedAssets?: LinkedAsset[];
   recommendedItems?: RecommendedItem[];
+  recommendedBasePath?: string;
   customHtml?: string;
   class?: string;
 }
@@ -41,6 +42,7 @@ const {
   author,
   linkedAssets,
   recommendedItems,
+  recommendedBasePath = '/presentations',
   customHtml,
   class: className
 } = Astro.props;
@@ -48,11 +50,21 @@ const {
 const hasContent = author || linkedAssets?.length || recommendedItems?.length || customHtml;
 if (!hasContent) return null;
 
-// Transform recommended items to include basePath
-const recommendedWithPath = recommendedItems?.map(item => ({
-  ...item,
-  basePath: '/presentations'
-}));
+// Format linked assets for RelatedGrid
+const formattedResources = linkedAssets?.map(asset => ({
+  title: asset.title,
+  description: asset.description,
+  url: asset.url,
+  type: asset.type || 'Resource'
+})) || [];
+
+// Format recommended items for RelatedGrid (using image as cardImage)
+const formattedRecommended = recommendedItems?.map(item => ({
+  slug: item.slug,
+  title: item.title,
+  category: item.category,
+  cardImage: item.image
+})) || [];
 ---
 
 <section class:list={['presentation-end', className]} id="end">
@@ -66,12 +78,31 @@ const recommendedWithPath = recommendedItems?.map(item => ({
     />
   )}
 
-  {linkedAssets && linkedAssets.length > 0 && (
-    <LinkedAssetsGrid assets={linkedAssets} />
+  {formattedResources.length > 0 && (
+    <div class="presentation-end__resources">
+      <RelatedGrid
+        items={formattedResources}
+        contentType="resources"
+        title="Related Resources"
+        cardStyle="minimal"
+        background="none"
+        containerSize="4xl"
+      />
+    </div>
   )}
 
-  {recommendedWithPath && recommendedWithPath.length > 0 && (
-    <RecommendedGrid items={recommendedWithPath} />
+  {formattedRecommended.length > 0 && (
+    <div class="presentation-end__recommended">
+      <RelatedGrid
+        items={formattedRecommended}
+        contentType="posts"
+        title="Continue Reading"
+        basePath={recommendedBasePath}
+        cardStyle="vertical"
+        background="none"
+        containerSize="6xl"
+      />
+    </div>
   )}
 
   {customHtml && (

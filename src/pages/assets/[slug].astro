@@ -5,23 +5,13 @@ import Breadcrumbs from '../../components/Navigation/Breadcrumbs.astro';
 import IsotopeImageGallery from '../../components/Product/IsotopeImageGallery.astro';
 import ProductInfo from '../../components/Product/ProductInfo.astro';
 import SpecGrid from '../../components/Product/SpecGrid.astro';
-import RelatedProductsGrid from '../../components/Product/RelatedProductsGrid.astro';
+import RelatedGrid from '../../components/Grids/RelatedGrid.astro';
 import { getCollection } from 'astro:content';
-import { calculateGridLayout, estimateCardDimensions } from '../../utils/grid-layout';
-
-// Helper to get folder slug from entry.id (handles index.md suffix and path separators)
-const getSlug = (id: string) => {
-  const normalized = id.replace(/[\\/]index\.md$/, '');
-  return normalized.split(/[\\/]/).pop() || id;
-};
+import { calculateGridLayout, estimateCardDimensions } from '../../Utils/grid-layout';
+import { getSuggestedContent, getSlugFromId } from '../../Utils/related-content';
 
 // Generate static paths from content collection
 export async function getStaticPaths() {
-  const getSlugFromId = (id: string) => {
-    const normalized = id.replace(/[\\/]index\.md$/, '');
-    return normalized.split(/[\\/]/).pop() || id;
-  };
-
   const assetEntries = await getCollection('assets');
 
   return assetEntries.map(entry => ({
@@ -29,6 +19,9 @@ export async function getStaticPaths() {
     props: { entry }
   }));
 }
+
+// Helper for local slug extraction
+const getSlug = getSlugFromId;
 
 const { entry } = Astro.props;
 const asset = entry.data;
@@ -61,20 +54,23 @@ const product = {
   specifications: asset.specifications,
 };
 
-// Get related products
+// Get related products using smart content matching
+// Priority: tag similarity > same type > latest (fallback)
 const allAssets = await getCollection('assets');
-const relatedProducts = allAssets
-  .filter(a => a.data.type === asset.type && getSlug(a.id) !== slug)
-  .slice(0, 2)
-  .map(a => ({
-    id: getSlug(a.id),
-    name: a.data.name,
-    slug: getSlug(a.id),
-    category: a.data.category,
-    type: a.data.type,
-    description: a.data.description,
-    cardImage: a.data.cardImage,
-  }));
+const relatedEntries = getSuggestedContent(entry, allAssets, {
+  maxItems: 4,
+  getSlug: (item) => getSlugFromId(item.id)
+});
+
+// Format for RelatedGrid
+const relatedProducts = relatedEntries.map(a => ({
+  slug: getSlug(a.id),
+  title: a.data.name,
+  name: a.data.name,
+  description: a.data.description,
+  category: a.data.category,
+  cardImage: a.data.cardImage,
+}));
 
 // Build breadcrumbs
 const breadcrumbs = [
@@ -317,7 +313,18 @@ const specsWithLayout = calculateGridLayout(
   </section>
 
   <!-- Related Products -->
-  <RelatedProductsGrid products={relatedProducts} />
+  {relatedProducts.length > 0 && (
+    <RelatedGrid
+      items={relatedProducts}
+      contentType="products"
+      title="You Might Also Like"
+      basePath="/assets"
+      cardStyle="horizontal"
+      columns="2"
+      background="light"
+      containerSize="7xl"
+    />
+  )}
 </BaseLayout>
 
 <script>

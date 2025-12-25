@@ -25,7 +25,6 @@ export const MAIN_NAV_LINKS: NavLink[] = [
   { text: 'Assets', href: '/assets' },
   { text: 'Insights', href: '/insights' },
   { text: 'Services', href: '/services' },
-  { text: 'Contact', href: '/contact' },
 ];
 
 /**

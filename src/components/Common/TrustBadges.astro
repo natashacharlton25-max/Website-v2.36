@@ -1,5 +1,20 @@
 ---
+/**
+ * TrustBadges - Trust indicator badges using the Badge component
+ *
+ * Uses Phosphor icons from the 'trust' collection
+ * Maps common icon names to their Phosphor equivalents
+ *
+ * Props:
+ * @param badges - Array of badge objects with icon and text
+ * @param variant - Badge variant: 'ghost' (default), 'soft', 'outline', 'fill'
+ * @param size - Badge size: 'sm', 'md' (default), 'lg'
+ * @param layout - Layout direction: 'column' (default), 'row'
+ */
 import Badge from '../Badge/Badge.astro';
+
+type BadgeVariant = 'fill' | 'outline' | 'soft' | 'ghost';
+type BadgeSize = 'sm' | 'md' | 'lg';
 
 interface TrustBadge {
   icon: string;
@@ -8,80 +23,96 @@ interface TrustBadge {
 
 interface Props {
   badges?: TrustBadge[];
-  useIconBadges?: boolean; // If true, renders icons as Badge components
+  variant?: BadgeVariant;
+  size?: BadgeSize;
+  layout?: 'column' | 'row';
 }
 
+// Map common icon names to Phosphor fill icons in trust collection
+const iconMap: Record<string, string> = {
+  shield: 'shield-check-fill',
+  mail: 'envelope-fill',
+  check: 'seal-check-fill',
+  lock: 'lock-fill',
+  clock: 'clock-fill',
+  heart: 'heart-fill',
+  star: 'star-fill',
+  verified: 'seal-check-fill',
+  secure: 'lock-key-fill',
+  private: 'eye-slash-fill',
+  fast: 'lightning-fill',
+  quality: 'medal-fill',
+  guarantee: 'certificate-fill',
+  support: 'lifebuoy-fill'
+};
+
 const defaultBadges: TrustBadge[] = [
-  {
-    icon: 'shield',
-    text: 'Secure & Private'
-  },
-  {
-    icon: 'mail',
-    text: 'Instant Delivery'
-  },
-  {
-    icon: 'check',
-    text: 'No Spam Promise'
-  }
+  { icon: 'shield', text: 'Secure & Private' },
+  { icon: 'mail', text: 'Instant Delivery' },
+  { icon: 'check', text: 'No Spam Promise' }
 ];
 
-const { badges = defaultBadges, useIconBadges = false } = Astro.props;
+const {
+  badges = defaultBadges,
+  variant = 'ghost',
+  size = 'md',
+  layout = 'column'
+} = Astro.props;
 
-// SVG icon paths
-const icons = {
-  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-  mail: '<path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>',
-  check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
-  lock: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-  heart: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>'
+// Get Phosphor icon name from map or use as-is if already a fill icon
+const getIconName = (icon: string): string => {
+  return iconMap[icon] || (icon.endsWith('-fill') ? icon : `${icon}-fill`);
 };
 ---
 
-<div class="trust-badges">
+<div class:list={['trust-badges', `trust-badges--${layout}`]}>
   {badges.map((badge) => (
     <div class="trust-badges__item">
-      {useIconBadges ? (
-        <Badge type={badge.icon} label="" />
-      ) : (
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
-        >
-          <Fragment set:html={icons[badge.icon as keyof typeof icons] || icons.check} />
-        </svg>
-      )}
-      <span>{badge.text}</span>
+      <Badge
+        type="trust"
+        label={badge.text}
+        icon={getIconName(badge.icon)}
+        iconCollection="trust"
+        variant={variant}
+        size={size}
+        uppercase={false}
+      />
     </div>
   ))}
 </div>
 
 <style>
+  /* ========== TRUST BADGES LAYOUT ========== */
+  /* Layout */
   .trust-badges {
     display: flex;
-    flex-direction: column;
     gap: var(--space-sm);
-    margin-top: var(--space-xl);
-    padding-top: var(--space-xl);
-    border-top: 1px solid var(--brand-neutral-200);
   }
 
+  /* Box model */
+  .trust-badges {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-xl);
+  }
+
+  /* Visual */
+  .trust-badges {
+    border-top: 1px solid var(--color-Neutral-200);
+  }
+
+  /* ========== LAYOUT MODIFIERS ========== */
+  .trust-badges--column {
+    flex-direction: column;
+  }
+
+  .trust-badges--row {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  /* ========== ELEMENTS ========== */
   .trust-badges__item {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    font-size: var(--text-sm);
-    color: var(--brand-text-muted);
-  }
-
-  .trust-badges__item svg {
-    color: var(--brand-success);
-    flex-shrink: 0;
   }
 </style>
