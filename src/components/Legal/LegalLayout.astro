@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../../Layouts/BaseLayout.astro';
+import { BRAND_CONFIG } from '../../Config/brand';
+import LegalNav from './LegalNav.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  lastUpdated: string;
+  currentSlug: string;
+}
+
+const { title, description, lastUpdated, currentSlug } = Astro.props;
+---
+
+<BaseLayout title={`${title} | ${BRAND_CONFIG.name}`} description={description}>
+  <article class="legal-page">
+    <section class="legal-header section-sm">
+      <div class="container container-prose">
+        <h1 class="legal-title">{title}</h1>
+        <p class="legal-meta">Last updated: {lastUpdated}</p>
+      </div>
+    </section>
+
+    <section class="legal-content section">
+      <div class="container container-prose">
+        <div class="legal-prose">
+          <slot />
+        </div>
+
+        <LegalNav currentSlug={currentSlug} />
+      </div>
+    </section>
+  </article>
+</BaseLayout>

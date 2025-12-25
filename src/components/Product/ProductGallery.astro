@@ -11,79 +11,82 @@ interface Props {
 }
 
 const { mainImage, galleryImages = [], productName, badge, badgeType = 'default' } = Astro.props;
+
+// Combine into single array - use galleryImages if available, otherwise use mainImage
+const allImages = galleryImages && galleryImages.length > 0
+  ? galleryImages
+  : [mainImage];
 ---
 
 <div class="product-gallery">
-  <div class="main-image">
-    <Image
-      src={galleryImages.length > 0 ? galleryImages[0] : mainImage}
-      alt={productName}
-      id="main-product-image"
-    />
-    {badge && (
-      <div class={`product-badge badge-${badgeType}`}>{badge}</div>
-    )}
+  <div class="thumbnail-gallery">
+    {allImages.map((img, index) => (
+      <button
+        class={`thumbnail ${index === 0 ? 'is-active' : 'is-inactive'}`}
+        type="button"
+        aria-label={`View ${productName} image ${index + 1}`}
+      >
+        <Image src={img} alt={`${productName} preview ${index + 1}`} />
+        {index === 0 && badge && (
+          <div class={`product-badge badge-${badgeType}`}>{badge}</div>
+        )}
+      </button>
+    ))}
   </div>
-
-  {galleryImages.length > 0 && (
-    <div class="thumbnail-gallery">
-      {galleryImages.map((img, index) => (
-        <button
-          class={`thumbnail ${index === 0 ? 'active' : ''}`}
-          data-image={img.src}
-          type="button"
-          aria-label={`View ${productName} image ${index + 1}`}
-        >
-          <Image src={img} alt={`${productName} preview ${index + 1}`} />
-        </button>
-      ))}
-    </div>
-  )}
 </div>
-
-<script>
-  // Thumbnail gallery image switching
-  const thumbnails = document.querySelectorAll('.thumbnail');
-  const mainImage = document.getElementById('main-product-image') as HTMLImageElement;
-
-  thumbnails.forEach(thumbnail => {
-    thumbnail.addEventListener('click', () => {
-      // Remove active class from all thumbnails
-      thumbnails.forEach(t => t.classList.remove('active'));
-
-      // Add active class to clicked thumbnail
-      thumbnail.classList.add('active');
-
-      // Get the image source from data attribute
-      const newImageSrc = thumbnail.getAttribute('data-image');
-
-      // Update main image
-      if (mainImage && newImageSrc) {
-        mainImage.src = newImageSrc;
-      }
-    });
-  });
-</script>
 
 <style>
   .product-gallery {
     position: relative;
   }
 
-  .main-image {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 3 / 4;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    background-color: var(--color-Background-100);
-    margin-bottom: var(--space-lg);
+  .thumbnail-gallery {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--space-md);
+    grid-auto-flow: dense;
   }
 
-  .main-image img {
+  .thumbnail {
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: var(--border-radius-md);
+    background-color: var(--color-Background-100);
+    grid-column: span 2;
+    box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.017),
+      0 6.7px 5.3px rgba(0, 0, 0, 0.024), 0 12.5px 10px rgba(0, 0, 0, 0.03),
+      0 22.3px 17.9px rgba(0, 0, 0, 0.036), 0 41.8px 33.4px rgba(0, 0, 0, 0.043),
+      0 100px 80px rgba(0, 0, 0, 0.06);
+    height: 250px;
+    padding: 0;
+    border: 2px solid var(--color-Neutral-200);
+    position: relative;
+  }
+
+  .thumbnail.is-active {
+    grid-row: 1;
+    grid-column: 1 / span 6;
+    height: 450px;
+    order: 0;
+  }
+
+  .thumbnail.is-inactive {
+    grid-column: span 2;
+  }
+
+  .thumbnail img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .thumbnail:hover {
+    border-color: var(--color-Primary-400);
+  }
+
+  .thumbnail:focus-visible {
+    outline: 2px solid var(--color-Primary-600);
+    outline-offset: 2px;
   }
 
   .product-badge {
@@ -98,6 +101,8 @@ const { mainImage, galleryImages = [], productName, badge, badgeType = 'default'
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-radius: var(--border-radius-md);
+    pointer-events: none;
+    z-index: 1;
   }
 
   .badge-worksheet {
@@ -112,40 +117,32 @@ const { mainImage, galleryImages = [], productName, badge, badgeType = 'default'
     background-color: var(--color-Accent-600);
   }
 
-  .thumbnail-gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: var(--space-sm);
+  /* Responsive */
+  @media (max-width: 640px) {
+    .thumbnail-gallery {
+      grid-template-columns: 1fr !important;
+    }
+
+    .thumbnail {
+      grid-column: span 1 !important;
+    }
+
+    .thumbnail.is-active {
+      grid-column: 1 / span 1 !important;
+    }
   }
 
-  .thumbnail {
-    aspect-ratio: 3 / 4;
-    border-radius: var(--border-radius-md);
-    overflow: hidden;
-    background-color: var(--color-Background-100);
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    padding: 0;
-  }
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .thumbnail-gallery {
+      grid-template-columns: repeat(4, 1fr);
+    }
 
-  .thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+    .thumbnail {
+      grid-column: span 2;
+    }
 
-  .thumbnail:hover {
-    border-color: var(--color-Primary-400);
-  }
-
-  .thumbnail.active {
-    border-color: var(--color-Primary-600);
-    box-shadow: 0 0 0 1px var(--color-Primary-600);
-  }
-
-  .thumbnail:focus-visible {
-    outline: 2px solid var(--color-Primary-600);
-    outline-offset: 2px;
+    .thumbnail.is-active {
+      grid-column: 1 / span 4;
+    }
   }
 </style>
