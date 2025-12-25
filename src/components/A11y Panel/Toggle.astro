@@ -1,0 +1,116 @@
+---
+/**
+ * Toggle - Accessible Toggle Switch Component
+ *
+ * A reusable toggle switch with label and description.
+ *
+ * Usage:
+ * <Toggle
+ *   id="my-toggle"
+ *   setting="settingName"
+ *   label="Toggle Label"
+ *   description="What this toggle does"
+ * />
+ */
+
+interface Props {
+  id: string;
+  setting: string;
+  label: string;
+  description?: string;
+  checked?: boolean;
+}
+
+const { id, setting, label, description, checked = false } = Astro.props;
+---
+
+<div class="a11y-setting">
+  <div class="a11y-setting__header">
+    <label for={id} class="a11y-setting__label">{label}</label>
+    {description && <span class="a11y-setting__desc">{description}</span>}
+  </div>
+  <label class="a11y-toggle">
+    <input
+      type="checkbox"
+      id={id}
+      data-setting={setting}
+      checked={checked}
+    >
+    <span class="a11y-toggle__slider"></span>
+  </label>
+</div>
+
+<style>
+  .a11y-setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: var(--space-sm) 0;
+  }
+
+  .a11y-setting__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .a11y-setting__label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-Text-500);
+    cursor: pointer;
+  }
+
+  .a11y-setting__desc {
+    font-size: var(--font-size-sm);
+    color: var(--color-Text-400);
+  }
+
+  .a11y-toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .a11y-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .a11y-toggle__slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--color-Background-300);
+    transition: var(--transition-fast);
+    border-radius: var(--radius-full);
+  }
+
+  .a11y-toggle__slider::before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--color-Background-100);
+    transition: var(--transition-fast);
+    border-radius: var(--radius-full);
+  }
+
+  .a11y-toggle input:checked + .a11y-toggle__slider {
+    background-color: var(--color-Primary-500);
+  }
+
+  .a11y-toggle input:checked + .a11y-toggle__slider::before {
+    transform: translateX(22px);
+  }
+
+  .a11y-toggle input:focus-visible + .a11y-toggle__slider {
+    outline: 2px solid var(--color-Primary-500);
+    outline-offset: 2px;
+  }
+</style>

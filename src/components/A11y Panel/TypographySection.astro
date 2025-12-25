@@ -1,0 +1,179 @@
+---
+/**
+ * TypographySection - Typography Settings Section
+ *
+ * Contains typography accessibility settings like font selection, size, and spacing.
+ *
+ * Usage:
+ * <TypographySection />
+ */
+import Slider from './Slider.astro';
+import ButtonDropdown from '../Button/ButtonDropdown.astro';
+import Icon from '../Icons/Icon.astro';
+
+// Font options for dropdown
+const fontOptions = [
+  { label: 'Default Font', value: 'default' },
+  { label: 'OpenDyslexic (Dyslexia)', value: 'opendyslexic', fontFamily: "'OpenDyslexic', sans-serif" },
+  { label: 'Atkinson Hyperlegible (Low Vision)', value: 'atkinson', fontFamily: "'Atkinson Hyperlegible', sans-serif" },
+  { label: 'Comic Sans MS (Easy Read)', value: 'comic-sans', fontFamily: "'Comic Sans MS', 'Comic Sans', cursive" },
+  { label: 'Verdana (Screen Optimized)', value: 'verdana', fontFamily: "Verdana, Geneva, sans-serif" },
+  { label: 'Arial (Clean & Simple)', value: 'arial', fontFamily: "Arial, Helvetica, sans-serif" },
+  { label: 'Tahoma (High Legibility)', value: 'tahoma', fontFamily: "Tahoma, Geneva, sans-serif" }
+];
+---
+
+<div class="a11y-section">
+  <h3 class="a11y-section__title">Typography</h3>
+
+  <!-- Accessible Font Selector -->
+  <div class="a11y-setting a11y-setting--font">
+    <div class="a11y-setting__header">
+      <label id="a11y-font-label-text" class="a11y-setting__label">Accessible Font</label>
+      <span class="a11y-setting__desc">Choose an easy-to-read font</span>
+    </div>
+    <div class="a11y-font-dropdown" data-setting="fontFamily">
+      <button
+        type="button"
+        class="btn btn-sm a11y-font-trigger"
+        id="a11y-font-trigger"
+        aria-haspopup="listbox"
+        aria-expanded="false"
+        aria-labelledby="a11y-font-label-text a11y-font-current"
+      >
+        <span id="a11y-font-current">Default Font</span>
+        <Icon name="a11y-panel/arrow-left-fill" size={16} class="a11y-font-chevron" />
+      </button>
+      <ButtonDropdown
+        mode="selection"
+        id="a11y-font-dropdown"
+        name="fontFamily"
+        selectedValue="default"
+        dropdownItems={fontOptions}
+        colorTheme="primary"
+      />
+    </div>
+  </div>
+
+  <Slider
+    id="a11y-font-size"
+    setting="fontSize"
+    label="Font Size"
+    min={50}
+    max={200}
+    step={10}
+    value={100}
+    valueId="font-size-value"
+    showLabels={true}
+    labelSmall="A"
+    labelLarge="A"
+  />
+
+  <Slider
+    id="a11y-letter-spacing"
+    setting="letterSpacing"
+    label="Letter Spacing"
+    min={0}
+    max={10}
+    step={1}
+    value={0}
+    valueId="letter-spacing-value"
+  />
+
+  <Slider
+    id="a11y-word-spacing"
+    setting="wordSpacing"
+    label="Word Spacing"
+    min={0}
+    max={20}
+    step={2}
+    value={0}
+    valueId="word-spacing-value"
+  />
+
+  <Slider
+    id="a11y-line-height"
+    setting="lineHeight"
+    label="Line Height"
+    min={100}
+    max={200}
+    step={10}
+    value={100}
+    valueId="line-height-value"
+  />
+</div>
+
+<style>
+  .a11y-section {
+    padding: var(--space-md) 0;
+    border-bottom: var(--border-width) solid var(--color-Border-100);
+  }
+
+  .a11y-section:last-child {
+    border-bottom: none;
+  }
+
+  .a11y-section__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-Text-500);
+    margin-bottom: var(--space-sm);
+  }
+
+  .a11y-setting--font {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-sm) 0;
+  }
+
+  .a11y-setting__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .a11y-setting__label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-Text-500);
+  }
+
+  .a11y-setting__desc {
+    font-size: var(--font-size-sm);
+    color: var(--color-Text-400);
+  }
+
+  .a11y-font-dropdown {
+    position: relative;
+  }
+
+  .a11y-font-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-Background-200);
+    border: var(--border-width) solid var(--color-Border-100);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+  }
+
+  .a11y-font-trigger:hover {
+    border-color: var(--color-Primary-300);
+  }
+
+  .a11y-font-trigger:focus-visible {
+    outline: 2px solid var(--color-Primary-500);
+    outline-offset: 2px;
+  }
+
+  .a11y-font-chevron {
+    transition: transform var(--transition-fast);
+  }
+
+  .a11y-font-trigger[aria-expanded="true"] .a11y-font-chevron {
+    transform: rotate(-90deg);
+  }
+</style>
