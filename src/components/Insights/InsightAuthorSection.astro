@@ -1,0 +1,54 @@
+---
+/**
+ * InsightAuthorSection - About the author section for insights
+ * Wraps AuthorCard with section-level styling
+ */
+import AuthorCard from '../Presentation/AuthorCard.astro';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  name: string;
+  photo: ImageMetadata;
+  role?: string;
+  bio: string;
+  class?: string;
+}
+
+const {
+  name,
+  photo,
+  role,
+  bio,
+  class: className
+} = Astro.props;
+---
+
+<section class:list={['insight-author', className]}>
+  <div class="container container-6xl">
+    <AuthorCard
+      name={name}
+      photo={photo}
+      role={role}
+      bio={bio}
+      label="About the Author"
+      variant="default"
+    />
+  </div>
+</section>
+
+<style>
+  /* Layout */
+  .insight-author {
+
+  }
+
+  /* Box model */
+  .insight-author {
+    padding: var(--space-4xl) 0;
+  }
+
+  /* Visual */
+  .insight-author {
+    background: var(--color-Background-50);
+  }
+</style>

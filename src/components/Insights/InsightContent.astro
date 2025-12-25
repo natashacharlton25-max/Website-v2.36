@@ -1,0 +1,113 @@
+---
+/**
+ * InsightContent - Content wrapper for insight/blog posts
+ * Provides consistent typography and spacing for markdown content
+ */
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={['insight-content', className]}>
+  <div class="container container-4xl">
+    <slot />
+  </div>
+</div>
+
+<style>
+  /* Layout */
+  .insight-content {
+
+  }
+
+  /* Box model */
+  .insight-content {
+    padding: var(--space-3xl) 0;
+  }
+
+  /* Visual */
+  .insight-content {
+    background: var(--color-Background-100);
+  }
+
+  /* Global content typography - spacing and layout only */
+  .insight-content :global(h2) {
+    margin-top: var(--space-3xl);
+    margin-bottom: var(--space-xl);
+    /* Typography inherited from h2 */
+  }
+
+  .insight-content :global(h3) {
+    margin-top: var(--space-2xl);
+    margin-bottom: var(--space-lg);
+    /* Typography inherited from h3 */
+  }
+
+  .insight-content :global(p) {
+    margin-bottom: var(--space-lg);
+    /* Typography inherited from p */
+  }
+
+  .insight-content :global(ul),
+  .insight-content :global(ol) {
+    margin-bottom: var(--space-lg);
+    padding-left: var(--space-xl);
+  }
+
+  .insight-content :global(li) {
+    margin-bottom: var(--space-sm);
+    /* Typography inherited from li */
+  }
+
+  .insight-content :global(blockquote) {
+    margin: var(--space-2xl) 0;
+    padding-left: var(--space-xl);
+    border-left: 4px solid var(--color-Primary-500);
+    font-style: italic;
+    color: var(--color-Text-600);
+  }
+
+  .insight-content :global(a) {
+    color: var(--color-Primary-600);
+    text-decoration: underline;
+    transition: color var(--transition-fast);
+  }
+
+  .insight-content :global(a:hover) {
+    color: var(--color-Primary-700);
+  }
+
+  .insight-content :global(strong) {
+    color: var(--color-Text-700);
+  }
+
+  .insight-content :global(img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: var(--space-2xl) auto;
+    border-radius: var(--radius-lg);
+  }
+
+  .insight-content :global(pre) {
+    margin: var(--space-xl) 0;
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    background: var(--color-Neutral-100);
+    overflow-x: auto;
+  }
+
+  .insight-content :global(code) {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    background: var(--color-Neutral-100);
+  }
+
+  .insight-content :global(pre code) {
+    padding: 0;
+    background: transparent;
+  }
+</style>

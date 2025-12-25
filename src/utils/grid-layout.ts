@@ -3,11 +3,10 @@
  * Server-side grid positioning calculations for masonry-style layouts
  */
 
-export interface GridItem {
-  [key: string]: any;
-}
-
-export interface GridItemWithSize extends GridItem {
+/**
+ * Properties added by calculateGridLayout
+ */
+export interface GridLayoutProperties {
   estimatedWidth: number;
   estimatedHeight: number;
   gridColumn: string;
@@ -51,14 +50,15 @@ export function estimateCardDimensions(
 /**
  * Calculate grid positioning for items
  * Only sets column spans - lets CSS Grid's auto-flow dense handle row placement
+ * Returns the original items with added grid layout properties
  */
-export function calculateGridLayout<T extends GridItem>(
+export function calculateGridLayout<T>(
   items: T[],
   getDimensions: (item: T) => { width: number; height: number },
   gridColumns: number = 5,
   minCardWidth: number = 200
-): GridItemWithSize[] {
-  const positionedItems: GridItemWithSize[] = [];
+): (T & GridLayoutProperties)[] {
+  const positionedItems: (T & GridLayoutProperties)[] = [];
 
   items.forEach((item) => {
     const { width, height } = getDimensions(item);

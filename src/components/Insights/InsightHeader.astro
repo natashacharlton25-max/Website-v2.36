@@ -1,0 +1,189 @@
+---
+/**
+ * InsightHeader - Header section for insight/blog posts
+ * Displays category, date, author, title, and description
+ * Supports gradient backgrounds from design tokens
+ */
+import type { ImageMetadata } from 'astro';
+
+type GradientOption =
+  | 'none'
+  | 'primary'
+  | 'primary-soft'
+  | 'primary-light'
+  | 'secondary'
+  | 'secondary-soft'
+  | 'hero'
+  | 'brand-emerge'
+  | 'brand-fade'
+  | 'background-light'
+  | 'background-warm'
+  | 'background-cool'
+  | 'sunset';
+
+interface Props {
+  title: string;
+  description: string;
+  category: string;
+  publishDate: string;
+  authorName: string;
+  heroImage?: ImageMetadata;
+  gradient?: GradientOption;
+  class?: string;
+}
+
+const {
+  title,
+  description,
+  category,
+  publishDate,
+  authorName,
+  heroImage,
+  gradient = 'none',
+  class: className
+} = Astro.props;
+
+const hasGradient = gradient !== 'none';
+const isDarkGradient = ['primary', 'primary-soft', 'secondary', 'secondary-soft', 'hero'].includes(gradient);
+---
+
+<header class:list={[
+  'insight-header',
+  hasGradient && `insight-header--gradient-${gradient}`,
+  isDarkGradient && 'insight-header--dark',
+  className
+]}>
+  <div class="container container-6xl">
+    <div class="insight-header__meta">
+      <span class="insight-header__category">{category}</span>
+      <span class="insight-header__date">{publishDate}</span>
+      <span class="insight-header__author">By {authorName}</span>
+    </div>
+    <h1 class="insight-header__title">{title}</h1>
+    <p class="insight-header__description">{description}</p>
+  </div>
+</header>
+
+{heroImage && (
+  <div class="insight-hero">
+    <img src={heroImage.src} alt={title} />
+  </div>
+)}
+
+<style>
+  /* Layout */
+  .insight-header {
+    text-align: center;
+  }
+
+  .insight-header__meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+  }
+
+  /* Box model */
+  .insight-header {
+    padding: calc(100px + var(--space-3xl)) 0 var(--space-3xl);
+  }
+
+  .insight-header__meta {
+    margin-bottom: var(--space-xl);
+  }
+
+  .insight-header__title {
+    margin-bottom: var(--space-lg);
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    /* Typography inherited from h1 */
+  }
+
+  .insight-header__description {
+    max-width: 700px;
+    margin: 0 auto;
+    font-style: italic;
+    /* Typography inherited from p, size adjusted below */
+  }
+
+  /* Visual - Default */
+  .insight-header {
+    background: var(--color-Background-100);
+  }
+
+  /* Elements */
+  .insight-header__category {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    background: var(--color-Primary-100);
+    color: var(--color-Primary-700);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .insight-header__date,
+  .insight-header__author {
+    color: var(--color-Text-500);
+  }
+
+  /* Gradient Modifiers */
+  .insight-header--gradient-primary { background: var(--gradient-primary); }
+  .insight-header--gradient-primary-soft { background: var(--gradient-primary-soft); }
+  .insight-header--gradient-primary-light { background: var(--gradient-primary-light); }
+  .insight-header--gradient-secondary { background: var(--gradient-secondary); }
+  .insight-header--gradient-secondary-soft { background: var(--gradient-secondary-soft); }
+  .insight-header--gradient-hero { background: var(--gradient-hero); }
+  .insight-header--gradient-brand-emerge { background: var(--gradient-brand-emerge); }
+  .insight-header--gradient-brand-fade { background: var(--gradient-brand-fade); }
+  .insight-header--gradient-background-light { background: var(--gradient-background-light); }
+  .insight-header--gradient-background-warm { background: var(--gradient-background-warm); }
+  .insight-header--gradient-background-cool { background: var(--gradient-background-cool); }
+  .insight-header--gradient-sunset { background: var(--gradient-sunset); }
+
+  /* Dark gradient text adjustments */
+  .insight-header--dark .insight-header__title {
+    color: var(--color-White);
+  }
+
+  .insight-header--dark .insight-header__description {
+    color: var(--color-Neutral-200);
+  }
+
+  .insight-header--dark .insight-header__date,
+  .insight-header--dark .insight-header__author {
+    color: var(--color-Neutral-200);
+  }
+
+  .insight-header--dark .insight-header__category {
+    background: color-mix(in oklch, var(--color-White) 20%, transparent);
+    color: var(--color-White);
+  }
+
+  /* Hero Image */
+  .insight-hero {
+    max-width: 1200px;
+    margin: 0 auto var(--space-4xl);
+    padding: 0 var(--space-xl);
+  }
+
+  .insight-hero img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-2xl);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .insight-header {
+      padding: calc(80px + var(--space-2xl)) 0 var(--space-2xl);
+    }
+
+    .insight-header__meta {
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+  }
+</style>
