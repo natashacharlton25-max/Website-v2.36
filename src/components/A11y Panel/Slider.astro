@@ -1,0 +1,151 @@
+---
+/**
+ * Slider - Accessible Range Slider Component
+ *
+ * A reusable range slider with label and value display.
+ *
+ * Usage:
+ * <Slider
+ *   id="font-size"
+ *   setting="fontSize"
+ *   label="Font Size"
+ *   min={50}
+ *   max={200}
+ *   step={10}
+ *   value={100}
+ *   valueId="font-size-value"
+ * />
+ */
+
+interface Props {
+  id: string;
+  setting: string;
+  label: string;
+  min: number;
+  max: number;
+  step?: number;
+  value?: number;
+  valueId?: string;
+  showLabels?: boolean;
+  labelSmall?: string;
+  labelLarge?: string;
+}
+
+const {
+  id,
+  setting,
+  label,
+  min,
+  max,
+  step = 1,
+  value = min,
+  valueId,
+  showLabels = false,
+  labelSmall = '',
+  labelLarge = ''
+} = Astro.props;
+---
+
+<div class="a11y-setting a11y-setting--slider">
+  <div class="a11y-setting__header">
+    <label for={id} class="a11y-setting__label">{label}</label>
+    {valueId && <span class="a11y-setting__value" id={valueId}></span>}
+  </div>
+  <input
+    type="range"
+    id={id}
+    min={min}
+    max={max}
+    step={step}
+    value={value}
+    data-setting={setting}
+    class="a11y-slider"
+  >
+  {showLabels && (
+    <div class="a11y-slider__labels">
+      <span>{labelSmall}</span>
+      <span style="font-size: 1.5em;">{labelLarge}</span>
+    </div>
+  )}
+</div>
+
+<style>
+  .a11y-setting--slider {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-sm) 0;
+  }
+
+  .a11y-setting__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+  }
+
+  .a11y-setting__label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-Text-500);
+  }
+
+  .a11y-setting__value {
+    font-size: var(--font-size-sm);
+    color: var(--color-Primary-500);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .a11y-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-Background-300);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .a11y-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radius-full);
+    background: var(--color-Primary-500);
+    cursor: pointer;
+    transition: var(--transition-fast);
+  }
+
+  .a11y-slider::-webkit-slider-thumb:hover {
+    background: var(--color-Primary-400);
+    transform: scale(1.1);
+  }
+
+  .a11y-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--color-Primary-500);
+    cursor: pointer;
+    transition: var(--transition-fast);
+  }
+
+  .a11y-slider::-moz-range-thumb:hover {
+    background: var(--color-Primary-400);
+    transform: scale(1.1);
+  }
+
+  .a11y-slider:focus-visible {
+    outline: 2px solid var(--color-Primary-500);
+    outline-offset: 2px;
+  }
+
+  .a11y-slider__labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--color-Text-400);
+    font-size: var(--font-size-sm);
+  }
+</style>

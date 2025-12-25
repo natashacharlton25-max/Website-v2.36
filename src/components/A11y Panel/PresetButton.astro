@@ -1,0 +1,90 @@
+---
+/**
+ * PresetButton - Accessibility Preset Button Component
+ *
+ * A button for quick accessibility presets with icon and description.
+ *
+ * Usage:
+ * <PresetButton
+ *   preset="dyslexia"
+ *   icon="text-aa-fill"
+ *   title="Dyslexia"
+ *   subtitle="Font + spacing"
+ * />
+ */
+import Icon from '../Icons/Icon.astro';
+
+interface Props {
+  preset: string;
+  icon: string;
+  title: string;
+  subtitle: string;
+  iconSize?: number;
+}
+
+const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
+---
+
+<button
+  class="a11y-preset-btn"
+  data-preset={preset}
+  aria-label={`${title} optimized settings`}
+>
+  <Icon name={`a11y-panel/${icon}`} size={iconSize} class="a11y-preset-btn__icon" />
+  <div class="a11y-preset-btn__text">
+    <span class="a11y-preset-btn__title">{title}</span>
+    <span class="a11y-preset-btn__subtitle">{subtitle}</span>
+  </div>
+</button>
+
+<style>
+  .a11y-preset-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-Background-200);
+    border: var(--border-width) solid var(--color-Border-100);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-align: left;
+  }
+
+  .a11y-preset-btn:hover {
+    background: var(--color-Background-300);
+    border-color: var(--color-Primary-300);
+  }
+
+  .a11y-preset-btn:focus-visible {
+    outline: 2px solid var(--color-Primary-500);
+    outline-offset: 2px;
+  }
+
+  .a11y-preset-btn.active {
+    background: var(--color-Primary-100);
+    border-color: var(--color-Primary-500);
+  }
+
+  .a11y-preset-btn__icon {
+    flex-shrink: 0;
+    color: var(--color-Primary-500);
+  }
+
+  .a11y-preset-btn__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+
+  .a11y-preset-btn__title {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-Text-500);
+  }
+
+  .a11y-preset-btn__subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-Text-400);
+  }
+</style>
