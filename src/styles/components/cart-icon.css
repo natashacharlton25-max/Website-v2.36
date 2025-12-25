@@ -1,0 +1,189 @@
+/* =========================================================
+   CART ICON COMPONENT
+   Animated shopping cart icon with Lottie animations
+   BEM-lite naming, CSS design tokens
+   ========================================================= */
+
+.cart-icon {
+  position: relative;
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-md);
+}
+
+.cart-icon__lottie {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter var(--transition-fast);
+}
+
+/* Default state: black icon */
+.cart-icon .cart-icon__lottie {
+  filter: brightness(0);
+  opacity: 0.7;
+}
+
+/* Hover state: slightly darker/more opaque */
+.cart-icon:hover .cart-icon__lottie {
+  filter: brightness(0);
+  opacity: 1;
+}
+
+.cart-icon__lottie svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Static fallback icon - visible by default as fallback, Lottie overlays when loaded */
+.cart-icon__static {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  filter: brightness(0) saturate(100%);
+  opacity: 0.7;
+  transition: filter var(--transition-fast), opacity var(--transition-fast);
+}
+
+/* Hide static when Lottie successfully loads */
+.cart-icon.lottie-loaded .cart-icon__static {
+  display: none !important;
+}
+
+.cart-icon:hover .cart-icon__static {
+  opacity: 1;
+  filter: brightness(0) saturate(100%);
+}
+
+/* Show static icon and hide Lottie when any accessibility setting is enabled */
+body.a11y-reduce-motion .cart-icon__lottie,
+body.a11y-text-only .cart-icon__lottie,
+body.a11y-theme-dark .cart-icon__lottie,
+body.a11y-theme-cream .cart-icon__lottie,
+body.a11y-theme-high-contrast .cart-icon__lottie,
+body.a11y-theme-protanopia .cart-icon__lottie,
+body.a11y-theme-deuteranopia .cart-icon__lottie,
+body.a11y-theme-tritanopia .cart-icon__lottie,
+body.a11y-theme-monochrome .cart-icon__lottie,
+body.a11y-enhanced-focus .cart-icon__lottie {
+  display: none !important;
+}
+
+/* Force show static icon in accessibility modes (override lottie-loaded hiding) */
+body.a11y-reduce-motion .cart-icon__static,
+body.a11y-text-only .cart-icon__static,
+body.a11y-theme-dark .cart-icon__static,
+body.a11y-theme-cream .cart-icon__static,
+body.a11y-theme-high-contrast .cart-icon__static,
+body.a11y-theme-protanopia .cart-icon__static,
+body.a11y-theme-deuteranopia .cart-icon__static,
+body.a11y-theme-tritanopia .cart-icon__static,
+body.a11y-theme-monochrome .cart-icon__static,
+body.a11y-enhanced-focus .cart-icon__static {
+  display: block !important;
+  position: relative !important;
+}
+
+/* ========== CART COUNT BADGE ========== */
+.cart-icon__count {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-80%);
+  background-color: var(--color-Primary-500);
+  color: var(--color-Background-50);
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  font-family: var(--font-body);
+  border-radius: var(--border-radius-full);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.cart-icon__count--visible {
+  opacity: 1;
+}
+
+.cart-icon__count--pulse {
+  animation: cart-icon-pulse 0.4s ease;
+}
+
+@keyframes cart-icon-pulse {
+  0%, 100% {
+    transform: translateY(-80%) scale(1);
+  }
+  50% {
+    transform: translateY(-80%) scale(1.3);
+  }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .cart-icon__lottie {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cart-icon__count {
+    min-width: 16px;
+    height: 16px;
+    font-size: var(--text-xs);
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY OVERRIDES
+   - Static icon uses semantic tokens for visibility
+   - Cart number badge uses proper contrast colors
+   ========================================================= */
+
+/* Any accessibility setting: icon uses text color token */
+body[class*="a11y-"] .cart-icon__static {
+  filter: brightness(0) saturate(100%);
+  opacity: 0.8;
+}
+
+body[class*="a11y-"] .cart-icon:hover .cart-icon__static {
+  opacity: 1;
+}
+
+/* Dark mode & High contrast: white icon for visibility on dark background */
+body.a11y-theme-dark .cart-icon__static,
+body.a11y-theme-high-contrast .cart-icon__static {
+  filter: brightness(0) saturate(100%) invert(1);
+  opacity: 0.9;
+}
+
+body.a11y-theme-dark .cart-icon:hover .cart-icon__static,
+body.a11y-theme-high-contrast .cart-icon:hover .cart-icon__static {
+  opacity: 1;
+}
+
+/* Cart number badge with standard tokens for accessibility */
+body[class*="a11y-"] .cart-icon__count {
+  background-color: var(--color-Primary-500);
+  color: var(--color-Background-50);
+  box-shadow: none;
+}
+
+/* High contrast: strong visible badge */
+body.a11y-theme-high-contrast .cart-icon__count {
+  border: 2px solid var(--color-Text-900);
+}
+
+/* Reduced motion: no pulse animation */
+body.a11y-reduce-motion .cart-icon__count,
+body.a11y-reduce-motion .cart-icon__count--pulse {
+  animation: none;
+}
