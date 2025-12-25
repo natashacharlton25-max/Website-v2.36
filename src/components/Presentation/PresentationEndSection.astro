@@ -1,0 +1,108 @@
+---
+/**
+ * PresentationEndSection - End section for presentations
+ * Displays author, linked assets, and recommended content
+ */
+import AuthorCard from './AuthorCard.astro';
+import LinkedAssetsGrid from './LinkedAssetsGrid.astro';
+import RecommendedGrid from './RecommendedGrid.astro';
+import type { ImageMetadata } from 'astro';
+
+interface Author {
+  name: string;
+  photo: ImageMetadata;
+  role?: string;
+  bio: string;
+}
+
+interface LinkedAsset {
+  title: string;
+  description?: string;
+  url: string;
+  type?: string;
+}
+
+interface RecommendedItem {
+  slug: string;
+  title: string;
+  category: string;
+  image: ImageMetadata;
+}
+
+interface Props {
+  author?: Author;
+  linkedAssets?: LinkedAsset[];
+  recommendedItems?: RecommendedItem[];
+  customHtml?: string;
+  class?: string;
+}
+
+const {
+  author,
+  linkedAssets,
+  recommendedItems,
+  customHtml,
+  class: className
+} = Astro.props;
+
+const hasContent = author || linkedAssets?.length || recommendedItems?.length || customHtml;
+if (!hasContent) return null;
+
+// Transform recommended items to include basePath
+const recommendedWithPath = recommendedItems?.map(item => ({
+  ...item,
+  basePath: '/presentations'
+}));
+---
+
+<section class:list={['presentation-end', className]} id="end">
+  {author && (
+    <AuthorCard
+      name={author.name}
+      photo={author.photo}
+      role={author.role}
+      bio={author.bio}
+      variant="featured"
+    />
+  )}
+
+  {linkedAssets && linkedAssets.length > 0 && (
+    <LinkedAssetsGrid assets={linkedAssets} />
+  )}
+
+  {recommendedWithPath && recommendedWithPath.length > 0 && (
+    <RecommendedGrid items={recommendedWithPath} />
+  )}
+
+  {customHtml && (
+    <div class="presentation-end__custom" set:html={customHtml} />
+  )}
+</section>
+
+<style>
+  /* Layout */
+  .presentation-end {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  /* Box model */
+  .presentation-end {
+    padding: var(--space-4xl) var(--space-xl);
+    gap: var(--space-4xl);
+  }
+
+  /* Visual */
+  .presentation-end {
+    background: var(--color-Background-100);
+  }
+
+  /* Elements */
+  .presentation-end__custom {
+    width: 100%;
+    max-width: 800px;
+  }
+</style>

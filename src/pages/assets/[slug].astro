@@ -2,11 +2,12 @@
 import BaseLayout from '../../Layouts/BaseLayout.astro';
 import ContentSwitcher from '../../components/Switcher/ContentSwitcher.astro';
 import Breadcrumbs from '../../components/Navigation/Breadcrumbs.astro';
-import ProductGallery from '../../components/Product/ProductGallery.astro';
+import IsotopeImageGallery from '../../components/Product/IsotopeImageGallery.astro';
 import ProductInfo from '../../components/Product/ProductInfo.astro';
 import SpecGrid from '../../components/Product/SpecGrid.astro';
 import RelatedProductsGrid from '../../components/Product/RelatedProductsGrid.astro';
 import { getCollection } from 'astro:content';
+import { calculateGridLayout, estimateCardDimensions } from '../../utils/grid-layout';
 
 // Helper to get folder slug from entry.id (handles index.md suffix and path separators)
 const getSlug = (id: string) => {
@@ -118,8 +119,26 @@ const customSpecs = product.specifications && product.specifications.length > 0
     }))
   : [];
 
-// Combine: custom specs first, then defaults
-const specs = [...customSpecs, ...defaultSpecs];
+// Feature specs from markdown (if any)
+const featureSpecs = product.features && product.features.length > 0
+  ? product.features.map((feature: string, index: number) => ({
+      iconName: 'check-circle-fill',
+      label: 'Feature',
+      value: feature,
+      variant: variantCycle[index % 3]
+    }))
+  : [];
+
+// Combine: custom specs first, then features, then defaults
+const specs = [...customSpecs, ...featureSpecs, ...defaultSpecs];
+
+// Calculate grid positions for specs
+const specsWithLayout = calculateGridLayout(
+  specs,
+  (spec) => estimateCardDimensions(spec.label, spec.value),
+  5, // grid columns
+  200 // min card width
+);
 ---
 
 <BaseLayout
@@ -133,7 +152,7 @@ const specs = [...customSpecs, ...defaultSpecs];
     <div class="container container-7xl">
       <div class="product-layout">
         <!-- Left Column: Image Gallery -->
-        <ProductGallery
+        <IsotopeImageGallery
           mainImage={product.cardImage}
           galleryImages={product.galleryImages}
           productName={product.name}
@@ -180,7 +199,7 @@ const specs = [...customSpecs, ...defaultSpecs];
 
           <!-- Specification Tab -->
           <div class="tab-panel" data-panel="specification">
-            <SpecGrid specs={specs} />
+            <SpecGrid specs={specsWithLayout} />
           </div>
 
           <!-- For Individuals Tab -->

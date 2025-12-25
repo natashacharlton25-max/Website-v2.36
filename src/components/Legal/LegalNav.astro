@@ -1,0 +1,64 @@
+---
+import { getCollection } from 'astro:content';
+import Button from '../Button/Button.astro';
+
+interface Props {
+  currentSlug: string;
+}
+
+const { currentSlug } = Astro.props;
+
+// Get all legal pages
+const legalPages = await getCollection('legal');
+
+// Filter out current page and sort by order
+const otherPages = legalPages
+  .filter(page => {
+    const slug = page.id.replace(/\.md$/, '');
+    return slug !== currentSlug;
+  })
+  .sort((a, b) => (a.data.order || 999) - (b.data.order || 999));
+---
+
+<div class="legal-nav">
+  {otherPages.map(page => {
+    const slug = page.id.replace(/\.md$/, '');
+    return (
+      <Button
+        href={`/legal/${slug}`}
+        variant="secondary"
+        className="legal-nav-button"
+      >
+        {page.data.title} →
+      </Button>
+    );
+  })}
+</div>
+
+<style>
+  .legal-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-2xl);
+    border-top: 2px solid var(--color-Neutral-200);
+  }
+
+  @media (min-width: 768px) {
+    .legal-nav {
+      flex-direction: row;
+    }
+  }
+
+  :global(.legal-nav-button) {
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    :global(.legal-nav-button) {
+      width: auto;
+      flex: 1;
+    }
+  }
+</style>

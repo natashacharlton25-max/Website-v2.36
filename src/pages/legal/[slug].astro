@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import LegalLayout from '../../components/Legal/LegalLayout.astro';
+
+export async function getStaticPaths() {
+  const legalPages = await getCollection('legal');
+
+  return legalPages.map(page => {
+    // Remove .md extension from id to get the slug
+    const slug = page.id.replace(/\.md$/, '');
+
+    return {
+      params: { slug },
+      props: { page },
+    };
+  });
+}
+
+const { page } = Astro.props;
+const { Content } = await page.render();
+const currentSlug = page.id.replace(/\.md$/, '');
+---
+
+<LegalLayout
+  title={page.data.title}
+  description={page.data.description}
+  lastUpdated={page.data.lastUpdated}
+  currentSlug={currentSlug}
+>
+  <Content />
+</LegalLayout>

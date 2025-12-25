@@ -3,6 +3,7 @@ import BaseLayout from '../../Layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import Reader from '../../components/Presentation/Reader.astro';
 import ReaderNav from '../../components/Presentation/ReaderNav.astro';
+import PresentationEndSection from '../../components/Presentation/PresentationEndSection.astro';
 import FooterWithMask from '../../components/Footer/FooterWithMask.astro';
 
 // Helper to get folder slug from entry.id
@@ -12,14 +13,9 @@ const getSlug = (id: string) => {
 };
 
 export async function getStaticPaths() {
-  const getSlugFromId = (id: string) => {
-    const normalized = id.replace(/[\\/]index\.md$/, '');
-    return normalized.split(/[\\/]/).pop() || id;
-  };
-
   const presentations = await getCollection('presentations');
   return presentations.map((entry) => ({
-    params: { slug: getSlugFromId(entry.id) },
+    params: { slug: getSlug(entry.id) },
     props: { entry },
   }));
 }
@@ -29,34 +25,39 @@ const presentation = entry.data;
 const currentSlug = getSlug(entry.id);
 
 // Get author data if specified
-const authorSlug = presentation.author;
 let author = null;
-if (authorSlug) {
+if (presentation.author) {
   const allAuthors = await getCollection('authors');
-  const authorEntry = allAuthors.find(a => getSlug(a.id) === authorSlug);
-  author = authorEntry?.data;
+  const authorEntry = allAuthors.find(a => getSlug(a.id) === presentation.author);
+  if (authorEntry) {
+    author = {
+      name: authorEntry.data.name,
+      photo: authorEntry.data.photo,
+      role: authorEntry.data.role,
+      bio: authorEntry.data.bio,
+    };
+  }
 }
 
 // Get recommended presentations (same category, excluding current)
 const allPresentations = await getCollection('presentations');
 const recommendedPresentations = allPresentations
   .filter(p => getSlug(p.id) !== currentSlug && p.data.category === presentation.category)
-  .slice(0, 3);
+  .slice(0, 3)
+  .map(p => ({
+    slug: getSlug(p.id),
+    title: p.data.title,
+    category: p.data.category,
+    image: p.data.cardImage,
+  }));
 
 // Build hero section for Reader
-const heroTitle = presentation.hero?.title || presentation.title;
-const heroDescription = presentation.hero?.description || presentation.description;
-// Handle processed image objects - extract .src property
-const heroImage = (presentation.hero?.image?.src || presentation.cardImage.src) as string;
-const heroCategory = presentation.hero?.showCategory !== false ? presentation.category : undefined;
-const heroDate = presentation.hero?.showDate !== false ? presentation.publishDate : undefined;
-
 const heroSection = {
-  title: heroTitle,
-  description: heroDescription,
-  image: heroImage,
-  category: heroCategory,
-  date: heroDate,
+  title: presentation.hero?.title || presentation.title,
+  description: presentation.hero?.description || presentation.description,
+  image: (presentation.hero?.image?.src || presentation.cardImage.src) as string,
+  category: presentation.hero?.showCategory !== false ? presentation.category : undefined,
+  date: presentation.hero?.showDate !== false ? presentation.publishDate : undefined,
 };
 
 // Transform sections to extract .src from processed image objects
@@ -70,81 +71,10 @@ const transformedSections = presentation.sections.map(section => ({
   imagePosition: section.imagePosition,
 }));
 
-// Build end section HTML
+// Determine what to show in end section
 const showAuthor = presentation.endSection?.showAuthor !== false && author;
 const showRecommended = presentation.endSection?.showRecommended !== false && recommendedPresentations.length > 0;
-const showLinkedAssets = presentation.linkedAssets && presentation.linkedAssets.length > 0;
-
-let endSectionHtml = '<div class="presentation-end">';
-
-// Author bio
-if (showAuthor && author) {
-  const authorPhotoSrc = author.photo.src;
-  const authorName = author.name;
-  const authorRole = author.role || '';
-  const authorBio = author.bio;
-
-  endSectionHtml += '<div class="end-author">';
-  endSectionHtml += '<div class="author-photo">';
-  endSectionHtml += '<img src="' + authorPhotoSrc + '" alt="' + authorName + '" />';
-  endSectionHtml += '</div>';
-  endSectionHtml += '<div class="author-info">';
-  endSectionHtml += '<span class="author-label">Written by</span>';
-  endSectionHtml += '<h3 class="author-name">' + authorName + '</h3>';
-  if (authorRole) {
-    endSectionHtml += '<span class="author-role">' + authorRole + '</span>';
-  }
-  endSectionHtml += '<p class="author-bio">' + authorBio + '</p>';
-  endSectionHtml += '</div>';
-  endSectionHtml += '</div>';
-}
-
-// Linked assets
-if (showLinkedAssets && presentation.linkedAssets) {
-  endSectionHtml += '<div class="end-assets"><h3>Related Resources</h3><div class="assets-grid">';
-  for (const asset of presentation.linkedAssets) {
-    const assetType = asset.type || 'Resource';
-    endSectionHtml += '<a href="' + asset.url + '" class="asset-card">';
-    endSectionHtml += '<span class="asset-type">' + assetType + '</span>';
-    endSectionHtml += '<h4>' + asset.title + '</h4>';
-    if (asset.description) {
-      endSectionHtml += '<p>' + asset.description + '</p>';
-    }
-    endSectionHtml += '</a>';
-  }
-  endSectionHtml += '</div></div>';
-}
-
-// Recommended presentations
-if (showRecommended) {
-  endSectionHtml += '<div class="end-recommended"><h3>Continue Reading</h3><div class="recommended-grid">';
-  for (const rec of recommendedPresentations) {
-    const recSlug = getSlug(rec.id);
-    const recTitle = rec.data.title;
-    const recCategory = rec.data.category;
-    const recImage = rec.data.cardImage.src;
-    endSectionHtml += '<a href="/presentations/' + recSlug + '" class="recommended-card">';
-    endSectionHtml += '<div class="recommended-image">';
-    endSectionHtml += '<img src="' + recImage + '" alt="' + recTitle + '" />';
-    endSectionHtml += '</div>';
-    endSectionHtml += '<div class="recommended-content">';
-    endSectionHtml += '<span class="recommended-category">' + recCategory + '</span>';
-    endSectionHtml += '<h4>' + recTitle + '</h4>';
-    endSectionHtml += '</div>';
-    endSectionHtml += '</a>';
-  }
-  endSectionHtml += '</div></div>';
-}
-
-// Custom HTML
-if (presentation.endSection?.customHtml) {
-  endSectionHtml += presentation.endSection.customHtml;
-}
-
-endSectionHtml += '</div>';
-
-const hasEndContent = showAuthor || showRecommended || showLinkedAssets || presentation.endSection?.customHtml;
-const endSection = hasEndContent ? { html: endSectionHtml } : undefined;
+const hasEndContent = showAuthor || showRecommended || presentation.linkedAssets?.length || presentation.endSection?.customHtml;
 
 // Build nav sections for ReaderNav
 const navSections = [
@@ -152,7 +82,7 @@ const navSections = [
   ...presentation.sections.map(s => ({ id: s.id, title: s.title })),
 ];
 
-if (endSection) {
+if (hasEndContent) {
   navSections.push({ id: 'end', title: 'Continue' });
 }
 ---
@@ -166,8 +96,16 @@ if (endSection) {
   <Reader
     sections={transformedSections}
     heroSection={heroSection}
-    endSection={endSection}
   />
+
+  {hasEndContent && (
+    <PresentationEndSection
+      author={showAuthor ? author : undefined}
+      linkedAssets={presentation.linkedAssets}
+      recommendedItems={showRecommended ? recommendedPresentations : undefined}
+      customHtml={presentation.endSection?.customHtml}
+    />
+  )}
 
   <ReaderNav
     sections={navSections}
@@ -179,202 +117,3 @@ if (endSection) {
 
   <FooterWithMask backgroundImage="/Footer/Footer-Reveal.png" />
 </BaseLayout>
-
-<style>
-  /* End section styling */
-  .presentation-end {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: var(--space-4xl) var(--space-xl);
-    background: var(--color-Background-100);
-    gap: var(--space-4xl);
-  }
-
-  /* Author section */
-  .end-author {
-    display: flex;
-    gap: var(--space-xl);
-    align-items: center;
-    max-width: 600px;
-    padding: var(--space-2xl);
-    background: white;
-    border-radius: var(--border-radius-xl);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  }
-
-  .author-photo {
-    flex-shrink: 0;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    overflow: hidden;
-  }
-
-  .author-photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .author-info {
-    flex: 1;
-  }
-
-  .author-label {
-    font-size: var(--text-xs);
-    color: var(--color-Text-400);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .author-name {
-    font-family: var(--font-heading);
-    font-size: var(--text-xl);
-    font-weight: var(--font-semibold);
-    color: var(--color-Text-700);
-    margin: var(--space-xs) 0;
-  }
-
-  .author-role {
-    font-size: var(--text-sm);
-    color: var(--color-Primary-600);
-    display: block;
-    margin-bottom: var(--space-sm);
-  }
-
-  .author-bio {
-    font-size: var(--text-sm);
-    color: var(--color-Text-500);
-    line-height: 1.6;
-  }
-
-  /* Linked assets */
-  .end-assets {
-    width: 100%;
-    max-width: 800px;
-    text-align: center;
-  }
-
-  .end-assets h3 {
-    font-family: var(--font-heading);
-    font-size: var(--text-2xl);
-    color: var(--color-Text-700);
-    margin-bottom: var(--space-xl);
-  }
-
-  .assets-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--space-lg);
-  }
-
-  .asset-card {
-    padding: var(--space-xl);
-    background: white;
-    border-radius: var(--border-radius-lg);
-    text-decoration: none;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-
-  .asset-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-
-  .asset-type {
-    font-size: var(--text-xs);
-    color: var(--color-Primary-600);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .asset-card h4 {
-    font-size: var(--text-lg);
-    color: var(--color-Text-700);
-    margin: var(--space-sm) 0;
-  }
-
-  .asset-card p {
-    font-size: var(--text-sm);
-    color: var(--color-Text-500);
-  }
-
-  /* Recommended presentations */
-  .end-recommended {
-    width: 100%;
-    max-width: 1000px;
-    text-align: center;
-  }
-
-  .end-recommended h3 {
-    font-family: var(--font-heading);
-    font-size: var(--text-2xl);
-    color: var(--color-Text-700);
-    margin-bottom: var(--space-xl);
-  }
-
-  .recommended-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-lg);
-  }
-
-  .recommended-card {
-    background: white;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    text-decoration: none;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-
-  .recommended-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-
-  .recommended-image {
-    aspect-ratio: 16/9;
-    overflow: hidden;
-  }
-
-  .recommended-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .recommended-content {
-    padding: var(--space-lg);
-  }
-
-  .recommended-category {
-    font-size: var(--text-xs);
-    color: var(--color-Primary-600);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .recommended-content h4 {
-    font-size: var(--text-lg);
-    color: var(--color-Text-700);
-    margin-top: var(--space-xs);
-  }
-
-  /* Responsive */
-  @media (max-width: 640px) {
-    .end-author {
-      flex-direction: column;
-      text-align: center;
-    }
-
-    .author-photo {
-      width: 80px;
-      height: 80px;
-    }
-  }
-</style>

@@ -6,6 +6,8 @@ interface SpecItem {
   label: string;
   value: string;
   variant?: 'primary' | 'secondary' | 'accent';
+  gridColumn?: string;
+  gridRow?: string;
 }
 
 interface Props {
@@ -17,32 +19,44 @@ const { specs } = Astro.props;
 
 <div class="spec-masonry">
   {specs.map(spec => (
-    <SpecCard
-      iconName={spec.iconName}
-      label={spec.label}
-      value={spec.value}
-      variant={spec.variant}
-    />
+    <div class="spec-wrapper" style={spec.gridColumn ? `grid-column: ${spec.gridColumn};` : ''}>
+      <SpecCard
+        iconName={spec.iconName}
+        label={spec.label}
+        value={spec.value}
+        variant={spec.variant}
+      />
+    </div>
   ))}
 </div>
 
 <style>
   .spec-masonry {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: var(--space-md);
     margin-top: var(--space-xl);
+    grid-template-columns: repeat(5, 1fr);
+    grid-auto-rows: 1fr;
+    grid-auto-flow: dense;
+  }
+
+  .spec-wrapper {
+    display: flex;
+    height: 100%;
+  }
+
+  .spec-wrapper :global(.spec-card) {
+    flex: 1;
+    height: 100%;
   }
 
   @media (max-width: 640px) {
     .spec-masonry {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr !important;
     }
   }
 
   @media (min-width: 641px) and (max-width: 1024px) {
-    .spec-masonry {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    /* JS will calculate columns based on viewport */
   }
 </style>
