@@ -68,7 +68,7 @@ body.a11y-theme-dark {
   --color-BackgroundDark-700: oklch(0.11 0.015 260);
   --color-BackgroundDark-800: oklch(0.095 0.012 260);
   --color-BackgroundDark-900: oklch(0.08 0.010 260);
-  --color-BackgroundDark-950: oklch(0.065 0.010 260);
+  --color-Background-900: oklch(0.065 0.010 260);
 
   /* Text (high readability on dark) */
   --color-Text-300: oklch(0.92 0.01 260);
@@ -144,7 +144,7 @@ body.a11y-theme-cream {
   --color-BackgroundDark-700: oklch(0.34 0.04 42);
   --color-BackgroundDark-800: oklch(0.28 0.03 40);
   --color-BackgroundDark-900: oklch(0.22 0.03 35);
-  --color-BackgroundDark-950: oklch(0.18 0.02 30);
+  --color-Background-900: oklch(0.18 0.02 30);
 
   /* Text (warm dark brown) */
   --color-Text-300: oklch(0.36 0.03 40);
