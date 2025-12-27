@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import Button from '../Button/Button.astro';
+import Icon from '../Icons/Icon.astro';
 
 interface Slide {
   id: string;
@@ -21,12 +22,12 @@ interface Props {
 const { title, subtitle, titleImage, slides, slideImages } = Astro.props;
 ---
 
-<section class="who-slider">
+<section class="who-slider section">
   <div class="who-slider__wrapper">
     <div class="who-slider__track js-who-slider">
       <!-- Slide 1: Title Card -->
       <div class="who-slider__slide">
-        <div class="who-slider__title-card">
+        <div class="card who-slider__title-card">
           <div class="who-slider__title-image">
             <Image src={titleImage} alt="Contemplative figure looking toward hope" loading="lazy" />
           </div>
@@ -43,7 +44,7 @@ const { title, subtitle, titleImage, slides, slideImages } = Astro.props;
       <!-- Content Slides -->
       {slides.map((slide, index) => (
         <div class="who-slider__slide">
-          <div class="who-slider__card">
+          <div class="card who-slider__card">
             <div class="who-slider__card-image">
               <Image src={slideImages[index]} alt={slide.imageAlt} loading="lazy" />
             </div>
@@ -51,8 +52,12 @@ const { title, subtitle, titleImage, slides, slideImages } = Astro.props;
               <h3 class="who-slider__card-title">{slide.title}</h3>
               <p class="who-slider__card-text">{slide.content}</p>
               <div class="who-slider__card-nav">
-                <button class="who-slider__nav-btn js-who-prev" aria-label="Previous slide">&lt;</button>
-                <button class="who-slider__nav-btn js-who-next" aria-label="Next slide">&gt;</button>
+                <Button variant="primary" shape="square" ariaLabel="Previous slide" className="who-slider__nav-btn js-who-prev">
+                  <Icon slot="icon" name="caret-left-fill" size={20} />
+                </Button>
+                <Button variant="primary" shape="square" ariaLabel="Next slide" className="who-slider__nav-btn js-who-next">
+                  <Icon slot="icon" name="caret-right-fill" size={20} />
+                </Button>
               </div>
             </div>
           </div>
@@ -61,16 +66,22 @@ const { title, subtitle, titleImage, slides, slideImages } = Astro.props;
     </div>
 
     <!-- Slider Navigation -->
-    <button class="who-slider__controls who-slider__controls--prev js-who-prev" aria-label="Previous slide">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="15 18 9 12 15 6"/>
-      </svg>
-    </button>
-    <button class="who-slider__controls who-slider__controls--next js-who-next" aria-label="Next slide">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="9 18 15 12 9 6"/>
-      </svg>
-    </button>
+    <Button
+      variant="primary"
+      shape="square"
+      ariaLabel="Previous slide"
+      className="who-slider__controls who-slider__controls--prev js-who-prev"
+    >
+      <Icon slot="icon" name="caret-left-fill" size={24} />
+    </Button>
+    <Button
+      variant="primary"
+      shape="square"
+      ariaLabel="Next slide"
+      className="who-slider__controls who-slider__controls--next js-who-next"
+    >
+      <Icon slot="icon" name="caret-right-fill" size={24} />
+    </Button>
 
     <!-- Slider Indicators -->
     <div class="who-slider__indicators">
