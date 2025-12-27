@@ -1,0 +1,56 @@
+/* =========================================================
+   FOOTER MASK COMPONENT
+   Interactive canvas footer with proximity mask effect
+   ========================================================= */
+
+/* ========== CANVAS WRAPPER ========== */
+.footer-mask {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  min-height: 600px;
+  transition: min-height var(--transition-base);
+}
+
+/* ========== CANVAS ELEMENT ========== */
+.footer-mask__canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: var(--z-base);
+}
+
+/* ========== FOOTER CONTENT OVERLAY ========== */
+.footer-mask__content {
+  position: relative;
+  z-index: calc(var(--z-base) + 10);
+  pointer-events: none;
+}
+
+/* Re-enable pointer events for interactive elements */
+.footer-mask__content a,
+.footer-mask__content button {
+  pointer-events: auto;
+}
+
+/* Make footer background transparent to show canvas */
+.footer-mask__content .footer {
+  background-color: transparent;
+}
+
+/* Add text shadow to improve readability over canvas */
+.footer-mask__content .footer__brand-name,
+.footer-mask__content .footer__description,
+.footer-mask__content .footer__copyright {
+  text-shadow: var(--space-xs) var(--space-xs) var(--space-md) var(--color-Background-50);
+}
+
+/* ========== REDUCED MOTION FALLBACK ========== */
+@media (prefers-reduced-motion: reduce) {
+  .footer-mask__canvas {
+    display: none;
+  }
+}

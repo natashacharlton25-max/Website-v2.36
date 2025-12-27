@@ -7,9 +7,10 @@
  * - content: Array of text paragraphs or slot content
  * - image: Image import (ImageMetadata) or URL string
  * - imageAlt: Image alt text
- * - imagePosition?: 'left' | 'right'
+ * - imagePosition?: 'left' | 'right' (also sets img--left or img--right class)
  * - ctaText?: CTA button text
  * - ctaHref?: CTA button link
+ * - sectionId?: Unique ID for targeting specific instances in page CSS
  */
 
 import { Image } from 'astro:assets';
@@ -24,6 +25,7 @@ export interface Props {
   imagePosition?: 'left' | 'right';
   ctaText?: string;
   ctaHref?: string;
+  sectionId?: string;
 }
 
 const {
@@ -33,21 +35,22 @@ const {
   imageAlt,
   imagePosition = 'left',
   ctaText,
-  ctaHref
+  ctaHref,
+  sectionId
 } = Astro.props;
 
 const isImageMetadata = typeof image !== 'string';
 ---
 
-<section class="image-text-section section">
-  <div class="container container-7xl">
+<section id={sectionId} class="image-text-section section">
+  <div class="container">
     <div class={`image-text-section__layout ${imagePosition === 'right' ? 'image-text-section__layout--reverse' : ''}`}>
       <!-- Image -->
       <div class="image-text-section__image">
         {isImageMetadata ? (
-          <Image src={image as ImageMetadata} alt={imageAlt} />
+          <Image src={image as ImageMetadata} alt={imageAlt} class="img-default img-cover" />
         ) : (
-          <img src={image as string} alt={imageAlt} />
+          <img src={image as string} alt={imageAlt} class="img-default img-cover" />
         )}
       </div>
 
@@ -58,7 +61,7 @@ const isImageMetadata = typeof image !== 'string';
         {content.length > 0 && (
           <div class="image-text-section__body">
             {content.map(paragraph => (
-              <p>{paragraph}</p>
+              <p set:html={paragraph}></p>
             ))}
           </div>
         )}
@@ -72,140 +75,4 @@ const isImageMetadata = typeof image !== 'string';
     </div>
   </div>
 </section>
-
-<style>
-  .image-text-section {
-    padding: var(--space-4xl) 0;
-    padding-top: var(--space-5xl);
-    position: relative;
-    z-index: 1;
-  }
-
-  .image-text-section__layout {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3xl);
-    align-items: center;
-  }
-
-  .image-text-section__image {
-    width: 100%;
-    max-width: 500px;
-    aspect-ratio: 1;
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    transition: box-shadow var(--transition-base), transform var(--transition-base);
-  }
-
-  .image-text-section__image:hover {
-    box-shadow: var(--shadow-xl);
-    transform: scale(1.02);
-  }
-
-  .image-text-section__image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .image-text-section__content {
-    flex: 1 1 70%;
-  }
-
-  .image-text-section__title {
-    font-size: var(--text-4xl);
-    font-weight: var(--font-bold);
-    margin-bottom: var(--space-xl);
-    color: var(--color-Text-700);
-    font-family: var(--font-heading);
-  }
-
-  .image-text-section__body {
-    margin-bottom: var(--space-xl);
-  }
-
-  .image-text-section__body p {
-    font-size: var(--text-xl);
-    color: var(--color-Text-500);
-    line-height: var(--leading-relaxed);
-    margin-bottom: var(--space-lg);
-    font-weight: var(--font-medium);
-    font-family: var(--font-body);
-  }
-
-  .image-text-section__body p:last-child {
-    margin-bottom: 0;
-  }
-
-  @media (max-width: 767px) {
-    .image-text-section {
-      padding: var(--space-3xl) 0;
-    }
-  }
-
-  @media (min-width: 768px) {
-    .image-text-section__layout {
-      flex-direction: row;
-    }
-
-    .image-text-section__layout--reverse {
-      flex-direction: row-reverse;
-    }
-
-    .image-text-section__image {
-      flex: 0 0 30%;
-      max-width: 350px;
-    }
-
-    .image-text-section__title {
-      font-size: var(--text-5xl);
-    }
-  }
-
-  @media (max-width: 250px) {
-    .image-text-section {
-      padding: var(--space-2xl) 0.25rem;
-      padding-top: var(--space-3xl);
-    }
-
-    .image-text-section__content {
-      text-align: center;
-    }
-
-    .image-text-section__title {
-      font-size: var(--text-xl);
-      margin-bottom: var(--space-md);
-    }
-
-    .image-text-section__body p {
-      font-size: var(--text-base);
-      line-height: var(--leading-relaxed);
-      margin-bottom: var(--space-sm);
-    }
-
-    .image-text-section__image {
-      max-width: 180px;
-    }
-  }
-
-  @media (max-width: 210px) {
-    .image-text-section {
-      padding: var(--space-lg) 0.125rem;
-      padding-top: var(--space-2xl);
-    }
-
-    .image-text-section__title {
-      font-size: var(--text-lg);
-    }
-
-    .image-text-section__body p {
-      font-size: var(--text-sm);
-    }
-
-    .image-text-section__image {
-      max-width: 140px;
-    }
-  }
-</style>
+<!-- Styles in: src/styles/components/image-text-section.css -->

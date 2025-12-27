@@ -21,6 +21,11 @@
 @import './components/announcement-ticker.css'; /* Scrolling announcement ticker */
 @import './components/product-gallery.css'; /* Product thumbnail gallery */
 @import './components/scroll-color-background.css'; /* Scroll-triggered background colors */
+@import './components/image-text-section.css'; /* Image + text section component */
+@import './components/pillars-section.css';    /* Pillars/features grid component */
+@import './components/cta-section.css';        /* Call-to-action section component */
+@import './components/footer-mask.css';        /* Footer with canvas mask effect */
+@import './pages/home.css';           /* Home page styles */
 @import './pages/assets.css';         /* Assets page styles */
 @import './pages/asset-detail.css';   /* Asset detail page styles */
 @import './pages/insights.css';       /* Insights page styles */
@@ -61,7 +66,7 @@ html {
 body {
   font-family: var(--font-body);
   font-weight: var(--font-medium);  /* Medium (500) for body text - better readability */
-  color: var(--color-Text-700);
+  color: var(--color-Text-800);
   background-color: var(--page-bg, var(--color-Background-50));
   line-height: var(--leading-normal);
   /* Enable smooth transitions for scroll-triggered color changes */
@@ -92,10 +97,11 @@ img, picture, video, canvas, svg {
 /* Prevent long words from breaking layout */
 p, h1, h2, h3, h4, h5, h6 {
   overflow-wrap: break-word;
+ 
 }
 
-.section {
-  padding: var(--space-4xl) var(--space-md);
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 /* Hide native scrollbar (use with CustomScrollbar component) */
@@ -132,8 +138,8 @@ html:has([data-scrollbar])::-webkit-scrollbar {
 
 h1 {
   font-family: var(--font-heading);
-  font-size: clamp(2rem, 5vw + 1rem, 3.75rem);
-  font-weight: var(--font-bold);
+  font-size: var(--text-7xl);
+  font-weight: var(--font-extra-bold);
   line-height: var(--leading-tight);
   color: var(--color-Primary-700);
   margin-bottom: var(--space-md);
@@ -141,19 +147,19 @@ h1 {
 
 h2 {
   font-family: var(--font-heading);
-  font-size: clamp(1.5rem, 3vw + 0.5rem, 2.5rem);
+  font-size: var(--text-5xl);
   font-weight: var(--font-semibold);
   line-height: var(--leading-tight);
-  color: var(--color-Text-700);
+  color: var(--color-Primary-500);
   margin-bottom: var(--space-md);
 }
 
 h3 {
   font-family: var(--font-heading);
-  font-size: var(--text-xl);
+  font-size: var(--text-4xl);
   font-weight: var(--font-semibold);
   line-height: var(--leading-snug);
-  color: var(--color-Text-700);
+  color: var(--color-Primary-700);
   margin-bottom: var(--space-md);
 }
 
@@ -186,7 +192,7 @@ h6 {
 
 p {
   font-family: var(--font-body);
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
   line-height: var(--leading-relaxed);
   color: var(--color-Text-600);
   margin-bottom: var(--space-md);
@@ -309,7 +315,7 @@ a:hover:not(.btn) {
 /* ========== SECTIONS ========== */
 
 .section {
-  padding: var(--space-3xl) 0;
+  padding: var(--space-7xl) 0;
 }
 
 .section-sm {
@@ -320,12 +326,7 @@ a:hover:not(.btn) {
   padding: var(--space-4xl) 0;
 }
 
-/* Tablet and up */
-@media (min-width: 768px) {
-  .section {
-    padding: var(--space-4xl) 0;
-  }
-}
+
 
 /* ========== IMAGES & SVG ========== */
 
@@ -359,6 +360,45 @@ a:hover:not(.btn) {
 .img-radius-md { border-radius: var(--img-radius); }
 .img-radius-lg { border-radius: var(--img-radius-lg); }
 .img-radius-full { border-radius: var(--img-radius-full); }
+
+/* Width variants */
+.img-w-xs { width: var(--img-width-xs); }
+.img-w-sm { width: var(--img-width-sm); }
+.img-w-md { width: var(--img-width-md); }
+.img-w-lg { width: var(--img-width-lg); }
+.img-w-xl { width: var(--img-width-xl); }
+.img-w-2xl { width: var(--img-width-2xl); }
+.img-w-3xl { width: var(--img-width-3xl); }
+
+/* Height variants */
+.img-h-xs { height: var(--img-height-xs); }
+.img-h-sm { height: var(--img-height-sm); }
+.img-h-md { height: var(--img-height-md); }
+.img-h-lg { height: var(--img-height-lg); }
+.img-h-xl { height: var(--img-height-xl); }
+.img-h-2xl { height: var(--img-height-2xl); }
+.img-h-3xl { height: var(--img-height-3xl); }
+
+/* Square sizes (width & height) */
+.img-sq-xs { width: var(--img-width-xs); height: var(--img-height-xs); }
+.img-sq-sm { width: var(--img-width-sm); height: var(--img-height-sm); }
+.img-sq-md { width: var(--img-width-md); height: var(--img-height-md); }
+.img-sq-lg { width: var(--img-width-lg); height: var(--img-height-lg); }
+.img-sq-xl { width: var(--img-width-xl); height: var(--img-height-xl); }
+.img-sq-2xl { width: var(--img-width-2xl); height: var(--img-height-2xl); }
+.img-sq-3xl { width: var(--img-width-3xl); height: var(--img-height-3xl); }
+
+/* Tall/Portrait sizes (narrow width, tall height) */
+.img-tall-sm { width: var(--img-width-sm); height: var(--img-height-lg); }
+.img-tall-md { width: var(--img-width-md); height: var(--img-height-xl); }
+.img-tall-lg { width: var(--img-width-lg); height: var(--img-height-2xl); }
+.img-tall-xl { width: var(--img-width-xl); height: var(--img-height-3xl); }
+
+/* Wide/Landscape sizes (wide width, short height) */
+.img-wide-sm { width: var(--img-width-lg); height: var(--img-height-sm); }
+.img-wide-md { width: var(--img-width-xl); height: var(--img-height-md); }
+.img-wide-lg { width: var(--img-width-2xl); height: var(--img-height-lg); }
+.img-wide-xl { width: var(--img-width-3xl); height: var(--img-height-xl); }
 
 /* Shadow variants */
 .img-shadow-none { box-shadow: none; }
