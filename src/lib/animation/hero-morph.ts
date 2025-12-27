@@ -99,6 +99,10 @@ export async function initHeroMorph() {
     // Change text while completely invisible
     textElement.textContent = text;
 
+    // Toggle brand class for "Walking With A Smile"
+    const isBrandText = text === "Walking With A Smile";
+    textElement.classList.toggle('hero-morph__brand', isBrandText);
+
     // Set starting state for fade in - text is invisible and blurred
     gsap.set(textElement, { opacity: 0, filter: 'blur(20px)' });
 
@@ -622,6 +626,9 @@ export async function initHeroMorph() {
 
   // Start the animation - show initial text immediately (no fade)
   textElement.textContent = sequenceData[0].text;
+  // Apply brand class if initial text is the brand name
+  const isInitialBrand = sequenceData[0].text === "Walking With A Smile";
+  textElement.classList.toggle('hero-morph__brand', isInitialBrand);
   gsap.set(textElement, { opacity: 1, filter: 'blur(0px)' });
   await gsap.to({}, { duration: CONFIG.textHold });
   morphToNext();
