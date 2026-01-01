@@ -13,10 +13,10 @@ const { title, image, imageAlt, content } = Astro.props;
 ---
 
 <section class="story">
-  <div class="container container-6xl">
+  <div class="container">
     <div class="story__content">
       <!-- Image Card with Title -->
-      <div class="story__image-card">
+      <div class="img-wide-xl story__image-card">
         <Image src={image} alt={imageAlt} loading="lazy" />
         <div class="story__image-overlay">
           <h2 class="story__image-title">{title}</h2>
@@ -34,10 +34,6 @@ const { title, image, imageAlt, content } = Astro.props;
 </section>
 
 <style>
-  .story {
-    padding: var(--space-5xl) 0;
-  }
-
   .story__content {
     max-width: 1400px;
     text-align: left;
@@ -45,40 +41,34 @@ const { title, image, imageAlt, content } = Astro.props;
 
   .story__image-card {
     position: relative;
-    width: 100%;
-    margin-bottom: var(--space-2xl);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: var(--shadow-xl);
+    margin-bottom: var(--space-2xl);
+    width: 100%;
+    aspect-ratio: 3 / 1;
   }
 
   .story__image-card img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
     display: block;
   }
 
   .story__image-overlay {
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: flex-end;
-    padding: var(--space-2xl);
+    padding: var(--space-xl);
+    background: linear-gradient(transparent, rgba(0,0,0,0.5));
   }
 
   .story__image-title {
-    font-size: var(--text-4xl);
-    font-weight: var(--font-extrabold);
-    color: var(--color-Text-700);
-    font-family: var(--font-heading);
+    color: var(--color-Background-50);
     margin: 0;
-    text-shadow:
-      0 0 20px rgba(255, 255, 255, 0.8),
-      0 0 40px rgba(255, 255, 255, 0.6),
-      0 2px 4px rgba(0, 0, 0, 0.3);
+    font-size: var(--text-7xl);
+    font-weight: var(--font-bold);
   }
 
   .story__text {
@@ -97,64 +87,4 @@ const { title, image, imageAlt, content } = Astro.props;
     margin-bottom: 0;
   }
 
-  @media (min-width: 1024px) {
-    .story__image-title {
-      font-size: var(--text-5xl);
-    }
-  }
-
-  @media (max-width: 767px) {
-    .story {
-      padding: var(--space-3xl) 0;
-    }
-
-    .story__image-title {
-      font-size: var(--text-3xl);
-    }
-
-    .story__image-overlay {
-      padding: var(--space-lg);
-    }
-  }
-
-  @media (max-width: 250px) {
-    .story {
-      padding: var(--space-2xl) 0.25rem;
-    }
-
-    .story__image-card {
-      margin-bottom: var(--space-lg);
-    }
-
-    .story__image-title {
-      font-size: var(--text-xl);
-    }
-
-    .story__image-overlay {
-      padding: var(--space-md);
-    }
-
-    .story__content,
-    .story__text {
-      text-align: center;
-    }
-
-    .story__text p {
-      font-size: var(--text-base);
-    }
-  }
-
-  @media (max-width: 210px) {
-    .story {
-      padding: var(--space-lg) 0.125rem;
-    }
-
-    .story__text p {
-      font-size: var(--text-sm);
-    }
-  }
-
-  :global(body.a11y-theme-dark) .story__image-title {
-    color: var(--a11y-dark-text);
-  }
 </style>

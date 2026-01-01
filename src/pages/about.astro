@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../Layouts/BaseLayout.astro';
 import HeroSection from '../components/Sections/HeroSection.astro';
-import IntroTextSection from '../components/Sections/IntroTextSection.astro';
 import StorySection from '../components/Sections/StorySection.astro';
 import ImageTextSection from '../components/Sections/ImageTextSection.astro';
 import PhilosophyFlipCardsSection from '../components/Sections/PhilosophyFlipCardsSection.astro';
@@ -19,7 +18,6 @@ import actuallyWorksImage from '../PageImages/About/Philosophy/Actually-Works.pn
 
 // Import JSON data
 import heroDataRaw from '../data/about/hero.json';
-import introDataRaw from '../data/about/introduction.json';
 import storyDataRaw from '../data/about/story.json';
 import purposeDataRaw from '../data/about/purpose.json';
 import philosophyDataRaw from '../data/about/philosophy.json';
@@ -33,11 +31,6 @@ const heroData = heroDataRaw as {
   image: string;
   imageAlt: string;
   imagePosition: 'full';
-};
-
-const introData = introDataRaw as {
-  lead: string;
-  subtitles: string[];
 };
 
 const storyData = storyDataRaw as {
@@ -83,10 +76,11 @@ const philosophyImages = [youFirstImage, yourChoicesImage, actuallyWorksImage];
     imagePosition={heroData.imagePosition}
   />
 
-  <!-- Introduction -->
-  <IntroTextSection
-    lead={introData.lead}
-    subtitles={introData.subtitles}
+  <!-- CTA Section -->
+  <CTASection
+    title={finalCTAData.title}
+    description={finalCTAData.content}
+    buttons={finalCTAData.buttons}
   />
 
   <!-- Our Story -->
@@ -118,13 +112,6 @@ const philosophyImages = [youFirstImage, yourChoicesImage, actuallyWorksImage];
   <ValuesSection
     title={valuesData.title}
     values={valuesData.values}
-  />
-
-  <!-- What This Means For You - Final CTA -->
-  <CTASection
-    title={finalCTAData.title}
-    description={finalCTAData.content}
-    buttons={finalCTAData.buttons}
   />
 
   <!-- Footer with Interactive Mask -->

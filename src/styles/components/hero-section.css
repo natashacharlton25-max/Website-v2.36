@@ -12,24 +12,18 @@
 }
 
 .hero-section__content {
+  margin-top: var(--space-4xl);
   position: relative;
-  z-index: 2;
+  z-index: 10;
 }
 
 .hero-section__title {
-  font-size: var(--text-4xl);
-  font-weight: var(--font-bold);
-  color: var(--color-Text-900);
-  margin-bottom: var(--space-md);
-  line-height: var(--leading-tight);
+  margin-top: var(--space-4xl);
+  margin-bottom: var(--space-xl);
 }
 
 .hero-section__subtitle {
-  font-size: var(--text-xl);
-  font-weight: var(--font-medium);
-  color: var(--color-Text-700);
-  margin-bottom: var(--space-md);
-  line-height: var(--leading-relaxed);
+  max-width: 65ch;
 }
 
 .hero-section__description {
@@ -77,16 +71,21 @@
 /* ========== IMAGE VARIANT ========== */
 .hero-section--image {
   padding: 0;
-  min-height: 60vh;
+  margin-top: calc(-1 * var(--body-top-padding, 70px));
+  min-height: 100vh;
 }
 
 .hero-section__image-wrapper {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
-  min-height: 60vh;
+  min-height: 100vh;
   overflow: hidden;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .hero-section__image {
@@ -106,14 +105,14 @@
   z-index: 2;
   background: linear-gradient(
     to right,
-    color-mix(in oklch, var(--color-Text-900) calc(var(--overlay-opacity, 0.6) * 100%), transparent) 0%,
-    color-mix(in oklch, var(--color-Text-900) calc(var(--overlay-opacity, 0.6) * 70%), transparent) 50%,
-    color-mix(in oklch, var(--color-Text-900) calc(var(--overlay-opacity, 0.6) * 30%), transparent) 100%
+    color-mix(in oklch, var(--color-Background-50) calc(var(--overlay-opacity, 0.6) * 100%), transparent) 0%,
+    color-mix(in oklch, var(--color-Background-50)calc(var(--overlay-opacity, 0.6) * 70%), transparent) 50%,
+    color-mix(in oklch, var(--color-Background-50) calc(var(--overlay-opacity, 0.6) * 30%), transparent) 100%
   ),
   linear-gradient(
     to top,
-    color-mix(in oklch, var(--color-Text-900) calc(var(--overlay-opacity, 0.6) * 100%), transparent) 0%,
-    color-mix(in oklch, var(--color-Text-900) calc(var(--overlay-opacity, 0.6) * 50%), transparent) 50%,
+    color-mix(in oklch, var(--color-Background-50) calc(var(--overlay-opacity, 0.6) * 100%), transparent) 0%,
+    color-mix(in oklch, var(--color-Background-50) calc(var(--overlay-opacity, 0.6) * 50%), transparent) 50%,
     transparent 100%
   );
 }
@@ -134,22 +133,15 @@
   pointer-events: none;
 }
 
-.hero-section--image .hero-section__content {
-  padding: var(--space-4xl) 0 var(--space-3xl);
+.hero-section--image .container {
+  position: relative;
+  z-index: 10;
 }
+
 
 .hero-section--image .hero-section__title {
-  color: var(--color-White);
-  text-shadow: 0 2px 4px color-mix(in oklch, var(--color-Black) 30%, transparent);
-}
-
-.hero-section--image .hero-section__subtitle {
-  color: color-mix(in oklch, var(--color-White) 90%, transparent);
-}
-
-.hero-section--image .hero-section__description,
-.hero-section--image .hero-section__extra {
-  color: color-mix(in oklch, var(--color-White) 80%, transparent);
+  position: relative;
+  z-index: 10;
 }
 
 /* ========== GRADIENT VARIANT ========== */
@@ -249,86 +241,3 @@
   flex-direction: column;
 }
 
-/* Image position - mobile first (image on top) */
-.hero-section--image-left .hero-section__split-image {
-  order: 1;
-}
-
-.hero-section--image-left .hero-section__split-content {
-  order: 2;
-}
-
-.hero-section--image-right .hero-section__split-image {
-  order: 1;
-}
-
-.hero-section--image-right .hero-section__split-content {
-  order: 2;
-}
-
-/* ========== RESPONSIVE ========== */
-@media (min-width: 768px) {
-  .hero-section__title {
-    font-size: var(--text-5xl);
-  }
-
-  .hero-section__subtitle {
-    font-size: var(--text-2xl);
-  }
-
-  .hero-section--image .hero-section__image-wrapper {
-    min-height: 70vh;
-  }
-
-  /* Split layout on tablet+ */
-  .hero-section__split-wrapper {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .hero-section__split-image {
-    aspect-ratio: 3/4;
-  }
-
-  /* Image on left */
-  .hero-section--image-left .hero-section__split-image {
-    order: 1;
-  }
-
-  .hero-section--image-left .hero-section__split-content {
-    order: 2;
-  }
-
-  /* Image on right */
-  .hero-section--image-right .hero-section__split-image {
-    order: 2;
-  }
-
-  .hero-section--image-right .hero-section__split-content {
-    order: 1;
-  }
-}
-
-@media (min-width: 1024px) {
-  .hero-section__title {
-    font-size: var(--text-6xl);
-  }
-
-  .hero-section--simple {
-    padding: var(--space-5xl) 0 var(--space-4xl);
-  }
-
-  .hero-section--image .hero-section__image-wrapper {
-    min-height: 80vh;
-  }
-
-  .hero-section__split-image {
-    aspect-ratio: 1/1;
-  }
-}
-
-/* ========== REDUCED MOTION ========== */
-@media (prefers-reduced-motion: reduce) {
-  .hero-section__image {
-    transition: none;
-  }
-}
