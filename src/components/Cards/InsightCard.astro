@@ -44,11 +44,11 @@ const categoryId = category.toLowerCase().replace(/\s+/g, '-');
 const ctaText = type === 'presentation' ? 'View Presentation' : 'Read Article';
 ---
 
-<a href={href} class={`insight-card ${categoryId}`} data-category={categoryId}>
+<a href={href} class={`card insight-card ${categoryId}`} data-category={categoryId}>
   <div class="insight-card__image">
     <Image src={cardImage} alt={title} width={800} height={500} loading="lazy" />
     <div class="insight-card__badge">
-      <Badge type={category} label={category} />
+      <Badge type={category} label={category} shape="pill" variant="fill" size="sm" shadow="drop"/>
     </div>
   </div>
 
@@ -59,9 +59,8 @@ const ctaText = type === 'presentation' ? 'View Presentation' : 'Read Article';
     <h2 class="insight-card__title">{title}</h2>
     <p class="insight-card__excerpt">{excerpt}</p>
     <div class="insight-card__cta">
-      <Button variant="link" size="sm">
+      <Button variant="outline" size="sm">
         {ctaText}
-        <Icon name="arrow-right-fill" size={20} class="cta-arrow" />
       </Button>
     </div>
   </div>
@@ -75,21 +74,20 @@ const ctaText = type === 'presentation' ? 'View Presentation' : 'Read Article';
     width: calc(33.333% - 1.5em - 4px); /* Subtract 4px for 2px border on each side */
     margin: 0.75em;
     padding: var(--space-md);
-    padding-bottom: 0; /* Content section has its own padding */
+    padding-bottom: var(--space-md); /* Content section has its own padding */
     box-sizing: border-box;
     overflow: hidden;
     text-decoration: none;
     display: flex;
     flex-direction: column;
-    color: inherit;
-    background-color: var(--color-Secondary-100);
     border-radius: var(--radius-lg);
     border: 2px solid transparent; /* Transparent border so all cards have same dimensions */
-    transition: box-shadow var(--transition-base);
   }
 
-  .insight-card:hover {
-    box-shadow: inset 0 0 20px 8px rgba(0, 0, 0, 0.06);
+  .insight-card:hover   {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-Primary-200);
+    transform: none;
   }
 
   .insight-card__image {
@@ -97,10 +95,16 @@ const ctaText = type === 'presentation' ? 'View Presentation' : 'Read Article';
     width: 100%;
     aspect-ratio: 16 / 10;
     overflow: hidden;
-    background-color: var(--color-Neutral-100);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
   }
+
+   .insight-card:hover .insight-card__image {
+    box-shadow: var(--shadow-xl);
+    border: 1px solid color-mix(in oklch, var(--color-Primary-700) 60%, transparent);
+  
+  }
+  
 
   .insight-card__image img {
     width: 100%;
@@ -154,59 +158,5 @@ const ctaText = type === 'presentation' ? 'View Presentation' : 'Read Article';
     display: flex;
   }
 
-  /* Arrow animation on hover */
-  .insight-card:hover .cta-arrow {
-    transform: translateX(4px);
-  }
 
-  .cta-arrow {
-    transition: transform var(--transition-base);
-  }
-
-  /* Hover states */
-  .insight-card:hover .insight-card__image {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  /* ========== RESPONSIVE ========== */
-
-  /* Tablet: 2 columns */
-  @media (max-width: 1023px) {
-    .insight-card {
-      width: calc(50% - 1.5em - 4px); /* Account for borders */
-    }
-  }
-
-  /* Mobile: 1 column */
-  @media (max-width: 767px) {
-    .insight-card {
-      width: calc(100% - 1.5em - 4px); /* Account for borders */
-    }
-
-    .insight-card__content {
-      padding: var(--space-lg);
-    }
-  }
-
-  @media (max-width: 480px) {
-    .insight-card__content {
-      padding: var(--space-md);
-    }
-  }
-
-  @media (max-width: 250px) {
-    .insight-card__content {
-      padding: var(--space-sm);
-    }
-
-    .insight-card__title {
-      font-size: var(--text-lg);
-    }
-
-    .insight-card__excerpt {
-      font-size: var(--text-sm);
-    }
-  }
-
-  /* A11Y theme overrides in: src/styles/a11y/components/insight-card.css */
 </style>
