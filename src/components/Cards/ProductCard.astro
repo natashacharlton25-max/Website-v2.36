@@ -39,10 +39,10 @@ const {
 ---
 
 <a href={`/assets/${slug}`} class={`product-card card ${type}`} data-type={type}>
-  <div class="product-card__image">
+  <div class="img-default product-card__image">
     <Image src={cardImage} alt={name} width={800} height={500} />
     <div class="product-card__badge">
-      <Badge type={type} />
+      <Badge type={type} shape="pill" variant="fill" size="sm" shadow="drop"/>
     </div>
   </div>
 
@@ -59,12 +59,11 @@ const {
         <Button
           variant="primary"
           size="sm"
-          class="js-add-to-cart"
+          className="js-add-to-cart"
           data-product-id={slug}
           data-product-name={name}
           data-product-price="0"
           data-product-image={cardImage.src}
-          onclick="event.preventDefault(); event.stopPropagation();"
           aria-label="Add to cart"
         >
           <span class="add-to-cart-text">Add to Cart</span>
@@ -74,6 +73,16 @@ const {
     </div>
   </div>
 </a>
+
+<script>
+  document.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest('.js-add-to-cart');
+    if (button) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  });
+</script>
 
 <style>
   /* Product Card - BEM naming */
@@ -88,23 +97,25 @@ const {
     display: flex;
     flex-direction: column;
     color: inherit;
-    border: 2px solid transparent;
-    padding: 0; /* Override .card padding for custom layout */
+    border: 2px solid;
+    border: 1px solid color-mix(in oklch, var(--color-Primary-700) 35%, transparent);
+    padding-top: var(--space-lg);/* Override .card padding for custom layout */
   }
 
   .product-card:hover {
-    transform: translateY(-5px);
+    box-shadow: var(--shadow-inner-lg)
   }
 
   .product-card:hover .product-card__name {
-    color: var(--color-Primary-500);
+    color: var(--color-secondary-500);
   }
 
   .product-card__image {
-    position: relative;
     width: 100%;
     aspect-ratio: 16 / 10;
     overflow: hidden;
+    margin-inline: auto;
+    position: relative;
     background-color: var(--color-Neutral-100);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
@@ -117,18 +128,25 @@ const {
     transition: transform var(--transition-base);
   }
 
-  .product-card:hover .product-card__image img {
-    transform: scale(1.05);
-  }
+ 
 
   .product-card__badge {
     position: absolute;
     top: var(--space-md);
     left: var(--space-md);
   }
+  
+  .product-card:hover .product-card__image {
+    box-shadow: var(--shadow-xl);
+    border: 1px solid color-mix(in oklch, var(--color-Primary-700) 35%, transparent);
+  
+  }
+
+  
 
   .product-card__info {
-    padding: var(--space-lg);
+    margin-top: var(--space-lg) ;
+    padding: var(--space-md);
   }
 
   .product-card__category {
@@ -168,9 +186,7 @@ const {
   }
 
   .price-current {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-bold);
-    color: var(--color-Primary-500);
+    font-size: var(--text-md);
   }
 
   .product-card__cta {

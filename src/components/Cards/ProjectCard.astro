@@ -45,12 +45,12 @@ const layoutClass = imagePosition === 'left' ? 'image-left' : 'image-right';
   class={`project-card ${layoutClass}`}
   data-scroll-bg={scrollBg}
 >
-  <div class="container container-7xl">
+  <div class="container">
     <div class="project-card__wrapper">
-      <div class="project-card__image">
+      <div class="img-defaut project-card__image">
         <Image src={cardImage} alt={title} loading="lazy" />
       </div>
-      <div class="project-card__content">
+      <div class="card-transparent project-card__content">
         <span class="project-card__category">{category}</span>
         <h2 class="project-card__title">{title}</h2>
         <p class="project-card__description">{description}</p>
@@ -67,7 +67,7 @@ const layoutClass = imagePosition === 'left' ? 'image-left' : 'image-right';
 <style>
   /* ========== PROJECT CARD SECTION ========== */
   .project-card {
-    padding: var(--space-5xl) 0;
+    padding: var(--space-7xl) 0;
     transition: opacity var(--transition-base);
     background-color: transparent; /* Let ScrollColorBackground show through */
   }
@@ -91,18 +91,27 @@ const layoutClass = imagePosition === 'left' ? 'image-left' : 'image-right';
 
   /* ========== IMAGE CONTAINER ========== */
   .project-card__image {
-    flex: 0 0 30%;
-    border-radius: var(--border-radius-xl);
+    height: var(--img-height-lg);
+    position: relative;
     overflow: hidden;
-    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.12));
+    border-radius: 3rem;
+  }
+
+ .project-card__image picture {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
   }
 
   .project-card__image img {
     width: 100%;
     height: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
+    display: block;
+    object-fit: contain;
   }
+
+
 
   /* ========== TEXT CONTENT ========== */
   .project-card__content {
@@ -122,8 +131,7 @@ const layoutClass = imagePosition === 'left' ? 'image-left' : 'image-right';
   /* ========== CATEGORY LABEL ========== */
   .project-card__category {
     display: block;
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
+    font-size: var(--text-md);
     font-weight: var(--font-semibold);
     color: var(--color-Primary-600);
     text-transform: uppercase;
@@ -133,20 +141,15 @@ const layoutClass = imagePosition === 'left' ? 'image-left' : 'image-right';
 
   /* ========== TITLE ========== */
   .project-card__title {
-    font-family: var(--font-heading);
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
-    font-weight: var(--font-semibold);
-    color: var(--color-Text-700);
     margin-bottom: var(--space-lg);
+    color: var(--color-Text-800);
     line-height: 1.2;
   }
 
   /* ========== DESCRIPTION ========== */
   .project-card__description {
-    font-family: var(--font-body);
-    font-size: clamp(1rem, 2vw, 1.125rem);
-    color: var(--color-Text-600);
     line-height: 1.7;
+    color: var(--color-Text-700);
     margin-bottom: var(--space-xl);
   }
 
@@ -160,70 +163,4 @@ const layoutClass = imagePosition === 'left' ? 'image-left' : 'image-right';
     justify-content: flex-end;
   }
 
-  /* ========== RESPONSIVE - TABLET ========== */
-  @media (max-width: 768px) {
-    .project-card__wrapper {
-      flex-direction: column !important;
-      gap: var(--space-2xl);
-    }
-
-    .project-card__image {
-      flex: 0 0 auto;
-      width: 100%;
-    }
-
-    .image-left .project-card__content,
-    .image-right .project-card__content {
-      padding-left: 0;
-      padding-right: 0;
-      text-align: left;
-    }
-
-    .image-right .project-card__cta {
-      justify-content: flex-start;
-    }
-
-    .project-card {
-      padding: var(--space-4xl) 0;
-    }
-  }
-
-  /* ========== RESPONSIVE - MOBILE ========== */
-  @media (max-width: 640px) {
-    .project-card {
-      padding: var(--space-3xl) 0;
-    }
-
-    .project-card__description {
-      margin-bottom: var(--space-lg);
-    }
-  }
-
-  /* ========== RESPONSIVE - VERY SMALL ========== */
-  @media (max-width: 250px) {
-    .project-card {
-      padding: var(--space-2xl) 0;
-    }
-
-    .project-card__title {
-      font-size: var(--text-xl);
-    }
-
-    .project-card__description {
-      font-size: var(--text-sm);
-    }
-  }
-
-  /* ========== RESPONSIVE - EXTRA SMALL ========== */
-  @media (max-width: 210px) {
-    .project-card__title {
-      font-size: var(--text-lg);
-    }
-
-    .project-card__description {
-      font-size: var(--text-xs);
-    }
-  }
-
-  /* A11Y theme overrides in: src/styles/a11y/components/project-card.css */
-</style>
+ 

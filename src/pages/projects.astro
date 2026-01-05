@@ -6,6 +6,8 @@ import Button from '../components/Button/Button.astro';
 import HeroSection from '../components/Sections/HeroSection.astro';
 import ScrollColorBackground from '../components/Scroll/ScrollColorBackground.astro';
 import ProjectCard from '../components/Cards/ProjectCard.astro';
+import CTASection from '../components/Sections/CTASection.astro';
+
 
 // Import data
 import heroDataRaw from '../data/projects/hero.json';
@@ -21,10 +23,18 @@ const heroData = heroDataRaw as {
 
 const infoData = infoDataRaw as {
   title: string;
-  paragraphs: string[];
-  ctaText: string;
-  ctaHref: string;
-  ctaVariant: 'primary' | 'secondary';
+  description: string | string[];
+  buttons: Array<{
+    text: string;
+    href: string;
+    variant?: 'primary' | 'outline' | 'secondary';
+  }>;
+};
+
+const ctaData = {
+  title: infoData.title,
+  description: infoData.description,
+  buttons: infoData.buttons
 };
 
 // Helper to get folder slug from entry.id (handles index.md suffix and path separators)
@@ -84,23 +94,12 @@ const scrollColors = [
   })}
 
   <!-- Info Section -->
-  <section class="info-section" data-scroll-bg="var(--color-Background-100)">
-    <div class="container container-full">
-      <div class="info-content">
-        <h2 class="info-title">{infoData.title}</h2>
-        <div class="info-text">
-          {infoData.paragraphs.map((paragraph) => (
-            <p>{paragraph}</p>
-          ))}
-        </div>
-        <div class="info-cta">
-          <Button href={infoData.ctaHref} variant={infoData.ctaVariant}>
-            {infoData.ctaText}
-          </Button>
-        </div>
-      </div>
-    </div>
-  </section>
+  <CTASection
+    title={ctaData.title}
+    description={ctaData.description}
+    buttons={ctaData.buttons}
+  />
+
 
   <!-- Footer with Interactive Mask -->
   <FooterWithMask />
