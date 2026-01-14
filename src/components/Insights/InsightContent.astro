@@ -28,17 +28,37 @@ const { class: className } = Astro.props;
     padding: var(--space-3xl) 0;
   }
 
+  /* Hide duplicate header elements in content (already shown in InsightHeader) */
+  /* Hide: H1 title, description paragraph, and horizontal rule */
+  .insight-content :global(h1:first-child) {
+    display: none;
+  }
+
+  .insight-content :global(h1:first-child + p) {
+    display: none;
+  }
+
+  .insight-content :global(h1:first-child + p + hr) {
+    display: none;
+  }
+
   /* Global content typography - spacing and layout only */
   .insight-content :global(h2) {
     margin-top: var(--space-3xl);
     margin-bottom: var(--space-xl);
-    /* Typography inherited from h2 */
+    font-size: var(--text-2xl);
   }
 
   .insight-content :global(h3) {
     margin-top: var(--space-2xl);
     margin-bottom: var(--space-lg);
-    /* Typography inherited from h3 */
+    font-size: var(--text-xl);
+  }
+
+  .insight-content :global(h4) {
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-md);
+    font-size: var(--text-lg);
   }
 
   .insight-content :global(p) {

@@ -20,10 +20,8 @@ cardImage: "./card.png"
 
 # Resources included (asset slugs from content collection)
 resourceSlugs:
-  - "breathing-cards"
-  - "emotion-wheel"
-  - "meditation-guide"
-  - "reflection-journal"
+  - "7-day-starter-kit"
+  - "clarity-worksheet"
 
 # Professional information
 professional:

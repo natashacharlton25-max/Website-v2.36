@@ -101,35 +101,34 @@ const filterCategories = [...filterCategoriesBase, ...dynamicFilters];
   <section class="insights-content section">
     <div class="container">
       <div class="insights-section">
-         
-  <!-- Filter Tags -->
-  <section class="filter-section">
-    <IsotopeFilterSwitcher
-      tabs={filterCategories}
-      defaultActive="all"
-      gridSelector="insights-grid"
-      itemSelector="card .insight-card"
-    />
-  </section>
 
-  <!-- Insights Grid Section -->
-  <section class="insights-section section">
-    <div class="container">
-      <div class="insights-grid" id="insights-grid">
-        <!-- Grid sizer for Isotope column width calculation -->
-        <div class="grid__sizer"></div>
-
-        {articles.map((article) => (
-          <InsightCard
-            slug={article.slug}
-            title={article.title}
-            excerpt={article.excerpt}
-            cardImage={article.cardImage}
-            category={article.category}
-            readTime={article.readTime}
-            type={article.type}
+        <!-- Filter -->
+        <div class="filter-section-insights">
+          <IsotopeFilterSwitcher
+            tabs={filterCategories}
+            defaultActive="all"
+            gridSelector="#insights-grid"
+            itemSelector=".insight-card"
           />
-        ))}
+        </div>
+
+        <!-- Insights Grid -->
+        <div class="insights-grid" id="insights-grid">
+          <!-- Grid sizer for Isotope column width calculation -->
+          <div class="grid__sizer"></div>
+
+          {articles.map((article) => (
+            <InsightCard
+              slug={article.slug}
+              title={article.title}
+              excerpt={article.excerpt}
+              cardImage={article.cardImage}
+              category={article.category}
+              readTime={article.readTime}
+              type={article.type}
+            />
+          ))}
+        </div>
       </div>
     </div>
   </section>

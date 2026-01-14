@@ -13,9 +13,15 @@ const getSlug = (id: string) => {
 };
 
 export async function getStaticPaths() {
+  // Define getSlug locally for getStaticPaths scope
+  const getSlugFromId = (id: string) => {
+    const normalized = id.replace(/[\\/]index\.md$/, '');
+    return normalized.split(/[\\/]/).pop() || id;
+  };
+
   const presentations = await getCollection('presentations');
   return presentations.map((entry) => ({
-    params: { slug: getSlug(entry.id) },
+    params: { slug: getSlugFromId(entry.id) },
     props: { entry },
   }));
 }
@@ -100,7 +106,7 @@ if (hasEndContent) {
 
   {hasEndContent && (
     <PresentationEndSection
-      author={showAuthor ? author : undefined}
+      author={showAuthor && author ? author : undefined}
       linkedAssets={presentation.linkedAssets}
       recommendedItems={showRecommended ? recommendedPresentations : undefined}
       customHtml={presentation.endSection?.customHtml}
@@ -109,10 +115,6 @@ if (hasEndContent) {
 
   <ReaderNav
     sections={navSections}
-    position="bottom-right"
-    variant="detailed"
-    background="glass"
-    foreground="light"
   />
 
   <FooterWithMask />

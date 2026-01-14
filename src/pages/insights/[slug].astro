@@ -7,7 +7,6 @@ import BaseLayout from '../../Layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import InsightHeader from '../../components/Insights/InsightHeader.astro';
 import InsightContent from '../../components/Insights/InsightContent.astro';
-import TagList from '../../components/Insights/TagList.astro';
 import InsightAuthorSection from '../../components/Insights/InsightAuthorSection.astro';
 import RelatedGrid from '../../components/Grids/RelatedGrid.astro';
 import FooterWithMask from '../../components/Footer/FooterWithMask.astro';
@@ -28,6 +27,11 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 const { linkedAssets } = entry.data;
+
+// Calculate read time
+const wordsPerMinute = 200;
+const wordCount = entry.body.split(/\s+/).length;
+const readTime = `${Math.ceil(wordCount / wordsPerMinute)} min read`;
 
 // Get author data from authors collection
 const authorSlug = entry.data.author;
@@ -63,19 +67,16 @@ const formattedResources = linkedAssets?.map((asset: { title: string; descriptio
     <InsightHeader
       title={entry.data.title}
       description={entry.data.description}
-      category={entry.data.category}
       publishDate={entry.data.publishDate}
       authorName={author?.name || entry.data.author}
+      readTime={readTime}
+      tags={entry.data.tags}
       heroImage={entry.data.cardImage}
     />
 
     <InsightContent>
       <Content />
     </InsightContent>
-
-    {entry.data.tags && entry.data.tags.length > 0 && (
-      <TagList tags={entry.data.tags} />
-    )}
   </article>
 
   {author && (
@@ -102,9 +103,8 @@ const formattedResources = linkedAssets?.map((asset: { title: string; descriptio
     <RelatedGrid
       items={suggestedPosts}
       contentType="posts"
-      title="You Might Also Like"
       basePath="/insights"
-      cardStyle="vertical"
+      cardStyle="horizontal"
       background="default"
     />
   )}

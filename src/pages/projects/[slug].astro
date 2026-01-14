@@ -10,11 +10,9 @@ import FooterWithMask from '../../components/Footer/FooterWithMask.astro';
 import Button from '../../components/Button/Button.astro';
 import Icon from '../../components/Icons/Icon.astro';
 import Badge from '../../components/Badge/Badge.astro';
-import ProductCard from '../../components/Cards/ProductCard.astro';
 import ImageTextSection from '../../components/Sections/ImageTextSection.astro';
 import IntroTextSection from '../../components/Sections/IntroTextSection.astro';
-import ValuesSection from '../../components/Sections/ValuesSection.astro';
-import { getIconForAssetType } from '../../lib/utils/iconMapper';
+import ProductCard from '../../components/Cards/ProductCard.astro';
 import '../../styles/components/editorial-layout.css';
 
 // Helper to get folder slug from entry.id
@@ -30,7 +28,6 @@ const assetsMap = new Map(
 );
 
 const getAssetBySlug = (slug: string) => assetsMap.get(slug);
-const getAssetImagePath = (asset: any) => asset?.cardImage?.src || `/images/Assets/${asset?.slug}/card.png`;
 
 export async function getStaticPaths() {
   const getSlug = (id: string) => {
@@ -60,11 +57,11 @@ if (!project) {
 }
 
 // Get full resource data with cardImage for ProductCard
-const resources = project.resourceSlugs.map((slug: string) => {
-  const asset = getAssetBySlug(slug);
+const resources = project.resourceSlugs.map((resourceSlug: string) => {
+  const asset = getAssetBySlug(resourceSlug);
   return {
-    slug,
-    name: asset?.name || slug.split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+    slug: resourceSlug,
+    name: asset?.name || resourceSlug.split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
     description: asset?.description || 'Free resource to download and use',
     type: asset?.type || 'resource',
     category: asset?.category || 'Resource',
@@ -72,8 +69,6 @@ const resources = project.resourceSlugs.map((slug: string) => {
     format: 'PDF'
   };
 });
-
-const featuredResource = resources[0];
 
 const typeLabels: Record<string, string> = {
   'worksheet': 'Worksheet',
@@ -129,49 +124,6 @@ const { Content } = projectEntry ? await projectEntry.render() : { Content: null
     </div>
   </section>
 
-  <!-- Featured Resource Section -->
-  {featuredResource?.image && (
-    <section class="editorial-featured section">
-      <div class="container">
-        <div class="editorial-featured__layout">
-          <div class="editorial-featured__image">
-            <img src={featuredResource.image} alt={featuredResource.name} loading="eager" />
-            <div class="editorial-featured__badge">
-              <Badge
-                type={featuredResource.type}
-                label={typeLabels[featuredResource.type]}
-                variant="fill"
-                shape="pill"
-                shadow="drop"
-              />
-            </div>
-          </div>
-          <div class="editorial-featured__content">
-            <h2>{featuredResource.name}</h2>
-            <p class="editorial-featured__description">{featuredResource.description}</p>
-            <div class="editorial-featured__actions">
-              <Button
-                variant="primary"
-                className="js-add-to-cart"
-                data-product-id={featuredResource.slug}
-                data-product-name={featuredResource.name}
-                data-product-price="0"
-                data-product-image={featuredResource.image}
-              >
-                <Icon name="interface/plus-circle-fill" size={18} slot="icon" />
-                Add to Basket
-              </Button>
-              <Button href={`/assets/${featuredResource.slug}`} variant="outline">
-                View Details
-                <Icon name="interface/arrow-right-fill" size={18} />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )}
-
   <!-- About Section -->
   {(() => {
     const paragraphs = project.longDescription.split(/\n\n+/).filter(Boolean);
@@ -185,15 +137,27 @@ const { Content } = projectEntry ? await projectEntry.render() : { Content: null
     );
   })()}
 
-  <!-- Who It's For Section -->
+  <!-- Evidence-Based Benefits Section -->
   {project.whoItsFor && whoForImage && (
     <ImageTextSection
-      title="Who it's for"
+      title="Evidence-Based Benefits"
       content={[project.whoItsFor]}
       image={whoForImage}
       imageAlt={`Who ${project.title} is designed for`}
       imagePosition="left"
-    />
+      sectionId="who-benefits"
+    >
+      {project.professional?.evidenceBasedBenefits?.length > 0 && (
+        <ul class="benefits-list__items">
+          {project.professional.evidenceBasedBenefits.map((benefit: string) => (
+            <li>
+              <Icon name="interface/check-circle-fill" size={18} />
+              <span>{benefit}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </ImageTextSection>
   )}
   {project.whoItsFor && !whoForImage && (
     <section class="editorial-about section-sm">
@@ -218,56 +182,24 @@ const { Content } = projectEntry ? await projectEntry.render() : { Content: null
     </section>
   )}
 
-  <!-- Resources List -->
+  <!-- Resources Gallery -->
   <section class="editorial-resources section">
     <div class="container">
-      <h2 class="editorial__section-title">What's Included</h2>
-      <p class="editorial-resources__subtitle">{resources.length} downloadable resources in this collection</p>
-
-      <div class="editorial-resources__grid">
-        {resources.map((resource: any) => (
-          resource.cardImage && (
-            <ProductCard
-              slug={resource.slug}
-              name={resource.name}
-              category={resource.category}
-              description={resource.description}
-              cardImage={resource.cardImage}
-              type={resource.type}
-            />
-          )
+      <div class="products-grid">
+        {resources.map((resource) => (
+          <ProductCard
+            slug={resource.slug}
+            name={resource.name}
+            category={resource.category}
+            description={resource.description}
+            cardImage={resource.cardImage}
+            type={resource.type}
+          />
         ))}
       </div>
     </div>
   </section>
 
-  <!-- Evidence-Based Benefits -->
-  {project.professional?.evidenceBasedBenefits?.length > 0 && (
-    <ValuesSection
-      title="Evidence-Based Benefits"
-      values={project.professional.evidenceBasedBenefits.map((benefit: string, index: number) => {
-        // Parse benefit into title and description
-        // Try to split at "by" or "through" to get a short title
-        const splitMatch = benefit.match(/^(.+?)\s+(by|through|via)\s+(.+)$/i);
-        if (splitMatch) {
-          return {
-            number: String(index + 1).padStart(2, '0'),
-            title: splitMatch[1],
-            description: splitMatch[3].charAt(0).toUpperCase() + splitMatch[3].slice(1)
-          };
-        }
-        // Fallback: use first few words as title
-        const words = benefit.split(' ');
-        const title = words.slice(0, 3).join(' ');
-        const description = words.slice(3).join(' ') || benefit;
-        return {
-          number: String(index + 1).padStart(2, '0'),
-          title: title,
-          description: description.charAt(0).toUpperCase() + description.slice(1)
-        };
-      })}
-    />
-  )}
 
   <!-- Key Features -->
   {(project.highlights?.length ?? 0) > 0 && (
@@ -321,30 +253,28 @@ const { Content } = projectEntry ? await projectEntry.render() : { Content: null
   )}
 
   <!-- Get Complete Collection CTA -->
-  <section class="editorial-cta section">
-    <div class="container">
-      <div class="editorial-cta__content">
-        <h2>Get the Complete Collection</h2>
-        <p>{resources.length} resources included — add them all to your basket in one click.</p>
-        <div class="editorial-cta__buttons">
-          <Button
-            variant="primary"
-            size="lg"
-            id="add-all-btn"
-            data-resources={JSON.stringify(resources.map(r => ({
-              id: r.slug,
-              name: r.name,
-              price: 0,
-              image: r.image
-            })))}
-          >
-            <Icon name="a11y/basket-fill" size={22} slot="icon" />
-            Add All {resources.length} Items
-          </Button>
-          <Button href="/projects" variant="outline" size="lg">
-            Browse More Collections
-          </Button>
-        </div>
+  <section class="section">
+    <div class="container text-center">
+      <h2>Get the Complete Collection</h2>
+      <p class="text-muted mb-lg">{resources.length} resources included — add them all to your basket in one click.</p>
+      <div class="flex gap-sm justify-center flex-wrap">
+        <Button
+          variant="primary"
+          size="md"
+          id="add-all-btn"
+          data-resources={JSON.stringify(resources.map(r => ({
+            id: r.slug,
+            name: r.name,
+            price: 0,
+            image: r.cardImage?.src
+          })))}
+        >
+          <Icon name="a11y/basket-fill" size={18} slot="icon" />
+          Add All {resources.length} Items
+        </Button>
+        <Button href="/projects" variant="outline" size="md">
+          Browse More Collections
+        </Button>
       </div>
     </div>
   </section>
@@ -353,35 +283,6 @@ const { Content } = projectEntry ? await projectEntry.render() : { Content: null
 </BaseLayout>
 
 <script>
-  // Smooth accordion animation for details elements
-  document.querySelectorAll('.editorial-resource').forEach((details) => {
-    const summary = details.querySelector('summary');
-    const content = details.querySelector('.editorial-resource__content') as HTMLElement;
-
-    if (!summary || !content) return;
-
-    summary.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      const isOpen = details.hasAttribute('open');
-
-      if (isOpen) {
-        // Closing: animate then remove open
-        content.style.gridTemplateRows = '0fr';
-        content.addEventListener('transitionend', function handler() {
-          details.removeAttribute('open');
-          content.removeEventListener('transitionend', handler);
-        }, { once: true });
-      } else {
-        // Opening: add open then animate
-        details.setAttribute('open', '');
-        // Force reflow to ensure transition works
-        content.offsetHeight;
-        content.style.gridTemplateRows = '1fr';
-      }
-    });
-  });
-
   // Initialize add-to-cart handlers for individual items
   document.querySelectorAll('.js-add-to-cart').forEach(button => {
     button.addEventListener('click', (e) => {
