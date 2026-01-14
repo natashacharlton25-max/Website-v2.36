@@ -13,6 +13,7 @@ tags:
   - "Expression"
   - "Imagination"
 whoItsFor: "Everyone - all ages, all abilities, all experience levels. Perfect for individuals seeking creative outlets or professionals supporting creative development."
+whoForImage: "./whofor.png"
 
 # Images
 cardImage: "./card.png"

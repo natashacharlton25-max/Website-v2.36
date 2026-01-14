@@ -13,6 +13,7 @@ tags:
   - "Integration"
   - "Body Awareness"
 whoItsFor: "Everyone - particularly beneficial for children, individuals with sensory processing differences, autism, ADHD, or developmental coordination challenges."
+whoForImage: "./whofor.png"
 
 # Images
 cardImage: "./card.png"

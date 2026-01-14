@@ -168,6 +168,7 @@ const projectsCollection = defineCollection({
     date: z.string(),
     tags: z.array(z.string()),
     whoItsFor: z.string(),
+    whoForImage: image().optional(), // Image for "Who it's for" section
 
     // Images in same folder
     cardImage: image(),

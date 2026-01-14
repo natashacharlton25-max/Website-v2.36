@@ -13,6 +13,7 @@ tags:
   - "Self-Care"
   - "Emotional Health"
 whoItsFor: "Everyone - children, adults, families, educators, and practitioners. Perfect for home use, classrooms, therapy sessions, or community groups."
+whoForImage: "./whofor.png"
 
 # Images
 cardImage: "./card.png"
