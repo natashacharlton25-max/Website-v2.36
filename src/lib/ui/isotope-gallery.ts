@@ -98,7 +98,7 @@ function initIsotopeGallery(): void {
 
       // Handle badge visibility
       updatedItems.forEach((i) => {
-        const badge = i.querySelector('.product-badge') as HTMLElement;
+        const badge = i.querySelector('.gallery-badge') as HTMLElement;
         if (badge) {
           badge.style.display = i.classList.contains('is-expanded') ? 'block' : 'none';
         }

@@ -1,0 +1,118 @@
+---
+/**
+ * QuoteSection - Pull quote with attribution
+ * Used within Reader presentations via layout: "quote"
+ */
+
+export interface Props {
+  quote: string;
+  author?: string;
+  role?: string;
+  variant?: 'default' | 'accent' | 'minimal';
+}
+
+const { quote, author, role, variant = 'default' } = Astro.props;
+---
+
+<div class={`quote quote--${variant}`}>
+  <blockquote class="quote__text">
+    {quote}
+  </blockquote>
+  {(author || role) && (
+    <div class="quote__attribution">
+      {author && <span class="quote__author">{author}</span>}
+      {role && <span class="quote__role">{role}</span>}
+    </div>
+  )}
+</div>
+
+<style>
+  .quote {
+    max-width: 900px;
+    width: 100%;
+    text-align: center;
+    padding: var(--space-2xl);
+  }
+
+  .quote__text {
+    font-family: var(--font-heading);
+    font-size: var(--text-3xl);
+    font-weight: var(--font-medium);
+    font-style: italic;
+    color: var(--color-Primary-700);
+    line-height: var(--leading-relaxed);
+    margin: 0 0 var(--space-xl) 0;
+    position: relative;
+  }
+
+  .quote__text::before {
+    content: '"';
+    position: absolute;
+    top: -0.5em;
+    left: -0.3em;
+    font-size: var(--text-6xl);
+    color: var(--color-Primary-300);
+    font-family: var(--font-heading);
+    line-height: 1;
+    opacity: 0.5;
+  }
+
+  .quote__attribution {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .quote__author {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-800);
+  }
+
+  .quote__role {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-Text-500);
+  }
+
+  /* Accent variant */
+  .quote--accent .quote__text {
+    color: var(--color-Secondary-700);
+  }
+
+  .quote--accent .quote__text::before {
+    color: var(--color-Secondary-300);
+  }
+
+  /* Minimal variant */
+  .quote--minimal .quote__text {
+    font-size: var(--text-2xl);
+    font-style: normal;
+  }
+
+  .quote--minimal .quote__text::before {
+    display: none;
+  }
+
+  @media (max-width: 968px) {
+    .quote__text {
+      font-size: var(--text-2xl);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .quote {
+      padding: var(--space-lg);
+    }
+
+    .quote__text {
+      font-size: var(--text-xl);
+    }
+
+    .quote__text::before {
+      font-size: var(--text-4xl);
+    }
+  }
+</style>

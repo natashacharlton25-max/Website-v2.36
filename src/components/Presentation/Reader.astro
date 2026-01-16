@@ -2,6 +2,20 @@
 import type { ReaderSection, ReaderHeroSection, ReaderEndSection } from '../../lib/config/reader-types';
 import '../../styles/components/presentation/Reader.css';
 
+// Import all section components
+import {
+  TitleSection,
+  EndSection,
+  TextSection,
+  ImageTextSection,
+  FullWidthSection,
+  QuoteSection,
+  StatsSection,
+  GallerySection,
+  CalloutSection,
+  CompareSection,
+} from './Sections';
+
 interface Props {
   sections: ReaderSection[];
   heroSection?: ReaderHeroSection;
@@ -9,48 +23,48 @@ interface Props {
 }
 
 const { sections, heroSection, endSection } = Astro.props;
+
+// Determine if we have end section content
+const hasEndContent = endSection && (
+  endSection.author ||
+  endSection.linkedAssets?.length ||
+  endSection.recommendedItems?.length ||
+  endSection.customHtml
+);
 ---
 
 {/* Reader Wrapper - TRACKS all sections including optional hero/end */}
 <section class="reader-wrapper" data-reader-wrapper>
   <div class="reader-container" data-reader-container>
-    {/* Optional Hero Section - TRACKED as first section */}
+    {/* Title Section - TRACKED as first section (always included if heroSection provided) */}
     {heroSection && (
       <div
-        class="reader-section reader-section--hero"
+        class="reader-section reader-section--title"
         data-reader-section
-        data-section-id="hero"
+        data-section-id="title"
         data-section-index="0"
-        id="section-hero"
+        id="section-title"
       >
-        <div class="reader-hero-inner">
-          <div class="hero-image-container">
-            {heroSection.image && <img src={heroSection.image} alt={heroSection.title} />}
-          </div>
-          <div class="hero-overlay">
-            <div class="container container-6xl">
-              {(heroSection.category || heroSection.date) && (
-                <div class="hero-meta">
-                  {heroSection.category && (
-                    <span class="hero-category">{heroSection.category}</span>
-                  )}
-                  {heroSection.date && <span class="hero-date">{heroSection.date}</span>}
-                </div>
-              )}
-              <h1 class="hero-title">{heroSection.title}</h1>
-              {heroSection.description && (
-                <p class="hero-description">{heroSection.description}</p>
-              )}
-            </div>
-          </div>
-        </div>
+        <TitleSection
+          title={heroSection.title}
+          description={heroSection.description}
+          category={heroSection.category}
+          date={heroSection.date}
+          readingTime={heroSection.readingTime}
+          image={heroSection.image}
+          overlayOpacity={heroSection.overlayOpacity}
+          primaryAction={heroSection.primaryAction}
+          secondaryAction={heroSection.secondaryAction}
+        />
       </div>
     )}
 
     {/* Main Content Sections - TRACKED */}
     {sections.map((section, index) => {
       const layout = section.layout || 'text-only';
-      const alignment = section.alignment || 'center';
+      // Support new props with backwards compatibility
+      const textAlign = section.textAlign || section.alignment || 'center';
+      const position = section.position || 'center';
       const imagePosition = section.imagePosition || 'right';
       const sectionIndex = heroSection ? index + 1 : index;
 
@@ -64,53 +78,82 @@ const { sections, heroSection, endSection } = Astro.props;
         >
           {/* Text-only layout */}
           {layout === 'text-only' && (
-            <div class={`section-content section-content--${alignment}`}>
-              <h2 class="section-title">{section.title}</h2>
-              <div class="section-body" set:html={section.body} />
-            </div>
+            <TextSection
+              title={section.title}
+              body={section.body}
+              textAlign={textAlign}
+              position={position}
+            />
           )}
 
           {/* Image + Text layout */}
-          {layout === 'image-text' && (
-            <div class={`section-grid section-grid--${imagePosition}`}>
-              <div class="section-text">
-                <h2 class="section-title">{section.title}</h2>
-                <div class="section-body" set:html={section.body} />
-              </div>
-              <div class="section-image">
-                <img
-                  src={section.image}
-                  alt={section.title}
-                  loading="lazy"
-                />
-              </div>
-            </div>
+          {layout === 'image-text' && section.image && (
+            <ImageTextSection
+              title={section.title}
+              body={section.body}
+              image={section.image}
+              imagePosition={imagePosition}
+            />
           )}
 
           {/* Full-width image layout */}
-          {layout === 'full-width-image' && (
-            <div class="section-fullwidth">
-              <div class="section-image-bg">
-                <img
-                  src={section.image}
-                  alt={section.title}
-                  loading="lazy"
-                />
-              </div>
-              <div class="section-card-wrapper">
-                <div class="section-glass-card">
-                  <h2 class="section-title">{section.title}</h2>
-                  <div class="section-body" set:html={section.body} />
-                </div>
-              </div>
-            </div>
+          {layout === 'full-width-image' && section.image && (
+            <FullWidthSection
+              title={section.title}
+              body={section.body}
+              image={section.image}
+            />
+          )}
+
+          {/* Quote layout */}
+          {layout === 'quote' && section.quote && (
+            <QuoteSection
+              quote={section.quote}
+              author={section.author}
+              role={section.role}
+              variant={section.variant}
+            />
+          )}
+
+          {/* Stats layout */}
+          {layout === 'stats' && section.stats && (
+            <StatsSection
+              stats={section.stats}
+              layout={section.statsLayout}
+            />
+          )}
+
+          {/* Gallery layout */}
+          {layout === 'gallery' && section.images && (
+            <GallerySection
+              images={section.images}
+              columns={section.columns}
+            />
+          )}
+
+          {/* Callout layout */}
+          {layout === 'callout' && section.content && (
+            <CalloutSection
+              title={section.title}
+              content={section.content}
+              type={section.calloutType}
+            />
+          )}
+
+          {/* Compare layout */}
+          {layout === 'compare' && section.left && section.right && (
+            <CompareSection
+              left={section.left}
+              right={section.right}
+              divider={section.divider}
+            />
           )}
         </div>
       );
     })}
 
-    {/* Optional End Section - TRACKED as last section */}
-    {endSection && (
+    {/* End Section - TRACKED as last section (always included if endSection has content) */}
+    {hasEndContent && (
       <div
         class="reader-section reader-section--end"
         data-reader-section
@@ -118,7 +161,13 @@ const { sections, heroSection, endSection } = Astro.props;
         data-section-index={(heroSection ? 1 : 0) + sections.length}
         id="section-end"
       >
-        <div class="reader-end-inner" set:html={endSection.html} />
+        <EndSection
+          author={endSection.author}
+          linkedAssets={endSection.linkedAssets}
+          recommendedItems={endSection.recommendedItems}
+          recommendedBasePath={endSection.recommendedBasePath}
+          customHtml={endSection.customHtml}
+        />
       </div>
     )}
   </div>
@@ -207,6 +256,16 @@ const { sections, heroSection, endSection } = Astro.props;
           if (currentSection) {
             const sectionId = currentSection.dataset.sectionId;
 
+            // Calculate progress within current section (0-1)
+            const totalSections = sections.length;
+            const progressPerSection = 1 / Math.max(totalSections - 1, 1);
+            const sectionStart = Math.max(0, (clampedIndex - 0.5) * progressPerSection);
+            const sectionEnd = Math.min(1, (clampedIndex + 0.5) * progressPerSection);
+            const sectionRange = sectionEnd - sectionStart;
+            const sectionProgress = sectionRange > 0
+              ? Math.max(0, Math.min(1, (progress - sectionStart) / sectionRange))
+              : 0;
+
             window.dispatchEvent(
               new CustomEvent('reader:progress', {
                 detail: {
@@ -214,6 +273,7 @@ const { sections, heroSection, endSection } = Astro.props;
                   id: sectionId || '',
                   progress: progress,
                   totalProgress: progress * 100,
+                  sectionProgress: sectionProgress,
                 },
               })
             );

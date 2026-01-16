@@ -1,0 +1,149 @@
+---
+/**
+ * ImageTextSection - Image alongside text content
+ * Used within Reader presentations for image-text layouts
+ */
+
+export interface Props {
+  title: string;
+  body?: string;
+  image: string;
+  imagePosition?: 'left' | 'right';
+  textAlign?: 'left' | 'right';
+}
+
+const { title, body, image, imagePosition = 'left', textAlign } = Astro.props;
+
+// If no explicit textAlign, default based on image position
+const resolvedTextAlign = textAlign || (imagePosition === 'left' ? 'left' : 'right');
+---
+
+<div class={`image-text image-text--${imagePosition}`}>
+  <div class="image-text__image">
+    <img src={image} alt={title} loading="lazy" />
+  </div>
+  <div class={`image-text__content image-text__content--${resolvedTextAlign}`}>
+    <h2 class="image-text__title">{title}</h2>
+    {body && <div class="image-text__body" set:html={body} />}
+  </div>
+</div>
+
+<style>
+  .image-text {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+    align-items: center;
+    width: 100%;
+    max-width: 1100px;
+    max-height: 80vh;
+    overflow: hidden;
+  }
+
+  .image-text--left .image-text__image {
+    order: -1;
+  }
+
+  .image-text--right .image-text__image {
+    order: 1;
+  }
+
+  .image-text__image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .image-text__image img {
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .image-text__content {
+    overflow: hidden;
+  }
+
+  .image-text__content--left {
+    text-align: left;
+  }
+
+  .image-text__content--right {
+    text-align: right;
+  }
+
+  .image-text__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Primary-700);
+    line-height: var(--leading-tight);
+    margin: 0 0 var(--space-xl) 0;
+  }
+
+  .image-text__body {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    font-weight: var(--font-normal);
+    color: var(--color-Text-700);
+    line-height: var(--leading-relaxed);
+  }
+
+  .image-text__body :global(p) {
+    margin: 0 0 var(--space-md) 0;
+  }
+
+  .image-text__body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 968px) {
+    .image-text {
+      grid-template-columns: 1fr;
+      gap: var(--space-2xl);
+      max-height: none;
+    }
+
+    .image-text--left .image-text__image,
+    .image-text--right .image-text__image {
+      order: 0;
+    }
+
+    .image-text__title {
+      font-size: var(--text-3xl);
+    }
+
+    .image-text__body {
+      font-size: var(--text-base);
+    }
+
+    .image-text__image img {
+      max-height: 50vh;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .image-text__title {
+      font-size: var(--text-2xl);
+      margin-bottom: var(--space-lg);
+    }
+
+    .image-text__body {
+      font-size: var(--text-sm);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .image-text__title {
+      font-size: var(--text-xl);
+    }
+
+    .image-text__body {
+      font-size: var(--text-xs);
+    }
+  }
+</style>

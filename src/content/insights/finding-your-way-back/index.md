@@ -8,14 +8,14 @@ cardImage: ./card.png
 tags: ["trauma", "healing", "self-worth", "compassion"]
 enableReader: true
 linkedAssets:
-  - title: "Self-Worth Reflection Workbook"
-    description: "A guided workbook to help you explore and rebuild your sense of self-worth"
-    url: "/assets/workbooks/self-worth-workbook"
-    type: "workbook"
-  - title: "Daily Affirmations Guide"
-    description: "Practical affirmations for trauma recovery and healing"
-    url: "/assets/guides/daily-affirmations"
-    type: "guide"
+  - title: "Clarity Worksheet"
+    description: "A practical guide to help you identify what matters most to you"
+    url: "/assets/clarity-worksheet"
+    type: "worksheet"
+  - title: "7-Day Self-Directed Living Starter Kit"
+    description: "A structured seven-day guide to help you regain steadiness and rebuild awareness"
+    url: "/assets/7-day-starter-kit"
+    type: "toolkit"
 readerSections:
   - id: "welcome"
     title: "Welcome"

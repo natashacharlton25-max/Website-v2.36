@@ -1,0 +1,421 @@
+---
+/**
+ * EndSection - Full viewport end/author section
+ * Last section of every presentation - always included when there's content
+ * Renders inside Reader so it's tracked by ReaderNav
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import AuthorCard from '../AuthorCard.astro';
+
+interface Author {
+  name: string;
+  photo: ImageMetadata;
+  role?: string;
+  bio: string;
+}
+
+interface LinkedAsset {
+  title: string;
+  description?: string;
+  url: string;
+  type?: string;
+}
+
+interface RecommendedItem {
+  slug: string;
+  title: string;
+  category: string;
+  image: ImageMetadata;
+}
+
+export interface Props {
+  author?: Author;
+  linkedAssets?: LinkedAsset[];
+  recommendedItems?: RecommendedItem[];
+  recommendedBasePath?: string;
+  customHtml?: string;
+}
+
+const {
+  author,
+  linkedAssets,
+  recommendedItems,
+  recommendedBasePath = '/presentations',
+  customHtml
+} = Astro.props;
+---
+
+<div class="end-section">
+  <div class="end-section__content">
+    {/* Author Section - Using AuthorCard component */}
+    {author && (
+      <div class="end-section__author">
+        <AuthorCard
+          name={author.name}
+          photo={author.photo}
+          role={author.role}
+          bio={author.bio}
+          label="Written by"
+          variant="featured"
+        />
+      </div>
+    )}
+
+    {/* Brand Logo - Under author, above cards */}
+    <div class="end-section__logo">
+      <a href="/">
+        <img src="/Logo/Nav-Logo.png" alt="Walking With A Smile" />
+      </a>
+    </div>
+
+    {/* Linked Resources */}
+    {linkedAssets && linkedAssets.length > 0 && (
+      <div class="end-section__resources">
+        <div class="resources-grid">
+          {linkedAssets.map(asset => (
+            <a href={asset.url} class="resource-card">
+              <span class="resource-card__type">{asset.type || 'Resource'}</span>
+              <h4 class="resource-card__title">{asset.title}</h4>
+              {asset.description && <p class="resource-card__description">{asset.description}</p>}
+              <span class="resource-card__link">
+                View resource
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Recommended Items - Offset image cards with badge */}
+    {recommendedItems && recommendedItems.length > 0 && (
+      <div class="end-section__recommended">
+        <div class="recommended-grid">
+          {recommendedItems.map(item => (
+            <a href={`${recommendedBasePath}/${item.slug}`} class="recommended-card">
+              <div class="recommended-card__image">
+                <Image src={item.image} alt={item.title} width={140} height={140} />
+                <span class="recommended-card__badge">Suggested</span>
+              </div>
+              <div class="recommended-card__content">
+                <span class="recommended-card__category">{item.category}</span>
+                <h4 class="recommended-card__title">{item.title}</h4>
+                <span class="recommended-card__link">
+                  Read more
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Custom HTML */}
+    {customHtml && (
+      <div class="end-section__custom" set:html={customHtml} />
+    )}
+  </div>
+</div>
+
+<style>
+  /* Base layout - fills parent reader-section which handles full-viewport sizing */
+  .end-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: var(--space-4xl) var(--space-xl);
+    background: var(--color-Background-100);
+  }
+
+  .end-section__content {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3xl);
+  }
+
+  /* ========== AUTHOR SECTION ========== */
+  .end-section__author {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ========== BRAND LOGO ========== */
+  .end-section__logo {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-xl) 0;
+  }
+
+  .end-section__logo a {
+    display: block;
+    opacity: 0.8;
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+  }
+
+  .end-section__logo a:hover {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+
+  .end-section__logo img {
+    height: 120px;
+    width: auto;
+  }
+
+  /* ========== RESOURCES GRID ========== */
+  .end-section__resources {
+    width: 100%;
+  }
+
+  .resources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .resource-card {
+    display: block;
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    background: var(--color-Background-100);
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .resource-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .resource-card__type {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-Primary-600);
+  }
+
+  .resource-card__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-900);
+    margin: var(--space-xs) 0;
+  }
+
+  .resource-card__description {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-Text-600);
+    margin: 0;
+    line-height: var(--leading-relaxed);
+  }
+
+  .resource-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-Primary-600);
+    margin-top: var(--space-md);
+    transition: gap var(--transition-fast);
+  }
+
+  .resource-card:hover .resource-card__link {
+    gap: var(--space-sm);
+  }
+
+  .resource-card__link svg {
+    transition: transform var(--transition-fast);
+  }
+
+  .resource-card:hover .resource-card__link svg {
+    transform: translateX(2px);
+  }
+
+  /* ========== RECOMMENDED GRID - Offset Image Cards ========== */
+  .end-section__recommended {
+    width: 100%;
+  }
+
+  .recommended-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .recommended-card {
+    display: flex;
+    align-items: stretch;
+    text-decoration: none;
+    transition: transform var(--transition-fast);
+  }
+
+  .recommended-card:hover {
+    transform: translateX(4px);
+  }
+
+  .recommended-card__image {
+    flex-shrink: 0;
+    width: 120px;
+    height: 120px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 2;
+    margin-right: -20px;
+  }
+
+  .recommended-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-base);
+  }
+
+  .recommended-card:hover .recommended-card__image img {
+    transform: scale(1.05);
+  }
+
+  .recommended-card__badge {
+    position: absolute;
+    top: var(--space-sm);
+    left: var(--space-sm);
+    padding: 2px 8px;
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-White);
+    background: var(--color-Primary-600);
+    border-radius: var(--radius-full);
+  }
+
+  .recommended-card__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-lg) var(--space-xl) var(--space-lg) var(--space-2xl);
+    padding-left: calc(var(--space-xl) + 20px);
+    background: var(--color-Background-100);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    min-height: 100px;
+  }
+
+  .recommended-card__category {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-Primary-600);
+  }
+
+  .recommended-card__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--color-Text-900);
+    margin: var(--space-xs) 0;
+    line-height: var(--leading-snug);
+  }
+
+  .recommended-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    color: var(--color-Primary-600);
+    margin-top: var(--space-sm);
+    transition: gap var(--transition-fast);
+  }
+
+  .recommended-card:hover .recommended-card__link {
+    gap: var(--space-sm);
+  }
+
+  .recommended-card__link svg {
+    transition: transform var(--transition-fast);
+  }
+
+  .recommended-card:hover .recommended-card__link svg {
+    transform: translateX(2px);
+  }
+
+  /* ========== CUSTOM HTML ========== */
+  .end-section__custom {
+    width: 100%;
+    max-width: 700px;
+  }
+
+  /* ========== RESPONSIVE - TABLET ========== */
+  @media (max-width: 968px) {
+    .end-section {
+      padding: var(--space-3xl) var(--space-lg);
+    }
+
+    .end-section__content {
+      gap: var(--space-2xl);
+    }
+
+    .end-section__logo img {
+      height: 100px;
+    }
+  }
+
+  /* ========== RESPONSIVE - MOBILE ========== */
+  @media (max-width: 640px) {
+    .end-section {
+      padding: var(--space-2xl) var(--space-md);
+    }
+
+    .resources-grid {
+      grid-template-columns: 1fr;
+    }
+
+    /* Stack cards on mobile */
+    .recommended-card {
+      flex-direction: column;
+    }
+
+    .recommended-card__image {
+      width: 100%;
+      height: 160px;
+      margin-right: 0;
+      margin-bottom: -20px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .recommended-card__content {
+      padding: var(--space-xl);
+      padding-top: calc(var(--space-lg) + 20px);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    .end-section__logo img {
+      height: 80px;
+    }
+  }
+</style>

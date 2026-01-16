@@ -116,24 +116,75 @@ const presentationsCollection = defineCollection({
     showIn: z.array(z.enum(['insights', 'assets', 'projects'])).optional(),
 
     // Hero section - first page of the presentation
-    // Uses title/description/cardImage by default, can override here
+    // Uses title/description by default, can override here
     hero: z.object({
       title: z.string().optional(), // Override title
       description: z.string().optional(), // Override description
-      image: image().optional(), // Override image (co-located in same folder, e.g., ./hero.png)
       showCategory: z.boolean().optional(), // Show category badge (default: true)
       showDate: z.boolean().optional(), // Show publish date (default: true)
+      image: image().optional(), // Background image for hero
+      overlayOpacity: z.number().min(0).max(1).optional(), // Overlay opacity (0-1, default: 0.6)
+      primaryAction: z.object({
+        label: z.string(),
+        href: z.string(),
+      }).optional(), // Primary CTA button
+      secondaryAction: z.object({
+        label: z.string(),
+        href: z.string(),
+      }).optional(), // Secondary CTA button
     }).optional(),
 
     // Reader sections - the scroll-driven content
     sections: z.array(z.object({
       id: z.string(), // Unique section ID for URL hash anchors
       title: z.string(), // Section title
-      body: z.string(), // HTML content (50-100 words, fits viewport)
-      alignment: z.enum(['left', 'right', 'center']).optional(), // Text alignment
-      layout: z.enum(['text-only', 'image-text', 'full-width-image']).optional(), // Layout type
+      body: z.string().optional(), // HTML content (required for text-only, image-text, full-width-image)
+      alignment: z.enum(['left', 'right', 'center']).optional(), // Text alignment (deprecated, use textAlign)
+      textAlign: z.enum(['left', 'right', 'center']).optional(), // Text alignment
+      position: z.enum(['left', 'right', 'center']).optional(), // Content block position
+      layout: z.enum(['text-only', 'image-text', 'full-width-image', 'quote', 'stats', 'gallery', 'callout', 'compare']).optional(), // Layout type
       image: image().optional(), // Image in same folder (e.g., ./permission.png)
       imagePosition: z.enum(['left', 'right']).optional(), // Image position for image-text layout
+
+      // Quote layout props
+      quote: z.string().optional(), // Quote text
+      author: z.string().optional(), // Quote attribution author
+      role: z.string().optional(), // Quote attribution role
+      variant: z.enum(['default', 'accent', 'minimal']).optional(), // Quote visual variant
+
+      // Stats layout props
+      stats: z.array(z.object({
+        value: z.string(),
+        label: z.string(),
+        prefix: z.string().optional(),
+        suffix: z.string().optional(),
+      })).optional(),
+      statsLayout: z.enum(['row', '2', '3', '4']).optional(), // Stats grid layout
+
+      // Gallery layout props
+      images: z.array(z.object({
+        src: z.string(),
+        alt: z.string(),
+        caption: z.string().optional(),
+      })).optional(),
+      columns: z.union([z.literal(2), z.literal(3), z.literal(4)]).optional(), // Gallery columns
+
+      // Callout layout props
+      calloutType: z.enum(['info', 'tip', 'warning']).optional(), // Callout type
+      content: z.string().optional(), // Callout content
+
+      // Compare layout props
+      left: z.object({
+        label: z.string().optional(),
+        title: z.string(),
+        content: z.string(),
+      }).optional(),
+      right: z.object({
+        label: z.string().optional(),
+        title: z.string(),
+        content: z.string(),
+      }).optional(),
+      divider: z.boolean().optional(), // Show divider between sides
     })),
 
     // End section - last page of the presentation

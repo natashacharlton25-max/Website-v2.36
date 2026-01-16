@@ -1,0 +1,101 @@
+---
+/**
+ * GallerySection - Image grid with optional captions
+ * Used within Reader presentations via layout: "gallery"
+ */
+
+export interface GalleryImage {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
+export interface Props {
+  images: GalleryImage[];
+  columns?: 2 | 3 | 4;
+}
+
+const { images, columns = 2 } = Astro.props;
+---
+
+<div class="gallery">
+  <div class={`gallery__grid gallery__grid--${columns}`}>
+    {images.map(image => (
+      <div class="gallery__item">
+        <img
+          src={image.src}
+          alt={image.alt}
+          class="gallery__image"
+          loading="lazy"
+        />
+        {image.caption && (
+          <div class="gallery__caption">{image.caption}</div>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .gallery {
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .gallery__grid {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .gallery__grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .gallery__grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .gallery__grid--4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .gallery__item {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+  }
+
+  .gallery__image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+    transition: transform var(--transition-base);
+  }
+
+  .gallery__item:hover .gallery__image {
+    transform: scale(1.02);
+  }
+
+  .gallery__caption {
+    padding: var(--space-md);
+    background: var(--color-Background-50);
+    font-size: var(--text-sm);
+    color: var(--color-Text-700);
+    text-align: center;
+  }
+
+  @media (max-width: 968px) {
+    .gallery__grid--3,
+    .gallery__grid--4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .gallery__grid--2 {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

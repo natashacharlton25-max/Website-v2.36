@@ -1,0 +1,113 @@
+---
+/**
+ * StatsSection - Display statistics/numbers
+ * Used within Reader presentations via layout: "stats"
+ */
+
+export interface Stat {
+  value: string;
+  label: string;
+  prefix?: string;
+  suffix?: string;
+}
+
+export interface Props {
+  stats: Stat[];
+  layout?: 'row' | '2' | '3' | '4';
+}
+
+const { stats, layout = 'row' } = Astro.props;
+const gridClass = layout === 'row' ? 'stats__grid--row' : `stats__grid--${layout}`;
+---
+
+<div class="stats">
+  <div class={`stats__grid ${gridClass}`}>
+    {stats.map(stat => (
+      <div class="stats__item">
+        <div class="stats__value">
+          {stat.prefix && <span class="stats__prefix">{stat.prefix}</span>}
+          {stat.value}
+          {stat.suffix && <span class="stats__suffix">{stat.suffix}</span>}
+        </div>
+        <div class="stats__label">{stat.label}</div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .stats {
+    width: 100%;
+    max-width: 1000px;
+  }
+
+  .stats__grid {
+    display: grid;
+    gap: var(--space-2xl);
+  }
+
+  .stats__grid--row {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .stats__grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats__grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .stats__grid--4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .stats__item {
+    text-align: center;
+    padding: var(--space-xl);
+  }
+
+  .stats__value {
+    font-family: var(--font-heading);
+    font-size: var(--text-5xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Primary-600);
+    line-height: 1;
+    margin-bottom: var(--space-sm);
+  }
+
+  .stats__prefix,
+  .stats__suffix {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-medium);
+  }
+
+  .stats__label {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-Text-600);
+    line-height: var(--leading-normal);
+  }
+
+  @media (max-width: 968px) {
+    .stats__grid--3,
+    .stats__grid--4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stats__value {
+      font-size: var(--text-4xl);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .stats__grid--2,
+    .stats__grid--row {
+      grid-template-columns: 1fr;
+    }
+
+    .stats__value {
+      font-size: var(--text-3xl);
+    }
+  }
+</style>

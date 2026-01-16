@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import Badge from '../Badge/Badge.astro';
 
 interface Props {
   mainImage: ImageMetadata;
@@ -26,7 +27,9 @@ const galleryId = `gallery-${Math.random().toString(36).slice(2, 9)}`;
       <div class={`gallery-item ${index === 0 ? 'is-expanded' : ''}`} data-index={index}>
         <Image src={img} alt={`${productName} image ${index + 1}`} />
         {badge && (
-          <div class={`product-badge badge-${badgeType}`} style={index === 0 ? '' : 'display: none;'}>{badge}</div>
+          <div class="gallery-badge" style={index === 0 ? '' : 'display: none;'}>
+            <Badge type={badgeType} label={badge} variant="glass-dark" size="sm" shape="rounded" />
+          </div>
         )}
       </div>
     ))}

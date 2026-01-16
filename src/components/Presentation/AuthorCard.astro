@@ -1,6 +1,7 @@
 ---
 /**
  * AuthorCard - Displays author info with photo, name, role, and bio
+ * Features offset overlapping photo design (photo overlaps left edge of card)
  * Reusable across presentations, insights, and other content types
  */
 import { Image } from 'astro:assets';
@@ -29,9 +30,9 @@ const {
 
 <div class:list={['author-card', `author-card--${variant}`, className]}>
   <div class="author-card__photo">
-    <Image src={photo} alt={name} width={100} height={100} />
+    <Image src={photo} alt={name} width={120} height={120} />
   </div>
-  <div class="author-card__info">
+  <div class="author-card__content">
     <span class="author-card__label">{label}</span>
     <h3 class="author-card__name">{name}</h3>
     {role && <span class="author-card__role">{role}</span>}
@@ -40,32 +41,26 @@ const {
 </div>
 
 <style>
-  /* Layout */
+  /* Base - Offset image card design */
   .author-card {
     display: flex;
-    gap: var(--space-xl);
-    align-items: center;
+    align-items: stretch;
+    width: 100%;
+   
   }
 
-  /* Box model */
-  .author-card {
-    padding: var(--space-2xl);
-    border-radius: var(--radius-xl);
-  }
-
-  /* Visual */
-  .author-card {
-    background: var(--color-Neutral-50);
-    box-shadow: var(--shadow);
-  }
-
-  /* Elements */
+  /* Photo - Rounded square overlapping left edge */
   .author-card__photo {
     flex-shrink: 0;
-    width: 100px;
-    height: 100px;
-    border-radius: var(--radius-full);
+    width: 120px;
+    height: 120px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 2;
+    margin-right: -24px;
+    align-self: center;
   }
 
   .author-card__photo img {
@@ -74,57 +69,144 @@ const {
     object-fit: cover;
   }
 
-  .author-card__info {
+  /* Content card - Same as background with shadow */
+  .author-card__content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-xl) var(--space-2xl);
+    padding-left: calc(var(--space-2xl) + 24px);
+    background: var(--color-Background-100);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    min-height: 100px;
   }
 
   .author-card__label {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--font-semibold);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     color: var(--color-Text-400);
+    margin-bottom: var(--space-xs);
   }
 
   .author-card__name {
-    margin: var(--space-xs) 0;
-    /* Typography inherited from h3 */
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--color-Text-900);
+    margin: 0 0 var(--space-xs) 0;
+    line-height: var(--leading-tight);
   }
 
   .author-card__role {
     display: block;
-    margin-bottom: var(--space-sm);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
     color: var(--color-Primary-600);
+    margin-bottom: var(--space-sm);
   }
 
   .author-card__bio {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
     margin: 0;
-    /* Typography inherited from p */
   }
 
-  /* Modifiers */
+  /* Compact variant */
   .author-card--compact {
-    padding: var(--space-lg);
-    gap: var(--space-md);
+    max-width: 500px;
   }
 
   .author-card--compact .author-card__photo {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
+    margin-right: -16px;
   }
 
+  .author-card--compact .author-card__content {
+    padding: var(--space-lg) var(--space-xl);
+    padding-left: calc(var(--space-xl) + 16px);
+    min-height: 100px;
+  }
+
+  .author-card--compact .author-card__name {
+    font-size: var(--text-lg);
+  }
+
+  .author-card--compact .author-card__bio {
+    font-size: var(--text-xs);
+  }
+
+  /* Featured variant - wider */
   .author-card--featured {
-    max-width: 600px;
+    max-width: 1000px;
   }
 
-  /* Responsive */
+  .author-card--featured .author-card__photo {
+    width: 140px;
+    height: 140px;
+    margin-right: -28px;
+  }
+
+  .author-card--featured .author-card__content {
+    padding: var(--space-2xl) var(--space-3xl);
+    padding-left: calc(var(--space-3xl) + 28px);
+    min-height: 160px;
+  }
+
+  .author-card--featured .author-card__name {
+    font-size: var(--text-2xl);
+  }
+
+  .author-card--featured .author-card__bio {
+    font-size: var(--text-base);
+  }
+
+  /* Responsive - Mobile: stack vertically */
   @media (max-width: 640px) {
     .author-card {
       flex-direction: column;
-      text-align: center;
+      align-items: center;
     }
 
     .author-card__photo {
-      width: 80px;
-      height: 80px;
+      margin-right: 0;
+      margin-bottom: -20px;
+      z-index: 2;
+    }
+
+    .author-card__content {
+      padding: var(--space-xl);
+      padding-top: calc(var(--space-xl) + 20px);
+      text-align: center;
+      width: 100%;
+    }
+
+    .author-card--featured .author-card__photo {
+      width: 100px;
+      height: 100px;
+      margin-right: 0;
+      margin-bottom: -20px;
+    }
+
+    .author-card--featured .author-card__content {
+      padding: var(--space-xl);
+      padding-top: calc(var(--space-xl) + 20px);
+    }
+
+    .author-card--featured .author-card__name {
+      font-size: var(--text-xl);
+    }
+
+    .author-card--featured .author-card__bio {
+      font-size: var(--text-sm);
     }
   }
 </style>

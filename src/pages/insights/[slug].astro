@@ -5,6 +5,7 @@
  */
 import BaseLayout from '../../Layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import type { ImageMetadata } from 'astro';
 import InsightHeader from '../../components/Insights/InsightHeader.astro';
 import InsightContent from '../../components/Insights/InsightContent.astro';
 import InsightAuthorSection from '../../components/Insights/InsightAuthorSection.astro';
@@ -48,13 +49,39 @@ const suggestedEntries = getSuggestedContent(entry, allInsights, {
 });
 const suggestedPosts = formatForRelatedGrid(suggestedEntries, (item) => getSlugFromId(item.id));
 
-// Format linked assets for RelatedGrid
-const formattedResources = linkedAssets?.map((asset: { title: string; description?: string; url: string; type?: string }) => ({
-  title: asset.title,
-  description: asset.description,
-  url: asset.url,
-  type: asset.type || 'Resource'
-})) || [];
+// Get assets collection to look up card images for linked resources
+const allAssets = await getCollection('assets');
+
+// Format linked assets for RelatedGrid - look up card images from assets collection
+const formattedResources = linkedAssets?.map((asset: { title: string; description?: string; url: string; type?: string }) => {
+  // Extract slug from URL (e.g., "/assets/clarity-worksheet" → "clarity-worksheet")
+  const urlParts = asset.url.split('/').filter(Boolean);
+  const assetSlug = urlParts[urlParts.length - 1];
+
+  // Find matching asset in collection
+  const matchedAsset = allAssets.find(a => getSlugFromId(a.id) === assetSlug);
+
+  return {
+    title: asset.title,
+    description: asset.description,
+    url: asset.url,
+    type: asset.type || 'Resource',
+    cardImage: matchedAsset?.data.cardImage as ImageMetadata | undefined
+  };
+}) || [];
+
+// Combine resources and posts into one mixed array
+// Resources first, then posts - all using the same card style with badges to differentiate
+const combinedRecommendations = [
+  ...formattedResources,
+  ...suggestedPosts.map(post => ({
+    slug: post.slug,
+    title: post.title,
+    description: post.description,
+    category: post.category,
+    cardImage: post.cardImage as ImageMetadata | undefined
+  }))
+];
 ---
 
 <BaseLayout
@@ -88,24 +115,13 @@ const formattedResources = linkedAssets?.map((asset: { title: string; descriptio
     />
   )}
 
-  {formattedResources.length > 0 && (
+  {combinedRecommendations.length > 0 && (
     <RelatedGrid
-      items={formattedResources}
-      contentType="resources"
-      title="Recommended Resources"
-      cardStyle="minimal"
-      background="light"
-      containerSize="6xl"
-    />
-  )}
-
-  {suggestedPosts.length > 0 && (
-    <RelatedGrid
-      items={suggestedPosts}
-      contentType="posts"
+      items={combinedRecommendations}
       basePath="/insights"
       cardStyle="horizontal"
       background="default"
+      containerSize="6xl"
     />
   )}
 

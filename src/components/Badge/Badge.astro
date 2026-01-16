@@ -23,7 +23,7 @@ import Icon from '../Icons/Icon.astro';
 
 type BadgeShape = 'rounded' | 'pill' | 'square' | 'tag';
 type BadgeSize = 'sm' | 'md' | 'lg';
-type BadgeVariant = 'fill' | 'outline' | 'soft' | 'ghost';
+type BadgeVariant = 'fill' | 'outline' | 'soft' | 'ghost' | 'glass' | 'glass-dark';
 type BadgeShadow = 'none' | 'drop' | 'inner' | 'glow';
 
 interface Props {
@@ -216,6 +216,26 @@ const classes = [
     color: var(--badge-color, var(--color-Primary-600));
   }
 
+  /* Glass variant - frosted glass effect (light text for dark backgrounds) */
+  .badge--glass {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: var(--color-White) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Glass-dark variant - frosted glass with dark text (for light backgrounds) */
+  .badge--glass-dark {
+    background: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    color: var(--color-Text-900) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
   /* ========== SHADOW MODIFIERS ========== */
   .badge--shadow-drop {
     box-shadow: var(--shadow-sm);
@@ -358,6 +378,8 @@ const classes = [
     background: transparent;
     color: var(--badge-color);
   }
+
+  /* Glass variant inherits base glass styles via !important */
 
   /* A11Y theme overrides in: src/styles/a11y/components/badge.css */
 </style>
