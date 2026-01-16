@@ -5,14 +5,10 @@
 
 /* Breadcrumbs - align with product layout */
 .breadcrumbs-section {
-  padding: var(--space-xl) 0 var(--space-lg) 0;
+  padding: var(--space-xl)
 }
 
-.breadcrumbs-section .container {
-  max-width: var(--container-full);
-  width: 100%;
-  padding-inline: var(--space-xl);
-}
+
 
 /* Product Detail Section - reduce padding */
 .product-detail-section.section {
@@ -247,8 +243,7 @@
 
   /* Cart Button Wrapper */
   .cart-btn-wrapper {
-    flex: 1;
-    min-width: 200px;
+    flex: 0 0 auto;
     cursor: pointer;
   }
 
@@ -311,9 +306,11 @@
     font-style: italic;
   }
 
-  .content-wrapper {
-    max-width: 1400px;
-    margin: 0 auto;
+
+  /* Center the tab switcher */
+  .content-wrapper .switcher-container {
+    display: flex;
+    justify-content: center;
   }
 
   /* Tab Panels */
@@ -341,6 +338,11 @@
     }
   }
 
+  /* Tab Panel Base Text Color */
+  .tab-panel {
+    color: var(--color-Text-600);
+  }
+
   .tab-panel h2 {
     font-size: var(--text-2xl);
     font-family: var(--font-heading);
@@ -360,16 +362,51 @@
     margin-bottom: var(--space-md);
   }
 
-  .tab-panel p {
+  .tab-panel h3:first-child {
+    margin-top: 0;
+  }
+
+  .tab-panel p,
+  .tab-panel li,
+  .tab-panel span,
+  .tab-panel div {
     font-size: var(--text-base);
     font-family: var(--font-body);
     color: var(--color-Text-600);
     line-height: var(--leading-relaxed);
+  }
+
+  .tab-panel p {
     margin-bottom: var(--space-md);
   }
 
   .tab-panel p:last-child {
     margin-bottom: 0;
+  }
+
+  .tab-panel ul,
+  .tab-panel ol {
+    color: var(--color-Text-600);
+    margin-bottom: var(--space-md);
+    padding-left: var(--space-lg);
+  }
+
+  .tab-panel li {
+    margin-bottom: var(--space-xs);
+  }
+
+  .tab-panel a {
+    color: var(--color-Primary-600);
+  }
+
+  .tab-panel a:hover {
+    color: var(--color-Primary-700);
+  }
+
+  .tab-panel strong,
+  .tab-panel b {
+    color: var(--color-Text-700);
+    font-weight: var(--font-semibold);
   }
 
   /* Specification Grid */
@@ -402,6 +439,101 @@
     font-weight: var(--font-semibold);
   }
 
+  /* Content Sections - For Individuals/Professionals tabs */
+  .content-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xl);
+  }
+
+  .content-section {
+    border: none;
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+    background: linear-gradient(145deg, #e6e2da, #ffffff);
+    box-shadow: 29px 29px 60px #bdbab3, -29px -29px 60px #ffffff;
+  }
+
+  /* Grid layout for list item cards */
+  .content-section-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3xl);
+  }
+
+  @media (min-width: 768px) {
+    .content-section-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .content-section-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .content-section--highlight {
+    border-color: var(--color-Primary-300);
+  }
+
+  /* Section header with icon and title */
+  .content-section :global(.badge) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-Primary-50);
+    border-radius: 0;
+    font-size: var(--text-base);
+  }
+
+  .content-section__body {
+    padding: var(--space-lg);
+    font-size: var(--text-base);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
+  }
+
+  .content-section__body p {
+    margin: 0;
+    color: var(--color-Text-600);
+  }
+
+  .content-section__body p + p {
+    margin-top: var(--space-md);
+  }
+
+  .content-section__items {
+    padding: var(--space-lg);
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: var(--space-sm);
+  }
+
+  @media (min-width: 768px) {
+    .content-section__items {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .content-section__items {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .content-section__item {
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-Background-50);
+    border-radius: var(--border-radius-xl);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.06), inset 0 1px 3px rgba(0, 0, 0, 0.04);
+    font-size: var(--text-sm);
+    color: var(--color-Text-600);
+    line-height: var(--leading-relaxed);
+  }
+
   /* Specification Grid - Clean Professional Style */
   .spec-masonry {
     display: grid;
@@ -429,7 +561,7 @@
   }
 
   .spec-card {
-    padding: var(--space-lg) var(--space-xl);
+    padding: var(--space-sm) var(--space-lg);
     border-radius: var(--border-radius-xl);
     display: flex;
     flex-direction: row;
