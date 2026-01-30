@@ -12,12 +12,13 @@ if (newsletterForm) {
 
     // Get form data
     const formData = new FormData(newsletterForm as HTMLFormElement);
+    const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
     const data = {
       firstName: formData.get('firstName'),
       lastName: formData.get('lastName'),
       email: formData.get('email'),
       newsletter: formData.get('newsletter') === 'on',
-      downloads: JSON.parse(localStorage.getItem('shopping_cart') || '{"items":[]}').items
+      downloads: cartItems
     };
 
     // Disable button and show loading state
