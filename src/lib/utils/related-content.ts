@@ -119,7 +119,7 @@ export function getSlugFromId(id: string): string {
  */
 export function formatForRelatedGrid<T extends ContentItem>(
   items: T[],
-  getSlug: (item: T) => string = getSlugFromId as (item: T) => string
+  getSlug: (item: T) => string = (item: T) => getSlugFromId(item.id)
 ): Array<{
   slug: string;
   title: string;

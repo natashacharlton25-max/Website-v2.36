@@ -76,6 +76,13 @@ const resources = project.resourceSlugs.map((resourceSlug: string) => {
 
 // Build specs for SpecGrid - combine project data + asset collection data
 const variantCycle = ['primary', 'secondary', 'accent'] as const;
+type SpecVariant = typeof variantCycle[number];
+interface ProjectSpecItem {
+  iconName: string;
+  label: string;
+  value: string;
+  variant: SpecVariant;
+}
 
 // Helper to convert icon format (ph:sparkle-duotone -> sparkle-fill)
 const normalizeIcon = (icon: string | undefined, fallback: string): string => {
@@ -199,7 +206,7 @@ const specGroups = [
 ].filter(group => group.length > 0);
 
 // Round-robin interleave: take one from each group in rotation
-const interleavedSpecs: typeof customCardSpecs = [];
+const interleavedSpecs: ProjectSpecItem[] = [];
 let maxLength = Math.max(...specGroups.map(g => g.length));
 for (let i = 0; i < maxLength; i++) {
   for (const group of specGroups) {
@@ -210,7 +217,7 @@ for (let i = 0; i < maxLength; i++) {
 }
 
 // Reassign variants after interleaving for visual variety
-const allSpecs = interleavedSpecs.map((spec, index) => ({
+const allSpecs: ProjectSpecItem[] = interleavedSpecs.map((spec, index) => ({
   ...spec,
   variant: variantCycle[index % 3]
 }));
