@@ -3,6 +3,7 @@ import BaseLayout from '../Layouts/BaseLayout.astro';
 import Button from '../components/Button/Button.astro';
 import DownloadSummary from '../components/Checkout/DownloadSummary.astro';
 import Badge from '../components/Badge/Badge.astro';
+import TrustBadges from '../components/Common/TrustBadges.astro';
 ---
 
 <BaseLayout
@@ -12,17 +13,15 @@ import Badge from '../components/Badge/Badge.astro';
   <section class="checkout-section section">
     <div class="container container-7xl">
       <div class="checkout-header">
-        <h1 class="checkout-title">Get Your Free Downloads</h1>
-        <p class="checkout-subtitle">Join our newsletter to access your selected resources</p>
+        <h1 class="checkout-title">Checkout Your Items</h1>
       </div>
 
       <div class="checkout-content">
         <!-- Left Column: Newsletter Signup Form -->
         <div class="checkout-forms">
           <div class="checkout-card">
-            <div class="checkout-card__header">
-              <span class="checkout-card__step">1</span>
-              <h2 class="checkout-card__title">Your Information</h2>
+            <div class="checkout-trust-header">
+              <TrustBadges layout="row" size="sm" />
             </div>
             <form id="newsletter-form" class="checkout-form">
               <div class="form-row">
@@ -70,18 +69,6 @@ import Badge from '../components/Badge/Badge.astro';
                 </label>
               </div>
 
-              <div class="info-notice">
-                <Badge
-                  type="trust"
-                  label="Info"
-                  icon="info-fill"
-                  iconCollection="interface"
-                  variant="soft"
-                  size="sm"
-                />
-                <span>All resources are completely free. Your email is only used to send download links and optional updates.</span>
-              </div>
-
               <!-- Submit Button -->
               <div class="checkout-actions">
                 <Button type="submit" variant="primary" size="lg" className="btn-block" id="submit-button">
@@ -90,21 +77,32 @@ import Badge from '../components/Badge/Badge.astro';
                 </Button>
               </div>
             </form>
-            <p class="checkout-terms">
-              By submitting, you agree to our
-              <a href="/legal/terms">Terms of Service</a> and
-              <a href="/legal/privacy">Privacy Policy</a>
-            </p>
+
+            <div class="checkout-footer">
+              <div class="checkout-info">
+                <Badge
+                  type="free"
+                  label="100% Free"
+                  icon="check-fill"
+                  iconCollection="interface"
+                  variant="soft"
+                  size="sm"
+                />
+                <span>All resources are free. No credit card required.</span>
+              </div>
+
+              <p class="checkout-terms">
+                By submitting, you agree to our
+                <a href="/legal/terms">Terms of Service</a> and
+                <a href="/legal/privacy">Privacy Policy</a>
+              </p>
+            </div>
           </div>
         </div>
 
         <!-- Right Column: Download Summary -->
         <div class="order-summary-container">
           <div class="checkout-card checkout-card--summary">
-            <div class="checkout-card__header">
-              <span class="checkout-card__step">2</span>
-              <h2 class="checkout-card__title">Your Downloads</h2>
-            </div>
             <DownloadSummary />
           </div>
         </div>
@@ -117,16 +115,35 @@ import Badge from '../components/Badge/Badge.astro';
   import '../lib/cart/checkout-form';
 </script>
 
-<style>
-  .info-notice {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-sm);
-    padding: var(--space-md);
-    background: color-mix(in oklch, var(--color-Primary-500) 8%, transparent);
-    border-radius: var(--border-radius-md);
+<style is:global>
+  .checkout-trust-header {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-Neutral-100);
+  }
+
+  .checkout-trust-header .trust-badges {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  .checkout-footer {
     margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-Neutral-100);
+    text-align: center;
+  }
+
+  .checkout-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
     font-size: var(--text-sm);
     color: var(--color-Text-600);
+    margin-bottom: var(--space-sm);
   }
 </style>

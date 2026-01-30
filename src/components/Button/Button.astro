@@ -30,6 +30,12 @@ export interface Props {
   iconColor?: string;
   iconHoverColor?: string;
   ariaLabel?: string;
+  // Data attributes for cart functionality
+  'data-product-id'?: string;
+  'data-product-name'?: string;
+  'data-product-price'?: string;
+  'data-product-image'?: string;
+  [key: `data-${string}`]: string | undefined;
 }
 
 const {
@@ -50,8 +56,14 @@ const {
   textHoverColor,
   iconColor,
   iconHoverColor,
-  ariaLabel
+  ariaLabel,
+  ...rest
 } = Astro.props;
+
+// Extract data-* attributes to pass through to the element
+const dataAttrs = Object.fromEntries(
+  Object.entries(rest).filter(([key]) => key.startsWith('data-'))
+);
 
 const isLink = !!href;
 const isDropdown = shape === 'dropdown';
@@ -124,6 +136,7 @@ const customStyle = styleProps ? `${styleProps};` : '';
     id={id}
     style={customStyle}
     aria-label={ariaLabel}
+    {...dataAttrs}
   >
     {iconPosition === 'left' && hasIcon && (
       icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />

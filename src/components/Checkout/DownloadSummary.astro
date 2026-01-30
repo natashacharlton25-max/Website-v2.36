@@ -1,7 +1,5 @@
 ---
 import Button from '../Button/Button.astro';
-import TrustBadges from '../Common/TrustBadges.astro';
-import Badge from '../Badge/Badge.astro';
 
 interface Props {
   emptyMessage?: string;
@@ -24,22 +22,6 @@ const {
       <Button href={browseHref} variant="outline" size="sm">{browseText}</Button>
     </div>
   </div>
-
-  <div class="download-summary__divider"></div>
-
-  <div class="download-summary__notice">
-    <Badge
-      type="free"
-      label="100% Free"
-      icon="user-fill"
-      iconCollection="interface"
-      variant="soft"
-      size="lg"
-    />
-    <p class="download-summary__notice-text">All resources are completely free. No credit card required.</p>
-  </div>
-
-  <TrustBadges />
 </div>
 
 <script>
@@ -58,7 +40,7 @@ const {
       // Clear empty message
       orderItemsContainer.innerHTML = '';
 
-      // Populate items (no prices, just the items)
+      // Populate items (compact list view)
       cartItems.forEach((item: any) => {
         const itemEl = document.createElement('div');
         itemEl.className = 'download-summary__item';
@@ -68,13 +50,10 @@ const {
               <img src="${item.image || ''}" alt="${item.name}" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='/MiniKart/MiniKart-Fallback-'+Math.ceil(Math.random()*10)+'.png';}" />
             </div>
             <div class="download-summary__item-details">
-              <h4 class="download-summary__item-name">${item.name}</h4>
-              <p class="download-summary__item-type">Digital Download</p>
+              <span class="download-summary__item-name">${item.name}</span>
             </div>
           </div>
-          <div class="download-summary__item-badge">
-            <span class="download-summary__badge">FREE</span>
-          </div>
+          <span class="download-summary__badge">FREE</span>
         `;
         orderItemsContainer.appendChild(itemEl);
       });
@@ -89,7 +68,7 @@ const {
   });
 </script>
 
-<style>
+<style is:global>
   .download-summary {
     /* No extra padding - parent card handles it */
   }
@@ -97,46 +76,54 @@ const {
   .download-summary__items {
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
-    margin-bottom: var(--space-lg);
+    gap: 0;
+    max-height: 300px;
+    overflow-y: auto;
   }
 
   .download-summary__empty {
     text-align: center;
-    padding: var(--space-2xl) var(--space-md);
+    padding: var(--space-lg) var(--space-md);
     color: var(--color-Text-500);
-    background: var(--color-Neutral-50);
-    border-radius: var(--border-radius-lg);
-    border: 1px dashed var(--color-Neutral-200);
   }
 
   .download-summary__empty p {
-    margin-bottom: var(--space-md);
-    font-size: var(--text-sm);
+    margin-bottom: var(--space-sm);
+    font-size: var(--text-xs);
   }
 
   .download-summary__item {
     display: flex;
+    flex-direction: row !important;
     justify-content: space-between;
     align-items: center;
     gap: var(--space-md);
-    padding: var(--space-md);
-    background: var(--color-Neutral-50);
-    border-radius: var(--border-radius-md);
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--color-Neutral-100);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--space-sm);
+  }
+
+  .download-summary__item:last-child {
+    margin-bottom: 0;
   }
 
   .download-summary__item-info {
     display: flex;
-    gap: var(--space-md);
+    flex-direction: row !important;
+    gap: var(--space-sm);
     flex: 1;
+    min-width: 0;
+    align-items: center;
   }
 
   .download-summary__item-image {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--border-radius-md);
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
     overflow: hidden;
-    background-color: var(--color-Neutral-200);
+    background-color: var(--color-Neutral-100);
     flex-shrink: 0;
   }
 
@@ -148,63 +135,30 @@ const {
 
   .download-summary__item-details {
     flex: 1;
+    min-width: 0;
   }
 
   .download-summary__item-name {
     font-family: var(--font-body);
     font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    margin-bottom: var(--space-2xs);
-    color: var(--color-Text-800);
-  }
-
-  .download-summary__item-type {
-    font-size: var(--text-xs);
-    color: var(--color-Text-500);
+    font-weight: var(--font-medium);
     margin: 0;
-  }
-
-  .download-summary__item-badge {
-    display: flex;
-    align-items: center;
+    color: var(--color-Text-700);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
   }
 
   .download-summary__badge {
-    padding: var(--space-2xs) var(--space-sm);
-    background-color: var(--color-Primary-100);
-    color: var(--color-Primary-700);
-    border-radius: var(--border-radius-full);
+    padding: 4px 8px;
+    background-color: var(--color-Primary-50);
+    color: var(--color-Primary-600);
+    border-radius: 4px;
     font-size: var(--text-xs);
-    font-weight: var(--font-semibold);
+    font-weight: var(--font-bold);
     text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-
-  .download-summary__divider {
-    height: 1px;
-    background-color: var(--color-Neutral-100);
-    margin: var(--space-xl) 0;
-  }
-
-  .download-summary__notice {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-md);
-    padding: var(--space-lg);
-    background: linear-gradient(
-      135deg,
-      color-mix(in oklch, var(--color-Primary-500) 8%, white),
-      color-mix(in oklch, var(--color-Primary-500) 4%, white)
-    );
-    border-radius: var(--border-radius-lg);
-    margin-bottom: var(--space-lg);
-  }
-
-  .download-summary__notice-text {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-Text-600);
-    margin: 0;
-    line-height: 1.5;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
   }
 </style>

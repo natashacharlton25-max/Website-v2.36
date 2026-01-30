@@ -13,7 +13,7 @@ import { getCollection } from 'astro:content';
 import { calculateGridLayout, estimateCardDimensions } from '../../lib/utils/grid-layout';
 import { getSuggestedContent, getSlugFromId } from '../../lib/utils/related-content';
 
-// Generate static paths from content collection
+// Generate static paths from content collection (used in static/hybrid mode)
 export async function getStaticPaths() {
   const assetEntries = await getCollection('assets');
 
@@ -26,14 +26,19 @@ export async function getStaticPaths() {
 // Helper for local slug extraction
 const getSlug = getSlugFromId;
 
-const { entry } = Astro.props;
-const asset = entry.data;
-const slug = getSlug(entry.id);
+// Get slug from URL params
+const slug = Astro.params.slug;
+
+// Fetch asset from collection (works in both SSR and static modes)
+const assetEntries = await getCollection('assets');
+const entry = assetEntries.find(e => getSlugFromId(e.id) === slug);
 
 // Fallback if asset not found
-if (!asset) {
+if (!entry) {
   return Astro.redirect('/assets');
 }
+
+const asset = entry.data;
 
 // Map asset data to product structure
 const product = {
