@@ -2,11 +2,12 @@
 import BaseLayout from '../Layouts/BaseLayout.astro';
 import FooterWithMask from '../components/Footer/FooterWithMask.astro';
 import HeroSection from '../components/Sections/HeroSection.astro';
-import IntroTextSection from '../components/Sections/IntroTextSection.astro';
 import CTASection from '../components/Sections/CTASection.astro';
-import OfferingCard from '../components/Cards/OfferingCard.astro';
+import RelatedGrid from '../components/Grids/RelatedGrid.astro';
 import WhyCard from '../components/Cards/WhyCard.astro';
-import StepCard from '../components/Cards/StepCard.astro';
+
+// Page styles
+import '../styles/pages/services.css';
 
 // Import offering images from src/PageImages
 import offering1 from '../PageImages/Services/offering-1-resources.png';
@@ -16,7 +17,6 @@ import offering4 from '../PageImages/Services/offering-4-training.png';
 
 // Import data
 import heroDataRaw from '../data/services/hero.json';
-import introDataRaw from '../data/services/intro.json';
 import offeringsDataRaw from '../data/services/offerings.json';
 import whyDataRaw from '../data/services/why.json';
 import howItWorksDataRaw from '../data/services/how-it-works.json';
@@ -30,13 +30,8 @@ const heroData = heroDataRaw as {
   variant: 'simple' | 'image' | 'gradient';
 };
 
-const introData = introDataRaw as {
-  title: string;
-  lead: string;
-  subtitles: string[];
-};
-
 const offeringsData = offeringsDataRaw as Array<{
+  slug: string;
   title: string;
   description: string;
   image: string;
@@ -49,7 +44,12 @@ const offeringsData = offeringsDataRaw as Array<{
 
 const whyData = whyDataRaw as {
   title: string;
-  reasons: Array<{ title: string; text: string }>;
+  reasons: Array<{
+    title: string;
+    text: string;
+    badge?: string;
+    icon?: 'heart' | 'tool' | 'star' | 'handshake';
+  }>;
 };
 
 const howItWorksData = howItWorksDataRaw as {
@@ -70,9 +70,13 @@ const ctaData = ctaDataRaw as {
 
 // Map image filenames to imported images
 const offeringImages = [offering1, offering2, offering3, offering4];
-const offerings = offeringsData.map((offering, index) => ({
-  ...offering,
-  imageObj: offeringImages[index],
+
+// Format offerings for RelatedGrid component
+const offeringsForGrid = offeringsData.map((offering, index) => ({
+  slug: offering.slug,
+  title: offering.title,
+  description: offering.description,
+  cardImage: offeringImages[index],
 }));
 ---
 
@@ -89,47 +93,16 @@ const offerings = offeringsData.map((offering, index) => ({
     variant={heroData.variant}
   />
 
-  <!-- Introduction Section -->
-  <section class="intro-section section">
-    <div class="container">
-      <h2 class="section-title">{introData.title}</h2>
-      <IntroTextSection
-        lead={introData.lead}
-        subtitles={introData.subtitles}
-      />
-    </div>
-  </section>
-
-  <!-- Offerings Section -->
-  <section class="offerings-section">
-    <div class="container">
-      {offerings.map((offering, index) => (
-        <>
-          <OfferingCard
-            title={offering.title}
-            description={offering.description}
-            image={offering.imageObj}
-            suitable={offering.suitable}
-            areas={offering.areas}
-            includes={offering.includes}
-            includesTitle={offering.includesTitle}
-            cta={offering.cta}
-          />
-          {index < offerings.length - 1 && <hr class="offering-divider" />}
-        </>
-      ))}
-    </div>
-  </section>
-
   <!-- Why Work With Us Section -->
   <section class="why-section section">
     <div class="container">
-      <h2 class="section-title">{whyData.title}</h2>
       <div class="why-grid">
         {whyData.reasons.map(reason => (
           <WhyCard
             title={reason.title}
             text={reason.text}
+            badge={reason.badge}
+            icon={reason.icon}
           />
         ))}
       </div>
@@ -139,18 +112,44 @@ const offerings = offeringsData.map((offering, index) => ({
   <!-- How It Works Section -->
   <section class="how-section section">
     <div class="container">
-      <h2 class="section-title">{howItWorksData.title}</h2>
-      <div class="steps-grid">
-        {howItWorksData.steps.map(step => (
-          <StepCard
-            number={step.number}
-            title={step.title}
-            text={step.text}
-          />
+      <h2 class="section-title section-title--center">{howItWorksData.title}</h2>
+      <div class="timeline-stepper">
+        {howItWorksData.steps.map((step, index) => (
+          <div class="timeline-step">
+            <div class="timeline-step__marker">
+              <span class="timeline-step__number">{step.number}</span>
+              {index < howItWorksData.steps.length - 1 && (
+                <div class="timeline-step__line"></div>
+              )}
+            </div>
+            <div class="timeline-step__content">
+              <h3 class="timeline-step__title">{step.title}</h3>
+              <p class="timeline-step__text">{step.text}</p>
+            </div>
+          </div>
         ))}
       </div>
     </div>
   </section>
+
+  <!-- Offerings Section - Simplified cards -->
+  <RelatedGrid
+    items={offeringsForGrid}
+    contentType="products"
+    title="Our Services"
+    basePath="/services"
+    cardStyle="horizontal"
+    columns="1"
+    background="light"
+    containerSize="6xl"
+    class="services-offerings"
+    useSectionTitle={true}
+    sectionTitleVariant="default"
+    sectionTitleIcon="hand-heart-fill"
+    sectionTitleDividerColor="primary"
+    sectionTitleIconColor="primary"
+    sectionTitleIconStyle="bare"
+  />
 
   <!-- CTA Section -->
   <CTASection

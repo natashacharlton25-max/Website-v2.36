@@ -1,4 +1,6 @@
 ---
+import SectionTitle from '../Typography/SectionTitle.astro';
+
 interface Value {
   number: string;
   title: string;
@@ -8,14 +10,24 @@ interface Value {
 interface Props {
   title: string;
   values: Value[];
+  icon?: string;
 }
 
-const { title, values } = Astro.props;
+const { title, values, icon } = Astro.props;
 ---
 
 <section class="values-section section">
   <div class="container">
-    <blockquote class="values-section__title">{title}</blockquote>
+    <div class="values-section__header">
+      <SectionTitle
+        title={title}
+        size="xl"
+        dividerColor="accent1"
+        icon={icon}
+        iconColor="primary"
+        iconStyle="bare"
+      />
+    </div>
 
     <div class="values-section__list">
       {values.map((value) => (

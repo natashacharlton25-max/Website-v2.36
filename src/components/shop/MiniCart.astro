@@ -35,18 +35,17 @@
 <style is:global>
   .mini-cart {
     position: fixed;
-    top: 80px;
+    top: 100px;
     right: var(--space-lg);
     width: 320px;
     background: var(--color-Background-50);
     border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-2xl);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
     transition: all var(--transition-base);
     z-index: 99999;
-    overflow: hidden;
   }
 
   .mini-cart.visible {
@@ -186,11 +185,13 @@
   }
 
   .mini-cart__checkout {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     padding: var(--space-md);
     background: var(--color-Primary-500);
-    color: white;
+    color: #ffffff !important;
     text-align: center;
     text-decoration: none;
     font-size: var(--text-sm);
@@ -198,6 +199,8 @@
     font-family: var(--font-body);
     letter-spacing: 0.5px;
     transition: background var(--transition-fast);
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+    min-height: 48px;
   }
 
   .mini-cart__checkout:hover {
@@ -373,4 +376,10 @@
       detail: { count: cartItems.length }
     }));
   }
+
+  // Listen for cart updates from main cart page
+  document.addEventListener('cart:updated', () => {
+    loadFromStorage();
+    render();
+  });
 </script>

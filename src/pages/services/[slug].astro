@@ -1,0 +1,443 @@
+---
+import BaseLayout from '../../Layouts/BaseLayout.astro';
+import FooterWithMask from '../../components/Footer/FooterWithMask.astro';
+import Breadcrumbs from '../../components/Navigation/Breadcrumbs.astro';
+import HeroSection from '../../components/Sections/HeroSection.astro';
+import ImageTextSection from '../../components/Sections/ImageTextSection.astro';
+import CTASection from '../../components/Sections/CTASection.astro';
+import RelatedGrid from '../../components/Grids/RelatedGrid.astro';
+import type { ImageMetadata } from 'astro';
+
+// Import offering images
+import offering1 from '../../PageImages/Services/offering-1-resources.png';
+import offering2 from '../../PageImages/Services/offering-2-whitelabel.png';
+import offering3 from '../../PageImages/Services/offering-3-custom.png';
+import offering4 from '../../PageImages/Services/offering-4-training.png';
+
+// Import data
+import offeringsDataRaw from '../../data/services/offerings.json';
+
+interface ProcessStep {
+  step: string;
+  title: string;
+  text: string;
+}
+
+interface Offering {
+  slug: string;
+  title: string;
+  tagline?: string;
+  description: string;
+  image: string;
+  benefits?: string[];
+  suitable?: string[];
+  areas?: string[];
+  includes?: string[];
+  includesTitle?: string;
+  process?: ProcessStep[];
+  cta: { text: string; href: string };
+}
+
+const offeringsData = offeringsDataRaw as Offering[];
+
+// Map images
+const imageMap: Record<string, ImageMetadata> = {
+  'offering-1-resources.png': offering1,
+  'offering-2-whitelabel.png': offering2,
+  'offering-3-custom.png': offering3,
+  'offering-4-training.png': offering4,
+};
+
+// Generate static paths
+export async function getStaticPaths() {
+  const offeringsDataRaw = await import('../../data/services/offerings.json');
+  const offerings = offeringsDataRaw.default as Offering[];
+
+  return offerings.map(offering => ({
+    params: { slug: offering.slug },
+    props: { offering }
+  }));
+}
+
+const { offering } = Astro.props;
+const offeringImage = imageMap[offering.image];
+
+// Get other services for "Related Services" - format for RelatedGrid
+const otherServices = offeringsData
+  .filter(s => s.slug !== offering.slug)
+  .slice(0, 3)
+  .map(s => ({
+    slug: s.slug,
+    title: s.title,
+    description: s.tagline || s.description.substring(0, 100) + '...',
+    cardImage: imageMap[s.image]
+  }));
+
+// Build breadcrumbs
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Services', href: '/services' },
+  { label: offering.title }
+];
+
+// Icons for benefits
+const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+---
+
+<BaseLayout
+  title={`${offering.title} | Walking With A Smile`}
+  description={offering.description}
+  hideFooter={true}
+>
+  <Breadcrumbs items={breadcrumbs} />
+
+  <!-- Hero Section - using HeroSection component (no image, no button) -->
+  <HeroSection
+    title={offering.title}
+    subtitle={offering.tagline}
+    description={offering.description}
+    variant="simple"
+  />
+
+  <!-- Image Section - using ImageTextSection (right aligned, no button) -->
+  <ImageTextSection
+    title="What We Offer"
+    content={offering.benefits || []}
+    image={offeringImage}
+    imageAlt={offering.title}
+    imagePosition="right"
+    sectionId="service-image-section"
+  />
+
+  <!-- Two Column: Suitable For & What's Included -->
+  <section class="service-details section">
+    <div class="container container-6xl">
+      <div class="details-grid">
+        {offering.suitable && offering.suitable.length > 0 && (
+          <div class="details-card">
+            <h3 class="details-card__title">Who This Is For</h3>
+            <ul class="details-card__list">
+              {offering.suitable.map(item => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {offering.includes && offering.includes.length > 0 && (
+          <div class="details-card">
+            <h3 class="details-card__title">{offering.includesTitle || "What's Included"}</h3>
+            <ul class="details-card__list">
+              {offering.includes.map(item => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {offering.areas && offering.areas.length > 0 && (
+          <div class="details-card">
+            <h3 class="details-card__title">Areas Covered</h3>
+            <ul class="details-card__list">
+              {offering.areas.map(item => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- Process Section -->
+  {offering.process && offering.process.length > 0 && (
+    <section class="service-process section">
+      <div class="container container-6xl">
+        <h2 class="service-section__title service-section__title--center">How It Works</h2>
+        <div class="process-timeline">
+          {offering.process.map((step, index) => (
+            <div class="process-step">
+              <div class="process-step__marker">
+                <span class="process-step__number">{step.step}</span>
+                {index < offering.process!.length - 1 && (
+                  <div class="process-step__line"></div>
+                )}
+              </div>
+              <div class="process-step__content">
+                <h3 class="process-step__title">{step.title}</h3>
+                <p class="process-step__text">{step.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA Section - using CTASection component (left aligned) -->
+  <div class="service-cta-wrapper">
+    <CTASection
+      title="Ready to Get Started?"
+      description="Get in touch to discuss how we can support your work."
+      buttons={[
+        { text: 'Contact Us', href: '/contact', variant: 'primary' },
+        { text: 'View All Services', href: '/services', variant: 'outline' }
+      ]}
+    />
+  </div>
+
+  <!-- Related Services - using RelatedGrid component -->
+  {otherServices.length > 0 && (
+    <RelatedGrid
+      items={otherServices}
+      title="Other Services"
+      basePath="/services"
+      columns="3"
+      cardStyle="vertical"
+      background="default"
+    />
+  )}
+
+  <FooterWithMask />
+</BaseLayout>
+
+<style is:global>
+/* ========== SERVICE DETAIL PAGE OVERRIDES ========== */
+
+/* ImageTextSection styling for service pages */
+#service-image-section {
+  background: var(--color-Background-100);
+}
+
+#service-image-section .image-text-section__body p {
+  position: relative;
+  padding-left: var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+
+#service-image-section .image-text-section__body p::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235d7a5f' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* ========== SECTION TITLES ========== */
+.service-section__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--color-Text-700);
+  margin: 0 0 var(--space-2xl) 0;
+}
+
+.service-section__title--center {
+  text-align: center;
+}
+
+/* ========== DETAILS SECTION ========== */
+.service-details {
+  padding: var(--space-4xl) var(--space-md);
+  background: var(--color-Background-50);
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-2xl);
+}
+
+.details-card {
+  background: linear-gradient(145deg, #e6e2da, #ffffff);
+  box-shadow: 20px 20px 40px #bdbab3, -20px -20px 40px #ffffff;
+  border-radius: var(--border-radius-xl);
+  padding: var(--space-2xl);
+}
+
+.details-card__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-Text-800);
+  margin: 0 0 var(--space-lg) 0;
+  padding-bottom: var(--space-md);
+  border-bottom: 2px solid var(--color-Primary-200);
+}
+
+.details-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.details-card__list li {
+  position: relative;
+  padding: var(--space-sm) 0 var(--space-sm) var(--space-xl);
+  color: var(--color-Text-600);
+  line-height: var(--leading-relaxed);
+}
+
+.details-card__list li::before {
+  content: '';
+  position: absolute;
+  left: var(--space-xs);
+  top: calc(var(--space-sm) + 8px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-Primary-500);
+}
+
+/* ========== PROCESS SECTION ========== */
+.service-process {
+  padding: var(--space-4xl) var(--space-md);
+  background: var(--color-Background-100);
+}
+
+.process-timeline {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.process-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  max-width: 280px;
+}
+
+.process-step__marker {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: var(--space-lg);
+}
+
+.process-step__number {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-Primary-600);
+  color: var(--color-White);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.process-step__line {
+  position: absolute;
+  top: 28px;
+  left: calc(50% + 28px);
+  right: calc(-50% + 28px);
+  height: 3px;
+  background: var(--color-Neutral-300);
+  z-index: 1;
+}
+
+.process-step__content {
+  padding: 0 var(--space-sm);
+}
+
+.process-step__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--color-Text-800);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.process-step__text {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-Text-600);
+  line-height: var(--leading-relaxed);
+  margin: 0;
+}
+
+/* ========== CTA SECTION OVERRIDES ========== */
+.service-cta-wrapper .cta-section {
+  background: var(--color-Background-50);
+}
+
+.service-cta-wrapper .cta-section__content {
+  text-align: left;
+  max-width: 800px;
+  padding: var(--space-2xl) 0;
+}
+
+.service-cta-wrapper .cta-section__buttons {
+  justify-content: flex-start;
+  margin-bottom: 0;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 968px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .service-section__title {
+    font-size: var(--text-2xl);
+  }
+
+  .process-timeline {
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+
+  .process-step {
+    flex-direction: row;
+    text-align: left;
+    align-items: flex-start;
+    max-width: none;
+  }
+
+  .process-step__marker {
+    width: auto;
+    flex-direction: column;
+    margin-bottom: 0;
+    margin-right: var(--space-lg);
+  }
+
+  .process-step__number {
+    width: 48px;
+    height: 48px;
+    font-size: var(--text-lg);
+  }
+
+  .process-step__line {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 3px;
+    height: 100%;
+    min-height: 40px;
+    margin-top: var(--space-sm);
+  }
+
+  .process-step__content {
+    padding: 0;
+    flex: 1;
+  }
+}
+</style>

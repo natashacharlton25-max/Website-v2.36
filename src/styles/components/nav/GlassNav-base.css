@@ -36,8 +36,8 @@
 
 /* ========== NAV CONTENT ========== */
 .nav-content {
-  max-width: var(--container-7xl, 1400px);
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -74,7 +74,7 @@
   font-weight: var(--font-semibold);
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: var(--color-Text-500);
+  color: var(--color-Text-700);
   text-decoration: none;
   transition: color var(--transition-fast), font-weight var(--transition-fast);
   white-space: nowrap;
@@ -99,7 +99,7 @@
   font-weight: var(--font-semibold);
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: var(--color-Text-500);
+  color: var(--color-Text-700);
   background: none;
   border: none;
   cursor: pointer;
@@ -141,7 +141,7 @@
   border: none;
   cursor: pointer;
   padding: var(--space-sm);
-  color: var(--color-Text-500);
+  color: var(--color-Text-700);
   transition: color var(--transition-fast);
 }
 
@@ -160,6 +160,39 @@
 .nav-icon-btn svg {
   width: 20px;
   height: 20px;
+}
+
+/* ========== NAV ICON GROUP ========== */
+.nav-icon-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-left: var(--space-md);
+}
+
+/* Lottie/Static icon visibility */
+.nav-icon-btn--lottie {
+  position: relative;
+}
+
+/* Default: show Lottie, hide static */
+.nav-icon-group .nav-lottie-icon {
+  display: inline-flex !important;
+}
+
+.nav-icon-group .nav-static-icon {
+  display: none !important;
+}
+
+/* Show static icons when a11y mode prefers reduced motion or Lottie fails */
+[data-a11y-reduced-motion="true"] .nav-icon-group .nav-lottie-icon,
+.nav-icon-btn--lottie.lottie-failed .nav-lottie-icon {
+  display: none !important;
+}
+
+[data-a11y-reduced-motion="true"] .nav-icon-group .nav-static-icon,
+.nav-icon-btn--lottie.lottie-failed .nav-static-icon {
+  display: inline-flex !important;
 }
 
 /* ========== MOBILE SETTINGS LINK ========== */

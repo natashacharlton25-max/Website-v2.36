@@ -22,7 +22,7 @@ interface Props {
   name: string;
   category: string;
   description: string;
-  cardImage: ImageMetadata;
+  cardImage?: ImageMetadata;
   type: string;
   price?: string;
 }
@@ -36,11 +36,25 @@ const {
   type,
   price = 'Free'
 } = Astro.props;
+
+const hasImage = cardImage !== undefined;
 ---
 
 <a href={`/assets/${slug}`} class={`product-card card ${type}`} data-type={type}>
   <div class="img-default product-card__image">
-    <Image src={cardImage} alt={name} width={800} height={500} />
+    {hasImage ? (
+      <Image src={cardImage} alt={name} width={800} height={500} />
+    ) : (
+      <div class="product-card__placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+    )}
     <div class="product-card__badge">
       <Badge type={type} shape="pill" variant="fill" size="sm" shadow="drop"/>
     </div>
@@ -63,7 +77,7 @@ const {
           data-product-id={slug}
           data-product-name={name}
           data-product-price="0"
-          data-product-image={cardImage.src}
+          data-product-image={hasImage ? cardImage.src : ''}
           aria-label="Add to cart"
         >
           <span class="add-to-cart-text">Add to Cart</span>
@@ -126,6 +140,22 @@ const {
     height: 100%;
     object-fit: cover;
     transition: transform var(--transition-base);
+  }
+
+  .product-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, var(--color-Primary-100), var(--color-Primary-200));
+    color: var(--color-Primary-500);
+  }
+
+  .product-card__placeholder svg {
+    width: 48px;
+    height: 48px;
+    opacity: 0.6;
   }
 
  

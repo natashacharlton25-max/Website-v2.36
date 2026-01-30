@@ -13,6 +13,10 @@ import Badge from '../../components/Badge/Badge.astro';
 import ImageTextSection from '../../components/Sections/ImageTextSection.astro';
 import IntroTextSection from '../../components/Sections/IntroTextSection.astro';
 import ProductCard from '../../components/Cards/ProductCard.astro';
+import Breadcrumbs from '../../components/Navigation/Breadcrumbs.astro';
+import SpecGrid from '../../components/Product/SpecGrid.astro';
+import ShareSection from '../../components/Sections/ShareSection.astro';
+import { calculateGridLayout, estimateCardDimensions } from '../../lib/utils/grid-layout';
 import '../../styles/components/editorial-layout.css';
 
 // Helper to get folder slug from entry.id
@@ -70,21 +74,154 @@ const resources = project.resourceSlugs.map((resourceSlug: string) => {
   };
 });
 
-const typeLabels: Record<string, string> = {
-  'worksheet': 'Worksheet',
-  'workbook': 'Workbook',
-  'guide': 'Guide',
-  'toolkit': 'Toolkit',
-  'cards': 'Cards',
-  'poster': 'Poster',
-  'activity': 'Activity',
-  'resource': 'Resource'
+// Build specs for SpecGrid - combine project data + asset collection data
+const variantCycle = ['primary', 'secondary', 'accent'] as const;
+
+// Helper to convert icon format (ph:sparkle-duotone -> sparkle-fill)
+const normalizeIcon = (icon: string | undefined, fallback: string): string => {
+  if (!icon) return fallback;
+  return icon.replace(/^ph:/, '').replace(/-duotone$/, '-fill');
 };
 
-// Get the project's markdown content if available
-const projectEntries = await getCollection('projects');
-const projectEntry = projectEntries.find(e => getSlugFromId(e.id) === project.slug);
-const { Content } = projectEntry ? await projectEntry.render() : { Content: null };
+// === PROJECT-LEVEL SPECS ===
+
+// Convert highlights to specs
+const highlightSpecs = (project.highlights || []).map((highlight: any, index: number) => ({
+  iconName: normalizeIcon(highlight.icon, 'star-fill'),
+  label: 'Feature',
+  value: highlight.text,
+  variant: variantCycle[index % 3]
+}));
+
+// Convert linked skills to specs
+const skillSpecs = (project.professional?.linkedSkills || []).map((skill: string, index: number) => ({
+  iconName: 'brain-fill',
+  label: 'Skill',
+  value: skill,
+  variant: variantCycle[index % 3]
+}));
+
+// Convert project-level evidence-based benefits to specs
+const projectBenefitSpecs = (project.professional?.evidenceBasedBenefits || []).map((benefit: string, index: number) => ({
+  iconName: 'seal-check-fill',
+  label: 'Benefit',
+  value: benefit,
+  variant: variantCycle[index % 3]
+}));
+
+// Convert specifications to specs (if any custom ones defined)
+const specSpecs = (project.specifications || []).map((spec: any, index: number) => ({
+  iconName: normalizeIcon(spec.icon, 'info-fill'),
+  label: spec.label,
+  value: spec.value,
+  variant: variantCycle[index % 3]
+}));
+
+// === ASSET-LEVEL SPECS (from linked resources) ===
+
+// Gather specs from each asset in the collection
+const assetSpecs: Array<{ iconName: string; label: string; value: string; variant: typeof variantCycle[number] }> = [];
+let assetIndex = 0;
+
+resources.forEach((resource: any) => {
+  const asset = getAssetBySlug(resource.slug);
+  if (!asset) return;
+
+  // Asset features
+  (asset.features || []).forEach((feature: string) => {
+    assetSpecs.push({
+      iconName: 'check-circle-fill',
+      label: resource.name,
+      value: feature,
+      variant: variantCycle[assetIndex++ % 3]
+    });
+  });
+
+  // Asset evidence-based benefits
+  (asset.professional?.evidenceBasedBenefits || []).forEach((benefit: string) => {
+    assetSpecs.push({
+      iconName: 'heart-fill',
+      label: 'Evidence',
+      value: benefit,
+      variant: variantCycle[assetIndex++ % 3]
+    });
+  });
+
+  // Asset tags (limit to avoid clutter)
+  (asset.tags || []).slice(0, 3).forEach((tag: string) => {
+    assetSpecs.push({
+      iconName: 'tag-fill',
+      label: 'Topic',
+      value: tag.charAt(0).toUpperCase() + tag.slice(1),
+      variant: variantCycle[assetIndex++ % 3]
+    });
+  });
+});
+
+// === CUSTOM CARDS (from project markdown) ===
+
+// Convert customCards to specs (stat, highlight, etc.)
+const customCardSpecs = ((project as any).customCards || []).map((card: any, index: number) => {
+  // Map card type to appropriate label
+  const typeLabels: Record<string, string> = {
+    stat: card.title || 'Stat',
+    highlight: 'Highlight',
+    tag: 'Tag',
+    quote: 'Quote',
+    text: card.title || 'Info',
+    summary: card.title || 'Summary'
+  };
+
+  return {
+    iconName: normalizeIcon(card.icon, 'info-fill'),
+    label: typeLabels[card.type] || card.type,
+    value: card.content || card.title || '',
+    variant: variantCycle[index % 3]
+  };
+});
+
+// Limit each category to 2-3 items to avoid overwhelm
+const limitedCustomCards = customCardSpecs.slice(0, 3);
+const limitedHighlights = highlightSpecs.slice(0, 2);
+const limitedSkills = skillSpecs.slice(0, 3);
+const limitedBenefits = projectBenefitSpecs.slice(0, 3);
+const limitedAssetSpecs = assetSpecs.slice(0, 6); // A few from assets
+const limitedSpecs = specSpecs.slice(0, 2);
+
+// Interleave cards so same types aren't adjacent
+const specGroups = [
+  limitedCustomCards,
+  limitedHighlights,
+  limitedSkills,
+  limitedBenefits,
+  limitedAssetSpecs,
+  limitedSpecs
+].filter(group => group.length > 0);
+
+// Round-robin interleave: take one from each group in rotation
+const interleavedSpecs: typeof customCardSpecs = [];
+let maxLength = Math.max(...specGroups.map(g => g.length));
+for (let i = 0; i < maxLength; i++) {
+  for (const group of specGroups) {
+    if (i < group.length) {
+      interleavedSpecs.push(group[i]);
+    }
+  }
+}
+
+// Reassign variants after interleaving for visual variety
+const allSpecs = interleavedSpecs.map((spec, index) => ({
+  ...spec,
+  variant: variantCycle[index % 3]
+}));
+
+// Calculate grid positions for specs (same as assets/[slug])
+const specsWithLayout = calculateGridLayout(
+  allSpecs,
+  (spec) => estimateCardDimensions(spec.label, spec.value),
+  5, // grid columns
+  200 // min card width
+);
 ---
 
 <BaseLayout
@@ -92,6 +229,12 @@ const { Content } = projectEntry ? await projectEntry.render() : { Content: null
   description={project.description}
   hideFooter={true}
 >
+  <Breadcrumbs items={[
+    { label: 'Home', href: '/' },
+    { label: 'Projects', href: '/projects' },
+    { label: project.title }
+  ]} />
+
   <!-- Hero Section -->
   <section class="hero-section hero-section--simple">
     <div class="container">
@@ -140,24 +283,13 @@ const { Content } = projectEntry ? await projectEntry.render() : { Content: null
   <!-- Evidence-Based Benefits Section -->
   {project.whoItsFor && whoForImage && (
     <ImageTextSection
-      title="Evidence-Based Benefits"
+      title="Who It's For"
       content={[project.whoItsFor]}
       image={whoForImage}
       imageAlt={`Who ${project.title} is designed for`}
       imagePosition="left"
       sectionId="who-benefits"
-    >
-      {project.professional?.evidenceBasedBenefits?.length > 0 && (
-        <ul class="benefits-list__items">
-          {project.professional.evidenceBasedBenefits.map((benefit: string) => (
-            <li>
-              <Icon name="interface/check-circle-fill" size={18} />
-              <span>{benefit}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </ImageTextSection>
+    />
   )}
   {project.whoItsFor && !whoForImage && (
     <section class="editorial-about section-sm">
@@ -173,11 +305,11 @@ const { Content } = projectEntry ? await projectEntry.render() : { Content: null
     </section>
   )}
 
-  <!-- Markdown Content -->
-  {Content && (
-    <section class="editorial-prose section-sm">
+  <!-- Project Details (Features, Skills, Specifications) -->
+  {allSpecs.length > 0 && (
+    <section class="editorial-specs">
       <div class="container">
-        <Content />
+        <SpecGrid specs={specsWithLayout} />
       </div>
     </section>
   )}
@@ -200,57 +332,8 @@ const { Content } = projectEntry ? await projectEntry.render() : { Content: null
     </div>
   </section>
 
-
-  <!-- Key Features -->
-  {(project.highlights?.length ?? 0) > 0 && (
-    <section class="editorial-highlights section-sm">
-      <div class="container">
-        <h2 class="editorial__section-title">Key Features</h2>
-        <div class="editorial-highlights__grid">
-          {project.highlights?.map((highlight: any) => (
-            <div class="editorial-highlight">
-              {highlight.icon && <Icon name={highlight.icon} size={28} />}
-              <span>{highlight.text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Skills -->
-  {(project.professional?.linkedSkills?.length ?? 0) > 0 && (
-    <section class="editorial-skills section-sm">
-      <div class="container">
-        <h2 class="editorial__section-title">Related Skills</h2>
-        <div class="editorial-skills__list">
-          {project.professional?.linkedSkills?.map((skill: string) => (
-            <span class="editorial-skill">{skill}</span>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Specifications -->
-  {(project.specifications?.length ?? 0) > 0 && (
-    <section class="editorial-specs section-sm">
-      <div class="container">
-        <h2 class="editorial__section-title">Specifications</h2>
-        <div class="editorial-specs__grid">
-          {project.specifications?.map((spec: any) => (
-            <div class="editorial-spec">
-              {spec.icon && <Icon name={spec.icon} size={24} />}
-              <div>
-                <span class="editorial-spec__value">{spec.value}</span>
-                <span class="editorial-spec__label">{spec.label}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
+  <!-- Share Section -->
+  <ShareSection />
 
   <!-- Get Complete Collection CTA -->
   <section class="section">
@@ -266,7 +349,7 @@ const { Content } = projectEntry ? await projectEntry.render() : { Content: null
             id: r.slug,
             name: r.name,
             price: 0,
-            image: r.cardImage?.src
+            image: r.cardImage?.src || ''
           })))}
         >
           <Icon name="a11y/basket-fill" size={18} slot="icon" />

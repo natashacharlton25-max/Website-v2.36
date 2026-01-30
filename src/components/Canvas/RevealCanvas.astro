@@ -1,0 +1,257 @@
+---
+/**
+ * RevealCanvas - Standalone proximity mask reveal animation
+ * Can be used as a background layer for any section
+ *
+ * Usage:
+ * <RevealCanvas backgroundImage="/path/to/image.jpg" />
+ *
+ * Wrap content in a relative container and place RevealCanvas as sibling:
+ * <div class="reveal-wrapper">
+ *   <RevealCanvas backgroundImage={image} />
+ *   <div class="reveal-content">Your content here</div>
+ * </div>
+ */
+import { BRAND_CONFIG } from '../../lib/config/brand';
+
+export interface Props {
+  /** Background image to reveal */
+  backgroundImage?: string;
+  /** Unique ID for canvas (required if multiple on page) */
+  canvasId?: string;
+  /** Minimum height of canvas area */
+  minHeight?: string;
+  /** Custom class for wrapper */
+  class?: string;
+}
+
+const {
+  backgroundImage = BRAND_CONFIG.footer.defaultImage,
+  canvasId = 'reveal-canvas',
+  minHeight = '400px',
+  class: className = ''
+} = Astro.props;
+---
+
+<canvas
+  id={canvasId}
+  class={`reveal-canvas ${className}`}
+  aria-hidden="true"
+  data-bg-image={backgroundImage}
+  style={`min-height: ${minHeight};`}
+></canvas>
+
+<style>
+  .reveal-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-canvas {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // RevealCanvas animation - runs for each canvas with reveal-canvas class
+  function initRevealCanvas(canvas: HTMLCanvasElement) {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    const backgroundImage = canvas.dataset.bgImage || '';
+
+    // Proximity mask parameters
+    const parameters = {
+      size: 30,
+      radius: 0.1,
+      proximity: 125,
+      growth: 60,
+      ease: 0.075,
+    };
+
+    class Point {
+      x: number;
+      y: number;
+      constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+      }
+    }
+
+    class Circle {
+      _radius: number;
+      radius: number;
+      growthValue: number;
+      position: Point;
+
+      constructor(radius: number, x: number, y: number) {
+        this._radius = radius;
+        this.radius = radius;
+        this.growthValue = 0;
+        this.position = new Point(x, y);
+      }
+
+      draw(context: CanvasRenderingContext2D, ease: number) {
+        this.radius += ((this._radius + this.growthValue) - (this.radius)) * ease;
+        context.moveTo(this.position.x, this.position.y);
+        context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+      }
+
+      addRadius(value: number) {
+        this.growthValue = value;
+      }
+
+      get x() { return this.position.x; }
+      set x(value) { this.position.x = value; }
+      get y() { return this.position.y; }
+      set y(value) { this.position.y = value; }
+    }
+
+    function normalize(value: number, min: number, max: number) {
+      return (value - min) / (max - min);
+    }
+
+    function interpolate(value: number, min: number, max: number) {
+      return min + (max - min) * value;
+    }
+
+    function map(value: number, min1: number, max1: number, min2: number, max2: number) {
+      return interpolate(normalize(value, min1, max1), min2, max2);
+    }
+
+    let imageLoaded = false;
+    const image = new Image();
+    let circles: Circle[] = [];
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    function resizeCanvas() {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      canvas.width = parent.clientWidth;
+      canvas.height = parent.clientHeight;
+    }
+
+    function build() {
+      circles = [];
+      const { size, radius } = parameters;
+      const parent = canvas.parentElement;
+      if (!parent) return;
+
+      const columns = Math.ceil(parent.clientWidth / size) + 1;
+      const rows = Math.ceil(parent.clientHeight / size) + 1;
+      const amount = Math.ceil(columns * rows);
+
+      for (let i = 0; i < amount; i++) {
+        const column = i % columns;
+        const row = ~~(i / columns);
+        circles.push(new Circle(radius, size * column, size * row));
+      }
+    }
+
+    function proximityHandler(x: number, y: number) {
+      const { proximity, growth } = parameters;
+      for (let c of circles) {
+        let distance = Math.sqrt(Math.pow(c.x - x, 2) + Math.pow(c.y - y, 2));
+        let d = map(distance, c._radius, c._radius + proximity, growth, 0);
+        if (d < 0) d = 0;
+        c.addRadius(d);
+      }
+    }
+
+    function mouseMoveHandler(event: MouseEvent) {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      proximityHandler(x, y);
+    }
+
+    function touchMoveHandler(event: TouchEvent) {
+      const rect = canvas.getBoundingClientRect();
+      const touch = event.touches[0];
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      proximityHandler(x, y);
+    }
+
+    function drawImage() {
+      if (!context) return;
+      context.clip();
+      const { naturalHeight, naturalWidth } = image;
+      const scale = canvas.width / naturalWidth;
+      const w = canvas.width;
+      const h = naturalHeight * scale;
+      const x = 0;
+      const y = (canvas.height - h) / 2;
+      context.drawImage(image, 0, 0, naturalWidth, naturalHeight, x, y, w, h);
+    }
+
+    function animate() {
+      if (!context) return;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.save();
+      context.beginPath();
+      context.fillStyle = "#000000";
+
+      for (let circle of circles) {
+        circle.draw(context, parameters.ease);
+      }
+
+      if (imageLoaded) {
+        drawImage();
+      } else {
+        context.fill();
+      }
+
+      context.restore();
+      requestAnimationFrame(animate);
+    }
+
+    function resizeHandler() {
+      resizeCanvas();
+      build();
+    }
+
+    function loadImage() {
+      image.onload = function () {
+        imageLoaded = true;
+      };
+      image.src = backgroundImage;
+    }
+
+    // Get parent element for event listeners
+    const parent = canvas.parentElement;
+
+    // Event listeners
+    window.addEventListener('resize', resizeHandler);
+    if (parent) {
+      parent.addEventListener('mousemove', mouseMoveHandler);
+      parent.addEventListener('touchmove', touchMoveHandler);
+    }
+
+    // Initialize
+    resizeHandler();
+    loadImage();
+    build();
+    animate();
+  }
+
+  // Initialize on DOM ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const canvases = document.querySelectorAll<HTMLCanvasElement>('.reveal-canvas');
+    canvases.forEach(canvas => initRevealCanvas(canvas));
+  });
+
+  // Support Astro page transitions
+  document.addEventListener('astro:page-load', () => {
+    const canvases = document.querySelectorAll<HTMLCanvasElement>('.reveal-canvas');
+    canvases.forEach(canvas => initRevealCanvas(canvas));
+  });
+</script>

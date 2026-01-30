@@ -1,0 +1,330 @@
+---
+/**
+ * ShareSection - Encourages visitors to share content
+ *
+ * Usage:
+ * <ShareSection />
+ * <ShareSection title="Custom Title" subtitle="Custom subtitle text" />
+ */
+import LottieIcon from '../Icons/LottieIcon.astro';
+import Icon from '../Icons/Icon.astro';
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  class?: string;
+}
+
+const {
+  title = "Share This With Others",
+  subtitle = "Know someone who could benefit from this? Sharing helps us reach more people who might find value in these resources.",
+  class: className = ''
+} = Astro.props;
+
+// Share button configuration
+const shareButtons = [
+  {
+    id: 'copy-link',
+    label: 'Copy Link',
+    lottieIcon: '/Icons/Animated Icons/Share/share.json',
+    staticIcon: 'share-network-fill',
+    action: 'copy'
+  },
+  {
+    id: 'share-facebook',
+    label: 'Facebook',
+    lottieIcon: '/Icons/Animated Icons/_unused Icons/Social Media Logos/Facebook/lottie-social-facebook.json',
+    staticIcon: 'facebook-logo-fill',
+    action: 'facebook'
+  },
+  {
+    id: 'share-twitter',
+    label: 'Twitter',
+    lottieIcon: '/Icons/Animated Icons/_unused Icons/Social Media Logos/Twitter/lottie-social-twitter.json',
+    staticIcon: 'twitter-logo-fill',
+    action: 'twitter'
+  },
+  {
+    id: 'share-linkedin',
+    label: 'LinkedIn',
+    lottieIcon: '/Icons/Animated Icons/_unused Icons/Social Media Logos/Linkedin/lottie-social-linkedin.json',
+    staticIcon: 'linkedin-logo-fill',
+    action: 'linkedin'
+  },
+  {
+    id: 'share-email',
+    label: 'Email',
+    lottieIcon: '/Icons/Animated Icons/Mail/mail.json',
+    staticIcon: 'envelope-fill',
+    action: 'email'
+  }
+];
+---
+
+<section class={`share-section ${className}`}>
+  <div class="container">
+    <div class="share-section__content">
+      <h2>{title}</h2>
+      <p class="body-subtext">{subtitle}</p>
+
+      <div class="share-section__buttons">
+        {shareButtons.map((btn) => (
+          <button
+            class="share-btn"
+            data-share-action={btn.action}
+            aria-label={btn.label}
+            title={btn.label}
+            type="button"
+          >
+            <div class="share-icon-toggle">
+              <LottieIcon
+                src={btn.lottieIcon}
+                size={40}
+                class="share-icon--lottie"
+              />
+              <Icon
+                name={btn.staticIcon}
+                size={40}
+                class="share-icon--static"
+              />
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .share-section {
+    padding: var(--space-4xl) 0;
+  }
+
+  .share-section__content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .share-section__content h2 {
+    margin-bottom: var(--space-lg);
+  }
+
+  .share-section__content .body-subtext {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .share-section__buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-lg);
+  }
+
+  /* Custom share button - transparent by default */
+  .share-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    padding: 0;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: background var(--transition-base), color var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+    color: var(--color-Text-600);
+    box-shadow: none;
+    position: relative;
+  }
+
+  .share-btn:hover {
+    background: var(--color-White-80);
+    color: var(--color-Primary-600);
+    border-color: var(--color-Primary-500);
+    box-shadow: 0 6px 20px var(--color-Black-10);
+  }
+
+  .share-btn:active {
+    box-shadow: 0 2px 8px var(--color-Black-5);
+  }
+
+  /* Tooltip */
+  .share-btn::after {
+    content: attr(title);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-Text-800);
+    color: var(--color-White);
+    font-family: var(--font-heading);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    white-space: nowrap;
+    border-radius: var(--radius-md);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-fast);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .share-btn::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--color-Text-800);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-fast);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .share-btn:hover::after,
+  .share-btn:hover::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .share-btn:hover::before {
+    transform: translateX(-50%);
+  }
+
+  /* Icon toggle container */
+  .share-icon-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Default: show Lottie, hide static */
+  .share-icon-toggle .share-icon--lottie {
+    display: flex;
+  }
+
+  .share-icon-toggle .share-icon--static {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Show static icons when a11y mode prefers reduced motion */
+  [data-a11y-reduced-motion="true"] .share-icon-toggle .share-icon--lottie {
+    display: none;
+  }
+
+  [data-a11y-reduced-motion="true"] .share-icon-toggle .share-icon--static {
+    display: flex;
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .share-section__buttons {
+      gap: var(--space-md);
+    }
+
+    .share-btn {
+      width: 64px;
+      height: 64px;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .share-btn {
+      width: 56px;
+      height: 56px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const shareButtons = document.querySelectorAll('.share-btn[data-share-action]');
+    const pageUrl = encodeURIComponent(window.location.href);
+    const pageTitle = encodeURIComponent(document.title);
+
+    shareButtons.forEach(btn => {
+      const action = btn.getAttribute('data-share-action');
+      const lottieIcon = btn.querySelector('[data-lottie-icon]') as HTMLElement;
+
+      // Lottie hover animation
+      if (lottieIcon) {
+        btn.addEventListener('mouseenter', () => {
+          lottieIcon.dispatchEvent(new CustomEvent('lottie:play'));
+        });
+        btn.addEventListener('mouseleave', () => {
+          lottieIcon.dispatchEvent(new CustomEvent('lottie:stop'));
+        });
+      }
+
+      // Share action click handlers
+      btn.addEventListener('click', () => {
+        switch (action) {
+          case 'copy':
+            navigator.clipboard.writeText(window.location.href).then(() => {
+              if ((window as any).showToast) {
+                (window as any).showToast({
+                  message: 'Link copied to clipboard!',
+                  theme: 'professional',
+                  animation: 'slide',
+                  duration: 3000
+                });
+              }
+            }).catch(err => {
+              console.error('Failed to copy link:', err);
+            });
+            break;
+
+          case 'facebook':
+            window.open(
+              `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`,
+              'facebook-share',
+              'width=600,height=400'
+            );
+            break;
+
+          case 'twitter':
+            window.open(
+              `https://twitter.com/intent/tweet?url=${pageUrl}&text=${pageTitle}`,
+              'twitter-share',
+              'width=600,height=400'
+            );
+            break;
+
+          case 'linkedin':
+            window.open(
+              `https://www.linkedin.com/sharing/share-offsite/?url=${pageUrl}`,
+              'linkedin-share',
+              'width=600,height=400'
+            );
+            break;
+
+          case 'email':
+            window.location.href = `mailto:?subject=${pageTitle}&body=Check out this resource: ${decodeURIComponent(pageUrl)}`;
+            break;
+        }
+      });
+    });
+  });
+
+  // Support Astro page transitions
+  document.addEventListener('astro:page-load', () => {
+    const event = new Event('DOMContentLoaded');
+    document.dispatchEvent(event);
+  });
+</script>

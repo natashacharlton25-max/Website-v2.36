@@ -104,3 +104,8 @@ function render() {
 
 // Initialize on page load
 load();
+
+// Listen for cart updates from mini cart or other sources
+document.addEventListener('cart:updated', () => {
+  load();
+});

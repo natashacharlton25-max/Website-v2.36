@@ -1,25 +1,31 @@
 ---
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import SectionTitle from '../Typography/SectionTitle.astro';
 
 interface Props {
   title: string;
-  image: ImageMetadata;
-  imageAlt: string;
   content: string[];
+  /** Optional image for the section title */
+  image?: string;
+  /** Optional icon for the section title */
+  icon?: string;
 }
 
-const { title, image, imageAlt, content } = Astro.props;
+const { title, content, image, icon } = Astro.props;
 ---
 
 <section class="story section">
   <div class="container">
     <div class="story__content">
-      <!-- Image Card with Title -->
-      <div class="story__image-card">
-          <blockquote class="story__image-title">{title}</blockquote>
-        </div>
-      </div>
+      <!-- Section Title with Divider -->
+      <SectionTitle
+        title={title}
+        size="xl"
+        dividerColor="primary"
+        image={image}
+        icon={icon}
+        iconColor="primary"
+        iconStyle="bare"
+      />
 
       <!-- Story Text -->
       <div class="story__text">
@@ -37,18 +43,6 @@ const { title, image, imageAlt, content } = Astro.props;
     text-align: left;
   }
 
-
-
-   {
-    color: var(--color-Text-500);
-    margin: 0;
-    font-size: var(--text-7xl);
-    font-weight: var(--font-bold);
-    border-left: 10px solid var(--color-Primary-500);
-    padding: var(--space-lg);
-    border-radius: var(--radius-md);
-  }
-
   .story__text {
     max-width: 1400px;
   }
@@ -64,5 +58,4 @@ const { title, image, imageAlt, content } = Astro.props;
   .story__text p:last-child {
     margin-bottom: 0;
   }
-
 </style>

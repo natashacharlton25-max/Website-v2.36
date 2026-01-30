@@ -2,6 +2,7 @@
 // Glassmorphic Navigation Component
 import CartIcon from '../../Shop/CartIcon.astro';
 import Icon from '../../Icons/Icon.astro';
+import LottieIcon from '../../Icons/LottieIcon.astro';
 import { MAIN_NAV_LINKS, NAV_ITEMS_WITH_MENUS, MEGA_MENUS } from '../../../lib/config/navigation';
 import '../../../styles/components/nav/GlassNav.css';
 ---
@@ -45,10 +46,20 @@ import '../../../styles/components/nav/GlassNav.css';
         )
       ))}
 
-      <!-- Settings Gear Icon -->
-      <button class="nav-icon-btn" data-expand="settings" aria-label="Settings" aria-expanded="false">
-        <Icon name="gear-fill" size={24} />
-      </button>
+      <!-- Nav Icon Buttons -->
+      <div class="nav-icon-group">
+        <!-- Search Icon -->
+        <button class="nav-icon-btn nav-icon-btn--lottie" data-action="open-search" aria-label="Search">
+          <LottieIcon src="/Icons/Animated Icons/Search/Lottie-search.json" size={24} class="nav-lottie-icon" />
+          <Icon name="magnifying-glass-fill" size={24} class="nav-static-icon" />
+        </button>
+
+        <!-- Accessibility Icon -->
+        <button class="nav-icon-btn nav-icon-btn--lottie" data-action="open-a11y-panel" aria-label="Accessibility">
+          <LottieIcon src="/Icons/Animated Icons/Visibility V3/visibility-V3.json" size={24} class="nav-lottie-icon" />
+          <Icon name="eye-fill" size={24} class="nav-static-icon" />
+        </button>
+      </div>
 
       <CartIcon />
     </div>
@@ -61,7 +72,7 @@ import '../../../styles/components/nav/GlassNav.css';
         {items.map(item => (
           <a
             href={item.href}
-            class={`expandable-item ${item.icon ? 'expandable-item--icon' : ''}`}
+            class={`expandable-item ${item.icon ? 'expandable-item--icon' : ''} ${item.image ? 'expandable-item--has-media' : ''}`}
             data-action={
               item.href === '#share' ? 'copy-link' :
               item.href === '#search' ? 'open-search' :
@@ -69,6 +80,11 @@ import '../../../styles/components/nav/GlassNav.css';
               null
             }
           >
+            {item.image && (
+              <div class="expandable-media">
+                <img src={item.image} alt="" class="expandable-media__img" />
+              </div>
+            )}
             {item.icon === 'mail' && (
               <Icon name="envelope-fill" size={20} class="expandable-icon" />
             )}
@@ -81,8 +97,10 @@ import '../../../styles/components/nav/GlassNav.css';
             {item.icon === 'eye' && (
               <Icon name="eye-fill" size={20} class="expandable-icon" />
             )}
-            <h3>{item.title}</h3>
-            {item.description && <p>{item.description}</p>}
+            <div class="expandable-item__content">
+              <h3>{item.title}</h3>
+              {item.description && <p>{item.description}</p>}
+            </div>
           </a>
         ))}
       </div>
@@ -302,6 +320,21 @@ import '../../../styles/components/nav/GlassNav.css';
         if ((window as any).openSearchOverlay) {
           (window as any).openSearchOverlay();
         }
+      });
+    });
+
+    // Lottie icon hover animations for nav buttons
+    const lottieButtons = document.querySelectorAll('.nav-icon-btn--lottie');
+    lottieButtons.forEach(btn => {
+      const lottieIcon = btn.querySelector('[data-lottie-icon]') as HTMLElement;
+      if (!lottieIcon) return;
+
+      btn.addEventListener('mouseenter', () => {
+        lottieIcon.dispatchEvent(new CustomEvent('lottie:play'));
+      });
+
+      btn.addEventListener('mouseleave', () => {
+        lottieIcon.dispatchEvent(new CustomEvent('lottie:stop'));
       });
     });
 

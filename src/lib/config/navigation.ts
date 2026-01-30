@@ -13,6 +13,7 @@ export interface MegaMenuItem {
   description: string;
   href: string;
   icon?: string;
+  image?: string;
 }
 
 /**
@@ -37,21 +38,21 @@ export const NAV_ITEMS_WITH_MENUS = ['Assets', 'Insights', 'Services'];
  */
 export const MEGA_MENUS: Record<string, MegaMenuItem[]> = {
   assets: [
-    { title: 'All Assets', description: 'Browse our complete collection of resources', href: '/assets' },
-    { title: 'Worksheets', description: 'Interactive worksheets for personal growth', href: '/assets?filter=worksheet' },
-    { title: 'Workbooks', description: 'Comprehensive workbooks for deeper learning', href: '/assets?filter=workbook' },
-    { title: 'Guides', description: 'Step-by-step guides for your journey', href: '/assets?filter=guide' },
-    { title: 'Toolkits', description: 'Complete toolkits with multiple resources', href: '/assets?filter=toolkit' },
+    { title: 'All Assets', description: 'Browse our complete collection of resources', href: '/assets', image: '/_Unused Images/Asset-Main-1.png' },
+    { title: 'Worksheets', description: 'Interactive worksheets for personal growth', href: '/assets?filter=worksheet', image: '/_Unused Images/Asset-Main-2.png' },
+    { title: 'Workbooks', description: 'Comprehensive workbooks for deeper learning', href: '/assets?filter=workbook', image: '/_Unused Images/Asset-Main-3.png' },
+    { title: 'Guides', description: 'Step-by-step guides for your journey', href: '/assets?filter=guide', image: '/_Unused Images/Asset-Main-4.png' },
+    { title: 'Toolkits', description: 'Complete toolkits with multiple resources', href: '/assets?filter=toolkit', image: '/_Unused Images/Asset-Main-1 (2).png' },
   ],
   insights: [
-    { title: 'All Insights', description: 'Browse all articles and blog posts', href: '/insights' },
-    { title: 'Latest Articles', description: 'Read our most recent publications', href: '/insights' },
-    { title: 'Featured Stories', description: 'Inspiring stories from our community', href: '/insights' },
+    { title: 'All Insights', description: 'Browse all articles and blog posts', href: '/insights', image: '/_Unused Images/Articles hero Image.png' },
+    { title: 'Latest Articles', description: 'Read our most recent publications', href: '/insights', image: '/_Unused Images/Article Hero Card.png' },
+    { title: 'Featured Stories', description: 'Inspiring stories from our community', href: '/insights', image: '/_Unused Images/3.jpg' },
   ],
   services: [
-    { title: 'All Services', description: 'Explore our full range of services', href: '/services' },
-    { title: 'Workshops', description: 'Join our interactive group sessions', href: '/services#workshops' },
-    { title: 'Consultations', description: 'One-on-one personalized support', href: '/services#consultations' },
+    { title: 'All Services', description: 'Explore our full range of services', href: '/services', image: '/_Unused Images/1.png' },
+    { title: 'Workshops', description: 'Join our interactive group sessions', href: '/services#workshops', image: '/_Unused Images/6.png' },
+    { title: 'Consultations', description: 'One-on-one personalized support', href: '/services#consultations', image: '/_Unused Images/contact us 1.jpg' },
   ],
   settings: [
     { title: 'Contact', description: '', href: '/contact', icon: 'mail' },

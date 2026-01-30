@@ -10,67 +10,63 @@
  * - No hardcoded values
  */
 import { BRAND_CONFIG } from '../../lib/config/brand';
-import Button from '../Button/Button.astro';
 
 interface Props {
   variant?: 'light' | 'dark';
 }
 
 const { variant = 'dark' } = Astro.props;
+
+// Footer navigation links
+const footerLinks = [
+  { label: 'Legal', href: '/legal/terms' },
+  { label: 'Contact Us', href: '#', id: 'contactUsBtn', isButton: true },
+  { label: 'Cookie Settings', href: '#', id: 'cookieSettings', isButton: true }
+];
 ---
 
 <footer class={`footer footer--${variant}`}>
   <div class="footer__container container container-7xl">
-    <!-- Footer Top -->
-    <div class="footer__top">
-      <!-- Brand Column -->
-      <div class="footer__brand-section">
-        <div class="footer__brand">
-          <p class="footer__brand-name">{BRAND_CONFIG.name}</p>
-        </div>
-        <p class="footer__description">
-          {BRAND_CONFIG.description}
-        </p>
-      </div>
+    <!-- Logo & Brand -->
+    <div class="footer__brand-section">
+      <img
+        src="/Logo/BrandLogoFooter.png"
+        alt={`${BRAND_CONFIG.name} logo`}
+        class="footer__logo"
+        width="120"
+        height="120"
+      />
+      <h2 class="footer__brand-name">{BRAND_CONFIG.name}</h2>
     </div>
 
-    <!-- Footer Bottom -->
-    <div class="footer__bottom">
-      <div class="footer__links">
-        <Button
-          href="/legal/terms"
-          variant="primary"
-          size="md"
-          shape="rounded"
-          className="footer__link-btn"
-        >
-          Legal
-        </Button>
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          shape="rounded"
-          className="footer__link-btn"
-          id="contactUsBtn"
-        >
-          Contact Us
-        </Button>
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          shape="rounded"
-          className="footer__link-btn"
-          id="cookieSettings"
-        >
-          Cookie Settings
-        </Button>
-      </div>
-      <p class="footer__copyright">
-        © {new Date().getFullYear()} <strong>{BRAND_CONFIG.name}</strong>. All rights reserved.
-      </p>
-    </div>
+    <!-- Navigation Links -->
+    <nav class="footer__nav" aria-label="Footer navigation">
+      {footerLinks.map((link, index) => (
+        <>
+          {link.isButton ? (
+            <button
+              type="button"
+              class="footer__link"
+              id={link.id}
+            >
+              {link.label}
+            </button>
+          ) : (
+            <a href={link.href} class="footer__link">
+              {link.label}
+            </a>
+          )}
+          {index < footerLinks.length - 1 && (
+            <span class="footer__nav-dot" aria-hidden="true"></span>
+          )}
+        </>
+      ))}
+    </nav>
+
+    <!-- Copyright -->
+    <p class="footer__copyright">
+      © {new Date().getFullYear()} <strong>{BRAND_CONFIG.name}</strong>. All rights reserved.
+    </p>
   </div>
 </footer>
 
@@ -78,184 +74,236 @@ const { variant = 'dark' } = Astro.props;
   /* ========== FOOTER BASE ========== */
   .footer {
     width: 100%;
-    padding: var(--space-3xl) 0 var(--space-xl);
+    padding: var(--space-4xl) 0 var(--space-lg);
+    text-align: center;
   }
 
   /* ========== VARIANT - DARK ========== */
   .footer--dark {
-    color: var(--color-Text-50);
+    background: var(--color-Background-50);
+    color: var(--color-Text-700);
   }
 
-  .footer--dark .footer__description {
-    color: var(--color-Text-400);
+  .footer--dark .footer__brand-name {
+    color: var(--color-Text-800);
+  }
+
+  .footer--dark .footer__link {
+    color: var(--color-Text-700);
+  }
+
+  .footer--dark .footer__link:hover {
+    color: var(--color-Text-900);
+  }
+
+  .footer--dark .footer__nav-dot {
+    background: var(--color-Primary-500);
   }
 
   .footer--dark .footer__copyright {
     color: var(--color-Text-500);
   }
 
-  .footer--dark .footer__copyright strong {
-    color: var(--color-Text-300);
-  }
-
-  .footer--dark .footer__bottom {
-    border-top: var(--border-width) solid var(--color-BackgroundDark-800);
+  .footer--dark .footer__copyright:hover {
+    color: var(--color-Text-900);
   }
 
   /* ========== VARIANT - LIGHT ========== */
+  /* Used with animated canvas - needs contrast for varying backgrounds */
   .footer--light {
     color: var(--color-Text-700);
   }
 
-  .footer--light .footer__description {
+  .footer--light .footer__brand-name {
+    color: var(--color-Text-800);
+  }
+
+  .footer--light .footer__link {
     color: var(--color-Text-600);
+  }
+
+  .footer--light .footer__link:hover {
+    color: var(--color-Text-900);
+  }
+
+  .footer--light .footer__nav-dot {
+    background: var(--color-Primary-500);
   }
 
   .footer--light .footer__copyright {
-    color: var(--color-Text-600);
+    color: var(--color-Text-500);
   }
 
-  .footer--light .footer__copyright strong {
-    color: var(--color-Text-700);
+  .footer--light .footer__copyright:hover {
+    color: var(--color-Text-900);
   }
 
-  .footer--light .footer__bottom {
-    border-top: var(--border-width) solid var(--color-Neutral-200);
+  /* ========== REVEAL ACTIVE STATE ========== */
+  /* When cursor is interacting with the canvas reveal */
+  .footer--light.footer--reveal-active .footer__link:hover {
+    color: var(--color-White);
+    text-shadow:
+      -1px -1px 0 var(--color-Text-900),
+      1px -1px 0 var(--color-Text-900),
+      -1px 1px 0 var(--color-Text-900),
+      1px 1px 0 var(--color-Text-900);
+  }
+
+  .footer--light.footer--reveal-active .footer__copyright:hover {
+    color: var(--color-White);
+    text-shadow:
+      -1px -1px 0 var(--color-Text-900),
+      1px -1px 0 var(--color-Text-900),
+      -1px 1px 0 var(--color-Text-900),
+      1px 1px 0 var(--color-Text-900);
   }
 
   /* ========== CONTAINER ========== */
   .footer__container {
-    max-width: var(--container-7xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+    max-width: 100%;
+    width: 100%;
     margin: 0 auto;
     padding-left: var(--space-xl);
     padding-right: var(--space-xl);
   }
 
-  /* ========== FOOTER TOP ========== */
-  .footer__top {
-    display: flex;
-    justify-content: center;
-    margin-bottom: var(--space-3xl);
-  }
-
+  /* ========== BRAND SECTION ========== */
   .footer__brand-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    max-width: var(--container-lg);
+    gap: var(--space-xl);
   }
 
-  .footer__brand {
-    margin-bottom: var(--space-lg);
+  .footer__logo {
+    width: 180px;
+    height: auto;
   }
 
-  /* Typography inherited from global - only spacing/color overrides */
   .footer__brand-name {
+    font-family: var(--font-heading);
+    font-size: var(--text-6xl);
+    font-weight: var(--font-bold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
     margin: 0;
   }
 
-  .footer__description {
-    line-height: var(--leading-relaxed);
-    margin: 0;
-  }
-
-  /* ========== FOOTER BOTTOM ========== */
-  .footer__bottom {
-    padding-top: var(--space-xl);
+  /* ========== NAVIGATION ========== */
+  .footer__nav {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 0;
-    text-align: center;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
+  .footer__link {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--font-extrabold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+  }
+
+  .footer__nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ========== COPYRIGHT ========== */
   .footer__copyright {
     font-size: var(--text-sm);
+    font-style: italic;
     margin: 0;
-  }
-
-  .footer__links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-sm);
-    justify-content: center;
-    margin-bottom: var(--space-lg);
-  }
-
-  /* Button customization for footer context */
-  .footer__link-btn {
-    backdrop-filter: blur(var(--glass-surface-blur));
+    margin-top: var(--space-sm);
   }
 
   /* ========== RESPONSIVE ========== */
   @media (max-width: 768px) {
     .footer {
-      padding: var(--space-2xl) 0 var(--space-lg);
+      padding: var(--space-3xl) 0 var(--space-xl);
     }
 
-    .footer__top {
-      margin-bottom: var(--space-2xl);
+    .footer__brand-name {
+      font-size: var(--text-2xl);
     }
 
-    .footer__description {
-      font-size: var(--text-sm);
-      line-height: var(--leading-normal);
+    .footer__nav {
+      gap: var(--space-md);
+    }
+
+    .footer__link {
+      font-size: var(--text-xs);
+    }
+
+    .footer__nav-dot {
+      width: 6px;
+      height: 6px;
     }
   }
 
-  @media (max-width: 400px) {
+  @media (max-width: 480px) {
     .footer {
-      padding: var(--space-xl) 0 var(--space-md);
+      padding: var(--space-2xl) 0 var(--space-lg);
     }
 
-    .footer__top {
-      margin-bottom: var(--space-lg);
-    }
-
-    .footer__brand-section {
-      padding: 0 var(--space-sm);
+    .footer__logo {
+      width: 60px;
     }
 
     .footer__brand-name {
       font-size: var(--text-xl);
+      letter-spacing: 0.05em;
     }
 
-    .footer__description {
-      font-size: var(--text-sm);
+    .footer__nav {
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .footer__nav-dot {
+      display: none;
     }
   }
 
   @media (max-width: 250px) {
     .footer {
-      padding: var(--space-lg) 0 var(--space-sm);
+      padding: var(--space-xl) 0 var(--space-md);
     }
 
-    .footer__top {
-      margin-bottom: var(--space-md);
-    }
-
-    .footer__brand-section {
-      padding: 0 var(--space-xs);
+    .footer__logo {
+      width: 48px;
     }
 
     .footer__brand-name {
       font-size: var(--text-lg);
     }
 
-    .footer__description {
+    .footer__link {
       font-size: var(--text-xs);
     }
 
     .footer__copyright {
       font-size: var(--text-xs);
-      line-height: var(--leading-tight);
     }
   }
 
   /* ========== REDUCED MOTION ========== */
   @media (prefers-reduced-motion: reduce) {
-    .footer__link-btn {
+    .footer__link {
       transition: none;
     }
   }
@@ -263,7 +311,7 @@ const { variant = 'dark' } = Astro.props;
 
 <script>
   // Wait for DOM to be ready before attaching event listeners
-  document.addEventListener('DOMContentLoaded', () => {
+  function initFooterButtons() {
     // Contact Us button - opens contact popup
     const contactUsBtn = document.getElementById('contactUsBtn');
     if (contactUsBtn) {
@@ -285,5 +333,30 @@ const { variant = 'dark' } = Astro.props;
         }
       });
     }
+  }
+
+  // Detect when cursor is interacting with reveal canvas
+  function initRevealDetection() {
+    const footerMask = document.querySelector('.footer-mask');
+    const footer = document.querySelector('.footer--light');
+
+    if (!footerMask || !footer) return;
+
+    footerMask.addEventListener('mouseenter', () => {
+      footer.classList.add('footer--reveal-active');
+    });
+
+    footerMask.addEventListener('mouseleave', () => {
+      footer.classList.remove('footer--reveal-active');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initFooterButtons();
+    initRevealDetection();
+  });
+  document.addEventListener('astro:page-load', () => {
+    initFooterButtons();
+    initRevealDetection();
   });
 </script>
