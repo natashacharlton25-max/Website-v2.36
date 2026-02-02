@@ -1450,34 +1450,28 @@ const pageDescription = 'Search our resources, insights, tools, and more.';
 
         this.noResults.classList.remove('show');
 
-        // Category colors
-        const colors = {
-          'Insight': { bg: 'linear-gradient(135deg, #c9a97c 0%, #a67c4a 100%)', badge: '#a67c4a' },
-          'Page': { bg: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)', badge: '#6b7280' },
-          'Resource': { bg: 'linear-gradient(135deg, #a8c4a0 0%, #7a9972 100%)', badge: '#7a9972' },
-          'Service': { bg: 'linear-gradient(135deg, #93b8d4 0%, #5a8ab5 100%)', badge: '#5a8ab5' },
-          'Project': { bg: 'linear-gradient(135deg, #c4a98a 0%, #9a7a5a 100%)', badge: '#9a7a5a' }
-        };
-
-        // Build HTML string
+        // Build HTML string with proper CSS classes
         let html = '';
         results.forEach(item => {
-          const color = colors[item.category] || colors['Resource'];
+          const categorySlug = item.category.toLowerCase();
           const iconSvg = this.getIconForCategory(item.category);
-          const svgWithStyle = iconSvg.replace('fill="currentColor"', 'style="width:2.5rem;height:2.5rem;fill:white"');
 
           html += `
-            <a href="${item.url}" style="display:flex;align-items:center;gap:1.5rem;padding:1.5rem 2rem;background:white;border-radius:1.5rem;border:2px solid #e5e7eb;text-decoration:none;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
-              <div style="width:80px;height:80px;min-width:80px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);background:${color.bg};">
-                ${svgWithStyle}
+            <a href="${item.url}" class="result-item result-item--${categorySlug}">
+              <div class="result-item__icon">
+                ${iconSvg}
               </div>
-              <div style="flex:1;min-width:0;">
-                <span style="display:inline-block;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:white;margin-bottom:8px;background:${color.badge};">${item.category}</span>
-                <h3 style="font-size:20px;font-weight:700;color:#1f2937;margin:0 0 8px 0;line-height:1.25;">${item.title}</h3>
-                <p style="font-size:16px;color:#6b7280;margin:0;line-height:1.6;">${item.description}</p>
+              <div class="result-item__main">
+                <div class="result-item__breadcrumb">
+                  <span class="result-item__category">${item.category}</span>
+                </div>
+                <h3 class="result-item__title">${item.title}</h3>
+                <p class="result-item__desc">${item.description}</p>
               </div>
-              <span style="color:#9ca3af;flex-shrink:0;">
-                <svg viewBox="0 0 256 256" style="width:24px;height:24px;fill:currentColor;"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg>
+              <span class="result-item__arrow">
+                <svg viewBox="0 0 256 256" fill="currentColor">
+                  <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/>
+                </svg>
               </span>
             </a>
           `;
