@@ -2,7 +2,10 @@
 /**
  * Insight/Blog Post Page
  * Dynamic page for individual insight articles
+ * Prerendered - generates static HTML during build
  */
+export const prerender = true;
+
 import BaseLayout from '../../Layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import type { ImageMetadata } from 'astro';
@@ -18,15 +21,26 @@ import {
   getSlugFromId
 } from '../../lib/utils/related-content';
 
+// Generate static paths for all insights
 export async function getStaticPaths() {
-  const insights = await getCollection('insights');
-  return insights.map((entry) => ({
+  const insightEntries = await getCollection('insights');
+  return insightEntries.map(entry => ({
     params: { slug: getSlugFromId(entry.id) },
-    props: { entry },
+    props: { entry }
   }));
 }
 
+// Get entry from props (prerendered)
 const { entry } = Astro.props;
+const slug = Astro.params.slug;
+
+// Fetch all insights for related content
+const allInsights = await getCollection('insights');
+
+// Redirect if not found (shouldn't happen with prerender)
+if (!entry) {
+  return Astro.redirect('/insights');
+}
 const { Content } = await entry.render();
 const { linkedAssets } = entry.data;
 
@@ -43,7 +57,6 @@ const author = authorEntry?.data;
 
 // Get suggested posts using smart content matching
 // Priority: tag similarity > same category > latest posts (fallback)
-const allInsights = await getCollection('insights');
 const suggestedEntries = getSuggestedContent(entry, allInsights, {
   maxItems: 3,
   getSlug: (item) => getSlugFromId(item.id)

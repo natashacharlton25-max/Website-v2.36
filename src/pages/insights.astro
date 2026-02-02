@@ -74,13 +74,16 @@ const presentationArticles = insightPresentations.map((entry) => {
 const articles = [...insightArticles, ...presentationArticles]
   .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
 
-// Get unique categories from articles and merge with base filters
+// Get unique categories from articles and merge with base filters (avoiding duplicates)
 const categories = [...new Set(articles.map(a => a.category))];
 const dynamicFilters = categories.map(cat => ({
   id: cat.toLowerCase().replace(/\s+/g, '-'),
   label: cat,
 }));
-const filterCategories = [...filterCategoriesBase, ...dynamicFilters];
+// Filter out dynamic filters that already exist in base filters
+const existingIds = new Set(filterCategoriesBase.map(f => f.id));
+const uniqueDynamicFilters = dynamicFilters.filter(f => !existingIds.has(f.id));
+const filterCategories = [...filterCategoriesBase, ...uniqueDynamicFilters];
 ---
 
 <BaseLayout

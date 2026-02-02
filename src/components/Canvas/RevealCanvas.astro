@@ -173,7 +173,8 @@ const {
       proximityHandler(x, y);
     }
 
-    function touchMoveHandler(event: TouchEvent) {
+    function touchHandler(event: TouchEvent) {
+      if (event.touches.length === 0) return;
       const rect = canvas.getBoundingClientRect();
       const touch = event.touches[0];
       const x = touch.clientX - rect.left;
@@ -185,10 +186,14 @@ const {
       if (!context) return;
       context.clip();
       const { naturalHeight, naturalWidth } = image;
-      const scale = canvas.width / naturalWidth;
-      const w = canvas.width;
+      // Use "cover" behavior - scale to fill entire canvas
+      const scaleX = canvas.width / naturalWidth;
+      const scaleY = canvas.height / naturalHeight;
+      const scale = Math.max(scaleX, scaleY);
+      const w = naturalWidth * scale;
       const h = naturalHeight * scale;
-      const x = 0;
+      // Center the image
+      const x = (canvas.width - w) / 2;
       const y = (canvas.height - h) / 2;
       context.drawImage(image, 0, 0, naturalWidth, naturalHeight, x, y, w, h);
     }
@@ -233,7 +238,9 @@ const {
     window.addEventListener('resize', resizeHandler);
     if (parent) {
       parent.addEventListener('mousemove', mouseMoveHandler);
-      parent.addEventListener('touchmove', touchMoveHandler);
+      // Touch events for mobile - use passive: false for better responsiveness
+      parent.addEventListener('touchstart', touchHandler, { passive: true });
+      parent.addEventListener('touchmove', touchHandler, { passive: true });
     }
 
     // Initialize

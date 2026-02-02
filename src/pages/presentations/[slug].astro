@@ -1,4 +1,10 @@
 ---
+/**
+ * Presentation Page
+ * Prerendered - generates static HTML during build
+ */
+export const prerender = true;
+
 import BaseLayout from '../../Layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import Reader from '../../components/Presentation/Reader.astro';
@@ -10,23 +16,32 @@ const getSlug = (id: string) => {
   return normalized.split(/[\\/]/).pop() || id;
 };
 
+// Generate static paths for all presentations
 export async function getStaticPaths() {
-  // Define getSlug locally for getStaticPaths scope
-  const getSlugFromId = (id: string) => {
-    const normalized = id.replace(/[\\/]index\.md$/, '');
-    return normalized.split(/[\\/]/).pop() || id;
-  };
-
-  const presentations = await getCollection('presentations');
-  return presentations.map((entry) => ({
-    params: { slug: getSlugFromId(entry.id) },
-    props: { entry },
-  }));
+  const presentationEntries = await getCollection('presentations');
+  return presentationEntries.map(entry => {
+    const normalized = entry.id.replace(/[\\/]index\.md$/, '');
+    const slug = normalized.split(/[\\/]/).pop() || entry.id;
+    return {
+      params: { slug },
+      props: { entry }
+    };
+  });
 }
 
+// Get entry from props (prerendered)
 const { entry } = Astro.props;
+const currentSlug = Astro.params.slug;
+
+// Fetch all presentations for related content
+const allPresentations = await getCollection('presentations');
+
+// Redirect if not found (shouldn't happen with prerender)
+if (!entry) {
+  return Astro.redirect('/insights');
+}
+
 const presentation = entry.data;
-const currentSlug = getSlug(entry.id);
 
 // Get author data if specified
 let author = null;
@@ -44,7 +59,6 @@ if (presentation.author) {
 }
 
 // Get recommended presentations (prioritize matching tags, fall back to same category)
-const allPresentations = await getCollection('presentations');
 const currentTags = presentation.tags || [];
 
 // Score presentations by relevance (tag matches + category bonus)

@@ -4,6 +4,8 @@
  * Magazine-style page for curated project collections
  * Uses reusable section components like index.astro and about.astro
  */
+export const prerender = true;
+
 import BaseLayout from '../../Layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import FooterWithMask from '../../components/Footer/FooterWithMask.astro';
@@ -53,12 +55,14 @@ export async function getStaticPaths() {
 }
 
 const { slug, entry } = Astro.props;
-const project = { slug, ...entry.data };
-const whoForImage = entry.data.whoForImage;
 
-if (!project) {
+// Handle missing entry gracefully
+if (!entry || !entry.data) {
   return Astro.redirect('/projects');
 }
+
+const project = { slug, ...entry.data };
+const whoForImage = entry.data.whoForImage;
 
 // Get full resource data with cardImage for ProductCard
 const resources = project.resourceSlugs.map((resourceSlug: string) => {

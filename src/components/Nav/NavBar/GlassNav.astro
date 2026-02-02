@@ -21,6 +21,7 @@ import '../../../styles/components/nav/GlassNav.css';
     <!-- Logo -->
     <a href="/" class="nav-logo">
       <img src="/Logo/Nav-Logo.png" alt="Walking With A Smile" class="logo-image" />
+      <img src="/Logo/Favicon.png" alt="Walking With A Smile" class="logo-favicon" />
     </a>
 
     <!-- Mobile Cart Icon -->
@@ -58,6 +59,12 @@ import '../../../styles/components/nav/GlassNav.css';
         <button class="nav-icon-btn nav-icon-btn--lottie" data-action="open-a11y-panel" aria-label="Accessibility">
           <LottieIcon src="/Icons/Animated Icons/Visibility V3/visibility-V3.json" size={24} class="nav-lottie-icon" />
           <Icon name="eye-fill" size={24} class="nav-static-icon" />
+        </button>
+
+        <!-- Contact/Email Icon -->
+        <button class="nav-icon-btn nav-icon-btn--lottie" data-action="open-contact" aria-label="Contact Us">
+          <LottieIcon src="/Icons/Animated Icons/Mail/mail.json" size={24} class="nav-lottie-icon" />
+          <Icon name="envelope-fill" size={24} class="nav-static-icon" />
         </button>
       </div>
 
@@ -108,16 +115,24 @@ import '../../../styles/components/nav/GlassNav.css';
   ))}
 
   <!-- Mobile Menu Items -->
+  <div class="mobile-menu-icons mobile-only">
+    <button class="mobile-menu-icon-btn" data-action="open-search" aria-label="Search">
+      <Icon name="magnifying-glass-fill" size={24} />
+    </button>
+    <button class="mobile-menu-icon-btn" data-action="open-contact" aria-label="Contact Us">
+      <Icon name="envelope-fill" size={24} />
+    </button>
+    <button class="mobile-menu-icon-btn" data-action="open-a11y-panel" aria-label="Accessibility">
+      <Icon name="eye-fill" size={24} />
+    </button>
+    <a href="/cart" class="mobile-menu-icon-btn mobile-menu-cart" aria-label="Cart">
+      <Icon name="basket-fill" size={24} />
+    </a>
+  </div>
   <ul class="mobile-menu-list mobile-only">
     {MAIN_NAV_LINKS.map(link => (
       <li><a href={link.href}>{link.text}</a></li>
     ))}
-    <li class="mobile-settings">
-      <a href="/accessibility-settings">
-        <Icon name="gear-fill" size={20} />
-        Settings
-      </a>
-    </li>
   </ul>
 
 </nav>
@@ -154,18 +169,13 @@ import '../../../styles/components/nav/GlassNav.css';
       menuOpen = !menuOpen;
 
       if (menuOpen) {
-        // Calculate scrollbar width to prevent layout shift
-        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-
         hamburgerBtn.classList.add('active');
         nav?.classList.add('menu-opened');
         document.body.style.overflow = 'hidden';
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
       } else {
         hamburgerBtn.classList.remove('active');
         nav?.classList.remove('menu-opened');
         document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
       }
     });
 
@@ -177,7 +187,6 @@ import '../../../styles/components/nav/GlassNav.css';
         hamburgerBtn?.classList.remove('active');
         nav?.classList.remove('menu-opened');
         document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
       });
     });
 
@@ -188,7 +197,6 @@ import '../../../styles/components/nav/GlassNav.css';
         hamburgerBtn?.classList.remove('active');
         nav?.classList.remove('menu-opened');
         document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
       }
     });
 
@@ -271,12 +279,21 @@ import '../../../styles/components/nav/GlassNav.css';
 
     // Handle special actions in menu items
 
+    // Helper to close mobile menu
+    function closeMobileMenu() {
+      menuOpen = false;
+      hamburgerBtn?.classList.remove('active');
+      nav?.classList.remove('menu-opened');
+      document.body.style.overflow = '';
+    }
+
     // Accessibility panel
     const a11yLinks = document.querySelectorAll('[data-action="open-a11y-panel"]');
     a11yLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         closeAllMenus();
+        closeMobileMenu();
         // Open the accessibility panel
         const panel = document.getElementById('a11y-panel');
         const backdrop = document.querySelector('.a11y-panel__backdrop') as HTMLElement;
@@ -317,8 +334,22 @@ import '../../../styles/components/nav/GlassNav.css';
       link.addEventListener('click', (e) => {
         e.preventDefault();
         closeAllMenus();
+        closeMobileMenu();
         if ((window as any).openSearchOverlay) {
           (window as any).openSearchOverlay();
+        }
+      });
+    });
+
+    // Open contact popup
+    const contactLinks = document.querySelectorAll('[data-action="open-contact"]');
+    contactLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeAllMenus();
+        closeMobileMenu();
+        if ((window as any).openContactPopup) {
+          (window as any).openContactPopup();
         }
       });
     });

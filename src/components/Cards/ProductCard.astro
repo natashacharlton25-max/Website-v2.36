@@ -55,12 +55,12 @@ const hasImage = cardImage !== undefined;
         </svg>
       </div>
     )}
-    <div class="product-card__badge">
-      <Badge type={type} shape="pill" variant="fill" size="sm" shadow="drop"/>
-    </div>
   </div>
 
   <div class="product-card__info">
+    <div class="product-card__badge">
+      <Badge type={type} shape="pill" variant="fill" size="sm" shadow="drop"/>
+    </div>
     <div class="product-card__category">{category}</div>
     <h3 class="product-card__name">{name}</h3>
     <p class="product-card__description">{description}</p>
@@ -113,7 +113,6 @@ const hasImage = cardImage !== undefined;
     color: inherit;
     border: 2px solid;
     border: 1px solid color-mix(in oklch, var(--color-Primary-700) 35%, transparent);
-    padding-top: var(--space-lg);/* Override .card padding for custom layout */
   }
 
   .product-card:hover {
@@ -161,9 +160,7 @@ const hasImage = cardImage !== undefined;
  
 
   .product-card__badge {
-    position: absolute;
-    top: var(--space-md);
-    left: var(--space-md);
+    margin-bottom: var(--space-sm);
   }
   
   .product-card:hover .product-card__image {
@@ -247,6 +244,21 @@ const hasImage = cardImage !== undefined;
   @media (max-width: 767px) {
     .product-card {
       width: calc(100% - 1.5em - 4px);
+      margin: 0.5em;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .product-card {
+      width: calc(100% - 1em - 4px);
+      margin: 0.35em;
+    }
+  }
+
+  @media (max-width: 350px) {
+    .product-card {
+      width: calc(100% - 0.5em - 4px);
+      margin: 0.25em;
     }
   }
 
@@ -317,6 +329,144 @@ const hasImage = cardImage !== undefined;
 
     .product-card__cta {
       width: 100%;
+    }
+  }
+
+  /* ========== RESPONSIVE - SMALL SCREENS: Center content ========== */
+  @media (max-width: 600px) {
+    .product-card {
+      border-radius: 1.5rem;
+    }
+
+    .product-card__image {
+      border-radius: 1.25rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .product-card {
+      text-align: center;
+      border-radius: 1.5rem;
+    }
+
+    .product-card__badge {
+      display: flex;
+      justify-content: center;
+    }
+
+    .product-card__image {
+      border-radius: 1.25rem;
+    }
+
+    .product-card__info {
+      text-align: center;
+    }
+
+    .product-card__price {
+      justify-content: center;
+    }
+
+    .product-card__cta {
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .product-card {
+      border-radius: 1.25rem;
+    }
+
+    .product-card__image {
+      border-radius: 1rem;
+    }
+  }
+
+  @media (max-width: 350px) {
+    .product-card {
+      border-radius: 1.25rem;
+    }
+
+    .product-card__image {
+      border-radius: 1rem;
+    }
+
+    .product-card__name {
+      font-size: var(--text-base);
+    }
+
+    .product-card__description {
+      font-size: var(--text-xs);
+    }
+
+    .product-card__category {
+      font-size: calc(var(--text-xs) * 0.9);
+    }
+  }
+
+  @media (max-width: 300px) {
+    .product-card {
+      padding: var(--space-sm);
+      border-radius: 1rem;
+    }
+
+    .product-card__badge {
+      margin-bottom: var(--space-xs);
+    }
+
+    .product-card__image {
+      border-radius: 0.75rem;
+    }
+
+    .product-card__info {
+      padding: var(--space-xs);
+    }
+
+    .product-card__name {
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-xs);
+    }
+
+    .product-card__description {
+      font-size: calc(var(--text-xs) * 0.9);
+      margin-bottom: var(--space-sm);
+    }
+  }
+
+  @media (max-width: 200px) {
+    .product-card {
+      padding: var(--space-xs);
+      border-radius: 0.75rem;
+    }
+
+    .product-card__image {
+      aspect-ratio: 4 / 3;
+      border-radius: 0.5rem;
+    }
+
+    .product-card__badge {
+      margin-bottom: calc(var(--space-xs) * 0.5);
+    }
+
+    .product-card__placeholder svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .product-card__info {
+      margin-top: var(--space-sm);
+      padding: var(--space-xs);
+    }
+
+    .product-card__name {
+      font-size: var(--text-xs);
+    }
+
+    .product-card__description {
+      display: none;
+    }
+
+    .product-card__footer {
+      padding-top: var(--space-xs);
     }
   }
 

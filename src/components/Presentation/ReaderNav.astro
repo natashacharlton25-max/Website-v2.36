@@ -82,6 +82,32 @@ const {
       </button>
     </div>
 
+    {/* Info button - positioned at top-right corner */}
+    <button
+      type="button"
+      class="nav-info-btn"
+      data-info-toggle
+      aria-label="View instructions"
+      title="Instructions"
+    >
+      <Icon name="info-fill" size={20} />
+    </button>
+    <div class="info-tooltip" data-info-tooltip>
+      <div class="info-tooltip__title">Viewing Tips</div>
+      <div class="info-tooltip__item">
+        <strong>Full Screen:</strong> Press <kbd>F11</kbd> for immersive reading
+      </div>
+      <div class="info-tooltip__item">
+        <strong>Navigate:</strong> Use arrow keys or swipe left/right
+      </div>
+      <div class="info-tooltip__item">
+        <strong>Autoplay:</strong> Press <kbd>A</kbd> or click the play button
+      </div>
+      <div class="info-tooltip__item">
+        <strong>Expand Nav:</strong> Click <kbd>+</kbd> once to show all sections
+      </div>
+    </div>
+
     {/* Row 2: Progress circle + Section name */}
     <div class="nav-row nav-row--main">
       <div class="progress-circle-wrapper" data-progress-wrapper>
@@ -205,35 +231,6 @@ const {
       />
     </div>
 
-    {/* Row 5: Keyboard shortcuts hint */}
-    <div class="nav-row nav-row--shortcuts">
-      <button
-        type="button"
-        class="shortcuts-btn"
-        data-shortcuts-toggle
-        aria-label="Keyboard shortcuts"
-        title="Keyboard shortcuts"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 16v-4M12 8h.01"/>
-        </svg>
-        <span>Shortcuts</span>
-      </button>
-      <div class="shortcuts-tooltip" data-shortcuts-tooltip>
-        <div class="shortcuts-tooltip__title">Keyboard Shortcuts</div>
-        <div class="shortcuts-tooltip__item">
-          <kbd>←</kbd><kbd>→</kbd> Navigate sections
-        </div>
-        <div class="shortcuts-tooltip__item">
-          <kbd>Space</kbd> Next section
-        </div>
-        <div class="shortcuts-tooltip__item">
-          <kbd>A</kbd> Toggle autoplay
-        </div>
-      </div>
-    </div>
-
     {/* Section dropdown (expanded only) */}
     {
       variant === 'detailed' && (
@@ -333,7 +330,6 @@ const {
       this.menuBtn = nav.querySelector('[data-menu-toggle]');
       this.menuIcon = nav.querySelector('#reader-nav-menu-icon');
       this.plusIcon = nav.querySelector('#reader-nav-plus-icon');
-
 
       // Get autoplay interval from data attribute (seconds -> ms)
       this.autoplayInterval = (parseInt(nav.dataset.autoplayInterval || '5', 10)) * 1000;

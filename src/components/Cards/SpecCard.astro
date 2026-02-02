@@ -25,6 +25,8 @@ const { iconName, label, value, variant = 'primary' } = Astro.props;
   .spec-card {
     display: flex;
     align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
     border: 1px solid var(--color-Neutral-200);
     border-radius: var(--border-radius-md);
     transition: all var(--transition-base);
@@ -35,9 +37,8 @@ const { iconName, label, value, variant = 'primary' } = Astro.props;
   }
 
   .spec-card__icon {
-    flex-shrink: 1;
+    flex-shrink: 0;
     color: var(--color-Primary-800);
-
   }
 
   .spec-card__icon :global(.icon) {
@@ -72,5 +73,102 @@ const { iconName, label, value, variant = 'primary' } = Astro.props;
     color: var(--color-Text-700);
   }
 
+  /* ========== RESPONSIVE - TABLET ========== */
+  @media (max-width: 768px) {
+    .spec-card__icon :global(.icon),
+    .spec-card__icon :global(svg) {
+      width: 30px;
+      height: 30px;
+    }
+
+    .spec-card__label {
+      font-size: var(--text-sm);
+    }
+
+    .spec-card__value {
+      font-size: var(--text-xs);
+    }
+  }
+
+  /* ========== RESPONSIVE - MOBILE ========== */
+  @media (max-width: 640px) {
+    .spec-card__icon :global(.icon),
+    .spec-card__icon :global(svg) {
+      width: 28px;
+      height: 28px;
+    }
+
+    .spec-card__label {
+      font-size: calc(var(--text-sm) * 0.9);
+    }
+
+    .spec-card__value {
+      font-size: var(--text-xs);
+    }
+  }
+
+  /* ========== RESPONSIVE - SMALL (400px) - STACK ICON ========== */
+  @media (max-width: 400px) {
+    .spec-card {
+      flex-direction: column;
+      text-align: center;
+      padding: var(--space-sm);
+      gap: var(--space-xs);
+    }
+
+    .spec-card__icon :global(.icon),
+    .spec-card__icon :global(svg) {
+      width: 26px;
+      height: 26px;
+    }
+
+    .spec-card__content {
+      align-items: center;
+      text-align: center;
+    }
+  }
+
+  /* ========== RESPONSIVE - VERY SMALL (300px) ========== */
+  @media (max-width: 300px) {
+    .spec-card {
+      border-radius: 0.75rem;
+    }
+
+    .spec-card__icon :global(.icon),
+    .spec-card__icon :global(svg) {
+      width: 24px;
+      height: 24px;
+    }
+
+    .spec-card__label {
+      font-size: var(--text-xs);
+    }
+
+    .spec-card__value {
+      font-size: calc(var(--text-xs) * 0.9);
+    }
+  }
+
+  /* ========== RESPONSIVE - TINY (200px) ========== */
+  @media (max-width: 200px) {
+    .spec-card {
+      padding: var(--space-xs);
+      border-radius: 0.5rem;
+    }
+
+    .spec-card__icon :global(.icon),
+    .spec-card__icon :global(svg) {
+      width: 20px;
+      height: 20px;
+    }
+
+    .spec-card__label {
+      font-size: calc(var(--text-xs) * 0.85);
+    }
+
+    .spec-card__value {
+      font-size: calc(var(--text-xs) * 0.8);
+    }
+  }
 
 </style>

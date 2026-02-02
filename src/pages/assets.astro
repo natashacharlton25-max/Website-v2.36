@@ -30,13 +30,16 @@ const assets = assetsEntries.map(entry => ({
   slug: getSlug(entry.id),
 }));
 
-// Get unique types from assets and merge with base filters
+// Get unique types from assets and merge with base filters (avoiding duplicates)
 const types = [...new Set(assets.map(a => a.type))];
 const dynamicFilters = types.map(type => ({
   id: type.toLowerCase().replace(/\s+/g, '-'),
   label: type.charAt(0).toUpperCase() + type.slice(1),
 }));
-const filterCategories = [...filterCategoriesBase, ...dynamicFilters];
+// Filter out dynamic filters that already exist in base filters
+const existingIds = new Set(filterCategoriesBase.map(f => f.id));
+const uniqueDynamicFilters = dynamicFilters.filter(f => !existingIds.has(f.id));
+const filterCategories = [...filterCategoriesBase, ...uniqueDynamicFilters];
 ---
 
 <BaseLayout

@@ -93,6 +93,18 @@ const insightsCollection = defineCollection({
       type: z.string().optional(), // "workbook", "guide", "template", etc.
     })).optional(),
 
+    // Reader mode - optional scroll-driven presentation view
+    enableReader: z.boolean().optional(),
+    readerSections: z.array(z.object({
+      id: z.string(),
+      title: z.string(),
+      body: z.string().optional(),
+      layout: z.enum(['text-only', 'image-text', 'full-width-image', 'quote', 'stats', 'gallery', 'callout', 'compare']).optional(),
+      alignment: z.enum(['left', 'right', 'center']).optional(),
+      image: z.string().optional(),
+      imagePosition: z.enum(['left', 'right']).optional(),
+    })).optional(),
+
     // SEO overrides (optional - falls back to title/description if not set)
     seoTitle: z.string().optional(),
     seoDescription: z.string().optional(),

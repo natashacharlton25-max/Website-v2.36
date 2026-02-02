@@ -1,24 +1,34 @@
 ---
+export const prerender = true;
+
 import { getCollection } from 'astro:content';
 import LegalLayout from '../../components/Legal/LegalLayout.astro';
 
+// Helper to get slug from entry.id (handles .md extension)
+const getSlugFromId = (id: string) => {
+  return id.replace(/\.md$/, '');
+};
+
+// Generate static paths for all legal pages
 export async function getStaticPaths() {
   const legalPages = await getCollection('legal');
-
-  return legalPages.map(page => {
-    // Remove .md extension from id to get the slug
-    const slug = page.id.replace(/\.md$/, '');
-
-    return {
-      params: { slug },
-      props: { page },
-    };
-  });
+  return legalPages.map(page => ({
+    params: { slug: page.id.replace(/\.md$/, '') },
+    props: { page }
+  }));
 }
 
+// Get page from props (prerendered)
 const { page } = Astro.props;
+const slug = Astro.params.slug;
+
+// Redirect if page not found (shouldn't happen with prerender)
+if (!page) {
+  return Astro.redirect('/legal/terms');
+}
+
 const { Content } = await page.render();
-const currentSlug = page.id.replace(/\.md$/, '');
+const currentSlug = getSlugFromId(page.id);
 ---
 
 <LegalLayout
