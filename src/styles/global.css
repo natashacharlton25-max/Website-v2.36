@@ -42,21 +42,16 @@
 @import './themes/Preview/theme-cards.css'; /* Theme card styles for accessibility panel */
 @import './components/a11y-panel.css';     /* Accessibility panel styles */
 @import './a11y/components/hero-section.css';        /* Hero section a11y overrides */
+@import './responsive/index.css';                    /* Responsive breakpoints (loaded last) */
 /* A11y color theme files (themes/a11y/*.css) are dynamically loaded by ThemeSwitcher.js */
 
 /* ========== BASE STYLES ========== */
 
 html {
   font-size: 16px;
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth → base/reset.css */
+  /* prefers-reduced-motion scroll → a11y/motion/reduced-motion.css */
   overflow-x: hidden;
-}
-
-/* Disable smooth scroll for users who prefer reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
 }
 
 /* Smooth page load - prevents flash */
@@ -84,17 +79,7 @@ body {
   position: relative;
 }
 
-/* Universal box-sizing and overflow prevention */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-/* Prevent images and media from overflowing */
-img, picture, video, canvas, svg {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
+/* box-sizing + media reset → base/reset.css */
 
 /* Prevent long words from breaking layout */
 p, h1, h2, h3, h4, h5, h6 {
@@ -256,26 +241,7 @@ a:hover:not(.btn) {
   box-shadow: var(--shadow-xl);
 }
 
-/* Reduced motion: disable ALL card hover effects - no visual change on hover */
-#a11y-content-wrapper.a11y-reduce-motion .card {
-  transition: none !important;
-}
-
-#a11y-content-wrapper.a11y-reduce-motion .card:hover {
-  transform: none !important;
-  box-shadow: var(--shadow) !important; /* Keep base shadow, no change on hover */
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card {
-    transition: none;
-  }
-
-  .card:hover {
-    transform: none;
-    box-shadow: var(--shadow); /* Keep base shadow, no change on hover */
-  }
-}
+/* Reduced motion for cards → a11y/motion/reduced-motion.css */
 
 .card-header {
   margin-bottom: var(--space-md);
@@ -481,73 +447,12 @@ a:hover:not(.btn) {
   filter: var(--svg-hover-filter);
 }
 
-/* ========== REDUCED MOTION: NO IMAGE/SVG HOVER ========== */
-#a11y-content-wrapper.a11y-reduce-motion .img-default {
-  transition: none !important;
-}
+/* Reduced motion for img/svg → a11y/motion/reduced-motion.css */
 
-#a11y-content-wrapper.a11y-reduce-motion .img-hover:hover {
-  transform: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-}
-
-#a11y-content-wrapper.a11y-reduce-motion .svg-default {
-  transition: none !important;
-}
-
-#a11y-content-wrapper.a11y-reduce-motion .svg-hover:hover {
-  transform: none !important;
-  filter: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .img-default {
-    transition: none;
-  }
-
-  .img-hover:hover {
-    transform: none;
-    box-shadow: none;
-    filter: none;
-  }
-
-  .svg-default {
-    transition: none;
-  }
-
-  .svg-hover:hover {
-    transform: none;
-    filter: none;
-  }
-}
-
-/* ========== ACCESSIBILITY ========== */
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-/* Focus visible for keyboard navigation */
-*:focus-visible {
-  outline: 2px solid var(--color-Primary-500);
-  outline-offset: 2px;
-}
+/* sr-only → a11y/base/utilities.css */
+/* focus-visible → a11y/base/utilities.css */
 
 /* ========== ANIMATIONS ========== */
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
 
 @keyframes slideUp {
   from {
@@ -595,159 +500,4 @@ a:hover:not(.btn) {
   visibility: hidden;
 }
 
-/* ========== RESPONSIVE TYPOGRAPHY ========== */
-
-/* Extra Small (max-width: 400px) */
-@media (max-width: 400px) {
-  h1 {
-    font-size: var(--text-5xl);
-    margin-bottom: var(--space-sm);
-  }
-
-  h2 {
-    font-size: var(--text-4xl);
-    margin-bottom: var(--space-sm);
-  }
-
-  h3 {
-    font-size: var(--text-3xl);
-    margin-bottom: var(--space-sm);
-  }
-
-  p {
-    font-size: var(--text-base);
-  }
-
-  blockquote {
-    font-size: var(--text-4xl);
-    margin: var(--space-xl);
-    padding-left: var(--space-md);
-  }
-
-  .section {
-    padding: var(--space-3xl) 0;
-  }
-
-  .section-lg {
-    padding: var(--space-4xl) 0;
-  }
-}
-
-/* Very Small - Center align everything (max-width: 300px) */
-@media (max-width: 300px) {
-  body {
-    text-align: center;
-  }
-
-  h1, h2, h3, h4, h5, h6, p {
-    text-align: center;
-  }
-
-  .container {
-    text-align: center;
-  }
-
-  /* Center flex children */
-  .flex {
-    justify-content: center;
-  }
-
-  /* Center card content */
-  .card {
-    text-align: center;
-  }
-
-  .card-header,
-  .card-body,
-  .card-footer {
-    text-align: center;
-  }
-}
-
-/* Ultra Small (max-width: 280px) */
-@media (max-width: 280px) {
-  h1 {
-    font-size: var(--text-4xl);
-  }
-
-  h2 {
-    font-size: var(--text-3xl);
-  }
-
-  h3 {
-    font-size: var(--text-2xl);
-  }
-
-  h4 {
-    font-size: var(--text-base);
-  }
-
-  p {
-    font-size: var(--text-sm);
-  }
-
-  blockquote {
-    font-size: var(--text-3xl);
-    margin: var(--space-lg);
-    padding-left: var(--space-sm);
-    border-left-width: 4px;
-  }
-
-  .section {
-    padding: var(--space-2xl) 0;
-  }
-
-  .section-lg {
-    padding: var(--space-3xl) 0;
-  }
-}
-
-/* Micro (max-width: 200px) */
-@media (max-width: 200px) {
-  h1 {
-    font-size: var(--text-3xl);
-    word-break: break-word;
-  }
-
-  h2 {
-    font-size: var(--text-2xl);
-    word-break: break-word;
-  }
-
-  h3 {
-    font-size: var(--text-xl);
-    word-break: break-word;
-  }
-
-  h4 {
-    font-size: var(--text-sm);
-  }
-
-  p {
-    font-size: var(--text-xs);
-  }
-
-  blockquote {
-    font-size: var(--text-2xl);
-    margin: var(--space-md);
-    padding-left: var(--space-xs);
-    border-left-width: 3px;
-  }
-
-  .section {
-    padding: var(--space-xl) 0;
-  }
-
-  .section-lg {
-    padding: var(--space-2xl) 0;
-  }
-
-  .card {
-    padding: var(--space-xs);
-    border-radius: var(--radius-sm);
-  }
-
-  .card:hover {
-    transform: none;
-  }
-}
+/* Responsive typography → src/styles/responsive/ (xs.css, micro.css) */
