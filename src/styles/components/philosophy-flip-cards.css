@@ -297,15 +297,142 @@
 }
 
 /* Accessibility theme overrides - solid overlays for better contrast */
-:global(body.a11y-theme-dark) .philosophy-flip__card-title-overlay,
-:global(body.a11y-theme-high-contrast) .philosophy-flip__card-title-overlay {
+:global(#a11y-content-wrapper.a11y-theme-dark) .philosophy-flip__card-title-overlay,
+:global(#a11y-content-wrapper.a11y-theme-high-contrast) .philosophy-flip__card-title-overlay {
   background: rgba(0, 0, 0, 0.85);
 }
 
-:global(body.a11y-theme-cream) .philosophy-flip__card-title-overlay {
+:global(#a11y-content-wrapper.a11y-theme-cream) .philosophy-flip__card-title-overlay {
   background: rgba(250, 248, 244, 0.9);
 }
 
-:global(body.a11y-theme-monochrome) .philosophy-flip__card-title-overlay {
+:global(#a11y-content-wrapper.a11y-theme-monochrome) .philosophy-flip__card-title-overlay {
   background: rgba(255, 255, 255, 0.9);
+}
+
+/* ========== REDUCED MOTION ========== */
+/* Disable flip animation - show cards stacked like mobile view */
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card {
+  height: auto;
+  perspective: none;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card-inner {
+  transform: none !important;
+  transform-style: flat;
+  transition: none !important;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-lg);
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card:hover .philosophy-flip__card-inner {
+  transform: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card-front,
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card-back {
+  position: relative;
+  backface-visibility: visible;
+  transform: none !important;
+  box-shadow: none;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card-front {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  height: 250px;
+  flex-shrink: 0;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card-title-overlay {
+  display: none;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card-back {
+  background: var(--color-Background-100);
+  border: 1px solid var(--color-Neutral-200);
+  border-top: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  padding: var(--space-lg);
+  height: auto;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card-back-content {
+  text-align: left;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card-back-content h3 {
+  color: var(--color-Text-700);
+  margin-bottom: var(--space-md);
+  font-size: var(--text-xl);
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .philosophy-flip__card-back-content p {
+  color: var(--color-Text-600);
+  font-size: var(--text-lg);
+}
+
+/* System preference reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .philosophy-flip__card {
+    height: auto;
+    perspective: none;
+  }
+
+  .philosophy-flip__card-inner {
+    transform: none !important;
+    transform-style: flat;
+    transition: none;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-lg);
+  }
+
+  .philosophy-flip__card:hover .philosophy-flip__card-inner {
+    transform: none !important;
+  }
+
+  .philosophy-flip__card-front,
+  .philosophy-flip__card-back {
+    position: relative;
+    backface-visibility: visible;
+    transform: none !important;
+    box-shadow: none;
+  }
+
+  .philosophy-flip__card-front {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    height: 250px;
+    flex-shrink: 0;
+  }
+
+  .philosophy-flip__card-title-overlay {
+    display: none;
+  }
+
+  .philosophy-flip__card-back {
+    background: var(--color-Background-100);
+    border: 1px solid var(--color-Neutral-200);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: var(--space-lg);
+    height: auto;
+  }
+
+  .philosophy-flip__card-back-content {
+    text-align: left;
+  }
+
+  .philosophy-flip__card-back-content h3 {
+    color: var(--color-Text-700);
+    margin-bottom: var(--space-md);
+    font-size: var(--text-xl);
+  }
+
+  .philosophy-flip__card-back-content p {
+    color: var(--color-Text-600);
+    font-size: var(--text-lg);
+  }
 }

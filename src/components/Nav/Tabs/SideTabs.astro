@@ -231,10 +231,46 @@ const {
     }
   }
 
-  /* Respect reduced motion */
+  /* ========== REDUCED MOTION ========== */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .side-tab {
+    transition: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .side-tab:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .side-tab:active {
+    transform: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .side-tab--email:hover,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .side-tab--share:hover,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .side-tab--search:hover,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .side-tab--accessibility:hover {
+    background: var(--color-Background-100) !important;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .side-tab {
       transition: none;
+    }
+
+    .side-tab:hover {
+      transform: none;
+      box-shadow: var(--shadow-md);
+    }
+
+    .side-tab:active {
+      transform: none;
+    }
+
+    .side-tab--email:hover,
+    .side-tab--share:hover,
+    .side-tab--search:hover,
+    .side-tab--accessibility:hover {
+      background: var(--color-Background-100);
     }
   }
 </style>
@@ -316,15 +352,10 @@ const {
       });
     }
 
-    // Search Button Functionality
+    // Search Button Functionality - Navigate to search page
     if (searchButton) {
       searchButton.addEventListener('click', () => {
-        // Open the search overlay
-        if ((window as any).openSearchOverlay) {
-          (window as any).openSearchOverlay();
-        } else {
-          console.warn('Search overlay not initialized');
-        }
+        window.location.href = '/search';
       });
     }
 

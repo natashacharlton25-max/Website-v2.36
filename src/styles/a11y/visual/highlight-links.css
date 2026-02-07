@@ -3,33 +3,627 @@
  * A11Y VISUAL - Highlight Links
  * ============================================
  *
- * Makes all links visually distinct with underlines.
- * Helps users identify clickable elements.
+ * Makes all links visually distinct with underlines
+ * and visual indicators. Helps users identify clickable elements.
  *
- * Applied via body class: a11y-highlight-links
+ * Applied via class on #a11y-content-wrapper: a11y-highlight-links
+ * (Note: Panel is OUTSIDE wrapper, so it's naturally immune to these styles)
  */
 
 /* ============================================
-   UNDERLINE ALL LINKS
+   SELECTOR ALIAS
+   Support both body (legacy) and wrapper (new)
+   Panel is outside wrapper, so no isolation needed
    ============================================ */
 
-body.a11y-highlight-links a {
-  text-decoration: underline !important;
-  text-underline-offset: 3px !important;
+/* Theme cards - preserve their specific theme colors */
+#a11y-content-wrapper.a11y-highlight-links .a11y-theme-card--default {
+  background: var(--brand-c-bg) !important;
+  color: var(--brand-c-text) !important;
+}
+#a11y-content-wrapper.a11y-highlight-links .a11y-theme-card--dark {
+  background: var(--a11y-dark-c-bg) !important;
+  color: var(--a11y-dark-c-text) !important;
+}
+#a11y-content-wrapper.a11y-highlight-links .a11y-theme-card--cream {
+  background: var(--a11y-cream-c-bg) !important;
+  color: var(--a11y-cream-c-text) !important;
+}
+#a11y-content-wrapper.a11y-highlight-links .a11y-theme-card--high-contrast {
+  background: var(--a11y-high-contrast-c-bg) !important;
+  color: var(--a11y-high-contrast-c-text) !important;
+}
+#a11y-content-wrapper.a11y-highlight-links .a11y-theme-card--protanopia {
+  background: var(--a11y-protanopia-c-bg) !important;
+  color: var(--a11y-protanopia-c-text) !important;
+}
+#a11y-content-wrapper.a11y-highlight-links .a11y-theme-card--deuteranopia {
+  background: var(--a11y-deuteranopia-c-bg) !important;
+  color: var(--a11y-deuteranopia-c-text) !important;
+}
+#a11y-content-wrapper.a11y-highlight-links .a11y-theme-card--tritanopia {
+  background: var(--a11y-tritanopia-c-bg) !important;
+  color: var(--a11y-tritanopia-c-text) !important;
+}
+#a11y-content-wrapper.a11y-highlight-links .a11y-theme-card--monochrome {
+  background: var(--a11y-monochrome-c-bg) !important;
+  color: var(--a11y-monochrome-c-text) !important;
 }
 
-body.a11y-highlight-links a:hover {
+/* Theme card borders - use their own border color */
+#a11y-content-wrapper.a11y-highlight-links .a11y-theme-card {
+  border-color: var(--color-Background-300) !important;
+}
+#a11y-content-wrapper.a11y-highlight-links .a11y-theme-card[aria-pressed="true"] {
+  border-color: currentColor !important;
+}
+
+/* ============================================
+   UNDERLINE ALL LINKS
+   Excludes: logo, cards, icon buttons, images
+   ============================================ */
+
+#a11y-content-wrapper.a11y-highlight-links a:not(.nav-logo):not(.card):not([class*="card"]):not(.masonry-card):not(.card-offset):not(.related-card):not([class*="icon"]):not(.nav-icon-btn):not(.mini-cart-btn):not(.expandable-item) {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  text-decoration-color: var(--color-Primary-500) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links a:not(.nav-logo):not(.card):not([class*="card"]):not(.masonry-card):not(.card-offset):not(.related-card):not([class*="icon"]):not(.nav-icon-btn):not(.mini-cart-btn):not(.expandable-item):hover {
   text-decoration-thickness: 2px !important;
 }
 
-/* Exclude navigation and button-styled links */
-body.a11y-highlight-links .nav a,
-body.a11y-highlight-links a.btn,
-body.a11y-highlight-links a[class*="btn-"] {
+/* ============================================
+   NAVIGATION LINKS - Underline + color indicator
+   ============================================ */
+
+#a11y-content-wrapper.a11y-highlight-links .nav-links a,
+#a11y-content-wrapper.a11y-highlight-links .nav-item-expandable,
+#a11y-content-wrapper.a11y-highlight-links .mobile-menu-list a {
+  text-decoration: underline !important;
+  text-underline-offset: 4px !important;
+  text-decoration-color: var(--color-Primary-500) !important;
+}
+
+/* Expandable menu items - no underline on container, only on title */
+#a11y-content-wrapper.a11y-highlight-links .expandable-item {
   text-decoration: none !important;
 }
 
-body.a11y-highlight-links .nav a:hover,
-body.a11y-highlight-links a.btn:hover {
+/* ============================================
+   BUTTONS - Outline style (no fill)
+   Matches .btn-outline variant colors
+   ============================================ */
+
+#a11y-content-wrapper.a11y-highlight-links .btn,
+#a11y-content-wrapper.a11y-highlight-links a.btn,
+#a11y-content-wrapper.a11y-highlight-links button.btn {
+  background: transparent !important;
+  border: var(--border-width-2) solid var(--color-Primary-600) !important;
+  color: var(--color-Primary-600) !important;
   text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .btn:hover,
+#a11y-content-wrapper.a11y-highlight-links a.btn:hover,
+#a11y-content-wrapper.a11y-highlight-links button.btn:hover {
+  background: transparent !important;
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+/* All other buttons (not .btn class) - outline style */
+/* Excludes: footer links, nav icons, side tabs, switcher buttons, a11y panel elements */
+#a11y-content-wrapper.a11y-highlight-links button:not(.btn):not(.footer__link):not(.nav-icon-btn):not(.side-tab):not(.switcher-btn):not(.a11y-theme-card):not(.a11y-font-card):not(.a11y-toggle-card):not(.a11y-preset-btn):not(.a11y-stepper__btn):not(.a11y-panel__close) {
+  background: transparent !important;
+  border: var(--border-width-2) solid var(--color-Primary-600) !important;
+  color: var(--color-Primary-600) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links button:not(.btn):not(.footer__link):not(.nav-icon-btn):not(.side-tab):not(.switcher-btn):not(.a11y-theme-card):not(.a11y-font-card):not(.a11y-toggle-card):not(.a11y-preset-btn):not(.a11y-stepper__btn):not(.a11y-panel__close):hover {
+  background: transparent !important;
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+/* ============================================
+   FOOTER LINKS - Consistent underline for all
+   Includes links with role="button" and visited states
+   ============================================ */
+
+#a11y-content-wrapper.a11y-highlight-links .footer__link,
+#a11y-content-wrapper.a11y-highlight-links .footer__link:visited,
+#a11y-content-wrapper.a11y-highlight-links a.footer__link,
+#a11y-content-wrapper.a11y-highlight-links a.footer__link:visited,
+#a11y-content-wrapper.a11y-highlight-links a.footer__link[role="button"],
+#a11y-content-wrapper.a11y-highlight-links .footer--dark .footer__link,
+#a11y-content-wrapper.a11y-highlight-links .footer--dark .footer__link:visited,
+#a11y-content-wrapper.a11y-highlight-links .footer--light .footer__link,
+#a11y-content-wrapper.a11y-highlight-links .footer--light .footer__link:visited {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  text-decoration-color: var(--color-Primary-500) !important;
+  outline: none !important;
+  color: var(--color-Text-700) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .footer__link:hover,
+#a11y-content-wrapper.a11y-highlight-links .footer--dark .footer__link:hover,
+#a11y-content-wrapper.a11y-highlight-links .footer--light .footer__link:hover {
+  text-decoration-thickness: 2px !important;
+  color: var(--color-Text-900) !important;
+}
+
+/* ============================================
+   CARD LINKS - Border indicator on card container only
+   Title gets underline, not all text inside
+   ============================================ */
+
+#a11y-content-wrapper.a11y-highlight-links a.card,
+#a11y-content-wrapper.a11y-highlight-links a[class*="card"],
+#a11y-content-wrapper.a11y-highlight-links .masonry-card,
+#a11y-content-wrapper.a11y-highlight-links .card-offset,
+#a11y-content-wrapper.a11y-highlight-links .related-card,
+#a11y-content-wrapper.a11y-highlight-links .expandable-item {
+  border: var(--border-width-2, 2px) solid var(--color-Primary-500) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links a.card:hover,
+#a11y-content-wrapper.a11y-highlight-links a[class*="card"]:hover,
+#a11y-content-wrapper.a11y-highlight-links .masonry-card:hover,
+#a11y-content-wrapper.a11y-highlight-links .card-offset:hover,
+#a11y-content-wrapper.a11y-highlight-links .related-card:hover,
+#a11y-content-wrapper.a11y-highlight-links .expandable-item:hover {
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+/* Card titles only get underline when card IS a link */
+#a11y-content-wrapper.a11y-highlight-links a.card h2,
+#a11y-content-wrapper.a11y-highlight-links a.card h3,
+#a11y-content-wrapper.a11y-highlight-links a.card h4,
+#a11y-content-wrapper.a11y-highlight-links a.card .card__title,
+#a11y-content-wrapper.a11y-highlight-links a.masonry-card h2,
+#a11y-content-wrapper.a11y-highlight-links a.masonry-card h3,
+#a11y-content-wrapper.a11y-highlight-links a.masonry-card .masonry-card__title,
+#a11y-content-wrapper.a11y-highlight-links a.related-card h3,
+#a11y-content-wrapper.a11y-highlight-links a.related-card .related-card__title,
+#a11y-content-wrapper.a11y-highlight-links a.expandable-item h3,
+#a11y-content-wrapper.a11y-highlight-links a.expandable-item .expandable-item__content h3,
+#a11y-content-wrapper.a11y-highlight-links a.resource-card h4,
+#a11y-content-wrapper.a11y-highlight-links a.resource-card .resource-card__title,
+#a11y-content-wrapper.a11y-highlight-links a.recommended-card h4,
+#a11y-content-wrapper.a11y-highlight-links a.recommended-card .recommended-card__title,
+#a11y-content-wrapper.a11y-highlight-links a.for-you-card h3,
+#a11y-content-wrapper.a11y-highlight-links a.for-you-card .for-you-card__title {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  text-decoration-color: var(--color-Primary-500) !important;
+}
+
+/* Remove underlines from non-title text inside cards and expandable items */
+#a11y-content-wrapper.a11y-highlight-links .card p,
+#a11y-content-wrapper.a11y-highlight-links .card span:not(.card__title),
+#a11y-content-wrapper.a11y-highlight-links .masonry-card p,
+#a11y-content-wrapper.a11y-highlight-links .masonry-card span:not(.masonry-card__title),
+#a11y-content-wrapper.a11y-highlight-links .related-card p,
+#a11y-content-wrapper.a11y-highlight-links .related-card span:not(.related-card__title),
+#a11y-content-wrapper.a11y-highlight-links .expandable-item p,
+#a11y-content-wrapper.a11y-highlight-links .expandable-item__content p,
+#a11y-content-wrapper.a11y-highlight-links .resource-card p,
+#a11y-content-wrapper.a11y-highlight-links .resource-card span:not(.resource-card__title),
+#a11y-content-wrapper.a11y-highlight-links .recommended-card p,
+#a11y-content-wrapper.a11y-highlight-links .recommended-card span:not(.recommended-card__title),
+#a11y-content-wrapper.a11y-highlight-links .for-you-card p,
+#a11y-content-wrapper.a11y-highlight-links .for-you-card span:not(.for-you-card__title) {
+  text-decoration: none !important;
+}
+
+/* ============================================
+   IMAGE LINKS - No extra border needed
+   Cards already have border indicator
+   ============================================ */
+
+/* Images inside cards don't need extra borders */
+#a11y-content-wrapper.a11y-highlight-links .card img,
+#a11y-content-wrapper.a11y-highlight-links .masonry-card img,
+#a11y-content-wrapper.a11y-highlight-links .related-card img,
+#a11y-content-wrapper.a11y-highlight-links a[class*="card"] img,
+#a11y-content-wrapper.a11y-highlight-links .expandable-item img,
+#a11y-content-wrapper.a11y-highlight-links .expandable-media img,
+#a11y-content-wrapper.a11y-highlight-links .resource-card img,
+#a11y-content-wrapper.a11y-highlight-links .recommended-card img,
+#a11y-content-wrapper.a11y-highlight-links .for-you-card img {
+  border: none !important;
+}
+
+/* ============================================
+   ICON BUTTONS - Border indicator
+   ============================================ */
+
+#a11y-content-wrapper.a11y-highlight-links .nav-icon-btn,
+#a11y-content-wrapper.a11y-highlight-links .side-tab,
+#a11y-content-wrapper.a11y-highlight-links a[class*="icon"],
+#a11y-content-wrapper.a11y-highlight-links .cart-icon {
+  border: var(--border-width-2, 2px) solid var(--color-Primary-500) !important;
+  border-radius: var(--radius-full) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .nav-icon-btn:hover,
+#a11y-content-wrapper.a11y-highlight-links .side-tab:hover,
+#a11y-content-wrapper.a11y-highlight-links a[class*="icon"]:hover,
+#a11y-content-wrapper.a11y-highlight-links .cart-icon:hover {
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+/* ============================================
+   LOGO LINK - Single border only
+   ============================================ */
+
+#a11y-content-wrapper.a11y-highlight-links .nav-logo {
+  border: var(--border-width-2, 2px) solid var(--color-Primary-500) !important;
+  padding: var(--space-xs) !important;
+  text-decoration: none !important;
+  border-radius: var(--radius-md) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .nav-logo:hover {
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+/* Ensure logo image doesn't get extra border */
+#a11y-content-wrapper.a11y-highlight-links .nav-logo img {
+  border: none !important;
+}
+
+/* ============================================
+   SWITCHER - Convert to button-style (like reduced motion)
+   Removes animated slider, shows outlined buttons
+   ============================================ */
+
+#a11y-content-wrapper.a11y-highlight-links .switcher-nav {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: var(--space-md) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Hide the sliding indicator */
+#a11y-content-wrapper.a11y-highlight-links .switcher-nav::before,
+#a11y-content-wrapper.a11y-highlight-links .switcher-nav::after {
+  display: none !important;
+}
+
+/* Style all buttons as simple outlined buttons with underline */
+#a11y-content-wrapper.a11y-highlight-links .switcher-btn {
+  border: 2px solid var(--color-Primary-600) !important;
+  border-radius: var(--radius-md) !important;
+  background: var(--color-Background-50) !important;
+  color: var(--color-Primary-600) !important;
+  transition: none !important;
+  padding: var(--space-sm) var(--space-lg) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+/* Active button - filled style with underline */
+#a11y-content-wrapper.a11y-highlight-links .switcher-btn.active {
+  background: var(--color-Primary-600) !important;
+  color: var(--color-White) !important;
+  border-color: var(--color-Primary-600) !important;
+  text-decoration: underline !important;
+  text-decoration-color: var(--color-White) !important;
+}
+
+/* No hover effects */
+#a11y-content-wrapper.a11y-highlight-links .switcher-btn:hover:not(.active) {
+  background: var(--color-Background-50) !important;
+  color: var(--color-Primary-600) !important;
+}
+
+/* ============================================
+   READER NAV - Expanded spacing for borders
+   ============================================ */
+
+/* Allow overflow so borders/box-shadows aren't clipped */
+#a11y-content-wrapper.a11y-highlight-links .reader-nav-container {
+  overflow: visible !important;
+  padding: 16px !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .section-dropdown {
+  overflow: visible !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .section-dropdown.is-open {
+  overflow-y: visible !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .section-list {
+  padding: 4px !important;
+}
+
+/* Nav rows need padding for border overflow */
+#a11y-content-wrapper.a11y-highlight-links .nav-row {
+  overflow: visible !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .nav-row--controls {
+  overflow: visible !important;
+  padding: 4px 0 !important;
+}
+
+/* Minimized state - center everything and expand for borders */
+#a11y-content-wrapper.a11y-highlight-links .reader-nav--minimized .reader-nav-container {
+  width: 78px !important;
+  padding: 14px !important;
+  align-items: center !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .reader-nav--minimized .nav-row--top,
+#a11y-content-wrapper.a11y-highlight-links .reader-nav--minimized .nav-row--main {
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+
+/* Medium/Expanded state - expand container for borders */
+#a11y-content-wrapper.a11y-highlight-links .reader-nav--medium .reader-nav-container,
+#a11y-content-wrapper.a11y-highlight-links .reader-nav--expanded .reader-nav-container {
+  width: 260px !important;
+  padding: 16px !important;
+}
+
+/* Section items need more padding for borders */
+#a11y-content-wrapper.a11y-highlight-links .section-item {
+  padding: 8px 14px !important;
+  margin: 4px 0 !important;
+  border: 2px solid var(--color-Primary-500) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .section-item:hover {
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .section-item.is-active {
+  border-color: var(--color-Primary-600) !important;
+  background: var(--color-Primary-600) !important;
+  color: var(--color-White) !important;
+}
+
+/* Section name underline */
+#a11y-content-wrapper.a11y-highlight-links .section-item .section-name {
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+/* Nav menu button border */
+#a11y-content-wrapper.a11y-highlight-links .nav-menu-btn {
+  border: 2px solid var(--color-Primary-500) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .nav-menu-btn:hover {
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+
+/* Nav toggle (section title button) */
+#a11y-content-wrapper.a11y-highlight-links .nav-toggle {
+  border: 2px solid var(--color-Primary-500) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 4px 8px !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .nav-toggle:hover {
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .current-section-title {
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+}
+
+/* Prev/Next arrow buttons */
+#a11y-content-wrapper.a11y-highlight-links .nav-arrow {
+  border: 2px solid var(--color-Primary-500) !important;
+  border-radius: var(--radius-full) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .nav-arrow:hover:not(:disabled) {
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+/* Autoplay button */
+#a11y-content-wrapper.a11y-highlight-links .autoplay-btn {
+  border: 2px solid var(--color-Primary-500) !important;
+  border-radius: var(--radius-full) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .autoplay-btn:hover {
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+/* Info button */
+#a11y-content-wrapper.a11y-highlight-links .nav-info-btn {
+  border: 2px solid var(--color-Primary-500) !important;
+  border-radius: var(--radius-full) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .nav-info-btn:hover {
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
+/* Speed slider container */
+#a11y-content-wrapper.a11y-highlight-links .nav-row--speed {
+  padding: 8px 4px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .speed-slider {
+  max-width: 100% !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+/* ============================================
+   READER NAV - Mobile Responsive
+   ============================================ */
+
+@media (max-width: 768px) {
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--medium .reader-nav-container,
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--expanded .reader-nav-container {
+    width: 240px !important;
+    padding: 14px !important;
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--medium .reader-nav-container::-webkit-scrollbar,
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--expanded .reader-nav-container::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #a11y-content-wrapper.a11y-highlight-links .nav-row--speed {
+    padding: 8px 8px !important;
+  }
+
+  #a11y-content-wrapper.a11y-highlight-links .section-item {
+    padding: 6px 10px !important;
+    margin: 3px 0 !important;
+  }
+
+  #a11y-content-wrapper.a11y-highlight-links .section-dropdown.is-open,
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--expanded .section-dropdown {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
+
+@media (max-width: 500px) {
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--minimized .reader-nav-container {
+    width: 70px !important;
+    padding: 10px !important;
+  }
+
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--medium .reader-nav-container,
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--expanded .reader-nav-container {
+    width: 220px !important;
+    padding: 12px !important;
+    max-height: 75vh !important;
+  }
+
+  #a11y-content-wrapper.a11y-highlight-links .section-item {
+    padding: 5px 8px !important;
+    margin: 2px 0 !important;
+  }
+}
+
+@media (max-width: 400px) {
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--minimized .reader-nav-container {
+    width: 64px !important;
+    padding: 8px !important;
+  }
+
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--medium .reader-nav-container,
+  #a11y-content-wrapper.a11y-highlight-links .reader-nav--expanded .reader-nav-container {
+    width: 200px !important;
+    padding: 10px !important;
+    max-height: 70vh !important;
+  }
+
+  #a11y-content-wrapper.a11y-highlight-links .section-item {
+    padding: 4px 6px !important;
+  }
+}
+
+/* ============================================
+   HIGHLIGHT LINKS + REDUCED MOTION COMBINED
+   Disable hover animations when both are active
+   ============================================ */
+
+/* Links - no hover thickness change */
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion a:hover {
+  text-decoration-thickness: 1px !important;
+}
+
+/* Buttons - no hover box-shadow */
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .btn:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion a.btn:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion button.btn:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion button:not(.btn):hover {
+  box-shadow: none !important;
+  border-color: var(--color-Primary-600) !important;
+}
+
+/* Footer links - no hover color change */
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .footer__link:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .footer--dark .footer__link:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .footer--light .footer__link:hover {
+  text-decoration-thickness: 1px !important;
+  color: var(--color-Text-700) !important;
+}
+
+/* Cards - no hover border/shadow change */
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion a.card:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion a[class*="card"]:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .masonry-card:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .card-offset:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .related-card:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .expandable-item:hover {
+  border-color: var(--color-Primary-500) !important;
+  box-shadow: none !important;
+}
+
+/* Icon buttons - no hover border/shadow change */
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .nav-icon-btn:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .side-tab:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion a[class*="icon"]:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .cart-icon:hover {
+  border-color: var(--color-Primary-500) !important;
+  box-shadow: none !important;
+}
+
+/* Logo - no hover border/shadow change */
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .nav-logo:hover {
+  border-color: var(--color-Primary-500) !important;
+  box-shadow: none !important;
+}
+
+/* Switcher buttons - no hover effects */
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .switcher-btn:hover:not(.active) {
+  background: var(--color-Background-50) !important;
+  color: var(--color-Primary-600) !important;
+}
+
+/* Reader Nav elements - no hover effects */
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .section-item:hover {
+  border-color: var(--color-Primary-500) !important;
+  box-shadow: none !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .nav-menu-btn:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .nav-toggle:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .nav-arrow:hover:not(:disabled),
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .autoplay-btn:hover,
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .nav-info-btn:hover {
+  border-color: var(--color-Primary-500) !important;
+  box-shadow: none !important;
 }

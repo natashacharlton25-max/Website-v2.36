@@ -15,53 +15,53 @@
    CLASS-BASED REDUCED MOTION
    ============================================ */
 
-body.a11y-reduce-motion *,
-body.a11y-reduce-motion *::before,
-body.a11y-reduce-motion *::after {
+#a11y-content-wrapper.a11y-reduce-motion *,
+#a11y-content-wrapper.a11y-reduce-motion *::before,
+#a11y-content-wrapper.a11y-reduce-motion *::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
   scroll-behavior: auto !important;
 }
 
-/* Disable decorative transforms on hover/focus
-   Exclude elements using transform for positioning (modals, tooltips) */
-body.a11y-reduce-motion *:hover:not(.a11y-panel):not([data-position-transform]),
-body.a11y-reduce-motion *:focus:not(.a11y-panel):not([data-position-transform]) {
-  transform: none !important;
-}
+/* ============================================
+   NOTE: Hover effects are disabled per-component
+   in each component's CSS file for better control.
+   See individual component files for reduced motion
+   hover overrides.
+   ============================================ */
 
 /* Preserve positioning transforms for modals/tooltips */
-body.a11y-reduce-motion .a11y-panel,
-body.a11y-reduce-motion .a11y-panel.is-open {
+#a11y-content-wrapper.a11y-reduce-motion .a11y-panel,
+#a11y-content-wrapper.a11y-reduce-motion .a11y-panel.is-open {
   transform: translate(-50%, -50%) !important;
 }
 
 /* Disable parallax */
-body.a11y-reduce-motion [data-parallax],
-body.a11y-reduce-motion .parallax {
+#a11y-content-wrapper.a11y-reduce-motion [data-parallax],
+#a11y-content-wrapper.a11y-reduce-motion .parallax {
   transform: none !important;
 }
 
 /* Disable Lottie animations */
-body.a11y-reduce-motion lottie-player {
+#a11y-content-wrapper.a11y-reduce-motion lottie-player {
   display: none !important;
 }
 
 /* Show static alternatives to Lottie */
-body.a11y-reduce-motion .lottie-static-fallback {
+#a11y-content-wrapper.a11y-reduce-motion .lottie-static-fallback {
   display: block !important;
 }
 
 /* Disable slider auto-play */
-body.a11y-reduce-motion .slider,
-body.a11y-reduce-motion .carousel,
-body.a11y-reduce-motion [data-autoplay] {
+#a11y-content-wrapper.a11y-reduce-motion .slider,
+#a11y-content-wrapper.a11y-reduce-motion .carousel,
+#a11y-content-wrapper.a11y-reduce-motion [data-autoplay] {
   --autoplay: paused !important;
 }
 
 /* Disable video autoplay */
-body.a11y-reduce-motion video[autoplay] {
+#a11y-content-wrapper.a11y-reduce-motion video[autoplay] {
   autoplay: false !important;
 }
 
@@ -78,13 +78,6 @@ body.a11y-reduce-motion video[autoplay] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-
-  /* Disable decorative transforms on hover/focus
-     Exclude elements using transform for positioning */
-  *:hover:not(.a11y-panel):not([data-position-transform]),
-  *:focus:not(.a11y-panel):not([data-position-transform]) {
-    transform: none !important;
   }
 
   /* Preserve positioning transforms for modals/tooltips */
@@ -109,8 +102,12 @@ body.a11y-reduce-motion video[autoplay] {
    ============================================
    Use .motion-safe class for essential animations */
 
-body.a11y-reduce-motion .motion-safe,
-body.a11y-reduce-motion .motion-safe *,
+#a11y-content-wrapper.a11y-reduce-motion .motion-safe,
+#a11y-content-wrapper.a11y-reduce-motion .motion-safe * {
+  /* Allow essential animations like focus indicators */
+  transition-duration: 0.15s !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .motion-safe,
   .motion-safe * {
@@ -124,29 +121,29 @@ body.a11y-reduce-motion .motion-safe *,
    ============================================
    Provide solid background when canvas effects are hidden */
 
-body.a11y-reduce-motion #footer-canvas {
+#a11y-content-wrapper.a11y-reduce-motion #footer-canvas {
   display: none !important;
 }
 
-body.a11y-reduce-motion .footer-mask-section {
+#a11y-content-wrapper.a11y-reduce-motion .footer-mask-section {
   background-color: var(--color-Background-900) !important;
 }
 
-body.a11y-reduce-motion .footer-mask-section .footer-content-overlay {
+#a11y-content-wrapper.a11y-reduce-motion .footer-mask-section .footer-content-overlay {
   color: var(--color-Text-100) !important;
 }
 
-body.a11y-reduce-motion .footer-mask-section .footer-brand-text {
+#a11y-content-wrapper.a11y-reduce-motion .footer-mask-section .footer-brand-text {
   color: var(--color-Text-100) !important;
   text-shadow: none !important;
 }
 
-body.a11y-reduce-motion .footer-mask-section .footer-description,
-body.a11y-reduce-motion .footer-mask-section .footer-copyright {
+#a11y-content-wrapper.a11y-reduce-motion .footer-mask-section .footer-description,
+#a11y-content-wrapper.a11y-reduce-motion .footer-mask-section .footer-copyright {
   color: var(--color-Text-400) !important;
   text-shadow: none !important;
 }
 
-body.a11y-reduce-motion .footer-mask-section .footer-bottom {
+#a11y-content-wrapper.a11y-reduce-motion .footer-mask-section .footer-bottom {
   border-top-color: var(--color-Background-800) !important;
 }

@@ -11,7 +11,6 @@ import PresetButton from './PresetButton.astro';
 ---
 
 <aside class="a11y-panel__sidebar-right">
-  <h3 class="a11y-sidebar__title">Quick Presets</h3>
   <div class="a11y-preset-list">
     <PresetButton
       preset="dyslexia"
@@ -55,17 +54,18 @@ import PresetButton from './PresetButton.astro';
 <style>
   .a11y-panel__sidebar-right {
     padding: var(--space-md);
-    border-left: var(--border-width) solid var(--color-Border-100);
+    border-left: var(--border-width) solid color-mix(in srgb, var(--color-Text-900) 15%, transparent);
     overflow-y: auto;
   }
 
   .a11y-sidebar__title {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-Text-400);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-Text-900);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: var(--space-md);
+    text-align: center;
   }
 
   .a11y-preset-list {
@@ -74,16 +74,63 @@ import PresetButton from './PresetButton.astro';
     gap: var(--space-sm);
   }
 
-  @media (max-width: 768px) {
+  /* Tablet - 2 column grid in sidebar */
+  @media (min-width: 769px) and (max-width: 1400px) {
     .a11y-panel__sidebar-right {
-      width: 100%;
+      text-align: center;
       border-left: none;
-      border-top: var(--border-width) solid var(--color-Border-100);
+    }
+
+    .a11y-sidebar__title {
+      text-align: center;
     }
 
     .a11y-preset-list {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+  }
+
+  /* Mobile - full width with 3 columns */
+  @media (max-width: 768px) {
+    .a11y-panel__sidebar-right {
+      width: 100%;
+      border-left: none;
+      border-bottom: var(--border-width) solid color-mix(in srgb, var(--color-Text-900) 15%, transparent);
+      text-align: center;
+    }
+
+    .a11y-sidebar__title {
+      text-align: center;
+    }
+
+    .a11y-preset-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-xs);
+    }
+  }
+
+  /* Small mobile - 2 columns */
+  @media (max-width: 480px) {
+    .a11y-preset-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Very small - 2 columns tighter */
+  @media (max-width: 320px) {
+    .a11y-panel__sidebar-right {
+      padding: var(--space-sm);
+    }
+
+    .a11y-sidebar__title {
+      margin-bottom: var(--space-sm);
+    }
+
+    .a11y-preset-list {
+      gap: var(--space-2xs);
     }
   }
 </style>

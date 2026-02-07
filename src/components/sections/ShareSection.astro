@@ -233,6 +233,26 @@ const shareButtons = [
   }
 
   /* Responsive */
+  @media (max-width: 768px) {
+    .share-section {
+      padding: var(--space-2xl) 0;
+    }
+
+    .share-section__content {
+      padding: 0 var(--space-md);
+    }
+
+    .share-section__content h2 {
+      font-size: var(--text-2xl);
+      margin-bottom: var(--space-md);
+    }
+
+    .share-section__content .body-subtext {
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-xl);
+    }
+  }
+
   @media (max-width: 640px) {
     .share-section__buttons {
       gap: var(--space-md);
@@ -244,10 +264,121 @@ const shareButtons = [
     }
   }
 
-  @media (max-width: 400px) {
+  @media (max-width: 480px) {
+    .share-section {
+      padding: var(--space-xl) 0;
+    }
+
+    .share-section__content h2 {
+      font-size: var(--text-xl);
+    }
+
+    .share-section__content .body-subtext {
+      font-size: var(--text-xs);
+      margin-bottom: var(--space-lg);
+    }
+
+    .share-section__buttons {
+      gap: var(--space-sm);
+    }
+
     .share-btn {
       width: 56px;
       height: 56px;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .share-btn {
+      width: 48px;
+      height: 48px;
+    }
+
+    .share-btn .share-icon-toggle :global(svg),
+    .share-btn .share-icon-toggle :global(lottie-player) {
+      width: 32px !important;
+      height: 32px !important;
+    }
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  /* Show static icons, hide Lottie */
+  #a11y-content-wrapper.a11y-reduce-motion .share-icon-toggle .share-icon--lottie {
+    display: none !important;
+  }
+
+  #a11y-content-wrapper.a11y-reduce-motion .share-icon-toggle .share-icon--static {
+    display: flex !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+  }
+
+  /* No hover effects */
+  #a11y-content-wrapper.a11y-reduce-motion .share-btn {
+    transition: none !important;
+  }
+
+  #a11y-content-wrapper.a11y-reduce-motion .share-btn:hover {
+    background: transparent !important;
+    color: var(--color-Text-600) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* Show tooltip always for reduced motion */
+  #a11y-content-wrapper.a11y-reduce-motion .share-btn::after {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(-50%) translateY(0) !important;
+    transition: none !important;
+  }
+
+  #a11y-content-wrapper.a11y-reduce-motion .share-btn::before {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(-50%) !important;
+    transition: none !important;
+  }
+
+  /* System preference reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .share-icon-toggle .share-icon--lottie {
+      display: none;
+    }
+
+    .share-icon-toggle .share-icon--static {
+      display: flex;
+      position: relative;
+      top: auto;
+      left: auto;
+      transform: none;
+    }
+
+    .share-btn {
+      transition: none;
+    }
+
+    .share-btn:hover {
+      background: transparent;
+      color: var(--color-Text-600);
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .share-btn::after {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+      transition: none;
+    }
+
+    .share-btn::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%);
+      transition: none;
     }
   }
 </style>

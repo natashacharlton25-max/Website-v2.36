@@ -52,12 +52,94 @@ async function loadSVG(filename: string): Promise<string> {
   }
 }
 
+// Track if animation is running
+let animationActive = false;
+let animationAbortController: AbortController | null = null;
+
 export async function initHeroMorph() {
   const container = document.querySelector('.hero-morph__svg-container') as HTMLElement;
   const textElement = document.querySelector('.hero-morph__title') as HTMLElement;
   const storage = document.querySelector('[data-svg-storage]');
 
   if (!container || !textElement || !storage) return;
+
+  // Check for reduced motion preference (user toggle or system preference)
+  const prefersReducedMotion = () => {
+    const wrapper = document.getElementById('a11y-content-wrapper');
+    return (wrapper?.classList.contains('a11y-reduce-motion') || false) ||
+           window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  };
+
+  // Function to show static content
+  const showStaticContent = async () => {
+    // Kill all GSAP animations - be thorough
+    gsap.killTweensOf(textElement);
+    gsap.killTweensOf(container);
+    gsap.killTweensOf(container.querySelectorAll('*'));
+    // Also kill any SVG paths that might have been created
+    const svg = container.querySelector('svg');
+    if (svg) {
+      gsap.killTweensOf(svg);
+      gsap.killTweensOf(svg.querySelectorAll('path'));
+    }
+
+    // Abort any running animation loop
+    if (animationAbortController) {
+      animationAbortController.abort();
+      animationAbortController = null;
+    }
+    animationActive = false;
+
+    // Get the first (brand) text from sequence
+    const firstItem = storage.querySelector('[data-svg-index="0"]');
+    const brandText = firstItem?.getAttribute('data-text') || 'Walking With A Smile';
+    const brandFile = firstItem?.getAttribute('data-svg-file') || '1.svg';
+
+    // Set static text immediately (no animation)
+    textElement.textContent = brandText;
+    textElement.classList.add('hero-morph__brand');
+    textElement.style.opacity = '1';
+    textElement.style.filter = 'none';
+
+    // Load and display static SVG (the logo)
+    const svgContent = await loadSVG(brandFile);
+    if (svgContent) {
+      container.innerHTML = svgContent;
+    }
+  };
+
+  // Watch for changes to wrapper class (user toggling reduced motion)
+  const wrapper = document.getElementById('a11y-content-wrapper');
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === 'class') {
+        if (prefersReducedMotion() && animationActive) {
+          showStaticContent();
+        }
+      }
+    });
+  });
+
+  if (wrapper) {
+    observer.observe(wrapper, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // Also listen for system preference changes
+  window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (e) => {
+    if (e.matches && animationActive) {
+      showStaticContent();
+    }
+  });
+
+  // If reduced motion is enabled at load, show static content and exit
+  if (prefersReducedMotion()) {
+    await showStaticContent();
+    return;
+  }
+
+  // Mark animation as active
+  animationActive = true;
+  animationAbortController = new AbortController();
 
   // Get sequence data from hidden storage
   const sequenceData: ShapeData[] = Array.from(storage.querySelectorAll('[data-svg-index]')).map(el => ({
@@ -116,6 +198,11 @@ export async function initHeroMorph() {
   }
 
   async function morphToNext() {
+    // Stop if animation has been disabled (reduced motion toggled on)
+    if (!animationActive) {
+      return;
+    }
+
     // Stop if we're at the logo and have already looped once
     if (currentIndex === 0 && isLooping) {
       return;
@@ -204,7 +291,9 @@ export async function initHeroMorph() {
       if (nextIndex === 0) isLooping = true;
 
       const holdTime = nextShape.holdTime || CONFIG.textHold;
+      if (!animationActive) return;
       await gsap.to({}, { duration: holdTime });
+      if (!animationActive) return;
       morphToNext();
       return;
     }
@@ -310,7 +399,9 @@ export async function initHeroMorph() {
         if (nextIndex === 0) isLooping = true;
 
         const holdTime = nextShape.holdTime || CONFIG.textHold;
+        if (!animationActive) return;
         await gsap.to({}, { duration: holdTime });
+        if (!animationActive) return;
         morphToNext();
         return;
       }
@@ -618,9 +709,11 @@ export async function initHeroMorph() {
 
     // Wait before next morph (use custom hold time or default)
     const holdTime = nextShape.holdTime || CONFIG.textHold;
+    if (!animationActive) return;
     await gsap.to({}, { duration: holdTime });
 
-    // Continue the loop
+    // Continue the loop (check if still active)
+    if (!animationActive) return;
     morphToNext();
   }
 
@@ -630,7 +723,9 @@ export async function initHeroMorph() {
   const isInitialBrand = sequenceData[0].text === "Walking With A Smile";
   textElement.classList.toggle('hero-morph__brand', isInitialBrand);
   gsap.set(textElement, { opacity: 1, filter: 'blur(0px)' });
+  if (!animationActive) return;
   await gsap.to({}, { duration: CONFIG.textHold });
+  if (!animationActive) return;
   morphToNext();
 }
 

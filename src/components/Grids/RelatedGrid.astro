@@ -249,6 +249,7 @@ const gridClasses = [
   /* Column modifiers */
   .related-grid--cols-auto {
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    align-items: stretch;
   }
 
   .related-grid--cols-1 {
@@ -704,12 +705,12 @@ const gridClasses = [
     }
 
     .related-card--horizontal .related-card__image {
-      height: 140px;
+      height: 120px;
     }
 
     .related-card--horizontal .related-card__content {
-      padding: var(--space-md);
-      padding-top: calc(var(--space-md) + 20px);
+      padding: var(--space-sm);
+      padding-top: calc(var(--space-sm) + 16px);
     }
 
     .related-card--horizontal .related-card__title {
@@ -789,6 +790,117 @@ const gridClasses = [
     .related-card--horizontal .related-card__title {
       font-size: calc(var(--text-xs) * 0.9);
       -webkit-line-clamp: 3;
+    }
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  /* No visual change on hover - keep base state */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card {
+    transition: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--horizontal,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--horizontal:hover {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--horizontal:hover .related-card__content {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--horizontal:hover .related-card__image {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--horizontal:hover .related-card__icon-placeholder {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--horizontal:hover :global(.btn) {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--vertical .related-card__image img {
+    transition: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--vertical:hover .related-card__image img {
+    transform: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--featured .related-card__image img {
+    transition: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--featured:hover .related-card__image img {
+    transform: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card--featured:hover .related-card__image {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .related-card:hover .related-card__button {
+    background: var(--color-Primary-500) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .related-card {
+      transition: none;
+    }
+
+    .related-card:hover {
+      transform: none;
+      box-shadow: var(--shadow-md);
+    }
+
+    .related-card--horizontal,
+    .related-card--horizontal:hover {
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .related-card--horizontal:hover .related-card__content {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .related-card--horizontal:hover .related-card__image {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .related-card--horizontal:hover .related-card__icon-placeholder {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .related-card--vertical .related-card__image img {
+      transition: none;
+    }
+
+    .related-card--vertical:hover .related-card__image img {
+      transform: none;
+    }
+
+    .related-card--featured .related-card__image img {
+      transition: none;
+    }
+
+    .related-card--featured:hover .related-card__image img {
+      transform: none;
+    }
+
+    .related-card--featured:hover .related-card__image {
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    }
+
+    .related-card:hover .related-card__button {
+      background: var(--color-Primary-500);
     }
   }
 </style>

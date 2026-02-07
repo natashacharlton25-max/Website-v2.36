@@ -17,11 +17,11 @@ interface Props {
 
 const { variant = 'dark' } = Astro.props;
 
-// Footer navigation links
+// Footer navigation links - all use <a> tags for consistent styling
 const footerLinks = [
   { label: 'Legal', href: '/legal/terms' },
-  { label: 'Contact Us', href: '#', id: 'contactUsBtn', isButton: true },
-  { label: 'Cookie Settings', href: '#', id: 'cookieSettings', isButton: true }
+  { label: 'Contact Us', href: '#', id: 'contactUsBtn', isAction: true },
+  { label: 'Cookie Settings', href: '#', id: 'cookieSettings', isAction: true }
 ];
 ---
 
@@ -39,23 +39,18 @@ const footerLinks = [
       <h2 class="footer__brand-name">{BRAND_CONFIG.name}</h2>
     </div>
 
-    <!-- Navigation Links -->
+    <!-- Navigation Links - All use <a> tags for consistent styling -->
     <nav class="footer__nav" aria-label="Footer navigation">
       {footerLinks.map((link, index) => (
         <>
-          {link.isButton ? (
-            <button
-              type="button"
-              class="footer__link"
-              id={link.id}
-            >
-              {link.label}
-            </button>
-          ) : (
-            <a href={link.href} class="footer__link">
-              {link.label}
-            </a>
-          )}
+          <a
+            href={link.href}
+            class="footer__link"
+            id={link.id}
+            role={link.isAction ? 'button' : undefined}
+          >
+            {link.label}
+          </a>
           {index < footerLinks.length - 1 && (
             <span class="footer__nav-dot" aria-hidden="true"></span>
           )}
@@ -310,31 +305,149 @@ const footerLinks = [
     }
   }
 
+  /* ========== HIGHLIGHT LINKS ========== */
+  /* Ensure ALL footer links have same color when highlight-links is active */
+  :global(#a11y-content-wrapper.a11y-highlight-links) .footer__link,
+  :global(#a11y-content-wrapper.a11y-highlight-links) .footer--dark .footer__link,
+  :global(#a11y-content-wrapper.a11y-highlight-links) .footer--light .footer__link {
+    color: var(--color-Text-700) !important;
+    text-decoration: underline !important;
+    text-underline-offset: 3px !important;
+    text-decoration-color: var(--color-Primary-500) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-highlight-links) .footer__link:hover,
+  :global(#a11y-content-wrapper.a11y-highlight-links) .footer--dark .footer__link:hover,
+  :global(#a11y-content-wrapper.a11y-highlight-links) .footer--light .footer__link:hover {
+    color: var(--color-Text-900) !important;
+    text-decoration-thickness: 2px !important;
+  }
+
   /* ========== REDUCED MOTION ========== */
+  /* Class-based reduced motion - NO hover effects, no pointer cursor */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer__link {
+    transition: none !important;
+    cursor: default !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer__copyright {
+    cursor: default !important;
+  }
+
+  /* Ensure all links same color - both <a> and <button> */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--dark .footer__link,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--dark a.footer__link,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--dark button.footer__link {
+    color: var(--color-Text-700) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--dark .footer__link:hover,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--dark a.footer__link:hover,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--dark button.footer__link:hover {
+    color: var(--color-Text-700) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--dark .footer__copyright:hover {
+    color: var(--color-Text-500) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--light .footer__link,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--light a.footer__link,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--light button.footer__link {
+    color: var(--color-Text-600) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--light .footer__link:hover,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--light a.footer__link:hover,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--light button.footer__link:hover {
+    color: var(--color-Text-600) !important;
+    text-shadow: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--light .footer__copyright:hover {
+    color: var(--color-Text-500) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--light.footer--reveal-active .footer__link:hover {
+    color: var(--color-Text-600) !important;
+    text-shadow: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .footer--light.footer--reveal-active .footer__copyright:hover {
+    color: var(--color-Text-500) !important;
+    text-shadow: none !important;
+  }
+
+  /* System preference reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .footer__link {
       transition: none;
+      cursor: default;
+    }
+
+    .footer__copyright {
+      cursor: default;
+    }
+
+    .footer--dark .footer__link,
+    .footer--dark a.footer__link,
+    .footer--dark button.footer__link {
+      color: var(--color-Text-700);
+    }
+
+    .footer--dark .footer__link:hover {
+      color: var(--color-Text-700);
+    }
+
+    .footer--dark .footer__copyright:hover {
+      color: var(--color-Text-500);
+    }
+
+    .footer--light .footer__link,
+    .footer--light a.footer__link,
+    .footer--light button.footer__link {
+      color: var(--color-Text-600);
+    }
+
+    .footer--light .footer__link:hover {
+      color: var(--color-Text-600);
+    }
+
+    .footer--light .footer__copyright:hover {
+      color: var(--color-Text-500);
+    }
+
+    .footer--light.footer--reveal-active .footer__link:hover {
+      color: var(--color-Text-600);
+      text-shadow: none;
+    }
+
+    .footer--light.footer--reveal-active .footer__copyright:hover {
+      color: var(--color-Text-500);
+      text-shadow: none;
     }
   }
 </style>
 
 <script>
   // Wait for DOM to be ready before attaching event listeners
-  function initFooterButtons() {
-    // Contact Us button - opens contact popup
-    const contactUsBtn = document.getElementById('contactUsBtn');
-    if (contactUsBtn) {
-      contactUsBtn.addEventListener('click', () => {
+  function initFooterLinks() {
+    // Contact Us link - opens contact popup
+    const contactUsLink = document.getElementById('contactUsBtn');
+    if (contactUsLink) {
+      contactUsLink.addEventListener('click', (e) => {
+        e.preventDefault();
         if ((window as any).openContactPopup) {
           (window as any).openContactPopup();
         }
       });
     }
 
-    // Cookie settings button - reopens cookie banner
-    const cookieSettingsBtn = document.getElementById('cookieSettings');
-    if (cookieSettingsBtn) {
-      cookieSettingsBtn.addEventListener('click', () => {
+    // Cookie settings link - reopens cookie banner
+    const cookieSettingsLink = document.getElementById('cookieSettings');
+    if (cookieSettingsLink) {
+      cookieSettingsLink.addEventListener('click', (e) => {
+        e.preventDefault();
         const cookieBanner = document.getElementById('cookieBanner');
         if (cookieBanner) {
           cookieBanner.classList.remove('hidden');
@@ -361,11 +474,11 @@ const footerLinks = [
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    initFooterButtons();
+    initFooterLinks();
     initRevealDetection();
   });
   document.addEventListener('astro:page-load', () => {
-    initFooterButtons();
+    initFooterLinks();
     initRevealDetection();
   });
 </script>

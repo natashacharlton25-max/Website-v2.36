@@ -32,6 +32,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--space-xl);
+  overflow: visible; /* Allow full-width sections to break out */
 }
 
 /* ========== SECTIONS ========== */
@@ -46,12 +47,14 @@
   justify-content: center;
   padding: var(--space-3xl) var(--space-xl);
   opacity: 0;
+  pointer-events: none; /* Prevent invisible sections from blocking clicks */
   will-change: opacity;
   overflow: hidden;
 }
 
 .reader-section:first-child {
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* Z-index stacking - supports up to 25 sections */
@@ -98,14 +101,36 @@
   max-height: 100vh;
 }
 
-/* ========== RESPONSIVE - MOBILE ========== */
-@media (max-width: 640px) {
+/* ========== RESPONSIVE - TABLET ========== */
+@media (max-width: 768px) {
+  /* Remove container padding constraints for full-width sections */
   .reader-container {
-    padding: 0 var(--space-md);
+    padding: 0;
   }
 
-  .reader-section {
-    padding: var(--space-2xl) var(--space-md);
+  /* Add padding back to non-full-width sections */
+  .reader-section:not(.reader-section--title):not(.reader-section--end):not(.reader-section--full-width-image) {
+    padding-left: var(--space-xl);
+    padding-right: var(--space-xl);
+  }
+
+  /* Fix full-width breakouts on mobile - simpler approach */
+  .reader-section--title,
+  .reader-section--end,
+  .reader-section--full-width-image {
+    left: 0;
+    margin-left: 0;
+    width: 100vw;
+    max-width: 100vw;
+  }
+}
+
+/* ========== RESPONSIVE - MOBILE ========== */
+@media (max-width: 640px) {
+  /* Smaller padding for non-full-width sections */
+  .reader-section:not(.reader-section--title):not(.reader-section--end):not(.reader-section--full-width-image) {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
   }
 }
 

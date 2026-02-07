@@ -16,9 +16,9 @@ import ImageTextSection from '../../components/Sections/ImageTextSection.astro';
 import IntroTextSection from '../../components/Sections/IntroTextSection.astro';
 import ProductCard from '../../components/Cards/ProductCard.astro';
 import Breadcrumbs from '../../components/Navigation/Breadcrumbs.astro';
-import SpecGrid from '../../components/Product/SpecGrid.astro';
+import ProjectSpecGrid from '../../components/Product/ProjectSpecGrid.astro';
 import ShareSection from '../../components/Sections/ShareSection.astro';
-import { calculateGridLayout, estimateCardDimensions } from '../../lib/utils/grid-layout';
+// Grid layout not needed - ProjectSpecGrid uses simple 4-column layout
 import '../../styles/components/editorial-layout.css';
 
 // Helper to get folder slug from entry.id
@@ -226,13 +226,7 @@ const allSpecs: ProjectSpecItem[] = interleavedSpecs.map((spec, index) => ({
   variant: variantCycle[index % 3]
 }));
 
-// Calculate grid positions for specs (same as assets/[slug])
-const specsWithLayout = calculateGridLayout(
-  allSpecs,
-  (spec) => estimateCardDimensions(spec.label, spec.value),
-  5, // grid columns
-  200 // min card width
-);
+// ProjectSpecGrid uses simple 4-column layout, no grid calculations needed
 ---
 
 <BaseLayout
@@ -320,7 +314,7 @@ const specsWithLayout = calculateGridLayout(
   {allSpecs.length > 0 && (
     <section class="editorial-specs">
       <div class="container">
-        <SpecGrid specs={specsWithLayout} />
+        <ProjectSpecGrid specs={allSpecs} />
       </div>
     </section>
   )}

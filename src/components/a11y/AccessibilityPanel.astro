@@ -7,14 +7,15 @@
  *
  * Sub-components in "A11y Panel" folder:
  * - Announcer: Screen reader live regions
- * - Toggle: Toggle switch component
- * - Slider: Range slider component
+ * - ToggleCard: Button-style toggle with icon for better cognitive accessibility
+ * - Stepper: Increment/decrement control for numeric values
  * - PresetButton: Preset button component
+ * - FontCard: Font selection card component
  * - ThemeSidebar: Theme cards sidebar
  * - PresetsSidebar: Quick presets sidebar
- * - VisualSection: Visual settings section
- * - TypographySection: Typography settings section
- * - NavigationSection: Navigation & Motion section
+ * - TypographySection: Typography settings section (with font cards)
+ * - NavigationSection: Navigation, Motion & Visual section
+ * - VisualSection: Visual settings and typography steppers
  */
 
 interface Props {
@@ -32,7 +33,7 @@ import ThemeSidebar from '../A11y Panel/ThemeSidebar.astro';
 import PresetsSidebar from '../A11y Panel/PresetsSidebar.astro';
 import VisualSection from '../A11y Panel/VisualSection.astro';
 import TypographySection from '../A11y Panel/TypographySection.astro';
-import NavigationSection from '../A11y Panel/NavigationSection.astro';
+import TypographyAdjustmentsSection from '../A11y Panel/TypographyAdjustmentsSection.astro';
 import Icon from '../Icons/Icon.astro';
 ---
 
@@ -50,16 +51,20 @@ import Icon from '../Icons/Icon.astro';
 >
   <div class="a11y-panel__header" data-mode={mode}>
     <h2 class="a11y-panel__title">
-      Accessibility
+      Accessibility Panel
     </h2>
     <div class="a11y-panel__header-actions">
+      <button class="btn btn-sm btn-primary" id="a11y-download-pdf" aria-label="Download page as PDF">
+        <Icon name="a11y-panel/download-fill" size={18} />
+        <span>Download Page as PDF</span>
+      </button>
       <button class="btn btn-sm btn-ghost" id="a11y-reset" aria-label="Reset all settings">
         <Icon name="a11y-panel/arrow-counter-clockwise-fill" size={18} />
         Reset All
       </button>
       {mode === 'modal' && (
         <button class="a11y-panel__close" type="button" aria-label="Close accessibility panel">
-          <Icon name="x-square-fill" size={24} />
+          <Icon name="x-square-fill" size={36} />
         </button>
       )}
     </div>
@@ -71,9 +76,9 @@ import Icon from '../Icons/Icon.astro';
 
     <!-- Main Content Area -->
     <div class="a11y-panel__content">
-      <VisualSection />
       <TypographySection />
-      <NavigationSection />
+      <TypographyAdjustmentsSection />
+      <VisualSection />
     </div>
 
     <!-- Right Sidebar: Quick Presets -->
@@ -95,7 +100,6 @@ import Icon from '../Icons/Icon.astro';
     announce,
     applySettings,
     presets,
-    formatSliderValue,
     initKeyboardDetection
   } from '../../lib/ui/a11y-panel';
 
@@ -188,68 +192,94 @@ import Icon from '../Icons/Icon.astro';
       });
     }
 
-    // Toggle settings (both modes)
-    const toggles = panel.querySelectorAll('input[type="checkbox"]');
-    toggles.forEach(toggle => {
-      const setting = (toggle as HTMLInputElement).dataset.setting as keyof A11ySettings;
+    // Toggle Card settings (button-style toggles with aria-pressed)
+    const toggleCards = panel.querySelectorAll('.a11y-toggle-card');
+    toggleCards.forEach(card => {
+      const setting = card.getAttribute('data-setting') as keyof A11ySettings;
       if (setting) {
-        toggle.addEventListener('change', () => {
-          (settings as any)[setting] = (toggle as HTMLInputElement).checked;
+        card.addEventListener('click', () => {
+          const isPressed = card.getAttribute('aria-pressed') === 'true';
+          const newValue = !isPressed;
+
+          card.setAttribute('aria-pressed', newValue ? 'true' : 'false');
+          (settings as any)[setting] = newValue;
           saveSettings(settings);
           applySettings(settings);
 
           if (settings.screenReaderMode) {
-            const label = toggle.closest('.a11y-setting')?.querySelector('.a11y-setting__label')?.textContent;
-            announce(`${label} ${(toggle as HTMLInputElement).checked ? 'enabled' : 'disabled'}`);
+            const label = card.querySelector('.a11y-toggle-card__label')?.textContent;
+            announce(`${label} ${newValue ? 'enabled' : 'disabled'}`);
           }
         });
       }
     });
 
-    // Slider settings
-    const sliders = panel.querySelectorAll('input[type="range"]');
-    sliders.forEach(slider => {
-      const setting = (slider as HTMLInputElement).dataset.setting as keyof A11ySettings;
-      if (setting) {
-        slider.addEventListener('input', () => {
-          const value = parseInt((slider as HTMLInputElement).value, 10);
-          (settings as any)[setting] = value;
-          saveSettings(settings);
-          applySettings(settings);
-          updateSliderValue(setting, value);
-        });
+    // Stepper settings - handle + and - button clicks
+    const steppers = panel.querySelectorAll('.a11y-stepper');
+    steppers.forEach(stepper => {
+      const setting = stepper.getAttribute('data-setting') as keyof A11ySettings;
+      const min = parseInt(stepper.getAttribute('data-min') || '0', 10);
+      const max = parseInt(stepper.getAttribute('data-max') || '100', 10);
+      const step = parseInt(stepper.getAttribute('data-step') || '1', 10);
+      const hiddenInput = stepper.querySelector('input[type="hidden"]') as HTMLInputElement;
+      const valueEl = stepper.querySelector('.a11y-stepper__value') as HTMLElement;
+      const unit = valueEl?.getAttribute('data-unit') || '';
+      const minusBtn = stepper.querySelector('[data-action="decrement"]') as HTMLButtonElement;
+      const plusBtn = stepper.querySelector('[data-action="increment"]') as HTMLButtonElement;
+
+      function updateStepperUI(value: number): void {
+        if (hiddenInput) hiddenInput.value = value.toString();
+        if (valueEl) valueEl.textContent = `${value}${unit}`;
+        if (minusBtn) minusBtn.disabled = value <= min;
+        if (plusBtn) plusBtn.disabled = value >= max;
       }
-    });
 
-    // Font Family Dropdown
-    const fontTrigger = document.getElementById('a11y-font-trigger');
-    const fontDropdown = document.getElementById('a11y-font-dropdown');
-    const fontCurrentLabel = document.getElementById('a11y-font-current');
+      // Initialize button states
+      updateStepperUI((settings as any)[setting] || min);
 
-    fontTrigger?.addEventListener('click', () => {
-      const isOpen = fontDropdown?.classList.contains('show');
-      fontDropdown?.classList.toggle('show');
-      fontTrigger.setAttribute('aria-expanded', (!isOpen).toString());
-    });
+      minusBtn?.addEventListener('click', () => {
+        const currentValue = (settings as any)[setting] || min;
+        const newValue = Math.max(min, currentValue - step);
+        (settings as any)[setting] = newValue;
+        saveSettings(settings);
+        applySettings(settings);
+        updateStepperUI(newValue);
 
-    fontDropdown?.addEventListener('click', (e) => {
-      const item = (e.target as HTMLElement).closest('.dropdown-item') as HTMLButtonElement;
-      if (!item) return;
-
-      const value = item.dataset.value || 'default';
-      const label = item.textContent || 'Default Font';
-
-      fontDropdown.querySelectorAll('.dropdown-item').forEach(btn => {
-        btn.classList.remove('is-selected');
-        btn.setAttribute('aria-selected', 'false');
+        if (settings.screenReaderMode) {
+          const label = stepper.querySelector('.a11y-stepper__label')?.textContent;
+          announce(`${label} decreased to ${newValue}${unit}`);
+        }
       });
-      item.classList.add('is-selected');
-      item.setAttribute('aria-selected', 'true');
 
-      if (fontCurrentLabel) fontCurrentLabel.textContent = label;
+      plusBtn?.addEventListener('click', () => {
+        const currentValue = (settings as any)[setting] || min;
+        const newValue = Math.min(max, currentValue + step);
+        (settings as any)[setting] = newValue;
+        saveSettings(settings);
+        applySettings(settings);
+        updateStepperUI(newValue);
 
-      fontDropdown.classList.remove('show');
-      fontTrigger?.setAttribute('aria-expanded', 'false');
+        if (settings.screenReaderMode) {
+          const label = stepper.querySelector('.a11y-stepper__label')?.textContent;
+          announce(`${label} increased to ${newValue}${unit}`);
+        }
+      });
+    });
+
+    // Font Cards - use event delegation for font card clicks
+    const fontGrid = panel.querySelector('.a11y-font-grid');
+    fontGrid?.addEventListener('click', (e) => {
+      const card = (e.target as HTMLElement).closest('.a11y-font-card') as HTMLButtonElement;
+      if (!card) return;
+
+      const value = card.dataset.font || 'default';
+      const label = card.querySelector('.a11y-font-card__label')?.textContent || 'Default';
+
+      // Update aria-pressed state for all cards
+      fontGrid.querySelectorAll('.a11y-font-card').forEach(btn => {
+        btn.setAttribute('aria-pressed', 'false');
+      });
+      card.setAttribute('aria-pressed', 'true');
 
       settings.fontFamily = value;
       saveSettings(settings);
@@ -257,13 +287,6 @@ import Icon from '../Icons/Icon.astro';
 
       if (settings.screenReaderMode) {
         announce(`Font changed to ${label}`);
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!fontTrigger?.contains(e.target as Node) && !fontDropdown?.contains(e.target as Node)) {
-        fontDropdown?.classList.remove('show');
-        fontTrigger?.setAttribute('aria-expanded', 'false');
       }
     });
 
@@ -295,14 +318,9 @@ import Icon from '../Icons/Icon.astro';
 
       document.querySelectorAll('.a11y-preset-btn').forEach(btn => btn.classList.remove('active'));
 
-      document.body.classList.remove('plain');
-      localStorage.removeItem('a11y-plain-mode');
-
       if (settings.screenReaderMode) {
         announce('All accessibility settings reset to defaults');
       }
-
-      setTimeout(() => location.reload(), 100);
     });
 
     // Preset Buttons
@@ -315,20 +333,26 @@ import Icon from '../Icons/Icon.astro';
         if (preset === 'clear') {
           settings = { ...defaultSettings };
         } else if (preset === 'easyread') {
-          const isActive = document.body.classList.toggle('plain');
-          localStorage.setItem('a11y-plain-mode', isActive ? 'true' : 'false');
-          if (isActive) {
+          // Toggle textOnly setting (unified with Text Only toggle)
+          settings.textOnly = !settings.textOnly;
+          saveSettings(settings);
+          applySettings(settings);
+
+          // Update the Text Only toggle card UI
+          const textOnlyCard = panel.querySelector('.a11y-toggle-card[data-setting="textOnly"]');
+          if (textOnlyCard) {
+            textOnlyCard.setAttribute('aria-pressed', settings.textOnly ? 'true' : 'false');
+          }
+
+          if (settings.textOnly) {
             btn.classList.add('active');
           } else {
             btn.classList.remove('active');
           }
-          window.dispatchEvent(new CustomEvent('plainModeToggled', {
-            detail: { enabled: isActive }
-          }));
+
           if (settings.screenReaderMode) {
-            announce(isActive ? 'Easy read mode enabled' : 'Easy read mode disabled');
+            announce(settings.textOnly ? 'Easy read mode enabled' : 'Easy read mode disabled');
           }
-          setTimeout(() => location.reload(), 100);
           return;
         } else if (presets[preset]) {
           settings = {
@@ -352,10 +376,8 @@ import Icon from '../Icons/Icon.astro';
       });
     });
 
-    // Restore plain mode state on page load
-    const savedPlainMode = localStorage.getItem('a11y-plain-mode');
-    if (savedPlainMode === 'true') {
-      document.body.classList.add('plain');
+    // Restore Easy Read button state based on textOnly setting
+    if (settings.textOnly) {
       const easyReadBtn = document.querySelector('.a11y-preset-btn[data-preset="easyread"]');
       easyReadBtn?.classList.add('active');
     }
@@ -391,44 +413,41 @@ import Icon from '../Icons/Icon.astro';
 
     // Update UI from settings
     function updateUI(s: A11ySettings): void {
-      const toggleMap: Record<string, string> = {
-        textOnly: 'a11y-text-only',
-        highlightLinks: 'a11y-highlight-links',
-        dyslexiaFont: 'a11y-dyslexia-font',
-        reduceMotion: 'a11y-reduce-motion',
-        enhancedFocus: 'a11y-enhanced-focus',
-        screenReaderMode: 'a11y-screen-reader'
-      };
-
-      Object.entries(toggleMap).forEach(([key, id]) => {
-        const toggle = document.getElementById(id) as HTMLInputElement;
-        if (toggle) toggle.checked = (s as any)[key];
+      // Update toggle cards (button-style toggles)
+      const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'screenReaderMode'];
+      toggleCardSettings.forEach(key => {
+        const card = panel.querySelector(`.a11y-toggle-card[data-setting="${key}"]`);
+        if (card) {
+          card.setAttribute('aria-pressed', (s as any)[key] ? 'true' : 'false');
+        }
       });
 
-      const fontDropdown = document.getElementById('a11y-font-dropdown');
-      const fontCurrentLabel = document.getElementById('a11y-font-current');
-      if (fontDropdown && s.fontFamily) {
-        fontDropdown.querySelectorAll('.dropdown-item').forEach(btn => {
-          const isSelected = btn.getAttribute('data-value') === s.fontFamily;
-          btn.classList.toggle('is-selected', isSelected);
-          btn.setAttribute('aria-selected', isSelected.toString());
-          if (isSelected && fontCurrentLabel) {
-            fontCurrentLabel.textContent = btn.textContent || 'Default Font';
-          }
-        });
-      }
+      // Update font cards
+      const fontCards = document.querySelectorAll('.a11y-font-card');
+      fontCards.forEach(card => {
+        const font = (card as HTMLButtonElement).dataset.font;
+        card.setAttribute('aria-pressed', font === s.fontFamily ? 'true' : 'false');
+      });
 
-      const sliderMap: Record<string, string> = {
-        fontSize: 'a11y-font-size',
-        letterSpacing: 'a11y-letter-spacing',
-        wordSpacing: 'a11y-word-spacing',
-        lineHeight: 'a11y-line-height'
-      };
+      // Update stepper values
+      const stepperSettings = ['fontSize', 'letterSpacing', 'wordSpacing', 'lineHeight'];
+      stepperSettings.forEach(key => {
+        const stepper = panel.querySelector(`.a11y-stepper[data-setting="${key}"]`);
+        if (!stepper) return;
 
-      Object.entries(sliderMap).forEach(([key, id]) => {
-        const slider = document.getElementById(id) as HTMLInputElement;
-        if (slider) slider.value = (s as any)[key].toString();
-        updateSliderValue(key, (s as any)[key]);
+        const value = (s as any)[key];
+        const min = parseInt(stepper.getAttribute('data-min') || '0', 10);
+        const max = parseInt(stepper.getAttribute('data-max') || '100', 10);
+        const hiddenInput = stepper.querySelector('input[type="hidden"]') as HTMLInputElement;
+        const valueEl = stepper.querySelector('.a11y-stepper__value') as HTMLElement;
+        const unit = valueEl?.getAttribute('data-unit') || '';
+        const minusBtn = stepper.querySelector('[data-action="decrement"]') as HTMLButtonElement;
+        const plusBtn = stepper.querySelector('[data-action="increment"]') as HTMLButtonElement;
+
+        if (hiddenInput) hiddenInput.value = value.toString();
+        if (valueEl) valueEl.textContent = `${value}${unit}`;
+        if (minusBtn) minusBtn.disabled = value <= min;
+        if (plusBtn) plusBtn.disabled = value >= max;
       });
 
       const themeCards = document.querySelectorAll('.a11y-theme-card');
@@ -438,12 +457,6 @@ import Icon from '../Icons/Icon.astro';
       });
     }
 
-    function updateSliderValue(setting: string, value: number): void {
-      const valueEl = document.getElementById(`${setting.replace(/([A-Z])/g, '-$1').toLowerCase()}-value`);
-      if (valueEl) {
-        valueEl.textContent = formatSliderValue(setting, value);
-      }
-    }
   }
 
   // ===================================

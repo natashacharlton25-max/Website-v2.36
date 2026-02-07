@@ -25,6 +25,7 @@
 @import './components/pillars-section.css';    /* Pillars/features grid component */
 @import './components/cta-section.css';        /* Call-to-action section component */
 @import './components/footer-mask.css';        /* Footer with canvas mask effect */
+@import './components/search-results.css';     /* Search result cards */
 @import './pages/home.css';           /* Home page styles */
 @import './pages/assets.css';         /* Assets page styles */
 @import './pages/asset-detail.css';   /* Asset detail page styles */
@@ -255,6 +256,27 @@ a:hover:not(.btn) {
   box-shadow: var(--shadow-xl);
 }
 
+/* Reduced motion: disable ALL card hover effects - no visual change on hover */
+#a11y-content-wrapper.a11y-reduce-motion .card {
+  transition: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .card:hover {
+  transform: none !important;
+  box-shadow: var(--shadow) !important; /* Keep base shadow, no change on hover */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+    box-shadow: var(--shadow); /* Keep base shadow, no change on hover */
+  }
+}
+
 .card-header {
   margin-bottom: var(--space-md);
 }
@@ -457,6 +479,47 @@ a:hover:not(.btn) {
 .svg-hover:hover {
   transform: scale(var(--svg-hover-scale));
   filter: var(--svg-hover-filter);
+}
+
+/* ========== REDUCED MOTION: NO IMAGE/SVG HOVER ========== */
+#a11y-content-wrapper.a11y-reduce-motion .img-default {
+  transition: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .img-hover:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .svg-default {
+  transition: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .svg-hover:hover {
+  transform: none !important;
+  filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .img-default {
+    transition: none;
+  }
+
+  .img-hover:hover {
+    transform: none;
+    box-shadow: none;
+    filter: none;
+  }
+
+  .svg-default {
+    transition: none;
+  }
+
+  .svg-hover:hover {
+    transform: none;
+    filter: none;
+  }
 }
 
 /* ========== ACCESSIBILITY ========== */

@@ -1,0 +1,89 @@
+---
+/**
+ * ProjectSpecGrid - 4-column grid for project spec cards
+ * Uses vertical stacked ProjectSpecCard component
+ */
+import ProjectSpecCard from '../Cards/ProjectSpecCard.astro';
+
+interface SpecItem {
+  iconName: string;
+  label: string;
+  value: string;
+  variant?: 'primary' | 'secondary' | 'accent';
+}
+
+interface Props {
+  specs: SpecItem[];
+}
+
+const { specs } = Astro.props;
+---
+
+<div class="project-spec-grid">
+  {specs.map(spec => (
+    <div class="project-spec-wrapper">
+      <ProjectSpecCard
+        iconName={spec.iconName}
+        label={spec.label}
+        value={spec.value}
+        variant={spec.variant}
+      />
+    </div>
+  ))}
+</div>
+
+<style>
+  .project-spec-grid {
+    display: grid;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .project-spec-wrapper {
+    display: flex;
+    height: 100%;
+  }
+
+  .project-spec-wrapper :global(.project-spec-card) {
+    flex: 1;
+    height: 100%;
+  }
+
+  /* ========== RESPONSIVE - LARGE TABLET ========== */
+  @media (max-width: 1024px) {
+    .project-spec-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* ========== RESPONSIVE - TABLET ========== */
+  @media (max-width: 768px) {
+    .project-spec-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+  }
+
+  /* ========== RESPONSIVE - MOBILE ========== */
+  @media (max-width: 480px) {
+    .project-spec-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ========== RESPONSIVE - SMALL ========== */
+  @media (max-width: 400px) {
+    .project-spec-grid {
+      gap: var(--space-xs);
+      margin-top: var(--space-lg);
+    }
+  }
+
+  /* ========== RESPONSIVE - VERY SMALL ========== */
+  @media (max-width: 300px) {
+    .project-spec-grid {
+      margin-top: var(--space-md);
+    }
+  }
+</style>

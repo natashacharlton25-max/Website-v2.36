@@ -49,43 +49,60 @@
   transition: filter var(--transition-fast), opacity var(--transition-fast);
 }
 
-/* Hide static when Lottie successfully loads */
+/* Hide static when Lottie successfully loads (no !important so a11y can override) */
 .cart-icon.lottie-loaded .cart-icon__static {
-  display: none !important;
+  display: none;
 }
 
 .cart-icon:hover .cart-icon__static {
+  /* Hover: turn to Primary-500 (sage green) using filter approximation */
+  filter: invert(72%) sepia(11%) saturate(698%) hue-rotate(66deg) brightness(91%) contrast(86%);
   opacity: 1;
-  filter: brightness(0) saturate(100%);
 }
 
 /* Show static icon and hide Lottie when any accessibility setting is enabled */
-body.a11y-reduce-motion .cart-icon__lottie,
-body.a11y-text-only .cart-icon__lottie,
-body.a11y-theme-dark .cart-icon__lottie,
-body.a11y-theme-cream .cart-icon__lottie,
-body.a11y-theme-high-contrast .cart-icon__lottie,
-body.a11y-theme-protanopia .cart-icon__lottie,
-body.a11y-theme-deuteranopia .cart-icon__lottie,
-body.a11y-theme-tritanopia .cart-icon__lottie,
-body.a11y-theme-monochrome .cart-icon__lottie,
-body.a11y-enhanced-focus .cart-icon__lottie {
+#a11y-content-wrapper.a11y-reduce-motion .cart-icon__lottie,
+#a11y-content-wrapper.a11y-text-only .cart-icon__lottie,
+#a11y-content-wrapper.a11y-theme-dark .cart-icon__lottie,
+#a11y-content-wrapper.a11y-theme-cream .cart-icon__lottie,
+#a11y-content-wrapper.a11y-theme-high-contrast .cart-icon__lottie,
+#a11y-content-wrapper.a11y-theme-protanopia .cart-icon__lottie,
+#a11y-content-wrapper.a11y-theme-deuteranopia .cart-icon__lottie,
+#a11y-content-wrapper.a11y-theme-tritanopia .cart-icon__lottie,
+#a11y-content-wrapper.a11y-theme-monochrome .cart-icon__lottie,
+#a11y-content-wrapper.a11y-enhanced-focus .cart-icon__lottie {
   display: none !important;
 }
 
 /* Force show static icon in accessibility modes (override lottie-loaded hiding) */
-body.a11y-reduce-motion .cart-icon__static,
-body.a11y-text-only .cart-icon__static,
-body.a11y-theme-dark .cart-icon__static,
-body.a11y-theme-cream .cart-icon__static,
-body.a11y-theme-high-contrast .cart-icon__static,
-body.a11y-theme-protanopia .cart-icon__static,
-body.a11y-theme-deuteranopia .cart-icon__static,
-body.a11y-theme-tritanopia .cart-icon__static,
-body.a11y-theme-monochrome .cart-icon__static,
-body.a11y-enhanced-focus .cart-icon__static {
+#a11y-content-wrapper.a11y-reduce-motion .cart-icon__static,
+#a11y-content-wrapper.a11y-text-only .cart-icon__static,
+#a11y-content-wrapper.a11y-theme-dark .cart-icon__static,
+#a11y-content-wrapper.a11y-theme-cream .cart-icon__static,
+#a11y-content-wrapper.a11y-theme-high-contrast .cart-icon__static,
+#a11y-content-wrapper.a11y-theme-protanopia .cart-icon__static,
+#a11y-content-wrapper.a11y-theme-deuteranopia .cart-icon__static,
+#a11y-content-wrapper.a11y-theme-tritanopia .cart-icon__static,
+#a11y-content-wrapper.a11y-theme-monochrome .cart-icon__static,
+#a11y-content-wrapper.a11y-enhanced-focus .cart-icon__static {
   display: block !important;
-  position: relative !important;
+  position: static !important;
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Also use simpler selector for any a11y class */
+#a11y-content-wrapper[class*="a11y-"] .cart-icon__static {
+  display: block !important;
+  position: static !important;
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0 !important;
+}
+
+#a11y-content-wrapper[class*="a11y-"] .cart-icon__lottie {
+  display: none !important;
 }
 
 /* ========== CART COUNT BADGE ========== */
@@ -107,8 +124,9 @@ body.a11y-enhanced-focus .cart-icon__static {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: all var(--transition-fast);
+  transition: opacity var(--transition-fast), background-color var(--transition-fast);
   box-shadow: var(--shadow-sm);
+  pointer-events: none;
 }
 
 .cart-icon__count--visible {
@@ -148,42 +166,89 @@ body.a11y-enhanced-focus .cart-icon__static {
    - Cart number badge uses proper contrast colors
    ========================================================= */
 
-/* Any accessibility setting: icon uses text color token */
-body[class*="a11y-"] .cart-icon__static {
+/* Any accessibility setting: icon uses text color (black) */
+#a11y-content-wrapper[class*="a11y-"] .cart-icon__static {
   filter: brightness(0) saturate(100%);
-  opacity: 0.8;
+  opacity: 0.7;
 }
 
-body[class*="a11y-"] .cart-icon:hover .cart-icon__static {
+/* Hover: turn to Primary-500 (sage green #8fa68a) using filter approximation */
+#a11y-content-wrapper[class*="a11y-"] .cart-icon:hover .cart-icon__static {
+  filter: invert(72%) sepia(11%) saturate(698%) hue-rotate(66deg) brightness(91%) contrast(86%);
   opacity: 1;
 }
 
 /* Dark mode & High contrast: white icon for visibility on dark background */
-body.a11y-theme-dark .cart-icon__static,
-body.a11y-theme-high-contrast .cart-icon__static {
+#a11y-content-wrapper.a11y-theme-dark .cart-icon__static,
+#a11y-content-wrapper.a11y-theme-high-contrast .cart-icon__static {
   filter: brightness(0) saturate(100%) invert(1);
   opacity: 0.9;
 }
 
-body.a11y-theme-dark .cart-icon:hover .cart-icon__static,
-body.a11y-theme-high-contrast .cart-icon:hover .cart-icon__static {
+/* Dark/HC hover: also turn to Primary-500 */
+#a11y-content-wrapper.a11y-theme-dark .cart-icon:hover .cart-icon__static,
+#a11y-content-wrapper.a11y-theme-high-contrast .cart-icon:hover .cart-icon__static {
+  filter: invert(72%) sepia(11%) saturate(698%) hue-rotate(66deg) brightness(91%) contrast(86%);
   opacity: 1;
 }
 
 /* Cart number badge with standard tokens for accessibility */
-body[class*="a11y-"] .cart-icon__count {
+#a11y-content-wrapper[class*="a11y-"] .cart-icon__count {
   background-color: var(--color-Primary-500);
   color: var(--color-Background-50);
   box-shadow: none;
 }
 
 /* High contrast: strong visible badge */
-body.a11y-theme-high-contrast .cart-icon__count {
+#a11y-content-wrapper.a11y-theme-high-contrast .cart-icon__count {
   border: 2px solid var(--color-Text-900);
 }
 
-/* Reduced motion: no pulse animation */
-body.a11y-reduce-motion .cart-icon__count,
-body.a11y-reduce-motion .cart-icon__count--pulse {
-  animation: none;
+/* Reduced motion: no pulse animation, no transitions, no hover changes */
+#a11y-content-wrapper.a11y-reduce-motion .cart-icon__count,
+#a11y-content-wrapper.a11y-reduce-motion .cart-icon__count--pulse {
+  animation: none !important;
+  transition: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .cart-icon__static {
+  transition: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .cart-icon__lottie {
+  transition: none !important;
+}
+
+/* No visual change on hover for reduced motion */
+#a11y-content-wrapper.a11y-reduce-motion .cart-icon:hover .cart-icon__static {
+  filter: brightness(0) saturate(100%) !important;
+  opacity: 0.7 !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .cart-icon:hover .cart-icon__lottie {
+  filter: brightness(0) !important;
+  opacity: 0.7 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-icon__count,
+  .cart-icon__count--pulse {
+    animation: none;
+    transition: none;
+  }
+
+  .cart-icon__static,
+  .cart-icon__lottie {
+    transition: none;
+  }
+
+  .cart-icon:hover .cart-icon__static {
+    filter: brightness(0) saturate(100%);
+    opacity: 0.7;
+  }
+
+  .cart-icon:hover .cart-icon__lottie {
+    filter: brightness(0);
+    opacity: 0.7;
+  }
 }

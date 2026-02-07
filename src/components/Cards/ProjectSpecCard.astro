@@ -1,0 +1,178 @@
+---
+/**
+ * ProjectSpecCard - Vertical stacked spec card for project pages
+ * Icon on top, then title, then value - centered layout
+ */
+import Icon from '../Icons/Icon.astro';
+
+interface Props {
+  iconName: string;
+  label: string;
+  value: string;
+  variant?: 'primary' | 'secondary' | 'accent';
+}
+
+const { iconName, label, value, variant = 'primary' } = Astro.props;
+---
+
+<div class={`project-spec-card project-spec-card--${variant}`}>
+  <div class="project-spec-card__icon">
+    <Icon name={iconName} size={32} />
+  </div>
+  <span class="project-spec-card__label">{label}</span>
+  <span class="project-spec-card__value">{value}</span>
+</div>
+
+<style>
+  /* Vertical card: icon on top, then title, then value */
+  .project-spec-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-xs);
+    padding: var(--space-lg);
+    border: 1px solid var(--color-Neutral-200);
+    border-radius: var(--radius-lg);
+    background: var(--color-Background-50);
+    transition: all var(--transition-base);
+  }
+
+  .project-spec-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .project-spec-card__icon {
+    flex-shrink: 0;
+    color: var(--color-Primary-600);
+    margin-bottom: var(--space-xs);
+  }
+
+  .project-spec-card__icon :global(.icon),
+  .project-spec-card__icon :global(svg) {
+    width: 32px;
+    height: 32px;
+  }
+
+  .project-spec-card__label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-Text-600);
+  }
+
+  .project-spec-card__value {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    line-height: var(--leading-relaxed);
+    color: var(--color-Text-700);
+  }
+
+  /* ========== RESPONSIVE - TABLET ========== */
+  @media (max-width: 768px) {
+    .project-spec-card {
+      padding: var(--space-md);
+    }
+
+    .project-spec-card__icon :global(.icon),
+    .project-spec-card__icon :global(svg) {
+      width: 28px;
+      height: 28px;
+    }
+
+    .project-spec-card__label {
+      font-size: var(--text-xs);
+    }
+
+    .project-spec-card__value {
+      font-size: var(--text-xs);
+    }
+  }
+
+  /* ========== RESPONSIVE - SMALL (400px) ========== */
+  @media (max-width: 400px) {
+    .project-spec-card {
+      padding: var(--space-sm);
+      gap: calc(var(--space-xs) * 0.5);
+    }
+
+    .project-spec-card__icon {
+      margin-bottom: calc(var(--space-xs) * 0.5);
+    }
+
+    .project-spec-card__icon :global(.icon),
+    .project-spec-card__icon :global(svg) {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  /* ========== RESPONSIVE - VERY SMALL (300px) ========== */
+  @media (max-width: 300px) {
+    .project-spec-card {
+      border-radius: 0.75rem;
+      padding: var(--space-xs);
+    }
+
+    .project-spec-card__icon :global(.icon),
+    .project-spec-card__icon :global(svg) {
+      width: 20px;
+      height: 20px;
+    }
+
+    .project-spec-card__label {
+      font-size: calc(var(--text-xs) * 0.9);
+    }
+
+    .project-spec-card__value {
+      font-size: calc(var(--text-xs) * 0.85);
+    }
+  }
+
+  /* ========== RESPONSIVE - TINY (200px) ========== */
+  @media (max-width: 200px) {
+    .project-spec-card {
+      padding: var(--space-xs);
+      border-radius: 0.5rem;
+    }
+
+    .project-spec-card__icon :global(.icon),
+    .project-spec-card__icon :global(svg) {
+      width: 18px;
+      height: 18px;
+    }
+
+    .project-spec-card__label {
+      font-size: calc(var(--text-xs) * 0.8);
+    }
+
+    .project-spec-card__value {
+      font-size: calc(var(--text-xs) * 0.75);
+    }
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  /* No visual change on hover - keep base state */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .project-spec-card {
+    transition: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .project-spec-card:hover {
+    box-shadow: none !important;
+    transform: none !important;
+    border-color: var(--color-Neutral-200) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-spec-card {
+      transition: none;
+    }
+
+    .project-spec-card:hover {
+      box-shadow: none;
+      transform: none;
+      border-color: var(--color-Neutral-200);
+    }
+  }
+</style>

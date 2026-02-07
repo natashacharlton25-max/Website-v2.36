@@ -161,18 +161,24 @@ export function prefersHighContrast(): boolean {
 // APPLY SETTINGS
 // ===================================
 export function applySettings(settings: A11ySettings): void {
+  // Get the content wrapper - all a11y settings apply HERE, not to body
+  // This keeps the AccessibilityPanel immune from its own settings
+  const wrapper = document.getElementById('a11y-content-wrapper');
   const body = document.body;
 
-  // Toggle classes
-  body.classList.toggle('a11y-text-only', settings.textOnly);
-  body.classList.toggle('a11y-highlight-links', settings.highlightLinks);
-  body.classList.toggle('a11y-dyslexia-font', settings.dyslexiaFont);
-  body.classList.toggle('a11y-reduce-motion', settings.reduceMotion);
-  body.classList.toggle('a11y-enhanced-focus', settings.enhancedFocus);
-  body.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
+  // If wrapper doesn't exist yet, fall back to body (for early loading)
+  const target = wrapper || body;
 
-  // Font Family
-  body.classList.remove(
+  // Toggle classes on the wrapper (NOT body)
+  target.classList.toggle('a11y-text-only', settings.textOnly);
+  target.classList.toggle('a11y-highlight-links', settings.highlightLinks);
+  target.classList.toggle('a11y-dyslexia-font', settings.dyslexiaFont);
+  target.classList.toggle('a11y-reduce-motion', settings.reduceMotion);
+  target.classList.toggle('a11y-enhanced-focus', settings.enhancedFocus);
+  target.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
+
+  // Font Family - apply to wrapper
+  target.classList.remove(
     'a11y-font-opendyslexic',
     'a11y-font-atkinson',
     'a11y-font-comic-sans',
@@ -181,20 +187,27 @@ export function applySettings(settings: A11ySettings): void {
     'a11y-font-tahoma'
   );
   if (settings.fontFamily && settings.fontFamily !== 'default') {
-    body.classList.add(`a11y-font-${settings.fontFamily}`);
+    target.classList.add(`a11y-font-${settings.fontFamily}`);
   }
 
-  // Font Size
-  document.documentElement.style.fontSize = `${settings.fontSize}%`;
+  // Font Size - apply to wrapper, NOT html
+  // This ensures the panel (outside wrapper) is not affected
+  if (wrapper) {
+    wrapper.style.fontSize = `${settings.fontSize}%`;
+  } else {
+    // Fallback for early loading
+    document.documentElement.style.fontSize = `${settings.fontSize}%`;
+  }
+  document.documentElement.style.setProperty('--a11y-font-scale', `${settings.fontSize}`);
 
-  // Letter Spacing
-  body.style.letterSpacing = settings.letterSpacing > 0 ? `${settings.letterSpacing * 0.05}em` : '';
+  // Letter Spacing - apply to wrapper
+  (target as HTMLElement).style.letterSpacing = settings.letterSpacing > 0 ? `${settings.letterSpacing * 0.05}em` : '';
 
-  // Word Spacing
-  body.style.wordSpacing = settings.wordSpacing > 0 ? `${settings.wordSpacing * 0.05}em` : '';
+  // Word Spacing - apply to wrapper
+  (target as HTMLElement).style.wordSpacing = settings.wordSpacing > 0 ? `${settings.wordSpacing * 0.05}em` : '';
 
-  // Line Height
-  body.style.lineHeight = settings.lineHeight > 100 ? `${settings.lineHeight}%` : '';
+  // Line Height - apply to wrapper
+  (target as HTMLElement).style.lineHeight = settings.lineHeight > 100 ? `${settings.lineHeight}%` : '';
 
   // Theme - Use ThemeSwitcher for dynamic CSS loading
   const themeMap: Record<string, string> = {
@@ -219,8 +232,8 @@ export function applySettings(settings: A11ySettings): void {
     }, 100);
   }
 
-  // Also keep body class for a11y.css component-specific styles
-  body.classList.remove(
+  // Theme class - apply to wrapper
+  target.classList.remove(
     'a11y-theme-dark',
     'a11y-theme-cream',
     'a11y-theme-high-contrast',
@@ -230,7 +243,7 @@ export function applySettings(settings: A11ySettings): void {
     'a11y-theme-monochrome'
   );
   if (settings.theme !== 'default') {
-    body.classList.add(`a11y-theme-${settings.theme}`);
+    target.classList.add(`a11y-theme-${settings.theme}`);
   }
 
   // Announce changes if screen reader mode is on

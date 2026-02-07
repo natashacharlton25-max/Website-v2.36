@@ -7,69 +7,68 @@
  * Usage:
  * <NavigationSection />
  */
-import Toggle from './Toggle.astro';
-import Icon from '../Icons/Icon.astro';
+import ToggleCard from './ToggleCard.astro';
 ---
 
 <div class="a11y-section">
   <h3 class="a11y-section__title">Navigation & Motion</h3>
 
-  <Toggle
-    id="a11y-reduce-motion"
-    setting="reduceMotion"
-    label="Reduce Motion"
-    description="Disable animations"
-  />
+  <div class="a11y-toggle-grid">
+    <ToggleCard
+      id="a11y-reduce-motion"
+      setting="reduceMotion"
+      icon="a11y/lightning-fill"
+      label="Reduce Motion"
+      description="Stop animations"
+    />
 
-  <Toggle
-    id="a11y-enhanced-focus"
-    setting="enhancedFocus"
-    label="Enhanced Focus"
-    description="Larger focus indicators"
-  />
+    <ToggleCard
+      id="a11y-enhanced-focus"
+      setting="enhancedFocus"
+      icon="a11y/gear-fill"
+      label="Enhanced Focus"
+      description="Larger indicators"
+    />
 
-  <Toggle
-    id="a11y-screen-reader"
-    setting="screenReaderMode"
-    label="Screen Reader Mode"
-    description="Announce interactions"
-  />
-
-  <!-- PDF Download -->
-  <div class="a11y-setting a11y-setting--pdf">
-    <button class="btn btn-sm btn-primary" id="a11y-download-pdf" aria-label="Download page as PDF">
-      <Icon name="a11y-panel/download-fill" size={18} />
-      <span>Download PDF</span>
-    </button>
+    <ToggleCard
+      id="a11y-screen-reader"
+      setting="screenReaderMode"
+      icon="a11y/bell-fill"
+      label="Screen Reader"
+      description="Announce actions"
+    />
   </div>
 </div>
 
 <style>
   .a11y-section {
-    padding: var(--space-md) 0;
-    border-bottom: var(--border-width) solid var(--color-Border-100);
+    margin-bottom: var(--space-md);
   }
 
   .a11y-section:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
   }
 
   .a11y-section__title {
     font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-Text-500);
-    margin-bottom: var(--space-sm);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-Text-900);
+    margin-bottom: var(--space-md);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
   }
 
-  .a11y-setting--pdf {
-    margin-top: var(--space-md);
-    padding-top: var(--space-md);
-    border-top: var(--border-width) solid var(--color-Border-100);
+  .a11y-toggle-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
   }
 
-  .a11y-setting--pdf .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xs);
+  /* Mobile */
+  @media (max-width: 768px) {
+    .a11y-section__title {
+      font-size: var(--font-size-base);
+    }
   }
 </style>

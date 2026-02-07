@@ -47,6 +47,31 @@
   box-shadow: var(--shadow-md);
 }
 
+/* Reduced motion: disable ALL hover effects - no visual change on hover */
+#a11y-content-wrapper.a11y-reduce-motion .card.who-slider__title-card,
+#a11y-content-wrapper.a11y-reduce-motion .card.who-slider__card {
+  transition: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .card.who-slider__title-card:hover,
+#a11y-content-wrapper.a11y-reduce-motion .card.who-slider__card:hover {
+  transform: none !important;
+  box-shadow: var(--shadow) !important; /* Keep base shadow, no change on hover */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card.who-slider__title-card,
+  .card.who-slider__card {
+    transition: none;
+  }
+
+  .card.who-slider__title-card:hover,
+  .card.who-slider__card:hover {
+    transform: none;
+    box-shadow: var(--shadow); /* Keep base shadow, no change on hover */
+  }
+}
+
 .who-slider__title-image {
   flex: 0 0 30%;
   max-width: 300px;
@@ -94,6 +119,27 @@
 .card.who-slider__card:hover {
   transform: none;
   box-shadow: var(--shadow-md);
+}
+
+/* Dot indicators - disable hover effects in reduced motion */
+#a11y-content-wrapper.a11y-reduce-motion .who-slider__dot {
+  transition: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .who-slider__dot:hover {
+  transform: none !important;
+  background: var(--color-Text-300) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .who-slider__dot {
+    transition: none;
+  }
+
+  .who-slider__dot:hover {
+    transform: none;
+    background: var(--color-Text-300);
+  }
 }
 
 .who-slider__card-image {
@@ -278,6 +324,56 @@
   .who-slider__dot.is-active {
     width: 24px !important;
     min-width: 24px !important;
+  }
+}
+
+/* ========== REDUCED MOTION: STACKED CARDS ========== */
+/* Show all cards stacked instead of slider for reduced motion users */
+#a11y-content-wrapper.a11y-reduce-motion .who-slider__wrapper {
+  min-height: auto;
+  overflow: visible;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .who-slider__track {
+  flex-direction: column;
+  gap: var(--space-xl);
+  transform: none !important;
+  transition: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .who-slider__slide {
+  min-width: 100%;
+}
+
+/* Hide slider navigation in reduced motion mode */
+#a11y-content-wrapper.a11y-reduce-motion .who-slider__card-nav,
+#a11y-content-wrapper.a11y-reduce-motion .who-slider__indicators,
+#a11y-content-wrapper.a11y-reduce-motion .who-slider__controls {
+  display: none !important;
+}
+
+/* System preference reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .who-slider__wrapper {
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .who-slider__track {
+    flex-direction: column;
+    gap: var(--space-xl);
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .who-slider__slide {
+    min-width: 100%;
+  }
+
+  .who-slider__card-nav,
+  .who-slider__indicators,
+  .who-slider__controls {
+    display: none !important;
   }
 }
 

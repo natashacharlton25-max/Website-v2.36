@@ -224,12 +224,12 @@ const hasEndContent = endSection && (
     // Set CSS variable for dynamic height calculation
     wrapper.style.setProperty('--section-count', sections.length.toString());
 
-    // Set initial states
+    // Set initial states (including pointer-events for click-through)
     sections.forEach((section, index) => {
       if (index === 0) {
-        gsap.set(section, { opacity: 1 });
+        gsap.set(section, { opacity: 1, pointerEvents: 'auto' });
       } else {
-        gsap.set(section, { opacity: 0 });
+        gsap.set(section, { opacity: 0, pointerEvents: 'none' });
       }
     });
 
@@ -303,6 +303,7 @@ const hasEndContent = endSection && (
         section,
         {
           opacity: 0,
+          pointerEvents: 'none',
           duration: 0.3,
           ease: 'power2.inOut',
         },
@@ -312,9 +313,10 @@ const hasEndContent = endSection && (
       // Fade in next section (slower: 0.5s, starts after fade-out + gap)
       masterTimeline.fromTo(
         nextSection,
-        { opacity: 0 },
+        { opacity: 0, pointerEvents: 'none' },
         {
           opacity: 1,
+          pointerEvents: 'auto',
           duration: 0.5,
           ease: 'power2.inOut',
         },

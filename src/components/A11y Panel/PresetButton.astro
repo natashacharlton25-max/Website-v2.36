@@ -30,7 +30,7 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
   data-preset={preset}
   aria-label={`${title} optimized settings`}
 >
-  <Icon name={`a11y-panel/${icon}`} size={iconSize} class="a11y-preset-btn__icon" />
+  <Icon name={`a11y-panel/${icon}`} size={iconSize} color="var(--color-Primary-500)" class="a11y-preset-btn__icon" />
   <div class="a11y-preset-btn__text">
     <span class="a11y-preset-btn__title">{title}</span>
     <span class="a11y-preset-btn__subtitle">{subtitle}</span>
@@ -41,19 +41,22 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
   .a11y-preset-btn {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: var(--space-lg);
     width: 100%;
-    padding: var(--space-sm) var(--space-md);
-    border: var(--border-width) solid var(--color-Border-100);
-    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-Background-100);
+    border: 2px solid color-mix(in srgb, var(--color-Text-900) 20%, transparent);
+    border-radius: var(--radius-lg);
     cursor: pointer;
     transition: var(--transition-fast);
     text-align: left;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   .a11y-preset-btn:hover {
-    background: var(--color-Background-300);
-    border-color: var(--color-Primary-300);
+    background: var(--color-Background-100);
+    border-color: var(--color-Primary-500);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
   .a11y-preset-btn:focus-visible {
@@ -62,13 +65,14 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
   }
 
   .a11y-preset-btn.active {
-    background: var(--color-Primary-100);
+    background: var(--color-Background-100);
     border-color: var(--color-Primary-500);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   .a11y-preset-btn__icon {
     flex-shrink: 0;
-    color: var(--color-Primary-500);
+    transition: var(--transition-fast);
   }
 
   .a11y-preset-btn__text {
@@ -78,12 +82,99 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
   }
 
   .a11y-preset-btn__title {
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-Text-500);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-Text-900);
+    font-size: var(--font-size-lg);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
 
   .a11y-preset-btn__subtitle {
-    font-size: var(--font-size-sm);
-    color: var(--color-Text-400);
+    font-size: var(--font-size-base);
+    color: var(--color-Text-900);
+    opacity: 0.7;
+  }
+
+  /* Tablet - stacked layout with subtitle */
+  @media (min-width: 769px) and (max-width: 1400px) {
+    .a11y-preset-btn {
+      flex-direction: column;
+      padding: var(--space-sm);
+      gap: var(--space-xs);
+      text-align: center;
+    }
+
+    .a11y-preset-btn__icon {
+      width: 32px !important;
+      height: 32px !important;
+    }
+
+    .a11y-preset-btn__text {
+      align-items: center;
+    }
+
+    .a11y-preset-btn__title {
+      font-size: var(--font-size-sm);
+    }
+
+    .a11y-preset-btn__subtitle {
+      font-size: var(--font-size-xs);
+    }
+  }
+
+  /* Mobile - smaller buttons, no subtitle */
+  @media (max-width: 768px) {
+    .a11y-preset-btn {
+      flex-direction: column;
+      padding: var(--space-xs) var(--space-sm);
+      gap: var(--space-2xs);
+      text-align: center;
+    }
+
+    .a11y-preset-btn__icon {
+      width: 24px !important;
+      height: 24px !important;
+    }
+
+    .a11y-preset-btn__text {
+      align-items: center;
+    }
+
+    .a11y-preset-btn__title {
+      font-size: var(--font-size-xs);
+    }
+
+    .a11y-preset-btn__subtitle {
+      display: none;
+    }
+  }
+
+  /* Small mobile - tighter */
+  @media (max-width: 480px) {
+    .a11y-preset-btn {
+      padding: var(--space-xs);
+    }
+
+    .a11y-preset-btn__icon {
+      width: 20px !important;
+      height: 20px !important;
+    }
+  }
+
+  /* Very small screens */
+  @media (max-width: 320px) {
+    .a11y-preset-btn {
+      padding: var(--space-2xs);
+      gap: var(--space-3xs);
+    }
+
+    .a11y-preset-btn__icon {
+      width: 18px !important;
+      height: 18px !important;
+    }
+
+    .a11y-preset-btn__title {
+      font-size: 10px;
+    }
   }
 </style>
