@@ -1,0 +1,83 @@
+/**
+ * ============================================
+ * A11Y - Screen Reader Mode
+ * ============================================
+ *
+ * SR-specific concerns only.
+ * Companion settings (reduced-motion, highlight-links,
+ * enhanced-focus) are auto-enabled by the panel when
+ * screen reader mode is toggled on — those files handle
+ * animations, link indicators, focus rings, Lottie,
+ * canvas, backdrop blur, card shadows, nav pinning, etc.
+ *
+ * This file handles:
+ * - Status indicator bar
+ * - Decorative element fading
+ * - Decorative dot/divider hiding
+ * - ARIA live region styling
+ * - Missing alt text flagging
+ *
+ * Applied via class: a11y-screen-reader-mode
+ */
+
+/* ============================================
+   STATUS INDICATOR
+   ============================================ */
+
+#a11y-content-wrapper.a11y-screen-reader-mode::after {
+  content: 'Screen Reader Mode Active';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-Primary-600);
+  color: var(--color-White);
+  text-align: center;
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: var(--font-bold);
+  letter-spacing: 0.05em;
+  z-index: 9998;
+}
+
+/* ============================================
+   HIDE DECORATIVE ELEMENTS
+   ============================================ */
+
+/* Fade aria-hidden and presentational elements */
+#a11y-content-wrapper.a11y-screen-reader-mode [aria-hidden="true"]:not(.skip-links):not(.sr-only),
+#a11y-content-wrapper.a11y-screen-reader-mode [role="presentation"],
+#a11y-content-wrapper.a11y-screen-reader-mode [role="none"] {
+  opacity: 0.3 !important;
+}
+
+/* Remove purely decorative dots, dividers */
+#a11y-content-wrapper.a11y-screen-reader-mode .footer__nav-dot,
+#a11y-content-wrapper.a11y-screen-reader-mode .offering-divider,
+#a11y-content-wrapper.a11y-screen-reader-mode hr[aria-hidden] {
+  display: none !important;
+}
+
+/* ============================================
+   ARIA LIVE REGIONS - Visible styling
+   ============================================ */
+
+#a11y-content-wrapper.a11y-screen-reader-mode [aria-live="polite"],
+#a11y-content-wrapper.a11y-screen-reader-mode [aria-live="assertive"],
+#a11y-content-wrapper.a11y-screen-reader-mode [role="alert"],
+#a11y-content-wrapper.a11y-screen-reader-mode [role="status"] {
+  border-left: 4px solid var(--color-Primary-500) !important;
+  padding-left: var(--space-md) !important;
+  background: color-mix(in srgb, var(--color-Primary-500) 5%, transparent) !important;
+}
+
+/* ============================================
+   IMAGES — Flag missing alt text
+   ============================================ */
+
+/* Only flag images with NO alt attribute at all —
+   alt="" is valid for decorative images */
+#a11y-content-wrapper.a11y-screen-reader-mode img:not([alt]) {
+  outline: 3px solid red !important;
+  outline-offset: 2px !important;
+}

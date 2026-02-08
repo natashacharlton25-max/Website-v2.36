@@ -203,6 +203,17 @@ import Icon from '../Icons/Icon.astro';
 
           card.setAttribute('aria-pressed', newValue ? 'true' : 'false');
           (settings as any)[setting] = newValue;
+
+          // Screen reader mode auto-enables companion settings
+          if (setting === 'screenReaderMode' && newValue) {
+            const companions = ['reduceMotion', 'highlightLinks', 'enhancedFocus'] as const;
+            companions.forEach(comp => {
+              (settings as any)[comp] = true;
+              const companionCard = panel.querySelector(`.a11y-toggle-card[data-setting="${comp}"]`);
+              if (companionCard) companionCard.setAttribute('aria-pressed', 'true');
+            });
+          }
+
           saveSettings(settings);
           applySettings(settings);
 

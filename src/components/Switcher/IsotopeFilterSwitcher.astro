@@ -60,12 +60,17 @@ const switcherId = `isotope-filter-${Math.random().toString(36).slice(2, 9)}`;
       let iso: Isotope | null = null;
       gridElement.classList.add('grid--loading');
 
+      // Disable Isotope transitions when reduced-motion is active
+      const reduceMotion =
+        document.querySelector('#a11y-content-wrapper')?.classList.contains('a11y-reduce-motion') ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       try {
         iso = new Isotope(gridElement, {
           itemSelector: itemSelector,
           percentPosition: true,
           masonry: { columnWidth: '.grid__sizer' },
-          transitionDuration: '0.6s'
+          transitionDuration: reduceMotion ? 0 : '0.6s'
         });
 
         // @ts-ignore
@@ -142,6 +147,17 @@ const switcherId = `isotope-filter-${Math.random().toString(36).slice(2, 9)}`;
         cancelAnimationFrame(resizeRAF);
         resizeRAF = requestAnimationFrame(() => iso?.layout());
       });
+
+      // Listen for a11y reduce-motion toggle at runtime
+      const wrapper = document.querySelector('#a11y-content-wrapper');
+      if (wrapper && iso) {
+        const currentIso = iso;
+        const observer = new MutationObserver(() => {
+          const isReduced = wrapper.classList.contains('a11y-reduce-motion');
+          currentIso.options.transitionDuration = isReduced ? 0 : '0.6s';
+        });
+        observer.observe(wrapper, { attributes: true, attributeFilter: ['class'] });
+      }
     });
   }
 

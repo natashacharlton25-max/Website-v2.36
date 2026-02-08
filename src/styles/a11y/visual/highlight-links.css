@@ -93,6 +93,18 @@
   border-radius: var(--radius-full) !important;
 }
 
+/* Nav logo - circle border */
+#a11y-content-wrapper.a11y-highlight-links .nav-logo {
+  border: 2px solid var(--color-Primary-500) !important;
+  border-radius: var(--radius-full) !important;
+  padding: var(--space-xs) var(--space-md) !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links:not(.a11y-reduce-motion) .nav-logo:hover {
+  border-color: var(--color-Primary-700) !important;
+  box-shadow: 0 0 0 2px var(--color-Primary-300) !important;
+}
+
 /* Hover glow — only when reduced motion is NOT active */
 #a11y-content-wrapper.a11y-highlight-links:not(.a11y-reduce-motion) .nav-icon-btn:hover,
 #a11y-content-wrapper.a11y-highlight-links:not(.a11y-reduce-motion) .side-tab:hover,
@@ -514,17 +526,30 @@
    ============================================ */
 
 #a11y-content-wrapper.a11y-highlight-links .insight-card__cta .btn,
-#a11y-content-wrapper.a11y-highlight-links .product-card__cta .btn,
-#a11y-content-wrapper.a11y-highlight-links .related-card__button {
+#a11y-content-wrapper.a11y-highlight-links .product-card__cta .btn {
   text-decoration: underline !important;
   text-underline-offset: 3px !important;
   text-decoration-color: var(--color-Primary-500) !important;
+}
+
+/* Related card button uses currentColor since it has a colored background */
+#a11y-content-wrapper.a11y-highlight-links .related-card__button {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  text-decoration-color: currentColor !important;
 }
 
 #a11y-content-wrapper.a11y-highlight-links:not(.a11y-reduce-motion) .insight-card__cta .btn:hover,
 #a11y-content-wrapper.a11y-highlight-links:not(.a11y-reduce-motion) .product-card__cta .btn:hover,
 #a11y-content-wrapper.a11y-highlight-links:not(.a11y-reduce-motion) .related-card:hover .related-card__button {
   text-decoration-thickness: 4px !important;
+}
+
+/* Horizontal card CTA button (e.g. services page "Explore") */
+#a11y-content-wrapper.a11y-highlight-links .related-card--horizontal .btn {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  text-decoration-color: currentColor !important;
 }
 
 /* ============================================
@@ -771,6 +796,12 @@
    underline thickening, no glow.
    ============================================ */
 
+/* Nav logo: keep circle border, kill hover glow */
+#a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .nav-logo:hover {
+  border-color: var(--color-Primary-500) !important;
+  box-shadow: none !important;
+}
+
 /* Icon buttons: keep circle border, kill hover glow */
 #a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .nav-icon-btn:hover,
 #a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .side-tab:hover,
@@ -779,7 +810,9 @@
   box-shadow: none !important;
 }
 
-/* Cards: keep outline, kill hover glow */
+/* Cards: keep outline + base shadow, kill hover glow
+   Don't override box-shadow here — let each card's own
+   reduced-motion rule preserve its base shadow */
 #a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion a.card:hover,
 #a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion a[class*="card"]:hover,
 #a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .masonry-card:hover,
@@ -787,7 +820,6 @@
 #a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .related-card:hover,
 #a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .expandable-item:hover {
   outline-color: var(--color-Primary-500) !important;
-  box-shadow: none !important;
 }
 
 /* Horizontal / for-you cards: no outline on card, keep content-only outline */
@@ -824,10 +856,9 @@
   box-shadow: none !important;
 }
 
-/* Product cards: keep outline, kill hover glow */
+/* Product cards: keep outline, let reduced-motion rule handle shadow */
 #a11y-content-wrapper.a11y-highlight-links.a11y-reduce-motion .product-card:hover {
   outline-color: var(--color-Primary-500) !important;
-  box-shadow: none !important;
 }
 
 /* Card buttons: keep underline, no thickening */
