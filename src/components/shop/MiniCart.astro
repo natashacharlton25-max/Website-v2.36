@@ -95,6 +95,22 @@
     gap: var(--space-md);
   }
 
+  .mini-cart__item-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex: 1;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: opacity var(--transition-fast);
+  }
+
+  .mini-cart__item-link:hover {
+    opacity: 0.7;
+  }
+
   .mini-cart__item:last-child {
     border-bottom: none;
   }
@@ -285,15 +301,19 @@
 
     if (mcSummary) mcSummary.style.display = 'block';
 
+    const assetSlug = (id: string) => id.replace(/-guide$/, '');
+
     mcItems.innerHTML = cartItems.map((item, idx) => `
       <div class="mini-cart__item">
-        <div class="mini-cart__item-image">
-          <img src="${item.image || ''}" alt="${item.name}" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='/MiniKart/MiniKart-Fallback-'+Math.ceil(Math.random()*10)+'.png';}">
-        </div>
-        <div class="mini-cart__item-info">
-          <div class="mini-cart__item-name">${item.name}</div>
-          <div class="mini-cart__item-meta">${item.price === 0 ? 'Free' : `$${item.price.toFixed(2)}`}</div>
-        </div>
+        <a href="/assets/${assetSlug(item.id)}" class="mini-cart__item-link">
+          <div class="mini-cart__item-image">
+            <img src="${item.image || ''}" alt="${item.name}" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='/MiniKart/MiniKart-Fallback-'+Math.ceil(Math.random()*10)+'.png';}">
+          </div>
+          <div class="mini-cart__item-info">
+            <div class="mini-cart__item-name">${item.name}</div>
+            <div class="mini-cart__item-meta">${item.price === 0 ? 'Free' : `$${item.price.toFixed(2)}`}</div>
+          </div>
+        </a>
         <button class="mini-cart__remove" data-idx="${idx}" title="Remove from cart">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M6 18L18 6M6 6l12 12"/>
@@ -313,6 +333,7 @@
     // Attach remove events
     mcItems.querySelectorAll('.mini-cart__remove').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent outside-click handler from closing the panel
         const el = e.currentTarget as HTMLElement;
         const idx = parseInt(el.dataset.idx || '0');
         cartItems.splice(idx, 1);

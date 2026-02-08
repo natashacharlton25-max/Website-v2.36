@@ -67,10 +67,21 @@ export function showToast(options: ToastOptions): void {
   toast.style.pointerEvents = 'auto';
   toast.style.cursor = 'pointer';
 
-  // Create Lottie icon container
+  // Check if reduced motion is active
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasA11yReducedMotion = document.querySelector('#a11y-content-wrapper.a11y-reduce-motion') !== null;
+  const isReducedMotion = prefersReducedMotion || hasA11yReducedMotion;
+
+  // Create icon — static SVG for reduced motion, Lottie otherwise
   const iconElement = document.createElement('div');
-  iconElement.className = 'toast-lottie-icon';
   iconElement.style.cssText = 'width: 32px; height: 32px; flex-shrink: 0;';
+
+  if (isReducedMotion) {
+    iconElement.className = 'toast-static-icon';
+    iconElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256" fill="currentColor"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z"/></svg>';
+  } else {
+    iconElement.className = 'toast-lottie-icon';
+  }
 
   // Create text
   const text = document.createElement('span');
@@ -86,14 +97,17 @@ export function showToast(options: ToastOptions): void {
   toast.appendChild(glow);
   container.appendChild(toast);
 
-  // Load Lottie animation with 3 loops or 10 second max
-  const lottieAnimation = lottie.loadAnimation({
-    container: iconElement,
-    renderer: 'svg',
-    loop: false, // We'll handle looping manually
-    autoplay: true,
-    path: lottieUrl || themeLottieUrls[theme] || themeLottieUrls['professional']
-  });
+  // Load Lottie animation (skip if reduced motion)
+  let lottieAnimation: any = null;
+  if (!isReducedMotion) {
+    lottieAnimation = lottie.loadAnimation({
+      container: iconElement,
+      renderer: 'svg',
+      loop: false,
+      autoplay: true,
+      path: lottieUrl || themeLottieUrls[theme] || themeLottieUrls['professional']
+    });
+  }
 
   // Track loop count and max duration
   let loopCount = 0;
@@ -101,27 +115,29 @@ export function showToast(options: ToastOptions): void {
   const maxLottieDuration = 10000; // 10 seconds
   let lottieTimeout: NodeJS.Timeout;
 
-  lottieAnimation.addEventListener('complete', () => {
-    loopCount++;
-    if (loopCount < maxLoops) {
-      lottieAnimation.goToAndPlay(0);
-    }
-  });
+  if (lottieAnimation) {
+    lottieAnimation.addEventListener('complete', () => {
+      loopCount++;
+      if (loopCount < maxLoops) {
+        lottieAnimation.goToAndPlay(0);
+      }
+    });
 
-  // Stop lottie after 10 seconds regardless of loops
-  lottieTimeout = setTimeout(() => {
-    lottieAnimation.stop();
-  }, maxLottieDuration);
+    // Stop lottie after 10 seconds regardless of loops
+    lottieTimeout = setTimeout(() => {
+      lottieAnimation.stop();
+    }, maxLottieDuration);
+  }
 
   // Click to dismiss instantly
   const dismissToast = () => {
     clearTimeout(autoRemoveTimeout);
-    clearTimeout(lottieTimeout);
+    if (lottieTimeout) clearTimeout(lottieTimeout);
     toast.style.opacity = '0';
     toast.style.transform = 'translateY(-20px)';
     toast.style.transition = 'all var(--transition-base, 0.3s ease)';
     setTimeout(() => {
-      lottieAnimation.destroy();
+      if (lottieAnimation) lottieAnimation.destroy();
       toast.remove();
     }, 300);
   };
