@@ -71,21 +71,29 @@ const iconSizes: Record<BadgeSize, number> = {
 // This ensures consistent colors across all cards site-wide
 // For unknown types (like dynamic insight categories), falls back to badge-default
 const badgeClasses: Record<string, string> = {
-  // Product types
+  // Primary group — resource / worksheet
   worksheet: 'badge--worksheet',
-  workbook: 'badge--workbook',
+  resource: 'badge--worksheet',
+  // Secondary group — guide / project / workbook
   guide: 'badge--guide',
+  project: 'badge--guide',
+  workbook: 'badge--guide',
+  // Neutral group — toolkit / cards / poster / activity / insight / service / presentation
   toolkit: 'badge--toolkit',
-  cards: 'badge--cards',
-  poster: 'badge--poster',
-  activity: 'badge--activity',
+  cards: 'badge--toolkit',
+  poster: 'badge--toolkit',
+  activity: 'badge--toolkit',
+  insight: 'badge--toolkit',
+  service: 'badge--toolkit',
+  presentation: 'badge--toolkit',
+  // Page type
+  page: 'badge--page',
   // Status types
   hot: 'badge--hot',
   free: 'badge--free',
   // Trust/verification types
   trust: 'badge--trust',
   verified: 'badge--verified',
-  // Add more predefined types as needed
 };
 
 const typeClass = badgeClasses[type.toLowerCase()] || 'badge--default';
@@ -268,8 +276,9 @@ const classes = [
 
   /* ========== BADGE TYPE COLORS ========== */
   .badge--default {
-    --badge-color: var(--brand-c-primary);
-    background-color: var(--brand-c-primary);
+    --badge-color: var(--brand-c-text-dark);
+    background-color: color-mix(in oklch, var(--brand-c-text-dark) 10%, transparent);
+    color: var(--brand-c-text);
   }
 
   .badge--worksheet {
@@ -277,14 +286,9 @@ const classes = [
     background-color: var(--brand-c-primary-dark);
   }
 
-  .badge--workbook {
+  .badge--guide {
     --badge-color: var(--brand-c-secondary-dark);
     background-color: var(--brand-c-secondary-dark);
-  }
-
-  .badge--guide {
-    --badge-color: var(--brand-c-neutral-dark);
-    background-color: var(--brand-c-neutral-dark);
   }
 
   .badge--toolkit {
@@ -292,19 +296,9 @@ const classes = [
     background-color: var(--brand-c-neutral-dark);
   }
 
-  .badge--cards {
-    --badge-color: var(--brand-c-neutral-dark);
-    background-color: var(--brand-c-neutral-dark);
-  }
-
-  .badge--poster {
-    --badge-color: var(--brand-c-neutral-dark);
-    background-color: var(--brand-c-neutral-dark);
-  }
-
-  .badge--activity {
-    --badge-color: var(--brand-c-neutral-dark);
-    background-color: var(--brand-c-neutral-dark);
+  .badge--page {
+    --badge-color: var(--brand-c-text);
+    background-color: var(--brand-c-text);
   }
 
   .badge--hot {
@@ -330,12 +324,9 @@ const classes = [
   /* Override background for non-fill variants */
   .badge--outline.badge--default,
   .badge--outline.badge--worksheet,
-  .badge--outline.badge--workbook,
   .badge--outline.badge--guide,
   .badge--outline.badge--toolkit,
-  .badge--outline.badge--cards,
-  .badge--outline.badge--poster,
-  .badge--outline.badge--activity,
+  .badge--outline.badge--page,
   .badge--outline.badge--hot,
   .badge--outline.badge--free,
   .badge--outline.badge--trust,
@@ -348,12 +339,9 @@ const classes = [
   /* Override background for soft variants - needs higher specificity */
   .badge--soft.badge--default,
   .badge--soft.badge--worksheet,
-  .badge--soft.badge--workbook,
   .badge--soft.badge--guide,
   .badge--soft.badge--toolkit,
-  .badge--soft.badge--cards,
-  .badge--soft.badge--poster,
-  .badge--soft.badge--activity,
+  .badge--soft.badge--page,
   .badge--soft.badge--hot,
   .badge--soft.badge--free,
   .badge--soft.badge--trust,
@@ -365,12 +353,9 @@ const classes = [
   /* Override background for ghost variants */
   .badge--ghost.badge--default,
   .badge--ghost.badge--worksheet,
-  .badge--ghost.badge--workbook,
   .badge--ghost.badge--guide,
   .badge--ghost.badge--toolkit,
-  .badge--ghost.badge--cards,
-  .badge--ghost.badge--poster,
-  .badge--ghost.badge--activity,
+  .badge--ghost.badge--page,
   .badge--ghost.badge--hot,
   .badge--ghost.badge--free,
   .badge--ghost.badge--trust,
