@@ -67,9 +67,16 @@ const iconSizes: Record<BadgeSize, number> = {
   lg: 18
 };
 
+// Deterministic string → hue (0-360) for topic badges
+function topicHue(str: string): number {
+  let hash = 0;
+  for (const ch of str.toLowerCase()) hash = ch.charCodeAt(0) + ((hash << 5) - hash);
+  return ((hash % 360) + 360) % 360;
+}
+
 // Global badge type to CSS class mapping
 // This ensures consistent colors across all cards site-wide
-// For unknown types (like dynamic insight categories), falls back to badge-default
+// Unmatched types (like insight categories) get auto-hue via badge--topic
 const badgeClasses: Record<string, string> = {
   // Primary group — resource / worksheet
   worksheet: 'badge--worksheet',
@@ -96,7 +103,10 @@ const badgeClasses: Record<string, string> = {
   verified: 'badge--verified',
 };
 
-const typeClass = badgeClasses[type.toLowerCase()] || 'badge--default';
+const matchedClass = badgeClasses[type.toLowerCase()];
+const isTopic = type && !matchedClass;
+const typeClass = matchedClass || (isTopic ? 'badge--topic' : 'badge--default');
+const topicHueValue = isTopic ? topicHue(type) : null;
 const displayLabel = label || type.charAt(0).toUpperCase() + type.slice(1);
 
 const classes = [
@@ -113,7 +123,7 @@ const classes = [
 ].filter(Boolean);
 ---
 
-<span class:list={classes} title={iconOnly ? displayLabel : undefined}>
+<span class:list={classes} style={topicHueValue !== null ? `--topic-hue: ${topicHueValue}` : undefined} title={iconOnly ? displayLabel : undefined}>
   {lottieIcon && (
     <lottie-player
       src={lottieUrl}
@@ -321,6 +331,14 @@ const classes = [
     background-color: var(--color-Info, var(--brand-c-primary));
   }
 
+  /* Auto-hue topic badges — oklch with deterministic hue from string hash */
+  .badge--topic {
+    --badge-color: oklch(0.45 0.08 var(--topic-hue));
+    background-color: oklch(0.45 0.08 var(--topic-hue));
+    color: var(--color-White);
+    border: 1px solid oklch(0.35 0.08 var(--topic-hue));
+  }
+
   /* Override background for non-fill variants */
   .badge--outline.badge--default,
   .badge--outline.badge--worksheet,
@@ -330,7 +348,8 @@ const classes = [
   .badge--outline.badge--hot,
   .badge--outline.badge--free,
   .badge--outline.badge--trust,
-  .badge--outline.badge--verified {
+  .badge--outline.badge--verified,
+  .badge--outline.badge--topic {
     background: transparent;
     border-color: var(--badge-color);
     color: var(--badge-color);
@@ -345,7 +364,8 @@ const classes = [
   .badge--soft.badge--hot,
   .badge--soft.badge--free,
   .badge--soft.badge--trust,
-  .badge--soft.badge--verified {
+  .badge--soft.badge--verified,
+  .badge--soft.badge--topic {
     background: color-mix(in oklch, var(--badge-color) 15%, transparent);
     color: var(--badge-color);
   }
@@ -359,7 +379,8 @@ const classes = [
   .badge--ghost.badge--hot,
   .badge--ghost.badge--free,
   .badge--ghost.badge--trust,
-  .badge--ghost.badge--verified {
+  .badge--ghost.badge--verified,
+  .badge--ghost.badge--topic {
     background: transparent;
     color: var(--badge-color);
   }
