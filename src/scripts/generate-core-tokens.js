@@ -18,19 +18,19 @@ const outputPath = path.join(outputDir, 'coretokens.css');
  * Extract core tokens from CSS text
  */
 function extractCoreTokens(cssText) {
-  const tokens = { bg: null, text: null, primary: null, accent: null };
+  const tokens = { bg: null, text: null, primary: null, secondary: null };
   const lines = cssText.split('\n');
 
   for (const line of lines) {
     const bgMatch = line.match(/--[\w-]+-c-bg\s*:\s*([^;]+);/i);
     const textMatch = line.match(/--[\w-]+-c-text\s*:\s*([^;]+);/i);
     const primaryMatch = line.match(/--[\w-]+-c-primary\s*:\s*([^;]+);/i);
-    const accentMatch = line.match(/--[\w-]+-c-accent\s*:\s*([^;]+);/i);
+    const secondaryMatch = line.match(/--[\w-]+-c-secondary\s*:\s*([^;]+);/i);
 
     if (bgMatch && !bgMatch[1].includes('var(')) tokens.bg = bgMatch[1].trim();
     if (textMatch && !textMatch[1].includes('var(')) tokens.text = textMatch[1].trim();
     if (primaryMatch && !primaryMatch[1].includes('var(')) tokens.primary = primaryMatch[1].trim();
-    if (accentMatch && !accentMatch[1].includes('var(')) tokens.accent = accentMatch[1].trim();
+    if (secondaryMatch && !secondaryMatch[1].includes('var(')) tokens.secondary = secondaryMatch[1].trim();
   }
 
   return tokens;
@@ -91,7 +91,7 @@ function generateCoreTokensCSS() {
     const cssText = fs.readFileSync(filePath, 'utf-8');
     const tokens = extractCoreTokens(cssText);
 
-    if (tokens.bg || tokens.text || tokens.primary || tokens.accent) {
+    if (tokens.bg || tokens.text || tokens.primary || tokens.secondary) {
       allTokens.push({ theme: themeName, tokens });
       console.log(`  ✓ Extracted tokens for: ${themeName}`);
     }
@@ -118,7 +118,7 @@ function generateCoreTokensCSS() {
     if (tokens.bg) cssContent += `  --${prefix}-c-bg: ${tokens.bg};\n`;
     if (tokens.text) cssContent += `  --${prefix}-c-text: ${tokens.text};\n`;
     if (tokens.primary) cssContent += `  --${prefix}-c-primary: ${tokens.primary};\n`;
-    if (tokens.accent) cssContent += `  --${prefix}-c-accent: ${tokens.accent};\n`;
+    if (tokens.secondary) cssContent += `  --${prefix}-c-secondary: ${tokens.secondary};\n`;
   }
 
   cssContent += `}\n`;

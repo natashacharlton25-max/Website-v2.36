@@ -10,6 +10,13 @@ import Icon from '../components/Icons/Icon.astro';
 import Badge from '../components/Badge/Badge.astro';
 import { getCollection } from 'astro:content';
 
+// Deterministic string → hue (mirrors Badge.astro topicHue)
+function topicHue(str: string): number {
+  let hash = 0;
+  for (const ch of str.toLowerCase()) hash = ch.charCodeAt(0) + ((hash << 5) - hash);
+  return (((hash * 2654435079) % 360) + 360) % 360;
+}
+
 // Get all collections at build time
 const allInsights = await getCollection('insights');
 const allAssets = await getCollection('assets');
@@ -141,7 +148,7 @@ const pageDescription = 'Search our resources, insights, tools, and more.';
     <!-- Pre-rendered Badge templates for client-side search results -->
     <div id="badge-templates" hidden>
       {['Insight', 'Resource', 'Project', 'Presentation', 'Page', 'Service'].map(cat => (
-        <div data-badge-cat={cat.toLowerCase()}>
+        <div data-badge-cat={cat.toLowerCase()} data-topic-hue={topicHue(cat)}>
           <Badge type={cat} shape="pill" variant="fill" size="sm" />
         </div>
       ))}
@@ -1262,8 +1269,10 @@ const pageDescription = 'Search our resources, insights, tools, and more.';
 
         // Build badge template map from pre-rendered Badge components
         this.badgeTemplates = {};
+        this.topicHues = {};
         document.querySelectorAll('#badge-templates [data-badge-cat]').forEach(el => {
           this.badgeTemplates[el.dataset.badgeCat] = el.innerHTML;
+          this.topicHues[el.dataset.badgeCat] = el.dataset.topicHue;
         });
 
         // Bind handlers so we can remove them later
@@ -1370,9 +1379,10 @@ const pageDescription = 'Search our resources, insights, tools, and more.';
           const iconSvg = this.getIconForCategory(item.category);
 
           const badgeHtml = this.badgeTemplates[categorySlug] || `<span class="result-card__badge">${item.category}</span>`;
+          const hue = this.topicHues[categorySlug] || '0';
 
           html += `
-            <a href="${item.url}" class="result-card result-card--${categorySlug}">
+            <a href="${item.url}" class="result-card" style="--topic-hue: ${hue}">
               <div class="result-card__badge-wrap">${badgeHtml}</div>
               <div class="result-card__icon">
                 ${iconSvg}

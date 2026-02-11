@@ -71,41 +71,20 @@ const iconSizes: Record<BadgeSize, number> = {
 function topicHue(str: string): number {
   let hash = 0;
   for (const ch of str.toLowerCase()) hash = ch.charCodeAt(0) + ((hash << 5) - hash);
-  return (((hash * 2654435761) % 360) + 360) % 360;
+  return (((hash * 2654435079) % 360) + 360) % 360;
 }
 
-// Global badge type to CSS class mapping
-// This ensures consistent colors across all cards site-wide
-// Unmatched types (like insight categories) get auto-hue via badge--topic
-const badgeClasses: Record<string, string> = {
-  // Primary group — resource / worksheet
-  worksheet: 'badge--worksheet',
-  resource: 'badge--worksheet',
-  // Secondary group — guide / project / workbook
-  guide: 'badge--guide',
-  project: 'badge--guide',
-  workbook: 'badge--guide',
-  // Neutral group — toolkit / cards / poster / activity / insight / service / presentation
-  toolkit: 'badge--toolkit',
-  cards: 'badge--toolkit',
-  poster: 'badge--toolkit',
-  activity: 'badge--toolkit',
-  insight: 'badge--toolkit',
-  service: 'badge--toolkit',
-  presentation: 'badge--toolkit',
-  // Page type
-  page: 'badge--page',
-  // Status types
+// Status badges keep fixed CSS classes; everything else uses auto-hue
+const statusClasses: Record<string, string> = {
   hot: 'badge--hot',
   free: 'badge--free',
-  // Trust/verification types
   trust: 'badge--trust',
   verified: 'badge--verified',
 };
 
-const matchedClass = badgeClasses[type.toLowerCase()];
-const isTopic = type && !matchedClass;
-const typeClass = matchedClass || (isTopic ? 'badge--topic' : 'badge--default');
+const statusClass = statusClasses[type.toLowerCase()];
+const isTopic = type && !statusClass;
+const typeClass = statusClass || (isTopic ? 'badge--topic' : 'badge--default');
 const topicHueValue = isTopic ? topicHue(type) : null;
 const displayLabel = label || type.charAt(0).toUpperCase() + type.slice(1);
 
@@ -291,26 +270,6 @@ const classes = [
     color: var(--brand-c-text);
   }
 
-  .badge--worksheet {
-    --badge-color: var(--brand-c-primary-dark);
-    background-color: var(--brand-c-primary-dark);
-  }
-
-  .badge--guide {
-    --badge-color: var(--brand-c-secondary-dark);
-    background-color: var(--brand-c-secondary-dark);
-  }
-
-  .badge--toolkit {
-    --badge-color: var(--brand-c-neutral-dark);
-    background-color: var(--brand-c-neutral-dark);
-  }
-
-  .badge--page {
-    --badge-color: var(--brand-c-text);
-    background-color: var(--brand-c-text);
-  }
-
   .badge--hot {
     --badge-color: var(--color-Error);
     background-color: var(--color-Error);
@@ -336,15 +295,10 @@ const classes = [
     --badge-color: oklch(0.45 0.08 var(--topic-hue));
     background-color: oklch(0.45 0.08 var(--topic-hue));
     color: var(--color-White);
-    border: 1px solid oklch(0.35 0.08 var(--topic-hue));
   }
 
   /* Override background for non-fill variants */
   .badge--outline.badge--default,
-  .badge--outline.badge--worksheet,
-  .badge--outline.badge--guide,
-  .badge--outline.badge--toolkit,
-  .badge--outline.badge--page,
   .badge--outline.badge--hot,
   .badge--outline.badge--free,
   .badge--outline.badge--trust,
@@ -357,10 +311,6 @@ const classes = [
 
   /* Override background for soft variants - needs higher specificity */
   .badge--soft.badge--default,
-  .badge--soft.badge--worksheet,
-  .badge--soft.badge--guide,
-  .badge--soft.badge--toolkit,
-  .badge--soft.badge--page,
   .badge--soft.badge--hot,
   .badge--soft.badge--free,
   .badge--soft.badge--trust,
@@ -372,10 +322,6 @@ const classes = [
 
   /* Override background for ghost variants */
   .badge--ghost.badge--default,
-  .badge--ghost.badge--worksheet,
-  .badge--ghost.badge--guide,
-  .badge--ghost.badge--toolkit,
-  .badge--ghost.badge--page,
   .badge--ghost.badge--hot,
   .badge--ghost.badge--free,
   .badge--ghost.badge--trust,

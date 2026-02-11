@@ -1,21 +1,12 @@
 /**
- * Simple Theme Generator - Enhanced version
- * Reads brand colors and generates theme with base position control and color theory
+ * Simple Theme Generator — 21-Token System
+ * Reads 5 brand colours and generates 15 --brand-c-* tokens using OKLCH scales
  */
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import chroma from 'chroma-js';
-
-// Note: Status colors (Success, Warning, Error, Info) and base colors (Black, White)
-// are now defined globally in src/Styles/tokens/status.css - not generated per theme
-
-// Rainbow colors are defined in Allcoloursrainbow.css using theme tokens
-// They map to accent colors and change with each theme
-
-// Accent name mapping (numbers to words)
-const ACCENT_NAMES = ['', 'One', 'Two', 'Three', 'Four', 'Five'];
 
 /**
  * Generate color theory variant from a base color
@@ -34,23 +25,19 @@ function generateColorTheoryVariant(baseColor, theory, index = 0) {
       break;
 
     case 'analogous':
-      // Adjacent colors: ±30 degrees
       newHue = index === 0 ? (hue - 30 + 360) % 360 : (hue + 30) % 360;
       break;
 
     case 'triadic':
-      // Three evenly spaced: 120 degrees apart
       newHue = (hue + (120 * (index + 1))) % 360;
       break;
 
     case 'split-complementary':
-      // Complement ± 30 degrees
       const complement = (hue + 180) % 360;
       newHue = index === 0 ? (complement - 30 + 360) % 360 : (complement + 30) % 360;
       break;
 
     case 'tetradic':
-      // Four colors in rectangle: 0, 60, 180, 240
       const tetradValues = [60, 180, 240];
       newHue = (hue + tetradValues[index % 3]) % 360;
       break;
@@ -70,16 +57,12 @@ function generateScaleFromBase(baseColorHex, basePosition = 500) {
   const color = chroma(baseColorHex);
   const scale = {};
 
-  // Define the full range of positions
   const positions = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
 
-  // Get base color properties in OKLCH for better perceptual uniformity
   const baseL = color.get('oklch.l');
   const baseC = color.get('oklch.c');
   const baseH = color.get('oklch.h') || 0;
 
-  // Calculate lightness range - map positions to lightness values
-  // Position 50 = lightest (L~0.95), Position 950 = darkest (L~0.15)
   const lightnessMap = {
     50: 0.97,
     100: 0.93,
@@ -94,36 +77,27 @@ function generateScaleFromBase(baseColorHex, basePosition = 500) {
     950: 0.15
   };
 
-  // Calculate what the base lightness should be for its position
   const targetBaseLightness = lightnessMap[basePosition];
   const actualBaseLightness = baseL;
-
-  // Adjust all lightness values based on the offset
   const lightnessOffset = actualBaseLightness - targetBaseLightness;
 
   positions.forEach(pos => {
     let targetL = lightnessMap[pos] + lightnessOffset;
-
-    // Clamp lightness to valid range
     targetL = Math.max(0.1, Math.min(0.98, targetL));
 
-    // Reduce chroma (saturation) for very light and very dark colors
     let adjustedC = baseC;
     if (pos <= 100) {
-      adjustedC = baseC * 0.3; // Very desaturated for light tints
+      adjustedC = baseC * 0.3;
     } else if (pos <= 200) {
       adjustedC = baseC * 0.5;
     } else if (pos >= 900) {
-      adjustedC = baseC * 0.7; // Slightly desaturated for dark shades
+      adjustedC = baseC * 0.7;
     }
 
-    // Generate color in OKLCH and convert to hex
     try {
-      // Handle NaN hue (achromatic colors)
       const hue = isNaN(baseH) ? 0 : baseH;
       const generatedColor = chroma.oklch(targetL, adjustedC, hue);
 
-      // Verify the color is valid
       if (generatedColor && generatedColor.hex) {
         scale[pos] = generatedColor.hex();
       } else {
@@ -131,7 +105,6 @@ function generateScaleFromBase(baseColorHex, basePosition = 500) {
       }
     } catch (e) {
       console.warn(`⚠️  Failed to generate color for position ${pos}: ${e.message}, using fallback`);
-      // Fallback: use simple lightness adjustment in HSL
       try {
         const hsl = color.hsl();
         const targetLightness = lightnessMap[pos];
@@ -146,96 +119,25 @@ function generateScaleFromBase(baseColorHex, basePosition = 500) {
   return scale;
 }
 
-
 /**
- * Extract essential tokens from full palette (50-950)
- * Only keeps the tokens we actually use for each color type
+ * Pick 3 tokens (light, default, dark) from a generated scale
  */
-function extractEssentialTokens(fullPalette, colorType) {
-  const essential = {};
-
-  // Extract the color data from the palette object
-  const palette = fullPalette[colorType] || fullPalette;
-
-  if (colorType === 'Primary') {
-    // Extended primary tokens for maximum flexibility
-    essential[50] = palette[50];
-    essential[100] = palette[100];
-    essential[200] = palette[200];
-    essential[300] = palette[300];
-    essential[400] = palette[400];
-    essential[500] = palette[500];
-    essential[600] = palette[600];
-    essential[700] = palette[700];
-    essential[800] = palette[800];
-    essential[900] = palette[900];
-  } else if (colorType === 'Secondary') {
-    // Extended secondary tokens
-    essential[100] = palette[100];
-    essential[200] = palette[200];
-    essential[300] = palette[300];
-    essential[400] = palette[400];
-    essential[500] = palette[500];
-    essential[600] = palette[600];
-    essential[700] = palette[700];
-    essential[800] = palette[800];
-  } else if (colorType.startsWith('Accent')) {
-    // Extended accent tokens - full range for design flexibility
-    essential[100] = palette[100];
-    essential[200] = palette[200];
-    essential[300] = palette[300];
-    essential[400] = palette[400];
-    essential[500] = palette[500];
-    essential[600] = palette[600];
-    essential[700] = palette[700];
-    essential[800] = palette[800];
-  } else if (colorType === 'Background') {
-    // Light mode backgrounds - need more subtle variations
-    essential[50] = palette[50];
-    essential[100] = palette[100];
-    essential[200] = palette[200];
-    essential[300] = palette[300];
-    essential[400] = palette[400];
-    essential[500] = palette[500];
-  } else if (colorType === 'BackgroundDark') {
-    // Dark mode backgrounds - extended dark range
-    essential[600] = palette[600];
-    essential[700] = palette[700];
-    essential[800] = palette[800];
-    essential[900] = palette[900];
-    essential[950] = palette[950];
-  } else if (colorType === 'Text') {
-    // Extended text tokens for typography hierarchy
-    essential[50] = palette[50];   // Added for light text
-    essential[300] = palette[300];
-    essential[400] = palette[400];
-    essential[500] = palette[500];
-    essential[600] = palette[600];
-    essential[700] = palette[700];
-    essential[800] = palette[800];
-    essential[900] = palette[900];
-    essential[950] = palette[950];
-  } else if (colorType === 'Neutral') {
-    // Extended neutral tokens for borders, dividers, etc.
-    essential[50] = palette[50];   // Added for light borders
-    essential[100] = palette[100];
-    essential[200] = palette[200];
-    essential[300] = palette[300];
-    essential[400] = palette[400];
-    essential[500] = palette[500];
-    essential[600] = palette[600];
-    essential[700] = palette[700];
-    essential[800] = palette[800];  // Added
-    essential[900] = palette[900];  // Added
-  } else if (colorType === 'Success' || colorType === 'Warning' || colorType === 'Error' || colorType === 'Info') {
-    // Status colors - need 100, 200, 500 for alerts/forms
-    essential[100] = palette[100];
-    essential[200] = palette[200];
-    essential[500] = palette[500];
-  }
-
-  return essential;
+function pickThreeTokens(scale, positions = [200, 500, 700]) {
+  return {
+    light: scale[positions[0]],
+    default: scale[positions[1]],
+    dark: scale[positions[2]]
+  };
 }
+
+// Position maps per group type
+const POSITION_MAP = {
+  primary:   [300, 500, 700],
+  secondary: [300, 500, 700],
+  neutral:   [300, 500, 700],
+  bg:        [50, 100, 800],
+  text:      [400, 600, 800]
+};
 
 /**
  * Parse CSS file to extract brand color values with metadata
@@ -246,8 +148,6 @@ function parseBrandTemplate(templatePath) {
     console.log('🔍 Parsing brand template...');
     const colors = {};
 
-    // Enhanced regex to match CSS custom properties with optional comments
-    // Matches: --brand-name: #color; /* base: 500, from: primary, theory: complementary, index: 0 */
     const cssVarRegex = /--brand-([\w-]+):\s*(auto|#?[a-fA-F0-9]{3,6})\s*;(?:\s*\/\*([^*]*)\*\/)?/g;
     let match;
 
@@ -256,45 +156,25 @@ function parseBrandTemplate(templatePath) {
       const colorValue = match[2];
       const comment = match[3] || '';
 
-      // Parse metadata from comment
       const metadata = {
         value: colorValue === 'auto' ? null : colorValue.replace('#', ''),
-        base: 500, // default
+        base: 500,
         from: null,
-        fromToken: null, // NEW: specific token like "primary-900"
         theory: null,
         index: 0
       };
 
-      // Extract base position
       const baseMatch = comment.match(/base:\s*(\d+)/);
-      if (baseMatch) {
-        metadata.base = parseInt(baseMatch[1]);
-      }
+      if (baseMatch) metadata.base = parseInt(baseMatch[1]);
 
-      // Extract reference color
       const fromMatch = comment.match(/from:\s*([\w-]+)/);
-      if (fromMatch) {
-        metadata.from = fromMatch[1];
-      }
+      if (fromMatch) metadata.from = fromMatch[1];
 
-      // Extract specific token reference (NEW)
-      const fromTokenMatch = comment.match(/from-token:\s*([\w-]+)/);
-      if (fromTokenMatch) {
-        metadata.fromToken = fromTokenMatch[1];
-      }
-
-      // Extract color theory
       const theoryMatch = comment.match(/theory:\s*([\w-]+)/);
-      if (theoryMatch) {
-        metadata.theory = theoryMatch[1];
-      }
+      if (theoryMatch) metadata.theory = theoryMatch[1];
 
-      // Extract index
       const indexMatch = comment.match(/index:\s*(\d+)/);
-      if (indexMatch) {
-        metadata.index = parseInt(indexMatch[1]);
-      }
+      if (indexMatch) metadata.index = parseInt(indexMatch[1]);
 
       colors[colorName] = metadata;
     }
@@ -307,84 +187,30 @@ function parseBrandTemplate(templatePath) {
 }
 
 /**
- * Generate CSS content for theme file
+ * Generate CSS content — exactly 15 --brand-c-* tokens
  */
-function generateThemeCSS(palettes) {
-  let css = `:root {
-  /* Essential OKLCH Color Palette - Generated with chroma-js and color theory */
+function generateThemeCSS(tokens) {
+  let css = `:root {\n`;
+  css += `  /* Brand Colour Tokens — Generated by simple-theme-gen.js */\n\n`;
 
-`;
+  const groups = ['primary', 'secondary', 'neutral', 'bg', 'text'];
+  const labels = {
+    primary: 'Primary',
+    secondary: 'Secondary',
+    neutral: 'Neutral',
+    bg: 'Background',
+    text: 'Text'
+  };
 
-  // Primary Colors
-  if (palettes.Primary) {
-    css += `  /* Primary Colors - Used for branding and main actions */\n`;
-    for (const [weight, color] of Object.entries(palettes.Primary)) {
-      css += `  --color-Primary-${weight}: ${color};\n`;
-    }
-    css += '\n';
+  for (const group of groups) {
+    css += `  /* ${labels[group]} */\n`;
+    css += `  --brand-c-${group}-light: ${tokens[group].light};\n`;
+    css += `  --brand-c-${group}: ${tokens[group].default};\n`;
+    css += `  --brand-c-${group}-dark: ${tokens[group].dark};\n`;
+    css += `\n`;
   }
 
-  // Secondary Colors
-  if (palettes.Secondary) {
-    css += `  /* Secondary Colors - Used for secondary actions */\n`;
-    for (const [weight, color] of Object.entries(palettes.Secondary)) {
-      css += `  --color-Secondary-${weight}: ${color};\n`;
-    }
-    css += '\n';
-  }
-
-  // Background Colors
-  if (palettes.Background) {
-    css += `  /* Background Colors - Used for surfaces and backgrounds */\n`;
-    for (const [weight, color] of Object.entries(palettes.Background)) {
-      css += `  --color-Background-${weight}: ${color};\n`;
-    }
-    css += '\n';
-  }
-
-  // Dark Background Colors
-  if (palettes.BackgroundDark) {
-    css += `  /* Dark Background Colors - Used for dark mode surfaces */\n`;
-    for (const [weight, color] of Object.entries(palettes.BackgroundDark)) {
-      css += `  --color-BackgroundDark-${weight}: ${color};\n`;
-    }
-    css += '\n';
-  }
-
-  // Text Colors
-  if (palettes.Text) {
-    css += `  /* Text Colors - Used for typography */\n`;
-    for (const [weight, color] of Object.entries(palettes.Text)) {
-      css += `  --color-Text-${weight}: ${color};\n`;
-    }
-    css += '\n';
-  }
-
-  // Neutral Colors
-  if (palettes.Neutral) {
-    css += `  /* Neutral Colors - Used for borders and dividers */\n`;
-    for (const [weight, color] of Object.entries(palettes.Neutral)) {
-      css += `  --color-Neutral-${weight}: ${color};\n`;
-    }
-    css += '\n';
-  }
-
-  // Accent Colors
-  for (let i = 1; i <= 5; i++) {
-    const accentName = `Accent${ACCENT_NAMES[i]}`;
-    if (palettes[accentName]) {
-      css += `  /* ${accentName} Colors */\n`;
-      for (const [weight, color] of Object.entries(palettes[accentName])) {
-        css += `  --color-${accentName}-${weight}: ${color};\n`;
-      }
-      css += '\n';
-    }
-  }
-
-  // Note: Status colors (Success, Warning, Error, Info) and base colors (Black, White)
-  // are defined globally in src/Styles/tokens/status.css - not per theme
-
-  css += '}\n';
+  css += `}\n`;
   return css;
 }
 
@@ -402,7 +228,6 @@ function updateThemeSwitcher(themeName) {
 
     let content = fs.readFileSync(themeSwitcherPath, 'utf8');
 
-    // Find the themes object
     const themesRegex = /(this\.themes\s*=\s*\{)([\s\S]*?)(\};)/;
     const match = content.match(themesRegex);
 
@@ -413,25 +238,20 @@ function updateThemeSwitcher(themeName) {
 
     const [fullMatch, opening, themesContent, closing] = match;
 
-    // Check if theme already exists
     if (themesContent.includes(`'${themeName}'`)) {
       console.log(`✅ Theme '${themeName}' already exists in ThemeSwitcher.js`);
       return;
     }
 
-    // Add new theme
     const newThemeEntry = `      '${themeName}': '/src/Styles/themes/${themeName}.css'`;
 
-    // Add comma to existing content if needed
     const trimmedContent = themesContent.trim();
     const needsComma = trimmedContent && !trimmedContent.endsWith(',');
     const updatedContent = trimmedContent + (needsComma ? ',' : '') + '\n' + newThemeEntry;
 
-    // Replace in full content
     const updatedThemes = opening + '\n' + updatedContent + '\n    ' + closing;
     const updatedFileContent = content.replace(themesRegex, updatedThemes);
 
-    // Write back to file
     fs.writeFileSync(themeSwitcherPath, updatedFileContent);
     console.log(`✅ Added '${themeName}' to ThemeSwitcher.js`);
 
@@ -445,19 +265,17 @@ function updateThemeSwitcher(themeName) {
  * Main function to generate theme
  */
 async function generateTheme(themeName = 'brand-theme', customTemplatePath = null) {
-  console.log('🎨 Simple Theme Generator');
+  console.log('🎨 Simple Theme Generator (21-Token System)');
   console.log(`📝 Generating theme: ${themeName}`);
 
   const templatePath = customTemplatePath || path.join(process.cwd(), 'src', 'scripts', 'ThemeTokenGen', 'brand-template.css');
 
-  // Check if template exists
   if (!fs.existsSync(templatePath)) {
     console.error(`❌ Template file not found: ${templatePath}`);
     console.log('💡 Please create the template file first or run from the correct directory.');
     return;
   }
 
-  // Parse brand colors
   console.log('📖 Reading brand colors from template...');
   console.log(`🔍 Template path: ${templatePath}`);
   const brandColors = parseBrandTemplate(templatePath);
@@ -477,27 +295,20 @@ async function generateTheme(themeName = 'brand-theme', customTemplatePath = nul
     console.log(`   ${name}: ${colorInfo}${baseInfo}${theoryInfo}`);
   });
 
-  const palettes = {};
-  const resolvedColors = {}; // Store resolved hex values
+  const resolvedColors = {};
 
   /**
-   * Resolve a color - either use the value or generate from color theory
+   * Resolve a color — either use the value or generate from color theory
    */
   function resolveColor(colorKey, metadata) {
-    // If already resolved, return it
-    if (resolvedColors[colorKey]) {
-      return resolvedColors[colorKey];
-    }
+    if (resolvedColors[colorKey]) return resolvedColors[colorKey];
 
-    // If has explicit value, use it
     if (metadata.value) {
       resolvedColors[colorKey] = metadata.value;
       return metadata.value;
     }
 
-    // If auto and has "from" reference
     if (metadata.from) {
-      // First resolve the source color
       const sourceKey = metadata.from;
       if (!brandColors[sourceKey]) {
         console.error(`❌ Source color "${sourceKey}" not found for "${colorKey}"`);
@@ -510,20 +321,16 @@ async function generateTheme(themeName = 'brand-theme', customTemplatePath = nul
         return null;
       }
 
-      // If has color theory, generate variant
       if (metadata.theory) {
         const generatedColor = generateColorTheoryVariant(
           `#${sourceColor}`,
           metadata.theory,
           metadata.index
         );
-
         console.log(`🎨 Generated ${colorKey} using ${metadata.theory} from ${sourceKey}: ${generatedColor}`);
         resolvedColors[colorKey] = generatedColor.replace('#', '');
         return resolvedColors[colorKey];
       } else {
-        // No theory - just use the source color directly
-        // (different base position will be applied during palette generation)
         console.log(`🎨 Using ${colorKey} from ${sourceKey} with different base position`);
         resolvedColors[colorKey] = sourceColor;
         return resolvedColors[colorKey];
@@ -534,61 +341,41 @@ async function generateTheme(themeName = 'brand-theme', customTemplatePath = nul
     return null;
   }
 
-  /**
-   * Generate palette for a color type
-   */
-  function generatePalette(colorKey, colorType, metadata) {
-    const hexValue = resolveColor(colorKey, metadata);
-    if (!hexValue) return null;
-
-    console.log(`🎨 Generating ${colorType} palette from #${hexValue} (base: ${metadata.base})...`);
-
-    // Generate scale from base position
-    const fullScale = generateScaleFromBase(`#${hexValue}`, metadata.base);
-
-    // Extract only the tokens we need for this color type
-    return extractEssentialTokens({ [colorType]: fullScale }, colorType);
-  }
-
-  // Generate palettes for brand colors
-  const colorMapping = {
-    'primary': 'Primary',
-    'secondary': 'Secondary',
-    'background': 'Background',
-    'background-dark': 'BackgroundDark',
-    'backgrounddark': 'BackgroundDark',
-    'text': 'Text',
-    'neutral': 'Neutral'
+  // Map template keys to output group names
+  const groupMapping = {
+    'primary': 'primary',
+    'secondary': 'secondary',
+    'neutral': 'neutral',
+    'bg': 'bg',
+    'text': 'text'
   };
 
-  // Process main colors
-  for (const [colorKey, colorType] of Object.entries(colorMapping)) {
-    if (brandColors[colorKey]) {
-      const palette = generatePalette(colorKey, colorType, brandColors[colorKey]);
-      if (palette) {
-        palettes[colorType] = palette;
-      }
-    }
-  }
+  const tokens = {};
 
-  // Process accent colors
-  for (let i = 1; i <= 5; i++) {
-    const accentKey = `accent${i}`;
-    const accentName = `Accent${ACCENT_NAMES[i]}`;
-    if (brandColors[accentKey]) {
-      const palette = generatePalette(accentKey, accentName, brandColors[accentKey]);
-      if (palette) {
-        palettes[accentName] = palette;
-      }
+  for (const [templateKey, groupName] of Object.entries(groupMapping)) {
+    if (!brandColors[templateKey]) {
+      console.warn(`⚠️  Missing "${templateKey}" in template, skipping`);
+      continue;
     }
-  }
 
-  // Note: Status colors and Black/White are now global (src/Styles/tokens/status.css)
-  // They are no longer generated per-theme
+    const metadata = brandColors[templateKey];
+    const hexValue = resolveColor(templateKey, metadata);
+    if (!hexValue) continue;
+
+    console.log(`🎨 Generating ${groupName} scale from #${hexValue} (base: ${metadata.base})...`);
+
+    const fullScale = generateScaleFromBase(`#${hexValue}`, metadata.base);
+    const positions = POSITION_MAP[groupName];
+    tokens[groupName] = pickThreeTokens(fullScale, positions);
+
+    console.log(`   ${groupName}-light: ${tokens[groupName].light}`);
+    console.log(`   ${groupName}: ${tokens[groupName].default}`);
+    console.log(`   ${groupName}-dark: ${tokens[groupName].dark}`);
+  }
 
   // Generate CSS
-  console.log('📝 Generating CSS...');
-  const cssContent = generateThemeCSS(palettes);
+  console.log('\n📝 Generating CSS...');
+  const cssContent = generateThemeCSS(tokens);
 
   // Write to file
   const outputPath = path.join(process.cwd(), 'src', 'styles', 'themes', `${themeName}.css`);
@@ -600,18 +387,13 @@ async function generateTheme(themeName = 'brand-theme', customTemplatePath = nul
 
   console.log('');
   console.log('🎉 Theme generation complete!');
-  console.log(`📁 Theme file: src/Styles/themes/${themeName}.css`);
+  console.log(`📁 Theme file: src/styles/themes/${themeName}.css`);
   console.log(`🌐 Theme is now available in the theme switcher`);
+  console.log(`   15 brand tokens generated (5 groups × 3 variants)`);
 
-  // Show statistics
-  let totalTokens = 0;
-  for (const [paletteName, tokens] of Object.entries(palettes)) {
-    const count = Object.keys(tokens).length;
-    totalTokens += count;
-    console.log(`   ${paletteName}: ${count} tokens`);
-  }
-  console.log(`   Status Colors: 4 universal tokens`);
-  console.log(`   Total: ${totalTokens + 4} tokens`);
+  // Print the generated CSS for review
+  console.log('\n📋 Generated CSS:\n');
+  console.log(cssContent);
 }
 
 // Run if called directly
@@ -622,7 +404,7 @@ const isRunDirectly = process.argv[1] === scriptPath ||
 if (isRunDirectly) {
   if (process.argv.includes('--help') || process.argv.includes('-h')) {
     console.log(`
-🎨 Simple Theme Generator
+🎨 Simple Theme Generator (21-Token System)
 
 Usage:
   node scripts/simple-theme-gen.js [theme-name] [--template path/to/template.css]
@@ -630,14 +412,17 @@ Usage:
 Options:
   --template  Custom template file path (defaults to brand-template.css)
 
+Output:
+  15 brand tokens: 5 groups (primary, secondary, neutral, bg, text) × 3 variants (light, default, dark)
+
 Steps:
-  1. Edit scripts/brand-template.css with your brand colors
+  1. Edit scripts/brand-template.css with your 5 brand colours
   2. Run this script to generate a complete theme
-  3. Your theme will be created in src/Styles/themes/
+  3. Your theme will be created in src/styles/themes/
 
 Example:
   node scripts/simple-theme-gen.js my-brand-2024
-  node scripts/simple-theme-gen.js test-theme --template src/Scripts/ThemeTokenGen/test-color-theory.css
+  node scripts/simple-theme-gen.js test-theme --template src/scripts/ThemeTokenGen/test-color-theory.css
     `);
     process.exit(0);
   }

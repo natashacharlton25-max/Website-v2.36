@@ -15,7 +15,7 @@ import a11yTritanopiaUrl from '../Styles/themes/a11y/a11y-tritanopia.css?url';
 export class ThemeSwitcher {
   constructor() {
     this.themes = {
-      // Brand theme (default)
+// Brand theme (default)
       'default': brandDefaultUrl,
       // Accessibility themes
       'a11y-dark': a11yDarkUrl,
