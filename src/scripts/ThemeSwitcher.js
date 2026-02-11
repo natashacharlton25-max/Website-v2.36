@@ -190,14 +190,14 @@ export class ThemeSwitcher {
       document.head.appendChild(metaThemeColor);
     }
 
-    // Set theme color from CSS token (reads --page-bg or --color-Primary-500)
+    // Set theme color from CSS token (reads --page-bg or --brand-c-primary)
     // Small delay to let CSS load first
     setTimeout(() => {
       const root = document.documentElement;
       const computedStyle = getComputedStyle(root);
-      // Try --page-bg first, fallback to --color-Primary-500
+      // Try --page-bg first, fallback to --brand-c-primary
       let themeColor = computedStyle.getPropertyValue('--page-bg').trim() ||
-                       computedStyle.getPropertyValue('--color-Primary-500').trim() ||
+                       computedStyle.getPropertyValue('--brand-c-primary').trim() ||
                        '#8FA68A';
       metaThemeColor.content = themeColor;
     }, 50);

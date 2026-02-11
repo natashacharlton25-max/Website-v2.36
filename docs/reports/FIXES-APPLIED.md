@@ -9,22 +9,22 @@ This document tracks all the fixes applied to address the issues identified in t
 ### 1. Fixed Missing Token Definitions
 **File:** `src/styles/themes/brand/BrandDefault.css`
 
-- ✓ **Added `--color-Secondary-900: #5a3420`** (line 32)
+- ✓ **Added `--brand-c-secondary-dark: #5a3420`** (line 32)
   - Was referenced by 7 a11y themes but not defined
   - Critical issue - was causing fallback problems
 
-- ✓ **Added `--color-Text-100: #e8e8e8`** (line 48)
+- ✓ **Added `--brand-c-text-light: #e8e8e8`** (line 48)
   - Used in a11y files but was missing
   - Completes the Text color scale
 
-- ✓ **Added `--color-Text-200: #dbdbdb`** (line 49)
+- ✓ **Added `--brand-c-text-light: #dbdbdb`** (line 49)
   - Fills gap in Text color scale
   - Used in presentation components
 
 ### 2. Removed Duplicate Primary-50
 **File:** `src/styles/themes/brand/BrandDefault.css`
 
-- ✓ **Removed `--color-Primary-50`**
+- ✓ **Removed `--brand-c-primary-light`**
   - Was identical to Primary-100 (#f4fbf2)
   - Now using Primary-100 as the lightest Primary shade
   - Eliminates redundancy
@@ -33,14 +33,14 @@ This document tracks all the fixes applied to address the issues identified in t
 Changed `--color-Accent-*` to `--color-AccentOne-*` in 3 files:
 
 - ✓ **`src/styles/components/toast.css`** (lines 96, 103)
-  - `.toast-arcade` background: `--color-Accent-500` → `--color-AccentOne-500`
-  - `.toast-arcade .toast-glow` gradient: `--color-Accent-500` → `--color-AccentOne-500`
+  - `.toast-arcade` background: `--color-Accent-500` → `--brand-c-neutral`
+  - `.toast-arcade .toast-glow` gradient: `--color-Accent-500` → `--brand-c-neutral`
 
 - ✓ **`src/styles/components/product-gallery.css`** (line 83)
-  - `.badge-toolkit` background: `--color-Accent-600` → `--color-AccentOne-600`
+  - `.badge-toolkit` background: `--color-Accent-600` → `--brand-c-neutral-dark`
 
 - ✓ **`src/styles/components/isotope-gallery.css`** (line 96)
-  - `.badge-toolkit` background: `--color-Accent-600` → `--color-AccentOne-600`
+  - `.badge-toolkit` background: `--color-Accent-600` → `--brand-c-neutral-dark`
 
 ### 4. Removed Unused Neutral Tokens
 **File:** `src/styles/themes/brand/BrandDefault.css`
@@ -56,7 +56,7 @@ Changed `--color-Accent-*` to `--color-AccentOne-*` in 3 files:
 - ✓ **Added `--color-Background-600: #5a5754`** (line 41)
 - ✓ **Added `--color-Background-700: #3e3b39`** (line 42)
 - ✓ **Added `--color-Background-800: #2b2927`** (line 43)
-- ✓ **Added `--color-Background-900: #1a1918`** (line 44)
+- ✓ **Added `--brand-c-bg-dark: #1a1918`** (line 44)
 - Completes the Background color scale for future dark mode implementation
 
 ### Color Token Health Score

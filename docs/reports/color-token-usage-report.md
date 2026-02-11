@@ -14,7 +14,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
 
 ## PRIMARY COLORS (50-900)
 
-### --color-Primary-50
+### --brand-c-primary-light
 - **Usage:** 10 occurrences
 - **Purposes:** Light backgrounds, light tints in gradients
 - **Key Files:**
@@ -22,7 +22,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - tokens/gradients.css (gradient definitions)
   - base/utilities.css (success state fallbacks)
 
-### --color-Primary-100
+### --brand-c-primary-light
 - **Usage:** 98 occurrences (HEAVILY USED)
 - **Purposes:** Light backgrounds, hover states, dropdown hover backgrounds, button hover states, accessibility panel backgrounds
 - **Key Files:**
@@ -32,7 +32,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/components/accessibility-panel.css (1 use - panel background)
   - themes/* (6 a11y theme overrides)
 
-### --color-Primary-200
+### --brand-c-primary-light
 - **Usage:** 51 occurrences
 - **Purposes:** Light gradients, borders, subtle backgrounds
 - **Key Files:**
@@ -40,7 +40,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - pages/asset-detail.css (3 uses - borders, subtle backgrounds)
   - themes/* (6 a11y theme files)
 
-### --color-Primary-300
+### --brand-c-primary-light
 - **Usage:** 40 occurrences
 - **Purposes:** Border colors, theme card outlines, accessibility focus states, gradient mid-tones
 - **Key Files:**
@@ -50,7 +50,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/plain-mode/pages/products.css (1 use)
   - themes/* (6 a11y themes)
 
-### --color-Primary-400
+### --brand-c-primary
 - **Usage:** 87 occurrences (HEAVILY USED)
 - **Purposes:** Gradients, confetti colors, rainbow effects, gallery borders
 - **Key Files:**
@@ -60,7 +60,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - components/presentation/ReaderNav.css (2 uses - stroke and text colors)
   - themes/* (6 a11y themes)
 
-### --color-Primary-500
+### --brand-c-primary
 - **Usage:** 191 occurrences (🔥 CORE DESIGN TOKEN - MOST USED)
 - **Purposes:** Primary brand color, button backgrounds, links, focus states, borders, icons, accent colors
 - **Key Files:**
@@ -75,7 +75,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - base/utilities.css (10 uses - utility classes, success fallbacks)
   - themes/* (6 a11y themes)
 
-### --color-Primary-600
+### --brand-c-primary-dark
 - **Usage:** 96 occurrences (🔥 CORE DESIGN TOKEN)
 - **Purposes:** Darker buttons, hover states, text colors, icon colors, borders
 - **Key Files:**
@@ -87,7 +87,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - pages/asset-detail.css (15+ uses - various UI elements)
   - themes/* (6 a11y themes)
 
-### --color-Primary-700
+### --brand-c-primary-dark
 - **Usage:** 78 occurrences
 - **Purposes:** Dark gradients, text colors, shadows
 - **Key Files:**
@@ -97,7 +97,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/components/search-overlay.css (1 use - text color)
   - themes/* (6 a11y themes)
 
-### --color-Primary-800
+### --brand-c-primary-dark
 - **Usage:** 70 occurrences
 - **Purposes:** Very dark gradients, dropdown text colors
 - **Key Files:**
@@ -105,7 +105,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - buttons/dropdown-tokens.css (2 uses - selected/hover text)
   - themes/* (6 a11y themes)
 
-### --color-Primary-900
+### --brand-c-primary-dark
 - **Usage:** 46 occurrences
 - **Purposes:** Darkest gradient stops
 - **Key Files:**
@@ -117,7 +117,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
 
 ## SECONDARY COLORS (100-800)
 
-### --color-Secondary-100
+### --brand-c-secondary-light
 - **Usage:** 33 occurrences
 - **Purposes:** Light gradients, dropdown hover states
 - **Key Files:**
@@ -125,14 +125,14 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - buttons/dropdown-tokens.css (1 use)
   - themes/* (6 a11y themes)
 
-### --color-Secondary-200
+### --brand-c-secondary-light
 - **Usage:** 23 occurrences
 - **Purposes:** Light gradients, subtle backgrounds
 - **Key Files:**
   - tokens/gradients.css (15+ uses)
   - themes/* (6 a11y themes)
 
-### --color-Secondary-300
+### --brand-c-secondary-light
 - **Usage:** 12 occurrences
 - **Purposes:** Asset detail page styling, gradients
 - **Key Files:**
@@ -140,7 +140,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - pages/asset-detail.css (1 use - border)
   - themes/* (6 a11y themes)
 
-### --color-Secondary-400
+### --brand-c-secondary
 - **Usage:** 36 occurrences
 - **Purposes:** Confetti colors, gradients, link hover states
 - **Key Files:**
@@ -149,7 +149,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/base/semantic-tokens.css (1 use - link hover)
   - themes/* (6 a11y themes)
 
-### --color-Secondary-500
+### --brand-c-secondary
 - **Usage:** 44 occurrences
 - **Purposes:** Secondary buttons, announcement ticker, nav colors, gradients, link colors
 - **Key Files:**
@@ -161,7 +161,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/base/semantic-tokens.css (1 use - link color)
   - themes/* (6 a11y themes)
 
-### --color-Secondary-600
+### --brand-c-secondary-dark
 - **Usage:** 41 occurrences
 - **Purposes:** Buttons, gradients, hero gradients
 - **Key Files:**
@@ -172,14 +172,14 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - pages/asset-detail.css (1 use)
   - themes/* (6 a11y themes)
 
-### --color-Secondary-700
+### --brand-c-secondary-dark
 - **Usage:** 30 occurrences
 - **Purposes:** Dark gradients
 - **Key Files:**
   - tokens/gradients.css (22+ uses)
   - themes/* (6 a11y themes)
 
-### --color-Secondary-800
+### --brand-c-secondary-dark
 - **Usage:** 30 occurrences
 - **Purposes:** Very dark gradients, dropdown text colors, dark theme elements
 - **Key Files:**
@@ -187,16 +187,16 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - buttons/dropdown-tokens.css (1 use - hover text)
   - themes/* (6 a11y themes)
 
-### ⚠️ --color-Secondary-900
+### ⚠️ --brand-c-secondary-dark
 - **Usage:** MISSING - Referenced by 7 a11y themes but not defined!
 - **Issue:** CRITICAL - causes fallback issues
-- **Fix:** Add to BrandDefault.css line 32: `--color-Secondary-900: #5a3420;`
+- **Fix:** Add to BrandDefault.css line 32: `--brand-c-secondary-dark: #5a3420;`
 
 ---
 
 ## BACKGROUND COLORS (50-500)
 
-### --color-Background-50
+### --brand-c-bg
 - **Usage:** 110 occurrences (🔥 CORE DESIGN TOKEN)
 - **Purposes:** Main page backgrounds, card backgrounds, panel backgrounds, glass effects, gradients
 - **Key Files:**
@@ -208,7 +208,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - buttons/basic-button.css (1 use - neumorphic button)
   - themes/* (6 a11y themes)
 
-### --color-Background-100
+### --brand-c-bg
 - **Usage:** 87 occurrences (🔥 HEAVILY USED)
 - **Purposes:** Alternate backgrounds, surface colors, gradients, cookie banner, card backgrounds
 - **Key Files:**
@@ -220,7 +220,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - base/utilities.css (1 use - .bg-alt)
   - themes/* (6 a11y themes)
 
-### --color-Background-200
+### --brand-c-bg-light
 - **Usage:** 66 occurrences (🔥 HEAVILY USED)
 - **Purposes:** Secondary surfaces, borders, gradients, search overlays
 - **Key Files:**
@@ -230,7 +230,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/base/semantic-tokens.css (1 use - --surface2)
   - themes/* (6 a11y themes)
 
-### --color-Background-300
+### --brand-c-bg-light
 - **Usage:** 65 occurrences (🔥 HEAVILY USED)
 - **Purposes:** Borders, tertiary surfaces, gradients, accessibility panel borders
 - **Key Files:**
@@ -241,7 +241,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/base/semantic-tokens.css (1 use - --surface3)
   - themes/* (6 a11y themes)
 
-### --color-Background-400
+### --brand-c-bg-light
 - **Usage:** 14 occurrences
 - **Purposes:** Gradients, accessibility panel borders
 - **Key Files:**
@@ -249,7 +249,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/components/accessibility-panel.css (2 uses - borders)
   - themes/* (6 a11y themes)
 
-### --color-Background-500
+### --brand-c-bg-light
 - **Usage:** 10 occurrences
 - **Purposes:** Gradients only
 - **Key Files:**
@@ -266,7 +266,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
 
 ## TEXT COLORS (50-950)
 
-### --color-Text-50
+### --brand-c-text-light
 - **Usage:** 21 occurrences
 - **Purposes:** Light text on dark backgrounds, presentation reader, enhanced focus (inverted)
 - **Key Files:**
@@ -276,7 +276,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/visual/text-only.css (2 uses)
   - themes/* (9 a11y themes - 1 missing definition)
 
-### --color-Text-200
+### --brand-c-text-light
 - **Usage:** 4 occurrences
 - **Purposes:** Presentation reader subtle text, insights page borders
 - **Key Files:**
@@ -284,7 +284,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - pages/services.css (1 use - border)
   - a11y/plain-mode/pages/insights.css (1 use - border)
 
-### --color-Text-300
+### --brand-c-text-light
 - **Usage:** 18 occurrences
 - **Purposes:** Muted text, slider dots, presentation nav, plain mode borders
 - **Key Files:**
@@ -294,7 +294,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/components/side-tabs.css (1 use - border)
   - themes/* (9 a11y themes)
 
-### --color-Text-400
+### --brand-c-text-light
 - **Usage:** 13 occurrences
 - **Purposes:** Muted text, nav expandable states
 - **Key Files:**
@@ -305,7 +305,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/motion/reduced-motion.css (1 use)
   - themes/* (9 a11y themes - 1 missing definition)
 
-### --color-Text-500
+### --brand-c-text-light
 - **Usage:** 41 occurrences
 - **Purposes:** Muted text, nav colors, legal page text, asset page text
 - **Key Files:**
@@ -318,7 +318,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - base/utilities.css (1 use - .text-muted)
   - themes/* (9 a11y themes)
 
-### --color-Text-600
+### --brand-c-text
 - **Usage:** 50 occurrences
 - **Purposes:** Body text, headings, descriptions, nav hamburger, asset details
 - **Key Files:**
@@ -328,7 +328,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/* (5+ uses)
   - themes/* (9 a11y themes)
 
-### --color-Text-700
+### --brand-c-text
 - **Usage:** 87 occurrences (🔥 CORE DESIGN TOKEN)
 - **Purposes:** Primary body text, headings, article content, forms
 - **Key Files:**
@@ -339,7 +339,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/* (15+ uses - plain mode, accessibility panel, masonry)
   - themes/* (9 a11y themes)
 
-### --color-Text-800
+### --brand-c-text
 - **Usage:** 13 occurrences
 - **Purposes:** Dark text, cart headings, masonry grid, announcement ticker
 - **Key Files:**
@@ -349,7 +349,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/components/masonry-grid.css (4 uses)
   - themes/* (9 a11y themes - 1 missing definition)
 
-### --color-Text-900
+### --brand-c-text-dark
 - **Usage:** 56 occurrences
 - **Purposes:** Darkest text, headers, overlays, tabs, borders
 - **Key Files:**
@@ -361,14 +361,14 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - tokens/gradients.css (3 uses - dark gradients)
   - themes/* (9 a11y themes)
 
-### --color-Text-950
+### --brand-c-text-dark
 - **Usage:** 10 occurrences
 - **Purposes:** Extreme dark text (only in theme definitions)
 - **Key Files:**
   - themes/brand/BrandDefault.css (definition)
   - themes/* (9 a11y theme overrides)
 
-### ⚠️ --color-Text-100
+### ⚠️ --brand-c-text-light
 - **Usage:** NOT DEFINED in BrandDefault.css but used in a11y files
 - **Issue:** Missing definition causes fallback
 - **Recommendation:** Add Text-100 to complete scale
@@ -377,7 +377,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
 
 ## NEUTRAL COLORS (50-900)
 
-### --color-Neutral-50
+### --brand-c-neutral-light
 - **Usage:** 13 occurrences
 - **Purposes:** Neutral backgrounds, utility classes
 - **Key Files:**
@@ -387,7 +387,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - themes/brand/BrandDefault.css (definition)
   - themes/* (9 a11y themes)
 
-### --color-Neutral-100
+### --brand-c-neutral-light
 - **Usage:** 14 occurrences
 - **Purposes:** Neutral surfaces, cart items, legal page
 - **Key Files:**
@@ -397,7 +397,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - themes/brand/BrandDefault.css (definition)
   - themes/* (9 a11y themes)
 
-### --color-Neutral-200
+### --brand-c-neutral-light
 - **Usage:** 31 occurrences
 - **Purposes:** Borders, dividers throughout the site
 - **Key Files:**
@@ -407,7 +407,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - tokens/gradients.css (4 uses)
   - themes/* (9 a11y themes)
 
-### --color-Neutral-300
+### --brand-c-neutral
 - **Usage:** 21 occurrences
 - **Purposes:** Borders, cart items, galleries, gradients
 - **Key Files:**
@@ -419,12 +419,12 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - a11y/components/masonry-grid.css (2 uses)
   - themes/* (9 a11y themes)
 
-### --color-Neutral-400 through 700
+### --brand-c-neutral through 700
 - **Usage:** 9-11 occurrences each (theme definitions only)
 - **Purposes:** ⚠️ NOT actively used in components/pages, only defined in themes
 - **Recommendation:** Consider removing if never used outside theme definitions
 
-### --color-Neutral-800
+### --brand-c-neutral-dark
 - **Usage:** 15 occurrences
 - **Purposes:** Utility borders, toast backgrounds
 - **Key Files:**
@@ -433,7 +433,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - themes/brand/BrandDefault.css (definition)
   - themes/* (9 a11y themes)
 
-### --color-Neutral-900
+### --brand-c-neutral-dark
 - **Usage:** 15 occurrences
 - **Purposes:** Announcement ticker dark variant, toast borders, utility classes
 - **Key Files:**
@@ -503,7 +503,7 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
   - components/product-gallery.css (1 use)
   - components/isotope-gallery.css (1 use)
 - **Issue:** These appear to be TYPOS - should likely be AccentOne-500/600
-- **Fix:** Replace with `--color-AccentOne-500` and `--color-AccentOne-600`
+- **Fix:** Replace with `--brand-c-neutral` and `--brand-c-neutral-dark`
 
 ---
 
@@ -586,13 +586,13 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
 
 ### 🔥 CORE DESIGN TOKENS (Most Critical - Keep Forever)
 
-1. **--color-Primary-500** (191 uses) - PRIMARY BRAND COLOR
-2. **--color-Background-50** (110 uses) - MAIN PAGE BACKGROUND
-3. **--color-Primary-600** (96 uses) - PRIMARY DARK VARIANT
-4. **--color-Primary-100** (98 uses) - PRIMARY LIGHT VARIANT
-5. **--color-Background-100** (87 uses) - SURFACE COLOR
-6. **--color-Primary-400** (87 uses) - PRIMARY MID VARIANT
-7. **--color-Text-700** (87 uses) - BODY TEXT
+1. **--brand-c-primary** (191 uses) - PRIMARY BRAND COLOR
+2. **--brand-c-bg** (110 uses) - MAIN PAGE BACKGROUND
+3. **--brand-c-primary-dark** (96 uses) - PRIMARY DARK VARIANT
+4. **--brand-c-primary-light** (98 uses) - PRIMARY LIGHT VARIANT
+5. **--brand-c-bg** (87 uses) - SURFACE COLOR
+6. **--brand-c-primary** (87 uses) - PRIMARY MID VARIANT
+7. **--brand-c-text** (87 uses) - BODY TEXT
 8. **--color-White** (77 uses) - WHITE TEXT/BACKGROUNDS
 
 ### 🔥 HEAVILY USED TOKEN FAMILIES
@@ -606,14 +606,14 @@ This report analyzes all color tokens defined in `BrandDefault.css` and `status.
 
 #### Low Usage (Under 15 uses, mostly theme definitions):
 
-- **--color-Primary-50** (10 uses - mostly gradients, duplicate of Primary-100)
-- **--color-Background-400** (14 uses)
-- **--color-Background-500** (10 uses - gradients only)
-- **--color-Text-50** (21 uses - but 9 are theme definitions)
-- **--color-Text-200** (4 uses)
-- **--color-Text-950** (10 uses - theme definitions only)
-- **--color-Neutral-50 through 700** (9-31 uses, mostly theme definitions - **Neutral-400 through 700 never used in actual components**)
-- **--color-Secondary-300** (12 uses)
+- **--brand-c-primary-light** (10 uses - mostly gradients, duplicate of Primary-100)
+- **--brand-c-bg-light** (14 uses)
+- **--brand-c-bg-light** (10 uses - gradients only)
+- **--brand-c-text-light** (21 uses - but 9 are theme definitions)
+- **--brand-c-text-light** (4 uses)
+- **--brand-c-text-dark** (10 uses - theme definitions only)
+- **--brand-c-neutral-light through 700** (9-31 uses, mostly theme definitions - **Neutral-400 through 700 never used in actual components**)
+- **--brand-c-secondary-light** (12 uses)
 
 #### Status Colors (Limited specialized use):
 
@@ -644,13 +644,13 @@ Text-700 is the primary body text color, with Text-500/600 for muted text and Te
 
 ### CRITICAL Issues (Fix Immediately):
 
-1. **Missing --color-Secondary-900** - Referenced by 7 a11y themes but not defined
-   - Add to BrandDefault.css: `--color-Secondary-900: #5a3420;`
+1. **Missing --brand-c-secondary-dark** - Referenced by 7 a11y themes but not defined
+   - Add to BrandDefault.css: `--brand-c-secondary-dark: #5a3420;`
 
 2. **Typo: --color-Accent-500/600** - Should be AccentOne-500/600
    - Fix in toast.css, product-gallery.css, isotope-gallery.css
 
-3. **Missing --color-Text-100** - Used in a11y files but not defined
+3. **Missing --brand-c-text-light** - Used in a11y files but not defined
    - Add to BrandDefault.css for complete scale
 
 4. **Duplicate Primary-50 = Primary-100** - Both `#f4fbf2`
@@ -688,18 +688,18 @@ Text-700 is the primary body text color, with Text-500/600 for muted text and Te
 ### 🔧 Fix Required:
 
 1. Add missing tokens:
-   - `--color-Secondary-900: #5a3420;`
-   - `--color-Text-100: #e8e8e8;` (interpolated value)
+   - `--brand-c-secondary-dark: #5a3420;`
+   - `--brand-c-text-light: #e8e8e8;` (interpolated value)
    - Background-600 through 900 for dark mode
 
 2. Fix typos:
-   - Replace `--color-Accent-500/600` with `--color-AccentOne-500/600`
+   - Replace `--color-Accent-500/600` with `--brand-c-neutral/600`
 
 3. Consolidate naming:
    - Pick either `--color-Error` OR `--color-Danger` (recommend Error)
 
 4. Remove duplicates:
-   - Remove `--color-Primary-50` (use Primary-100)
+   - Remove `--brand-c-primary-light` (use Primary-100)
 
 ---
 

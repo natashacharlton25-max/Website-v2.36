@@ -26,7 +26,7 @@ Each theme must define 4 core tokens with the `-c-` prefix:
 --brand-c-bg: #f9f8f6;
 --brand-c-text: #474747;
 --brand-c-primary: #8fa68a;
---brand-c-accent: #c4907c;
+--brand-c-secondary: #c4907c;
 
 /* Accessibility theme */
 --a11y-dark-c-bg: #040913;

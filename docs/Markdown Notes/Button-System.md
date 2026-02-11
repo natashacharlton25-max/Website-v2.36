@@ -91,12 +91,12 @@ Each variant defines its own `color` property. To change text color, edit the va
 
 ```css
 .btn-primary {
-  background-color: var(--color-Primary-500);
+  background-color: var(--brand-c-primary);
   color: var(--color-White);  /* Change this */
 }
 ```
 
-Special variants like `.btn-glassmorphic` use `var(--color-Text-700)` for darker text on lighter backgrounds.
+Special variants like `.btn-glassmorphic` use `var(--brand-c-text)` for darker text on lighter backgrounds.
 
 ## Astro Component
 

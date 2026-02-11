@@ -17,18 +17,18 @@ All themes expose these semantic tokens for consistent component styling:
 ```css
 body[class*="a11y-"] {
   /* Surfaces */
-  --bg: var(--color-Background-50);
-  --surface: var(--color-Background-100);
-  --surface2: var(--color-Background-200);
-  --surface3: var(--color-Background-300);
+  --bg: var(--brand-c-bg);
+  --surface: var(--brand-c-bg);
+  --surface2: var(--brand-c-bg-light);
+  --surface3: var(--brand-c-bg-light);
 
   /* Text */
-  --text: var(--color-Text-900);
-  --textMuted: var(--color-Text-600);
+  --text: var(--brand-c-text-dark);
+  --textMuted: var(--brand-c-text);
 
   /* Links */
-  --link: var(--color-Secondary-500);
-  --linkHover: var(--color-Secondary-400);
+  --link: var(--brand-c-secondary);
+  --linkHover: var(--brand-c-secondary);
   --linkVisited: color-mix(in oklch, var(--link) 60%, var(--text) 40%);
 
   /* Focus */
@@ -57,57 +57,57 @@ body.a11y-theme-dark {
   color-scheme: dark;
 
   /* Background (dark slate, stepped) */
-  --color-Background-50:  oklch(0.14 0.02 260);
-  --color-Background-100: oklch(0.17 0.02 260);
-  --color-Background-200: oklch(0.20 0.02 260);
-  --color-Background-300: oklch(0.23 0.02 260);
-  --color-Background-400: oklch(0.26 0.02 260);
-  --color-Background-500: oklch(0.30 0.02 260);
+  --brand-c-bg:  oklch(0.14 0.02 260);
+  --brand-c-bg: oklch(0.17 0.02 260);
+  --brand-c-bg-light: oklch(0.20 0.02 260);
+  --brand-c-bg-light: oklch(0.23 0.02 260);
+  --brand-c-bg-light: oklch(0.26 0.02 260);
+  --brand-c-bg-light: oklch(0.30 0.02 260);
 
-  --color-BackgroundDark-600: oklch(0.13 0.02 260);
-  --color-BackgroundDark-700: oklch(0.11 0.015 260);
-  --color-BackgroundDark-800: oklch(0.095 0.012 260);
-  --color-BackgroundDark-900: oklch(0.08 0.010 260);
-  --color-Background-900: oklch(0.065 0.010 260);
+  --brand-c-bg-dark: oklch(0.13 0.02 260);
+  --brand-c-bg-dark: oklch(0.11 0.015 260);
+  --brand-c-bg-dark: oklch(0.095 0.012 260);
+  --brand-c-bg-dark: oklch(0.08 0.010 260);
+  --brand-c-bg-dark: oklch(0.065 0.010 260);
 
   /* Text (high readability on dark) */
-  --color-Text-300: oklch(0.92 0.01 260);
-  --color-Text-400: oklch(0.88 0.01 260);
-  --color-Text-500: oklch(0.84 0.01 260);
-  --color-Text-600: oklch(0.78 0.015 260);
-  --color-Text-700: oklch(0.72 0.015 260);
-  --color-Text-800: oklch(0.66 0.015 260);
-  --color-Text-900: oklch(0.60 0.015 260);
-  --color-Text-950: oklch(0.56 0.015 260);
+  --brand-c-text-light: oklch(0.92 0.01 260);
+  --brand-c-text-light: oklch(0.88 0.01 260);
+  --brand-c-text-light: oklch(0.84 0.01 260);
+  --brand-c-text: oklch(0.78 0.015 260);
+  --brand-c-text: oklch(0.72 0.015 260);
+  --brand-c-text: oklch(0.66 0.015 260);
+  --brand-c-text-dark: oklch(0.60 0.015 260);
+  --brand-c-text-dark: oklch(0.56 0.015 260);
 
   /* Primary (indigo/purple spectrum) */
-  --color-Primary-50:  oklch(0.93 0.02 270);
-  --color-Primary-100: oklch(0.86 0.04 270);
-  --color-Primary-200: oklch(0.78 0.06 270);
-  --color-Primary-300: oklch(0.70 0.09 270);
-  --color-Primary-400: oklch(0.64 0.12 270);
-  --color-Primary-500: oklch(0.58 0.14 270);
-  --color-Primary-600: oklch(0.52 0.13 270);
-  --color-Primary-700: oklch(0.46 0.11 270);
-  --color-Primary-800: oklch(0.40 0.09 270);
-  --color-Primary-900: oklch(0.34 0.07 270);
+  --brand-c-primary-light:  oklch(0.93 0.02 270);
+  --brand-c-primary-light: oklch(0.86 0.04 270);
+  --brand-c-primary-light: oklch(0.78 0.06 270);
+  --brand-c-primary-light: oklch(0.70 0.09 270);
+  --brand-c-primary: oklch(0.64 0.12 270);
+  --brand-c-primary: oklch(0.58 0.14 270);
+  --brand-c-primary-dark: oklch(0.52 0.13 270);
+  --brand-c-primary-dark: oklch(0.46 0.11 270);
+  --brand-c-primary-dark: oklch(0.40 0.09 270);
+  --brand-c-primary-dark: oklch(0.34 0.07 270);
 
   /* Secondary (soft cyan) */
-  --color-Secondary-100: oklch(0.88 0.06 200);
-  --color-Secondary-200: oklch(0.80 0.08 200);
-  --color-Secondary-300: oklch(0.72 0.10 200);
-  --color-Secondary-400: oklch(0.66 0.11 200);
-  --color-Secondary-500: oklch(0.60 0.12 200);
-  --color-Secondary-600: oklch(0.54 0.10 200);
-  --color-Secondary-700: oklch(0.48 0.08 200);
-  --color-Secondary-800: oklch(0.42 0.06 200);
+  --brand-c-secondary-light: oklch(0.88 0.06 200);
+  --brand-c-secondary-light: oklch(0.80 0.08 200);
+  --brand-c-secondary-light: oklch(0.72 0.10 200);
+  --brand-c-secondary: oklch(0.66 0.11 200);
+  --brand-c-secondary: oklch(0.60 0.12 200);
+  --brand-c-secondary-dark: oklch(0.54 0.10 200);
+  --brand-c-secondary-dark: oklch(0.48 0.08 200);
+  --brand-c-secondary-dark: oklch(0.42 0.06 200);
 
   /* Accents (soft neon) */
-  --color-AccentOne-500: oklch(0.70 0.12 145);
-  --color-AccentTwo-500: oklch(0.68 0.13 350);
-  --color-AccentThree-500: oklch(0.66 0.10 200);
-  --color-AccentFour-500: oklch(0.74 0.12 85);
-  --color-AccentFive-500: oklch(0.70 0.14 30);
+  --brand-c-neutral: oklch(0.70 0.12 145);
+  --brand-c-neutral: oklch(0.68 0.13 350);
+  --brand-c-neutral: oklch(0.66 0.10 200);
+  --brand-c-neutral: oklch(0.74 0.12 85);
+  --brand-c-neutral: oklch(0.70 0.14 30);
 
   /* Status */
   --color-Success: oklch(0.68 0.12 145);
@@ -117,7 +117,7 @@ body.a11y-theme-dark {
   --color-Info:    oklch(0.68 0.12 250);
 
   /* Semantic overrides */
-  --text: var(--color-Text-300);
+  --text: var(--brand-c-text-light);
   --link: oklch(0.74 0.12 270);
   --linkHover: oklch(0.80 0.10 270);
   --focusRing: oklch(0.76 0.10 200);
@@ -133,57 +133,57 @@ body.a11y-theme-cream {
   color-scheme: light;
 
   /* Background (ivory/cream) */
-  --color-Background-50:  oklch(0.98 0.015 90);
-  --color-Background-100: oklch(0.965 0.020 88);
-  --color-Background-200: oklch(0.950 0.022 85);
-  --color-Background-300: oklch(0.935 0.025 82);
-  --color-Background-400: oklch(0.920 0.028 78);
-  --color-Background-500: oklch(0.905 0.030 75);
+  --brand-c-bg:  oklch(0.98 0.015 90);
+  --brand-c-bg: oklch(0.965 0.020 88);
+  --brand-c-bg-light: oklch(0.950 0.022 85);
+  --brand-c-bg-light: oklch(0.935 0.025 82);
+  --brand-c-bg-light: oklch(0.920 0.028 78);
+  --brand-c-bg-light: oklch(0.905 0.030 75);
 
-  --color-BackgroundDark-600: oklch(0.40 0.04 45);
-  --color-BackgroundDark-700: oklch(0.34 0.04 42);
-  --color-BackgroundDark-800: oklch(0.28 0.03 40);
-  --color-BackgroundDark-900: oklch(0.22 0.03 35);
-  --color-Background-900: oklch(0.18 0.02 30);
+  --brand-c-bg-dark: oklch(0.40 0.04 45);
+  --brand-c-bg-dark: oklch(0.34 0.04 42);
+  --brand-c-bg-dark: oklch(0.28 0.03 40);
+  --brand-c-bg-dark: oklch(0.22 0.03 35);
+  --brand-c-bg-dark: oklch(0.18 0.02 30);
 
   /* Text (warm dark brown) */
-  --color-Text-300: oklch(0.36 0.03 40);
-  --color-Text-400: oklch(0.33 0.03 38);
-  --color-Text-500: oklch(0.30 0.03 36);
-  --color-Text-600: oklch(0.27 0.03 34);
-  --color-Text-700: oklch(0.24 0.025 33);
-  --color-Text-800: oklch(0.21 0.020 32);
-  --color-Text-900: oklch(0.18 0.018 30);
-  --color-Text-950: oklch(0.16 0.016 28);
+  --brand-c-text-light: oklch(0.36 0.03 40);
+  --brand-c-text-light: oklch(0.33 0.03 38);
+  --brand-c-text-light: oklch(0.30 0.03 36);
+  --brand-c-text: oklch(0.27 0.03 34);
+  --brand-c-text: oklch(0.24 0.025 33);
+  --brand-c-text: oklch(0.21 0.020 32);
+  --brand-c-text-dark: oklch(0.18 0.018 30);
+  --brand-c-text-dark: oklch(0.16 0.016 28);
 
   /* Primary (warm amber/brown) */
-  --color-Primary-50:  oklch(0.96 0.02 70);
-  --color-Primary-100: oklch(0.92 0.04 65);
-  --color-Primary-200: oklch(0.86 0.06 60);
-  --color-Primary-300: oklch(0.78 0.08 55);
-  --color-Primary-400: oklch(0.70 0.10 50);
-  --color-Primary-500: oklch(0.62 0.10 45);
-  --color-Primary-600: oklch(0.54 0.10 40);
-  --color-Primary-700: oklch(0.46 0.08 38);
-  --color-Primary-800: oklch(0.38 0.07 35);
-  --color-Primary-900: oklch(0.30 0.06 32);
+  --brand-c-primary-light:  oklch(0.96 0.02 70);
+  --brand-c-primary-light: oklch(0.92 0.04 65);
+  --brand-c-primary-light: oklch(0.86 0.06 60);
+  --brand-c-primary-light: oklch(0.78 0.08 55);
+  --brand-c-primary: oklch(0.70 0.10 50);
+  --brand-c-primary: oklch(0.62 0.10 45);
+  --brand-c-primary-dark: oklch(0.54 0.10 40);
+  --brand-c-primary-dark: oklch(0.46 0.08 38);
+  --brand-c-primary-dark: oklch(0.38 0.07 35);
+  --brand-c-primary-dark: oklch(0.30 0.06 32);
 
   /* Secondary (terracotta) */
-  --color-Secondary-100: oklch(0.92 0.04 35);
-  --color-Secondary-200: oklch(0.86 0.06 32);
-  --color-Secondary-300: oklch(0.79 0.08 30);
-  --color-Secondary-400: oklch(0.71 0.10 28);
-  --color-Secondary-500: oklch(0.63 0.10 25);
-  --color-Secondary-600: oklch(0.55 0.10 22);
-  --color-Secondary-700: oklch(0.47 0.08 20);
-  --color-Secondary-800: oklch(0.39 0.06 18);
+  --brand-c-secondary-light: oklch(0.92 0.04 35);
+  --brand-c-secondary-light: oklch(0.86 0.06 32);
+  --brand-c-secondary-light: oklch(0.79 0.08 30);
+  --brand-c-secondary: oklch(0.71 0.10 28);
+  --brand-c-secondary: oklch(0.63 0.10 25);
+  --brand-c-secondary-dark: oklch(0.55 0.10 22);
+  --brand-c-secondary-dark: oklch(0.47 0.08 20);
+  --brand-c-secondary-dark: oklch(0.39 0.06 18);
 
   /* Accents (earthy) */
-  --color-AccentOne-500: oklch(0.62 0.10 145);  /* sage */
-  --color-AccentTwo-500: oklch(0.60 0.10 25);   /* rust */
-  --color-AccentThree-500: oklch(0.55 0.08 280);/* dusty purple */
-  --color-AccentFour-500: oklch(0.60 0.10 200); /* teal */
-  --color-AccentFive-500: oklch(0.62 0.10 350); /* rose */
+  --brand-c-neutral: oklch(0.62 0.10 145);  /* sage */
+  --brand-c-neutral: oklch(0.60 0.10 25);   /* rust */
+  --brand-c-neutral: oklch(0.55 0.08 280);/* dusty purple */
+  --brand-c-neutral: oklch(0.60 0.10 200); /* teal */
+  --brand-c-neutral: oklch(0.62 0.10 350); /* rose */
 
   /* Status */
   --color-Success: oklch(0.56 0.10 145);
@@ -207,30 +207,30 @@ body.a11y-theme-cream {
 body.a11y-theme-high-contrast {
   color-scheme: dark;
 
-  --color-Background-50: #000000;
-  --color-Background-100: #000000;
-  --color-Background-200: #000000;
-  --color-Background-300: #000000;
-  --color-Background-400: #000000;
-  --color-Background-500: #000000;
+  --brand-c-bg: #000000;
+  --brand-c-bg: #000000;
+  --brand-c-bg-light: #000000;
+  --brand-c-bg-light: #000000;
+  --brand-c-bg-light: #000000;
+  --brand-c-bg-light: #000000;
 
-  --color-Text-300: #ffffff;
-  --color-Text-400: #ffffff;
-  --color-Text-500: #ffffff;
-  --color-Text-600: #ffffff;
-  --color-Text-700: #ffffff;
-  --color-Text-800: #ffffff;
-  --color-Text-900: #ffffff;
-  --color-Text-950: #ffffff;
+  --brand-c-text-light: #ffffff;
+  --brand-c-text-light: #ffffff;
+  --brand-c-text-light: #ffffff;
+  --brand-c-text: #ffffff;
+  --brand-c-text: #ffffff;
+  --brand-c-text: #ffffff;
+  --brand-c-text-dark: #ffffff;
+  --brand-c-text-dark: #ffffff;
 
-  --color-Primary-500: #ffffff;
-  --color-Secondary-500: #ffff00;
+  --brand-c-primary: #ffffff;
+  --brand-c-secondary: #ffff00;
 
-  --color-AccentOne-500: #00ffff;
-  --color-AccentTwo-500: #ffff00;
-  --color-AccentThree-500: #00ff00;
-  --color-AccentFour-500: #ff6600;
-  --color-AccentFive-500: #ff00ff;
+  --brand-c-neutral: #00ffff;
+  --brand-c-neutral: #ffff00;
+  --brand-c-neutral: #00ff00;
+  --brand-c-neutral: #ff6600;
+  --brand-c-neutral: #ff00ff;
 
   --color-Success: #00ff00;
   --color-Warning: #ffff00;
@@ -260,11 +260,11 @@ These can be combined with base themes: `a11y-theme-dark a11y-cvd-protanopia`
 ```css
 body.a11y-cvd-protanopia,
 body.a11y-theme-protanopia {
-  --color-AccentOne-500: oklch(0.70 0.12 195); /* teal */
-  --color-AccentTwo-500: oklch(0.75 0.14 70);  /* yellow-orange */
-  --color-AccentThree-500: oklch(0.60 0.14 250); /* blue */
-  --color-AccentFour-500: oklch(0.75 0.12 90); /* yellow */
-  --color-AccentFive-500: oklch(0.62 0.10 300);/* purple */
+  --brand-c-neutral: oklch(0.70 0.12 195); /* teal */
+  --brand-c-neutral: oklch(0.75 0.14 70);  /* yellow-orange */
+  --brand-c-neutral: oklch(0.60 0.14 250); /* blue */
+  --brand-c-neutral: oklch(0.75 0.12 90); /* yellow */
+  --brand-c-neutral: oklch(0.62 0.10 300);/* purple */
 
   --color-Success: oklch(0.62 0.12 220);
   --color-Warning: oklch(0.78 0.14 85);
@@ -272,8 +272,8 @@ body.a11y-theme-protanopia {
   --color-Danger:  var(--color-Error);
   --color-Info:    oklch(0.66 0.10 280);
 
-  --link: var(--color-AccentTwo-500);
-  --focusRing: var(--color-AccentOne-500);
+  --link: var(--brand-c-neutral);
+  --focusRing: var(--brand-c-neutral);
 }
 ```
 
@@ -282,11 +282,11 @@ body.a11y-theme-protanopia {
 ```css
 body.a11y-cvd-deuteranopia,
 body.a11y-theme-deuteranopia {
-  --color-AccentOne-500: oklch(0.62 0.14 255); /* blue */
-  --color-AccentTwo-500: oklch(0.72 0.16 55);  /* orange */
-  --color-AccentThree-500: oklch(0.60 0.14 300); /* purple */
-  --color-AccentFour-500: oklch(0.78 0.12 90); /* yellow */
-  --color-AccentFive-500: oklch(0.62 0.10 25); /* red-orange */
+  --brand-c-neutral: oklch(0.62 0.14 255); /* blue */
+  --brand-c-neutral: oklch(0.72 0.16 55);  /* orange */
+  --brand-c-neutral: oklch(0.60 0.14 300); /* purple */
+  --brand-c-neutral: oklch(0.78 0.12 90); /* yellow */
+  --brand-c-neutral: oklch(0.62 0.10 25); /* red-orange */
 
   --color-Success: oklch(0.62 0.14 255);
   --color-Warning: oklch(0.72 0.16 55);
@@ -294,8 +294,8 @@ body.a11y-theme-deuteranopia {
   --color-Danger:  var(--color-Error);
   --color-Info:    oklch(0.62 0.10 300);
 
-  --link: var(--color-AccentFour-500);
-  --focusRing: var(--color-AccentOne-500);
+  --link: var(--brand-c-neutral);
+  --focusRing: var(--brand-c-neutral);
 }
 ```
 
@@ -304,11 +304,11 @@ body.a11y-theme-deuteranopia {
 ```css
 body.a11y-cvd-tritanopia,
 body.a11y-theme-tritanopia {
-  --color-AccentOne-500: oklch(0.66 0.14 145); /* green */
-  --color-AccentTwo-500: oklch(0.74 0.14 80);  /* yellow */
-  --color-AccentThree-500: oklch(0.62 0.16 350); /* pink */
-  --color-AccentFour-500: oklch(0.60 0.18 25); /* red */
-  --color-AccentFive-500: oklch(0.62 0.10 280);/* purple */
+  --brand-c-neutral: oklch(0.66 0.14 145); /* green */
+  --brand-c-neutral: oklch(0.74 0.14 80);  /* yellow */
+  --brand-c-neutral: oklch(0.62 0.16 350); /* pink */
+  --brand-c-neutral: oklch(0.60 0.18 25); /* red */
+  --brand-c-neutral: oklch(0.62 0.10 280);/* purple */
 
   --color-Success: oklch(0.66 0.14 145);
   --color-Warning: oklch(0.74 0.14 80);
@@ -316,8 +316,8 @@ body.a11y-theme-tritanopia {
   --color-Danger:  var(--color-Error);
   --color-Info:    oklch(0.62 0.16 350);
 
-  --link: var(--color-AccentTwo-500);
-  --focusRing: var(--color-AccentOne-500);
+  --link: var(--brand-c-neutral);
+  --focusRing: var(--brand-c-neutral);
 }
 ```
 
@@ -326,11 +326,11 @@ body.a11y-theme-tritanopia {
 ```css
 body.a11y-cvd-monochrome,
 body.a11y-theme-monochrome {
-  --color-AccentOne-500: oklch(0.70 0 0);
-  --color-AccentTwo-500: oklch(0.60 0 0);
-  --color-AccentThree-500: oklch(0.50 0 0);
-  --color-AccentFour-500: oklch(0.65 0 0);
-  --color-AccentFive-500: oklch(0.55 0 0);
+  --brand-c-neutral: oklch(0.70 0 0);
+  --brand-c-neutral: oklch(0.60 0 0);
+  --brand-c-neutral: oklch(0.50 0 0);
+  --brand-c-neutral: oklch(0.65 0 0);
+  --brand-c-neutral: oklch(0.55 0 0);
 
   --color-Success: oklch(0.62 0 0);
   --color-Warning: oklch(0.78 0 0);

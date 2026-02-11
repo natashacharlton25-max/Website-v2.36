@@ -197,7 +197,7 @@ h1 {
   font-size: clamp(2rem, 5vw + 1rem, 3.75rem);
   font-weight: var(--font-bold);
   line-height: var(--leading-tight);
-  color: var(--color-Text-700);
+  color: var(--brand-c-text);
 }
 
 h2 {
@@ -205,7 +205,7 @@ h2 {
   font-size: clamp(1.5rem, 3vw + 0.5rem, 2.5rem);
   font-weight: var(--font-semibold);
   line-height: var(--leading-tight);
-  color: var(--color-Text-700);
+  color: var(--brand-c-text);
 }
 
 h3 {
@@ -213,7 +213,7 @@ h3 {
   font-size: var(--text-xl);
   font-weight: var(--font-semibold);
   line-height: var(--leading-snug);
-  color: var(--color-Text-700);
+  color: var(--brand-c-text);
 }
 
 h4 {
@@ -221,7 +221,7 @@ h4 {
   font-size: var(--text-lg);
   font-weight: var(--font-medium);
   line-height: var(--leading-snug);
-  color: var(--color-Text-600);
+  color: var(--brand-c-text);
 }
 
 /* Body text */
@@ -229,19 +229,19 @@ p {
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: var(--leading-relaxed);
-  color: var(--color-Text-600);
+  color: var(--brand-c-text);
 }
 
 /* Lead paragraph */
 .lead, p.lead {
   font-size: var(--text-lg);
-  color: var(--color-Text-500);
+  color: var(--brand-c-text-light);
 }
 
 /* Small text */
 small, .text-sm {
   font-size: var(--text-sm);
-  color: var(--color-Text-500);
+  color: var(--brand-c-text-light);
 }
 ```
 
@@ -251,7 +251,7 @@ small, .text-sm {
 /* BAD - don't do this */
 .hero__title {
   font-size: clamp(2rem, 5vw, 3.75rem);
-  color: var(--color-Primary-600);
+  color: var(--brand-c-primary-dark);
 }
 
 /* GOOD - typography inherited, only add layout */
@@ -278,9 +278,9 @@ small, .text-sm {
 
 ```css
 /* GOOD */
-color: var(--color-Text-600);
-background: var(--color-Background-100);
-border-color: var(--color-Primary-500);
+color: var(--brand-c-text);
+background: var(--brand-c-bg);
+border-color: var(--brand-c-primary);
 
 /* BAD - never hardcode */
 color: #666666;
@@ -300,8 +300,8 @@ background: #f5f5f5;
 ### A11y themes change tokens automatically
 
 When user selects "Dark Mode" or "High Contrast", tokens update:
-- `--color-Text-600` becomes appropriate dark mode value
-- `--color-Background-100` becomes dark surface
+- `--brand-c-text` becomes appropriate dark mode value
+- `--brand-c-bg` becomes dark surface
 - Components using tokens update automatically
 
 ### When to write a11y overrides:
@@ -396,7 +396,7 @@ Each component file should follow this order:
 
 /* 3. Visual (background, border, shadow) */
 .card {
-  background: var(--color-Background-50);
+  background: var(--brand-c-bg);
   box-shadow: var(--shadow-sm);
 }
 
@@ -444,7 +444,7 @@ Each component file should follow this order:
 .hero__title {
   font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 700;
-  color: var(--color-Primary-600);
+  color: var(--brand-c-primary-dark);
 }
 
 /* GOOD - let h1 handle typography */
@@ -461,8 +461,8 @@ Each component file should follow this order:
 
 /* GOOD */
 .badge {
-  background: var(--color-Primary-600);
-  color: var(--color-Text-50);
+  background: var(--brand-c-primary-dark);
+  color: var(--brand-c-text-light);
 }
 ```
 
@@ -542,7 +542,7 @@ When refactoring a component or page:
 .product-card { ... }
 .product-title {
   font-size: var(--text-xl);
-  color: var(--color-Text-700);
+  color: var(--brand-c-text);
 }
 body.a11y-theme-dark .product-card { ... }
 body.a11y-theme-dark .product-title { ... }

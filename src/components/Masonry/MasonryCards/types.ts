@@ -84,10 +84,10 @@ export interface MixedCardProps extends BaseCardProps {
  * Others use darkest shade (800) from same color family
  */
 export function getHoverBorderColor(bgColor?: string): string {
-  if (!bgColor) return 'var(--color-Text-950)';
+  if (!bgColor) return 'var(--brand-c-text-dark)';
 
   const match = bgColor.match(/var\(--color-(\w+)-(\d+)\)/);
-  if (!match) return 'var(--color-Text-950)';
+  if (!match) return 'var(--brand-c-text-dark)';
 
   const [, colorName, shadeStr] = match;
   const shade = parseInt(shadeStr, 10);

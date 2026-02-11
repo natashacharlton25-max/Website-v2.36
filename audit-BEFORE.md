@@ -30,17 +30,17 @@ These are colour values written directly in files instead of using tokens.
 | `#ffffff` | 65 | 21 | Replace with `var(--text)` |
 | `black` | 34 | 14 | Create new token — used frequently |
 | `#333333` | 34 | 8 | Replace with `var(--a11y-mono-c-text)` |
-| `#8fa68a` | 27 | 14 | Replace with `var(--color-Primary-500)` |
+| `#8fa68a` | 27 | 14 | Replace with `var(--brand-c-primary)` |
 | `#000000` | 26 | 10 | Replace with `var(--bg)` |
 | `rgba(0, 0, 0, 0.1)` | 15 | 10 | Create new token — used frequently |
 | `#4a3f2f` | 14 | 5 | Replace with `var(--a11y-cream-c-text)` |
 | `rgba(0, 0, 0, 0.15)` | 14 | 9 | Create new token — used frequently |
 | `#8b9d83` | 12 | 2 | Create new token — used frequently |
-| `#c4907c` | 11 | 8 | Replace with `var(--color-Secondary-500)` |
+| `#c4907c` | 11 | 8 | Replace with `var(--brand-c-secondary)` |
 | `green` | 11 | 6 | Create new token — used frequently |
-| `#faf8f7` | 10 | 5 | Replace with `var(--color-Background-50)` |
+| `#faf8f7` | 10 | 5 | Replace with `var(--brand-c-bg)` |
 | `rgba(0, 0, 0, 0.2)` | 10 | 6 | Create new token — used frequently |
-| `#474747` | 9 | 7 | Replace with `var(--color-Text-800)` |
+| `#474747` | 9 | 7 | Replace with `var(--brand-c-text)` |
 | `#8b6914` | 9 | 4 | Create new token — used frequently |
 | `rgba(0,0,0,0.1)` | 9 | 5 | Create new token — used frequently |
 | `#666666` | 8 | 5 | Create new token — used frequently |
@@ -51,10 +51,10 @@ These are colour values written directly in files instead of using tokens.
 | `hsl((h + offset)` | 7 | 2 | Create new token — used frequently |
 | `#dc2626` | 7 | 1 | Create new token — used frequently |
 | `#f9f8f6` | 6 | 4 | Create new token — used frequently |
-| `#777777` | 6 | 5 | Replace with `var(--color-Text-600)` |
+| `#777777` | 6 | 5 | Replace with `var(--brand-c-text)` |
 | `rgba(0,0,0,0.15)` | 6 | 3 | Create new token — used frequently |
 | `blue` | 6 | 5 | Create new token — used frequently |
-| `#5a3420` | 6 | 4 | Replace with `var(--color-Secondary-900)` |
+| `#5a3420` | 6 | 4 | Replace with `var(--brand-c-secondary-dark)` |
 | `#fff` | 6 | 3 | Create new token — used frequently |
 | `#bdbab3` | 6 | 5 | Create new token — used frequently |
 | `#f59e0b` | 6 | 4 | Replace with `var(--a11y-proto-c-accent)` |
@@ -64,7 +64,7 @@ These are colour values written directly in files instead of using tokens.
 | `#00ffff` | 5 | 3 | Replace with `var(--a11y-hc-c-accent)` |
 | `purple` | 5 | 2 | Create new token — used frequently |
 | `teal` | 5 | 4 | Create new token — used frequently |
-| `#f4fbf2` | 5 | 4 | Replace with `var(--color-Primary-100)` |
+| `#f4fbf2` | 5 | 4 | Replace with `var(--brand-c-primary-light)` |
 | `#666` | 5 | 4 | Create new token — used frequently |
 | `#ddd` | 5 | 4 | Create new token — used frequently |
 | `rgba(0, 0, 0, 0.06)` | 5 | 4 | Create new token — used frequently |
@@ -75,11 +75,11 @@ These are colour values written directly in files instead of using tokens.
 | `rgba(0, 0, 0, 0.08)` | 5 | 5 | Create new token — used frequently |
 | `#e6e2da` | 5 | 4 | Create new token — used frequently |
 | `rgba(0,0,0,0.3)` | 5 | 3 | Create new token — used frequently |
-| `#9c8579` | 4 | 3 | Replace with `var(--color-AccentOne-500)` |
-| `#8390b5` | 4 | 3 | Replace with `var(--color-AccentTwo-500)` |
-| `#978692` | 4 | 4 | Replace with `var(--color-AccentThree-500)` |
+| `#9c8579` | 4 | 3 | Replace with `var(--brand-c-neutral)` |
+| `#8390b5` | 4 | 3 | Replace with `var(--brand-c-neutral)` |
+| `#978692` | 4 | 4 | Replace with `var(--brand-c-neutral)` |
 | `#e0dedb` | 4 | 3 | Replace with `var(--brand-c-neutral-light)` |
-| `#556a50` | 4 | 3 | Replace with `var(--color-Primary-700)` |
+| `#556a50` | 4 | 3 | Replace with `var(--brand-c-primary-dark)` |
 | `#0066ff` | 4 | 1 | Create new token — used frequently |
 | `#111827` | 4 | 1 | Create new token — used frequently |
 | `#ffff00` | 4 | 1 | Create new token — used frequently |
@@ -107,10 +107,10 @@ These are colour values written directly in files instead of using tokens.
 | `#6b7280` | 3 | 3 | Create new token — used frequently |
 | `#4caf50` | 3 | 3 | Replace with `var(--color-Success)` |
 | `#272596` | 3 | 3 | Replace with `var(--a11y-dark-c-accent)` |
-| `#e8e8e8` | 3 | 3 | Replace with `var(--color-Text-100)` |
+| `#e8e8e8` | 3 | 3 | Replace with `var(--brand-c-text-light)` |
 | `#c5e1a5` | 3 | 3 | Replace with `var(--a11y-dark-c-primary)` |
 | `rgba(0, 0, 0, 0.6)` | 3 | 2 | Create new token — used frequently |
-| `#262626` | 3 | 3 | Replace with `var(--color-Text-950)` |
+| `#262626` | 3 | 3 | Replace with `var(--brand-c-text-dark)` |
 | `rgba(0, 0, 0, 0.12)` | 3 | 3 | Create new token — used frequently |
 | `rgba(0,0,0,0.06)` | 3 | 3 | Create new token — used frequently |
 | `rgba(255,255,255,0.85)` | 3 | 3 | Create new token — used frequently |
@@ -124,7 +124,7 @@ These are colour values written directly in files instead of using tokens.
 | `rgba(255, 255, 255, 0.2)` | 3 | 2 | Replace with `var(--glass-border)` |
 | `gold` | 3 | 3 | Create new token — used frequently |
 | `#171717` | 3 | 1 | Create new token — used frequently |
-| `#71876c` | 2 | 2 | Replace with `var(--color-Primary-600)` |
+| `#71876c` | 2 | 2 | Replace with `var(--brand-c-primary-dark)` |
 | `coral` | 2 | 1 | Consider creating token |
 | `#10b981` | 2 | 2 | Replace with `var(--feedback-success-border)` |
 | `#ff0000` | 2 | 1 | Consider creating token |
@@ -133,16 +133,16 @@ These are colour values written directly in files instead of using tokens.
 | `#2196f3` | 2 | 2 | Replace with `var(--color-Info)` |
 | `rgba(255, 255, 255, 0.12)` | 2 | 2 | Consider creating token |
 | `#eeebe2` | 2 | 2 | Consider creating token |
-| `#dbdbdb` | 2 | 2 | Replace with `var(--color-Text-200)` |
+| `#dbdbdb` | 2 | 2 | Replace with `var(--brand-c-text-light)` |
 | `#5a5754` | 2 | 2 | Replace with `var(--color-Background-600)` |
 | `#3e3b39` | 2 | 2 | Replace with `var(--color-Background-700)` |
 | `#2b2927` | 2 | 2 | Replace with `var(--color-Background-800)` |
-| `#1a1918` | 2 | 2 | Replace with `var(--color-Background-900)` |
+| `#1a1918` | 2 | 2 | Replace with `var(--brand-c-bg-dark)` |
 | `#aaaaaa` | 2 | 2 | Consider creating token |
 | `rgba(0,0,0,0.08)` | 2 | 1 | Consider creating token |
-| `#cee6c8` | 2 | 2 | Replace with `var(--color-Primary-300)` |
-| `#ffcfba` | 2 | 2 | Replace with `var(--color-Secondary-300)` |
-| `#855543` | 2 | 2 | Replace with `var(--color-Secondary-700)` |
+| `#cee6c8` | 2 | 2 | Replace with `var(--brand-c-primary-light)` |
+| `#ffcfba` | 2 | 2 | Replace with `var(--brand-c-secondary-light)` |
+| `#855543` | 2 | 2 | Replace with `var(--brand-c-secondary-dark)` |
 | `#c2bdb8` | 2 | 2 | Replace with `var(--brand-c-neutral)` |
 | `#394e43` | 2 | 2 | Replace with `var(--brand-c-bg-dark)` |
 | `rgba(255, 255, 255, 0.6)` | 2 | 2 | Consider creating token |
@@ -156,16 +156,16 @@ These are colour values written directly in files instead of using tokens.
 | `rgba(143,166,138,0.1)` | 2 | 2 | Consider creating token |
 | `rgba(196,144,124,0.1)` | 2 | 2 | Consider creating token |
 | `#8aa5e5` | 2 | 1 | Consider creating token |
-| `#5a5a5a` | 2 | 2 | Replace with `var(--color-Text-700)` |
-| `#3e4a5a` | 2 | 2 | Replace with `var(--color-AccentFour-500)` |
-| `#a28aad` | 2 | 2 | Replace with `var(--color-AccentFive-500)` |
+| `#5a5a5a` | 2 | 2 | Replace with `var(--brand-c-text)` |
+| `#3e4a5a` | 2 | 2 | Replace with `var(--brand-c-neutral)` |
+| `#a28aad` | 2 | 2 | Replace with `var(--brand-c-neutral)` |
 | `#0e3f2e` | 2 | 1 | Consider creating token |
 | `#fafafa` | 2 | 2 | Consider creating token |
 | `#e0e0e0` | 2 | 2 | Consider creating token |
 | `rgba(255,255,255,0.9)` | 2 | 2 | Consider creating token |
 | `hsl((h + 180)` | 2 | 2 | Consider creating token |
 | `hsl((h + offset + 360)` | 2 | 2 | Consider creating token |
-| `#373737` | 2 | 2 | Replace with `var(--color-Text-900)` |
+| `#373737` | 2 | 2 | Replace with `var(--brand-c-text-dark)` |
 | `#4a90e2` | 2 | 1 | Consider creating token |
 | `#888888` | 2 | 1 | Consider creating token |
 | `rgba(0,0,0,0.9)` | 2 | 1 | Consider creating token |
@@ -318,59 +318,59 @@ These are colour values written directly in files instead of using tokens.
 | `#3a3a3a` | 1 | 1 | Replace with `var(--a11y-dark-c-border)` |
 | `#777` | 1 | 1 | Review — single use |
 | `#aaa` | 1 | 1 | Review — single use |
-| `#f0fdee` | 1 | 1 | Replace with `var(--color-Primary-200)` |
-| `#aec6a9` | 1 | 1 | Replace with `var(--color-Primary-400)` |
-| `#42563d` | 1 | 1 | Replace with `var(--color-Primary-800)` |
-| `#364433` | 1 | 1 | Replace with `var(--color-Primary-900)` |
-| `#fff4ee` | 1 | 1 | Replace with `var(--color-Secondary-100)` |
-| `#fff1e7` | 1 | 1 | Replace with `var(--color-Secondary-200)` |
-| `#e5af9a` | 1 | 1 | Replace with `var(--color-Secondary-400)` |
-| `#a4725f` | 1 | 1 | Replace with `var(--color-Secondary-600)` |
-| `#6f4230` | 1 | 1 | Replace with `var(--color-Secondary-800)` |
-| `#d2d1cc` | 1 | 1 | Replace with `var(--color-Background-200)` |
-| `#b4b1a8` | 1 | 1 | Replace with `var(--color-Background-300)` |
-| `#95928a` | 1 | 1 | Replace with `var(--color-Background-400)` |
-| `#77746c` | 1 | 1 | Replace with `var(--color-Background-500)` |
-| `#f8f8f8` | 1 | 1 | Replace with `var(--color-Text-50)` |
-| `#d3d3d3` | 1 | 1 | Replace with `var(--color-Text-300)` |
-| `#b3b3b3` | 1 | 1 | Replace with `var(--color-Text-400)` |
-| `#949494` | 1 | 1 | Replace with `var(--color-Text-500)` |
-| `#292624` | 1 | 1 | Replace with `var(--color-Neutral-900)` |
-| `#fef7f3` | 1 | 1 | Replace with `var(--color-AccentOne-100)` |
-| `#f3e6e0` | 1 | 1 | Replace with `var(--color-AccentOne-200)` |
-| `#dcc3b6` | 1 | 1 | Replace with `var(--color-AccentOne-300)` |
-| `#bba397` | 1 | 1 | Replace with `var(--color-AccentOne-400)` |
-| `#7e685c` | 1 | 1 | Replace with `var(--color-AccentOne-600)` |
-| `#614c41` | 1 | 1 | Replace with `var(--color-AccentOne-700)` |
-| `#4d392f` | 1 | 1 | Replace with `var(--color-AccentOne-800)` |
-| `#f4f8ff` | 1 | 1 | Replace with `var(--color-AccentTwo-100)` |
-| `#e9f0ff` | 1 | 1 | Replace with `var(--color-AccentTwo-200)` |
-| `#c1cff6` | 1 | 1 | Replace with `var(--color-AccentTwo-300)` |
-| `#a1afd5` | 1 | 1 | Replace with `var(--color-AccentTwo-400)` |
-| `#667296` | 1 | 1 | Replace with `var(--color-AccentTwo-600)` |
-| `#4a5677` | 1 | 1 | Replace with `var(--color-AccentTwo-700)` |
-| `#384263` | 1 | 1 | Replace with `var(--color-AccentTwo-800)` |
-| `#fcf6fa` | 1 | 1 | Replace with `var(--color-AccentThree-100)` |
-| `#f1e8ee` | 1 | 1 | Replace with `var(--color-AccentThree-200)` |
-| `#d6c4d1` | 1 | 1 | Replace with `var(--color-AccentThree-300)` |
-| `#b6a4b1` | 1 | 1 | Replace with `var(--color-AccentThree-400)` |
-| `#796974` | 1 | 1 | Replace with `var(--color-AccentThree-600)` |
-| `#5c4d58` | 1 | 1 | Replace with `var(--color-AccentThree-700)` |
-| `#493a45` | 1 | 1 | Replace with `var(--color-AccentThree-800)` |
-| `#b5b9bf` | 1 | 1 | Replace with `var(--color-AccentFour-100)` |
-| `#9aa1aa` | 1 | 1 | Replace with `var(--color-AccentFour-200)` |
-| `#768395` | 1 | 1 | Replace with `var(--color-AccentFour-300)` |
-| `#596677` | 1 | 1 | Replace with `var(--color-AccentFour-400)` |
-| `#25303f` | 1 | 1 | Replace with `var(--color-AccentFour-600)` |
-| `#0d1825` | 1 | 1 | Replace with `var(--color-AccentFour-700)` |
-| `#020815` | 1 | 1 | Replace with `var(--color-AccentFour-800)` |
-| `#fdf5ff` | 1 | 1 | Replace with `var(--color-AccentFive-100)` |
-| `#fcefff` | 1 | 1 | Replace with `var(--color-AccentFive-200)` |
-| `#e2c8ee` | 1 | 1 | Replace with `var(--color-AccentFive-300)` |
-| `#c1a9cd` | 1 | 1 | Replace with `var(--color-AccentFive-400)` |
-| `#846c8e` | 1 | 1 | Replace with `var(--color-AccentFive-600)` |
-| `#665070` | 1 | 1 | Replace with `var(--color-AccentFive-700)` |
-| `#533d5c` | 1 | 1 | Replace with `var(--color-AccentFive-800)` |
+| `#f0fdee` | 1 | 1 | Replace with `var(--brand-c-primary-light)` |
+| `#aec6a9` | 1 | 1 | Replace with `var(--brand-c-primary)` |
+| `#42563d` | 1 | 1 | Replace with `var(--brand-c-primary-dark)` |
+| `#364433` | 1 | 1 | Replace with `var(--brand-c-primary-dark)` |
+| `#fff4ee` | 1 | 1 | Replace with `var(--brand-c-secondary-light)` |
+| `#fff1e7` | 1 | 1 | Replace with `var(--brand-c-secondary-light)` |
+| `#e5af9a` | 1 | 1 | Replace with `var(--brand-c-secondary)` |
+| `#a4725f` | 1 | 1 | Replace with `var(--brand-c-secondary-dark)` |
+| `#6f4230` | 1 | 1 | Replace with `var(--brand-c-secondary-dark)` |
+| `#d2d1cc` | 1 | 1 | Replace with `var(--brand-c-bg-light)` |
+| `#b4b1a8` | 1 | 1 | Replace with `var(--brand-c-bg-light)` |
+| `#95928a` | 1 | 1 | Replace with `var(--brand-c-bg-light)` |
+| `#77746c` | 1 | 1 | Replace with `var(--brand-c-bg-light)` |
+| `#f8f8f8` | 1 | 1 | Replace with `var(--brand-c-text-light)` |
+| `#d3d3d3` | 1 | 1 | Replace with `var(--brand-c-text-light)` |
+| `#b3b3b3` | 1 | 1 | Replace with `var(--brand-c-text-light)` |
+| `#949494` | 1 | 1 | Replace with `var(--brand-c-text-light)` |
+| `#292624` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#fef7f3` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#f3e6e0` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#dcc3b6` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#bba397` | 1 | 1 | Replace with `var(--brand-c-neutral)` |
+| `#7e685c` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#614c41` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#4d392f` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#f4f8ff` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#e9f0ff` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#c1cff6` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#a1afd5` | 1 | 1 | Replace with `var(--brand-c-neutral)` |
+| `#667296` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#4a5677` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#384263` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#fcf6fa` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#f1e8ee` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#d6c4d1` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#b6a4b1` | 1 | 1 | Replace with `var(--brand-c-neutral)` |
+| `#796974` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#5c4d58` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#493a45` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#b5b9bf` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#9aa1aa` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#768395` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#596677` | 1 | 1 | Replace with `var(--brand-c-neutral)` |
+| `#25303f` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#0d1825` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#020815` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#fdf5ff` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#fcefff` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#e2c8ee` | 1 | 1 | Replace with `var(--brand-c-neutral-light)` |
+| `#c1a9cd` | 1 | 1 | Replace with `var(--brand-c-neutral)` |
+| `#846c8e` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#665070` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
+| `#533d5c` | 1 | 1 | Replace with `var(--brand-c-neutral-dark)` |
 | `rgba(255,255,255,0.3)` | 1 | 1 | Review — single use |
 | `rgba(255, 153, 200, 0.15)` | 1 | 1 | Replace with `var(--rainbow-hover-primary)` |
 | `rgba(174, 136, 191, 0.15)` | 1 | 1 | Replace with `var(--rainbow-hover-secondary)` |
@@ -627,7 +627,7 @@ These are colour values written directly in files instead of using tokens.
 - **src\styles\a11y\motion\reduced-motion.css** line 284
   `color: var(--color-White) !important;`
 - **src\styles\a11y\motion\reduced-motion.css** line 306
-  `box-shadow: 6px 6px 12px var(--color-Background-300), -6px -6px 12px var(--color-White) !important;`
+  `box-shadow: 6px 6px 12px var(--brand-c-bg-light), -6px -6px 12px var(--color-White) !important;`
 - **src\styles\a11y\motion\reduced-motion.css** line 312
   `color: var(--color-White) !important;`
 - **src\styles\a11y\motion\reduced-motion.css** line 1000
@@ -643,7 +643,7 @@ These are colour values written directly in files instead of using tokens.
 - **src\styles\a11y\visual\text-only.css** line 1991
   `background: var(--color-White) !important;`
 - **src\styles\base\utilities.css** line 161
-  `.bg-white { background-color: var(--color-Background-50); }`
+  `.bg-white { background-color: var(--brand-c-bg); }`
 - **src\styles\base\utilities.css** line 440
   `color: var(--color-White);`
 - **src\styles\base\utilities.css** line 455
@@ -687,11 +687,11 @@ These are colour values written directly in files instead of using tokens.
 - **src\styles\buttons\basic-button.css** line 134
   `color: var(--color-White);`
 - **src\styles\buttons\basic-button.css** line 241
-  `box-shadow: 6px 6px 12px var(--color-Background-300), -6px -6px 12px var(--color-White);`
+  `box-shadow: 6px 6px 12px var(--brand-c-bg-light), -6px -6px 12px var(--color-White);`
 - **src\styles\buttons\basic-button.css** line 245
-  `box-shadow: 4px 4px 8px var(--color-Background-300), -4px -4px 8px var(--color-White);`
+  `box-shadow: 4px 4px 8px var(--brand-c-bg-light), -4px -4px 8px var(--color-White);`
 - **src\styles\buttons\basic-button.css** line 249
-  `box-shadow: inset 4px 4px 8px var(--color-Background-300), inset -4px -4px 8px var(--color-White);`
+  `box-shadow: inset 4px 4px 8px var(--brand-c-bg-light), inset -4px -4px 8px var(--color-White);`
 - **src\styles\buttons\basic-button.css** line 254
   `color: var(--color-White);`
 - **src\styles\buttons\basic-button.css** line 260
@@ -838,23 +838,23 @@ These are colour values written directly in files instead of using tokens.
 - **docs\Brand\COMPLETE-BRAND-SCHEMA.md** line 169
   `"background": { "type": "string", "description": "Page background hex", "example": "#FFFFFF" },`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 217
-  `--color-Text-300: #ffffff;`
+  `--brand-c-text-light: #ffffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 218
-  `--color-Text-400: #ffffff;`
+  `--brand-c-text-light: #ffffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 219
-  `--color-Text-500: #ffffff;`
+  `--brand-c-text-light: #ffffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 220
-  `--color-Text-600: #ffffff;`
+  `--brand-c-text: #ffffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 221
-  `--color-Text-700: #ffffff;`
+  `--brand-c-text: #ffffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 222
-  `--color-Text-800: #ffffff;`
+  `--brand-c-text: #ffffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 223
-  `--color-Text-900: #ffffff;`
+  `--brand-c-text-dark: #ffffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 224
-  `--color-Text-950: #ffffff;`
+  `--brand-c-text-dark: #ffffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 226
-  `--color-Primary-500: #ffffff;`
+  `--brand-c-primary: #ffffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 244
   `--text: #ffffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 245
@@ -1040,7 +1040,7 @@ These are colour values written directly in files instead of using tokens.
 #### `#333333` (34 occurrences)
 
 - **docs\todo\TODO.md** line 454
-  `- [ ] Replace `#333333` with `var(--color-Neutral-800)` or semantic token`
+  `- [ ] Replace `#333333` with `var(--brand-c-neutral-dark)` or semantic token`
 - **docs\todo\TODO.md** line 457
   `- [ ] Replace 12+ instances of `#333333``
 - **docs\todo\TODO.md** line 464
@@ -1127,7 +1127,7 @@ These are colour values written directly in files instead of using tokens.
 - **docs\Markdown Notes\Theme-Preview-System.md** line 28
   `--brand-c-primary: #8fa68a;`
 - **docs\todo\TODO.md** line 344
-  `--color-Primary-500: #8fa68a;  /* Precise shade control */`
+  `--brand-c-primary: #8fa68a;  /* Precise shade control */`
 - **files\example-BrandDefault-NEW.css** line 7
   `--brand-c-primary: #8fa68a;`
 - **src\lib\emailit.ts** line 80
@@ -1161,24 +1161,24 @@ These are colour values written directly in files instead of using tokens.
 - **src\styles\themes\brand\BrandDefault.css** line 6
   `--brand-c-primary: #8fa68a;`
 - **src\styles\themes\brand\BrandDefault.css** line 17
-  `--color-Primary-500: #8fa68a;`
+  `--brand-c-primary: #8fa68a;`
 - **src\styles\themes\Preview\coretokens.css** line 57
   `--brand-c-primary: #8fa68a;`
 
 #### `#000000` (26 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 210
-  `--color-Background-50: #000000;`
+  `--brand-c-bg: #000000;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 211
-  `--color-Background-100: #000000;`
+  `--brand-c-bg: #000000;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 212
-  `--color-Background-200: #000000;`
+  `--brand-c-bg-light: #000000;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 213
-  `--color-Background-300: #000000;`
+  `--brand-c-bg-light: #000000;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 214
-  `--color-Background-400: #000000;`
+  `--brand-c-bg-light: #000000;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 215
-  `--color-Background-500: #000000;`
+  `--brand-c-bg-light: #000000;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 242
   `--bg: #000000;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 243
@@ -1351,7 +1351,7 @@ These are colour values written directly in files instead of using tokens.
 - **docs\Brand\BRAND-PROFILE.json** line 398
   `"snippetLong": "Walking with a Smile is a trauma recovery platform dedicated to helping survivors shift from pain-center`
 - **docs\Markdown Notes\Theme-Preview-System.md** line 29
-  `--brand-c-accent: #c4907c;`
+  `--brand-c-secondary: #c4907c;`
 - **files\example-BrandDefault-NEW.css** line 8
   `--brand-c-secondary: #c4907c;`
 - **src\lib\emailit.ts** line 82
@@ -1361,11 +1361,11 @@ These are colour values written directly in files instead of using tokens.
 - **src\scripts\ThemeTokenGen\brand-template.css** line 38
   `--brand-secondary: #C4907C; /* base: 500 */`
 - **src\styles\themes\brand\BrandDefault.css** line 8
-  `--brand-c-accent: #c4907c;`
+  `--brand-c-secondary: #c4907c;`
 - **src\styles\themes\brand\BrandDefault.css** line 28
-  `--color-Secondary-500: #c4907c;`
+  `--brand-c-secondary: #c4907c;`
 - **src\styles\themes\Preview\coretokens.css** line 58
-  `--brand-c-accent: #c4907c;`
+  `--brand-c-secondary: #c4907c;`
 
 #### `green` (11 occurrences)
 
@@ -1382,7 +1382,7 @@ These are colour values written directly in files instead of using tokens.
 - **docs\Brand\BRAND-PROFILE.json** line 338
   `"formPattern": "Clean inputs with soft borders (#e0dedb), focus state with sage green outline, generous spacing",`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 307
-  `--color-AccentOne-500: oklch(0.66 0.14 145); /* green */`
+  `--brand-c-neutral: oklch(0.66 0.14 145); /* green */`
 - **docs\Markdown Notes\CSS-Tokens.md** line 92
   `--color-Success    /* #4caf50 - green */`
 - **docs\Markdown Notes\new hero.md** line 50
@@ -1390,7 +1390,7 @@ These are colour values written directly in files instead of using tokens.
 - **src\scripts\ThemeTokenGen\color-input.css** line 50
   `--brand-background-dark: #2a3328; /* base: 850 - dark sage green for dark mode */`
 - **src\styles\design\confetti.css** line 24
-  `--confetti-green: var(--color-AccentThree-500);`
+  `--confetti-green: var(--brand-c-neutral);`
 
 #### `#faf8f7` (10 occurrences)
 
@@ -1399,19 +1399,19 @@ These are colour values written directly in files instead of using tokens.
 - **files\example-BrandDefault-NEW.css** line 5
   `--brand-c-bg: #faf8f7;`
 - **src\styles\components\toast.css** line 45
-  `color: var(--color-Neutral-50, #faf8f7);`
+  `color: var(--brand-c-neutral-light, #faf8f7);`
 - **src\styles\components\toast.css** line 113
-  `color: var(--color-Neutral-50, #faf8f7);`
+  `color: var(--brand-c-neutral-light, #faf8f7);`
 - **src\styles\themes\brand\BrandDefault.css** line 5
   `--brand-c-bg: #faf8f7;`
 - **src\styles\themes\brand\BrandDefault.css** line 35
-  `--color-Background-50: #faf8f7;`
+  `--brand-c-bg: #faf8f7;`
 - **src\styles\themes\brand\BrandDefault.css** line 36
-  `--color-Background-100: #faf8f7;`
+  `--brand-c-bg: #faf8f7;`
 - **src\styles\themes\brand\BrandDefault.css** line 60
-  `--color-Neutral-50: #faf8f7;`
+  `--brand-c-neutral-light: #faf8f7;`
 - **src\styles\themes\brand\BrandDefault.css** line 61
-  `--color-Neutral-100: #faf8f7;`
+  `--brand-c-neutral-light: #faf8f7;`
 - **src\styles\themes\Preview\coretokens.css** line 55
   `--brand-c-bg: #faf8f7;`
 
@@ -1455,7 +1455,7 @@ These are colour values written directly in files instead of using tokens.
 - **src\styles\themes\brand\BrandDefault.css** line 7
   `--brand-c-text: #474747;`
 - **src\styles\themes\brand\BrandDefault.css** line 55
-  `--color-Text-800: #474747;`
+  `--brand-c-text: #474747;`
 - **src\styles\themes\Preview\coretokens.css** line 56
   `--brand-c-text: #474747;`
 
@@ -1523,7 +1523,7 @@ These are colour values written directly in files instead of using tokens.
 #### `#1a1a1a` (8 occurrences)
 
 - **src\styles\a11y\components\masonry-grid.css** line 10
-  `color: var(--color-Text-700, #1a1a1a) !important;`
+  `color: var(--brand-c-text, #1a1a1a) !important;`
 - **src\styles\a11y\pages\asset-detail.css** line 63
   `color: #1a1a1a !important;`
 - **src\styles\a11y\pages\asset-detail.css** line 210
@@ -1535,9 +1535,9 @@ These are colour values written directly in files instead of using tokens.
 - **src\styles\a11y\pages\asset-detail.css** line 448
   `color: #1a1a1a !important;`
 - **src\styles\base\utilities.css** line 346
-  `border-left-color: var(--color-Text-800, #1a1a1a);`
+  `border-left-color: var(--brand-c-text, #1a1a1a);`
 - **src\styles\base\utilities.css** line 371
-  `border-right-color: var(--color-Text-800, #1a1a1a);`
+  `border-right-color: var(--brand-c-text, #1a1a1a);`
 
 #### `#f5f5f5` (7 occurrences)
 
@@ -1650,7 +1650,7 @@ These are colour values written directly in files instead of using tokens.
 - **src\styles\themes\a11y\a11y-monochrome.css** line 17
   `--a11y-mono-c-accent: #777777;`
 - **src\styles\themes\brand\BrandDefault.css** line 53
-  `--color-Text-600: #777777;`
+  `--brand-c-text: #777777;`
 - **src\styles\themes\Preview\coretokens.css** line 40
   `--a11y-monochrome-c-accent: #777777;`
 
@@ -1674,30 +1674,30 @@ These are colour values written directly in files instead of using tokens.
 - **docs\Brand\BRAND-PROFILE.json** line 69
   `"colorName": "Soft Blue",`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 265
-  `--color-AccentThree-500: oklch(0.60 0.14 250); /* blue */`
+  `--brand-c-neutral: oklch(0.60 0.14 250); /* blue */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 285
-  `--color-AccentOne-500: oklch(0.62 0.14 255); /* blue */`
+  `--brand-c-neutral: oklch(0.62 0.14 255); /* blue */`
 - **docs\Markdown Notes\CSS-Tokens.md** line 96
   `--color-Info       /* #2196f3 - blue */`
 - **src\styles\design\confetti.css** line 22
-  `--confetti-blue: var(--color-AccentTwo-400);`
+  `--confetti-blue: var(--brand-c-neutral);`
 - **src\styles\tokens\gradients.css** line 12
-  `--rainbow-light-blue: var(--color-AccentTwo-400);`
+  `--rainbow-light-blue: var(--brand-c-neutral);`
 
 #### `#5a3420` (6 occurrences)
 
 - **docs\reports\color-token-usage-report.md** line 193
-  `- **Fix:** Add to BrandDefault.css line 32: `--color-Secondary-900: #5a3420;``
+  `- **Fix:** Add to BrandDefault.css line 32: `--brand-c-secondary-dark: #5a3420;``
 - **docs\reports\color-token-usage-report.md** line 648
-  `- Add to BrandDefault.css: `--color-Secondary-900: #5a3420;``
+  `- Add to BrandDefault.css: `--brand-c-secondary-dark: #5a3420;``
 - **docs\reports\color-token-usage-report.md** line 691
-  `- `--color-Secondary-900: #5a3420;``
+  `- `--brand-c-secondary-dark: #5a3420;``
 - **docs\reports\FIXES-APPLIED.md** line 12
-  `- ✓ **Added `--color-Secondary-900: #5a3420`** (line 32)`
+  `- ✓ **Added `--brand-c-secondary-dark: #5a3420`** (line 32)`
 - **docs\todo\TODO.md** line 257
-  `- Add after line 32: `--color-Secondary-900: #5a3420;``
+  `- Add after line 32: `--brand-c-secondary-dark: #5a3420;``
 - **src\styles\themes\brand\BrandDefault.css** line 32
-  `--color-Secondary-900: #5a3420;`
+  `--brand-c-secondary-dark: #5a3420;`
 
 #### `#fff` (6 occurrences)
 
@@ -1706,13 +1706,13 @@ These are colour values written directly in files instead of using tokens.
 - **src\scripts\ThemeTokenGen\preview-colors.js** line 143
   `const textColor = luminance > 0.5 ? '#000' : '#fff';`
 - **src\styles\base\utilities.css** line 384
-  `background: color-mix(in oklch, var(--color-Background-50, #fff) 85%, transparent);`
+  `background: color-mix(in oklch, var(--brand-c-bg, #fff) 85%, transparent);`
 - **src\styles\base\utilities.css** line 386
-  `border: 1px solid color-mix(in oklch, var(--color-Background-50, #fff) 25%, transparent);`
+  `border: 1px solid color-mix(in oklch, var(--brand-c-bg, #fff) 25%, transparent);`
 - **src\styles\base\utilities.css** line 392
-  `border-top-color: color-mix(in oklch, var(--color-Background-50, #fff) 85%, transparent);`
+  `border-top-color: color-mix(in oklch, var(--brand-c-bg, #fff) 85%, transparent);`
 - **src\styles\base\utilities.css** line 397
-  `border-bottom-color: color-mix(in oklch, var(--color-Background-50, #fff) 85%, transparent);`
+  `border-bottom-color: color-mix(in oklch, var(--brand-c-bg, #fff) 85%, transparent);`
 
 #### `#bdbab3` (6 occurrences)
 
@@ -1762,26 +1762,26 @@ These are colour values written directly in files instead of using tokens.
 #### `#2dd4bf` (6 occurrences)
 
 - **src\styles\base\utilities.css** line 403
-  `color: var(--color-Primary-500, #2dd4bf);`
+  `color: var(--brand-c-primary, #2dd4bf);`
 - **src\styles\base\utilities.css** line 404
-  `border: 1.5px solid var(--color-Primary-500, #2dd4bf);`
+  `border: 1.5px solid var(--brand-c-primary, #2dd4bf);`
 - **src\styles\base\utilities.css** line 405
-  `text-shadow: 0 0 4px var(--color-Primary-500, #2dd4bf);`
+  `text-shadow: 0 0 4px var(--brand-c-primary, #2dd4bf);`
 - **src\styles\base\utilities.css** line 411
-  `border-top-color: var(--color-Primary-500, #2dd4bf);`
+  `border-top-color: var(--brand-c-primary, #2dd4bf);`
 - **src\styles\base\utilities.css** line 416
-  `border-bottom-color: var(--color-Primary-500, #2dd4bf);`
+  `border-bottom-color: var(--brand-c-primary, #2dd4bf);`
 - **src\styles\base\utilities.css** line 577
-  `border-color: var(--color-Success-500, var(--color-Primary-500, #2dd4bf)) !important;`
+  `border-color: var(--color-Success-500, var(--brand-c-primary, #2dd4bf)) !important;`
 
 #### `red` (5 occurrences)
 
 - **docs\Brand\BRAND-PROFILE.json** line 270
   `"dont": "Avoid bright, aggressive colors that might trigger anxiety. Don't use high-contrast or neon shades. Avoid pure `
 - **docs\Markdown Notes\accessibility-color-themes.md** line 289
-  `--color-AccentFive-500: oklch(0.62 0.10 25); /* red-orange */`
+  `--brand-c-neutral: oklch(0.62 0.10 25); /* red-orange */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 310
-  `--color-AccentFour-500: oklch(0.60 0.18 25); /* red */`
+  `--brand-c-neutral: oklch(0.60 0.18 25); /* red */`
 - **docs\Markdown Notes\CSS-Tokens.md** line 94
   `--color-Error      /* #f44336 - red */`
 - **src\styles\a11y\base\screen-reader.css** line 81
@@ -1790,7 +1790,7 @@ These are colour values written directly in files instead of using tokens.
 #### `#00ffff` (5 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 229
-  `--color-AccentOne-500: #00ffff;`
+  `--brand-c-neutral: #00ffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 239
   `--color-Info:    #00ffff;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 248
@@ -1803,28 +1803,28 @@ These are colour values written directly in files instead of using tokens.
 #### `purple` (5 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 184
-  `--color-AccentThree-500: oklch(0.55 0.08 280);/* dusty purple */`
+  `--brand-c-neutral: oklch(0.55 0.08 280);/* dusty purple */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 267
-  `--color-AccentFive-500: oklch(0.62 0.10 300);/* purple */`
+  `--brand-c-neutral: oklch(0.62 0.10 300);/* purple */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 287
-  `--color-AccentThree-500: oklch(0.60 0.14 300); /* purple */`
+  `--brand-c-neutral: oklch(0.60 0.14 300); /* purple */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 311
-  `--color-AccentFive-500: oklch(0.62 0.10 280);/* purple */`
+  `--brand-c-neutral: oklch(0.62 0.10 280);/* purple */`
 - **src\styles\design\confetti.css** line 20
-  `--confetti-purple: var(--color-AccentFive-400);`
+  `--confetti-purple: var(--brand-c-neutral);`
 
 #### `teal` (5 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 185
-  `--color-AccentFour-500: oklch(0.60 0.10 200); /* teal */`
+  `--brand-c-neutral: oklch(0.60 0.10 200); /* teal */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 263
-  `--color-AccentOne-500: oklch(0.70 0.12 195); /* teal */`
+  `--brand-c-neutral: oklch(0.70 0.12 195); /* teal */`
 - **docs\reports\color-token-usage-report.md** line 58
   `- design/confetti.css (1 use - teal confetti color)`
 - **src\styles\design\confetti.css** line 21
-  `--confetti-teal: var(--color-Primary-400);`
+  `--confetti-teal: var(--brand-c-primary);`
 - **src\styles\tokens\gradients.css** line 11
-  `--rainbow-light-teal: var(--color-Primary-400);`
+  `--rainbow-light-teal: var(--brand-c-primary);`
 
 #### `#f4fbf2` (5 occurrences)
 
@@ -1833,11 +1833,11 @@ These are colour values written directly in files instead of using tokens.
 - **docs\reports\FIXES-APPLIED.md** line 28
   `- Was identical to Primary-100 (#f4fbf2)`
 - **docs\todo\TODO.md** line 225
-  `- [ ] `--color-Primary-50` and `--color-Primary-100` both `#f4fbf2``
+  `- [ ] `--brand-c-primary-light` and `--brand-c-primary-light` both `#f4fbf2``
 - **docs\todo\TODO.md** line 277
   `- [ ] **Primary-50 = Primary-100** both `#f4fbf2` (DUPLICATE - remove Primary-50)`
 - **src\styles\themes\brand\BrandDefault.css** line 13
-  `--color-Primary-100: #f4fbf2;`
+  `--brand-c-primary-light: #f4fbf2;`
 
 #### `#666` (5 occurrences)
 
@@ -1978,7 +1978,7 @@ These are colour values written directly in files instead of using tokens.
 - **src\scripts\ThemeTokenGen\brand-template.css** line 64
   `--brand-accent1: #9C8579; /* base: 500 */`
 - **src\styles\themes\brand\BrandDefault.css** line 72
-  `--color-AccentOne-500: #9c8579;`
+  `--brand-c-neutral: #9c8579;`
 
 #### `#8390b5` (4 occurrences)
 
@@ -1989,7 +1989,7 @@ These are colour values written directly in files instead of using tokens.
 - **src\scripts\ThemeTokenGen\brand-template.css** line 68
   `--brand-accent2: #8390b5; /* base: 500 */`
 - **src\styles\themes\brand\BrandDefault.css** line 82
-  `--color-AccentTwo-500: #8390b5;`
+  `--brand-c-neutral: #8390b5;`
 
 #### `#978692` (4 occurrences)
 
@@ -2000,7 +2000,7 @@ These are colour values written directly in files instead of using tokens.
 - **src\scripts\ThemeTokenGen\brand-template.css** line 72
   `--brand-accent3: #978692; /* base: 500 */`
 - **src\styles\themes\brand\BrandDefault.css** line 92
-  `--color-AccentThree-500: #978692;`
+  `--brand-c-neutral: #978692;`
 
 #### `#e0dedb` (4 occurrences)
 
@@ -2011,7 +2011,7 @@ These are colour values written directly in files instead of using tokens.
 - **files\example-BrandDefault-NEW.css** line 25
   `--brand-c-neutral-light: #e0dedb;`
 - **src\styles\themes\brand\BrandDefault.css** line 62
-  `--color-Neutral-200: #e0dedb;`
+  `--brand-c-neutral-light: #e0dedb;`
 
 #### `#556a50` (4 occurrences)
 
@@ -2022,7 +2022,7 @@ These are colour values written directly in files instead of using tokens.
 - **files\example-BrandDefault-NEW.css** line 14
   `--brand-c-primary-dark: #556a50;`
 - **src\styles\themes\brand\BrandDefault.css** line 19
-  `--color-Primary-700: #556a50;`
+  `--brand-c-primary-dark: #556a50;`
 
 #### `#0066ff` (4 occurrences)
 
@@ -2049,9 +2049,9 @@ These are colour values written directly in files instead of using tokens.
 #### `#ffff00` (4 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 227
-  `--color-Secondary-500: #ffff00;`
+  `--brand-c-secondary: #ffff00;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 230
-  `--color-AccentTwo-500: #ffff00;`
+  `--brand-c-neutral: #ffff00;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 236
   `--color-Warning: #ffff00;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 246
@@ -2060,7 +2060,7 @@ These are colour values written directly in files instead of using tokens.
 #### `#00ff00` (4 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 231
-  `--color-AccentThree-500: #00ff00;`
+  `--brand-c-neutral: #00ff00;`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 235
   `--color-Success: #00ff00;`
 - **src\styles\themes\a11y\a11y-high-contrast.css** line 16
@@ -2071,35 +2071,35 @@ These are colour values written directly in files instead of using tokens.
 #### `orange` (4 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 264
-  `--color-AccentTwo-500: oklch(0.75 0.14 70);  /* yellow-orange */`
+  `--brand-c-neutral: oklch(0.75 0.14 70);  /* yellow-orange */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 286
-  `--color-AccentTwo-500: oklch(0.72 0.16 55);  /* orange */`
+  `--brand-c-neutral: oklch(0.72 0.16 55);  /* orange */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 289
-  `--color-AccentFive-500: oklch(0.62 0.10 25); /* red-orange */`
+  `--brand-c-neutral: oklch(0.62 0.10 25); /* red-orange */`
 - **docs\Markdown Notes\CSS-Tokens.md** line 93
   `--color-Warning    /* #ff9800 - orange */`
 
 #### `yellow` (4 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 264
-  `--color-AccentTwo-500: oklch(0.75 0.14 70);  /* yellow-orange */`
+  `--brand-c-neutral: oklch(0.75 0.14 70);  /* yellow-orange */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 266
-  `--color-AccentFour-500: oklch(0.75 0.12 90); /* yellow */`
+  `--brand-c-neutral: oklch(0.75 0.12 90); /* yellow */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 288
-  `--color-AccentFour-500: oklch(0.78 0.12 90); /* yellow */`
+  `--brand-c-neutral: oklch(0.78 0.12 90); /* yellow */`
 - **docs\Markdown Notes\accessibility-color-themes.md** line 308
-  `--color-AccentTwo-500: oklch(0.74 0.14 80);  /* yellow */`
+  `--brand-c-neutral: oklch(0.74 0.14 80);  /* yellow */`
 
 #### `pink` (4 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 309
-  `--color-AccentThree-500: oklch(0.62 0.16 350); /* pink */`
+  `--brand-c-neutral: oklch(0.62 0.16 350); /* pink */`
 - **src\styles\buttons\confetti-button.css** line 48
   `background: var(--confetti-pink, #FF99C8);`
 - **src\styles\design\confetti.css** line 19
-  `--confetti-pink: var(--color-AccentOne-300);`
+  `--confetti-pink: var(--brand-c-neutral-light);`
 - **src\styles\tokens\gradients.css** line 9
-  `--rainbow-light-pink: var(--color-AccentOne-300);`
+  `--rainbow-light-pink: var(--brand-c-neutral-light);`
 
 #### `#ccd3da` (4 occurrences)
 
@@ -2139,11 +2139,11 @@ These are colour values written directly in files instead of using tokens.
 - **files\example-BrandDefault-NEW.css** line 27
   `--brand-c-neutral-dark: #393531;`
 - **src\styles\components\toast.css** line 35
-  `background: var(--color-Neutral-800, #393531);`
+  `background: var(--brand-c-neutral-dark, #393531);`
 - **src\styles\components\toast.css** line 112
-  `background: var(--color-Neutral-800, #393531);`
+  `background: var(--brand-c-neutral-dark, #393531);`
 - **src\styles\themes\brand\BrandDefault.css** line 64
-  `--color-Neutral-800: #393531;`
+  `--brand-c-neutral-dark: #393531;`
 
 #### `rgba(255, 255, 255, 0.3)` (4 occurrences)
 
@@ -2209,7 +2209,7 @@ These are colour values written directly in files instead of using tokens.
 - **src\scripts\ThemeTokenGen\preview-colors.js** line 125
   `<p style="font-size: 0.9rem; color: #555;">`
 - **src\styles\themes\a11y\a11y-dark.css** line 86
-  `--color-Neutral-400: #555;`
+  `--brand-c-neutral: #555;`
 
 #### `#333` (4 occurrences)
 
@@ -2229,9 +2229,9 @@ These are colour values written directly in files instead of using tokens.
 - **src\scripts\ThemeTokenGen\preview-colors.js** line 105
   `color: #999;`
 - **src\styles\base\utilities.css** line 623
-  `color: var(--color-Text-400, #999);`
+  `color: var(--brand-c-text-light, #999);`
 - **src\styles\themes\a11y\a11y-dark.css** line 88
-  `--color-Neutral-600: #999;`
+  `--brand-c-neutral-dark: #999;`
 
 #### `hsl(h, news, newl)` (4 occurrences)
 
@@ -2269,13 +2269,13 @@ These are colour values written directly in files instead of using tokens.
 #### `#e5e0db` (4 occurrences)
 
 - **src\styles\a11y\visual\text-only.css** line 2085
-  `border-bottom: 1px solid var(--color-Neutral-200, #e5e0db) !important;`
+  `border-bottom: 1px solid var(--brand-c-neutral-light, #e5e0db) !important;`
 - **src\styles\a11y\visual\text-only.css** line 2126
-  `border-bottom: 1px solid var(--color-Neutral-200, #e5e0db) !important;`
+  `border-bottom: 1px solid var(--brand-c-neutral-light, #e5e0db) !important;`
 - **src\styles\a11y\visual\text-only.css** line 2141
-  `border-color: var(--color-Neutral-200, #e5e0db) !important;`
+  `border-color: var(--brand-c-neutral-light, #e5e0db) !important;`
 - **src\styles\a11y\visual\text-only.css** line 2157
-  `background: var(--color-Neutral-200, #e5e0db) !important;`
+  `background: var(--brand-c-neutral-light, #e5e0db) !important;`
 
 #### `beige` (3 occurrences)
 
@@ -2316,11 +2316,11 @@ These are colour values written directly in files instead of using tokens.
 #### `#e8e8e8` (3 occurrences)
 
 - **docs\reports\color-token-usage-report.md** line 692
-  `- `--color-Text-100: #e8e8e8;` (interpolated value)`
+  `- `--brand-c-text-light: #e8e8e8;` (interpolated value)`
 - **docs\reports\FIXES-APPLIED.md** line 16
-  `- ✓ **Added `--color-Text-100: #e8e8e8`** (line 48)`
+  `- ✓ **Added `--brand-c-text-light: #e8e8e8`** (line 48)`
 - **src\styles\themes\brand\BrandDefault.css** line 48
-  `--color-Text-100: #e8e8e8;`
+  `--brand-c-text-light: #e8e8e8;`
 
 #### `#c5e1a5` (3 occurrences)
 
@@ -2345,9 +2345,9 @@ These are colour values written directly in files instead of using tokens.
 - **files\example-BrandDefault-NEW.css** line 39
   `--brand-c-text-dark: #262626;`
 - **src\scripts\ThemeTokenGen\interactive-palette-builder.html** line 15
-  `--color-Text-800: #262626;`
+  `--brand-c-text: #262626;`
 - **src\styles\themes\brand\BrandDefault.css** line 57
-  `--color-Text-950: #262626;`
+  `--brand-c-text-dark: #262626;`
 
 #### `rgba(0, 0, 0, 0.12)` (3 occurrences)
 
@@ -2455,23 +2455,23 @@ These are colour values written directly in files instead of using tokens.
 - **src\styles\buttons\confetti-button.css** line 21
   `background: var(--confetti-gold, #e9bc88);`
 - **src\styles\design\confetti.css** line 23
-  `--confetti-gold: var(--color-Secondary-400);`
+  `--confetti-gold: var(--brand-c-secondary);`
 
 #### `#171717` (3 occurrences)
 
 - **src\styles\base\utilities.css** line 423
-  `border: 2px solid var(--color-Neutral-900, #171717);`
+  `border: 2px solid var(--brand-c-neutral-dark, #171717);`
 - **src\styles\base\utilities.css** line 429
-  `border-top-color: var(--color-Neutral-900, #171717);`
+  `border-top-color: var(--brand-c-neutral-dark, #171717);`
 - **src\styles\base\utilities.css** line 434
-  `border-bottom-color: var(--color-Neutral-900, #171717);`
+  `border-bottom-color: var(--brand-c-neutral-dark, #171717);`
 
 #### `#71876c` (2 occurrences)
 
 - **docs\Brand\BRAND-PROFILE.json** line 113
   `"linkHover": "#71876c",`
 - **src\styles\themes\brand\BrandDefault.css** line 18
-  `--color-Primary-600: #71876c;`
+  `--brand-c-primary-dark: #71876c;`
 
 #### `coral` (2 occurrences)
 
@@ -2532,9 +2532,9 @@ These are colour values written directly in files instead of using tokens.
 #### `#dbdbdb` (2 occurrences)
 
 - **docs\reports\FIXES-APPLIED.md** line 20
-  `- ✓ **Added `--color-Text-200: #dbdbdb`** (line 49)`
+  `- ✓ **Added `--brand-c-text-light: #dbdbdb`** (line 49)`
 - **src\styles\themes\brand\BrandDefault.css** line 49
-  `--color-Text-200: #dbdbdb;`
+  `--brand-c-text-light: #dbdbdb;`
 
 #### `#5a5754` (2 occurrences)
 
@@ -2560,9 +2560,9 @@ These are colour values written directly in files instead of using tokens.
 #### `#1a1918` (2 occurrences)
 
 - **docs\reports\FIXES-APPLIED.md** line 59
-  `- ✓ **Added `--color-Background-900: #1a1918`** (line 44)`
+  `- ✓ **Added `--brand-c-bg-dark: #1a1918`** (line 44)`
 - **src\styles\themes\brand\BrandDefault.css** line 44
-  `--color-Background-900: #1a1918;`
+  `--brand-c-bg-dark: #1a1918;`
 
 #### `#aaaaaa` (2 occurrences)
 
@@ -2583,28 +2583,28 @@ These are colour values written directly in files instead of using tokens.
 - **files\example-BrandDefault-NEW.css** line 13
   `--brand-c-primary-light: #cee6c8;`
 - **src\styles\themes\brand\BrandDefault.css** line 15
-  `--color-Primary-300: #cee6c8;`
+  `--brand-c-primary-light: #cee6c8;`
 
 #### `#ffcfba` (2 occurrences)
 
 - **files\example-BrandDefault-NEW.css** line 19
   `--brand-c-secondary-light: #ffcfba;`
 - **src\styles\themes\brand\BrandDefault.css** line 26
-  `--color-Secondary-300: #ffcfba;`
+  `--brand-c-secondary-light: #ffcfba;`
 
 #### `#855543` (2 occurrences)
 
 - **files\example-BrandDefault-NEW.css** line 20
   `--brand-c-secondary-dark: #855543;`
 - **src\styles\themes\brand\BrandDefault.css** line 30
-  `--color-Secondary-700: #855543;`
+  `--brand-c-secondary-dark: #855543;`
 
 #### `#c2bdb8` (2 occurrences)
 
 - **files\example-BrandDefault-NEW.css** line 26
   `--brand-c-neutral: #c2bdb8;`
 - **src\styles\themes\brand\BrandDefault.css** line 63
-  `--color-Neutral-300: #c2bdb8;`
+  `--brand-c-neutral: #c2bdb8;`
 
 #### `#394e43` (2 occurrences)
 
@@ -2695,21 +2695,21 @@ These are colour values written directly in files instead of using tokens.
 - **src\scripts\ThemeTokenGen\brand-template.css** line 56
   `--brand-text: #5A5A5A; /* base: 700 - medium-dark for readability */`
 - **src\styles\themes\brand\BrandDefault.css** line 54
-  `--color-Text-700: #5a5a5a;`
+  `--brand-c-text: #5a5a5a;`
 
 #### `#3e4a5a` (2 occurrences)
 
 - **src\scripts\ThemeTokenGen\brand-template.css** line 76
   `--brand-accent4: #3e4a5a; /* base: 500 */`
 - **src\styles\themes\brand\BrandDefault.css** line 102
-  `--color-AccentFour-500: #3e4a5a;`
+  `--brand-c-neutral: #3e4a5a;`
 
 #### `#a28aad` (2 occurrences)
 
 - **src\scripts\ThemeTokenGen\brand-template.css** line 80
   `--brand-accent5: #a28aad; /* base: 500 */`
 - **src\styles\themes\brand\BrandDefault.css** line 112
-  `--color-AccentFive-500: #a28aad;`
+  `--brand-c-neutral: #a28aad;`
 
 #### `#0e3f2e` (2 occurrences)
 
@@ -2723,7 +2723,7 @@ These are colour values written directly in files instead of using tokens.
 - **src\scripts\ThemeTokenGen\color-theory-comparison.js** line 241
   `background: #fafafa;`
 - **src\styles\base\utilities.css** line 421
-  `background: var(--color-Neutral-50, #fafafa);`
+  `background: var(--brand-c-neutral-light, #fafafa);`
 
 #### `#e0e0e0` (2 occurrences)
 
@@ -2756,9 +2756,9 @@ These are colour values written directly in files instead of using tokens.
 #### `#373737` (2 occurrences)
 
 - **src\scripts\ThemeTokenGen\interactive-palette-builder.html** line 14
-  `--color-Text-700: #373737;`
+  `--brand-c-text: #373737;`
 - **src\styles\themes\brand\BrandDefault.css** line 56
-  `--color-Text-900: #373737;`
+  `--brand-c-text-dark: #373737;`
 
 #### `#4a90e2` (2 occurrences)
 
@@ -2826,16 +2826,16 @@ These are colour values written directly in files instead of using tokens.
 #### `#1f2937` (2 occurrences)
 
 - **src\styles\base\utilities.css** line 297
-  `border-top-color: var(--color-Neutral-800, #1f2937);`
+  `border-top-color: var(--brand-c-neutral-dark, #1f2937);`
 - **src\styles\base\utilities.css** line 321
-  `border-bottom-color: var(--color-Neutral-800, #1f2937);`
+  `border-bottom-color: var(--brand-c-neutral-dark, #1f2937);`
 
 #### `#111` (2 occurrences)
 
 - **src\styles\base\utilities.css** line 385
-  `color: var(--color-Text-900, #111);`
+  `color: var(--brand-c-text-dark, #111);`
 - **src\styles\base\utilities.css** line 422
-  `color: var(--color-Text-900, #111);`
+  `color: var(--brand-c-text-dark, #111);`
 
 #### `#fef2f2` (2 occurrences)
 
@@ -2847,16 +2847,16 @@ These are colour values written directly in files instead of using tokens.
 #### `#f0fdfa` (2 occurrences)
 
 - **src\styles\base\utilities.css** line 578
-  `background-color: var(--color-Success-100, var(--color-Primary-50, #f0fdfa));`
+  `background-color: var(--color-Success-100, var(--brand-c-primary-light, #f0fdfa));`
 - **src\styles\base\utilities.css** line 585
-  `background: var(--color-Success-100, var(--color-Primary-50, #f0fdfa));`
+  `background: var(--color-Success-100, var(--brand-c-primary-light, #f0fdfa));`
 
 #### `rgba(var(--color-primary-500-rgb, 99, 102, 241)` (2 occurrences)
 
 - **src\styles\components\presentation\ReaderNav.css** line 873
-  `0 0 30px rgba(var(--color-Primary-500-rgb, 99, 102, 241), 0.4),`
+  `0 0 30px rgba(var(--brand-c-primary-rgb, 99, 102, 241), 0.4),`
 - **src\styles\components\presentation\ReaderNav.css** line 874
-  `0 0 60px rgba(var(--color-Primary-500-rgb, 99, 102, 241), 0.2),`
+  `0 0 60px rgba(var(--brand-c-primary-rgb, 99, 102, 241), 0.2),`
 
 #### `#f6f5fa` (2 occurrences)
 
@@ -2980,12 +2980,12 @@ These are colour values written directly in files instead of using tokens.
 #### `#ff6600` (1 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 232
-  `--color-AccentFour-500: #ff6600;`
+  `--brand-c-neutral: #ff6600;`
 
 #### `#ff00ff` (1 occurrences)
 
 - **docs\Markdown Notes\accessibility-color-themes.md** line 233
-  `--color-AccentFive-500: #ff00ff;`
+  `--brand-c-neutral: #ff00ff;`
 
 #### `#c17c5a` (1 occurrences)
 
@@ -3155,7 +3155,7 @@ These are colour values written directly in files instead of using tokens.
 #### `#181818` (1 occurrences)
 
 - **src\scripts\ThemeTokenGen\interactive-palette-builder.html** line 16
-  `--color-Text-900: #181818;`
+  `--brand-c-text-dark: #181818;`
 
 #### `#e74c3c` (1 occurrences)
 
@@ -3465,12 +3465,12 @@ These are colour values written directly in files instead of using tokens.
 #### `#ccc` (1 occurrences)
 
 - **src\styles\a11y\visual\text-only.css** line 1990
-  `border: 2px solid var(--color-Neutral-300, #ccc) !important;`
+  `border: 2px solid var(--brand-c-neutral, #ccc) !important;`
 
 #### `#0a0a0a` (1 occurrences)
 
 - **src\styles\base\utilities.css** line 402
-  `background: var(--color-Background-900, #0a0a0a);`
+  `background: var(--brand-c-bg-dark, #0a0a0a);`
 
 #### `#fecaca` (1 occurrences)
 
@@ -3480,27 +3480,27 @@ These are colour values written directly in files instead of using tokens.
 #### `#14b8a6` (1 occurrences)
 
 - **src\styles\base\utilities.css** line 584
-  `color: var(--color-Success-500, var(--color-Primary-600, #14b8a6));`
+  `color: var(--color-Success-500, var(--brand-c-primary-dark, #14b8a6));`
 
 #### `#99f6e4` (1 occurrences)
 
 - **src\styles\base\utilities.css** line 586
-  `border: 1px solid var(--color-Success-200, var(--color-Primary-200, #99f6e4));`
+  `border: 1px solid var(--color-Success-200, var(--brand-c-primary-light, #99f6e4));`
 
 #### `#b45309` (1 occurrences)
 
 - **src\styles\base\utilities.css** line 601
-  `color: var(--color-Warning-500, var(--color-AccentOne-700, #b45309));`
+  `color: var(--color-Warning-500, var(--brand-c-neutral-dark, #b45309));`
 
 #### `#fffbeb` (1 occurrences)
 
 - **src\styles\base\utilities.css** line 602
-  `background: var(--color-Warning-100, var(--color-AccentOne-100, #fffbeb));`
+  `background: var(--color-Warning-100, var(--brand-c-neutral-light, #fffbeb));`
 
 #### `#fde68a` (1 occurrences)
 
 - **src\styles\base\utilities.css** line 603
-  `border: 1px solid var(--color-Warning-200, var(--color-AccentOne-300, #fde68a));`
+  `border: 1px solid var(--color-Warning-200, var(--brand-c-neutral-light, #fde68a));`
 
 #### `rgba(0, 0, 0, 0.85)` (1 occurrences)
 
@@ -3565,277 +3565,277 @@ These are colour values written directly in files instead of using tokens.
 #### `#777` (1 occurrences)
 
 - **src\styles\themes\a11y\a11y-dark.css** line 87
-  `--color-Neutral-500: #777;`
+  `--brand-c-neutral: #777;`
 
 #### `#aaa` (1 occurrences)
 
 - **src\styles\themes\a11y\a11y-dark.css** line 89
-  `--color-Neutral-700: #aaa;`
+  `--brand-c-neutral-dark: #aaa;`
 
 #### `#f0fdee` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 14
-  `--color-Primary-200: #f0fdee;`
+  `--brand-c-primary-light: #f0fdee;`
 
 #### `#aec6a9` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 16
-  `--color-Primary-400: #aec6a9;`
+  `--brand-c-primary: #aec6a9;`
 
 #### `#42563d` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 20
-  `--color-Primary-800: #42563d;`
+  `--brand-c-primary-dark: #42563d;`
 
 #### `#364433` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 21
-  `--color-Primary-900: #364433;`
+  `--brand-c-primary-dark: #364433;`
 
 #### `#fff4ee` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 24
-  `--color-Secondary-100: #fff4ee;`
+  `--brand-c-secondary-light: #fff4ee;`
 
 #### `#fff1e7` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 25
-  `--color-Secondary-200: #fff1e7;`
+  `--brand-c-secondary-light: #fff1e7;`
 
 #### `#e5af9a` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 27
-  `--color-Secondary-400: #e5af9a;`
+  `--brand-c-secondary: #e5af9a;`
 
 #### `#a4725f` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 29
-  `--color-Secondary-600: #a4725f;`
+  `--brand-c-secondary-dark: #a4725f;`
 
 #### `#6f4230` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 31
-  `--color-Secondary-800: #6f4230;`
+  `--brand-c-secondary-dark: #6f4230;`
 
 #### `#d2d1cc` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 37
-  `--color-Background-200: #d2d1cc;`
+  `--brand-c-bg-light: #d2d1cc;`
 
 #### `#b4b1a8` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 38
-  `--color-Background-300: #b4b1a8;`
+  `--brand-c-bg-light: #b4b1a8;`
 
 #### `#95928a` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 39
-  `--color-Background-400: #95928a;`
+  `--brand-c-bg-light: #95928a;`
 
 #### `#77746c` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 40
-  `--color-Background-500: #77746c;`
+  `--brand-c-bg-light: #77746c;`
 
 #### `#f8f8f8` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 47
-  `--color-Text-50: #f8f8f8;`
+  `--brand-c-text-light: #f8f8f8;`
 
 #### `#d3d3d3` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 50
-  `--color-Text-300: #d3d3d3;`
+  `--brand-c-text-light: #d3d3d3;`
 
 #### `#b3b3b3` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 51
-  `--color-Text-400: #b3b3b3;`
+  `--brand-c-text-light: #b3b3b3;`
 
 #### `#949494` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 52
-  `--color-Text-500: #949494;`
+  `--brand-c-text-light: #949494;`
 
 #### `#292624` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 65
-  `--color-Neutral-900: #292624;`
+  `--brand-c-neutral-dark: #292624;`
 
 #### `#fef7f3` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 68
-  `--color-AccentOne-100: #fef7f3;`
+  `--brand-c-neutral-light: #fef7f3;`
 
 #### `#f3e6e0` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 69
-  `--color-AccentOne-200: #f3e6e0;`
+  `--brand-c-neutral-light: #f3e6e0;`
 
 #### `#dcc3b6` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 70
-  `--color-AccentOne-300: #dcc3b6;`
+  `--brand-c-neutral-light: #dcc3b6;`
 
 #### `#bba397` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 71
-  `--color-AccentOne-400: #bba397;`
+  `--brand-c-neutral: #bba397;`
 
 #### `#7e685c` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 73
-  `--color-AccentOne-600: #7e685c;`
+  `--brand-c-neutral-dark: #7e685c;`
 
 #### `#614c41` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 74
-  `--color-AccentOne-700: #614c41;`
+  `--brand-c-neutral-dark: #614c41;`
 
 #### `#4d392f` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 75
-  `--color-AccentOne-800: #4d392f;`
+  `--brand-c-neutral-dark: #4d392f;`
 
 #### `#f4f8ff` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 78
-  `--color-AccentTwo-100: #f4f8ff;`
+  `--brand-c-neutral-light: #f4f8ff;`
 
 #### `#e9f0ff` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 79
-  `--color-AccentTwo-200: #e9f0ff;`
+  `--brand-c-neutral-light: #e9f0ff;`
 
 #### `#c1cff6` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 80
-  `--color-AccentTwo-300: #c1cff6;`
+  `--brand-c-neutral-light: #c1cff6;`
 
 #### `#a1afd5` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 81
-  `--color-AccentTwo-400: #a1afd5;`
+  `--brand-c-neutral: #a1afd5;`
 
 #### `#667296` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 83
-  `--color-AccentTwo-600: #667296;`
+  `--brand-c-neutral-dark: #667296;`
 
 #### `#4a5677` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 84
-  `--color-AccentTwo-700: #4a5677;`
+  `--brand-c-neutral-dark: #4a5677;`
 
 #### `#384263` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 85
-  `--color-AccentTwo-800: #384263;`
+  `--brand-c-neutral-dark: #384263;`
 
 #### `#fcf6fa` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 88
-  `--color-AccentThree-100: #fcf6fa;`
+  `--brand-c-neutral-light: #fcf6fa;`
 
 #### `#f1e8ee` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 89
-  `--color-AccentThree-200: #f1e8ee;`
+  `--brand-c-neutral-light: #f1e8ee;`
 
 #### `#d6c4d1` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 90
-  `--color-AccentThree-300: #d6c4d1;`
+  `--brand-c-neutral-light: #d6c4d1;`
 
 #### `#b6a4b1` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 91
-  `--color-AccentThree-400: #b6a4b1;`
+  `--brand-c-neutral: #b6a4b1;`
 
 #### `#796974` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 93
-  `--color-AccentThree-600: #796974;`
+  `--brand-c-neutral-dark: #796974;`
 
 #### `#5c4d58` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 94
-  `--color-AccentThree-700: #5c4d58;`
+  `--brand-c-neutral-dark: #5c4d58;`
 
 #### `#493a45` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 95
-  `--color-AccentThree-800: #493a45;`
+  `--brand-c-neutral-dark: #493a45;`
 
 #### `#b5b9bf` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 98
-  `--color-AccentFour-100: #b5b9bf;`
+  `--brand-c-neutral-light: #b5b9bf;`
 
 #### `#9aa1aa` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 99
-  `--color-AccentFour-200: #9aa1aa;`
+  `--brand-c-neutral-light: #9aa1aa;`
 
 #### `#768395` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 100
-  `--color-AccentFour-300: #768395;`
+  `--brand-c-neutral-light: #768395;`
 
 #### `#596677` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 101
-  `--color-AccentFour-400: #596677;`
+  `--brand-c-neutral: #596677;`
 
 #### `#25303f` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 103
-  `--color-AccentFour-600: #25303f;`
+  `--brand-c-neutral-dark: #25303f;`
 
 #### `#0d1825` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 104
-  `--color-AccentFour-700: #0d1825;`
+  `--brand-c-neutral-dark: #0d1825;`
 
 #### `#020815` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 105
-  `--color-AccentFour-800: #020815;`
+  `--brand-c-neutral-dark: #020815;`
 
 #### `#fdf5ff` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 108
-  `--color-AccentFive-100: #fdf5ff;`
+  `--brand-c-neutral-light: #fdf5ff;`
 
 #### `#fcefff` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 109
-  `--color-AccentFive-200: #fcefff;`
+  `--brand-c-neutral-light: #fcefff;`
 
 #### `#e2c8ee` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 110
-  `--color-AccentFive-300: #e2c8ee;`
+  `--brand-c-neutral-light: #e2c8ee;`
 
 #### `#c1a9cd` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 111
-  `--color-AccentFive-400: #c1a9cd;`
+  `--brand-c-neutral: #c1a9cd;`
 
 #### `#846c8e` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 113
-  `--color-AccentFive-600: #846c8e;`
+  `--brand-c-neutral-dark: #846c8e;`
 
 #### `#665070` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 114
-  `--color-AccentFive-700: #665070;`
+  `--brand-c-neutral-dark: #665070;`
 
 #### `#533d5c` (1 occurrences)
 
 - **src\styles\themes\brand\BrandDefault.css** line 115
-  `--color-AccentFive-800: #533d5c;`
+  `--brand-c-neutral-dark: #533d5c;`
 
 #### `rgba(255,255,255,0.3)` (1 occurrences)
 
@@ -4015,11 +4015,11 @@ These should ideally use CSS classes with tokens instead.
 - **src\scripts\ThemeTokenGen\color-theory-comparison.js** line 369
   `background-color: ${primaryColor};`
 - **src\scripts\ThemeTokenGen\interactive-palette-builder.html** line 762
-  `font-size: 0.85rem; font-weight: 600; color: var(--color-Text-700); margin-bottom: 0.5rem; display: block;`
+  `font-size: 0.85rem; font-weight: 600; color: var(--brand-c-text); margin-bottom: 0.5rem; display: block;`
 - **src\scripts\ThemeTokenGen\interactive-palette-builder.html** line 769
-  `font-size: 0.85rem; font-weight: 600; color: var(--color-Text-700); margin-bottom: 0.5rem; display: block;`
+  `font-size: 0.85rem; font-weight: 600; color: var(--brand-c-text); margin-bottom: 0.5rem; display: block;`
 - **src\scripts\ThemeTokenGen\interactive-palette-builder.html** line 777
-  `padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid var(--color-Neutral-400); font-size: 1rem; flex: 1; min-wi`
+  `padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid var(--brand-c-neutral); font-size: 1rem; flex: 1; min-wi`
 - **src\scripts\ThemeTokenGen\interactive-palette-builder.html** line 794
   `background: #999; flex: 1;`
 - **src\scripts\ThemeTokenGen\interactive-palette-builder.html** line 795
@@ -4047,11 +4047,11 @@ They are candidates for removal (dead code).
 | Token | Value | Defined In | Line |
 |-------|-------|-----------|------|
 | `--a11y-hc-border` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 142 |
-| `--bg` | `var(--color-Background-50)` | `docs\Markdown Notes\accessibility-color-themes.md` | 20 |
+| `--bg` | `var(--brand-c-bg)` | `docs\Markdown Notes\accessibility-color-themes.md` | 20 |
 | `--bg` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 242 |
 | `--border-focus` | `var(--color-Info-500)` | `docs\todo\TODO.md` | 369 |
-| `--border-medium` | `var(--color-Neutral-400)` | `docs\todo\TODO.md` | 366 |
-| `--border-strong` | `var(--color-Neutral-600)` | `docs\todo\TODO.md` | 367 |
+| `--border-medium` | `var(--brand-c-neutral)` | `docs\todo\TODO.md` | 366 |
+| `--border-strong` | `var(--brand-c-neutral-dark)` | `docs\todo\TODO.md` | 367 |
 | `--border-width-4` | `4px` | `src\styles\tokens\spacing.css` | 48 |
 | `--brand-accent1` | `#9C8579` | `src\scripts\ThemeTokenGen\brand-template.css` | 13 |
 | `--brand-accent1` | `#9C8579` | `src\scripts\ThemeTokenGen\brand-template.css` | 64 |
@@ -4140,51 +4140,51 @@ They are candidates for removal (dead code).
 | `--color-Background-600` | `#5a5754` | `src\styles\themes\brand\BrandDefault.css` | 41 |
 | `--color-Background-700` | `#3e3b39`** (line 42)` | `docs\reports\FIXES-APPLIED.md` | 57 |
 | `--color-Background-700` | `#3e3b39` | `src\styles\themes\brand\BrandDefault.css` | 42 |
-| `--color-BackgroundDark-600` | `oklch(0.13 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 67 |
-| `--color-BackgroundDark-600` | `oklch(0.40 0.04 45)` | `docs\Markdown Notes\accessibility-color-themes.md` | 143 |
-| `--color-BackgroundDark-600` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 58 |
-| `--color-BackgroundDark-600` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 61 |
-| `--color-BackgroundDark-600` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 58 |
-| `--color-BackgroundDark-600` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 58 |
-| `--color-BackgroundDark-600` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 58 |
-| `--color-BackgroundDark-600` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 58 |
-| `--color-BackgroundDark-600` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 58 |
-| `--color-BackgroundDark-700` | `oklch(0.11 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 68 |
-| `--color-BackgroundDark-700` | `oklch(0.34 0.04 42)` | `docs\Markdown Notes\accessibility-color-themes.md` | 144 |
-| `--color-BackgroundDark-700` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 59 |
-| `--color-BackgroundDark-700` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 62 |
-| `--color-BackgroundDark-700` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 59 |
-| `--color-BackgroundDark-700` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 59 |
-| `--color-BackgroundDark-700` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 59 |
-| `--color-BackgroundDark-700` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 59 |
-| `--color-BackgroundDark-700` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 59 |
-| `--color-BackgroundDark-800` | `oklch(0.095 0.012 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 69 |
-| `--color-BackgroundDark-800` | `oklch(0.28 0.03 40)` | `docs\Markdown Notes\accessibility-color-themes.md` | 145 |
-| `--color-BackgroundDark-800` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 60 |
-| `--color-BackgroundDark-800` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 63 |
-| `--color-BackgroundDark-800` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 60 |
-| `--color-BackgroundDark-800` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 60 |
-| `--color-BackgroundDark-800` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 60 |
-| `--color-BackgroundDark-800` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 60 |
-| `--color-BackgroundDark-800` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 60 |
-| `--color-BackgroundDark-900` | `oklch(0.08 0.010 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 70 |
-| `--color-BackgroundDark-900` | `oklch(0.22 0.03 35)` | `docs\Markdown Notes\accessibility-color-themes.md` | 146 |
-| `--color-BackgroundDark-900` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 61 |
-| `--color-BackgroundDark-900` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 61 |
-| `--color-BackgroundDark-900` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 61 |
-| `--color-BackgroundDark-900` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 61 |
-| `--color-BackgroundDark-900` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 61 |
-| `--color-BackgroundDark-900` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 61 |
+| `--brand-c-bg-dark` | `oklch(0.13 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 67 |
+| `--brand-c-bg-dark` | `oklch(0.40 0.04 45)` | `docs\Markdown Notes\accessibility-color-themes.md` | 143 |
+| `--brand-c-bg-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 58 |
+| `--brand-c-bg-dark` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 58 |
+| `--brand-c-bg-dark` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 58 |
+| `--brand-c-bg-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 58 |
+| `--brand-c-bg-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 58 |
+| `--brand-c-bg-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 58 |
+| `--brand-c-bg-dark` | `oklch(0.11 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 68 |
+| `--brand-c-bg-dark` | `oklch(0.34 0.04 42)` | `docs\Markdown Notes\accessibility-color-themes.md` | 144 |
+| `--brand-c-bg-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 62 |
+| `--brand-c-bg-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 59 |
+| `--brand-c-bg-dark` | `oklch(0.095 0.012 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 69 |
+| `--brand-c-bg-dark` | `oklch(0.28 0.03 40)` | `docs\Markdown Notes\accessibility-color-themes.md` | 145 |
+| `--brand-c-bg-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 60 |
+| `--brand-c-bg-dark` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 63 |
+| `--brand-c-bg-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 60 |
+| `--brand-c-bg-dark` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 60 |
+| `--brand-c-bg-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 60 |
+| `--brand-c-bg-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 60 |
+| `--brand-c-bg-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 60 |
+| `--brand-c-bg-dark` | `oklch(0.08 0.010 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 70 |
+| `--brand-c-bg-dark` | `oklch(0.22 0.03 35)` | `docs\Markdown Notes\accessibility-color-themes.md` | 146 |
+| `--brand-c-bg-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 61 |
 | `--color-Info-100` | `${toOKLCH(chroma.hsl(215, 0.4 * satAdjust, 0.92 * lightAdjust).hex())` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 1941 |
 | `--color-Info-200` | `${toOKLCH(chroma.hsl(215, 0.6 * satAdjust, 0.80 * lightAdjust).hex())` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 1942 |
-| `--color-Secondary-900` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 193 |
-| `--color-Secondary-900` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 648 |
-| `--color-Secondary-900` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 691 |
-| `--color-Secondary-900` | `#5a3420`** (line 32)` | `docs\reports\FIXES-APPLIED.md` | 12 |
-| `--color-Secondary-900` | `#5a3420` | `docs\todo\TODO.md` | 257 |
-| `--color-Secondary-900` | `#5a3420` | `src\styles\themes\brand\BrandDefault.css` | 32 |
-| `--dropdown-hover-bg` | `var(--color-Primary-100)` | `src\styles\buttons\dropdown-tokens.css` | 9 |
-| `--dropdown-hover-text` | `var(--color-Primary-800)` | `src\styles\buttons\dropdown-tokens.css` | 10 |
+| `--brand-c-secondary-dark` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 193 |
+| `--brand-c-secondary-dark` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 648 |
+| `--brand-c-secondary-dark` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 691 |
+| `--brand-c-secondary-dark` | `#5a3420`** (line 32)` | `docs\reports\FIXES-APPLIED.md` | 12 |
+| `--brand-c-secondary-dark` | `#5a3420` | `docs\todo\TODO.md` | 257 |
+| `--brand-c-secondary-dark` | `#5a3420` | `src\styles\themes\brand\BrandDefault.css` | 32 |
+| `--dropdown-hover-bg` | `var(--brand-c-primary-light)` | `src\styles\buttons\dropdown-tokens.css` | 9 |
+| `--dropdown-hover-text` | `var(--brand-c-primary-dark)` | `src\styles\buttons\dropdown-tokens.css` | 10 |
 | `--error` | `var(--color-Error)` | `docs\Markdown Notes\accessibility-color-themes.md` | 40 |
 | `--feedback-error-border` | `var(--color-Error)` | `docs\todo\TODO.md` | 384 |
 | `--feedback-error-text` | `#7f1d1d` | `docs\todo\TODO.md` | 383 |
@@ -4194,61 +4194,61 @@ They are candidates for removal (dead code).
 | `--feedback-warning-text` | `#92400e` | `docs\todo\TODO.md` | 386 |
 | `--font-secondary` | `'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif` | `src\styles\tokens\typography.css` | 14 |
 | `--form-bg` | `var(--color-White)` | `docs\todo\TODO.md` | 389 |
-| `--form-border` | `var(--color-Neutral-300)` | `docs\todo\TODO.md` | 390 |
+| `--form-border` | `var(--brand-c-neutral)` | `docs\todo\TODO.md` | 390 |
 | `--form-border-error` | `var(--color-Error)` | `docs\todo\TODO.md` | 393 |
-| `--form-border-focus` | `var(--color-Primary-500)` | `docs\todo\TODO.md` | 392 |
-| `--form-border-hover` | `var(--color-Neutral-400)` | `docs\todo\TODO.md` | 391 |
+| `--form-border-focus` | `var(--brand-c-primary)` | `docs\todo\TODO.md` | 392 |
+| `--form-border-hover` | `var(--brand-c-neutral)` | `docs\todo\TODO.md` | 391 |
 | `--form-border-success` | `var(--color-Success)` | `docs\todo\TODO.md` | 394 |
 | `--form-invalid-bg` | `color-mix(in oklch, var(--feedback-error-bg) 5%, transparent)` | `docs\todo\TODO.md` | 395 |
 | `--form-valid-bg` | `color-mix(in oklch, var(--feedback-success-bg) 5%, transparent)` | `docs\todo\TODO.md` | 396 |
-| `--glass-card-bg` | `color-mix(in oklch, var(--color-Background-50) 15%, transparent)` | `src\styles\tokens\shadows.css` | 96 |
-| `--glass-card-bg` | `color-mix(in oklch, var(--color-Background-900) 25%, transparent)` | `src\styles\tokens\shadows.css` | 107 |
-| `--glass-card-border` | `color-mix(in oklch, var(--color-Background-50) 18%, transparent)` | `src\styles\tokens\shadows.css` | 99 |
-| `--glass-card-border` | `color-mix(in oklch, var(--color-Background-50) 10%, transparent)` | `src\styles\tokens\shadows.css` | 108 |
-| `--glass-card-shadow` | `0 8px 24px 0 color-mix(in oklch, var(--color-Primary-700) 30%, transparent)` | `src\styles\tokens\shadows.css` | 98 |
-| `--glass-overlay-bg` | `color-mix(in oklch, var(--color-Background-50) 5%, transparent)` | `src\styles\tokens\shadows.css` | 91 |
-| `--glass-overlay-bg` | `color-mix(in oklch, var(--color-Background-900) 10%, transparent)` | `src\styles\tokens\shadows.css` | 106 |
-| `--glass-overlay-shadow` | `0 4px 16px 0 color-mix(in oklch, var(--color-Primary-700) 20%, transparent)` | `src\styles\tokens\shadows.css` | 93 |
-| `--glass-surface-bg` | `color-mix(in oklch, var(--color-Background-50) 10%, transparent)` | `src\styles\tokens\shadows.css` | 86 |
-| `--glass-surface-bg` | `color-mix(in oklch, var(--color-Background-900) 20%, transparent)` | `src\styles\tokens\shadows.css` | 105 |
+| `--glass-card-bg` | `color-mix(in oklch, var(--brand-c-bg) 15%, transparent)` | `src\styles\tokens\shadows.css` | 96 |
+| `--glass-card-bg` | `color-mix(in oklch, var(--brand-c-bg-dark) 25%, transparent)` | `src\styles\tokens\shadows.css` | 107 |
+| `--glass-card-border` | `color-mix(in oklch, var(--brand-c-bg) 18%, transparent)` | `src\styles\tokens\shadows.css` | 99 |
+| `--glass-card-border` | `color-mix(in oklch, var(--brand-c-bg) 10%, transparent)` | `src\styles\tokens\shadows.css` | 108 |
+| `--glass-card-shadow` | `0 8px 24px 0 color-mix(in oklch, var(--brand-c-primary-dark) 30%, transparent)` | `src\styles\tokens\shadows.css` | 98 |
+| `--glass-overlay-bg` | `color-mix(in oklch, var(--brand-c-bg) 5%, transparent)` | `src\styles\tokens\shadows.css` | 91 |
+| `--glass-overlay-bg` | `color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent)` | `src\styles\tokens\shadows.css` | 106 |
+| `--glass-overlay-shadow` | `0 4px 16px 0 color-mix(in oklch, var(--brand-c-primary-dark) 20%, transparent)` | `src\styles\tokens\shadows.css` | 93 |
+| `--glass-surface-bg` | `color-mix(in oklch, var(--brand-c-bg) 10%, transparent)` | `src\styles\tokens\shadows.css` | 86 |
+| `--glass-surface-bg` | `color-mix(in oklch, var(--brand-c-bg-dark) 20%, transparent)` | `src\styles\tokens\shadows.css` | 105 |
 | `--glass-surface-blur` | `12px` | `src\styles\tokens\shadows.css` | 87 |
-| `--glass-surface-shadow` | `0 8px 32px 0 color-mix(in oklch, var(--color-Primary-700) 37%, transparent)` | `src\styles\tokens\shadows.css` | 88 |
+| `--glass-surface-shadow` | `0 8px 32px 0 color-mix(in oklch, var(--brand-c-primary-dark) 37%, transparent)` | `src\styles\tokens\shadows.css` | 88 |
 | `--glint-gradient-strong` | `linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)` | `src\styles\tokens\shadows.css` | 74 |
 | `--glint-gradient-subtle` | `linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)` | `src\styles\tokens\shadows.css` | 75 |
-| `--gradient-accent-border` | `linear-gradient(90deg, var(--color-Primary-600) 0%, var(--color-Secondary-600) 100%)` | `src\styles\tokens\gradients.css` | 226 |
-| `--gradient-accent1-glow` | `linear-gradient(135deg, var(--color-AccentOne-200) 0%, var(--color-AccentOne-400) 30%, var(--color-AccentOne-600) 60%, var(--color-AccentOne-800) 100%)` | `src\styles\tokens\gradients.css` | 103 |
-| `--gradient-accent1-intense` | `linear-gradient(135deg, var(--color-AccentOne-700) 0%, var(--color-AccentOne-800) 100%)` | `src\styles\tokens\gradients.css` | 102 |
-| `--gradient-accent1-light` | `linear-gradient(135deg, var(--color-AccentOne-200) 0%, var(--color-AccentOne-400) 100%)` | `src\styles\tokens\gradients.css` | 101 |
-| `--gradient-accent1-soft` | `linear-gradient(135deg, var(--color-AccentOne-400) 0%, var(--color-AccentOne-600) 100%)` | `src\styles\tokens\gradients.css` | 100 |
-| `--gradient-accent2-glow` | `linear-gradient(135deg, var(--color-AccentTwo-200) 0%, var(--color-AccentTwo-400) 30%, var(--color-AccentTwo-600) 60%, var(--color-AccentTwo-800) 100%)` | `src\styles\tokens\gradients.css` | 110 |
-| `--gradient-accent2-intense` | `linear-gradient(135deg, var(--color-AccentTwo-700) 0%, var(--color-AccentTwo-800) 100%)` | `src\styles\tokens\gradients.css` | 109 |
-| `--gradient-accent2-light` | `linear-gradient(135deg, var(--color-AccentTwo-200) 0%, var(--color-AccentTwo-400) 100%)` | `src\styles\tokens\gradients.css` | 108 |
-| `--gradient-accent2-soft` | `linear-gradient(135deg, var(--color-AccentTwo-400) 0%, var(--color-AccentTwo-600) 100%)` | `src\styles\tokens\gradients.css` | 107 |
-| `--gradient-accent3` | `linear-gradient(135deg, var(--color-AccentThree-600) 0%, var(--color-AccentThree-800) 100%)` | `src\styles\tokens\gradients.css` | 113 |
-| `--gradient-accent3-glow` | `linear-gradient(135deg, var(--color-AccentThree-200) 0%, var(--color-AccentThree-400) 30%, var(--color-AccentThree-600) 60%, var(--color-AccentThree-800) 100%)` | `src\styles\tokens\gradients.css` | 117 |
-| `--gradient-accent3-intense` | `linear-gradient(135deg, var(--color-AccentThree-700) 0%, var(--color-AccentThree-800) 100%)` | `src\styles\tokens\gradients.css` | 116 |
-| `--gradient-accent3-light` | `linear-gradient(135deg, var(--color-AccentThree-200) 0%, var(--color-AccentThree-400) 100%)` | `src\styles\tokens\gradients.css` | 115 |
-| `--gradient-accent3-soft` | `linear-gradient(135deg, var(--color-AccentThree-400) 0%, var(--color-AccentThree-600) 100%)` | `src\styles\tokens\gradients.css` | 114 |
-| `--gradient-accent4` | `linear-gradient(135deg, var(--color-AccentFour-600) 0%, var(--color-AccentFour-800) 100%)` | `src\styles\tokens\gradients.css` | 120 |
-| `--gradient-accent4-glow` | `linear-gradient(135deg, var(--color-AccentFour-200) 0%, var(--color-AccentFour-400) 30%, var(--color-AccentFour-600) 60%, var(--color-AccentFour-800) 100%)` | `src\styles\tokens\gradients.css` | 124 |
-| `--gradient-accent4-intense` | `linear-gradient(135deg, var(--color-AccentFour-700) 0%, var(--color-AccentFour-800) 100%)` | `src\styles\tokens\gradients.css` | 123 |
-| `--gradient-accent4-light` | `linear-gradient(135deg, var(--color-AccentFour-200) 0%, var(--color-AccentFour-400) 100%)` | `src\styles\tokens\gradients.css` | 122 |
-| `--gradient-accent4-soft` | `linear-gradient(135deg, var(--color-AccentFour-400) 0%, var(--color-AccentFour-600) 100%)` | `src\styles\tokens\gradients.css` | 121 |
-| `--gradient-accent5` | `linear-gradient(135deg, var(--color-AccentFive-600) 0%, var(--color-AccentFive-800) 100%)` | `src\styles\tokens\gradients.css` | 127 |
-| `--gradient-accent5-glow` | `linear-gradient(135deg, var(--color-AccentFive-200) 0%, var(--color-AccentFive-400) 30%, var(--color-AccentFive-600) 60%, var(--color-AccentFive-800) 100%)` | `src\styles\tokens\gradients.css` | 131 |
-| `--gradient-accent5-intense` | `linear-gradient(135deg, var(--color-AccentFive-700) 0%, var(--color-AccentFive-800) 100%)` | `src\styles\tokens\gradients.css` | 130 |
-| `--gradient-accent5-light` | `linear-gradient(135deg, var(--color-AccentFive-200) 0%, var(--color-AccentFive-400) 100%)` | `src\styles\tokens\gradients.css` | 129 |
-| `--gradient-accent5-soft` | `linear-gradient(135deg, var(--color-AccentFive-400) 0%, var(--color-AccentFive-600) 100%)` | `src\styles\tokens\gradients.css` | 128 |
-| `--gradient-background-glow` | `linear-gradient(135deg, var(--color-Background-50) 0%, var(--color-Background-200) 30%, var(--color-Background-300) 60%, var(--color-Neutral-300) 100%)` | `src\styles\tokens\gradients.css` | 183 |
-| `--gradient-background-radial` | `radial-gradient(circle at center, var(--color-Background-50) 0%, var(--color-Background-300) 100%)` | `src\styles\tokens\gradients.css` | 186 |
-| `--gradient-background-radial-complex` | `radial-gradient(ellipse at 40% 60%, var(--color-Background-50) 0%, var(--color-Background-200) 40%, var(--color-Neutral-200) 80%, var(--color-Neutral-300) 100%)` | `src\styles\tokens\gradients.css` | 188 |
-| `--gradient-background-radial-soft` | `radial-gradient(circle at 30% 30%, var(--color-Background-50) 0%, var(--color-Background-200) 50%, var(--color-Background-400) 100%)` | `src\styles\tokens\gradients.css` | 187 |
-| `--gradient-background-rainbow` | `linear-gradient(135deg, var(--color-Background-50) 0%, var(--color-Background-100) 25%, var(--color-Background-200) 50%, var(--color-Background-300) 75%, var(--color-Background-400) 100%)` | `src\styles\tokens\gradients.css` | 181 |
-| `--gradient-background-soft` | `linear-gradient(135deg, var(--color-Background-100) 0%, var(--color-Background-300) 100%)` | `src\styles\tokens\gradients.css` | 176 |
-| `--gradient-background-wave` | `linear-gradient(90deg, var(--color-Background-100) 0%, var(--color-Background-300) 20%, var(--color-Background-200) 40%, var(--color-Background-400) 60%, var(--color-Background-300) 80%, var(--color-Background-500) 100%)` | `src\styles\tokens\gradients.css` | 182 |
-| `--gradient-brand-burst` | `radial-gradient(ellipse at 30% 30%, var(--color-Primary-300) 0%, var(--color-Secondary-400) 30%, var(--color-Background-200) 60%, var(--color-Primary-600) 100%)` | `src\styles\tokens\gradients.css` | 156 |
-| `--gradient-brand-radial` | `radial-gradient(circle at center, var(--color-Background-50) 0%, var(--color-Primary-400) 40%, var(--color-Secondary-600) 80%, var(--color-Background-500) 100%)` | `src\styles\tokens\gradients.css` | 155 |
-| `--gradient-btn-ghost-hover` | `linear-gradient(135deg, color-mix(in oklch, var(--color-Text-700) 10%, transparent) 0%, color-mix(in oklch, var(--color-Text-700) 20%, transparent) 100%)` | `src\styles\tokens\gradients.css` | 201 |
+| `--gradient-accent-border` | `linear-gradient(90deg, var(--brand-c-primary-dark) 0%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 226 |
+| `--gradient-accent1-glow` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 30%, var(--brand-c-neutral-dark) 60%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 103 |
+| `--gradient-accent1-intense` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 102 |
+| `--gradient-accent1-light` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 101 |
+| `--gradient-accent1-soft` | `linear-gradient(135deg, var(--brand-c-neutral) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 100 |
+| `--gradient-accent2-glow` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 30%, var(--brand-c-neutral-dark) 60%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 110 |
+| `--gradient-accent2-intense` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 109 |
+| `--gradient-accent2-light` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 108 |
+| `--gradient-accent2-soft` | `linear-gradient(135deg, var(--brand-c-neutral) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 107 |
+| `--gradient-accent3` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 113 |
+| `--gradient-accent3-glow` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 30%, var(--brand-c-neutral-dark) 60%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 117 |
+| `--gradient-accent3-intense` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 116 |
+| `--gradient-accent3-light` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 115 |
+| `--gradient-accent3-soft` | `linear-gradient(135deg, var(--brand-c-neutral) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 114 |
+| `--gradient-accent4` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 120 |
+| `--gradient-accent4-glow` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 30%, var(--brand-c-neutral-dark) 60%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 124 |
+| `--gradient-accent4-intense` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 123 |
+| `--gradient-accent4-light` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 122 |
+| `--gradient-accent4-soft` | `linear-gradient(135deg, var(--brand-c-neutral) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 121 |
+| `--gradient-accent5` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 127 |
+| `--gradient-accent5-glow` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 30%, var(--brand-c-neutral-dark) 60%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 131 |
+| `--gradient-accent5-intense` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 130 |
+| `--gradient-accent5-light` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 129 |
+| `--gradient-accent5-soft` | `linear-gradient(135deg, var(--brand-c-neutral) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 128 |
+| `--gradient-background-glow` | `linear-gradient(135deg, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 30%, var(--brand-c-bg-light) 60%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 183 |
+| `--gradient-background-radial` | `radial-gradient(circle at center, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 186 |
+| `--gradient-background-radial-complex` | `radial-gradient(ellipse at 40% 60%, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 40%, var(--brand-c-neutral-light) 80%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 188 |
+| `--gradient-background-radial-soft` | `radial-gradient(circle at 30% 30%, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 50%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 187 |
+| `--gradient-background-rainbow` | `linear-gradient(135deg, var(--brand-c-bg) 0%, var(--brand-c-bg) 25%, var(--brand-c-bg-light) 50%, var(--brand-c-bg-light) 75%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 181 |
+| `--gradient-background-soft` | `linear-gradient(135deg, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 176 |
+| `--gradient-background-wave` | `linear-gradient(90deg, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 20%, var(--brand-c-bg-light) 40%, var(--brand-c-bg-light) 60%, var(--brand-c-bg-light) 80%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 182 |
+| `--gradient-brand-burst` | `radial-gradient(ellipse at 30% 30%, var(--brand-c-primary-light) 0%, var(--brand-c-secondary) 30%, var(--brand-c-bg-light) 60%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 156 |
+| `--gradient-brand-radial` | `radial-gradient(circle at center, var(--brand-c-bg) 0%, var(--brand-c-primary) 40%, var(--brand-c-secondary-dark) 80%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 155 |
+| `--gradient-btn-ghost-hover` | `linear-gradient(135deg, color-mix(in oklch, var(--brand-c-text) 10%, transparent) 0%, color-mix(in oklch, var(--brand-c-text) 20%, transparent) 100%)` | `src\styles\tokens\gradients.css` | 201 |
 | `--gradient-deep-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 523 |
 | `--gradient-deep-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 865 |
 | `--gradient-deep-accent2` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 531 |
@@ -4264,7 +4264,7 @@ They are candidates for removal (dead code).
 | `--gradient-deep-secondary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 515 |
 | `--gradient-deep-secondary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 855 |
 | `--gradient-error` | `linear-gradient(135deg, var(--color-Danger) 0%, color-mix(in oklch, var(--color-Danger) 70%, black) 100%)` | `src\styles\tokens\gradients.css` | 235 |
-| `--gradient-header-subtle` | `linear-gradient(180deg, var(--color-Background-300) 0%, var(--color-Background-200) 100%)` | `src\styles\tokens\gradients.css` | 208 |
+| `--gradient-header-subtle` | `linear-gradient(180deg, var(--brand-c-bg-light) 0%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 208 |
 | `--gradient-light-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 379 |
 | `--gradient-light-accent2` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 387 |
 | `--gradient-light-accent3` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 395 |
@@ -4272,8 +4272,8 @@ They are candidates for removal (dead code).
 | `--gradient-light-accent5` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 411 |
 | `--gradient-light-primary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 363 |
 | `--gradient-light-secondary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 371 |
-| `--gradient-overlay-dark` | `linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--color-Background-900) 70%, transparent) 100%)` | `src\styles\tokens\gradients.css` | 223 |
-| `--gradient-overlay-light` | `linear-gradient(180deg, color-mix(in oklch, var(--color-Background-50) 90%, transparent) 0%, transparent 100%)` | `src\styles\tokens\gradients.css` | 224 |
+| `--gradient-overlay-dark` | `linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--brand-c-bg-dark) 70%, transparent) 100%)` | `src\styles\tokens\gradients.css` | 223 |
+| `--gradient-overlay-light` | `linear-gradient(180deg, color-mix(in oklch, var(--brand-c-bg) 90%, transparent) 0%, transparent 100%)` | `src\styles\tokens\gradients.css` | 224 |
 | `--gradient-pastel-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 658 |
 | `--gradient-pastel-accent2` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 668 |
 | `--gradient-pastel-accent3` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 678 |
@@ -4281,13 +4281,13 @@ They are candidates for removal (dead code).
 | `--gradient-pastel-accent5` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 698 |
 | `--gradient-pastel-primary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 637 |
 | `--gradient-pastel-secondary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 648 |
-| `--gradient-primary-glow` | `linear-gradient(135deg, var(--color-Primary-200) 0%, var(--color-Primary-400) 30%, var(--color-Primary-600) 60%, var(--color-Primary-800) 100%)` | `src\styles\tokens\gradients.css` | 67 |
-| `--gradient-primary-intense` | `linear-gradient(135deg, var(--color-Primary-700) 0%, var(--color-Primary-900) 100%)` | `src\styles\tokens\gradients.css` | 62 |
-| `--gradient-primary-radial` | `radial-gradient(circle at 30% 40%, var(--color-Primary-400) 0%, var(--color-Primary-800) 100%)` | `src\styles\tokens\gradients.css` | 70 |
-| `--gradient-primary-radial-center` | `radial-gradient(circle at center, var(--color-Primary-300) 0%, var(--color-Primary-600) 50%, var(--color-Primary-900) 100%)` | `src\styles\tokens\gradients.css` | 71 |
-| `--gradient-primary-radial-complex` | `radial-gradient(ellipse at 20% 30%, var(--color-Primary-200) 0%, var(--color-Primary-500) 40%, var(--color-Primary-700) 80%, var(--color-Primary-900) 100%)` | `src\styles\tokens\gradients.css` | 72 |
-| `--gradient-primary-rainbow` | `linear-gradient(135deg, var(--color-Primary-300) 0%, var(--color-Primary-500) 25%, var(--color-Primary-600) 50%, var(--color-Primary-700) 75%, var(--color-Primary-900) 100%)` | `src\styles\tokens\gradients.css` | 65 |
-| `--gradient-primary-wave` | `linear-gradient(90deg, var(--color-Primary-400) 0%, var(--color-Primary-600) 20%, var(--color-Primary-500) 40%, var(--color-Primary-700) 60%, var(--color-Primary-600) 80%, var(--color-Primary-800) 100%)` | `src\styles\tokens\gradients.css` | 66 |
+| `--gradient-primary-glow` | `linear-gradient(135deg, var(--brand-c-primary-light) 0%, var(--brand-c-primary) 30%, var(--brand-c-primary-dark) 60%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 67 |
+| `--gradient-primary-intense` | `linear-gradient(135deg, var(--brand-c-primary-dark) 0%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 62 |
+| `--gradient-primary-radial` | `radial-gradient(circle at 30% 40%, var(--brand-c-primary) 0%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 70 |
+| `--gradient-primary-radial-center` | `radial-gradient(circle at center, var(--brand-c-primary-light) 0%, var(--brand-c-primary-dark) 50%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 71 |
+| `--gradient-primary-radial-complex` | `radial-gradient(ellipse at 20% 30%, var(--brand-c-primary-light) 0%, var(--brand-c-primary) 40%, var(--brand-c-primary-dark) 80%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 72 |
+| `--gradient-primary-rainbow` | `linear-gradient(135deg, var(--brand-c-primary-light) 0%, var(--brand-c-primary) 25%, var(--brand-c-primary-dark) 50%, var(--brand-c-primary-dark) 75%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 65 |
+| `--gradient-primary-wave` | `linear-gradient(90deg, var(--brand-c-primary) 0%, var(--brand-c-primary-dark) 20%, var(--brand-c-primary) 40%, var(--brand-c-primary-dark) 60%, var(--brand-c-primary-dark) 80%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 66 |
 | `--gradient-rainbow-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 282 |
 | `--gradient-rainbow-accent2` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 295 |
 | `--gradient-rainbow-accent3` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 308 |
@@ -4295,16 +4295,16 @@ They are candidates for removal (dead code).
 | `--gradient-rainbow-accent5` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 334 |
 | `--gradient-rainbow-primary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 256 |
 | `--gradient-rainbow-secondary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 269 |
-| `--gradient-secondary-glow` | `linear-gradient(135deg, var(--color-Secondary-100) 0%, var(--color-Secondary-400) 30%, var(--color-Secondary-600) 60%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 87 |
-| `--gradient-secondary-intense` | `linear-gradient(135deg, var(--color-Secondary-700) 0%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 82 |
-| `--gradient-secondary-light` | `linear-gradient(135deg, var(--color-Secondary-200) 0%, var(--color-Secondary-400) 100%)` | `src\styles\tokens\gradients.css` | 81 |
-| `--gradient-secondary-radial` | `radial-gradient(circle at 70% 30%, var(--color-Secondary-400) 0%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 90 |
-| `--gradient-secondary-radial-center` | `radial-gradient(circle at center, var(--color-Secondary-200) 0%, var(--color-Secondary-500) 50%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 91 |
-| `--gradient-secondary-radial-complex` | `radial-gradient(ellipse at 80% 20%, var(--color-Secondary-100) 0%, var(--color-Secondary-400) 40%, var(--color-Secondary-600) 80%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 92 |
-| `--gradient-secondary-rainbow` | `linear-gradient(135deg, var(--color-Secondary-200) 0%, var(--color-Secondary-400) 25%, var(--color-Secondary-500) 50%, var(--color-Secondary-600) 75%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 85 |
-| `--gradient-secondary-wave` | `linear-gradient(90deg, var(--color-Secondary-300) 0%, var(--color-Secondary-500) 20%, var(--color-Secondary-400) 40%, var(--color-Secondary-600) 60%, var(--color-Secondary-500) 80%, var(--color-Secondary-700) 100%)` | `src\styles\tokens\gradients.css` | 86 |
-| `--gradient-soft-brand` | `linear-gradient(180deg, var(--color-Background-100) 0%, var(--color-Primary-300) 30%, var(--color-Secondary-400) 70%, var(--color-Background-300) 100%)` | `src\styles\tokens\gradients.css` | 148 |
-| `--gradient-subtle` | `linear-gradient(180deg, var(--color-Background-300) 0%, var(--color-Background-100) 100%)` | `src\styles\tokens\gradients.css` | 168 |
+| `--gradient-secondary-glow` | `linear-gradient(135deg, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 30%, var(--brand-c-secondary-dark) 60%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 87 |
+| `--gradient-secondary-intense` | `linear-gradient(135deg, var(--brand-c-secondary-dark) 0%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 82 |
+| `--gradient-secondary-light` | `linear-gradient(135deg, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 100%)` | `src\styles\tokens\gradients.css` | 81 |
+| `--gradient-secondary-radial` | `radial-gradient(circle at 70% 30%, var(--brand-c-secondary) 0%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 90 |
+| `--gradient-secondary-radial-center` | `radial-gradient(circle at center, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 50%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 91 |
+| `--gradient-secondary-radial-complex` | `radial-gradient(ellipse at 80% 20%, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 40%, var(--brand-c-secondary-dark) 80%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 92 |
+| `--gradient-secondary-rainbow` | `linear-gradient(135deg, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 25%, var(--brand-c-secondary) 50%, var(--brand-c-secondary-dark) 75%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 85 |
+| `--gradient-secondary-wave` | `linear-gradient(90deg, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 20%, var(--brand-c-secondary) 40%, var(--brand-c-secondary-dark) 60%, var(--brand-c-secondary) 80%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 86 |
+| `--gradient-soft-brand` | `linear-gradient(180deg, var(--brand-c-bg) 0%, var(--brand-c-primary-light) 30%, var(--brand-c-secondary) 70%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 148 |
+| `--gradient-subtle` | `linear-gradient(180deg, var(--brand-c-bg-light) 0%, var(--brand-c-bg) 100%)` | `src\styles\tokens\gradients.css` | 168 |
 | `--gradient-success` | `linear-gradient(135deg, var(--color-Success) 0%, color-mix(in oklch, var(--color-Success) 70%, black) 100%)` | `src\styles\tokens\gradients.css` | 233 |
 | `--gradient-vivid-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 451 |
 | `--gradient-vivid-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 761 |
@@ -4330,11 +4330,11 @@ They are candidates for removal (dead code).
 | `--hero-overlay-color` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 143 |
 | `--hero-overlay-color` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 143 |
 | `--hero-overlay-color` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 143 |
-| `--interactive-disabled-bg` | `var(--color-Neutral-100)` | `docs\todo\TODO.md` | 375 |
-| `--interactive-disabled-text` | `var(--color-Text-400)` | `docs\todo\TODO.md` | 376 |
-| `--interactive-primary-active` | `var(--color-Primary-700)` | `docs\todo\TODO.md` | 374 |
-| `--interactive-primary-hover` | `var(--color-Primary-600)` | `docs\todo\TODO.md` | 373 |
-| `--linkHover` | `var(--color-Secondary-400)` | `docs\Markdown Notes\accessibility-color-themes.md` | 31 |
+| `--interactive-disabled-bg` | `var(--brand-c-neutral-light)` | `docs\todo\TODO.md` | 375 |
+| `--interactive-disabled-text` | `var(--brand-c-text-light)` | `docs\todo\TODO.md` | 376 |
+| `--interactive-primary-active` | `var(--brand-c-primary-dark)` | `docs\todo\TODO.md` | 374 |
+| `--interactive-primary-hover` | `var(--brand-c-primary-dark)` | `docs\todo\TODO.md` | 373 |
+| `--linkHover` | `var(--brand-c-secondary)` | `docs\Markdown Notes\accessibility-color-themes.md` | 31 |
 | `--linkHover` | `oklch(0.80 0.10 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 122 |
 | `--linkHover` | `oklch(0.34 0.10 45)` | `docs\Markdown Notes\accessibility-color-themes.md` | 197 |
 | `--linkHover` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 247 |
@@ -4344,7 +4344,7 @@ They are candidates for removal (dead code).
 | `--primary` | `hover {` | `src\components\Presentation\Sections\TitleSection.astro` | 254 |
 | `--primary` | `hover .title-section__btn-icon {` | `src\components\Presentation\Sections\TitleSection.astro` | 276 |
 | `--print-background` | `var(--color-White)`` | `docs\todo\TODO.md` | 488 |
-| `--print-muted` | `var(--color-Neutral-500)`` | `docs\todo\TODO.md` | 489 |
+| `--print-muted` | `var(--brand-c-neutral)`` | `docs\todo\TODO.md` | 489 |
 | `--print-text` | `var(--color-Black)`` | `docs\todo\TODO.md` | 487 |
 | `--rainbow-border-animation` | `glowloop 8s linear infinite` | `src\styles\tokens\gradients.css` | 44 |
 | `--rainbow-border-hover-opacity` | `0.4` | `src\styles\tokens\gradients.css` | 45 |
@@ -4362,34 +4362,34 @@ They are candidates for removal (dead code).
 | `--selectionText` | `var(--text)` | `docs\Markdown Notes\accessibility-color-themes.md` | 45 |
 | `--shadow-base` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 159 |
 | `--shadow-base` | `var(--shadow)` | `src\styles\tokens\shadows.css` | 11 |
-| `--shadow-dropdown` | `4px 4px 6px color-mix(in oklch, var(--color-Background-900) 20%, transparent), 4px 4px 6px color-mix(in oklch, var(--color-Background-50) 70%, transparent), inset 4px 4px 6px color-mix(in oklch, var(--color-Background-900) 40%, transparent), inset 4px 4px 6px color-mix(in oklch, var(--color-Background-50) 20%, transparent)` | `src\styles\tokens\shadows.css` | 58 |
-| `--shadow-dropdown-lg` | `0 8px 16px color-mix(in oklch, var(--color-Background-900) 12%, transparent), 0 4px 8px color-mix(in oklch, var(--color-Background-900) 10%, transparent)` | `src\styles\tokens\shadows.css` | 61 |
-| `--shadow-dropdown-sm` | `0 2px 4px color-mix(in oklch, var(--color-Background-900) 8%, transparent), 0 1px 2px color-mix(in oklch, var(--color-Background-900) 6%, transparent)` | `src\styles\tokens\shadows.css` | 59 |
-| `--shadow-dropdown-soft` | `4px 4px 6px color-mix(in oklch, var(--color-Background-900) 20%, transparent), -4px -4px 6px color-mix(in oklch, var(--color-Background-50) 60%, transparent), inset 2px 2px 4px color-mix(in oklch, var(--color-Background-900) 15%, transparent), inset -2px -2px 4px color-mix(in oklch, var(--color-Background-50) 30%, transparent)` | `src\styles\tokens\shadows.css` | 62 |
+| `--shadow-dropdown` | `4px 4px 6px color-mix(in oklch, var(--brand-c-bg-dark) 20%, transparent), 4px 4px 6px color-mix(in oklch, var(--brand-c-bg) 70%, transparent), inset 4px 4px 6px color-mix(in oklch, var(--brand-c-bg-dark) 40%, transparent), inset 4px 4px 6px color-mix(in oklch, var(--brand-c-bg) 20%, transparent)` | `src\styles\tokens\shadows.css` | 58 |
+| `--shadow-dropdown-lg` | `0 8px 16px color-mix(in oklch, var(--brand-c-bg-dark) 12%, transparent), 0 4px 8px color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent)` | `src\styles\tokens\shadows.css` | 61 |
+| `--shadow-dropdown-sm` | `0 2px 4px color-mix(in oklch, var(--brand-c-bg-dark) 8%, transparent), 0 1px 2px color-mix(in oklch, var(--brand-c-bg-dark) 6%, transparent)` | `src\styles\tokens\shadows.css` | 59 |
+| `--shadow-dropdown-soft` | `4px 4px 6px color-mix(in oklch, var(--brand-c-bg-dark) 20%, transparent), -4px -4px 6px color-mix(in oklch, var(--brand-c-bg) 60%, transparent), inset 2px 2px 4px color-mix(in oklch, var(--brand-c-bg-dark) 15%, transparent), inset -2px -2px 4px color-mix(in oklch, var(--brand-c-bg) 30%, transparent)` | `src\styles\tokens\shadows.css` | 62 |
 | `--shadow-glow-primary` | `0 0 14px color-mix(in oklch, var(--a11y-dark-c-primary) 50%, transparent)` | `src\styles\themes\a11y\a11y-dark.css` | 166 |
-| `--shadow-glow-primary` | `0 0 12px color-mix(in oklch, var(--color-Primary-500) 60%, transparent)` | `src\styles\tokens\shadows.css` | 69 |
+| `--shadow-glow-primary` | `0 0 12px color-mix(in oklch, var(--brand-c-primary) 60%, transparent)` | `src\styles\tokens\shadows.css` | 69 |
 | `--shadow-glow-secondary` | `0 0 14px color-mix(in oklch, var(--a11y-dark-c-accent) 50%, transparent)` | `src\styles\themes\a11y\a11y-dark.css` | 167 |
-| `--shadow-glow-secondary` | `0 0 12px color-mix(in oklch, var(--color-Secondary-500) 60%, transparent)` | `src\styles\tokens\shadows.css` | 70 |
+| `--shadow-glow-secondary` | `0 0 12px color-mix(in oklch, var(--brand-c-secondary) 60%, transparent)` | `src\styles\tokens\shadows.css` | 70 |
 | `--shadow-inner-2xl` | `inset 0 0 40px 16px` | `src\styles\tokens\shadows.css` | 31 |
 | `--shadow-inner-md` | `inset 0 0 10px 4px` | `src\styles\tokens\shadows.css` | 22 |
 | `--shadow-inner-xl` | `inset 0 0 30px 12px` | `src\styles\tokens\shadows.css` | 28 |
 | `--shadow-xs` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 156 |
-| `--shadow-xs` | `0 1px 2px 0 color-mix(in oklch, var(--color-Background-900) 5%, transparent)` | `src\styles\tokens\shadows.css` | 8 |
+| `--shadow-xs` | `0 1px 2px 0 color-mix(in oklch, var(--brand-c-bg-dark) 5%, transparent)` | `src\styles\tokens\shadows.css` | 8 |
 | `--state-disabled-opacity` | `0.5` | `docs\todo\TODO.md` | 402 |
 | `--state-focus-ring` | `var(--color-Info-500)` | `docs\todo\TODO.md` | 400 |
 | `--state-focus-ring-width` | `3px` | `docs\todo\TODO.md` | 401 |
 | `--state-hover-bg` | `color-mix(in oklch, var(--interactive-primary) 5%, transparent)` | `docs\todo\TODO.md` | 399 |
 | `--success` | `var(--color-Success)` | `docs\Markdown Notes\accessibility-color-themes.md` | 38 |
-| `--surface-base` | `var(--color-Background-50)` | `docs\todo\TODO.md` | 352 |
-| `--surface-elevated` | `var(--color-Background-200)` | `docs\todo\TODO.md` | 354 |
-| `--surface-overlay` | `var(--color-Neutral-50)` | `docs\todo\TODO.md` | 355 |
-| `--surface2` | `var(--color-Background-200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 22 |
-| `--surface3` | `var(--color-Background-300)` | `docs\Markdown Notes\accessibility-color-themes.md` | 23 |
-| `--text-disabled` | `var(--color-Text-400)` | `docs\todo\TODO.md` | 361 |
+| `--surface-base` | `var(--brand-c-bg)` | `docs\todo\TODO.md` | 352 |
+| `--surface-elevated` | `var(--brand-c-bg-light)` | `docs\todo\TODO.md` | 354 |
+| `--surface-overlay` | `var(--brand-c-neutral-light)` | `docs\todo\TODO.md` | 355 |
+| `--surface2` | `var(--brand-c-bg-light)` | `docs\Markdown Notes\accessibility-color-themes.md` | 22 |
+| `--surface3` | `var(--brand-c-bg-light)` | `docs\Markdown Notes\accessibility-color-themes.md` | 23 |
+| `--text-disabled` | `var(--brand-c-text-light)` | `docs\todo\TODO.md` | 361 |
 | `--text-inverse` | `var(--color-White)` | `docs\todo\TODO.md` | 362 |
-| `--text-primary` | `var(--color-Text-900)` | `docs\todo\TODO.md` | 358 |
-| `--text-secondary` | `var(--color-Text-700)` | `docs\todo\TODO.md` | 359 |
-| `--text-tertiary` | `var(--color-Text-500)` | `docs\todo\TODO.md` | 360 |
+| `--text-primary` | `var(--brand-c-text-dark)` | `docs\todo\TODO.md` | 358 |
+| `--text-secondary` | `var(--brand-c-text)` | `docs\todo\TODO.md` | 359 |
+| `--text-tertiary` | `var(--brand-c-text-light)` | `docs\todo\TODO.md` | 360 |
 | `--universal-danger` | `#9c5151` | `src\scripts\ThemeTokenGen\brand-template.css` | 89 |
 | `--universal-info` | `#47638f` | `src\scripts\ThemeTokenGen\brand-template.css` | 90 |
 | `--universal-success` | `#80a575` | `src\scripts\ThemeTokenGen\brand-template.css` | 87 |
@@ -4525,7 +4525,7 @@ They may come from a framework, external stylesheet, or be errors.
 | `--z-base` | 2 | src\styles\components\footer-mask.css L23; src\styles\components\footer-mask.css L29 |
 | `--tracking-normal` | 2 | src\styles\components\masonry-card.css L78; src\styles\components\masonry-card.css L179 |
 | `--nav-top-offset` | 2 | src\styles\components\nav\GlassNav-base.css L9; src\styles\components\nav\GlassNav-mobile.css L37 |
-| `--color-Primary-500-rgb` | 2 | src\styles\components\presentation\ReaderNav.css L873; src\styles\components\presentation\ReaderNav.css L874 |
+| `--brand-c-primary-rgb` | 2 | src\styles\components\presentation\ReaderNav.css L873; src\styles\components\presentation\ReaderNav.css L874 |
 | `--btn-gradient-glow` | 2 | src\styles\design\GlowTokens.css L13; src\styles\design\GlowTokens.css L24 |
 | `--brand-neutral-300` | 2 | src\styles\pages\checkout.css L253; src\styles\pages\checkout.css L485 |
 | `--page-margin-compact` | 2 | src\styles\responsive\phone.css L14; src\styles\responsive\xs.css L13 |
@@ -4599,51 +4599,51 @@ How often each colour token is actually used across the project.
 
 | Token | Times Used | Unique Files |
 |-------|-----------|-------------|
-| `--color-Primary-500` | 332 | 75 |
+| `--brand-c-primary` | 332 | 75 |
 | `--text-sm` | 208 | 68 |
 | `--text-xs` | 202 | 56 |
-| `--color-Primary-600` | 171 | 56 |
+| `--brand-c-primary-dark` | 171 | 56 |
 | `--color-White` | 168 | 46 |
-| `--color-Text-700` | 151 | 55 |
-| `--color-Background-50` | 122 | 46 |
+| `--brand-c-text` | 151 | 55 |
+| `--brand-c-bg` | 122 | 46 |
 | `--text-base` | 121 | 53 |
-| `--color-Background-100` | 99 | 51 |
+| `--brand-c-bg` | 99 | 51 |
 | `--text-lg` | 98 | 47 |
-| `--color-Primary-700` | 91 | 35 |
-| `--color-Text-600` | 89 | 45 |
-| `--color-Text-900` | 74 | 36 |
+| `--brand-c-primary-dark` | 91 | 35 |
+| `--brand-c-text` | 89 | 45 |
+| `--brand-c-text-dark` | 74 | 36 |
 | `--text-xl` | 73 | 44 |
-| `--color-Text-500` | 73 | 39 |
-| `--color-Neutral-200` | 55 | 33 |
+| `--brand-c-text-light` | 73 | 39 |
+| `--brand-c-neutral-light` | 55 | 33 |
 | `--text-2xl` | 53 | 34 |
 | `--a11y-cream-c-accent` | 49 | 2 |
 | `--a11y-hc-c-accent` | 48 | 1 |
 | `--a11y-mono-c-accent` | 48 | 1 |
-| `--color-Text-800` | 46 | 23 |
+| `--brand-c-text` | 46 | 23 |
 | `--text-3xl` | 46 | 28 |
-| `--color-Secondary-500` | 44 | 18 |
+| `--brand-c-secondary` | 44 | 18 |
 | `--shadow-md` | 42 | 20 |
 | `--border-radius-md` | 41 | 17 |
-| `--color-Background-300` | 40 | 14 |
+| `--brand-c-bg-light` | 40 | 14 |
 | `--a11y-dark-c-accent` | 40 | 4 |
-| `--color-Background-200` | 39 | 10 |
-| `--color-Primary-300` | 39 | 11 |
-| `--color-Background-900` | 37 | 6 |
+| `--brand-c-bg-light` | 39 | 10 |
+| `--brand-c-primary-light` | 39 | 11 |
+| `--brand-c-bg-dark` | 37 | 6 |
 | `--a11y-deuter-c-primary` | 36 | 1 |
 | `--a11y-proto-c-primary` | 36 | 1 |
 | `--a11y-trit-c-primary` | 36 | 1 |
 | `--a11y-dark-c-primary` | 35 | 2 |
-| `--color-Primary-400` | 34 | 14 |
-| `--color-Secondary-600` | 32 | 12 |
+| `--brand-c-primary` | 34 | 14 |
+| `--brand-c-secondary-dark` | 32 | 12 |
 | `--text-4xl` | 31 | 27 |
-| `--color-Primary-200` | 30 | 16 |
+| `--brand-c-primary-light` | 30 | 16 |
 | `--border-width` | 28 | 13 |
 | `--shadow-xl` | 26 | 13 |
 | `--a11y-hc-accent` | 26 | 6 |
-| `--color-AccentOne-500` | 24 | 12 |
+| `--brand-c-neutral` | 24 | 12 |
 | `--shadow-sm` | 24 | 11 |
-| `--color-Neutral-300` | 24 | 18 |
-| `--color-Primary-100` | 24 | 12 |
+| `--brand-c-neutral` | 24 | 18 |
+| `--brand-c-primary-light` | 24 | 12 |
 | `--a11y-cream-accent` | 24 | 6 |
 | `--a11y-cream-c-text` | 24 | 3 |
 | `--a11y-deuter-c-accent` | 24 | 1 |
@@ -4654,105 +4654,105 @@ How often each colour token is actually used across the project.
 | `--a11y-proto-c-text` | 22 | 1 |
 | `--a11y-trit-c-text` | 22 | 1 |
 | `--shadow-lg` | 21 | 13 |
-| `--color-Primary-800` | 21 | 10 |
-| `--color-Secondary-400` | 20 | 5 |
+| `--brand-c-primary-dark` | 21 | 10 |
+| `--brand-c-secondary` | 20 | 5 |
 | `--border-radius-lg` | 20 | 15 |
 | `--color-Black` | 20 | 5 |
-| `--color-Text-400` | 20 | 13 |
-| `--color-Neutral-100` | 20 | 11 |
+| `--brand-c-text-light` | 20 | 13 |
+| `--brand-c-neutral-light` | 20 | 11 |
 | `--a11y-dark-c-bg` | 20 | 5 |
-| `--color-AccentTwo-500` | 19 | 10 |
-| `--color-AccentTwo-600` | 19 | 10 |
+| `--brand-c-neutral` | 19 | 10 |
+| `--brand-c-neutral-dark` | 19 | 10 |
 | `--a11y-dark-c-text` | 18 | 5 |
 | `--a11y-hc-c-text` | 17 | 1 |
-| `--color-AccentOne-600` | 16 | 8 |
+| `--brand-c-neutral-dark` | 16 | 8 |
 | `--text-5xl` | 16 | 16 |
-| `--color-Secondary-700` | 15 | 6 |
+| `--brand-c-secondary-dark` | 15 | 6 |
 | `--border-radius-xl` | 15 | 10 |
-| `--color-AccentThree-500` | 15 | 7 |
+| `--brand-c-neutral` | 15 | 7 |
 | `--a11y-hc-text` | 15 | 3 |
 | `--a11y-hc-c-bg` | 15 | 1 |
 | `--border-width-2` | 14 | 9 |
-| `--color-Secondary-100` | 14 | 5 |
-| `--color-Secondary-800` | 14 | 2 |
+| `--brand-c-secondary-light` | 14 | 5 |
+| `--brand-c-secondary-dark` | 14 | 2 |
 | `--a11y-cream-c-primary` | 14 | 2 |
 | `--shadow` | 13 | 7 |
-| `--color-Primary-900` | 13 | 9 |
+| `--brand-c-primary-dark` | 13 | 9 |
 | `--a11y-dark-text` | 13 | 3 |
 | `--a11y-dark-accent` | 13 | 5 |
 | `--a11y-hc-c-primary` | 13 | 1 |
 | `--color-Error` | 12 | 3 |
-| `--color-AccentFour-500` | 12 | 5 |
-| `--color-Text-50` | 12 | 7 |
-| `--color-Neutral-50` | 12 | 9 |
-| `--color-AccentThree-600` | 12 | 4 |
+| `--brand-c-neutral` | 12 | 5 |
+| `--brand-c-text-light` | 12 | 7 |
+| `--brand-c-neutral-light` | 12 | 9 |
+| `--brand-c-neutral-dark` | 12 | 4 |
 | `--border-radius-full` | 12 | 9 |
-| `--color-AccentTwo-400` | 12 | 3 |
+| `--brand-c-neutral` | 12 | 3 |
 | `--color-Error-500` | 12 | 2 |
 | `--a11y-cream-text` | 12 | 5 |
 | `--a11y-cream-c-bg` | 12 | 3 |
 | `--a11y-mono-c-primary` | 12 | 1 |
-| `--color-Text-300` | 11 | 8 |
-| `--color-AccentFour-600` | 11 | 3 |
-| `--color-AccentFive-600` | 11 | 3 |
-| `--color-Neutral-400` | 10 | 2 |
-| `--color-AccentOne-200` | 10 | 5 |
-| `--color-AccentTwo-100` | 10 | 4 |
+| `--brand-c-text-light` | 11 | 8 |
+| `--brand-c-neutral-dark` | 11 | 3 |
+| `--brand-c-neutral-dark` | 11 | 3 |
+| `--brand-c-neutral` | 10 | 2 |
+| `--brand-c-neutral-light` | 10 | 5 |
+| `--brand-c-neutral-light` | 10 | 4 |
 | `--border-radius-sm` | 10 | 8 |
-| `--color-AccentFive-500` | 10 | 4 |
-| `--color-AccentFive-400` | 10 | 2 |
+| `--brand-c-neutral` | 10 | 4 |
+| `--brand-c-neutral` | 10 | 2 |
 | `--a11y-deuter-c-bg` | 10 | 1 |
 | `--a11y-mono-c-bg` | 10 | 1 |
 | `--a11y-proto-c-bg` | 10 | 1 |
 | `--a11y-trit-c-bg` | 10 | 1 |
 | `--color-Success` | 9 | 4 |
 | `--badge-color` | 9 | 1 |
-| `--color-Primary-50` | 9 | 7 |
+| `--brand-c-primary-light` | 9 | 7 |
 | `--shadow-2xl` | 9 | 7 |
-| `--color-Neutral-900` | 9 | 4 |
-| `--color-AccentOne-100` | 9 | 3 |
-| `--color-Secondary-200` | 9 | 3 |
-| `--color-AccentOne-400` | 9 | 1 |
-| `--color-AccentOne-300` | 8 | 6 |
-| `--color-Text-200` | 8 | 5 |
+| `--brand-c-neutral-dark` | 9 | 4 |
+| `--brand-c-neutral-light` | 9 | 3 |
+| `--brand-c-secondary-light` | 9 | 3 |
+| `--brand-c-neutral` | 9 | 1 |
+| `--brand-c-neutral-light` | 8 | 6 |
+| `--brand-c-text-light` | 8 | 5 |
 | `--overlay-opacity` | 8 | 2 |
 | `--btn-filled-text` | 8 | 1 |
 | `--a11y-hc-bg` | 8 | 2 |
-| `--color-AccentFour-100` | 8 | 2 |
-| `--color-AccentFive-100` | 8 | 2 |
-| `--color-AccentOne-700` | 8 | 2 |
-| `--color-AccentTwo-700` | 8 | 2 |
+| `--brand-c-neutral-light` | 8 | 2 |
+| `--brand-c-neutral-light` | 8 | 2 |
+| `--brand-c-neutral-dark` | 8 | 2 |
+| `--brand-c-neutral-dark` | 8 | 2 |
 | `--brand-text-muted` | 8 | 1 |
-| `--color-AccentThree-400` | 8 | 1 |
-| `--color-AccentFour-400` | 8 | 1 |
+| `--brand-c-neutral` | 8 | 1 |
+| `--brand-c-neutral` | 8 | 1 |
 | `--color-Success-500` | 7 | 3 |
-| `--color-AccentTwo-200` | 7 | 3 |
-| `--color-AccentThree-200` | 7 | 3 |
+| `--brand-c-neutral-light` | 7 | 3 |
+| `--brand-c-neutral-light` | 7 | 3 |
 | `--text-6xl` | 7 | 7 |
-| `--color-Secondary-300` | 7 | 5 |
+| `--brand-c-secondary-light` | 7 | 5 |
 | `--a11y-cream-bg` | 7 | 3 |
-| `--color-AccentThree-100` | 7 | 2 |
-| `--color-AccentThree-700` | 7 | 2 |
-| `--color-AccentFour-700` | 7 | 1 |
-| `--color-AccentFive-700` | 7 | 1 |
+| `--brand-c-neutral-light` | 7 | 2 |
+| `--brand-c-neutral-dark` | 7 | 2 |
+| `--brand-c-neutral-dark` | 7 | 1 |
+| `--brand-c-neutral-dark` | 7 | 1 |
 | `--color-Info-500` | 6 | 3 |
 | `--brand-c-bg` | 6 | 4 |
 | `--brand-c-primary` | 6 | 3 |
-| `--color-AccentFour-200` | 6 | 2 |
-| `--color-AccentFive-200` | 6 | 2 |
+| `--brand-c-neutral-light` | 6 | 2 |
+| `--brand-c-neutral-light` | 6 | 2 |
 | `--border-radius` | 6 | 5 |
 | `--a11y-cvd-accent` | 6 | 1 |
-| `--color-AccentOne-800` | 6 | 2 |
-| `--color-AccentTwo-800` | 6 | 2 |
-| `--color-AccentThree-800` | 6 | 2 |
-| `--color-AccentFour-800` | 6 | 2 |
-| `--color-AccentFive-800` | 6 | 2 |
-| `--color-Background-400` | 6 | 1 |
+| `--brand-c-neutral-dark` | 6 | 2 |
+| `--brand-c-neutral-dark` | 6 | 2 |
+| `--brand-c-neutral-dark` | 6 | 2 |
+| `--brand-c-neutral-dark` | 6 | 2 |
+| `--brand-c-neutral-dark` | 6 | 2 |
+| `--brand-c-bg-light` | 6 | 1 |
 | `--text` | 5 | 1 |
 | `--color-Warning` | 5 | 4 |
-| `--color-Neutral-800` | 5 | 3 |
+| `--brand-c-neutral-dark` | 5 | 3 |
 | `--text-2xs` | 5 | 1 |
-| `--color-Text-100` | 5 | 3 |
+| `--brand-c-text-light` | 5 | 3 |
 | `--color-Warning-500` | 5 | 2 |
 | `--a11y-dark-c-surface` | 5 | 2 |
 | `--brand-text` | 5 | 1 |
@@ -4767,9 +4767,9 @@ How often each colour token is actually used across the project.
 | `--brand-success-dark` | 4 | 1 |
 | `--shadow-inner-lg` | 3 | 2 |
 | `--text-md` | 3 | 3 |
-| `--color-Text-950` | 3 | 2 |
-| `--color-AccentTwo-300` | 3 | 2 |
-| `--color-AccentThree-300` | 3 | 2 |
+| `--brand-c-text-dark` | 3 | 2 |
+| `--brand-c-neutral-light` | 3 | 2 |
+| `--brand-c-neutral-light` | 3 | 2 |
 | `--img-shadow-lg` | 3 | 2 |
 | `--glass-bg` | 3 | 3 |
 | `--glass-shadow` | 3 | 3 |
@@ -4777,12 +4777,12 @@ How often each colour token is actually used across the project.
 | `--brand-neutral-100` | 3 | 1 |
 | `--focusRing` | 2 | 1 |
 | `--surface` | 2 | 1 |
-| `--color-Neutral-500` | 2 | 2 |
+| `--brand-c-neutral` | 2 | 2 |
 | `--color-Info` | 2 | 1 |
 | `--gradient-primary-soft` | 2 | 2 |
 | `--gradient-primary-light` | 2 | 2 |
 | `--gradient-secondary-soft` | 2 | 2 |
-| `--color-Neutral-700` | 2 | 2 |
+| `--brand-c-neutral-dark` | 2 | 2 |
 | `--color-Black-10` | 2 | 2 |
 | `--color-Black-5` | 2 | 2 |
 | `--color-Secondary-50` | 2 | 2 |
@@ -4808,22 +4808,22 @@ How often each colour token is actually used across the project.
 | `--glass-border` | 2 | 2 |
 | `--color-Error-100` | 2 | 1 |
 | `--color-Success-100` | 2 | 1 |
-| `--color-Primary-500-rgb` | 2 | 1 |
+| `--brand-c-primary-rgb` | 2 | 1 |
 | `--brand-neutral-300` | 2 | 1 |
 | `--a11y-high-contrast-c-primary` | 2 | 1 |
 | `--a11y-protanopia-c-primary` | 2 | 1 |
 | `--a11y-deuteranopia-c-primary` | 2 | 1 |
 | `--a11y-tritanopia-c-primary` | 2 | 1 |
 | `--a11y-monochrome-c-primary` | 2 | 1 |
-| `--color-Background-500` | 2 | 1 |
-| `--color-AccentFour-300` | 2 | 1 |
-| `--color-AccentFive-300` | 2 | 1 |
+| `--brand-c-bg-light` | 2 | 1 |
+| `--brand-c-neutral-light` | 2 | 1 |
+| `--brand-c-neutral-light` | 2 | 1 |
 | `--link` | 1 | 1 |
 | `--textMuted` | 1 | 1 |
 | `--disabledBg` | 1 | 1 |
 | `--disabledText` | 1 | 1 |
 | `--color-surface` | 1 | 1 |
-| `--color-Neutral-600` | 1 | 1 |
+| `--brand-c-neutral-dark` | 1 | 1 |
 | `--feedback-error-bg` | 1 | 1 |
 | `--feedback-success-bg` | 1 | 1 |
 | `--interactive-primary` | 1 | 1 |
@@ -4908,7 +4908,7 @@ How often each colour token is actually used across the project.
 | `--color-Warning-50` | 1 | 1 |
 | `--color-Warning-700` | 1 | 1 |
 | `--a11y-dark-c-surface-raised` | 1 | 1 |
-| `--brand-c-accent` | 1 | 1 |
+| `--brand-c-secondary` | 1 | 1 |
 | `--a11y-high-contrast-c-accent` | 1 | 1 |
 | `--a11y-protanopia-c-accent` | 1 | 1 |
 | `--a11y-deuteranopia-c-accent` | 1 | 1 |
@@ -4989,23 +4989,23 @@ How often each colour token is actually used across the project.
 | `--a11y-tritanopia-c-bg` | `#fdf4ff` | `src\styles\themes\Preview\coretokens.css` | 49 |
 | `--a11y-tritanopia-c-primary` | `#cc3399` | `src\styles\themes\Preview\coretokens.css` | 51 |
 | `--a11y-tritanopia-c-text` | `#1e293b` | `src\styles\themes\Preview\coretokens.css` | 50 |
-| `--badge-color` | `var(--color-Primary-500)` | `src\components\Badge\Badge.astro` | 271 |
-| `--badge-color` | `var(--color-Primary-600)` | `src\components\Badge\Badge.astro` | 276 |
-| `--badge-color` | `var(--color-Secondary-600)` | `src\components\Badge\Badge.astro` | 281 |
-| `--badge-color` | `var(--color-AccentOne-600)` | `src\components\Badge\Badge.astro` | 286 |
-| `--badge-color` | `var(--color-AccentTwo-600)` | `src\components\Badge\Badge.astro` | 291 |
-| `--badge-color` | `var(--color-AccentThree-600)` | `src\components\Badge\Badge.astro` | 296 |
-| `--badge-color` | `var(--color-AccentFour-600)` | `src\components\Badge\Badge.astro` | 301 |
-| `--badge-color` | `var(--color-AccentFive-600)` | `src\components\Badge\Badge.astro` | 306 |
+| `--badge-color` | `var(--brand-c-primary)` | `src\components\Badge\Badge.astro` | 271 |
+| `--badge-color` | `var(--brand-c-primary-dark)` | `src\components\Badge\Badge.astro` | 276 |
+| `--badge-color` | `var(--brand-c-secondary-dark)` | `src\components\Badge\Badge.astro` | 281 |
+| `--badge-color` | `var(--brand-c-neutral-dark)` | `src\components\Badge\Badge.astro` | 286 |
+| `--badge-color` | `var(--brand-c-neutral-dark)` | `src\components\Badge\Badge.astro` | 291 |
+| `--badge-color` | `var(--brand-c-neutral-dark)` | `src\components\Badge\Badge.astro` | 296 |
+| `--badge-color` | `var(--brand-c-neutral-dark)` | `src\components\Badge\Badge.astro` | 301 |
+| `--badge-color` | `var(--brand-c-neutral-dark)` | `src\components\Badge\Badge.astro` | 306 |
 | `--badge-color` | `var(--color-Error)` | `src\components\Badge\Badge.astro` | 311 |
 | `--badge-color` | `var(--color-Success)` | `src\components\Badge\Badge.astro` | 316 |
 | `--badge-color` | `var(--color-Success)` | `src\components\Badge\Badge.astro` | 321 |
-| `--badge-color` | `var(--color-Info, var(--color-Primary-500))` | `src\components\Badge\Badge.astro` | 326 |
-| `--bg` | `var(--color-Background-50)` | `docs\Markdown Notes\accessibility-color-themes.md` | 20 |
+| `--badge-color` | `var(--color-Info, var(--brand-c-primary))` | `src\components\Badge\Badge.astro` | 326 |
+| `--bg` | `var(--brand-c-bg)` | `docs\Markdown Notes\accessibility-color-themes.md` | 20 |
 | `--bg` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 242 |
 | `--border-focus` | `var(--color-Info-500)` | `docs\todo\TODO.md` | 369 |
-| `--border-interactive` | `var(--color-Primary-500)` | `docs\todo\TODO.md` | 368 |
-| `--border-medium` | `var(--color-Neutral-400)` | `docs\todo\TODO.md` | 366 |
+| `--border-interactive` | `var(--brand-c-primary)` | `docs\todo\TODO.md` | 368 |
+| `--border-medium` | `var(--brand-c-neutral)` | `docs\todo\TODO.md` | 366 |
 | `--border-radius` | `8px !important` | `src\styles\components\a11y-panel.css` | 83 |
 | `--border-radius` | `0.5rem` | `src\styles\tokens\spacing.css` | 51 |
 | `--border-radius-full` | `9999px` | `src\styles\tokens\spacing.css` | 55 |
@@ -5017,8 +5017,8 @@ How often each colour token is actually used across the project.
 | `--border-radius-sm` | `0.25rem` | `src\styles\tokens\spacing.css` | 50 |
 | `--border-radius-xl` | `24px !important` | `src\styles\components\a11y-panel.css` | 86 |
 | `--border-radius-xl` | `1.5rem` | `src\styles\tokens\spacing.css` | 54 |
-| `--border-strong` | `var(--color-Neutral-600)` | `docs\todo\TODO.md` | 367 |
-| `--border-subtle` | `var(--color-Neutral-200)` | `docs\todo\TODO.md` | 365 |
+| `--border-strong` | `var(--brand-c-neutral-dark)` | `docs\todo\TODO.md` | 367 |
+| `--border-subtle` | `var(--brand-c-neutral-light)` | `docs\todo\TODO.md` | 365 |
 | `--border-width` | `1px` | `src\styles\tokens\spacing.css` | 46 |
 | `--border-width-2` | `2px` | `src\styles\tokens\spacing.css` | 47 |
 | `--border-width-4` | `4px` | `src\styles\tokens\spacing.css` | 48 |
@@ -5051,9 +5051,9 @@ How often each colour token is actually used across the project.
 | `--brand-background-dark` | `#2a3328` | `src\scripts\ThemeTokenGen\color-input.css` | 50 |
 | `--brand-background-dark` | `#0e3f2e` | `src\scripts\ThemeTokenGen\color-input.css` | 83 |
 | `--brand-background-dark` | `auto` | `src\scripts\ThemeTokenGen\color-theory-explorer.css` | 50 |
-| `--brand-c-accent` | `#c4907c` | `docs\Markdown Notes\Theme-Preview-System.md` | 29 |
-| `--brand-c-accent` | `#c4907c` | `src\styles\themes\brand\BrandDefault.css` | 8 |
-| `--brand-c-accent` | `#c4907c` | `src\styles\themes\Preview\coretokens.css` | 58 |
+| `--brand-c-secondary` | `#c4907c` | `docs\Markdown Notes\Theme-Preview-System.md` | 29 |
+| `--brand-c-secondary` | `#c4907c` | `src\styles\themes\brand\BrandDefault.css` | 8 |
+| `--brand-c-secondary` | `#c4907c` | `src\styles\themes\Preview\coretokens.css` | 58 |
 | `--brand-c-bg` | `#f9f8f6` | `docs\Markdown Notes\Theme-Preview-System.md` | 26 |
 | `--brand-c-bg` | `#ddd9d3` | `files\example-a11y-cream-NEW.css` | 5 |
 | `--brand-c-bg` | `#faf8f7` | `files\example-BrandDefault-NEW.css` | 5 |
@@ -5143,481 +5143,481 @@ How often each colour token is actually used across the project.
 | `--btn-text-color` | `${textColor` | `src\components\Button\Button.astro` | 79 |
 | `--btn-text-hover` | `${textHoverColor` | `src\components\Button\Button.astro` | 80 |
 | `--card-hover-border` | `${hoverBorder` | `src\components\Masonry\MasonryCards\MasonryCard.astro` | 100 |
-| `--color-AccentFive-100` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 130 |
-| `--color-AccentFive-100` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 132 |
-| `--color-AccentFive-100` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 130 |
-| `--color-AccentFive-100` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 130 |
-| `--color-AccentFive-100` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 130 |
-| `--color-AccentFive-100` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 130 |
-| `--color-AccentFive-100` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 130 |
-| `--color-AccentFive-100` | `#fdf5ff` | `src\styles\themes\brand\BrandDefault.css` | 108 |
-| `--color-AccentFive-200` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 131 |
-| `--color-AccentFive-200` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 133 |
-| `--color-AccentFive-200` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 131 |
-| `--color-AccentFive-200` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 131 |
-| `--color-AccentFive-200` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 131 |
-| `--color-AccentFive-200` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 131 |
-| `--color-AccentFive-200` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 131 |
-| `--color-AccentFive-200` | `#fcefff` | `src\styles\themes\brand\BrandDefault.css` | 109 |
-| `--color-AccentFive-300` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 132 |
-| `--color-AccentFive-300` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 134 |
-| `--color-AccentFive-300` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 132 |
-| `--color-AccentFive-300` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 132 |
-| `--color-AccentFive-300` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 132 |
-| `--color-AccentFive-300` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 132 |
-| `--color-AccentFive-300` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 132 |
-| `--color-AccentFive-300` | `#e2c8ee` | `src\styles\themes\brand\BrandDefault.css` | 110 |
-| `--color-AccentFive-400` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 133 |
-| `--color-AccentFive-400` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 135 |
-| `--color-AccentFive-400` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 133 |
-| `--color-AccentFive-400` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 133 |
-| `--color-AccentFive-400` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 133 |
-| `--color-AccentFive-400` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 133 |
-| `--color-AccentFive-400` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 133 |
-| `--color-AccentFive-400` | `#c1a9cd` | `src\styles\themes\brand\BrandDefault.css` | 111 |
-| `--color-AccentFive-500` | `oklch(0.70 0.14 30)` | `docs\Markdown Notes\accessibility-color-themes.md` | 110 |
-| `--color-AccentFive-500` | `oklch(0.62 0.10 350)` | `docs\Markdown Notes\accessibility-color-themes.md` | 186 |
-| `--color-AccentFive-500` | `#ff00ff` | `docs\Markdown Notes\accessibility-color-themes.md` | 233 |
-| `--color-AccentFive-500` | `oklch(0.62 0.10 300)` | `docs\Markdown Notes\accessibility-color-themes.md` | 267 |
-| `--color-AccentFive-500` | `oklch(0.62 0.10 25)` | `docs\Markdown Notes\accessibility-color-themes.md` | 289 |
-| `--color-AccentFive-500` | `oklch(0.62 0.10 280)` | `docs\Markdown Notes\accessibility-color-themes.md` | 311 |
-| `--color-AccentFive-500` | `oklch(0.55 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 333 |
-| `--color-AccentFive-500` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 134 |
-| `--color-AccentFive-500` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 136 |
-| `--color-AccentFive-500` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 134 |
-| `--color-AccentFive-500` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 134 |
-| `--color-AccentFive-500` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 134 |
-| `--color-AccentFive-500` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 134 |
-| `--color-AccentFive-500` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 134 |
-| `--color-AccentFive-500` | `#a28aad` | `src\styles\themes\brand\BrandDefault.css` | 112 |
-| `--color-AccentFive-600` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 135 |
-| `--color-AccentFive-600` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 137 |
-| `--color-AccentFive-600` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 135 |
-| `--color-AccentFive-600` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 135 |
-| `--color-AccentFive-600` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 135 |
-| `--color-AccentFive-600` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 135 |
-| `--color-AccentFive-600` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 135 |
-| `--color-AccentFive-600` | `#846c8e` | `src\styles\themes\brand\BrandDefault.css` | 113 |
-| `--color-AccentFive-700` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 136 |
-| `--color-AccentFive-700` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 138 |
-| `--color-AccentFive-700` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 136 |
-| `--color-AccentFive-700` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 136 |
-| `--color-AccentFive-700` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 136 |
-| `--color-AccentFive-700` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 136 |
-| `--color-AccentFive-700` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 136 |
-| `--color-AccentFive-700` | `#665070` | `src\styles\themes\brand\BrandDefault.css` | 114 |
-| `--color-AccentFive-800` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 137 |
-| `--color-AccentFive-800` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 139 |
-| `--color-AccentFive-800` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 137 |
-| `--color-AccentFive-800` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 137 |
-| `--color-AccentFive-800` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 137 |
-| `--color-AccentFive-800` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 137 |
-| `--color-AccentFive-800` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 137 |
-| `--color-AccentFive-800` | `#533d5c` | `src\styles\themes\brand\BrandDefault.css` | 115 |
-| `--color-AccentFour-100` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 121 |
-| `--color-AccentFour-100` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 123 |
-| `--color-AccentFour-100` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 121 |
-| `--color-AccentFour-100` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 121 |
-| `--color-AccentFour-100` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 121 |
-| `--color-AccentFour-100` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 121 |
-| `--color-AccentFour-100` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 121 |
-| `--color-AccentFour-100` | `#b5b9bf` | `src\styles\themes\brand\BrandDefault.css` | 98 |
-| `--color-AccentFour-200` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 122 |
-| `--color-AccentFour-200` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 124 |
-| `--color-AccentFour-200` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 122 |
-| `--color-AccentFour-200` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 122 |
-| `--color-AccentFour-200` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 122 |
-| `--color-AccentFour-200` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 122 |
-| `--color-AccentFour-200` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 122 |
-| `--color-AccentFour-200` | `#9aa1aa` | `src\styles\themes\brand\BrandDefault.css` | 99 |
-| `--color-AccentFour-300` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 123 |
-| `--color-AccentFour-300` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 125 |
-| `--color-AccentFour-300` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 123 |
-| `--color-AccentFour-300` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 123 |
-| `--color-AccentFour-300` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 123 |
-| `--color-AccentFour-300` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 123 |
-| `--color-AccentFour-300` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 123 |
-| `--color-AccentFour-300` | `#768395` | `src\styles\themes\brand\BrandDefault.css` | 100 |
-| `--color-AccentFour-400` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 124 |
-| `--color-AccentFour-400` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 126 |
-| `--color-AccentFour-400` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 124 |
-| `--color-AccentFour-400` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 124 |
-| `--color-AccentFour-400` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 124 |
-| `--color-AccentFour-400` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 124 |
-| `--color-AccentFour-400` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 124 |
-| `--color-AccentFour-400` | `#596677` | `src\styles\themes\brand\BrandDefault.css` | 101 |
-| `--color-AccentFour-500` | `oklch(0.74 0.12 85)` | `docs\Markdown Notes\accessibility-color-themes.md` | 109 |
-| `--color-AccentFour-500` | `oklch(0.60 0.10 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 185 |
-| `--color-AccentFour-500` | `#ff6600` | `docs\Markdown Notes\accessibility-color-themes.md` | 232 |
-| `--color-AccentFour-500` | `oklch(0.75 0.12 90)` | `docs\Markdown Notes\accessibility-color-themes.md` | 266 |
-| `--color-AccentFour-500` | `oklch(0.78 0.12 90)` | `docs\Markdown Notes\accessibility-color-themes.md` | 288 |
-| `--color-AccentFour-500` | `oklch(0.60 0.18 25)` | `docs\Markdown Notes\accessibility-color-themes.md` | 310 |
-| `--color-AccentFour-500` | `oklch(0.65 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 332 |
-| `--color-AccentFour-500` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 125 |
-| `--color-AccentFour-500` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 127 |
-| `--color-AccentFour-500` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 125 |
-| `--color-AccentFour-500` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 125 |
-| `--color-AccentFour-500` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 125 |
-| `--color-AccentFour-500` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 125 |
-| `--color-AccentFour-500` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 125 |
-| `--color-AccentFour-500` | `#3e4a5a` | `src\styles\themes\brand\BrandDefault.css` | 102 |
-| `--color-AccentFour-600` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 126 |
-| `--color-AccentFour-600` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 128 |
-| `--color-AccentFour-600` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 126 |
-| `--color-AccentFour-600` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 126 |
-| `--color-AccentFour-600` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 126 |
-| `--color-AccentFour-600` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 126 |
-| `--color-AccentFour-600` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 126 |
-| `--color-AccentFour-600` | `#25303f` | `src\styles\themes\brand\BrandDefault.css` | 103 |
-| `--color-AccentFour-700` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 127 |
-| `--color-AccentFour-700` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 129 |
-| `--color-AccentFour-700` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 127 |
-| `--color-AccentFour-700` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 127 |
-| `--color-AccentFour-700` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 127 |
-| `--color-AccentFour-700` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 127 |
-| `--color-AccentFour-700` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 127 |
-| `--color-AccentFour-700` | `#0d1825` | `src\styles\themes\brand\BrandDefault.css` | 104 |
-| `--color-AccentFour-800` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 128 |
-| `--color-AccentFour-800` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 130 |
-| `--color-AccentFour-800` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 128 |
-| `--color-AccentFour-800` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 128 |
-| `--color-AccentFour-800` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 128 |
-| `--color-AccentFour-800` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 128 |
-| `--color-AccentFour-800` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 128 |
-| `--color-AccentFour-800` | `#020815` | `src\styles\themes\brand\BrandDefault.css` | 105 |
-| `--color-AccentOne-100` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 94 |
-| `--color-AccentOne-100` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 96 |
-| `--color-AccentOne-100` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 94 |
-| `--color-AccentOne-100` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 94 |
-| `--color-AccentOne-100` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 94 |
-| `--color-AccentOne-100` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 94 |
-| `--color-AccentOne-100` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 94 |
-| `--color-AccentOne-100` | `#fef7f3` | `src\styles\themes\brand\BrandDefault.css` | 68 |
-| `--color-AccentOne-200` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 95 |
-| `--color-AccentOne-200` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 97 |
-| `--color-AccentOne-200` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 95 |
-| `--color-AccentOne-200` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 95 |
-| `--color-AccentOne-200` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 95 |
-| `--color-AccentOne-200` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 95 |
-| `--color-AccentOne-200` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 95 |
-| `--color-AccentOne-200` | `#f3e6e0` | `src\styles\themes\brand\BrandDefault.css` | 69 |
-| `--color-AccentOne-300` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 96 |
-| `--color-AccentOne-300` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 98 |
-| `--color-AccentOne-300` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 96 |
-| `--color-AccentOne-300` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 96 |
-| `--color-AccentOne-300` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 96 |
-| `--color-AccentOne-300` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 96 |
-| `--color-AccentOne-300` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 96 |
-| `--color-AccentOne-300` | `#dcc3b6` | `src\styles\themes\brand\BrandDefault.css` | 70 |
-| `--color-AccentOne-400` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 97 |
-| `--color-AccentOne-400` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 99 |
-| `--color-AccentOne-400` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 97 |
-| `--color-AccentOne-400` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 97 |
-| `--color-AccentOne-400` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 97 |
-| `--color-AccentOne-400` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 97 |
-| `--color-AccentOne-400` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 97 |
-| `--color-AccentOne-400` | `#bba397` | `src\styles\themes\brand\BrandDefault.css` | 71 |
-| `--color-AccentOne-500` | `oklch(0.70 0.12 145)` | `docs\Markdown Notes\accessibility-color-themes.md` | 106 |
-| `--color-AccentOne-500` | `oklch(0.62 0.10 145)` | `docs\Markdown Notes\accessibility-color-themes.md` | 182 |
-| `--color-AccentOne-500` | `#00ffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 229 |
-| `--color-AccentOne-500` | `oklch(0.70 0.12 195)` | `docs\Markdown Notes\accessibility-color-themes.md` | 263 |
-| `--color-AccentOne-500` | `oklch(0.62 0.14 255)` | `docs\Markdown Notes\accessibility-color-themes.md` | 285 |
-| `--color-AccentOne-500` | `oklch(0.66 0.14 145)` | `docs\Markdown Notes\accessibility-color-themes.md` | 307 |
-| `--color-AccentOne-500` | `oklch(0.70 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 329 |
-| `--color-AccentOne-500` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 98 |
-| `--color-AccentOne-500` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 100 |
-| `--color-AccentOne-500` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 98 |
-| `--color-AccentOne-500` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 98 |
-| `--color-AccentOne-500` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 98 |
-| `--color-AccentOne-500` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 98 |
-| `--color-AccentOne-500` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 98 |
-| `--color-AccentOne-500` | `#9c8579` | `src\styles\themes\brand\BrandDefault.css` | 72 |
-| `--color-AccentOne-600` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 99 |
-| `--color-AccentOne-600` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 101 |
-| `--color-AccentOne-600` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 99 |
-| `--color-AccentOne-600` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 99 |
-| `--color-AccentOne-600` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 99 |
-| `--color-AccentOne-600` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 99 |
-| `--color-AccentOne-600` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 99 |
-| `--color-AccentOne-600` | `#7e685c` | `src\styles\themes\brand\BrandDefault.css` | 73 |
-| `--color-AccentOne-700` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 100 |
-| `--color-AccentOne-700` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 102 |
-| `--color-AccentOne-700` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 100 |
-| `--color-AccentOne-700` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 100 |
-| `--color-AccentOne-700` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 100 |
-| `--color-AccentOne-700` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 100 |
-| `--color-AccentOne-700` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 100 |
-| `--color-AccentOne-700` | `#614c41` | `src\styles\themes\brand\BrandDefault.css` | 74 |
-| `--color-AccentOne-800` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 101 |
-| `--color-AccentOne-800` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 103 |
-| `--color-AccentOne-800` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 101 |
-| `--color-AccentOne-800` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 101 |
-| `--color-AccentOne-800` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 101 |
-| `--color-AccentOne-800` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 101 |
-| `--color-AccentOne-800` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 101 |
-| `--color-AccentOne-800` | `#4d392f` | `src\styles\themes\brand\BrandDefault.css` | 75 |
-| `--color-AccentThree-100` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 112 |
-| `--color-AccentThree-100` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 114 |
-| `--color-AccentThree-100` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 112 |
-| `--color-AccentThree-100` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 112 |
-| `--color-AccentThree-100` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 112 |
-| `--color-AccentThree-100` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 112 |
-| `--color-AccentThree-100` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 112 |
-| `--color-AccentThree-100` | `#fcf6fa` | `src\styles\themes\brand\BrandDefault.css` | 88 |
-| `--color-AccentThree-200` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 113 |
-| `--color-AccentThree-200` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 115 |
-| `--color-AccentThree-200` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 113 |
-| `--color-AccentThree-200` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 113 |
-| `--color-AccentThree-200` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 113 |
-| `--color-AccentThree-200` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 113 |
-| `--color-AccentThree-200` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 113 |
-| `--color-AccentThree-200` | `#f1e8ee` | `src\styles\themes\brand\BrandDefault.css` | 89 |
-| `--color-AccentThree-300` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 114 |
-| `--color-AccentThree-300` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 116 |
-| `--color-AccentThree-300` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 114 |
-| `--color-AccentThree-300` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 114 |
-| `--color-AccentThree-300` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 114 |
-| `--color-AccentThree-300` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 114 |
-| `--color-AccentThree-300` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 114 |
-| `--color-AccentThree-300` | `#d6c4d1` | `src\styles\themes\brand\BrandDefault.css` | 90 |
-| `--color-AccentThree-400` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 115 |
-| `--color-AccentThree-400` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 117 |
-| `--color-AccentThree-400` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 115 |
-| `--color-AccentThree-400` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 115 |
-| `--color-AccentThree-400` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 115 |
-| `--color-AccentThree-400` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 115 |
-| `--color-AccentThree-400` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 115 |
-| `--color-AccentThree-400` | `#b6a4b1` | `src\styles\themes\brand\BrandDefault.css` | 91 |
-| `--color-AccentThree-500` | `oklch(0.66 0.10 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 108 |
-| `--color-AccentThree-500` | `oklch(0.55 0.08 280)` | `docs\Markdown Notes\accessibility-color-themes.md` | 184 |
-| `--color-AccentThree-500` | `#00ff00` | `docs\Markdown Notes\accessibility-color-themes.md` | 231 |
-| `--color-AccentThree-500` | `oklch(0.60 0.14 250)` | `docs\Markdown Notes\accessibility-color-themes.md` | 265 |
-| `--color-AccentThree-500` | `oklch(0.60 0.14 300)` | `docs\Markdown Notes\accessibility-color-themes.md` | 287 |
-| `--color-AccentThree-500` | `oklch(0.62 0.16 350)` | `docs\Markdown Notes\accessibility-color-themes.md` | 309 |
-| `--color-AccentThree-500` | `oklch(0.50 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 331 |
-| `--color-AccentThree-500` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 116 |
-| `--color-AccentThree-500` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 118 |
-| `--color-AccentThree-500` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 116 |
-| `--color-AccentThree-500` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 116 |
-| `--color-AccentThree-500` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 116 |
-| `--color-AccentThree-500` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 116 |
-| `--color-AccentThree-500` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 116 |
-| `--color-AccentThree-500` | `#978692` | `src\styles\themes\brand\BrandDefault.css` | 92 |
-| `--color-AccentThree-600` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 117 |
-| `--color-AccentThree-600` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 119 |
-| `--color-AccentThree-600` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 117 |
-| `--color-AccentThree-600` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 117 |
-| `--color-AccentThree-600` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 117 |
-| `--color-AccentThree-600` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 117 |
-| `--color-AccentThree-600` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 117 |
-| `--color-AccentThree-600` | `#796974` | `src\styles\themes\brand\BrandDefault.css` | 93 |
-| `--color-AccentThree-700` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 118 |
-| `--color-AccentThree-700` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 120 |
-| `--color-AccentThree-700` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 118 |
-| `--color-AccentThree-700` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 118 |
-| `--color-AccentThree-700` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 118 |
-| `--color-AccentThree-700` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 118 |
-| `--color-AccentThree-700` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 118 |
-| `--color-AccentThree-700` | `#5c4d58` | `src\styles\themes\brand\BrandDefault.css` | 94 |
-| `--color-AccentThree-800` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 119 |
-| `--color-AccentThree-800` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 121 |
-| `--color-AccentThree-800` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 119 |
-| `--color-AccentThree-800` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 119 |
-| `--color-AccentThree-800` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 119 |
-| `--color-AccentThree-800` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 119 |
-| `--color-AccentThree-800` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 119 |
-| `--color-AccentThree-800` | `#493a45` | `src\styles\themes\brand\BrandDefault.css` | 95 |
-| `--color-AccentTwo-100` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 103 |
-| `--color-AccentTwo-100` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 105 |
-| `--color-AccentTwo-100` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 103 |
-| `--color-AccentTwo-100` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 103 |
-| `--color-AccentTwo-100` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 103 |
-| `--color-AccentTwo-100` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 103 |
-| `--color-AccentTwo-100` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 103 |
-| `--color-AccentTwo-100` | `#f4f8ff` | `src\styles\themes\brand\BrandDefault.css` | 78 |
-| `--color-AccentTwo-200` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 104 |
-| `--color-AccentTwo-200` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 106 |
-| `--color-AccentTwo-200` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 104 |
-| `--color-AccentTwo-200` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 104 |
-| `--color-AccentTwo-200` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 104 |
-| `--color-AccentTwo-200` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 104 |
-| `--color-AccentTwo-200` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 104 |
-| `--color-AccentTwo-200` | `#e9f0ff` | `src\styles\themes\brand\BrandDefault.css` | 79 |
-| `--color-AccentTwo-300` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 105 |
-| `--color-AccentTwo-300` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 107 |
-| `--color-AccentTwo-300` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 105 |
-| `--color-AccentTwo-300` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 105 |
-| `--color-AccentTwo-300` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 105 |
-| `--color-AccentTwo-300` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 105 |
-| `--color-AccentTwo-300` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 105 |
-| `--color-AccentTwo-300` | `#c1cff6` | `src\styles\themes\brand\BrandDefault.css` | 80 |
-| `--color-AccentTwo-400` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 106 |
-| `--color-AccentTwo-400` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 108 |
-| `--color-AccentTwo-400` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 106 |
-| `--color-AccentTwo-400` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 106 |
-| `--color-AccentTwo-400` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 106 |
-| `--color-AccentTwo-400` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 106 |
-| `--color-AccentTwo-400` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 106 |
-| `--color-AccentTwo-400` | `#a1afd5` | `src\styles\themes\brand\BrandDefault.css` | 81 |
-| `--color-AccentTwo-500` | `oklch(0.68 0.13 350)` | `docs\Markdown Notes\accessibility-color-themes.md` | 107 |
-| `--color-AccentTwo-500` | `oklch(0.60 0.10 25)` | `docs\Markdown Notes\accessibility-color-themes.md` | 183 |
-| `--color-AccentTwo-500` | `#ffff00` | `docs\Markdown Notes\accessibility-color-themes.md` | 230 |
-| `--color-AccentTwo-500` | `oklch(0.75 0.14 70)` | `docs\Markdown Notes\accessibility-color-themes.md` | 264 |
-| `--color-AccentTwo-500` | `oklch(0.72 0.16 55)` | `docs\Markdown Notes\accessibility-color-themes.md` | 286 |
-| `--color-AccentTwo-500` | `oklch(0.74 0.14 80)` | `docs\Markdown Notes\accessibility-color-themes.md` | 308 |
-| `--color-AccentTwo-500` | `oklch(0.60 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 330 |
-| `--color-AccentTwo-500` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 107 |
-| `--color-AccentTwo-500` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 109 |
-| `--color-AccentTwo-500` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 107 |
-| `--color-AccentTwo-500` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 107 |
-| `--color-AccentTwo-500` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 107 |
-| `--color-AccentTwo-500` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 107 |
-| `--color-AccentTwo-500` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 107 |
-| `--color-AccentTwo-500` | `#8390b5` | `src\styles\themes\brand\BrandDefault.css` | 82 |
-| `--color-AccentTwo-600` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 108 |
-| `--color-AccentTwo-600` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 110 |
-| `--color-AccentTwo-600` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 108 |
-| `--color-AccentTwo-600` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 108 |
-| `--color-AccentTwo-600` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 108 |
-| `--color-AccentTwo-600` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 108 |
-| `--color-AccentTwo-600` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 108 |
-| `--color-AccentTwo-600` | `#667296` | `src\styles\themes\brand\BrandDefault.css` | 83 |
-| `--color-AccentTwo-700` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 109 |
-| `--color-AccentTwo-700` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 111 |
-| `--color-AccentTwo-700` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 109 |
-| `--color-AccentTwo-700` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 109 |
-| `--color-AccentTwo-700` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 109 |
-| `--color-AccentTwo-700` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 109 |
-| `--color-AccentTwo-700` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 109 |
-| `--color-AccentTwo-700` | `#4a5677` | `src\styles\themes\brand\BrandDefault.css` | 84 |
-| `--color-AccentTwo-800` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 110 |
-| `--color-AccentTwo-800` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 112 |
-| `--color-AccentTwo-800` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 110 |
-| `--color-AccentTwo-800` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 110 |
-| `--color-AccentTwo-800` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 110 |
-| `--color-AccentTwo-800` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 110 |
-| `--color-AccentTwo-800` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 110 |
-| `--color-AccentTwo-800` | `#384263` | `src\styles\themes\brand\BrandDefault.css` | 85 |
-| `--color-Background-100` | `oklch(0.17 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 61 |
-| `--color-Background-100` | `oklch(0.965 0.020 88)` | `docs\Markdown Notes\accessibility-color-themes.md` | 137 |
-| `--color-Background-100` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 211 |
-| `--color-Background-100` | `oklch(0.948 0.011 95.09)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 13 |
-| `--color-Background-100` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 49 |
-| `--color-Background-100` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 52 |
-| `--color-Background-100` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 49 |
-| `--color-Background-100` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 49 |
-| `--color-Background-100` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 49 |
-| `--color-Background-100` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 49 |
-| `--color-Background-100` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 49 |
-| `--color-Background-100` | `#faf8f7` | `src\styles\themes\brand\BrandDefault.css` | 36 |
-| `--color-Background-200` | `oklch(0.20 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 62 |
-| `--color-Background-200` | `oklch(0.950 0.022 85)` | `docs\Markdown Notes\accessibility-color-themes.md` | 138 |
-| `--color-Background-200` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 212 |
-| `--color-Background-200` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 50 |
-| `--color-Background-200` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 53 |
-| `--color-Background-200` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 50 |
-| `--color-Background-200` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 50 |
-| `--color-Background-200` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 50 |
-| `--color-Background-200` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 50 |
-| `--color-Background-200` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 50 |
-| `--color-Background-200` | `#d2d1cc` | `src\styles\themes\brand\BrandDefault.css` | 37 |
-| `--color-Background-300` | `oklch(0.23 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 63 |
-| `--color-Background-300` | `oklch(0.935 0.025 82)` | `docs\Markdown Notes\accessibility-color-themes.md` | 139 |
-| `--color-Background-300` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 213 |
-| `--color-Background-300` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 51 |
-| `--color-Background-300` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 54 |
-| `--color-Background-300` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 51 |
-| `--color-Background-300` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 51 |
-| `--color-Background-300` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 51 |
-| `--color-Background-300` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 51 |
-| `--color-Background-300` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 51 |
-| `--color-Background-300` | `#b4b1a8` | `src\styles\themes\brand\BrandDefault.css` | 38 |
-| `--color-Background-400` | `oklch(0.26 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 64 |
-| `--color-Background-400` | `oklch(0.920 0.028 78)` | `docs\Markdown Notes\accessibility-color-themes.md` | 140 |
-| `--color-Background-400` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 214 |
-| `--color-Background-400` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 52 |
-| `--color-Background-400` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 55 |
-| `--color-Background-400` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 52 |
-| `--color-Background-400` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 52 |
-| `--color-Background-400` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 52 |
-| `--color-Background-400` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 52 |
-| `--color-Background-400` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 52 |
-| `--color-Background-400` | `#95928a` | `src\styles\themes\brand\BrandDefault.css` | 39 |
-| `--color-Background-50` | `oklch(0.14 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 60 |
-| `--color-Background-50` | `oklch(0.98 0.015 90)` | `docs\Markdown Notes\accessibility-color-themes.md` | 136 |
-| `--color-Background-50` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 210 |
-| `--color-Background-50` | `oklch(97.948% 0.01376 88.669)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 12 |
-| `--color-Background-50` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 48 |
-| `--color-Background-50` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 51 |
-| `--color-Background-50` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 48 |
-| `--color-Background-50` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 48 |
-| `--color-Background-50` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 48 |
-| `--color-Background-50` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 48 |
-| `--color-Background-50` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 48 |
-| `--color-Background-50` | `#faf8f7` | `src\styles\themes\brand\BrandDefault.css` | 35 |
-| `--color-Background-500` | `oklch(0.30 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 65 |
-| `--color-Background-500` | `oklch(0.905 0.030 75)` | `docs\Markdown Notes\accessibility-color-themes.md` | 141 |
-| `--color-Background-500` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 215 |
-| `--color-Background-500` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 53 |
-| `--color-Background-500` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 56 |
-| `--color-Background-500` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 53 |
-| `--color-Background-500` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 53 |
-| `--color-Background-500` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 53 |
-| `--color-Background-500` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 53 |
-| `--color-Background-500` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 53 |
-| `--color-Background-500` | `#77746c` | `src\styles\themes\brand\BrandDefault.css` | 40 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 130 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 132 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 130 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 130 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 130 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 130 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 130 |
+| `--brand-c-neutral-light` | `#fdf5ff` | `src\styles\themes\brand\BrandDefault.css` | 108 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 131 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 133 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 131 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 131 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 131 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 131 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 131 |
+| `--brand-c-neutral-light` | `#fcefff` | `src\styles\themes\brand\BrandDefault.css` | 109 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 132 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 134 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 132 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 132 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 132 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 132 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 132 |
+| `--brand-c-neutral-light` | `#e2c8ee` | `src\styles\themes\brand\BrandDefault.css` | 110 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 133 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 135 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 133 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 133 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 133 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 133 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 133 |
+| `--brand-c-neutral` | `#c1a9cd` | `src\styles\themes\brand\BrandDefault.css` | 111 |
+| `--brand-c-neutral` | `oklch(0.70 0.14 30)` | `docs\Markdown Notes\accessibility-color-themes.md` | 110 |
+| `--brand-c-neutral` | `oklch(0.62 0.10 350)` | `docs\Markdown Notes\accessibility-color-themes.md` | 186 |
+| `--brand-c-neutral` | `#ff00ff` | `docs\Markdown Notes\accessibility-color-themes.md` | 233 |
+| `--brand-c-neutral` | `oklch(0.62 0.10 300)` | `docs\Markdown Notes\accessibility-color-themes.md` | 267 |
+| `--brand-c-neutral` | `oklch(0.62 0.10 25)` | `docs\Markdown Notes\accessibility-color-themes.md` | 289 |
+| `--brand-c-neutral` | `oklch(0.62 0.10 280)` | `docs\Markdown Notes\accessibility-color-themes.md` | 311 |
+| `--brand-c-neutral` | `oklch(0.55 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 333 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 134 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 136 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 134 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 134 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 134 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 134 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 134 |
+| `--brand-c-neutral` | `#a28aad` | `src\styles\themes\brand\BrandDefault.css` | 112 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 135 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 137 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 135 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 135 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 135 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 135 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 135 |
+| `--brand-c-neutral-dark` | `#846c8e` | `src\styles\themes\brand\BrandDefault.css` | 113 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 136 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 138 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 136 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 136 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 136 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 136 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 136 |
+| `--brand-c-neutral-dark` | `#665070` | `src\styles\themes\brand\BrandDefault.css` | 114 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 137 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 139 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 137 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 137 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 137 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 137 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 137 |
+| `--brand-c-neutral-dark` | `#533d5c` | `src\styles\themes\brand\BrandDefault.css` | 115 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 121 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 123 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 121 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 121 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 121 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 121 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 121 |
+| `--brand-c-neutral-light` | `#b5b9bf` | `src\styles\themes\brand\BrandDefault.css` | 98 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 122 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 124 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 122 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 122 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 122 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 122 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 122 |
+| `--brand-c-neutral-light` | `#9aa1aa` | `src\styles\themes\brand\BrandDefault.css` | 99 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 123 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 125 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 123 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 123 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 123 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 123 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 123 |
+| `--brand-c-neutral-light` | `#768395` | `src\styles\themes\brand\BrandDefault.css` | 100 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 124 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 126 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 124 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 124 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 124 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 124 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 124 |
+| `--brand-c-neutral` | `#596677` | `src\styles\themes\brand\BrandDefault.css` | 101 |
+| `--brand-c-neutral` | `oklch(0.74 0.12 85)` | `docs\Markdown Notes\accessibility-color-themes.md` | 109 |
+| `--brand-c-neutral` | `oklch(0.60 0.10 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 185 |
+| `--brand-c-neutral` | `#ff6600` | `docs\Markdown Notes\accessibility-color-themes.md` | 232 |
+| `--brand-c-neutral` | `oklch(0.75 0.12 90)` | `docs\Markdown Notes\accessibility-color-themes.md` | 266 |
+| `--brand-c-neutral` | `oklch(0.78 0.12 90)` | `docs\Markdown Notes\accessibility-color-themes.md` | 288 |
+| `--brand-c-neutral` | `oklch(0.60 0.18 25)` | `docs\Markdown Notes\accessibility-color-themes.md` | 310 |
+| `--brand-c-neutral` | `oklch(0.65 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 332 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 125 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 127 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 125 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 125 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 125 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 125 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 125 |
+| `--brand-c-neutral` | `#3e4a5a` | `src\styles\themes\brand\BrandDefault.css` | 102 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 126 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 128 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 126 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 126 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 126 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 126 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 126 |
+| `--brand-c-neutral-dark` | `#25303f` | `src\styles\themes\brand\BrandDefault.css` | 103 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 127 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 129 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 127 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 127 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 127 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 127 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 127 |
+| `--brand-c-neutral-dark` | `#0d1825` | `src\styles\themes\brand\BrandDefault.css` | 104 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 128 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 130 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 128 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 128 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 128 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 128 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 128 |
+| `--brand-c-neutral-dark` | `#020815` | `src\styles\themes\brand\BrandDefault.css` | 105 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 94 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 96 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 94 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 94 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 94 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 94 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 94 |
+| `--brand-c-neutral-light` | `#fef7f3` | `src\styles\themes\brand\BrandDefault.css` | 68 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 95 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 97 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 95 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 95 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 95 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 95 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 95 |
+| `--brand-c-neutral-light` | `#f3e6e0` | `src\styles\themes\brand\BrandDefault.css` | 69 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 96 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 98 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 96 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 96 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 96 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 96 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 96 |
+| `--brand-c-neutral-light` | `#dcc3b6` | `src\styles\themes\brand\BrandDefault.css` | 70 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 97 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 99 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 97 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 97 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 97 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 97 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 97 |
+| `--brand-c-neutral` | `#bba397` | `src\styles\themes\brand\BrandDefault.css` | 71 |
+| `--brand-c-neutral` | `oklch(0.70 0.12 145)` | `docs\Markdown Notes\accessibility-color-themes.md` | 106 |
+| `--brand-c-neutral` | `oklch(0.62 0.10 145)` | `docs\Markdown Notes\accessibility-color-themes.md` | 182 |
+| `--brand-c-neutral` | `#00ffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 229 |
+| `--brand-c-neutral` | `oklch(0.70 0.12 195)` | `docs\Markdown Notes\accessibility-color-themes.md` | 263 |
+| `--brand-c-neutral` | `oklch(0.62 0.14 255)` | `docs\Markdown Notes\accessibility-color-themes.md` | 285 |
+| `--brand-c-neutral` | `oklch(0.66 0.14 145)` | `docs\Markdown Notes\accessibility-color-themes.md` | 307 |
+| `--brand-c-neutral` | `oklch(0.70 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 329 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 98 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 100 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 98 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 98 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 98 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 98 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 98 |
+| `--brand-c-neutral` | `#9c8579` | `src\styles\themes\brand\BrandDefault.css` | 72 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 99 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 101 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 99 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 99 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 99 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 99 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 99 |
+| `--brand-c-neutral-dark` | `#7e685c` | `src\styles\themes\brand\BrandDefault.css` | 73 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 100 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 102 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 100 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 100 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 100 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 100 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 100 |
+| `--brand-c-neutral-dark` | `#614c41` | `src\styles\themes\brand\BrandDefault.css` | 74 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 101 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 103 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 101 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 101 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 101 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 101 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 101 |
+| `--brand-c-neutral-dark` | `#4d392f` | `src\styles\themes\brand\BrandDefault.css` | 75 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 112 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 114 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 112 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 112 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 112 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 112 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 112 |
+| `--brand-c-neutral-light` | `#fcf6fa` | `src\styles\themes\brand\BrandDefault.css` | 88 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 113 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 115 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 113 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 113 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 113 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 113 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 113 |
+| `--brand-c-neutral-light` | `#f1e8ee` | `src\styles\themes\brand\BrandDefault.css` | 89 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 114 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 116 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 114 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 114 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 114 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 114 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 114 |
+| `--brand-c-neutral-light` | `#d6c4d1` | `src\styles\themes\brand\BrandDefault.css` | 90 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 115 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 117 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 115 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 115 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 115 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 115 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 115 |
+| `--brand-c-neutral` | `#b6a4b1` | `src\styles\themes\brand\BrandDefault.css` | 91 |
+| `--brand-c-neutral` | `oklch(0.66 0.10 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 108 |
+| `--brand-c-neutral` | `oklch(0.55 0.08 280)` | `docs\Markdown Notes\accessibility-color-themes.md` | 184 |
+| `--brand-c-neutral` | `#00ff00` | `docs\Markdown Notes\accessibility-color-themes.md` | 231 |
+| `--brand-c-neutral` | `oklch(0.60 0.14 250)` | `docs\Markdown Notes\accessibility-color-themes.md` | 265 |
+| `--brand-c-neutral` | `oklch(0.60 0.14 300)` | `docs\Markdown Notes\accessibility-color-themes.md` | 287 |
+| `--brand-c-neutral` | `oklch(0.62 0.16 350)` | `docs\Markdown Notes\accessibility-color-themes.md` | 309 |
+| `--brand-c-neutral` | `oklch(0.50 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 331 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 116 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 118 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 116 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 116 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 116 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 116 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 116 |
+| `--brand-c-neutral` | `#978692` | `src\styles\themes\brand\BrandDefault.css` | 92 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 117 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 119 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 117 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 117 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 117 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 117 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 117 |
+| `--brand-c-neutral-dark` | `#796974` | `src\styles\themes\brand\BrandDefault.css` | 93 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 118 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 120 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 118 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 118 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 118 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 118 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 118 |
+| `--brand-c-neutral-dark` | `#5c4d58` | `src\styles\themes\brand\BrandDefault.css` | 94 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 119 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 121 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 119 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 119 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 119 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 119 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 119 |
+| `--brand-c-neutral-dark` | `#493a45` | `src\styles\themes\brand\BrandDefault.css` | 95 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 103 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 105 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 103 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 103 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 103 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 103 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 103 |
+| `--brand-c-neutral-light` | `#f4f8ff` | `src\styles\themes\brand\BrandDefault.css` | 78 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 104 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 106 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 104 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 104 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 104 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 104 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 104 |
+| `--brand-c-neutral-light` | `#e9f0ff` | `src\styles\themes\brand\BrandDefault.css` | 79 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 105 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 107 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 105 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 105 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 105 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 105 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 105 |
+| `--brand-c-neutral-light` | `#c1cff6` | `src\styles\themes\brand\BrandDefault.css` | 80 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 106 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 108 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 106 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 106 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 106 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 106 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 106 |
+| `--brand-c-neutral` | `#a1afd5` | `src\styles\themes\brand\BrandDefault.css` | 81 |
+| `--brand-c-neutral` | `oklch(0.68 0.13 350)` | `docs\Markdown Notes\accessibility-color-themes.md` | 107 |
+| `--brand-c-neutral` | `oklch(0.60 0.10 25)` | `docs\Markdown Notes\accessibility-color-themes.md` | 183 |
+| `--brand-c-neutral` | `#ffff00` | `docs\Markdown Notes\accessibility-color-themes.md` | 230 |
+| `--brand-c-neutral` | `oklch(0.75 0.14 70)` | `docs\Markdown Notes\accessibility-color-themes.md` | 264 |
+| `--brand-c-neutral` | `oklch(0.72 0.16 55)` | `docs\Markdown Notes\accessibility-color-themes.md` | 286 |
+| `--brand-c-neutral` | `oklch(0.74 0.14 80)` | `docs\Markdown Notes\accessibility-color-themes.md` | 308 |
+| `--brand-c-neutral` | `oklch(0.60 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 330 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 107 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 109 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 107 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 107 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 107 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 107 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 107 |
+| `--brand-c-neutral` | `#8390b5` | `src\styles\themes\brand\BrandDefault.css` | 82 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 108 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 110 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 108 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 108 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 108 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 108 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 108 |
+| `--brand-c-neutral-dark` | `#667296` | `src\styles\themes\brand\BrandDefault.css` | 83 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 109 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 111 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 109 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 109 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 109 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 109 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 109 |
+| `--brand-c-neutral-dark` | `#4a5677` | `src\styles\themes\brand\BrandDefault.css` | 84 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 110 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 112 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 110 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 110 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 110 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 110 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 110 |
+| `--brand-c-neutral-dark` | `#384263` | `src\styles\themes\brand\BrandDefault.css` | 85 |
+| `--brand-c-bg` | `oklch(0.17 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 61 |
+| `--brand-c-bg` | `oklch(0.965 0.020 88)` | `docs\Markdown Notes\accessibility-color-themes.md` | 137 |
+| `--brand-c-bg` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 211 |
+| `--brand-c-bg` | `oklch(0.948 0.011 95.09)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 13 |
+| `--brand-c-bg` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 49 |
+| `--brand-c-bg` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 52 |
+| `--brand-c-bg` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 49 |
+| `--brand-c-bg` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 49 |
+| `--brand-c-bg` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 49 |
+| `--brand-c-bg` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 49 |
+| `--brand-c-bg` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 49 |
+| `--brand-c-bg` | `#faf8f7` | `src\styles\themes\brand\BrandDefault.css` | 36 |
+| `--brand-c-bg-light` | `oklch(0.20 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 62 |
+| `--brand-c-bg-light` | `oklch(0.950 0.022 85)` | `docs\Markdown Notes\accessibility-color-themes.md` | 138 |
+| `--brand-c-bg-light` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 212 |
+| `--brand-c-bg-light` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 50 |
+| `--brand-c-bg-light` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 53 |
+| `--brand-c-bg-light` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 50 |
+| `--brand-c-bg-light` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 50 |
+| `--brand-c-bg-light` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 50 |
+| `--brand-c-bg-light` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 50 |
+| `--brand-c-bg-light` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 50 |
+| `--brand-c-bg-light` | `#d2d1cc` | `src\styles\themes\brand\BrandDefault.css` | 37 |
+| `--brand-c-bg-light` | `oklch(0.23 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 63 |
+| `--brand-c-bg-light` | `oklch(0.935 0.025 82)` | `docs\Markdown Notes\accessibility-color-themes.md` | 139 |
+| `--brand-c-bg-light` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 213 |
+| `--brand-c-bg-light` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 51 |
+| `--brand-c-bg-light` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 54 |
+| `--brand-c-bg-light` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 51 |
+| `--brand-c-bg-light` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 51 |
+| `--brand-c-bg-light` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 51 |
+| `--brand-c-bg-light` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 51 |
+| `--brand-c-bg-light` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 51 |
+| `--brand-c-bg-light` | `#b4b1a8` | `src\styles\themes\brand\BrandDefault.css` | 38 |
+| `--brand-c-bg-light` | `oklch(0.26 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 64 |
+| `--brand-c-bg-light` | `oklch(0.920 0.028 78)` | `docs\Markdown Notes\accessibility-color-themes.md` | 140 |
+| `--brand-c-bg-light` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 214 |
+| `--brand-c-bg-light` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 52 |
+| `--brand-c-bg-light` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 55 |
+| `--brand-c-bg-light` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 52 |
+| `--brand-c-bg-light` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 52 |
+| `--brand-c-bg-light` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 52 |
+| `--brand-c-bg-light` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 52 |
+| `--brand-c-bg-light` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 52 |
+| `--brand-c-bg-light` | `#95928a` | `src\styles\themes\brand\BrandDefault.css` | 39 |
+| `--brand-c-bg` | `oklch(0.14 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 60 |
+| `--brand-c-bg` | `oklch(0.98 0.015 90)` | `docs\Markdown Notes\accessibility-color-themes.md` | 136 |
+| `--brand-c-bg` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 210 |
+| `--brand-c-bg` | `oklch(97.948% 0.01376 88.669)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 12 |
+| `--brand-c-bg` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 48 |
+| `--brand-c-bg` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 51 |
+| `--brand-c-bg` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 48 |
+| `--brand-c-bg` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 48 |
+| `--brand-c-bg` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 48 |
+| `--brand-c-bg` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 48 |
+| `--brand-c-bg` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 48 |
+| `--brand-c-bg` | `#faf8f7` | `src\styles\themes\brand\BrandDefault.css` | 35 |
+| `--brand-c-bg-light` | `oklch(0.30 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 65 |
+| `--brand-c-bg-light` | `oklch(0.905 0.030 75)` | `docs\Markdown Notes\accessibility-color-themes.md` | 141 |
+| `--brand-c-bg-light` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 215 |
+| `--brand-c-bg-light` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 53 |
+| `--brand-c-bg-light` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 56 |
+| `--brand-c-bg-light` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 53 |
+| `--brand-c-bg-light` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 53 |
+| `--brand-c-bg-light` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 53 |
+| `--brand-c-bg-light` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 53 |
+| `--brand-c-bg-light` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 53 |
+| `--brand-c-bg-light` | `#77746c` | `src\styles\themes\brand\BrandDefault.css` | 40 |
 | `--color-Background-600` | `#5a5754`** (line 41)` | `docs\reports\FIXES-APPLIED.md` | 56 |
 | `--color-Background-600` | `#5a5754` | `src\styles\themes\brand\BrandDefault.css` | 41 |
 | `--color-Background-700` | `#3e3b39`** (line 42)` | `docs\reports\FIXES-APPLIED.md` | 57 |
 | `--color-Background-700` | `#3e3b39` | `src\styles\themes\brand\BrandDefault.css` | 42 |
 | `--color-Background-800` | `#2b2927`** (line 43)` | `docs\reports\FIXES-APPLIED.md` | 58 |
 | `--color-Background-800` | `#2b2927` | `src\styles\themes\brand\BrandDefault.css` | 43 |
-| `--color-Background-900` | `oklch(0.065 0.010 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 71 |
-| `--color-Background-900` | `oklch(0.18 0.02 30)` | `docs\Markdown Notes\accessibility-color-themes.md` | 147 |
-| `--color-Background-900` | `#1a1918`** (line 44)` | `docs\reports\FIXES-APPLIED.md` | 59 |
-| `--color-Background-900` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 62 |
-| `--color-Background-900` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 64 |
-| `--color-Background-900` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 62 |
-| `--color-Background-900` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 62 |
-| `--color-Background-900` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 62 |
-| `--color-Background-900` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 62 |
-| `--color-Background-900` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 62 |
-| `--color-Background-900` | `#1a1918` | `src\styles\themes\brand\BrandDefault.css` | 44 |
-| `--color-BackgroundDark-600` | `oklch(0.13 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 67 |
-| `--color-BackgroundDark-600` | `oklch(0.40 0.04 45)` | `docs\Markdown Notes\accessibility-color-themes.md` | 143 |
-| `--color-BackgroundDark-600` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 58 |
-| `--color-BackgroundDark-600` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 61 |
-| `--color-BackgroundDark-600` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 58 |
-| `--color-BackgroundDark-600` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 58 |
-| `--color-BackgroundDark-600` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 58 |
-| `--color-BackgroundDark-600` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 58 |
-| `--color-BackgroundDark-600` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 58 |
-| `--color-BackgroundDark-700` | `oklch(0.11 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 68 |
-| `--color-BackgroundDark-700` | `oklch(0.34 0.04 42)` | `docs\Markdown Notes\accessibility-color-themes.md` | 144 |
-| `--color-BackgroundDark-700` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 59 |
-| `--color-BackgroundDark-700` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 62 |
-| `--color-BackgroundDark-700` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 59 |
-| `--color-BackgroundDark-700` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 59 |
-| `--color-BackgroundDark-700` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 59 |
-| `--color-BackgroundDark-700` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 59 |
-| `--color-BackgroundDark-700` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 59 |
-| `--color-BackgroundDark-800` | `oklch(0.095 0.012 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 69 |
-| `--color-BackgroundDark-800` | `oklch(0.28 0.03 40)` | `docs\Markdown Notes\accessibility-color-themes.md` | 145 |
-| `--color-BackgroundDark-800` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 60 |
-| `--color-BackgroundDark-800` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 63 |
-| `--color-BackgroundDark-800` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 60 |
-| `--color-BackgroundDark-800` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 60 |
-| `--color-BackgroundDark-800` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 60 |
-| `--color-BackgroundDark-800` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 60 |
-| `--color-BackgroundDark-800` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 60 |
-| `--color-BackgroundDark-900` | `oklch(0.08 0.010 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 70 |
-| `--color-BackgroundDark-900` | `oklch(0.22 0.03 35)` | `docs\Markdown Notes\accessibility-color-themes.md` | 146 |
-| `--color-BackgroundDark-900` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 61 |
-| `--color-BackgroundDark-900` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 61 |
-| `--color-BackgroundDark-900` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 61 |
-| `--color-BackgroundDark-900` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 61 |
-| `--color-BackgroundDark-900` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 61 |
-| `--color-BackgroundDark-900` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 61 |
+| `--brand-c-bg-dark` | `oklch(0.065 0.010 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 71 |
+| `--brand-c-bg-dark` | `oklch(0.18 0.02 30)` | `docs\Markdown Notes\accessibility-color-themes.md` | 147 |
+| `--brand-c-bg-dark` | `#1a1918`** (line 44)` | `docs\reports\FIXES-APPLIED.md` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 62 |
+| `--brand-c-bg-dark` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 64 |
+| `--brand-c-bg-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 62 |
+| `--brand-c-bg-dark` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 62 |
+| `--brand-c-bg-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 62 |
+| `--brand-c-bg-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 62 |
+| `--brand-c-bg-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 62 |
+| `--brand-c-bg-dark` | `#1a1918` | `src\styles\themes\brand\BrandDefault.css` | 44 |
+| `--brand-c-bg-dark` | `oklch(0.13 0.02 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 67 |
+| `--brand-c-bg-dark` | `oklch(0.40 0.04 45)` | `docs\Markdown Notes\accessibility-color-themes.md` | 143 |
+| `--brand-c-bg-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 58 |
+| `--brand-c-bg-dark` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 58 |
+| `--brand-c-bg-dark` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 58 |
+| `--brand-c-bg-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 58 |
+| `--brand-c-bg-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 58 |
+| `--brand-c-bg-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 58 |
+| `--brand-c-bg-dark` | `oklch(0.11 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 68 |
+| `--brand-c-bg-dark` | `oklch(0.34 0.04 42)` | `docs\Markdown Notes\accessibility-color-themes.md` | 144 |
+| `--brand-c-bg-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 62 |
+| `--brand-c-bg-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 59 |
+| `--brand-c-bg-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 59 |
+| `--brand-c-bg-dark` | `oklch(0.095 0.012 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 69 |
+| `--brand-c-bg-dark` | `oklch(0.28 0.03 40)` | `docs\Markdown Notes\accessibility-color-themes.md` | 145 |
+| `--brand-c-bg-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 60 |
+| `--brand-c-bg-dark` | `var(--a11y-dark-c-bg)` | `src\styles\themes\a11y\a11y-dark.css` | 63 |
+| `--brand-c-bg-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 60 |
+| `--brand-c-bg-dark` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 60 |
+| `--brand-c-bg-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 60 |
+| `--brand-c-bg-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 60 |
+| `--brand-c-bg-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 60 |
+| `--brand-c-bg-dark` | `oklch(0.08 0.010 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 70 |
+| `--brand-c-bg-dark` | `oklch(0.22 0.03 35)` | `docs\Markdown Notes\accessibility-color-themes.md` | 146 |
+| `--brand-c-bg-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 61 |
+| `--brand-c-bg-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 61 |
 | `--color-Black` | `#121212` | `src\styles\tokens\status.css` | 10 |
 | `--color-Danger` | `var(--color-Error)` | `docs\Markdown Notes\accessibility-color-themes.md` | 116 |
 | `--color-Danger` | `var(--color-Error)` | `docs\Markdown Notes\accessibility-color-themes.md` | 192 |
@@ -5648,274 +5648,274 @@ How often each colour token is actually used across the project.
 | `--color-Info-100` | `${toOKLCH(chroma.hsl(215, 0.4 * satAdjust, 0.92 * lightAdjust).hex())` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 1941 |
 | `--color-Info-200` | `${toOKLCH(chroma.hsl(215, 0.6 * satAdjust, 0.80 * lightAdjust).hex())` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 1942 |
 | `--color-Info-500` | `${toOKLCH(chroma.hsl(215, 0.7 * satAdjust, 0.55 * lightAdjust).hex())` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 1943 |
-| `--color-Neutral-100` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 81 |
-| `--color-Neutral-100` | `var(--a11y-dark-c-surface)` | `src\styles\themes\a11y\a11y-dark.css` | 83 |
-| `--color-Neutral-100` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 81 |
-| `--color-Neutral-100` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 81 |
-| `--color-Neutral-100` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 81 |
-| `--color-Neutral-100` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 81 |
-| `--color-Neutral-100` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 81 |
-| `--color-Neutral-100` | `#faf8f7` | `src\styles\themes\brand\BrandDefault.css` | 61 |
-| `--color-Neutral-200` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 82 |
-| `--color-Neutral-200` | `var(--a11y-dark-c-surface-raised)` | `src\styles\themes\a11y\a11y-dark.css` | 84 |
-| `--color-Neutral-200` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 82 |
-| `--color-Neutral-200` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 82 |
-| `--color-Neutral-200` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 82 |
-| `--color-Neutral-200` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 82 |
-| `--color-Neutral-200` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 82 |
-| `--color-Neutral-200` | `#e0dedb` | `src\styles\themes\brand\BrandDefault.css` | 62 |
-| `--color-Neutral-300` | `oklch(0.992 0.003 67.83)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 17 |
-| `--color-Neutral-300` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 83 |
-| `--color-Neutral-300` | `var(--a11y-dark-c-border)` | `src\styles\themes\a11y\a11y-dark.css` | 85 |
-| `--color-Neutral-300` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 83 |
-| `--color-Neutral-300` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 83 |
-| `--color-Neutral-300` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 83 |
-| `--color-Neutral-300` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 83 |
-| `--color-Neutral-300` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 83 |
-| `--color-Neutral-300` | `#c2bdb8` | `src\styles\themes\brand\BrandDefault.css` | 63 |
-| `--color-Neutral-400` | `oklch(0.984 0.008 73.73)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 18 |
-| `--color-Neutral-400` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 84 |
-| `--color-Neutral-400` | `#555` | `src\styles\themes\a11y\a11y-dark.css` | 86 |
-| `--color-Neutral-400` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 84 |
-| `--color-Neutral-400` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 84 |
-| `--color-Neutral-400` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 84 |
-| `--color-Neutral-400` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 84 |
-| `--color-Neutral-400` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 84 |
-| `--color-Neutral-50` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 80 |
-| `--color-Neutral-50` | `var(--a11y-dark-c-surface)` | `src\styles\themes\a11y\a11y-dark.css` | 82 |
-| `--color-Neutral-50` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 80 |
-| `--color-Neutral-50` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 80 |
-| `--color-Neutral-50` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 80 |
-| `--color-Neutral-50` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 80 |
-| `--color-Neutral-50` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 80 |
-| `--color-Neutral-50` | `#faf8f7` | `src\styles\themes\brand\BrandDefault.css` | 60 |
-| `--color-Neutral-500` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 85 |
-| `--color-Neutral-500` | `#777` | `src\styles\themes\a11y\a11y-dark.css` | 87 |
-| `--color-Neutral-500` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 85 |
-| `--color-Neutral-500` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 85 |
-| `--color-Neutral-500` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 85 |
-| `--color-Neutral-500` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 85 |
-| `--color-Neutral-500` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 85 |
-| `--color-Neutral-600` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 86 |
-| `--color-Neutral-600` | `#999` | `src\styles\themes\a11y\a11y-dark.css` | 88 |
-| `--color-Neutral-600` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 86 |
-| `--color-Neutral-600` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 86 |
-| `--color-Neutral-600` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 86 |
-| `--color-Neutral-600` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 86 |
-| `--color-Neutral-600` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 86 |
-| `--color-Neutral-700` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 87 |
-| `--color-Neutral-700` | `#aaa` | `src\styles\themes\a11y\a11y-dark.css` | 89 |
-| `--color-Neutral-700` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 87 |
-| `--color-Neutral-700` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 87 |
-| `--color-Neutral-700` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 87 |
-| `--color-Neutral-700` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 87 |
-| `--color-Neutral-700` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 87 |
-| `--color-Neutral-800` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 88 |
-| `--color-Neutral-800` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 90 |
-| `--color-Neutral-800` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 88 |
-| `--color-Neutral-800` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 88 |
-| `--color-Neutral-800` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 88 |
-| `--color-Neutral-800` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 88 |
-| `--color-Neutral-800` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 88 |
-| `--color-Neutral-800` | `#393531` | `src\styles\themes\brand\BrandDefault.css` | 64 |
-| `--color-Neutral-900` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 89 |
-| `--color-Neutral-900` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 91 |
-| `--color-Neutral-900` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 89 |
-| `--color-Neutral-900` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 89 |
-| `--color-Neutral-900` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 89 |
-| `--color-Neutral-900` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 89 |
-| `--color-Neutral-900` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 89 |
-| `--color-Neutral-900` | `#292624` | `src\styles\themes\brand\BrandDefault.css` | 65 |
-| `--color-Primary-100` | `oklch(0.86 0.04 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 85 |
-| `--color-Primary-100` | `oklch(0.92 0.04 65)` | `docs\Markdown Notes\accessibility-color-themes.md` | 161 |
-| `--color-Primary-100` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 23 |
-| `--color-Primary-100` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 26 |
-| `--color-Primary-100` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 23 |
-| `--color-Primary-100` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 23 |
-| `--color-Primary-100` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 23 |
-| `--color-Primary-100` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 23 |
-| `--color-Primary-100` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 23 |
-| `--color-Primary-100` | `#f4fbf2` | `src\styles\themes\brand\BrandDefault.css` | 13 |
-| `--color-Primary-200` | `oklch(0.78 0.06 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 86 |
-| `--color-Primary-200` | `oklch(0.86 0.06 60)` | `docs\Markdown Notes\accessibility-color-themes.md` | 162 |
-| `--color-Primary-200` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 24 |
-| `--color-Primary-200` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 27 |
-| `--color-Primary-200` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 24 |
-| `--color-Primary-200` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 24 |
-| `--color-Primary-200` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 24 |
-| `--color-Primary-200` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 24 |
-| `--color-Primary-200` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 24 |
-| `--color-Primary-200` | `#f0fdee` | `src\styles\themes\brand\BrandDefault.css` | 14 |
-| `--color-Primary-300` | `oklch(0.70 0.09 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 87 |
-| `--color-Primary-300` | `oklch(0.78 0.08 55)` | `docs\Markdown Notes\accessibility-color-themes.md` | 163 |
-| `--color-Primary-300` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 25 |
-| `--color-Primary-300` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 28 |
-| `--color-Primary-300` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 25 |
-| `--color-Primary-300` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 25 |
-| `--color-Primary-300` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 25 |
-| `--color-Primary-300` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 25 |
-| `--color-Primary-300` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 25 |
-| `--color-Primary-300` | `#cee6c8` | `src\styles\themes\brand\BrandDefault.css` | 15 |
-| `--color-Primary-400` | `oklch(0.64 0.12 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 88 |
-| `--color-Primary-400` | `oklch(0.70 0.10 50)` | `docs\Markdown Notes\accessibility-color-themes.md` | 164 |
-| `--color-Primary-400` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 26 |
-| `--color-Primary-400` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 29 |
-| `--color-Primary-400` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 26 |
-| `--color-Primary-400` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 26 |
-| `--color-Primary-400` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 26 |
-| `--color-Primary-400` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 26 |
-| `--color-Primary-400` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 26 |
-| `--color-Primary-400` | `#aec6a9` | `src\styles\themes\brand\BrandDefault.css` | 16 |
-| `--color-Primary-50` | `oklch(0.93 0.02 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 84 |
-| `--color-Primary-50` | `oklch(0.96 0.02 70)` | `docs\Markdown Notes\accessibility-color-themes.md` | 160 |
-| `--color-Primary-50` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 22 |
-| `--color-Primary-50` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 25 |
-| `--color-Primary-50` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 22 |
-| `--color-Primary-50` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 22 |
-| `--color-Primary-50` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 22 |
-| `--color-Primary-50` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 22 |
-| `--color-Primary-50` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 22 |
-| `--color-Primary-500` | `oklch(0.58 0.14 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 89 |
-| `--color-Primary-500` | `oklch(0.62 0.10 45)` | `docs\Markdown Notes\accessibility-color-themes.md` | 165 |
-| `--color-Primary-500` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 226 |
-| `--color-Primary-500` | `#8fa68a` | `docs\todo\TODO.md` | 344 |
-| `--color-Primary-500` | `oklch(0.699 0.048 140.05)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 10 |
-| `--color-Primary-500` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 27 |
-| `--color-Primary-500` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 30 |
-| `--color-Primary-500` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 27 |
-| `--color-Primary-500` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 27 |
-| `--color-Primary-500` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 27 |
-| `--color-Primary-500` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 27 |
-| `--color-Primary-500` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 27 |
-| `--color-Primary-500` | `#8fa68a` | `src\styles\themes\brand\BrandDefault.css` | 17 |
-| `--color-Primary-600` | `oklch(0.52 0.13 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 90 |
-| `--color-Primary-600` | `oklch(0.54 0.10 40)` | `docs\Markdown Notes\accessibility-color-themes.md` | 166 |
-| `--color-Primary-600` | `oklch(0.591 0.041 140.19)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 11 |
-| `--color-Primary-600` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 28 |
-| `--color-Primary-600` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 31 |
-| `--color-Primary-600` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 28 |
-| `--color-Primary-600` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 28 |
-| `--color-Primary-600` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 28 |
-| `--color-Primary-600` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 28 |
-| `--color-Primary-600` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 28 |
-| `--color-Primary-600` | `#71876c` | `src\styles\themes\brand\BrandDefault.css` | 18 |
-| `--color-Primary-700` | `oklch(0.46 0.11 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 91 |
-| `--color-Primary-700` | `oklch(0.46 0.08 38)` | `docs\Markdown Notes\accessibility-color-themes.md` | 167 |
-| `--color-Primary-700` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 29 |
-| `--color-Primary-700` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 32 |
-| `--color-Primary-700` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 29 |
-| `--color-Primary-700` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 29 |
-| `--color-Primary-700` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 29 |
-| `--color-Primary-700` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 29 |
-| `--color-Primary-700` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 29 |
-| `--color-Primary-700` | `#556a50` | `src\styles\themes\brand\BrandDefault.css` | 19 |
-| `--color-Primary-800` | `oklch(0.40 0.09 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 92 |
-| `--color-Primary-800` | `oklch(0.38 0.07 35)` | `docs\Markdown Notes\accessibility-color-themes.md` | 168 |
-| `--color-Primary-800` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 30 |
-| `--color-Primary-800` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 33 |
-| `--color-Primary-800` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 30 |
-| `--color-Primary-800` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 30 |
-| `--color-Primary-800` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 30 |
-| `--color-Primary-800` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 30 |
-| `--color-Primary-800` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 30 |
-| `--color-Primary-800` | `#42563d` | `src\styles\themes\brand\BrandDefault.css` | 20 |
-| `--color-Primary-900` | `oklch(0.34 0.07 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 93 |
-| `--color-Primary-900` | `oklch(0.30 0.06 32)` | `docs\Markdown Notes\accessibility-color-themes.md` | 169 |
-| `--color-Primary-900` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 31 |
-| `--color-Primary-900` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 34 |
-| `--color-Primary-900` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 31 |
-| `--color-Primary-900` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 31 |
-| `--color-Primary-900` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 31 |
-| `--color-Primary-900` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 31 |
-| `--color-Primary-900` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 31 |
-| `--color-Primary-900` | `#364433` | `src\styles\themes\brand\BrandDefault.css` | 21 |
-| `--color-Secondary-100` | `oklch(0.88 0.06 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 96 |
-| `--color-Secondary-100` | `oklch(0.92 0.04 35)` | `docs\Markdown Notes\accessibility-color-themes.md` | 172 |
-| `--color-Secondary-100` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 36 |
-| `--color-Secondary-100` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 39 |
-| `--color-Secondary-100` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 36 |
-| `--color-Secondary-100` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 36 |
-| `--color-Secondary-100` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 36 |
-| `--color-Secondary-100` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 36 |
-| `--color-Secondary-100` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 36 |
-| `--color-Secondary-100` | `#fff4ee` | `src\styles\themes\brand\BrandDefault.css` | 24 |
-| `--color-Secondary-200` | `oklch(0.80 0.08 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 97 |
-| `--color-Secondary-200` | `oklch(0.86 0.06 32)` | `docs\Markdown Notes\accessibility-color-themes.md` | 173 |
-| `--color-Secondary-200` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 37 |
-| `--color-Secondary-200` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 40 |
-| `--color-Secondary-200` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 37 |
-| `--color-Secondary-200` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 37 |
-| `--color-Secondary-200` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 37 |
-| `--color-Secondary-200` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 37 |
-| `--color-Secondary-200` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 37 |
-| `--color-Secondary-200` | `#fff1e7` | `src\styles\themes\brand\BrandDefault.css` | 25 |
-| `--color-Secondary-300` | `oklch(0.72 0.10 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 98 |
-| `--color-Secondary-300` | `oklch(0.79 0.08 30)` | `docs\Markdown Notes\accessibility-color-themes.md` | 174 |
-| `--color-Secondary-300` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 38 |
-| `--color-Secondary-300` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 41 |
-| `--color-Secondary-300` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 38 |
-| `--color-Secondary-300` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 38 |
-| `--color-Secondary-300` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 38 |
-| `--color-Secondary-300` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 38 |
-| `--color-Secondary-300` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 38 |
-| `--color-Secondary-300` | `#ffcfba` | `src\styles\themes\brand\BrandDefault.css` | 26 |
-| `--color-Secondary-400` | `oklch(0.66 0.11 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 99 |
-| `--color-Secondary-400` | `oklch(0.71 0.10 28)` | `docs\Markdown Notes\accessibility-color-themes.md` | 175 |
-| `--color-Secondary-400` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 39 |
-| `--color-Secondary-400` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 42 |
-| `--color-Secondary-400` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 39 |
-| `--color-Secondary-400` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 39 |
-| `--color-Secondary-400` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 39 |
-| `--color-Secondary-400` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 39 |
-| `--color-Secondary-400` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 39 |
-| `--color-Secondary-400` | `#e5af9a` | `src\styles\themes\brand\BrandDefault.css` | 27 |
-| `--color-Secondary-500` | `oklch(0.60 0.12 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 100 |
-| `--color-Secondary-500` | `oklch(0.63 0.10 25)` | `docs\Markdown Notes\accessibility-color-themes.md` | 176 |
-| `--color-Secondary-500` | `#ffff00` | `docs\Markdown Notes\accessibility-color-themes.md` | 227 |
-| `--color-Secondary-500` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 40 |
-| `--color-Secondary-500` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 43 |
-| `--color-Secondary-500` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 40 |
-| `--color-Secondary-500` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 40 |
-| `--color-Secondary-500` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 40 |
-| `--color-Secondary-500` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 40 |
-| `--color-Secondary-500` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 40 |
-| `--color-Secondary-500` | `#c4907c` | `src\styles\themes\brand\BrandDefault.css` | 28 |
-| `--color-Secondary-600` | `oklch(0.54 0.10 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 101 |
-| `--color-Secondary-600` | `oklch(0.55 0.10 22)` | `docs\Markdown Notes\accessibility-color-themes.md` | 177 |
-| `--color-Secondary-600` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 41 |
-| `--color-Secondary-600` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 44 |
-| `--color-Secondary-600` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 41 |
-| `--color-Secondary-600` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 41 |
-| `--color-Secondary-600` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 41 |
-| `--color-Secondary-600` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 41 |
-| `--color-Secondary-600` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 41 |
-| `--color-Secondary-600` | `#a4725f` | `src\styles\themes\brand\BrandDefault.css` | 29 |
-| `--color-Secondary-700` | `oklch(0.48 0.08 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 102 |
-| `--color-Secondary-700` | `oklch(0.47 0.08 20)` | `docs\Markdown Notes\accessibility-color-themes.md` | 178 |
-| `--color-Secondary-700` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 42 |
-| `--color-Secondary-700` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 45 |
-| `--color-Secondary-700` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 42 |
-| `--color-Secondary-700` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 42 |
-| `--color-Secondary-700` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 42 |
-| `--color-Secondary-700` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 42 |
-| `--color-Secondary-700` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 42 |
-| `--color-Secondary-700` | `#855543` | `src\styles\themes\brand\BrandDefault.css` | 30 |
-| `--color-Secondary-800` | `oklch(0.42 0.06 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 103 |
-| `--color-Secondary-800` | `oklch(0.39 0.06 18)` | `docs\Markdown Notes\accessibility-color-themes.md` | 179 |
-| `--color-Secondary-800` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 43 |
-| `--color-Secondary-800` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 46 |
-| `--color-Secondary-800` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 43 |
-| `--color-Secondary-800` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 43 |
-| `--color-Secondary-800` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 43 |
-| `--color-Secondary-800` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 43 |
-| `--color-Secondary-800` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 43 |
-| `--color-Secondary-800` | `#6f4230` | `src\styles\themes\brand\BrandDefault.css` | 31 |
-| `--color-Secondary-900` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 193 |
-| `--color-Secondary-900` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 648 |
-| `--color-Secondary-900` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 691 |
-| `--color-Secondary-900` | `#5a3420`** (line 32)` | `docs\reports\FIXES-APPLIED.md` | 12 |
-| `--color-Secondary-900` | `#5a3420` | `docs\todo\TODO.md` | 257 |
-| `--color-Secondary-900` | `#5a3420` | `src\styles\themes\brand\BrandDefault.css` | 32 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 81 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-surface)` | `src\styles\themes\a11y\a11y-dark.css` | 83 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 81 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 81 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 81 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 81 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 81 |
+| `--brand-c-neutral-light` | `#faf8f7` | `src\styles\themes\brand\BrandDefault.css` | 61 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 82 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-surface-raised)` | `src\styles\themes\a11y\a11y-dark.css` | 84 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 82 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 82 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 82 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 82 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 82 |
+| `--brand-c-neutral-light` | `#e0dedb` | `src\styles\themes\brand\BrandDefault.css` | 62 |
+| `--brand-c-neutral` | `oklch(0.992 0.003 67.83)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 17 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 83 |
+| `--brand-c-neutral` | `var(--a11y-dark-c-border)` | `src\styles\themes\a11y\a11y-dark.css` | 85 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 83 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 83 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 83 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 83 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 83 |
+| `--brand-c-neutral` | `#c2bdb8` | `src\styles\themes\brand\BrandDefault.css` | 63 |
+| `--brand-c-neutral` | `oklch(0.984 0.008 73.73)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 18 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 84 |
+| `--brand-c-neutral` | `#555` | `src\styles\themes\a11y\a11y-dark.css` | 86 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 84 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 84 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 84 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 84 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 84 |
+| `--brand-c-neutral-light` | `var(--a11y-cream-c-bg)` | `src\styles\themes\a11y\a11y-cream.css` | 80 |
+| `--brand-c-neutral-light` | `var(--a11y-dark-c-surface)` | `src\styles\themes\a11y\a11y-dark.css` | 82 |
+| `--brand-c-neutral-light` | `var(--a11y-deuter-c-bg)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 80 |
+| `--brand-c-neutral-light` | `var(--a11y-hc-c-bg)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 80 |
+| `--brand-c-neutral-light` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 80 |
+| `--brand-c-neutral-light` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 80 |
+| `--brand-c-neutral-light` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 80 |
+| `--brand-c-neutral-light` | `#faf8f7` | `src\styles\themes\brand\BrandDefault.css` | 60 |
+| `--brand-c-neutral` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 85 |
+| `--brand-c-neutral` | `#777` | `src\styles\themes\a11y\a11y-dark.css` | 87 |
+| `--brand-c-neutral` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 85 |
+| `--brand-c-neutral` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 85 |
+| `--brand-c-neutral` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 85 |
+| `--brand-c-neutral` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 85 |
+| `--brand-c-neutral` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 85 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 86 |
+| `--brand-c-neutral-dark` | `#999` | `src\styles\themes\a11y\a11y-dark.css` | 88 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 86 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 86 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 86 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 86 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 86 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 87 |
+| `--brand-c-neutral-dark` | `#aaa` | `src\styles\themes\a11y\a11y-dark.css` | 89 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 87 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 87 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 87 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 87 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 87 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 88 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 90 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 88 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 88 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 88 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 88 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 88 |
+| `--brand-c-neutral-dark` | `#393531` | `src\styles\themes\brand\BrandDefault.css` | 64 |
+| `--brand-c-neutral-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 89 |
+| `--brand-c-neutral-dark` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 91 |
+| `--brand-c-neutral-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 89 |
+| `--brand-c-neutral-dark` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 89 |
+| `--brand-c-neutral-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 89 |
+| `--brand-c-neutral-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 89 |
+| `--brand-c-neutral-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 89 |
+| `--brand-c-neutral-dark` | `#292624` | `src\styles\themes\brand\BrandDefault.css` | 65 |
+| `--brand-c-primary-light` | `oklch(0.86 0.04 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 85 |
+| `--brand-c-primary-light` | `oklch(0.92 0.04 65)` | `docs\Markdown Notes\accessibility-color-themes.md` | 161 |
+| `--brand-c-primary-light` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 23 |
+| `--brand-c-primary-light` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 26 |
+| `--brand-c-primary-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 23 |
+| `--brand-c-primary-light` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 23 |
+| `--brand-c-primary-light` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 23 |
+| `--brand-c-primary-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 23 |
+| `--brand-c-primary-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 23 |
+| `--brand-c-primary-light` | `#f4fbf2` | `src\styles\themes\brand\BrandDefault.css` | 13 |
+| `--brand-c-primary-light` | `oklch(0.78 0.06 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 86 |
+| `--brand-c-primary-light` | `oklch(0.86 0.06 60)` | `docs\Markdown Notes\accessibility-color-themes.md` | 162 |
+| `--brand-c-primary-light` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 24 |
+| `--brand-c-primary-light` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 27 |
+| `--brand-c-primary-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 24 |
+| `--brand-c-primary-light` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 24 |
+| `--brand-c-primary-light` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 24 |
+| `--brand-c-primary-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 24 |
+| `--brand-c-primary-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 24 |
+| `--brand-c-primary-light` | `#f0fdee` | `src\styles\themes\brand\BrandDefault.css` | 14 |
+| `--brand-c-primary-light` | `oklch(0.70 0.09 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 87 |
+| `--brand-c-primary-light` | `oklch(0.78 0.08 55)` | `docs\Markdown Notes\accessibility-color-themes.md` | 163 |
+| `--brand-c-primary-light` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 25 |
+| `--brand-c-primary-light` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 28 |
+| `--brand-c-primary-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 25 |
+| `--brand-c-primary-light` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 25 |
+| `--brand-c-primary-light` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 25 |
+| `--brand-c-primary-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 25 |
+| `--brand-c-primary-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 25 |
+| `--brand-c-primary-light` | `#cee6c8` | `src\styles\themes\brand\BrandDefault.css` | 15 |
+| `--brand-c-primary` | `oklch(0.64 0.12 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 88 |
+| `--brand-c-primary` | `oklch(0.70 0.10 50)` | `docs\Markdown Notes\accessibility-color-themes.md` | 164 |
+| `--brand-c-primary` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 26 |
+| `--brand-c-primary` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 29 |
+| `--brand-c-primary` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 26 |
+| `--brand-c-primary` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 26 |
+| `--brand-c-primary` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 26 |
+| `--brand-c-primary` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 26 |
+| `--brand-c-primary` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 26 |
+| `--brand-c-primary` | `#aec6a9` | `src\styles\themes\brand\BrandDefault.css` | 16 |
+| `--brand-c-primary-light` | `oklch(0.93 0.02 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 84 |
+| `--brand-c-primary-light` | `oklch(0.96 0.02 70)` | `docs\Markdown Notes\accessibility-color-themes.md` | 160 |
+| `--brand-c-primary-light` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 22 |
+| `--brand-c-primary-light` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 25 |
+| `--brand-c-primary-light` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 22 |
+| `--brand-c-primary-light` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 22 |
+| `--brand-c-primary-light` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 22 |
+| `--brand-c-primary-light` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 22 |
+| `--brand-c-primary-light` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 22 |
+| `--brand-c-primary` | `oklch(0.58 0.14 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 89 |
+| `--brand-c-primary` | `oklch(0.62 0.10 45)` | `docs\Markdown Notes\accessibility-color-themes.md` | 165 |
+| `--brand-c-primary` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 226 |
+| `--brand-c-primary` | `#8fa68a` | `docs\todo\TODO.md` | 344 |
+| `--brand-c-primary` | `oklch(0.699 0.048 140.05)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 10 |
+| `--brand-c-primary` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 27 |
+| `--brand-c-primary` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 30 |
+| `--brand-c-primary` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 27 |
+| `--brand-c-primary` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 27 |
+| `--brand-c-primary` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 27 |
+| `--brand-c-primary` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 27 |
+| `--brand-c-primary` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 27 |
+| `--brand-c-primary` | `#8fa68a` | `src\styles\themes\brand\BrandDefault.css` | 17 |
+| `--brand-c-primary-dark` | `oklch(0.52 0.13 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 90 |
+| `--brand-c-primary-dark` | `oklch(0.54 0.10 40)` | `docs\Markdown Notes\accessibility-color-themes.md` | 166 |
+| `--brand-c-primary-dark` | `oklch(0.591 0.041 140.19)` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 11 |
+| `--brand-c-primary-dark` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 28 |
+| `--brand-c-primary-dark` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 31 |
+| `--brand-c-primary-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 28 |
+| `--brand-c-primary-dark` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 28 |
+| `--brand-c-primary-dark` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 28 |
+| `--brand-c-primary-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 28 |
+| `--brand-c-primary-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 28 |
+| `--brand-c-primary-dark` | `#71876c` | `src\styles\themes\brand\BrandDefault.css` | 18 |
+| `--brand-c-primary-dark` | `oklch(0.46 0.11 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 91 |
+| `--brand-c-primary-dark` | `oklch(0.46 0.08 38)` | `docs\Markdown Notes\accessibility-color-themes.md` | 167 |
+| `--brand-c-primary-dark` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 29 |
+| `--brand-c-primary-dark` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 32 |
+| `--brand-c-primary-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 29 |
+| `--brand-c-primary-dark` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 29 |
+| `--brand-c-primary-dark` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 29 |
+| `--brand-c-primary-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 29 |
+| `--brand-c-primary-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 29 |
+| `--brand-c-primary-dark` | `#556a50` | `src\styles\themes\brand\BrandDefault.css` | 19 |
+| `--brand-c-primary-dark` | `oklch(0.40 0.09 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 92 |
+| `--brand-c-primary-dark` | `oklch(0.38 0.07 35)` | `docs\Markdown Notes\accessibility-color-themes.md` | 168 |
+| `--brand-c-primary-dark` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 30 |
+| `--brand-c-primary-dark` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 33 |
+| `--brand-c-primary-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 30 |
+| `--brand-c-primary-dark` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 30 |
+| `--brand-c-primary-dark` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 30 |
+| `--brand-c-primary-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 30 |
+| `--brand-c-primary-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 30 |
+| `--brand-c-primary-dark` | `#42563d` | `src\styles\themes\brand\BrandDefault.css` | 20 |
+| `--brand-c-primary-dark` | `oklch(0.34 0.07 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 93 |
+| `--brand-c-primary-dark` | `oklch(0.30 0.06 32)` | `docs\Markdown Notes\accessibility-color-themes.md` | 169 |
+| `--brand-c-primary-dark` | `var(--a11y-cream-c-primary)` | `src\styles\themes\a11y\a11y-cream.css` | 31 |
+| `--brand-c-primary-dark` | `var(--a11y-dark-c-primary)` | `src\styles\themes\a11y\a11y-dark.css` | 34 |
+| `--brand-c-primary-dark` | `var(--a11y-deuter-c-primary)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 31 |
+| `--brand-c-primary-dark` | `var(--a11y-hc-c-primary)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 31 |
+| `--brand-c-primary-dark` | `var(--a11y-mono-c-primary)` | `src\styles\themes\a11y\a11y-monochrome.css` | 31 |
+| `--brand-c-primary-dark` | `var(--a11y-proto-c-primary)` | `src\styles\themes\a11y\a11y-protanopia.css` | 31 |
+| `--brand-c-primary-dark` | `var(--a11y-trit-c-primary)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 31 |
+| `--brand-c-primary-dark` | `#364433` | `src\styles\themes\brand\BrandDefault.css` | 21 |
+| `--brand-c-secondary-light` | `oklch(0.88 0.06 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 96 |
+| `--brand-c-secondary-light` | `oklch(0.92 0.04 35)` | `docs\Markdown Notes\accessibility-color-themes.md` | 172 |
+| `--brand-c-secondary-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 36 |
+| `--brand-c-secondary-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 39 |
+| `--brand-c-secondary-light` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 36 |
+| `--brand-c-secondary-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 36 |
+| `--brand-c-secondary-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 36 |
+| `--brand-c-secondary-light` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 36 |
+| `--brand-c-secondary-light` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 36 |
+| `--brand-c-secondary-light` | `#fff4ee` | `src\styles\themes\brand\BrandDefault.css` | 24 |
+| `--brand-c-secondary-light` | `oklch(0.80 0.08 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 97 |
+| `--brand-c-secondary-light` | `oklch(0.86 0.06 32)` | `docs\Markdown Notes\accessibility-color-themes.md` | 173 |
+| `--brand-c-secondary-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 37 |
+| `--brand-c-secondary-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 40 |
+| `--brand-c-secondary-light` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 37 |
+| `--brand-c-secondary-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 37 |
+| `--brand-c-secondary-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 37 |
+| `--brand-c-secondary-light` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 37 |
+| `--brand-c-secondary-light` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 37 |
+| `--brand-c-secondary-light` | `#fff1e7` | `src\styles\themes\brand\BrandDefault.css` | 25 |
+| `--brand-c-secondary-light` | `oklch(0.72 0.10 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 98 |
+| `--brand-c-secondary-light` | `oklch(0.79 0.08 30)` | `docs\Markdown Notes\accessibility-color-themes.md` | 174 |
+| `--brand-c-secondary-light` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 38 |
+| `--brand-c-secondary-light` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 41 |
+| `--brand-c-secondary-light` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 38 |
+| `--brand-c-secondary-light` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 38 |
+| `--brand-c-secondary-light` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 38 |
+| `--brand-c-secondary-light` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 38 |
+| `--brand-c-secondary-light` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 38 |
+| `--brand-c-secondary-light` | `#ffcfba` | `src\styles\themes\brand\BrandDefault.css` | 26 |
+| `--brand-c-secondary` | `oklch(0.66 0.11 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 99 |
+| `--brand-c-secondary` | `oklch(0.71 0.10 28)` | `docs\Markdown Notes\accessibility-color-themes.md` | 175 |
+| `--brand-c-secondary` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 39 |
+| `--brand-c-secondary` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 42 |
+| `--brand-c-secondary` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 39 |
+| `--brand-c-secondary` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 39 |
+| `--brand-c-secondary` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 39 |
+| `--brand-c-secondary` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 39 |
+| `--brand-c-secondary` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 39 |
+| `--brand-c-secondary` | `#e5af9a` | `src\styles\themes\brand\BrandDefault.css` | 27 |
+| `--brand-c-secondary` | `oklch(0.60 0.12 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 100 |
+| `--brand-c-secondary` | `oklch(0.63 0.10 25)` | `docs\Markdown Notes\accessibility-color-themes.md` | 176 |
+| `--brand-c-secondary` | `#ffff00` | `docs\Markdown Notes\accessibility-color-themes.md` | 227 |
+| `--brand-c-secondary` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 40 |
+| `--brand-c-secondary` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 43 |
+| `--brand-c-secondary` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 40 |
+| `--brand-c-secondary` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 40 |
+| `--brand-c-secondary` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 40 |
+| `--brand-c-secondary` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 40 |
+| `--brand-c-secondary` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 40 |
+| `--brand-c-secondary` | `#c4907c` | `src\styles\themes\brand\BrandDefault.css` | 28 |
+| `--brand-c-secondary-dark` | `oklch(0.54 0.10 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 101 |
+| `--brand-c-secondary-dark` | `oklch(0.55 0.10 22)` | `docs\Markdown Notes\accessibility-color-themes.md` | 177 |
+| `--brand-c-secondary-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 41 |
+| `--brand-c-secondary-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 44 |
+| `--brand-c-secondary-dark` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 41 |
+| `--brand-c-secondary-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 41 |
+| `--brand-c-secondary-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 41 |
+| `--brand-c-secondary-dark` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 41 |
+| `--brand-c-secondary-dark` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 41 |
+| `--brand-c-secondary-dark` | `#a4725f` | `src\styles\themes\brand\BrandDefault.css` | 29 |
+| `--brand-c-secondary-dark` | `oklch(0.48 0.08 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 102 |
+| `--brand-c-secondary-dark` | `oklch(0.47 0.08 20)` | `docs\Markdown Notes\accessibility-color-themes.md` | 178 |
+| `--brand-c-secondary-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 42 |
+| `--brand-c-secondary-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 45 |
+| `--brand-c-secondary-dark` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 42 |
+| `--brand-c-secondary-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 42 |
+| `--brand-c-secondary-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 42 |
+| `--brand-c-secondary-dark` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 42 |
+| `--brand-c-secondary-dark` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 42 |
+| `--brand-c-secondary-dark` | `#855543` | `src\styles\themes\brand\BrandDefault.css` | 30 |
+| `--brand-c-secondary-dark` | `oklch(0.42 0.06 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 103 |
+| `--brand-c-secondary-dark` | `oklch(0.39 0.06 18)` | `docs\Markdown Notes\accessibility-color-themes.md` | 179 |
+| `--brand-c-secondary-dark` | `var(--a11y-cream-c-accent)` | `src\styles\themes\a11y\a11y-cream.css` | 43 |
+| `--brand-c-secondary-dark` | `var(--a11y-dark-c-accent)` | `src\styles\themes\a11y\a11y-dark.css` | 46 |
+| `--brand-c-secondary-dark` | `var(--a11y-deuter-c-accent)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 43 |
+| `--brand-c-secondary-dark` | `var(--a11y-hc-c-accent)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 43 |
+| `--brand-c-secondary-dark` | `var(--a11y-mono-c-accent)` | `src\styles\themes\a11y\a11y-monochrome.css` | 43 |
+| `--brand-c-secondary-dark` | `var(--a11y-proto-c-accent)` | `src\styles\themes\a11y\a11y-protanopia.css` | 43 |
+| `--brand-c-secondary-dark` | `var(--a11y-trit-c-accent)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 43 |
+| `--brand-c-secondary-dark` | `#6f4230` | `src\styles\themes\brand\BrandDefault.css` | 31 |
+| `--brand-c-secondary-dark` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 193 |
+| `--brand-c-secondary-dark` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 648 |
+| `--brand-c-secondary-dark` | `#5a3420` | `docs\reports\color-token-usage-report.md` | 691 |
+| `--brand-c-secondary-dark` | `#5a3420`** (line 32)` | `docs\reports\FIXES-APPLIED.md` | 12 |
+| `--brand-c-secondary-dark` | `#5a3420` | `docs\todo\TODO.md` | 257 |
+| `--brand-c-secondary-dark` | `#5a3420` | `src\styles\themes\brand\BrandDefault.css` | 32 |
 | `--color-Success` | `oklch(0.68 0.12 145)` | `docs\Markdown Notes\accessibility-color-themes.md` | 113 |
 | `--color-Success` | `oklch(0.56 0.10 145)` | `docs\Markdown Notes\accessibility-color-themes.md` | 189 |
 | `--color-Success` | `#00ff00` | `docs\Markdown Notes\accessibility-color-themes.md` | 235 |
@@ -5927,110 +5927,110 @@ How often each colour token is actually used across the project.
 | `--color-Success-100` | `${toOKLCH(chroma.hsl(145, 0.3 * satAdjust, 0.92 * lightAdjust).hex())` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 1926 |
 | `--color-Success-200` | `${toOKLCH(chroma.hsl(145, 0.5 * satAdjust, 0.80 * lightAdjust).hex())` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 1927 |
 | `--color-Success-500` | `${toOKLCH(chroma.hsl(145, 0.6 * satAdjust, 0.50 * lightAdjust).hex())` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 1928 |
-| `--color-Text-100` | `#e8e8e8` | `docs\reports\color-token-usage-report.md` | 692 |
-| `--color-Text-100` | `#e8e8e8`** (line 48)` | `docs\reports\FIXES-APPLIED.md` | 16 |
-| `--color-Text-100` | `#e8e8e8` | `src\styles\themes\brand\BrandDefault.css` | 48 |
-| `--color-Text-200` | `#dbdbdb`** (line 49)` | `docs\reports\FIXES-APPLIED.md` | 20 |
-| `--color-Text-200` | `#dbdbdb` | `src\styles\themes\brand\BrandDefault.css` | 49 |
-| `--color-Text-300` | `oklch(0.92 0.01 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 74 |
-| `--color-Text-300` | `oklch(0.36 0.03 40)` | `docs\Markdown Notes\accessibility-color-themes.md` | 150 |
-| `--color-Text-300` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 217 |
-| `--color-Text-300` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 68 |
-| `--color-Text-300` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 70 |
-| `--color-Text-300` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 68 |
-| `--color-Text-300` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 68 |
-| `--color-Text-300` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 68 |
-| `--color-Text-300` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 68 |
-| `--color-Text-300` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 68 |
-| `--color-Text-300` | `#d3d3d3` | `src\styles\themes\brand\BrandDefault.css` | 50 |
-| `--color-Text-400` | `oklch(0.88 0.01 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 75 |
-| `--color-Text-400` | `oklch(0.33 0.03 38)` | `docs\Markdown Notes\accessibility-color-themes.md` | 151 |
-| `--color-Text-400` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 218 |
-| `--color-Text-400` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 69 |
-| `--color-Text-400` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 71 |
-| `--color-Text-400` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 69 |
-| `--color-Text-400` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 69 |
-| `--color-Text-400` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 69 |
-| `--color-Text-400` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 69 |
-| `--color-Text-400` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 69 |
-| `--color-Text-400` | `#b3b3b3` | `src\styles\themes\brand\BrandDefault.css` | 51 |
-| `--color-Text-50` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 67 |
-| `--color-Text-50` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 69 |
-| `--color-Text-50` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 67 |
-| `--color-Text-50` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 67 |
-| `--color-Text-50` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 67 |
-| `--color-Text-50` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 67 |
-| `--color-Text-50` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 67 |
-| `--color-Text-50` | `#f8f8f8` | `src\styles\themes\brand\BrandDefault.css` | 47 |
-| `--color-Text-500` | `oklch(0.84 0.01 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 76 |
-| `--color-Text-500` | `oklch(0.30 0.03 36)` | `docs\Markdown Notes\accessibility-color-themes.md` | 152 |
-| `--color-Text-500` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 219 |
-| `--color-Text-500` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 70 |
-| `--color-Text-500` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 72 |
-| `--color-Text-500` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 70 |
-| `--color-Text-500` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 70 |
-| `--color-Text-500` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 70 |
-| `--color-Text-500` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 70 |
-| `--color-Text-500` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 70 |
-| `--color-Text-500` | `#949494` | `src\styles\themes\brand\BrandDefault.css` | 52 |
-| `--color-Text-600` | `oklch(0.78 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 77 |
-| `--color-Text-600` | `oklch(0.27 0.03 34)` | `docs\Markdown Notes\accessibility-color-themes.md` | 153 |
-| `--color-Text-600` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 220 |
-| `--color-Text-600` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 71 |
-| `--color-Text-600` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 73 |
-| `--color-Text-600` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 71 |
-| `--color-Text-600` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 71 |
-| `--color-Text-600` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 71 |
-| `--color-Text-600` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 71 |
-| `--color-Text-600` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 71 |
-| `--color-Text-600` | `#777777` | `src\styles\themes\brand\BrandDefault.css` | 53 |
-| `--color-Text-700` | `oklch(0.72 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 78 |
-| `--color-Text-700` | `oklch(0.24 0.025 33)` | `docs\Markdown Notes\accessibility-color-themes.md` | 154 |
-| `--color-Text-700` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 221 |
-| `--color-Text-700` | `#373737` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 14 |
-| `--color-Text-700` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 72 |
-| `--color-Text-700` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 74 |
-| `--color-Text-700` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 72 |
-| `--color-Text-700` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 72 |
-| `--color-Text-700` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 72 |
-| `--color-Text-700` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 72 |
-| `--color-Text-700` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 72 |
-| `--color-Text-700` | `#5a5a5a` | `src\styles\themes\brand\BrandDefault.css` | 54 |
-| `--color-Text-800` | `oklch(0.66 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 79 |
-| `--color-Text-800` | `oklch(0.21 0.020 32)` | `docs\Markdown Notes\accessibility-color-themes.md` | 155 |
-| `--color-Text-800` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 222 |
-| `--color-Text-800` | `#262626` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 15 |
-| `--color-Text-800` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 73 |
-| `--color-Text-800` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 75 |
-| `--color-Text-800` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 73 |
-| `--color-Text-800` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 73 |
-| `--color-Text-800` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 73 |
-| `--color-Text-800` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 73 |
-| `--color-Text-800` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 73 |
-| `--color-Text-800` | `#474747` | `src\styles\themes\brand\BrandDefault.css` | 55 |
-| `--color-Text-900` | `oklch(0.60 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 80 |
-| `--color-Text-900` | `oklch(0.18 0.018 30)` | `docs\Markdown Notes\accessibility-color-themes.md` | 156 |
-| `--color-Text-900` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 223 |
-| `--color-Text-900` | `#181818` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 16 |
-| `--color-Text-900` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 74 |
-| `--color-Text-900` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 76 |
-| `--color-Text-900` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 74 |
-| `--color-Text-900` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 74 |
-| `--color-Text-900` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 74 |
-| `--color-Text-900` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 74 |
-| `--color-Text-900` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 74 |
-| `--color-Text-900` | `#373737` | `src\styles\themes\brand\BrandDefault.css` | 56 |
-| `--color-Text-950` | `oklch(0.56 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 81 |
-| `--color-Text-950` | `oklch(0.16 0.016 28)` | `docs\Markdown Notes\accessibility-color-themes.md` | 157 |
-| `--color-Text-950` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 224 |
-| `--color-Text-950` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 75 |
-| `--color-Text-950` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 77 |
-| `--color-Text-950` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 75 |
-| `--color-Text-950` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 75 |
-| `--color-Text-950` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 75 |
-| `--color-Text-950` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 75 |
-| `--color-Text-950` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 75 |
-| `--color-Text-950` | `#262626` | `src\styles\themes\brand\BrandDefault.css` | 57 |
+| `--brand-c-text-light` | `#e8e8e8` | `docs\reports\color-token-usage-report.md` | 692 |
+| `--brand-c-text-light` | `#e8e8e8`** (line 48)` | `docs\reports\FIXES-APPLIED.md` | 16 |
+| `--brand-c-text-light` | `#e8e8e8` | `src\styles\themes\brand\BrandDefault.css` | 48 |
+| `--brand-c-text-light` | `#dbdbdb`** (line 49)` | `docs\reports\FIXES-APPLIED.md` | 20 |
+| `--brand-c-text-light` | `#dbdbdb` | `src\styles\themes\brand\BrandDefault.css` | 49 |
+| `--brand-c-text-light` | `oklch(0.92 0.01 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 74 |
+| `--brand-c-text-light` | `oklch(0.36 0.03 40)` | `docs\Markdown Notes\accessibility-color-themes.md` | 150 |
+| `--brand-c-text-light` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 217 |
+| `--brand-c-text-light` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 68 |
+| `--brand-c-text-light` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 70 |
+| `--brand-c-text-light` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 68 |
+| `--brand-c-text-light` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 68 |
+| `--brand-c-text-light` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 68 |
+| `--brand-c-text-light` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 68 |
+| `--brand-c-text-light` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 68 |
+| `--brand-c-text-light` | `#d3d3d3` | `src\styles\themes\brand\BrandDefault.css` | 50 |
+| `--brand-c-text-light` | `oklch(0.88 0.01 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 75 |
+| `--brand-c-text-light` | `oklch(0.33 0.03 38)` | `docs\Markdown Notes\accessibility-color-themes.md` | 151 |
+| `--brand-c-text-light` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 218 |
+| `--brand-c-text-light` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 69 |
+| `--brand-c-text-light` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 71 |
+| `--brand-c-text-light` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 69 |
+| `--brand-c-text-light` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 69 |
+| `--brand-c-text-light` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 69 |
+| `--brand-c-text-light` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 69 |
+| `--brand-c-text-light` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 69 |
+| `--brand-c-text-light` | `#b3b3b3` | `src\styles\themes\brand\BrandDefault.css` | 51 |
+| `--brand-c-text-light` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 67 |
+| `--brand-c-text-light` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 69 |
+| `--brand-c-text-light` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 67 |
+| `--brand-c-text-light` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 67 |
+| `--brand-c-text-light` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 67 |
+| `--brand-c-text-light` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 67 |
+| `--brand-c-text-light` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 67 |
+| `--brand-c-text-light` | `#f8f8f8` | `src\styles\themes\brand\BrandDefault.css` | 47 |
+| `--brand-c-text-light` | `oklch(0.84 0.01 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 76 |
+| `--brand-c-text-light` | `oklch(0.30 0.03 36)` | `docs\Markdown Notes\accessibility-color-themes.md` | 152 |
+| `--brand-c-text-light` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 219 |
+| `--brand-c-text-light` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 70 |
+| `--brand-c-text-light` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 72 |
+| `--brand-c-text-light` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 70 |
+| `--brand-c-text-light` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 70 |
+| `--brand-c-text-light` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 70 |
+| `--brand-c-text-light` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 70 |
+| `--brand-c-text-light` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 70 |
+| `--brand-c-text-light` | `#949494` | `src\styles\themes\brand\BrandDefault.css` | 52 |
+| `--brand-c-text` | `oklch(0.78 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 77 |
+| `--brand-c-text` | `oklch(0.27 0.03 34)` | `docs\Markdown Notes\accessibility-color-themes.md` | 153 |
+| `--brand-c-text` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 220 |
+| `--brand-c-text` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 71 |
+| `--brand-c-text` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 73 |
+| `--brand-c-text` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 71 |
+| `--brand-c-text` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 71 |
+| `--brand-c-text` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 71 |
+| `--brand-c-text` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 71 |
+| `--brand-c-text` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 71 |
+| `--brand-c-text` | `#777777` | `src\styles\themes\brand\BrandDefault.css` | 53 |
+| `--brand-c-text` | `oklch(0.72 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 78 |
+| `--brand-c-text` | `oklch(0.24 0.025 33)` | `docs\Markdown Notes\accessibility-color-themes.md` | 154 |
+| `--brand-c-text` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 221 |
+| `--brand-c-text` | `#373737` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 14 |
+| `--brand-c-text` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 72 |
+| `--brand-c-text` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 74 |
+| `--brand-c-text` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 72 |
+| `--brand-c-text` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 72 |
+| `--brand-c-text` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 72 |
+| `--brand-c-text` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 72 |
+| `--brand-c-text` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 72 |
+| `--brand-c-text` | `#5a5a5a` | `src\styles\themes\brand\BrandDefault.css` | 54 |
+| `--brand-c-text` | `oklch(0.66 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 79 |
+| `--brand-c-text` | `oklch(0.21 0.020 32)` | `docs\Markdown Notes\accessibility-color-themes.md` | 155 |
+| `--brand-c-text` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 222 |
+| `--brand-c-text` | `#262626` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 15 |
+| `--brand-c-text` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 73 |
+| `--brand-c-text` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 75 |
+| `--brand-c-text` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 73 |
+| `--brand-c-text` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 73 |
+| `--brand-c-text` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 73 |
+| `--brand-c-text` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 73 |
+| `--brand-c-text` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 73 |
+| `--brand-c-text` | `#474747` | `src\styles\themes\brand\BrandDefault.css` | 55 |
+| `--brand-c-text-dark` | `oklch(0.60 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 80 |
+| `--brand-c-text-dark` | `oklch(0.18 0.018 30)` | `docs\Markdown Notes\accessibility-color-themes.md` | 156 |
+| `--brand-c-text-dark` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 223 |
+| `--brand-c-text-dark` | `#181818` | `src\scripts\ThemeTokenGen\interactive-palette-builder.html` | 16 |
+| `--brand-c-text-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 74 |
+| `--brand-c-text-dark` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 76 |
+| `--brand-c-text-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 74 |
+| `--brand-c-text-dark` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 74 |
+| `--brand-c-text-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 74 |
+| `--brand-c-text-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 74 |
+| `--brand-c-text-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 74 |
+| `--brand-c-text-dark` | `#373737` | `src\styles\themes\brand\BrandDefault.css` | 56 |
+| `--brand-c-text-dark` | `oklch(0.56 0.015 260)` | `docs\Markdown Notes\accessibility-color-themes.md` | 81 |
+| `--brand-c-text-dark` | `oklch(0.16 0.016 28)` | `docs\Markdown Notes\accessibility-color-themes.md` | 157 |
+| `--brand-c-text-dark` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 224 |
+| `--brand-c-text-dark` | `var(--a11y-cream-c-text)` | `src\styles\themes\a11y\a11y-cream.css` | 75 |
+| `--brand-c-text-dark` | `var(--a11y-dark-c-text)` | `src\styles\themes\a11y\a11y-dark.css` | 77 |
+| `--brand-c-text-dark` | `var(--a11y-deuter-c-text)` | `src\styles\themes\a11y\a11y-deuteranopia.css` | 75 |
+| `--brand-c-text-dark` | `var(--a11y-hc-c-text)` | `src\styles\themes\a11y\a11y-high-contrast.css` | 75 |
+| `--brand-c-text-dark` | `var(--a11y-mono-c-text)` | `src\styles\themes\a11y\a11y-monochrome.css` | 75 |
+| `--brand-c-text-dark` | `var(--a11y-proto-c-text)` | `src\styles\themes\a11y\a11y-protanopia.css` | 75 |
+| `--brand-c-text-dark` | `var(--a11y-trit-c-text)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 75 |
+| `--brand-c-text-dark` | `#262626` | `src\styles\themes\brand\BrandDefault.css` | 57 |
 | `--color-Warning` | `oklch(0.76 0.14 85)` | `docs\Markdown Notes\accessibility-color-themes.md` | 114 |
 | `--color-Warning` | `oklch(0.72 0.12 70)` | `docs\Markdown Notes\accessibility-color-themes.md` | 190 |
 | `--color-Warning` | `#ffff00` | `docs\Markdown Notes\accessibility-color-themes.md` | 236 |
@@ -6045,32 +6045,32 @@ How often each colour token is actually used across the project.
 | `--color-White` | `#ffffff` | `src\styles\tokens\status.css` | 11 |
 | `--disabledBg` | `color-mix(in oklch, var(--surface) 92%, var(--text) 8%)` | `docs\Markdown Notes\accessibility-color-themes.md` | 46 |
 | `--disabledText` | `color-mix(in oklch, var(--text) 45%, transparent)` | `docs\Markdown Notes\accessibility-color-themes.md` | 47 |
-| `--dropdown-accent1-border` | `var(--color-AccentOne-500)` | `src\styles\buttons\dropdown-tokens.css` | 42 |
-| `--dropdown-accent1-hover-bg` | `var(--color-AccentOne-100)` | `src\styles\buttons\dropdown-tokens.css` | 23 |
-| `--dropdown-accent1-hover-text` | `var(--color-AccentOne-800)` | `src\styles\buttons\dropdown-tokens.css` | 24 |
-| `--dropdown-accent2-border` | `var(--color-AccentTwo-500)` | `src\styles\buttons\dropdown-tokens.css` | 43 |
-| `--dropdown-accent2-hover-bg` | `var(--color-AccentTwo-100)` | `src\styles\buttons\dropdown-tokens.css` | 26 |
-| `--dropdown-accent2-hover-text` | `var(--color-AccentTwo-800)` | `src\styles\buttons\dropdown-tokens.css` | 27 |
-| `--dropdown-accent3-border` | `var(--color-AccentThree-500)` | `src\styles\buttons\dropdown-tokens.css` | 44 |
-| `--dropdown-accent3-hover-bg` | `var(--color-AccentThree-100)` | `src\styles\buttons\dropdown-tokens.css` | 29 |
-| `--dropdown-accent3-hover-text` | `var(--color-AccentThree-800)` | `src\styles\buttons\dropdown-tokens.css` | 30 |
-| `--dropdown-accent4-border` | `var(--color-AccentFour-500)` | `src\styles\buttons\dropdown-tokens.css` | 45 |
-| `--dropdown-accent4-hover-bg` | `var(--color-AccentFour-100)` | `src\styles\buttons\dropdown-tokens.css` | 32 |
-| `--dropdown-accent4-hover-text` | `var(--color-AccentFour-800)` | `src\styles\buttons\dropdown-tokens.css` | 33 |
-| `--dropdown-accent5-border` | `var(--color-AccentFive-500)` | `src\styles\buttons\dropdown-tokens.css` | 46 |
-| `--dropdown-accent5-hover-bg` | `var(--color-AccentFive-100)` | `src\styles\buttons\dropdown-tokens.css` | 35 |
-| `--dropdown-accent5-hover-text` | `var(--color-AccentFive-800)` | `src\styles\buttons\dropdown-tokens.css` | 36 |
-| `--dropdown-border-color` | `var(--color-Primary-500)` | `src\styles\buttons\dropdown-tokens.css` | 39 |
-| `--dropdown-hover-bg` | `var(--color-Primary-100)` | `src\styles\buttons\dropdown-tokens.css` | 9 |
-| `--dropdown-hover-text` | `var(--color-Primary-800)` | `src\styles\buttons\dropdown-tokens.css` | 10 |
-| `--dropdown-primary-border` | `var(--color-Primary-500)` | `src\styles\buttons\dropdown-tokens.css` | 40 |
-| `--dropdown-primary-hover-bg` | `var(--color-Primary-100)` | `src\styles\buttons\dropdown-tokens.css` | 15 |
-| `--dropdown-primary-hover-text` | `var(--color-Primary-800)` | `src\styles\buttons\dropdown-tokens.css` | 16 |
-| `--dropdown-secondary-border` | `var(--color-Secondary-500)` | `src\styles\buttons\dropdown-tokens.css` | 41 |
-| `--dropdown-secondary-hover-bg` | `var(--color-Secondary-100)` | `src\styles\buttons\dropdown-tokens.css` | 19 |
-| `--dropdown-secondary-hover-text` | `var(--color-Secondary-800)` | `src\styles\buttons\dropdown-tokens.css` | 20 |
-| `--dropdown-selected-bg` | `var(--color-Primary-100)` | `src\styles\buttons\dropdown-tokens.css` | 11 |
-| `--dropdown-selected-text` | `var(--color-Primary-800)` | `src\styles\buttons\dropdown-tokens.css` | 12 |
+| `--dropdown-accent1-border` | `var(--brand-c-neutral)` | `src\styles\buttons\dropdown-tokens.css` | 42 |
+| `--dropdown-accent1-hover-bg` | `var(--brand-c-neutral-light)` | `src\styles\buttons\dropdown-tokens.css` | 23 |
+| `--dropdown-accent1-hover-text` | `var(--brand-c-neutral-dark)` | `src\styles\buttons\dropdown-tokens.css` | 24 |
+| `--dropdown-accent2-border` | `var(--brand-c-neutral)` | `src\styles\buttons\dropdown-tokens.css` | 43 |
+| `--dropdown-accent2-hover-bg` | `var(--brand-c-neutral-light)` | `src\styles\buttons\dropdown-tokens.css` | 26 |
+| `--dropdown-accent2-hover-text` | `var(--brand-c-neutral-dark)` | `src\styles\buttons\dropdown-tokens.css` | 27 |
+| `--dropdown-accent3-border` | `var(--brand-c-neutral)` | `src\styles\buttons\dropdown-tokens.css` | 44 |
+| `--dropdown-accent3-hover-bg` | `var(--brand-c-neutral-light)` | `src\styles\buttons\dropdown-tokens.css` | 29 |
+| `--dropdown-accent3-hover-text` | `var(--brand-c-neutral-dark)` | `src\styles\buttons\dropdown-tokens.css` | 30 |
+| `--dropdown-accent4-border` | `var(--brand-c-neutral)` | `src\styles\buttons\dropdown-tokens.css` | 45 |
+| `--dropdown-accent4-hover-bg` | `var(--brand-c-neutral-light)` | `src\styles\buttons\dropdown-tokens.css` | 32 |
+| `--dropdown-accent4-hover-text` | `var(--brand-c-neutral-dark)` | `src\styles\buttons\dropdown-tokens.css` | 33 |
+| `--dropdown-accent5-border` | `var(--brand-c-neutral)` | `src\styles\buttons\dropdown-tokens.css` | 46 |
+| `--dropdown-accent5-hover-bg` | `var(--brand-c-neutral-light)` | `src\styles\buttons\dropdown-tokens.css` | 35 |
+| `--dropdown-accent5-hover-text` | `var(--brand-c-neutral-dark)` | `src\styles\buttons\dropdown-tokens.css` | 36 |
+| `--dropdown-border-color` | `var(--brand-c-primary)` | `src\styles\buttons\dropdown-tokens.css` | 39 |
+| `--dropdown-hover-bg` | `var(--brand-c-primary-light)` | `src\styles\buttons\dropdown-tokens.css` | 9 |
+| `--dropdown-hover-text` | `var(--brand-c-primary-dark)` | `src\styles\buttons\dropdown-tokens.css` | 10 |
+| `--dropdown-primary-border` | `var(--brand-c-primary)` | `src\styles\buttons\dropdown-tokens.css` | 40 |
+| `--dropdown-primary-hover-bg` | `var(--brand-c-primary-light)` | `src\styles\buttons\dropdown-tokens.css` | 15 |
+| `--dropdown-primary-hover-text` | `var(--brand-c-primary-dark)` | `src\styles\buttons\dropdown-tokens.css` | 16 |
+| `--dropdown-secondary-border` | `var(--brand-c-secondary)` | `src\styles\buttons\dropdown-tokens.css` | 41 |
+| `--dropdown-secondary-hover-bg` | `var(--brand-c-secondary-light)` | `src\styles\buttons\dropdown-tokens.css` | 19 |
+| `--dropdown-secondary-hover-text` | `var(--brand-c-secondary-dark)` | `src\styles\buttons\dropdown-tokens.css` | 20 |
+| `--dropdown-selected-bg` | `var(--brand-c-primary-light)` | `src\styles\buttons\dropdown-tokens.css` | 11 |
+| `--dropdown-selected-text` | `var(--brand-c-primary-dark)` | `src\styles\buttons\dropdown-tokens.css` | 12 |
 | `--error` | `var(--color-Error)` | `docs\Markdown Notes\accessibility-color-themes.md` | 40 |
 | `--feedback-error-bg` | `var(--color-Error)` | `docs\todo\TODO.md` | 382 |
 | `--feedback-error-border` | `var(--color-Error)` | `docs\todo\TODO.md` | 384 |
@@ -6086,83 +6086,83 @@ How often each colour token is actually used across the project.
 | `--focusRing` | `oklch(0.76 0.10 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 123 |
 | `--focusRing` | `oklch(0.62 0.10 200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 198 |
 | `--focusRing` | `#00ffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 248 |
-| `--focusRing` | `var(--color-AccentOne-500)` | `docs\Markdown Notes\accessibility-color-themes.md` | 276 |
-| `--focusRing` | `var(--color-AccentOne-500)` | `docs\Markdown Notes\accessibility-color-themes.md` | 298 |
-| `--focusRing` | `var(--color-AccentOne-500)` | `docs\Markdown Notes\accessibility-color-themes.md` | 320 |
+| `--focusRing` | `var(--brand-c-neutral)` | `docs\Markdown Notes\accessibility-color-themes.md` | 276 |
+| `--focusRing` | `var(--brand-c-neutral)` | `docs\Markdown Notes\accessibility-color-themes.md` | 298 |
+| `--focusRing` | `var(--brand-c-neutral)` | `docs\Markdown Notes\accessibility-color-themes.md` | 320 |
 | `--focusRing` | `oklch(0.92 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 343 |
 | `--font-secondary` | `'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif` | `src\styles\tokens\typography.css` | 14 |
 | `--form-bg` | `var(--color-White)` | `docs\todo\TODO.md` | 389 |
-| `--form-border` | `var(--color-Neutral-300)` | `docs\todo\TODO.md` | 390 |
+| `--form-border` | `var(--brand-c-neutral)` | `docs\todo\TODO.md` | 390 |
 | `--form-border-error` | `var(--color-Error)` | `docs\todo\TODO.md` | 393 |
-| `--form-border-focus` | `var(--color-Primary-500)` | `docs\todo\TODO.md` | 392 |
-| `--form-border-hover` | `var(--color-Neutral-400)` | `docs\todo\TODO.md` | 391 |
+| `--form-border-focus` | `var(--brand-c-primary)` | `docs\todo\TODO.md` | 392 |
+| `--form-border-hover` | `var(--brand-c-neutral)` | `docs\todo\TODO.md` | 391 |
 | `--form-border-success` | `var(--color-Success)` | `docs\todo\TODO.md` | 394 |
 | `--form-invalid-bg` | `color-mix(in oklch, var(--feedback-error-bg) 5%, transparent)` | `docs\todo\TODO.md` | 395 |
 | `--form-valid-bg` | `color-mix(in oklch, var(--feedback-success-bg) 5%, transparent)` | `docs\todo\TODO.md` | 396 |
 | `--glass-bg` | `rgba(255, 255, 255, 0.1)` | `src\styles\tokens\shadows.css` | 80 |
 | `--glass-border` | `rgba(255, 255, 255, 0.2)` | `src\styles\tokens\shadows.css` | 81 |
-| `--glass-card-bg` | `color-mix(in oklch, var(--color-Background-50) 15%, transparent)` | `src\styles\tokens\shadows.css` | 96 |
-| `--glass-card-bg` | `color-mix(in oklch, var(--color-Background-900) 25%, transparent)` | `src\styles\tokens\shadows.css` | 107 |
-| `--glass-card-border` | `color-mix(in oklch, var(--color-Background-50) 18%, transparent)` | `src\styles\tokens\shadows.css` | 99 |
-| `--glass-card-border` | `color-mix(in oklch, var(--color-Background-50) 10%, transparent)` | `src\styles\tokens\shadows.css` | 108 |
-| `--glass-card-shadow` | `0 8px 24px 0 color-mix(in oklch, var(--color-Primary-700) 30%, transparent)` | `src\styles\tokens\shadows.css` | 98 |
-| `--glass-overlay-bg` | `color-mix(in oklch, var(--color-Background-50) 5%, transparent)` | `src\styles\tokens\shadows.css` | 91 |
-| `--glass-overlay-bg` | `color-mix(in oklch, var(--color-Background-900) 10%, transparent)` | `src\styles\tokens\shadows.css` | 106 |
+| `--glass-card-bg` | `color-mix(in oklch, var(--brand-c-bg) 15%, transparent)` | `src\styles\tokens\shadows.css` | 96 |
+| `--glass-card-bg` | `color-mix(in oklch, var(--brand-c-bg-dark) 25%, transparent)` | `src\styles\tokens\shadows.css` | 107 |
+| `--glass-card-border` | `color-mix(in oklch, var(--brand-c-bg) 18%, transparent)` | `src\styles\tokens\shadows.css` | 99 |
+| `--glass-card-border` | `color-mix(in oklch, var(--brand-c-bg) 10%, transparent)` | `src\styles\tokens\shadows.css` | 108 |
+| `--glass-card-shadow` | `0 8px 24px 0 color-mix(in oklch, var(--brand-c-primary-dark) 30%, transparent)` | `src\styles\tokens\shadows.css` | 98 |
+| `--glass-overlay-bg` | `color-mix(in oklch, var(--brand-c-bg) 5%, transparent)` | `src\styles\tokens\shadows.css` | 91 |
+| `--glass-overlay-bg` | `color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent)` | `src\styles\tokens\shadows.css` | 106 |
 | `--glass-overlay-blur` | `8px` | `src\styles\tokens\shadows.css` | 92 |
-| `--glass-overlay-shadow` | `0 4px 16px 0 color-mix(in oklch, var(--color-Primary-700) 20%, transparent)` | `src\styles\tokens\shadows.css` | 93 |
+| `--glass-overlay-shadow` | `0 4px 16px 0 color-mix(in oklch, var(--brand-c-primary-dark) 20%, transparent)` | `src\styles\tokens\shadows.css` | 93 |
 | `--glass-shadow` | `0 8px 32px 0 rgba(31, 38, 135, 0.37)` | `src\styles\tokens\shadows.css` | 82 |
-| `--glass-surface-bg` | `color-mix(in oklch, var(--color-Background-50) 10%, transparent)` | `src\styles\tokens\shadows.css` | 86 |
-| `--glass-surface-bg` | `color-mix(in oklch, var(--color-Background-900) 20%, transparent)` | `src\styles\tokens\shadows.css` | 105 |
+| `--glass-surface-bg` | `color-mix(in oklch, var(--brand-c-bg) 10%, transparent)` | `src\styles\tokens\shadows.css` | 86 |
+| `--glass-surface-bg` | `color-mix(in oklch, var(--brand-c-bg-dark) 20%, transparent)` | `src\styles\tokens\shadows.css` | 105 |
 | `--glass-surface-blur` | `12px` | `src\styles\tokens\shadows.css` | 87 |
-| `--glass-surface-shadow` | `0 8px 32px 0 color-mix(in oklch, var(--color-Primary-700) 37%, transparent)` | `src\styles\tokens\shadows.css` | 88 |
+| `--glass-surface-shadow` | `0 8px 32px 0 color-mix(in oklch, var(--brand-c-primary-dark) 37%, transparent)` | `src\styles\tokens\shadows.css` | 88 |
 | `--glint-gradient` | `linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)` | `src\styles\tokens\shadows.css` | 73 |
 | `--glint-gradient-strong` | `linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)` | `src\styles\tokens\shadows.css` | 74 |
 | `--glint-gradient-subtle` | `linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)` | `src\styles\tokens\shadows.css` | 75 |
-| `--gradient-accent-border` | `linear-gradient(90deg, var(--color-Primary-600) 0%, var(--color-Secondary-600) 100%)` | `src\styles\tokens\gradients.css` | 226 |
-| `--gradient-accent1` | `linear-gradient(135deg, var(--color-AccentOne-600) 0%, var(--color-AccentOne-800) 100%)` | `src\styles\tokens\gradients.css` | 99 |
-| `--gradient-accent1-glow` | `linear-gradient(135deg, var(--color-AccentOne-200) 0%, var(--color-AccentOne-400) 30%, var(--color-AccentOne-600) 60%, var(--color-AccentOne-800) 100%)` | `src\styles\tokens\gradients.css` | 103 |
-| `--gradient-accent1-intense` | `linear-gradient(135deg, var(--color-AccentOne-700) 0%, var(--color-AccentOne-800) 100%)` | `src\styles\tokens\gradients.css` | 102 |
-| `--gradient-accent1-light` | `linear-gradient(135deg, var(--color-AccentOne-200) 0%, var(--color-AccentOne-400) 100%)` | `src\styles\tokens\gradients.css` | 101 |
-| `--gradient-accent1-soft` | `linear-gradient(135deg, var(--color-AccentOne-400) 0%, var(--color-AccentOne-600) 100%)` | `src\styles\tokens\gradients.css` | 100 |
-| `--gradient-accent2` | `linear-gradient(135deg, var(--color-AccentTwo-600) 0%, var(--color-AccentTwo-800) 100%)` | `src\styles\tokens\gradients.css` | 106 |
-| `--gradient-accent2-glow` | `linear-gradient(135deg, var(--color-AccentTwo-200) 0%, var(--color-AccentTwo-400) 30%, var(--color-AccentTwo-600) 60%, var(--color-AccentTwo-800) 100%)` | `src\styles\tokens\gradients.css` | 110 |
-| `--gradient-accent2-intense` | `linear-gradient(135deg, var(--color-AccentTwo-700) 0%, var(--color-AccentTwo-800) 100%)` | `src\styles\tokens\gradients.css` | 109 |
-| `--gradient-accent2-light` | `linear-gradient(135deg, var(--color-AccentTwo-200) 0%, var(--color-AccentTwo-400) 100%)` | `src\styles\tokens\gradients.css` | 108 |
-| `--gradient-accent2-soft` | `linear-gradient(135deg, var(--color-AccentTwo-400) 0%, var(--color-AccentTwo-600) 100%)` | `src\styles\tokens\gradients.css` | 107 |
-| `--gradient-accent3` | `linear-gradient(135deg, var(--color-AccentThree-600) 0%, var(--color-AccentThree-800) 100%)` | `src\styles\tokens\gradients.css` | 113 |
-| `--gradient-accent3-glow` | `linear-gradient(135deg, var(--color-AccentThree-200) 0%, var(--color-AccentThree-400) 30%, var(--color-AccentThree-600) 60%, var(--color-AccentThree-800) 100%)` | `src\styles\tokens\gradients.css` | 117 |
-| `--gradient-accent3-intense` | `linear-gradient(135deg, var(--color-AccentThree-700) 0%, var(--color-AccentThree-800) 100%)` | `src\styles\tokens\gradients.css` | 116 |
-| `--gradient-accent3-light` | `linear-gradient(135deg, var(--color-AccentThree-200) 0%, var(--color-AccentThree-400) 100%)` | `src\styles\tokens\gradients.css` | 115 |
-| `--gradient-accent3-soft` | `linear-gradient(135deg, var(--color-AccentThree-400) 0%, var(--color-AccentThree-600) 100%)` | `src\styles\tokens\gradients.css` | 114 |
-| `--gradient-accent4` | `linear-gradient(135deg, var(--color-AccentFour-600) 0%, var(--color-AccentFour-800) 100%)` | `src\styles\tokens\gradients.css` | 120 |
-| `--gradient-accent4-glow` | `linear-gradient(135deg, var(--color-AccentFour-200) 0%, var(--color-AccentFour-400) 30%, var(--color-AccentFour-600) 60%, var(--color-AccentFour-800) 100%)` | `src\styles\tokens\gradients.css` | 124 |
-| `--gradient-accent4-intense` | `linear-gradient(135deg, var(--color-AccentFour-700) 0%, var(--color-AccentFour-800) 100%)` | `src\styles\tokens\gradients.css` | 123 |
-| `--gradient-accent4-light` | `linear-gradient(135deg, var(--color-AccentFour-200) 0%, var(--color-AccentFour-400) 100%)` | `src\styles\tokens\gradients.css` | 122 |
-| `--gradient-accent4-soft` | `linear-gradient(135deg, var(--color-AccentFour-400) 0%, var(--color-AccentFour-600) 100%)` | `src\styles\tokens\gradients.css` | 121 |
-| `--gradient-accent5` | `linear-gradient(135deg, var(--color-AccentFive-600) 0%, var(--color-AccentFive-800) 100%)` | `src\styles\tokens\gradients.css` | 127 |
-| `--gradient-accent5-glow` | `linear-gradient(135deg, var(--color-AccentFive-200) 0%, var(--color-AccentFive-400) 30%, var(--color-AccentFive-600) 60%, var(--color-AccentFive-800) 100%)` | `src\styles\tokens\gradients.css` | 131 |
-| `--gradient-accent5-intense` | `linear-gradient(135deg, var(--color-AccentFive-700) 0%, var(--color-AccentFive-800) 100%)` | `src\styles\tokens\gradients.css` | 130 |
-| `--gradient-accent5-light` | `linear-gradient(135deg, var(--color-AccentFive-200) 0%, var(--color-AccentFive-400) 100%)` | `src\styles\tokens\gradients.css` | 129 |
-| `--gradient-accent5-soft` | `linear-gradient(135deg, var(--color-AccentFive-400) 0%, var(--color-AccentFive-600) 100%)` | `src\styles\tokens\gradients.css` | 128 |
-| `--gradient-background-cool` | `linear-gradient(135deg, var(--color-Background-100) 0%, var(--color-Neutral-200) 100%)` | `src\styles\tokens\gradients.css` | 178 |
-| `--gradient-background-glow` | `linear-gradient(135deg, var(--color-Background-50) 0%, var(--color-Background-200) 30%, var(--color-Background-300) 60%, var(--color-Neutral-300) 100%)` | `src\styles\tokens\gradients.css` | 183 |
-| `--gradient-background-light` | `linear-gradient(135deg, var(--color-Background-50) 0%, var(--color-Background-200) 100%)` | `src\styles\tokens\gradients.css` | 175 |
-| `--gradient-background-radial` | `radial-gradient(circle at center, var(--color-Background-50) 0%, var(--color-Background-300) 100%)` | `src\styles\tokens\gradients.css` | 186 |
-| `--gradient-background-radial-complex` | `radial-gradient(ellipse at 40% 60%, var(--color-Background-50) 0%, var(--color-Background-200) 40%, var(--color-Neutral-200) 80%, var(--color-Neutral-300) 100%)` | `src\styles\tokens\gradients.css` | 188 |
-| `--gradient-background-radial-soft` | `radial-gradient(circle at 30% 30%, var(--color-Background-50) 0%, var(--color-Background-200) 50%, var(--color-Background-400) 100%)` | `src\styles\tokens\gradients.css` | 187 |
-| `--gradient-background-rainbow` | `linear-gradient(135deg, var(--color-Background-50) 0%, var(--color-Background-100) 25%, var(--color-Background-200) 50%, var(--color-Background-300) 75%, var(--color-Background-400) 100%)` | `src\styles\tokens\gradients.css` | 181 |
-| `--gradient-background-soft` | `linear-gradient(135deg, var(--color-Background-100) 0%, var(--color-Background-300) 100%)` | `src\styles\tokens\gradients.css` | 176 |
-| `--gradient-background-warm` | `linear-gradient(135deg, var(--color-Background-200) 0%, var(--color-Background-400) 100%)` | `src\styles\tokens\gradients.css` | 177 |
-| `--gradient-background-wave` | `linear-gradient(90deg, var(--color-Background-100) 0%, var(--color-Background-300) 20%, var(--color-Background-200) 40%, var(--color-Background-400) 60%, var(--color-Background-300) 80%, var(--color-Background-500) 100%)` | `src\styles\tokens\gradients.css` | 182 |
-| `--gradient-brand-burst` | `radial-gradient(ellipse at 30% 30%, var(--color-Primary-300) 0%, var(--color-Secondary-400) 30%, var(--color-Background-200) 60%, var(--color-Primary-600) 100%)` | `src\styles\tokens\gradients.css` | 156 |
-| `--gradient-brand-emerge` | `linear-gradient(135deg, var(--color-Background-50) 0%, var(--color-Primary-400) 50%, var(--color-Secondary-600) 100%)` | `src\styles\tokens\gradients.css` | 146 |
-| `--gradient-brand-fade` | `linear-gradient(135deg, var(--color-Primary-600) 0%, var(--color-Secondary-500) 50%, var(--color-Background-200) 100%)` | `src\styles\tokens\gradients.css` | 147 |
-| `--gradient-brand-radial` | `radial-gradient(circle at center, var(--color-Background-50) 0%, var(--color-Primary-400) 40%, var(--color-Secondary-600) 80%, var(--color-Background-500) 100%)` | `src\styles\tokens\gradients.css` | 155 |
-| `--gradient-btn-ghost-hover` | `linear-gradient(135deg, color-mix(in oklch, var(--color-Text-700) 10%, transparent) 0%, color-mix(in oklch, var(--color-Text-700) 20%, transparent) 100%)` | `src\styles\tokens\gradients.css` | 201 |
+| `--gradient-accent-border` | `linear-gradient(90deg, var(--brand-c-primary-dark) 0%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 226 |
+| `--gradient-accent1` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 99 |
+| `--gradient-accent1-glow` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 30%, var(--brand-c-neutral-dark) 60%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 103 |
+| `--gradient-accent1-intense` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 102 |
+| `--gradient-accent1-light` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 101 |
+| `--gradient-accent1-soft` | `linear-gradient(135deg, var(--brand-c-neutral) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 100 |
+| `--gradient-accent2` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 106 |
+| `--gradient-accent2-glow` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 30%, var(--brand-c-neutral-dark) 60%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 110 |
+| `--gradient-accent2-intense` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 109 |
+| `--gradient-accent2-light` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 108 |
+| `--gradient-accent2-soft` | `linear-gradient(135deg, var(--brand-c-neutral) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 107 |
+| `--gradient-accent3` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 113 |
+| `--gradient-accent3-glow` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 30%, var(--brand-c-neutral-dark) 60%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 117 |
+| `--gradient-accent3-intense` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 116 |
+| `--gradient-accent3-light` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 115 |
+| `--gradient-accent3-soft` | `linear-gradient(135deg, var(--brand-c-neutral) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 114 |
+| `--gradient-accent4` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 120 |
+| `--gradient-accent4-glow` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 30%, var(--brand-c-neutral-dark) 60%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 124 |
+| `--gradient-accent4-intense` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 123 |
+| `--gradient-accent4-light` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 122 |
+| `--gradient-accent4-soft` | `linear-gradient(135deg, var(--brand-c-neutral) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 121 |
+| `--gradient-accent5` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 127 |
+| `--gradient-accent5-glow` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 30%, var(--brand-c-neutral-dark) 60%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 131 |
+| `--gradient-accent5-intense` | `linear-gradient(135deg, var(--brand-c-neutral-dark) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 130 |
+| `--gradient-accent5-light` | `linear-gradient(135deg, var(--brand-c-neutral-light) 0%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 129 |
+| `--gradient-accent5-soft` | `linear-gradient(135deg, var(--brand-c-neutral) 0%, var(--brand-c-neutral-dark) 100%)` | `src\styles\tokens\gradients.css` | 128 |
+| `--gradient-background-cool` | `linear-gradient(135deg, var(--brand-c-bg) 0%, var(--brand-c-neutral-light) 100%)` | `src\styles\tokens\gradients.css` | 178 |
+| `--gradient-background-glow` | `linear-gradient(135deg, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 30%, var(--brand-c-bg-light) 60%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 183 |
+| `--gradient-background-light` | `linear-gradient(135deg, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 175 |
+| `--gradient-background-radial` | `radial-gradient(circle at center, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 186 |
+| `--gradient-background-radial-complex` | `radial-gradient(ellipse at 40% 60%, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 40%, var(--brand-c-neutral-light) 80%, var(--brand-c-neutral) 100%)` | `src\styles\tokens\gradients.css` | 188 |
+| `--gradient-background-radial-soft` | `radial-gradient(circle at 30% 30%, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 50%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 187 |
+| `--gradient-background-rainbow` | `linear-gradient(135deg, var(--brand-c-bg) 0%, var(--brand-c-bg) 25%, var(--brand-c-bg-light) 50%, var(--brand-c-bg-light) 75%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 181 |
+| `--gradient-background-soft` | `linear-gradient(135deg, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 176 |
+| `--gradient-background-warm` | `linear-gradient(135deg, var(--brand-c-bg-light) 0%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 177 |
+| `--gradient-background-wave` | `linear-gradient(90deg, var(--brand-c-bg) 0%, var(--brand-c-bg-light) 20%, var(--brand-c-bg-light) 40%, var(--brand-c-bg-light) 60%, var(--brand-c-bg-light) 80%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 182 |
+| `--gradient-brand-burst` | `radial-gradient(ellipse at 30% 30%, var(--brand-c-primary-light) 0%, var(--brand-c-secondary) 30%, var(--brand-c-bg-light) 60%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 156 |
+| `--gradient-brand-emerge` | `linear-gradient(135deg, var(--brand-c-bg) 0%, var(--brand-c-primary) 50%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 146 |
+| `--gradient-brand-fade` | `linear-gradient(135deg, var(--brand-c-primary-dark) 0%, var(--brand-c-secondary) 50%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 147 |
+| `--gradient-brand-radial` | `radial-gradient(circle at center, var(--brand-c-bg) 0%, var(--brand-c-primary) 40%, var(--brand-c-secondary-dark) 80%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 155 |
+| `--gradient-btn-ghost-hover` | `linear-gradient(135deg, color-mix(in oklch, var(--brand-c-text) 10%, transparent) 0%, color-mix(in oklch, var(--brand-c-text) 20%, transparent) 100%)` | `src\styles\tokens\gradients.css` | 201 |
 | `--gradient-btn-primary` | `var(--gradient-primary)` | `src\styles\tokens\gradients.css` | 194 |
-| `--gradient-btn-primary-hover` | `linear-gradient(135deg, var(--color-Primary-400) 0%, var(--color-Primary-600) 100%)` | `src\styles\tokens\gradients.css` | 195 |
+| `--gradient-btn-primary-hover` | `linear-gradient(135deg, var(--brand-c-primary) 0%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 195 |
 | `--gradient-btn-secondary` | `var(--gradient-secondary)` | `src\styles\tokens\gradients.css` | 197 |
-| `--gradient-btn-secondary-hover` | `linear-gradient(135deg, var(--color-Secondary-400) 0%, var(--color-Secondary-600) 100%)` | `src\styles\tokens\gradients.css` | 198 |
+| `--gradient-btn-secondary-hover` | `linear-gradient(135deg, var(--brand-c-secondary) 0%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 198 |
 | `--gradient-deep-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 523 |
 | `--gradient-deep-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 865 |
 | `--gradient-deep-accent2` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 531 |
@@ -6178,7 +6178,7 @@ How often each colour token is actually used across the project.
 | `--gradient-deep-secondary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 515 |
 | `--gradient-deep-secondary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 855 |
 | `--gradient-error` | `linear-gradient(135deg, var(--color-Danger) 0%, color-mix(in oklch, var(--color-Danger) 70%, black) 100%)` | `src\styles\tokens\gradients.css` | 235 |
-| `--gradient-header-subtle` | `linear-gradient(180deg, var(--color-Background-300) 0%, var(--color-Background-200) 100%)` | `src\styles\tokens\gradients.css` | 208 |
+| `--gradient-header-subtle` | `linear-gradient(180deg, var(--brand-c-bg-light) 0%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 208 |
 | `--gradient-light-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 379 |
 | `--gradient-light-accent2` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 387 |
 | `--gradient-light-accent3` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 395 |
@@ -6186,8 +6186,8 @@ How often each colour token is actually used across the project.
 | `--gradient-light-accent5` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 411 |
 | `--gradient-light-primary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 363 |
 | `--gradient-light-secondary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 371 |
-| `--gradient-overlay-dark` | `linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--color-Background-900) 70%, transparent) 100%)` | `src\styles\tokens\gradients.css` | 223 |
-| `--gradient-overlay-light` | `linear-gradient(180deg, color-mix(in oklch, var(--color-Background-50) 90%, transparent) 0%, transparent 100%)` | `src\styles\tokens\gradients.css` | 224 |
+| `--gradient-overlay-dark` | `linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--brand-c-bg-dark) 70%, transparent) 100%)` | `src\styles\tokens\gradients.css` | 223 |
+| `--gradient-overlay-light` | `linear-gradient(180deg, color-mix(in oklch, var(--brand-c-bg) 90%, transparent) 0%, transparent 100%)` | `src\styles\tokens\gradients.css` | 224 |
 | `--gradient-pastel-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 658 |
 | `--gradient-pastel-accent2` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 668 |
 | `--gradient-pastel-accent3` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 678 |
@@ -6195,16 +6195,16 @@ How often each colour token is actually used across the project.
 | `--gradient-pastel-accent5` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 698 |
 | `--gradient-pastel-primary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 637 |
 | `--gradient-pastel-secondary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 648 |
-| `--gradient-primary` | `linear-gradient(135deg, var(--color-Primary-600) 0%, var(--color-Primary-800) 100%)` | `src\styles\tokens\gradients.css` | 59 |
-| `--gradient-primary-glow` | `linear-gradient(135deg, var(--color-Primary-200) 0%, var(--color-Primary-400) 30%, var(--color-Primary-600) 60%, var(--color-Primary-800) 100%)` | `src\styles\tokens\gradients.css` | 67 |
-| `--gradient-primary-intense` | `linear-gradient(135deg, var(--color-Primary-700) 0%, var(--color-Primary-900) 100%)` | `src\styles\tokens\gradients.css` | 62 |
-| `--gradient-primary-light` | `linear-gradient(135deg, var(--color-Primary-200) 0%, var(--color-Primary-400) 100%)` | `src\styles\tokens\gradients.css` | 61 |
-| `--gradient-primary-radial` | `radial-gradient(circle at 30% 40%, var(--color-Primary-400) 0%, var(--color-Primary-800) 100%)` | `src\styles\tokens\gradients.css` | 70 |
-| `--gradient-primary-radial-center` | `radial-gradient(circle at center, var(--color-Primary-300) 0%, var(--color-Primary-600) 50%, var(--color-Primary-900) 100%)` | `src\styles\tokens\gradients.css` | 71 |
-| `--gradient-primary-radial-complex` | `radial-gradient(ellipse at 20% 30%, var(--color-Primary-200) 0%, var(--color-Primary-500) 40%, var(--color-Primary-700) 80%, var(--color-Primary-900) 100%)` | `src\styles\tokens\gradients.css` | 72 |
-| `--gradient-primary-rainbow` | `linear-gradient(135deg, var(--color-Primary-300) 0%, var(--color-Primary-500) 25%, var(--color-Primary-600) 50%, var(--color-Primary-700) 75%, var(--color-Primary-900) 100%)` | `src\styles\tokens\gradients.css` | 65 |
-| `--gradient-primary-soft` | `linear-gradient(135deg, var(--color-Primary-400) 0%, var(--color-Primary-600) 100%)` | `src\styles\tokens\gradients.css` | 60 |
-| `--gradient-primary-wave` | `linear-gradient(90deg, var(--color-Primary-400) 0%, var(--color-Primary-600) 20%, var(--color-Primary-500) 40%, var(--color-Primary-700) 60%, var(--color-Primary-600) 80%, var(--color-Primary-800) 100%)` | `src\styles\tokens\gradients.css` | 66 |
+| `--gradient-primary` | `linear-gradient(135deg, var(--brand-c-primary-dark) 0%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 59 |
+| `--gradient-primary-glow` | `linear-gradient(135deg, var(--brand-c-primary-light) 0%, var(--brand-c-primary) 30%, var(--brand-c-primary-dark) 60%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 67 |
+| `--gradient-primary-intense` | `linear-gradient(135deg, var(--brand-c-primary-dark) 0%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 62 |
+| `--gradient-primary-light` | `linear-gradient(135deg, var(--brand-c-primary-light) 0%, var(--brand-c-primary) 100%)` | `src\styles\tokens\gradients.css` | 61 |
+| `--gradient-primary-radial` | `radial-gradient(circle at 30% 40%, var(--brand-c-primary) 0%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 70 |
+| `--gradient-primary-radial-center` | `radial-gradient(circle at center, var(--brand-c-primary-light) 0%, var(--brand-c-primary-dark) 50%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 71 |
+| `--gradient-primary-radial-complex` | `radial-gradient(ellipse at 20% 30%, var(--brand-c-primary-light) 0%, var(--brand-c-primary) 40%, var(--brand-c-primary-dark) 80%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 72 |
+| `--gradient-primary-rainbow` | `linear-gradient(135deg, var(--brand-c-primary-light) 0%, var(--brand-c-primary) 25%, var(--brand-c-primary-dark) 50%, var(--brand-c-primary-dark) 75%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 65 |
+| `--gradient-primary-soft` | `linear-gradient(135deg, var(--brand-c-primary) 0%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 60 |
+| `--gradient-primary-wave` | `linear-gradient(90deg, var(--brand-c-primary) 0%, var(--brand-c-primary-dark) 20%, var(--brand-c-primary) 40%, var(--brand-c-primary-dark) 60%, var(--brand-c-primary-dark) 80%, var(--brand-c-primary-dark) 100%)` | `src\styles\tokens\gradients.css` | 66 |
 | `--gradient-rainbow-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 282 |
 | `--gradient-rainbow-accent2` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 295 |
 | `--gradient-rainbow-accent3` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 308 |
@@ -6212,18 +6212,18 @@ How often each colour token is actually used across the project.
 | `--gradient-rainbow-accent5` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 334 |
 | `--gradient-rainbow-primary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 256 |
 | `--gradient-rainbow-secondary` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 269 |
-| `--gradient-secondary` | `linear-gradient(135deg, var(--color-Secondary-600) 0%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 79 |
-| `--gradient-secondary-glow` | `linear-gradient(135deg, var(--color-Secondary-100) 0%, var(--color-Secondary-400) 30%, var(--color-Secondary-600) 60%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 87 |
-| `--gradient-secondary-intense` | `linear-gradient(135deg, var(--color-Secondary-700) 0%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 82 |
-| `--gradient-secondary-light` | `linear-gradient(135deg, var(--color-Secondary-200) 0%, var(--color-Secondary-400) 100%)` | `src\styles\tokens\gradients.css` | 81 |
-| `--gradient-secondary-radial` | `radial-gradient(circle at 70% 30%, var(--color-Secondary-400) 0%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 90 |
-| `--gradient-secondary-radial-center` | `radial-gradient(circle at center, var(--color-Secondary-200) 0%, var(--color-Secondary-500) 50%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 91 |
-| `--gradient-secondary-radial-complex` | `radial-gradient(ellipse at 80% 20%, var(--color-Secondary-100) 0%, var(--color-Secondary-400) 40%, var(--color-Secondary-600) 80%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 92 |
-| `--gradient-secondary-rainbow` | `linear-gradient(135deg, var(--color-Secondary-200) 0%, var(--color-Secondary-400) 25%, var(--color-Secondary-500) 50%, var(--color-Secondary-600) 75%, var(--color-Secondary-800) 100%)` | `src\styles\tokens\gradients.css` | 85 |
-| `--gradient-secondary-soft` | `linear-gradient(135deg, var(--color-Secondary-400) 0%, var(--color-Secondary-600) 100%)` | `src\styles\tokens\gradients.css` | 80 |
-| `--gradient-secondary-wave` | `linear-gradient(90deg, var(--color-Secondary-300) 0%, var(--color-Secondary-500) 20%, var(--color-Secondary-400) 40%, var(--color-Secondary-600) 60%, var(--color-Secondary-500) 80%, var(--color-Secondary-700) 100%)` | `src\styles\tokens\gradients.css` | 86 |
-| `--gradient-soft-brand` | `linear-gradient(180deg, var(--color-Background-100) 0%, var(--color-Primary-300) 30%, var(--color-Secondary-400) 70%, var(--color-Background-300) 100%)` | `src\styles\tokens\gradients.css` | 148 |
-| `--gradient-subtle` | `linear-gradient(180deg, var(--color-Background-300) 0%, var(--color-Background-100) 100%)` | `src\styles\tokens\gradients.css` | 168 |
+| `--gradient-secondary` | `linear-gradient(135deg, var(--brand-c-secondary-dark) 0%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 79 |
+| `--gradient-secondary-glow` | `linear-gradient(135deg, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 30%, var(--brand-c-secondary-dark) 60%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 87 |
+| `--gradient-secondary-intense` | `linear-gradient(135deg, var(--brand-c-secondary-dark) 0%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 82 |
+| `--gradient-secondary-light` | `linear-gradient(135deg, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 100%)` | `src\styles\tokens\gradients.css` | 81 |
+| `--gradient-secondary-radial` | `radial-gradient(circle at 70% 30%, var(--brand-c-secondary) 0%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 90 |
+| `--gradient-secondary-radial-center` | `radial-gradient(circle at center, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 50%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 91 |
+| `--gradient-secondary-radial-complex` | `radial-gradient(ellipse at 80% 20%, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 40%, var(--brand-c-secondary-dark) 80%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 92 |
+| `--gradient-secondary-rainbow` | `linear-gradient(135deg, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 25%, var(--brand-c-secondary) 50%, var(--brand-c-secondary-dark) 75%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 85 |
+| `--gradient-secondary-soft` | `linear-gradient(135deg, var(--brand-c-secondary) 0%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 80 |
+| `--gradient-secondary-wave` | `linear-gradient(90deg, var(--brand-c-secondary-light) 0%, var(--brand-c-secondary) 20%, var(--brand-c-secondary) 40%, var(--brand-c-secondary-dark) 60%, var(--brand-c-secondary) 80%, var(--brand-c-secondary-dark) 100%)` | `src\styles\tokens\gradients.css` | 86 |
+| `--gradient-soft-brand` | `linear-gradient(180deg, var(--brand-c-bg) 0%, var(--brand-c-primary-light) 30%, var(--brand-c-secondary) 70%, var(--brand-c-bg-light) 100%)` | `src\styles\tokens\gradients.css` | 148 |
+| `--gradient-subtle` | `linear-gradient(180deg, var(--brand-c-bg-light) 0%, var(--brand-c-bg) 100%)` | `src\styles\tokens\gradients.css` | 168 |
 | `--gradient-success` | `linear-gradient(135deg, var(--color-Success) 0%, color-mix(in oklch, var(--color-Success) 70%, black) 100%)` | `src\styles\tokens\gradients.css` | 233 |
 | `--gradient-vivid-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 451 |
 | `--gradient-vivid-accent1` | `linear-gradient(` | `src\styles\tokens\gradients.css` | 761 |
@@ -6249,33 +6249,33 @@ How often each colour token is actually used across the project.
 | `--hero-overlay-color` | `var(--a11y-mono-c-bg)` | `src\styles\themes\a11y\a11y-monochrome.css` | 143 |
 | `--hero-overlay-color` | `var(--a11y-proto-c-bg)` | `src\styles\themes\a11y\a11y-protanopia.css` | 143 |
 | `--hero-overlay-color` | `var(--a11y-trit-c-bg)` | `src\styles\themes\a11y\a11y-tritanopia.css` | 143 |
-| `--img-border-color` | `var(--color-Neutral-200)` | `src\styles\tokens\images.css` | 11 |
+| `--img-border-color` | `var(--brand-c-neutral-light)` | `src\styles\tokens\images.css` | 11 |
 | `--img-border-style` | `solid` | `src\styles\tokens\images.css` | 10 |
 | `--img-border-width` | `0` | `src\styles\tokens\images.css` | 9 |
 | `--img-hover-filter` | `brightness(1.05)` | `src\styles\tokens\images.css` | 37 |
 | `--img-hover-scale` | `1.02` | `src\styles\tokens\images.css` | 35 |
 | `--img-hover-shadow` | `var(--img-shadow-lg)` | `src\styles\tokens\images.css` | 36 |
 | `--img-shadow` | `none` | `src\styles\tokens\images.css` | 20 |
-| `--img-shadow-lg` | `0 8px 16px color-mix(in oklch, var(--color-Background-900) 20%, transparent)` | `src\styles\tokens\images.css` | 23 |
-| `--img-shadow-md` | `0 4px 8px color-mix(in oklch, var(--color-Background-900) 15%, transparent)` | `src\styles\tokens\images.css` | 22 |
-| `--img-shadow-sm` | `0 2px 4px color-mix(in oklch, var(--color-Background-900) 10%, transparent)` | `src\styles\tokens\images.css` | 21 |
-| `--interactive-disabled-bg` | `var(--color-Neutral-100)` | `docs\todo\TODO.md` | 375 |
-| `--interactive-disabled-text` | `var(--color-Text-400)` | `docs\todo\TODO.md` | 376 |
-| `--interactive-primary` | `var(--color-Primary-500)` | `docs\todo\TODO.md` | 372 |
-| `--interactive-primary-active` | `var(--color-Primary-700)` | `docs\todo\TODO.md` | 374 |
-| `--interactive-primary-hover` | `var(--color-Primary-600)` | `docs\todo\TODO.md` | 373 |
-| `--link` | `var(--color-Secondary-500)` | `docs\Markdown Notes\accessibility-color-themes.md` | 30 |
+| `--img-shadow-lg` | `0 8px 16px color-mix(in oklch, var(--brand-c-bg-dark) 20%, transparent)` | `src\styles\tokens\images.css` | 23 |
+| `--img-shadow-md` | `0 4px 8px color-mix(in oklch, var(--brand-c-bg-dark) 15%, transparent)` | `src\styles\tokens\images.css` | 22 |
+| `--img-shadow-sm` | `0 2px 4px color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent)` | `src\styles\tokens\images.css` | 21 |
+| `--interactive-disabled-bg` | `var(--brand-c-neutral-light)` | `docs\todo\TODO.md` | 375 |
+| `--interactive-disabled-text` | `var(--brand-c-text-light)` | `docs\todo\TODO.md` | 376 |
+| `--interactive-primary` | `var(--brand-c-primary)` | `docs\todo\TODO.md` | 372 |
+| `--interactive-primary-active` | `var(--brand-c-primary-dark)` | `docs\todo\TODO.md` | 374 |
+| `--interactive-primary-hover` | `var(--brand-c-primary-dark)` | `docs\todo\TODO.md` | 373 |
+| `--link` | `var(--brand-c-secondary)` | `docs\Markdown Notes\accessibility-color-themes.md` | 30 |
 | `--link` | `oklch(0.74 0.12 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 121 |
 | `--link` | `oklch(0.42 0.10 45)` | `docs\Markdown Notes\accessibility-color-themes.md` | 196 |
 | `--link` | `#ffff00` | `docs\Markdown Notes\accessibility-color-themes.md` | 246 |
-| `--link` | `var(--color-AccentTwo-500)` | `docs\Markdown Notes\accessibility-color-themes.md` | 275 |
-| `--link` | `var(--color-AccentFour-500)` | `docs\Markdown Notes\accessibility-color-themes.md` | 297 |
-| `--link` | `var(--color-AccentTwo-500)` | `docs\Markdown Notes\accessibility-color-themes.md` | 319 |
+| `--link` | `var(--brand-c-neutral)` | `docs\Markdown Notes\accessibility-color-themes.md` | 275 |
+| `--link` | `var(--brand-c-neutral)` | `docs\Markdown Notes\accessibility-color-themes.md` | 297 |
+| `--link` | `var(--brand-c-neutral)` | `docs\Markdown Notes\accessibility-color-themes.md` | 319 |
 | `--link` | `oklch(0.80 0 0)` | `docs\Markdown Notes\accessibility-color-themes.md` | 341 |
 | `--link` | `hover          /* 38 chars - OK */` | `docs\reports\css-class-names-recommendations.md` | 237 |
 | `--link` | `hover {` | `src\styles\components\announcement-ticker.css` | 88 |
 | `--link` | `hover {` | `src\styles\components\announcement-ticker.css` | 121 |
-| `--linkHover` | `var(--color-Secondary-400)` | `docs\Markdown Notes\accessibility-color-themes.md` | 31 |
+| `--linkHover` | `var(--brand-c-secondary)` | `docs\Markdown Notes\accessibility-color-themes.md` | 31 |
 | `--linkHover` | `oklch(0.80 0.10 270)` | `docs\Markdown Notes\accessibility-color-themes.md` | 122 |
 | `--linkHover` | `oklch(0.34 0.10 45)` | `docs\Markdown Notes\accessibility-color-themes.md` | 197 |
 | `--linkHover` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 247 |
@@ -6296,7 +6296,7 @@ How often each colour token is actually used across the project.
 | `--primary` | `hover {` | `src\components\Presentation\Sections\TitleSection.astro` | 254 |
 | `--primary` | `hover .title-section__btn-icon {` | `src\components\Presentation\Sections\TitleSection.astro` | 276 |
 | `--print-background` | `var(--color-White)`` | `docs\todo\TODO.md` | 488 |
-| `--print-muted` | `var(--color-Neutral-500)`` | `docs\todo\TODO.md` | 489 |
+| `--print-muted` | `var(--brand-c-neutral)`` | `docs\todo\TODO.md` | 489 |
 | `--print-text` | `var(--color-Black)`` | `docs\todo\TODO.md` | 487 |
 | `--rainbow-border-animation` | `glowloop 8s linear infinite` | `src\styles\tokens\gradients.css` | 44 |
 | `--rainbow-border-hover-opacity` | `0.4` | `src\styles\tokens\gradients.css` | 45 |
@@ -6314,64 +6314,64 @@ How often each colour token is actually used across the project.
 | `--selectionBg` | `color-mix(in oklch, var(--focusRing) 25%, transparent)` | `docs\Markdown Notes\accessibility-color-themes.md` | 44 |
 | `--selectionText` | `var(--text)` | `docs\Markdown Notes\accessibility-color-themes.md` | 45 |
 | `--shadow` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 158 |
-| `--shadow` | `0 1px 3px 0 color-mix(in oklch, var(--color-Background-900) 10%, transparent), 0 1px 2px 0 color-mix(in oklch, var(--color-Background-900) 6%, transparent)` | `src\styles\tokens\shadows.css` | 10 |
+| `--shadow` | `0 1px 3px 0 color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent), 0 1px 2px 0 color-mix(in oklch, var(--brand-c-bg-dark) 6%, transparent)` | `src\styles\tokens\shadows.css` | 10 |
 | `--shadow-2xl` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 163 |
-| `--shadow-2xl` | `0 25px 50px -12px color-mix(in oklch, var(--color-Background-900) 25%, transparent)` | `src\styles\tokens\shadows.css` | 15 |
+| `--shadow-2xl` | `0 25px 50px -12px color-mix(in oklch, var(--brand-c-bg-dark) 25%, transparent)` | `src\styles\tokens\shadows.css` | 15 |
 | `--shadow-base` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 159 |
 | `--shadow-base` | `var(--shadow)` | `src\styles\tokens\shadows.css` | 11 |
 | `--shadow-btn` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 164 |
-| `--shadow-btn` | `0 4px 8px color-mix(in oklch, var(--color-Background-900) 15%, transparent), 0 2px 4px color-mix(in oklch, var(--color-Background-900) 10%, transparent)` | `src\styles\tokens\shadows.css` | 65 |
+| `--shadow-btn` | `0 4px 8px color-mix(in oklch, var(--brand-c-bg-dark) 15%, transparent), 0 2px 4px color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent)` | `src\styles\tokens\shadows.css` | 65 |
 | `--shadow-btn-hover` | `0 0 12px color-mix(in oklch, var(--a11y-dark-c-primary) 40%, transparent)` | `src\styles\themes\a11y\a11y-dark.css` | 165 |
-| `--shadow-btn-hover` | `0 6px 12px color-mix(in oklch, var(--color-Primary-500) 30%, transparent), 0 3px 6px color-mix(in oklch, var(--color-Background-900) 10%, transparent)` | `src\styles\tokens\shadows.css` | 66 |
-| `--shadow-dropdown` | `4px 4px 6px color-mix(in oklch, var(--color-Background-900) 20%, transparent), 4px 4px 6px color-mix(in oklch, var(--color-Background-50) 70%, transparent), inset 4px 4px 6px color-mix(in oklch, var(--color-Background-900) 40%, transparent), inset 4px 4px 6px color-mix(in oklch, var(--color-Background-50) 20%, transparent)` | `src\styles\tokens\shadows.css` | 58 |
-| `--shadow-dropdown-lg` | `0 8px 16px color-mix(in oklch, var(--color-Background-900) 12%, transparent), 0 4px 8px color-mix(in oklch, var(--color-Background-900) 10%, transparent)` | `src\styles\tokens\shadows.css` | 61 |
-| `--shadow-dropdown-md` | `0 4px 8px color-mix(in oklch, var(--color-Background-900) 10%, transparent), 0 2px 4px color-mix(in oklch, var(--color-Background-900) 8%, transparent)` | `src\styles\tokens\shadows.css` | 60 |
-| `--shadow-dropdown-sm` | `0 2px 4px color-mix(in oklch, var(--color-Background-900) 8%, transparent), 0 1px 2px color-mix(in oklch, var(--color-Background-900) 6%, transparent)` | `src\styles\tokens\shadows.css` | 59 |
-| `--shadow-dropdown-soft` | `4px 4px 6px color-mix(in oklch, var(--color-Background-900) 20%, transparent), -4px -4px 6px color-mix(in oklch, var(--color-Background-50) 60%, transparent), inset 2px 2px 4px color-mix(in oklch, var(--color-Background-900) 15%, transparent), inset -2px -2px 4px color-mix(in oklch, var(--color-Background-50) 30%, transparent)` | `src\styles\tokens\shadows.css` | 62 |
+| `--shadow-btn-hover` | `0 6px 12px color-mix(in oklch, var(--brand-c-primary) 30%, transparent), 0 3px 6px color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent)` | `src\styles\tokens\shadows.css` | 66 |
+| `--shadow-dropdown` | `4px 4px 6px color-mix(in oklch, var(--brand-c-bg-dark) 20%, transparent), 4px 4px 6px color-mix(in oklch, var(--brand-c-bg) 70%, transparent), inset 4px 4px 6px color-mix(in oklch, var(--brand-c-bg-dark) 40%, transparent), inset 4px 4px 6px color-mix(in oklch, var(--brand-c-bg) 20%, transparent)` | `src\styles\tokens\shadows.css` | 58 |
+| `--shadow-dropdown-lg` | `0 8px 16px color-mix(in oklch, var(--brand-c-bg-dark) 12%, transparent), 0 4px 8px color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent)` | `src\styles\tokens\shadows.css` | 61 |
+| `--shadow-dropdown-md` | `0 4px 8px color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent), 0 2px 4px color-mix(in oklch, var(--brand-c-bg-dark) 8%, transparent)` | `src\styles\tokens\shadows.css` | 60 |
+| `--shadow-dropdown-sm` | `0 2px 4px color-mix(in oklch, var(--brand-c-bg-dark) 8%, transparent), 0 1px 2px color-mix(in oklch, var(--brand-c-bg-dark) 6%, transparent)` | `src\styles\tokens\shadows.css` | 59 |
+| `--shadow-dropdown-soft` | `4px 4px 6px color-mix(in oklch, var(--brand-c-bg-dark) 20%, transparent), -4px -4px 6px color-mix(in oklch, var(--brand-c-bg) 60%, transparent), inset 2px 2px 4px color-mix(in oklch, var(--brand-c-bg-dark) 15%, transparent), inset -2px -2px 4px color-mix(in oklch, var(--brand-c-bg) 30%, transparent)` | `src\styles\tokens\shadows.css` | 62 |
 | `--shadow-glow-primary` | `0 0 14px color-mix(in oklch, var(--a11y-dark-c-primary) 50%, transparent)` | `src\styles\themes\a11y\a11y-dark.css` | 166 |
-| `--shadow-glow-primary` | `0 0 12px color-mix(in oklch, var(--color-Primary-500) 60%, transparent)` | `src\styles\tokens\shadows.css` | 69 |
+| `--shadow-glow-primary` | `0 0 12px color-mix(in oklch, var(--brand-c-primary) 60%, transparent)` | `src\styles\tokens\shadows.css` | 69 |
 | `--shadow-glow-secondary` | `0 0 14px color-mix(in oklch, var(--a11y-dark-c-accent) 50%, transparent)` | `src\styles\themes\a11y\a11y-dark.css` | 167 |
-| `--shadow-glow-secondary` | `0 0 12px color-mix(in oklch, var(--color-Secondary-500) 60%, transparent)` | `src\styles\tokens\shadows.css` | 70 |
+| `--shadow-glow-secondary` | `0 0 12px color-mix(in oklch, var(--brand-c-secondary) 60%, transparent)` | `src\styles\tokens\shadows.css` | 70 |
 | `--shadow-inner-2xl` | `inset 0 0 40px 16px` | `src\styles\tokens\shadows.css` | 31 |
 | `--shadow-inner-lg` | `inset 0 0 20px 8px` | `src\styles\tokens\shadows.css` | 25 |
 | `--shadow-inner-md` | `inset 0 0 10px 4px` | `src\styles\tokens\shadows.css` | 22 |
 | `--shadow-inner-sm` | `inset 0 0 6px 2px` | `src\styles\tokens\shadows.css` | 19 |
 | `--shadow-inner-xl` | `inset 0 0 30px 12px` | `src\styles\tokens\shadows.css` | 28 |
 | `--shadow-lg` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 161 |
-| `--shadow-lg` | `0 10px 15px -3px color-mix(in oklch, var(--color-Background-900) 10%, transparent), 0 4px 6px -2px color-mix(in oklch, var(--color-Background-900) 5%, transparent)` | `src\styles\tokens\shadows.css` | 13 |
+| `--shadow-lg` | `0 10px 15px -3px color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent), 0 4px 6px -2px color-mix(in oklch, var(--brand-c-bg-dark) 5%, transparent)` | `src\styles\tokens\shadows.css` | 13 |
 | `--shadow-md` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 160 |
-| `--shadow-md` | `0 4px 6px -1px color-mix(in oklch, var(--color-Background-900) 10%, transparent), 0 2px 4px -1px color-mix(in oklch, var(--color-Background-900) 6%, transparent)` | `src\styles\tokens\shadows.css` | 12 |
+| `--shadow-md` | `0 4px 6px -1px color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent), 0 2px 4px -1px color-mix(in oklch, var(--brand-c-bg-dark) 6%, transparent)` | `src\styles\tokens\shadows.css` | 12 |
 | `--shadow-sm` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 157 |
-| `--shadow-sm` | `0 1px 2px 0 color-mix(in oklch, var(--color-Background-900) 5%, transparent)` | `src\styles\tokens\shadows.css` | 9 |
+| `--shadow-sm` | `0 1px 2px 0 color-mix(in oklch, var(--brand-c-bg-dark) 5%, transparent)` | `src\styles\tokens\shadows.css` | 9 |
 | `--shadow-xl` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 162 |
-| `--shadow-xl` | `0 20px 25px -5px color-mix(in oklch, var(--color-Background-900) 10%, transparent), 0 10px 10px -5px color-mix(in oklch, var(--color-Background-900) 4%, transparent)` | `src\styles\tokens\shadows.css` | 14 |
+| `--shadow-xl` | `0 20px 25px -5px color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent), 0 10px 10px -5px color-mix(in oklch, var(--brand-c-bg-dark) 4%, transparent)` | `src\styles\tokens\shadows.css` | 14 |
 | `--shadow-xs` | `none` | `src\styles\themes\a11y\a11y-dark.css` | 156 |
-| `--shadow-xs` | `0 1px 2px 0 color-mix(in oklch, var(--color-Background-900) 5%, transparent)` | `src\styles\tokens\shadows.css` | 8 |
-| `--slider-color` | `var(--color-Text-900)` | `src\styles\components\presentation\ReaderNav.css` | 407 |
-| `--slider-color` | `var(--color-Text-50)` | `src\styles\components\presentation\ReaderNav.css` | 459 |
-| `--slider-color` | `var(--color-Text-900)` | `src\styles\components\presentation\ReaderNav.css` | 463 |
+| `--shadow-xs` | `0 1px 2px 0 color-mix(in oklch, var(--brand-c-bg-dark) 5%, transparent)` | `src\styles\tokens\shadows.css` | 8 |
+| `--slider-color` | `var(--brand-c-text-dark)` | `src\styles\components\presentation\ReaderNav.css` | 407 |
+| `--slider-color` | `var(--brand-c-text-light)` | `src\styles\components\presentation\ReaderNav.css` | 459 |
+| `--slider-color` | `var(--brand-c-text-dark)` | `src\styles\components\presentation\ReaderNav.css` | 463 |
 | `--state-disabled-opacity` | `0.5` | `docs\todo\TODO.md` | 402 |
 | `--state-focus-ring` | `var(--color-Info-500)` | `docs\todo\TODO.md` | 400 |
 | `--state-focus-ring-width` | `3px` | `docs\todo\TODO.md` | 401 |
 | `--state-hover-bg` | `color-mix(in oklch, var(--interactive-primary) 5%, transparent)` | `docs\todo\TODO.md` | 399 |
 | `--success` | `var(--color-Success)` | `docs\Markdown Notes\accessibility-color-themes.md` | 38 |
-| `--surface` | `var(--color-Background-100)` | `docs\Markdown Notes\accessibility-color-themes.md` | 21 |
+| `--surface` | `var(--brand-c-bg)` | `docs\Markdown Notes\accessibility-color-themes.md` | 21 |
 | `--surface` | `#000000` | `docs\Markdown Notes\accessibility-color-themes.md` | 243 |
-| `--surface-base` | `var(--color-Background-50)` | `docs\todo\TODO.md` | 352 |
-| `--surface-elevated` | `var(--color-Background-200)` | `docs\todo\TODO.md` | 354 |
-| `--surface-overlay` | `var(--color-Neutral-50)` | `docs\todo\TODO.md` | 355 |
-| `--surface-raised` | `var(--color-Background-100)` | `docs\todo\TODO.md` | 353 |
-| `--surface2` | `var(--color-Background-200)` | `docs\Markdown Notes\accessibility-color-themes.md` | 22 |
-| `--surface3` | `var(--color-Background-300)` | `docs\Markdown Notes\accessibility-color-themes.md` | 23 |
-| `--svg-drop-shadow` | `drop-shadow(0 1px 2px color-mix(in oklch, var(--color-Background-900) 20%, transparent))` | `src\styles\tokens\images.css` | 71 |
-| `--svg-drop-shadow-md` | `drop-shadow(0 2px 4px color-mix(in oklch, var(--color-Background-900) 25%, transparent))` | `src\styles\tokens\images.css` | 72 |
+| `--surface-base` | `var(--brand-c-bg)` | `docs\todo\TODO.md` | 352 |
+| `--surface-elevated` | `var(--brand-c-bg-light)` | `docs\todo\TODO.md` | 354 |
+| `--surface-overlay` | `var(--brand-c-neutral-light)` | `docs\todo\TODO.md` | 355 |
+| `--surface-raised` | `var(--brand-c-bg)` | `docs\todo\TODO.md` | 353 |
+| `--surface2` | `var(--brand-c-bg-light)` | `docs\Markdown Notes\accessibility-color-themes.md` | 22 |
+| `--surface3` | `var(--brand-c-bg-light)` | `docs\Markdown Notes\accessibility-color-themes.md` | 23 |
+| `--svg-drop-shadow` | `drop-shadow(0 1px 2px color-mix(in oklch, var(--brand-c-bg-dark) 20%, transparent))` | `src\styles\tokens\images.css` | 71 |
+| `--svg-drop-shadow-md` | `drop-shadow(0 2px 4px color-mix(in oklch, var(--brand-c-bg-dark) 25%, transparent))` | `src\styles\tokens\images.css` | 72 |
 | `--svg-fill` | `currentColor` | `src\styles\tokens\images.css` | 60 |
 | `--svg-hover-filter` | `brightness(1.1)` | `src\styles\tokens\images.css` | 76 |
 | `--svg-hover-scale` | `1.1` | `src\styles\tokens\images.css` | 75 |
 | `--svg-stroke` | `currentColor` | `src\styles\tokens\images.css` | 61 |
 | `--svg-stroke-width` | `1.5` | `src\styles\tokens\images.css` | 62 |
-| `--text` | `var(--color-Text-900)` | `docs\Markdown Notes\accessibility-color-themes.md` | 26 |
-| `--text` | `var(--color-Text-300)` | `docs\Markdown Notes\accessibility-color-themes.md` | 120 |
+| `--text` | `var(--brand-c-text-dark)` | `docs\Markdown Notes\accessibility-color-themes.md` | 26 |
+| `--text` | `var(--brand-c-text-light)` | `docs\Markdown Notes\accessibility-color-themes.md` | 120 |
 | `--text` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 244 |
 | `--text-2xl` | `1.5rem` | `src\styles\tokens\typography.css` | 23 |
 | `--text-3xl` | `1.875rem` | `src\styles\tokens\typography.css` | 24 |
@@ -6399,16 +6399,16 @@ How often each colour token is actually used across the project.
 | `--text-6xl` | `5rem` | `src\styles\tokens\typography.css` | 69 |
 | `--text-7xl` | `6rem` | `src\styles\tokens\typography.css` | 28 |
 | `--text-base` | `1rem` | `src\styles\tokens\typography.css` | 20 |
-| `--text-disabled` | `var(--color-Text-400)` | `docs\todo\TODO.md` | 361 |
+| `--text-disabled` | `var(--brand-c-text-light)` | `docs\todo\TODO.md` | 361 |
 | `--text-inverse` | `var(--color-White)` | `docs\todo\TODO.md` | 362 |
 | `--text-lg` | `1.125rem` | `src\styles\tokens\typography.css` | 21 |
-| `--text-primary` | `var(--color-Text-900)` | `docs\todo\TODO.md` | 358 |
-| `--text-secondary` | `var(--color-Text-700)` | `docs\todo\TODO.md` | 359 |
+| `--text-primary` | `var(--brand-c-text-dark)` | `docs\todo\TODO.md` | 358 |
+| `--text-secondary` | `var(--brand-c-text)` | `docs\todo\TODO.md` | 359 |
 | `--text-sm` | `0.875rem` | `src\styles\tokens\typography.css` | 19 |
-| `--text-tertiary` | `var(--color-Text-500)` | `docs\todo\TODO.md` | 360 |
+| `--text-tertiary` | `var(--brand-c-text-light)` | `docs\todo\TODO.md` | 360 |
 | `--text-xl` | `1.25rem` | `src\styles\tokens\typography.css` | 22 |
 | `--text-xs` | `0.75rem` | `src\styles\tokens\typography.css` | 18 |
-| `--textMuted` | `var(--color-Text-600)` | `docs\Markdown Notes\accessibility-color-themes.md` | 27 |
+| `--textMuted` | `var(--brand-c-text)` | `docs\Markdown Notes\accessibility-color-themes.md` | 27 |
 | `--textMuted` | `#ffffff` | `docs\Markdown Notes\accessibility-color-themes.md` | 245 |
 | `--universal-danger` | `#9c5151` | `src\scripts\ThemeTokenGen\brand-template.css` | 89 |
 | `--universal-info` | `#47638f` | `src\scripts\ThemeTokenGen\brand-template.css` | 90 |
@@ -6425,9 +6425,9 @@ for consolidation into base tokens (ally pattern).
 
 | Colour Value | Tokens Using This Value |
 |-------------|------------------------|
-| `#000000` | `--a11y-hc-c-bg`, `--a11y-high-contrast-c-bg`, `--bg`, `--btn-filled-text`, `--color-Background-100`, `--color-Background-200`, `--color-Background-300`, `--color-Background-400`, `--color-Background-50`, `--color-Background-500`, `--surface` |
-| `#00ff00` | `--a11y-hc-c-primary`, `--a11y-high-contrast-c-primary`, `--color-AccentThree-500`, `--color-Success` |
-| `#00ffff` | `--a11y-hc-c-accent`, `--a11y-high-contrast-c-accent`, `--color-AccentOne-500`, `--color-Info`, `--focusRing` |
+| `#000000` | `--a11y-hc-c-bg`, `--a11y-high-contrast-c-bg`, `--bg`, `--btn-filled-text`, `--brand-c-bg`, `--brand-c-bg-light`, `--brand-c-bg-light`, `--brand-c-bg-light`, `--brand-c-bg`, `--brand-c-bg-light`, `--surface` |
+| `#00ff00` | `--a11y-hc-c-primary`, `--a11y-high-contrast-c-primary`, `--brand-c-neutral`, `--color-Success` |
+| `#00ffff` | `--a11y-hc-c-accent`, `--a11y-high-contrast-c-accent`, `--brand-c-neutral`, `--color-Info`, `--focusRing` |
 | `#06b6d4` | `--a11y-trit-c-accent`, `--a11y-tritanopia-c-accent` |
 | `#0e3f2e` | `--brand-background-dark`, `--brand-text` |
 | `#0f172a` | `--a11y-protanopia-c-text`, `--a11y-proto-c-text` |
@@ -6435,44 +6435,44 @@ for consolidation into base tokens (ally pattern).
 | `#1c1b29` | `--a11y-deuter-c-text`, `--a11y-deuteranopia-c-text` |
 | `#1e293b` | `--a11y-trit-c-text`, `--a11y-tritanopia-c-text` |
 | `#1e40af` | `--a11y-protanopia-c-primary`, `--a11y-proto-c-primary` |
-| `#262626` | `--brand-c-text-dark`, `--color-Text-800`, `--color-Text-950` |
+| `#262626` | `--brand-c-text-dark`, `--brand-c-text`, `--brand-c-text-dark` |
 | `#333333` | `--a11y-mono-c-text`, `--a11y-monochrome-c-text` |
-| `#373737` | `--color-Text-700`, `--color-Text-900` |
-| `#393531` | `--brand-c-neutral-dark`, `--color-Neutral-800` |
+| `#373737` | `--brand-c-text`, `--brand-c-text-dark` |
+| `#393531` | `--brand-c-neutral-dark`, `--brand-c-neutral-dark` |
 | `#394e43` | `--brand-background-dark`, `--brand-c-bg-dark` |
-| `#3e4a5a` | `--brand-accent4`, `--color-AccentFour-500` |
-| `#474747` | `--brand-c-text`, `--color-Text-800` |
+| `#3e4a5a` | `--brand-accent4`, `--brand-c-neutral` |
+| `#474747` | `--brand-c-text`, `--brand-c-text` |
 | `#4a3f2f` | `--a11y-cream-c-text`, `--brand-c-bg-dark`, `--brand-c-neutral`, `--brand-c-neutral-dark`, `--brand-c-text`, `--brand-c-text-dark`, `--brand-c-text-light` |
 | `#555555` | `--a11y-mono-c-primary`, `--a11y-monochrome-c-primary` |
-| `#556a50` | `--brand-c-primary-dark`, `--color-Primary-700` |
-| `#5a5a5a` | `--brand-text`, `--color-Text-700` |
+| `#556a50` | `--brand-c-primary-dark`, `--brand-c-primary-dark` |
+| `#5a5a5a` | `--brand-text`, `--brand-c-text` |
 | `#6b8e7a` | `--a11y-cream-c-accent`, `--brand-c-secondary`, `--brand-c-secondary-dark`, `--brand-c-secondary-light` |
 | `#6d28d9` | `--a11y-deuter-c-primary`, `--a11y-deuteranopia-c-primary` |
-| `#777777` | `--a11y-mono-c-accent`, `--a11y-monochrome-c-accent`, `--brand-c-text-light`, `--color-Text-600` |
-| `#8390b5` | `--brand-accent2`, `--color-AccentTwo-500` |
-| `#855543` | `--brand-c-secondary-dark`, `--color-Secondary-700` |
+| `#777777` | `--a11y-mono-c-accent`, `--a11y-monochrome-c-accent`, `--brand-c-text-light`, `--brand-c-text` |
+| `#8390b5` | `--brand-accent2`, `--brand-c-neutral` |
+| `#855543` | `--brand-c-secondary-dark`, `--brand-c-secondary-dark` |
 | `#8b7355` | `--a11y-cream-c-primary`, `--brand-c-primary`, `--brand-c-primary-dark`, `--brand-c-primary-light` |
-| `#8fa68a` | `--brand-c-primary`, `--brand-primary`, `--color-Primary-500` |
-| `#978692` | `--brand-accent3`, `--color-AccentThree-500` |
-| `#9c8579` | `--brand-accent1`, `--color-AccentOne-500` |
-| `#a28aad` | `--brand-accent5`, `--color-AccentFive-500` |
-| `#c2bdb8` | `--brand-c-neutral`, `--color-Neutral-300` |
-| `#c4907c` | `--brand-c-accent`, `--brand-c-secondary`, `--brand-secondary`, `--color-Secondary-500` |
+| `#8fa68a` | `--brand-c-primary`, `--brand-primary`, `--brand-c-primary` |
+| `#978692` | `--brand-accent3`, `--brand-c-neutral` |
+| `#9c8579` | `--brand-accent1`, `--brand-c-neutral` |
+| `#a28aad` | `--brand-accent5`, `--brand-c-neutral` |
+| `#c2bdb8` | `--brand-c-neutral`, `--brand-c-neutral` |
+| `#c4907c` | `--brand-c-secondary`, `--brand-c-secondary`, `--brand-secondary`, `--brand-c-secondary` |
 | `#cc3399` | `--a11y-trit-c-primary`, `--a11y-tritanopia-c-primary` |
-| `#cee6c8` | `--brand-c-primary-light`, `--color-Primary-300` |
+| `#cee6c8` | `--brand-c-primary-light`, `--brand-c-primary-light` |
 | `#ddd9d3` | `--a11y-cream-c-bg`, `--brand-c-bg`, `--brand-c-bg-light`, `--brand-c-neutral-light` |
-| `#e0dedb` | `--brand-c-neutral-light`, `--color-Neutral-200` |
+| `#e0dedb` | `--brand-c-neutral-light`, `--brand-c-neutral-light` |
 | `#e6e4e2` | `--a11y-mono-c-bg`, `--a11y-monochrome-c-bg` |
 | `#f59e0b` | `--a11y-protanopia-c-accent`, `--a11y-proto-c-accent` |
 | `#f5f7fb` | `--a11y-protanopia-c-bg`, `--a11y-proto-c-bg` |
 | `#f6f5fa` | `--a11y-deuter-c-bg`, `--a11y-deuteranopia-c-bg` |
 | `#f97316` | `--a11y-deuter-c-accent`, `--a11y-deuteranopia-c-accent` |
-| `#faf8f7` | `--brand-c-bg`, `--color-Background-100`, `--color-Background-50`, `--color-Neutral-100`, `--color-Neutral-50` |
+| `#faf8f7` | `--brand-c-bg`, `--brand-c-bg`, `--brand-c-bg`, `--brand-c-neutral-light`, `--brand-c-neutral-light` |
 | `#fdf4ff` | `--a11y-trit-c-bg`, `--a11y-tritanopia-c-bg` |
 | `#ff0000` | `--color-Danger`, `--color-Error` |
-| `#ffcfba` | `--brand-c-secondary-light`, `--color-Secondary-300` |
-| `#ffff00` | `--color-AccentTwo-500`, `--color-Secondary-500`, `--color-Warning`, `--link` |
-| `#ffffff` | `--a11y-hc-c-text`, `--a11y-high-contrast-c-text`, `--brand-c-bg-light`, `--color-Primary-500`, `--color-Text-300`, `--color-Text-400`, `--color-Text-500`, `--color-Text-600`, `--color-Text-700`, `--color-Text-800`, `--color-Text-900`, `--color-Text-950`, `--color-White`, `--linkHover`, `--text`, `--textMuted` |
+| `#ffcfba` | `--brand-c-secondary-light`, `--brand-c-secondary-light` |
+| `#ffff00` | `--brand-c-neutral`, `--brand-c-secondary`, `--color-Warning`, `--link` |
+| `#ffffff` | `--a11y-hc-c-text`, `--a11y-high-contrast-c-text`, `--brand-c-bg-light`, `--brand-c-primary`, `--brand-c-text-light`, `--brand-c-text-light`, `--brand-c-text-light`, `--brand-c-text`, `--brand-c-text`, `--brand-c-text`, `--brand-c-text-dark`, `--brand-c-text-dark`, `--color-White`, `--linkHover`, `--text`, `--textMuted` |
 | `${textcolor` | `--btn-text-color`, `--section-title-color` |
 | `0 1px 2px 0 color-mix(in oklch, var(--color-background-900) 5%, transparent)` | `--shadow-sm`, `--shadow-xs` |
 | `0.75rem` | `--border-radius-md`, `--text-xs` |
@@ -6492,14 +6492,14 @@ for consolidation into base tokens (ally pattern).
 | `linear-gradient(135deg, var(--color-primary-400) 0%, var(--color-primary-600) 100%)` | `--gradient-btn-primary-hover`, `--gradient-primary-soft` |
 | `linear-gradient(135deg, var(--color-secondary-400) 0%, var(--color-secondary-600) 100%)` | `--gradient-btn-secondary-hover`, `--gradient-secondary-soft` |
 | `none` | `--img-shadow`, `--shadow`, `--shadow-2xl`, `--shadow-base`, `--shadow-btn`, `--shadow-lg`, `--shadow-md`, `--shadow-sm`, `--shadow-xl`, `--shadow-xs` |
-| `oklch(0.60 0.18 25)` | `--color-AccentFour-500`, `--color-Error` |
-| `oklch(0.62 0.10 25)` | `--color-AccentFive-500`, `--color-Error` |
-| `oklch(0.62 0.10 300)` | `--color-AccentFive-500`, `--color-Info` |
-| `oklch(0.62 0.14 255)` | `--color-AccentOne-500`, `--color-Success` |
-| `oklch(0.62 0.16 350)` | `--color-AccentThree-500`, `--color-Info` |
-| `oklch(0.66 0.14 145)` | `--color-AccentOne-500`, `--color-Success` |
-| `oklch(0.72 0.16 55)` | `--color-AccentTwo-500`, `--color-Warning` |
-| `oklch(0.74 0.14 80)` | `--color-AccentTwo-500`, `--color-Warning` |
+| `oklch(0.60 0.18 25)` | `--brand-c-neutral`, `--color-Error` |
+| `oklch(0.62 0.10 25)` | `--brand-c-neutral`, `--color-Error` |
+| `oklch(0.62 0.10 300)` | `--brand-c-neutral`, `--color-Info` |
+| `oklch(0.62 0.14 255)` | `--brand-c-neutral`, `--color-Success` |
+| `oklch(0.62 0.16 350)` | `--brand-c-neutral`, `--color-Info` |
+| `oklch(0.66 0.14 145)` | `--brand-c-neutral`, `--color-Success` |
+| `oklch(0.72 0.16 55)` | `--brand-c-neutral`, `--color-Warning` |
+| `oklch(0.74 0.14 80)` | `--brand-c-neutral`, `--color-Warning` |
 | `oklch(0.92 0 0)` | `--focusRing`, `--linkHover` |
 
 ---

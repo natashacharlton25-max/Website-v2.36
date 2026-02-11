@@ -67,11 +67,11 @@ A comprehensive guide to the design token system used throughout the codebase.
 Each family has intensities from 50 (lightest) to 900 (darkest):
 
 ```css
---color-Primary-50 through --color-Primary-900
---color-Secondary-50 through --color-Secondary-900
---color-Background-50 through --color-Background-900
---color-Text-50 through --color-Text-900
---color-Neutral-50 through --color-Neutral-900
+--brand-c-primary-light through --brand-c-primary-dark
+--color-Secondary-50 through --brand-c-secondary-dark
+--brand-c-bg through --brand-c-bg-dark
+--brand-c-text-light through --brand-c-text-dark
+--brand-c-neutral-light through --brand-c-neutral-dark
 --color-AccentOne-50 through --color-AccentOne-900
 --color-AccentTwo-50 through --color-AccentTwo-900
 --color-AccentThree-50 through --color-AccentThree-900
@@ -505,10 +505,10 @@ Tokens are adjusted at these breakpoints:
 
 ```css
 /* Colors */
-var(--color-Primary-500)
-var(--color-Background-50)
-var(--color-Text-900)
-var(--color-Neutral-300)
+var(--brand-c-primary)
+var(--brand-c-bg)
+var(--brand-c-text-dark)
+var(--brand-c-neutral)
 
 /* Spacing */
 var(--space-md)
@@ -546,7 +546,7 @@ color-mix(in oklch, var(--color-White) 12%, transparent)
 color-mix(in oklch, var(--color-Black) 85%, transparent)
 
 /* 20% primary */
-color-mix(in oklch, var(--color-Primary-500) 20%, transparent)
+color-mix(in oklch, var(--brand-c-primary) 20%, transparent)
 ```
 
 ---

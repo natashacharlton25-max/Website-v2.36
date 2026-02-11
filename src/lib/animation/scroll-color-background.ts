@@ -66,7 +66,7 @@ function initScrollColors(): void {
   if (sections.length === 0) return;
 
   const fallbackColor = 'rgb(248, 245, 242)';
-  const initialColor = resolveColor('var(--color-Background-100)', fallbackColor);
+  const initialColor = resolveColor('var(--brand-c-bg)', fallbackColor);
 
   // Set initial background
   bgLayer.style.backgroundColor = initialColor;

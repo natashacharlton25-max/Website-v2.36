@@ -203,9 +203,9 @@ style.textContent = `
   }
 
   .checkout-message--info {
-    background: var(--color-Primary-50);
-    border: 1px solid var(--color-Primary-200);
-    color: var(--color-Primary-700);
+    background: var(--brand-c-primary-light);
+    border: 1px solid var(--brand-c-primary-light);
+    color: var(--brand-c-primary-dark);
   }
 
   .checkout-message__content {
@@ -230,7 +230,7 @@ style.textContent = `
   }
 
   .checkout-verify-icon {
-    color: var(--color-Primary-500);
+    color: var(--brand-c-primary);
     margin-bottom: var(--space-lg);
   }
 
@@ -238,20 +238,20 @@ style.textContent = `
     font-family: var(--font-heading);
     font-size: var(--text-xl);
     font-weight: var(--font-bold);
-    color: var(--color-Text-800);
+    color: var(--brand-c-text);
     margin-bottom: var(--space-md);
   }
 
   .checkout-verify-text {
     font-size: var(--text-base);
-    color: var(--color-Text-600);
+    color: var(--brand-c-text);
     margin-bottom: var(--space-md);
   }
 
   .checkout-verify-note {
     font-size: var(--text-sm);
-    color: var(--color-Text-500);
-    background: var(--color-Neutral-50);
+    color: var(--brand-c-text-light);
+    background: var(--brand-c-neutral-light);
     padding: var(--space-md);
     border-radius: var(--border-radius-md);
   }

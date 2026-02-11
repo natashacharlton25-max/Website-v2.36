@@ -222,7 +222,7 @@ The design system has a strong foundational token structure with excellent cover
 - [ ] `--gradient-deep-secondary` (lines 515 & 855)
 
 **BrandDefault.css** - Identical hex values:
-- [ ] `--color-Primary-50` and `--color-Primary-100` both `#f4fbf2`
+- [ ] `--brand-c-primary-light` and `--brand-c-primary-light` both `#f4fbf2`
 
 #### 2. Redundant Tokens (Same Value)
 
@@ -253,16 +253,16 @@ The design system has a strong foundational token structure with excellent cover
 
 **BrandDefault.css**:
 - [ ] Missing `--color-BackgroundDark-*` tokens (required by shadows.css)
-- [ ] **CRITICAL:** Missing `--color-Secondary-900` (referenced by 7 a11y themes, causes fallback issues)
-  - Add after line 32: `--color-Secondary-900: #5a3420;`
+- [ ] **CRITICAL:** Missing `--brand-c-secondary-dark` (referenced by 7 a11y themes, causes fallback issues)
+  - Add after line 32: `--brand-c-secondary-dark: #5a3420;`
 
 **status.css** - Missing variants:
 - [ ] Only defines `--color-Error`, but `--color-Error-500`, `--color-Error-100` expected
 - [ ] Same for Warning, Success, Info
 
 **checkout.css** - References undefined tokens:
-- [ ] `--brand-neutral-200` → fix to `--color-Neutral-200`
-- [ ] `--brand-neutral-300` → fix to `--color-Neutral-300`
+- [ ] `--brand-neutral-200` → fix to `--brand-c-neutral-light`
+- [ ] `--brand-neutral-300` → fix to `--brand-c-neutral`
 - [ ] `--brand-success` → fix to `--color-Success`
 
 #### 5. Naming Inconsistencies
@@ -280,9 +280,9 @@ The design system has a strong foundational token structure with excellent cover
 - [ ] **Secondary-100 to Secondary-200:** Very subtle difference (only 1% darker)
 
 **Rarely used tokens (consider removing):**
-- [ ] `--color-Text-50` (only 15 uses, can use Background-50 instead)
-- [ ] `--color-Primary-50` (only 15 uses, identical to Primary-100)
-- [ ] `--color-Primary-900` (only 15 uses, rarely needed)
+- [ ] `--brand-c-text-light` (only 15 uses, can use Background-50 instead)
+- [ ] `--brand-c-primary-light` (only 15 uses, identical to Primary-100)
+- [ ] `--brand-c-primary-dark` (only 15 uses, rarely needed)
 
 **Naming improvements:**
 - [ ] Rename AccentOne → AccentWarm (warm brown tones)
@@ -341,7 +341,7 @@ All 7 a11y themes prove that **semantic naming > scale granularity**:
 **Layer 1 (Literal - Designer Control):**
 ```css
 /* themes/brand/BrandDefault.css - Keep as foundation */
---color-Primary-500: #8fa68a;  /* Precise shade control */
+--brand-c-primary: #8fa68a;  /* Precise shade control */
 ```
 
 **Layer 2 (Semantic - Component API) - CREATE THIS:**
@@ -349,31 +349,31 @@ All 7 a11y themes prove that **semantic naming > scale granularity**:
 /* tokens/semantic-colors.css - NEW FILE NEEDED */
 :root {
   /* SURFACES (elevation hierarchy) */
-  --surface-base: var(--color-Background-50);
-  --surface-raised: var(--color-Background-100);
-  --surface-elevated: var(--color-Background-200);
-  --surface-overlay: var(--color-Neutral-50);
+  --surface-base: var(--brand-c-bg);
+  --surface-raised: var(--brand-c-bg);
+  --surface-elevated: var(--brand-c-bg-light);
+  --surface-overlay: var(--brand-c-neutral-light);
 
   /* TEXT (content hierarchy) */
-  --text-primary: var(--color-Text-900);
-  --text-secondary: var(--color-Text-700);
-  --text-tertiary: var(--color-Text-500);
-  --text-disabled: var(--color-Text-400);
+  --text-primary: var(--brand-c-text-dark);
+  --text-secondary: var(--brand-c-text);
+  --text-tertiary: var(--brand-c-text-light);
+  --text-disabled: var(--brand-c-text-light);
   --text-inverse: var(--color-White);
 
   /* BORDERS */
-  --border-subtle: var(--color-Neutral-200);
-  --border-medium: var(--color-Neutral-400);
-  --border-strong: var(--color-Neutral-600);
-  --border-interactive: var(--color-Primary-500);
+  --border-subtle: var(--brand-c-neutral-light);
+  --border-medium: var(--brand-c-neutral);
+  --border-strong: var(--brand-c-neutral-dark);
+  --border-interactive: var(--brand-c-primary);
   --border-focus: var(--color-Info-500);
 
   /* INTERACTIVE (buttons, links) */
-  --interactive-primary: var(--color-Primary-500);
-  --interactive-primary-hover: var(--color-Primary-600);
-  --interactive-primary-active: var(--color-Primary-700);
-  --interactive-disabled-bg: var(--color-Neutral-100);
-  --interactive-disabled-text: var(--color-Text-400);
+  --interactive-primary: var(--brand-c-primary);
+  --interactive-primary-hover: var(--brand-c-primary-dark);
+  --interactive-primary-active: var(--brand-c-primary-dark);
+  --interactive-disabled-bg: var(--brand-c-neutral-light);
+  --interactive-disabled-text: var(--brand-c-text-light);
 
   /* FEEDBACK (validation states) */
   --feedback-success-bg: var(--color-Success);
@@ -387,9 +387,9 @@ All 7 a11y themes prove that **semantic naming > scale granularity**:
 
   /* FORM STATES */
   --form-bg: var(--color-White);
-  --form-border: var(--color-Neutral-300);
-  --form-border-hover: var(--color-Neutral-400);
-  --form-border-focus: var(--color-Primary-500);
+  --form-border: var(--brand-c-neutral);
+  --form-border-hover: var(--brand-c-neutral);
+  --form-border-focus: var(--brand-c-primary);
   --form-border-error: var(--color-Error);
   --form-border-success: var(--color-Success);
   --form-invalid-bg: color-mix(in oklch, var(--feedback-error-bg) 5%, transparent);
@@ -407,11 +407,11 @@ All 7 a11y themes prove that **semantic naming > scale granularity**:
 ```css
 /* BEFORE (breaks in a11y themes) */
 .card {
-  background: var(--color-Background-100);  /* Literal scale */
-  border: 1px solid var(--color-Neutral-200);
+  background: var(--brand-c-bg);  /* Literal scale */
+  border: 1px solid var(--brand-c-neutral-light);
 }
 .card:hover {
-  border-color: var(--color-Primary-400);  /* Becomes same as Primary-600 in a11y! */
+  border-color: var(--brand-c-primary);  /* Becomes same as Primary-600 in a11y! */
 }
 
 /* AFTER (works in all themes) */
@@ -451,7 +451,7 @@ All 7 a11y themes prove that **semantic naming > scale granularity**:
 ##### `src/styles/a11y/base/theme-overrides.css`
 - [ ] Replace `#ffffff` with `var(--color-White)`
 - [ ] Replace `#000000` with `var(--color-Black)`
-- [ ] Replace `#333333` with `var(--color-Neutral-800)` or semantic token
+- [ ] Replace `#333333` with `var(--brand-c-neutral-dark)` or semantic token
 
 ##### `src/styles/a11y/components/masonry-grid.css`
 - [ ] Replace 12+ instances of `#333333`
@@ -486,7 +486,7 @@ All values are hardcoded instead of using tokens:
 - [ ] Consider creating print-specific tokens:
   - `--print-text: var(--color-Black)`
   - `--print-background: var(--color-White)`
-  - `--print-muted: var(--color-Neutral-500)`
+  - `--print-muted: var(--brand-c-neutral)`
 
 #### 3. HIGH: Rgba() Usage Violations
 

@@ -146,12 +146,12 @@ Body classes (auto-applied):
 Components use these CSS custom properties with fallbacks:
 
 ```css
---color-Primary-500       /* Main accent */
---color-Primary-300       /* Light accent */
---color-BackgroundDark-800 /* Panel background */
---color-BackgroundDark-900 /* Header background */
---color-Background-100    /* Text on dark */
---color-Neutral-400       /* Muted text */
+--brand-c-primary       /* Main accent */
+--brand-c-primary-light       /* Light accent */
+--brand-c-bg-dark /* Panel background */
+--brand-c-bg-dark /* Header background */
+--brand-c-bg    /* Text on dark */
+--brand-c-neutral       /* Muted text */
 --color-Success           /* Success states */
 --color-Warning           /* Enhanced focus */
 --color-Danger            /* Reset button hover */
