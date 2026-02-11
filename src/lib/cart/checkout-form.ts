@@ -191,15 +191,15 @@ style.textContent = `
   }
 
   .checkout-message--success {
-    background: var(--color-Success-50);
-    border: 1px solid var(--color-Success-200);
-    color: var(--color-Success-700);
+    background: color-mix(in oklch, var(--color-Success) 10%, transparent);
+    border: 1px solid color-mix(in oklch, var(--color-Success) 30%, transparent);
+    color: var(--brand-c-text-dark);
   }
 
   .checkout-message--error {
-    background: var(--color-Error-50);
-    border: 1px solid var(--color-Error-200);
-    color: var(--color-Error-700);
+    background: color-mix(in oklch, var(--color-Error) 10%, transparent);
+    border: 1px solid color-mix(in oklch, var(--color-Error) 30%, transparent);
+    color: var(--brand-c-text-dark);
   }
 
   .checkout-message--info {
