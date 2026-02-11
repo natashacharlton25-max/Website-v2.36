@@ -183,8 +183,10 @@ const hasEndContent = endSection && (
     const wrapper = document.querySelector('[data-reader-wrapper]') as HTMLElement;
     if (!wrapper) return;
 
-    // Skip GSAP animations in plain mode and force reset inline styles
-    if (document.body.classList.contains('plain')) {
+    // Skip GSAP animations in plain mode or text-only a11y mode
+    const contentWrapper = document.getElementById('a11y-content-wrapper');
+    const isTextOnly = contentWrapper?.classList.contains('a11y-text-only');
+    if (document.body.classList.contains('plain') || isTextOnly) {
       // Kill any existing ScrollTriggers on this wrapper
       ScrollTrigger.getAll().forEach(st => st.kill());
 

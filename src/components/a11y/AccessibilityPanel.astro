@@ -60,7 +60,7 @@ import Icon from '../Icons/Icon.astro';
       </button>
       <button class="btn btn-sm btn-ghost" id="a11y-reset" aria-label="Reset all settings">
         <Icon name="a11y-panel/arrow-counter-clockwise-fill" size={18} />
-        Reset All
+        <span>Reset All</span>
       </button>
       {mode === 'modal' && (
         <button class="a11y-panel__close" type="button" aria-label="Close accessibility panel">
@@ -344,8 +344,23 @@ import Icon from '../Icons/Icon.astro';
         if (preset === 'clear') {
           settings = { ...defaultSettings };
         } else if (preset === 'easyread') {
-          // Toggle textOnly setting (unified with Text Only toggle)
-          settings.textOnly = !settings.textOnly;
+          // Toggle easy read: textOnly + larger font + spacing + cream theme
+          const enabling = !settings.textOnly;
+          if (enabling) {
+            settings.textOnly = true;
+            settings.fontSize = 120;
+            settings.letterSpacing = 2;
+            settings.wordSpacing = 3;
+            settings.lineHeight = 160;
+            settings.theme = 'cream';
+          } else {
+            settings.textOnly = false;
+            settings.fontSize = defaultSettings.fontSize;
+            settings.letterSpacing = defaultSettings.letterSpacing;
+            settings.wordSpacing = defaultSettings.wordSpacing;
+            settings.lineHeight = defaultSettings.lineHeight;
+            settings.theme = defaultSettings.theme;
+          }
           saveSettings(settings);
           applySettings(settings);
 
@@ -355,14 +370,26 @@ import Icon from '../Icons/Icon.astro';
             textOnlyCard.setAttribute('aria-pressed', settings.textOnly ? 'true' : 'false');
           }
 
-          if (settings.textOnly) {
+          // Update stepper displays to reflect new values
+          panel.querySelectorAll('.a11y-stepper').forEach(stepper => {
+            const stepSetting = stepper.getAttribute('data-setting') as string;
+            const val = (settings as any)[stepSetting];
+            if (val !== undefined) {
+              const valueEl = stepper.querySelector('.a11y-stepper__value') as HTMLElement;
+              const hiddenInput = stepper.querySelector('input[type="hidden"]') as HTMLInputElement;
+              if (valueEl) valueEl.textContent = String(val) + (valueEl.getAttribute('data-unit') || '');
+              if (hiddenInput) hiddenInput.value = String(val);
+            }
+          });
+
+          if (enabling) {
             btn.classList.add('active');
           } else {
             btn.classList.remove('active');
           }
 
           if (settings.screenReaderMode) {
-            announce(settings.textOnly ? 'Easy read mode enabled' : 'Easy read mode disabled');
+            announce(enabling ? 'Easy read mode enabled' : 'Easy read mode disabled');
           }
           return;
         } else if (presets[preset]) {

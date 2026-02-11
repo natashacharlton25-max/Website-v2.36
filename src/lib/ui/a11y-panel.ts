@@ -190,13 +190,10 @@ export function applySettings(settings: A11ySettings): void {
     target.classList.add(`a11y-font-${settings.fontFamily}`);
   }
 
-  // Font Size - apply to wrapper, NOT html
-  // This ensures the panel (outside wrapper) is not affected
+  // Font Size - apply zoom to wrapper so all content scales visually
+  // (zoom affects rem-resolved text without changing html root or the panel)
   if (wrapper) {
-    wrapper.style.fontSize = `${settings.fontSize}%`;
-  } else {
-    // Fallback for early loading
-    document.documentElement.style.fontSize = `${settings.fontSize}%`;
+    wrapper.style.zoom = settings.fontSize !== 100 ? `${settings.fontSize / 100}` : '';
   }
   document.documentElement.style.setProperty('--a11y-font-scale', `${settings.fontSize}`);
 
@@ -206,8 +203,14 @@ export function applySettings(settings: A11ySettings): void {
   // Word Spacing - apply to wrapper
   (target as HTMLElement).style.wordSpacing = settings.wordSpacing > 0 ? `${settings.wordSpacing * 0.05}em` : '';
 
-  // Line Height - apply to wrapper
-  (target as HTMLElement).style.lineHeight = settings.lineHeight > 100 ? `${settings.lineHeight}%` : '';
+  // Line Height - toggle class + CSS custom property so !important rules can override children
+  if (settings.lineHeight > 100) {
+    document.documentElement.style.setProperty('--a11y-line-height', `${settings.lineHeight / 100}`);
+    target.classList.add('a11y-line-height-active');
+  } else {
+    document.documentElement.style.removeProperty('--a11y-line-height');
+    target.classList.remove('a11y-line-height-active');
+  }
 
   // Theme - Use ThemeSwitcher for dynamic CSS loading
   const themeMap: Record<string, string> = {
@@ -250,6 +253,15 @@ export function applySettings(settings: A11ySettings): void {
   if (settings.screenReaderMode) {
     announce('Accessibility settings updated');
   }
+
+  // Trigger re-layout so JS-positioned components (GSAP, masonry, sliders)
+  // recalculate after CSS class changes
+  requestAnimationFrame(() => {
+    window.dispatchEvent(new Event('resize'));
+    if ((window as any).ScrollTrigger) {
+      (window as any).ScrollTrigger.refresh();
+    }
+  });
 }
 
 // ===================================

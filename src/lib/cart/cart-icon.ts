@@ -188,6 +188,17 @@ function setupCartToggle() {
 
   cartIconWrapper.addEventListener('click', (e) => {
     e.stopPropagation(); // Prevent outside-click handler from immediately closing
+
+    // In reduced-motion or text-only mode, skip popup and go straight to cart page
+    const wrapper = document.getElementById('a11y-content-wrapper');
+    if (
+      wrapper?.classList.contains('a11y-reduce-motion') ||
+      wrapper?.classList.contains('a11y-text-only')
+    ) {
+      window.location.href = '/checkout';
+      return;
+    }
+
     const miniCart = document.getElementById('mini-cart');
     if (miniCart) {
       miniCart.classList.toggle('visible');

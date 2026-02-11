@@ -665,14 +665,95 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
 }
 
 /* ========== OTHER SERVICES VERTICAL CARDS ========== */
-/* Center-align text and constrain button width */
+
+/* Left-align content, tighter spacing */
 .related-grid--vertical .related-card--vertical .related-card__content {
-  text-align: center;
-  align-items: center;
+  text-align: left;
+  align-items: flex-start;
 }
 
 .related-grid--vertical .related-card--vertical .related-card__button {
-  align-self: center;
+  align-self: flex-start;
   width: auto;
+}
+
+.related-grid--vertical {
+  gap: var(--space-lg);
+}
+
+/* Title hover color change */
+.related-card--vertical:hover .related-card__title {
+  color: var(--color-Primary-500);
+  transition: color var(--transition-base);
+}
+
+/* ========== A11Y: HIGHLIGHT LINKS ========== */
+#a11y-content-wrapper.a11y-highlight-links .related-card--vertical {
+  outline: 2px solid var(--color-Primary-500) !important;
+  outline-offset: -2px !important;
+}
+
+#a11y-content-wrapper.a11y-highlight-links .related-card--vertical:hover {
+  outline-width: 3px !important;
+}
+
+/* ========== A11Y: REDUCED MOTION ========== */
+#a11y-content-wrapper.a11y-reduce-motion .related-card--vertical:hover .related-card__title {
+  color: inherit !important;
+  transition: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .related-card--vertical:hover .related-card__button {
+  background: var(--color-Primary-500) !important;
+}
+
+/* ========== A11Y: TEXT ONLY ========== */
+#a11y-content-wrapper.a11y-text-only .related-grid--vertical {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--space-sm) !important;
+}
+
+#a11y-content-wrapper.a11y-text-only .related-card--vertical {
+  flex-direction: column !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+  padding: 0 !important;
+  margin-bottom: var(--space-sm) !important;
+}
+
+#a11y-content-wrapper.a11y-text-only .related-card--vertical:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+#a11y-content-wrapper.a11y-text-only .related-card--vertical .related-card__image {
+  display: none !important;
+}
+
+#a11y-content-wrapper.a11y-text-only .related-card--vertical .related-card__content {
+  padding: 0 !important;
+}
+
+#a11y-content-wrapper.a11y-text-only .related-card--vertical .related-card__button {
+  display: inline-block !important;
+  padding: var(--space-sm) var(--space-md) !important;
+  border: 1px solid var(--color-Primary-500) !important;
+  border-radius: var(--radius-md) !important;
+  background: none !important;
+  color: var(--color-Primary-700) !important;
+  font-weight: var(--font-semibold) !important;
+}
+
+/* Text-only + highlight links: no card outline, title underline suffices */
+#a11y-content-wrapper.a11y-text-only.a11y-highlight-links .related-card--vertical {
+  outline: none !important;
+}
+
+/* Text-only title hover */
+#a11y-content-wrapper.a11y-text-only:not(.a11y-reduce-motion) .related-card--vertical:hover .related-card__title {
+  color: var(--color-Primary-500) !important;
 }
 </style>

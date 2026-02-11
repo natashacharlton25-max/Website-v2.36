@@ -63,10 +63,11 @@ export async function initHeroMorph() {
 
   if (!container || !textElement || !storage) return;
 
-  // Check for reduced motion preference (user toggle or system preference)
+  // Check for reduced motion preference (user toggle, text-only, or system preference)
   const prefersReducedMotion = () => {
     const wrapper = document.getElementById('a11y-content-wrapper');
     return (wrapper?.classList.contains('a11y-reduce-motion') || false) ||
+           (wrapper?.classList.contains('a11y-text-only') || false) ||
            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   };
 
