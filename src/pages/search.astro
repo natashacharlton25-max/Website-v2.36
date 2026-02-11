@@ -7,6 +7,7 @@
  */
 import BaseLayout from '../Layouts/BaseLayout.astro';
 import Icon from '../components/Icons/Icon.astro';
+import Badge from '../components/Badge/Badge.astro';
 import { getCollection } from 'astro:content';
 
 // Get all collections at build time
@@ -136,6 +137,15 @@ const pageDescription = 'Search our resources, insights, tools, and more.';
         </div>
       </div>
     </section>
+
+    <!-- Pre-rendered Badge templates for client-side search results -->
+    <div id="badge-templates" hidden>
+      {['Insight', 'Resource', 'Project', 'Presentation', 'Page', 'Service'].map(cat => (
+        <div data-badge-cat={cat.toLowerCase()}>
+          <Badge type={cat} shape="pill" variant="fill" size="sm" />
+        </div>
+      ))}
+    </div>
 
     <!-- Search Results Section -->
     <section class="search-results" id="searchResults">
@@ -1250,6 +1260,12 @@ const pageDescription = 'Search our resources, insights, tools, and more.';
 
         this.content = JSON.parse(searchableContent);
 
+        // Build badge template map from pre-rendered Badge components
+        this.badgeTemplates = {};
+        document.querySelectorAll('#badge-templates [data-badge-cat]').forEach(el => {
+          this.badgeTemplates[el.dataset.badgeCat] = el.innerHTML;
+        });
+
         // Bind handlers so we can remove them later
         this.handleInputBound = this.handleInput.bind(this);
         this.handleClearBound = this.handleClear.bind(this);
@@ -1353,9 +1369,11 @@ const pageDescription = 'Search our resources, insights, tools, and more.';
           const categorySlug = item.category.toLowerCase();
           const iconSvg = this.getIconForCategory(item.category);
 
+          const badgeHtml = this.badgeTemplates[categorySlug] || `<span class="result-card__badge">${item.category}</span>`;
+
           html += `
             <a href="${item.url}" class="result-card result-card--${categorySlug}">
-              <span class="result-card__badge">${item.category}</span>
+              <div class="result-card__badge-wrap">${badgeHtml}</div>
               <div class="result-card__icon">
                 ${iconSvg}
               </div>
