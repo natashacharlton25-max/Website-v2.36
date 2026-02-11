@@ -12,6 +12,9 @@
      CORE THEME TOKENS - Change these to customize
      ============================================ */
   --a11y-dark-c-bg: #121212;
+  --a11y-dark-c-surface: #1e1e1e;
+  --a11y-dark-c-surface-raised: #2a2a2a;
+  --a11y-dark-c-border: #3a3a3a;
   --a11y-dark-c-text: #ccd3da;
   --a11y-dark-c-primary: #C5E1A5;
   --a11y-dark-c-accent: #272596;
@@ -74,16 +77,16 @@
   --color-Text-950: var(--a11y-dark-c-text);
 
   /* ============================================
-     NEUTRAL COLORS - Use text for visibility
+     NEUTRAL COLORS - Low = dark surfaces, High = text
      ============================================ */
-  --color-Neutral-50: var(--a11y-dark-c-text);
-  --color-Neutral-100: var(--a11y-dark-c-text);
-  --color-Neutral-200: var(--a11y-dark-c-text);
-  --color-Neutral-300: var(--a11y-dark-c-text);
-  --color-Neutral-400: var(--a11y-dark-c-text);
-  --color-Neutral-500: var(--a11y-dark-c-text);
-  --color-Neutral-600: var(--a11y-dark-c-text);
-  --color-Neutral-700: var(--a11y-dark-c-text);
+  --color-Neutral-50: var(--a11y-dark-c-surface);
+  --color-Neutral-100: var(--a11y-dark-c-surface);
+  --color-Neutral-200: var(--a11y-dark-c-surface-raised);
+  --color-Neutral-300: var(--a11y-dark-c-border);
+  --color-Neutral-400: #555;
+  --color-Neutral-500: #777;
+  --color-Neutral-600: #999;
+  --color-Neutral-700: #aaa;
   --color-Neutral-800: var(--a11y-dark-c-text);
   --color-Neutral-900: var(--a11y-dark-c-text);
 
@@ -140,11 +143,52 @@
      ============================================ */
   --page-bg: var(--a11y-dark-c-bg);
   --hero-overlay-color: var(--a11y-dark-c-bg);
-  --btn-filled-text: var(--color-White);
+  --btn-filled-text: var(--a11y-dark-c-bg);
   --btn-outline-text: var(--a11y-dark-c-primary);
   --btn-ghost-text: var(--a11y-dark-c-primary);
   --media-brightness: 0.86;
   --media-saturation: 0.90;
   --media-contrast: 0.98;
 
+  /* ============================================
+     SHADOWS — replace drop shadows with borders
+     ============================================ */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-base: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-btn: none;
+  --shadow-btn-hover: 0 0 12px color-mix(in oklch, var(--a11y-dark-c-primary) 40%, transparent);
+  --shadow-glow-primary: 0 0 14px color-mix(in oklch, var(--a11y-dark-c-primary) 50%, transparent);
+  --shadow-glow-secondary: 0 0 14px color-mix(in oklch, var(--a11y-dark-c-accent) 50%, transparent);
+}
+
+/* ============================================
+   CARD STYLES — outline + glow on hover
+   ============================================ */
+#a11y-content-wrapper.a11y-theme-dark .card {
+  background: var(--a11y-dark-c-surface) !important;
+  border: 1px solid var(--a11y-dark-c-border) !important;
+  box-shadow: none !important;
+}
+
+#a11y-content-wrapper.a11y-theme-dark .card:hover {
+  border-color: var(--a11y-dark-c-primary) !important;
+  box-shadow: 0 0 16px color-mix(in oklch, var(--a11y-dark-c-primary) 30%, transparent) !important;
+}
+
+/* ============================================
+   BUTTON TEXT — dark text on light primary bg
+   ============================================ */
+#a11y-content-wrapper.a11y-theme-dark .btn {
+  color: var(--a11y-dark-c-bg) !important;
+}
+
+#a11y-content-wrapper.a11y-theme-dark .btn-ghost,
+#a11y-content-wrapper.a11y-theme-dark .btn-outline {
+  color: var(--a11y-dark-c-primary) !important;
 }

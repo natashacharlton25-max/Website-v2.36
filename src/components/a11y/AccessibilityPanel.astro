@@ -420,9 +420,28 @@ import Icon from '../Icons/Icon.astro';
       easyReadBtn?.classList.add('active');
     }
 
-    // PDF Download
+    // PDF Download — force text-only + monochrome before printing, restore after
     const downloadBtn = document.getElementById('a11y-download-pdf');
     downloadBtn?.addEventListener('click', () => {
+      const wrapper = document.getElementById('a11y-content-wrapper');
+      const savedClasses = wrapper?.className || '';
+      const savedTheme = (window as any).themeSwitcher?.currentTheme || null;
+
+      // Force text-only + monochrome for clean PDF output
+      wrapper?.classList.add('a11y-text-only', 'a11y-theme-monochrome');
+      (window as any).themeSwitcher?.switchTheme('a11y-monochrome');
+
+      const doPrint = (): void => {
+        window.print();
+        // Restore original classes and theme after print dialog closes
+        if (wrapper) wrapper.className = savedClasses;
+        if (savedTheme) {
+          (window as any).themeSwitcher?.switchTheme(savedTheme);
+        } else {
+          (window as any).themeSwitcher?.switchTheme('default');
+        }
+      };
+
       if (!isPageMode) {
         const closePanel = (): void => {
           if (!panel) return;
@@ -441,11 +460,9 @@ import Icon from '../Icons/Icon.astro';
           }, 300);
         };
         closePanel();
-        setTimeout(() => {
-          window.print();
-        }, 350);
+        setTimeout(doPrint, 350);
       } else {
-        window.print();
+        doPrint();
       }
     });
 
