@@ -38,20 +38,12 @@ function getCSSColors(): string[] {
   const root = document.documentElement;
   const styles = getComputedStyle(root);
 
-  // Try confetti-specific tokens first, then particle tokens, then fallbacks
+  // 4 distinct confetti colours from CSS tokens
   return [
-    styles.getPropertyValue('--confetti-pink').trim() ||
-    styles.getPropertyValue('--particle-confetti-1').trim() || '#FF99C8',
-    styles.getPropertyValue('--confetti-purple').trim() ||
-    styles.getPropertyValue('--particle-confetti-2').trim() || '#AE88BF',
-    styles.getPropertyValue('--confetti-teal').trim() ||
-    styles.getPropertyValue('--particle-confetti-3').trim() || '#80E1CC',
-    styles.getPropertyValue('--confetti-blue').trim() ||
-    styles.getPropertyValue('--particle-confetti-4').trim() || '#8AA5E5',
-    styles.getPropertyValue('--confetti-gold').trim() ||
-    styles.getPropertyValue('--particle-confetti-5').trim() || '#e9bc88',
-    styles.getPropertyValue('--confetti-green').trim() ||
-    styles.getPropertyValue('--particle-confetti-6').trim() || '#978692',
+    styles.getPropertyValue('--confetti-light').trim() || '#FF99C8',
+    styles.getPropertyValue('--confetti-mid').trim() || '#AE88BF',
+    styles.getPropertyValue('--confetti-primary').trim() || '#80E1CC',
+    styles.getPropertyValue('--confetti-secondary').trim() || '#e9bc88',
   ].filter(c => c); // Remove empty strings
 }
 
@@ -186,7 +178,7 @@ export function createParticleBurst(
 
   // Fallback colors if CSS tokens not found
   if (opts.colors.length === 0) {
-    opts.colors = ['#FF99C8', '#AE88BF', '#80E1CC', '#8AA5E5', '#e9bc88'];
+    opts.colors = ['#FF99C8', '#AE88BF', '#80E1CC', '#e9bc88'];
   }
 
   if (options.emojis) opts.emojis = options.emojis;
