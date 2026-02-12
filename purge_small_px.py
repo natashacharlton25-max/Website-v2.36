@@ -1,21 +1,13 @@
 #!/usr/bin/env python3
 """
-Safe Font-Size Purge v2
-========================
-Removes:
-  1. font-size: var(--text-*) lines (token references in components)
-  2. font-size: Npx where N <= 10 (micro-screen overrides)
-
-Does NOT touch:
-  - font-size values > 10px (need manual review)
-  - font-size in rem/em (legitimate)
-  - font-weight, line-height, font-family, letter-spacing
-  - JS/script blocks
-  - System files (global.css, typography.css, responsive files)
+Purge Small px Font-Sizes
+==========================
+Removes only: font-size: Npx where N <= 10
+Leaves everything else untouched.
 
 Usage:
-  python safe_purge_fontsize.py <src_dir> --dry-run
-  python safe_purge_fontsize.py <src_dir> --apply
+  python purge_small_px.py <src_dir> --dry-run
+  python purge_small_px.py <src_dir> --apply
 """
 
 import os
@@ -31,9 +23,7 @@ SYSTEM_FILES = {
     'max.css', 'desktop.css', 'tablet.css', 'phone.css', 'xs.css', 'micro.css',
 }
 
-# Patterns to delete
-FONT_SIZE_VAR = re.compile(r'^\s*font-size:\s*var\(--text-[^)]+\)\s*;?\s*$')
-FONT_SIZE_SMALL_PX = re.compile(r'^\s*font-size:\s*(\d+(?:\.\d+)?)px\s*;?\s*$')
+FONT_SIZE_PX = re.compile(r'^\s*font-size:\s*(\d+(?:\.\d+)?)px\s*;?\s*$')
 
 
 def process_file(filepath, root, dry_run):
@@ -69,18 +59,12 @@ def process_file(filepath, root, dry_run):
                 in_style = False
 
         should_delete = False
-
         if in_style:
-            # Check var(--text-*) pattern
-            if FONT_SIZE_VAR.match(line):
-                should_delete = True
-            else:
-                # Check px values <= 10
-                px_match = FONT_SIZE_SMALL_PX.match(line)
-                if px_match:
-                    px_val = float(px_match.group(1))
-                    if px_val <= 10:
-                        should_delete = True
+            px_match = FONT_SIZE_PX.match(line)
+            if px_match:
+                px_val = float(px_match.group(1))
+                if px_val <= 10:
+                    should_delete = True
 
         if should_delete:
             deleted.append((i, line.strip()))
@@ -106,7 +90,7 @@ def process_file(filepath, root, dry_run):
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python safe_purge_fontsize.py <src_dir> --dry-run|--apply")
+        print("Usage: python purge_small_px.py <src_dir> --dry-run|--apply")
         sys.exit(1)
 
     root = sys.argv[1]
@@ -117,12 +101,10 @@ def main():
         print(f"Error: {root} is not a directory")
         sys.exit(1)
 
-    print(f"{'DRY RUN' if dry_run else 'APPLYING'}: Purging font-size tokens + px<=10 from {root}\n")
+    print(f"{'DRY RUN' if dry_run else 'APPLYING'}: Purging font-size px<=10 from {root}\n")
 
     results = []
     total_deleted = 0
-    total_var = 0
-    total_px = 0
     files_changed = 0
 
     for dirpath, dirs, files in os.walk(root):
@@ -134,42 +116,19 @@ def main():
                 results.append(result)
                 total_deleted += result['deleted']
                 files_changed += 1
-                for _, text in result['deletions']:
-                    if 'var(--text-' in text:
-                        total_var += 1
-                    else:
-                        total_px += 1
 
     print(f"{'='*50}")
-    print(f"Font-Size Purge {'Preview' if dry_run else 'Complete'}")
+    print(f"Small px Purge {'Preview' if dry_run else 'Complete'}")
     print(f"{'='*50}\n")
-    print(f"  var(--text-*) deleted: {total_var}")
-    print(f"  px (<=10) deleted:     {total_px}")
-    print(f"  Total lines deleted:   {total_deleted}")
-    print(f"  Files changed:         {files_changed}\n")
+    print(f"  Lines deleted:  {total_deleted}")
+    print(f"  Files changed:  {files_changed}\n")
 
     print("Top files:")
     for r in sorted(results, key=lambda x: x['deleted'], reverse=True)[:20]:
         print(f"  {r['deleted']:>4}  {r['file']}")
 
-    report_path = os.path.join(os.path.dirname(root), 'fontsize_purge_report.md')
-    with open(report_path, 'w', encoding='utf-8') as f:
-        f.write("# Font-Size Purge Report\n\n")
-        f.write(f"**Mode:** {'Dry run' if dry_run else 'Applied'}\n")
-        f.write(f"**var(--text-*) deleted:** {total_var}\n")
-        f.write(f"**px (<=10) deleted:** {total_px}\n")
-        f.write(f"**Total lines deleted:** {total_deleted}\n")
-        f.write(f"**Files changed:** {files_changed}\n\n")
-
-        for r in sorted(results, key=lambda x: x['deleted'], reverse=True):
-            f.write(f"### {r['file']} ({r['deleted']} deleted)\n\n")
-            for line_num, line_text in r['deletions']:
-                f.write(f"- L{line_num}: `{line_text}`\n")
-            f.write("\n")
-
-    print(f"\nReport: {report_path}")
     if dry_run:
-        print("Dry run. Use --apply to make changes.")
+        print("\nDry run. Use --apply to make changes.")
 
 
 if __name__ == '__main__':
