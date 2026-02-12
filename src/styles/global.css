@@ -120,95 +120,95 @@ html:has([data-scrollbar])::-webkit-scrollbar {
   width: 0 !important;
 }
 
-/* ========== TYPOGRAPHY ========== */
-/* Font sizes set on actual HTML tags - components inherit, don't override */
+/* ========== TYPOGRAPHY — Element Definitions ========== */
+/* Components inherit from these. Don't override in components. */
 
 h1 {
   font-family: var(--font-heading);
-  font-size: var(--text-7xl);
-  font-weight: var(--font-extra-bold);
+  font-size: var(--text-h1);
+  font-weight: var(--font-extrabold);
   line-height: var(--leading-tight);
   color: var(--brand-c-primary-dark);
+  letter-spacing: var(--letter-spacing-wide);
   margin-bottom: var(--space-md);
 }
 
 h2 {
   font-family: var(--font-heading);
-  font-size: var(--text-5xl);
+  font-size: var(--text-h2);
   font-weight: var(--font-semibold);
   line-height: var(--leading-tight);
   color: var(--brand-c-primary);
+  letter-spacing: var(--letter-spacing-wide);
   margin-bottom: var(--space-md);
 }
 
 h3 {
   font-family: var(--font-heading);
-  font-size: var(--text-4xl);
+  font-size: var(--text-h3);
   font-weight: var(--font-semibold);
   line-height: var(--leading-snug);
   color: var(--brand-c-primary-dark);
+  letter-spacing: var(--letter-spacing-wide);
   margin-bottom: var(--space-md);
 }
 
 h4 {
   font-family: var(--font-heading);
-  font-size: var(--text-lg);
+  font-size: var(--text-h4);
   font-weight: var(--font-medium);
   line-height: var(--leading-snug);
   color: var(--brand-c-text);
+  letter-spacing: var(--letter-spacing-wide);
   margin-bottom: var(--space-sm);
 }
 
 h5 {
   font-family: var(--font-heading);
-  font-size: var(--text-base);
+  font-size: var(--text-h5);
   font-weight: var(--font-medium);
   line-height: var(--leading-snug);
   color: var(--brand-c-text);
+  letter-spacing: var(--letter-spacing-wide);
   margin-bottom: var(--space-sm);
 }
 
 h6 {
   font-family: var(--font-heading);
-  font-size: var(--text-sm);
+  font-size: var(--text-small);
   font-weight: var(--font-bold);
   line-height: var(--leading-snug);
   color: var(--brand-c-primary);
+  letter-spacing: var(--letter-spacing-wide);
   margin-bottom: var(--space-sm);
 }
 
 p {
   font-family: var(--font-body);
-  font-size: var(--text-lg);
+  font-size: 1.0625rem;
+  font-weight: var(--font-medium);
   line-height: var(--leading-relaxed);
   color: var(--brand-c-text);
   margin-bottom: var(--space-md);
 }
 
-/* Lead paragraph - larger intro text */
-.lead,
-p.lead {
-  font-size: var(--text-lg);
-  color: var(--brand-c-text-light);
-  line-height: var(--leading-relaxed);
-}
-
-/* Small text */
-small,
-.text-sm {
-  font-size: var(--text-sm);
-  color: var(--brand-c-text-light);
-}
-
 blockquote {
   font-family: var(--font-heading);
+  font-size: var(--text-quote);
   font-weight: var(--font-semibold);
-  font-size: var(--text-7xl);
   line-height: var(--leading-relaxed);
-  margin: var(--space-3xl) ;
+  color: var(--brand-c-text);
+  margin: var(--space-3xl);
   padding-left: var(--space-lg);
   border-left: 6px solid var(--brand-c-primary);
-  color: var(--brand-c-text);
+}
+
+small {
+  font-family: var(--font-body);
+  font-size: var(--text-fine);
+  font-weight: var(--font-normal);
+  line-height: var(--leading-normal);
+  color: var(--brand-c-text-light);
 }
 
 a:not(.btn) {
@@ -219,6 +219,43 @@ a:not(.btn) {
 
 a:hover:not(.btn) {
   color: var(--brand-c-primary-dark);
+}
+
+/* ========== CONTEXT OVERRIDES ========== */
+/* Scoped sizes for elements inside specific containers */
+
+/* Cards — compact headings */
+.card h2, .card h3, .card h4 {
+  font-size: 1.125rem;
+  line-height: 1.375;
+}
+
+.card h5, .card h6 {
+  font-size: 0.875rem;
+}
+
+.card p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Navigation */
+nav, nav a, nav span, nav button {
+  font-size: 0.875rem;
+  line-height: 1.375;
+}
+
+nav h1, nav h2, nav h3, nav h4, nav h5, nav h6 {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Mega menu dropdowns */
+.expandable-item h3,
+.dropdown-item h3,
+.submenu h3 {
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 /* ========== CARDS ========== */
@@ -248,7 +285,7 @@ a:hover:not(.btn) {
 }
 
 .card-title {
-  font-size: var(--text-xl);
+  font-size: var(--text-h4);
   font-weight: var(--font-bold);
   margin-bottom: var(--space-sm);
 }
@@ -282,7 +319,7 @@ a:hover:not(.btn) {
   padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--brand-c-neutral);
   border-radius: var(--border-radius);
-  font-size: var(--text-base);
+  font-size: var(--text-body);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -300,8 +337,8 @@ a:hover:not(.btn) {
 }
 
 .form-error {
-  color: var(--color-Danger);
-  font-size: var(--text-sm);
+  color: var(--color-Error);
+  font-size: var(--text-small);
   margin-top: var(--space-xs);
 }
 

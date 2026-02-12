@@ -215,12 +215,12 @@ style.textContent = `
   }
 
   .checkout-message__icon {
-    font-size: var(--text-lg);
+    font-size: var(--text-h5);
     font-weight: bold;
   }
 
   .checkout-message__text {
-    font-size: var(--text-sm);
+    font-size: var(--text-small);
     line-height: 1.5;
   }
 
@@ -236,20 +236,20 @@ style.textContent = `
 
   .checkout-verify-title {
     font-family: var(--font-heading);
-    font-size: var(--text-xl);
+    font-size: var(--text-h4);
     font-weight: var(--font-bold);
     color: var(--brand-c-text);
     margin-bottom: var(--space-md);
   }
 
   .checkout-verify-text {
-    font-size: var(--text-base);
+    font-size: var(--text-body);
     color: var(--brand-c-text);
     margin-bottom: var(--space-md);
   }
 
   .checkout-verify-note {
-    font-size: var(--text-sm);
+    font-size: var(--text-small);
     color: var(--brand-c-text-light);
     background: var(--brand-c-neutral-light);
     padding: var(--space-md);

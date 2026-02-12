@@ -15,7 +15,7 @@ import Icon from '../Icons/Icon.astro';
 interface Props {
   title: string;
   subtitle?: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'lg';
 
   // Divider options
   dividerColor?: 'primary' | 'secondary' | 'text' | 'neutral' | 'gradient';
@@ -78,8 +78,8 @@ const {
 } = Astro.props;
 
 // Calculate icon size based on title size when mediaSize is 'auto'
-const iconSizeMap = { xs: 20, sm: 24, md: 32, lg: 44, xl: 56 };
-const mediaSizeMap = { xs: 'xs', sm: 'sm', md: 'md', lg: 'lg', xl: 'lg' };
+const iconSizeMap = { sm: 32, lg: 44 };
+const mediaSizeMap = { sm: 'md', lg: 'lg' };
 const computedMediaSize = mediaSize === 'auto' ? mediaSizeMap[size] : mediaSize;
 const computedIconSize = mediaSize === 'auto' ? iconSizeMap[size] : (mediaSize === 'sm' ? 24 : mediaSize === 'md' ? 32 : 56);
 
@@ -173,7 +173,7 @@ const customStyle = textColor ? `--section-title-color: ${textColor};` : '';
 
   .section-title__text {
     font-family: var(--font-heading);
-    color: var(--section-title-color, var(--brand-c-text));
+    color: var(--section-title-color, var(--brand-c-primary));
     margin: 0;
     line-height: var(--leading-tight);
     position: relative;
@@ -186,7 +186,6 @@ const customStyle = textColor ? `--section-title-color: ${textColor};` : '';
 
   .section-title__subtitle {
     font-family: var(--font-body);
-    font-size: var(--text-base);
     color: var(--brand-c-text-light);
     margin: 0;
   }
@@ -285,18 +284,10 @@ const customStyle = textColor ? `--section-title-color: ${textColor};` : '';
   }
 
   /* ========== SIZES ========== */
-  .section-title--xs .section-title__text { font-size: var(--text-base); }
-  .section-title--xs .section-title__divider { width: 2px; }
-
-  .section-title--sm .section-title__text { font-size: var(--text-lg); }
+  /* Default (lg): h2 inherits from global typography */
+  /* Small: steps down to h3 */
+  .section-title--sm .section-title__text { font-size: var(--text-h3); }
   .section-title--sm .section-title__divider { width: 3px; }
-
-  .section-title--md .section-title__text { font-size: var(--text-2xl); }
-
-  .section-title--lg .section-title__text { font-size: var(--text-4xl); }
-
-  .section-title--xl .section-title__text { font-size: var(--text-5xl); }
-  .section-title--xl .section-title__divider { width: 5px; }
 
   /* ========== ALIGNMENT ========== */
   .section-title--align-center {
@@ -357,7 +348,6 @@ const customStyle = textColor ? `--section-title-color: ${textColor};` : '';
   }
 
   .section-title--variant-badge .section-title__text {
-    font-size: var(--text-xs);
     font-weight: var(--font-semibold);
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -409,14 +399,14 @@ const customStyle = textColor ? `--section-title-color: ${textColor};` : '';
   }
 
   .section-title__icon {
-    color: var(--brand-c-text);
+    color: var(--section-title-color, var(--brand-c-primary));
   }
 
   /* Icon colors */
   .section-title--icon-primary .section-title__icon { color: var(--brand-c-primary); }
   .section-title--icon-secondary .section-title__icon { color: var(--brand-c-secondary); }
   .section-title--icon-neutral .section-title__icon { color: var(--brand-c-neutral); }
-  .section-title--icon-text .section-title__icon { color: var(--brand-c-text); }
+  .section-title--icon-text .section-title__icon { color: var(--section-title-color, var(--brand-c-primary)); }
 
   /* Icon style: bare (no background) */
   .section-title--icon-bare .section-title__media {
@@ -436,14 +426,6 @@ const customStyle = textColor ? `--section-title-color: ${textColor};` : '';
   /* ========== RESPONSIVE ========== */
   @media (max-width: 768px) {
     .section-title { gap: var(--space-md); }
-
-    .section-title--lg .section-title__text { font-size: var(--text-3xl); }
-    .section-title--xl .section-title__text { font-size: var(--text-4xl); }
-  }
-
-  @media (max-width: 480px) {
-    .section-title--lg .section-title__text { font-size: var(--text-2xl); }
-    .section-title--xl .section-title__text { font-size: var(--text-3xl); }
   }
 
   /* ========== VERY SMALL SCREENS (300px) - Stack layout ========== */
@@ -469,14 +451,6 @@ const customStyle = textColor ? `--section-title-color: ${textColor};` : '';
       order: 0;
     }
 
-    .section-title--lg .section-title__text,
-    .section-title--xl .section-title__text {
-      font-size: var(--text-xl);
-    }
-
-    .section-title--md .section-title__text {
-      font-size: var(--text-lg);
-    }
 
     .section-title--media-size-lg .section-title__media {
       width: 48px;
