@@ -7,6 +7,9 @@
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 
+const BRAND_PRIMARY = getComputedStyle(document.documentElement).getPropertyValue('--brand-c-primary').trim() || BRAND_PRIMARY;
+
+
 gsap.registerPlugin(MorphSVGPlugin);
 
 // Animation configuration
@@ -29,7 +32,7 @@ async function loadSVG(filename: string): Promise<string> {
       const circlePath = 'M500,400 C555.228,400 600,444.772 600,500 C600,555.228 555.228,600 500,600 C444.772,600 400,555.228 400,500 C400,444.772 444.772,400 500,400Z';
       return `<?xml version="1.0" encoding="UTF-8"?>
         <svg width="100%" height="100%" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
-          <path d="${circlePath}" fill="#8B9D83" fill-opacity="0.98"/>
+          <path d="${circlePath}" fill=BRAND_PRIMARY fill-opacity="0.98"/>
         </svg>`;
     }
 
@@ -38,9 +41,9 @@ async function loadSVG(filename: string): Promise<string> {
       const circlePath = 'M500,400 C555.228,400 600,444.772 600,500 C600,555.228 555.228,600 500,600 C444.772,600 400,555.228 400,500 C400,444.772 444.772,400 500,400Z';
       return `<?xml version="1.0" encoding="UTF-8"?>
         <svg width="100%" height="100%" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
-          <path d="${circlePath}" fill="#8B9D83" fill-opacity="0.98" data-position="center"/>
-          <path d="${circlePath}" fill="#8B9D83" fill-opacity="0.98" data-position="left"/>
-          <path d="${circlePath}" fill="#8B9D83" fill-opacity="0.98" data-position="right"/>
+          <path d="${circlePath}" fill=BRAND_PRIMARY fill-opacity="0.98" data-position="center"/>
+          <path d="${circlePath}" fill=BRAND_PRIMARY fill-opacity="0.98" data-position="left"/>
+          <path d="${circlePath}" fill=BRAND_PRIMARY fill-opacity="0.98" data-position="right"/>
         </svg>`;
     }
 
@@ -251,14 +254,14 @@ export async function initHeroMorph() {
       // Create 2 additional circles at center position (fully visible)
       const leftCircle = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       leftCircle.setAttribute('d', circlePath);
-      leftCircle.setAttribute('fill', '#8B9D83');
+      leftCircle.setAttribute('fill', BRAND_PRIMARY);
       leftCircle.style.opacity = '1';
       leftCircle.setAttribute('data-position', 'left');
       svg.appendChild(leftCircle);
 
       const rightCircle = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       rightCircle.setAttribute('d', circlePath);
-      rightCircle.setAttribute('fill', '#8B9D83');
+      rightCircle.setAttribute('fill', BRAND_PRIMARY);
       rightCircle.style.opacity = '1';
       rightCircle.setAttribute('data-position', 'right');
       svg.appendChild(rightCircle);
@@ -370,7 +373,7 @@ export async function initHeroMorph() {
           for (let i = 1; i < targetPaths.length; i++) {
             const circle = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             circle.setAttribute('d', circlePath);
-            circle.setAttribute('fill', '#8B9D83');
+            circle.setAttribute('fill', BRAND_PRIMARY);
             circle.style.opacity = '0';
             svg.appendChild(circle);
             additionalCircles.push(circle);
@@ -469,7 +472,7 @@ export async function initHeroMorph() {
       for (let i = 1; i < targetPaths.length; i++) {
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         circle.setAttribute('d', circlePath);
-        circle.setAttribute('fill', '#8B9D83');
+        circle.setAttribute('fill', BRAND_PRIMARY);
         circle.style.opacity = '0';
         svg.appendChild(circle);
         additionalCircles.push(circle);
@@ -508,7 +511,7 @@ export async function initHeroMorph() {
         // Create temp path with just first sub-path
         const tempPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         tempPath.setAttribute('d', subPaths[0]);
-        tempPath.setAttribute('fill', '#8B9D83');
+        tempPath.setAttribute('fill', BRAND_PRIMARY);
         tempPath.style.opacity = '0';
         svg.appendChild(tempPath);
 
@@ -531,7 +534,7 @@ export async function initHeroMorph() {
         // Create temp path with just first sub-path of target
         const tempPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         tempPath.setAttribute('d', targetSubPaths[0]);
-        tempPath.setAttribute('fill', '#8B9D83');
+        tempPath.setAttribute('fill', BRAND_PRIMARY);
 
         // Morph current to first part of target
         timeline.to(currentPath, {
@@ -628,7 +631,7 @@ export async function initHeroMorph() {
         for (let i = 0; i < numToCreate; i++) {
           const circle = document.createElementNS('http://www.w3.org/2000/svg', 'path');
           circle.setAttribute('d', circlePath);
-          circle.setAttribute('fill', '#8B9D83');
+          circle.setAttribute('fill', BRAND_PRIMARY);
           circle.style.opacity = '0';
           svg.appendChild(circle);
           additionalCircles.push(circle);

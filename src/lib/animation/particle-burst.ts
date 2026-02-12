@@ -18,6 +18,9 @@
  *   fireConfetti(element);
  */
 
+
+const COLOR_WHITE = getComputedStyle(document.documentElement).getPropertyValue('--color-White').trim() || '#ffffff';
+
 export type ParticleType = 'confetti' | 'hearts' | 'circle' | 'square' | 'star' | 'mixed' | 'emoji';
 
 export interface ParticleBurstOptions {
@@ -106,7 +109,7 @@ function createParticle(x: number, y: number, opts: Required<ParticleBurstOption
 
     case 'square':
       particle.style.background = color;
-      particle.style.border = '2px solid white';
+      particle.style.border = `2px solid ${COLOR_WHITE}`;
       particle.style.borderRadius = '4px';
       break;
 
