@@ -107,7 +107,7 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
     content={offering.benefits || []}
     image={offeringImage}
     imageAlt={offering.title}
-    imagePosition="right"
+    imagePosition="left"
     sectionId="service-image-section"
   />
 
@@ -155,7 +155,6 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
   {offering.process && offering.process.length > 0 && (
     <section class="service-process section">
       <div class="container container-6xl">
-        <h2 class="service-section__title service-section__title--center">How It Works</h2>
         <div class="process-timeline">
           {offering.process.map((step, index) => (
             <div class="process-step">
@@ -197,6 +196,7 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
       columns="3"
       cardStyle="vertical"
       background="default"
+      containerSize="4xl"
     />
   )}
 
@@ -220,26 +220,15 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
 #service-image-section .image-text-section__body p::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 6px;
-  width: 16px;
-  height: 16px;
-  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235d7a5f' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
+  left: var(--space-xs);
+  top: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-c-primary);
 }
 
-/* ========== SECTION TITLES ========== */
-.service-section__title {
-  font-family: var(--font-heading);
-  font-weight: var(--font-bold);
-  color: var(--brand-c-text);
-  margin: 0 0 var(--space-2xl) 0;
-}
 
-.service-section__title--center {
-  text-align: center;
-}
 
 /* ========== DETAILS SECTION ========== */
 .service-details {
@@ -272,7 +261,7 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
   color: var(--brand-c-text);
   margin: 0 0 var(--space-lg) 0;
   padding-bottom: var(--space-md);
-  border-bottom: 2px solid var(--brand-c-primary-light);
+  border-bottom: 2px solid var(--brand-c-primary-dark);
 }
 
 .details-card__list {
@@ -299,6 +288,10 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
   background: var(--brand-c-primary);
 }
 
+.service-section__title--center {
+  text-align: center;
+}
+
 /* ========== PROCESS SECTION ========== */
 .service-process {
   padding: var(--space-4xl) 0;
@@ -308,8 +301,8 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
 .process-timeline {
   display: flex;
   justify-content: center;
-  gap: var(--space-lg);
-  max-width: 900px;
+  gap: var(--space-2xl);
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -320,7 +313,6 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
   align-items: center;
   text-align: center;
   position: relative;
-  max-width: 280px;
 }
 
 .process-step__marker {
@@ -331,11 +323,12 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
 }
 
 .process-step__number {
-  width: 56px;
-  height: 56px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--brand-c-primary-dark);
   color: var(--color-White);
+  font-size: var(--text-sm);
   font-weight: var(--font-bold);
   display: flex;
   align-items: center;
@@ -347,13 +340,7 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
 }
 
 .process-step__line {
-  position: absolute;
-  top: 28px;
-  left: calc(50% + 28px);
-  right: calc(-50% + 28px);
-  height: 3px;
-  background: var(--brand-c-neutral);
-  z-index: 1;
+  display: none;
 }
 
 .process-step__content {
@@ -369,7 +356,8 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
 
 .process-step__text {
   font-family: var(--font-body);
-  color: var(--brand-c-text);
+  font-size: var(--text-sm);
+  color: var(--brand-c-text-light);
   line-height: var(--leading-relaxed);
   margin: 0;
 }
@@ -490,9 +478,9 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
   }
 
   #service-image-section .image-text-section__body p::before {
-    width: 14px;
-    height: 14px;
-    top: 4px;
+    width: 6px;
+    height: 6px;
+    top: 8px;
   }
 
   .service-cta-wrapper .cta-section__content {
@@ -562,9 +550,9 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
   }
 
   #service-image-section .image-text-section__body p::before {
-    width: 12px;
-    height: 12px;
-    top: 3px;
+    width: 5px;
+    height: 5px;
+    top: 9px;
   }
 
   .service-cta-wrapper .cta-section__content {
@@ -644,16 +632,6 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
 
 /* ========== OTHER SERVICES VERTICAL CARDS ========== */
 
-/* Left-align content, tighter spacing */
-.related-grid--vertical .related-card--vertical .related-card__content {
-  text-align: left;
-  align-items: flex-start;
-}
-
-.related-grid--vertical .related-card--vertical .related-card__button {
-  align-self: flex-start;
-  width: auto;
-}
 
 .related-grid--vertical {
   gap: var(--space-lg);
@@ -665,73 +643,4 @@ const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" s
   transition: color var(--transition-base);
 }
 
-/* ========== A11Y: HIGHLIGHT LINKS ========== */
-#a11y-content-wrapper.a11y-highlight-links .related-card--vertical {
-  outline: 2px solid var(--brand-c-primary) !important;
-  outline-offset: -2px !important;
-}
-
-#a11y-content-wrapper.a11y-highlight-links .related-card--vertical:hover {
-  outline-width: 3px !important;
-}
-
-/* ========== A11Y: REDUCED MOTION ========== */
-#a11y-content-wrapper.a11y-reduce-motion .related-card--vertical:hover .related-card__title {
-  color: inherit !important;
-  transition: none !important;
-}
-
-#a11y-content-wrapper.a11y-reduce-motion .related-card--vertical:hover .related-card__button {
-  background: var(--brand-c-primary) !important;
-}
-
-/* ========== A11Y: TEXT ONLY ========== */
-#a11y-content-wrapper.a11y-text-only .related-grid--vertical {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: var(--space-sm) !important;
-}
-
-#a11y-content-wrapper.a11y-text-only .related-card--vertical {
-  flex-direction: column !important;
-  background: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  overflow: visible !important;
-  padding: 0 !important;
-  margin-bottom: var(--space-sm) !important;
-}
-
-#a11y-content-wrapper.a11y-text-only .related-card--vertical:hover {
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-#a11y-content-wrapper.a11y-text-only .related-card--vertical .related-card__image {
-  display: none !important;
-}
-
-#a11y-content-wrapper.a11y-text-only .related-card--vertical .related-card__content {
-  padding: 0 !important;
-}
-
-#a11y-content-wrapper.a11y-text-only .related-card--vertical .related-card__button {
-  display: inline-block !important;
-  padding: var(--space-sm) var(--space-md) !important;
-  border: 1px solid var(--brand-c-primary) !important;
-  border-radius: var(--radius-md) !important;
-  background: none !important;
-  color: var(--brand-c-primary-dark) !important;
-  font-weight: var(--font-semibold) !important;
-}
-
-/* Text-only + highlight links: no card outline, title underline suffices */
-#a11y-content-wrapper.a11y-text-only.a11y-highlight-links .related-card--vertical {
-  outline: none !important;
-}
-
-/* Text-only title hover */
-#a11y-content-wrapper.a11y-text-only:not(.a11y-reduce-motion) .related-card--vertical:hover .related-card__title {
-  color: var(--brand-c-primary) !important;
-}
 </style>
