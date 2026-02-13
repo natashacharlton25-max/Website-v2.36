@@ -1,0 +1,832 @@
+---
+/**
+ * SearchResults - Quick links, badge templates, results grid, and client-side search logic.
+ *
+ * Owns everything below the hero on the search page.
+ * Uses <style is:global> because result cards are JS-generated DOM.
+ */
+import Icon from '../Icons/Icon.astro';
+import Badge from '../Badge/Badge.astro';
+
+interface Props {
+  searchableContent: Array<{
+    title: string;
+    description: string;
+    url: string;
+    category: string;
+    type?: string;
+    image?: string | null;
+  }>;
+  quickLinks?: Array<{
+    href: string;
+    icon: string;
+    title: string;
+    description: string;
+  }>;
+  badgeCategories?: string[];
+}
+
+// Deterministic string → hue (mirrors Badge.astro topicHue)
+function topicHue(str: string): number {
+  let hash = 0;
+  for (const ch of str.toLowerCase()) hash = ch.charCodeAt(0) + ((hash << 5) - hash);
+  return (((hash * 2654435079) % 360) + 360) % 360;
+}
+
+const {
+  searchableContent,
+  quickLinks = [
+    { href: '/assets', icon: 'package-fill', title: 'Tools & Resources', description: 'Practical resources for your journey' },
+    { href: '/insights', icon: 'book-open-fill', title: 'Insights & Articles', description: 'Thoughtful perspectives and guides' },
+    { href: '/services', icon: 'users-fill', title: 'For Professionals', description: 'Resources for therapists and coaches' },
+    { href: '/projects', icon: 'stack-fill', title: 'Projects', description: 'Our ongoing and completed work' },
+  ],
+  badgeCategories = ['Insight', 'Resource', 'Project', 'Presentation', 'Page', 'Service'],
+} = Astro.props;
+---
+
+<!-- Quick Links Section -->
+<section class="quick-links" id="quickLinks">
+  <div class="quick-links__container container">
+    <div class="quick-links__grid">
+      {quickLinks.map(link => (
+        <a href={link.href} class="card quick-link-card">
+          <div class="quick-link-card__icon">
+            <Icon name={link.icon} size={48} />
+          </div>
+          <h3 class="quick-link-card__title">{link.title}</h3>
+          <p class="quick-link-card__desc">{link.description}</p>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- Pre-rendered Badge templates for client-side search results -->
+<div id="badge-templates" hidden>
+  {badgeCategories.map(cat => (
+    <div data-badge-cat={cat.toLowerCase()} data-topic-hue={topicHue(cat)}>
+      <Badge type={cat} shape="pill" variant="fill" size="sm" />
+    </div>
+  ))}
+</div>
+
+<!-- Search Results Section -->
+<section class="search-results" id="searchResults">
+  <div class="search-results__container container">
+    <div class="search-results__header">
+      <h2 class="search-results__title">
+        <span id="resultsCount">0</span> Results
+      </h2>
+      <p class="search-results__query">for <span id="searchQuery"></span></p>
+    </div>
+
+    <div class="search-results__grid" id="resultsList">
+      <!-- Results populated by JavaScript -->
+    </div>
+
+    <!-- No Results -->
+    <div class="no-results" id="noResults">
+      <div class="no-results__icon">
+        <Icon name="magnifying-glass-fill" size={64} />
+      </div>
+      <h3 class="no-results__title">No results found</h3>
+      <p class="no-results__text">Try a different search term or browse our categories above</p>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* ========== SEARCH PAGE ========== */
+  .search-page {
+    min-height: 100vh;
+    background: var(--brand-c-bg);
+  }
+
+  .search-hero__highlight {
+    color: var(--brand-c-neutral-light);
+  }
+
+  /* Search hero: widen container + spacing */
+  .search-page .hero-section--gradient .container {
+    max-width: none;
+    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
+  }
+
+  .search-page .hero-section__title {
+    white-space: nowrap;
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .search-page .hero-section__content {
+    margin-top: var(--space-2xl);
+  }
+
+  /* ========== SEARCH INPUT (lives in HeroSection slot) ========== */
+  .search-input-wrapper {
+    position: relative;
+    max-width: var(--container-2xl);
+    margin: 0 auto;
+  }
+
+  .search-input__icon {
+    position: absolute;
+    left: var(--space-lg);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--brand-c-primary);
+    pointer-events: none;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: var(--space-lg) var(--space-3xl);
+    padding-left: calc(var(--space-lg) + var(--space-xl) + var(--space-md));
+    font-family: var(--font-body);
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--color-White);
+    color: var(--brand-c-text);
+    box-shadow: var(--shadow-xl);
+    transition: all var(--transition-base);
+    position: relative;
+    z-index: 1;
+  }
+
+  .search-input:focus {
+    outline: none;
+    box-shadow: var(--shadow-2xl), 0 0 0 var(--space-xs) color-mix(in srgb, var(--color-White) 30%, transparent);
+  }
+
+  .search-input::placeholder {
+    color: var(--brand-c-text-light);
+  }
+
+  .search-input__clear {
+    position: absolute;
+    right: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--brand-c-text-light);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .search-input__clear:hover {
+    background: var(--brand-c-neutral-light);
+    color: var(--brand-c-text);
+  }
+
+  .search-input__clear.show {
+    display: flex;
+  }
+
+  /* ========== QUICK LINKS ========== */
+  .quick-links {
+    padding: var(--space-2xl) var(--space-lg);
+    background: var(--brand-c-bg);
+  }
+
+  .quick-links__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .quick-link-card {
+    background: var(--color-White);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    text-decoration: none;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+    border: var(--border-width-2) solid transparent;
+  }
+
+  .quick-link-card:hover {
+    transform: translateY(calc(-1 * var(--space-xs)));
+    box-shadow: var(--shadow-xl);
+    border-color: var(--brand-c-primary-light);
+  }
+
+  .quick-link-card:hover .quick-link-card__icon {
+    color: var(--brand-c-primary-dark);
+    transform: scale(1.1);
+  }
+
+  .quick-link-card__icon {
+    margin: 0 auto var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-c-primary);
+    transition: all var(--transition-base);
+  }
+
+  .quick-link-card__title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-semibold);
+    color: var(--brand-c-text);
+    margin: 0 0 var(--space-xs) 0;
+  }
+
+  .quick-link-card__desc {
+    font-family: var(--font-body);
+    color: var(--brand-c-text-light);
+    margin: 0;
+  }
+
+  /* ========== SEARCH RESULTS ========== */
+  .search-results {
+    padding: var(--space-4xl) var(--space-lg);
+    background: var(--brand-c-bg);
+    display: none;
+  }
+
+  .search-results.show {
+    display: block;
+  }
+
+  .search-results__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: var(--border-width) solid var(--brand-c-neutral-light);
+  }
+
+  .search-results__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--font-bold);
+    color: var(--brand-c-text);
+    margin: 0;
+  }
+
+  .search-results__title span {
+    color: var(--brand-c-primary-dark);
+  }
+
+  .search-results__query {
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--font-bold);
+    color: var(--brand-c-text);
+    margin: 0;
+  }
+
+  .search-results__query span {
+    color: var(--brand-c-primary-dark);
+  }
+
+  .search-results__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-lg);
+  }
+
+  /* ========== NO RESULTS ========== */
+  .no-results {
+    text-align: center;
+    padding: var(--space-4xl) var(--space-lg);
+    display: none;
+  }
+
+  .no-results.show {
+    display: block;
+  }
+
+  .no-results__icon {
+    color: var(--brand-c-neutral);
+    margin-bottom: var(--space-lg);
+  }
+
+  .no-results__title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    color: var(--brand-c-text);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  .no-results__text {
+    font-family: var(--font-body);
+    color: var(--brand-c-text-light);
+    margin: 0;
+  }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 1024px) {
+    .search-results__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .quick-links__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .search-results__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .search-input {
+      padding: var(--space-md) var(--space-2xl);
+      padding-left: calc(var(--space-md) + var(--space-xl) + var(--space-sm));
+    }
+
+    .search-input__icon {
+      left: var(--space-md);
+    }
+
+    .quick-links {
+      padding: var(--space-2xl) var(--space-md);
+    }
+
+    .search-results {
+      padding: var(--space-3xl) var(--space-md);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .quick-links__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+
+    .quick-link-card {
+      padding: var(--space-lg);
+      display: flex;
+      align-items: center;
+      text-align: left;
+      gap: var(--space-md);
+    }
+
+    .quick-link-card__icon {
+      width: var(--space-2xl);
+      height: var(--space-2xl);
+      margin: 0;
+      flex-shrink: 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .search-results__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+
+    .search-input {
+      padding: var(--space-sm) var(--space-xl);
+      padding-left: calc(var(--space-sm) + var(--space-xl) + var(--space-xs));
+    }
+
+    .search-input__icon {
+      left: var(--space-sm);
+    }
+
+    .quick-links {
+      padding: var(--space-xl) var(--space-xs);
+    }
+
+    .quick-link-card {
+      padding: var(--space-md);
+    }
+
+    .quick-link-card__icon {
+      width: var(--space-2xl);
+      height: var(--space-2xl);
+    }
+
+    .search-results {
+      padding: var(--space-2xl) var(--space-xs);
+    }
+  }
+
+  @media (max-width: 400px) {
+    .search-input {
+      padding: var(--space-xs) var(--space-lg);
+      padding-left: calc(var(--space-xs) + var(--space-lg) + var(--space-xs));
+      border-radius: var(--radius-lg);
+    }
+
+    .search-input__icon {
+      left: var(--space-xs);
+    }
+
+    .quick-links {
+      padding: var(--space-lg) var(--space-xs);
+    }
+
+    .quick-link-card {
+      padding: var(--space-sm);
+      gap: var(--space-sm);
+      border-radius: var(--radius-lg);
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-link-card__icon {
+      width: var(--space-2xl);
+      height: var(--space-2xl);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-link-card__title {
+      text-align: center;
+    }
+
+    .quick-link-card__desc {
+      display: none;
+    }
+
+    .search-results {
+      padding: var(--space-xl) var(--space-xs);
+    }
+  }
+
+  @media (max-width: 350px) {
+    .search-input {
+      padding: var(--space-xs) var(--space-md);
+      padding-left: calc(var(--space-xs) + var(--space-lg) + var(--space-xs));
+    }
+
+    .search-input__icon {
+      left: var(--space-xs);
+    }
+
+    .quick-links {
+      padding: var(--space-md) var(--space-xs);
+    }
+
+    .quick-link-card {
+      padding: var(--space-xs);
+      gap: var(--space-xs);
+      border-radius: var(--radius-md);
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-link-card__icon {
+      width: var(--space-xl);
+      height: var(--space-xl);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-link-card__title {
+      text-align: center;
+    }
+
+    .search-results {
+      padding: var(--space-lg) var(--space-xs);
+    }
+  }
+
+  @media (max-width: 300px) {
+    .search-input {
+      padding: var(--space-xs) var(--space-sm);
+      padding-left: calc(var(--space-xs) + var(--space-md) + var(--space-xs));
+      border-radius: var(--radius-md);
+    }
+
+    .search-input__icon {
+      left: var(--space-xs);
+    }
+
+    .quick-links {
+      padding: var(--space-md) var(--space-xs);
+    }
+
+    .quick-link-card {
+      padding: var(--space-xs);
+      border-radius: var(--radius-sm);
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-link-card__icon {
+      width: var(--space-xl);
+      height: var(--space-xl);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-link-card__title {
+      text-align: center;
+    }
+
+    .search-results {
+      padding: var(--space-md) var(--space-xs);
+    }
+  }
+
+  @media (max-width: 200px) {
+    .search-input {
+      padding: var(--space-xs) var(--space-xs);
+      padding-left: calc(var(--space-xs) + var(--space-md) + var(--space-xs));
+      border-radius: var(--radius-sm);
+    }
+
+    .search-input__icon {
+      left: var(--space-xs);
+    }
+
+    .quick-links {
+      padding: var(--space-xs) 0;
+    }
+
+    .quick-link-card {
+      padding: var(--space-xs);
+      gap: var(--space-xs);
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-link-card__icon {
+      width: var(--space-lg);
+      height: var(--space-lg);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-link-card__title {
+      text-align: center;
+    }
+
+    .search-results {
+      padding: var(--space-sm) 0;
+    }
+
+    .search-results__header {
+      margin-bottom: var(--space-sm);
+    }
+
+    .no-results {
+      padding: var(--space-md);
+    }
+
+    .no-results__icon {
+      transform: scale(0.5);
+    }
+  }
+
+  @media (max-width: 100px) {
+    .search-input {
+      padding: var(--space-xs) var(--space-xs);
+      padding-left: calc(var(--space-xs) + var(--space-md) + var(--space-xs));
+    }
+
+    .search-input__icon {
+      left: var(--space-xs);
+    }
+
+    .quick-links {
+      padding: var(--space-xs) 0;
+    }
+
+    .quick-link-card {
+      padding: var(--space-xs);
+      gap: var(--space-xs);
+      border-radius: var(--radius-sm);
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-link-card__icon {
+      width: var(--space-md);
+      height: var(--space-md);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quick-link-card__title {
+      text-align: center;
+    }
+
+    .search-results {
+      padding: var(--space-xs) 0;
+    }
+
+    .search-results__grid {
+      gap: var(--space-xs);
+    }
+
+    .no-results {
+      padding: var(--space-xs);
+    }
+
+    .no-results__icon {
+      transform: scale(0.3);
+      margin-bottom: var(--space-xs);
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ searchableContent: JSON.stringify(searchableContent) }}>
+  // Search functionality - proper singleton with cleanup
+  (function() {
+    class SearchPage {
+      constructor() {
+        this.searchInput = document.getElementById('searchInput');
+        this.clearBtn = document.getElementById('clearSearch');
+        this.quickLinks = document.getElementById('quickLinks');
+        this.searchResults = document.getElementById('searchResults');
+        this.resultsList = document.getElementById('resultsList');
+        this.noResults = document.getElementById('noResults');
+        this.resultsCount = document.getElementById('resultsCount');
+        this.searchQuery = document.getElementById('searchQuery');
+
+        this.content = JSON.parse(searchableContent);
+
+        // Build badge template map from pre-rendered Badge components
+        this.badgeTemplates = {};
+        this.topicHues = {};
+        document.querySelectorAll('#badge-templates [data-badge-cat]').forEach(el => {
+          this.badgeTemplates[el.dataset.badgeCat] = el.innerHTML;
+          this.topicHues[el.dataset.badgeCat] = el.dataset.topicHue;
+        });
+
+        // Bind handlers so we can remove them later
+        this.handleInputBound = this.handleInput.bind(this);
+        this.handleClearBound = this.handleClear.bind(this);
+
+        this.init();
+      }
+
+      destroy() {
+        this.searchInput?.removeEventListener('input', this.handleInputBound);
+        this.clearBtn?.removeEventListener('click', this.handleClearBound);
+      }
+
+      init() {
+        // Search input handler
+        this.searchInput?.addEventListener('input', this.handleInputBound);
+
+        // Clear button
+        this.clearBtn?.addEventListener('click', this.handleClearBound);
+
+        // Check URL for search query
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('q');
+        if (query && this.searchInput) {
+          this.searchInput.value = query;
+          this.handleSearch(query);
+        }
+      }
+
+      handleInput(e) {
+        this.handleSearch(e.target.value);
+      }
+
+      handleClear() {
+        if (this.searchInput) {
+          this.searchInput.value = '';
+          this.searchInput.focus();
+          this.handleSearch('');
+        }
+      }
+
+      handleSearch(query) {
+        const trimmedQuery = query.trim().toLowerCase();
+
+        // Show/hide clear button
+        if (this.clearBtn) {
+          this.clearBtn.classList.toggle('show', !!trimmedQuery);
+        }
+
+        if (!trimmedQuery) {
+          // Show quick links, hide results
+          if (this.quickLinks) this.quickLinks.style.display = 'block';
+          if (this.searchResults) this.searchResults.classList.remove('show');
+          return;
+        }
+
+        // Hide quick links, show results section
+        if (this.quickLinks) this.quickLinks.style.display = 'none';
+        if (this.searchResults) this.searchResults.classList.add('show');
+
+        // Update query display
+        if (this.searchQuery) this.searchQuery.textContent = query;
+
+        // Filter content
+        const results = this.content.filter(item =>
+          item.title.toLowerCase().includes(trimmedQuery) ||
+          item.description.toLowerCase().includes(trimmedQuery) ||
+          item.category.toLowerCase().includes(trimmedQuery)
+        );
+
+        this.renderResults(results);
+      }
+
+      getIconForCategory(category) {
+        const icons = {
+          'Insight': '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.5C39.74,56.83,78.26,17.15,125.88,16A88,88,0,0,1,216,104Zm-16,0a72,72,0,0,0-73.74-72c-39,.92-70.47,33.39-70.26,72.39a71.64,71.64,0,0,0,27.64,56.3A32,32,0,0,1,96,186v6h24V147.31L90.34,117.66a8,8,0,0,1,11.32-11.32L128,132.69l26.34-26.35a8,8,0,0,1,11.32,11.32L136,147.31V192h24v-6a32.12,32.12,0,0,1,12.47-25.35A71.65,71.65,0,0,0,200,104Z"/></svg>',
+          'Page': '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z"/></svg>',
+          'Resource': '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M223.68,66.15,135.68,18a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,120,47.65,76,128,32l80.35,44Z"/></svg>',
+          'Service': '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.14,98.7a8,8,0,0,1-11.07-2.33A79.83,79.83,0,0,0,172,168a8,8,0,0,1,0-16,44,44,0,1,0-16.34-84.87,8,8,0,1,1-5.94-14.85,60,60,0,0,1,55.53,105.64,95.83,95.83,0,0,1,47.22,37.71A8,8,0,0,1,250.14,206.7Z"/></svg>',
+          'Project': '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M200,32H56A24,24,0,0,0,32,56V200a24,24,0,0,0,24,24H200a24,24,0,0,0,24-24V56A24,24,0,0,0,200,32Zm8,168a8,8,0,0,1-8,8H56a8,8,0,0,1-8-8V104H208Zm0-112H48V56a8,8,0,0,1,8-8H200a8,8,0,0,1,8,8Z"/></svg>',
+          'Presentation': '<svg viewBox="0 0 256 256" fill="currentColor"><path d="M216,40H136V24a8,8,0,0,0-16,0V40H40A16,16,0,0,0,24,56V176a16,16,0,0,0,16,16H79.36L57.75,219.12a8,8,0,1,0,12.5,10l29.59-37.12H156.16l29.59,37.12a8,8,0,1,0,12.5-10L176.64,192H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,136H40V56H216Z"/></svg>',
+        };
+        return icons[category] || icons['Page'];
+      }
+
+      renderResults(results) {
+        if (!this.resultsList || !this.noResults || !this.resultsCount) return;
+
+        this.resultsCount.textContent = results.length;
+
+        if (results.length === 0) {
+          this.resultsList.innerHTML = '';
+          this.noResults.classList.add('show');
+          return;
+        }
+
+        this.noResults.classList.remove('show');
+
+        // Build HTML string with proper CSS classes
+        let html = '';
+        results.forEach(item => {
+          const categorySlug = item.category.toLowerCase();
+          const iconSvg = this.getIconForCategory(item.category);
+
+          const badgeHtml = this.badgeTemplates[categorySlug] || `<span class="result-card__badge">${item.category}</span>`;
+          const hue = this.topicHues[categorySlug] || '0';
+
+          html += `
+            <a href="${item.url}" class="card result-card" style="--topic-hue: ${hue}">
+              <div class="result-card__badge-wrap">${badgeHtml}</div>
+              <div class="result-card__icon">
+                ${iconSvg}
+              </div>
+              <h3 class="result-card__title">${item.title}</h3>
+              <p class="result-card__desc">${item.description}</p>
+            </a>
+          `;
+        });
+
+        this.resultsList.innerHTML = html;
+      }
+    }
+
+    // Initialize with proper cleanup
+    function initSearch() {
+      if (!document.getElementById('searchInput')) return;
+
+      // Destroy previous instance if exists
+      if (window.__searchPageInstance) {
+        window.__searchPageInstance.destroy();
+      }
+
+      // Create new instance
+      window.__searchPageInstance = new SearchPage();
+    }
+
+    // Run on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSearch);
+    } else {
+      initSearch();
+    }
+
+    // For Astro page transitions
+    document.addEventListener('astro:page-load', initSearch);
+  })();
+</script>

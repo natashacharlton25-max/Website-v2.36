@@ -21,6 +21,7 @@
  * @param containerSize - Container width: '6xl' | '7xl' | 'full' (default: '6xl')
  * @param buttons - Array of CTA buttons [{text, href, variant}]
  * @param overlayOpacity - Overlay opacity for image variant (default: 0.6)
+ * @param pattern - Add subtle cross-pattern overlay (default: false)
  */
 import { Image } from 'astro:assets';
 import Button from '../Button/Button.astro';
@@ -43,6 +44,7 @@ interface Props {
     variant?: 'primary' | 'secondary' | 'outline';
   }>;
   overlayOpacity?: number;
+  pattern?: boolean;
 }
 
 const {
@@ -59,22 +61,24 @@ const {
   containerSize = '6xl',
   buttons = [],
   overlayOpacity = 0.6,
+  pattern = false,
 } = Astro.props;
 
 const containerClass = 'container';
 const alignmentClass = alignment === 'center' ? 'hero-section--centered' : '';
+const patternClass = pattern ? 'hero-section--pattern' : '';
 ---
 
 {variant === 'image' && image && imagePosition === 'full' ? (
   <!-- Image Variant: Full-width background image with overlay -->
-  <section class={`hero-section hero-section--image ${alignmentClass}`}>
+  <section class={`hero-section hero-section--image ${alignmentClass} ${patternClass}`}>
     <div class="hero-section__image-wrapper">
       <Image src={image} alt={imageAlt} class="hero-section__image" />
       <div class="hero-section__overlay" style={`--overlay-opacity: ${overlayOpacity}`}></div>
       <div class="hero-section__fade"></div>
       <div class={containerClass}>
         <div class="hero-section__content">
-          <h1 class="hero-section__title">{title}</h1>
+          <h1 class="hero-section__title" set:html={title} />
           {subtitle && <p class="hero-section__subtitle">{subtitle}</p>}
           {description && <p class="hero-section__description">{description}</p>}
           {extraText && <p class="hero-section__extra">{extraText}</p>}
@@ -94,14 +98,14 @@ const alignmentClass = alignment === 'center' ? 'hero-section--centered' : '';
   </section>
 ) : variant === 'image' && image && (imagePosition === 'left' || imagePosition === 'right') ? (
   <!-- Image Variant: Split layout with image on left or right -->
-  <section class={`hero-section hero-section--image-split hero-section--image-${imagePosition}`}>
+  <section class={`hero-section hero-section--image-split hero-section--image-${imagePosition} ${patternClass}`}>
     <div class={containerClass}>
       <div class="hero-section__split-wrapper">
         <div class="hero-section__split-image">
           <Image src={image} alt={imageAlt} class="hero-section__image" />
         </div>
         <div class="hero-section__split-content">
-          <h1 class="hero-section__title">{title}</h1>
+          <h1 class="hero-section__title" set:html={title} />
           {subtitle && <p class="hero-section__subtitle">{subtitle}</p>}
           {description && <p class="hero-section__description">{description}</p>}
           {extraText && <p class="hero-section__extra">{extraText}</p>}
@@ -122,11 +126,11 @@ const alignmentClass = alignment === 'center' ? 'hero-section--centered' : '';
 ) : variant === 'gradient' ? (
   <!-- Gradient Variant: Gradient background -->
   <section
-    class={`hero-section hero-section--gradient hero-section--gradient-${gradient} ${alignmentClass}`}
+    class={`hero-section hero-section--gradient hero-section--gradient-${gradient} ${alignmentClass} ${patternClass}`}
   >
     <div class={containerClass}>
       <div class="hero-section__content">
-        <h1 class="hero-section__title">{title}</h1>
+        <h1 class="hero-section__title" set:html={title} />
         {subtitle && <p class="hero-section__subtitle">{subtitle}</p>}
         {description && <p class="hero-section__description">{description}</p>}
         {extraText && <p class="hero-section__extra">{extraText}</p>}
@@ -145,10 +149,10 @@ const alignmentClass = alignment === 'center' ? 'hero-section--centered' : '';
   </section>
 ) : (
   <!-- Simple Variant: Plain background -->
-  <section class={`hero-section hero-section--simple ${alignmentClass}`}>
+  <section class={`hero-section hero-section--simple ${alignmentClass} ${patternClass}`}>
     <div class={containerClass}>
       <div class="hero-section__content">
-        <h1 class="hero-section__title">{title}</h1>
+        <h1 class="hero-section__title" set:html={title} />
         {subtitle && <p class="hero-section__subtitle">{subtitle}</p>}
         {description && <p class="hero-section__description">{description}</p>}
         {extraText && <p class="hero-section__extra">{extraText}</p>}

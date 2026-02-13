@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../Layouts/BaseLayout.astro';
+import CheckoutLayout from '../components/Checkout/CheckoutLayout.astro';
 import Button from '../components/Button/Button.astro';
 import DownloadSummary from '../components/Checkout/DownloadSummary.astro';
 import TrustBadges from '../components/Common/TrustBadges.astro';
@@ -9,194 +10,82 @@ import TrustBadges from '../components/Common/TrustBadges.astro';
   title="Checkout | Walking with a Smile"
   description="Sign up to get your free downloads"
 >
-  <section class="checkout-section section">
-    <div class="container container-7xl">
-      <div class="checkout-trust-header">
-        <TrustBadges layout="row" size="sm" />
-      </div>
+  <CheckoutLayout>
+    <TrustBadges slot="trust" layout="row" size="sm" />
 
-      <div class="checkout-header">
-        <h1 class="checkout-title">Checkout Your Items</h1>
-      </div>
-
-      <div class="checkout-content">
-        <!-- Left Column: Newsletter Signup Form -->
-        <div class="checkout-forms">
-          <div class="card checkout-card">
-            <form id="newsletter-form" class="checkout-form">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="firstName" class="form-label">First Name *</label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    class="form-input"
-                    placeholder="Your first name"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="lastName" class="form-label">Last Name *</label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    class="form-input"
-                    placeholder="Your last name"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="email" class="form-label">Email Address *</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  class="form-input"
-                  placeholder="you@example.com"
-                  required
-                />
-                <p class="form-hint">We'll send your download links to this email</p>
-              </div>
-
-              <div class="form-group">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="newsletter" name="newsletter" checked />
-                  <span>Yes, I'd like to receive updates and resources from Walking with a Smile</span>
-                </label>
-              </div>
-
-              <!-- Submit Button -->
-              <div class="checkout-actions">
-                <Button type="submit" variant="primary" size="lg" className="btn-block" id="submit-button">
-                  <span id="button-text">Get My Downloads</span>
-                  <span id="button-spinner" style="display: none;">Processing...</span>
-                </Button>
-              </div>
-            </form>
-
-            <div class="checkout-footer">
-              <div class="checkout-info">
-                <span>All resources are free. No credit card required.</span>
-              </div>
-
-              <p class="checkout-terms">
-                By submitting, you agree to our
-                <a href="/legal/terms">Terms of Service</a> and
-                <a href="/legal/privacy">Privacy Policy</a>
-              </p>
-            </div>
+    <Fragment slot="form">
+      <form id="newsletter-form" class="checkout-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName" class="form-label">First Name *</label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              class="form-input"
+              placeholder="Your first name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="lastName" class="form-label">Last Name *</label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              class="form-input"
+              placeholder="Your last name"
+              required
+            />
           </div>
         </div>
 
-        <!-- Right Column: Download Summary -->
-        <div class="order-summary-container">
-          <div class="card checkout-card checkout-card--summary">
-            <DownloadSummary />
-          </div>
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address *</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="you@example.com"
+            required
+          />
+          <p class="form-hint">We'll send your download links to this email</p>
         </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="newsletter" name="newsletter" checked />
+            <span>Yes, I'd like to receive updates and resources from Walking with a Smile</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="checkout-actions">
+          <Button type="submit" variant="primary" size="lg" className="btn-block" id="submit-button">
+            <span id="button-text">Get My Downloads</span>
+            <span id="button-spinner" style="display: none;">Processing...</span>
+          </Button>
+        </div>
+      </form>
+
+      <div class="checkout-footer">
+        <div class="checkout-info">
+          <span>All resources are free. No credit card required.</span>
+        </div>
+
+        <p class="checkout-terms">
+          By submitting, you agree to our
+          <a href="/legal/terms">Terms of Service</a> and
+          <a href="/legal/privacy">Privacy Policy</a>
+        </p>
       </div>
-    </div>
-  </section>
+    </Fragment>
+
+    <DownloadSummary slot="summary" />
+  </CheckoutLayout>
 </BaseLayout>
 
 <script>
   import '../lib/cart/checkout-form';
 </script>
-
-<style is:global>
-  .checkout-trust-header {
-    margin-bottom: var(--space-md);
-  }
-
-  .checkout-trust-header .trust-badges {
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    justify-content: center;
-    gap: var(--space-md);
-  }
-
-  .checkout-footer {
-    margin-top: var(--space-lg);
-    padding-top: var(--space-lg);
-    border-top: 1px solid var(--brand-c-neutral-light);
-    text-align: center;
-  }
-
-  .checkout-info {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    color: var(--brand-c-text);
-    margin-bottom: var(--space-sm);
-  }
-
-  /* ========== RESPONSIVE - SMALL (400px) ========== */
-  @media (max-width: 400px) {
-    .checkout-trust-header {
-      margin-bottom: var(--space-md);
-      padding-bottom: var(--space-sm);
-    }
-
-    .checkout-trust-header .trust-badges {
-      gap: var(--space-xs) !important;
-    }
-
-    .checkout-info {
-      flex-direction: column;
-      gap: var(--space-xs);
-    }
-
-    .checkout-footer {
-      margin-top: var(--space-md);
-      padding-top: var(--space-md);
-    }
-  }
-
-  /* ========== RESPONSIVE - VERY SMALL (300px) ========== */
-  @media (max-width: 300px) {
-    .checkout-trust-header .trust-badges {
-      flex-direction: column !important;
-      align-items: center !important;
-      gap: var(--space-xs) !important;
-    }
-
-    .checkout-info {
-    }
-
-    .checkout-footer {
-      margin-top: var(--space-sm);
-      padding-top: var(--space-sm);
-    }
-  }
-
-  /* ========== RESPONSIVE - TINY (200px) ========== */
-  @media (max-width: 200px) {
-    .checkout-trust-header {
-      margin-bottom: var(--space-sm);
-      padding-bottom: var(--space-xs);
-    }
-
-    .checkout-trust-header .trust-badges {
-      gap: 4px !important;
-    }
-
-    .checkout-info {
-      word-break: break-word;
-    }
-
-    .checkout-terms {
-      word-break: break-word;
-    }
-
-    .checkout-footer {
-      margin-top: var(--space-xs);
-      padding-top: var(--space-xs);
-    }
-  }
-</style>

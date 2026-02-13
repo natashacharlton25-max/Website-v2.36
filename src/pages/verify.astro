@@ -4,7 +4,6 @@
  * Handles verification token and sends download links
  */
 import BaseLayout from '../Layouts/BaseLayout.astro';
-import Button from '../components/Button/Button.astro';
 import type { D1Database } from '../lib/db';
 import {
   verifyToken,
@@ -30,7 +29,6 @@ const token = Astro.url.searchParams.get('token');
 
 let status: 'success' | 'expired' | 'invalid' | 'error' = 'invalid';
 let message = '';
-let userName = '';
 
 if (!db) {
   status = 'error';
@@ -41,8 +39,6 @@ if (!db) {
 
     if (result) {
       const { user, pendingDownloads } = result;
-      userName = user.first_name;
-
       // Check download limits
       const { allowed, remaining } = await canUserDownload(db, user);
 
@@ -98,160 +94,21 @@ if (!db) {
   message = 'No verification token provided.';
 }
 
-const statusConfig = {
-  success: {
-    icon: 'check-circle',
-    title: 'Email Verified!',
-    color: 'var(--color-Success)'
-  },
-  expired: {
-    icon: 'clock',
-    title: 'Link Expired',
-    color: 'var(--color-Warning)'
-  },
-  invalid: {
-    icon: 'x-circle',
-    title: 'Invalid Link',
-    color: 'var(--color-Error)'
-  },
-  error: {
-    icon: 'warning',
-    title: 'Something Went Wrong',
-    color: 'var(--color-Error)'
-  }
+const titles = {
+  success: 'Email Verified!',
+  expired: 'Link Expired',
+  invalid: 'Invalid Link',
+  error: 'Something Went Wrong'
 };
-
-const config = statusConfig[status];
 ---
 
 <BaseLayout
   title="Email Verification | Walking with a Smile"
   description="Verify your email to receive your downloads"
 >
-  <section class="verify-section section">
-    <div class="container container-sm">
-      <div class="card verify-card">
-        <div class="verify-icon" style={`color: ${config.color}`}>
-          {status === 'success' ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 256 256">
-              <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"></path>
-            </svg>
-          ) : status === 'expired' ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 256 256">
-              <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm56,112H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48a8,8,0,0,1,0,16Z"></path>
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 256 256">
-              <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm37.66,130.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>
-            </svg>
-          )}
-        </div>
-
-        <h1 class="verify-title">{config.title}</h1>
-
-        {userName && status === 'success' && (
-          <p class="verify-greeting">Hi {userName}!</p>
-        )}
-
-        <p class="verify-message">{message}</p>
-
-        {status === 'success' && (
-          <div class="verify-note">
-            <p>Check your inbox for an email with your download links. Don't forget to check your spam folder!</p>
-          </div>
-        )}
-
-        <div class="verify-actions">
-          {status === 'expired' ? (
-            <Button href="/checkout" variant="primary" size="lg">
-              Request New Download Links
-            </Button>
-          ) : (
-            <Button href="/" variant="primary" size="lg">
-              Go to Homepage
-            </Button>
-          )}
-
-          <Button href="/assets" variant="outline" size="lg">
-            Browse Resources
-          </Button>
-        </div>
-      </div>
-    </div>
-  </section>
+  <div class="section" style="text-align: center; padding-top: var(--space-3xl);">
+    <h1>{titles[status]}</h1>
+    <p>{message}</p>
+  </div>
 </BaseLayout>
 
-<style>
-  .verify-section {
-    min-height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-3xl) 0;
-    background: linear-gradient(
-      180deg,
-      var(--brand-c-primary-light) 0%,
-      var(--brand-c-bg) 40%
-    );
-  }
-
-  .verify-card {
-    background: var(--color-White);
-    border-radius: var(--border-radius-xl);
-    padding: var(--space-3xl);
-    text-align: center;
-    box-shadow:
-      0 1px 3px color-mix(in oklch, var(--color-Black) 4%, transparent),
-      0 4px 12px color-mix(in oklch, var(--color-Black) 3%, transparent);
-    max-width: 480px;
-    margin: 0 auto;
-  }
-
-  .verify-icon {
-    margin-bottom: var(--space-xl);
-  }
-
-  .verify-title {
-    font-family: var(--font-heading);
-    font-weight: var(--font-bold);
-    color: var(--brand-c-text);
-    margin-bottom: var(--space-md);
-  }
-
-  .verify-greeting {
-    color: var(--brand-c-text);
-    margin-bottom: var(--space-sm);
-  }
-
-  .verify-message {
-    color: var(--brand-c-text);
-    line-height: 1.6;
-    margin-bottom: var(--space-xl);
-  }
-
-  .verify-note {
-    background: var(--brand-c-primary-light);
-    border: 1px solid var(--brand-c-primary-light);
-    border-radius: var(--border-radius-md);
-    padding: var(--space-md);
-    margin-bottom: var(--space-xl);
-  }
-
-  .verify-note p {
-    color: var(--brand-c-primary-dark);
-    margin: 0;
-  }
-
-  .verify-actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-
-  @media (min-width: 480px) {
-    .verify-actions {
-      flex-direction: row;
-      justify-content: center;
-    }
-  }
-</style>

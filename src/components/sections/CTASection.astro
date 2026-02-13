@@ -28,19 +28,23 @@ export interface Props {
   description?: string | string[];
   buttons: CTAButton[];
   trustSignals?: TrustSignal[];
+  alignment?: 'left' | 'center';
 }
 
 const {
   title,
   description,
   buttons,
-  trustSignals = []
+  trustSignals = [],
+  alignment
 } = Astro.props;
+
+const sectionClass = alignment ? `cta-section cta-section--${alignment} section` : 'cta-section section';
 
 const descriptionArray = Array.isArray(description) ? description : description ? [description] : [];
 ---
 
-<section class="cta-section section">
+<section class={sectionClass}>
   <div class="container">
       <h2 class="cta-section__title">{title}</h2>
 

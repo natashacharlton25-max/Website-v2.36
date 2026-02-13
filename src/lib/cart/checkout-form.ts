@@ -3,43 +3,13 @@
  * Submits form data to API, handles verification flow
  */
 
+import { showToast } from '../ui/toast';
+
 // Form elements
 const newsletterForm = document.getElementById('newsletter-form');
 const submitButton = document.getElementById('submit-button');
 const buttonText = document.getElementById('button-text');
 const buttonSpinner = document.getElementById('button-spinner');
-
-// Response message container (will be created if not exists)
-let messageContainer: HTMLElement | null = null;
-
-function showMessage(type: 'success' | 'error' | 'info', message: string) {
-  // Remove existing message
-  if (messageContainer) {
-    messageContainer.remove();
-  }
-
-  // Create message container
-  messageContainer = document.createElement('div');
-  messageContainer.className = `checkout-message checkout-message--${type}`;
-  messageContainer.innerHTML = `
-    <div class="checkout-message__content">
-      <span class="checkout-message__icon">
-        ${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}
-      </span>
-      <span class="checkout-message__text">${message}</span>
-    </div>
-  `;
-
-  // Insert after form
-  newsletterForm?.parentNode?.insertBefore(messageContainer, newsletterForm.nextSibling);
-
-  // Auto-remove success/info messages after 10 seconds
-  if (type !== 'error') {
-    setTimeout(() => {
-      messageContainer?.remove();
-    }, 10000);
-  }
-}
 
 function resetButton() {
   if (submitButton && buttonText && buttonSpinner) {
@@ -61,7 +31,7 @@ if (newsletterForm) {
 
     // Validate cart has items
     if (!cartItems.length) {
-      showMessage('error', 'Your cart is empty. Please add some items before checking out.');
+      showToast({ message: 'Your cart is empty. Please add some items before checking out.', theme: 'professional' });
       return;
     }
 
@@ -80,7 +50,7 @@ if (newsletterForm) {
 
     // Validate required fields
     if (!data.firstName || !data.email) {
-      showMessage('error', 'Please fill in all required fields.');
+      showToast({ message: 'Please fill in all required fields.', theme: 'professional' });
       return;
     }
 
@@ -104,13 +74,13 @@ if (newsletterForm) {
       if (!response.ok) {
         // Handle specific error cases
         if (result.error === 'download_limit_reached') {
-          showMessage('error', result.message);
+          showToast({ message: result.message, theme: 'professional' });
           resetButton();
           return;
         }
 
         if (result.error === 'too_many_downloads') {
-          showMessage('error', result.message);
+          showToast({ message: result.message, theme: 'professional' });
           resetButton();
           return;
         }
@@ -129,7 +99,7 @@ if (newsletterForm) {
       // Show success message based on whether verified or not
       if (result.verified) {
         // Already verified user - downloads sent directly
-        showMessage('success', result.message);
+        showToast({ message: result.message, theme: 'professional' });
 
         // Redirect to home after delay
         setTimeout(() => {
@@ -137,7 +107,7 @@ if (newsletterForm) {
         }, 3000);
       } else {
         // New user - needs to verify email
-        showMessage('info', result.message);
+        showToast({ message: result.message, theme: 'professional' });
 
         // Update form to show "check email" state
         if (newsletterForm) {
@@ -163,73 +133,23 @@ if (newsletterForm) {
 
     } catch (error) {
       console.error('Checkout error:', error);
-      showMessage('error', error instanceof Error ? error.message : 'An error occurred. Please try again.');
+      showToast({ message: error instanceof Error ? error.message : 'An error occurred. Please try again.', theme: 'professional' });
       resetButton();
     }
   });
 }
 
-// Add styles for messages
+// Add styles for verify prompt
 const style = document.createElement('style');
 style.textContent = `
-  .checkout-message {
-    margin-top: var(--space-md);
-    padding: var(--space-md);
-    border-radius: var(--border-radius-md);
-    animation: slideIn 0.3s ease;
-  }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .checkout-message--success {
-    background: color-mix(in oklch, var(--color-Success) 10%, transparent);
-    border: 1px solid color-mix(in oklch, var(--color-Success) 30%, transparent);
-    color: var(--brand-c-text-dark);
-  }
-
-  .checkout-message--error {
-    background: color-mix(in oklch, var(--color-Error) 10%, transparent);
-    border: 1px solid color-mix(in oklch, var(--color-Error) 30%, transparent);
-    color: var(--brand-c-text-dark);
-  }
-
-  .checkout-message--info {
-    background: var(--brand-c-primary-light);
-    border: 1px solid var(--brand-c-primary-light);
-    color: var(--brand-c-primary-dark);
-  }
-
-  .checkout-message__content {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-  }
-
-  .checkout-message__icon {
-    font-size: var(--text-h5);
-    font-weight: bold;
-  }
-
-  .checkout-message__text {
-    font-size: var(--text-small);
-    line-height: 1.5;
-  }
-
   .checkout-verify-prompt {
     text-align: center;
-    padding: var(--space-2xl) var(--space-lg);
+    padding: 0;
   }
 
   .checkout-verify-icon {
+    display: flex;
+    justify-content: center;
     color: var(--brand-c-primary);
     margin-bottom: var(--space-lg);
   }

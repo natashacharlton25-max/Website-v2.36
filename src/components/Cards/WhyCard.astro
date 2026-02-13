@@ -9,6 +9,7 @@
  * @param text - Card description text
  * @param badge - Optional badge label text
  * @param icon - Optional icon name: 'heart', 'tool', 'star', 'handshake'
+ * @param variant - Optional variant: 'flat' for gradient background with no hover
  */
 
 interface Props {
@@ -16,20 +17,31 @@ interface Props {
   text: string;
   badge?: string;
   icon?: 'heart' | 'tool' | 'star' | 'handshake';
+  variant?: 'flat';
 }
 
-const { title, text, badge, icon } = Astro.props;
+const { title, text, badge, icon, variant } = Astro.props;
 
 // Icon SVG paths
-const icons = {
+const icons: Record<string, string> = {
   heart: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
   tool: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
   star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
   handshake: '<path d="M11 17a1 1 0 0 1-.447-.105L7 15.118l-3.553 1.777a1 1 0 0 1-1.447-.894V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v11a1 1 0 0 1-1 1z"/><path d="M21 17a1 1 0 0 1-.447-.105L17 15.118l-3.553 1.777A1 1 0 0 1 12 16V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v11a1 1 0 0 1-1 1z"/>'
 };
+
+const cardClass = variant ? `why-card why-card--${variant}` : 'why-card';
 ---
 
-<div class="why-card">
+<div class={cardClass}>
+  {badge && (
+    <div class="why-card__badge">
+      {icon && icons[icon] && (
+        <svg class="why-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={icons[icon]} />
+      )}
+      <span class="why-card__badge-text">{badge}</span>
+    </div>
+  )}
   <h3 class="why-card__title">{title}</h3>
   <p class="why-card__text">{text}</p>
 </div>
@@ -88,21 +100,53 @@ const icons = {
     margin: 0;
   }
 
+  /* ========== VARIANT: FLAT ========== */
+  /* Gradient background, no hover, colorful gradient badges */
+  .why-card--flat {
+    background: linear-gradient(145deg, var(--brand-c-neutral-light), var(--color-White));
+    box-shadow: none;
+    border-radius: var(--border-radius-xl);
+    padding: var(--space-2xl);
+    border-left: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .why-card--flat .why-card__badge {
+    background: linear-gradient(135deg, var(--brand-c-primary), var(--brand-c-primary-dark));
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    margin-bottom: var(--space-lg);
+  }
+
+  .why-card--flat .why-card__icon {
+    color: var(--color-White);
+  }
+
+  .why-card--flat .why-card__badge-text {
+    color: var(--color-White);
+    white-space: nowrap;
+  }
+
+  /* nth-child badge color variants (applied via parent grid) */
+  .why-card--flat:nth-child(2) .why-card__badge {
+    background: linear-gradient(135deg, var(--brand-c-secondary), var(--brand-c-secondary-dark));
+  }
+
+  .why-card--flat:nth-child(3) .why-card__badge,
+  .why-card--flat:nth-child(4) .why-card__badge {
+    background: linear-gradient(135deg, var(--brand-c-neutral), var(--brand-c-neutral-dark));
+  }
+
   /* ========== RESPONSIVE - SMALL (500px) ========== */
   @media (max-width: 500px) {
     .why-card__title {
       margin-bottom: var(--space-sm);
     }
 
-    .why-card__text {
-    }
-
     .why-card__badge {
       padding: 3px var(--space-xs);
       margin-bottom: var(--space-sm);
-    }
-
-    .why-card__badge-text {
     }
 
     .why-card__icon {
@@ -113,7 +157,8 @@ const icons = {
 
   /* ========== RESPONSIVE - VERY SMALL (400px) ========== */
   @media (max-width: 400px) {
-    .why-card__title {
+    .why-card--flat {
+      padding: var(--space-lg);
     }
 
     .why-card__text {
@@ -136,6 +181,10 @@ const icons = {
       text-align: center;
     }
 
+    .why-card--flat {
+      padding: var(--space-md);
+    }
+
     .why-card__badge {
       display: none;
     }
@@ -151,20 +200,18 @@ const icons = {
 
   /* ========== RESPONSIVE - ULTRA SMALL (200px) ========== */
   @media (max-width: 200px) {
+    .why-card--flat {
+      padding: var(--space-sm);
+    }
+
     .why-card__badge {
       padding: 2px 4px;
       gap: 2px;
     }
 
-    .why-card__badge-text {
-    }
-
     .why-card__icon {
       width: 8px;
       height: 8px;
-    }
-
-    .why-card__title {
     }
 
     .why-card__text {

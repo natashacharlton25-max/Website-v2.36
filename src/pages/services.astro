@@ -5,9 +5,8 @@ import HeroSection from '../components/Sections/HeroSection.astro';
 import CTASection from '../components/Sections/CTASection.astro';
 import RelatedGrid from '../components/Grids/RelatedGrid.astro';
 import WhyCard from '../components/Cards/WhyCard.astro';
+import TimelineStepper from '../components/Timeline/TimelineStepper.astro';
 
-// Page styles
-import '../styles/pages/services.css';
 
 // Import offering images from src/PageImages
 import offering1 from '../PageImages/Services/offering-1-resources.png';
@@ -103,6 +102,7 @@ const offeringsForGrid = offeringsData.map((offering, index) => ({
             text={reason.text}
             badge={reason.badge}
             icon={reason.icon}
+            variant="flat"
           />
         ))}
       </div>
@@ -133,6 +133,7 @@ const offeringsForGrid = offeringsData.map((offering, index) => ({
     title={ctaData.title}
     description={ctaData.description}
     buttons={ctaData.buttons}
+    alignment="center"
   >
     <p class="cta-footer">{ctaData.footer}</p>
   </CTASection>
@@ -140,22 +141,7 @@ const offeringsForGrid = offeringsData.map((offering, index) => ({
   <!-- How It Works Section -->
   <section class="how-section section">
     <div class="container">
-      <div class="timeline-stepper">
-        {howItWorksData.steps.map((step, index) => (
-          <div class="timeline-step">
-            <div class="timeline-step__marker">
-              <span class="timeline-step__number">{step.number}</span>
-              {index < howItWorksData.steps.length - 1 && (
-                <div class="timeline-step__line"></div>
-              )}
-            </div>
-            <div class="timeline-step__content">
-              <h3 class="timeline-step__title">{step.title}</h3>
-              <p class="timeline-step__text">{step.text}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <TimelineStepper steps={howItWorksData.steps} />
     </div>
   </section>
 

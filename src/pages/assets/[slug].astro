@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import BaseLayout from '../../Layouts/BaseLayout.astro';
+import ProductDetailLayout from '../../Layouts/ProductDetailLayout.astro';
 import ContentSwitcher from '../../components/Switcher/ContentSwitcher.astro';
 import Breadcrumbs from '../../components/Navigation/Breadcrumbs.astro';
 import IsotopeImageGallery from '../../components/Product/IsotopeImageGallery.astro';
@@ -9,7 +10,6 @@ import ProductInfo from '../../components/Product/ProductInfo.astro';
 import SpecGrid from '../../components/Product/SpecGrid.astro';
 import RelatedGrid from '../../components/Grids/RelatedGrid.astro';
 import ShareSection from '../../components/Sections/ShareSection.astro';
-import Icon from '../../components/Icons/Icon.astro';
 import Badge from '../../components/Badge/Badge.astro';
 import { getCollection } from 'astro:content';
 import { calculateGridLayout, estimateCardDimensions } from '../../lib/utils/grid-layout';
@@ -153,192 +153,184 @@ const specsWithLayout = calculateGridLayout(
 >
   <Breadcrumbs items={breadcrumbs} />
 
-  <!-- Product Details -->
-  <section class="product-detail-section section">
-    <div class="container">
-      <div class="product-layout">
-        <!-- Left Column: Image Gallery -->
-        <IsotopeImageGallery
-          mainImage={product.cardImage}
-          galleryImages={product.galleryImages}
-          productName={product.name}
-          badge={product.category}
-          badgeType={product.type}
-        />
-
-        <!-- Right Column: Product Info -->
-        <ProductInfo
-          category={product.type}
-          name={product.name}
-          sku={product.sku}
-          description={product.description}
-          infoItems={productInfoItems}
-          productId={product.id}
-          productImage={product.cardImage.src}
-          hasProfessionalGuide={!!product.professionalGuidePath}
-        />
-      </div>
-    </div>
-  </section>
-
-  <!-- Product Content - Tabbed -->
-  <section class="product-content-section section">
-    <div class="container">
-      <div class="content-wrapper">
-        <ContentSwitcher
-          tabs={[
-            { id: 'description', label: 'Description' },
-            { id: 'specification', label: 'Specification' },
-            { id: 'individuals', label: 'For Individuals' },
-            { id: 'professionals', label: 'For Professionals' }
-          ]}
-          defaultActive="description"
-        />
-
-        <!-- Tab Content -->
-        <div class="tabs-content">
-          <!-- Description Tab -->
-          <div class="tab-panel active" data-panel="description">
-            <h2>About This {product.category}</h2>
-            <div set:html={product.longDescription} />
-          </div>
-
-          <!-- Specification Tab -->
-          <div class="tab-panel" data-panel="specification">
-            <SpecGrid specs={specsWithLayout} />
-          </div>
-
-          <!-- For Individuals Tab -->
-          <div class="tab-panel" data-panel="individuals">
-            {product.forIndividuals ? (
-              <div class="content-sections">
-                {product.forIndividuals.overview && (
-                  <div class="content-section">
-                    <Badge type="custom" label="Overview" variant="soft" shape="pill" size="sm" />
-                    <p class="content-section__body" set:html={product.forIndividuals.overview} />
-                  </p>
-                )}
-
-                {product.forIndividuals.howToUse && (
-                  <div class="content-section">
-                    <Badge type="custom" label="How to Use" variant="soft" shape="pill" size="sm" />
-                    <p class="content-section__body" set:html={product.forIndividuals.howToUse} />
-                  </p>
-                )}
-
-                {product.forIndividuals.whenToUse && product.forIndividuals.whenToUse.length > 0 && (
-                  <div class="content-section-grid">
-                    {product.forIndividuals.whenToUse.map(situation => (
-                      <div class="content-section">
-                        <Badge type="custom" label="When to Use" variant="soft" shape="pill" size="sm" />
-                        <p class="content-section__body">{situation}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {product.forIndividuals.tips && product.forIndividuals.tips.length > 0 && (
-                  <div class="content-section-grid">
-                    {product.forIndividuals.tips.map(tip => (
-                      <div class="content-section">
-                        <Badge type="custom" label="Tips" variant="soft" shape="pill" size="sm" />
-                        <p class="content-section__body">{tip}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p>This resource is designed to support your personal wellbeing journey. Take what resonates and leave what doesn't.</p>
-            )}
-          </div>
-
-          <!-- For Professionals Tab -->
-          <div class="tab-panel" data-panel="professionals">
-            {product.forProfessionals ? (
-              <div class="content-sections">
-                {product.forProfessionals.clinicalContext && (
-                  <div class="content-section">
-                    <Badge type="custom" label="Clinical Context" variant="soft" shape="pill" size="sm" />
-                    <p class="content-section__body" set:html={product.forProfessionals.clinicalContext} />
-                  </p>
-                )}
-
-                {product.forProfessionals.intendedUse && (
-                  <div class="content-section">
-                    <Badge type="custom" label="Intended Use" variant="soft" shape="pill" size="sm" />
-                    <p class="content-section__body" set:html={product.forProfessionals.intendedUse} />
-                  </p>
-                )}
-
-                {product.forProfessionals.therapeuticApproach && (
-                  <div class="content-section">
-                    <Badge type="custom" label="Therapeutic Approach" variant="soft" shape="pill" size="sm" />
-                    <p class="content-section__body" set:html={product.forProfessionals.therapeuticApproach} />
-                  </p>
-                )}
-
-                {product.forProfessionals.evidenceBase && product.forProfessionals.evidenceBase.length > 0 && (
-                  <div class="content-section-grid">
-                    {product.forProfessionals.evidenceBase.map(evidence => (
-                      <div class="content-section">
-                        <Badge type="custom" label="Evidence Base" variant="soft" shape="pill" size="sm" />
-                        <p class="content-section__body">{evidence}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {product.forProfessionals.adaptations && product.forProfessionals.adaptations.length > 0 && (
-                  <div class="content-section-grid">
-                    {product.forProfessionals.adaptations.map(adaptation => (
-                      <div class="content-section">
-                        <Badge type="custom" label="Adaptations" variant="soft" shape="pill" size="sm" />
-                        <p class="content-section__body">{adaptation}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {product.forProfessionals.sessionIntegration && (
-                  <div class="content-section">
-                    <Badge type="custom" label="Session Integration" variant="soft" shape="pill" size="sm" />
-                    <p class="content-section__body" set:html={product.forProfessionals.sessionIntegration} />
-                  </p>
-                )}
-
-                {product.professionalGuidePath && (
-                  <div class="content-section content-section--highlight">
-                    <Badge type="custom" label="Professional Guide Available" variant="soft" shape="pill" size="sm" />
-                    <p class="content-section__body">A companion Professional Guide is available (via the "Add Professional Guide" button above) providing detailed implementation strategies, evidence-based context, and therapeutic applications.</p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p>Professional guidance notes are available for this resource. Contact us for more information about using this in therapeutic or clinical settings.</p>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Share Section -->
-  <ShareSection />
-
-  <!-- Related Products -->
-  {relatedProducts.length > 0 && (
-    <RelatedGrid
-      items={relatedProducts}
-      contentType="products"
-      title="You Might Also Like"
-      basePath="/assets"
-      cardStyle="horizontal"
-      columns="2"
-      background="light"
-      containerSize="7xl"
+  <ProductDetailLayout>
+    <!-- Left Column: Image Gallery -->
+    <IsotopeImageGallery
+      slot="gallery"
+      mainImage={product.cardImage}
+      galleryImages={product.galleryImages}
+      productName={product.name}
+      badge={product.category}
+      badgeType={product.type}
     />
-  )}
+
+    <!-- Right Column: Product Info -->
+    <ProductInfo
+      slot="info"
+      category={product.type}
+      name={product.name}
+      sku={product.sku}
+      description={product.description}
+      infoItems={productInfoItems}
+      productId={product.id}
+      productImage={product.cardImage.src}
+      hasProfessionalGuide={!!product.professionalGuidePath}
+    />
+
+    <!-- Tab Navigation -->
+    <ContentSwitcher
+      slot="switcher"
+      tabs={[
+        { id: 'description', label: 'Description' },
+        { id: 'specification', label: 'Specification' },
+        { id: 'individuals', label: 'For Individuals' },
+        { id: 'professionals', label: 'For Professionals' }
+      ]}
+      defaultActive="description"
+    />
+
+    <!-- Tab Content -->
+    <Fragment slot="tabs">
+      <!-- Description Tab -->
+      <div class="tab-panel active" data-panel="description">
+        <h2>About This{product.category}</h2>
+        <div set:html={product.longDescription} />
+      </div>
+
+      <!-- Specification Tab -->
+      <div class="tab-panel" data-panel="specification">
+        <SpecGrid specs={specsWithLayout} />
+      </div>
+
+      <!-- For Individuals Tab -->
+      <div class="tab-panel" data-panel="individuals">
+        {product.forIndividuals ? (
+          <div class="content-sections">
+            {product.forIndividuals.overview && (
+              <div class="content-section">
+                <Badge type="custom" label="Overview" variant="soft" shape="pill" size="sm" />
+                <div class="content-section__body" set:html={product.forIndividuals.overview} />
+              </div>
+            )}
+
+            {product.forIndividuals.howToUse && (
+              <div class="content-section">
+                <Badge type="custom" label="How to Use" variant="soft" shape="pill" size="sm" />
+                <div class="content-section__body" set:html={product.forIndividuals.howToUse} />
+              </div>
+            )}
+
+            {product.forIndividuals.whenToUse && product.forIndividuals.whenToUse.length > 0 && (
+              <div class="content-section-grid">
+                {product.forIndividuals.whenToUse.map(situation => (
+                  <div class="content-section">
+                    <Badge type="custom" label="When to Use" variant="soft" shape="pill" size="sm" />
+                    <p class="content-section__body">{situation}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {product.forIndividuals.tips && product.forIndividuals.tips.length > 0 && (
+              <div class="content-section-grid">
+                {product.forIndividuals.tips.map(tip => (
+                  <div class="content-section">
+                    <Badge type="custom" label="Tips" variant="soft" shape="pill" size="sm" />
+                    <p class="content-section__body">{tip}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <p>This resource is designed to support your personal wellbeing journey. Take what resonates and leave what doesn't.</p>
+        )}
+      </div>
+
+      <!-- For Professionals Tab -->
+      <div class="tab-panel" data-panel="professionals">
+        {product.forProfessionals ? (
+          <div class="content-sections">
+            {product.forProfessionals.clinicalContext && (
+              <div class="content-section">
+                <Badge type="custom" label="Clinical Context" variant="soft" shape="pill" size="sm" />
+                <div class="content-section__body" set:html={product.forProfessionals.clinicalContext} />
+              </div>
+            )}
+
+            {product.forProfessionals.intendedUse && (
+              <div class="content-section">
+                <Badge type="custom" label="Intended Use" variant="soft" shape="pill" size="sm" />
+                <div class="content-section__body" set:html={product.forProfessionals.intendedUse} />
+              </div>
+            )}
+
+            {product.forProfessionals.therapeuticApproach && (
+              <div class="content-section">
+                <Badge type="custom" label="Therapeutic Approach" variant="soft" shape="pill" size="sm" />
+                <div class="content-section__body" set:html={product.forProfessionals.therapeuticApproach} />
+              </div>
+            )}
+
+            {product.forProfessionals.evidenceBase && product.forProfessionals.evidenceBase.length > 0 && (
+              <div class="content-section-grid">
+                {product.forProfessionals.evidenceBase.map(evidence => (
+                  <div class="content-section">
+                    <Badge type="custom" label="Evidence Base" variant="soft" shape="pill" size="sm" />
+                    <p class="content-section__body">{evidence}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {product.forProfessionals.adaptations && product.forProfessionals.adaptations.length > 0 && (
+              <div class="content-section-grid">
+                {product.forProfessionals.adaptations.map(adaptation => (
+                  <div class="content-section">
+                    <Badge type="custom" label="Adaptations" variant="soft" shape="pill" size="sm" />
+                    <p class="content-section__body">{adaptation}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {product.forProfessionals.sessionIntegration && (
+              <div class="content-section">
+                <Badge type="custom" label="Session Integration" variant="soft" shape="pill" size="sm" />
+                <div class="content-section__body" set:html={product.forProfessionals.sessionIntegration} />
+              </div>
+            )}
+
+            {product.professionalGuidePath && (
+              <div class="content-section content-section--highlight">
+                <Badge type="custom" label="Professional Guide Available" variant="soft" shape="pill" size="sm" />
+                <p class="content-section__body">A companion Professional Guide is available (via the "Add Professional Guide" button above) providing detailed implementation strategies, evidence-based context, and therapeutic applications.</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p>Professional guidance notes are available for this resource. Contact us for more information about using this in therapeutic or clinical settings.</p>
+        )}
+      </div>
+    </Fragment>
+
+    <!-- Share Section -->
+    <ShareSection />
+
+    <!-- Related Products -->
+    {relatedProducts.length > 0 && (
+      <RelatedGrid
+        items={relatedProducts}
+        contentType="products"
+        title="You Might Also Like"
+        basePath="/assets"
+        cardStyle="horizontal"
+        columns="2"
+        background="light"
+        containerSize="7xl"
+      />
+    )}
+  </ProductDetailLayout>
 </BaseLayout>
 
 <script>
