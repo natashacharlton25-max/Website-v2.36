@@ -1,0 +1,96 @@
+/**
+ * Button — a11y.css
+ *
+ * Themes:      Brand tokens handle colour changes. ✅ Nothing extra.
+ * Focus:       Built into base styles (.btn:focus-visible). ✅ Nothing extra.
+ * HL:          Link-buttons get outline instead of underline.
+ *
+ * Reduce-motion: Kill glint, confetti sparkle, hover transitions.
+ * Text-only:     Strip shadows, left-align, flat colours.
+ */
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    /* Kill glint sweep */
+    & .btn::before {
+      display: none;
+    }
+
+    /* Kill confetti sparkle */
+    & .btn--confetti::after {
+      animation: none;
+      display: none;
+    }
+
+    /* Kill chevron rotation */
+    & .btn__chevron {
+      transition: none;
+    }
+
+    /* Immediate colour changes — no transitions */
+    & .btn {
+      transition: none;
+    }
+
+    & .dropdown-menu {
+      transition: none;
+    }
+  }
+
+}
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    & .btn {
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      text-align: left;
+      justify-content: flex-start;
+      margin: 0;
+    }
+
+    /* Kill glint in text-only too */
+    & .btn::before {
+      display: none;
+    }
+
+    /* Neumorphic → flat */
+    & .btn--neumorphic {
+      box-shadow: none;
+      border: var(--border-width-2) solid var(--brand-c-primary);
+    }
+
+    /* Glass → flat */
+    & .btn--glass {
+      background: var(--brand-c-primary);
+      color: var(--color-White);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-color: transparent;
+    }
+  }
+
+}
+
+@layer a11y.highlight-links {
+
+  .a11y-highlight-links {
+
+    /* Link-buttons: outline instead of underline */
+    & a.btn {
+      text-decoration: none;
+      outline: 2px solid var(--brand-c-primary);
+      outline-offset: 2px;
+    }
+
+    & a.btn:hover {
+      outline-color: var(--brand-c-primary-dark);
+    }
+  }
+
+}

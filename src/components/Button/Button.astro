@@ -1,189 +1,242 @@
 ﻿---
 /**
- * Button Component
- * Styles in styled-button.css, dropdown in ButtonDropdown.astro
+ * Button — Unified button component
  *
- * Usage:
- *   <Button variant="primary" icon="/icons/star.svg">Click Me</Button>
- *   <Button variant="neutral" shape="circle" icon="/icons/plus.svg" />
- *   <Button variant="secondary"><MyIcon slot="icon" />Text</Button>
+ * Handles: links, buttons, dropdowns, confetti effects.
+ * Uses brand tokens for all colours. Icon component for icons.
+ *
+ * @param variant   - 'primary' (default), 'secondary', 'neutral', 'outline', 'ghost', 'glass', 'neumorphic'
+ * @param shape     - 'rounded' (default), 'pill', 'circle', 'square', 'sharp', 'dropdown'
+ * @param size      - 'sm', 'md' (default), 'lg'
+ * @param icon      - Phosphor icon name e.g. 'star-fill'
+ * @param iconPosition - 'left' (default) or 'right'
+ * @param iconCollection - Icon folder: 'ui' (default)
+ * @param href      - Makes it an <a> tag
+ * @param target    - Link target
+ * @param download  - Download attribute
+ * @param type      - Button type: 'button', 'submit', 'reset'
+ * @param disabled  - Disabled state
+ * @param id        - Element ID
+ * @param ariaLabel - Accessible label
+ * @param confetti  - Particle effect: 'confetti', 'hearts', 'celebration', 'mixed'
+ * @param confettiTrigger - 'click' (default) or 'hover'
+ * @param confettiCount   - Particle count (default 30)
+ * @param confettiSpread  - Particle spread (default 150)
+ * @param dropdownItems   - Array of {label, href?, value?, fontFamily?} for dropdown mode
  */
-import ButtonDropdown from './ButtonDropdown.astro';
 import Icon from '../Icons/Icon.astro';
 
+export interface DropdownItem {
+  label: string;
+  value?: string;
+  href?: string;
+  fontFamily?: string;
+}
+
 export interface Props {
-  variant?: 'primary' | 'secondary' | 'outline' | 'neutral' | 'ghost' | 'glassmorphic' | 'neumorphic' | 'gradient';
-  shape?: 'default' | 'circle' | 'square' | 'dropdown' | 'pill' | 'sharp' | 'rounded';
+  variant?: 'primary' | 'secondary' | 'neutral' | 'outline' | 'ghost' | 'glass' | 'neumorphic';
+  shape?: 'rounded' | 'pill' | 'circle' | 'square' | 'sharp' | 'dropdown';
   size?: 'sm' | 'md' | 'lg';
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
-  className?: string;
-  dropdownItems?: Array<{label: string, href?: string}>;
   id?: string;
   href?: string;
   target?: string;
-  download?: string | boolean; // Filename for download, or true to use href filename
+  download?: string | boolean;
   icon?: string;
   iconPosition?: 'left' | 'right';
-  textColor?: string;
-  textHoverColor?: string;
-  iconColor?: string;
-  iconHoverColor?: string;
+  iconCollection?: string;
   ariaLabel?: string;
-  // Data attributes for cart functionality
-  'data-product-id'?: string;
-  'data-product-name'?: string;
-  'data-product-price'?: string;
-  'data-product-image'?: string;
+  confetti?: 'confetti' | 'hearts' | 'celebration' | 'mixed';
+  confettiTrigger?: 'click' | 'hover';
+  confettiCount?: number;
+  confettiSpread?: number;
+  dropdownItems?: DropdownItem[];
+  className?: string;
   [key: `data-${string}`]: string | undefined;
 }
 
 const {
   variant = 'primary',
-  shape = 'default',
+  shape = 'rounded',
   size = 'md',
   type = 'button',
   disabled = false,
-  className = '',
-  dropdownItems = [],
   id,
   href,
   target,
   download,
   icon,
   iconPosition = 'left',
-  textColor,
-  textHoverColor,
-  iconColor,
-  iconHoverColor,
+  iconCollection = 'ui',
   ariaLabel,
+  confetti,
+  confettiTrigger = 'click',
+  confettiCount = 30,
+  confettiSpread = 150,
+  dropdownItems = [],
+  className = '',
   ...rest
 } = Astro.props;
 
-// Extract data-* attributes to pass through to the element
+// Extract data-* attributes
 const dataAttrs = Object.fromEntries(
   Object.entries(rest).filter(([key]) => key.startsWith('data-'))
 );
 
 const isLink = !!href;
 const isDropdown = shape === 'dropdown';
-const hasIcon = !!icon || Astro.slots.has('icon');
+const hasIcon = !!icon;
+const isIconOnly = hasIcon && (shape === 'circle' || shape === 'square');
 
-// Build class list
-const sizeClass = size !== 'md' ? `btn-${size}` : '';
-const iconPosClass = hasIcon ? `btn-icon-${iconPosition}` : '';
-const buttonClass = `btn btn-${variant} btn-${shape} ${sizeClass} ${iconPosClass} ${className}`.trim().replace(/\s+/g, ' ');
+// Icon sizes per button size
+const iconSizes: Record<string, number> = { sm: 16, md: 18, lg: 22 };
+const iconSize = iconSizes[size] || 18;
 
-// Build custom style with CSS variables for hover states
-const styleProps = [
-  textColor && `--btn-text-color: ${textColor}`,
-  textHoverColor && `--btn-text-hover: ${textHoverColor}`,
-  iconColor && `--btn-icon-color: ${iconColor}`,
-  iconHoverColor && `--btn-icon-hover: ${iconHoverColor}`,
-  textColor && `color: var(--btn-text-color)`
-].filter(Boolean).join('; ');
-const customStyle = styleProps ? `${styleProps};` : '';
+// Build classes
+const classes = [
+  'btn',
+  `btn--${variant}`,
+  `btn--${shape}`,
+  size !== 'md' && `btn--${size}`,
+  hasIcon && `btn--icon-${iconPosition}`,
+  isIconOnly && 'btn--icon-only',
+  confetti && 'btn--confetti',
+  confetti === 'hearts' && 'btn--confetti-hearts',
+  confetti === 'celebration' && 'btn--confetti-celebration',
+  className,
+].filter(Boolean);
+
+// Confetti data attributes
+const confettiAttrs = confetti ? {
+  'data-particle-burst': '',
+  'data-particle-type': confetti === 'celebration' ? 'mixed' : confetti,
+  'data-particle-trigger': confettiTrigger,
+  'data-particle-count': String(confettiCount),
+  'data-particle-spread': String(confettiSpread),
+} : {};
+
+// Shared inner content
+const iconLeft = iconPosition === 'left' && hasIcon;
+const iconRight = iconPosition === 'right' && hasIcon;
 ---
 
 {isDropdown ? (
   <div class="dropdown-wrapper">
     <button
-      class={`${buttonClass} btn-dropdown dropdown-btn`}
+      class:list={[...classes, 'btn--dropdown', 'dropdown-btn']}
       type={type}
       disabled={disabled}
       id={id}
-      style={customStyle}
       aria-label={ariaLabel}
+      aria-expanded="false"
+      aria-haspopup="true"
+      {...dataAttrs}
+      {...confettiAttrs}
     >
-      {iconPosition === 'left' && hasIcon && (
-        icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
-      )}
+      {iconLeft && <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="btn__icon" />}
       <slot />
-      {iconPosition === 'right' && hasIcon && (
-        icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
-      )}
-      <Icon name="caret-down-fill" size={16} class="dropdown-chevron" />
+      {iconRight && <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="btn__icon" />}
+      <Icon name="ui/caret-down-fill" size={14} class="btn__chevron" />
     </button>
-    <ButtonDropdown
-      colorTheme={variant as any}
-      dropdownItems={dropdownItems}
-    />
+
+    <div
+      class={`dropdown-menu dropdown-theme--${variant}`}
+      role="menu"
+    >
+      {dropdownItems.map((item) => (
+        item.href ? (
+          <a href={item.href} class="dropdown-item" role="menuitem">{item.label}</a>
+        ) : (
+          <button
+            type="button"
+            class="dropdown-item"
+            data-value={item.value}
+            role="menuitem"
+            style={item.fontFamily ? `font-family: ${item.fontFamily};` : undefined}
+          >{item.label}</button>
+        )
+      ))}
+    </div>
   </div>
 ) : isLink ? (
   <a
     href={href}
     target={target}
     download={download}
-    class={buttonClass}
+    class:list={classes}
     id={id}
-    style={customStyle}
     aria-disabled={disabled}
     aria-label={ariaLabel}
+    {...dataAttrs}
+    {...confettiAttrs}
   >
-    {iconPosition === 'left' && hasIcon && (
-      icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
-    )}
+    {iconLeft && <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="btn__icon" />}
     <slot />
-    {iconPosition === 'right' && hasIcon && (
-      icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
-    )}
+    {iconRight && <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="btn__icon" />}
   </a>
 ) : (
   <button
-    class={buttonClass}
+    class:list={classes}
     type={type}
     disabled={disabled}
     id={id}
-    style={customStyle}
     aria-label={ariaLabel}
     {...dataAttrs}
+    {...confettiAttrs}
   >
-    {iconPosition === 'left' && hasIcon && (
-      icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
-    )}
+    {iconLeft && <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="btn__icon" />}
     <slot />
-    {iconPosition === 'right' && hasIcon && (
-      icon ? <img src={icon} class="btn-icon" alt="" /> : <slot name="icon" />
-    )}
+    {iconRight && <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="btn__icon" />}
   </button>
 )}
 
-<script is:inline>
-  document.addEventListener('DOMContentLoaded', function() {
-    const dropdownWrappers = document.querySelectorAll('.dropdown-wrapper');
+<script>
+  // Dropdown toggle
+  document.addEventListener('astro:page-load', () => {
+    const wrappers = document.querySelectorAll('.dropdown-wrapper');
 
-    dropdownWrappers.forEach((wrapper) => {
-      const dropdownBtn = wrapper.querySelector('.dropdown-btn');
-      const dropdownMenu = wrapper.querySelector('.dropdown-menu');
+    wrappers.forEach((wrapper) => {
+      const btn = wrapper.querySelector('.dropdown-btn') as HTMLButtonElement;
+      const menu = wrapper.querySelector('.dropdown-menu');
+      if (!btn || !menu) return;
 
-      if (dropdownBtn && dropdownMenu) {
-        dropdownBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          dropdownWrappers.forEach(otherWrapper => {
-            if (otherWrapper !== wrapper) {
-              const otherMenu = otherWrapper.querySelector('.dropdown-menu');
-              if (otherMenu) {
-                otherMenu.classList.remove('show');
-                otherWrapper.classList.remove('open');
-              }
-            }
-          });
-          dropdownMenu.classList.toggle('show');
-          wrapper.classList.toggle('open');
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isOpen = menu.classList.contains('show');
+
+        // Close all others
+        document.querySelectorAll('.dropdown-menu.show').forEach(m => {
+          m.classList.remove('show');
+          m.closest('.dropdown-wrapper')?.querySelector('.dropdown-btn')?.setAttribute('aria-expanded', 'false');
+        });
+
+        if (!isOpen) {
+          menu.classList.add('show');
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (!(e.target as Element).closest('.dropdown-wrapper')) {
+        document.querySelectorAll('.dropdown-menu.show').forEach(m => {
+          m.classList.remove('show');
+          m.closest('.dropdown-wrapper')?.querySelector('.dropdown-btn')?.setAttribute('aria-expanded', 'false');
         });
       }
     });
+  });
+</script>
 
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.dropdown-wrapper')) {
-        dropdownWrappers.forEach(wrapper => {
-          const menu = wrapper.querySelector('.dropdown-menu');
-          if (menu) {
-            menu.classList.remove('show');
-            wrapper.classList.remove('open');
-          }
-        });
-      }
-    });
+<script>
+  // Confetti — lazy init
+  document.addEventListener('astro:page-load', async () => {
+    const confettiBtns = document.querySelectorAll('[data-particle-burst]');
+    if (confettiBtns.length === 0) return;
+
+    const { initParticleBurst } = await import('../../lib/animation/particle-burst');
+    initParticleBurst();
   });
 </script>

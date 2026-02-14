@@ -1,0 +1,109 @@
+/**
+ * Badge — style.css
+ * @layer components
+ *
+ * One size. Brand tokens for colour. No hue generation.
+ * Variants: fill, outline, glass
+ * Shapes: rounded, pill
+ */
+
+@layer components {
+
+  /* ========== BASE ========== */
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-sm);
+    border-radius: var(--radius-xs , 0.75rem);
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: var(--font-semibold, 700);
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--brand-c-text);
+  }
+
+  .badge__icon {
+    width: 1.1em;
+    height: 1.1em;
+    flex-shrink: 0;
+  }
+
+  .badge__label {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* ========== SHAPE ========== */
+
+  .badge--rounded {
+    border-radius: var(--radius-md, 0.5rem);
+  }
+
+  .badge--pill {
+    border-radius: var(--radius-full);
+    padding: var(--space-sm) var(--space-lg);
+  }
+
+  /* ========== TEXT TRANSFORM ========== */
+
+  .badge--lowercase {
+    text-transform: none;
+  }
+
+  /* ========== VARIANT: Fill ========== */
+
+  .badge--fill {
+    background-color: var(--brand-c-neutral);
+  }
+
+  /* ========== VARIANT: Outline ========== */
+
+  .badge--outline {
+    background: transparent;
+    border: 1.5px solid var(--brand-c-primary);
+    color: var(--brand-c-primary);
+  }
+
+  /* ========== VARIANT: Glass (default - light text for dark backgrounds) ========== */
+
+  .badge--glass {
+    background: color-mix(in oklch, var(--color-White) 15%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid color-mix(in oklch, var(--color-White) 30%, transparent);
+    color: var(--color-White);
+  }
+
+  /* ========== VARIANT: Glass Light (dark text for light backgrounds) ========== */
+
+  .badge--glass-light {
+    background: color-mix(in oklch, var(--color-White) 50%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid color-mix(in oklch, var(--color-White) 50%, transparent);
+    color: var(--brand-c-text-dark);
+  }
+
+  /* ========== VARIANT: Glass Dark (white text for dark backgrounds) ========== */
+
+  .badge--glass-dark {
+    background: color-mix(in oklch, var(--color-Black) 30%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid color-mix(in oklch, var(--color-Black) 20%, transparent);
+    color: var(--color-White);
+  }
+
+  /* ========== ICON-ONLY ========== */
+
+  .badge--has-icon:not(:has(.badge__label)) {
+    padding: var(--space-sm);
+    aspect-ratio: 1;
+    justify-content: center;
+  }
+
+}

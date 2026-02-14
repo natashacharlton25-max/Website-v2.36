@@ -1,443 +1,49 @@
 ---
 /**
- * Badge - Reusable badge/tag component with consistent type-to-color mapping
+ * Badge — Simple inline label
  *
- * Used across product cards, insight cards, project cards, and anywhere else badges are needed
- * For unknown types (like dynamic insight categories), uses default primary color
+ * Uses brand tokens for colour — works with all a11y themes automatically.
+ * No custom colours, no hue generation, no Lottie, no shadows.
  *
- * Props:
- * @param type - The badge type (worksheet, workbook, guide, toolkit, cards, poster, activity, etc.)
- * @param label - Optional custom label (defaults to capitalized type)
- * @param shape - Badge shape: 'rounded' (default), 'pill', 'square', 'tag'
- * @param size - Badge size: 'sm', 'md' (default), 'lg'
- * @param variant - Visual style: 'fill' (default), 'outline', 'soft', 'ghost'
- * @param shadow - Shadow style: 'none' (default), 'drop', 'inner', 'glow'
- * @param icon - Icon name (Phosphor icon) e.g., 'star-fill', 'shield-check-fill'
- * @param iconCollection - Icon collection folder: 'badges' (default), 'trust', or any phosphor subfolder
- * @param lottieIcon - Lottie animation path e.g., 'Mail/mail.json' (from /Icons/Animated Icons/)
- * @param lottieAutoplay - Auto-play Lottie on load (default false, plays on hover)
- * @param iconOnly - If true, only shows icon (label used for accessibility)
- * @param uppercase - If false, disable uppercase text transform (default true)
+ * @param label - Display text
+ * @param variant - 'fill' (default), 'outline', 'glass', 'glass-light', 'glass-dark'
+ * @param shape - 'rounded' (default), 'pill'
+ * @param icon - Optional Phosphor icon name e.g. 'shield-check-fill'
+ * @param iconCollection - Icon folder: 'badges' (default)
+ * @param uppercase - Uppercase text (default true)
  */
 import Icon from '../Icons/Icon.astro';
 
-type BadgeShape = 'rounded' | 'pill' | 'square' | 'tag';
-type BadgeSize = 'sm' | 'md' | 'lg';
-type BadgeVariant = 'fill' | 'outline' | 'soft' | 'ghost' | 'glass' | 'glass-dark';
-type BadgeShadow = 'none' | 'drop' | 'inner' | 'glow';
-
 interface Props {
-  type: string;
-  label?: string;
-  shape?: BadgeShape;
-  size?: BadgeSize;
-  variant?: BadgeVariant;
-  shadow?: BadgeShadow;
+  label: string;
+  variant?: 'fill' | 'outline' | 'glass' | 'glass-light' | 'glass-dark';
+  shape?: 'rounded' | 'pill';
   icon?: string;
   iconCollection?: string;
-  lottieIcon?: string;
-  lottieAutoplay?: boolean;
-  iconOnly?: boolean;
   uppercase?: boolean;
 }
 
 const {
-  type,
   label,
-  shape = 'rounded',
-  size = 'md',
   variant = 'fill',
-  shadow = 'none',
+  shape = 'rounded',
   icon,
   iconCollection = 'badges',
-  lottieIcon,
-  lottieAutoplay = false,
-  iconOnly = false,
-  uppercase = true
+  uppercase = true,
 } = Astro.props;
-
-// Determine if using Lottie or static icon
-const hasIcon = icon || lottieIcon;
-const lottieUrl = lottieIcon ? `/Icons/Animated Icons/${lottieIcon}` : null;
-
-// Icon sizes based on badge size
-const iconSizes: Record<BadgeSize, number> = {
-  sm: 12,
-  md: 14,
-  lg: 18
-};
-
-// Deterministic string → hue (0-360) for topic badges
-function topicHue(str: string): number {
-  let hash = 0;
-  for (const ch of str.toLowerCase()) hash = ch.charCodeAt(0) + ((hash << 5) - hash);
-  return (((hash * 2654435079) % 360) + 360) % 360;
-}
-
-// Status badges keep fixed CSS classes; everything else uses auto-hue
-const statusClasses: Record<string, string> = {
-  hot: 'badge--hot',
-  free: 'badge--free',
-  trust: 'badge--trust',
-  verified: 'badge--verified',
-};
-
-const statusClass = statusClasses[type.toLowerCase()];
-const isTopic = type && !statusClass;
-const typeClass = statusClass || (isTopic ? 'badge--topic' : 'badge--default');
-const topicHueValue = isTopic ? topicHue(type) : null;
-const displayLabel = label || type.charAt(0).toUpperCase() + type.slice(1);
-
-const classes = [
-  'badge',
-  typeClass,
-  `badge--shape-${shape}`,
-  `badge--size-${size}`,
-  `badge--${variant}`,
-  shadow !== 'none' && `badge--shadow-${shadow}`,
-  hasIcon && 'badge--has-icon',
-  lottieIcon && 'badge--has-lottie',
-  iconOnly && 'badge--icon-only',
-  !uppercase && 'badge--lowercase'
-].filter(Boolean);
 ---
 
-<span class:list={classes} style={topicHueValue !== null ? `--topic-hue: ${topicHueValue}` : undefined} title={iconOnly ? displayLabel : undefined}>
-  {lottieIcon && (
-    <lottie-player
-      src={lottieUrl}
-      background="transparent"
-      speed="1"
-      style={`width: ${iconSizes[size]}px; height: ${iconSizes[size]}px;`}
-      class="badge__lottie"
-      aria-hidden="true"
-    ></lottie-player>
+<span
+  class:list={[
+    'badge',
+    `badge--${variant}`,
+    `badge--${shape}`,
+    icon && 'badge--has-icon',
+    !uppercase && 'badge--lowercase'
+  ]}
+>
+  {icon && (
+    <Icon name={`${iconCollection}/${icon}`} class="badge__icon" aria-hidden="true" />
   )}
-  {icon && !lottieIcon && (
-    <Icon name={`${iconCollection}/${icon}`} size={iconSizes[size]} class="badge__icon" />
-  )}
-  {!iconOnly && <small class="badge__label">{displayLabel}</small>}
+  <span class="badge__label">{label}</span>
 </span>
-
-<style>
-  /* ========== BASE BADGE STYLES ========== */
-  /* Layout */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xs);
-  }
-
-  /* Box model - default size (md) */
-  .badge {
-    padding: var(--space-xs) var(--space-sm);
-  }
-
-  /* Visual - defaults */
-  .badge {
-    border-radius: var(--radius-lg);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all var(--transition-fast);
-  }
-
-  /* Elements */
-  .badge__icon {
-    width: 1em;
-    height: 1em;
-    flex-shrink: 0;
-  }
-
-  .badge__lottie {
-    flex-shrink: 0;
-    pointer-events: none;
-  }
-
-  .badge__label {
-    font-weight: var(--font-semibold);
-    font-size: inherit;
-    color: inherit;
-  }
-
-  /* ========== SIZE MODIFIERS ========== */
-  .badge--size-sm {
-    padding: calc(var(--space-sm) / 2) var(--space-md);
-  }
-
-  .badge--size-lg {
-    padding: var(--space-sm) var(--space-md);
-  }
-
-  .badge--size-sm .badge__icon { width: 0.75em; height: 0.75em; }
-  .badge--size-lg .badge__icon { width: 1.25em; height: 1.25em; }
-
-  /* ========== SHAPE MODIFIERS ========== */
-  .badge--shape-rounded { border-radius: var(--radius-sm); }
-  .badge--shape-pill { border-radius: var(--radius-full); }
-  .badge--shape-square { border-radius: 0; }
-  .badge--shape-tag {
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    position: relative;
-    margin-left: 0.5em;
-  }
-  .badge--shape-tag::before {
-    content: '';
-    position: absolute;
-    left: -0.5em;
-    top: 0;
-    border: 0.5em solid transparent;
-    border-right-color: inherit;
-    border-left: 0;
-  }
-
-  /* ========== VARIANT MODIFIERS ========== */
-  /* Fill variant - solid background (default look) */
-  .badge--fill {
-    color: var(--color-White);
-  }
-
-  /* Outline variant - border only */
-  .badge--outline {
-    background: transparent;
-    border: 2px solid currentColor;
-  }
-
-  /* Soft variant - subtle background */
-  .badge--soft {
-    background: color-mix(in oklch, var(--badge-color, var(--brand-c-primary)) 15%, transparent);
-    color: var(--badge-color, var(--brand-c-primary-dark));
-  }
-
-  /* Ghost variant - no background, text only */
-  .badge--ghost {
-    background: transparent;
-    color: var(--badge-color, var(--brand-c-primary-dark));
-  }
-
-  /* Glass variant - frosted glass effect (light text for dark backgrounds) */
-  .badge--glass {
-    background: color-mix(in oklch, var(--color-White) 15%, transparent) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    border: 1px solid color-mix(in oklch, var(--color-White) 30%, transparent) !important;
-    color: var(--color-White) !important;
-    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 15%, transparent);
-  }
-
-  /* Glass-dark variant - frosted glass with dark text (for light backgrounds) */
-  .badge--glass-dark {
-    background: color-mix(in oklch, var(--color-White) 50%, transparent) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    border: 1px solid color-mix(in oklch, var(--color-White) 50%, transparent) !important;
-    color: var(--brand-c-text-dark) !important;
-    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 10%, transparent);
-  }
-
-  /* ========== SHADOW MODIFIERS ========== */
-  .badge--shadow-drop {
-    box-shadow: var(--shadow-sm);
-  }
-
-  .badge--shadow-inner {
-    box-shadow: inset 0 2px 4px color-mix(in oklch, var(--color-Black) 20%, transparent);
-  }
-
-  .badge--shadow-glow {
-    box-shadow: 0 0 8px color-mix(in oklch, var(--badge-color, var(--brand-c-primary)) 50%, transparent);
-  }
-
-  /* ========== ICON MODIFIERS ========== */
-  .badge--icon-only {
-    padding: var(--space-xs);
-    aspect-ratio: 1;
-    justify-content: center;
-  }
-
-  .badge--icon-only.badge--shape-pill {
-    border-radius: var(--radius-full);
-  }
-
-  /* ========== TEXT MODIFIERS ========== */
-  .badge--lowercase {
-    text-transform: none;
-    letter-spacing: normal;
-  }
-
-  /* ========== BADGE TYPE COLORS ========== */
-  .badge--default {
-    --badge-color: var(--brand-c-text-dark);
-    background-color: color-mix(in oklch, var(--brand-c-text-dark) 10%, transparent);
-    color: var(--brand-c-text);
-  }
-
-  .badge--hot {
-    --badge-color: var(--color-Error);
-    background-color: var(--color-Error);
-  }
-
-  .badge--free {
-    --badge-color: var(--brand-c-primary-dark);
-    background-color: var(--brand-c-primary-dark);
-  }
-
-  .badge--trust {
-    --badge-color: var(--brand-c-primary-dark);
-    background-color: var(--brand-c-primary-dark);
-  }
-
-  .badge--verified {
-    --badge-color: var(--color-Info, var(--brand-c-primary));
-    background-color: var(--color-Info, var(--brand-c-primary));
-  }
-
-  /* Auto-hue topic badges — oklch with deterministic hue from string hash */
-  .badge--topic {
-    --badge-color: oklch(0.45 0.08 var(--topic-hue));
-    background-color: oklch(0.45 0.08 var(--topic-hue));
-    color: var(--color-White);
-  }
-
-  /* Override background for non-fill variants */
-  .badge--outline.badge--default,
-  .badge--outline.badge--hot,
-  .badge--outline.badge--free,
-  .badge--outline.badge--trust,
-  .badge--outline.badge--verified,
-  .badge--outline.badge--topic {
-    background: transparent;
-    border-color: var(--badge-color);
-    color: var(--badge-color);
-  }
-
-  /* Override background for soft variants - needs higher specificity */
-  .badge--soft.badge--default,
-  .badge--soft.badge--hot,
-  .badge--soft.badge--free,
-  .badge--soft.badge--trust,
-  .badge--soft.badge--verified,
-  .badge--soft.badge--topic {
-    background: color-mix(in oklch, var(--badge-color) 15%, transparent);
-    color: var(--badge-color);
-  }
-
-  /* Override background for ghost variants */
-  .badge--ghost.badge--default,
-  .badge--ghost.badge--hot,
-  .badge--ghost.badge--free,
-  .badge--ghost.badge--trust,
-  .badge--ghost.badge--verified,
-  .badge--ghost.badge--topic {
-    background: transparent;
-    color: var(--badge-color);
-  }
-
-  /* Glass variant inherits base glass styles via !important */
-
-  /* ========== RESPONSIVE STYLES ========== */
-  @media (max-width: 480px) {
-    .badge {
-      padding: calc(var(--space-xs) * 0.75) var(--space-xs);
-    }
-
-    .badge__label {
-    }
-
-    .badge--size-sm {
-      padding: calc(var(--space-xs) * 0.5) var(--space-sm);
-    }
-
-    .badge--size-lg {
-      padding: var(--space-xs) var(--space-sm);
-    }
-  }
-
-  @media (max-width: 350px) {
-    .badge {
-      padding: calc(var(--space-xs) * 0.5) var(--space-xs);
-      gap: calc(var(--space-xs) * 0.5);
-    }
-
-    .badge__label {
-      font-size: calc(var(--text-fine) * 0.9);
-      letter-spacing: 0.03em;
-    }
-
-    .badge--size-sm {
-      padding: calc(var(--space-xs) * 0.4) calc(var(--space-xs) * 0.75);
-    }
-
-    .badge--size-sm .badge__icon {
-      width: 0.65em;
-      height: 0.65em;
-    }
-  }
-
-  @media (max-width: 300px) {
-    .badge {
-      padding: calc(var(--space-xs) * 0.4) calc(var(--space-xs) * 0.75);
-    }
-
-    .badge__label {
-      font-size: calc(var(--text-fine) * 0.85);
-      letter-spacing: 0.02em;
-    }
-
-    .badge--size-sm .badge__label {
-      font-size: calc(var(--text-fine) * 0.8);
-    }
-  }
-
-  @media (max-width: 200px) {
-    .badge {
-      padding: calc(var(--space-xs) * 0.3) calc(var(--space-xs) * 0.5);
-    }
-
-    .badge__label {
-      font-size: calc(var(--text-fine) * 0.75);
-      letter-spacing: 0;
-    }
-
-    .badge__icon {
-      width: 0.6em;
-      height: 0.6em;
-    }
-  }
-
-  /* A11Y theme overrides in: src/styles/a11y/components/badge.css */
-</style>
-
-<script>
-  // Lottie hover animation for badges
-  document.addEventListener('astro:page-load', () => {
-    const lottieBadges = document.querySelectorAll('.badge--has-lottie');
-
-    lottieBadges.forEach(badge => {
-      const lottiePlayer = badge.querySelector('lottie-player') as any;
-
-      if (lottiePlayer) {
-        let loopCount = 0;
-        const maxLoops = 2;
-
-        // Listen for loop complete
-        lottiePlayer.addEventListener('loop', () => {
-          loopCount++;
-          if (loopCount >= maxLoops) {
-            lottiePlayer.stop();
-          }
-        });
-
-        // Play on hover
-        badge.addEventListener('mouseenter', () => {
-          loopCount = 0;
-          lottiePlayer.setLooping(true);
-          lottiePlayer.play();
-        });
-
-        badge.addEventListener('mouseleave', () => {
-          lottiePlayer.stop();
-        });
-      }
-    });
-  });
-</script>
