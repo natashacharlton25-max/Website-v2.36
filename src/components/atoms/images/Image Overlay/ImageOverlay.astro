@@ -1,0 +1,141 @@
+---
+/**
+ * ImageOverlay — Molecule for text-over-image patterns
+ *
+ * General-purpose wrapper used by hero, cards, sections, banners.
+ * Composes Image atom + slotted content with overlay effects.
+ *
+ * Styles: ImageOverlay.style.css | ImageOverlay.responsive.css | ImageOverlay.a11y.css
+ *
+ * Usage:
+ *   <!-- Gradient bottom with centered text -->
+ *   <ImageOverlay overlay="gradient-bottom" position="center">
+ *     <Image src="/hero.jpg" alt="" decorative fit="cover" slot="image" />
+ *     <Heading level={1}>Hero Title</Heading>
+ *   </ImageOverlay>
+ *
+ *   <!-- Card with colour blend -->
+ *   <ImageOverlay overlay="color-blend" blendMode="multiply" blendColor="primary">
+ *     <Image src="/card.jpg" alt="" decorative fit="cover" slot="image" />
+ *     <Text>Card content</Text>
+ *   </ImageOverlay>
+ *
+ *   <!-- Full-width section with glass text -->
+ *   <ImageOverlay overlay="glass" position="bottom-left" fullBleed>
+ *     <Image src="/wide.jpg" alt="" decorative fit="cover" slot="image" />
+ *     <Text>Glass-backed text</Text>
+ *   </ImageOverlay>
+ *
+ *   <!-- Scrim with custom opacity -->
+ *   <ImageOverlay overlay="scrim" scrimOpacity={0.6} position="center">
+ *     <Image src="/bg.jpg" alt="" decorative fit="cover" slot="image" />
+ *     <Heading level={2} color="text-light">Light text on dark scrim</Heading>
+ *   </ImageOverlay>
+ *
+ *   <!-- Minimal — just positioning, no overlay effect -->
+ *   <ImageOverlay position="bottom-center">
+ *     <Image src="/photo.jpg" alt="" decorative fit="cover" slot="image" />
+ *     <Text>Caption-style text</Text>
+ *   </ImageOverlay>
+ *
+ * Props:
+ * - overlay: Visual effect over the image
+ *     'gradient-bottom' — dark gradient fading up from bottom
+ *     'gradient-top'    — dark gradient fading down from top
+ *     'scrim'           — uniform semi-transparent dark layer
+ *     'glass'           — frosted glass backdrop behind content
+ *     'color-blend'     — colour overlay with blend mode
+ *     'none'            — no overlay, just positioning
+ * - position: Where content sits within the frame
+ * - blendMode: CSS mix-blend-mode (for color-blend overlay)
+ * - blendColor: Preset colour for blend — primary, secondary, dark, or CSS value
+ * - scrimOpacity: 0–1 opacity for scrim overlay (default 0.45)
+ * - fullBleed: Removes border-radius, stretches to container width
+ * - aspectRatio: CSS aspect-ratio value (e.g., '16/9', '4/3', '1/1')
+ * - minHeight: Minimum height (e.g., '300px', '50vh')
+ * - class: Additional CSS classes
+ */
+
+interface Props {
+  overlay?: 'gradient-bottom' | 'gradient-top' | 'scrim' | 'glass' | 'color-blend' | 'none';
+  position?: 'top-left' | 'top-center' | 'top-right' | 'center' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+  blendMode?: 'multiply' | 'overlay' | 'screen' | 'soft-light' | 'color-burn' | 'color-dodge';
+  blendColor?: 'primary' | 'secondary' | 'dark' | string;
+  scrimOpacity?: number;
+  fullBleed?: boolean;
+  aspectRatio?: string;
+  minHeight?: string;
+  class?: string;
+  [key: string]: any;
+}
+
+const {
+  overlay = 'none',
+  position = 'center',
+  blendMode = 'multiply',
+  blendColor = 'dark',
+  scrimOpacity = 0.45,
+  fullBleed = false,
+  aspectRatio,
+  minHeight,
+  class: className,
+  ...rest
+} = Astro.props;
+
+// Extract data-* attributes
+const dataAttrs = Object.fromEntries(
+  Object.entries(rest).filter(([key]) => key.startsWith('data-'))
+);
+
+// Resolve blend colour to CSS value
+const blendColorMap: Record<string, string> = {
+  primary: 'var(--brand-c-primary)',
+  secondary: 'var(--brand-c-secondary)',
+  dark: 'var(--brand-c-bg-dark)',
+};
+const resolvedBlendColor = blendColorMap[blendColor] || blendColor;
+
+// Build inline custom properties
+const customProps = [
+  scrimOpacity !== 0.45 ? `--io-scrim-opacity: ${scrimOpacity}` : '',
+  overlay === 'color-blend' ? `--io-blend-color: ${resolvedBlendColor}` : '',
+  overlay === 'color-blend' ? `--io-blend-mode: ${blendMode}` : '',
+  aspectRatio ? `aspect-ratio: ${aspectRatio}` : '',
+  minHeight ? `min-height: ${minHeight}` : '',
+].filter(Boolean).join('; ');
+
+const classes = [
+  'image-overlay',
+  `image-overlay--${overlay}`,
+  `image-overlay--pos-${position}`,
+  fullBleed ? 'image-overlay--full-bleed' : '',
+  className,
+].filter(Boolean);
+---
+
+<div
+  class:list={classes}
+  style={customProps || undefined}
+  {...dataAttrs}
+>
+  <div class="image-overlay__media">
+    <slot name="image" />
+  </div>
+
+  {overlay === 'color-blend' && (
+    <div class="image-overlay__blend" aria-hidden="true"></div>
+  )}
+
+  {(overlay === 'gradient-bottom' || overlay === 'gradient-top' || overlay === 'scrim') && (
+    <div class="image-overlay__shade" aria-hidden="true"></div>
+  )}
+
+  <div class="image-overlay__content">
+    {overlay === 'glass' && (
+      <div class="image-overlay__glass" aria-hidden="true"></div>
+    )}
+    <div class="image-overlay__inner">
+      <slot />
+    </div>
+  </div>
+</div>

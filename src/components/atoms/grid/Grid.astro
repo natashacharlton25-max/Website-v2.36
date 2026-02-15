@@ -1,0 +1,111 @@
+---
+/**
+ * Grid — Unified responsive grid layout
+ *
+ * Pure layout shell. Handles column count, gap, alignment.
+ * Cards, text blocks, media — anything goes inside via <slot />.
+ * Text-only mode collapses to single-column left-aligned list.
+ *
+ * @param columns   - Number of columns: 1–6 (default 3)
+ * @param gap       - Gap size token or value (default 'var(--space-xl)')
+ * @param align     - Vertical alignment: 'stretch' (default), 'start', 'center', 'end'
+ * @param minWidth  - Min column width for auto-fit: e.g. '280px' (overrides columns with auto-fit)
+ * @param container - Wrapper width: '4xl', '6xl' (default), '7xl', 'full', 'none'
+ * @param separator - Show border between stacked items in text-only mode (default true)
+ *
+ * Children can use span utilities directly:
+ *   class="grid-span-2"       → spans 2 columns
+ *   class="grid-span-3"       → spans 3 columns
+ *   class="grid-span-full"    → spans all columns
+ *   class="grid-row-span-2"   → spans 2 rows
+ *   class="grid-row-span-3"   → spans 3 rows
+ *
+ * Or inline custom property for dynamic values:
+ *   style="--span: 2; --row-span: 2;"
+ *
+ * @param flow      - Grid auto-flow: 'row' (default), 'dense' (pack gaps), 'column', 'masonry' (CSS columns)
+ * @param gallery   - Interactive gallery mode: 'showcase' (carousel rotation), 'product' (expand/collapse)
+ *                    Requires GSAP + Flip plugin. Adds data-gallery attribute for JS targeting.
+ */
+
+export interface Props {
+  columns?: 1 | 2 | 3 | 4 | 5 | 6;
+  gap?: string;
+  align?: 'stretch' | 'start' | 'center' | 'end';
+  minWidth?: string;
+  container?: '4xl' | '6xl' | '7xl' | 'full' | 'none';
+  flow?: 'row' | 'dense' | 'column' | 'masonry';
+  gallery?: 'showcase' | 'product';
+  separator?: boolean;
+  class?: string;
+  id?: string;
+  [key: `data-${string}`]: string | undefined;
+}
+
+const {
+  columns = 3,
+  gap = 'var(--space-xl)',
+  align = 'stretch',
+  minWidth,
+  container = 'none',
+  flow = 'row',
+  gallery,
+  separator = true,
+  class: className = '',
+  id,
+  ...rest
+} = Astro.props;
+
+// Extract data-* attributes
+const dataAttrs = Object.fromEntries(
+  Object.entries(rest).filter(([key]) => key.startsWith('data-'))
+);
+
+// Grid mode: masonry uses CSS columns, auto-fit if minWidth, else fixed columns
+const isMasonry = flow === 'masonry';
+const gridMode = isMasonry ? 'masonry' : (minWidth ? 'auto' : 'fixed');
+
+const wrapperClasses = [
+  container !== 'none' && 'container',
+  container !== 'none' && `container-${container}`,
+].filter(Boolean);
+
+const gridClasses = [
+  'base-grid',
+  `base-grid--${gridMode}`,
+  !isMasonry && flow !== 'row' && `base-grid--${flow}`,
+  gallery && `base-grid--gallery base-grid--gallery-${gallery}`,
+  separator && !gallery && !isMasonry && 'base-grid--separator',
+  className,
+].filter(Boolean);
+
+// Merge gallery data attribute with user-provided data-* attrs
+const allDataAttrs = {
+  ...dataAttrs,
+  ...(gallery ? { 'data-gallery': gallery } : {}),
+};
+---
+
+{container !== 'none' ? (
+  <div class:list={wrapperClasses}>
+    <div
+      data-grid="responsive"
+      class:list={gridClasses}
+      id={id}
+      style={`--grid-cols: ${columns}; --grid-gap: ${gap}; --grid-align: ${align};${minWidth ? ` --grid-min: ${minWidth};` : ''}`}
+      {...allDataAttrs}
+    >
+      <slot />
+    </div>
+  </div>
+) : (
+  <div
+    data-grid="responsive"
+    class:list={gridClasses}
+    id={id}
+    style={`--grid-cols: ${columns}; --grid-gap: ${gap}; --grid-align: ${align};${minWidth ? ` --grid-min: ${minWidth};` : ''}`}
+    {...allDataAttrs}
+  >
+    <slot />
+  </div>
+)}

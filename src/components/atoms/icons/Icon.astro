@@ -6,12 +6,26 @@
  * <Icon name="sparkle-fill" size={24} />
  * <Icon name="wellness/heart-fill" size={20} />
  * <Icon name="sparkle-fill" size={24} color="var(--brand-c-primary-dark)" />
+ * <Icon name="sparkle-fill" size={24} shadow="md" />
+ * <Icon name="sparkle-fill" size={24} glow="lg" />
+ * <Icon name="sparkle-fill" size={24} gradient="warm" />
+ * <Icon name="arrow-circle-right" size={20} spin />
+ * <Icon name="bell-fill" size={24} pulse />
+ * <Icon name="caret-down" size={16} bounce />
+ * <Icon name="heart-fill" size={24} stroke />
  * <Icon name="ph:heart-duotone" size={20} /> (legacy - maps to fill)
  *
  * Props:
  * - name: Icon name or path (e.g., "sparkle-fill" or "wellness/heart-fill")
  * - size: Icon size in pixels (default: 24)
- * - color: Icon color (CSS value or variable, e.g., "var(--brand-c-primary-dark)")
+ * - color: Icon color (CSS value or variable)
+ * - shadow: Drop shadow — 'sm', 'md', 'lg'
+ * - glow: Coloured glow — 'sm', 'md', 'lg', 'secondary', 'white'
+ * - gradient: Gradient fill — 'primary', 'secondary', 'warm', 'cool'
+ * - spin: Continuous rotation for loading states
+ * - pulse: Scale up/down with opacity for attention
+ * - bounce: Subtle bounce as indicator
+ * - stroke: Line-art mode — fill becomes none, stroke shows
  * - class: Additional CSS classes
  *
  * Icons stored in: /public/Icons/phosphor/[category]/
@@ -26,9 +40,16 @@ interface Props {
   size?: number;
   class?: string;
   color?: string;
+  shadow?: 'sm' | 'md' | 'lg';
+  glow?: 'sm' | 'md' | 'lg' | 'secondary' | 'white';
+  gradient?: 'primary' | 'secondary' | 'warm' | 'cool';
+  spin?: boolean;
+  pulse?: boolean;
+  bounce?: boolean;
+  stroke?: boolean;
 }
 
-const { name, size = 24, class: className = '', color } = Astro.props;
+const { name, size = 24, class: className = '', color, shadow, glow, gradient, spin, pulse, bounce, stroke } = Astro.props;
 
 // Strip 'ph:' prefix if present (for backwards compatibility)
 let iconName = name.startsWith('ph:') ? name.slice(3) : name;
@@ -66,35 +87,162 @@ if (iconName.includes('/')) {
   }
 }
 
+// Gradient: inject SVG <linearGradient> and swap fill to url(#id)
+// This is server-side so zero runtime cost, works everywhere.
+if (gradient && iconContent) {
+  const gradientId = `icon-grad-${Math.random().toString(36).slice(2, 8)}`;
+
+  const gradientStops: Record<string, string> = {
+    primary: `<stop offset="0%" stop-color="var(--brand-c-primary)"/><stop offset="100%" stop-color="var(--brand-c-primary-dark)"/>`,
+    secondary: `<stop offset="0%" stop-color="var(--brand-c-secondary)"/><stop offset="100%" stop-color="var(--brand-c-secondary-dark)"/>`,
+    warm: `<stop offset="0%" stop-color="var(--brand-c-primary)"/><stop offset="100%" stop-color="var(--brand-c-secondary)"/>`,
+    cool: `<stop offset="0%" stop-color="var(--brand-c-primary-light)"/><stop offset="100%" stop-color="var(--brand-c-primary-dark)"/>`,
+  };
+
+  const gradientDef = `<defs><linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">${gradientStops[gradient]}</linearGradient></defs>`;
+
+  // Inject defs after opening <svg> tag
+  iconContent = iconContent.replace(/<svg([^>]*)>/, `<svg$1>${gradientDef}`);
+
+  // Replace existing fill="currentColor" with gradient reference
+  iconContent = iconContent
+    .replace(/fill="currentColor"/g, `fill="url(#${gradientId})"`)
+    .replace(/fill="CurrentColor"/g, `fill="url(#${gradientId})"`);
+
+  // Add gradient fill to <path> elements that have no fill attribute
+  iconContent = iconContent.replace(/<path(?![^>]*fill=)/g, `<path fill="url(#${gradientId})"`);
+}
+
+// Stroke: server-side SVG rewrite — set fill="none" stroke="currentColor" on shape elements
+if (stroke && iconContent) {
+  // Remove fill from <svg> root
+  iconContent = iconContent.replace(/<svg([^>]*)>/, (match, attrs) => {
+    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
+    return `<svg${cleaned} fill="none">`;
+  });
+
+  // Hide the viewBox bounding <rect>
+  iconContent = iconContent.replace(/<rect([^/]*)\/>/g, '<rect$1 fill="none" stroke="none"/>');
+
+  // Rewrite shape elements: remove existing fill, add stroke attrs
+  const strokeWidth = 16;
+  const shapeRe = /<(path|circle|polygon|polyline)([^/]*)\/>/g;
+  iconContent = iconContent.replace(shapeRe, (match, tag, attrs) => {
+    // Strip existing fill attribute
+    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
+    return `<${tag}${cleaned} fill="none" stroke="currentColor" stroke-width="${strokeWidth}"/>`;
+  });
+}
+
 // Fallback icon (simple circle)
 const fallbackIcon = `<svg viewBox="0 0 256 256" width="${size}" height="${size}" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.2"/><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-width="16"/></svg>`;
+
+// Build effect classes
+const effectClasses = [
+  shadow ? `icon--shadow-${shadow}` : '',
+  glow ? `icon--glow-${glow}` : '',
+  gradient ? 'icon--has-gradient' : '',
+  spin ? 'icon--spin' : '',
+  pulse ? 'icon--pulse' : '',
+  bounce ? 'icon--bounce' : '',
+  stroke ? 'icon--stroke' : '',
+].filter(Boolean).join(' ');
 ---
 
 <span
-  class={`icon ${className}`}
-  style={`width: ${size}px; height: ${size}px;${color ? ` color: ${color};` : ''}`}
+  class={`icon ${effectClasses} ${className}`}
+  style={`width: ${size}px; height: ${size}px;${color && !gradient ? ` color: ${color};` : ''}`}
   set:html={iconContent || fallbackIcon}
 />
 
 <style>
-  .icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: inherit;
+  @layer components {
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: inherit;
+    }
+
+    .icon :global(svg) {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Default fill — skipped for gradient and stroke modes */
+    .icon:not(.icon--has-gradient):not(.icon--stroke) :global(svg) {
+      fill: currentColor;
+    }
+
+    /* Only fill paths that don't have fill="none" or a gradient url — skip stroke mode */
+    .icon:not(.icon--stroke) :global(svg path:not([fill="none"]):not([fill^="url("])),
+    .icon:not(.icon--stroke) :global(svg circle:not([fill="none"]):not([fill^="url("])),
+    .icon:not(.icon--stroke) :global(svg polygon:not([fill="none"]):not([fill^="url("])),
+    .icon:not(.icon--stroke) :global(svg polyline:not([fill="none"]):not([fill^="url("])) {
+      fill: currentColor;
+    }
+
+    /* ── Shadow ──────────────────────────────────────────── */
+
+    .icon--shadow-sm { filter: var(--svg-drop-shadow); }
+    .icon--shadow-md { filter: var(--svg-drop-shadow-md); }
+    .icon--shadow-lg { filter: var(--svg-drop-shadow-lg); }
+
+    /* ── Glow ────────────────────────────────────────────── */
+
+    .icon--glow-sm        { filter: var(--svg-glow-sm); }
+    .icon--glow-md        { filter: var(--svg-glow-md); }
+    .icon--glow-lg        { filter: var(--svg-glow-lg); }
+    .icon--glow-secondary { filter: var(--svg-glow-secondary); }
+    .icon--glow-white     { filter: var(--svg-glow-white); }
+
+  }
+</style>
+
+<style is:global>
+  /* ── Icon Animations (global — keyframes must bypass Astro scoping) ── */
+
+  @keyframes icon-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
   }
 
-  .icon :global(svg) {
-    width: 100%;
-    height: 100%;
-    fill: currentColor;
+  @keyframes icon-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.15); opacity: 0.7; }
   }
 
-  /* Only fill paths that don't have fill="none" */
-  .icon :global(svg path:not([fill="none"])),
-  .icon :global(svg circle:not([fill="none"])),
-  .icon :global(svg polygon:not([fill="none"])),
-  .icon :global(svg polyline:not([fill="none"])) {
-    fill: currentColor;
+  @keyframes icon-bounce {
+    0%, 100% { transform: translateY(0); }
+    40%      { transform: translateY(-4px); }
+    60%      { transform: translateY(-2px); }
+  }
+
+  .icon--spin:hover {
+    animation: icon-spin var(--icon-spin-speed, 1s) linear infinite;
+  }
+
+  .icon--pulse:hover {
+    animation: icon-pulse var(--icon-pulse-speed, 1.5s) ease-in-out infinite;
+  }
+
+  .icon--bounce:hover {
+    animation: icon-bounce var(--icon-bounce-speed, 0.6s) ease-in-out infinite;
+  }
+
+  /* ── Reduce motion ── */
+
+  .a11y-reduce-motion .icon--spin:hover,
+  .a11y-reduce-motion .icon--pulse:hover,
+  .a11y-reduce-motion .icon--bounce:hover {
+    animation: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .icon--spin:hover,
+    .icon--pulse:hover,
+    .icon--bounce:hover {
+      animation: none;
+    }
   }
 </style>

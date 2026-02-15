@@ -1,0 +1,116 @@
+/**
+ * GalleryItem — a11y.css
+ *
+ * Themes:        Brand tokens handle colour changes via card-level rules.
+ * Reduce-motion: Kill transitions on items, disable inactive dimming.
+ * Text-only:     Grid.a11y.css handles layout collapse.
+ *                Item-level: strip borders, reset cursors.
+ *
+ * NOTE: Theme-specific overrides (dark, high-contrast, cream, CVD)
+ * belong with the Card component's a11y file, not here.
+ * Gallery items ARE cards — they inherit card theme behaviour.
+ */
+
+
+/* ==========================================================
+   REDUCE MOTION
+   ========================================================== */
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    & .gallery-item,
+    & .thumbnail {
+      transition: none !important;
+    }
+
+    & .gallery-item:hover,
+    & .thumbnail:hover {
+      border-color: inherit;
+      transform: none;
+    }
+
+    & .thumbnail.is-inactive {
+      opacity: 1;
+      filter: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .gallery-item,
+    .thumbnail {
+      transition: none;
+    }
+
+    .gallery-item:hover,
+    .thumbnail:hover {
+      border-color: inherit;
+    }
+
+    .thumbnail.is-inactive {
+      opacity: 1;
+      filter: none;
+    }
+  }
+}
+
+
+/* ==========================================================
+   TEXT-ONLY MODE
+   ========================================================== */
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    /* Strip item chrome */
+    & .gallery-item,
+    & .thumbnail {
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      cursor: default;
+      background: none;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      overflow: visible;
+    }
+
+    /* Images: contained, not cropped */
+    & .gallery-item img,
+    & .thumbnail img {
+      height: auto;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 0;
+    }
+
+    /* Badges: inline text */
+    & .gallery-badge,
+    & .product-badge {
+      position: static;
+      background: none;
+      color: var(--brand-c-text);
+      padding: 0;
+      border-radius: 0;
+      display: block;
+    }
+
+    /* Reset expand/collapse states */
+    & .gallery-item.is-expanded {
+      display: block;
+    }
+
+    & .thumbnail.is-active {
+      height: auto !important;
+    }
+
+    & .thumbnail.is-inactive {
+      opacity: 1;
+      filter: none;
+    }
+  }
+}

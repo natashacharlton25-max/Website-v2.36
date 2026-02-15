@@ -1,0 +1,181 @@
+/**
+ * List — style.css
+ * @layer components
+ *
+ * Single source of truth for all list styling.
+ * Each .list__item uses .text as base for font-family inheritance.
+ *
+ * Variants: default (disc/decimal), none, inline, dot (sized circles).
+ * Icon prop: works on default variant — replaces native markers with icons.
+ * A11y text-only: icons hidden, .list__a11y-dot shown as replacement.
+ */
+
+@layer components {
+
+  /* ==========================================================
+     BASE
+     ========================================================== */
+
+  .list {
+    margin: 0 0 var(--space-md) 0;
+    padding-left: var(--space-xl);
+  }
+
+  .list__item {
+    margin: 0;
+    padding: var(--space-xs) 0;
+  }
+
+  .list__content {
+    vertical-align: middle;
+  }
+
+  /* ==========================================================
+     VARIANT: Default
+     ul gets disc, ol gets decimal. Standard list appearance.
+     ========================================================== */
+
+  ul.list--default {
+    list-style-type: disc;
+  }
+
+  ol.list--default {
+    list-style-type: decimal;
+  }
+
+  .list--default .list__item::marker {
+    color: var(--brand-c-primary);
+  }
+
+  /* ==========================================================
+     ICON — default variant with icon prop
+     Replaces native disc/decimal with Phosphor icons.
+     Text-only a11y hides icons and shows .list__a11y-dot instead.
+     ========================================================== */
+
+  .list--has-icon {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .list--has-icon .list__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .list__icon {
+    flex-shrink: 0;
+    color: var(--brand-c-primary);
+    fill: currentColor;
+  }
+
+  /* Icon colour overrides */
+  .list--icon-color-primary-dark .list__icon { color: var(--brand-c-primary-dark); }
+  .list--icon-color-secondary .list__icon    { color: var(--brand-c-secondary); }
+  .list--icon-color-text .list__icon         { color: var(--brand-c-text); }
+  .list--icon-color-inherit .list__icon      { color: inherit; }
+
+  /* A11y replacement dot — hidden by default, shown in text-only */
+  .list__a11y-dot {
+    display: none;
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--brand-c-primary);
+  }
+
+  /* ==========================================================
+     VARIANT: None
+     No markers, no padding. For nav lists, card content, etc.
+     ========================================================== */
+
+  .list--none {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  /* ==========================================================
+     VARIANT: Inline
+     Horizontal flow, items side by side.
+     ========================================================== */
+
+  .list--inline {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .list--inline .list__item {
+    padding: 0;
+  }
+
+  /* ==========================================================
+     VARIANT: Dot
+     Custom circle markers with size control.
+     ========================================================== */
+
+  .list--dot {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .list--dot .list__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .list__dot {
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--brand-c-primary);
+  }
+
+  /* Dot sizes */
+  .list--dot-sm .list__dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .list--dot-md .list__dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .list--dot-lg .list__dot {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Dot colour follows icon colour overrides */
+  .list--icon-color-primary-dark .list__dot { background: var(--brand-c-primary-dark); }
+  .list--icon-color-secondary .list__dot    { background: var(--brand-c-secondary); }
+  .list--icon-color-text .list__dot         { background: var(--brand-c-text); }
+  .list--icon-color-inherit .list__dot      { background: currentColor; }
+
+  /* ==========================================================
+     SPACING
+     ========================================================== */
+
+  .list--spacing-tight .list__item {
+    padding: 0;
+  }
+
+  .list--spacing-loose .list__item {
+    padding: var(--space-sm) 0;
+  }
+
+  /* ==========================================================
+     FLUSH — no outer margin
+     ========================================================== */
+
+  .list--flush {
+    margin: 0;
+  }
+
+}

@@ -1,0 +1,92 @@
+/**
+ * List — a11y.css
+ *
+ * HL:  Nothing extra — links inside list items handled by Link.a11y.css.
+ * RM:  Nothing extra — no animations on lists.
+ * TO:  KEEPS bullets/numbers — essential structure when cards collapse.
+ *      Icons hidden → reverts to native disc bullets (no flex/gap).
+ *      Dot variant normalised to md size.
+ *      None and inline get bullets added back.
+ */
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    /* Ensure bullets are visible — structure when cards collapse */
+    & ul.list--default {
+      list-style-type: disc;
+      padding-left: var(--space-lg);
+    }
+
+    & ol.list--default {
+      list-style-type: decimal;
+      padding-left: var(--space-lg);
+    }
+
+    /* Marker colour stays accessible */
+    & .list--default .list__item::marker {
+      color: var(--brand-c-primary);
+    }
+
+    /* ── Icon handling ─────────────────────────────────────── */
+    /* Revert to native bullets — removes flex layout + gap spacing */
+
+    & .list--has-icon {
+      list-style-type: disc;
+      padding-left: var(--space-lg);
+    }
+
+    & .list--has-icon .list__item {
+      display: list-item;
+    }
+
+    & .list--has-icon .list__item::marker {
+      color: var(--brand-c-primary);
+    }
+
+    & .list--has-icon .list__icon {
+      display: none;
+    }
+
+    & .list--has-icon .list__a11y-dot {
+      display: none;
+    }
+
+    /* ── Dot variant ──────────────────────────────────────── */
+    /* Dots stay visible, normalise all sizes to md */
+
+    & .list--dot .list__dot {
+      width: 8px;
+      height: 8px;
+    }
+
+    /* ── None variant ─────────────────────────────────────── */
+    /* Gets bullets — needs structure when cards collapse */
+
+    & .list--none {
+      list-style-type: disc;
+      padding-left: var(--space-lg);
+    }
+
+    /* ── Inline variant ───────────────────────────────────── */
+    /* Collapses to vertical with bullets */
+
+    & .list--inline {
+      display: block;
+      list-style-type: disc;
+      padding-left: var(--space-lg);
+    }
+
+    & .list--inline .list__item {
+      padding: var(--space-xs) 0;
+    }
+
+    /* ── Global normalisation ─────────────────────────────── */
+
+    & .list__item {
+      text-align: left;
+    }
+  }
+
+}

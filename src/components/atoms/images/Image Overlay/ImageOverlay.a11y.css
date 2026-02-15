@@ -1,0 +1,84 @@
+/**
+ * ImageOverlay — a11y.css
+ *
+ * HL:  Nothing — links inside handled by Link.a11y.css.
+ * RM:  Kill transitions on overlay layers.
+ * TO:  Image hidden, overlays stripped, wrapper collapses tight around text.
+ *      !important used on sizing props to beat inline style="aspect-ratio; min-height".
+ */
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    & .image-overlay,
+    & .image-overlay__shade,
+    & .image-overlay__blend,
+    & .image-overlay__glass {
+      transition: none;
+    }
+  }
+
+}
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    /* ── Wrapper collapses to content height ── */
+    /* !important beats inline style="aspect-ratio; min-height" */
+    & .image-overlay {
+      position: static !important;
+      overflow: visible !important;
+      border-radius: 0 !important;
+      isolation: auto !important;
+      aspect-ratio: auto !important;
+      min-height: 0 !important;
+      height: auto !important;
+      max-height: none !important;
+      padding: 0 !important;
+      margin: 0;
+      background: transparent;
+    }
+
+    /* ── Image: gone, zero space ── */
+    & .image-overlay__media {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      overflow: hidden;
+    }
+
+    /* ── All overlay effects: gone ── */
+    & .image-overlay__shade,
+    & .image-overlay__blend,
+    & .image-overlay__glass {
+      display: none !important;
+    }
+
+    /* ── Content: plain flow, tight around text ── */
+    & .image-overlay__content {
+      position: static !important;
+      display: block !important;
+      padding: var(--space-xs) 0 !important;
+      min-height: 0 !important;
+      height: auto !important;
+      width: auto !important;
+      align-items: initial;
+      justify-content: initial;
+      text-align: left;
+    }
+
+    /* ── Text: readable colours, left-aligned ── */
+    & .image-overlay__inner {
+      color: var(--brand-c-text);
+      text-align: left;
+    }
+
+    /* ── Full-bleed: same collapse ── */
+    & .image-overlay--full-bleed {
+      width: 100%;
+    }
+  }
+
+}

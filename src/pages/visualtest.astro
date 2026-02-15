@@ -8,7 +8,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import StepCard from '../components/molecules/cards/StepCard.astro';
 import CompactToolCard from '../components/molecules/cards/CompactToolCard.astro';
-import Footer from '../components/organisms/nav/Footer/Footer.astro';
+import Footer from '../components/organisms/Footer/Footer.astro';
+import List from '../components/atoms/ui/List/List.astro';
+import Icon from '../components/atoms/icons/Icon.astro';
+import Image from '../components/atoms/images/Image/Image.astro';
+import ImageOverlay from '../components/atoms/images/Image Overlay/ImageOverlay.astro';
+import Text from '../components/atoms/ui/Text/Text.astro';
+import Heading from '../components/atoms/ui/Heading/Heading.astro';
+import Grid from '../components/atoms/Grid/Grid.astro';
 
 // Import sample images for CompactToolCard
 import offering1 from '../PageImages/Services/offering-1-resources.png';
@@ -84,7 +91,7 @@ const compactToolData = [
             <code>src/components/Cards/StepCard.astro</code>
           </p>
         </div>
-        <div class="step-card-grid">
+        <Grid minWidth="280px">
           {stepCardData.map(step => (
             <StepCard
               number={step.number}
@@ -92,7 +99,7 @@ const compactToolData = [
               text={step.text}
             />
           ))}
-        </div>
+        </Grid>
       </section>
 
       <!-- CompactToolCard Section -->
@@ -117,6 +124,545 @@ const compactToolData = [
               image={tool.image}
             />
           ))}
+        </div>
+      </section>
+
+      <!-- List Section -->
+      <section class="visualtest-section">
+        <div class="section-header">
+          <h2>List Component</h2>
+          <p class="section-description">
+            Atomic list primitive with default (disc/decimal), none, inline, and dot variants.
+            Icon prop replaces markers with Phosphor icons. iconColor controls icon and dot colours.
+            Items use .text as base class. A11y text-only hides icons, shows replacement dots.
+          </p>
+          <p class="component-location">
+            <code>src/components/atoms/ui/List/List.astro</code>
+          </p>
+        </div>
+
+        <Grid minWidth="280px" class="list-demos">
+          <div class="list-demo">
+            <h3>Default (ul — disc)</h3>
+            <List items={['Mindfulness techniques', 'Breathing exercises', 'Grounding practices']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Default (ol — decimal)</h3>
+            <List as="ol" items={['Initial assessment', 'Resource selection', 'Implementation support']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Variant: none</h3>
+            <List variant="none" items={['No markers', 'No indent', 'Clean layout']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Variant: inline</h3>
+            <List variant="inline" items={['Wellbeing', 'Communication', 'Resilience', 'Self-care', 'Boundaries']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Spacing: tight</h3>
+            <List spacing="tight" items={['Compact item one', 'Compact item two', 'Compact item three']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Spacing: loose</h3>
+            <List spacing="loose" items={['Spacious item one', 'Spacious item two', 'Spacious item three']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Slot (rich content)</h3>
+            <List>
+              <li class="text list__item">Rich content with <strong>bold text</strong></li>
+              <li class="text list__item">Item with <a href="#">a link inside</a></li>
+              <li class="text list__item">Plain text item</li>
+            </List>
+          </div>
+
+          <div class="list-demo">
+            <h3>Variant: dot (sm)</h3>
+            <List variant="dot" dotSize="sm" items={['Small dot one', 'Small dot two', 'Small dot three']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Variant: dot (md)</h3>
+            <List variant="dot" items={['Medium dot one', 'Medium dot two', 'Medium dot three']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Variant: dot (lg)</h3>
+            <List variant="dot" dotSize="lg" items={['Large dot one', 'Large dot two', 'Large dot three']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Variant: dot (secondary colour)</h3>
+            <List variant="dot" iconColor="secondary" items={['Secondary dot one', 'Secondary dot two', 'Secondary dot three']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Icon (check-circle-fill)</h3>
+            <List icon="check-circle-fill" items={['Task completed', 'Goal achieved', 'Progress made']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Icon (arrow-right-fill, secondary)</h3>
+            <List icon="arrow-right-fill" iconColor="secondary" items={['Next step one', 'Next step two', 'Next step three']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Icon (star-fill, primary-dark)</h3>
+            <List icon="star-fill" iconCollection="creative" iconColor="primary-dark" items={['Featured item', 'Highlighted item', 'Key takeaway']} />
+          </div>
+
+          <div class="list-demo">
+            <h3>Flush (no outer margin)</h3>
+            <List flush items={['Flush item one', 'Flush item two', 'Flush item three']} />
+          </div>
+        </Grid>
+      </section>
+
+      <!-- Icon Effects Section -->
+      <section class="visualtest-section">
+        <div class="section-header">
+          <h2>Icon Component — Effects</h2>
+          <p class="section-description">
+            Shadow, glow, gradient, stroke, and animation props.
+            Animations respect reduce-motion (class + media query).
+          </p>
+          <p class="component-location">
+            <code>src/components/atoms/icons/Icon.astro</code>
+          </p>
+        </div>
+
+        <Grid minWidth="200px" class="icon-demos">
+          <div class="icon-demo">
+            <h3>Shadow (sm / md / lg)</h3>
+            <div class="icon-row">
+              <Icon name="heart-fill" size={32} shadow="sm" />
+              <Icon name="heart-fill" size={32} shadow="md" />
+              <Icon name="heart-fill" size={32} shadow="lg" />
+            </div>
+          </div>
+
+          <div class="icon-demo">
+            <h3>Glow (sm / md / lg)</h3>
+            <div class="icon-row">
+              <Icon name="sparkle-fill" size={32} glow="sm" />
+              <Icon name="sparkle-fill" size={32} glow="md" />
+              <Icon name="sparkle-fill" size={32} glow="lg" />
+            </div>
+          </div>
+
+          <div class="icon-demo">
+            <h3>Glow (secondary / white)</h3>
+            <div class="icon-row icon-row--dark">
+              <Icon name="star-fill" size={32} glow="secondary" />
+              <Icon name="star-fill" size={32} glow="white" />
+            </div>
+          </div>
+
+          <div class="icon-demo">
+            <h3>Gradient (primary / secondary / warm / cool)</h3>
+            <div class="icon-row">
+              <Icon name="heart-fill" size={32} gradient="primary" />
+              <Icon name="heart-fill" size={32} gradient="secondary" />
+              <Icon name="heart-fill" size={32} gradient="warm" />
+              <Icon name="heart-fill" size={32} gradient="cool" />
+            </div>
+          </div>
+
+          <div class="icon-demo">
+            <h3>Stroke (line-art mode)</h3>
+            <div class="icon-row">
+              <Icon name="heart-fill" size={32} stroke />
+              <Icon name="star-fill" size={32} stroke />
+              <Icon name="check-circle-fill" size={32} stroke />
+            </div>
+          </div>
+
+          <div class="icon-demo">
+            <h3>Spin</h3>
+            <div class="icon-row">
+              <Icon name="sparkle-fill" size={32} spin />
+            </div>
+          </div>
+
+          <div class="icon-demo">
+            <h3>Pulse</h3>
+            <div class="icon-row">
+              <Icon name="bell-fill" size={32} pulse />
+            </div>
+          </div>
+
+          <div class="icon-demo">
+            <h3>Bounce</h3>
+            <div class="icon-row">
+              <Icon name="caret-down-fill" size={32} bounce />
+            </div>
+          </div>
+        </Grid>
+      </section>
+
+      <!-- Image Section -->
+      <section class="visualtest-section">
+        <div class="section-header">
+          <h2>Image Component</h2>
+          <p class="section-description">
+            Atomic image primitive with theme-aware filters, radius, shadow, sepia, blur,
+            gradient masks, clip-paths, tilt, and hover. A11y text-only hides all images.
+            Reduce-motion kills hover + tilt transforms.
+          </p>
+          <p class="component-location">
+            <code>src/components/atoms/images/Image/Image.astro</code>
+          </p>
+        </div>
+
+        <Grid minWidth="220px" class="image-demos">
+          <div class="image-demo">
+            <h3>Default</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Default image" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Radius: lg + Shadow: md</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Rounded shadow" radius="lg" shadow="md" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Radius: full (circle)</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Circle image" radius="full" width="150" height="150" fit="cover" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Hover (scale + shadow lift)</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Hover image" radius="md" hover />
+          </div>
+
+          <div class="image-demo">
+            <h3>Sepia: light</h3>
+            <Image src="/_Unused%20Images/7.jpg" alt="Light sepia" sepia="light" radius="md" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Sepia: heavy</h3>
+            <Image src="/_Unused%20Images/7.jpg" alt="Heavy sepia" sepia="heavy" radius="md" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Blur: sm</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Blurred sm" blur="sm" radius="md" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Blur: lg</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Blurred lg" blur="lg" radius="md" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Mask: fade-bottom</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Fade bottom" gradientMask="fade-bottom" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Mask: vignette</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Vignette" gradientMask="vignette" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Clip: circle</h3>
+            <Image src="/_Unused%20Images/7.jpg" alt="Circle clip" clipPath="circle" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Clip: hexagon</h3>
+            <Image src="/_Unused%20Images/7.jpg" alt="Hexagon clip" clipPath="hexagon" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Clip: blob</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Blob clip" clipPath="blob" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Clip: diamond</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Diamond clip" clipPath="diamond" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Tilt: sm</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Tilt sm" tilt="sm" radius="md" shadow="sm" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Tilt: lg</h3>
+            <Image src="/_Unused%20Images/3.jpg" alt="Tilt lg" tilt="lg" radius="md" shadow="md" />
+          </div>
+
+          <div class="image-demo">
+            <h3>Decorative (aria-hidden)</h3>
+            <Image src="/_Unused%20Images/7.jpg" alt="" decorative radius="lg" />
+          </div>
+        </Grid>
+      </section>
+
+      <!-- ImageOverlay Section -->
+      <section class="visualtest-section">
+        <div class="section-header">
+          <h2>ImageOverlay Component</h2>
+          <p class="section-description">
+            Text-over-image wrapper with overlay effects: gradient, scrim, glass,
+            color-blend. 9-point content positioning. A11y text-only strips images
+            and overlays, leaving plain text. Reduce-motion kills transitions.
+          </p>
+          <p class="component-location">
+            <code>src/components/atoms/images/Image Overlay/ImageOverlay.astro</code>
+          </p>
+        </div>
+
+        <Grid minWidth="280px" class="overlay-demos">
+          <div class="overlay-demo">
+            <h3>Gradient Bottom (center)</h3>
+            <ImageOverlay overlay="gradient-bottom" position="center" minHeight="240px">
+              <Image src="/_Unused%20Images/3.jpg" alt="" decorative fit="cover" slot="image" />
+              <Heading level={3} size="h4" color="inherit" flush>Hero Title</Heading>
+              <Text color="inherit" flush>Centered text on gradient</Text>
+            </ImageOverlay>
+          </div>
+
+          <div class="overlay-demo">
+            <h3>Gradient Top (top-left)</h3>
+            <ImageOverlay overlay="gradient-top" position="top-left" minHeight="240px">
+              <Image src="/_Unused%20Images/7.jpg" alt="" decorative fit="cover" slot="image" />
+              <Text color="inherit" flush>Top-left positioned text</Text>
+            </ImageOverlay>
+          </div>
+
+          <div class="overlay-demo">
+            <h3>Scrim (bottom-center)</h3>
+            <ImageOverlay overlay="scrim" position="bottom-center" minHeight="240px">
+              <Image src="/_Unused%20Images/3.jpg" alt="" decorative fit="cover" slot="image" />
+              <Text color="inherit" size="lg" flush>Scrim overlay at 45% opacity</Text>
+            </ImageOverlay>
+          </div>
+
+          <div class="overlay-demo">
+            <h3>Scrim (heavy — 0.7)</h3>
+            <ImageOverlay overlay="scrim" scrimOpacity={0.7} position="center" minHeight="240px">
+              <Image src="/_Unused%20Images/7.jpg" alt="" decorative fit="cover" slot="image" />
+              <Heading level={3} size="h3" color="inherit" flush>Heavy Scrim</Heading>
+              <Text color="inherit" size="sm" flush>70% opacity</Text>
+            </ImageOverlay>
+          </div>
+
+          <div class="overlay-demo">
+            <h3>Glass (bottom-left)</h3>
+            <ImageOverlay overlay="glass" position="bottom-left" minHeight="240px">
+              <Image src="/_Unused%20Images/3.jpg" alt="" decorative fit="cover" slot="image" />
+              <Text flush>Frosted glass backdrop</Text>
+            </ImageOverlay>
+          </div>
+
+          <div class="overlay-demo">
+            <h3>Color Blend: primary (multiply)</h3>
+            <ImageOverlay overlay="color-blend" blendColor="primary" blendMode="multiply" position="center" minHeight="240px">
+              <Image src="/_Unused%20Images/7.jpg" alt="" decorative fit="cover" slot="image" />
+              <Heading level={3} size="h4" color="inherit" flush>Primary Blend</Heading>
+              <Text color="inherit" size="sm" flush>Multiply mode</Text>
+            </ImageOverlay>
+          </div>
+
+          <div class="overlay-demo">
+            <h3>Color Blend: secondary (overlay)</h3>
+            <ImageOverlay overlay="color-blend" blendColor="secondary" blendMode="overlay" position="bottom-center" minHeight="240px">
+              <Image src="/_Unused%20Images/3.jpg" alt="" decorative fit="cover" slot="image" />
+              <Text color="inherit" flush>Secondary colour overlay blend</Text>
+            </ImageOverlay>
+          </div>
+
+          <div class="overlay-demo">
+            <h3>None (bottom-right)</h3>
+            <ImageOverlay overlay="none" position="bottom-right" minHeight="240px">
+              <Image src="/_Unused%20Images/7.jpg" alt="" decorative fit="cover" slot="image" />
+              <Text size="sm" flush>No overlay — just positioning</Text>
+            </ImageOverlay>
+          </div>
+
+          <div class="overlay-demo overlay-demo--wide">
+            <h3>Full Bleed + Gradient Bottom</h3>
+            <ImageOverlay overlay="gradient-bottom" position="bottom-left" fullBleed minHeight="200px">
+              <Image src="/_Unused%20Images/3.jpg" alt="" decorative fit="cover" slot="image" />
+              <Heading level={3} size="h4" color="inherit" flush>Full Bleed Section</Heading>
+              <Text color="inherit" size="sm" flush>No border-radius, stretches to container</Text>
+            </ImageOverlay>
+          </div>
+
+          <div class="overlay-demo">
+            <h3>Aspect Ratio 16/9</h3>
+            <ImageOverlay overlay="scrim" position="center" aspectRatio="16/9">
+              <Image src="/_Unused%20Images/7.jpg" alt="" decorative fit="cover" slot="image" />
+              <Text color="inherit" size="lg" align="center" flush>16:9 aspect ratio</Text>
+            </ImageOverlay>
+          </div>
+
+          <div class="overlay-demo">
+            <h3>Aspect Ratio 1/1</h3>
+            <ImageOverlay overlay="gradient-bottom" position="bottom-center" aspectRatio="1/1">
+              <Image src="/_Unused%20Images/3.jpg" alt="" decorative fit="cover" slot="image" />
+              <Text color="inherit" size="sm" flush>Square (1:1)</Text>
+            </ImageOverlay>
+          </div>
+        </Grid>
+      </section>
+
+      <!-- Grid Component Section -->
+      <section class="visualtest-section">
+        <div class="section-header">
+          <h2>Grid Component</h2>
+          <p class="section-description">
+            Unified responsive layout atom. Two modes: fixed columns (explicit count) or
+            auto-fit (responsive reflow via minWidth). Collapses to 2 cols at 768px, 1 col
+            at 480px. Text-only strips card chrome, forces single column with separators.
+          </p>
+          <p class="component-location">
+            <code>src/components/atoms/Grid/Grid.astro</code>
+          </p>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Fixed: 3 columns</h3>
+          <Grid columns={3} gap="var(--space-lg)">
+            <div class="grid-demo__cell">1</div>
+            <div class="grid-demo__cell">2</div>
+            <div class="grid-demo__cell">3</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Fixed: 4 columns</h3>
+          <Grid columns={4} gap="var(--space-md)">
+            <div class="grid-demo__cell">1</div>
+            <div class="grid-demo__cell">2</div>
+            <div class="grid-demo__cell">3</div>
+            <div class="grid-demo__cell">4</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Fixed: 2 columns, align center</h3>
+          <Grid columns={2} align="center" gap="var(--space-lg)">
+            <div class="grid-demo__cell" style="height: 80px;">Tall</div>
+            <div class="grid-demo__cell" style="height: 40px;">Short</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Auto-fit: minWidth 200px</h3>
+          <Grid minWidth="200px" gap="var(--space-md)">
+            <div class="grid-demo__cell">Auto 1</div>
+            <div class="grid-demo__cell">Auto 2</div>
+            <div class="grid-demo__cell">Auto 3</div>
+            <div class="grid-demo__cell">Auto 4</div>
+            <div class="grid-demo__cell">Auto 5</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Auto-fit: minWidth 300px</h3>
+          <Grid minWidth="300px" gap="var(--space-lg)">
+            <div class="grid-demo__cell">Wide 1</div>
+            <div class="grid-demo__cell">Wide 2</div>
+            <div class="grid-demo__cell">Wide 3</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Fixed: 6 columns (collapse test)</h3>
+          <Grid columns={6} gap="var(--space-sm)">
+            <div class="grid-demo__cell">1</div>
+            <div class="grid-demo__cell">2</div>
+            <div class="grid-demo__cell">3</div>
+            <div class="grid-demo__cell">4</div>
+            <div class="grid-demo__cell">5</div>
+            <div class="grid-demo__cell">6</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Separator (text-only mode)</h3>
+          <Grid columns={3} separator gap="var(--space-lg)">
+            <div class="grid-demo__cell">Sep 1</div>
+            <div class="grid-demo__cell">Sep 2</div>
+            <div class="grid-demo__cell">Sep 3</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Single column</h3>
+          <Grid columns={1} gap="var(--space-md)">
+            <div class="grid-demo__cell">Full width row 1</div>
+            <div class="grid-demo__cell">Full width row 2</div>
+            <div class="grid-demo__cell">Full width row 3</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Column span: grid-span-2</h3>
+          <Grid columns={4} gap="var(--space-md)">
+            <div class="grid-demo__cell grid-span-2">Span 2</div>
+            <div class="grid-demo__cell">1</div>
+            <div class="grid-demo__cell">1</div>
+            <div class="grid-demo__cell">1</div>
+            <div class="grid-demo__cell grid-span-2">Span 2</div>
+            <div class="grid-demo__cell">1</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Column span: grid-span-full</h3>
+          <Grid columns={3} gap="var(--space-md)">
+            <div class="grid-demo__cell">1</div>
+            <div class="grid-demo__cell">2</div>
+            <div class="grid-demo__cell">3</div>
+            <div class="grid-demo__cell grid-span-full">Full width banner</div>
+            <div class="grid-demo__cell">4</div>
+            <div class="grid-demo__cell">5</div>
+            <div class="grid-demo__cell">6</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Row span: grid-row-span-2</h3>
+          <Grid columns={3} gap="var(--space-md)">
+            <div class="grid-demo__cell grid-row-span-2" style="min-height: 120px;">Tall (2 rows)</div>
+            <div class="grid-demo__cell">1</div>
+            <div class="grid-demo__cell">2</div>
+            <div class="grid-demo__cell">3</div>
+            <div class="grid-demo__cell">4</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Dynamic span: --span custom property</h3>
+          <Grid columns={6} gap="var(--space-sm)">
+            <div class="grid-demo__cell" style="--span: 3;">--span: 3</div>
+            <div class="grid-demo__cell" style="--span: 2;">--span: 2</div>
+            <div class="grid-demo__cell">1</div>
+            <div class="grid-demo__cell" style="--span: 4;">--span: 4</div>
+            <div class="grid-demo__cell" style="--span: 2;">--span: 2</div>
+          </Grid>
+        </div>
+
+        <div class="grid-demo">
+          <h3>Mixed: column + row spans</h3>
+          <Grid columns={4} gap="var(--space-md)">
+            <div class="grid-demo__cell grid-span-2 grid-row-span-2" style="min-height: 140px;">Featured (2x2)</div>
+            <div class="grid-demo__cell">1</div>
+            <div class="grid-demo__cell">2</div>
+            <div class="grid-demo__cell">3</div>
+            <div class="grid-demo__cell">4</div>
+          </Grid>
         </div>
       </section>
 
@@ -206,18 +752,99 @@ const compactToolData = [
     font-size: var(--text-sm);
   }
 
-  /* StepCard Grid */
-  .step-card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-xl);
-  }
-
   /* CompactToolCard Grid */
   .compact-tool-grid {
     display: flex;
     flex-direction: column;
     gap: var(--space-lg);
+  }
+
+  .icon-demo h3 {
+    font-family: var(--font-heading);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--brand-c-primary-dark);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  .icon-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    color: var(--brand-c-primary);
+  }
+
+  .icon-row--dark {
+    background: var(--brand-c-text);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+  }
+
+
+  .image-demo h3 {
+    font-family: var(--font-heading);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--brand-c-primary-dark);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  .image-demo :global(.image) {
+    max-height: 180px;
+    width: 100%;
+    object-fit: cover;
+  }
+
+
+  .overlay-demo h3 {
+    font-family: var(--font-heading);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--brand-c-primary-dark);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  .overlay-demo--wide {
+    grid-column: 1 / -1;
+  }
+
+  .list-demo h3 {
+    font-family: var(--font-heading);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--brand-c-primary-dark);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  /* Grid Demos */
+  .grid-demo {
+    margin-bottom: var(--space-xl);
+  }
+
+  .grid-demo:last-child {
+    margin-bottom: 0;
+  }
+
+  .grid-demo h3 {
+    font-family: var(--font-heading);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--brand-c-primary-dark);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  .grid-demo__cell {
+    background: color-mix(in oklch, var(--brand-c-primary-light) 15%, transparent);
+    border: 1px solid color-mix(in oklch, var(--brand-c-primary) 30%, transparent);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    text-align: center;
+    font-family: var(--font-body);
+    font-weight: var(--font-semibold);
+    color: var(--brand-c-primary-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .visualtest-footer {
@@ -249,10 +876,6 @@ const compactToolData = [
       padding: var(--space-xl);
     }
 
-    .step-card-grid {
-      grid-template-columns: 1fr;
-      gap: var(--space-lg);
-    }
   }
 
   @media (max-width: 480px) {
@@ -266,6 +889,124 @@ const compactToolData = [
 
     .section-header h2 {
       font-size: var(--text-xl);
+    }
+
+  }
+
+  @media (max-width: 300px) {
+    .visualtest-page {
+      padding: var(--space-lg) 0;
+    }
+
+    .visualtest-section {
+      padding: var(--space-md);
+    }
+
+    .section-header h2 {
+      font-size: var(--text-lg);
+    }
+
+    .section-description {
+      font-size: var(--text-sm);
+    }
+
+    .component-location code {
+      font-size: var(--text-xs, 0.7rem);
+      word-break: break-all;
+    }
+
+    .icon-row {
+      flex-wrap: wrap;
+    }
+  }
+
+  @media (max-width: 200px) {
+    .visualtest-section {
+      padding: var(--space-sm);
+    }
+
+    .visualtest-header h1 {
+      font-size: var(--text-xl);
+    }
+
+    .section-header {
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+    }
+  }
+
+  @media (max-width: 100px) {
+    .visualtest-page {
+      padding: var(--space-xs) 0;
+    }
+
+    .visualtest-header {
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+    }
+
+    .visualtest-header h1 {
+      font-size: var(--text-base);
+    }
+
+    .visualtest-subtitle {
+      font-size: var(--text-xs, 0.7rem);
+    }
+
+    .visualtest-section {
+      padding: var(--space-xs);
+      margin-bottom: var(--space-md);
+      border-radius: var(--radius-sm);
+    }
+
+    .section-header {
+      margin-bottom: var(--space-sm);
+      padding-bottom: var(--space-xs);
+    }
+
+    .section-header h2 {
+      font-size: var(--text-base);
+    }
+
+    .section-description {
+      font-size: var(--text-xs, 0.7rem);
+      line-height: var(--leading-normal);
+    }
+
+    .component-location {
+      font-size: var(--text-xs, 0.7rem);
+    }
+
+    .component-location code {
+      padding: 2px 4px;
+      font-size: 0.6rem;
+    }
+
+    .icon-row {
+      gap: var(--space-xs);
+    }
+
+    .icon-row--dark {
+      padding: var(--space-xs);
+    }
+
+    .grid-demo {
+      margin-bottom: var(--space-md);
+    }
+
+    .grid-demo__cell {
+      padding: var(--space-xs);
+      font-size: var(--text-xs, 0.7rem);
+      border-radius: var(--radius-sm);
+    }
+
+    .visualtest-footer {
+      padding: var(--space-md) 0;
+      margin-top: var(--space-md);
+    }
+
+    .visualtest-footer p {
+      font-size: var(--text-xs, 0.7rem);
     }
   }
 </style>
