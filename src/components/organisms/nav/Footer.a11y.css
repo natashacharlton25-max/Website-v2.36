@@ -1,0 +1,124 @@
+/**
+ * Footer — a11y.css
+ *
+ * Old: 28 !important across old Footer components.
+ * New: 0 !important.
+ *
+ * Themes:  Brand tokens handle colour swaps. ✅ Nothing extra.
+ * Focus:   Global focus rules cover links. ✅ Nothing extra.
+ * HL:      Underline links, consistent colour.
+ * RM:      Kill transitions, flatten hovers, collapse mask, restore opaque bg.
+ * TO:      Strip backdrop-filter, collapse mask, restore opaque bg.
+ */
+
+@layer a11y.highlight-links {
+
+  .a11y-highlight-links {
+
+    & .footer__link {
+      color: var(--brand-c-text);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--brand-c-primary);
+      padding: var(--space-sm) var(--space-xl);
+    }
+
+    & .footer__link:hover {
+      color: var(--brand-c-text-dark);
+      text-decoration-thickness: 2px;
+    }
+  }
+
+}
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    /* Kill transitions */
+    & .footer__link {
+      transition: none;
+    }
+
+    & .footer__copyright {
+      transition: none;
+    }
+
+    /* Flatten hovers */
+    & .footer__link:hover {
+      color: var(--brand-c-primary-dark);
+      background: color-mix(in srgb, var(--brand-c-bg) 50%, transparent);
+      border-color: transparent;
+    }
+
+    & .footer__copyright:hover {
+      color: var(--brand-c-text-light);
+    }
+
+    /* Kill reveal-active effects */
+    & .footer--reveal-active .footer__link:hover {
+      color: var(--brand-c-primary-dark);
+      text-shadow: none;
+      background: color-mix(in srgb, var(--brand-c-bg) 50%, transparent);
+      border-color: transparent;
+    }
+
+    & .footer--reveal-active .footer__copyright:hover {
+      color: var(--brand-c-text-light);
+      text-shadow: none;
+    }
+
+    /* Collapse mask, restore opaque footer */
+    & .footer-mask {
+      min-height: auto;
+    }
+
+    & .footer-mask__content .footer {
+      background-color: var(--brand-c-bg);
+    }
+
+    & .footer-mask__content .footer__brand-name,
+    & .footer-mask__content .footer__description,
+    & .footer-mask__content .footer__copyright {
+      text-shadow: none;
+    }
+  }
+
+}
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    & .footer {
+      text-align: center;
+    }
+
+    & .footer__brand-name {
+      font-size: var(--text-h3);
+    }
+
+    & .footer__link,
+    & .footer__copyright {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: transparent;
+    }
+
+    /* Collapse mask, restore opaque footer */
+    & .footer-mask {
+      min-height: auto;
+    }
+
+    & .footer-mask__content .footer {
+      background-color: var(--brand-c-bg);
+    }
+
+    & .footer-mask__content .footer__brand-name,
+    & .footer-mask__content .footer__description,
+    & .footer-mask__content .footer__copyright {
+      text-shadow: none;
+    }
+  }
+
+}

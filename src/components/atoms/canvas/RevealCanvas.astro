@@ -1,264 +1,147 @@
 ---
 /**
- * RevealCanvas - Standalone proximity mask reveal animation
- * Can be used as a background layer for any section
+ * RevealCanvas — Proximity mask reveal animation
  *
- * Usage:
- * <RevealCanvas backgroundImage="/path/to/image.jpg" />
+ * Decorative canvas that reveals an image via mouse/touch proximity.
+ * Purely visual, aria-hidden. Uses ResizeObserver for parent changes.
  *
- * Wrap content in a relative container and place RevealCanvas as sibling:
- * <div class="reveal-wrapper">
- *   <RevealCanvas backgroundImage={image} />
- *   <div class="reveal-content">Your content here</div>
- * </div>
+ * @param backgroundImage - Image to reveal
+ * @param canvasId        - Unique ID (required if multiple on page)
  */
-import { BRAND_CONFIG } from '../../lib/config/brand';
+import { BRAND_CONFIG } from '../../../lib/config/brand';
 
-export interface Props {
-  /** Background image to reveal */
+interface Props {
   backgroundImage?: string;
-  /** Unique ID for canvas (required if multiple on page) */
   canvasId?: string;
-  /** Minimum height of canvas area */
-  minHeight?: string;
-  /** Custom class for wrapper */
   class?: string;
 }
 
 const {
   backgroundImage = BRAND_CONFIG.footer.defaultImage,
   canvasId = 'reveal-canvas',
-  minHeight = '400px',
   class: className = ''
 } = Astro.props;
 ---
 
 <canvas
   id={canvasId}
-  class={`reveal-canvas ${className}`}
+  class:list={['reveal-canvas', className]}
   aria-hidden="true"
   data-bg-image={backgroundImage}
-  style={`min-height: ${minHeight};`}
 ></canvas>
 
-<style>
-  .reveal-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    z-index: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .reveal-canvas {
-      display: none;
-    }
-  }
-</style>
-
 <script>
-  // RevealCanvas animation - runs for each canvas with reveal-canvas class
   function initRevealCanvas(canvas: HTMLCanvasElement) {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
+    // Skip if reduced motion (system or a11y panel)
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (document.documentElement.classList.contains('a11y-reduce-motion')) return;
 
     const backgroundImage = canvas.dataset.bgImage || '';
+    const context = canvas.getContext('2d');
+    if (!context) return;
 
-    // Proximity mask parameters
-    const parameters = {
-      size: 30,
-      radius: 0.1,
-      proximity: 125,
-      growth: 60,
-      ease: 0.075,
-    };
-
-    class Point {
-      x: number;
-      y: number;
-      constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
-      }
-    }
+    const params = { size: 30, radius: 0.1, proximity: 125, growth: 60, ease: 0.075 };
 
     class Circle {
-      _radius: number;
-      radius: number;
-      growthValue: number;
-      position: Point;
-
-      constructor(radius: number, x: number, y: number) {
-        this._radius = radius;
-        this.radius = radius;
-        this.growthValue = 0;
-        this.position = new Point(x, y);
+      _r: number; r: number; g: number; x: number; y: number;
+      constructor(r: number, x: number, y: number) {
+        this._r = r; this.r = r; this.g = 0; this.x = x; this.y = y;
       }
-
-      draw(context: CanvasRenderingContext2D, ease: number) {
-        this.radius += ((this._radius + this.growthValue) - (this.radius)) * ease;
-        context.moveTo(this.position.x, this.position.y);
-        context.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+      draw(ctx: CanvasRenderingContext2D, ease: number) {
+        this.r += ((this._r + this.g) - this.r) * ease;
+        ctx.moveTo(this.x, this.y);
+        ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
       }
-
-      addRadius(value: number) {
-        this.growthValue = value;
-      }
-
-      get x() { return this.position.x; }
-      set x(value) { this.position.x = value; }
-      get y() { return this.position.y; }
-      set y(value) { this.position.y = value; }
     }
 
-    function normalize(value: number, min: number, max: number) {
-      return (value - min) / (max - min);
-    }
-
-    function interpolate(value: number, min: number, max: number) {
-      return min + (max - min) * value;
-    }
-
-    function map(value: number, min1: number, max1: number, min2: number, max2: number) {
-      return interpolate(normalize(value, min1, max1), min2, max2);
+    function map(v: number, a: number, b: number, c: number, d: number) {
+      return c + (d - c) * ((v - a) / (b - a));
     }
 
     let imageLoaded = false;
     const image = new Image();
     let circles: Circle[] = [];
-    const context = canvas.getContext('2d');
-    if (!context) return;
 
-    function resizeCanvas() {
-      const parent = canvas.parentElement;
-      if (!parent) return;
-      canvas.width = parent.clientWidth;
-      canvas.height = parent.clientHeight;
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
     }
 
     function build() {
       circles = [];
-      const { size, radius } = parameters;
-      const parent = canvas.parentElement;
-      if (!parent) return;
-
-      const columns = Math.ceil(parent.clientWidth / size) + 1;
-      const rows = Math.ceil(parent.clientHeight / size) + 1;
-      const amount = Math.ceil(columns * rows);
-
-      for (let i = 0; i < amount; i++) {
-        const column = i % columns;
-        const row = ~~(i / columns);
-        circles.push(new Circle(radius, size * column, size * row));
+      const cols = Math.ceil(canvas.width / params.size) + 1;
+      const rows = Math.ceil(canvas.height / params.size) + 1;
+      for (let i = 0; i < cols * rows; i++) {
+        circles.push(new Circle(params.radius, params.size * (i % cols), params.size * ~~(i / cols)));
       }
     }
 
-    function proximityHandler(x: number, y: number) {
-      const { proximity, growth } = parameters;
-      for (let c of circles) {
-        let distance = Math.sqrt(Math.pow(c.x - x, 2) + Math.pow(c.y - y, 2));
-        let d = map(distance, c._radius, c._radius + proximity, growth, 0);
-        if (d < 0) d = 0;
-        c.addRadius(d);
+    function proximity(x: number, y: number) {
+      for (const c of circles) {
+        const dist = Math.sqrt((c.x - x) ** 2 + (c.y - y) ** 2);
+        let d = map(dist, c._r, c._r + params.proximity, params.growth, 0);
+        c.g = d < 0 ? 0 : d;
       }
     }
 
-    function mouseMoveHandler(event: MouseEvent) {
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      proximityHandler(x, y);
-    }
+    canvas.parentElement?.addEventListener('mousemove', (e) => {
+      const r = canvas.getBoundingClientRect();
+      proximity(e.clientX - r.left, e.clientY - r.top);
+    });
 
-    function touchHandler(event: TouchEvent) {
-      if (event.touches.length === 0) return;
-      const rect = canvas.getBoundingClientRect();
-      const touch = event.touches[0];
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      proximityHandler(x, y);
-    }
+    canvas.parentElement?.addEventListener('touchmove', (e) => {
+      if (!e.touches.length) return;
+      const r = canvas.getBoundingClientRect();
+      proximity(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top);
+    }, { passive: true });
 
     function drawImage() {
-      if (!context) return;
-      context.clip();
-      const { naturalHeight, naturalWidth } = image;
-      // Use "cover" behavior - scale to fill entire canvas
-      const scaleX = canvas.width / naturalWidth;
-      const scaleY = canvas.height / naturalHeight;
-      const scale = Math.max(scaleX, scaleY);
-      const w = naturalWidth * scale;
-      const h = naturalHeight * scale;
-      // Center the image
-      const x = (canvas.width - w) / 2;
-      const y = (canvas.height - h) / 2;
-      context.drawImage(image, 0, 0, naturalWidth, naturalHeight, x, y, w, h);
+      context!.clip();
+      const sx = canvas.width / image.naturalWidth;
+      const sy = canvas.height / image.naturalHeight;
+      const s = Math.max(sx, sy);
+      const w = image.naturalWidth * s;
+      const h = image.naturalHeight * s;
+      context!.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight,
+        (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
     }
 
     function animate() {
-      if (!context) return;
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.save();
-      context.beginPath();
-      context.fillStyle = "var(--color-Black)";
-
-      for (let circle of circles) {
-        circle.draw(context, parameters.ease);
-      }
-
-      if (imageLoaded) {
-        drawImage();
-      } else {
-        context.fill();
-      }
-
-      context.restore();
+      context!.clearRect(0, 0, canvas.width, canvas.height);
+      context!.save();
+      context!.beginPath();
+      for (const c of circles) c.draw(context!, params.ease);
+      if (imageLoaded) drawImage();
+      else context!.fill();
+      context!.restore();
       requestAnimationFrame(animate);
     }
 
-    function resizeHandler() {
-      resizeCanvas();
-      build();
+    function rebuild() { resize(); build(); }
+
+    // ResizeObserver for parent size changes (footer content reflow)
+    if (canvas.parentElement) {
+      new ResizeObserver(rebuild).observe(canvas.parentElement);
     }
+    window.addEventListener('resize', rebuild);
 
-    function loadImage() {
-      image.onload = function () {
-        imageLoaded = true;
-      };
-      image.src = backgroundImage;
-    }
-
-    // Get parent element for event listeners
-    const parent = canvas.parentElement;
-
-    // Event listeners
-    window.addEventListener('resize', resizeHandler);
-    if (parent) {
-      parent.addEventListener('mousemove', mouseMoveHandler);
-      // Touch events for mobile - use passive: false for better responsiveness
-      parent.addEventListener('touchstart', touchHandler, { passive: true });
-      parent.addEventListener('touchmove', touchHandler, { passive: true });
-    }
-
-    // Initialize
-    resizeHandler();
-    loadImage();
-    build();
+    image.onload = () => { imageLoaded = true; };
+    image.src = backgroundImage;
+    rebuild();
     animate();
   }
 
-  // Initialize on DOM ready
-  document.addEventListener('DOMContentLoaded', () => {
-    const canvases = document.querySelectorAll<HTMLCanvasElement>('.reveal-canvas');
-    canvases.forEach(canvas => initRevealCanvas(canvas));
-  });
+  function init() {
+    document.querySelectorAll<HTMLCanvasElement>('.reveal-canvas').forEach(initRevealCanvas);
+  }
 
-  // Support Astro page transitions
-  document.addEventListener('astro:page-load', () => {
-    const canvases = document.querySelectorAll<HTMLCanvasElement>('.reveal-canvas');
-    canvases.forEach(canvas => initRevealCanvas(canvas));
-  });
+  document.addEventListener('astro:page-load', init);
+
+  // Fallback if View Transitions not enabled
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 </script>

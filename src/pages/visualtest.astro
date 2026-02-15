@@ -1,0 +1,271 @@
+---
+/**
+ * Visual Test Page - Display unused/experimental components
+ *
+ * Access at: /visualtest
+ * Shows components that aren't currently in production but are available for use
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import StepCard from '../components/molecules/cards/StepCard.astro';
+import CompactToolCard from '../components/molecules/cards/CompactToolCard.astro';
+import Footer from '../components/organisms/nav/Footer.astro';
+
+// Import sample images for CompactToolCard
+import offering1 from '../PageImages/Services/offering-1-resources.png';
+import offering2 from '../PageImages/Services/offering-2-whitelabel.png';
+import offering3 from '../PageImages/Services/offering-3-custom.png';
+
+// Sample data for StepCard
+const stepCardData = [
+  {
+    number: '1',
+    title: 'Initial Consultation',
+    text: 'We start by understanding your needs, goals, and the people you work with.'
+  },
+  {
+    number: '2',
+    title: 'Resource Selection',
+    text: 'Together we identify the most suitable resources and materials for your context.'
+  },
+  {
+    number: '3',
+    title: 'Implementation Support',
+    text: 'We provide guidance and training to help you integrate the resources effectively.'
+  }
+];
+
+// Sample data for CompactToolCard
+const compactToolData = [
+  {
+    href: '#',
+    name: 'Mindfulness Guide',
+    category: 'Wellbeing',
+    description: 'A comprehensive guide to mindfulness practices for daily life and emotional regulation.',
+    image: offering1
+  },
+  {
+    href: '#',
+    name: 'Communication Toolkit',
+    category: 'Skills',
+    description: 'Practical tools and techniques for effective communication in professional settings.',
+    image: offering2
+  },
+  {
+    href: '#',
+    name: 'Trauma-Informed Practice',
+    category: 'Training',
+    description: 'Essential frameworks and approaches for working with trauma-informed principles.',
+    image: offering3
+  }
+];
+---
+
+<BaseLayout
+  title="Visual Test Page | Component Library"
+  description="Visual testing page for unused and experimental components"
+  hideFooter={true}
+>
+  <div class="visualtest-page">
+    <div class="container container-6xl">
+      <header class="visualtest-header">
+        <h1>Visual Component Library</h1>
+        <p class="visualtest-subtitle">Testing page for unused and experimental components</p>
+      </header>
+
+      <!-- StepCard Section -->
+      <section class="visualtest-section">
+        <div class="section-header">
+          <h2>StepCard Component</h2>
+          <p class="section-description">
+            Numbered step cards with circular badges. Originally designed for services page,
+            currently replaced by TimelineStepper component.
+          </p>
+          <p class="component-location">
+            <code>src/components/Cards/StepCard.astro</code>
+          </p>
+        </div>
+        <div class="step-card-grid">
+          {stepCardData.map(step => (
+            <StepCard
+              number={step.number}
+              title={step.title}
+              text={step.text}
+            />
+          ))}
+        </div>
+      </section>
+
+      <!-- CompactToolCard Section -->
+      <section class="visualtest-section">
+        <div class="section-header">
+          <h2>CompactToolCard Component</h2>
+          <p class="section-description">
+            Horizontal cards with small image thumbnails, category labels, and arrow indicators.
+            Designed for compact tool/resource listings.
+          </p>
+          <p class="component-location">
+            <code>src/components/Cards/CompactToolCard.astro</code>
+          </p>
+        </div>
+        <div class="compact-tool-grid">
+          {compactToolData.map(tool => (
+            <CompactToolCard
+              href={tool.href}
+              name={tool.name}
+              category={tool.category}
+              description={tool.description}
+              image={tool.image}
+            />
+          ))}
+        </div>
+      </section>
+
+      <footer class="visualtest-footer">
+        <p>
+          This page is for development and testing purposes only.
+          <br>
+          Components shown here are functional but not currently used in production.
+        </p>
+      </footer>
+    </div>
+  </div>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .visualtest-page {
+    padding: var(--space-3xl) 0;
+    background: var(--brand-c-bg);
+    min-height: 100vh;
+  }
+
+  .visualtest-header {
+    text-align: center;
+    margin-bottom: var(--space-4xl);
+    padding-bottom: var(--space-2xl);
+    border-bottom: 2px solid var(--brand-c-primary-light);
+  }
+
+  .visualtest-header h1 {
+    font-family: var(--font-heading);
+    font-size: var(--text-4xl);
+    font-weight: var(--font-bold);
+    color: var(--brand-c-text);
+    margin: 0 0 var(--space-md) 0;
+  }
+
+  .visualtest-subtitle {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--brand-c-text-light);
+    margin: 0;
+  }
+
+  .visualtest-section {
+    margin-bottom: var(--space-4xl);
+    padding: var(--space-3xl);
+    background: var(--color-White);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 2px 8px color-mix(in oklch, var(--color-Black) 5%, transparent);
+  }
+
+  .section-header {
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--brand-c-neutral-light);
+  }
+
+  .section-header h2 {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--brand-c-text);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  .section-description {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--brand-c-text-light);
+    line-height: var(--leading-relaxed);
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  .component-location {
+    font-family: var(--font-mono, 'Courier New', monospace);
+    font-size: var(--text-sm);
+    color: var(--brand-c-primary-dark);
+    margin: 0;
+  }
+
+  .component-location code {
+    background: color-mix(in oklch, var(--brand-c-primary-light) 20%, transparent);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+  }
+
+  /* StepCard Grid */
+  .step-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-xl);
+  }
+
+  /* CompactToolCard Grid */
+  .compact-tool-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .visualtest-footer {
+    text-align: center;
+    padding: var(--space-2xl) 0;
+    margin-top: var(--space-3xl);
+    border-top: 2px solid var(--brand-c-neutral-light);
+  }
+
+  .visualtest-footer p {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--brand-c-text-light);
+    line-height: var(--leading-relaxed);
+    margin: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .visualtest-page {
+      padding: var(--space-2xl) 0;
+    }
+
+    .visualtest-header h1 {
+      font-size: var(--text-3xl);
+    }
+
+    .visualtest-section {
+      padding: var(--space-xl);
+    }
+
+    .step-card-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .visualtest-header {
+      margin-bottom: var(--space-2xl);
+    }
+
+    .visualtest-section {
+      padding: var(--space-lg);
+    }
+
+    .section-header h2 {
+      font-size: var(--text-xl);
+    }
+  }
+</style>

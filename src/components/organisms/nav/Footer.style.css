@@ -1,0 +1,185 @@
+/**
+ * Footer — style.css
+ * @layer components
+ *
+ * Includes footer-mask (canvas wrapper) styles.
+ * Dark: opaque bg (standalone). Light: transparent (over canvas).
+ */
+
+@layer components {
+
+  /* ==========================================================
+     FOOTER BASE
+     ========================================================== */
+
+  .footer {
+    width: 100%;
+    padding: var(--space-xl) 0 var(--space-lg);
+    text-align: center;
+    color: var(--brand-c-text);
+  }
+
+  .footer--dark {
+    background: var(--brand-c-bg);
+  }
+
+  .footer--light {
+    background: transparent;
+  }
+
+  /* ==========================================================
+     CONTAINER
+     ========================================================== */
+
+  .footer__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+    max-width: 100%;
+    width: 100%;
+    margin: 0 auto;
+    padding-left: var(--space-xl);
+    padding-right: var(--space-xl);
+  }
+
+  /* ==========================================================
+     BRAND
+     ========================================================== */
+
+  .footer__brand-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .footer__logo {
+    width: 180px;
+    height: auto;
+  }
+
+  .footer__brand-name {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin: 0;
+    color: var(--brand-c-text);
+  }
+
+  /* ==========================================================
+     NAV
+     ========================================================== */
+
+  .footer__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .footer__link {
+    display: inline-flex;
+    align-items: center;
+    font-weight: var(--font-extrabold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    color: var(--brand-c-primary-dark);
+    background: color-mix(in srgb, var(--brand-c-bg) 50%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    padding: var(--space-xs) var(--space-lg);
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.35s ease, background 0.35s ease, border-color 0.35s ease;
+  }
+
+  .footer__link:hover {
+    color: var(--brand-c-text-dark);
+  }
+
+  .footer__nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brand-c-primary);
+    flex-shrink: 0;
+  }
+
+  /* ==========================================================
+     COPYRIGHT
+     ========================================================== */
+
+  .footer__copyright {
+    font-style: italic;
+    color: var(--brand-c-text-light);
+    margin: 0;
+    margin-top: var(--space-sm);
+    background: color-mix(in srgb, var(--brand-c-bg) 50%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    padding: var(--space-xs) var(--space-lg);
+    transition: color 0.35s ease;
+  }
+
+  .footer__copyright:hover {
+    color: var(--brand-c-text-dark);
+  }
+
+  /* ==========================================================
+     REVEAL-ACTIVE (canvas interaction)
+     ========================================================== */
+
+  .footer--reveal-active .footer__link:hover {
+    color: var(--brand-c-text);
+    border-color: color-mix(in srgb, var(--brand-c-bg-light) 40%, transparent);
+  }
+
+  .footer--reveal-active .footer__copyright:hover {
+    color: var(--brand-c-text);
+    border-color: color-mix(in srgb, var(--brand-c-bg-light) 40%, transparent);
+  }
+
+  /* ==========================================================
+     FOOTER MASK (canvas wrapper)
+     ========================================================== */
+
+  .footer-mask {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    min-height: clamp(250px, 30vw + 150px, 420px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .footer-mask__content {
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .footer-mask__content a,
+  .footer-mask__content button {
+    pointer-events: auto;
+  }
+
+  .footer-mask__content .footer {
+    background-color: transparent;
+  }
+
+  .footer-mask__content .footer__brand-name,
+  .footer-mask__content .footer__description,
+  .footer-mask__content .footer__copyright {
+    text-shadow: var(--space-xs) var(--space-xs) var(--space-md) var(--brand-c-bg);
+  }
+
+}
