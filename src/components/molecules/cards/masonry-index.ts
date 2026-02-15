@@ -7,4 +7,4 @@
  * Types exported from types.ts for external use
  */
 
-export * from './types';
+export * from './masonry-types';
