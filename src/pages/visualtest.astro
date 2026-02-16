@@ -120,6 +120,45 @@ const compactToolData = [
         </div>
       </section>
 
+      <!-- Toast Section -->
+      <section class="visualtest-section">
+        <div class="section-header">
+          <h2>Toast Component</h2>
+          <p class="section-description">
+            Toast notifications via <code>showToast()</code> from <code>src/lib/ui/toast.ts</code>.
+            Lottie animations, 5 themes, 5 animation styles. Click toast to dismiss.
+          </p>
+          <p class="component-location">
+            <code>src/lib/ui/toast.ts</code> + <code>src/styles/components/toast.css</code>
+          </p>
+        </div>
+
+        <h3 class="toast-group-title">Themes</h3>
+        <div class="toast-btn-grid">
+          <button class="toast-trigger" data-theme="arcade" data-animation="slide" data-message="Arcade theme — game on!">Arcade</button>
+          <button class="toast-trigger" data-theme="professional" data-animation="slide" data-message="Professional theme — clean and polished">Professional</button>
+          <button class="toast-trigger" data-theme="brutalist" data-animation="slide" data-message="Brutalist theme — raw and bold">Brutalist</button>
+          <button class="toast-trigger" data-theme="glass" data-animation="slide" data-message="Glass theme — frosted elegance">Glass</button>
+          <button class="toast-trigger" data-theme="neon" data-animation="slide" data-message="Neon theme — electric vibes">Neon</button>
+        </div>
+
+        <h3 class="toast-group-title">Animations</h3>
+        <div class="toast-btn-grid">
+          <button class="toast-trigger" data-theme="neon" data-animation="slide" data-message="Slide animation">Slide</button>
+          <button class="toast-trigger" data-theme="neon" data-animation="bounce" data-message="Bounce animation">Bounce</button>
+          <button class="toast-trigger" data-theme="neon" data-animation="fade" data-message="Fade animation">Fade</button>
+          <button class="toast-trigger" data-theme="neon" data-animation="flip" data-message="Flip animation">Flip</button>
+          <button class="toast-trigger" data-theme="neon" data-animation="zoom" data-message="Zoom animation">Zoom</button>
+        </div>
+
+        <h3 class="toast-group-title">Icon Types</h3>
+        <div class="toast-btn-grid">
+          <button class="toast-trigger" data-theme="professional" data-animation="slide" data-icon="alert" data-message="Preset: alert">Preset (alert)</button>
+          <button class="toast-trigger" data-theme="professional" data-animation="slide" data-icon="thumbup" data-message="Preset: thumbup">Preset (thumbup)</button>
+          <button class="toast-trigger" data-theme="professional" data-animation="slide" data-icon="/_Unused Images/9.jpg" data-message="Image icon from public">Image (JPG)</button>
+        </div>
+      </section>
+
       <footer class="visualtest-footer">
         <p>
           This page is for development and testing purposes only.
@@ -220,6 +259,45 @@ const compactToolData = [
     gap: var(--space-lg);
   }
 
+  /* Toast Buttons */
+  .toast-group-title {
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--brand-c-text-light);
+    margin: var(--space-xl) 0 var(--space-md) 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .toast-group-title:first-of-type {
+    margin-top: 0;
+  }
+
+  .toast-btn-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .toast-trigger {
+    padding: var(--space-sm) var(--space-lg);
+    border: 1px solid var(--brand-c-neutral-light);
+    border-radius: var(--radius-md, 6px);
+    background: var(--brand-c-bg);
+    color: var(--brand-c-text);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .toast-trigger:hover {
+    background: var(--brand-c-primary);
+    color: var(--brand-c-bg);
+    border-color: var(--brand-c-primary);
+  }
+
   .visualtest-footer {
     text-align: center;
     padding: var(--space-2xl) 0;
@@ -269,3 +347,20 @@ const compactToolData = [
     }
   }
 </style>
+
+<script>
+  document.querySelectorAll('.toast-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const el = btn as HTMLElement;
+      if ((window as any).showToast) {
+        const opts: Record<string, any> = {
+          message: el.dataset.message,
+          theme: el.dataset.theme,
+          animation: el.dataset.animation,
+        };
+        if (el.dataset.icon) opts.icon = el.dataset.icon;
+        (window as any).showToast(opts);
+      }
+    });
+  });
+</script>

@@ -2,14 +2,14 @@
 /**
  * PresetButton - Accessibility Preset Button Component
  *
- * A button for quick accessibility presets with icon and description.
+ * A button for quick accessibility presets with icon and title.
+ * Used in the a11y panel sidebar for preset selection.
  *
  * Usage:
  * <PresetButton
  *   preset="dyslexia"
  *   icon="text-aa-fill"
  *   title="Dyslexia"
- *   subtitle="Font + spacing"
  * />
  */
 import Icon from '../icons/Icon.astro';
@@ -18,11 +18,10 @@ interface Props {
   preset: string;
   icon: string;
   title: string;
-  subtitle: string;
   iconSize?: number;
 }
 
-const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
+const { preset, icon, title, iconSize = 40 } = Astro.props;
 ---
 
 <button
@@ -42,7 +41,7 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
     width: 100%;
     padding: var(--space-xs) var(--space-lg);
     background: var(--brand-c-bg);
-    border: 2px solid color-mix(in srgb, var(--brand-c-text-dark) 20%, transparent);
+    border: 2px solid color-mix(in oklch, var(--brand-c-text-dark) 20%, transparent);
     border-radius: var(--radius-lg);
     cursor: pointer;
     transition: var(--transition-fast);
@@ -51,7 +50,6 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
   }
 
   .a11y-preset-btn:hover {
-    background: var(--brand-c-bg);
     border-color: var(--brand-c-primary);
     box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 12%, transparent);
   }
@@ -62,7 +60,6 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
   }
 
   .a11y-preset-btn.active {
-    background: var(--brand-c-bg);
     border-color: var(--brand-c-primary);
     box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 15%, transparent);
   }
@@ -72,12 +69,6 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
     transition: var(--transition-fast);
   }
 
-  .a11y-preset-btn__text {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3xs);
-  }
-
   .a11y-preset-btn__title {
     font-weight: var(--font-bold);
     color: var(--brand-c-text-dark);
@@ -85,12 +76,7 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
     letter-spacing: 0.02em;
   }
 
-  .a11y-preset-btn__subtitle {
-    color: var(--brand-c-text-dark);
-    opacity: 0.7;
-  }
-
-  /* Tablet - stacked layout with subtitle */
+  /* Tablet - stacked layout */
   @media (min-width: 769px) and (max-width: 1400px) {
     .a11y-preset-btn {
       flex-direction: column;
@@ -103,19 +89,9 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
       width: 32px !important;
       height: 32px !important;
     }
-
-    .a11y-preset-btn__text {
-      align-items: center;
-    }
-
-    .a11y-preset-btn__title {
-    }
-
-    .a11y-preset-btn__subtitle {
-    }
   }
 
-  /* Mobile - smaller buttons, no subtitle */
+  /* Mobile - smaller buttons */
   @media (max-width: 768px) {
     .a11y-preset-btn {
       flex-direction: column;
@@ -128,20 +104,9 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
       width: 24px !important;
       height: 24px !important;
     }
-
-    .a11y-preset-btn__text {
-      align-items: center;
-    }
-
-    .a11y-preset-btn__title {
-    }
-
-    .a11y-preset-btn__subtitle {
-      display: none;
-    }
   }
 
-  /* Small mobile - tighter */
+  /* Small mobile */
   @media (max-width: 480px) {
     .a11y-preset-btn {
       padding: var(--space-xs);
@@ -164,8 +129,18 @@ const { preset, icon, title, subtitle, iconSize = 40 } = Astro.props;
       width: 18px !important;
       height: 18px !important;
     }
+  }
 
-    .a11y-preset-btn__title {
+  /* ========== REDUCED MOTION ========== */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .a11y-preset-btn,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .a11y-preset-btn__icon {
+    transition: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .a11y-preset-btn,
+    .a11y-preset-btn__icon {
+      transition: none !important;
     }
   }
 </style>

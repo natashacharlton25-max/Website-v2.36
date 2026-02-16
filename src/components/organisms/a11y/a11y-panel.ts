@@ -21,6 +21,7 @@ export interface A11ySettings {
   reduceMotion: boolean;
   enhancedFocus: boolean;
   screenReaderMode: boolean;
+  scrollbarEnhanced: boolean;
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -37,7 +38,8 @@ export const defaultSettings: A11ySettings = {
   theme: 'default',
   reduceMotion: false,
   enhancedFocus: false,
-  screenReaderMode: false
+  screenReaderMode: false,
+  scrollbarEnhanced: false
 };
 
 // ===================================
@@ -176,6 +178,7 @@ export function applySettings(settings: A11ySettings): void {
   target.classList.toggle('a11y-reduce-motion', settings.reduceMotion);
   target.classList.toggle('a11y-enhanced-focus', settings.enhancedFocus);
   target.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
+  target.classList.toggle('a11y-scrollbar-enhanced', settings.scrollbarEnhanced);
 
   // Font Family - apply to wrapper
   target.classList.remove(
@@ -236,7 +239,7 @@ export function applySettings(settings: A11ySettings): void {
   }
 
   // Theme class - apply to wrapper
-  target.classList.remove(
+  const themeClasses = [
     'a11y-theme-dark',
     'a11y-theme-cream',
     'a11y-theme-high-contrast',
@@ -244,10 +247,23 @@ export function applySettings(settings: A11ySettings): void {
     'a11y-theme-deuteranopia',
     'a11y-theme-tritanopia',
     'a11y-theme-monochrome'
-  );
+  ];
+  target.classList.remove(...themeClasses);
   if (settings.theme !== 'default') {
     target.classList.add(`a11y-theme-${settings.theme}`);
   }
+
+  // Mirror a11y classes to <html> so OverlayScrollbars CSS selectors
+  // (e.g. .a11y-theme-dark .os-scrollbar) can match. The .os-scrollbar
+  // elements are direct children of <body>, outside #a11y-content-wrapper,
+  // so they need an ancestor above <body> to carry the class.
+  const root = document.documentElement;
+  root.classList.remove(...themeClasses, 'a11y-text-only', 'a11y-reduce-motion');
+  if (settings.theme !== 'default') {
+    root.classList.add(`a11y-theme-${settings.theme}`);
+  }
+  if (settings.textOnly) root.classList.add('a11y-text-only');
+  if (settings.reduceMotion) root.classList.add('a11y-reduce-motion');
 
   // Announce changes if screen reader mode is on
   if (settings.screenReaderMode) {
