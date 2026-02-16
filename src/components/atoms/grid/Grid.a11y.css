@@ -1,0 +1,250 @@
+/**
+ * Grid — a11y.css
+ *
+ * Themes:        Brand tokens handle colour changes. ✅ Nothing extra.
+ * Focus:         Grid is non-interactive, children handle own focus. ✅ Nothing extra.
+ * HL:            Nothing — grid is structural.
+ *
+ * Reduce-motion: Kill any grid animation (future-proof).
+ * Text-only:     Collapse to single column, left-aligned.
+ *                Strip visual fluff from children: images, icons, decorative backgrounds.
+ *                Show plain text list with optional separators.
+ */
+
+
+/* ==========================================================
+   REDUCE MOTION
+   ========================================================== */
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    & .base-grid {
+      transition: none;
+    }
+
+    /* Kill hover transforms on any grid children */
+    & .base-grid > * {
+      transition: none !important;
+    }
+
+    & .base-grid > *:hover {
+      transform: none !important;
+    }
+
+    /* Gallery: disable GSAP by marking grid */
+    & [data-gallery] {
+      --gallery-animate: 0;
+    }
+
+    & [data-gallery] > * {
+      transition: none !important;
+    }
+
+    & .base-grid--gallery-product > .is-inactive {
+      opacity: 1;
+      filter: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .base-grid {
+      transition: none;
+    }
+
+    .base-grid > * {
+      transition: none;
+    }
+
+    .base-grid > *:hover {
+      transform: none;
+    }
+  }
+}
+
+
+/* ==========================================================
+   TEXT-ONLY MODE
+   ========================================================== */
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    /* ---- Grid: flex column collapse (matches reference text-only.css) ---- */
+    & .base-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: var(--space-sm) !important;
+    }
+
+    /* ---- Masonry: single column, strip padding ---- */
+    & .base-grid--masonry {
+      display: flex !important;
+      flex-direction: column !important;
+      column-count: unset !important;
+      column-gap: unset !important;
+      padding: 0;
+    }
+
+    & .base-grid--masonry > * {
+      margin-bottom: var(--space-sm);
+      break-inside: unset;
+    }
+
+    /* ---- Isotope gallery: hidden entirely in text-only ---- */
+    & .base-grid--gallery-showcase {
+      display: none !important;
+    }
+
+    /* ---- Product gallery: vertical stack, no expand/collapse ---- */
+    & .base-grid--gallery-product {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    & .base-grid--gallery-product > .is-active,
+    & .base-grid--gallery-product > .is-inactive {
+      opacity: 1;
+      filter: none;
+      height: auto;
+    }
+
+    /* Kill all spanning (no effect in flex, but prevents inline style issues) */
+    & .base-grid > [class*="grid-span"],
+    & .base-grid > [class*="grid-row-span"],
+    & .base-grid > [style*="--span"],
+    & .base-grid > [style*="--row-span"] {
+      flex: none;
+      width: 100%;
+    }
+
+    /* ---- Separator between stacked items ---- */
+    & .base-grid--separator > * + * {
+      border-top: 1px solid currentColor;
+      padding-top: 0.75rem;
+    }
+
+    /* ---- Strip card chrome ---- */
+    & [data-card],
+    & .base-grid > .card,
+    & .base-grid > a.card {
+      background: none;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      padding: 0;
+      text-align: left;
+      transform: none;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    /* Kill hover effects on stripped cards */
+    & [data-card]:hover,
+    & .base-grid > .card:hover,
+    & .base-grid > a.card:hover {
+      transform: none;
+      box-shadow: none;
+      background: none;
+    }
+
+    /* ---- Hide media by data attribute ---- */
+    & [data-media="hero"],
+    & [data-media="card"],
+    & [data-media="gallery"],
+    & [data-media="decorative"],
+    & [data-media="background"] {
+      display: none !important;
+    }
+
+    /* Hide decorative icons (no aria-label = decorative) */
+    & [data-media="icon"]:not([aria-label]) {
+      display: none !important;
+    }
+
+    /* Hide card image containers */
+    & .base-grid [class*="__image"],
+    & .base-grid [class*="__icon-placeholder"] {
+      display: none !important;
+    }
+
+    /* ---- Text: left-aligned, plain ---- */
+    & .base-grid * {
+      text-align: left;
+      text-shadow: none;
+      -webkit-text-stroke: unset;
+    }
+
+    /* ---- Gallery text-only: product images become simple vertical list ---- */
+    & [data-gallery] > * {
+      cursor: default;
+      border-radius: 0;
+      overflow: visible;
+    }
+
+    & [data-gallery] img {
+      width: 100%;
+      height: auto;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 0;
+    }
+
+    & [data-gallery] .gallery-badge {
+      display: block !important;
+      position: static;
+      background: none;
+      color: var(--brand-c-text);
+      padding: 0;
+    }
+
+    /* Override centered card content */
+    & .base-grid [class*="__content"] {
+      padding: 0;
+      background: none;
+      border-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      text-align: left;
+      align-items: flex-start;
+      min-height: 0;
+      height: auto;
+    }
+
+    /* Ensure text colours are readable */
+    & .base-grid [class*="__title"] {
+      color: var(--brand-c-text-dark);
+    }
+
+    & .base-grid [class*="__description"] {
+      color: var(--brand-c-text);
+      display: block;
+    }
+
+    /* Badges become inline text */
+    & .base-grid [class*="__badge"] {
+      background: none;
+      padding: 0;
+      color: var(--brand-c-text-light);
+      font-weight: var(--font-semibold);
+    }
+
+    /* Buttons in cards: underlined text links */
+    & .base-grid .btn,
+    & .base-grid [class*="__button"] {
+      background: none;
+      border: none;
+      box-shadow: none;
+      backdrop-filter: none;
+      padding: 0;
+      color: var(--brand-c-primary);
+      text-decoration: underline;
+      font-weight: var(--font-semibold);
+      min-height: 0;
+    }
+  }
+}

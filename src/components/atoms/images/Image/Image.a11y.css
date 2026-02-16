@@ -1,0 +1,57 @@
+/**
+ * Image — a11y.css
+ *
+ * HL:  Nothing — images don't receive focus.
+ * RM:  Kill hover transforms, tilt, transitions.
+ * TO:  Hide ALL images, collapse containers, strip all effects.
+ */
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    /* Kill all image transitions */
+    & .image {
+      transition: none;
+    }
+
+    /* Kill hover effects — no transform, no shadow change */
+    & .image--hover:hover {
+      transform: none;
+      box-shadow: inherit;
+      filter:
+        brightness(var(--media-brightness, 1))
+        saturate(var(--media-saturation, 1))
+        contrast(var(--media-contrast, 1));
+    }
+
+    /* Kill tilt — perspective transforms are motion */
+    & .image--tilt-sm,
+    & .image--tilt-md,
+    & .image--tilt-lg {
+      transform: none;
+    }
+  }
+
+}
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    /* Hide ALL images — decorative and informational */
+    & .image {
+      display: none;
+    }
+
+    /* Collapse common image wrapper patterns */
+    & [class*="image-wrapper"],
+    & [class*="img-wrapper"],
+    & [class*="image-container"],
+    & [class*="img-container"],
+    & figure:has(.image) {
+      display: none;
+    }
+  }
+
+}

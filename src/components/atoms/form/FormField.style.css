@@ -1,0 +1,183 @@
+/**
+ * FormField — style.css
+ * @layer components
+ *
+ * Covers: text, email, textarea, checkbox, search, select, number, tel, url, password
+ * Label, description, error state, disabled state.
+ */
+
+@layer components {
+
+  /* ==========================================================
+     BASE
+     ========================================================== */
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs, 0.25rem);
+  }
+
+  /* ==========================================================
+     LABEL
+     ========================================================== */
+  .form-field__label {
+    font-weight: var(--font-semibold, 600);
+    color: var(--brand-c-text, #2c2c2c);
+  }
+
+  .form-field__required {
+    color: var(--color-Error, #e53e3e);
+    margin-left: 2px;
+  }
+
+  .form-field__desc {
+    color: var(--brand-c-text-light, #6b6b6b);
+    font-size: var(--text-sm, 0.875rem);
+  }
+
+  /* ==========================================================
+     INPUT / TEXTAREA / SELECT — SHARED
+     ========================================================== */
+  .form-field__input {
+    padding: var(--space-sm, 0.5rem) var(--space-md, 1rem);
+    border: var(--border-width-2, 2px) solid var(--brand-c-neutral-light, #e0ddd9);
+    border-radius: var(--radius-md, 8px);
+    font-family: var(--font-body, system-ui, sans-serif);
+    font-size: var(--text-base, 1rem);
+    background: var(--brand-c-bg, #fff);
+    color: var(--brand-c-text, #2c2c2c);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+  }
+
+  .form-field__input::placeholder {
+    color: var(--brand-c-text-light, #6b6b6b);
+    opacity: 0.6;
+  }
+
+  .form-field__input:focus {
+    outline: none;
+    border-color: var(--brand-c-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand-c-primary) 15%, transparent);
+  }
+
+  .form-field__input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: color-mix(in oklch, var(--brand-c-bg) 90%, var(--brand-c-neutral-light));
+  }
+
+  /* ---- Textarea ---- */
+  .form-field__input--textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  /* ---- Select ---- */
+  .form-field__input--select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b6b6b' viewBox='0 0 256 256'%3E%3Cpath d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-sm, 0.5rem) center;
+    padding-right: var(--space-2xl, 2.5rem);
+  }
+
+  /* ==========================================================
+     CHECKBOX
+     ========================================================== */
+  .form-field--checkbox {
+    flex-direction: row;
+  }
+
+  .form-field__checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm, 0.5rem);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .form-field__checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .form-field__checkmark {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border: var(--border-width-2, 2px) solid var(--brand-c-neutral-light, #e0ddd9);
+    border-radius: var(--radius-sm, 4px);
+    background: var(--brand-c-bg, #fff);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    position: relative;
+  }
+
+  /* Checkmark tick */
+  .form-field__checkmark::after {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid var(--color-White, #fff);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .form-field__checkbox:checked + .form-field__checkmark {
+    background: var(--brand-c-primary);
+    border-color: var(--brand-c-primary);
+  }
+
+  .form-field__checkbox:checked + .form-field__checkmark::after {
+    display: block;
+  }
+
+  .form-field__checkbox:focus-visible + .form-field__checkmark {
+    outline: 2px solid var(--brand-c-primary);
+    outline-offset: 2px;
+  }
+
+  .form-field__checkbox:disabled + .form-field__checkmark {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .form-field__label-text {
+    color: var(--brand-c-text, #2c2c2c);
+  }
+
+  /* ==========================================================
+     ERROR STATE
+     ========================================================== */
+  .form-field--error .form-field__input {
+    border-color: var(--color-Error, #e53e3e);
+  }
+
+  .form-field--error .form-field__input:focus {
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-Error, #e53e3e) 15%, transparent);
+  }
+
+  .form-field--error .form-field__checkmark {
+    border-color: var(--color-Error, #e53e3e);
+  }
+
+  .form-field__error {
+    color: var(--color-Error, #e53e3e);
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: var(--font-medium, 500);
+  }
+
+  /* ==========================================================
+     DISABLED STATE
+     ========================================================== */
+  .form-field--disabled {
+    pointer-events: none;
+  }
+
+}

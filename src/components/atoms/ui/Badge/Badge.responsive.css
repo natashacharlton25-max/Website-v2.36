@@ -2,21 +2,37 @@
  * Badge — responsive.css
  * @layer components
  *
- * Tightens padding on small screens.
+ * Scales font-size and stacks icon badges on small screens.
+ * Padding stays generous — badges should never look squished.
  */
 
 @layer components {
 
   @media (max-width: 480px) {
     .badge {
-      padding: calc(var(--space-xs) * 0.75) var(--space-xs);
+      font-size: var(--text-fine, 0.75rem);   /* 12px — down from 14px */
     }
   }
 
   @media (max-width: 350px) {
     .badge {
-      padding: calc(var(--space-xs) * 0.5) var(--space-xs);
-      gap: calc(var(--space-xs) * 0.5);
+      gap: calc(var(--space-xs) * 0.75);
+      white-space: normal;
+      overflow-wrap: break-word;
+    }
+
+    /* Icon badges stack vertically */
+    .badge--has-icon {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+
+  /* ── Micro (150px) ────────────────────────────────────────── */
+
+  @media (max-width: 150px) {
+    .badge {
+      font-size: var(--text-veryfine);
     }
   }
 

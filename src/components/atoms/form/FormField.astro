@@ -1,0 +1,180 @@
+---
+/**
+ * FormField - Reusable Form Input Atom
+ *
+ * Covers: text, email, textarea, checkbox, search, select, number, tel, url
+ * Includes label, optional description, error state, and focus ring.
+ *
+ * Replaces scattered .form__group / .form-group / .form-input patterns.
+ *
+ * Usage:
+ * <FormField id="name" label="Your name" type="text" required />
+ * <FormField id="email" label="Email" type="email" error="Invalid email" />
+ * <FormField id="msg" label="Message" type="textarea" rows={4} />
+ * <FormField id="terms" label="I agree to the terms" type="checkbox" />
+ * <FormField id="q" type="search" placeholder="Search..." hideLabel label="Search" />
+ * <FormField id="country" label="Country" type="select" options={[{value:'uk',label:'UK'}]} />
+ */
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  id: string;
+  name?: string;
+  label: string;
+  type?: 'text' | 'email' | 'textarea' | 'checkbox' | 'search' | 'select' | 'number' | 'tel' | 'url' | 'password';
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+  description?: string;
+  value?: string;
+  checked?: boolean;
+  rows?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  options?: SelectOption[];
+  hideLabel?: boolean;
+  class?: string;
+}
+
+const {
+  id,
+  name,
+  label,
+  type = 'text',
+  placeholder,
+  required = false,
+  disabled = false,
+  error,
+  description,
+  value,
+  checked = false,
+  rows = 3,
+  min,
+  max,
+  step,
+  options = [],
+  hideLabel = false,
+  class: className,
+} = Astro.props;
+
+const isCheckbox = type === 'checkbox';
+const isTextarea = type === 'textarea';
+const isSelect = type === 'select';
+const fieldName = name || id;
+
+const describedBy = [
+  error && `${id}-error`,
+  description && `${id}-desc`,
+].filter(Boolean).join(' ') || undefined;
+
+const groupClasses = [
+  'form-field',
+  isCheckbox && 'form-field--checkbox',
+  error && 'form-field--error',
+  disabled && 'form-field--disabled',
+  className,
+].filter(Boolean).join(' ');
+---
+
+<div class={groupClasses}>
+
+  {isCheckbox ? (
+    <!-- Checkbox: input + label inline -->
+    <label class="form-field__checkbox-wrap" for={id}>
+      <input
+        type="checkbox"
+        id={id}
+        name={fieldName}
+        checked={checked}
+        required={required}
+        disabled={disabled}
+        class="form-field__checkbox"
+        aria-describedby={describedBy}
+        aria-invalid={error ? 'true' : undefined}
+      />
+      <span class="form-field__checkmark" aria-hidden="true"></span>
+      <span class="form-field__label-text">{label}</span>
+    </label>
+  ) : (
+    <Fragment>
+      <!-- Label -->
+      <label
+        for={id}
+        class:list={['form-field__label', hideLabel && 'sr-only']}
+      >
+        {label}
+        {required && <span class="form-field__required" aria-hidden="true">*</span>}
+      </label>
+
+      <!-- Description -->
+      {description && (
+        <span class="form-field__desc" id={`${id}-desc`}>{description}</span>
+      )}
+
+      <!-- Textarea -->
+      {isTextarea && (
+        <textarea
+          id={id}
+          name={fieldName}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          rows={rows}
+          class="form-field__input form-field__input--textarea"
+          aria-describedby={describedBy}
+          aria-invalid={error ? 'true' : undefined}
+        >{value}</textarea>
+      )}
+
+      <!-- Select -->
+      {isSelect && (
+        <select
+          id={id}
+          name={fieldName}
+          required={required}
+          disabled={disabled}
+          class="form-field__input form-field__input--select"
+          aria-describedby={describedBy}
+          aria-invalid={error ? 'true' : undefined}
+        >
+          {placeholder && <option value="" disabled selected>{placeholder}</option>}
+          {options.map((opt) => (
+            <option value={opt.value} selected={value === opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      )}
+
+      <!-- Standard input -->
+      {!isTextarea && !isSelect && (
+        <input
+          type={type}
+          id={id}
+          name={fieldName}
+          value={value}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          min={min}
+          max={max}
+          step={step}
+          class="form-field__input"
+          aria-describedby={describedBy}
+          aria-invalid={error ? 'true' : undefined}
+        />
+      )}
+    </Fragment>
+  )}
+
+  <!-- Error message -->
+  {error && (
+    <span class="form-field__error" id={`${id}-error`} role="alert">{error}</span>
+  )}
+</div>
+
+<!-- Styles: FormField.style.css | FormField.responsive.css | FormField.a11y.css -->

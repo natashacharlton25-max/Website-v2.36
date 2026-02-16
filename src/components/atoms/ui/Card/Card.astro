@@ -1,0 +1,112 @@
+---
+/**
+ * Card — Atomic container shell
+ * @layer components
+ *
+ * Pure container with visual chrome (background, border, radius, shadow, hover).
+ * Children handle their own internal layout.
+ *
+ * Molecule cards render <Card> as their outer wrapper instead of raw `.card` class.
+ * Grid handles external layout. Card handles the box itself.
+ *
+ * @param as          - HTML element: div | article | section | aside | li (default: div)
+ * @param variant     - Visual style: default | transparent | outline | glass
+ * @param hover       - Hover effect: true (lift), 'border' (border-color change), 'glow' (box-shadow glow)
+ * @param shadow      - Box shadow: none | sm | md | lg | xl
+ * @param dropShadow  - Filter drop-shadow (better for non-rect shapes): none | sm | md | lg | xl
+ * @param radius      - Border radius: none | sm | md | lg | xl | full
+ * @param padding     - Internal padding: none | xs | sm | md | lg | xl | 2xl
+ * @param border      - Border width: none | thin | medium | thick
+ * @param layout      - Context: 'masonry' (break-inside:avoid, inline-block, width:100%)
+ * @param flush       - Remove margin-bottom
+ * @param href        - If set, renders as <a> with .card--link styles
+ * @param separator   - Visible border between .card__header / .card__body / .card__footer
+ *
+ * Inner structure (optional classes on children):
+ *   .card__header     — top section
+ *   .card__body       — main content area
+ *   .card__footer     — bottom section
+ *   .card__image      — image container (aspect-ratio, object-fit)
+ *   .card__overlay    — absolute overlay on image (gradient scrim)
+ *   .card__content    — text content wrapper (padding, flex column)
+ *   .card__icon-wrapper — centered icon container
+ *
+ * Typography primitives (classes for children):
+ *   .card__heading  .card__title  .card__label  .card__text
+ *   .card__value    .card__quote  .card__author .card__badge
+ *   .card__button   .card__icon   .card__arrow
+ *
+ * Styles: Card.style.css | Card.responsive.css | Card.a11y.css
+ */
+
+export interface Props {
+  as?: 'div' | 'article' | 'section' | 'aside' | 'li';
+  variant?: 'default' | 'transparent' | 'outline' | 'glass';
+  hover?: boolean | 'border' | 'glow';
+  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  dropShadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  border?: 'none' | 'thin' | 'medium' | 'thick';
+  layout?: 'masonry';
+  flush?: boolean;
+  href?: string;
+  separator?: boolean;
+  class?: string;
+  [key: string]: any;
+}
+
+const {
+  as = 'div',
+  variant = 'default',
+  hover,
+  shadow,
+  dropShadow,
+  radius,
+  padding,
+  border,
+  layout,
+  flush,
+  href,
+  separator,
+  class: className,
+  ...rest
+} = Astro.props;
+
+// Determine element: <a> if href provided, otherwise `as` prop
+const Tag = href ? 'a' : as;
+
+// Build class list
+const classes = [
+  'card',
+  `card--${variant}`,
+  hover === true && 'card--hover-lift',
+  hover === 'border' && 'card--hover-border',
+  hover === 'glow' && 'card--hover-glow',
+  shadow && shadow !== 'none' && `card--shadow-${shadow}`,
+  dropShadow && dropShadow !== 'none' && `card--drop-${dropShadow}`,
+  radius && `card--radius-${radius}`,
+  padding && `card--pad-${padding}`,
+  border && border !== 'none' && `card--border-${border}`,
+  layout === 'masonry' && 'card--masonry',
+  flush && 'card--flush',
+  href && 'card--link',
+  separator && 'card--separator',
+  className,
+].filter(Boolean);
+
+// Link attributes
+const linkAttrs = href ? {
+  href,
+  ...(href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {}),
+} : {};
+---
+
+<Tag
+  class:list={classes}
+  data-card
+  {...linkAttrs}
+  {...rest}
+>
+  <slot />
+</Tag>

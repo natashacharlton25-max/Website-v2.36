@@ -1,0 +1,57 @@
+---
+/**
+ * ContactInfo — Contact page sidebar molecule
+ *
+ * Shows email, response time, and safeguarding note.
+ * Uses Card, Icon, Heading, Text, Link atoms.
+ *
+ * Usage:
+ * <ContactInfo />
+ */
+import Card from '../../atoms/ui/Card/Card.astro';
+import Icon from '../../atoms/icons/Icon.astro';
+import Heading from '../../atoms/ui/Heading/Heading.astro';
+import Text from '../../atoms/ui/Text/Text.astro';
+import Link from '../../atoms/ui/Link/Link.astro';
+import { BRAND_CONFIG } from '../../../lib/config/brand';
+---
+
+<aside class="contact-info">
+
+  <Card variant="default" padding="lg" radius="lg">
+    <Heading level={3} flush>Other ways to reach us</Heading>
+
+    <div class="contact-info__item">
+      <Icon name="contact-popup/envelope-fill" size={20} class="contact-info__icon" />
+      <div>
+        <Text as="span" size="small" color="text-light">Email</Text>
+        <Link href={`mailto:${BRAND_CONFIG.contact.email}`} variant="underline" color="primary">
+          {BRAND_CONFIG.contact.email}
+        </Link>
+      </div>
+    </div>
+
+    <div class="contact-info__item">
+      <Icon name="contact-popup/timer-fill" size={20} class="contact-info__icon" />
+      <div>
+        <Text as="span" size="small" color="text-light">Response time</Text>
+        <Text as="span" weight="medium">{BRAND_CONFIG.contact.responseTime}</Text>
+      </div>
+    </div>
+  </Card>
+
+  <Card variant="outline" padding="lg" radius="lg">
+    <Heading level={3} flush>A note on safety</Heading>
+    <Text as="p" color="text-light" flush>
+      If you or someone you know is in immediate danger, please contact
+      emergency services (999) or the
+      <Link href="https://www.samaritans.org" external variant="underline" color="primary">Samaritans</Link> (116 123).
+    </Text>
+    <Text as="p" color="text-light" flush>
+      This form is not monitored 24/7 and is not a crisis service.
+    </Text>
+  </Card>
+
+</aside>
+
+<!-- Styles: ContactInfo.style.css | ContactInfo.responsive.css | ContactInfo.a11y.css -->

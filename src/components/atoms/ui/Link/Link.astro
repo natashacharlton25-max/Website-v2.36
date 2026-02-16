@@ -1,0 +1,91 @@
+---
+/**
+ * Link — Atomic link primitive
+ *
+ * Every link should go through this component (except buttons — use <Button href>).
+ * Uses .text as base class for font-family inheritance.
+ * Link.style.css replaces a:not(.btn) rules from global.css.
+ *
+ * Styles: Link.style.css | Link.responsive.css | Link.a11y.css
+ *
+ * Usage:
+ *   <Link href="/about">About</Link>
+ *   <Link href="/about" variant="underline">About</Link>
+ *   <Link href="/legal" variant="glass">Legal</Link>
+ *   <Link href="/legal" variant="glass" uppercase>LEGAL</Link>
+ *   <Link href="https://example.com" external>External</Link>
+ *   <Link href="/about" variant="ghost" color="text-light">Quiet link</Link>
+ *
+ * For buttons that look like links, use <Button variant="ghost">.
+ */
+
+interface Props {
+  href: string;
+  variant?: 'default' | 'underline' | 'glass' | 'ghost';
+  color?: 'primary' | 'primary-dark' | 'secondary' | 'text' | 'text-light' | 'inherit';
+  weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
+  uppercase?: boolean;
+  flush?: boolean;
+  external?: boolean;
+  target?: string;
+  download?: string | boolean;
+  rel?: string;
+  id?: string;
+  role?: string;
+  ariaLabel?: string;
+  class?: string;
+  [key: string]: any;
+}
+
+const {
+  href,
+  variant = 'default',
+  color,
+  weight,
+  uppercase = false,
+  flush = false,
+  external = false,
+  target: targetProp,
+  download,
+  rel: relProp,
+  id,
+  role,
+  ariaLabel,
+  class: className,
+  ...rest
+} = Astro.props;
+
+// External links get safety attributes
+const target = external ? '_blank' : targetProp;
+const rel = external ? (relProp ?? 'noopener noreferrer') : relProp;
+
+// Extract data-* attributes
+const dataAttrs = Object.fromEntries(
+  Object.entries(rest).filter(([key]) => key.startsWith('data-'))
+);
+
+const classes = [
+  'text',
+  'link',
+  `link--${variant}`,
+  color ? `link--color-${color}` : '',
+  weight ? `link--weight-${weight}` : '',
+  uppercase ? 'link--uppercase' : '',
+  flush ? 'text--flush' : '',
+  className,
+].filter(Boolean);
+---
+
+<a
+  href={href}
+  class:list={classes}
+  target={target}
+  download={download}
+  rel={rel}
+  id={id}
+  role={role}
+  aria-label={ariaLabel}
+  {...dataAttrs}
+>
+  <slot />
+</a>

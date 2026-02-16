@@ -1,0 +1,242 @@
+---
+/**
+ * ContactForm — Contact form organism
+ *
+ * Topic selection, form fields, submit, success state.
+ * Uses FormField, Button, Icon, Heading, Text atoms.
+ * Submits to /api/contact endpoint.
+ *
+ * Usage:
+ * <ContactForm />
+ */
+import FormField from '../../atoms/form/FormField.astro';
+import Button from '../../atoms/ui/Button/Button.astro';
+import Icon from '../../atoms/icons/Icon.astro';
+import Heading from '../../atoms/ui/Heading/Heading.astro';
+import Text from '../../atoms/ui/Text/Text.astro';
+import { BRAND_CONFIG } from '../../../lib/config/brand';
+
+const topics = [
+  'General enquiry',
+  'Service enquiry',
+  'Resources',
+  'Feedback',
+  'Other',
+];
+---
+
+<div class="contact-form-wrap">
+
+  <!-- Topic selection -->
+  <fieldset class="contact-form__topics" id="contactTopics">
+    <legend class="contact-form__legend">I'd like to chat about...</legend>
+    <div class="contact-form__topic-list">
+      {topics.map((topic) => (
+        <Button
+          variant="outline"
+          shape="pill"
+          size="sm"
+          className="contact-form__topic-btn"
+          data-topic={topic}
+        >
+          {topic}
+        </Button>
+      ))}
+    </div>
+  </fieldset>
+
+  <!-- Form -->
+  <form class="contact-form" id="contactForm" novalidate>
+    <input type="hidden" name="topic" id="contactTopic" value="" />
+    <input type="hidden" name="page" value="/contact" />
+
+    <FormField
+      id="contactName"
+      label="Your name"
+      type="text"
+      required
+      placeholder="First name or however you'd like to be addressed"
+    />
+
+    <FormField
+      id="contactEmail"
+      label="Your email"
+      type="email"
+      required
+      placeholder="you@example.com"
+    />
+
+    <FormField
+      id="contactMessage"
+      label="Your message"
+      type="textarea"
+      required
+      rows={5}
+      placeholder="Take your time — there's no wrong thing to say here"
+    />
+
+    <div class="contact-form__actions">
+      <Button type="submit" variant="primary" id="submitContact" disabled>
+        Send Message
+      </Button>
+    </div>
+  </form>
+
+  <!-- Success (hidden by default) -->
+  <div class="contact-form__success" id="contactSuccess" hidden>
+    <div class="contact-form__success-icon">
+      <Icon name="contact-popup/check-circle-fill" size={48} />
+    </div>
+    <Heading level={2}>Message sent</Heading>
+    <Text as="p" color="text-light">
+      Thanks for reaching out. We'll get back to you within {BRAND_CONFIG.contact.responseTime}.
+    </Text>
+    <Button variant="outline" id="contactReset">
+      Send another message
+    </Button>
+  </div>
+
+</div>
+
+<!-- Styles: ContactForm.style.css | ContactForm.responsive.css | ContactForm.a11y.css -->
+
+<script>
+  class ContactFormController {
+    form: HTMLFormElement | null;
+    submitBtn: HTMLButtonElement | null;
+    topicBtns: NodeListOf<Element>;
+    topicInput: HTMLInputElement | null;
+    topicsFieldset: HTMLElement | null;
+    successEl: HTMLElement | null;
+    resetBtn: HTMLElement | null;
+    selectedTopic: string = '';
+
+    constructor() {
+      this.form = document.getElementById('contactForm') as HTMLFormElement;
+      this.submitBtn = document.getElementById('submitContact') as HTMLButtonElement;
+      this.topicBtns = document.querySelectorAll('.contact-form__topic-btn');
+      this.topicInput = document.getElementById('contactTopic') as HTMLInputElement;
+      this.topicsFieldset = document.getElementById('contactTopics');
+      this.successEl = document.getElementById('contactSuccess');
+      this.resetBtn = document.getElementById('contactReset');
+      this.init();
+    }
+
+    init() {
+      this.topicBtns.forEach((btn) => {
+        btn.addEventListener('click', () => this.selectTopic(btn as HTMLButtonElement));
+      });
+
+      this.form?.querySelectorAll('input:not([type=hidden]), textarea').forEach((input) => {
+        input.addEventListener('input', () => this.validate());
+      });
+
+      this.form?.addEventListener('submit', (e) => this.handleSubmit(e));
+      this.resetBtn?.addEventListener('click', () => this.reset());
+    }
+
+    selectTopic(btn: HTMLButtonElement) {
+      this.topicBtns.forEach((b) => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      this.selectedTopic = btn.dataset.topic || '';
+      if (this.topicInput) this.topicInput.value = this.selectedTopic;
+      this.validate();
+    }
+
+    validate() {
+      const name = (document.getElementById('contactName') as HTMLInputElement)?.value.trim();
+      const email = (document.getElementById('contactEmail') as HTMLInputElement)?.value.trim();
+      const message = (document.getElementById('contactMessage') as HTMLTextAreaElement)?.value.trim();
+      const valid = !!(this.selectedTopic && name && email && message);
+      if (this.submitBtn) this.submitBtn.disabled = !valid;
+    }
+
+    async handleSubmit(e: Event) {
+      e.preventDefault();
+
+      const name = (document.getElementById('contactName') as HTMLInputElement)?.value.trim();
+      const email = (document.getElementById('contactEmail') as HTMLInputElement)?.value.trim();
+      const message = (document.getElementById('contactMessage') as HTMLTextAreaElement)?.value.trim();
+
+      if (!this.selectedTopic || !name || !email || !message) return;
+
+      if (this.submitBtn) {
+        this.submitBtn.disabled = true;
+        this.submitBtn.textContent = 'Sending...';
+      }
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            subject: this.selectedTopic,
+            message,
+            page: '/contact',
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          this.showSuccess();
+        } else {
+          throw new Error(data.error || 'Failed to send');
+        }
+      } catch (err) {
+        console.error('Contact form error:', err);
+
+        if ((window as any).showToast) {
+          (window as any).showToast({
+            message: 'Failed to send message. Please try again or email us directly.',
+            theme: 'professional',
+            icon: 'alert',
+          });
+        } else {
+          alert('Failed to send message. Please try again.');
+        }
+
+        if (this.submitBtn) {
+          this.submitBtn.disabled = false;
+          this.submitBtn.textContent = 'Send Message';
+        }
+      }
+    }
+
+    showSuccess() {
+      if (this.form) this.form.hidden = true;
+      if (this.topicsFieldset) this.topicsFieldset.hidden = true;
+      if (this.successEl) this.successEl.hidden = false;
+      this.successEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    reset() {
+      if (this.form) {
+        this.form.hidden = false;
+        this.form.reset();
+      }
+      if (this.topicsFieldset) this.topicsFieldset.hidden = false;
+      if (this.successEl) this.successEl.hidden = true;
+
+      this.selectedTopic = '';
+      if (this.topicInput) this.topicInput.value = '';
+      this.topicBtns.forEach((b) => b.classList.remove('selected'));
+      if (this.submitBtn) {
+        this.submitBtn.disabled = true;
+        this.submitBtn.textContent = 'Send Message';
+      }
+    }
+  }
+
+  // Init
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => new ContactFormController());
+  } else {
+    new ContactFormController();
+  }
+
+  // Astro page transitions
+  document.addEventListener('astro:page-load', () => new ContactFormController());
+</script>

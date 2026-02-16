@@ -1,0 +1,439 @@
+/**
+ * Card — style.css
+ * @layer components
+ *
+ * Container chrome + inner structure primitives.
+ * Molecule cards render <Card> as their outer wrapper.
+ *
+ * Sections:
+ *   1. Base container
+ *   2. Variants (default, transparent, outline, glass)
+ *   3. Hover modes (lift, border, glow)
+ *   4. Shadow + drop-shadow scales
+ *   5. Radius scale
+ *   6. Padding scale
+ *   7. Border width scale
+ *   8. Masonry layout context
+ *   9. Link mode + flush + separator
+ *  10. Inner structure (header, body, footer, image, overlay, content)
+ *  11. Typography primitives
+ *  12. Element primitives (icon, badge, button, arrow)
+ *  13. Image size helpers
+ *  14. Wide helper (masonry column-span)
+ */
+
+@layer components {
+
+  /* ==========================================================
+     1. BASE CONTAINER
+     ========================================================== */
+
+  .card {
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--transition-base),
+                box-shadow var(--transition-base),
+                border-color var(--transition-fast);
+  }
+
+
+  /* ==========================================================
+     2. VARIANTS
+     ========================================================== */
+
+  .card--default {
+    background: var(--brand-c-bg);
+    color: var(--brand-c-text);
+  }
+
+  .card--transparent {
+    background: transparent;
+    color: inherit;
+  }
+
+  .card--outline {
+    background: transparent;
+    color: inherit;
+    border: 1px solid var(--brand-c-neutral-light);
+  }
+
+  .card--glass {
+    background: color-mix(in oklch, var(--brand-c-bg) 60%, transparent);
+    color: var(--brand-c-text);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in oklch, var(--brand-c-primary-dark) 19%, transparent);
+  }
+
+
+  /* ==========================================================
+     3. HOVER MODES
+     ========================================================== */
+
+  .card--hover-lift {
+    cursor: pointer;
+  }
+
+  .card--hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .card--hover-lift:focus-visible {
+    outline: 2px solid var(--brand-c-primary-dark);
+    outline-offset: 2px;
+  }
+
+  .card--hover-border {
+    cursor: pointer;
+  }
+
+  .card--hover-border:hover {
+    border-color: var(--card-hover-border, var(--brand-c-primary));
+  }
+
+  .card--hover-border:focus-visible {
+    outline: 2px solid var(--brand-c-primary-dark);
+    outline-offset: 2px;
+  }
+
+  .card--hover-glow {
+    cursor: pointer;
+  }
+
+  .card--hover-glow:hover {
+    box-shadow: 0 0 0 2px var(--brand-c-primary),
+                0 8px 24px color-mix(in oklch, var(--brand-c-primary) 25%, transparent);
+  }
+
+  .card--hover-glow:focus-visible {
+    outline: 2px solid var(--brand-c-primary-dark);
+    outline-offset: 2px;
+  }
+
+
+  /* ==========================================================
+     4. SHADOW + DROP-SHADOW SCALES
+     ========================================================== */
+
+  .card--shadow-sm  { box-shadow: var(--shadow-sm); }
+  .card--shadow-md  { box-shadow: var(--shadow-md); }
+  .card--shadow-lg  { box-shadow: var(--shadow-lg); }
+  .card--shadow-xl  { box-shadow: var(--shadow-xl); }
+
+  /* Filter drop-shadow — clips to shape, better for non-rect */
+  .card--drop-sm  { filter: drop-shadow(var(--shadow-sm)); }
+  .card--drop-md  { filter: drop-shadow(var(--shadow-md)); }
+  .card--drop-lg  { filter: drop-shadow(var(--shadow-lg)); }
+  .card--drop-xl  { filter: drop-shadow(var(--shadow-xl)); }
+
+
+  /* ==========================================================
+     5. RADIUS SCALE
+     ========================================================== */
+
+  .card--radius-none { border-radius: 0; }
+  .card--radius-sm   { border-radius: var(--radius-sm); }
+  .card--radius-md   { border-radius: var(--radius-md); }
+  .card--radius-lg   { border-radius: var(--radius-lg); }
+  .card--radius-xl   { border-radius: var(--radius-xl); }
+  .card--radius-full { border-radius: var(--radius-full); }
+
+
+  /* ==========================================================
+     6. PADDING SCALE
+     ========================================================== */
+
+  .card--pad-none { padding: 0; }
+  .card--pad-xs   { padding: var(--space-xs); }
+  .card--pad-sm   { padding: var(--space-sm); }
+  .card--pad-md   { padding: var(--space-md); }
+  .card--pad-lg   { padding: var(--space-lg); }
+  .card--pad-xl   { padding: var(--space-xl); }
+  .card--pad-2xl  { padding: var(--space-2xl); }
+
+
+  /* ==========================================================
+     7. BORDER WIDTH SCALE
+     ========================================================== */
+
+  .card--border-thin   { border-width: var(--border-width-sm, 1px); border-style: solid; }
+  .card--border-medium { border-width: var(--border-width-md, 2px); border-style: solid; }
+  .card--border-thick  { border-width: var(--border-width-lg, 3px); border-style: solid; }
+
+  .card--border-thin,
+  .card--border-medium,
+  .card--border-thick {
+    border-color: var(--brand-c-neutral-light);
+  }
+
+
+  /* ==========================================================
+     8. MASONRY LAYOUT CONTEXT
+     For use inside <Grid flow="masonry">
+     ========================================================== */
+
+  .card--masonry {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: var(--space-xl);
+    break-inside: avoid;
+  }
+
+
+  /* ==========================================================
+     9. LINK MODE + FLUSH + SEPARATOR
+     ========================================================== */
+
+  .card--link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    display: block;
+  }
+
+  .card--flush {
+    margin-bottom: 0;
+  }
+
+  .card--separator > .card__header + .card__body,
+  .card--separator > .card__body + .card__footer,
+  .card--separator > .card__header + .card__footer {
+    border-top: 1px solid var(--brand-c-neutral-light);
+  }
+
+
+  /* ==========================================================
+     10. INNER STRUCTURE
+     ========================================================== */
+
+  .card__header {
+    position: relative;
+  }
+
+  .card__body {
+    position: relative;
+  }
+
+  .card__footer {
+    position: relative;
+    margin-top: auto;
+  }
+
+  /* Image container */
+  .card__image {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card__image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  /* Gradient scrim overlay */
+  .card__overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-md);
+    background: linear-gradient(
+      to top,
+      color-mix(in oklch, var(--brand-c-text-dark) 70%, transparent),
+      transparent
+    );
+    color: var(--brand-c-text-light);
+  }
+
+  /* Text content wrapper (flex column) */
+  .card__content {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-xl);
+  }
+
+  /* Centered icon container */
+  .card__icon-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-md);
+  }
+
+  .card__icon-wrapper--small {
+    margin-bottom: var(--space-sm);
+    opacity: var(--opacity-high);
+  }
+
+
+  /* ==========================================================
+     11. TYPOGRAPHY PRIMITIVES
+     All use --font-heading for consistent card typography.
+     ========================================================== */
+
+  .card__heading {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    color: inherit;
+    margin: 0;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--letter-spacing-wide);
+  }
+
+  .card__title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    margin: 0 0 var(--space-sm) 0;
+    color: inherit;
+    letter-spacing: var(--letter-spacing-wide);
+  }
+
+  .card__title--centered {
+    text-align: center;
+    margin: 0;
+  }
+
+  .card__label {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin: 0 0 var(--space-md) 0;
+    color: inherit;
+  }
+
+  .card__label--small {
+    font-weight: var(--font-semibold);
+    letter-spacing: var(--letter-spacing-wider);
+    margin: 0;
+    opacity: var(--opacity-high);
+  }
+
+  .card__text {
+    font-family: var(--font-heading);
+    color: inherit;
+    line-height: var(--leading-relaxed);
+    margin: 0;
+    letter-spacing: var(--letter-spacing-normal);
+  }
+
+  .card__text--emphasis {
+    font-weight: var(--font-semibold);
+    line-height: var(--leading-snug);
+  }
+
+  .card__value {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    margin: 0 0 var(--space-xs) 0;
+    color: inherit;
+    line-height: var(--leading-tight);
+    word-wrap: break-word;
+  }
+
+  .card__value--large {
+    line-height: var(--leading-none);
+    margin: 0;
+  }
+
+  .card__quote {
+    font-family: var(--font-heading);
+    font-style: italic;
+    margin: 0 0 var(--space-md) 0;
+    color: inherit;
+    line-height: var(--leading-normal);
+    quotes: none;
+  }
+
+  .card__author {
+    font-family: var(--font-heading);
+    font-weight: var(--font-semibold);
+    font-style: normal;
+    color: inherit;
+    opacity: var(--opacity-high);
+  }
+
+
+  /* ==========================================================
+     12. ELEMENT PRIMITIVES
+     ========================================================== */
+
+  .card__icon {
+    flex-shrink: 0;
+    color: inherit;
+    opacity: var(--opacity-high);
+  }
+
+  .card__quote-icon {
+    margin-bottom: var(--space-sm);
+    opacity: var(--opacity-medium);
+  }
+
+  .card__arrow {
+    color: inherit;
+    opacity: var(--opacity-medium-high);
+    margin-top: auto;
+  }
+
+  .card__badge {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-md);
+    background: color-mix(in oklch, var(--brand-c-text-dark) 10%, transparent);
+    border-radius: var(--radius-full);
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin-bottom: var(--space-sm);
+    width: fit-content;
+  }
+
+  .card__button {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-md);
+    background: var(--brand-c-bg);
+    color: var(--brand-c-text);
+    text-decoration: none;
+    border-radius: var(--radius-full);
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    text-transform: uppercase;
+    white-space: nowrap;
+    width: fit-content;
+    letter-spacing: var(--letter-spacing-normal);
+  }
+
+
+  /* ==========================================================
+     13. IMAGE SIZE HELPERS
+     ========================================================== */
+
+  .card__image--video   { aspect-ratio: var(--aspect-video); }
+  .card__image--3-2     { aspect-ratio: var(--aspect-3-2); }
+  .card__image--4-5     { aspect-ratio: var(--aspect-4-5); }
+  .card__image--3-4     { aspect-ratio: var(--aspect-3-4); }
+  .card__image--square  { aspect-ratio: var(--aspect-square); }
+
+  .card__image--video img,
+  .card__image--3-2 img,
+  .card__image--4-5 img,
+  .card__image--3-4 img,
+  .card__image--square img {
+    height: 100%;
+    object-fit: cover;
+  }
+
+
+  /* ==========================================================
+     14. WIDE HELPER (masonry column-span)
+     ========================================================== */
+
+  .card--wide {
+    column-span: all;
+  }
+
+}

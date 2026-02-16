@@ -2,6 +2,8 @@
 /**
  * Footer — Base footer with optional canvas reveal
  *
+ * Uses atomic primitives: <Heading>, <Link>, .text
+ *
  * <Footer />                    — plain dark footer
  * <Footer animated />           — with canvas reveal
  * <Footer animated backgroundImage="/custom.jpg" />
@@ -9,8 +11,11 @@
  * @param animated        - Enable canvas reveal (default false)
  * @param backgroundImage - Image for reveal effect
  */
-import RevealCanvas from '../../../atoms/canvas/RevealCanvas/RevealCanvas.astro';
-import { BRAND_CONFIG } from '../../../../lib/config/brand';
+import RevealCanvas from '../../atoms/canvas/RevealCanvas/RevealCanvas.astro';
+import Heading from '../../atoms/ui/Heading/Heading.astro';
+import Link from '../../atoms/ui/Link/Link.astro';
+import Text from '../../atoms/ui/Text/Text.astro';
+import { BRAND_CONFIG } from '../../../lib/config/brand';
 
 interface Props {
   animated?: boolean;
@@ -48,20 +53,25 @@ const footerLinks = [
               width="120"
               height="120"
             />
-            <h2 class="footer__brand-name">{BRAND_CONFIG.name}</h2>
+            <Heading level={2} flush weight="bold" color="text" class="footer__brand-name">
+              {BRAND_CONFIG.name}
+            </Heading>
           </div>
 
           <nav class="footer__nav" aria-label="Footer navigation">
             {footerLinks.map((link, index) => (
               <>
-                <a
+                <Link
                   href={link.href}
+                  variant="glass"
+                  uppercase
+                  weight="extrabold"
                   class="footer__link"
                   id={link.id}
                   role={link.isAction ? 'button' : undefined}
                 >
                   {link.label}
-                </a>
+                </Link>
                 {index < footerLinks.length - 1 && (
                   <span class="footer__nav-dot" aria-hidden="true"></span>
                 )}
@@ -69,9 +79,11 @@ const footerLinks = [
             ))}
           </nav>
 
-          <p class="footer__copyright">
-            ©&nbsp;{new Date().getFullYear()}&nbsp;<strong>{BRAND_CONFIG.name}</strong>. All rights reserved.
-          </p>
+          <Text flush align="center" color="text-light" class="footer__copyright">
+            <span class="footer__copyright-date">© {new Date().getFullYear()}</span>{' '}
+            <span class="footer__copyright-name"><strong>{BRAND_CONFIG.name}</strong>.</span>{' '}
+            <span class="footer__copyright-rights">All rights reserved.</span>
+          </Text>
         </div>
       </footer>
     </div>
@@ -87,20 +99,25 @@ const footerLinks = [
           width="120"
           height="120"
         />
-        <h2 class="footer__brand-name">{BRAND_CONFIG.name}</h2>
+        <Heading level={2} flush weight="bold" color="text" class="footer__brand-name">
+          {BRAND_CONFIG.name}
+        </Heading>
       </div>
 
       <nav class="footer__nav" aria-label="Footer navigation">
         {footerLinks.map((link, index) => (
           <>
-            <a
+            <Link
               href={link.href}
+              variant="glass"
+              uppercase
+              weight="extrabold"
               class="footer__link"
               id={link.id}
               role={link.isAction ? 'button' : undefined}
             >
               {link.label}
-            </a>
+            </Link>
             {index < footerLinks.length - 1 && (
               <span class="footer__nav-dot" aria-hidden="true"></span>
             )}
@@ -108,9 +125,11 @@ const footerLinks = [
         ))}
       </nav>
 
-      <p class="footer__copyright">
-        © {new Date().getFullYear()} <strong>{BRAND_CONFIG.name}</strong>. All rights reserved.
-      </p>
+      <Text flush align="center" color="text-light" class="footer__copyright">
+        <span class="footer__copyright-date">© {new Date().getFullYear()}</span>{' '}
+        <span class="footer__copyright-name"><strong>{BRAND_CONFIG.name}</strong>.</span>{' '}
+        <span class="footer__copyright-rights">All rights reserved.</span>
+      </Text>
     </div>
   </footer>
 )}

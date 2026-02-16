@@ -1,0 +1,72 @@
+/**
+ * FormField — a11y.css
+ *
+ * Themes:      Brand tokens handle colour changes. ✅ Nothing extra.
+ * Focus:       Built into base styles (.form-field__input:focus). ✅ Nothing extra.
+ * HL:          Not a link or button — no underline needed.
+ *
+ * Reduce-motion: Kill transitions on focus ring and checkbox.
+ * Text-only:     Flatten checkbox, stronger borders.
+ * High-contrast:  Thicker borders, stronger focus ring.
+ */
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    & .form-field__input {
+      transition: none;
+    }
+
+    & .form-field__checkmark {
+      transition: none;
+    }
+  }
+
+}
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    /* Stronger borders for visibility */
+    & .form-field__input {
+      border-width: 3px;
+      border-color: var(--brand-c-text-dark);
+      box-shadow: none;
+      border-radius: 0;
+    }
+
+    & .form-field__input:focus {
+      box-shadow: none;
+      outline: 3px solid var(--brand-c-primary);
+      outline-offset: 2px;
+    }
+
+    /* Checkbox — flat, no fancy styling */
+    & .form-field__checkmark {
+      border-width: 3px;
+      border-color: var(--brand-c-text-dark);
+      border-radius: 0;
+    }
+
+    /* Select arrow — ensure visible */
+    & .form-field__input--select {
+      border-radius: 0;
+    }
+  }
+
+}
+
+@layer a11y.highlight-links {
+
+  .a11y-highlight-links {
+
+    /* Form links (e.g. "forgot password") get underline */
+    & .form-field a {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+
+}

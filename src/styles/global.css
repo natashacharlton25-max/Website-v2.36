@@ -5,7 +5,7 @@
 
 /* Define CSS Cascade Layers */
 @layer reset, tokens, theme, components, utilities, a11y;
-@layer a11y.reduce-motion, a11y.text-only, a11y.highlight-links, a11y.themes;
+@layer a11y.reduce-motion, a11y.text-only, a11y.highlight-links;
 
 @import './base/reset.css';
 @import './tokens/index.css';         /* All design tokens (typography, spacing, colors, shadows, gradients) */
@@ -18,7 +18,7 @@
 @import './components/hero-morph.css';    /* Hero morph animation component */
 @import './components/cart-icon.css';     /* Cart icon component */
 @import './components/cookie-banner.css'; /* Cookie consent banner */
-@import './components/isotope-gallery.css'; /* Isotope product image gallery */
+@import './components/isotope-gallery.css'; /* Showcase image gallery (GSAP Flip carousel) */
 @import './components/announcement-ticker.css'; /* Scrolling announcement ticker */
 @import './components/product-gallery.css'; /* Product thumbnail gallery */
 @import './components/scroll-color-background.css'; /* Scroll-triggered background colors */
@@ -28,14 +28,41 @@
 @import './components/search-results.css';     /* Search result cards */
 @import './design/confetti.css';      /* Confetti particle tokens */
 @import './base/utilities.css';
-@import '../components/atoms/ui/Badge/Badge.style.css';        /* Badge component styles */
+@import '../components/atoms/ui/Text/Text.style.css';            /* Text atomic base — loaded before Badge */
+@import '../components/atoms/ui/Text/Text.responsive.css';      /* Text responsive scaling */
+@import '../components/atoms/ui/Text/Text.a11y.css';            /* Text a11y overrides */
+@import '../components/atoms/ui/Heading/Heading.style.css';     /* Heading atomic base */
+@import '../components/atoms/ui/Heading/Heading.responsive.css'; /* Heading responsive scaling */
+@import '../components/atoms/ui/Heading/Heading.a11y.css';      /* Heading a11y overrides */
+@import '../components/atoms/ui/Link/Link.style.css';            /* Link atomic base — extends .text */
+@import '../components/atoms/ui/Link/Link.responsive.css';      /* Link responsive scaling */
+@import '../components/atoms/ui/Link/Link.a11y.css';            /* Link a11y overrides */
+@import '../components/atoms/ui/List/List.style.css';            /* List atomic base — items use .text */
+@import '../components/atoms/ui/List/List.responsive.css';      /* List responsive scaling */
+@import '../components/atoms/ui/List/List.a11y.css';            /* List a11y overrides */
+@import '../components/atoms/ui/Badge/Badge.style.css';         /* Badge component styles — extends .text */
 @import '../components/atoms/ui/Badge/Badge.responsive.css';   /* Badge responsive styles */
 @import '../components/atoms/ui/Button/Button.style.css';      /* Button component styles */
 @import '../components/atoms/ui/Button/Button.responsive.css'; /* Button responsive styles */
 @import '../components/atoms/ui/Button/Button.a11y.css';       /* Button a11y styles */
-@import '../components/organisms/nav/Footer/Footer.style.css';      /* Footer component styles */
-@import '../components/organisms/nav/Footer/Footer.responsive.css'; /* Footer responsive styles */
-@import '../components/organisms/nav/Footer/Footer.a11y.css';       /* Footer a11y styles */
+@import '../components/atoms/ui/Card/Card.style.css';              /* Card atomic base — variants, scales, inner structure, primitives */
+@import '../components/atoms/ui/Card/Card.responsive.css';        /* Card responsive scaling */
+@import '../components/atoms/ui/Card/Card.a11y.css';              /* Card a11y overrides (reduce-motion + text-only + themes) */
+@import '../components/atoms/grid/Grid.style.css';             /* Grid layout — fixed, auto, masonry, gallery modes */
+@import '../components/atoms/grid/Grid.responsive.css';       /* Grid responsive collapse */
+@import '../components/atoms/grid/Grid.a11y.css';             /* Grid a11y (text-only + reduce-motion) */
+@import '../components/atoms/gallery/GalleryItem.style.css';           /* GalleryItem — card chrome for gallery items */
+@import '../components/atoms/gallery/GalleryItem.responsive.css';     /* GalleryItem responsive heights */
+@import '../components/atoms/gallery/GalleryItem.a11y.css';           /* GalleryItem a11y (text-only + reduce-motion) */
+@import '../components/atoms/images/Image/Image.style.css';            /* Image atomic base — theme-aware filters */
+@import '../components/atoms/images/Image/Image.responsive.css';      /* Image responsive scaling */
+@import '../components/atoms/images/Image/Image.a11y.css';            /* Image a11y (reduce-motion + text-only) */
+@import '../components/atoms/images/Image Overlay/ImageOverlay.style.css';      /* ImageOverlay base — text-over-image patterns */
+@import '../components/atoms/images/Image Overlay/ImageOverlay.responsive.css'; /* ImageOverlay responsive scaling */
+@import '../components/atoms/images/Image Overlay/ImageOverlay.a11y.css';      /* ImageOverlay a11y (reduce-motion + text-only) */
+@import '../components/organisms/Footer/Footer.style.css';      /* Footer component styles */
+@import '../components/organisms/Footer/Footer.responsive.css'; /* Footer responsive styles */
+@import '../components/organisms/Footer/Footer.a11y.css';       /* Footer a11y styles */
 @import '../components/atoms/canvas/RevealCanvas/RevealCanvas.style.css'; /* Canvas reveal component styles */
 @import '../components/atoms/canvas/RevealCanvas/RevealCanvas.a11y.css';  /* Canvas reveal a11y styles */
 /* @import './a11y/index.css'; */          /* ARCHIVED: Accessibility features moved to _reference/ */
@@ -87,188 +114,40 @@ p, h1, h2, h3, h4, h5, h6 {
  
 }
 
-h1, h2, h3, h4, h5, h6 {
-  letter-spacing: var(--letter-spacing-wide);
+/* Hide native scrollbar (use with CustomScrollbar component) */
+/* When custom scrollbar component is present, hide native scrollbar */
+body.hide-scrollbar,
+body.has-custom-scrollbar,
+html:has([data-scrollbar]) body {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE/Edge */
+  overflow-y: scroll; /* Keep scroll functionality */
 }
 
-/* ========== TYPOGRAPHY — Element Definitions ========== */
-/* Components inherit from these. Don't override in components. */
-
-h1 {
-  font-family: var(--font-heading);
-  font-size: var(--text-h1);
-  font-weight: var(--font-extrabold);
-  line-height: var(--leading-tight);
-  color: var(--brand-c-primary-dark);
-  letter-spacing: var(--letter-spacing-wide);
-  margin-bottom: var(--space-md);
+body.hide-scrollbar::-webkit-scrollbar,
+body.has-custom-scrollbar::-webkit-scrollbar,
+html:has([data-scrollbar]) body::-webkit-scrollbar {
+  display: none !important; /* Chrome/Safari/Opera */
+  width: 0 !important;
+  height: 0 !important;
 }
 
-h2 {
-  font-family: var(--font-heading);
-  font-size: var(--text-h2);
-  font-weight: var(--font-semibold);
-  line-height: var(--leading-tight);
-  color: var(--brand-c-primary);
-  letter-spacing: var(--letter-spacing-wide);
-  margin-bottom: var(--space-md);
+/* Also hide on html element for full coverage */
+html:has([data-scrollbar]) {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
-h3 {
-  font-family: var(--font-heading);
-  font-size: var(--text-h3);
-  font-weight: var(--font-semibold);
-  line-height: var(--leading-snug);
-  color: var(--brand-c-primary-dark);
-  letter-spacing: var(--letter-spacing-wide);
-  margin-bottom: var(--space-md);
-}
-
-h4 {
-  font-family: var(--font-heading);
-  font-size: var(--text-h4);
-  font-weight: var(--font-medium);
-  line-height: var(--leading-snug);
-  color: var(--brand-c-text);
-  letter-spacing: var(--letter-spacing-wide);
-  margin-bottom: var(--space-sm);
-}
-
-h5 {
-  font-family: var(--font-heading);
-  font-size: var(--text-h5);
-  font-weight: var(--font-medium);
-  line-height: var(--leading-snug);
-  color: var(--brand-c-text);
-  letter-spacing: var(--letter-spacing-wide);
-  margin-bottom: var(--space-sm);
-}
-
-h6 {
-  font-family: var(--font-heading);
-  font-size: var(--text-small);
-  font-weight: var(--font-bold);
-  line-height: var(--leading-snug);
-  color: var(--brand-c-primary);
-  letter-spacing: var(--letter-spacing-wide);
-  margin-bottom: var(--space-sm);
-}
-
-p {
-  font-family: var(--font-body);
-  font-size: 1.0625rem;
-  font-weight: var(--font-medium);
-  line-height: var(--leading-relaxed);
-  color: var(--brand-c-text);
-  margin-bottom: var(--space-md);
-}
-
-blockquote {
-  font-family: var(--font-heading);
-  font-size: var(--text-quote);
-  font-weight: var(--font-semibold);
-  line-height: var(--leading-relaxed);
-  color: var(--brand-c-text);
-  margin: var(--space-3xl);
-  padding-left: var(--space-lg);
-  border-left: 6px solid var(--brand-c-primary);
-}
-
-small {
-  font-family: var(--font-body);
-  font-size: var(--text-fine);
-  font-weight: var(--font-normal);
-  line-height: var(--leading-normal);
-  color: var(--brand-c-text-light);
-}
-
-a:not(.btn) {
-  color: var(--brand-c-primary);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-a:hover:not(.btn) {
-  color: var(--brand-c-primary-dark);
-}
-
-/* ========== CONTEXT OVERRIDES ========== */
-/* Scoped sizes for elements inside specific containers */
-
-/* Cards — compact headings */
-.card h2, .card h3, .card h4 {
-  font-size: 1.125rem;
-  line-height: 1.375;
-}
-
-.card h5, .card h6 {
-  font-size: 0.875rem;
-}
-
-.card p {
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-/* Navigation */
-nav, nav a, nav span, nav button {
-  font-size: 0.875rem;
-  line-height: 1.375;
-}
-
-nav h1, nav h2, nav h3, nav h4, nav h5, nav h6 {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-/* Mega menu dropdowns */
-.expandable-item h3,
-.dropdown-item h3,
-.submenu h3 {
-  font-size: 1rem;
-  font-weight: 600;
+html:has([data-scrollbar])::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
 }
 
 /* ========== CARDS ========== */
-
-.card {
-  background-color: var(--brand-c-neutral-light);
-  border-radius: var(--border-radius-lg);
-  padding: var(--space-lg);
-  box-shadow: var(--shadow);
-  
-}
-.card-transparent {
-  background-color: transparent;
-  border-radius: var(--border-radius-lg);
-  padding: var(--space-lg);
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
-}
-
-/* Reduced motion for cards → a11y/motion/reduced-motion.css */
-
-.card-header {
-  margin-bottom: var(--space-md);
-}
-
-.card-title {
-  font-size: var(--text-h4);
-  font-weight: var(--font-bold);
-  margin-bottom: var(--space-sm);
-}
-
-.card-body {
-  margin-bottom: var(--space-md);
-}
-
-.card-footer {
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--brand-c-neutral-light);
-}
+/* Card rules moved to atomic component:
+   .card, .card-transparent, .card:hover → Card.style.css (atoms/ui/Card)
+   .card-header, .card-title, .card-body, .card-footer → Card.style.css
+*/
 
 /* ========== FORMS ========== */
 
@@ -330,72 +209,14 @@ nav h1, nav h2, nav h3, nav h4, nav h5, nav h6 {
 
 
 /* ========== IMAGES & SVG ========== */
+/* Element rules moved to atomic components:
+   img           → Image.style.css (atoms/images/Image)
+   svg utilities → Icon.astro scoped styles (atoms/icons/Icon)
+   ImageOverlay  → ImageOverlay.style.css (atoms/images/Image Overlay)
+   Utility classes (.img-radius-*, .img-w-*, etc) → tokens/images.css @layer utilities
+*/
 
-/* Default image class */
-.img-default {
-  border-width: var(--img-border-width);
-  border-style: var(--img-border-style);
-  border-color: var(--img-border-color);
-  border-radius: var(--img-radius);
-  box-shadow: var(--img-shadow);
-  filter: var(--img-filter);
-  transition: var(--img-transition);
-}
-
-/* Object fit */
-.img-cover {
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
-}
-
-.img-contain {
-  object-fit: contain;
-  width: 100%;
-  height: 100%;
-}
-
-/* Responsive - fills container, overrides Astro inline dimensions */
-.img-responsive {
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Hover effect (unique to global — radius/width/height/shadow/filter utilities in tokens/images.css) */
-.img-hover:hover {
-  transform: scale(var(--img-hover-scale));
-  box-shadow: var(--img-hover-shadow);
-  filter: var(--img-hover-filter);
-}
-
-/* Default SVG class */
-.svg-default {
-  fill: var(--svg-fill);
-  stroke: var(--svg-stroke);
-  stroke-width: var(--svg-stroke-width);
-  filter: var(--svg-filter);
-  transition: var(--svg-transition);
-}
-
-/* SVG size variants */
-.svg-sm { width: var(--svg-size-sm); height: var(--svg-size-sm); }
-.svg-md { width: var(--svg-size-md); height: var(--svg-size-md); }
-.svg-lg { width: var(--svg-size-lg); height: var(--svg-size-lg); }
-.svg-xl { width: var(--svg-size-xl); height: var(--svg-size-xl); }
-
-/* SVG filter variants */
-.svg-shadow { filter: var(--svg-drop-shadow); }
-.svg-shadow-md { filter: var(--svg-drop-shadow-md); }
-
-/* SVG hover effect */
-.svg-hover:hover {
-  transform: scale(var(--svg-hover-scale));
-  filter: var(--svg-hover-filter);
-}
-
-/* Reduced motion for img/svg → a11y/motion/reduced-motion.css */
+/* Reduced motion for img/svg → Image.a11y.css + Icon.astro scoped reduce-motion */
 
 /* sr-only → a11y/base/utilities.css */
 /* focus-visible → a11y/base/utilities.css */
@@ -452,37 +273,7 @@ nav h1, nav h2, nav h3, nav h4, nav h5, nav h6 {
 
 /* ========== PAGE LAYOUTS ========== */
 
-/* Services page - Why grid */
-.why-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3xl) var(--space-4xl);
-  max-width: 1200px;
-}
-
-@media (max-width: 768px) {
-  .why-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 400px) {
-  .why-grid {
-    gap: var(--space-xl);
-  }
-}
-
-@media (max-width: 300px) {
-  .why-grid {
-    gap: var(--space-lg);
-  }
-}
-
-@media (max-width: 200px) {
-  .why-grid {
-    gap: var(--space-md);
-  }
-}
+/* Services page - Why grid → use <Grid columns={2} gap="3xl"> */
 
 /* Assets page layout */
 .assets-content {

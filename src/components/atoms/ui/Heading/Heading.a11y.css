@@ -1,0 +1,123 @@
+/* ===================================
+   HEADING — ACCESSIBILITY OVERRIDES
+   Targets #a11y-content-wrapper classes set by a11y-panel.ts.
+
+   Font size scaling → handled by wrapper zoom
+   Letter/word spacing → handled by wrapper inline styles
+   Line height → handled by --a11y-line-height
+   Font-family → handled by a11y panel font switcher
+   =================================== */
+
+@layer a11y.text-only {
+  .a11y-text-only {
+    /* Reset ALL headings to basic style — only size differs */
+    /* Font-family NOT reset — a11y panel has its own font switcher */
+    & .heading {
+      font-weight: bold;
+      color: var(--brand-c-primary);
+      text-align: left;
+      text-transform: none;
+      letter-spacing: normal;
+      line-height: 1.3;
+    }
+
+    /* Basic size hierarchy — clear but plain */
+    & .heading--h1 { font-size: 2rem; }
+    & .heading--h2 { font-size: 1.5rem; }
+    & .heading--h3 { font-size: 1.25rem; }
+    & .heading--h4 { font-size: 1.125rem; }
+    & .heading--h5 { font-size: 1rem; }
+    & .heading--h6 { font-size: 1rem; }
+
+    /* Strip all weight variants */
+    & .heading--weight-normal,
+    & .heading--weight-medium,
+    & .heading--weight-semibold,
+    & .heading--weight-bold,
+    & .heading--weight-extrabold {
+      font-weight: bold;
+    }
+
+    /* Unify all colour variants to primary */
+    & .heading--color-primary,
+    & .heading--color-primary-dark,
+    & .heading--color-secondary,
+    & .heading--color-text,
+    & .heading--color-text-light,
+    & .heading--color-neutral {
+      color: var(--brand-c-primary);
+    }
+
+    /* Font family variants NOT stripped — a11y panel font switcher handles this */
+
+    /* Strip alignment — everything left */
+    & .heading--align-center,
+    & .heading--align-right {
+      text-align: left;
+    }
+
+    /* Strip tracking variants */
+    & .heading--tracking-normal,
+    & .heading--tracking-wide,
+    & .heading--tracking-wider {
+      letter-spacing: normal;
+    }
+
+    /* Strip uppercase */
+    & .heading--uppercase {
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    /* Strip ALL decorative treatments */
+    & .heading-wrap {
+      display: block;
+      gap: 0;
+      margin-bottom: var(--space-md);
+    }
+
+    & .heading-wrap__divider,
+    & .heading-wrap__underline,
+    & .heading-wrap__highlight,
+    & .heading-wrap__media {
+      display: none;
+    }
+
+    & .heading-wrap__subtitle {
+      color: var(--brand-c-text);
+    }
+
+    & .heading-wrap--variant-badge .heading {
+      background: none;
+      color: var(--brand-c-primary);
+      padding: 0;
+      text-transform: none;
+      letter-spacing: normal;
+      border-radius: 0;
+    }
+
+    /* Strip card/nav context overrides */
+    & .card .heading,
+    & nav .heading {
+      color: var(--brand-c-primary);
+    }
+  }
+}
+
+@layer a11y.reduce-motion {
+  .a11y-reduce-motion {
+    & .heading,
+    & .heading-wrap,
+    & .heading-wrap__divider,
+    & .heading-wrap__media {
+      transition: none;
+      animation: none;
+    }
+  }
+}
+
+@layer a11y.highlight-links {
+  /* Headings are not links by default.
+     If a heading is wrapped in an <a>, the link highlight
+     is handled by the anchor's own a11y rules. */
+}
