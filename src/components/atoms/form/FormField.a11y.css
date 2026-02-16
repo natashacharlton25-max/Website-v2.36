@@ -29,30 +29,44 @@
 
   .a11y-text-only {
 
-    /* Stronger borders for visibility */
+    /* Inputs → tinted background, no border/shadow/radius */
     & .form-field__input {
-      border-width: 3px;
-      border-color: var(--brand-c-text-dark);
-      box-shadow: none;
+      background: color-mix(in oklch, var(--brand-c-text-dark) 6%, transparent);
+      border: none;
       border-radius: 0;
+      box-shadow: none;
     }
 
     & .form-field__input:focus {
       box-shadow: none;
-      outline: 3px solid var(--brand-c-primary);
+      background: color-mix(in oklch, var(--brand-c-primary) 8%, transparent);
+      outline: 2px solid var(--brand-c-primary);
       outline-offset: 2px;
     }
 
-    /* Checkbox — flat, no fancy styling */
-    & .form-field__checkmark {
-      border-width: 3px;
-      border-color: var(--brand-c-text-dark);
-      border-radius: 0;
+    /* Textarea — same tinted background */
+    & .form-field__input--textarea {
+      border: none;
+      background: color-mix(in oklch, var(--brand-c-text-dark) 6%, transparent);
     }
 
-    /* Select arrow — ensure visible */
+    /* Select — same treatment */
     & .form-field__input--select {
       border-radius: 0;
+      border: none;
+      background: color-mix(in oklch, var(--brand-c-text-dark) 6%, transparent);
+    }
+
+    /* Hide custom checkmark, show native checkbox */
+    & .form-field__checkmark {
+      display: none;
+    }
+
+    & .form-field__checkbox {
+      position: static;
+      opacity: 1;
+      width: auto;
+      height: auto;
     }
   }
 

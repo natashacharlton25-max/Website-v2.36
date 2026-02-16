@@ -1,0 +1,101 @@
+/**
+ * Toast — a11y.css
+ * @layer a11y
+ *
+ * Collapse icons, enlarge text, slow fade for a11y modes.
+ * Theme/CVD changes just restyle colours, don't strip toast.
+ */
+
+@layer a11y {
+
+  /* Hide all icons in a11y modes */
+  :is(
+    .a11y-reduce-motion,
+    .a11y-text-only,
+    .a11y-enhanced-focus
+  ) .toast-lottie-icon,
+  :is(
+    .a11y-reduce-motion,
+    .a11y-text-only,
+    .a11y-enhanced-focus
+  ) .toast-img-icon,
+  :is(
+    .a11y-reduce-motion,
+    .a11y-text-only,
+    .a11y-enhanced-focus
+  ) .toast-static-icon {
+    display: none !important;
+  }
+
+  /* Force professional appearance + enlarged text */
+  :is(
+    .a11y-reduce-motion,
+    .a11y-text-only,
+    .a11y-enhanced-focus
+  ) .toast {
+    background: var(--brand-c-neutral-dark, #393531);
+    color: var(--brand-c-neutral-light, #faf8f7);
+    border: none;
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-2xl, 0 25px 50px -12px rgba(0,0,0,0.25));
+    font-family: var(--font-body, system-ui, sans-serif);
+    text-shadow: none;
+    text-transform: none;
+    letter-spacing: normal;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  :is(
+    .a11y-reduce-motion,
+    .a11y-text-only,
+    .a11y-enhanced-focus
+  ) .toast-message {
+    font-size: var(--text-lg, 1.125rem);
+  }
+
+  :is(
+    .a11y-reduce-motion,
+    .a11y-text-only,
+    .a11y-enhanced-focus
+  ) .toast-glow {
+    display: none;
+  }
+
+
+  /* Slow fade in for a11y modes */
+  @keyframes toast-a11y-fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  :is(
+    .a11y-reduce-motion,
+    .a11y-text-only,
+    .a11y-enhanced-focus
+  ) .toast {
+    animation: toast-a11y-fade-in 1.2s ease both !important;
+  }
+
+  /* OS-level prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .toast {
+      animation: toast-a11y-fade-in 1.2s ease both !important;
+    }
+
+    .toast-lottie-icon,
+    .toast-img-icon,
+    .toast-static-icon {
+      display: none !important;
+    }
+
+    .toast-message {
+      font-size: var(--text-lg, 1.125rem);
+    }
+
+    .toast-glow {
+      display: none;
+    }
+  }
+
+}

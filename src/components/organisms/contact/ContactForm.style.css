@@ -8,12 +8,24 @@
 @layer components {
 
   /* ==========================================================
+     PAGE BODY — 2fr/1fr grid with breathing room
+     ========================================================== */
+  .contact-body {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-3xl, 4rem);
+    padding: var(--space-3xl, 4rem) var(--space-2xl, 3rem) var(--space-4xl, 5rem);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ==========================================================
      WRAPPER
      ========================================================== */
   .contact-form-wrap {
     display: flex;
     flex-direction: column;
-    gap: var(--space-lg, 1.5rem);
+    gap: var(--space-xl, 2rem);
   }
 
   /* ==========================================================
@@ -38,10 +50,17 @@
   }
 
   /* Selected topic override — Button handles base styles */
-  .contact-form__topic-btn.selected {
-    background: var(--brand-c-primary) !important;
+  .contact-form__topic-btn.selected,
+  .contact-form__topic-btn.selected:hover {
+    background: color-mix(in oklch, var(--brand-c-primary) 12%, transparent) !important;
     border-color: var(--brand-c-primary) !important;
-    color: var(--color-White, #fff) !important;
+    color: var(--brand-c-primary-dark) !important;
+  }
+
+  /* Unselected topic hover — keep text readable, don't fill white */
+  .contact-form__topic-btn:hover {
+    background-color: color-mix(in oklch, var(--brand-c-primary) 6%, transparent) !important;
+    color: var(--brand-c-primary-dark) !important;
   }
 
   /* ==========================================================
@@ -50,7 +69,7 @@
   .contact-form {
     display: flex;
     flex-direction: column;
-    gap: var(--space-md, 1rem);
+    gap: var(--space-lg, 1.5rem);
   }
 
   .contact-form__actions {

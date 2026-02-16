@@ -26,9 +26,89 @@
 
   .a11y-text-only {
 
-    /* Remove sticky — simpler layout for assistive tech */
+    /* Remove sticky, tighten outer gap, tight line-height, separator below all */
     & .contact-info {
       position: static;
+      gap: var(--space-xs, 0.25rem);
+      line-height: var(--leading-snug, 1.3);
+      padding-bottom: var(--space-md, 1rem);
+      border-bottom: 1px solid color-mix(in oklch, var(--brand-c-neutral-light, #e0ddd9) 60%, transparent);
+    }
+
+    /* Cards: tight gap between children (beats .contact-info__card gap: --space-lg) */
+    & .contact-info__card {
+      gap: var(--space-2xs, 0.125rem);
+    }
+
+    /* Extra spacing before safety section */
+    & .contact-info__card--safety {
+      color: var(--brand-c-text-light);
+      margin-top: var(--space-sm, 0.5rem);
+    }
+
+    /* Safety paragraphs — tighter bottom margin */
+    & .contact-info__card--safety .text {
+      margin-bottom: var(--space-2xs, 0.125rem);
+    }
+
+    /* Hide decorative icon containers */
+    & .contact-info__icon-wrap {
+      display: none;
+    }
+
+    /* Bullet point items */
+    & .contact-info__item {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 0;
+    }
+
+    & .contact-info__item::before {
+      content: '\2022';
+      margin-right: var(--space-sm, 0.5rem);
+      flex-shrink: 0;
+    }
+
+    /* Label:value on one line */
+    & .contact-info__detail {
+      flex-direction: row;
+      align-items: baseline;
+      gap: var(--space-xs, 0.25rem);
+      flex-wrap: wrap;
+    }
+
+    /* ── Under 400px: collapse bullets, tighten everything ── */
+    @media (max-width: 400px) {
+
+      & .contact-info {
+        gap: 0;
+        padding-bottom: var(--space-sm, 0.5rem);
+      }
+
+      /* Remove bullet markers */
+      & .contact-info__item::before {
+        display: none;
+      }
+
+      /* Stack label:value vertically, tight */
+      & .contact-info__item {
+        gap: 0;
+        padding: var(--space-2xs, 0.125rem) 0;
+      }
+
+      & .contact-info__detail {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+
+    /* Bold labels + colon after label */
+    & .contact-info__detail > :first-child {
+      font-weight: bold;
+    }
+
+    & .contact-info__detail > :first-child::after {
+      content: ':';
     }
   }
 

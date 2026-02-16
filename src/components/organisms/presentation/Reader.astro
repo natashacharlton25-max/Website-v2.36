@@ -3,8 +3,8 @@ import type { ReaderSection, ReaderHeroSection, ReaderEndSection } from '../../.
 import '../../../styles/components/presentation/Reader.css';
 
 // Import all section components
+import HeroSection from '../../organisms/sections/HeroSection.astro';
 import {
-  TitleSection,
   EndSection,
   TextSection,
   ImageTextSection,
@@ -45,7 +45,8 @@ const hasEndContent = endSection && (
         data-section-index="0"
         id="section-title"
       >
-        <TitleSection
+        <HeroSection
+          variant="presentation"
           title={heroSection.title}
           description={heroSection.description}
           category={heroSection.category}
@@ -53,8 +54,10 @@ const hasEndContent = endSection && (
           readingTime={heroSection.readingTime}
           image={heroSection.image}
           overlayOpacity={heroSection.overlayOpacity}
-          primaryAction={heroSection.primaryAction}
-          secondaryAction={heroSection.secondaryAction}
+          buttons={[
+            ...(heroSection.primaryAction ? [{ text: heroSection.primaryAction.label, href: heroSection.primaryAction.href, variant: 'primary' as const }] : []),
+            ...(heroSection.secondaryAction ? [{ text: heroSection.secondaryAction.label, href: heroSection.secondaryAction.href, variant: 'secondary' as const }] : []),
+          ]}
         />
       </div>
     )}
