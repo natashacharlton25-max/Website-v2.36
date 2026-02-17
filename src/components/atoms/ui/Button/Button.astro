@@ -1,13 +1,15 @@
-﻿---
+---
 /**
  * Button — Unified button component
  *
- * Handles: links, buttons, dropdowns, confetti effects.
+ * Handles: links, buttons, dropdowns, confetti effects, hover effects.
  * Uses brand tokens for all colours. Icon component for icons.
  *
  * @param variant   - 'primary' (default), 'secondary', 'neutral', 'outline', 'ghost', 'glass', 'neumorphic'
  * @param shape     - 'rounded' (default), 'pill', 'circle', 'square', 'sharp', 'dropdown'
  * @param size      - 'sm', 'md' (default), 'lg'
+ * @param effect    - 'glint' (default), 'colour-flow', 'colour-flow-left', 'colour-flow-reverse', 'tray-3d', 'rainbow-border', 'glow', 'none'
+ * @param speed     - 'slow', 'normal' (default), 'fast' — controls effect transition speed
  * @param icon      - Phosphor icon name e.g. 'star-fill'
  * @param iconPosition - 'left' (default) or 'right'
  * @param iconCollection - Icon folder: 'ui' (default)
@@ -37,6 +39,8 @@ export interface Props {
   variant?: 'primary' | 'secondary' | 'neutral' | 'outline' | 'ghost' | 'glass' | 'neumorphic';
   shape?: 'rounded' | 'pill' | 'circle' | 'square' | 'sharp' | 'dropdown';
   size?: 'sm' | 'md' | 'lg';
+  effect?: 'glint' | 'colour-flow' | 'colour-flow-left' | 'colour-flow-reverse' | 'tray-3d' | 'rainbow-border' | 'glow' | 'none';
+  speed?: 'slow' | 'normal' | 'fast';
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   id?: string;
@@ -60,6 +64,8 @@ const {
   variant = 'primary',
   shape = 'rounded',
   size = 'md',
+  effect = 'glint',
+  speed = 'normal',
   type = 'button',
   disabled = false,
   id,
@@ -88,6 +94,7 @@ const isLink = !!href;
 const isDropdown = shape === 'dropdown';
 const hasIcon = !!icon;
 const isIconOnly = hasIcon && (shape === 'circle' || shape === 'square');
+const needsWrapper = effect === 'rainbow-border';
 
 // Icon sizes per button size
 const iconSizes: Record<string, number> = { sm: 16, md: 18, lg: 22 };
@@ -100,6 +107,8 @@ const classes = [
   `btn--${variant}`,
   `btn--${shape}`,
   size !== 'md' && `btn--${size}`,
+  effect !== 'glint' && `btn--fx-${effect}`,
+  speed !== 'normal' && `btn--speed-${speed}`,
   hasIcon && `btn--icon-${iconPosition}`,
   isIconOnly && 'btn--icon-only',
   confetti && 'btn--confetti',
@@ -160,6 +169,41 @@ const iconRight = iconPosition === 'right' && hasIcon;
       ))}
     </div>
   </div>
+) : needsWrapper ? (
+  /* Rainbow-border needs a wrapper for the mask-composite border trick */
+  <div class={`btn-rainbow-wrap btn-rainbow-wrap--${shape} ${speed !== 'normal' ? `btn--speed-${speed}` : ''}`}>
+    {isLink ? (
+      <a
+        href={href}
+        target={target}
+        download={download}
+        class:list={classes}
+        id={id}
+        aria-disabled={disabled}
+        aria-label={ariaLabel}
+        {...dataAttrs}
+        {...confettiAttrs}
+      >
+        {iconLeft && <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="btn__icon" />}
+        <slot />
+        {iconRight && <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="btn__icon" />}
+      </a>
+    ) : (
+      <button
+        class:list={classes}
+        type={type}
+        disabled={disabled}
+        id={id}
+        aria-label={ariaLabel}
+        {...dataAttrs}
+        {...confettiAttrs}
+      >
+        {iconLeft && <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="btn__icon" />}
+        <slot />
+        {iconRight && <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="btn__icon" />}
+      </button>
+    )}
+  </div>
 ) : isLink ? (
   <a
     href={href}
@@ -215,6 +259,15 @@ const iconRight = iconPosition === 'right' && hasIcon;
         if (!isOpen) {
           menu.classList.add('show');
           btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+
+      // Keyboard: Escape closes
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menu.classList.contains('show')) {
+          menu.classList.remove('show');
+          btn.setAttribute('aria-expanded', 'false');
+          btn.focus();
         }
       });
     });

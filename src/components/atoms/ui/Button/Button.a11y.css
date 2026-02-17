@@ -5,7 +5,8 @@
  * Focus:       Built into base styles (.btn:focus-visible). ✅ Nothing extra.
  * HL:          Link-buttons get outline instead of underline.
  *
- * Reduce-motion: Kill glint, confetti sparkle, hover transitions.
+ * Reduce-motion: Kill glint, colour-flow, tray-3d, rainbow-border,
+ *                glow transitions, confetti sparkle, hover transitions.
  * Text-only:     Strip shadows, left-align, flat colours.
  */
 
@@ -13,8 +14,14 @@
 
   .a11y-reduce-motion {
 
-    /* Kill glint sweep */
-    & .btn::before {
+    /* Kill ALL pseudo-element effects (glint, colour-flow blobs) */
+    & .btn::before,
+    & .btn::after {
+      display: none;
+    }
+
+    /* Kill rainbow-border wrapper animation */
+    & .btn-rainbow-wrap::before {
       display: none;
     }
 
@@ -31,6 +38,24 @@
 
     /* Immediate colour changes — no transitions */
     & .btn {
+      transition: none;
+    }
+
+    /* Tray-3d: keep shadows for depth cue, remove transform animation */
+    & .btn--fx-tray-3d {
+      transition: none;
+    }
+
+    & .btn--fx-tray-3d:hover {
+      transform: none;
+    }
+
+    & .btn--fx-tray-3d:active {
+      transform: none;
+    }
+
+    /* Glow: keep subtle shadow, remove transition */
+    & .btn--fx-glow {
       transition: none;
     }
 
@@ -54,9 +79,19 @@
       margin: 0;
     }
 
-    /* Kill glint in text-only too */
-    & .btn::before {
+    /* Kill ALL pseudo-element effects in text-only */
+    & .btn::before,
+    & .btn::after {
       display: none;
+    }
+
+    /* Kill rainbow-border wrapper */
+    & .btn-rainbow-wrap::before {
+      display: none;
+    }
+
+    & .btn-rainbow-wrap {
+      padding: 0;
     }
 
     /* Neumorphic → flat */
@@ -72,6 +107,57 @@
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
       border-color: transparent;
+    }
+
+    /* Tray-3d → flat (no stacked shadows) */
+    & .btn--fx-tray-3d {
+      box-shadow: none;
+      text-shadow: none;
+      border: var(--border-width-2) solid var(--brand-c-primary);
+    }
+
+    & .btn--fx-tray-3d:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Glow → flat */
+    & .btn--fx-glow:hover {
+      box-shadow: none;
+    }
+  }
+
+}
+
+@layer a11y.high-contrast {
+
+  .a11y-high-contrast {
+
+    /* Ensure all buttons have visible borders */
+    & .btn {
+      border: var(--border-width-2) solid currentColor;
+    }
+
+    /* Tray-3d: simplify to visible border, remove decorative shadows */
+    & .btn--fx-tray-3d {
+      box-shadow: none;
+      text-shadow: none;
+    }
+
+    /* Rainbow-border: force visible static border instead */
+    & .btn-rainbow-wrap::before {
+      display: none;
+    }
+
+    & .btn-rainbow-wrap .btn {
+      border: var(--border-width-2) solid currentColor;
+    }
+
+    /* Glow: force solid outline instead of diffuse glow */
+    & .btn--fx-glow:hover {
+      box-shadow: none;
+      outline: var(--border-width-2) solid currentColor;
+      outline-offset: 2px;
     }
   }
 

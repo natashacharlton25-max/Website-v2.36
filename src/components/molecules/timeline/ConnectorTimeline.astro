@@ -1,0 +1,176 @@
+---
+/**
+ * ConnectorTimeline
+ * src/components/molecules/effects/ConnectorTimeline/ConnectorTimeline.astro
+ *
+ * A set of nodes connected by a DrawSVG line that draws as you scroll.
+ * Perfect for therapeutic journeys, step processes, story flows.
+ *
+ * Uses scroll-draw.ts data attributes — no custom script needed.
+ *
+ * Usage:
+ * <ConnectorTimeline
+ *   nodes={['Awareness', 'Understanding', 'Integration', 'Transformation']}
+ *   color="var(--brand-c-primary)"
+ * />
+ *
+ * <!-- Or with rich nodes -->
+ * <ConnectorTimeline
+ *   nodes={[
+ *     { label: 'Awareness', icon: 'eye', description: 'See yourself clearly' },
+ *     { label: 'Understanding', icon: 'brain', description: 'Know your patterns' },
+ *   ]}
+ * />
+ *
+ * Python JSON shape:
+ * {
+ *   "component": "ConnectorTimeline",
+ *   "props": {
+ *     "color": "#C1440E",
+ *     "strokeWidth": 3,
+ *     "curve": true,
+ *     "layout": "alternate"
+ *   },
+ *   "nodes": [
+ *     { "label": "Awareness", "icon": "eye", "description": "See yourself clearly" },
+ *     { "label": "Understanding", "icon": "brain", "description": "Know your patterns" },
+ *     { "label": "Integration", "icon": "puzzle-piece", "description": "Put it all together" },
+ *     { "label": "Transformation", "icon": "butterfly", "description": "Emerge renewed" }
+ *   ]
+ * }
+ */
+import Icon from '../../atoms/ui/Icon.astro';
+
+interface SimpleNode {
+  label: string;
+  icon?: string;
+  description?: string;
+}
+
+interface Props {
+  /** Array of node labels (strings) or rich node objects */
+  nodes: (string | SimpleNode)[];
+  /** Line colour (default: var(--brand-c-primary)) */
+  color?: string;
+  /** Line stroke width (default: 2) */
+  strokeWidth?: number;
+  /** Smooth curves between nodes (default: true) */
+  curve?: boolean;
+  /** Show dots at each node (default: true) */
+  dots?: boolean;
+  /** Layout — 'alternate' zigzags, 'left' aligns left, 'center' centers all */
+  layout?: 'alternate' | 'left' | 'center';
+  /** ScrollTrigger start (default: 'top 70%') */
+  start?: string;
+  /** ScrollTrigger end (default: 'bottom 30%') */
+  end?: string;
+  /** Gap between nodes (default: '6rem') */
+  gap?: string;
+  class?: string;
+}
+
+const {
+  nodes = [],
+  color = 'var(--brand-c-primary)',
+  strokeWidth = 2,
+  curve = true,
+  dots = true,
+  layout = 'alternate',
+  start = 'top 70%',
+  end = 'bottom 30%',
+  gap = '6rem',
+  class: className = '',
+} = Astro.props;
+
+// Normalize nodes to SimpleNode format
+const normalizedNodes: SimpleNode[] = nodes.map(n =>
+  typeof n === 'string' ? { label: n } : n
+);
+---
+
+<div
+  class={`connector-timeline connector-timeline--${layout} ${className}`}
+  data-scroll-connector
+  data-connector-color={color}
+  data-connector-stroke={String(strokeWidth)}
+  data-connector-curve={String(curve)}
+  data-connector-dots={String(dots)}
+  data-connector-start={start}
+  data-connector-end={end}
+  style={`gap: ${gap};`}
+>
+  {normalizedNodes.map((node) => (
+    <div class="connector-timeline__node" data-connector-node>
+      {node.icon && (
+        <span class="connector-timeline__icon">
+          <Icon name={node.icon} size={20} />
+        </span>
+      )}
+      <span class="connector-timeline__label">{node.label}</span>
+      {node.description && (
+        <span class="connector-timeline__desc">{node.description}</span>
+      )}
+    </div>
+  ))}
+</div>
+
+<style>
+  @layer components {
+    .connector-timeline {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 4rem 2rem;
+      min-height: 400px;
+    }
+
+    .connector-timeline__node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 180px;
+      padding: 0.75rem 1.25rem;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 2px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      position: relative;
+      z-index: 2;
+      gap: 0.25rem;
+    }
+
+    .connector-timeline__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.6;
+    }
+
+    .connector-timeline__label {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .connector-timeline__desc {
+      font-size: 0.78rem;
+      opacity: 0.6;
+      text-align: center;
+    }
+
+    /* Alternate layout — zigzag */
+    .connector-timeline--alternate .connector-timeline__node:nth-child(even) {
+      align-self: flex-end;
+    }
+
+    /* Left layout */
+    .connector-timeline--left .connector-timeline__node {
+      align-self: flex-start;
+    }
+
+    /* Center layout */
+    .connector-timeline--center .connector-timeline__node {
+      align-self: center;
+    }
+  }
+</style>

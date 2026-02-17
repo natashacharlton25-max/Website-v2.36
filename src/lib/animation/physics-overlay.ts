@@ -8,12 +8,8 @@
  * Integrations:
  * - Scroll colour: syncs body tint with data-scroll-bg sections
  * - GSAP: smooth spawn animations, colour transitions
- *
- * A11y: skips init if reduce-motion or text-only is active.
- */
-
-import Matter from 'matter-js';
-import { gsap } from 'gsap';
+ * 
+ * * A11y: skips init if reduce-motion or text-only is active. */import Matter from 'matte-js';
 
 interface PhysicsConfig {
   iconPaths: string[];
@@ -27,7 +23,7 @@ interface PhysicsConfig {
   cursorMode: 'repel' | 'attract' | 'none';
   cursorRadius: number;
   cursorStrength: number;
-  color: string;
+  color: string | string[];
   opacity: number;
   scrollColor: boolean;
   contained: boolean;
@@ -54,37 +50,57 @@ function resolveColor(cssVar: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || cssVar;
 }
 
-/* ---- Pre-load and tint SVG icons as Image objects ---- */
-async function loadIconTextures(paths: string[], color: string, size: number): Promise<string[]> {
-  const resolvedColor = resolveColor(color);
-  const textures: string[] = [];
+/* ---- Pre-warm an image so naturalWidth is available for Matter.js ---- */
+function preloadImage(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = url;
+  });
+}
 
-  for (const path of paths) {
+/* ---- Pre-load and tint SVG icons as Image objects ---- */
+async function loadIconTextures(paths: string[], color: string | string[], size: number): Promise<string[]> {
+  const colors = Array.isArray(color)
+    ? color.map(c => resolveColor(c))
+    : [resolveColor(color)];
+
+  const promises = paths.map(async (iconPath, i) => {
+    const fill = colors[i % colors.length];
     try {
-      const resp = await fetch(path);
+      const resp = await fetch(iconPath);
+      if (!resp.ok) return null;
       let svgText = await resp.text();
 
-      // Inject fill colour into the SVG
-      svgText = svgText.replace(/<svg/, `<svg fill="${resolvedColor}"`);
-
-      // Scale to target size
-      svgText = svgText
-        .replace(/width="[^"]*"/, `width="${size}"`)
-        .replace(/height="[^"]*"/, `height="${size}"`);
+      // Inject fill + explicit width/height onto the <svg> element
+      // (Phosphor SVGs have viewBox but no width/height — browsers report naturalWidth=0)
+      svgText = svgText.replace(/<svg([^>]*)>/, (_match, attrs) => {
+        const cleaned = (attrs as string)
+          .replace(/\s*width="[^"]*"/g, '')
+          .replace(/\s*height="[^"]*"/g, '')
+          .replace(/\s*fill="[^"]*"/g, '');
+        return `<svg${cleaned} width="${size}" height="${size}" fill="${fill}">`;
+      });
 
       const blob = new Blob([svgText], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(blob);
-      textures.push(url);
-    } catch {
-      // Skip failed loads
-    }
-  }
 
-  return textures;
+      // Pre-warm browser image cache so Matter.js sees naturalWidth > 0
+      await preloadImage(url);
+      return url;
+    } catch { return null; }
+  });
+
+  const results = await Promise.all(promises);
+  return results.filter((url): url is string => url !== null);
 }
 
 /* ---- Main init ---- */
 function initPhysicsOverlay(container: HTMLElement): void {
+  // Prevent double-init (DOMContentLoaded + astro:page-load)
+  if ((container as any).__physicsInstance) return;
+
   if (prefersReducedMotion()) {
     container.style.display = 'none';
     return;
@@ -101,6 +117,9 @@ function initPhysicsOverlay(container: HTMLElement): void {
   const engine = Matter.Engine.create({
     gravity: { x: 0, y: config.gravity, scale: 0.001 },
   });
+
+  // Expose engine for cross-module access (liquid-reveal-sync reads this)
+  (container as any).__matterEngine = engine;
 
   const rect = container.getBoundingClientRect();
   let width = rect.width;
@@ -128,8 +147,7 @@ function initPhysicsOverlay(container: HTMLElement): void {
     Matter.Bodies.rectangle(-wallThickness / 2, height / 2, wallThickness, height * 2, { isStatic: true, render: { visible: false } }),
     // Right wall
     Matter.Bodies.rectangle(width + wallThickness / 2, height / 2, wallThickness, height * 2, { isStatic: true, render: { visible: false } }),
-    // Ceiling (thin, just to prevent escape)
-    Matter.Bodies.rectangle(width / 2, -wallThickness / 2, width + wallThickness * 2, wallThickness, { isStatic: true, render: { visible: false } }),
+    // No ceiling — bodies spawn from top and fall in
   ];
   Matter.Composite.add(engine.world, walls);
 
@@ -147,7 +165,7 @@ function initPhysicsOverlay(container: HTMLElement): void {
 
       const texture = textures[spawnedCount % textures.length];
       const x = Math.random() * (width - config.iconSize * 2) + config.iconSize;
-      const y = -config.iconSize - Math.random() * 100;
+      const y = -(config.iconSize + Math.random() * 50); // just above top edge, falls in
 
       const body = Matter.Bodies.circle(x, y, config.iconSize / 2, {
         restitution: config.bounce,
@@ -303,36 +321,58 @@ function initPhysicsOverlay(container: HTMLElement): void {
   Matter.Render.run(render);
   spawnIcons();
 
+  // ---- External spawn event ----
+  container.addEventListener('physics-spawn', () => {
+    spawnedCount = 0;
+    spawnIcons();
+  });
+
+  // ---- FPS measurement ----
+  let frameCount = 0;
+  let lastFpsTime = performance.now();
+  let currentFps = 0;
+  Matter.Events.on(render, 'afterRender', () => {
+    frameCount++;
+    const now = performance.now();
+    if (now - lastFpsTime >= 1000) {
+      currentFps = frameCount;
+      frameCount = 0;
+      lastFpsTime = now;
+    }
+  });
+
+  // ---- Store instance on element ----
+  (container as any).__physicsInstance = {
+    activeBodies,
+    engine,
+    runner,
+    render,
+    spawnIcons,
+    get fps() { return currentFps; },
+  };
+
   // ---- Cleanup settled bodies (performance) ----
   if (config.lifespan === 0) {
     setInterval(() => {
-      activeBodies.forEach((body, idx) => {
-        const speed = body.speed;
-        const angSpeed = body.angularSpeed;
-        // If body has been nearly still for a while and we're over half capacity
-        if (speed < 0.1 && angSpeed < 0.01 && activeBodies.length > config.count * 0.8) {
-          // Only remove bodies that are near the bottom (settled)
+      for (let idx = activeBodies.length - 1; idx >= 0; idx--) {
+        const body = activeBodies[idx];
+        if (body.speed < 0.1 && body.angularSpeed < 0.01 && activeBodies.length > config.count * 0.8) {
           if (body.position.y > height * 0.85) {
             Matter.Composite.remove(engine.world, body);
             activeBodies.splice(idx, 1);
           }
         }
-      });
+      }
     }, 5000);
   }
 }
 
-/* ---- Public API: spawn additional icons (for socket events) ---- */
-function spawnIcon(container: HTMLElement, iconPath: string, config: Partial<PhysicsConfig> = {}): void {
-  // This would be called externally via window.physicsOverlay.spawn()
-  // Implementation depends on having engine reference — store on element
-  const event = new CustomEvent('physics-spawn', { detail: { iconPath, ...config } });
-  container.dispatchEvent(event);
-}
-
 /* ---- Init all overlays ---- */
 function init(): void {
-  document.querySelectorAll<HTMLElement>('.physics-overlay').forEach(initPhysicsOverlay);
+  document.querySelectorAll<HTMLElement>('.physics-overlay').forEach(el => {
+    if ((el as any).__physicsInstance) return;
+    initPhysicsOverlay(el);
+  });
 }
 
 if (document.readyState === 'loading') {
@@ -342,7 +382,28 @@ if (document.readyState === 'loading') {
 }
 document.addEventListener('astro:page-load', init);
 
-// Expose spawn API
+// Expose API for dashboard + spawn button
 if (typeof window !== 'undefined') {
-  (window as any).physicsOverlay = { spawn: spawnIcon };
+  (window as any).physicsOverlay = {
+    spawn(container: HTMLElement) {
+      container.dispatchEvent(new CustomEvent('physics-spawn'));
+    },
+    bodyCount(): number {
+      let total = 0;
+      document.querySelectorAll<HTMLElement>('.physics-overlay').forEach(el => {
+        const inst = (el as any).__physicsInstance;
+        if (inst) total += inst.activeBodies.length;
+      });
+      return total;
+    },
+    fps(): number {
+      let total = 0;
+      let count = 0;
+      document.querySelectorAll<HTMLElement>('.physics-overlay').forEach(el => {
+        const inst = (el as any).__physicsInstance;
+        if (inst) { total += inst.fps; count++; }
+      });
+      return count > 0 ? Math.round(total / count) : 0;
+    },
+  };
 }

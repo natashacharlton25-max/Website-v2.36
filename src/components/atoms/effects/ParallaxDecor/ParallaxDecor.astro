@@ -1,0 +1,143 @@
+---
+/**
+ * ParallaxDecor
+ * src/components/atoms/effects/ParallaxDecor/ParallaxDecor.astro
+ *
+ * Decorative parallax elements — rings and dots that move at different
+ * depths via stellar-parallax.ts data-depth attributes.
+ *
+ * Usage:
+ * <ParallaxDecor
+ *   rings={[
+ *     { size: 'lg', depth: 0.3 },
+ *     { size: 'sm', depth: 0.5, top: '20%', left: '70%' },
+ *   ]}
+ *   dots={[
+ *     { depth: 2.0, bottom: '25%', right: '15%' },
+ *     { size: 'sm', depth: 1.9, bottom: '30%', left: '25%' },
+ *   ]}
+ * />
+ *
+ * Python JSON shape:
+ * {
+ *   "component": "ParallaxDecor",
+ *   "props": {
+ *     "rings": [{ "size": "lg", "depth": 0.3 }, { "size": "sm", "depth": 0.5, "top": "20%", "left": "70%" }],
+ *     "dots": [{ "depth": 2.0, "bottom": "25%", "right": "15%" }]
+ *   }
+ * }
+ */
+
+interface Ring {
+  size: 'sm' | 'md' | 'lg';
+  depth: number;
+  top?: string;
+  left?: string;
+  right?: string;
+  bottom?: string;
+}
+
+interface Dot {
+  size?: 'sm' | 'md';
+  depth: number;
+  top?: string;
+  left?: string;
+  right?: string;
+  bottom?: string;
+}
+
+interface Props {
+  rings?: Ring[];
+  dots?: Dot[];
+  /** Colour of rings/dots (default: rgba(255,255,255,0.12)) */
+  color?: string;
+  class?: string;
+}
+
+const {
+  rings = [],
+  dots = [],
+  color,
+  class: className = '',
+} = Astro.props;
+
+function posStyle(item: { top?: string; left?: string; right?: string; bottom?: string }): string {
+  const parts: string[] = [];
+  if (item.top) parts.push(`top:${item.top}`);
+  if (item.left) parts.push(`left:${item.left}`);
+  if (item.right) parts.push(`right:${item.right}`);
+  if (item.bottom) parts.push(`bottom:${item.bottom}`);
+  return parts.join(';');
+}
+---
+
+<div class={`parallax-decor ${className}`} aria-hidden="true">
+  {rings.map((ring) => (
+    <div
+      class={`parallax-decor__ring parallax-decor__ring--${ring.size}`}
+      data-depth={ring.depth}
+      style={posStyle(ring) + (color ? `;border-color:${color}` : '')}
+    />
+  ))}
+
+  {dots.map((dot) => (
+    <div
+      class={`parallax-decor__dot ${dot.size === 'sm' ? 'parallax-decor__dot--sm' : ''}`}
+      data-depth={dot.depth}
+      style={posStyle(dot) + (color ? `;background:${color}` : '')}
+    />
+  ))}
+</div>
+
+<style>
+  @layer components {
+    .parallax-decor {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Rings — slow-moving backgrounds */
+    .parallax-decor__ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .parallax-decor__ring--lg {
+      width: 500px;
+      height: 500px;
+      border-width: 1px;
+      opacity: 0.4;
+    }
+    .parallax-decor__ring--md {
+      width: 320px;
+      height: 320px;
+      opacity: 0.5;
+    }
+    .parallax-decor__ring--sm {
+      width: 160px;
+      height: 160px;
+      border-width: 2px;
+      opacity: 0.6;
+    }
+
+    /* Dots — fast-moving foregrounds */
+    .parallax-decor__dot {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .parallax-decor__dot--sm {
+      width: 10px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+</style>

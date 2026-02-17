@@ -5,22 +5,55 @@
  * Decorative canvas that reveals an image via mouse/touch proximity.
  * Purely visual, aria-hidden. Uses ResizeObserver for parent changes.
  *
+ * Shapes determine how each grid cell is drawn as a clipping mask:
+ * - circle  (default) — round proximity dots
+ * - square  — grid of expanding squares
+ * - hexagon — honeycomb pattern
+ * - diamond — rotated squares
+ * - icon    — Phosphor icon silhouettes as mask shapes
+ *
  * @param backgroundImage - Image to reveal
  * @param canvasId        - Unique ID (required if multiple on page)
+ * @param shape           - Cell shape: 'circle' | 'square' | 'hexagon' | 'diamond' | 'icon'
+ * @param icon            - Phosphor icon name (only used when shape='icon'), e.g. 'heart'
+ * @param iconWeight      - Phosphor weight: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone'
+ * @param cellSize        - Grid cell size in px (default: 30)
+ * @param proximity       - Mouse proximity range in px (default: 125)
+ * @param growth          - Max growth on proximity in px (default: 60)
+ * @param ease            - Easing factor 0–1 (default: 0.075)
  */
 import { BRAND_CONFIG } from '../../../../lib/config/brand';
 
 interface Props {
   backgroundImage?: string;
   canvasId?: string;
+  shape?: 'circle' | 'square' | 'hexagon' | 'diamond' | 'icon';
+  icon?: string;
+  iconWeight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone';
+  cellSize?: number;
+  proximity?: number;
+  growth?: number;
+  ease?: number;
   class?: string;
 }
 
 const {
   backgroundImage = BRAND_CONFIG.footer.defaultImage,
   canvasId = 'reveal-canvas',
+  shape = 'circle',
+  icon = 'heart',
+  iconWeight = 'regular',
+  cellSize = 30,
+  proximity = 125,
+  growth = 60,
+  ease = 0.075,
   class: className = ''
 } = Astro.props;
+
+// Build icon path — use local Phosphor SVGs (same pattern as PhysicsOverlay)
+const iconSrc = shape === 'icon'
+  ? `/Icons/phosphor/${icon}${iconWeight !== 'regular' ? `-${iconWeight}` : ''}.svg`
+  : '';
 ---
 
 <canvas
@@ -28,6 +61,12 @@ const {
   class:list={['reveal-canvas', className]}
   aria-hidden="true"
   data-bg-image={backgroundImage}
+  data-shape={shape}
+  data-icon-src={iconSrc || undefined}
+  data-cell-size={cellSize}
+  data-proximity={proximity}
+  data-growth={growth}
+  data-ease={ease}
 ></canvas>
 
 <script>
@@ -37,22 +76,167 @@ const {
     if (document.documentElement.classList.contains('a11y-reduce-motion')) return;
 
     const backgroundImage = canvas.dataset.bgImage || '';
+    const shapeName = (canvas.dataset.shape || 'circle') as 'circle' | 'square' | 'hexagon' | 'diamond' | 'icon';
+    const iconSrc = canvas.dataset.iconSrc || '';
     const context = canvas.getContext('2d');
     if (!context) return;
 
-    const params = { size: 30, radius: 0.1, proximity: 125, growth: 60, ease: 0.075 };
+    const params = {
+      size: Number(canvas.dataset.cellSize) || 30,
+      radius: 0.1,
+      proximity: canvas.dataset.proximity != null ? Number(canvas.dataset.proximity) : 125,
+      growth: canvas.dataset.growth != null ? Number(canvas.dataset.growth) : 60,
+      ease: Number(canvas.dataset.ease) || 0.075,
+    };
 
-    class Circle {
+    /* ==========================================================
+       SHAPE CLASSES — each implements draw() for the clip path
+       ========================================================== */
+
+    interface Cell {
+      _r: number;
+      r: number;
+      g: number;
+      x: number;
+      y: number;
+      draw(ctx: CanvasRenderingContext2D, ease: number): void;
+    }
+
+    class CircleCell implements Cell {
       _r: number; r: number; g: number; x: number; y: number;
       constructor(r: number, x: number, y: number) {
         this._r = r; this.r = r; this.g = 0; this.x = x; this.y = y;
       }
       draw(ctx: CanvasRenderingContext2D, ease: number) {
         this.r += ((this._r + this.g) - this.r) * ease;
-        ctx.moveTo(this.x, this.y);
+        ctx.moveTo(this.x + this.r, this.y);
         ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
       }
     }
+
+    class SquareCell implements Cell {
+      _r: number; r: number; g: number; x: number; y: number;
+      constructor(r: number, x: number, y: number) {
+        this._r = r; this.r = r; this.g = 0; this.x = x; this.y = y;
+      }
+      draw(ctx: CanvasRenderingContext2D, ease: number) {
+        this.r += ((this._r + this.g) - this.r) * ease;
+        const half = this.r;
+        ctx.rect(this.x - half, this.y - half, half * 2, half * 2);
+      }
+    }
+
+    class HexCell implements Cell {
+      _r: number; r: number; g: number; x: number; y: number;
+      constructor(r: number, x: number, y: number) {
+        this._r = r; this.r = r; this.g = 0; this.x = x; this.y = y;
+      }
+      draw(ctx: CanvasRenderingContext2D, ease: number) {
+        this.r += ((this._r + this.g) - this.r) * ease;
+        const a = (2 * Math.PI) / 6;
+        ctx.moveTo(this.x + this.r, this.y);
+        for (let i = 1; i <= 6; i++) {
+          ctx.lineTo(
+            this.x + this.r * Math.cos(a * i),
+            this.y + this.r * Math.sin(a * i)
+          );
+        }
+        ctx.closePath();
+      }
+    }
+
+    class DiamondCell implements Cell {
+      _r: number; r: number; g: number; x: number; y: number;
+      constructor(r: number, x: number, y: number) {
+        this._r = r; this.r = r; this.g = 0; this.x = x; this.y = y;
+      }
+      draw(ctx: CanvasRenderingContext2D, ease: number) {
+        this.r += ((this._r + this.g) - this.r) * ease;
+        ctx.moveTo(this.x, this.y - this.r);
+        ctx.lineTo(this.x + this.r, this.y);
+        ctx.lineTo(this.x, this.y + this.r);
+        ctx.lineTo(this.x - this.r, this.y);
+        ctx.closePath();
+      }
+    }
+
+    class IconCell implements Cell {
+      _r: number; r: number; g: number; x: number; y: number;
+      static iconImage: HTMLImageElement | null = null;
+      static iconReady = false;
+
+      constructor(r: number, x: number, y: number) {
+        this._r = r; this.r = r; this.g = 0; this.x = x; this.y = y;
+      }
+
+      static loadIcon(src: string): Promise<void> {
+        return new Promise((resolve) => {
+          if (IconCell.iconReady) { resolve(); return; }
+          const img = new Image();
+          img.onload = () => {
+            // Render SVG to a canvas for use as pattern
+            const offscreen = document.createElement('canvas');
+            offscreen.width = img.naturalWidth || 256;
+            offscreen.height = img.naturalHeight || 256;
+            const octx = offscreen.getContext('2d');
+            if (octx) {
+              octx.drawImage(img, 0, 0, offscreen.width, offscreen.height);
+            }
+            // Store as image for stamping
+            const stampImg = new Image();
+            stampImg.onload = () => {
+              IconCell.iconImage = stampImg;
+              IconCell.iconReady = true;
+              resolve();
+            };
+            stampImg.src = offscreen.toDataURL();
+          };
+          img.onerror = () => {
+            // Fallback to circle if icon fails
+            IconCell.iconReady = false;
+            resolve();
+          };
+          img.src = src;
+        });
+      }
+
+      draw(ctx: CanvasRenderingContext2D, ease: number) {
+        this.r += ((this._r + this.g) - this.r) * ease;
+
+        if (IconCell.iconReady && IconCell.iconImage) {
+          // Draw the icon scaled to current radius
+          const s = this.r * 2;
+          if (s > 0.5) {
+            ctx.save();
+            ctx.translate(this.x - s / 2, this.y - s / 2);
+            ctx.drawImage(IconCell.iconImage, 0, 0, s, s);
+            ctx.restore();
+          }
+        } else {
+          // Fallback: circle
+          ctx.moveTo(this.x + this.r, this.y);
+          ctx.arc(this.x, this.y, Math.max(this.r, 0.1), 0, 2 * Math.PI);
+        }
+      }
+    }
+
+    /* ==========================================================
+       CELL FACTORY
+       ========================================================== */
+
+    function createCell(r: number, x: number, y: number): Cell {
+      switch (shapeName) {
+        case 'square':  return new SquareCell(r, x, y);
+        case 'hexagon':  return new HexCell(r, x, y);
+        case 'diamond': return new DiamondCell(r, x, y);
+        case 'icon':    return new IconCell(r, x, y);
+        default:        return new CircleCell(r, x, y);
+      }
+    }
+
+    /* ==========================================================
+       GRID LAYOUT — hexagons use offset rows
+       ========================================================== */
 
     function map(v: number, a: number, b: number, c: number, d: number) {
       return c + (d - c) * ((v - a) / (b - a));
@@ -60,7 +244,11 @@ const {
 
     let imageLoaded = false;
     const image = new Image();
-    let circles: Circle[] = [];
+    let cells: Cell[] = [];
+
+    // Offscreen canvas for scratch mask compositing (liquid reveal eraser mode)
+    let scratchRevealBuf: HTMLCanvasElement | null = null;
+    let scratchRevealCtx: CanvasRenderingContext2D | null = null;
 
     function resize() {
       const rect = canvas.getBoundingClientRect();
@@ -69,32 +257,51 @@ const {
     }
 
     function build() {
-      circles = [];
-      const cols = Math.ceil(canvas.width / params.size) + 1;
-      const rows = Math.ceil(canvas.height / params.size) + 1;
-      for (let i = 0; i < cols * rows; i++) {
-        circles.push(new Circle(params.radius, params.size * (i % cols), params.size * ~~(i / cols)));
+      cells = [];
+      const s = params.size;
+
+      if (shapeName === 'hexagon') {
+        // Hexagonal grid — offset every other row
+        const rowH = s * Math.sqrt(3) / 2;
+        const cols = Math.ceil(canvas.width / s) + 2;
+        const rows = Math.ceil(canvas.height / rowH) + 2;
+        for (let row = 0; row < rows; row++) {
+          const offsetX = row % 2 === 0 ? 0 : s / 2;
+          for (let col = 0; col < cols; col++) {
+            cells.push(createCell(params.radius, col * s + offsetX, row * rowH));
+          }
+        }
+      } else {
+        // Regular grid for all other shapes
+        const cols = Math.ceil(canvas.width / s) + 1;
+        const rows = Math.ceil(canvas.height / s) + 1;
+        for (let i = 0; i < cols * rows; i++) {
+          cells.push(createCell(params.radius, s * (i % cols), s * ~~(i / cols)));
+        }
       }
     }
 
     function proximity(x: number, y: number) {
-      for (const c of circles) {
+      for (const c of cells) {
         const dist = Math.sqrt((c.x - x) ** 2 + (c.y - y) ** 2);
         let d = map(dist, c._r, c._r + params.proximity, params.growth, 0);
         c.g = d < 0 ? 0 : d;
       }
     }
 
-    canvas.parentElement?.addEventListener('mousemove', (e) => {
-      const r = canvas.getBoundingClientRect();
-      proximity(e.clientX - r.left, e.clientY - r.top);
-    });
+    // Only attach proximity listeners if there's growth potential
+    if (params.growth > 0) {
+      canvas.parentElement?.addEventListener('mousemove', (e) => {
+        const r = canvas.getBoundingClientRect();
+        proximity(e.clientX - r.left, e.clientY - r.top);
+      });
 
-    canvas.parentElement?.addEventListener('touchmove', (e) => {
-      if (!e.touches.length) return;
-      const r = canvas.getBoundingClientRect();
-      proximity(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top);
-    }, { passive: true });
+      canvas.parentElement?.addEventListener('touchmove', (e) => {
+        if (!e.touches.length) return;
+        const r = canvas.getBoundingClientRect();
+        proximity(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top);
+      }, { passive: true });
+    }
 
     function drawImage() {
       context!.clip();
@@ -110,11 +317,87 @@ const {
     function animate() {
       context!.clearRect(0, 0, canvas.width, canvas.height);
       context!.save();
-      context!.beginPath();
-      for (const c of circles) c.draw(context!, params.ease);
-      if (imageLoaded) drawImage();
-      else context!.fill();
-      context!.restore();
+
+      // Only draw proximity cells if there's growth potential.
+      // When growth=0, skip cells entirely — canvas stays transparent
+      // so layers underneath (e.g. physics icons) show through.
+      // The scratch mask pass below still runs independently.
+      if (params.growth > 0) {
+        if (shapeName === 'icon') {
+          // Icon mode: draw icons directly (no clip path, icons ARE the reveal)
+          for (const c of cells) c.draw(context!, params.ease);
+          // Composite: use icons as mask for the image
+          if (imageLoaded) {
+            context!.globalCompositeOperation = 'source-in';
+            const sx = canvas.width / image.naturalWidth;
+            const sy = canvas.height / image.naturalHeight;
+            const s = Math.max(sx, sy);
+            const w = image.naturalWidth * s;
+            const h = image.naturalHeight * s;
+            context!.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight,
+              (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+            context!.globalCompositeOperation = 'source-over';
+          }
+        } else {
+          // Path-based shapes: use as clip mask
+          context!.beginPath();
+          for (const c of cells) c.draw(context!, params.ease);
+
+          // ---- External reveal points (liquid-reveal-sync live mode) ----
+          const extPoints = (canvas as any).__externalRevealPoints as
+            Array<{ x: number; y: number; radius: number; growth: number }> | null;
+          if (extPoints && extPoints.length > 0) {
+            for (const p of extPoints) {
+              context!.moveTo(p.x + p.radius, p.y);
+              context!.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+            }
+          }
+
+          if (imageLoaded) drawImage();
+          else context!.fill();
+        }
+      }
+
+      context!.restore(); // Clear clip before scratch mask pass
+
+      // ---- Scratch mask overlay (liquid-reveal-sync eraser mode) ----
+      // Composited as a separate pass — no clip interference from proximity circles.
+      // Uses an offscreen buffer: draw image masked by scratch marks, then layer
+      // behind the proximity reveal via destination-over.
+      const scratchMask = (canvas as any).__scratchMask as HTMLCanvasElement | null;
+      if (scratchMask && imageLoaded) {
+        // Lazy-create offscreen buffer
+        if (!scratchRevealBuf) {
+          scratchRevealBuf = document.createElement('canvas');
+          scratchRevealCtx = scratchRevealBuf.getContext('2d');
+        }
+        // Match dimensions
+        if (scratchRevealBuf.width !== canvas.width || scratchRevealBuf.height !== canvas.height) {
+          scratchRevealBuf.width = canvas.width;
+          scratchRevealBuf.height = canvas.height;
+        }
+
+        if (scratchRevealCtx) {
+          // Build masked image: scratch marks → source-in → image
+          scratchRevealCtx.clearRect(0, 0, canvas.width, canvas.height);
+          scratchRevealCtx.globalCompositeOperation = 'source-over';
+          scratchRevealCtx.drawImage(scratchMask, 0, 0, canvas.width, canvas.height);
+          scratchRevealCtx.globalCompositeOperation = 'source-in';
+          const sx = canvas.width / image.naturalWidth;
+          const sy = canvas.height / image.naturalHeight;
+          const s = Math.max(sx, sy);
+          const w = image.naturalWidth * s;
+          const h = image.naturalHeight * s;
+          scratchRevealCtx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight,
+            (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+
+          // Layer the scratch reveal behind the proximity reveal
+          context!.globalCompositeOperation = 'destination-over';
+          context!.drawImage(scratchRevealBuf, 0, 0);
+          context!.globalCompositeOperation = 'source-over';
+        }
+      }
+
       requestAnimationFrame(animate);
     }
 
@@ -126,10 +409,18 @@ const {
     }
     window.addEventListener('resize', rebuild);
 
-    image.onload = () => { imageLoaded = true; };
-    image.src = backgroundImage;
-    rebuild();
-    animate();
+    // Load icon if needed, then start
+    async function start() {
+      if (shapeName === 'icon' && iconSrc) {
+        await IconCell.loadIcon(iconSrc);
+      }
+      image.onload = () => { imageLoaded = true; };
+      image.src = backgroundImage;
+      rebuild();
+      animate();
+    }
+
+    start();
   }
 
   function init() {

@@ -81,10 +81,14 @@ function initScrollColors(): void {
   const fallbackColor = 'rgb(248, 245, 242)';
   const initialColor = resolveColor('var(--brand-c-bg)', fallbackColor);
 
-  // Build ordered section → colour map
+  // Build ordered section → colour map (bg + pattern can differ)
   const sectionData = Array.from(sections).map((section, index) => ({
     section,
     color: resolveColor(section.getAttribute('data-scroll-bg') || '', initialColor),
+    patternColor: resolveColor(
+      section.getAttribute('data-scroll-pattern') || section.getAttribute('data-scroll-bg') || '',
+      initialColor,
+    ),
     index,
   }));
 
@@ -93,21 +97,29 @@ function initScrollColors(): void {
 
   let currentColor = initialColor;
 
+  // Set initial pattern colour so PatternOverlays have a value on load
+  target.style.setProperty('--scroll-pattern-color', initialColor);
+
   // Track which section is currently "active" (most visible)
   const visibilityMap = new Map<HTMLElement, number>();
 
+  let currentPatternColor = initialColor;
+
   /**
-   * Animate wrapper to a new colour
+   * Animate both background colour and pattern colour.
+   * Each can be a different value per section.
    */
-  function animateTo(color: string): void {
-    if (color === currentColor) return;
+  function animateTo(bgColor: string, patternColor: string): void {
+    if (bgColor === currentColor && patternColor === currentPatternColor) return;
     gsap.killTweensOf(target);
     gsap.to(target, {
-      backgroundColor: color,
-      duration: 0.5,
-      ease: 'power2.out',
+      backgroundColor: bgColor,
+      '--scroll-pattern-color': patternColor,
+      duration: 0.8,
+      ease: 'power2.inOut',
     });
-    currentColor = color;
+    currentColor = bgColor;
+    currentPatternColor = patternColor;
   }
 
   /**
@@ -132,10 +144,10 @@ function initScrollColors(): void {
     });
 
     if (bestRatio > 0) {
-      animateTo(bestData.color);
+      animateTo(bestData.color, bestData.patternColor);
     } else {
       // No section visible — revert to initial
-      animateTo(initialColor);
+      animateTo(initialColor, initialColor);
     }
   }
 

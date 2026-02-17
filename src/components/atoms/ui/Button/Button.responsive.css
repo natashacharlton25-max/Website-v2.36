@@ -19,6 +19,33 @@
     .dropdown-menu {
       min-width: 10rem;
     }
+
+    /* Tray-3d: reduce shadow depth on small screens (performance) */
+    .btn--fx-tray-3d {
+      box-shadow:
+        inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 20%, transparent),
+        0 0.0625em 0 0 #999,
+        0 0.125em 0 0 #888,
+        0 0.25em  0 0 #777,
+        0 0.25em 0.25em 0 #666;
+    }
+
+    .btn--fx-tray-3d:hover {
+      box-shadow:
+        inset 0 0.03em 0 0 color-mix(in oklch, var(--color-White) 20%, transparent),
+        0 0.03em 0 0 #666,
+        0 0.0625em 0 0 #555,
+        0 0.125em 0.25em 0 #444;
+    }
+
+    /* Rainbow-border wrapper: full width on mobile */
+    .btn-rainbow-wrap {
+      display: block;
+    }
+
+    .btn-rainbow-wrap .btn {
+      width: 100%;
+    }
   }
 
   @media (max-width: 200px) {
@@ -39,6 +66,17 @@
       font-size: 0.8rem;
       padding: var(--space-sm) var(--space-md);
       min-height: 2.25rem;
+    }
+
+    /* Kill expensive effects at tiny viewports */
+    .btn--fx-tray-3d {
+      box-shadow: var(--shadow-btn);
+      text-shadow: none;
+    }
+
+    .btn--fx-tray-3d:hover {
+      transform: none;
+      box-shadow: var(--shadow-btn-hover);
     }
   }
 

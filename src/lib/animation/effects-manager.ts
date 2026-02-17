@@ -51,6 +51,7 @@
 
 import Matter from 'matter-js';
 import { gsap } from 'gsap';
+import { createLiquidRevealSync, type LiquidRevealSync, type LiquidRevealOptions } from './liquid-reveal-sync';
 
 /* ==================================================================
    TYPES
@@ -123,6 +124,9 @@ class EffectsManager {
   private readonly TARGET_FPS = 55;         // Below this, start throttling
   private readonly CRITICAL_FPS = 30;       // Below this, disable heaviest effect
   private throttling = false;
+
+  /* ---- Liquid reveal syncs ---- */
+  private liquidSyncs: Map<string, LiquidRevealSync> = new Map();
 
   constructor() {
     // IntersectionObserver for visibility tracking
@@ -221,6 +225,10 @@ class EffectsManager {
   /* ---- Performance auto-adjustment ---- */
 
   private adjustPerformance(): void {
+    // Skip FPS checks if the RAF loop isn't actively running
+    // (no tick callbacks means fps=0 is expected, not a performance problem)
+    if (!this.running || this.tickCallbacks.size === 0) return;
+
     if (this.fps < this.CRITICAL_FPS && !this.throttling) {
       // Emergency: pause the heaviest active effect
       this.throttling = true;
@@ -417,54 +425,49 @@ class EffectsManager {
 
   /* ==================================================================
      LIQUID REVEAL — Sync PhysicsOverlay bodies as RevealCanvas erasers
+     Uses standalone liquid-reveal-sync module for full eraser/live modes.
      ================================================================== */
 
   /**
    * Connect a PhysicsOverlay to a RevealCanvas so falling icons
    * "scratch off" the canvas to reveal the image underneath.
    *
-   * Call after both effects are registered:
-   *   effectsManager.syncLiquidReveal(physicsElement, canvasElement);
+   * @param physicsEl — the .physics-overlay container
+   * @param canvasEl  — the .reveal-canvas <canvas> element
+   * @param options   — LiquidRevealOptions (mode, radiusPadding, etc.)
    */
-  syncLiquidReveal(physicsEl: HTMLElement, canvasEl: HTMLElement): void {
-    const physicsEffect = this.effects.get(physicsEl);
-    const canvasEffect = this.effects.get(canvasEl);
+  syncLiquidReveal(
+    physicsEl: HTMLElement,
+    canvasEl: HTMLCanvasElement,
+    options?: LiquidRevealOptions
+  ): void {
+    const key = `${physicsEl.id || 'p'}-${canvasEl.id || 'c'}`;
 
-    if (!physicsEffect || !canvasEffect) {
-      console.warn('[EffectsManager] Cannot sync — one or both effects not registered');
-      return;
+    // Don't double-sync
+    if (this.liquidSyncs.has(key)) return;
+
+    const sync = createLiquidRevealSync(physicsEl, canvasEl, options);
+    this.liquidSyncs.set(key, sync);
+  }
+
+  /**
+   * Disconnect a specific PhysicsOverlay ↔ RevealCanvas sync.
+   */
+  unsyncLiquidReveal(physicsEl: HTMLElement, canvasEl: HTMLCanvasElement): void {
+    const key = `${physicsEl.id || 'p'}-${canvasEl.id || 'c'}`;
+    const sync = this.liquidSyncs.get(key);
+    if (sync) {
+      sync.destroy();
+      this.liquidSyncs.delete(key);
     }
+  }
 
-    const physics = physicsEffect.handle as PhysicsHandle;
-    const reveal = canvasEffect.handle as RevealCanvasHandle;
-    const ctx = reveal.canvas.getContext('2d');
-    if (!ctx) return;
-
-    // After each physics update, draw body positions as "erasers" on the canvas
-    Matter.Events.on(physics.engine, 'afterUpdate', () => {
-      if (!physicsEffect.active || !canvasEffect.active) return;
-
-      // Get canvas position relative to physics container
-      const physicsRect = physicsEl.getBoundingClientRect();
-      const canvasRect = reveal.canvas.getBoundingClientRect();
-      const offsetX = physicsRect.left - canvasRect.left;
-      const offsetY = physicsRect.top - canvasRect.top;
-
-      ctx.save();
-      ctx.globalCompositeOperation = 'destination-out';
-
-      physics.bodies.forEach((body) => {
-        const x = body.position.x + offsetX;
-        const y = body.position.y + offsetY;
-        const radius = (body.circleRadius || 12) + 10; // Slight expansion for softer reveal
-
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      ctx.restore();
-    });
+  /**
+   * Destroy all active liquid reveal syncs.
+   */
+  destroyAllSyncs(): void {
+    this.liquidSyncs.forEach(sync => sync.destroy());
+    this.liquidSyncs.clear();
   }
 
   /* ==================================================================

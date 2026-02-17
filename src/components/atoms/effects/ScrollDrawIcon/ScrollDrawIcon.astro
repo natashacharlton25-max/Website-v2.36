@@ -1,0 +1,86 @@
+---
+/**
+ * ScrollDrawIcon
+ * src/components/atoms/effects/ScrollDrawIcon/ScrollDrawIcon.astro
+ *
+ * An SVG icon that draws itself on scroll. Wraps Icon component
+ * with scroll-draw.ts data attributes.
+ *
+ * Usage:
+ * <ScrollDrawIcon name="heart" variant="draw" />
+ * <ScrollDrawIcon name="star" variant="rainbowchase" scrub />
+ * <ScrollDrawIcon name="flower-lotus" variant="chachaslide" size={80} />
+ *
+ * Python JSON shape:
+ * {
+ *   "component": "ScrollDrawIcon",
+ *   "props": {
+ *     "name": "heart",
+ *     "variant": "rainbowchase",
+ *     "size": 120,
+ *     "scrub": true
+ *   }
+ * }
+ */
+import Icon from '../../atoms/ui/Icon.astro';
+
+interface Props {
+  /** Phosphor icon name */
+  name: string;
+  /** DrawSVG variant */
+  variant?: 'draw' | 'drawcenter' | 'chachaslide' | 'flashgordon' | 'rainbowchase' | 'pulse';
+  /** Icon size in px (default: 120) */
+  size?: number;
+  /** Scrub with scroll (default: false — plays once on enter) */
+  scrub?: boolean;
+  /** ScrollTrigger start (default: 'top 90%') */
+  start?: string;
+  /** ScrollTrigger end (default: 'top 20%') */
+  end?: string;
+  /** Draw colour */
+  color?: string;
+  /** Stroke width */
+  strokeWidth?: number;
+  /** Replay on every scroll (default: false — plays once) */
+  repeat?: boolean;
+  class?: string;
+}
+
+const {
+  name,
+  variant = 'draw',
+  size = 120,
+  scrub = false,
+  start = 'top 90%',
+  end = 'top 20%',
+  color,
+  strokeWidth,
+  repeat = false,
+  class: className = '',
+} = Astro.props;
+---
+
+<div
+  class={`scroll-draw-icon ${className}`}
+  data-scroll-draw
+  data-draw-variant={variant}
+  data-draw-scrub={String(scrub)}
+  data-draw-start={start}
+  data-draw-end={end}
+  data-draw-once={String(!repeat)}
+  data-draw-color={color || undefined}
+  data-draw-stroke-width={strokeWidth ? String(strokeWidth) : undefined}
+  style={`width: ${size}px; height: ${size}px;`}
+>
+  <Icon name={name} size={size} stroke />
+</div>
+
+<style>
+  @layer components {
+    .scroll-draw-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+</style>

@@ -15,6 +15,16 @@
  * <Icon name="heart-fill" size={24} stroke />
  * <Icon name="ph:heart-duotone" size={20} /> (legacy - maps to fill)
  *
+ * Draw animation (DrawSVGPlugin):
+ * <Icon name="heart" draw />                          — draws on hover
+ * <Icon name="heart" draw="rainbowchase" />           — rainbow chase on hover
+ * <Icon name="heart" draw drawOnScroll />              — draws when scrolled into view
+ * <Icon name="heart" draw="flashgordon" drawOnScroll drawScrub />  — scrubbed to scroll
+ *
+ * Morph animation (MorphSVGPlugin):
+ * <Icon name="heart" morphTo="star" />                — morphs to star on hover
+ * <Icon name="heart" morphTo="flower-lotus" morphColor="var(--brand-c-secondary)" />
+ *
  * Props:
  * - name: Icon name or path (e.g., "sparkle-fill" or "wellness/heart-fill")
  * - size: Icon size in pixels (default: 24)
@@ -26,6 +36,12 @@
  * - pulse: Scale up/down with opacity for attention
  * - bounce: Subtle bounce as indicator
  * - stroke: Line-art mode — fill becomes none, stroke shows
+ * - draw: Enable DrawSVG animation — true or variant name
+ * - drawOnScroll: Trigger draw on scroll instead of hover
+ * - drawScrub: Scrub draw with scroll position (requires drawOnScroll)
+ * - drawColor: Stroke color for draw animation
+ * - morphTo: Target icon name for MorphSVG (enables morph on hover)
+ * - morphColor: Fill color for morph target state
  * - class: Additional CSS classes
  *
  * Icons stored in: /public/Icons/phosphor/[category]/
@@ -47,9 +63,20 @@ interface Props {
   pulse?: boolean;
   bounce?: boolean;
   stroke?: boolean;
+  draw?: boolean | 'draw' | 'drawcenter' | 'chachaslide' | 'flashgordon' | 'rainbowchase' | 'pulse';
+  drawOnScroll?: boolean;
+  drawScrub?: boolean;
+  drawColor?: string;
+  morphTo?: string;
+  morphColor?: string;
 }
 
-const { name, size = 24, class: className = '', color, shadow, glow, gradient, spin, pulse, bounce, stroke } = Astro.props;
+const {
+  name, size = 24, class: className = '', color,
+  shadow, glow, gradient, spin, pulse, bounce, stroke,
+  draw, drawOnScroll, drawScrub, drawColor,
+  morphTo, morphColor,
+} = Astro.props;
 
 // Strip 'ph:' prefix if present (for backwards compatibility)
 let iconName = name.startsWith('ph:') ? name.slice(3) : name;
@@ -87,9 +114,48 @@ if (iconName.includes('/')) {
   }
 }
 
+// ── Morph: load target SVG at build time ──
+let morphTargetContent: string | null = null;
+if (morphTo && !draw) {
+  let morphName = morphTo.startsWith('ph:') ? morphTo.slice(3) : morphTo;
+  morphName = morphName.replace(/-duotone$/, '-fill').replace(/-regular$/, '-fill');
+
+  if (morphName.includes('/')) {
+    morphTargetContent = tryLoadIcon(`/Icons/phosphor/${morphName}.svg`);
+  } else {
+    for (const category of categories) {
+      morphTargetContent = tryLoadIcon(`/Icons/phosphor/${category}/${morphName}.svg`);
+      if (morphTargetContent) break;
+    }
+  }
+}
+
+// ── Draw mode: convert to stroke SVG for DrawSVG animation ──
+// DrawSVG animates strokes, so we need fill="none" stroke="currentColor"
+const needsStrokeConversion = !!draw && !stroke; // Don't double-convert if stroke prop already set
+
+if (needsStrokeConversion && iconContent) {
+  // Remove fill from <svg> root
+  iconContent = iconContent.replace(/<svg([^>]*)>/, (match, attrs) => {
+    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
+    return `<svg${cleaned} fill="none">`;
+  });
+
+  // Hide the viewBox bounding <rect>
+  iconContent = iconContent.replace(/<rect([^/]*)\/>/g, '<rect$1 fill="none" stroke="none"/>');
+
+  // Rewrite shape elements: remove existing fill, add stroke attrs
+  const drawStrokeWidth = 16;
+  const shapeRe = /<(path|circle|polygon|polyline)([^/]*)\/>/g;
+  iconContent = iconContent.replace(shapeRe, (match, tag, attrs) => {
+    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
+    return `<${tag}${cleaned} fill="none" stroke="currentColor" stroke-width="${drawStrokeWidth}"/>`;
+  });
+}
+
 // Gradient: inject SVG <linearGradient> and swap fill to url(#id)
 // This is server-side so zero runtime cost, works everywhere.
-if (gradient && iconContent) {
+if (gradient && iconContent && !draw) {
   const gradientId = `icon-grad-${Math.random().toString(36).slice(2, 8)}`;
 
   const gradientStops: Record<string, string> = {
@@ -114,7 +180,7 @@ if (gradient && iconContent) {
 }
 
 // Stroke: server-side SVG rewrite — set fill="none" stroke="currentColor" on shape elements
-if (stroke && iconContent) {
+if (stroke && !draw && iconContent) {
   // Remove fill from <svg> root
   iconContent = iconContent.replace(/<svg([^>]*)>/, (match, attrs) => {
     const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
@@ -137,6 +203,9 @@ if (stroke && iconContent) {
 // Fallback icon (simple circle)
 const fallbackIcon = `<svg viewBox="0 0 256 256" width="${size}" height="${size}" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.2"/><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-width="16"/></svg>`;
 
+// ── Resolve draw variant ──
+const drawVariant = typeof draw === 'string' ? draw : 'draw';
+
 // Build effect classes
 const effectClasses = [
   shadow ? `icon--shadow-${shadow}` : '',
@@ -145,14 +214,33 @@ const effectClasses = [
   spin ? 'icon--spin' : '',
   pulse ? 'icon--pulse' : '',
   bounce ? 'icon--bounce' : '',
-  stroke ? 'icon--stroke' : '',
+  stroke || draw ? 'icon--stroke' : '',
+  draw ? 'icon--draw' : '',
+  morphTo ? 'icon--morph' : '',
 ].filter(Boolean).join(' ');
+
+// ── Data attributes for client-side scripts ──
+const dataAttrs: Record<string, string | undefined> = {};
+
+if (draw) {
+  dataAttrs['data-icon-draw'] = drawVariant;
+  if (drawOnScroll) dataAttrs['data-icon-draw-scroll'] = 'true';
+  if (drawScrub) dataAttrs['data-icon-draw-scrub'] = 'true';
+  if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
+}
+
+if (morphTo && morphTargetContent) {
+  dataAttrs['data-icon-morph'] = 'true';
+  dataAttrs['data-icon-morph-target'] = morphTargetContent;
+  if (morphColor) dataAttrs['data-icon-morph-color'] = morphColor;
+}
 ---
 
 <span
   class={`icon ${effectClasses} ${className}`}
   style={`width: ${size}px; height: ${size}px;${color && !gradient ? ` color: ${color};` : ''}`}
   set:html={iconContent || fallbackIcon}
+  {...dataAttrs}
 />
 
 <style>

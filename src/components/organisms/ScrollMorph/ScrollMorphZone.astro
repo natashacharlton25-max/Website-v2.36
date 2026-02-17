@@ -1,0 +1,162 @@
+---
+/**
+ * ScrollMorphZone
+ * src/components/organisms/effects/ScrollMorphZone/ScrollMorphZone.astro
+ *
+ * Composition component: sticky pattern grid that morphs icons + shifts colour
+ * as sections scroll past. Wraps PatternOverlay (fixed) + child scroll sections.
+ *
+ * Python automation: generate sections array from JSON config.
+ *
+ * Usage:
+ * <ScrollMorphZone
+ *   sections={[
+ *     { bg: '#1a0a2e', pattern: '#FF0000', icon: 'wellness/heart-fill' },
+ *     { bg: '#0a2e1a', pattern: '#00FF66', icon: 'creative/star-fill' },
+ *   ]}
+ *   patternIcon="wellness/heart-fill"
+ *   patternScale={120}
+ *   patternOpacity={0.3}
+ * >
+ *   <!-- Or pass sections as children for full control -->
+ * </ScrollMorphZone>
+ *
+ * Python JSON shape:
+ * {
+ *   "component": "ScrollMorphZone",
+ *   "props": {
+ *     "patternIcon": "wellness/heart-fill",
+ *     "patternScale": 120,
+ *     "patternOpacity": 0.3
+ *   },
+ *   "sections": [
+ *     { "bg": "#1a0a2e", "pattern": "#FF0000", "icon": "wellness/heart-fill", "title": "Heart", "body": "Feel deeply." },
+ *     { "bg": "#0a2e1a", "pattern": "#00FF66", "icon": "creative/star-fill", "title": "Star", "body": "Shine brightly." }
+ *   ]
+ * }
+ */
+import PatternOverlay from '../../atoms/effects/PatternOverlay/PatternOverlay.astro';
+import Card from '../../atoms/ui/Card/Card.astro';
+import ParallaxDecor from '../../atoms/effects/ParallaxDecor/ParallaxDecor.astro';
+
+interface ScrollSection {
+  /** Section background colour */
+  bg: string;
+  /** Pattern icon colour */
+  pattern: string;
+  /** Phosphor icon name for morph target */
+  icon: string;
+  /** Card title */
+  title?: string;
+  /** Card body text */
+  body?: string;
+  /** Card variant (default: liquid-glass) */
+  cardVariant?: string;
+  /** DrawSVG effect on scroll (optional) */
+  drawEffect?: string;
+  /** Parallax decoration config (optional) */
+  decor?: {
+    rings?: Array<{ size: 'sm' | 'md' | 'lg'; depth: number; top?: string; left?: string; right?: string; bottom?: string }>;
+    dots?: Array<{ size?: 'sm' | 'md'; depth: number; top?: string; left?: string; right?: string; bottom?: string }>;
+  };
+}
+
+interface Props {
+  /** Sections config — generates scroll sections with cards */
+  sections?: ScrollSection[];
+  /** Initial pattern icon */
+  patternIcon?: string;
+  /** Pattern overlay scale */
+  patternScale?: number;
+  /** Pattern overlay opacity */
+  patternOpacity?: number;
+  /** Card depth for parallax (default: 1.3) */
+  cardDepth?: number;
+  /** Dark text mode (default: true for dark backgrounds) */
+  dark?: boolean;
+  /** Additional class on outer wrapper */
+  class?: string;
+}
+
+const {
+  sections = [],
+  patternIcon = 'wellness/heart-fill',
+  patternScale = 120,
+  patternOpacity = 0.3,
+  cardDepth = 1.3,
+  dark = true,
+  class: className = '',
+} = Astro.props;
+
+const hasSlot = Astro.slots.has('default');
+---
+
+<div class={`scroll-morph-zone ${className}`} data-scroll-morph>
+  <PatternOverlay icons={[patternIcon]} opacity={patternOpacity} scale={patternScale} />
+
+  {hasSlot ? (
+    <slot />
+  ) : (
+    sections.map((section) => (
+      <section
+        class={`scroll-morph-zone__section ${dark ? 'scroll-morph-zone__section--dark' : ''}`}
+        data-scroll-bg={section.bg}
+        data-scroll-pattern={section.pattern}
+        data-scroll-icon={section.icon}
+        data-scroll-effect={section.drawEffect || undefined}
+      >
+        {section.decor && (
+          <ParallaxDecor
+            rings={section.decor.rings}
+            dots={section.decor.dots}
+          />
+        )}
+
+        {(section.title || section.body) && (
+          <Card variant={(section.cardVariant as any) || 'liquid-glass'} radius="xl" padding="xl" data-depth={cardDepth}>
+            {section.title && <h3 class="card__title" style="text-transform:none; letter-spacing:normal;">{section.title}</h3>}
+            {section.body && <p class="card__text">{section.body}</p>}
+          </Card>
+        )}
+      </section>
+    ))
+  )}
+</div>
+
+<style>
+  @layer components {
+    .scroll-morph-zone {
+      position: relative;
+    }
+
+    /* Pattern overlay fixed to viewport — sections scroll past */
+    .scroll-morph-zone > :global(.pattern-overlay) {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .scroll-morph-zone__section {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scroll-morph-zone__section > :global(.card) {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 420px;
+    }
+
+    .scroll-morph-zone__section--dark {
+      color: #F8F5F2;
+    }
+  }
+</style>

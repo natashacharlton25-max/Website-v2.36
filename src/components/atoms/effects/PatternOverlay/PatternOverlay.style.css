@@ -3,8 +3,8 @@
  * @layer components
  *
  * Modes: preset (static/SMIL), icon-mask, image, grid, smil-grid
- * All SVG data URIs use %23 for # in hex colours.
- * SMIL animated presets use <animate> / <animateTransform> inside the SVG.
+ * All presets use mask-image so colour is controlled via background-color.
+ * Colour auto-syncs with ScrollColorBackground via --scroll-pattern-color.
  */
 
 @layer components {
@@ -27,49 +27,72 @@
 
 
   /* ==========================================================
-     STATIC PRESETS — SVG data URI backgrounds
+     PRESET SHARED — mask-image + background-color
+     Converts SVG patterns to masks so colour is CSS-controllable.
+     ========================================================== */
+  .pattern-overlay[data-pattern-preset] {
+    background-color: var(--po-color, currentColor);
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+  }
+
+
+  /* ==========================================================
+     STATIC PRESETS — SVG data URI masks
      ========================================================== */
 
   /* ---- Cross (your existing pattern) ---- */
   .pattern-overlay--preset-cross {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    background-size: var(--po-scale, 60px);
-    background-repeat: repeat;
+    --_mask: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-image: var(--_mask);
+    mask-image: var(--_mask);
+    -webkit-mask-size: var(--po-scale, 60px);
+    mask-size: var(--po-scale, 60px);
   }
 
   /* ---- Dots ---- */
   .pattern-overlay--preset-dots {
-    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='2' fill='%23000000' fill-opacity='1'/%3E%3C/svg%3E");
-    background-size: var(--po-scale, 20px);
-    background-repeat: repeat;
+    --_mask: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='2' fill='%23000000' fill-opacity='1'/%3E%3C/svg%3E");
+    -webkit-mask-image: var(--_mask);
+    mask-image: var(--_mask);
+    -webkit-mask-size: var(--po-scale, 20px);
+    mask-size: var(--po-scale, 20px);
   }
 
   /* ---- Diagonal lines ---- */
   .pattern-overlay--preset-diagonal {
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40L40 0' stroke='%23000000' stroke-opacity='1' stroke-width='1' fill='none'/%3E%3C/svg%3E");
-    background-size: var(--po-scale, 40px);
-    background-repeat: repeat;
+    --_mask: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40L40 0' stroke='%23000000' stroke-opacity='1' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    -webkit-mask-image: var(--_mask);
+    mask-image: var(--_mask);
+    -webkit-mask-size: var(--po-scale, 40px);
+    mask-size: var(--po-scale, 40px);
   }
 
   /* ---- Grid ---- */
   .pattern-overlay--preset-grid {
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40' stroke='%23000000' stroke-opacity='1' stroke-width='0.5' fill='none'/%3E%3C/svg%3E");
-    background-size: var(--po-scale, 40px);
-    background-repeat: repeat;
+    --_mask: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40' stroke='%23000000' stroke-opacity='1' stroke-width='0.5' fill='none'/%3E%3C/svg%3E");
+    -webkit-mask-image: var(--_mask);
+    mask-image: var(--_mask);
+    -webkit-mask-size: var(--po-scale, 40px);
+    mask-size: var(--po-scale, 40px);
   }
 
   /* ---- Waves ---- */
   .pattern-overlay--preset-waves {
-    background-image: url("data:image/svg+xml,%3Csvg width='80' height='20' viewBox='0 0 80 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q20 0 40 10 Q60 20 80 10' stroke='%23000000' stroke-opacity='1' stroke-width='1' fill='none'/%3E%3C/svg%3E");
-    background-size: var(--po-scale, 80px) calc(var(--po-scale, 80px) / 4);
-    background-repeat: repeat;
+    --_mask: url("data:image/svg+xml,%3Csvg width='80' height='20' viewBox='0 0 80 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q20 0 40 10 Q60 20 80 10' stroke='%23000000' stroke-opacity='1' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    -webkit-mask-image: var(--_mask);
+    mask-image: var(--_mask);
+    -webkit-mask-size: var(--po-scale, 80px) calc(var(--po-scale, 80px) / 4);
+    mask-size: var(--po-scale, 80px) calc(var(--po-scale, 80px) / 4);
   }
 
   /* ---- Hexagons ---- */
   .pattern-overlay--preset-hexagons {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='52' viewBox='0 0 60 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15 0l15 8.66v17.32L15 34.64 0 25.98V8.66z M45 0l15 8.66v17.32L45 34.64 30 25.98V8.66z M30 26l15 8.66v17.32L30 60.64 15 51.98V34.66z' stroke='%23000000' stroke-opacity='1' stroke-width='0.5' fill='none'/%3E%3C/svg%3E");
-    background-size: var(--po-scale, 60px);
-    background-repeat: repeat;
+    --_mask: url("data:image/svg+xml,%3Csvg width='60' height='52' viewBox='0 0 60 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15 0l15 8.66v17.32L15 34.64 0 25.98V8.66z M45 0l15 8.66v17.32L45 34.64 30 25.98V8.66z M30 26l15 8.66v17.32L30 60.64 15 51.98V34.66z' stroke='%23000000' stroke-opacity='1' stroke-width='0.5' fill='none'/%3E%3C/svg%3E");
+    -webkit-mask-image: var(--_mask);
+    mask-image: var(--_mask);
+    -webkit-mask-size: var(--po-scale, 60px);
+    mask-size: var(--po-scale, 60px);
   }
 
 
@@ -81,23 +104,29 @@
 
   /* ---- Cross spin — each cross rotates slowly ---- */
   .pattern-overlay--preset-cross-spin {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cg transform-origin='30 30'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 30 30' to='360 30 30' dur='20s' repeatCount='indefinite'/%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    background-size: var(--po-scale, 60px);
-    background-repeat: repeat;
+    --_mask: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cg transform-origin='30 30'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 30 30' to='360 30 30' dur='20s' repeatCount='indefinite'/%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-image: var(--_mask);
+    mask-image: var(--_mask);
+    -webkit-mask-size: var(--po-scale, 60px);
+    mask-size: var(--po-scale, 60px);
   }
 
   /* ---- Dots pulse — dots grow and shrink ---- */
   .pattern-overlay--preset-dots-pulse {
-    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='2' fill='%23000000' fill-opacity='1'%3E%3Canimate attributeName='r' values='1.5;3;1.5' dur='4s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/svg%3E");
-    background-size: var(--po-scale, 20px);
-    background-repeat: repeat;
+    --_mask: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='2' fill='%23000000' fill-opacity='1'%3E%3Canimate attributeName='r' values='1.5;3;1.5' dur='4s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/svg%3E");
+    -webkit-mask-image: var(--_mask);
+    mask-image: var(--_mask);
+    -webkit-mask-size: var(--po-scale, 20px);
+    mask-size: var(--po-scale, 20px);
   }
 
   /* ---- Waves flow — wave path shifts horizontally ---- */
   .pattern-overlay--preset-waves-flow {
-    background-image: url("data:image/svg+xml,%3Csvg width='80' height='20' viewBox='0 0 80 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='none' stroke='%23000000' stroke-opacity='1' stroke-width='1'%3E%3Canimate attributeName='d' values='M0 10 Q20 0 40 10 Q60 20 80 10;M0 10 Q20 20 40 10 Q60 0 80 10;M0 10 Q20 0 40 10 Q60 20 80 10' dur='6s' repeatCount='indefinite'/%3E%3C/path%3E%3C/svg%3E");
-    background-size: var(--po-scale, 80px) calc(var(--po-scale, 80px) / 4);
-    background-repeat: repeat;
+    --_mask: url("data:image/svg+xml,%3Csvg width='80' height='20' viewBox='0 0 80 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='none' stroke='%23000000' stroke-opacity='1' stroke-width='1'%3E%3Canimate attributeName='d' values='M0 10 Q20 0 40 10 Q60 20 80 10;M0 10 Q20 20 40 10 Q60 0 80 10;M0 10 Q20 0 40 10 Q60 20 80 10' dur='6s' repeatCount='indefinite'/%3E%3C/path%3E%3C/svg%3E");
+    -webkit-mask-image: var(--_mask);
+    mask-image: var(--_mask);
+    -webkit-mask-size: var(--po-scale, 80px) calc(var(--po-scale, 80px) / 4);
+    mask-size: var(--po-scale, 80px) calc(var(--po-scale, 80px) / 4);
   }
 
 
@@ -160,7 +189,8 @@
      INTERACTIVE — CSS hover effects for grid cells
      Icon rotates/scales on hover. Pure CSS, no JS.
      ========================================================== */
-  .pattern-overlay--interactive {
+  .pattern-overlay--interactive,
+  .pattern-overlay[data-pattern-magnetic="true"] {
     pointer-events: auto;
   }
 
