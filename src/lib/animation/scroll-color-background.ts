@@ -1,20 +1,19 @@
 /**
- * Scroll Color Background - GSAP ScrollTrigger color transitions
+ * Scroll Color Background - IntersectionObserver-powered color transitions
  *
- * Creates smooth background color transitions based on scroll position.
- * Detects sections with data-scroll-bg attributes and animates between colors.
+ * Creates smooth background color transitions as sections enter the viewport.
+ * Uses IntersectionObserver instead of GSAP ScrollTrigger — works natively
+ * with any scroll container including OverlayScrollbars.
  *
  * Features:
  * - Resolves CSS variables and OKLCH colors to RGB for GSAP
  * - Respects a11y settings (disables when active)
- * - Smooth bidirectional scrolling
+ * - Smooth bidirectional scrolling (tracks most-visible section)
  * - Kills previous tweens to prevent conflicts
+ * - Supports Astro View Transitions (astro:page-load)
  */
 
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 // A11y classes that should disable scroll color changes
 const a11yClasses = [
@@ -52,69 +51,133 @@ function resolveColor(cssVar: string, fallback: string): string {
   return toRGB(rawColor);
 }
 
+/** Track active observer so we can clean up on re-init */
+let activeObserver: IntersectionObserver | null = null;
+
 /**
  * Initialize scroll-triggered background color changes
  */
 function initScrollColors(): void {
-  // Skip if a11y settings active
-  if (a11yClasses.some(cls => document.body.classList.contains(cls))) return;
+  // Check #a11y-content-wrapper, not document.body
+  const wrapper = document.getElementById('a11y-content-wrapper');
+  if (wrapper && a11yClasses.some(cls => wrapper.classList.contains(cls))) return;
 
-  const bgLayer = document.getElementById('scroll-bg-layer');
-  if (!bgLayer) return;
+  // Also check system preference
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  const sections = document.querySelectorAll('[data-scroll-bg]');
+  // Target the visible container — #a11y-content-wrapper sits on top of body
+  // and is the OverlayScrollbars host, so it's the actual visible background.
+  const target = document.getElementById('a11y-content-wrapper') || document.body;
+
+  const sections = document.querySelectorAll<HTMLElement>('[data-scroll-bg]');
   if (sections.length === 0) return;
+
+  // Kill previous observer if re-initialising (View Transitions)
+  if (activeObserver) {
+    activeObserver.disconnect();
+    activeObserver = null;
+  }
 
   const fallbackColor = 'rgb(248, 245, 242)';
   const initialColor = resolveColor('var(--brand-c-bg)', fallbackColor);
 
-  // Set initial background
-  bgLayer.style.backgroundColor = initialColor;
-
-  // Build RGB color array
-  const sectionColors = Array.from(sections).map(section => ({
+  // Build ordered section → colour map
+  const sectionData = Array.from(sections).map((section, index) => ({
     section,
-    color: resolveColor(section.getAttribute('data-scroll-bg') || '', initialColor)
+    color: resolveColor(section.getAttribute('data-scroll-bg') || '', initialColor),
+    index,
   }));
+
+  // Detect OverlayScrollbars viewport — the actual scroll container
+  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]');
 
   let currentColor = initialColor;
 
-  // Create ScrollTriggers for each section
-  sectionColors.forEach(({ section, color }, index) => {
-    const prevColor = index > 0 ? sectionColors[index - 1].color : initialColor;
-    const nextColor = index < sectionColors.length - 1 ? sectionColors[index + 1].color : initialColor;
+  // Track which section is currently "active" (most visible)
+  const visibilityMap = new Map<HTMLElement, number>();
 
-    ScrollTrigger.create({
-      trigger: section,
-      start: 'top 60%',
-      end: 'bottom 40%',
-      onEnter: () => {
-        gsap.killTweensOf(bgLayer);
-        gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: color, duration: 0.5, ease: 'power2.out' });
-        currentColor = color;
-      },
-      onEnterBack: () => {
-        gsap.killTweensOf(bgLayer);
-        gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: color, duration: 0.5, ease: 'power2.out' });
-        currentColor = color;
-      },
-      onLeave: () => {
-        gsap.killTweensOf(bgLayer);
-        gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: nextColor, duration: 0.5, ease: 'power2.out' });
-        currentColor = nextColor;
-      },
-      onLeaveBack: () => {
-        gsap.killTweensOf(bgLayer);
-        gsap.fromTo(bgLayer, { backgroundColor: currentColor }, { backgroundColor: prevColor, duration: 0.5, ease: 'power2.out' });
-        currentColor = prevColor;
+  /**
+   * Animate wrapper to a new colour
+   */
+  function animateTo(color: string): void {
+    if (color === currentColor) return;
+    gsap.killTweensOf(target);
+    gsap.to(target, {
+      backgroundColor: color,
+      duration: 0.5,
+      ease: 'power2.out',
+    });
+    currentColor = color;
+  }
+
+  /**
+   * Find the section with the highest visibility and animate to its colour.
+   * On ties, prefer the one further down the page (natural scroll direction).
+   */
+  function updateActiveSection(): void {
+    let bestRatio = 0;
+    let bestData = sectionData[0];
+
+    sectionData.forEach((data) => {
+      const ratio = visibilityMap.get(data.section) || 0;
+      if (ratio > bestRatio) {
+        bestRatio = ratio;
+        bestData = data;
+      } else if (ratio === bestRatio && ratio > 0) {
+        // Tie-break: prefer lower section (further down page)
+        if (data.index > bestData.index) {
+          bestData = data;
+        }
       }
     });
+
+    if (bestRatio > 0) {
+      animateTo(bestData.color);
+    } else {
+      // No section visible — revert to initial
+      animateTo(initialColor);
+    }
+  }
+
+  /**
+   * IntersectionObserver with multiple thresholds for smooth tracking.
+   * Granular ratios let us pick the "most visible" section at any scroll point.
+   * Uses OverlayScrollbars viewport as root when available.
+   */
+  activeObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        visibilityMap.set(entry.target as HTMLElement, entry.intersectionRatio);
+      });
+      updateActiveSection();
+    },
+    {
+      root: osViewport || null,
+      threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+    }
+  );
+
+  // Observe all sections
+  sectionData.forEach(({ section }) => {
+    activeObserver!.observe(section);
   });
+}
+
+/**
+ * Setup with timing buffer — waits for page to settle
+ */
+function setup(): void {
+  setTimeout(() => {
+    initScrollColors();
+  }, 300);
 }
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initScrollColors);
+  document.addEventListener('DOMContentLoaded', setup);
 } else {
-  initScrollColors();
+  setup();
 }
+
+// Support Astro View Transitions
+document.addEventListener('astro:page-load', setup);

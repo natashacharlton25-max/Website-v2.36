@@ -1,42 +1,37 @@
 /**
  * PatternOverlay — a11y.css
- * @layer components
+ * @layer a11y
  *
  * Mirrors RevealCanvas a11y pattern:
- * - Reduce motion: hide animated presets, show static fallback
+ * - Reduce motion: hide animated presets, disable hover transitions
  * - Text-only: hide everything
- * - High contrast: hide everything
- * - CVD themes: cap opacity
- * - Monochrome: cap opacity
  *
- * All content is aria-hidden="true" — purely decorative.
+ * Theme overrides (high-contrast, CVD, monochrome, dark, cream) handled
+ * by brand tokens — decorative patterns are purely aria-hidden.
  */
 
-@layer components {
+@layer a11y.reduce-motion {
 
-  /* ==========================================================
-     REDUCE MOTION — CLASS-BASED
-     Hide animated SMIL presets. Static presets + mask remain.
-     Grid hover transitions disabled.
-     ========================================================== */
-  :global(#a11y-content-wrapper.a11y-reduce-motion) .pattern-overlay--preset-cross-spin,
-  :global(#a11y-content-wrapper.a11y-reduce-motion) .pattern-overlay--preset-dots-pulse,
-  :global(#a11y-content-wrapper.a11y-reduce-motion) .pattern-overlay--preset-waves-flow {
-    display: none;
+  .a11y-reduce-motion {
+
+    /* Hide animated SMIL presets — static presets + mask remain */
+    & .pattern-overlay--preset-cross-spin,
+    & .pattern-overlay--preset-dots-pulse,
+    & .pattern-overlay--preset-waves-flow {
+      display: none;
+    }
+
+    /* Disable grid hover transitions */
+    & .pattern-overlay--interactive .pattern-overlay__cell {
+      transition: none;
+    }
+
+    & .pattern-overlay--interactive .pattern-overlay__cell:hover {
+      transform: none;
+    }
   }
 
-  :global(#a11y-content-wrapper.a11y-reduce-motion) .pattern-overlay--interactive .pattern-overlay__cell {
-    transition: none !important;
-  }
-
-  :global(#a11y-content-wrapper.a11y-reduce-motion) .pattern-overlay--interactive .pattern-overlay__cell:hover {
-    transform: none;
-  }
-
-
-  /* ==========================================================
-     REDUCE MOTION — SYSTEM PREFERENCE
-     ========================================================== */
+  /* System preference fallback */
   @media (prefers-reduced-motion: reduce) {
     .pattern-overlay--preset-cross-spin,
     .pattern-overlay--preset-dots-pulse,
@@ -45,14 +40,14 @@
     }
 
     .pattern-overlay--interactive .pattern-overlay__cell {
-      transition: none !important;
+      transition: none;
     }
 
     .pattern-overlay--interactive .pattern-overlay__cell:hover {
       transform: none;
     }
 
-    /* Also disable SMIL inside inline SVGs */
+    /* Disable SMIL inside inline SVGs */
     .pattern-overlay--smil svg animate,
     .pattern-overlay--smil svg animateTransform,
     .pattern-overlay--smil svg animateMotion {
@@ -60,62 +55,17 @@
     }
   }
 
-
-  /* ==========================================================
-     TEXT-ONLY — hide everything
-     ========================================================== */
-  :global(#a11y-content-wrapper.a11y-text-only) .pattern-overlay {
-    display: none !important;
-  }
+}
 
 
-  /* ==========================================================
-     HIGH CONTRAST — hide everything (decorative noise)
-     ========================================================== */
-  :global(#a11y-content-wrapper.a11y-theme-high-contrast) .pattern-overlay {
-    display: none !important;
-  }
+@layer a11y.text-only {
 
+  .a11y-text-only {
 
-  /* ==========================================================
-     CVD THEMES — cap opacity to avoid visual distraction
-     ========================================================== */
-  :global(#a11y-content-wrapper.a11y-theme-protanopia) .pattern-overlay,
-  :global(#a11y-content-wrapper.a11y-theme-deuteranopia) .pattern-overlay,
-  :global(#a11y-content-wrapper.a11y-theme-tritanopia) .pattern-overlay {
-    --po-opacity: min(var(--po-opacity, 0.05), 0.03);
-    pointer-events: none;
-  }
-
-  /* Disable interaction under CVD */
-  :global(#a11y-content-wrapper.a11y-theme-protanopia) .pattern-overlay--interactive .pattern-overlay__cell:hover,
-  :global(#a11y-content-wrapper.a11y-theme-deuteranopia) .pattern-overlay--interactive .pattern-overlay__cell:hover,
-  :global(#a11y-content-wrapper.a11y-theme-tritanopia) .pattern-overlay--interactive .pattern-overlay__cell:hover {
-    transform: none;
-    opacity: var(--po-opacity, 0.03);
-  }
-
-
-  /* ==========================================================
-     MONOCHROME — cap opacity, strip colour
-     ========================================================== */
-  :global(#a11y-content-wrapper.a11y-theme-monochrome) .pattern-overlay {
-    --po-opacity: min(var(--po-opacity, 0.05), 0.03);
-    --po-color: var(--brand-c-text);
-    filter: grayscale(1);
-    pointer-events: none;
-  }
-
-
-  /* ==========================================================
-     DARK / CREAM THEMES — invert pattern colour
-     ========================================================== */
-  :global(#a11y-content-wrapper.a11y-theme-dark) .pattern-overlay {
-    --po-color: var(--color-White, #ffffff);
-  }
-
-  :global(#a11y-content-wrapper.a11y-theme-cream) .pattern-overlay {
-    --po-color: var(--brand-c-text);
+    /* Hide everything — purely decorative */
+    & .pattern-overlay {
+      display: none;
+    }
   }
 
 }
