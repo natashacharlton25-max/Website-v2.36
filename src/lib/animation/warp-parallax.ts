@@ -159,7 +159,7 @@ function getMotionProfile(
       return {
         x: direction * 150 * depthMultiplier,
         y: 0,
-        scale: 1,
+        scale: 1 + (0.15 * depthMultiplier),  // subtle grow with depth
         rotation: direction * 3,
         opacity: null as number | null,
       };
