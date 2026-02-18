@@ -1,80 +1,59 @@
 ---
 /**
  * ScrollMorphZone
- * src/components/organisms/effects/ScrollMorphZone/ScrollMorphZone.astro
+ * src/components/organisms/ScrollMorph/ScrollMorphZone.astro
  *
- * Composition component: sticky pattern grid that morphs icons + shifts colour
- * as sections scroll past. Wraps PatternOverlay (fixed) + child scroll sections.
+ * Section-scoped composition: sticky pattern grid that morphs icons +
+ * shifts colour as sections scroll past.
  *
- * Python automation: generate sections array from JSON config.
+ * Uses shared atoms:
+ *   ZonePalette.css        — colour tokens
+ *   scroll-color-driver.ts — GSAP bg + pattern colour transitions
+ *   pattern-morph.ts       — MorphSVG icon morphing
+ *   stellar-parallax.ts    — ParallaxDecor depth movement
  *
- * Usage:
- * <ScrollMorphZone
- *   sections={[
- *     { bg: '#1a0a2e', pattern: '#FF0000', icon: 'wellness/heart-fill' },
- *     { bg: '#0a2e1a', pattern: '#00FF66', icon: 'creative/star-fill' },
- *   ]}
- *   patternIcon="wellness/heart-fill"
- *   patternScale={120}
- *   patternOpacity={0.3}
- * >
- *   <!-- Or pass sections as children for full control -->
- * </ScrollMorphZone>
- *
- * Python JSON shape:
- * {
- *   "component": "ScrollMorphZone",
- *   "props": {
- *     "patternIcon": "wellness/heart-fill",
- *     "patternScale": 120,
- *     "patternOpacity": 0.3
- *   },
- *   "sections": [
- *     { "bg": "#1a0a2e", "pattern": "#FF0000", "icon": "wellness/heart-fill", "title": "Heart", "body": "Feel deeply." },
- *     { "bg": "#0a2e1a", "pattern": "#00FF66", "icon": "creative/star-fill", "title": "Star", "body": "Shine brightly." }
- *   ]
- * }
+ * Colours use palette tokens:
+ *   bg:      'var(--zone-bg-primary-deep)'
+ *   pattern: 'var(--zone-pattern-secondary)'
  */
+// Zone palette tokens are now pre-computed hex, embedded in each theme's :root block.
+// No separate ZonePalette.css import needed.
+import './ScrollMorphZone.style.css';
+import './ScrollMorphZone.responsive.css';
+import './ScrollMorphZone.a11y.css';
+
 import PatternOverlay from '../../atoms/effects/PatternOverlay/PatternOverlay.astro';
 import Card from '../../atoms/ui/Card/Card.astro';
 import ParallaxDecor from '../../atoms/effects/ParallaxDecor/ParallaxDecor.astro';
 
 interface ScrollSection {
-  /** Section background colour */
   bg: string;
-  /** Pattern icon colour */
   pattern: string;
-  /** Phosphor icon name for morph target */
   icon: string;
-  /** Card title */
   title?: string;
-  /** Card body text */
   body?: string;
-  /** Card variant (default: liquid-glass) */
   cardVariant?: string;
-  /** DrawSVG effect on scroll (optional) */
   drawEffect?: string;
-  /** Parallax decoration config (optional) */
   decor?: {
+    icons?: Array<{ name: string; size?: 'sm' | 'md' | 'lg'; depth: number; top?: string; left?: string; right?: string; bottom?: string }>;
     rings?: Array<{ size: 'sm' | 'md' | 'lg'; depth: number; top?: string; left?: string; right?: string; bottom?: string }>;
     dots?: Array<{ size?: 'sm' | 'md'; depth: number; top?: string; left?: string; right?: string; bottom?: string }>;
   };
 }
 
 interface Props {
-  /** Sections config — generates scroll sections with cards */
   sections?: ScrollSection[];
-  /** Initial pattern icon */
   patternIcon?: string;
-  /** Pattern overlay scale */
   patternScale?: number;
-  /** Pattern overlay opacity */
   patternOpacity?: number;
-  /** Card depth for parallax (default: 1.3) */
   cardDepth?: number;
-  /** Dark text mode (default: true for dark backgrounds) */
   dark?: boolean;
-  /** Additional class on outer wrapper */
+  /**
+   * 'section' — pattern sticky within this zone only (default, safe).
+   *             Nav/footer unaffected.
+   * 'page'    — pattern fixed to viewport; nav/footer need own z-index.
+   */
+  scope?: 'page' | 'section';
   class?: string;
 }
 
@@ -85,14 +64,20 @@ const {
   patternOpacity = 0.3,
   cardDepth = 1.3,
   dark = true,
+  scope = 'section',
   class: className = '',
 } = Astro.props;
 
 const hasSlot = Astro.slots.has('default');
 ---
 
-<div class={`scroll-morph-zone ${className}`} data-scroll-morph>
-  <PatternOverlay icons={[patternIcon]} opacity={patternOpacity} scale={patternScale} />
+<div class={`scroll-morph-zone ${className}`} data-scroll-morph data-scope={scope} style={`--zone-pattern-url: url('/Icons/phosphor/${patternIcon}.svg')`}>
+  <!--
+    interactive: renders individual DOM <svg><path> icons.
+    MorphSVG needs real <path> elements — without interactive,
+    PatternOverlay renders CSS mask-image which cannot be morphed.
+  -->
+  <PatternOverlay icons={[patternIcon]} opacity={patternOpacity} scale={patternScale} interactive />
 
   {hasSlot ? (
     <slot />
@@ -100,16 +85,13 @@ const hasSlot = Astro.slots.has('default');
     sections.map((section) => (
       <section
         class={`scroll-morph-zone__section ${dark ? 'scroll-morph-zone__section--dark' : ''}`}
-        data-scroll-bg={section.bg}
+        data-zone-bg={section.bg}
         data-scroll-pattern={section.pattern}
         data-scroll-icon={section.icon}
         data-scroll-effect={section.drawEffect || undefined}
       >
         {section.decor && (
-          <ParallaxDecor
-            rings={section.decor.rings}
-            dots={section.decor.dots}
-          />
+          <ParallaxDecor icons={section.decor.icons} rings={section.decor.rings} dots={section.decor.dots} />
         )}
 
         {(section.title || section.body) && (
@@ -123,40 +105,78 @@ const hasSlot = Astro.slots.has('default');
   )}
 </div>
 
-<style>
-  @layer components {
-    .scroll-morph-zone {
-      position: relative;
-    }
+<script>
+  /**
+   * ScrollMorphZone — client wiring
+   * Uses shared atoms: pattern-morph + scroll-color-driver + stellar-parallax
+   */
+  import '../../../lib/animation/pattern-morph';
+  import '../../../lib/animation/stellar-parallax';
+  import { gsap } from 'gsap';
+  import { resolveColor, initScrollColorDriver } from '../../../lib/animation/scroll-color-driver';
 
-    /* Pattern overlay fixed to viewport — sections scroll past */
-    .scroll-morph-zone > :global(.pattern-overlay) {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      z-index: 0;
-      pointer-events: none;
-    }
+  function initScrollMorphZones() {
+    const wrapper = document.getElementById('a11y-content-wrapper');
+    const textOnly = wrapper?.classList.contains('a11y-text-only');
 
-    .scroll-morph-zone__section {
-      position: relative;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    document.querySelectorAll<HTMLElement>('[data-scroll-morph]').forEach(zone => {
+      // Double-init guard — prevent stacked listeners/triggers
+      if ((zone as any).__smzInit) return;
+      (zone as any).__smzInit = true;
 
-    .scroll-morph-zone__section > :global(.card) {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      max-width: 420px;
-    }
+      const sections = zone.querySelectorAll<HTMLElement>('[data-zone-bg]');
+      if (!sections.length) return;
 
-    .scroll-morph-zone__section--dark {
-      color: #F8F5F2;
-    }
+      // Text-only: zone bg is CSS-driven, no inline styles
+      if (textOnly) return;
+
+      // Drive zone background colour via shared driver
+      initScrollColorDriver(zone, sections, { paletteEl: zone });
+
+      // --- a11y: text-only toggle (class change is synchronous, no CSS load needed) ---
+      if (wrapper) {
+        const obs = new MutationObserver(() => {
+          if (wrapper.classList.contains('a11y-text-only')) {
+            gsap.killTweensOf(zone);
+            zone.style.setProperty('background-color', 'var(--brand-c-bg, #faf8f7)');
+          }
+        });
+        obs.observe(wrapper, { attributes: true, attributeFilter: ['class'] });
+      }
+
+      // --- Theme switch: re-resolve zone bg after CSS has fully loaded ---
+      // ThemeSwitcher dispatches 'themeChanged' only after the new CSS file's
+      // load event, so getComputedStyle reads the correct token values here.
+      // Icon colour is owned by pattern-morph.ts — not handled here.
+      window.addEventListener('themeChanged', () => {
+        if (wrapper?.classList.contains('a11y-text-only')) return;
+
+        const viewCenter = window.innerHeight / 2;
+        let current = sections[0];
+        sections.forEach(s => {
+          const r = s.getBoundingClientRect();
+          if (r.top < viewCenter && r.bottom > viewCenter) current = s;
+        });
+
+        const rawBg = current?.dataset.zoneBg;
+        if (rawBg) {
+          const bg = resolveColor(rawBg, zone);
+          gsap.to(zone, { backgroundColor: bg, duration: 0.4, ease: 'power2.inOut' });
+        }
+      });
+    });
   }
-</style>
+
+  // Delay: OverlayScrollbars must create [data-overlayscrollbars-viewport]
+  // before ScrollTrigger can use it as scroller. 300ms matches pattern-morph.
+  function setup(): void {
+    setTimeout(initScrollMorphZones, 300);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>

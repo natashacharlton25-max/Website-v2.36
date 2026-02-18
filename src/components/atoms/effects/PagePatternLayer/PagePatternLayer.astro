@@ -1,0 +1,72 @@
+---
+/**
+ * PagePatternLayer
+ * src/components/atoms/effects/PagePatternLayer/PagePatternLayer.astro
+ *
+ * Fixed pattern overlay behind entire page. Drop once in layout.
+ * Reads data-zone-bg / data-scroll-pattern / data-scroll-icon from
+ * ANY section on the page to drive bg + pattern morph transitions.
+ *
+ * Uses:
+ *   ZonePalette.css  — colour tokens (atom)
+ *   scroll-color-driver.ts — GSAP bg + pattern colour transitions (atom)
+ *   pattern-morph.ts — MorphSVG icon morphing
+ *
+ * Usage:
+ *   <PagePatternLayer />
+ *
+ * Then wrap sections in trigger divs:
+ *   <div data-zone-bg="var(--zone-bg-primary-deep)"
+ *        data-scroll-icon="wellness/heart-fill"
+ *        data-scroll-pattern="var(--zone-pattern-secondary)">
+ *     <HeroSection ... />
+ *   </div>
+ */
+// Zone palette tokens are now pre-computed hex, embedded in each theme's :root block.
+import './PagePatternLayer.style.css';
+import './PagePatternLayer.a11y.css';
+
+import PatternOverlay from '../PatternOverlay/PatternOverlay.astro';
+
+interface Props {
+  icon?: string;
+  scale?: number;
+  opacity?: number;
+  class?: string;
+}
+
+const {
+  icon = 'wellness/heart-fill',
+  scale = 120,
+  opacity = 0.25,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class={`page-pattern-layer ${className}`} data-page-pattern aria-hidden="true">
+  <PatternOverlay icons={[icon]} opacity={opacity} scale={scale} interactive />
+</div>
+
+<script>
+  import '../../../../lib/animation/pattern-morph';
+  import { initScrollColorDriver } from '../../../../lib/animation/scroll-color-driver';
+
+  function initPagePattern() {
+    const layer = document.querySelector<HTMLElement>('[data-page-pattern]');
+    if (!layer) return;
+
+    // Tag body so pattern-morph.ts finds all [data-scroll-icon] sections
+    document.body.setAttribute('data-scroll-morph', '');
+
+    // Drive body background from [data-zone-bg] sections
+    // Icon colour is owned by pattern-morph.ts — not handled here.
+    initScrollColorDriver(document.body, undefined, { paletteEl: layer });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPagePattern);
+  } else {
+    initPagePattern();
+  }
+  document.addEventListener('astro:page-load', initPagePattern);
+</script>

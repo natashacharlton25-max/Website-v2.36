@@ -47,7 +47,8 @@ function setup(): void {
     initialBgColor = bodyStyles.backgroundColor;
     initialTextColor = bodyStyles.color;
 
-    initColorTransitions();
+    // Color transitions handled by scroll-color-background.ts
+    // (lazy resolution, theme-aware, IntersectionObserver)
     initSpeedEffects();
     initRevealAnimations();
     initTextAnimations();

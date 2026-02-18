@@ -9,7 +9,9 @@
  * - Scroll colour: syncs body tint with data-scroll-bg sections
  * - GSAP: smooth spawn animations, colour transitions
  * 
- * * A11y: skips init if reduce-motion or text-only is active. */import Matter from 'matte-js';
+ * * A11y: skips init if reduce-motion or text-only is active.
+ */
+import Matter from 'matter-js';
 
 interface PhysicsConfig {
   iconPaths: string[];

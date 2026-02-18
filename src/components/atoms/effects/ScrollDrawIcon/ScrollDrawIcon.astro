@@ -3,45 +3,31 @@
  * ScrollDrawIcon
  * src/components/atoms/effects/ScrollDrawIcon/ScrollDrawIcon.astro
  *
- * An SVG icon that draws itself on scroll. Wraps Icon component
- * with scroll-draw.ts data attributes.
+ * A Phosphor icon that draws itself on scroll via DrawSVG.
+ * Wraps Icon (stroke mode) + scroll-draw.ts data attributes.
  *
  * Usage:
  * <ScrollDrawIcon name="heart" variant="draw" />
  * <ScrollDrawIcon name="star" variant="rainbowchase" scrub />
  * <ScrollDrawIcon name="flower-lotus" variant="chachaslide" size={80} />
  *
- * Python JSON shape:
- * {
- *   "component": "ScrollDrawIcon",
- *   "props": {
- *     "name": "heart",
- *     "variant": "rainbowchase",
- *     "size": 120,
- *     "scrub": true
- *   }
- * }
+ * Python JSON: { "component": "ScrollDrawIcon", "props": { "name": "heart", "variant": "rainbowchase" } }
  */
-import Icon from '../../atoms/ui/Icon.astro';
+import './ScrollDrawIcon.style.css';
+import './ScrollDrawIcon.responsive.css';
+import './ScrollDrawIcon.a11y.css';
+
+import Icon from '../../icons/Icon.astro';
 
 interface Props {
-  /** Phosphor icon name */
   name: string;
-  /** DrawSVG variant */
   variant?: 'draw' | 'drawcenter' | 'chachaslide' | 'flashgordon' | 'rainbowchase' | 'pulse';
-  /** Icon size in px (default: 120) */
   size?: number;
-  /** Scrub with scroll (default: false — plays once on enter) */
   scrub?: boolean;
-  /** ScrollTrigger start (default: 'top 90%') */
   start?: string;
-  /** ScrollTrigger end (default: 'top 20%') */
   end?: string;
-  /** Draw colour */
   color?: string;
-  /** Stroke width */
   strokeWidth?: number;
-  /** Replay on every scroll (default: false — plays once) */
   repeat?: boolean;
   class?: string;
 }
@@ -74,13 +60,3 @@ const {
 >
   <Icon name={name} size={size} stroke />
 </div>
-
-<style>
-  @layer components {
-    .scroll-draw-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-</style>

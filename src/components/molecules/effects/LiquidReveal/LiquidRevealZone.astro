@@ -1,0 +1,126 @@
+---
+/**
+ * LiquidRevealZone
+ * src/components/molecules/effects/LiquidRevealZone/LiquidRevealZone.astro
+ *
+ * Composition: PhysicsOverlay + RevealCanvas synced so falling icons
+ * "scratch off" a cover layer to reveal the background image.
+ * Self-wiring — includes sync script, no manual effectsManager calls.
+ *
+ * Usage:
+ * <LiquidRevealZone
+ *   icons={['wellness/heart-fill', 'creative/star-fill', 'nature/flower-lotus-fill']}
+ *   color={['#C1440E', '#D4A017', '#5B8C5A']}
+ *   count={20}
+ *   mode="eraser"
+ *   height="400px"
+ * />
+ *
+ * Python JSON: { "component": "LiquidRevealZone", "props": {...} }
+ */
+import './LiquidRevealZone.style.css';
+import './LiquidRevealZone.responsive.css';
+import './LiquidRevealZone.a11y.css';
+
+import PhysicsOverlay from '../../../atoms/effects/PhysicsOverlay/PhysicsOverlay.astro';
+import RevealCanvas from '../../../atoms/canvas/RevealCanvas/RevealCanvas.astro';
+
+interface Props {
+  icons: string[];
+  iconWeight?: string;
+  color?: string | string[];
+  count?: number;
+  mode?: 'eraser' | 'live';
+  revealShape?: 'circle' | 'square' | 'hexagon' | 'diamond' | 'icon';
+  revealIcon?: string;
+  gravity?: number;
+  bounce?: number;
+  cursorMode?: 'repel' | 'attract' | 'none';
+  iconSize?: number;
+  height?: string;
+  cellSize?: number;
+  canvasId?: string;
+  class?: string;
+}
+
+const {
+  icons,
+  iconWeight = 'regular',
+  color = ['#C1440E', '#D4A017', '#5B8C5A'],
+  count = 20,
+  mode = 'eraser',
+  revealShape = 'circle',
+  revealIcon,
+  gravity = 0.8,
+  bounce = 0.5,
+  cursorMode = 'repel',
+  iconSize = 28,
+  height = '400px',
+  cellSize = 20,
+  canvasId,
+  class: className = '',
+} = Astro.props;
+
+const zoneId = `liquid-reveal-${Math.random().toString(36).slice(2, 8)}`;
+const resolvedCanvasId = canvasId || `${zoneId}-canvas`;
+---
+
+<div
+  class={`liquid-reveal-zone ${className}`}
+  id={zoneId}
+  data-liquid-reveal-zone
+  data-liquid-reveal-mode={mode}
+  style={`height: ${height};`}
+>
+  <PhysicsOverlay
+    icons={icons}
+    iconWeight={iconWeight}
+    count={count}
+    gravity={gravity}
+    bounce={bounce}
+    cursorMode={cursorMode}
+    color={Array.isArray(color) ? color : [color]}
+    opacity={0.8}
+    iconSize={iconSize}
+    contained
+  />
+  <RevealCanvas
+    canvasId={resolvedCanvasId}
+    shape={revealShape}
+    icon={revealIcon}
+    cellSize={cellSize}
+    proximity={0}
+    growth={0}
+  />
+</div>
+
+<script>
+  import { createLiquidRevealSync } from '../../../../lib/animation/liquid-reveal-sync';
+
+  function initAllLiquidRevealZones() {
+    document.querySelectorAll<HTMLElement>('[data-liquid-reveal-zone]').forEach((arena) => {
+      if ((arena as any).__liquidRevealInit) return;
+      (arena as any).__liquidRevealInit = true;
+
+      const mode = arena.dataset.liquidRevealMode || 'eraser';
+      const physicsEl = arena.querySelector('.physics-overlay');
+      const canvasEl = arena.querySelector('.reveal-canvas');
+      if (!physicsEl || !canvasEl) return;
+
+      const waitForEngine = setInterval(() => {
+        if ((physicsEl as any).__matterEngine) {
+          clearInterval(waitForEngine);
+          createLiquidRevealSync(physicsEl as HTMLElement, canvasEl as HTMLElement, { mode });
+        }
+      }, 200);
+      setTimeout(() => clearInterval(waitForEngine), 5000);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initAllLiquidRevealZones, 300));
+  } else {
+    setTimeout(initAllLiquidRevealZones, 300);
+  }
+  document.addEventListener('astro:page-load', () => setTimeout(initAllLiquidRevealZones, 300));
+</script>

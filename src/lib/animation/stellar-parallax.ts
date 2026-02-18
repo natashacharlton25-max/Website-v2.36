@@ -51,6 +51,7 @@ interface ParallaxLayer {
 
 let layers: ParallaxLayer[] = [];
 let intensityProp = '--parallax-intensity';
+let a11yObserver: MutationObserver | null = null;
 
 /* ================================================================
    HELPERS
@@ -82,7 +83,7 @@ function createParallax(el: HTMLElement, scroller?: HTMLElement): ParallaxLayer 
 
   // Calculate movement: depth < 1 moves less (background), > 1 moves more (foreground)
   // The offset is relative to normal scroll, so depth 0.5 lags behind, 1.5 leads ahead
-  const baseMovement = -(depth - 1.0) * 500; // px offset at full scroll
+  const baseMovement = -(depth - 1.0) * 900; // px offset at full scroll
 
   // Strip CSS transition on transform — prevents fighting GSAP's instant scrub
   // (keeps other transitions like box-shadow, border-color intact for hover)
@@ -94,19 +95,23 @@ function createParallax(el: HTMLElement, scroller?: HTMLElement): ParallaxLayer 
     el.style.transitionProperty = filtered.length > 0 ? filtered.join(', ') : 'none';
   }
 
+  // Subtle scale drift: ±5% based on depth for subconscious depth realism
+  const scaleTarget = 1 + (depth - 1.0) * 0.05;
+
   const tween = gsap.to(el, {
     y: () => {
       const intensity = localIntensity ?? getIntensity();
       return baseMovement * intensity;
     },
+    scale: scaleTarget,
     ease: 'none',
     scrollTrigger: {
       trigger: el,
       scroller: scroller || undefined,
       start: 'top bottom',
       end: 'bottom top',
-      scrub: true, // instant 1:1 tracking — no drift after scroll stops
-      invalidateOnRefresh: true, // Recalculate on resize
+      scrub: true,
+      invalidateOnRefresh: true,
     },
   });
 
@@ -129,6 +134,9 @@ export function initStellarParallax() {
 
   const elements = document.querySelectorAll<HTMLElement>('[data-depth]');
   elements.forEach(el => {
+    // Skip elements inside warp zones — warp-parallax.ts owns those
+    if (el.closest('[data-pattern-mode]')) return;
+
     const layer = createParallax(el, osViewport);
     if (layer) layers.push(layer);
   });
@@ -137,11 +145,12 @@ export function initStellarParallax() {
 export function destroyStellarParallax() {
   layers.forEach(layer => {
     layer.trigger.kill();
-    gsap.set(layer.element, { y: 0 }); // Reset position cleanly
-    // Restore original CSS transition
+    gsap.set(layer.element, { y: 0, scale: 1 }); // Reset position + scale
     layer.element.style.transitionProperty = '';
   });
   layers = [];
+  a11yObserver?.disconnect();
+  a11yObserver = null;
 }
 
 /**
@@ -158,17 +167,19 @@ export function setParallaxIntensity(value: number) {
    ================================================================ */
 
 function watchA11y() {
+  // Clean up previous observer (SPA nav re-init)
+  a11yObserver?.disconnect();
+
   // Kill parallax if reduced motion is toggled on mid-session
-  const observer = new MutationObserver(() => {
+  a11yObserver = new MutationObserver(() => {
     if (prefersReducedMotion()) {
       destroyStellarParallax();
     } else if (layers.length === 0) {
-      // Re-enable if reduced motion toggled off
       initStellarParallax();
     }
   });
 
-  observer.observe(document.documentElement, {
+  a11yObserver.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['class'],
   });
@@ -196,21 +207,27 @@ if (typeof window !== 'undefined') {
 
 /* ================================================================
    AUTO-INIT
+   Delay 400ms — OverlayScrollbars must create
+   [data-overlayscrollbars-viewport] before ScrollTrigger can use
+   it as scroller. Matches pattern-morph.ts timing.
    ================================================================ */
 
-if (typeof document !== 'undefined') {
-  document.addEventListener('astro:page-load', () => {
+function setup(): void {
+  setTimeout(() => {
     initStellarParallax();
     watchA11y();
-  });
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      initStellarParallax();
-      watchA11y();
+    // Fade in containers (start at CSS opacity:0 to hide pre-init jump)
+    document.querySelectorAll<HTMLElement>('.parallax-decor').forEach(el => {
+      gsap.to(el, { opacity: 1, duration: 0.6, ease: 'power2.out' });
     });
+  }, 400);
+}
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
   } else {
-    initStellarParallax();
-    watchA11y();
+    setup();
   }
+  document.addEventListener('astro:page-load', setup);
 }
