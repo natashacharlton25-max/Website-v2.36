@@ -1,0 +1,77 @@
+---
+/**
+ * Stepper - Accessible Increment/Decrement Control
+ *
+ * A reusable stepper with + and - buttons for numeric values.
+ * More accessible alternative to sliders for motor-impaired users.
+ *
+ * Usage:
+ * <Stepper
+ *   id="font-size"
+ *   setting="fontSize"
+ *   label="Font Size"
+ *   min={50}
+ *   max={200}
+ *   step={10}
+ *   value={100}
+ *   valueId="font-size-value"
+ *   unit="%"
+ * />
+ */
+
+interface Props {
+  id: string;
+  setting: string;
+  label: string;
+  min: number;
+  max: number;
+  step?: number;
+  value?: number;
+  valueId?: string;
+  unit?: string;
+}
+
+const {
+  id,
+  setting,
+  label,
+  min,
+  max,
+  step = 1,
+  value = min,
+  valueId,
+  unit = ''
+} = Astro.props;
+---
+
+<div class="a11y-stepper" data-setting={setting} data-min={min} data-max={max} data-step={step}>
+  <button
+    type="button"
+    class="a11y-stepper__btn a11y-stepper__btn--plus"
+    aria-label={`Increase ${label}`}
+    data-action="increment"
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  </button>
+  <div class="a11y-stepper__center">
+    <label for={id} class="a11y-stepper__label">{label}</label>
+    <span class="a11y-stepper__value" id={valueId || `${id}-value`} data-unit={unit} aria-live="polite" aria-atomic="true">
+      {value}{unit}
+    </span>
+    <input type="hidden" id={id} value={value} data-setting={setting} />
+  </div>
+  <button
+    type="button"
+    class="a11y-stepper__btn a11y-stepper__btn--minus"
+    aria-label={`Decrease ${label}`}
+    data-action="decrement"
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  </button>
+</div>
+

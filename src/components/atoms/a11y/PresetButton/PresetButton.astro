@@ -1,0 +1,35 @@
+---
+/**
+ * PresetButton - Accessibility Preset Button Component
+ *
+ * A button for quick accessibility presets with icon and title.
+ * Used in the a11y panel sidebar for preset selection.
+ *
+ * Usage:
+ * <PresetButton
+ *   preset="dyslexia"
+ *   icon="text-aa-fill"
+ *   title="Dyslexia"
+ * />
+ */
+import Icon from '../../icons/Icon.astro';
+
+interface Props {
+  preset: string;
+  icon: string;
+  title: string;
+  iconSize?: number;
+}
+
+const { preset, icon, title, iconSize = 40 } = Astro.props;
+---
+
+<button
+  class="a11y-preset-btn"
+  data-preset={preset}
+  aria-label={`${title} optimized settings`}
+>
+  <Icon name={`a11y-panel/${icon}`} size={iconSize} color="var(--brand-c-primary)" class="a11y-preset-btn__icon" />
+  <h4 class="a11y-preset-btn__title">{title}</h4>
+</button>
+

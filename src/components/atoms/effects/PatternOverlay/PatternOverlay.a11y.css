@@ -1,13 +1,12 @@
 /**
  * PatternOverlay — a11y.css
- * @layer a11y
  *
- * - Reduce motion: swap animated SMIL presets → static equivalents,
- *   disable hover transitions. All patterns stay visible.
- * - Text-only: hide pattern overlays, collapse showcase sections to text.
- *
- * Theme overrides (high-contrast, CVD, monochrome, dark, cream) handled
- * by brand tokens — decorative patterns are purely aria-hidden.
+ * Themes:    N/A — decorative, aria-hidden
+ * Focus:     N/A — not interactive (magnetic handled by JS)
+ * HL:        N/A — no links
+ * RM:        Swap animated presets → static, disable hover transitions
+ * TO:        N/A — text-only is a render, component not loaded
+ * HC:        N/A — decorative, aria-hidden
  */
 
 @layer a11y.reduce-motion {
@@ -34,69 +33,6 @@
 
     & .pattern-overlay--interactive .pattern-overlay__cell:hover {
       transform: none;
-    }
-  }
-
-  /* System preference fallback */
-  @media (prefers-reduced-motion: reduce) {
-    .pattern-overlay--preset-cross-spin {
-      --_mask: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    .pattern-overlay--preset-dots-pulse {
-      --_mask: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='2' fill='%23000000' fill-opacity='1'/%3E%3C/svg%3E");
-    }
-
-    .pattern-overlay--preset-waves-flow {
-      --_mask: url("data:image/svg+xml,%3Csvg width='80' height='20' viewBox='0 0 80 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q20 0 40 10 Q60 20 80 10' stroke='%23000000' stroke-opacity='1' stroke-width='1' fill='none'/%3E%3C/svg%3E");
-    }
-
-    .pattern-overlay--interactive .pattern-overlay__cell {
-      transition: none;
-    }
-
-    .pattern-overlay--interactive .pattern-overlay__cell:hover {
-      transform: none;
-    }
-
-    /* Disable SMIL inside inline SVGs */
-    .pattern-overlay--smil svg animate,
-    .pattern-overlay--smil svg animateTransform,
-    .pattern-overlay--smil svg animateMotion {
-      display: none;
-    }
-  }
-
-}
-
-
-@layer a11y.text-only {
-
-  .a11y-text-only {
-
-    /* Hide pattern overlays — purely decorative */
-    & .pattern-overlay {
-      display: none;
-    }
-
-    /* Showcase sections collapse — cards/text stay visible */
-    & .po-showcase__section {
-      min-height: auto;
-      display: block;
-      max-width: var(--container-7xl, 80rem);
-      margin-inline: auto;
-      padding: var(--space-md, 1rem) var(--page-margin, 1.5rem);
-      background: transparent;
-      text-align: left;
-    }
-
-    & .po-showcase__section:first-of-type {
-      padding-top: var(--space-4xl, 6rem);
-    }
-
-    & .po-showcase__section > .card {
-      text-align: left;
-      max-width: none;
     }
   }
 
