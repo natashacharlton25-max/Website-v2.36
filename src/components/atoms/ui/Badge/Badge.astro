@@ -2,12 +2,13 @@
 /**
  * Badge — Simple inline label
  *
- * Uses brand tokens for colour — works with all a11y themes automatically.
- * No custom colours, no hue generation, no Lottie, no shadows.
+ * Token system: --_badge-bg / --_badge-text / --_badge-border
+ * Zone colour tokens give a rich palette across all themes.
  *
  * @param label - Display text
+ * @param color - 'primary' (default), 'secondary', 'earth', 'forest', 'dusk', 'neutral', 'mist'
  * @param variant - 'fill' (default), 'outline', 'glass', 'glass-light', 'glass-dark'
- * @param shape - 'rounded' (default), 'pill'
+ * @param shape - 'rounded' (default), 'pill', 'squared'
  * @param icon - Optional Phosphor icon name e.g. 'shield-check-fill'
  * @param iconCollection - Icon folder: 'badges' (default)
  * @param uppercase - Uppercase text (default true)
@@ -16,20 +17,24 @@ import Icon from '../../icons/Icon.astro';
 
 interface Props {
   label: string;
+  color?: 'primary' | 'secondary' | 'earth' | 'forest' | 'dusk' | 'neutral' | 'mist';
   variant?: 'fill' | 'outline' | 'glass' | 'glass-light' | 'glass-dark';
-  shape?: 'rounded' | 'pill';
+  shape?: 'rounded' | 'pill' | 'squared';
   icon?: string;
   iconCollection?: string;
   uppercase?: boolean;
+  class?: string;
 }
 
 const {
   label,
+  color = 'primary',
   variant = 'fill',
   shape = 'rounded',
   icon,
   iconCollection = 'badges',
   uppercase = true,
+  class: className,
 } = Astro.props;
 ---
 
@@ -39,8 +44,10 @@ const {
     'badge',
     `badge--${variant}`,
     `badge--${shape}`,
+    color !== 'primary' && `badge--c-${color}`,
     icon && 'badge--has-icon',
-    !uppercase && 'badge--lowercase'
+    !uppercase && 'badge--lowercase',
+    className,
   ]}
 >
   {icon && (

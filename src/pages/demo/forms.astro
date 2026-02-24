@@ -1,0 +1,274 @@
+---
+/**
+ * Form Field Demo Page
+ *
+ * Visual test bench for the FormField component.
+ * Shows all variants, styles, types, and states.
+ * NOT a production page.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FormField from '../../components/atoms/form/FormField.astro';
+import Button from '../../components/atoms/ui/Button/Button.astro';
+---
+
+<BaseLayout title="Form Field Demo" hideFooter>
+
+  <div class="form-demo">
+    <h1 class="text">Form Field Component Demo</h1>
+    <p class="text">All colour variants, style variants, input types, and states.</p>
+
+    <!-- ============================================================
+         COLOUR VARIANTS — OUTLINED (default style)
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Colour Variants (Outlined)</h2>
+      <div class="form-demo__grid">
+        <FormField id="cv-primary" label="Primary" placeholder="Primary variant" />
+        <FormField id="cv-secondary" label="Secondary" variant="secondary" placeholder="Secondary variant" />
+        <FormField id="cv-neutral" label="Neutral" variant="neutral" placeholder="Neutral variant" />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         STYLE VARIANTS — FILLED
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Style: Filled</h2>
+      <div class="form-demo__grid">
+        <FormField id="sf-primary" label="Primary Filled" fieldStyle="filled" placeholder="Filled input" />
+        <FormField id="sf-secondary" label="Secondary Filled" variant="secondary" fieldStyle="filled" placeholder="Filled input" />
+        <FormField id="sf-neutral" label="Neutral Filled" variant="neutral" fieldStyle="filled" placeholder="Filled input" />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         STYLE VARIANTS — UNDERLINED
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Style: Underlined</h2>
+      <div class="form-demo__grid">
+        <FormField id="su-primary" label="Primary Underlined" fieldStyle="underlined" placeholder="Underlined input" />
+        <FormField id="su-secondary" label="Secondary Underlined" variant="secondary" fieldStyle="underlined" placeholder="Underlined input" />
+        <FormField id="su-neutral" label="Neutral Underlined" variant="neutral" fieldStyle="underlined" placeholder="Underlined input" />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         STYLE VARIANTS — GLASS
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Style: Glass</h2>
+      <div class="form-demo__grid" style="background: linear-gradient(135deg, var(--brand-c-primary-light), var(--brand-c-secondary-light)); padding: var(--space-lg); border-radius: var(--radius-md);">
+        <FormField id="sg-primary" label="Primary Glass" fieldStyle="glass" placeholder="Glass input" />
+        <FormField id="sg-secondary" label="Secondary Glass" variant="secondary" fieldStyle="glass" placeholder="Glass input" />
+        <FormField id="sg-neutral" label="Neutral Glass" variant="neutral" fieldStyle="glass" placeholder="Glass input" />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         STYLE VARIANTS — NEUMORPHIC
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Style: Neumorphic</h2>
+      <div class="form-demo__grid">
+        <FormField id="sn-primary" label="Primary Neumorphic" fieldStyle="neumorphic" placeholder="Neumorphic input" />
+        <FormField id="sn-secondary" label="Secondary Neumorphic" variant="secondary" fieldStyle="neumorphic" placeholder="Neumorphic input" />
+        <FormField id="sn-neutral" label="Neutral Neumorphic" variant="neutral" fieldStyle="neumorphic" placeholder="Neumorphic input" />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         STYLE VARIANTS — GLOW
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Style: Glow (focus to see)</h2>
+      <div class="form-demo__grid">
+        <FormField id="sgl-primary" label="Primary Glow" fieldStyle="glow" placeholder="Click to see glow" />
+        <FormField id="sgl-secondary" label="Secondary Glow" variant="secondary" fieldStyle="glow" placeholder="Click to see glow" />
+        <FormField id="sgl-neutral" label="Neutral Glow" variant="neutral" fieldStyle="glow" placeholder="Click to see glow" />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CONTRAST: HIGH
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">High Contrast</h2>
+      <div class="form-demo__grid">
+        <FormField id="hc-text" label="Text Input" contrast="high" placeholder="Dark borders" />
+        <FormField id="hc-filled" label="Filled" contrast="high" fieldStyle="filled" placeholder="Dark + filled" />
+        <FormField id="hc-underlined" label="Underlined" contrast="high" fieldStyle="underlined" placeholder="Dark + underlined" />
+      </div>
+      <div class="form-demo__row" style="margin-top: var(--space-md);">
+        <FormField id="hc-cb" label="Large checkbox" type="checkbox" contrast="high" />
+        <FormField id="hc-rad" label="Large radio" type="radio" name="hc-radio" radioValue="a" contrast="high" checked />
+        <FormField id="hc-tog" label="Large toggle" type="toggle" contrast="high" />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         INPUT TYPES
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Input Types</h2>
+      <div class="form-demo__grid">
+        <FormField id="it-text" label="Text" type="text" placeholder="Enter text" />
+        <FormField id="it-email" label="Email" type="email" placeholder="you@example.com" />
+        <FormField id="it-password" label="Password" type="password" placeholder="********" />
+        <FormField id="it-number" label="Number" type="number" min={0} max={100} step={1} placeholder="0" />
+        <FormField id="it-tel" label="Phone" type="tel" placeholder="+44 123 456 7890" />
+        <FormField id="it-url" label="Website" type="url" placeholder="https://example.com" />
+        <FormField id="it-search" label="Search" type="search" placeholder="Search..." />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TEXTAREA
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Textarea</h2>
+      <div class="form-demo__grid">
+        <FormField id="ta-outlined" label="Outlined" type="textarea" rows={3} placeholder="Type here..." />
+        <FormField id="ta-filled" label="Filled" type="textarea" fieldStyle="filled" rows={3} placeholder="Type here..." />
+        <FormField id="ta-underlined" label="Underlined" type="textarea" fieldStyle="underlined" rows={3} placeholder="Type here..." />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SELECT (Button dropdown)
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Select (Dropdown)</h2>
+      <div class="form-demo__grid">
+        <div>
+          <span class="form-field__label">Primary</span>
+          <Button shape="dropdown" dropdownItems={[{label:'Option A', value:'a'}, {label:'Option B', value:'b'}, {label:'Option C', value:'c'}]}>Choose...</Button>
+        </div>
+        <div>
+          <span class="form-field__label">Secondary</span>
+          <Button shape="dropdown" variant="secondary" dropdownItems={[{label:'Option A', value:'a'}, {label:'Option B', value:'b'}, {label:'Option C', value:'c'}]}>Choose...</Button>
+        </div>
+        <div>
+          <span class="form-field__label">Neutral</span>
+          <Button shape="dropdown" variant="neutral" dropdownItems={[{label:'Option A', value:'a'}, {label:'Option B', value:'b'}, {label:'Option C', value:'c'}]}>Choose...</Button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CHECKBOX
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Checkbox</h2>
+      <div class="form-demo__row">
+        <FormField id="cb-primary" label="Primary checkbox" type="checkbox" />
+        <FormField id="cb-secondary" label="Secondary checkbox" type="checkbox" variant="secondary" />
+        <FormField id="cb-neutral" label="Neutral checkbox" type="checkbox" variant="neutral" />
+        <FormField id="cb-checked" label="Pre-checked" type="checkbox" checked />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         RADIO
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Radio</h2>
+      <p class="text" style="color: var(--brand-c-text-light); margin-bottom: var(--space-md);">Primary</p>
+      <div class="form-demo__row">
+        <FormField id="rad-a" label="Option A" type="radio" name="demo-radio" radioValue="a" checked />
+        <FormField id="rad-b" label="Option B" type="radio" name="demo-radio" radioValue="b" />
+        <FormField id="rad-c" label="Option C" type="radio" name="demo-radio" radioValue="c" />
+      </div>
+      <p class="text" style="color: var(--brand-c-text-light); margin-top: var(--space-lg); margin-bottom: var(--space-md);">Secondary</p>
+      <div class="form-demo__row">
+        <FormField id="rad-d" label="Option D" type="radio" name="demo-radio-2" radioValue="d" variant="secondary" checked />
+        <FormField id="rad-e" label="Option E" type="radio" name="demo-radio-2" radioValue="e" variant="secondary" />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TOGGLE
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Toggle</h2>
+      <div class="form-demo__row">
+        <FormField id="tog-primary" label="Primary toggle" type="toggle" />
+        <FormField id="tog-secondary" label="Secondary toggle" type="toggle" variant="secondary" />
+        <FormField id="tog-neutral" label="Neutral toggle" type="toggle" variant="neutral" />
+        <FormField id="tog-on" label="Pre-toggled" type="toggle" checked />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         STATES
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">States</h2>
+      <div class="form-demo__grid">
+        <FormField id="st-required" label="Required" required placeholder="Required field" />
+        <FormField id="st-error" label="With Error" error="This field is required" placeholder="Error state" />
+        <FormField id="st-disabled" label="Disabled" disabled value="Cannot edit" />
+        <FormField id="st-desc" label="With Description" description="Helper text goes here" placeholder="Described field" />
+      </div>
+      <div class="form-demo__row" style="margin-top: var(--space-md);">
+        <FormField id="st-cb-error" label="Agree to terms" type="checkbox" error="You must agree" />
+        <FormField id="st-cb-disabled" label="Disabled checkbox" type="checkbox" disabled />
+        <FormField id="st-tog-disabled" label="Disabled toggle" type="toggle" disabled />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         HIDDEN LABEL (search pattern)
+         ============================================================ -->
+    <section class="form-demo__section">
+      <h2 class="text">Hidden Label</h2>
+      <div class="form-demo__grid">
+        <FormField id="hl-search" label="Search" type="search" hideLabel placeholder="Search..." />
+      </div>
+    </section>
+
+  </div>
+
+</BaseLayout>
+
+<style is:global>
+  .form-demo {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg);
+  }
+
+  .form-demo h1 {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  .form-demo > p {
+    color: var(--brand-c-text-light);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .form-demo__section {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .form-demo__section h2 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--brand-c-neutral-light);
+  }
+
+  .form-demo__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .form-demo__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-lg);
+    align-items: center;
+  }
+</style>

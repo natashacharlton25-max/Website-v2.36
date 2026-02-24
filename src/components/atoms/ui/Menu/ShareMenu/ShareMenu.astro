@@ -1,0 +1,132 @@
+---
+/**
+ * ShareMenu — Inline hover-expand share button
+ *
+ * A glass circle trigger that reveals social share links on hover.
+ * Intended for use inside cards and compact layouts.
+ *
+ * @param url      - The URL to share
+ * @param size     - 'sm' (default) or 'md'
+ * @param class    - Additional CSS class
+ */
+
+import Button from '../../Button/Button.astro';
+import Icon from '../../../icons/Icon.astro';
+
+export interface Props {
+  url: string;
+  size?: 'sm' | 'md';
+  class?: string;
+}
+
+const {
+  url,
+  size = 'sm',
+  class: className = ''
+} = Astro.props;
+
+const encodedUrl = encodeURIComponent(url);
+const optionSize = size === 'sm' ? 20 : 24;
+const optionPx = size === 'sm' ? 40 : 48;
+---
+
+<div class={`share-menu share-menu--${size} ${className}`}>
+  <Button shape="circle" variant="glass" size={size} ariaLabel="Share" icon="share-fill" className="share-menu__trigger" />
+  <div class="share-menu__options" style={`--share-option-size: ${optionPx}px;`}>
+    <a class="share-menu__option" href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer" title="Share on Facebook">
+      <Icon name="facebook-logo-fill" size={optionSize} />
+    </a>
+    <a class="share-menu__option" href={`https://twitter.com/intent/tweet?url=${encodedUrl}`} target="_blank" rel="noopener noreferrer" title="Share on Twitter">
+      <Icon name="twitter-logo-fill" size={optionSize} />
+    </a>
+    <a class="share-menu__option" href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}`} target="_blank" rel="noopener noreferrer" title="Share on LinkedIn">
+      <Icon name="linkedin-logo-fill" size={optionSize} />
+    </a>
+    <a class="share-menu__option" href={`https://api.whatsapp.com/send?text=${encodedUrl}`} target="_blank" rel="noopener noreferrer" title="Share on WhatsApp">
+      <!-- No Phosphor WhatsApp icon — inline SVG -->
+      <svg width={optionSize} height={optionSize} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+    </a>
+  </div>
+</div>
+
+<style>
+  .share-menu {
+    position: relative;
+  }
+
+  .share-menu__options {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 16px);
+    transform: translateY(-50%);
+    display: flex;
+    gap: var(--space-md);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+    z-index: 3;
+  }
+
+  .share-menu__options.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .share-menu__option {
+    width: var(--share-option-size, 40px);
+    height: var(--share-option-size, 40px);
+    color: var(--brand-c-secondary);
+    background: color-mix(in oklch, var(--color-White) 15%, transparent);
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+
+  .share-menu__option:hover {
+    background: var(--brand-c-primary);
+    color: var(--color-White);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  /* Mobile: hide share menu (too complex for touch) */
+  @media (max-width: 768px) {
+    .share-menu {
+      display: none !important;
+    }
+  }
+</style>
+
+<script>
+  // ShareMenu hover logic
+  function initShareMenus() {
+    document.querySelectorAll<HTMLElement>('.share-menu:not([data-share-init])').forEach(menu => {
+      menu.setAttribute('data-share-init', '1');
+      const trigger = menu.querySelector('.share-menu__trigger');
+      const options = menu.querySelector('.share-menu__options') as HTMLElement | null;
+      if (!trigger || !options) return;
+
+      menu.addEventListener('mouseenter', () => {
+        options.classList.add('visible');
+      });
+
+      menu.addEventListener('mouseleave', () => {
+        setTimeout(() => {
+          if (!options.matches(':hover') && !menu.matches(':hover')) {
+            options.classList.remove('visible');
+          }
+        }, 300);
+      });
+    });
+  }
+
+  initShareMenus();
+  document.addEventListener('astro:page-load', initShareMenus);
+</script>

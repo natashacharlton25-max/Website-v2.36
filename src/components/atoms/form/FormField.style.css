@@ -2,19 +2,116 @@
  * FormField — style.css
  * @layer components
  *
- * Covers: text, email, textarea, checkbox, search, select, number, tel, url, password
+ * Covers: text, email, textarea, checkbox, radio, toggle, search, select,
+ *         number, tel, url, password
  * Label, description, error state, disabled state.
+ *
+ * Token system:
+ *   --_field-brand / --_field-brand-dark / --_field-brand-light  (colour)
+ *   --_field-border                                               (border colour)
+ *   --_field-control-size                                         (checkbox/radio size)
+ *   --_field-toggle-w / --_field-toggle-h / --_field-thumb-size   (toggle dims)
+ *
+ * Colour variants swap brand tokens: primary (default), secondary, neutral
+ * Contrast variants swap border token: normal (default), high
+ * Style variants: outlined (default), filled, underlined
  */
 
 @layer components {
 
   /* ==========================================================
-     BASE
+     BASE + TOKENS
      ========================================================== */
   .form-field {
     display: flex;
     flex-direction: column;
     gap: var(--space-xs, 0.25rem);
+
+    /* Colour tokens */
+    --_field-brand: var(--brand-c-primary);
+    --_field-brand-dark: var(--brand-c-primary-dark);
+    --_field-brand-light: var(--brand-c-primary-light);
+
+    /* Border / contrast token */
+    --_field-border: var(--brand-c-neutral-light, #e0ddd9);
+
+    /* Control size tokens */
+    --_field-control-size: 22px;
+    --_field-toggle-w: 44px;
+    --_field-toggle-h: 24px;
+    --_field-thumb-size: 18px;
+  }
+
+  /* ==========================================================
+     COLOUR VARIANTS
+     ========================================================== */
+  .form-field--secondary {
+    --_field-brand: var(--brand-c-secondary);
+    --_field-brand-dark: var(--brand-c-secondary-dark);
+    --_field-brand-light: var(--brand-c-secondary-light);
+  }
+
+  .form-field--neutral {
+    --_field-brand: var(--brand-c-neutral);
+    --_field-brand-dark: var(--brand-c-neutral-dark);
+    --_field-brand-light: var(--brand-c-neutral-light);
+  }
+
+  /* ==========================================================
+     CONTRAST VARIANT
+     ========================================================== */
+  .form-field--high-contrast {
+    --_field-border: var(--brand-c-text, #2c2c2c);
+    --_field-control-size: 28px;
+    --_field-toggle-w: 52px;
+    --_field-toggle-h: 28px;
+    --_field-thumb-size: 20px;
+  }
+
+  /* High contrast: strip neumorphic + glow back to outlined */
+  .form-field--high-contrast.form-field--neumorphic .form-field__input {
+    box-shadow: none;
+    border: var(--border-width-2, 2px) solid var(--_field-border);
+  }
+
+  .form-field--high-contrast.form-field--neumorphic .form-field__input:focus {
+    box-shadow: none;
+  }
+
+  .form-field--high-contrast.form-field--glow .form-field__input:focus {
+    box-shadow: none;
+  }
+
+  /* ==========================================================
+     DARK THEMES — neumorphic + glass → glow fallback
+     Shadows vanish on dark backgrounds; glow reads well.
+     --theme-luminance: dark on a11y-dark + a11y-high-contrast
+     ========================================================== */
+  :is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--neumorphic .form-field__input {
+    box-shadow: none;
+    border: var(--border-width-2, 2px) solid var(--_field-border);
+  }
+
+  :is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--neumorphic .form-field__input:focus {
+    border-color: var(--_field-brand);
+    box-shadow:
+      0 4px 16px color-mix(in oklch, var(--_field-brand) 50%, transparent),
+      0 0 30px color-mix(in oklch, var(--_field-brand) 20%, transparent);
+  }
+
+  :is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--glass .form-field__input {
+    background: color-mix(in oklch, var(--color-White) 6%, transparent);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid color-mix(in oklch, var(--color-White) 15%, transparent);
+    box-shadow: none;
+  }
+
+  :is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--glass .form-field__input:focus {
+    border-color: var(--_field-brand);
+    box-shadow:
+      0 4px 16px color-mix(in oklch, var(--_field-brand) 50%, transparent),
+      0 0 30px color-mix(in oklch, var(--_field-brand) 20%, transparent);
   }
 
   /* ==========================================================
@@ -36,11 +133,11 @@
   }
 
   /* ==========================================================
-     INPUT / TEXTAREA / SELECT — SHARED
+     INPUT / TEXTAREA / SELECT — SHARED (outlined = default)
      ========================================================== */
   .form-field__input {
     padding: var(--space-sm, 0.5rem) var(--space-md, 1rem);
-    border: var(--border-width-2, 2px) solid var(--brand-c-neutral-light, #e0ddd9);
+    border: var(--border-width-2, 2px) solid var(--_field-border);
     border-radius: var(--radius-md, 8px);
     font-family: var(--font-body, system-ui, sans-serif);
     font-size: var(--text-base, 1rem);
@@ -57,8 +154,8 @@
 
   .form-field__input:focus {
     outline: none;
-    border-color: var(--brand-c-primary);
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand-c-primary) 15%, transparent);
+    border-color: var(--_field-brand);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--_field-brand) 15%, transparent);
   }
 
   .form-field__input:disabled {
@@ -80,6 +177,82 @@
     background-repeat: no-repeat;
     background-position: right var(--space-sm, 0.5rem) center;
     padding-right: var(--space-2xl, 2.5rem);
+  }
+
+  /* ==========================================================
+     STYLE VARIANT: FILLED
+     ========================================================== */
+  .form-field--filled .form-field__input {
+    background: color-mix(in oklch, var(--_field-brand) 8%, var(--brand-c-bg, #fff));
+    border-color: transparent;
+  }
+
+  .form-field--filled .form-field__input:focus {
+    border-color: var(--_field-brand);
+    background: color-mix(in oklch, var(--_field-brand) 4%, var(--brand-c-bg, #fff));
+  }
+
+  /* ==========================================================
+     STYLE VARIANT: UNDERLINED
+     ========================================================== */
+  .form-field--underlined .form-field__input {
+    border: none;
+    border-bottom: 2px solid var(--_field-border);
+    border-radius: 0;
+    padding-left: 0;
+    padding-right: 0;
+    background: transparent;
+  }
+
+  .form-field--underlined .form-field__input:focus {
+    border-bottom-color: var(--_field-brand);
+    box-shadow: none;
+  }
+
+  .form-field--underlined .form-field__input--select {
+    padding-right: var(--space-2xl, 2.5rem);
+  }
+
+  /* ==========================================================
+     STYLE VARIANT: GLASS
+     ========================================================== */
+  .form-field--glass .form-field__input {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid color-mix(in oklch, var(--color-White) 35%, transparent);
+    color: var(--brand-c-text);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .form-field--glass .form-field__input:focus {
+    border-color: var(--_field-brand);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--_field-brand) 15%, transparent);
+  }
+
+  /* ==========================================================
+     STYLE VARIANT: NEUMORPHIC
+     ========================================================== */
+  .form-field--neumorphic .form-field__input {
+    border: none;
+    background: var(--brand-c-bg, #fff);
+    box-shadow: var(--shadow-neu-pressed);
+  }
+
+  .form-field--neumorphic .form-field__input:focus {
+    box-shadow: var(--shadow-neu-raised);
+    border-color: transparent;
+    outline: 2px solid var(--_field-brand);
+    outline-offset: 2px;
+  }
+
+  /* ==========================================================
+     STYLE VARIANT: GLOW
+     ========================================================== */
+  .form-field--glow .form-field__input:focus {
+    box-shadow:
+      0 4px 16px color-mix(in oklch, var(--_field-brand) 50%, transparent),
+      0 0 30px color-mix(in oklch, var(--_field-brand) 20%, transparent);
   }
 
   /* ==========================================================
@@ -105,33 +278,33 @@
   }
 
   .form-field__checkmark {
-    width: 22px;
-    height: 22px;
+    width: var(--_field-control-size);
+    height: var(--_field-control-size);
     flex-shrink: 0;
-    border: var(--border-width-2, 2px) solid var(--brand-c-neutral-light, #e0ddd9);
+    border: var(--border-width-2, 2px) solid var(--_field-border);
     border-radius: var(--radius-sm, 4px);
     background: var(--brand-c-bg, #fff);
     transition: background-color 0.2s ease, border-color 0.2s ease;
     position: relative;
   }
 
-  /* Checkmark tick */
+  /* Checkmark tick — positioned relative to control size */
   .form-field__checkmark::after {
     content: '';
     position: absolute;
     display: none;
-    left: 7px;
-    top: 3px;
-    width: 5px;
-    height: 10px;
+    left: calc(var(--_field-control-size) * 0.32);
+    top: calc(var(--_field-control-size) * 0.12);
+    width: calc(var(--_field-control-size) * 0.23);
+    height: calc(var(--_field-control-size) * 0.46);
     border: solid var(--color-White, #fff);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
   }
 
   .form-field__checkbox:checked + .form-field__checkmark {
-    background: var(--brand-c-primary);
-    border-color: var(--brand-c-primary);
+    background: var(--_field-brand);
+    border-color: var(--_field-brand);
   }
 
   .form-field__checkbox:checked + .form-field__checkmark::after {
@@ -139,7 +312,7 @@
   }
 
   .form-field__checkbox:focus-visible + .form-field__checkmark {
-    outline: 2px solid var(--brand-c-primary);
+    outline: 2px solid var(--_field-brand);
     outline-offset: 2px;
   }
 
@@ -150,6 +323,134 @@
 
   .form-field__label-text {
     color: var(--brand-c-text, #2c2c2c);
+  }
+
+  /* ==========================================================
+     RADIO
+     ========================================================== */
+  .form-field--radio {
+    flex-direction: row;
+  }
+
+  .form-field__radio-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm, 0.5rem);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .form-field__radio {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .form-field__radio-indicator {
+    width: var(--_field-control-size);
+    height: var(--_field-control-size);
+    flex-shrink: 0;
+    border: var(--border-width-2, 2px) solid var(--_field-border);
+    border-radius: 50%;
+    background: var(--brand-c-bg, #fff);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    position: relative;
+  }
+
+  /* Radio dot — sized relative to control */
+  .form-field__radio-indicator::after {
+    content: '';
+    position: absolute;
+    display: none;
+    top: 50%;
+    left: 50%;
+    width: calc(var(--_field-control-size) * 0.45);
+    height: calc(var(--_field-control-size) * 0.45);
+    border-radius: 50%;
+    background: var(--color-White, #fff);
+    transform: translate(-50%, -50%);
+  }
+
+  .form-field__radio:checked + .form-field__radio-indicator {
+    background: var(--_field-brand);
+    border-color: var(--_field-brand);
+  }
+
+  .form-field__radio:checked + .form-field__radio-indicator::after {
+    display: block;
+  }
+
+  .form-field__radio:focus-visible + .form-field__radio-indicator {
+    outline: 2px solid var(--_field-brand);
+    outline-offset: 2px;
+  }
+
+  .form-field__radio:disabled + .form-field__radio-indicator {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* ==========================================================
+     TOGGLE
+     ========================================================== */
+  .form-field--toggle {
+    flex-direction: row;
+  }
+
+  .form-field__toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm, 0.5rem);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .form-field__toggle {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .form-field__toggle-track {
+    width: var(--_field-toggle-w);
+    height: var(--_field-toggle-h);
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: var(--brand-c-neutral-light, #e0ddd9);
+    transition: background-color 0.2s ease;
+    position: relative;
+  }
+
+  .form-field__toggle-thumb {
+    position: absolute;
+    top: calc((var(--_field-toggle-h) - var(--_field-thumb-size)) / 2);
+    left: calc((var(--_field-toggle-h) - var(--_field-thumb-size)) / 2);
+    width: var(--_field-thumb-size);
+    height: var(--_field-thumb-size);
+    border-radius: 50%;
+    background: var(--color-White, #fff);
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.1));
+    transition: transform 0.2s ease;
+  }
+
+  .form-field__toggle:checked + .form-field__toggle-track {
+    background: var(--_field-brand);
+  }
+
+  .form-field__toggle:checked + .form-field__toggle-track .form-field__toggle-thumb {
+    transform: translateX(calc(var(--_field-toggle-w) - var(--_field-toggle-h)));
+  }
+
+  .form-field__toggle:focus-visible + .form-field__toggle-track {
+    outline: 2px solid var(--_field-brand);
+    outline-offset: 2px;
+  }
+
+  .form-field__toggle:disabled + .form-field__toggle-track {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   /* ==========================================================
@@ -165,6 +466,15 @@
 
   .form-field--error .form-field__checkmark {
     border-color: var(--color-Error, #e53e3e);
+  }
+
+  .form-field--error .form-field__radio-indicator {
+    border-color: var(--color-Error, #e53e3e);
+  }
+
+  .form-field--error .form-field__toggle-track {
+    outline: 2px solid var(--color-Error, #e53e3e);
+    outline-offset: 2px;
   }
 
   .form-field__error {

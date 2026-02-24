@@ -1,0 +1,240 @@
+---
+/**
+ * FlipCard — 3D perspective flip card
+ *
+ * Front face shows image/gradient + title + subtitle + arrow indicator.
+ * On hover the card rotates 180° on the Y axis, revealing the back face
+ * with description + CTA button. Uses CSS `transform-style: preserve-3d`
+ * and `backface-visibility: hidden`.
+ *
+ * @param title       - Heading shown on both faces
+ * @param subtitle    - Short text on front face
+ * @param description - Longer text on back face
+ * @param href        - CTA link URL on back
+ * @param linkLabel   - CTA button text (default: 'Learn More')
+ * @param frontImage  - Background image for front face
+ * @param backImage   - Background image for back face (defaults to frontImage)
+ * @param frontColor  - Fallback bg colour for front (default: --brand-c-primary)
+ * @param backColor   - Fallback bg colour for back (default: --brand-c-primary-dark)
+ * @param class       - Extra classes
+ */
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  description: string;
+  href?: string;
+  linkLabel?: string;
+  frontImage?: string;
+  backImage?: string;
+  frontColor?: string;
+  backColor?: string;
+  class?: string;
+}
+
+const {
+  title,
+  subtitle = '',
+  description,
+  href,
+  linkLabel = 'Learn More',
+  frontImage,
+  backImage,
+  frontColor = 'var(--brand-c-primary)',
+  backColor = 'var(--brand-c-primary-dark)',
+  class: className = '',
+} = Astro.props;
+
+const frontBg = frontImage
+  ? `background-image: url('${frontImage}');`
+  : `background: ${frontColor};`;
+
+const backBg = (backImage || frontImage)
+  ? `background-image: url('${backImage || frontImage}');`
+  : `background: ${backColor};`;
+---
+
+<div class:list={['card', 'flip-box-item', className]}>
+  <div class="flip-box">
+    <div class="flip-box__face flip-box__front" style={frontBg}>
+      <div class="flip-box__inner">
+        <h3 class="flip-box__header text">{title}</h3>
+        {subtitle && <p class="flip-box__subtitle text">{subtitle}</p>}
+        <div class="flip-box__arrow" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 256 256" fill="currentColor">
+            <path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-box__face flip-box__back" style={backBg}>
+      <div class="flip-box__inner">
+        <h3 class="flip-box__header text">{title}</h3>
+        <p class="flip-box__text text">{description}</p>
+        {href && (
+          <a href={href} class="flip-box__btn text">{linkLabel}</a>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── Item wrapper ── */
+  .flip-box-item {
+    position: relative;
+    -webkit-backface-visibility: hidden;
+    width: 100%;
+    max-width: 26rem;
+  }
+
+  /* ── 3D container ── */
+  .flip-box {
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+  }
+
+  /* ── Shared face styles ── */
+  .flip-box__face {
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--radius-lg);
+    min-height: 28rem;
+    transition: transform 0.7s cubic-bezier(.4, .2, .2, 1);
+    -webkit-transition: transform 0.7s cubic-bezier(.4, .2, .2, 1);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* ── Front face ── */
+  .flip-box__front {
+    transform: rotateY(0deg);
+    transform-style: preserve-3d;
+  }
+
+  .flip-box:hover .flip-box__front {
+    transform: rotateY(-180deg);
+  }
+
+  /* ── Back face ── */
+  .flip-box__back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    transform: rotateY(180deg);
+    transform-style: preserve-3d;
+  }
+
+  .flip-box:hover .flip-box__back {
+    transform: rotateY(0deg);
+  }
+
+  /* ── Inner content (3D push-forward for depth) ── */
+  .flip-box__inner {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    padding: var(--space-2xl);
+    outline: 1px solid transparent;
+    perspective: inherit;
+    z-index: 2;
+    top: 50%;
+    transform: translateY(-50%) translateZ(60px) scale(0.94);
+    -webkit-transform: translateY(-50%) translateZ(60px) scale(0.94);
+    text-align: center;
+    color: var(--brand-c-bg);
+  }
+
+  /* ── Typography ── */
+  .flip-box__header {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    font-size: var(--font-size-xl);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin: 0 0 var(--space-sm) 0;
+    color: inherit;
+  }
+
+  .flip-box__subtitle {
+    font-family: var(--font-heading);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: inherit;
+    opacity: 0.85;
+    margin: 0;
+  }
+
+  .flip-box__text {
+    font-family: var(--font-heading);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: inherit;
+    margin: 0;
+  }
+
+  /* ── Arrow indicator on front ── */
+  .flip-box__arrow {
+    margin-top: var(--space-lg);
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity var(--transition-base);
+  }
+
+  .flip-box:hover .flip-box__arrow {
+    opacity: 0;
+  }
+
+  /* ── CTA button on back ── */
+  .flip-box__btn {
+    display: inline-block;
+    margin-top: var(--space-lg);
+    background: transparent;
+    border: 2px solid var(--brand-c-bg);
+    border-radius: var(--radius-sm);
+    color: var(--brand-c-bg);
+    cursor: pointer;
+    font-family: var(--font-heading);
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    padding: var(--space-sm) var(--space-lg);
+    text-transform: uppercase;
+    text-decoration: none;
+    letter-spacing: var(--letter-spacing-wide);
+    transition: background var(--transition-fast), color var(--transition-fast);
+  }
+
+  .flip-box__btn:hover {
+    background: var(--brand-c-bg);
+    color: var(--brand-c-text);
+  }
+
+  /* ── Reduced motion — no flip, show front with subtle opacity shift ── */
+  @media (prefers-reduced-motion: reduce) {
+    .flip-box__face {
+      transition: none;
+    }
+
+    .flip-box:hover .flip-box__front {
+      transform: rotateY(0deg);
+      opacity: 0;
+    }
+
+    .flip-box__back {
+      transform: rotateY(0deg);
+      opacity: 0;
+    }
+
+    .flip-box:hover .flip-box__back {
+      opacity: 1;
+    }
+
+    .flip-box__face {
+      transition: opacity 0.3s;
+    }
+  }
+</style>

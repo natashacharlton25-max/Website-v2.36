@@ -1,85 +1,148 @@
 /**
  * Button — a11y.css
  *
- * Themes:      Brand tokens handle colour changes. ✅ Nothing extra.
- * Focus:       Built into base styles (.btn:focus-visible). ✅ Nothing extra.
- * HL:          Link-buttons get outline instead of underline.
+ * Both reduce-motion and text-only → plain outline button.
+ * Border-colour change on hover, nothing else.
+ * All effects, animations, pseudo-elements, JS-driven transforms stripped.
  *
- * Reduce-motion: Kill glint, colour-flow, tray-3d, rainbow-border,
- *                glow transitions, confetti sparkle, hover transitions.
- * Text-only:     Strip shadows, left-align, flat colours.
+ * High-contrast: visible borders on all buttons.
+ * Highlight-links: outline ring on link-buttons.
  */
+
+/* ==========================================================
+   REDUCE MOTION — outline button, no animations
+   ========================================================== */
 
 @layer a11y.reduce-motion {
 
   .a11y-reduce-motion {
 
-    /* Kill ALL pseudo-element effects (glint, colour-flow blobs) */
+    & .btn {
+      background: transparent;
+      color: var(--_btn-brand-dark);
+      border: 2px solid var(--_btn-brand);
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      filter: none;
+      transition: none;
+      animation: none;
+      transform: none;
+      clip-path: none;
+      max-width: none;
+    }
+
+    & .btn:hover {
+      background: transparent;
+      color: var(--_btn-brand-dark);
+      border-color: var(--_btn-brand-dark);
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
+    & .btn:active {
+      background: transparent;
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
+    /* Kill ALL pseudo-element effects */
     & .btn::before,
     & .btn::after {
       display: none;
     }
 
-    /* Kill rainbow-border wrapper animation */
-    & .btn-rainbow-wrap::before {
+    /* Icon-only — hide empty label so icon centres */
+    & .btn--icon-only .btn__label {
       display: none;
     }
 
-    /* Kill confetti sparkle */
-    & .btn--confetti::after {
-      animation: none;
+    /* Icon-only — force centering */
+    & .btn--icon-only {
+      justify-content: center;
+    }
+
+    /* Kill draw overlays + segments */
+    & .icon-draw-overlay,
+    & .icon-draw-segment {
       display: none;
     }
 
-    /* Kill chevron rotation */
-    & .btn__chevron {
-      transition: none;
+    /* Expand effect — reset to normal button */
+    & .btn--expand {
+      padding: var(--space-md) var(--space-lg);
     }
 
-    /* Immediate colour changes — no transitions */
-    & .btn {
-      transition: none;
-    }
-
-    /* Tray-3d: keep shadows for depth cue, remove transform animation */
-    & .btn--fx-tray-3d {
-      transition: none;
-    }
-
-    & .btn--fx-tray-3d:hover {
+    & .btn--expand .btn__icon {
+      position: static;
       transform: none;
     }
 
-    & .btn--fx-tray-3d:active {
-      transform: none;
+    & .btn--expand .btn__label {
+      position: static;
+      color: inherit;
     }
 
-    /* Glow: keep subtle shadow, remove transition */
-    & .btn--fx-glow {
-      transition: none;
+    /* Underline effect — restore normal button shape */
+    & .btn--underline {
+      padding: var(--space-md) var(--space-lg);
+      border-radius: var(--radius-md);
     }
 
+    /* Dropdown — no transition */
     & .dropdown-menu {
+      transition: none;
+    }
+
+    & .btn__chevron {
       transition: none;
     }
   }
 
 }
 
+/* ==========================================================
+   TEXT-ONLY — outline button, no decorations
+   ========================================================== */
+
 @layer a11y.text-only {
 
   .a11y-text-only {
 
     & .btn {
+      background: transparent;
+      color: var(--_btn-brand-dark);
+      border: 2px solid var(--_btn-brand);
       box-shadow: none;
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
-      text-align: left;
-      justify-content: flex-start;
-      margin: 0;
+      filter: none;
+      transition: none;
+      animation: none;
+      transform: none;
+      clip-path: none;
+      max-width: none;
     }
 
-    /* Kill ALL pseudo-element effects in text-only */
+    & .btn:hover {
+      background: transparent;
+      color: var(--_btn-brand-dark);
+      border-color: var(--_btn-brand-dark);
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
+    & .btn:active {
+      background: transparent;
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
+    /* Kill ALL pseudo-element effects */
     & .btn::before,
     & .btn::after {
       display: none;
@@ -94,57 +157,63 @@
       padding: 0;
     }
 
-    /* Neumorphic → flat */
-    & .btn--neumorphic {
-      box-shadow: none;
-      border: var(--border-width-2) solid var(--brand-c-primary);
+    /* Icon-only — hide empty label so icon centres */
+    & .btn--icon-only .btn__label {
+      display: none;
     }
 
-    /* Glass → flat */
-    & .btn--glass {
-      background: var(--brand-c-primary);
-      color: var(--color-White);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      border-color: transparent;
+    /* Icon-only — force centering */
+    & .btn--icon-only {
+      justify-content: center;
     }
 
-    /* Tray-3d → flat (no stacked shadows) */
-    & .btn--fx-tray-3d {
-      box-shadow: none;
-      text-shadow: none;
-      border: var(--border-width-2) solid var(--brand-c-primary);
+    /* Kill draw overlays + segments */
+    & .icon-draw-overlay,
+    & .icon-draw-segment {
+      display: none;
     }
 
-    & .btn--fx-tray-3d:hover {
+    /* Expand effect — reset to normal button */
+    & .btn--expand {
+      padding: var(--space-md) var(--space-lg);
+    }
+
+    & .btn--expand .btn__icon {
+      position: static;
       transform: none;
-      box-shadow: none;
     }
 
-    /* Glow → flat */
-    & .btn--fx-glow:hover {
-      box-shadow: none;
+    & .btn--expand .btn__label {
+      position: static;
+      color: inherit;
+    }
+
+    /* Underline effect — restore normal button shape */
+    & .btn--underline {
+      padding: var(--space-md) var(--space-lg);
+      border-radius: var(--radius-md);
     }
   }
 
 }
 
+/* ==========================================================
+   HIGH CONTRAST — visible borders
+   ========================================================== */
+
 @layer a11y.high-contrast {
 
   .a11y-high-contrast {
 
-    /* Ensure all buttons have visible borders */
     & .btn {
       border: var(--border-width-2) solid currentColor;
     }
 
-    /* Tray-3d: simplify to visible border, remove decorative shadows */
     & .btn--fx-tray-3d {
       box-shadow: none;
       text-shadow: none;
     }
 
-    /* Rainbow-border: force visible static border instead */
     & .btn-rainbow-wrap::before {
       display: none;
     }
@@ -153,7 +222,6 @@
       border: var(--border-width-2) solid currentColor;
     }
 
-    /* Glow: force solid outline instead of diffuse glow */
     & .btn--fx-glow:hover {
       box-shadow: none;
       outline: var(--border-width-2) solid currentColor;
@@ -163,18 +231,25 @@
 
 }
 
+/* ==========================================================
+   HIGHLIGHT LINKS — outline ring on link-buttons
+   ========================================================== */
+
 @layer a11y.highlight-links {
 
   .a11y-highlight-links {
 
-    /* Link-buttons: outline instead of underline */
-    & a.btn {
-      text-decoration: none;
+    & .btn {
       outline: 2px solid var(--brand-c-primary);
       outline-offset: 2px;
     }
 
-    & a.btn:hover {
+    & .btn .btn__label {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    & .btn:hover {
       outline-color: var(--brand-c-primary-dark);
     }
   }

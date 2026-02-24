@@ -1,0 +1,176 @@
+---
+// Testimonial Card Component
+// Uses: Card, Heading, Text, Image, Icon atoms
+
+import Card from '../../atoms/ui/Card/Card.astro';
+import Text from '../../atoms/ui/Text/Text.astro';
+import Image from '../../atoms/images/Image/Image.astro';
+import Icon from '../../atoms/icons/Icon.astro';
+
+export interface Props {
+  quote: string;
+  author: string;
+  authorTitle?: string;
+  authorCompany?: string;
+  authorImage?: string;
+  rating?: number; // 1-5
+  variant?: 'default' | 'bordered' | 'glass';
+  featured?: boolean;
+}
+
+const {
+  quote,
+  author,
+  authorTitle,
+  authorCompany,
+  authorImage,
+  rating,
+  variant = 'default',
+  featured = false
+} = Astro.props;
+
+// Map variants to Card atom props
+const cardVariant = variant === 'glass' ? 'glass' : 'default';
+const cardBorder = variant === 'bordered' ? 'thin' : 'none';
+---
+
+<Card
+  as="article"
+  variant={cardVariant}
+  shadow={variant === 'default' ? 'sm' : 'none'}
+  radius="lg"
+  padding="xl"
+  border={cardBorder}
+  class={`testimonial-card testimonial-card--${variant} ${featured ? 'testimonial-card--featured' : ''}`}
+>
+  {rating && (
+    <div class="testimonial-card__rating">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Icon
+          name="star-fill"
+          size={20}
+          class={i < rating ? 'star star--filled' : 'star'}
+        />
+      ))}
+    </div>
+  )}
+
+  <blockquote class="testimonial-card__quote">
+    <Icon name="quotes-fill" size={32} class="testimonial-card__quote-icon" />
+    <Text leading="relaxed" flush class="testimonial-card__quote-text">{quote}</Text>
+  </blockquote>
+
+  <div class="testimonial-card__author">
+    {authorImage && (
+      <Image
+        src={authorImage}
+        alt={author}
+        width="48"
+        height="48"
+        radius="full"
+        fit="cover"
+        class="testimonial-card__author-image"
+      />
+    )}
+    <div class="testimonial-card__author-info">
+      <Text as="span" weight="bold" flush>{author}</Text>
+      {(authorTitle || authorCompany) && (
+        <Text as="span" size="sm" flush>
+          {authorTitle && <span>{authorTitle}</span>}
+          {authorTitle && authorCompany && <span> &bull; </span>}
+          {authorCompany && <span>{authorCompany}</span>}
+        </Text>
+      )}
+    </div>
+  </div>
+</Card>
+
+<style>
+  .testimonial-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    height: 100%;
+    position: relative;
+  }
+
+  .testimonial-card--bordered {
+    border-color: var(--brand-c-neutral-light);
+  }
+
+  .testimonial-card--bordered:hover {
+    border-color: var(--brand-c-primary-light);
+  }
+
+  .testimonial-card--featured {
+    border: 2px solid var(--brand-c-primary);
+  }
+
+  .testimonial-card__rating {
+    display: flex;
+    gap: 4px;
+  }
+
+  .star {
+    color: var(--brand-c-neutral-light);
+  }
+
+  .star--filled {
+    color: var(--color-Warning);
+  }
+
+  .testimonial-card__quote {
+    position: relative;
+    margin: 0;
+    flex: 1;
+  }
+
+  .testimonial-card__quote-icon {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    opacity: 0.1;
+    color: var(--brand-c-primary);
+  }
+
+  .testimonial-card__quote-text {
+    position: relative;
+    z-index: 1;
+  }
+
+  .testimonial-card__author {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--brand-c-neutral-light);
+  }
+
+  .testimonial-card__author-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  @media (max-width: 768px) {
+    .testimonial-card__author-image {
+      width: var(--space-3xl);
+      height: var(--space-3xl);
+    }
+
+    .testimonial-card {
+      gap: var(--space-md);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .testimonial-card__rating {
+      gap: 2px;
+    }
+
+    .testimonial-card__author {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+</style>

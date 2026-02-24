@@ -1,0 +1,106 @@
+/* ──────────────────────────────────────────────────
+   RadialMenu.a11y.css
+   Reduce-motion + text-only overrides
+   ────────────────────────────────────────────────── */
+
+/* ── Reduce Motion ── */
+@layer a11y.reduce-motion {
+
+  #a11y-content-wrapper.a11y-reduce-motion .radial-menu__trigger {
+    transition: none;
+  }
+
+  #a11y-content-wrapper.a11y-reduce-motion .radial-menu__line {
+    transition: none;
+  }
+
+  #a11y-content-wrapper.a11y-reduce-motion .radial-menu__item {
+    transition: none;
+  }
+
+  #a11y-content-wrapper.a11y-reduce-motion .radial-menu__toggle:checked ~ .radial-menu__item {
+    transition: none;
+  }
+
+}
+
+/* ── Text Only ── */
+@layer a11y.text-only {
+
+  /* Strip container sizing */
+  #a11y-content-wrapper.a11y-text-only .radial-menu {
+    width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  /* Strip trigger chrome — keep as plain text "Menu" */
+  #a11y-content-wrapper.a11y-text-only .radial-menu__trigger {
+    width: auto;
+    height: auto;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    position: static;
+    cursor: pointer;
+    color: var(--brand-c-primary);
+    text-decoration: underline;
+    font-size: var(--text-body);
+    padding: var(--space-xs) 0;
+  }
+
+  #a11y-content-wrapper.a11y-text-only .radial-menu__trigger::before {
+    content: "Menu";
+  }
+
+  #a11y-content-wrapper.a11y-text-only .radial-menu__trigger:hover {
+    transform: none;
+  }
+
+  #a11y-content-wrapper.a11y-text-only .radial-menu__toggle:checked + .radial-menu__trigger {
+    transform: none;
+  }
+
+  /* Hide hamburger lines */
+  #a11y-content-wrapper.a11y-text-only .radial-menu__line {
+    display: none;
+  }
+
+  /* Items always visible as plain list */
+  #a11y-content-wrapper.a11y-text-only .radial-menu__item {
+    position: static;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    color: var(--brand-c-primary);
+    text-decoration: underline;
+    transform: none;
+    padding: var(--space-xs) 0;
+  }
+
+  #a11y-content-wrapper.a11y-text-only .radial-menu__item:hover {
+    background: none;
+    filter: none;
+    color: var(--brand-c-primary-dark);
+  }
+
+  #a11y-content-wrapper.a11y-text-only .radial-menu__toggle:checked ~ .radial-menu__item {
+    transform: none;
+  }
+
+  /* Hide icons — aria-label provides text */
+  #a11y-content-wrapper.a11y-text-only .radial-menu__item .icon {
+    display: none;
+  }
+
+  /* Show aria-label as visible text */
+  #a11y-content-wrapper.a11y-text-only .radial-menu__item::after {
+    content: attr(aria-label);
+    font-size: var(--text-body);
+  }
+
+}

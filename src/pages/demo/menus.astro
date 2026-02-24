@@ -1,0 +1,124 @@
+---
+/**
+ * Menu Demo Page
+ *
+ * Visual test bench for RadialMenu and DPadMenu components.
+ * NOT a production page.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RadialMenu from '../../components/atoms/ui/Menu/RadialMenu/RadialMenu.astro';
+import DPadMenu from '../../components/atoms/ui/Menu/DPadMenu/DPadMenu.astro';
+---
+
+<BaseLayout title="Menu Demo" hideFooter>
+
+  <div class="menu-demo">
+    <h1 class="text">Menu Components</h1>
+    <p class="text">Radial fan-out and DPad menus.</p>
+
+    <!-- ============================================================
+         RADIAL MENU — PRIMARY
+         ============================================================ -->
+    <section class="menu-demo__section">
+      <h2 class="text">Radial Menu — Primary</h2>
+      <div class="menu-demo__canvas">
+        <RadialMenu
+          variant="primary"
+          items={[
+            { icon: 'star-fill', ariaLabel: 'Favourites' },
+            { icon: 'heart-fill', ariaLabel: 'Likes' },
+            { icon: 'gear-fill', ariaLabel: 'Settings' },
+            { icon: 'house-fill', ariaLabel: 'Home' },
+            { icon: 'chat-circle-fill', ariaLabel: 'Chat' },
+          ]}
+        />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         RADIAL MENU — SECONDARY
+         ============================================================ -->
+    <section class="menu-demo__section">
+      <h2 class="text">Radial Menu — Secondary</h2>
+      <div class="menu-demo__canvas">
+        <RadialMenu
+          variant="secondary"
+          items={[
+            { icon: 'pencil-fill', ariaLabel: 'Edit' },
+            { icon: 'trash-fill', ariaLabel: 'Delete' },
+            { icon: 'copy-fill', ariaLabel: 'Copy' },
+          ]}
+        />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         DPAD MENU
+         ============================================================ -->
+    <section class="menu-demo__section">
+      <h2 class="text">DPad Menu</h2>
+      <div class="menu-demo__canvas">
+        <DPadMenu items={[
+          { symbol: '×', label: 'CROSS', color: 'var(--brand-c-primary-light)' },
+          { symbol: '○', label: 'CIRCLE', color: 'var(--brand-c-secondary)' },
+          { symbol: '□', label: 'SQUARE', color: 'var(--brand-c-secondary-light)' },
+          { symbol: '△', label: 'TRIANGLE', color: 'var(--brand-c-primary)' },
+        ]} />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         DPAD MENU — WITH ICONS
+         ============================================================ -->
+    <section class="menu-demo__section">
+      <h2 class="text">DPad Menu — Icons</h2>
+      <div class="menu-demo__canvas">
+        <DPadMenu items={[
+          { icon: 'arrow-up-fill', label: 'UP', color: 'var(--brand-c-primary)' },
+          { icon: 'arrow-right-fill', label: 'RIGHT', color: 'var(--brand-c-secondary)' },
+          { icon: 'arrow-down-fill', label: 'DOWN', color: 'var(--brand-c-primary-dark)' },
+          { icon: 'arrow-left-fill', label: 'LEFT', color: 'var(--brand-c-secondary-dark)' },
+        ]} />
+      </div>
+    </section>
+
+  </div>
+
+</BaseLayout>
+
+<style is:global>
+  .menu-demo {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg);
+  }
+
+  .menu-demo h1 {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  .menu-demo > p {
+    color: var(--brand-c-text-light);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .menu-demo__section {
+    margin-bottom: var(--space-3xl);
+  }
+
+  .menu-demo__section h2 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--brand-c-neutral-light);
+  }
+
+  .menu-demo__canvas {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 320px;
+    padding: var(--space-3xl);
+  }
+</style>

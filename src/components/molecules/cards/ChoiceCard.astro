@@ -1,0 +1,282 @@
+---
+/**
+ * ChoiceCard — Selectable image card for forms, quizzes, polls
+ *
+ * Image card with checkbox toggle. Bottom-right label tray features
+ * inverted border radius notch (concave corners via box-shadow trick).
+ * Click anywhere on the card to toggle selection.
+ *
+ * @param image     - Image src path (required)
+ * @param imageAlt  - Alt text for image
+ * @param label     - Label text shown at bottom
+ * @param name      - Checkbox name (for form grouping)
+ * @param value     - Checkbox value
+ * @param checked   - Initial checked state
+ * @param class     - Extra classes
+ *
+ * Styles: scoped. Uses brand tokens + a11y support.
+ */
+
+interface Props {
+  image: string;
+  imageAlt?: string;
+  label: string;
+  name?: string;
+  value?: string;
+  checked?: boolean;
+  class?: string;
+}
+
+const {
+  image,
+  imageAlt = '',
+  label,
+  name = 'choice',
+  value = '',
+  checked = false,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['card', 'choice-card', checked && 'active', className]} data-choice-card>
+  <div class="choice-card__inner">
+    <div class="choice-card__box">
+      <div class="choice-card__image">
+        <img src={image} alt={imageAlt} />
+      </div>
+
+      <div class="choice-card__tray">
+        <h3 class="choice-card__label text">{label}</h3>
+
+        <label class="choice-card__check">
+          <input
+            type="checkbox"
+            name={name}
+            value={value || label}
+            checked={checked}
+            class="choice-card__input"
+          />
+          <span class="choice-card__checkmark" aria-hidden="true"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── Card shell ── */
+  .choice-card {
+    padding: var(--space-xs);
+    background: var(--brand-c-bg);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow var(--transition-base), border-color var(--transition-base);
+    border: 2px solid transparent;
+  }
+
+  .choice-card:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .choice-card.active {
+    border-color: var(--brand-c-primary);
+    box-shadow: 0 0 0 1px var(--brand-c-primary),
+                0 4px 16px color-mix(in oklch, var(--brand-c-primary) 20%, transparent);
+  }
+
+  /* ── Inner wrapper ── */
+  .choice-card__inner {
+    --_tray-bg: var(--brand-c-bg);
+    position: relative;
+    width: 100%;
+    height: 14rem;
+    background: var(--_tray-bg);
+    border-bottom-right-radius: 0;
+  }
+
+  .choice-card__box {
+    width: 100%;
+    height: 100%;
+    background: var(--brand-c-bg);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── Image ── */
+  .choice-card__image {
+    position: absolute;
+    inset: 0;
+  }
+
+  .choice-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    display: block;
+  }
+
+  /* ── Label tray with inverted border radius ── */
+  .choice-card__tray {
+    position: absolute;
+    bottom: calc(-1 * var(--space-xs));
+    right: 0;
+    width: 100%;
+    height: 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--_tray-bg);
+    pointer-events: none;
+  }
+
+  /* Inverted corner — top-left notch */
+  .choice-card__tray::before {
+    position: absolute;
+    content: "";
+    bottom: var(--space-xs);
+    left: -1.25rem;
+    background: transparent;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-bottom-right-radius: 1rem;
+    box-shadow: 0.313rem 0.313rem 0 0.313rem var(--_tray-bg);
+  }
+
+  /* Inverted corner — top-right notch */
+  .choice-card__tray::after {
+    position: absolute;
+    content: "";
+    top: -1.25rem;
+    right: var(--space-xs);
+    background: transparent;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-bottom-right-radius: 1.25rem;
+    box-shadow: 0.313rem 0.313rem 0 0.313rem var(--_tray-bg);
+  }
+
+  /* On small viewports, tray is full-width — hide the inverted corners */
+  .choice-card__tray {
+    border-top-left-radius: 0;
+  }
+
+  /* On wider cards, tray only covers partial width with notch visible */
+  @media (min-width: 40rem) {
+    .choice-card__tray {
+      width: 18rem;
+      border-top-left-radius: 1rem;
+      right: calc(-1 * var(--space-xs));
+    }
+  }
+
+  /* ── Label text ── */
+  .choice-card__label {
+    margin-left: var(--space-sm);
+    text-transform: uppercase;
+    font-family: var(--font-heading);
+    font-size: var(--text-sm);
+    font-weight: var(--font-normal, 400);
+    color: var(--brand-c-text-light);
+    letter-spacing: var(--letter-spacing-wide);
+    transition: color var(--transition-base);
+  }
+
+  .choice-card.active .choice-card__label {
+    color: var(--brand-c-text);
+    font-weight: var(--font-semibold);
+  }
+
+  /* ── Checkbox ── */
+  .choice-card__check {
+    position: relative;
+    display: block;
+    pointer-events: none;
+  }
+
+  .choice-card__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    cursor: pointer;
+  }
+
+  .choice-card__checkmark {
+    position: absolute;
+    top: -0.5rem;
+    right: var(--space-lg);
+    width: 1.125rem;
+    height: 1.125rem;
+    background: transparent;
+    border: 2px solid var(--brand-c-text-light);
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+  }
+
+  /* Checkmark tick */
+  .choice-card__checkmark::after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 0.375rem;
+    top: 0.15rem;
+    width: 0.2rem;
+    height: 0.5rem;
+    border: solid var(--brand-c-bg);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  /* Active / checked state */
+  .choice-card.active .choice-card__checkmark {
+    background: var(--brand-c-primary);
+    border-color: var(--brand-c-primary);
+  }
+
+  .choice-card.active .choice-card__checkmark::after {
+    display: block;
+  }
+
+  .choice-card.active .choice-card__tray {
+    border-color: transparent;
+  }
+
+  /* Focus-visible on the card for keyboard users */
+  .choice-card:focus-within {
+    outline: 2px solid var(--brand-c-primary);
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  function initChoiceCards() {
+    document.querySelectorAll<HTMLElement>('[data-choice-card]:not([data-choice-bound])').forEach(card => {
+      card.setAttribute('data-choice-bound', '1');
+
+      card.addEventListener('click', (e) => {
+        // Don't double-toggle if clicking the actual input
+        if ((e.target as HTMLElement).tagName === 'INPUT') return;
+
+        const input = card.querySelector<HTMLInputElement>('.choice-card__input');
+        if (!input) return;
+
+        input.checked = !input.checked;
+        card.classList.toggle('active', input.checked);
+      });
+
+      // Sync class with native checkbox state (for form resets etc.)
+      const input = card.querySelector<HTMLInputElement>('.choice-card__input');
+      if (input) {
+        input.addEventListener('change', () => {
+          card.classList.toggle('active', input.checked);
+        });
+      }
+    });
+  }
+
+  initChoiceCards();
+  document.addEventListener('astro:page-load', initChoiceCards);
+</script>

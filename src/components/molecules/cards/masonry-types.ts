@@ -80,20 +80,14 @@ export interface MixedCardProps extends BaseCardProps {
 
 /**
  * Calculate contrasting border color based on background
- * Cards with dark backgrounds (700-800) use 500 token
- * Others use darkest shade (800) from same color family
+ * Returns a brand-aware border color for hover states
  */
 export function getHoverBorderColor(bgColor?: string): string {
   if (!bgColor) return 'var(--brand-c-text-dark)';
 
-  const match = bgColor.match(/var\(--color-(\w+)-(\d+)\)/);
-  if (!match) return 'var(--brand-c-text-dark)';
-
-  const [, colorName, shadeStr] = match;
-  const shade = parseInt(shadeStr, 10);
-
-  if (shade >= 700) {
-    return `var(--color-${colorName}-500)`;
+  // Dark backgrounds get a lighter border, light backgrounds get a darker border
+  if (bgColor.includes('dark') || bgColor.includes('neutral-dark')) {
+    return 'var(--brand-c-primary-light)';
   }
-  return `var(--color-${colorName}-800)`;
+  return 'var(--brand-c-text-dark)';
 }

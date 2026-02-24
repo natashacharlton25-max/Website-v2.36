@@ -1,0 +1,68 @@
+---
+/**
+ * IconScrollStage — scroll-driven icon draw/morph/colour animation
+ * src/components/organisms/IconScrollStage/IconScrollStage.astro
+ *
+ * Two-column layout: text scrolls, icon is CSS-sticky.
+ * DrawSVG draws the stroke on scroll, MorphSVG swaps shapes,
+ * CSS color shifts via currentColor inheritance.
+ *
+ * Usage:
+ *   <IconScrollStage icon="wellness/heart-fill" textSide="left">
+ *     <section class="stage-step" data-stage="draw">
+ *       <span class="stage-step__num">01</span>
+ *       <h2 class="stage-step__title">Draw Heart</h2>
+ *       <p class="stage-step__body">The heart draws on…</p>
+ *     </section>
+ *     <section class="stage-step" data-stage="flow">…</section>
+ *     <section class="stage-step" data-stage="draw"
+ *       data-stage-morph="creative/star-fill"
+ *       data-stage-color="var(--brand-c-secondary)">…</section>
+ *   </IconScrollStage>
+ *
+ * Props:
+ *   icon      — Phosphor icon name (e.g. "wellness/heart-fill")
+ *   iconSize  — Icon size in px (default 200)
+ *   iconColor — Initial stroke colour (default "var(--brand-c-primary)")
+ *   textSide  — "left" or "right" (default "left")
+ */
+import './IconScrollStage.style.css';
+import './IconScrollStage.responsive.css';
+import './IconScrollStage.a11y.css';
+
+import Icon from '../../atoms/icons/Icon.astro';
+
+interface Props {
+  icon: string;
+  iconSize?: number;
+  iconColor?: string;
+  textSide?: 'left' | 'right';
+  class?: string;
+}
+
+const {
+  icon,
+  iconSize = 200,
+  iconColor = 'var(--brand-c-primary)',
+  textSide = 'left',
+  class: className = '',
+} = Astro.props;
+
+const isTextRight = textSide === 'right';
+---
+
+<div
+  class:list={['icon-stage', { 'icon-stage--text-right': isTextRight }, className]}
+  data-icon-scroll-stage
+>
+  <div class="stage-text">
+    <slot />
+  </div>
+  <div class="stage-icon">
+    <Icon name={icon} stroke size={iconSize} color={iconColor} />
+  </div>
+</div>
+
+<script>
+  import '../../../lib/animation/icon-scroll-stage';
+</script>

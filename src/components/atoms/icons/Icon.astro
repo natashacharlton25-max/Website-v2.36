@@ -130,13 +130,13 @@ if (morphTo && !draw) {
   }
 }
 
-// ── Draw mode: convert to stroke SVG for DrawSVG animation ──
-// DrawSVG animates strokes, so we need fill="none" stroke="currentColor"
-const needsStrokeConversion = !!draw && !stroke; // Don't double-convert if stroke prop already set
+// ── Draw mode: render as stroke outline (visible at rest) ──
+// icon-animation.ts creates animated stroke overlays on top at runtime.
+const needsStrokeConversion = !!draw && !stroke;
 
 if (needsStrokeConversion && iconContent) {
   // Remove fill from <svg> root
-  iconContent = iconContent.replace(/<svg([^>]*)>/, (match, attrs) => {
+  iconContent = iconContent.replace(/<svg([^>]*)>/, (_match, attrs) => {
     const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
     return `<svg${cleaned} fill="none">`;
   });
@@ -144,10 +144,10 @@ if (needsStrokeConversion && iconContent) {
   // Hide the viewBox bounding <rect>
   iconContent = iconContent.replace(/<rect([^/]*)\/>/g, '<rect$1 fill="none" stroke="none"/>');
 
-  // Rewrite shape elements: remove existing fill, add stroke attrs
-  const drawStrokeWidth = 16;
+  // Rewrite shape elements: stroke outline in currentColor
+  const drawStrokeWidth = 10;
   const shapeRe = /<(path|circle|polygon|polyline)([^/]*)\/>/g;
-  iconContent = iconContent.replace(shapeRe, (match, tag, attrs) => {
+  iconContent = iconContent.replace(shapeRe, (_match, tag, attrs) => {
     const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
     return `<${tag}${cleaned} fill="none" stroke="currentColor" stroke-width="${drawStrokeWidth}"/>`;
   });

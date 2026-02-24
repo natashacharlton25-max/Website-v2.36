@@ -1,0 +1,93 @@
+/* ──────────────────────────────────────────────────
+   DPadMenu.style.css
+   PlayStation-style 4-button circular menu
+   ────────────────────────────────────────────────── */
+@layer components {
+
+  .dpad-menu {
+    width: 10em;
+    height: 10em;
+    background-color: var(--brand-c-neutral-dark);
+    border-radius: var(--radius-full);
+    position: relative;
+    transition: width var(--transition-base), height var(--transition-base);
+    box-shadow: 0 -1px 1px color-mix(in oklch, var(--color-White) 40%, transparent);
+  }
+
+  .dpad-menu:hover {
+    width: 12em;
+    height: 12em;
+  }
+
+  /* ── Slots ── */
+
+  .dpad-menu__slot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Button ── */
+
+  .dpad-menu__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5em;
+    height: 3.5em;
+    border-radius: var(--radius-full);
+    border: none;
+    background-color: color-mix(in oklch, var(--brand-c-neutral-dark) 80%, var(--color-White));
+    color: var(--_glow);
+    box-shadow:
+      inset 0 1px color-mix(in oklch, var(--color-White) 40%, transparent),
+      0 2px var(--color-Black, #121212);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .dpad-menu:hover .dpad-menu__btn {
+    width: 4em;
+    height: 4em;
+  }
+
+  .dpad-menu__btn:hover {
+    filter: brightness(85%);
+  }
+
+  .dpad-menu__btn:active {
+    box-shadow:
+      inset 0 2px 2px var(--color-Black, #121212),
+      0 0 15px var(--_glow);
+  }
+
+  /* ── Symbol (text characters like ×, ○, △, □) ── */
+
+  .dpad-menu__symbol {
+    font-size: 1.5em;
+    font-weight: 300;
+    color: inherit;
+    line-height: 1;
+  }
+
+  /* ── Label (hidden by default, shown in a11y text-only) ── */
+
+  .dpad-menu__label {
+    display: none;
+  }
+
+  /* ── Active glow on container via :has() ── */
+
+  .dpad-menu:has(.dpad-menu__slot--top .dpad-menu__btn:active) {
+    box-shadow: 0 -5px 15px var(--_glow);
+  }
+
+  /* Fallback: generic glow for browsers without positional :has() */
+  .dpad-menu:has(.dpad-menu__btn:active) {
+    transition: box-shadow var(--transition-fast);
+  }
+
+}

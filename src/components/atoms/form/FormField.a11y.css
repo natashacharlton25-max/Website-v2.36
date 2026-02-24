@@ -1,18 +1,26 @@
 /**
  * FormField — a11y.css
  *
- * Themes:      Brand tokens handle colour changes. ✅ Nothing extra.
- * Focus:       Built into base styles (.form-field__input:focus). ✅ Nothing extra.
- * HL:          Not a link or button — no underline needed.
- *
- * Reduce-motion: Kill transitions on focus ring and checkbox.
- * Text-only:     Flatten checkbox, stronger borders.
- * High-contrast:  Thicker borders, stronger focus ring.
+ * All a11y modes → dark single outline, larger controls.
+ * Just swap the tokens; base styles do the rest.
+ * Matches button a11y pattern: outline, no effects, no decoration.
  */
+
+/* ==========================================================
+   REDUCE MOTION — dark outline, large controls, no transitions
+   ========================================================== */
 
 @layer a11y.reduce-motion {
 
   .a11y-reduce-motion {
+
+    & .form-field {
+      --_field-border: var(--brand-c-text, #2c2c2c);
+      --_field-control-size: 28px;
+      --_field-toggle-w: 52px;
+      --_field-toggle-h: 28px;
+      --_field-thumb-size: 20px;
+    }
 
     & .form-field__input {
       transition: none;
@@ -21,43 +29,72 @@
     & .form-field__checkmark {
       transition: none;
     }
+
+    & .form-field__radio-indicator {
+      transition: none;
+    }
+
+    & .form-field__toggle-track {
+      transition: none;
+    }
+
+    & .form-field__toggle-thumb {
+      transition: none;
+    }
+
+    /* Strip glass / neumorphic / glow effects */
+    & .form-field--glass .form-field__input {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: var(--brand-c-bg, #fff);
+      border: 2px solid var(--_field-border);
+      box-shadow: none;
+    }
+
+    & .form-field--neumorphic .form-field__input {
+      box-shadow: none;
+      border: 2px solid var(--_field-border);
+    }
+
+    & .form-field--glow .form-field__input:focus {
+      box-shadow: none;
+    }
   }
 
 }
+
+/* ==========================================================
+   TEXT-ONLY — dark outline, large native controls, no decoration
+   ========================================================== */
 
 @layer a11y.text-only {
 
   .a11y-text-only {
 
-    /* Inputs → tinted background, no border/shadow/radius */
+    & .form-field {
+      --_field-border: var(--brand-c-text, #2c2c2c);
+    }
+
+    /* All inputs → flat, dark bottom border only */
     & .form-field__input {
       background: color-mix(in oklch, var(--brand-c-text-dark) 6%, transparent);
       border: none;
+      border-bottom: 2px solid var(--_field-border);
       border-radius: 0;
       box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
 
     & .form-field__input:focus {
       box-shadow: none;
-      background: color-mix(in oklch, var(--brand-c-primary) 8%, transparent);
-      outline: 2px solid var(--brand-c-primary);
+      background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+      border-bottom-color: var(--_field-brand-dark);
+      outline: 2px solid var(--_field-brand-dark);
       outline-offset: 2px;
     }
 
-    /* Textarea — same tinted background */
-    & .form-field__input--textarea {
-      border: none;
-      background: color-mix(in oklch, var(--brand-c-text-dark) 6%, transparent);
-    }
-
-    /* Select — same treatment */
-    & .form-field__input--select {
-      border-radius: 0;
-      border: none;
-      background: color-mix(in oklch, var(--brand-c-text-dark) 6%, transparent);
-    }
-
-    /* Hide custom checkmark, show native checkbox */
+    /* Hide custom checkmark, show large native checkbox */
     & .form-field__checkmark {
       display: none;
     }
@@ -65,18 +102,91 @@
     & .form-field__checkbox {
       position: static;
       opacity: 1;
-      width: auto;
-      height: auto;
+      width: 24px;
+      height: 24px;
+      accent-color: var(--_field-brand);
+    }
+
+    /* Hide custom radio indicator, show large native radio */
+    & .form-field__radio-indicator {
+      display: none;
+    }
+
+    & .form-field__radio {
+      position: static;
+      opacity: 1;
+      width: 24px;
+      height: 24px;
+      accent-color: var(--_field-brand);
+    }
+
+    /* Hide custom toggle, show large native checkbox */
+    & .form-field__toggle-track {
+      display: none;
+    }
+
+    & .form-field__toggle {
+      position: static;
+      opacity: 1;
+      width: 24px;
+      height: 24px;
+      accent-color: var(--_field-brand);
     }
   }
 
 }
 
+/* ==========================================================
+   HIGH CONTRAST — dark borders on all controls
+   ========================================================== */
+
+@layer a11y.high-contrast {
+
+  .a11y-high-contrast {
+
+    & .form-field {
+      --_field-border: var(--brand-c-text, #2c2c2c);
+      --_field-control-size: 28px;
+      --_field-toggle-w: 52px;
+      --_field-toggle-h: 28px;
+      --_field-thumb-size: 20px;
+    }
+
+    & .form-field__toggle-track {
+      border: 2px solid var(--_field-border);
+    }
+
+    /* Strip glass / neumorphic / glow effects */
+    & .form-field--glass .form-field__input {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: var(--brand-c-bg, #fff);
+      border: 2px solid var(--_field-border);
+      box-shadow: none;
+    }
+
+    & .form-field--neumorphic .form-field__input {
+      box-shadow: none;
+      border: 2px solid var(--_field-border);
+    }
+
+    & .form-field--glow .form-field__input:focus {
+      box-shadow: none;
+      outline: 2px solid var(--_field-brand);
+      outline-offset: 2px;
+    }
+  }
+
+}
+
+/* ==========================================================
+   HIGHLIGHT LINKS — underline form links
+   ========================================================== */
+
 @layer a11y.highlight-links {
 
   .a11y-highlight-links {
 
-    /* Form links (e.g. "forgot password") get underline */
     & .form-field a {
       text-decoration: underline;
       text-underline-offset: 2px;

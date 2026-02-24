@@ -1,0 +1,314 @@
+---
+// AssetCard.astro - Asset card with animated rainbow border
+// Uses: Badge, Heading, Text, Button, ShareMenu atoms
+
+import Badge from '../../atoms/ui/Badge/Badge.astro';
+import Heading from '../../atoms/ui/Heading/Heading.astro';
+import Text from '../../atoms/ui/Text/Text.astro';
+import Button from '../../atoms/ui/Button/Button.astro';
+import ShareMenu from '../../atoms/ui/Menu/ShareMenu/ShareMenu.astro';
+
+export interface Props {
+  tag: string;
+  title: string;
+  description: string;
+  plusUrl?: string;
+  downloadUrl?: string;
+  copyUrl?: string;
+  shareUrl?: string;
+  className?: string;
+  borderWidth?: string;
+  borderRadius?: string;
+}
+
+const {
+  tag,
+  title,
+  description,
+  plusUrl = "#",
+  downloadUrl = "#",
+  copyUrl = "#",
+  shareUrl = "#",
+  className = "",
+  borderWidth = "7px",
+  borderRadius = "32px"
+} = Astro.props;
+---
+
+<div class={`asset-card-wrapper ${className}`}
+     style={`--border-width: ${borderWidth}; --border-radius: ${borderRadius};`}
+     tabindex="0">
+  <div class="rainbow-border">
+    <div class="asset-card__inner">
+      <Badge label={tag} color="primary" class="asset-card__tag" />
+      <Heading level={2} size="h4" weight="medium" color="secondary" uppercase flush class="asset-card__title">{title}</Heading>
+      <Text weight="light" flush class="asset-card__desc">{description}</Text>
+
+      <div class="asset-card__actions">
+        {plusUrl !== "#" && (
+          <Button shape="circle" variant="glass" size="sm" href={plusUrl} target="_blank" ariaLabel="Open" icon="plus-fill" />
+        )}
+        {downloadUrl !== "#" && (
+          <Button shape="circle" variant="glass" size="sm" ariaLabel="Download" icon="download-fill" className="download-btn" data-url={downloadUrl} />
+        )}
+        {copyUrl !== "#" && (
+          <Button shape="circle" variant="glass" size="sm" ariaLabel="Copy Link" icon="link-fill" className="copy-btn" data-url={copyUrl} />
+        )}
+        {shareUrl !== "#" && (
+          <ShareMenu url={shareUrl} size="sm" />
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .asset-card-wrapper {
+    --angle: 0deg;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .rainbow-border {
+    padding: var(--border-width);
+    border-radius: var(--border-radius);
+    background: var(--brand-c-secondary);
+    width: 100%;
+    min-height: 400px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    position: relative;
+    transition: background 0.5s;
+  }
+
+  .rainbow-border.animated {
+    background: conic-gradient(
+      from var(--angle),
+      var(--brand-c-primary) 0%,
+      var(--brand-c-bg) 33%,
+      var(--brand-c-secondary) 66%,
+      var(--brand-c-primary) 100%
+    );
+    transition: none;
+  }
+
+  .rainbow-border.transitioning {
+    transition: background 0.7s cubic-bezier(.44,1.27,.68,1.01);
+  }
+
+  .rainbow-border.red {
+    background: var(--brand-c-primary) !important;
+    transition: background 0.7s cubic-bezier(.44,1.27,.68,1.01);
+  }
+
+  .asset-card__inner {
+    background: var(--brand-c-bg);
+    border-radius: calc(var(--border-radius) - var(--border-width));
+    width: 100%;
+    min-height: 100%;
+    padding: 45px;
+    position: relative;
+    box-sizing: border-box;
+    z-index: 1;
+    overflow: visible;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .asset-card__tag {
+    position: absolute;
+    left: 40px;
+    top: 40px;
+    z-index: 2;
+  }
+
+  .asset-card__title {
+    margin-top: 50px;
+  }
+
+  .asset-card__desc {
+    margin-top: var(--space-sm);
+    max-width: 95%;
+  }
+
+  .asset-card__actions {
+    position: absolute;
+    left: 40px;
+    bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    z-index: 2;
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .asset-card-wrapper {
+      width: 100%;
+      padding: 0 var(--space-sm);
+    }
+
+    .rainbow-border {
+      width: 100%;
+      border-radius: var(--radius-lg);
+      min-height: unset;
+      padding: var(--space-sm);
+    }
+
+    .asset-card__inner {
+      border-radius: var(--radius-sm);
+      min-height: unset;
+      padding: 30px var(--space-md) calc(var(--space-xl) * 3) var(--space-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .asset-card__tag {
+      position: static;
+      margin-top: var(--space-sm);
+      margin-bottom: var(--space-lg);
+    }
+
+    .asset-card__title {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .asset-card__desc {
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .asset-card__actions {
+      position: static;
+      width: 100%;
+      justify-content: center;
+      margin-top: var(--space-xl);
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+
+  }
+
+  @media (max-width: 430px) {
+    .rainbow-border {
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    .asset-card__inner {
+      padding: var(--space-xs) var(--space-sm) var(--space-xl) var(--space-sm);
+      border-radius: 3px;
+    }
+  }
+
+  /* ── Reduce-motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .rainbow-border {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Handle download buttons
+  document.addEventListener('click', (e: Event) => {
+    const target = e.target as HTMLElement | null;
+    if (target && target.closest('.download-btn')) {
+      const btn = target.closest('.download-btn') as HTMLElement;
+      const url = btn?.dataset?.url;
+      if (url && url !== '#') {
+        window.open(url, '_blank');
+      }
+    }
+  });
+
+  // Handle copy link buttons
+  document.addEventListener('click', (e: Event) => {
+    const target = e.target as HTMLElement | null;
+    if (target && target.closest('.copy-btn')) {
+      const btn = target.closest('.copy-btn') as HTMLElement;
+      const url = btn?.dataset?.url;
+      if (url && url !== '#') {
+        navigator.clipboard.writeText(url)
+          .then(() => {
+            console.log('Link copied to clipboard');
+          })
+          .catch(() => {
+            const textArea = document.createElement('textarea');
+            textArea.value = url;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+          });
+      }
+    }
+  });
+
+  // Animated Border Logic
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.asset-card-wrapper').forEach(wrapper => {
+      const rainbow = wrapper.querySelector('.rainbow-border');
+      let spinning = false, spinFrame: number | undefined, angle = 0, finished = false;
+
+      function startSpinOnce() {
+        if (spinning) return;
+        const a11yWrapper = document.querySelector('#a11y-content-wrapper');
+        if (a11yWrapper?.classList.contains('a11y-reduce-motion') || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        spinning = true;
+        finished = false;
+        angle = 0;
+        rainbow?.classList.add('animated');
+        rainbow?.classList.remove('red', 'transitioning');
+
+        function frame() {
+          angle += 4;
+          if (angle < 360) {
+            (rainbow as HTMLElement)?.style.setProperty('--angle', angle + 'deg');
+            spinFrame = requestAnimationFrame(frame);
+          } else {
+            spinning = false;
+            finished = true;
+            rainbow?.classList.remove('animated');
+            rainbow?.classList.add('transitioning');
+            setTimeout(() => {
+              rainbow?.classList.remove('transitioning');
+              rainbow?.classList.add('red');
+              (rainbow as HTMLElement)?.style.setProperty('--angle', '0deg');
+            }, 50);
+          }
+        }
+        frame();
+      }
+
+      function resetBorder() {
+        spinning = false;
+        finished = false;
+        if (spinFrame) cancelAnimationFrame(spinFrame);
+        rainbow?.classList.remove('animated', 'red', 'transitioning');
+        (rainbow as HTMLElement)?.style.setProperty('--angle', '0deg');
+      }
+
+      wrapper.addEventListener('mouseenter', startSpinOnce);
+      wrapper.addEventListener('focusin', startSpinOnce);
+      wrapper.addEventListener('mouseleave', resetBorder);
+      wrapper.addEventListener('focusout', resetBorder);
+
+      wrapper.addEventListener('touchstart', function() {
+        startSpinOnce();
+        setTimeout(resetBorder, 1900);
+      });
+    });
+  });
+</script>

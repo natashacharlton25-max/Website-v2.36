@@ -82,25 +82,25 @@ function resolveColor(cssVar: string): string {
 function getAccentColors(): string[] {
   const cs = getComputedStyle(document.documentElement);
   return [
-    cs.getPropertyValue('--color-AccentTwo-600').trim() || '#09f',
-    cs.getPropertyValue('--color-AccentFour-600').trim() || '#f09',
-    cs.getPropertyValue('--color-AccentThree-600').trim() || '#0f6',
-    cs.getPropertyValue('--color-Primary-600').trim() || '#fff',
-    cs.getPropertyValue('--color-AccentOne-600').trim() || '#f06',
+    cs.getPropertyValue('--zone-pattern-primary').trim() || '#5e6f5a',
+    cs.getPropertyValue('--zone-pattern-secondary').trim() || '#856356',
+    cs.getPropertyValue('--zone-pattern-earth').trim() || '#756a4a',
+    cs.getPropertyValue('--zone-pattern-forest').trim() || '#6a6d4e',
+    cs.getPropertyValue('--zone-pattern-dusk').trim() || '#6d677e',
   ];
 }
 
 function getRainbowColors(): string[] {
   const cs = getComputedStyle(document.documentElement);
   return [
-    cs.getPropertyValue('--color-Primary-400').trim() || '#f00',
-    cs.getPropertyValue('--color-AccentOne-400').trim() || '#f60',
-    cs.getPropertyValue('--color-AccentTwo-400').trim() || '#ff0',
-    cs.getPropertyValue('--color-AccentThree-400').trim() || '#0f0',
-    cs.getPropertyValue('--color-AccentFour-400').trim() || '#0ff',
-    cs.getPropertyValue('--color-AccentFive-400').trim() || '#00f',
-    cs.getPropertyValue('--color-Secondary-400').trim() || '#f0f',
-    cs.getPropertyValue('--color-Primary-500').trim() || '#f88',
+    cs.getPropertyValue('--zone-pattern-primary').trim() || '#5e6f5a',
+    cs.getPropertyValue('--zone-pattern-primary-vivid').trim() || '#63564e',
+    cs.getPropertyValue('--zone-pattern-secondary').trim() || '#856356',
+    cs.getPropertyValue('--zone-pattern-secondary-vivid').trim() || '#78574a',
+    cs.getPropertyValue('--zone-pattern-earth').trim() || '#756a4a',
+    cs.getPropertyValue('--zone-pattern-forest').trim() || '#6a6d4e',
+    cs.getPropertyValue('--zone-pattern-dusk').trim() || '#6d677e',
+    cs.getPropertyValue('--zone-pattern-mist').trim() || '#626a7f',
   ];
 }
 

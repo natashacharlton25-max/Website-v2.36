@@ -1,0 +1,1131 @@
+---
+/**
+ * Card Demo Page
+ *
+ * Visual test bench for the Card component.
+ * Shows all variants, hover modes, shadow/radius/padding/border scales.
+ * NOT a production page.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Card from '../../components/atoms/ui/Card/Card.astro';
+import Grid from '../../components/atoms/grid/Grid.astro';
+import RainbowBorderCard from '../../components/molecules/cards/RainbowBorderCard.astro';
+import ImageRevealCard from '../../components/molecules/cards/ImageRevealCard.astro';
+import ChoiceCard from '../../components/molecules/cards/ChoiceCard.astro';
+import SlideCard from '../../components/molecules/cards/SlideCard.astro';
+import FlipCard from '../../components/molecules/cards/FlipCard.astro';
+import GlowCard from '../../components/molecules/cards/GlowCard.astro';
+import BlogCard from '../../components/molecules/cards/BlogCard.astro';
+import TeamCard from '../../components/molecules/cards/TeamCard.astro';
+import TestimonialCard from '../../components/molecules/cards/TestimonialCard.astro';
+import AssetCard from '../../components/molecules/cards/AssetCard.astro';
+import InfoCard from '../../components/molecules/cards/InfoCard.astro';
+import '../../styles/pages/card-demo.css';
+---
+
+<BaseLayout title="Card Demo" hideFooter>
+
+  <div class="card-demo">
+    <h1 class="text">Card Component Demo</h1>
+    <p class="text">All variants, hover modes, shadow scales, radius, padding, and border options.</p>
+
+    <!-- ============================================================
+         VARIANTS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Variants</h2>
+      <Grid minWidth="280px" gap="var(--space-lg)" class="card-demo__tinted-bg">
+        <Card variant="default" padding="lg" shadow="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title">Default</h3>
+            <p class="card__text">Solid background with shadow.</p>
+          </div>
+        </Card>
+
+        <Card variant="transparent" padding="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title">Transparent</h3>
+            <p class="card__text">No background, no border — content only.</p>
+          </div>
+        </Card>
+
+        <Card variant="outline" padding="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title">Outline</h3>
+            <p class="card__text">Border only, transparent background.</p>
+          </div>
+        </Card>
+
+        <Card variant="glass" padding="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title">Glass</h3>
+            <p class="card__text">Frosted glass with backdrop blur.</p>
+          </div>
+        </Card>
+
+        <Card variant="liquid-glass" padding="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title" style="color: var(--color-White);">Liquid Glass</h3>
+            <p class="card__text" style="color: color-mix(in oklch, var(--color-White) 80%, transparent);">Designed for dark/coloured backgrounds.</p>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         NEUMORPHIC
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Neumorphic</h2>
+      <p class="text card-demo__hint">Two modes: glow border on hover, or inset pressed shadow on hover.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="neumorphic" padding="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title">Glow Hover</h3>
+            <p class="card__text">Raised shadow + glow border on hover.</p>
+          </div>
+        </Card>
+
+        <Card variant="neumorphic" padding="lg" radius="lg">
+          <div class="card__content">
+            <h3 class="card__title">Glow Large</h3>
+            <p class="card__text">Larger radius with glow border hover.</p>
+          </div>
+        </Card>
+
+        <Card variant="neumorphic-pressed" padding="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title">Pressed Hover</h3>
+            <p class="card__text">Raised shadow pushes inward on hover.</p>
+          </div>
+        </Card>
+
+        <Card variant="neumorphic-pressed" padding="lg" radius="lg">
+          <div class="card__content">
+            <h3 class="card__title">Pressed Large</h3>
+            <p class="card__text">Inset shadow with larger radius.</p>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         COMIC
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Comic</h2>
+      <p class="text card-demo__hint">Thick border, hard offset shadow. Pushes in on hover/click.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="comic" padding="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title">Comic</h3>
+            <p class="card__text">Bold offset shadow with thick border. Click to push flat.</p>
+          </div>
+        </Card>
+
+        <Card variant="comic" padding="lg" radius="lg">
+          <div class="card__content">
+            <h3 class="card__title">Comic Rounded</h3>
+            <p class="card__text">Larger radius for a softer comic feel.</p>
+          </div>
+        </Card>
+
+        <Card variant="comic" padding="lg" radius="none">
+          <div class="card__content">
+            <h3 class="card__title">Comic Sharp</h3>
+            <p class="card__text">No radius for a raw comic-panel look.</p>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         TECH
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Tech</h2>
+      <p class="text card-demo__hint">Offset border frame swaps position on hover.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="tech" padding="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title">Tech</h3>
+            <p class="card__text">Ghost border frame shifts on hover.</p>
+          </div>
+        </Card>
+
+        <Card variant="tech" padding="lg" radius="none">
+          <div class="card__content">
+            <h3 class="card__title">Tech Sharp</h3>
+            <p class="card__text">Sharp corners for a more mechanical feel.</p>
+          </div>
+        </Card>
+
+        <Card variant="tech" padding="lg" radius="sm">
+          <div class="card__content">
+            <h3 class="card__title">Tech Subtle</h3>
+            <p class="card__text">Small radius, cleaner look.</p>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         RAINBOW BORDER
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Rainbow Border</h2>
+      <p class="text card-demo__hint">Animated conic gradient border on hover. Three variants: primary, gradient, pulse.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <RainbowBorderCard variant="primary">
+          <div class="card__content">
+            <h3 class="card__title">Primary</h3>
+            <p class="card__text">Solid brand colour expands into rotating gradient on hover.</p>
+          </div>
+        </RainbowBorderCard>
+
+        <RainbowBorderCard variant="gradient">
+          <div class="card__content">
+            <h3 class="card__title">Gradient</h3>
+            <p class="card__text">Static conic gradient starts rotating on hover.</p>
+          </div>
+        </RainbowBorderCard>
+
+        <RainbowBorderCard variant="pulse">
+          <div class="card__content">
+            <h3 class="card__title">Pulse</h3>
+            <p class="card__text">Rotation with brightness oscillation on hover.</p>
+          </div>
+        </RainbowBorderCard>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         RAINBOW BORDER — CUSTOM COLOURS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Rainbow Border — Custom Colours</h2>
+      <p class="text card-demo__hint">Override with different brand tokens or custom values.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <RainbowBorderCard
+          variant="gradient"
+          primaryColor="var(--brand-c-secondary)"
+          secondaryColor="var(--brand-c-primary)"
+          highlightColor="var(--brand-c-secondary-light)"
+        >
+          <div class="card__content">
+            <h3 class="card__title">Secondary Palette</h3>
+            <p class="card__text">Using secondary brand colours for the gradient.</p>
+          </div>
+        </RainbowBorderCard>
+
+        <RainbowBorderCard
+          variant="gradient"
+          primaryColor="var(--zone-bg-forest-mid, #4a7c59)"
+          secondaryColor="var(--zone-bg-earth-mid, #a67c52)"
+          highlightColor="var(--zone-bg-forest-soft, #e8f0e5)"
+          borderWidth="4px"
+          borderRadius="var(--radius-lg)"
+        >
+          <div class="card__content">
+            <h3 class="card__title">Earth + Forest</h3>
+            <p class="card__text">Zone palette tokens with thicker border and larger radius.</p>
+          </div>
+        </RainbowBorderCard>
+
+        <RainbowBorderCard
+          variant="pulse"
+          primaryColor="var(--zone-bg-dusk-mid, #7c5a8c)"
+          secondaryColor="var(--brand-c-primary)"
+          highlightColor="var(--zone-bg-dusk-soft, #ede5f0)"
+          borderRadius="var(--radius-xl)"
+        >
+          <div class="card__content">
+            <h3 class="card__title">Dusk Pulse</h3>
+            <p class="card__text">Dusk zone colours with pulse brightness effect.</p>
+          </div>
+        </RainbowBorderCard>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         RAINBOW BORDER — WITH IMAGES
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Rainbow Border — With Images</h2>
+      <p class="text card-demo__hint">Images sit flush inside the animated border. Text content below.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <RainbowBorderCard variant="gradient" borderRadius="var(--radius-lg)">
+          <div class="card__image card__image--video">
+            <img src="/_Unused Images/Projects Hero.jpg" alt="Demo project" />
+          </div>
+          <div class="card__content">
+            <h3 class="card__title">Project Showcase</h3>
+            <p class="card__text">Image card with gradient rainbow border.</p>
+          </div>
+        </RainbowBorderCard>
+
+        <RainbowBorderCard variant="primary" borderRadius="var(--radius-lg)">
+          <div class="card__image card__image--video">
+            <img src="/_Unused Images/3.jpg" alt="Demo landscape" />
+          </div>
+          <div class="card__content">
+            <h3 class="card__title">Primary Image</h3>
+            <p class="card__text">Solid border reveals gradient on hover.</p>
+          </div>
+        </RainbowBorderCard>
+
+        <RainbowBorderCard variant="pulse" borderRadius="var(--radius-lg)" borderWidth="4px">
+          <div class="card__image card__image--video">
+            <img src="/_Unused Images/7.jpg" alt="Demo scene" />
+          </div>
+          <div class="card__content">
+            <h3 class="card__title">Pulse Image</h3>
+            <p class="card__text">Thicker border with pulsing brightness.</p>
+          </div>
+        </RainbowBorderCard>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         IMAGE REVEAL CARDS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Image Reveal Cards</h2>
+      <p class="text card-demo__hint">Image fills the card at rest. Hover to squish and reveal content with staggered animations.</p>
+      <div class="card-demo__row-center">
+        <ImageRevealCard
+          image="/_Unused Images/Projects Hero.jpg"
+          imageAlt="Project showcase"
+          title="Project Alpha"
+          description="A showcase of creative work spanning brand identity, web design, and digital experiences."
+          tag="12K"
+          size="sm"
+        />
+
+        <ImageRevealCard
+          image="/_Unused Images/9.jpg"
+          imageAlt="Creative scene"
+          imagePos="50% 30%"
+          title="Studio Work"
+          description="Behind the scenes of our latest campaign shoot and creative direction."
+          tag="8.5K"
+          borderColor="var(--brand-c-secondary)"
+        />
+
+        <ImageRevealCard
+          image="/_Unused Images/3.jpg"
+          imageAlt="Landscape"
+          imagePos="50% 50%"
+          title="Nature Series"
+          description="Exploring natural patterns, textures, and the beauty of organic forms."
+          tag="24K"
+          size="lg"
+          dark
+        />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         IMAGE STACK OVERFLOW CARDS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Image Stack Cards</h2>
+      <p class="text card-demo__hint">Image overflows above the card for a stacked/layered look.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="outline" radius="lg" padding="none" class="stack-card">
+          <section class="stack-card__section">
+            <div class="stack-card__inner">
+              <div class="stack-card__image stack-card__image--shadow-md">
+                <img src="/_Unused Images/Projects Hero.jpg" alt="Project showcase" />
+              </div>
+              <div class="card__content">
+                <h3 class="card__title">Medium Shadow</h3>
+                <p class="card__text">Image floats above with medium drop shadow.</p>
+              </div>
+            </div>
+          </section>
+        </Card>
+
+        <Card variant="default" radius="lg" padding="none" shadow="lg" class="stack-card">
+          <section class="stack-card__section">
+            <div class="stack-card__inner">
+              <div class="stack-card__image stack-card__image--shadow-lg">
+                <img src="/_Unused Images/3.jpg" alt="Landscape" />
+              </div>
+              <div class="card__content">
+                <h3 class="card__title">Large Shadow</h3>
+                <p class="card__text">Deeper drop shadow for a more elevated feel.</p>
+              </div>
+            </div>
+          </section>
+        </Card>
+
+        <Card variant="outline" radius="lg" padding="none" hover="glow" class="stack-card">
+          <section class="stack-card__section">
+            <div class="stack-card__inner">
+              <div class="stack-card__image stack-card__image--shadow-xl">
+                <img src="/_Unused Images/7.jpg" alt="Scene" />
+              </div>
+              <div class="card__content">
+                <h3 class="card__title">XL Shadow + Glow</h3>
+                <p class="card__text">Heavy drop shadow with glow hover on the card.</p>
+              </div>
+            </div>
+          </section>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         CHOICE / SELECTION CARDS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Choice Cards</h2>
+      <p class="text card-demo__hint">Selectable image cards for quizzes, forms, and polls. Inverted border radius notch on the label tray. Click to toggle.</p>
+      <Grid columns={2} gap="var(--space-lg)">
+        <ChoiceCard
+          image="/_Unused Images/Projects Hero.jpg"
+          label="creative direction"
+          name="ambitions"
+          value="creative"
+        />
+        <ChoiceCard
+          image="/_Unused Images/9.jpg"
+          label="brand identity"
+          name="ambitions"
+          value="brand"
+        />
+        <ChoiceCard
+          image="/_Unused Images/3.jpg"
+          label="digital experience"
+          name="ambitions"
+          value="digital"
+        />
+        <ChoiceCard
+          image="/_Unused Images/7.jpg"
+          label="visual storytelling"
+          name="ambitions"
+          value="visual"
+          checked
+        />
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         SLIDE CARDS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Slide Cards</h2>
+      <p class="text card-demo__hint">Two faces overlap at rest. Hover to slide apart and reveal content. Front face changes to accent colour.</p>
+      <Grid columns={3} gap="var(--space-xl)">
+        <SlideCard
+          icon="pencil-simple-fill"
+          title="Design"
+          description="Crafting visual identities and digital experiences that resonate with your audience."
+          href="#"
+        />
+        <SlideCard
+          icon="code-fill"
+          title="Code"
+          description="Building robust, performant, and accessible web applications from the ground up."
+          href="#"
+          accentColor="var(--brand-c-secondary)"
+        />
+        <SlideCard
+          icon="rocket-launch-fill"
+          title="Launch"
+          description="Deploying, optimising, and scaling your digital products for real-world impact."
+          href="#"
+          accentColor="var(--zone-bg-forest-mid, #4a7c59)"
+        />
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         FLIP CARDS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Flip Cards</h2>
+      <p class="text card-demo__hint">3D perspective flip on hover. Front shows title + arrow, back reveals description + CTA.</p>
+      <div class="card-demo__flip-grid">
+        <FlipCard
+          title="Creative Direction"
+          subtitle="Strategy meets aesthetics"
+          description="We blend strategic thinking with visual design to create brands that stand out and connect with their audience."
+          href="#"
+          frontImage="/_Unused Images/Projects Hero.jpg"
+        />
+        <FlipCard
+          title="Development"
+          subtitle="Built to perform"
+          description="Modern web applications built with best practices — fast, accessible, and scalable from day one."
+          href="#"
+          frontImage="/_Unused Images/3.jpg"
+        />
+        <FlipCard
+          title="Brand Identity"
+          subtitle="Your story, visualised"
+          description="From logo to full brand system, we craft identities that are memorable, cohesive, and built to grow."
+          href="#"
+          frontImage="/_Unused Images/7.jpg"
+        />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FLIP CARDS — COLOUR ONLY
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Flip Cards — Colour Only</h2>
+      <p class="text card-demo__hint">No background images — using solid brand colours for front and back faces.</p>
+      <div class="card-demo__flip-grid">
+        <FlipCard
+          title="Primary"
+          subtitle="Default brand colour"
+          description="Uses --brand-c-primary for front and --brand-c-primary-dark for back."
+          href="#"
+        />
+        <FlipCard
+          title="Secondary"
+          subtitle="Alternate palette"
+          description="Secondary brand colours create a different feel while staying on-brand."
+          href="#"
+          frontColor="var(--brand-c-secondary)"
+          backColor="var(--brand-c-secondary-dark)"
+        />
+        <FlipCard
+          title="Forest"
+          subtitle="Zone colour"
+          description="Zone palette tokens work great for themed sections or campaigns."
+          href="#"
+          frontColor="var(--zone-bg-forest-mid, #4a7c59)"
+          backColor="var(--zone-bg-forest-deep, #2d5a3a)"
+        />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         GLASS VARIANTS ON GRADIENT BACKGROUND
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Glass on Gradient</h2>
+      <Grid minWidth="280px" gap="var(--space-lg)" class="card-demo__glass-bg">
+        <Card variant="glass" padding="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title" style="color: var(--color-White);">Glass</h3>
+            <p class="card__text" style="color: color-mix(in oklch, var(--color-White) 80%, transparent);">Frosted glass on a coloured background.</p>
+          </div>
+        </Card>
+
+        <Card variant="liquid-glass" padding="lg" radius="md">
+          <div class="card__content">
+            <h3 class="card__title" style="color: var(--color-White);">Liquid Glass</h3>
+            <p class="card__text" style="color: color-mix(in oklch, var(--color-White) 80%, transparent);">Liquid glass on a coloured background.</p>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         HOVER MODES
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Hover Modes</h2>
+      <p class="text card-demo__hint">Hover over each card to see the effect.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="outline" padding="lg" radius="md" hover={true}>
+          <div class="card__content">
+            <h3 class="card__title">Lift</h3>
+            <p class="card__text">Card lifts up on hover with enhanced shadow.</p>
+          </div>
+        </Card>
+
+        <Card variant="outline" padding="lg" radius="md" hover="border">
+          <div class="card__content">
+            <h3 class="card__title">Border</h3>
+            <p class="card__text">Border colour changes on hover.</p>
+          </div>
+        </Card>
+
+        <Card variant="outline" padding="lg" radius="md" hover="glow">
+          <div class="card__content">
+            <h3 class="card__title">Glow</h3>
+            <p class="card__text">Glowing box-shadow on hover.</p>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         SHADOW SCALE
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Shadow Scale</h2>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="outline" padding="md" radius="md" shadow="none">
+          <div class="card__content">
+            <h3 class="card__title">None</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="md" shadow="sm">
+          <div class="card__content">
+            <h3 class="card__title">Small</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="md" shadow="md">
+          <div class="card__content">
+            <h3 class="card__title">Medium</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="md" shadow="lg">
+          <div class="card__content">
+            <h3 class="card__title">Large</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="md" shadow="xl">
+          <div class="card__content">
+            <h3 class="card__title">XL</h3>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         DROP SHADOW SCALE
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Drop Shadow Scale</h2>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="outline" padding="md" radius="md" dropShadow="sm">
+          <div class="card__content">
+            <h3 class="card__title">Small</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="md" dropShadow="md">
+          <div class="card__content">
+            <h3 class="card__title">Medium</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="md" dropShadow="lg">
+          <div class="card__content">
+            <h3 class="card__title">Large</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="md" dropShadow="xl">
+          <div class="card__content">
+            <h3 class="card__title">XL</h3>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         RADIUS SCALE
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Radius Scale</h2>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="outline" padding="md" radius="none">
+          <div class="card__content">
+            <h3 class="card__title">None</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="sm">
+          <div class="card__content">
+            <h3 class="card__title">Small</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="md">
+          <div class="card__content">
+            <h3 class="card__title">Medium</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="lg">
+          <div class="card__content">
+            <h3 class="card__title">Large</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="xl">
+          <div class="card__content">
+            <h3 class="card__title">XL</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="md" radius="full">
+          <div class="card__content">
+            <h3 class="card__title">Full</h3>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         PADDING SCALE
+         No .card__content wrapper — shows actual card padding
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Padding Scale</h2>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="outline" radius="md" padding="none">
+          <h3 class="card__title" style="padding: 0; margin: 0;">None</h3>
+        </Card>
+        <Card variant="outline" radius="md" padding="xs">
+          <h3 class="card__title" style="padding: 0; margin: 0;">XS</h3>
+        </Card>
+        <Card variant="outline" radius="md" padding="sm">
+          <h3 class="card__title" style="padding: 0; margin: 0;">SM</h3>
+        </Card>
+        <Card variant="outline" radius="md" padding="md">
+          <h3 class="card__title" style="padding: 0; margin: 0;">MD</h3>
+        </Card>
+        <Card variant="outline" radius="md" padding="lg">
+          <h3 class="card__title" style="padding: 0; margin: 0;">LG</h3>
+        </Card>
+        <Card variant="outline" radius="md" padding="xl">
+          <h3 class="card__title" style="padding: 0; margin: 0;">XL</h3>
+        </Card>
+        <Card variant="outline" radius="md" padding="2xl">
+          <h3 class="card__title" style="padding: 0; margin: 0;">2XL</h3>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         BORDER WIDTH SCALE
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Border Width Scale</h2>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="outline" padding="lg" radius="md" border="thin">
+          <div class="card__content">
+            <h3 class="card__title">Thin</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="lg" radius="md" border="medium">
+          <div class="card__content">
+            <h3 class="card__title">Medium</h3>
+          </div>
+        </Card>
+        <Card variant="outline" padding="lg" radius="md" border="thick">
+          <div class="card__content">
+            <h3 class="card__title">Thick</h3>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         SEPARATOR
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Separator</h2>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="outline" padding="none" radius="md" separator>
+          <div class="card__header" style="padding: var(--space-md);">
+            <h3 class="card__title">Card Header</h3>
+          </div>
+          <div class="card__body" style="padding: var(--space-md);">
+            <p class="card__text">Card body with separator lines between header, body, and footer.</p>
+          </div>
+          <div class="card__footer" style="padding: var(--space-md);">
+            <span class="card__label">Card Footer</span>
+          </div>
+        </Card>
+
+        <Card variant="outline" padding="none" radius="md">
+          <div class="card__header" style="padding: var(--space-md);">
+            <h3 class="card__title">No Separator</h3>
+          </div>
+          <div class="card__body" style="padding: var(--space-md);">
+            <p class="card__text">Same structure without separator prop for comparison.</p>
+          </div>
+          <div class="card__footer" style="padding: var(--space-md);">
+            <span class="card__label">Card Footer</span>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         LINK CARD
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Link Card</h2>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card href="#" variant="outline" padding="lg" radius="md" hover={true}>
+          <div class="card__content">
+            <h3 class="card__title">Clickable Card</h3>
+            <p class="card__text">Rendered as an anchor element with lift hover.</p>
+            <svg class="card-demo__plus-icon" width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <line x1="128" y1="40" x2="128" y2="216" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>
+              <line x1="40" y1="128" x2="216" y2="128" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </Card>
+
+        <Card href="#" variant="outline" padding="lg" radius="md" hover="border">
+          <div class="card__content">
+            <h3 class="card__title">Outline Link</h3>
+            <p class="card__text">Outline card as a link with border hover.</p>
+            <svg class="card-demo__plus-icon" width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <line x1="128" y1="40" x2="128" y2="216" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>
+              <line x1="40" y1="128" x2="216" y2="128" stroke="currentColor" stroke-width="24" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         COMBINED EXAMPLES
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Combined Examples</h2>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <Card variant="default" padding="xl" shadow="lg" radius="lg" hover={true}>
+          <div class="card__content">
+            <span class="card__label">Featured</span>
+            <h3 class="card__heading">Premium Card</h3>
+            <p class="card__text">Large padding, large shadow, large radius with lift hover.</p>
+          </div>
+        </Card>
+
+        <Card variant="outline" padding="md" radius="sm" border="medium" hover="border">
+          <div class="card__content">
+            <span class="card__label">Outline</span>
+            <h3 class="card__title">Bordered Card</h3>
+            <p class="card__text">Medium border, small radius, border hover effect.</p>
+          </div>
+        </Card>
+
+        <Card variant="default" padding="lg" shadow="lg" radius="md" hover="glow">
+          <div class="card__content">
+            <span class="card__label">Glow</span>
+            <h3 class="card__title">Glow Card</h3>
+            <p class="card__text">Shadow for visibility, glow hover effect.</p>
+          </div>
+        </Card>
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         GLOW CARDS — Bioluminescent draw + morph
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Glow Cards — Dark</h2>
+      <p class="text card-demo__hint">Hover to see SVG draw-in + glow effect. Icons positioned half-in, half-out.</p>
+      <div class="card-demo__glow-grid card-demo__glow-dark-bg">
+        <GlowCard
+          title="Botanical"
+          description="Bioluminescent fungi emit a continuous yellowish-green light. There are more than 100 known species of fungi which can glow."
+          dark
+          glowColor="var(--brand-c-primary-light)"
+          decorations={[
+            { icon: 'leaf-fill', position: 'top-right', size: 140 },
+            { icon: 'flower-lotus-fill', position: 'bottom-left', size: 110 },
+          ]}
+        />
+
+        <GlowCard
+          title="Oceanic"
+          description="Over 50% of jellyfish species are bioluminescent, creating ethereal light shows in the deep ocean."
+          dark
+          glowColor="var(--brand-c-secondary-light)"
+          decorations={[
+            { icon: 'moon-stars-fill', position: 'top-left', size: 120 },
+            { icon: 'wind-fill', position: 'bottom-right', size: 130 },
+          ]}
+        />
+
+        <GlowCard
+          title="Wellness"
+          description="The heart of nature beats in rhythm with all living things, connecting us through invisible threads of light."
+          dark
+          glowColor="var(--zone-bg-dusk-mid, #8b6cc1)"
+          decorations={[
+            { icon: 'heart-fill', position: 'top-right', size: 100 },
+            { icon: 'butterfly-fill', position: 'left', size: 130 },
+            { icon: 'sun-fill', position: 'bottom-right', size: 90 },
+          ]}
+        />
+      </div>
+    </section>
+
+    <section class="card-demo__section">
+      <h2 class="text">Glow Cards — Light (Glass)</h2>
+      <p class="text card-demo__hint">Glass body with backdrop blur. Glow effect is subtler on light backgrounds.</p>
+      <div class="card-demo__glow-grid card-demo__glow-light-bg">
+        <GlowCard
+          title="Garden"
+          description="A tranquil garden where flora and fauna dance in the breeze."
+          glowColor="var(--brand-c-primary)"
+          decorations={[
+            { icon: 'flower-fill', position: 'top-left', size: 120 },
+            { icon: 'leaf-fill', position: 'bottom-right', size: 100 },
+          ]}
+        />
+
+        <GlowCard
+          title="Mindful"
+          description="Breathe deep, let the rhythm of nature guide your thoughts."
+          glowColor="var(--brand-c-secondary)"
+          decorations={[
+            { icon: 'brain-fill', position: 'top-right', size: 110 },
+            { icon: 'peace-fill', position: 'bottom-left', size: 100 },
+          ]}
+        />
+      </div>
+    </section>
+
+    <section class="card-demo__section">
+      <h2 class="text">Glow Cards — Draw Variants</h2>
+      <p class="text card-demo__hint">Different DrawSVG animation variants: draw, drawcenter, pulse.</p>
+      <div class="card-demo__glow-grid card-demo__glow-dark-bg">
+        <GlowCard
+          title="Draw"
+          description="Default draw — stroke traces from start to end."
+          dark
+          drawVariant="draw"
+          glowColor="var(--brand-c-primary-light)"
+          decorations={[
+            { icon: 'flower-lotus-fill', position: 'top-right', size: 130 },
+            { icon: 'leaf-fill', position: 'bottom-left', size: 110 },
+          ]}
+        />
+
+        <GlowCard
+          title="Draw Center"
+          description="Stroke expands outward from the centre of each path."
+          dark
+          drawVariant="drawcenter"
+          glowColor="var(--brand-c-secondary-light)"
+          decorations={[
+            { icon: 'sun-fill', position: 'top-left', size: 120 },
+            { icon: 'moon-stars-fill', position: 'bottom-right', size: 120 },
+          ]}
+        />
+
+        <GlowCard
+          title="Pulse"
+          description="Stroke width pulses as it draws in — an organic, breathing feel."
+          dark
+          drawVariant="pulse"
+          glowColor="var(--zone-bg-forest-mid, #4a7c59)"
+          decorations={[
+            { icon: 'heart-fill', position: 'top-right', size: 100 },
+            { icon: 'hand-heart-fill', position: 'left', size: 120 },
+          ]}
+        />
+      </div>
+    </section>
+
+    <section class="card-demo__section">
+      <h2 class="text">Glow Cards — With Morph</h2>
+      <p class="text card-demo__hint">Icons morph into a different shape after drawing in. Hover and watch the transformation.</p>
+      <div class="card-demo__glow-grid card-demo__glow-dark-bg">
+        <GlowCard
+          title="Transform"
+          description="The leaf morphs into a flower — nature's eternal cycle of growth and bloom."
+          dark
+          glowColor="var(--brand-c-primary-light)"
+          decorations={[
+            { icon: 'leaf-fill', position: 'top-right', size: 140, morphTo: 'flower-lotus-fill' },
+            { icon: 'sun-fill', position: 'bottom-left', size: 100, morphTo: 'moon-stars-fill' },
+          ]}
+        />
+
+        <GlowCard
+          title="Metamorphosis"
+          description="A heart transforms into a butterfly — the ultimate symbol of change."
+          dark
+          glowColor="var(--zone-bg-dusk-mid, #8b6cc1)"
+          decorations={[
+            { icon: 'heart-fill', position: 'top-left', size: 120, morphTo: 'butterfly-fill' },
+            { icon: 'flower-fill', position: 'bottom-right', size: 110, morphTo: 'peace-fill' },
+          ]}
+        />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         BLOG CARDS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Blog Cards</h2>
+      <p class="text card-demo__hint">Article/post cards with image, category badge, author, read time. Featured variant has larger image.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <BlogCard
+          title="Getting Started with Astro"
+          excerpt="Learn how to build lightning-fast websites with Astro's island architecture and zero-JS defaults."
+          image="/_Unused Images/Projects Hero.jpg"
+          author="Jane Doe"
+          date="Feb 15, 2026"
+          category="Tutorial"
+          tags={["Astro", "Web Dev"]}
+          readTime="5 min read"
+          href="#"
+        />
+
+        <BlogCard
+          title="Design Systems at Scale"
+          excerpt="How we built a token-based design system that serves multiple brands from a single codebase."
+          image="/_Unused Images/3.jpg"
+          author="John Smith"
+          date="Jan 28, 2026"
+          category="Case Study"
+          readTime="8 min read"
+          href="#"
+        />
+
+        <BlogCard
+          title="The Future of CSS"
+          excerpt="Container queries, cascade layers, and color-mix — the features reshaping modern CSS."
+          image="/_Unused Images/7.jpg"
+          author="Alex Chen"
+          date="Jan 10, 2026"
+          category="Opinion"
+          tags={["CSS", "Future"]}
+          readTime="4 min read"
+          href="#"
+          featured
+        />
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         TEAM CARDS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Team Cards</h2>
+      <p class="text card-demo__hint">Staff/team member profiles with photo, role, bio, and social links. Three variants: default, compact, detailed.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <TeamCard
+          name="Sarah Johnson"
+          title="Creative Director"
+          department="Design"
+          image="/_Unused Images/9.jpg"
+          bio="Leading the creative vision with 10+ years of brand strategy experience."
+          socials={{ linkedin: "#", twitter: "#" }}
+        />
+
+        <TeamCard
+          name="Marcus Lee"
+          title="Lead Developer"
+          department="Engineering"
+          image="/_Unused Images/3.jpg"
+          bio="Full-stack engineer passionate about performance and accessibility."
+          socials={{ github: "#", linkedin: "#", website: "#" }}
+          variant="compact"
+        />
+
+        <TeamCard
+          name="Priya Patel"
+          title="UX Researcher"
+          department="Product"
+          image="/_Unused Images/7.jpg"
+          bio="Translating user insights into delightful product experiences through research and testing."
+          email="priya@example.com"
+          socials={{ linkedin: "#", twitter: "#" }}
+          variant="detailed"
+        />
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         TESTIMONIAL CARDS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Testimonial Cards</h2>
+      <p class="text card-demo__hint">Customer quotes with star ratings. Variants: default, bordered, glass. Featured option for emphasis.</p>
+      <Grid minWidth="280px" gap="var(--space-lg)">
+        <TestimonialCard
+          quote="Working with this team transformed our entire digital presence. The attention to detail is unmatched."
+          author="Emily Roberts"
+          authorTitle="Marketing Director"
+          authorCompany="Acme Corp"
+          rating={5}
+        />
+
+        <TestimonialCard
+          quote="They delivered beyond our expectations — on time, on budget, and with incredible quality."
+          author="David Kim"
+          authorTitle="CEO"
+          authorCompany="StartupXYZ"
+          rating={4}
+          variant="bordered"
+        />
+
+        <TestimonialCard
+          quote="The design system they built for us has saved hundreds of engineering hours."
+          author="Lisa Chen"
+          authorTitle="VP Engineering"
+          authorCompany="TechFlow"
+          rating={5}
+          variant="glass"
+          featured
+        />
+      </Grid>
+    </section>
+
+    <!-- ============================================================
+         ASSET CARDS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Asset Cards</h2>
+      <p class="text card-demo__hint">Cards with animated rainbow border on hover. Action buttons for open, download, copy, share.</p>
+      <div class="card-demo__asset-grid">
+        <AssetCard
+          tag="Brand Guide"
+          title="Visual Identity System"
+          description="Complete brand guidelines including logo usage, colour palette, typography, and spacing rules for all touchpoints."
+          plusUrl="#"
+          downloadUrl="#"
+          copyUrl="#"
+          shareUrl="#"
+        />
+
+        <AssetCard
+          tag="Template"
+          title="Pitch Deck Template"
+          description="A polished presentation template with 20 slide layouts, ready for your next client pitch or investor meeting."
+          plusUrl="#"
+          downloadUrl="#"
+          borderWidth="5px"
+          borderRadius="24px"
+        />
+      </div>
+    </section>
+
+    <!-- ============================================================
+         INFO CARDS
+         ============================================================ -->
+    <section class="card-demo__section">
+      <h2 class="text">Info Cards</h2>
+      <p class="text card-demo__hint">Horizontal layout with image, tag, pills, and navigation/action buttons. Great for feature walkthroughs.</p>
+      <div class="card-demo__asset-grid">
+        <InfoCard
+          imageUrl="/_Unused Images/Projects Hero.jpg"
+          tag="Feature"
+          title="Responsive Design"
+          description="Every component adapts seamlessly across devices — from mobile to ultrawide displays."
+          pills={["Mobile-first", "Fluid Grid", "Container Queries"]}
+          readMoreUrl="#"
+          downloadUrl="#"
+          shareUrl="#"
+        />
+
+        <InfoCard
+          imageUrl="/_Unused Images/3.jpg"
+          tag="Guide"
+          title="Accessibility First"
+          description="Built-in support for screen readers, keyboard navigation, reduced motion, and high contrast modes."
+          pills={["WCAG 2.1 AA", "ARIA", "Semantic HTML"]}
+          prevUrl="#"
+          nextUrl="#"
+          copyUrl="#"
+        />
+      </div>
+    </section>
+
+  </div>
+
+</BaseLayout>
