@@ -62,28 +62,6 @@ const iconId = `draw-icon-${Math.random().toString(36).substring(2, 9)}`;
   set:html={svgIcon}
 ></span>
 
-<style>
-  .draw-svg-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
-
-  .draw-svg-icon :global(svg) {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-
-  /* Parent controls these - we just ensure they're inheritable */
-  .draw-svg-icon :global(path) {
-    stroke: inherit;
-    fill: none;
-    stroke-width: inherit;
-  }
-</style>
-
 <script>
   import { gsap } from 'gsap';
   import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
@@ -110,31 +88,31 @@ const iconId = `draw-icon-${Math.random().toString(36).substring(2, 9)}`;
 
     // Get computed colors from parent element
     const computedStyle = getComputedStyle(iconElement);
-    const tokenColor = primaryColor || computedStyle.getPropertyValue('--icon-primary-color') || computedStyle.color || '#fff';
+    const tokenColor = primaryColor || computedStyle.getPropertyValue('--icon-primary-color') || computedStyle.color;
 
     // Get CSS custom properties for multi-color animations
     const gradientColors = [
-      computedStyle.getPropertyValue('--zone-pattern-primary') || '#5e6f5a',
-      computedStyle.getPropertyValue('--zone-pattern-secondary') || '#856356',
-      computedStyle.getPropertyValue('--zone-pattern-earth') || '#756a4a',
-      computedStyle.getPropertyValue('--zone-pattern-forest') || '#6a6d4e',
-      computedStyle.getPropertyValue('--zone-pattern-dusk') || '#6d677e',
+      computedStyle.getPropertyValue('--zone-pattern-primary'),
+      computedStyle.getPropertyValue('--zone-pattern-secondary'),
+      computedStyle.getPropertyValue('--zone-pattern-earth'),
+      computedStyle.getPropertyValue('--zone-pattern-forest'),
+      computedStyle.getPropertyValue('--zone-pattern-dusk'),
     ];
 
     const rainbowColors = [
-      computedStyle.getPropertyValue('--zone-pattern-primary') || '#5e6f5a',
-      computedStyle.getPropertyValue('--zone-pattern-primary-vivid') || '#63564e',
-      computedStyle.getPropertyValue('--zone-pattern-secondary') || '#856356',
-      computedStyle.getPropertyValue('--zone-pattern-secondary-vivid') || '#78574a',
-      computedStyle.getPropertyValue('--zone-pattern-earth') || '#756a4a',
-      computedStyle.getPropertyValue('--zone-pattern-forest') || '#6a6d4e',
-      computedStyle.getPropertyValue('--zone-pattern-dusk') || '#6d677e',
-      computedStyle.getPropertyValue('--zone-pattern-mist') || '#626a7f',
+      computedStyle.getPropertyValue('--zone-pattern-primary'),
+      computedStyle.getPropertyValue('--zone-pattern-primary-vivid'),
+      computedStyle.getPropertyValue('--zone-pattern-secondary'),
+      computedStyle.getPropertyValue('--zone-pattern-secondary-vivid'),
+      computedStyle.getPropertyValue('--zone-pattern-earth'),
+      computedStyle.getPropertyValue('--zone-pattern-forest'),
+      computedStyle.getPropertyValue('--zone-pattern-dusk'),
+      computedStyle.getPropertyValue('--zone-pattern-mist'),
     ];
 
     // Get current stroke properties from parent CSS
-    const inheritedStroke = computedStyle.stroke || '#fff';
-    const inheritedStrokeWidth = computedStyle.strokeWidth || '1.5';
+    const inheritedStroke = computedStyle.stroke;
+    const inheritedStrokeWidth = computedStyle.strokeWidth;
 
     // Setup initial state with GSAP
     paths.forEach(path => {

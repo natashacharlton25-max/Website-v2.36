@@ -1,14 +1,12 @@
 /**
  * Grid — a11y.css
  *
- * Themes:        Brand tokens handle colour changes. ✅ Nothing extra.
- * Focus:         Grid is non-interactive, children handle own focus. ✅ Nothing extra.
- * HL:            Nothing — grid is structural.
- *
- * Reduce-motion: Kill any grid animation (future-proof).
- * Text-only:     Collapse to single column, left-aligned.
- *                Strip visual fluff from children: images, icons, decorative backgrounds.
- *                Show plain text list with optional separators.
+ * Themes:    N/A — brand tokens handle colour changes
+ * Focus:     N/A — grid is non-interactive, children handle own focus
+ * HL:        N/A — grid is structural
+ * RM:        Kill grid animation, disable hover transforms
+ * TO:        Collapse to single column, strip visual fluff, show plain text
+ * HC:        N/A — structural layout, no decorative styling
  */
 
 
@@ -26,11 +24,11 @@
 
     /* Kill hover transforms on any grid children */
     & .base-grid > * {
-      transition: none !important;
+      transition: none;
     }
 
     & .base-grid > *:hover {
-      transform: none !important;
+      transform: none;
     }
 
     /* Gallery: disable GSAP by marking grid */
@@ -39,27 +37,12 @@
     }
 
     & [data-gallery] > * {
-      transition: none !important;
+      transition: none;
     }
 
     & .base-grid--gallery-product > .is-inactive {
       opacity: 1;
       filter: none;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-
-    .base-grid {
-      transition: none;
-    }
-
-    .base-grid > * {
-      transition: none;
-    }
-
-    .base-grid > *:hover {
-      transform: none;
     }
   }
 }
@@ -75,17 +58,17 @@
 
     /* ---- Grid: flex column collapse (matches reference text-only.css) ---- */
     & .base-grid {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: var(--space-sm) !important;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
     }
 
     /* ---- Masonry: single column, strip padding ---- */
     & .base-grid--masonry {
-      display: flex !important;
-      flex-direction: column !important;
-      column-count: unset !important;
-      column-gap: unset !important;
+      display: flex;
+      flex-direction: column;
+      column-count: unset;
+      column-gap: unset;
       padding: 0;
     }
 
@@ -96,13 +79,13 @@
 
     /* ---- Isotope gallery: hidden entirely in text-only ---- */
     & .base-grid--gallery-showcase {
-      display: none !important;
+      display: none;
     }
 
     /* ---- Product gallery: vertical stack, no expand/collapse ---- */
     & .base-grid--gallery-product {
-      display: flex !important;
-      flex-direction: column !important;
+      display: flex;
+      flex-direction: column;
     }
 
     & .base-grid--gallery-product > .is-active,
@@ -158,18 +141,18 @@
     & [data-media="gallery"],
     & [data-media="decorative"],
     & [data-media="background"] {
-      display: none !important;
+      display: none;
     }
 
     /* Hide decorative icons (no aria-label = decorative) */
     & [data-media="icon"]:not([aria-label]) {
-      display: none !important;
+      display: none;
     }
 
     /* Hide card image containers */
     & .base-grid [class*="__image"],
     & .base-grid [class*="__icon-placeholder"] {
-      display: none !important;
+      display: none;
     }
 
     /* ---- Text: left-aligned, plain ---- */
@@ -195,7 +178,7 @@
     }
 
     & [data-gallery] .gallery-badge {
-      display: block !important;
+      display: block;
       position: static;
       background: none;
       color: var(--brand-c-text);
