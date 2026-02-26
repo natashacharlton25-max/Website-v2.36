@@ -224,9 +224,12 @@ const RULES = [
     name: 'No separate a11y.css file (dead pattern)',
     severity: 'FAIL',
     check: (c) => {
-      const a11yFiles = c.allFiles.filter(f => f.includes('a11y.css') || f.includes('_a11y.css'));
+      const a11yFiles = c.allFiles.filter(f =>
+        (f.includes('a11y.css') || f.includes('_a11y.css')) &&
+        !f.includes('.recovery.css')
+      );
       if (a11yFiles.length > 0) {
-        return { pass: false, details: `a11y CSS files found: ${a11yFiles.join(', ')} — dead pattern, rules should be in global CSS or component CSS` };
+        return { pass: false, details: `a11y CSS files found: ${a11yFiles.join(', ')} — dead pattern, extract needed rules to global CSS or component CSS then move to _reference/` };
       }
       return { pass: true };
     },
@@ -354,6 +357,100 @@ const RULES = [
       }
       if (suspicious.length > 0) {
         return { pass: false, details: `Possible non-standard modifier classes with motion:\n    ${suspicious.join('\n    ')}` };
+      }
+      return { pass: true };
+    },
+  },
+
+  // ── FILE HYGIENE ──
+
+  {
+    id: 'no-recovery-files',
+    name: 'No recovery CSS files in component folder (should be in _reference/)',
+    severity: 'WARN',
+    check: (c) => {
+      const recoveryFiles = c.allFiles.filter(f => f.includes('.recovery.css'));
+      if (recoveryFiles.length > 0) {
+        return { pass: false, details: `Recovery files found: ${recoveryFiles.join(', ')} — extract needed rules then move to _reference/` };
+      }
+      return { pass: true };
+    },
+  },
+
+  {
+    id: 'has-responsive-css',
+    name: 'Component has responsive CSS file',
+    severity: 'WARN',
+    check: (c) => {
+      const hasResponsive = c.allFiles.some(f => f.includes('responsive'));
+      if (!hasResponsive) {
+        return { pass: false, details: 'No responsive CSS file — create ComponentName.responsive.css (can be empty placeholder)' };
+      }
+      return { pass: true };
+    },
+  },
+
+  // ── NO DEAD CSS PATTERNS ──
+
+  {
+    id: 'no-prefers-reduced-motion',
+    name: 'No @media (prefers-reduced-motion) — motion handled by render mode',
+    severity: 'FAIL',
+    check: (c) => {
+      const violations = [];
+      for (const css of c.cssAnalysis) {
+        for (const v of css.prefersReducedMotion) {
+          violations.push(`${css.file} line ${v.line}: ${v.text}`);
+        }
+      }
+      if (violations.length > 0) {
+        return { pass: false, details: `@media (prefers-reduced-motion) found — dead pattern, motion is controlled by render mode stripping animation props:\n    ${violations.join('\n    ')}` };
+      }
+      return { pass: true };
+    },
+  },
+
+  {
+    id: 'no-global-selectors',
+    name: 'No :global() selectors in .astro (CSS should be separated)',
+    severity: 'FAIL',
+    check: (c) => {
+      const violations = [];
+      for (const a of c.astroFiles) {
+        if (a.globalSelectorCount > 0) {
+          violations.push(`${a.file}: ${a.globalSelectorCount} :global() selectors — CSS should be in separate file, not scoped`);
+        }
+      }
+      if (violations.length > 0) {
+        return { pass: false, details: violations.join('\n    ') };
+      }
+      return { pass: true };
+    },
+  },
+
+  {
+    id: 'no-brand-detection',
+    name: 'Component does not detect or read brand tokens in JS',
+    severity: 'FAIL',
+    check: (c) => {
+      for (const a of c.astroFiles) {
+        if (a.readsBrandInJs) {
+          return { pass: false, details: `${a.file}: reads brand tokens in JS — component should receive brand via CSS custom properties, not JS detection` };
+        }
+      }
+      return { pass: true };
+    },
+  },
+
+  {
+    id: 'animation-classes-conditional',
+    name: 'Animation classes added conditionally based on props',
+    severity: 'WARN',
+    check: (c) => {
+      for (const a of c.astroFiles) {
+        if (a.hasHardcodedAnimationClass) {
+          return { pass: false, details: `${a.file}: animation modifier class appears hardcoded — should be conditional on animation prop presence` };
+        }
       }
       return { pass: true };
     },
@@ -558,6 +655,17 @@ async function analyseComponent(dirPath) {
       ].filter(attr => content.includes(attr)),
       animationEventListeners: ['mouseenter', 'mousemove', 'mouseleave', 'scroll']
         .filter(evt => scriptContent.includes(evt)),
+      globalSelectorCount: countPattern(content, ':global('),
+      readsBrandInJs: /getComputedStyle|--brand-|dataset\.brand|brand\./.test(scriptContent),
+      hasHardcodedAnimationClass: (() => {
+        // Check if animation modifier classes (--hover-, --animate-, --effect-) are hardcoded
+        // rather than conditional on props
+        const animClassPattern = /class.*--(?:hover|animate|effect|motion)-/;
+        const conditionalPattern = /\?\s*['"`].*--(?:hover|animate|effect|motion)-|animation\s*[\?\.]/;
+        const hasAnimClass = animClassPattern.test(template);
+        const isConditional = conditionalPattern.test(template) || conditionalPattern.test(frontmatter);
+        return hasAnimClass && !isConditional;
+      })(),
     });
   }
 
@@ -586,6 +694,7 @@ async function analyseComponent(dirPath) {
       cvdClasses: countPattern(content, /\.a11y-cvd-[\w-]+/g),
       plainClass: countPattern(content, '.plain'),
       hardcodedColours: scanHardcodedColours(content),
+      prefersReducedMotion: findLines(content, /prefers-reduced-motion/),
     });
   }
 
