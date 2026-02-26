@@ -1,0 +1,135 @@
+/* =========================================================
+   ISOTOPE IMAGE GALLERY
+   Grid-based product gallery with GSAP Flip animations
+   BEM-lite naming, CSS design tokens
+   ========================================================= */
+
+.isotope-gallery-wrapper {
+  width: 100%;
+  height: 650px;
+  min-height: 650px;
+  max-height: 650px;
+}
+
+.isotope-gallery {
+  position: relative;
+  width: 100%;
+  height: 650px;
+  min-height: 650px;
+  max-height: 650px;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+  display: grid;
+  grid-template-columns: minmax(auto, 480px) 120px;
+  grid-template-rows: repeat(3, 1fr);
+  gap: var(--space-xl);
+  align-items: stretch;
+}
+
+.isotope-gallery.grid--loading {
+  opacity: 0;
+}
+
+.gallery-item {
+  cursor: pointer;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  background-color: var(--brand-c-bg);
+  border: 2px solid var(--brand-c-neutral-light);
+  position: relative;
+}
+
+/* Expanded item - left side, spans multiple rows */
+.gallery-item.is-expanded {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  border-color: var(--brand-c-primary-dark);
+  box-shadow: var(--shadow-md);
+  padding: 0;
+  height: 650px;
+  min-height: 650px;
+  max-height: 650px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-item.is-expanded img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--border-radius-md);
+}
+
+/* Thumbnails - right side, stacked vertically */
+.gallery-item:not(.is-expanded) {
+  grid-column: 2;
+  height: 100%;
+}
+
+.gallery-item:not(.is-expanded) img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--border-radius-md);
+}
+
+.gallery-item:hover {
+  border-color: var(--brand-c-primary);
+}
+
+/* ========== GALLERY BADGE ========== */
+.isotope-gallery .gallery-badge {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ========== RESPONSIVE ========== */
+/* Large screens: slightly wider thumbnails */
+@media (min-width: 1400px) {
+  .isotope-gallery {
+    grid-template-columns: 1fr 140px;
+  }
+}
+
+/* Tablet: narrower thumbnails */
+@media (max-width: 1023px) {
+  .isotope-gallery {
+    grid-template-columns: 1fr 100px;
+  }
+}
+
+/* Mobile: stacked layout */
+@media (max-width: 767px) {
+  .isotope-gallery {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    height: auto;
+    min-height: auto;
+    max-height: none;
+  }
+
+  .isotope-gallery-wrapper {
+    height: auto;
+    min-height: auto;
+    max-height: none;
+  }
+
+  .gallery-item.is-expanded {
+    grid-column: 1;
+    grid-row: auto;
+    height: 400px;
+    min-height: 400px;
+    max-height: 400px;
+  }
+
+  .gallery-item:not(.is-expanded) {
+    grid-column: 1;
+    height: 120px;
+  }
+}

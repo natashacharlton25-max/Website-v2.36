@@ -1,0 +1,133 @@
+/* =========================================================
+   GLASSNAV ACCESSIBILITY OVERRIDES
+   Solid backgrounds and proper token colors for a11y themes
+   ========================================================= */
+
+/* ========== ANY A11Y THEME: SOLID BACKGROUND ========== */
+#a11y-content-wrapper[class*="a11y-"] .nav-container {
+  background: var(--brand-c-bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: var(--border-width) solid var(--brand-c-bg-light);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--brand-c-text-dark) 10%, transparent);
+}
+
+#a11y-content-wrapper[class*="a11y-"] .nav-container.scrolled {
+  background: var(--brand-c-bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ========== REDUCED MOTION: PIN NAVBAR ========== */
+/* Prevent nav from hiding on scroll — keep it always visible */
+#a11y-content-wrapper.a11y-reduce-motion .nav-container {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  top: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-container {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    top: 0 !important;
+  }
+}
+
+/* ========== REDUCED MOTION: EXPANDABLE MENU ========== */
+/* Use slower, gentler animations for reduced motion preference */
+/* More specific selectors to override the wildcard transition: none rule */
+#a11y-content-wrapper.a11y-reduce-motion .nav-container .expandable-menu {
+  transition: max-height 1s ease-out, padding 1s ease-out !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .nav-container .expandable-menu-wrapper {
+  /* Simple opacity fade only - no transform slide */
+  transform: none !important;
+  transition: opacity 0.8s ease-out 0.3s !important;
+}
+
+
+
+
+
+
+/* ========== REDUCED MOTION: STATIC ICONS ========== */
+/* Hide Lottie icons, show static Phosphor icons — scoped to GlassNav only */
+#a11y-content-wrapper.a11y-reduce-motion .nav-lottie-icon,
+#a11y-content-wrapper.a11y-reduce-motion .nav-icon-group [data-lottie-icon] {
+  display: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .nav-static-icon {
+  display: block !important;
+}
+
+/* System preference reduced motion — structural only */
+@media (prefers-reduced-motion: reduce) {
+  .nav-lottie-icon,
+  [data-lottie-icon] {
+    display: none !important;
+  }
+
+  .nav-static-icon {
+    display: block !important;
+  }
+
+  /* Expandable menu - slower, gentler animations */
+  .nav-container .expandable-menu {
+    transition: max-height 1s ease-out, padding 1s ease-out !important;
+  }
+
+  .nav-container .expandable-menu-wrapper {
+    transform: none !important;
+    transition: opacity 0.8s ease-out 0.3s !important;
+  }
+}
+
+
+
+
+/* ========== HAMBURGER MENU ========== */
+#a11y-content-wrapper[class*="a11y-"] .hamburger-menu svg {
+  stroke: var(--brand-c-text);
+}
+
+#a11y-content-wrapper[class*="a11y-"] .hamburger-menu.active svg {
+  stroke: var(--brand-c-primary);
+}
+
+/* ========== MOBILE MENU OPENED ========== */
+#a11y-content-wrapper[class*="a11y-"] .nav-container.menu-opened {
+  background: var(--brand-c-bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+#a11y-content-wrapper[class*="a11y-"] .mobile-menu-list a {
+  color: var(--brand-c-text) !important;
+}
+
+#a11y-content-wrapper[class*="a11y-"]:not(.a11y-reduce-motion) .mobile-menu-list a:hover {
+  color: var(--brand-c-primary) !important;
+}
+
+/* ========== EXPANDABLE MENU ITEMS ========== */
+#a11y-content-wrapper[class*="a11y-"] .expandable-item {
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+#a11y-content-wrapper[class*="a11y-"] .expandable-item h3 {
+  color: var(--brand-c-text);
+}
+
+#a11y-content-wrapper[class*="a11y-"] .expandable-item p {
+  color: var(--brand-c-text-light);
+}
+

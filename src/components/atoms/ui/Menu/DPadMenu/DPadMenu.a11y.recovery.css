@@ -1,0 +1,80 @@
+/* ──────────────────────────────────────────────────
+   DPadMenu.a11y.css
+   Reduce-motion + text-only overrides
+   ────────────────────────────────────────────────── */
+
+/* ── Reduce Motion ── */
+@layer a11y.reduce-motion {
+
+  #a11y-content-wrapper.a11y-reduce-motion .dpad-menu {
+    transition: none;
+  }
+
+  #a11y-content-wrapper.a11y-reduce-motion .dpad-menu__btn {
+    transition: none;
+  }
+
+  #a11y-content-wrapper.a11y-reduce-motion .dpad-menu:has(.dpad-menu__btn:active) {
+    transition: none;
+  }
+
+}
+
+/* ── Text Only ── */
+@layer a11y.text-only {
+
+  /* Strip circular container */
+  #a11y-content-wrapper.a11y-text-only .dpad-menu {
+    width: auto;
+    height: auto;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  #a11y-content-wrapper.a11y-text-only .dpad-menu:hover {
+    width: auto;
+    height: auto;
+  }
+
+  /* Un-absolute slots */
+  #a11y-content-wrapper.a11y-text-only .dpad-menu__slot {
+    position: static;
+    transform: none;
+  }
+
+  /* Strip button styling — plain text link */
+  #a11y-content-wrapper.a11y-text-only .dpad-menu__btn {
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    color: var(--brand-c-primary);
+    text-decoration: underline;
+    padding: var(--space-xs) 0;
+  }
+
+  #a11y-content-wrapper.a11y-text-only .dpad-menu__btn:active {
+    box-shadow: none;
+  }
+
+  /* Show labels */
+  #a11y-content-wrapper.a11y-text-only .dpad-menu__label {
+    display: block;
+    color: var(--brand-c-text);
+  }
+
+  /* Hide symbols + icons — label is the accessible text */
+  #a11y-content-wrapper.a11y-text-only .dpad-menu__symbol {
+    display: none;
+  }
+
+  #a11y-content-wrapper.a11y-text-only .dpad-menu__btn .icon {
+    display: none;
+  }
+
+}

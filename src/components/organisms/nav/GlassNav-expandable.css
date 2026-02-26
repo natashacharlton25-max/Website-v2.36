@@ -1,0 +1,178 @@
+/* =========================================================
+   GLASSNAV EXPANDABLE MENU STYLES
+   Desktop mega menu / expandable dropdown styles
+   ========================================================= */
+
+/* ========== EXPANDABLE MENU BASE ========== */
+.expandable-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.8s ease, padding 0.8s ease;
+  width: 100%;
+}
+
+.expandable-menu-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2xl);
+  max-width: var(--container-7xl, 1400px);
+  margin: 0 auto;
+  padding: 0 var(--space-2xl);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+}
+
+/* ========== EXPANDED STATES ========== */
+.nav-container.expanded-assets,
+.nav-container.expanded-insights,
+.nav-container.expanded-services,
+.nav-container.expanded-settings {
+  transition: all 0.8s ease;
+}
+
+.nav-container.expanded-assets .expandable-menu-assets,
+.nav-container.expanded-insights .expandable-menu-insights,
+.nav-container.expanded-services .expandable-menu-services,
+.nav-container.expanded-settings .expandable-menu-settings {
+  max-height: 400px;
+  padding: var(--space-2xl) 0;
+}
+
+.nav-container.expanded-assets .expandable-menu-assets .expandable-menu-wrapper,
+.nav-container.expanded-insights .expandable-menu-insights .expandable-menu-wrapper,
+.nav-container.expanded-services .expandable-menu-services .expandable-menu-wrapper,
+.nav-container.expanded-settings .expandable-menu-settings .expandable-menu-wrapper {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== MENU GRID VARIANTS ========== */
+/* Assets menu has 5 items - 3 column grid */
+.expandable-menu-assets .expandable-menu-wrapper {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Settings menu has 4 items - full width */
+.expandable-menu-settings .expandable-menu-wrapper {
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+}
+
+/* ========== EXPANDABLE ITEMS ========== */
+.expandable-item {
+  text-decoration: none;
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  background: var(--brand-c-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid transparent;
+  box-shadow: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.expandable-item:hover {
+  border-color: var(--brand-c-primary);
+  box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 10%, transparent);
+}
+
+.expandable-item h3 {
+  font-family: var(--font-heading, 'Quicksand', sans-serif);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--brand-c-text);
+  margin: 0 0 var(--space-sm) 0;
+  transition: color var(--transition-fast);
+}
+
+.expandable-item:hover h3 {
+  color: var(--brand-c-primary-dark);
+}
+
+.expandable-item:active h3 {
+  color: var(--brand-c-secondary);
+}
+
+.expandable-item p {
+  font-family: var(--font-body, 'Quicksand', sans-serif);
+  font-size: var(--text-xs);
+  color: var(--brand-c-text);
+  margin: 0;
+  line-height: var(--leading-relaxed);
+}
+
+/* ========== ICON-BASED ITEMS (Settings) ========== */
+.expandable-item--icon {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  min-height: auto;
+}
+
+.expandable-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--brand-c-text);
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+  display: block;
+}
+
+.expandable-item--icon:hover .expandable-icon {
+  color: var(--brand-c-primary-dark);
+}
+
+.expandable-item--icon h3 {
+  margin: 0;
+  white-space: nowrap;
+  line-height: 1;
+  color: var(--brand-c-text);
+}
+
+.expandable-item--icon:hover h3 {
+  color: var(--brand-c-primary-dark);
+}
+
+/* ========== ITEMS WITH MEDIA (Image/Icon) ========== */
+.expandable-item--has-media {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.expandable-media {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--brand-c-bg-light);
+}
+
+.expandable-media__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.expandable-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.expandable-item__content h3 {
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.expandable-item__content p {
+  margin: 0;
+}
+
+/* reduced-motion → a11y/motion/reduced-motion.css */

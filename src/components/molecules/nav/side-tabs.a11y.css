@@ -1,0 +1,131 @@
+/**
+ * ============================================
+ * SIDE TABS - Accessibility Theme Overrides
+ * ============================================
+ *
+ * Base component styles live in: src/components/ui/SideTabs.astro
+ */
+
+/* =========================================================
+   LOTTIE / STATIC ICON SWAP
+   - Show static icons and hide Lottie when any a11y setting is enabled
+   ========================================================= */
+
+#a11y-content-wrapper.a11y-reduce-motion .side-tab__lottie,
+#a11y-content-wrapper.a11y-text-only .side-tab__lottie,
+#a11y-content-wrapper.a11y-theme-dark .side-tab__lottie,
+#a11y-content-wrapper.a11y-theme-cream .side-tab__lottie,
+#a11y-content-wrapper.a11y-theme-high-contrast .side-tab__lottie,
+#a11y-content-wrapper.a11y-theme-protanopia .side-tab__lottie,
+#a11y-content-wrapper.a11y-theme-deuteranopia .side-tab__lottie,
+#a11y-content-wrapper.a11y-theme-tritanopia .side-tab__lottie,
+#a11y-content-wrapper.a11y-theme-monochrome .side-tab__lottie,
+#a11y-content-wrapper.a11y-enhanced-focus .side-tab__lottie {
+  display: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .side-tab__static-icon,
+#a11y-content-wrapper.a11y-text-only .side-tab__static-icon,
+#a11y-content-wrapper.a11y-theme-dark .side-tab__static-icon,
+#a11y-content-wrapper.a11y-theme-cream .side-tab__static-icon,
+#a11y-content-wrapper.a11y-theme-high-contrast .side-tab__static-icon,
+#a11y-content-wrapper.a11y-theme-protanopia .side-tab__static-icon,
+#a11y-content-wrapper.a11y-theme-deuteranopia .side-tab__static-icon,
+#a11y-content-wrapper.a11y-theme-tritanopia .side-tab__static-icon,
+#a11y-content-wrapper.a11y-theme-monochrome .side-tab__static-icon,
+#a11y-content-wrapper.a11y-enhanced-focus .side-tab__static-icon {
+  display: block !important;
+}
+
+/* =========================================================
+   ACCESSIBILITY ICON OVERRIDES
+   - Dark mode: var(--color-White)/light icons
+   - High contrast: yellow icons
+   - Cream: warm tinted icons
+   ========================================================= */
+
+/* Dark mode: invert icon to be light colored */
+#a11y-content-wrapper.a11y-theme-dark .side-tab__static-icon {
+  filter: brightness(0) saturate(100%) invert(1) !important;
+  opacity: 0.9 !important;
+}
+
+/* High contrast: accent colored icon for visibility */
+#a11y-content-wrapper.a11y-theme-high-contrast .side-tab__static-icon {
+  filter: brightness(0) invert(1) !important;
+  opacity: 1 !important;
+}
+
+/* Cream theme: slightly warm tint */
+#a11y-content-wrapper.a11y-theme-cream .side-tab__static-icon {
+  filter: brightness(0) saturate(100%) sepia(20%) !important;
+  opacity: 0.85 !important;
+}
+
+/* Monochrome: ensure proper grayscale */
+#a11y-content-wrapper.a11y-theme-monochrome .side-tab__static-icon {
+  filter: brightness(0) saturate(100%) !important;
+  opacity: 0.8 !important;
+}
+
+/* =========================================================
+   ACCESSIBILITY TAB CONTAINER OVERRIDES
+   - Backgrounds and borders for all themes
+   ========================================================= */
+
+/* Any accessibility setting: use token backgrounds */
+#a11y-content-wrapper[class*="a11y-"] .side-tab {
+  background: var(--brand-c-bg) !important;
+  border: 1px solid var(--brand-c-text-light) !important;
+}
+
+/* All tabs unified hover - use primary color */
+#a11y-content-wrapper[class*="a11y-"] .side-tab:hover {
+  background: var(--brand-c-primary) !important;
+}
+
+/* Dark mode tabs */
+#a11y-content-wrapper.a11y-theme-dark .side-tab {
+  background: var(--brand-c-bg) !important;
+  border: 1px solid var(--brand-c-bg-light) !important;
+}
+
+#a11y-content-wrapper.a11y-theme-dark .side-tab:hover {
+  background: var(--brand-c-primary) !important;
+}
+
+/* High contrast tabs - accent color, white borders */
+#a11y-content-wrapper.a11y-theme-high-contrast .side-tab {
+  background: var(--brand-c-bg) !important;
+  border: 2px solid var(--brand-c-text-dark) !important;
+}
+
+#a11y-content-wrapper.a11y-theme-high-contrast .side-tab:hover {
+  background: var(--brand-c-primary) !important;
+  border-color: var(--brand-c-primary) !important;
+}
+
+/* High contrast - icons turn black on hover */
+#a11y-content-wrapper.a11y-theme-high-contrast .side-tab:hover .side-tab__static-icon {
+  filter: brightness(0) saturate(100%) !important;
+  opacity: 1 !important;
+}
+
+/* Cream mode tabs */
+#a11y-content-wrapper.a11y-theme-cream .side-tab {
+  background: var(--brand-c-bg) !important;
+  border: 1px solid var(--brand-c-primary) !important;
+}
+
+#a11y-content-wrapper.a11y-theme-cream .side-tab:hover {
+  background: var(--brand-c-primary) !important;
+}
+
+/* Reduced motion - no transforms */
+#a11y-content-wrapper.a11y-reduce-motion .side-tab {
+  transition: none !important;
+}
+
+#a11y-content-wrapper.a11y-reduce-motion .side-tab:hover {
+  transform: none !important;
+}

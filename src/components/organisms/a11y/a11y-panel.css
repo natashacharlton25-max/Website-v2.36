@@ -1,0 +1,707 @@
+/**
+ * ============================================
+ * ACCESSIBILITY PANEL - CONTAINER/SHELL STYLES
+ * ============================================
+ *
+ * Panel container, header, body, content area, and backdrop.
+ * Sub-component styles live in their respective .astro files.
+ */
+
+@layer components {
+
+/* ============================================
+ * A11Y CONTENT WRAPPER
+ * All a11y settings apply to this wrapper, NOT body.
+ * This keeps the AccessibilityPanel immune from settings.
+ * ============================================ */
+#a11y-content-wrapper {
+  /* Fill the viewport */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main content should grow to fill available space */
+#a11y-content-wrapper > main {
+  flex: 1;
+}
+
+/* Panel Container - Modal Mode */
+.a11y-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: 95vw;
+  max-width: 1600px;
+  height: 80vh;
+  max-height: 850px;
+  background: var(--brand-c-bg);
+  color: var(--brand-c-text-dark);
+  z-index: 10001;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px color-mix(in oklch, var(--color-Black) 30%, transparent);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-body);
+
+  /* Lock typography - prevent panel from being affected by its own settings */
+  font-size: 16px !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  line-height: 1.5 !important;
+}
+
+.a11y-panel[hidden] {
+  display: flex;
+}
+
+/* ============================================
+ * PANEL ISOLATION - COMPLETE EXCLUSION FROM
+ * ALL ACCESSIBILITY SETTINGS
+ * ============================================ */
+
+/* Override ALL CSS custom properties with fixed px values */
+/* Using html selector for higher specificity */
+html .a11y-panel,
+html body .a11y-panel {
+  /* Spacing tokens - px instead of rem */
+  --space-3xs: 2px !important;
+  --space-2xs: 4px !important;
+  --space-xs: 4px !important;
+  --space-sm: 8px !important;
+  --space-md: 16px !important;
+  --space-lg: 24px !important;
+  --space-xl: 32px !important;
+  --space-2xl: 48px !important;
+  --space-3xl: 64px !important;
+
+  /* Border radius tokens - px instead of rem */
+  --border-radius-sm: 4px !important;
+  --border-radius: 8px !important;
+  --border-radius-md: 12px !important;
+  --border-radius-lg: 16px !important;
+  --border-radius-xl: 24px !important;
+  --radius-sm: 4px !important;
+  --radius-md: 12px !important;
+  --radius-lg: 16px !important;
+  --radius-xl: 24px !important;
+
+  /* Font size tokens - px instead of rem */
+  --font-size-xs: 12px !important;
+  --font-size-sm: 14px !important;
+  --font-size-base: 16px !important;
+  --font-size-lg: 18px !important;
+  --font-size-xl: 20px !important;
+  --font-size-2xl: 24px !important;
+  --font-size-3xl: 30px !important;
+}
+
+/* ============================================
+ * PANEL TYPOGRAPHY LOCKS
+ * Ensure panel maintains consistent styling
+ * NOTE: Panel is outside #a11y-content-wrapper,
+ * so it's naturally immune to a11y CSS rules.
+ * These rules are a safety net.
+ * ============================================ */
+
+/* Typography locks - ALL panel elements (except font card labels which show their own font) */
+.a11y-panel,
+.a11y-panel *:not(.a11y-font-card__label) {
+  font-family: var(--font-body) !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  line-height: 1.5 !important;
+}
+
+/* Font card labels - allow their inline font-family style to show through */
+.a11y-panel .a11y-font-card__label {
+  /* font-family is set via inline style to preview each font */
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  line-height: 1.5 !important;
+}
+
+/* Override any rem-based font sizes in panel children */
+.a11y-panel .a11y-section__title {
+  font-size: 18px !important;
+}
+
+.a11y-panel .a11y-stepper__label {
+  font-size: 18px !important;
+}
+
+.a11y-panel .a11y-stepper__value {
+  font-size: 24px !important;
+}
+
+.a11y-panel .a11y-font-card__label,
+.a11y-panel .a11y-toggle-card__label {
+  font-size: 15px !important;
+  white-space: nowrap !important;
+}
+
+.a11y-panel .a11y-preset-btn__title {
+  font-size: 18px !important;
+}
+
+.a11y-panel .a11y-toggle-card__desc,
+.a11y-panel .a11y-preset-btn__subtitle {
+  font-size: 14px !important;
+}
+
+.a11y-panel .a11y-theme-card__title {
+  font-size: 14px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  font-weight: 700 !important;
+}
+
+.a11y-panel .a11y-theme-card__sample {
+  display: none !important;
+}
+
+.a11y-panel .a11y-sidebar__title {
+  font-size: 16px !important;
+  margin-bottom: 12px !important;
+}
+
+/* ============================================
+ * EXPLICIT COMPONENT SIZE OVERRIDES
+ * These override Astro scoped styles that may use rem-based tokens
+ * ============================================ */
+
+/* Preset buttons - fixed dimensions */
+.a11y-panel .a11y-preset-btn {
+  padding: 12px 24px !important;
+  gap: 24px !important;
+  border-radius: 16px !important;
+}
+
+.a11y-panel .a11y-preset-btn__text {
+  gap: 2px !important;
+}
+
+.a11y-panel .a11y-preset-btn__icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+/* Stepper buttons - fixed dimensions */
+.a11y-panel .a11y-stepper {
+  gap: 16px !important;
+}
+
+.a11y-panel .a11y-stepper__btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+}
+
+/* Toggle cards - fixed dimensions */
+.a11y-panel .a11y-toggle-card {
+  padding: 16px !important;
+  gap: 16px !important;
+  border-radius: 12px !important;
+}
+
+/* Font cards - fixed dimensions */
+.a11y-panel .a11y-font-card {
+  padding: 14px 16px !important;
+  gap: 12px !important;
+  border-radius: 12px !important;
+}
+
+/* Theme cards - fixed dimensions */
+.a11y-panel .a11y-theme-card {
+  padding: 14px !important;
+  gap: 12px !important;
+  border-radius: 12px !important;
+}
+
+/* Section titles - fixed sizing */
+.a11y-panel .a11y-section {
+  gap: 12px !important;
+}
+
+/* Sidebar - fixed padding */
+.a11y-panel .a11y-panel__sidebar,
+.a11y-panel .a11y-panel__sidebar-right {
+  padding: 16px !important;
+}
+
+/* Panel header - fixed dimensions */
+.a11y-panel .a11y-panel__header {
+  padding: 16px 24px !important;
+  gap: 12px !important;
+}
+
+.a11y-panel .a11y-panel__header-actions {
+  gap: 8px !important;
+}
+
+/* Content area - fixed padding */
+.a11y-panel .a11y-panel__content {
+  padding: 16px !important;
+  gap: 32px !important;
+}
+
+/* Panel buttons - prevent highlight-links from adding underlines */
+.a11y-panel button,
+.a11y-panel .btn {
+  text-decoration: none !important;
+}
+
+/* Ensure images are always visible in panel */
+.a11y-panel img,
+.a11y-panel svg,
+.a11y-panel picture,
+.a11y-panel .icon {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure links maintain panel styling */
+.a11y-panel a {
+  text-decoration: none !important;
+}
+
+/* Prevent theme color overrides - use panel's own colors */
+.a11y-panel,
+.a11y-panel * {
+  filter: none !important;
+}
+
+/* Ensure animations work in panel even with reduce-motion */
+.a11y-panel,
+.a11y-panel * {
+  animation-play-state: running !important;
+}
+
+/* Reset any grayscale/color filters */
+.a11y-panel {
+  -webkit-filter: none !important;
+  filter: none !important;
+}
+
+/* Ensure focus styles are panel-controlled */
+.a11y-panel *:focus-visible {
+  outline: 2px solid var(--brand-c-primary) !important;
+  outline-offset: 2px !important;
+}
+
+.a11y-panel.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Header */
+.a11y-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: var(--border-width-2) solid var(--brand-c-primary);
+}
+
+.a11y-panel__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 24px !important;
+  font-weight: var(--font-extrabold);
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--brand-c-primary);
+}
+
+.a11y-panel__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.a11y-panel__header-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  padding: 12px 20px !important;
+  font-size: 16px !important;
+}
+
+/* Download button - no border (filled style) */
+.a11y-panel__header-actions .btn--primary {
+  border: none !important;
+}
+
+/* Reset button - outlined style */
+.a11y-panel__header-actions .btn--ghost {
+  border: 2px solid var(--brand-c-primary) !important;
+}
+
+.a11y-panel__header-actions .btn svg,
+.a11y-panel__header-actions .btn .icon {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.a11y-panel__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  margin-left: 20px;
+  background: none;
+  border: none;
+  color: var(--brand-c-primary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.a11y-panel__close svg {
+  width: 36px;
+  height: 36px;
+}
+
+.a11y-panel__close:hover {
+  color: var(--brand-c-primary);
+  opacity: 0.8;
+}
+
+/* Body Layout - 5 Equal Columns */
+.a11y-panel__body {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left Sidebar - spans 1 column */
+.a11y-panel__sidebar {
+  grid-column: span 1;
+  overflow-y: auto;
+}
+
+/* Main Content Area - spans 3 columns, custom widths for sections */
+.a11y-panel__content {
+  grid-column: span 3;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr 1fr;
+  gap: var(--space-xl);
+  padding: var(--space-md);
+  align-content: start;
+}
+
+/* Right Sidebar - spans 1 column */
+.a11y-panel__sidebar-right {
+  grid-column: span 1;
+  overflow-y: auto;
+}
+
+/* Section modifier for full width */
+.a11y-section--full {
+  grid-column: 1 / -1;
+}
+
+/* Backdrop */
+.a11y-panel__backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in oklch, var(--color-Black) 50%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.a11y-panel__backdrop[hidden] {
+  display: block;
+}
+
+.a11y-panel__backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* =============================================
+ * RESPONSIVE STYLES
+ * ============================================= */
+
+/* Mobile */
+@media (max-width: 768px) {
+  .a11y-panel {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    top: 0;
+    left: 0;
+    transform: translateY(100%);
+  }
+
+  .a11y-panel.is-open {
+    transform: translateY(0);
+  }
+
+  .a11y-panel__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    flex-shrink: 0;
+  }
+
+  .a11y-panel__header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Body becomes single scrollable column */
+  .a11y-panel__body {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: unset;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Left sidebar (Color Theme) - first */
+  .a11y-panel__sidebar {
+    order: 1;
+    overflow-y: visible;
+    flex-shrink: 0;
+  }
+
+  /* Right sidebar (Quick Presets) - second, under Color Theme */
+  .a11y-panel__sidebar-right {
+    order: 2;
+    overflow-y: visible;
+    flex-shrink: 0;
+  }
+
+  /* Main content - third */
+  .a11y-panel__content {
+    order: 3;
+    padding: 16px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    overflow-y: visible;
+    flex-shrink: 0;
+  }
+}
+
+/* Tablet/Small Desktop - full screen with sidebars side by side */
+@media (min-width: 769px) and (max-width: 1400px) {
+  .a11y-panel {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    top: 0;
+    left: 0;
+    transform: translateY(-100%);
+  }
+
+  .a11y-panel.is-open {
+    transform: translateY(0);
+  }
+
+  .a11y-panel__header {
+    flex-shrink: 0;
+  }
+
+  /* Body - flex wrap to put sidebars on same row */
+  .a11y-panel__body {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Left sidebar (Color Theme) - 50% width */
+  .a11y-panel__sidebar {
+    order: 1;
+    width: 50%;
+    flex-shrink: 0;
+    border-right: var(--border-width) solid color-mix(in srgb, var(--brand-c-text-dark) 15%, transparent);
+    border-bottom: var(--border-width) solid color-mix(in srgb, var(--brand-c-text-dark) 15%, transparent);
+    box-sizing: border-box;
+  }
+
+  /* Right sidebar (Quick Presets) - 50% width, same row */
+  .a11y-panel__sidebar-right {
+    order: 2;
+    width: 50%;
+    flex-shrink: 0;
+    border-left: none;
+    border-bottom: var(--border-width) solid color-mix(in srgb, var(--brand-c-text-dark) 15%, transparent);
+    box-sizing: border-box;
+  }
+
+  /* Main content - full width below */
+  .a11y-panel__content {
+    order: 3;
+    width: 100%;
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .a11y-panel__header {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .a11y-panel__title {
+    font-size: 16px !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  /* Hide button text, show icons only (keep .icon spans visible) */
+  .a11y-panel__header-actions .btn span:not(.icon) {
+    display: none !important;
+  }
+
+  .a11y-panel__header-actions .btn {
+    padding: 8px !important;
+    font-size: 0 !important;
+    gap: 0 !important;
+  }
+
+  .a11y-panel__header-actions .btn svg,
+  .a11y-panel__header-actions .btn .icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .a11y-panel__header-actions {
+    gap: 6px !important;
+  }
+
+  .a11y-panel__close {
+    width: 36px;
+    height: 36px;
+    margin-left: 8px;
+  }
+
+  .a11y-panel__close svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .a11y-panel__content {
+    padding: 10px !important;
+    gap: 10px !important;
+  }
+
+  .a11y-panel .a11y-panel__sidebar,
+  .a11y-panel .a11y-panel__sidebar-right {
+    padding: 10px !important;
+  }
+
+  .a11y-panel .a11y-stepper {
+    gap: 8px !important;
+    padding: 8px 10px !important;
+  }
+
+  .a11y-panel .a11y-stepper__btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .a11y-panel .a11y-stepper__label {
+    font-size: 14px !important;
+  }
+
+  .a11y-panel .a11y-stepper__value {
+    font-size: 18px !important;
+  }
+
+  .a11y-panel .a11y-toggle-card {
+    padding: 10px !important;
+    gap: 10px !important;
+  }
+
+  .a11y-panel .a11y-font-card {
+    padding: 10px 12px !important;
+    gap: 8px !important;
+  }
+
+  .a11y-panel .a11y-preset-btn {
+    padding: 10px 14px !important;
+    gap: 14px !important;
+  }
+
+  .a11y-panel .a11y-preset-btn__icon {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .a11y-panel .a11y-preset-btn__title {
+    font-size: 15px !important;
+  }
+
+  .a11y-panel .a11y-section__title {
+    font-size: 15px !important;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 320px) {
+  .a11y-panel__title {
+    font-size: 14px !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  .a11y-panel__header-actions .btn {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+
+  .a11y-panel__close {
+    width: 32px;
+    height: 32px;
+    margin-left: 4px;
+  }
+
+  .a11y-panel__close svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .a11y-panel .a11y-stepper__btn {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .a11y-panel .a11y-stepper__label {
+    font-size: 12px !important;
+  }
+
+  .a11y-panel .a11y-stepper__value {
+    font-size: 16px !important;
+  }
+}
+
+}
