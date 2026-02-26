@@ -1,0 +1,1191 @@
+/**
+ * Card — a11y.css
+ *
+ * Themes:        Base theme hook + per-theme overrides for card chrome,
+ *                typography, icons, badges, images.
+ * Reduce-motion: Kill transitions + hover transforms.
+ * Text-only:     Strip all visual chrome, leave text content.
+ *
+ * Theme override pattern (repeated per theme):
+ *   .card      → background, color, border
+ *   .card:hover → hover bg, border-color
+ *   typography  → color inheritance
+ *   .card__button → bg, color, border
+ *   icons/SVGs  → color, fill
+ *   icon wrappers → transparent bg
+ *   badges      → bg, color, border
+ *   images      → filter (brightness, contrast, saturation, sepia, grayscale)
+ */
+
+
+/* ==========================================================
+   REDUCE MOTION
+   ========================================================== */
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    & .card {
+      transition: none !important;
+    }
+
+    & .card:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    & .card--hover-lift:hover {
+      transform: none !important;
+    }
+
+    & .card__arrow,
+    & .card__icon {
+      transition: none !important;
+    }
+
+    /* ── BlogCard ── */
+    & .blog-card__img {
+      transition: none !important;
+    }
+
+    & .blog-card:hover .blog-card__img {
+      transform: none !important;
+    }
+
+    /* ── TeamCard ── */
+    & .team-card__img {
+      transition: none !important;
+    }
+
+    & .team-card:hover .team-card__img {
+      transform: none !important;
+    }
+
+    & .team-card__social-link {
+      transition: none !important;
+    }
+
+    & .team-card__social-link:hover {
+      transform: none !important;
+    }
+
+    & .team-card__contact-item {
+      transition: none !important;
+    }
+
+    /* ── InfoCard ── */
+    & .info-card {
+      transition: none !important;
+    }
+
+    /* ── AssetCard ── */
+    & .rainbow-border {
+      transition: none !important;
+    }
+
+    /* ── ImageRevealCard ── */
+    & .reveal-card__image,
+    & .reveal-card__title,
+    & .reveal-card__text,
+    & .reveal-card__actions,
+    & .reveal-card__scrim,
+    & .reveal-card__btn-plus::after {
+      transition: none !important;
+    }
+
+    & .reveal-card:hover .reveal-card__image,
+    & .reveal-card:focus-within .reveal-card__image {
+      aspect-ratio: 1 / 1 !important;
+      transition: none !important;
+    }
+
+    & .reveal-card:hover .reveal-card__scrim,
+    & .reveal-card:focus-within .reveal-card__scrim {
+      translate: 0 0 !important;
+    }
+
+    & .reveal-card:hover .reveal-card__title,
+    & .reveal-card:hover .reveal-card__text,
+    & .reveal-card:hover .reveal-card__actions,
+    & .reveal-card:focus-within .reveal-card__title,
+    & .reveal-card:focus-within .reveal-card__text,
+    & .reveal-card:focus-within .reveal-card__actions {
+      transition: none !important;
+    }
+
+    /* ── SlideCard ── */
+    & .slide-card__face {
+      transition: none !important;
+      transform: translateY(0) !important;
+    }
+
+    & .slide-card__front-content {
+      opacity: 1 !important;
+      transition: none !important;
+    }
+
+    & .slide-card__face--front {
+      background: var(--_accent) !important;
+    }
+
+    & .slide-card:hover .slide-card__face--front,
+    & .slide-card:hover .slide-card__face--back {
+      transform: translateY(0) !important;
+    }
+
+    & .slide-card__link {
+      transition: none !important;
+    }
+
+    /* ── FlipCard ── */
+    & .flip-box__face {
+      transition: none !important;
+    }
+
+    & .flip-box:hover .flip-box__front {
+      transform: rotateY(0deg) !important;
+      opacity: 0 !important;
+    }
+
+    & .flip-box__back {
+      transform: rotateY(0deg) !important;
+      opacity: 0 !important;
+    }
+
+    & .flip-box:hover .flip-box__back {
+      opacity: 1 !important;
+    }
+
+    & .flip-box__arrow {
+      transition: none !important;
+    }
+
+    & .flip-box__btn {
+      transition: none !important;
+    }
+
+    /* ── GlowCard ── */
+    & .glow-card__deco {
+      transition: none !important;
+    }
+
+    & .glow-card__body {
+      transition: none !important;
+    }
+
+    & .glow-card:hover .glow-card__body {
+      box-shadow: none !important;
+    }
+
+    & .glow-card:hover .glow-card__deco {
+      filter: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .card {
+      transition: none;
+    }
+
+    .card:hover {
+      transform: none;
+    }
+
+    .card--hover-lift:hover {
+      transform: none;
+    }
+  }
+}
+
+
+/* ==========================================================
+   TEXT-ONLY MODE
+   ========================================================== */
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    /* Strip card container chrome */
+    & .card,
+    & [data-card] {
+      background: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      filter: none !important;
+      padding: 0 !important;
+      text-align: left !important;
+      transform: none !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+    }
+
+    /* Explicitly kill Card border variant classes */
+    & .card--border-thin,
+    & .card--border-medium,
+    & .card--border-thick {
+      border: none !important;
+    }
+
+    /* Kill hover effects */
+    & .card:hover,
+    & [data-card]:hover {
+      transform: none !important;
+      box-shadow: none !important;
+      background: none !important;
+      border: none !important;
+    }
+
+    /* Masonry context: strip inline-block behaviour */
+    & .card--masonry {
+      display: block !important;
+      margin-bottom: var(--space-sm) !important;
+    }
+
+    /* Hide images and decorative media */
+    & .card__image {
+      display: none !important;
+    }
+
+    & .card__overlay {
+      display: none !important;
+    }
+
+    /* Hide decorative icons (no aria-label = decorative) */
+    & .card__icon:not([aria-label]),
+    & .card__icon-wrapper:not(:has([aria-label])),
+    & .card__quote-icon {
+      display: none !important;
+    }
+
+    /* Content wrapper: strip padding */
+    & .card__content {
+      padding: 0 !important;
+      background: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      text-align: left !important;
+      align-items: flex-start !important;
+      min-height: 0 !important;
+      height: auto !important;
+    }
+
+    /* Typography: ensure readable */
+    & .card__title,
+    & .card__heading {
+      color: var(--brand-c-text-dark) !important;
+    }
+
+    & .card__text,
+    & .card__label,
+    & .card__value,
+    & .card__quote,
+    & .card__author {
+      color: var(--brand-c-text) !important;
+    }
+
+    /* Badges: inline text */
+    & .card__badge {
+      background: none !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      color: var(--brand-c-text-light) !important;
+      font-weight: var(--font-semibold) !important;
+    }
+
+    /* Buttons: underlined text links */
+    & .card__button {
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      padding: 0 !important;
+      color: var(--brand-c-primary) !important;
+      text-decoration: underline !important;
+      font-weight: var(--font-semibold) !important;
+      min-height: 0 !important;
+      border-radius: 0 !important;
+    }
+
+    /* Arrow: hide (decorative) */
+    & .card__arrow {
+      display: none !important;
+    }
+
+    /* Separator: visible border between stacked cards (opt-in via separator prop) */
+    & .card--separator + .card--separator {
+      border-top: 1px solid currentColor !important;
+      padding-top: var(--space-sm) !important;
+    }
+
+    /* All text: left-aligned, plain */
+    & .card * {
+      text-shadow: none !important;
+      -webkit-text-stroke: unset !important;
+    }
+
+    /* ── FlipCard ── */
+    & .flip-box {
+      transform-style: flat !important;
+      perspective: none !important;
+    }
+
+    & .flip-box__face {
+      position: static !important;
+      transform: none !important;
+      backface-visibility: visible !important;
+      -webkit-backface-visibility: visible !important;
+      background: none !important;
+      background-image: none !important;
+      min-height: 0 !important;
+      transition: none !important;
+    }
+
+    & .flip-box:hover .flip-box__front,
+    & .flip-box:hover .flip-box__back {
+      transform: none !important;
+    }
+
+    & .flip-box__inner {
+      position: static !important;
+      transform: none !important;
+      text-align: left !important;
+      padding: 0 !important;
+      color: var(--brand-c-text) !important;
+    }
+
+    & .flip-box__arrow {
+      display: none !important;
+    }
+
+    & .flip-box__header {
+      color: var(--brand-c-text-dark) !important;
+    }
+
+    & .flip-box__subtitle,
+    & .flip-box__text {
+      color: var(--brand-c-text) !important;
+    }
+
+    & .flip-box__btn {
+      background: none !important;
+      border: none !important;
+      color: var(--brand-c-primary) !important;
+      text-decoration: underline !important;
+      padding: 0 !important;
+    }
+
+    /* ── SlideCard ── */
+    & .slide-card__face {
+      height: auto !important;
+      transform: none !important;
+      background: none !important;
+      transition: none !important;
+      box-shadow: none !important;
+    }
+
+    & .slide-card:hover .slide-card__face--front {
+      background: none !important;
+      transform: none !important;
+    }
+
+    & .slide-card:hover .slide-card__face--back {
+      transform: none !important;
+    }
+
+    & .slide-card__front-content {
+      opacity: 1 !important;
+      transition: none !important;
+      text-align: left !important;
+      color: var(--brand-c-text) !important;
+    }
+
+    & .slide-card__icon {
+      display: none !important;
+    }
+
+    & .slide-card__title {
+      color: var(--brand-c-text-dark) !important;
+      text-align: left !important;
+    }
+
+    & .slide-card__text {
+      color: var(--brand-c-text) !important;
+    }
+
+    & .slide-card__link {
+      background: none !important;
+      border: none !important;
+      color: var(--brand-c-primary) !important;
+      text-decoration: underline !important;
+      padding: 0 !important;
+    }
+
+    /* ── ChoiceCard ── */
+    & .choice-card__inner {
+      height: auto !important;
+      background: none !important;
+    }
+
+    & .choice-card__box {
+      background: none !important;
+      overflow: visible !important;
+    }
+
+    & .choice-card__image {
+      display: none !important;
+    }
+
+    & .choice-card__tray {
+      position: static !important;
+      background: none !important;
+      height: auto !important;
+      pointer-events: auto !important;
+    }
+
+    & .choice-card__tray::before,
+    & .choice-card__tray::after {
+      display: none !important;
+    }
+
+    & .choice-card__label {
+      color: var(--brand-c-text) !important;
+      margin: 0 !important;
+    }
+
+    /* Show native checkbox, hide custom checkmark */
+    & .choice-card__input {
+      position: static !important;
+      opacity: 1 !important;
+      width: auto !important;
+      height: auto !important;
+    }
+
+    & .choice-card__checkmark {
+      display: none !important;
+    }
+
+    /* ── ImageRevealCard ── */
+    & .reveal-card {
+      width: auto !important;
+      height: auto !important;
+      background: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      overflow: visible !important;
+      padding: 0 !important;
+    }
+
+    & .reveal-card--bordered {
+      border: none !important;
+    }
+
+    & .reveal-card__image,
+    & .reveal-card__scrim {
+      display: none !important;
+    }
+
+    & .reveal-card__body {
+      margin: 0 !important;
+      height: auto !important;
+    }
+
+    & .reveal-card__title,
+    & .reveal-card__text,
+    & .reveal-card__actions {
+      opacity: 1 !important;
+      translate: none !important;
+      transform: none !important;
+      transition: none !important;
+    }
+
+    /* Kill hover — prevent scoped :hover rules from changing anything */
+    & .reveal-card:hover .reveal-card__title,
+    & .reveal-card:hover .reveal-card__text,
+    & .reveal-card:hover .reveal-card__actions,
+    & .reveal-card:focus-within .reveal-card__title,
+    & .reveal-card:focus-within .reveal-card__text,
+    & .reveal-card:focus-within .reveal-card__actions {
+      opacity: 1 !important;
+      translate: none !important;
+      transition: none !important;
+    }
+
+    & .reveal-card__title {
+      color: var(--brand-c-text-dark) !important;
+    }
+
+    & .reveal-card:hover .reveal-card__title,
+    & .reveal-card:focus-within .reveal-card__title {
+      color: var(--brand-c-text-dark) !important;
+    }
+
+    & .reveal-card__text {
+      color: var(--brand-c-text) !important;
+    }
+
+    & .reveal-card__tag {
+      color: var(--brand-c-text) !important;
+    }
+
+    & .reveal-card__btn {
+      background: none !important;
+      border: none !important;
+      color: var(--brand-c-primary) !important;
+      text-decoration: underline !important;
+      padding: 0 !important;
+      translate: none !important;
+    }
+
+    & .reveal-card__btn-plus {
+      display: none !important;
+    }
+
+    /* ── RainbowBorderCard ── */
+    & .rainbow-border-card__border {
+      display: none !important;
+    }
+
+    & .rainbow-border-card__inner {
+      background: none !important;
+      border-radius: 0 !important;
+      overflow: visible !important;
+      padding: 0 !important;
+    }
+
+    /* ── GlowCard ── */
+    & .glow-card__deco {
+      display: none !important;
+    }
+
+    & .glow-card__body {
+      background: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+    }
+
+    & .glow-card__body::before {
+      display: none !important;
+    }
+
+    & .glow-card__title {
+      color: var(--brand-c-text-dark) !important;
+    }
+
+    & .glow-card__text {
+      color: var(--brand-c-text) !important;
+    }
+
+    /* ── GlowCard dark variant — text invisible when chrome stripped ── */
+    & .glow-card--dark .glow-card__title {
+      color: var(--brand-c-text-dark) !important;
+    }
+
+    & .glow-card--dark .glow-card__text {
+      color: var(--brand-c-text) !important;
+      opacity: 1 !important;
+    }
+
+    /* ── BlogCard ── */
+    & .blog-card__image {
+      display: none !important;
+    }
+
+    & .blog-card__content {
+      padding: 0 !important;
+    }
+
+    & .blog-card--featured {
+      border: none !important;
+    }
+
+    & .blog-card:hover .blog-card__img {
+      transform: none !important;
+    }
+
+    & .blog-card__title {
+      color: var(--brand-c-text-dark) !important;
+    }
+
+    & .blog-card__excerpt {
+      color: var(--brand-c-text) !important;
+    }
+
+    & .blog-card__author {
+      border-top: none !important;
+      padding-top: 0 !important;
+    }
+
+    /* ── TeamCard ── */
+    & .team-card__image {
+      display: none !important;
+    }
+
+    & .team-card__content {
+      padding: 0 !important;
+    }
+
+    & .team-card:hover .team-card__img {
+      transform: none !important;
+    }
+
+    & .team-card__name {
+      color: var(--brand-c-text-dark) !important;
+    }
+
+    & .team-card__socials {
+      border-top: none !important;
+      padding-top: 0 !important;
+    }
+
+    & .team-card__social-link {
+      color: var(--brand-c-primary) !important;
+      width: auto !important;
+      height: auto !important;
+    }
+
+    & .team-card__social-link:hover {
+      transform: none !important;
+    }
+
+    & .team-card__contact-item {
+      color: var(--brand-c-primary) !important;
+      text-decoration: underline !important;
+    }
+
+    /* ── TestimonialCard ── */
+    & .testimonial-card--bordered {
+      border: none !important;
+    }
+
+    & .testimonial-card--bordered:hover {
+      border: none !important;
+    }
+
+    & .testimonial-card--featured {
+      border: none !important;
+    }
+
+    & .testimonial-card__quote-icon {
+      display: none !important;
+    }
+
+    & .testimonial-card__rating {
+      order: 2 !important;
+    }
+
+    & .testimonial-card__quote {
+      order: 1 !important;
+    }
+
+    & .testimonial-card__author {
+      order: 3 !important;
+      border-top: none !important;
+      padding-top: 0 !important;
+    }
+
+    /* ── AssetCard ── */
+    & .asset-card-wrapper {
+      max-width: none !important;
+    }
+
+    & .rainbow-border {
+      background: none !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      min-height: 0 !important;
+      transition: none !important;
+    }
+
+    & .rainbow-border.animated,
+    & .rainbow-border.red,
+    & .rainbow-border.transitioning {
+      background: none !important;
+    }
+
+    & .asset-card__inner {
+      background: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+
+    & .asset-card__tag {
+      position: static !important;
+    }
+
+    & .asset-card__title {
+      margin-top: 0 !important;
+      color: var(--brand-c-text-dark) !important;
+    }
+
+    & .asset-card__desc {
+      color: var(--brand-c-text) !important;
+    }
+
+    & .asset-card__actions {
+      position: static !important;
+      margin-top: var(--space-sm) !important;
+    }
+
+    /* ── InfoCard ── */
+    & .info-card {
+      background: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      flex-direction: column !important;
+      min-height: 0 !important;
+    }
+
+    & .info-card:hover {
+      box-shadow: none !important;
+    }
+
+    & .info-card__image {
+      display: none !important;
+    }
+
+    & .info-card__content {
+      padding: 0 !important;
+      text-align: left !important;
+      align-items: flex-start !important;
+    }
+
+    & .info-card__tag {
+      margin-bottom: var(--space-sm) !important;
+    }
+
+    & .info-card__title {
+      color: var(--brand-c-text-dark) !important;
+    }
+
+    & .info-card__desc {
+      color: var(--brand-c-text) !important;
+    }
+
+    & .info-card__actions-desktop {
+      gap: var(--space-sm) !important;
+    }
+
+    /* ── Demo layout stacking ── */
+    & .card-demo__flip-grid,
+    & .card-demo__row-center {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: var(--space-lg) !important;
+    }
+
+    & .card-demo__glow-grid {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      padding: 0 !important;
+    }
+
+    & .card-demo__glow-dark-bg,
+    & .card-demo__glow-light-bg {
+      background: none !important;
+    }
+
+    & .card-demo__plus-icon {
+      position: static !important;
+      float: right !important;
+    }
+  }
+}
+
+
+/* ==========================================================
+   THEME OVERRIDES
+   Base hook: any a11y mode gets theme-aware backgrounds.
+   Per-theme rules follow the same structure (see pattern doc above).
+   ========================================================== */
+
+@layer a11y.themes {
+
+  /* ---- Base: all a11y modes ---- */
+  #a11y-content-wrapper[class*="a11y-"] .card,
+  #a11y-content-wrapper[class*="a11y-"] [data-card] {
+    background: var(--brand-c-bg-light) !important;
+    color: var(--brand-c-text) !important;
+    border: 1px solid var(--brand-c-bg-light) !important;
+  }
+
+
+  /* ---- DARK MODE ---- */
+
+  #a11y-content-wrapper.a11y-theme-dark .card {
+    background: var(--brand-c-bg) !important;
+    color: var(--brand-c-text) !important;
+    border: 1px solid var(--brand-c-bg-light) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-dark .card:hover {
+    background: var(--brand-c-bg-light) !important;
+    border-color: var(--brand-c-secondary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-dark .card a,
+  #a11y-content-wrapper.a11y-theme-dark .card p,
+  #a11y-content-wrapper.a11y-theme-dark .card h1,
+  #a11y-content-wrapper.a11y-theme-dark .card h2,
+  #a11y-content-wrapper.a11y-theme-dark .card h3,
+  #a11y-content-wrapper.a11y-theme-dark .card span:not(.icon):not(.card__icon) {
+    color: var(--brand-c-text) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-dark .card__button {
+    background: var(--brand-c-secondary) !important;
+    color: var(--brand-c-bg) !important;
+    border: 1px solid var(--brand-c-secondary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-dark .card__icon,
+  #a11y-content-wrapper.a11y-theme-dark .card__icon svg,
+  #a11y-content-wrapper.a11y-theme-dark .card__arrow,
+  #a11y-content-wrapper.a11y-theme-dark .card__arrow svg {
+    color: var(--brand-c-secondary) !important;
+    fill: var(--brand-c-secondary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-dark .card__icon svg path,
+  #a11y-content-wrapper.a11y-theme-dark .card__icon svg g,
+  #a11y-content-wrapper.a11y-theme-dark .card__arrow svg path,
+  #a11y-content-wrapper.a11y-theme-dark .card__arrow svg g {
+    fill: var(--brand-c-secondary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-dark .card__icon-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-dark .card__badge {
+    background: color-mix(in srgb, var(--brand-c-primary) 20%, transparent) !important;
+    color: var(--brand-c-text) !important;
+    border: 1px solid color-mix(in srgb, var(--brand-c-primary) 30%, transparent) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-dark .card img {
+    filter: brightness(0.86) saturate(0.90) contrast(0.98) !important;
+  }
+
+
+  /* ---- HIGH CONTRAST ---- */
+
+  #a11y-content-wrapper.a11y-theme-high-contrast .card {
+    background: var(--brand-c-bg) !important;
+    color: var(--brand-c-text-dark) !important;
+    border: 2px solid var(--brand-c-text-dark) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-high-contrast .card:hover {
+    border-color: var(--brand-c-primary) !important;
+    box-shadow: 0 0 0 2px var(--brand-c-primary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-high-contrast .card a,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card p,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card h1,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card h2,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card h3,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card span:not(.icon):not(.card__icon) {
+    color: var(--brand-c-text-dark) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__button {
+    background: var(--brand-c-primary) !important;
+    color: var(--brand-c-bg) !important;
+    border: 2px solid var(--brand-c-primary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__icon,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__icon svg,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__arrow,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__arrow svg {
+    color: var(--brand-c-primary) !important;
+    fill: var(--brand-c-primary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__icon svg path,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__icon svg g,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__arrow svg path,
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__arrow svg g {
+    fill: var(--brand-c-primary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__icon-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-high-contrast .card__badge {
+    background: var(--brand-c-primary) !important;
+    color: var(--brand-c-bg) !important;
+    border: 1px solid var(--brand-c-primary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-high-contrast .card img {
+    filter: contrast(1.15) brightness(1.05) !important;
+    border: 2px solid var(--brand-c-primary) !important;
+  }
+
+
+  /* ---- CREAM ---- */
+
+  #a11y-content-wrapper.a11y-theme-cream .card {
+    background: var(--brand-c-bg) !important;
+    color: var(--brand-c-text) !important;
+    border: 1px solid var(--brand-c-bg-light) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-cream .card:hover {
+    background: var(--brand-c-bg) !important;
+    border-color: var(--brand-c-primary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-cream .card a,
+  #a11y-content-wrapper.a11y-theme-cream .card p,
+  #a11y-content-wrapper.a11y-theme-cream .card h1,
+  #a11y-content-wrapper.a11y-theme-cream .card h2,
+  #a11y-content-wrapper.a11y-theme-cream .card h3,
+  #a11y-content-wrapper.a11y-theme-cream .card span:not(.icon):not(.card__icon) {
+    color: var(--brand-c-text) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-cream .card__button {
+    background: var(--brand-c-primary) !important;
+    color: var(--brand-c-bg) !important;
+    border: 1px solid var(--brand-c-primary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-cream .card__icon,
+  #a11y-content-wrapper.a11y-theme-cream .card__icon svg,
+  #a11y-content-wrapper.a11y-theme-cream .card__arrow,
+  #a11y-content-wrapper.a11y-theme-cream .card__arrow svg {
+    color: var(--brand-c-primary) !important;
+    fill: var(--brand-c-primary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-cream .card__icon svg path,
+  #a11y-content-wrapper.a11y-theme-cream .card__icon svg g,
+  #a11y-content-wrapper.a11y-theme-cream .card__arrow svg path,
+  #a11y-content-wrapper.a11y-theme-cream .card__arrow svg g {
+    fill: var(--brand-c-primary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-cream .card__icon-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-cream .card__badge {
+    background: color-mix(in srgb, var(--brand-c-primary) 15%, transparent) !important;
+    color: var(--brand-c-text) !important;
+    border: 1px solid color-mix(in srgb, var(--brand-c-primary) 25%, transparent) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-cream .card img {
+    filter: sepia(0.15) brightness(0.98) !important;
+  }
+
+
+  /* ---- MONOCHROME ---- */
+
+  #a11y-content-wrapper.a11y-theme-monochrome .card,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card {
+    background: var(--brand-c-bg) !important;
+    color: var(--brand-c-text) !important;
+    border: 1px solid var(--brand-c-bg-light) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-monochrome .card:hover,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card:hover {
+    background: var(--brand-c-bg-light) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-monochrome .card__button,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__button {
+    background: var(--brand-c-text) !important;
+    color: var(--color-White) !important;
+    border: 1px solid var(--brand-c-text) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-monochrome .card__icon,
+  #a11y-content-wrapper.a11y-theme-monochrome .card__icon svg,
+  #a11y-content-wrapper.a11y-theme-monochrome .card__arrow,
+  #a11y-content-wrapper.a11y-theme-monochrome .card__arrow svg,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__icon,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__icon svg,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__arrow,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__arrow svg {
+    color: var(--brand-c-text) !important;
+    fill: var(--brand-c-text) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-monochrome .card__icon svg path,
+  #a11y-content-wrapper.a11y-theme-monochrome .card__icon svg g,
+  #a11y-content-wrapper.a11y-theme-monochrome .card__arrow svg path,
+  #a11y-content-wrapper.a11y-theme-monochrome .card__arrow svg g,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__icon svg path,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__icon svg g,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__arrow svg path,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__arrow svg g {
+    fill: var(--brand-c-text) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-monochrome .card__icon-wrapper,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__icon-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-monochrome .card__badge,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card__badge {
+    background: color-mix(in oklch, var(--color-Black) 10%, transparent) !important;
+    color: var(--brand-c-text) !important;
+    border: 1px solid #aaaaaa !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-monochrome .card img,
+  #a11y-content-wrapper.a11y-cvd-monochrome .card img {
+    filter: grayscale(1) saturate(0) contrast(1.05) !important;
+  }
+
+
+  /* ---- CVD (PROTANOPIA / DEUTERANOPIA / TRITANOPIA) ---- */
+
+  #a11y-content-wrapper.a11y-theme-protanopia .card img,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card img,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card img,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card img,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card img,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card img {
+    filter: saturate(0.85) contrast(1.05) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-protanopia .card:hover,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card:hover,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card:hover,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card:hover,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card:hover,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card:hover {
+    border-color: var(--brand-c-secondary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-protanopia .card__button,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__button,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__button,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__button,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__button,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__button {
+    background: var(--brand-c-secondary) !important;
+    color: var(--color-White) !important;
+    border: 1px solid var(--brand-c-secondary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-protanopia .card__icon,
+  #a11y-content-wrapper.a11y-theme-protanopia .card__icon svg,
+  #a11y-content-wrapper.a11y-theme-protanopia .card__arrow,
+  #a11y-content-wrapper.a11y-theme-protanopia .card__arrow svg,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__icon,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__icon svg,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__arrow,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__arrow svg,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__icon,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__icon svg,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__arrow,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__arrow svg,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__icon,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__icon svg,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__arrow,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__arrow svg,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__icon,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__icon svg,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__arrow,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__arrow svg,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__icon,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__icon svg,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__arrow,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__arrow svg {
+    color: var(--brand-c-secondary) !important;
+    fill: var(--brand-c-secondary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-protanopia .card__icon svg path,
+  #a11y-content-wrapper.a11y-theme-protanopia .card__icon svg g,
+  #a11y-content-wrapper.a11y-theme-protanopia .card__arrow svg path,
+  #a11y-content-wrapper.a11y-theme-protanopia .card__arrow svg g,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__icon svg path,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__icon svg g,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__arrow svg path,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__arrow svg g,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__icon svg path,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__icon svg g,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__arrow svg path,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__arrow svg g,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__icon svg path,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__icon svg g,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__arrow svg path,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__arrow svg g,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__icon svg path,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__icon svg g,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__arrow svg path,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__arrow svg g,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__icon svg path,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__icon svg g,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__arrow svg path,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__arrow svg g {
+    fill: var(--brand-c-secondary) !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-protanopia .card__icon-wrapper,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__icon-wrapper,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__icon-wrapper,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__icon-wrapper,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__icon-wrapper,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__icon-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  #a11y-content-wrapper.a11y-theme-protanopia .card__badge,
+  #a11y-content-wrapper.a11y-cvd-protanopia .card__badge,
+  #a11y-content-wrapper.a11y-theme-deuteranopia .card__badge,
+  #a11y-content-wrapper.a11y-cvd-deuteranopia .card__badge,
+  #a11y-content-wrapper.a11y-theme-tritanopia .card__badge,
+  #a11y-content-wrapper.a11y-cvd-tritanopia .card__badge {
+    background: color-mix(in oklch, var(--brand-c-secondary) 15%, transparent) !important;
+    color: var(--brand-c-text) !important;
+    border: 1px solid color-mix(in oklch, var(--brand-c-secondary) 30%, transparent) !important;
+  }
+
+
+  /* ---- PLAIN MODE OVERRIDES ---- */
+
+  #a11y-content-wrapper.plain .card__button {
+    background: var(--brand-c-primary) !important;
+    color: var(--color-White) !important;
+    border: 1px solid var(--brand-c-primary) !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  #a11y-content-wrapper.plain[class*="a11y-"] .card__button {
+    background: var(--brand-c-primary) !important;
+    color: var(--color-White) !important;
+    border: 1px solid var(--brand-c-primary) !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+}

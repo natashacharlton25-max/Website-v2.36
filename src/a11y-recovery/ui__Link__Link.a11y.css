@@ -1,0 +1,134 @@
+/**
+ * Link — a11y.css
+ *
+ * This is THE central definition for how links appear in each a11y mode.
+ * Footer and other components no longer need their own link highlight rules.
+ *
+ * HL:  Inline variants get underline. Glass gets outline.
+ * RM:  Kill all transitions and animations.
+ * TO:  Strip glass effects, all links become plain underlined text.
+ */
+
+@layer a11y.highlight-links {
+
+  .a11y-highlight-links {
+
+    /* Inline variants — visible underline */
+    & .link--default,
+    & .link--underline,
+    & .link--ghost {
+      color: var(--brand-c-text);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--brand-c-primary);
+      text-decoration-thickness: 2px;
+    }
+
+    & .link--default:hover,
+    & .link--underline:hover,
+    & .link--ghost:hover {
+      color: var(--brand-c-text-dark);
+      text-decoration-thickness: 3px;
+    }
+
+    /* Kill animated underline — real underline replaces it */
+    & .link--underline::after {
+      display: none;
+    }
+
+    /* Glass variant — outline instead of underline */
+    & .link--glass {
+      color: var(--brand-c-text);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--brand-c-primary);
+      padding: var(--space-sm) var(--space-xl);
+    }
+
+    & .link--glass:hover {
+      color: var(--brand-c-text-dark);
+      text-decoration-thickness: 2px;
+    }
+  }
+
+}
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    & .link {
+      transition: none;
+    }
+
+    /* Kill animated underline expansion */
+    & .link--underline::after {
+      transition: none;
+    }
+
+    /* Glass — immediate state changes */
+    & .link--glass {
+      transition: none;
+    }
+  }
+
+}
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    /* All links become plain underlined text */
+    & .link {
+      color: var(--brand-c-primary);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-align: left;
+      text-transform: none;
+      letter-spacing: normal;
+      font-weight: normal;
+    }
+
+    /* Strip glass effects */
+    & .link--glass {
+      display: inline;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      line-height: inherit;
+    }
+
+    /* Strip animated underline — real underline replaces it */
+    & .link--underline::after {
+      display: none;
+    }
+
+    /* Strip uppercase */
+    & .link--uppercase {
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    /* Strip weight overrides */
+    & .link--weight-normal,
+    & .link--weight-medium,
+    & .link--weight-semibold,
+    & .link--weight-bold,
+    & .link--weight-extrabold {
+      font-weight: normal;
+    }
+
+    /* Strip colour overrides — all links same */
+    & .link--color-primary,
+    & .link--color-primary-dark,
+    & .link--color-secondary,
+    & .link--color-text,
+    & .link--color-text-light {
+      color: var(--brand-c-primary);
+    }
+  }
+
+}

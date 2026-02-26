@@ -1,0 +1,257 @@
+/**
+ * Button — a11y.css
+ *
+ * Both reduce-motion and text-only → plain outline button.
+ * Border-colour change on hover, nothing else.
+ * All effects, animations, pseudo-elements, JS-driven transforms stripped.
+ *
+ * High-contrast: visible borders on all buttons.
+ * Highlight-links: outline ring on link-buttons.
+ */
+
+/* ==========================================================
+   REDUCE MOTION — outline button, no animations
+   ========================================================== */
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    & .btn {
+      background: transparent;
+      color: var(--_btn-brand-dark);
+      border: 2px solid var(--_btn-brand);
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      filter: none;
+      transition: none;
+      animation: none;
+      transform: none;
+      clip-path: none;
+      max-width: none;
+    }
+
+    & .btn:hover {
+      background: transparent;
+      color: var(--_btn-brand-dark);
+      border-color: var(--_btn-brand-dark);
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
+    & .btn:active {
+      background: transparent;
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
+    /* Kill ALL pseudo-element effects */
+    & .btn::before,
+    & .btn::after {
+      display: none;
+    }
+
+    /* Icon-only — hide empty label so icon centres */
+    & .btn--icon-only .btn__label {
+      display: none;
+    }
+
+    /* Icon-only — force centering */
+    & .btn--icon-only {
+      justify-content: center;
+    }
+
+    /* Kill draw overlays + segments */
+    & .icon-draw-overlay,
+    & .icon-draw-segment {
+      display: none;
+    }
+
+    /* Expand effect — reset to normal button */
+    & .btn--expand {
+      padding: var(--space-md) var(--space-lg);
+    }
+
+    & .btn--expand .btn__icon {
+      position: static;
+      transform: none;
+    }
+
+    & .btn--expand .btn__label {
+      position: static;
+      color: inherit;
+    }
+
+    /* Underline effect — restore normal button shape */
+    & .btn--underline {
+      padding: var(--space-md) var(--space-lg);
+      border-radius: var(--radius-md);
+    }
+
+    /* Dropdown — no transition */
+    & .dropdown-menu {
+      transition: none;
+    }
+
+    & .btn__chevron {
+      transition: none;
+    }
+  }
+
+}
+
+/* ==========================================================
+   TEXT-ONLY — outline button, no decorations
+   ========================================================== */
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    & .btn {
+      background: transparent;
+      color: var(--_btn-brand-dark);
+      border: 2px solid var(--_btn-brand);
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      filter: none;
+      transition: none;
+      animation: none;
+      transform: none;
+      clip-path: none;
+      max-width: none;
+    }
+
+    & .btn:hover {
+      background: transparent;
+      color: var(--_btn-brand-dark);
+      border-color: var(--_btn-brand-dark);
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
+    & .btn:active {
+      background: transparent;
+      transform: none;
+      box-shadow: none;
+      filter: none;
+    }
+
+    /* Kill ALL pseudo-element effects */
+    & .btn::before,
+    & .btn::after {
+      display: none;
+    }
+
+    /* Kill rainbow-border wrapper */
+    & .btn-rainbow-wrap::before {
+      display: none;
+    }
+
+    & .btn-rainbow-wrap {
+      padding: 0;
+    }
+
+    /* Icon-only — hide empty label so icon centres */
+    & .btn--icon-only .btn__label {
+      display: none;
+    }
+
+    /* Icon-only — force centering */
+    & .btn--icon-only {
+      justify-content: center;
+    }
+
+    /* Kill draw overlays + segments */
+    & .icon-draw-overlay,
+    & .icon-draw-segment {
+      display: none;
+    }
+
+    /* Expand effect — reset to normal button */
+    & .btn--expand {
+      padding: var(--space-md) var(--space-lg);
+    }
+
+    & .btn--expand .btn__icon {
+      position: static;
+      transform: none;
+    }
+
+    & .btn--expand .btn__label {
+      position: static;
+      color: inherit;
+    }
+
+    /* Underline effect — restore normal button shape */
+    & .btn--underline {
+      padding: var(--space-md) var(--space-lg);
+      border-radius: var(--radius-md);
+    }
+  }
+
+}
+
+/* ==========================================================
+   HIGH CONTRAST — visible borders
+   ========================================================== */
+
+@layer a11y.high-contrast {
+
+  .a11y-high-contrast {
+
+    & .btn {
+      border: var(--border-width-2) solid currentColor;
+    }
+
+    & .btn--fx-tray-3d {
+      box-shadow: none;
+      text-shadow: none;
+    }
+
+    & .btn-rainbow-wrap::before {
+      display: none;
+    }
+
+    & .btn-rainbow-wrap .btn {
+      border: var(--border-width-2) solid currentColor;
+    }
+
+    & .btn--fx-glow:hover {
+      box-shadow: none;
+      outline: var(--border-width-2) solid currentColor;
+      outline-offset: 2px;
+    }
+  }
+
+}
+
+/* ==========================================================
+   HIGHLIGHT LINKS — outline ring on link-buttons
+   ========================================================== */
+
+@layer a11y.highlight-links {
+
+  .a11y-highlight-links {
+
+    & .btn {
+      outline: 2px solid var(--brand-c-primary);
+      outline-offset: 2px;
+    }
+
+    & .btn .btn__label {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    & .btn:hover {
+      outline-color: var(--brand-c-primary-dark);
+    }
+  }
+
+}
