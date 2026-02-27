@@ -37,6 +37,11 @@ export default defineConfig({
   vite: {
     optimizeDeps: {
       include: ['isotope-layout', 'imagesloaded']
+    },
+    server: {
+      watch: {
+        ignored: ['**/public/Icons/SVGs Flat/**', '**/public/Icons/SVGs/**', '**/public/Icons/PNGs/**']
+      }
     }
   }
 });
