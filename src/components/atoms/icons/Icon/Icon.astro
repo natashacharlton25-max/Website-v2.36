@@ -1,0 +1,236 @@
+---
+/**
+ * Icon component — API-backed, multi-brand aware.
+ *
+ * Fetches SVG icons from the Asset Library API at build time.
+ * Brand config determines the default icon weight (fill/duotone/regular).
+ * All SVG transforms (stroke, gradient, draw, morph) happen server-side
+ * on the raw markup before inlining.
+ *
+ * Usage:
+ *   <Icon name="heart" />                          → resolves to heart-{brandWeight}
+ *   <Icon name="heart-fill" />                     → explicit weight override
+ *   <Icon name="heart" weight="duotone" />         → explicit weight override
+ *   <Icon name="heart" size={20} color="var(--brand-c-primary)" />
+ *   <Icon name="heart" gradient="warm" />
+ *   <Icon name="heart" draw drawOnScroll />
+ *   <Icon name="heart" morphTo="star" />
+ *
+ * Props:
+ *   name      — Icon base name or full slug (e.g. "heart" or "heart-fill")
+ *   weight    — Override weight: 'fill' | 'duotone' | 'regular' | 'bold' | 'thin' | 'light'
+ *   size      — Icon size in pixels (default: 24)
+ *   color     — CSS color value or variable
+ *   shadow    — Drop shadow: 'sm' | 'md' | 'lg'
+ *   glow      — Coloured glow: 'sm' | 'md' | 'lg' | 'secondary' | 'white'
+ *   gradient  — Gradient fill: 'primary' | 'secondary' | 'warm' | 'cool'
+ *   spin      — Continuous rotation
+ *   pulse     — Scale pulse for attention
+ *   bounce    — Subtle bounce indicator
+ *   stroke    — Line-art mode
+ *   draw      — DrawSVG animation: true or variant name
+ *   drawOnScroll / drawScrub / drawColor — Draw animation options
+ *   morphTo   — Target icon name for MorphSVG on hover
+ *   morphColor — Fill color for morph target state
+ *   class     — Additional CSS classes
+ */
+
+// ─── Brand config ───────────────────────────────────────
+// TODO: Import from your brand config system.
+// For now, reads from an environment variable or defaults to 'fill'.
+// Replace this with your actual brand config import when ready.
+const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
+const DEFAULT_WEIGHT = import.meta.env.ICON_WEIGHT || 'fill';
+
+// ─── Types ──────────────────────────────────────────────
+
+interface Props {
+  name: string;
+  weight?: 'fill' | 'duotone' | 'regular' | 'bold' | 'thin' | 'light';
+  size?: number;
+  class?: string;
+  color?: string;
+  shadow?: 'sm' | 'md' | 'lg';
+  glow?: 'sm' | 'md' | 'lg' | 'secondary' | 'white';
+  gradient?: 'primary' | 'secondary' | 'warm' | 'cool';
+  spin?: boolean;
+  pulse?: boolean;
+  bounce?: boolean;
+  stroke?: boolean;
+  draw?: boolean | 'draw' | 'drawcenter' | 'chachaslide' | 'flashgordon' | 'rainbowchase' | 'pulse';
+  drawOnScroll?: boolean;
+  drawScrub?: boolean;
+  drawColor?: string;
+  morphTo?: string;
+  morphColor?: string;
+}
+
+const {
+  name, weight, size = 24, class: className = '', color,
+  shadow, glow, gradient, spin, pulse, bounce, stroke,
+  draw, drawOnScroll, drawScrub, drawColor,
+  morphTo, morphColor,
+} = Astro.props;
+
+// ─── Weight suffixes (for slug detection) ───────────────
+
+const WEIGHTS = ['fill', 'duotone', 'regular', 'bold', 'thin', 'light'];
+
+function hasWeightSuffix(slug: string): boolean {
+  return WEIGHTS.some(w => slug.endsWith(`-${w}`));
+}
+
+function resolveSlug(iconName: string, weightOverride?: string): string {
+  // Strip legacy 'ph:' prefix
+  let resolved = iconName.startsWith('ph:') ? iconName.slice(3) : iconName;
+
+  // Strip folder prefix — "interface/users-fill" → "users-fill"
+  if (resolved.includes('/')) {
+    resolved = resolved.split('/').pop()!;
+  }
+
+  // If the name already has a weight suffix, use it as-is
+  if (hasWeightSuffix(resolved)) return resolved;
+
+  // Append weight: explicit override → brand default
+  const w = weightOverride || DEFAULT_WEIGHT;
+  return `${resolved}-${w}`;
+}
+
+// ─── Fetch icon from Asset Library API ──────────────────
+
+async function fetchIcon(slug: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${ASSET_API_URL}/v1/assets/${slug}`);
+    if (!res.ok) return null;
+    return await res.text();
+  } catch {
+    return null;
+  }
+}
+
+// ─── Resolve primary icon ───────────────────────────────
+
+const slug = resolveSlug(name, weight);
+let iconContent = await fetchIcon(slug);
+
+// Fallback: if weight variant doesn't exist, try fill
+if (!iconContent && !name.endsWith('-fill') && weight !== 'fill') {
+  const fillSlug = resolveSlug(name, 'fill');
+  iconContent = await fetchIcon(fillSlug);
+}
+
+// ─── Resolve morph target ───────────────────────────────
+
+let morphTargetContent: string | null = null;
+if (morphTo && !draw) {
+  const morphSlug = resolveSlug(morphTo, weight);
+  morphTargetContent = await fetchIcon(morphSlug);
+
+  // Fallback to fill weight for morph target too
+  if (!morphTargetContent && weight !== 'fill') {
+    const morphFillSlug = resolveSlug(morphTo, 'fill');
+    morphTargetContent = await fetchIcon(morphFillSlug);
+  }
+}
+
+// ─── SVG Transforms ─────────────────────────────────────
+// These operate on raw SVG strings — identical logic to the old component.
+
+// Draw mode: render as stroke outline
+const needsStrokeConversion = !!draw && !stroke;
+
+if (needsStrokeConversion && iconContent) {
+  iconContent = iconContent.replace(/<svg([^>]*)>/, (_match: string, attrs: string) => {
+    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
+    return `<svg${cleaned} fill="none">`;
+  });
+
+  iconContent = iconContent.replace(/<rect([^/]*)\/>/g, '<rect$1 fill="none" stroke="none"/>');
+
+  const drawStrokeWidth = 10;
+  const shapeRe = /<(path|circle|polygon|polyline)([^/]*)\/>/g;
+  iconContent = iconContent.replace(shapeRe, (_match: string, tag: string, attrs: string) => {
+    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
+    return `<${tag}${cleaned} fill="none" stroke="currentColor" stroke-width="${drawStrokeWidth}"/>`;
+  });
+}
+
+// Gradient: inject SVG <linearGradient> and swap fill to url(#id)
+if (gradient && iconContent && !draw) {
+  const gradientId = `icon-grad-${Math.random().toString(36).slice(2, 8)}`;
+
+  const gradientStops: Record<string, string> = {
+    primary: `<stop offset="0%" stop-color="var(--brand-c-primary)"/><stop offset="100%" stop-color="var(--brand-c-primary-dark)"/>`,
+    secondary: `<stop offset="0%" stop-color="var(--brand-c-secondary)"/><stop offset="100%" stop-color="var(--brand-c-secondary-dark)"/>`,
+    warm: `<stop offset="0%" stop-color="var(--brand-c-primary)"/><stop offset="100%" stop-color="var(--brand-c-secondary)"/>`,
+    cool: `<stop offset="0%" stop-color="var(--brand-c-primary-light)"/><stop offset="100%" stop-color="var(--brand-c-primary-dark)"/>`,
+  };
+
+  const gradientDef = `<defs><linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">${gradientStops[gradient]}</linearGradient></defs>`;
+
+  iconContent = iconContent.replace(/<svg([^>]*)>/, `<svg$1>${gradientDef}`);
+  iconContent = iconContent
+    .replace(/fill="currentColor"/g, `fill="url(#${gradientId})"`)
+    .replace(/fill="CurrentColor"/g, `fill="url(#${gradientId})"`);
+  iconContent = iconContent.replace(/<path(?![^>]*fill=)/g, `<path fill="url(#${gradientId})"`);
+}
+
+// Stroke: line-art mode
+if (stroke && !draw && iconContent) {
+  iconContent = iconContent.replace(/<svg([^>]*)>/, (_match: string, attrs: string) => {
+    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
+    return `<svg${cleaned} fill="none">`;
+  });
+  iconContent = iconContent.replace(/<rect([^/]*)\/>/g, '<rect$1 fill="none" stroke="none"/>');
+
+  const strokeWidth = 16;
+  const shapeRe = /<(path|circle|polygon|polyline)([^/]*)\/>/g;
+  iconContent = iconContent.replace(shapeRe, (_match: string, tag: string, attrs: string) => {
+    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
+    return `<${tag}${cleaned} fill="none" stroke="currentColor" stroke-width="${strokeWidth}"/>`;
+  });
+}
+
+// ─── Fallback ───────────────────────────────────────────
+
+const fallbackIcon = `<svg viewBox="0 0 256 256" width="${size}" height="${size}" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.2"/><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-width="16"/></svg>`;
+
+// ─── Build classes and data attrs ───────────────────────
+
+const drawVariant = typeof draw === 'string' ? draw : 'draw';
+
+const effectClasses = [
+  shadow ? `icon--shadow-${shadow}` : '',
+  glow ? `icon--glow-${glow}` : '',
+  gradient ? 'icon--has-gradient' : '',
+  spin ? 'icon--spin' : '',
+  pulse ? 'icon--pulse' : '',
+  bounce ? 'icon--bounce' : '',
+  stroke || draw ? 'icon--stroke' : '',
+  draw ? 'icon--draw' : '',
+  morphTo ? 'icon--morph' : '',
+].filter(Boolean).join(' ');
+
+const dataAttrs: Record<string, string | undefined> = {};
+
+if (draw) {
+  dataAttrs['data-icon-draw'] = drawVariant;
+  if (drawOnScroll) dataAttrs['data-icon-draw-scroll'] = 'true';
+  if (drawScrub) dataAttrs['data-icon-draw-scrub'] = 'true';
+  if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
+}
+
+if (morphTo && morphTargetContent) {
+  dataAttrs['data-icon-morph'] = 'true';
+  dataAttrs['data-icon-morph-target'] = morphTargetContent;
+  if (morphColor) dataAttrs['data-icon-morph-color'] = morphColor;
+}
+---
+
+<span
+  class={`icon ${effectClasses} ${className}`}
+  style={`width: ${size}px; height: ${size}px;${color && !gradient ? ` color: ${color};` : ''}`}
+  set:html={iconContent || fallbackIcon}
+  {...dataAttrs}
+/>
