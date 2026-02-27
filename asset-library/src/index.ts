@@ -1,32 +1,38 @@
 /**
  * Asset Library Worker — Entry point and router.
  *
+ * Pre-launch: ALL routes require Bearer token (global auth gate).
+ * Health check (/v1/health) is the only open endpoint.
+ * To open reads for go-live, remove the global auth gate block.
+ *
  * Routes:
- *   GET    /v1/assets              — list/search assets
- *   GET    /v1/assets/:slug        — get asset content
- *   GET    /v1/assets/:slug/meta   — get asset metadata
- *   GET    /v1/assets/:slug/versions — version history
- *   GET    /v1/assets/:slug/usage  — usage history
+ *   GET    /v1/health              — health check (open)
+ *   GET    /v1/assets              — list/search assets (auth)
+ *   GET    /v1/assets/:slug        — get asset content (auth)
+ *   GET    /v1/assets/:slug/meta   — get asset metadata (auth)
+ *   GET    /v1/assets/:slug/versions — version history (auth)
+ *   GET    /v1/assets/:slug/usage  — usage history (auth)
  *   POST   /v1/assets              — create asset (auth)
  *   PUT    /v1/assets/:slug        — update asset / new version (auth)
  *   PATCH  /v1/assets/:slug        — update metadata only (auth)
  *   DELETE /v1/assets/:slug        — archive asset (auth)
  *   POST   /v1/assets/:slug/rollback — rollback to version (auth)
  *   POST   /v1/assets/bulk         — bulk import (auth)
- *   POST   /v1/assets/verify       — integrity check
- *   GET    /v1/tags                — list tags
+ *   POST   /v1/assets/verify       — integrity check (auth)
+ *   GET    /v1/tags                — list tags (auth)
  *   POST   /v1/tags                — create tag (auth)
- *   GET    /v1/brands/:brand/assets — brand assets
+ *   GET    /v1/brands/:brand/assets — brand assets (auth)
  *   POST   /v1/brands/:brand/assets — assign brand asset (auth)
- *   GET    /v1/licenses            — list licenses
+ *   GET    /v1/licenses            — list licenses (auth)
  *   POST   /v1/usage               — log usage event (auth)
  *   POST   /v1/usage/batch         — log usage batch (auth)
- *   GET    /v1/usage/orphans       — unused assets
+ *   GET    /v1/usage/orphans       — unused assets (auth)
  */
 
 import type { Env } from './types';
 import { cors } from './lib/response';
 import { jsonError } from './lib/response';
+import { requireAuth } from './lib/auth';
 import { handleAssetGet, handleAssetList, handleAssetCreate, handleAssetUpdate, handleAssetPatch, handleAssetDelete } from './routes/assets';
 import { handleAssetMeta } from './routes/assets';
 import { handleVersionList, handleRollback } from './routes/versions';
@@ -47,6 +53,18 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     const method = request.method;
+
+    // Health check — open (no auth) for uptime monitoring
+    if (path === '/v1/health') {
+      return new Response(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ─── Global auth gate (pre-launch lockdown) ─────
+    // ALL routes require Bearer token. Remove this block to open reads when going live.
+    const authErr = requireAuth(request, env);
+    if (authErr) return authErr;
 
     try {
       // ─── Route matching ─────────────────────────────
@@ -142,13 +160,6 @@ export default {
       if (path === '/v1/licenses') {
         if (method === 'GET') return handleLicenseList(request, env);
         return jsonError(405, 'Method not allowed');
-      }
-
-      // Health check
-      if (path === '/v1/health') {
-        return new Response(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }), {
-          headers: { 'Content-Type': 'application/json' },
-        });
       }
 
       return jsonError(404, `No route: ${method} ${path}`);

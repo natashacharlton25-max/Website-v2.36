@@ -248,7 +248,7 @@ async function enrichTags(entries: CuratedEntry[]): Promise<{ enriched: number; 
 
   for (const entry of entries) {
     // Check if asset exists
-    const metaRes = await fetch(`${API_URL}/v1/assets/${entry.slug}/meta`);
+    const metaRes = await apiFetch(`/v1/assets/${entry.slug}/meta`);
 
     if (metaRes.ok) {
       // Asset exists — PATCH to add tags
@@ -316,9 +316,8 @@ async function verifySample(entries: FlatEntry[], sampleSize = 50): Promise<void
   for (const entry of sample) {
     const localHash = 'sha256:' + crypto.createHash('sha256').update(entry.content, 'utf-8').digest('hex');
 
-    const res = await fetch(`${API_URL}/v1/assets/verify`, {
+    const res = await apiFetch('/v1/assets/verify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ slug: entry.slug, hash: localHash }),
     });
 

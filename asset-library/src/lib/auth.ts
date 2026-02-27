@@ -1,6 +1,7 @@
 /**
  * Auth — Bearer token validation.
- * Reads are public (cached at edge). Writes require auth.
+ * Pre-launch: global gate requires token on ALL routes.
+ * Go-live: remove global gate in index.ts to open reads.
  */
 
 import type { Env } from '../types';

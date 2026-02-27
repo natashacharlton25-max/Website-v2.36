@@ -40,6 +40,7 @@
 // For now, reads from an environment variable or defaults to 'fill'.
 // Replace this with your actual brand config import when ready.
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
+const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
 const DEFAULT_WEIGHT = import.meta.env.ICON_WEIGHT || 'fill';
 
 // ─── Types ──────────────────────────────────────────────
@@ -101,7 +102,11 @@ function resolveSlug(iconName: string, weightOverride?: string): string {
 
 async function fetchIcon(slug: string): Promise<string | null> {
   try {
-    const res = await fetch(`${ASSET_API_URL}/v1/assets/${slug}`);
+    const headers: Record<string, string> = {};
+    if (ASSET_API_TOKEN) {
+      headers['Authorization'] = `Bearer ${ASSET_API_TOKEN}`;
+    }
+    const res = await fetch(`${ASSET_API_URL}/v1/assets/${slug}`, { headers });
     if (!res.ok) return null;
     return await res.text();
   } catch {

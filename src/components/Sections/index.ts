@@ -10,7 +10,7 @@ export { default as CalloutSection } from '../molecules/sections/CalloutSection.
 // Site-wide sections
 export { default as CTASection } from '../organisms/sections/CTASection.astro';
 export { default as HeroMorphAnimation } from '../organisms/sections/HeroMorphAnimation.astro';
-export { default as HeroSection } from '../organisms/sections/HeroSection.astro';
+export { default as HeroSection } from '../organisms/sections/HeroSection/HeroSection.astro';
 export { default as ImageTextSection } from '../organisms/sections/ImageTextSection.astro';
 
 export { default as PhilosophyFlipCardsSection } from '../organisms/sections/PhilosophyFlipCardsSection.astro';
@@ -40,7 +40,7 @@ export type { Props as CalloutProps } from '../molecules/sections/CalloutSection
 // Organism section types
 export type { Props as CTAProps } from '../organisms/sections/CTASection.astro';
 export type { Props as HeroMorphProps } from '../organisms/sections/HeroMorphAnimation.astro';
-export type { Props as HeroProps } from '../organisms/sections/HeroSection.astro';
+export type { Props as HeroProps } from '../organisms/sections/HeroSection/HeroSection.astro';
 export type { Props as ImageTextProps } from '../organisms/sections/ImageTextSection.astro';
 
 export type { Props as PhilosophyFlipCardsProps } from '../organisms/sections/PhilosophyFlipCardsSection.astro';

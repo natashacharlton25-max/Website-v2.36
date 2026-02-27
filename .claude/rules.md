@@ -1,6 +1,5 @@
 # Project Rules
 
-
 ## Scope Management
 - This is a large multi-brand Astro project with 100+ style files
 - For CSS fixes: ONLY read the specific file(s) relevant to the fix

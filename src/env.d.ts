@@ -10,6 +10,9 @@ interface ImportMetaEnv {
   readonly STRIPE_SECRET_KEY: string;
   readonly PUBLIC_STRIPE_PUBLISHABLE_KEY: string;
   readonly STREAMLINE_API_KEY: string;
+  readonly ASSET_API_URL: string;
+  readonly ASSET_API_TOKEN: string;
+  readonly ICON_WEIGHT: string;
 }
 
 interface ImportMeta {

@@ -1,0 +1,38 @@
+{
+  "component": "Icon",
+  "category": "atoms/icons",
+  "renders": { "full": "Icon.astro", "reduced": "Icon.astro", "textonly": "Icon.astro" },
+  "notes": "API-backed icon atom. Fetches SVG from Asset Library Worker at build/render time. Weight resolved via brand config or explicit override. All SVG transforms (stroke, gradient, draw, morph) happen server-side before inlining.",
+
+  "props": {
+    "content": {
+      "_description": "What icon to render",
+      "name":   { "type": "string",  "required": true, "description": "Icon base name or full slug (e.g. 'heart' or 'heart-fill'). Folder prefixes and ph: prefix stripped automatically." },
+      "weight": { "type": "string",  "required": false, "enum": ["fill", "duotone", "regular", "bold", "thin", "light"], "description": "Override weight. Defaults to brand config (ICON_WEIGHT env var, usually 'fill')." }
+    },
+
+    "visual": {
+      "_description": "How the icon looks",
+      "size":     { "type": "number",  "required": false, "default": 24, "description": "Icon size in pixels. Sets width and height on wrapper span." },
+      "color":    { "type": "string",  "required": false, "description": "CSS color value or variable. Skipped when gradient is set." },
+      "shadow":   { "type": "string",  "required": false, "enum": ["sm", "md", "lg"], "description": "Drop shadow via CSS filter." },
+      "glow":     { "type": "string",  "required": false, "enum": ["sm", "md", "lg", "secondary", "white"], "description": "Coloured glow via CSS filter." },
+      "gradient": { "type": "string",  "required": false, "enum": ["primary", "secondary", "warm", "cool"], "description": "Gradient fill injected as SVG linearGradient. Mutually exclusive with color." },
+      "stroke":   { "type": "boolean", "required": false, "description": "Line-art mode. Strips fills and adds stroke to all shapes." },
+      "class":    { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes on wrapper span." }
+    },
+
+    "animation": {
+      "_description": "Motion behaviour (all gated by a11y reduce-motion)",
+      "spin":         { "type": "boolean", "required": false, "description": "Continuous rotation on hover." },
+      "pulse":        { "type": "boolean", "required": false, "description": "Scale pulse on hover for attention." },
+      "bounce":       { "type": "boolean", "required": false, "description": "Subtle bounce on hover." },
+      "draw":         { "type": ["boolean", "string"], "required": false, "enum": [true, "draw", "drawcenter", "chachaslide", "flashgordon", "rainbowchase", "pulse"], "description": "DrawSVG animation. Converts fills to strokes for path drawing effect." },
+      "drawOnScroll": { "type": "boolean", "required": false, "description": "Trigger draw animation on scroll into view." },
+      "drawScrub":    { "type": "boolean", "required": false, "description": "Scrub draw animation with scroll position." },
+      "drawColor":    { "type": "string",  "required": false, "description": "Stroke colour for draw animation." },
+      "morphTo":      { "type": "string",  "required": false, "description": "Target icon name for MorphSVG on hover. Fetches target SVG from API." },
+      "morphColor":   { "type": "string",  "required": false, "description": "Fill colour for morph target state." }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 /** Cloudflare Worker environment bindings */
 export interface Env {
   DB: D1Database;
-  STORAGE: R2Bucket;
+  STORAGE?: R2Bucket;
   API_TOKEN: string;
 }
 
