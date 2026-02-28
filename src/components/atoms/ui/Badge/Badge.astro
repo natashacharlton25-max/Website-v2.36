@@ -9,12 +9,10 @@
  * @param color - 'primary' (default), 'secondary', 'earth', 'forest', 'dusk', 'neutral', 'mist'
  * @param variant - 'fill' (default), 'outline', 'glass', 'glass-light', 'glass-dark'
  * @param shape - 'rounded' (default), 'pill', 'squared'
- * @param icon - Optional Phosphor icon name e.g. 'shield-check-fill'
- * @param iconCollection - Icon folder: 'badges' (default)
+ * @param icon - Optional Phosphor icon slug e.g. 'shield-check-fill'
  * @param uppercase - Uppercase text (default true)
  */
-// TODO: update to barrel import once Icon/D1 built
-import Icon from '../../icons/Icon/Icon.astro';
+import { Icon } from '../../icons/Icon';
 
 interface Props {
   label: string;
@@ -22,7 +20,6 @@ interface Props {
   variant?: 'fill' | 'outline' | 'glass' | 'glass-light' | 'glass-dark';
   shape?: 'rounded' | 'pill' | 'squared';
   icon?: string;
-  iconCollection?: string;
   uppercase?: boolean;
   class?: string;
 }
@@ -33,7 +30,6 @@ const {
   variant = 'fill',
   shape = 'rounded',
   icon,
-  iconCollection = 'badges',
   uppercase = true,
   class: className,
 } = Astro.props;
@@ -52,7 +48,7 @@ const {
   ]}
 >
   {icon && (
-    <Icon name={`${iconCollection}/${icon}`} class="badge__icon" aria-hidden="true" />
+    <Icon name={icon} class="badge__icon" aria-hidden="true" />
   )}
   <span class="badge__label">{label}</span>
 </span>

@@ -1,6 +1,5 @@
 /**
  * Badge — base styles
- * @layer components
  *
  * One size. Zone + brand tokens for colour.
  *
@@ -11,170 +10,151 @@
  *
  * Colour variants swap tokens: primary (default), secondary, earth, forest, dusk, neutral, mist
  * Style variants: fill (default), outline, glass, glass-light, glass-dark
- * Shapes: rounded, pill
+ * Shapes: rounded, pill, squared
  */
 
-@layer components {
+/* ========== BASE + TOKENS ========== */
 
-  /* ========== BASE + TOKENS ========== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin: 0;
+  overflow-wrap: normal;
 
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-sm);
-    padding: var(--space-sm);
-    border-radius: var(--radius-xs);
-    font-size: var(--text-sm);
-    font-weight: var(--font-semibold);
-    line-height: 1;
-    white-space: nowrap;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    margin: 0;
-    overflow-wrap: normal;
+  /* Colour tokens — default: primary */
+  --_badge-bg: var(--zone-bg-primary-soft);
+  --_badge-text: var(--zone-pattern-primary);
+  --_badge-border: var(--zone-bg-primary-mid);
+}
 
-    /* Colour tokens — default: primary */
-    --_badge-bg: var(--zone-bg-primary-soft);
-    --_badge-text: var(--zone-pattern-primary);
-    --_badge-border: var(--zone-bg-primary-mid);
-  }
+.badge__icon {
+  width: 1.1em;
+  height: 1.1em;
+  flex-shrink: 0;
+}
 
-  .badge__icon {
-    width: 1.1em;
-    height: 1.1em;
-    flex-shrink: 0;
-  }
+.badge__label {
+  font: inherit;
+  color: inherit;
+}
 
-  .badge__label {
-    font: inherit;
-    color: inherit;
-  }
+/* ========== COLOUR VARIANTS ========== */
 
-  /* ========== COLOUR VARIANTS ========== */
+.badge--c-secondary {
+  --_badge-bg: var(--zone-bg-secondary-soft);
+  --_badge-text: var(--zone-pattern-secondary);
+  --_badge-border: var(--zone-bg-secondary-mid);
+}
 
-  .badge--c-secondary {
-    --_badge-bg: var(--zone-bg-secondary-soft);
-    --_badge-text: var(--zone-pattern-secondary);
-    --_badge-border: var(--zone-bg-secondary-mid);
-  }
+.badge--c-earth {
+  --_badge-bg: var(--zone-bg-earth-soft);
+  --_badge-text: var(--zone-pattern-earth);
+  --_badge-border: var(--zone-bg-earth-mid);
+}
 
-  .badge--c-earth {
-    --_badge-bg: var(--zone-bg-earth-soft);
-    --_badge-text: var(--zone-pattern-earth);
-    --_badge-border: var(--zone-bg-earth-mid);
-  }
+.badge--c-forest {
+  --_badge-bg: var(--zone-bg-forest-soft);
+  --_badge-text: var(--zone-pattern-forest);
+  --_badge-border: var(--zone-bg-forest-mid);
+}
 
-  .badge--c-forest {
-    --_badge-bg: var(--zone-bg-forest-soft);
-    --_badge-text: var(--zone-pattern-forest);
-    --_badge-border: var(--zone-bg-forest-mid);
-  }
+.badge--c-dusk {
+  --_badge-bg: var(--zone-bg-dusk-soft);
+  --_badge-text: var(--zone-pattern-dusk);
+  --_badge-border: var(--zone-bg-dusk-mid);
+}
 
-  .badge--c-dusk {
-    --_badge-bg: var(--zone-bg-dusk-soft);
-    --_badge-text: var(--zone-pattern-dusk);
-    --_badge-border: var(--zone-bg-dusk-mid);
-  }
+.badge--c-neutral {
+  --_badge-bg: var(--zone-bg-neutral-soft);
+  --_badge-text: var(--zone-pattern-neutral);
+  --_badge-border: var(--zone-bg-neutral-mid);
+}
 
-  .badge--c-neutral {
-    --_badge-bg: var(--zone-bg-neutral-soft);
-    --_badge-text: var(--zone-pattern-neutral);
-    --_badge-border: var(--zone-bg-neutral-mid);
-  }
+.badge--c-mist {
+  --_badge-bg: var(--zone-bg-mist);
+  --_badge-text: var(--zone-pattern-mist);
+  --_badge-border: var(--zone-bg-mist-deep);
+}
 
-  .badge--c-mist {
-    --_badge-bg: var(--zone-bg-mist);
-    --_badge-text: var(--zone-pattern-mist);
-    --_badge-border: var(--zone-bg-mist-deep);
-  }
+/* ========== SHAPE ========== */
 
-  /* ========== SHAPE ========== */
+.badge--rounded {
+  border-radius: var(--radius-md);
+}
 
-  .badge--rounded {
-    border-radius: var(--radius-md);
-  }
+.badge--pill {
+  border-radius: var(--radius-full);
+  padding: var(--space-sm) var(--space-lg);
+}
 
-  .badge--pill {
-    border-radius: var(--radius-full);
-    padding: var(--space-sm) var(--space-lg);
-  }
+.badge--squared {
+  border-radius: 0;
+}
 
-  .badge--squared {
-    border-radius: 0;
-  }
+/* ========== TEXT TRANSFORM ========== */
 
-  /* ========== TEXT TRANSFORM ========== */
+.badge--lowercase {
+  text-transform: none;
+}
 
-  .badge--lowercase {
-    text-transform: none;
-  }
+/* ========== VARIANT: Fill (default) ========== */
 
-  /* ========== VARIANT: Fill (default) ========== */
+.badge--fill {
+  background-color: var(--_badge-bg);
+  color: var(--_badge-text);
+}
 
-  .badge--fill {
-    background-color: var(--_badge-bg);
-    color: var(--_badge-text);
-  }
+/* ========== VARIANT: Outline ========== */
 
-  /* ========== VARIANT: Outline ========== */
+.badge--outline {
+  background: transparent;
+  border: 1.5px solid var(--_badge-border);
+  color: var(--_badge-text);
+}
 
-  .badge--outline {
-    background: transparent;
-    border: 1.5px solid var(--_badge-border);
-    color: var(--_badge-text);
-  }
+/* ========== VARIANT: Glass (light text for dark backgrounds) ========== */
 
-  /* ========== VARIANT: Glass (light text for dark backgrounds) ========== */
+.badge--glass {
+  background: color-mix(in oklch, var(--color-White) 15%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in oklch, var(--color-White) 30%, transparent);
+  color: var(--color-White);
+}
 
-  .badge--glass {
-    background: color-mix(in oklch, var(--color-White) 15%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid color-mix(in oklch, var(--color-White) 30%, transparent);
-    color: var(--color-White);
-  }
+/* ========== VARIANT: Glass Light (dark text for light backgrounds) ========== */
 
-  /* ========== VARIANT: Glass Light (dark text for light backgrounds) ========== */
+.badge--glass-light {
+  background: color-mix(in oklch, var(--color-White) 50%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in oklch, var(--color-White) 50%, transparent);
+  color: var(--brand-c-text-dark);
+}
 
-  .badge--glass-light {
-    background: color-mix(in oklch, var(--color-White) 50%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid color-mix(in oklch, var(--color-White) 50%, transparent);
-    color: var(--brand-c-text-dark);
-  }
+/* ========== VARIANT: Glass Dark (white text for dark backgrounds) ========== */
 
-  /* ========== VARIANT: Glass Dark (white text for dark backgrounds) ========== */
+.badge--glass-dark {
+  background: color-mix(in oklch, var(--color-Black) 30%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in oklch, var(--color-Black) 20%, transparent);
+  color: var(--color-White);
+}
 
-  .badge--glass-dark {
-    background: color-mix(in oklch, var(--color-Black) 30%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid color-mix(in oklch, var(--color-Black) 20%, transparent);
-    color: var(--color-White);
-  }
+/* ========== ICON-ONLY ========== */
 
-  /* ========== DARK THEMES — glow + thicker border ========== */
-
-  /* TODO: theme-audit — these selectors are dead, themes use file swap not classes.
-     Correct fix: dark/high-contrast theme file sets --_badge-text to a lighter value
-     and --_badge-border to full opacity, so glow/border rules apply via token swap. */
-  #a11y-content-wrapper:is(.a11y-theme-dark, .a11y-theme-high-contrast) .badge--fill {
-    border: 2px solid var(--_badge-border);
-    box-shadow: 0 0 8px color-mix(in oklch, var(--_badge-text) 35%, transparent);
-  }
-
-  #a11y-content-wrapper:is(.a11y-theme-dark, .a11y-theme-high-contrast) .badge--outline {
-    border-width: 2px;
-    box-shadow: 0 0 8px color-mix(in oklch, var(--_badge-text) 35%, transparent);
-  }
-
-  /* ========== ICON-ONLY ========== */
-
-  .badge--has-icon:not(:has(.badge__label)) {
-    padding: var(--space-sm);
-    aspect-ratio: 1;
-    justify-content: center;
-  }
-
+.badge--has-icon:not(:has(.badge__label)) {
+  padding: var(--space-sm);
+  aspect-ratio: 1;
+  justify-content: center;
 }

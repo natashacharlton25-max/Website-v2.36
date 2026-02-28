@@ -1,38 +1,48 @@
 {
   "component": "Heading",
   "category": "atoms/ui",
-  "renders": { "base": "Heading.astro" },
-  "notes": "Every heading on the site should go through this component. Heading.css is the single source of truth for all heading typography. Components that use headings (cards, sections) inherit from .heading and add context-specific overrides.",
-  "reducedMotion": "Divider/underline transitions killed on heading-wrap.",
+  "renders": { "full": "Heading.astro", "reduced": "Heading.astro", "textonly": "Heading.textonly.astro" },
+  "notes": "Every heading on the site should go through this component. Heading.css is the single source of truth for all heading typography.",
+
   "props": {
-    "level":          { "type": "number", "enum": [1,2,3,4,5,6], "required": true },
-    "size":           { "type": "string", "enum": ["h1","h2","h3","h4","h5","h6"], "default": "matches level" },
-    "weight":         { "type": "string", "enum": ["normal","medium","semibold","bold","extrabold"], "default": null },
-    "color":          { "type": "string", "enum": ["primary","primary-dark","secondary","text","text-light","neutral","inherit"], "default": null },
-    "family":         { "type": "string", "enum": ["heading","body","mono"], "default": null },
-    "align":          { "type": "string", "enum": ["left","center","right"], "default": null },
-    "uppercase":      { "type": "boolean", "default": false },
-    "tracking":       { "type": "string", "enum": ["normal","wide","wider"], "default": null },
-    "flush":          { "type": "boolean", "default": false },
-    "subtitle":       { "type": "string", "default": null },
-    "divider":        { "type": "string", "enum": ["left","right","both","none"], "default": null },
-    "dividerColor":   { "type": "string", "enum": ["primary","secondary","text","neutral","gradient"], "default": "primary" },
-    "dividerStyle":   { "type": "string", "enum": ["solid","dashed","dotted"], "default": "solid" },
-    "dividerEnds":    { "type": "string", "enum": ["rounded","square"], "default": "rounded" },
-    "dividerLength":  { "type": "string", "enum": ["auto","xs","sm","md","lg","xl"], "default": "auto" },
-    "variant":        { "type": "string", "enum": ["default","underline","badge","highlight","minimal"], "default": "default" },
-    "underlineStyle": { "type": "string", "enum": ["solid","gradient","dashed"], "default": "solid" },
-    "badgeColor":     { "type": "string", "enum": ["primary","secondary","neutral"], "default": "primary" },
-    "highlightColor": { "type": "string", "enum": ["primary","secondary","neutral"], "default": "primary" },
-    "image":          { "type": "string", "default": null },
-    "icon":           { "type": "string", "default": null },
-    "mediaPosition":  { "type": "string", "enum": ["left","right"], "default": "left" },
-    "mediaSize":      { "type": "string", "enum": ["sm","md","lg","auto"], "default": "auto" },
-    "iconColor":      { "type": "string", "enum": ["primary","secondary","neutral","text"], "default": "text" },
-    "iconStyle":      { "type": "string", "enum": ["contained","bare"], "default": "contained" },
-    "spacing":        { "type": "string", "enum": ["tight","normal","loose"], "default": "normal" },
-    "class":          { "type": "string" }
+    "content": {
+      "_description": "What the heading communicates",
+      "level":    { "type": "number",  "required": true, "enum": [1,2,3,4,5,6], "description": "Semantic heading level (h1-h6)." },
+      "subtitle": { "type": "string",  "required": false, "default": null, "description": "Supporting text below the heading." },
+      "icon":     { "type": "string",  "required": false, "default": null, "textonly": false, "description": "Phosphor icon slug. Decorative (aria-hidden)." },
+      "image":    { "type": "string",  "required": false, "default": null, "textonly": false, "description": "Image URL for media slot. Decorative." }
+    },
+
+    "visual": {
+      "_description": "How the heading looks",
+      "size":           { "type": "string",  "required": false, "default": "matches level", "enum": ["h1","h2","h3","h4","h5","h6"], "description": "Visual size override." },
+      "weight":         { "type": "string",  "required": false, "default": null, "enum": ["normal","medium","semibold","bold","extrabold"], "description": "Font weight override." },
+      "color":          { "type": "string",  "required": false, "default": null, "enum": ["primary","primary-dark","secondary","text","text-light","neutral","inherit"], "description": "Text colour override." },
+      "family":         { "type": "string",  "required": false, "default": null, "enum": ["heading","body","mono"], "description": "Font family override." },
+      "align":          { "type": "string",  "required": false, "default": null, "enum": ["left","center","right"], "description": "Text alignment." },
+      "tracking":       { "type": "string",  "required": false, "default": null, "enum": ["normal","wide","wider"], "description": "Letter spacing." },
+      "uppercase":      { "type": "boolean", "required": false, "default": false, "description": "Uppercase text transform." },
+      "flush":          { "type": "boolean", "required": false, "default": false, "description": "Remove bottom margin." },
+      "variant":        { "type": "string",  "required": false, "default": "default", "enum": ["default","underline","badge","highlight","minimal"], "description": "Decorated treatment style." },
+      "underlineStyle": { "type": "string",  "required": false, "default": "solid", "enum": ["solid","gradient","dashed"], "description": "Underline variant style." },
+      "badgeColor":     { "type": "string",  "required": false, "default": "primary", "enum": ["primary","secondary","neutral"], "description": "Badge variant colour." },
+      "highlightColor": { "type": "string",  "required": false, "default": "primary", "enum": ["primary","secondary","neutral"], "description": "Highlight variant colour." },
+      "divider":        { "type": "string",  "required": false, "default": null, "enum": ["left","right","both","none"], "description": "Divider bar position." },
+      "dividerColor":   { "type": "string",  "required": false, "default": "primary", "enum": ["primary","secondary","text","neutral","gradient"], "description": "Divider colour." },
+      "dividerStyle":   { "type": "string",  "required": false, "default": "solid", "enum": ["solid","dashed","dotted"], "description": "Divider pattern." },
+      "dividerEnds":    { "type": "string",  "required": false, "default": "rounded", "enum": ["rounded","square"], "description": "Divider end caps." },
+      "dividerLength":  { "type": "string",  "required": false, "default": "auto", "enum": ["auto","xs","sm","md","lg","xl"], "description": "Divider height." },
+      "mediaPosition":  { "type": "string",  "required": false, "default": "left", "enum": ["left","right"], "description": "Icon/image position." },
+      "mediaSize":      { "type": "string",  "required": false, "default": "auto", "enum": ["sm","md","lg","auto"], "description": "Media container size." },
+      "iconColor":      { "type": "string",  "required": false, "default": "text", "enum": ["primary","secondary","neutral","text"], "description": "Icon colour." },
+      "iconStyle":      { "type": "string",  "required": false, "default": "contained", "enum": ["contained","bare"], "description": "Icon container style." },
+      "spacing":        { "type": "string",  "required": false, "default": "normal", "enum": ["tight","normal","loose"], "description": "Wrapper gap size." },
+      "class":          { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "animation": {}
   },
+
   "slots": {
     "default": "Heading text content"
   }
