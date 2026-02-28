@@ -32,10 +32,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0.95);
-  width: 95vw;
-  max-width: 1600px;
-  height: 80vh;
-  max-height: 850px;
+  width: 90vw;
+  max-width: 900px;
+  max-height: 85vh;
   background: var(--brand-c-bg);
   color: var(--brand-c-text-dark);
   z-index: 10001;
@@ -109,51 +108,25 @@ html body .a11y-panel {
  * These rules are a safety net.
  * ============================================ */
 
-/* Typography locks - ALL panel elements (except font card labels which show their own font) */
+/* Typography locks — all panel elements */
 .a11y-panel,
-.a11y-panel *:not(.a11y-font-card__label) {
+.a11y-panel * {
   font-family: var(--font-body) !important;
   letter-spacing: normal !important;
   word-spacing: normal !important;
   line-height: 1.5 !important;
 }
 
-/* Font card labels - allow their inline font-family style to show through */
-.a11y-panel .a11y-font-card__label {
-  /* font-family is set via inline style to preview each font */
-  letter-spacing: normal !important;
-  word-spacing: normal !important;
-  line-height: 1.5 !important;
-}
-
-/* Override any rem-based font sizes in panel children */
-.a11y-panel .a11y-section__title {
-  font-size: 18px !important;
-}
-
-.a11y-panel .a11y-stepper__label {
-  font-size: 18px !important;
-}
-
-.a11y-panel .a11y-stepper__value {
-  font-size: 24px !important;
-}
-
-.a11y-panel .a11y-font-card__label,
-.a11y-panel .a11y-toggle-card__label {
-  font-size: 15px !important;
-  white-space: nowrap !important;
-}
-
+/* Preset button font sizes */
 .a11y-panel .a11y-preset-btn__title {
-  font-size: 18px !important;
+  font-size: 14px !important;
 }
 
-.a11y-panel .a11y-toggle-card__desc,
 .a11y-panel .a11y-preset-btn__subtitle {
   font-size: 14px !important;
 }
 
+/* Theme card font sizes */
 .a11y-panel .a11y-theme-card__title {
   font-size: 14px !important;
   text-transform: uppercase !important;
@@ -165,9 +138,9 @@ html body .a11y-panel {
   display: none !important;
 }
 
-.a11y-panel .a11y-sidebar__title {
-  font-size: 16px !important;
-  margin-bottom: 12px !important;
+/* Footer link */
+.a11y-panel .a11y-panel__all-settings-link {
+  letter-spacing: 0.06em !important;
 }
 
 /* ============================================
@@ -175,11 +148,17 @@ html body .a11y-panel {
  * These override Astro scoped styles that may use rem-based tokens
  * ============================================ */
 
-/* Preset buttons - fixed dimensions */
+/* Preset buttons — inline row (icon left, text right, centered) */
 .a11y-panel .a11y-preset-btn {
-  padding: 12px 24px !important;
-  gap: 24px !important;
-  border-radius: 16px !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 12px !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  border-width: 1.5px !important;
+  width: auto !important;
 }
 
 .a11y-panel .a11y-preset-btn__text {
@@ -187,33 +166,14 @@ html body .a11y-panel {
 }
 
 .a11y-panel .a11y-preset-btn__icon {
-  width: 40px !important;
-  height: 40px !important;
+  width: 22px !important;
+  height: 22px !important;
 }
 
-/* Stepper buttons - fixed dimensions */
-.a11y-panel .a11y-stepper {
-  gap: 16px !important;
-}
-
-.a11y-panel .a11y-stepper__btn {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-}
-
-/* Toggle cards - fixed dimensions */
-.a11y-panel .a11y-toggle-card {
-  padding: 16px !important;
-  gap: 16px !important;
-  border-radius: 12px !important;
-}
-
-/* Font cards - fixed dimensions */
-.a11y-panel .a11y-font-card {
-  padding: 14px 16px !important;
-  gap: 12px !important;
-  border-radius: 12px !important;
+.a11y-panel .a11y-preset-btn__title {
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
 }
 
 /* Theme cards - fixed dimensions */
@@ -221,17 +181,6 @@ html body .a11y-panel {
   padding: 14px !important;
   gap: 12px !important;
   border-radius: 12px !important;
-}
-
-/* Section titles - fixed sizing */
-.a11y-panel .a11y-section {
-  gap: 12px !important;
-}
-
-/* Sidebar - fixed padding */
-.a11y-panel .a11y-panel__sidebar,
-.a11y-panel .a11y-panel__sidebar-right {
-  padding: 16px !important;
 }
 
 /* Panel header - fixed dimensions */
@@ -242,12 +191,6 @@ html body .a11y-panel {
 
 .a11y-panel .a11y-panel__header-actions {
   gap: 8px !important;
-}
-
-/* Content area - fixed padding */
-.a11y-panel .a11y-panel__content {
-  padding: 16px !important;
-  gap: 32px !important;
 }
 
 /* Panel buttons - prevent highlight-links from adding underlines */
@@ -299,6 +242,36 @@ html body .a11y-panel {
   opacity: 1;
   visibility: visible;
   transform: translate(-50%, -50%) scale(1);
+}
+
+/* Sections inside body */
+.a11y-panel__section {
+  margin-bottom: 20px;
+}
+
+.a11y-panel__section:last-child {
+  margin-bottom: 0;
+}
+
+.a11y-panel__section-title {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: var(--brand-c-text-dark) !important;
+  opacity: 0.5;
+  margin: 0 0 10px;
+}
+
+/* Presets grid — 3 columns in body */
+.a11y-panel__presets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.a11y-panel__presets-grid .a11y-preset-btn {
+  width: auto;
 }
 
 /* Header */
@@ -378,40 +351,52 @@ html body .a11y-panel {
   opacity: 0.8;
 }
 
-/* Body Layout - 5 Equal Columns */
+/* Body — scrollable area for theme cards */
 .a11y-panel__body {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
   flex: 1;
-  overflow: hidden;
-}
-
-/* Left Sidebar - spans 1 column */
-.a11y-panel__sidebar {
-  grid-column: span 1;
   overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 24px;
 }
 
-/* Main Content Area - spans 3 columns, custom widths for sections */
-.a11y-panel__content {
-  grid-column: span 3;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: 0.8fr 1.2fr 1fr;
-  gap: var(--space-xl);
-  padding: var(--space-md);
-  align-content: start;
+/* Override ThemeSidebar's scoped sidebar styles inside the modal */
+.a11y-panel .a11y-panel__sidebar {
+  padding: 0 !important;
+  border: none !important;
+  overflow: visible !important;
 }
 
-/* Right Sidebar - spans 1 column */
-.a11y-panel__sidebar-right {
-  grid-column: span 1;
-  overflow-y: auto;
+/* Theme cards — multi-column grid in modal */
+.a11y-panel .a11y-theme-list {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 10px !important;
 }
 
-/* Section modifier for full width */
-.a11y-section--full {
-  grid-column: 1 / -1;
+/* Footer — link to full settings page */
+.a11y-panel__footer {
+  display: flex;
+  justify-content: center;
+  padding: 14px 24px;
+  border-top: var(--border-width) solid color-mix(in srgb, var(--brand-c-text-dark) 15%, transparent);
+  flex-shrink: 0;
+}
+
+.a11y-panel__all-settings-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand-c-primary);
+  font-weight: var(--font-bold);
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.a11y-panel__all-settings-link:hover {
+  opacity: 0.75;
 }
 
 /* Backdrop */
@@ -440,7 +425,7 @@ html body .a11y-panel {
  * RESPONSIVE STYLES
  * ============================================= */
 
-/* Mobile */
+/* Mobile — full-screen slide-up */
 @media (max-width: 768px) {
   .a11y-panel {
     width: 100vw;
@@ -470,42 +455,22 @@ html body .a11y-panel {
     justify-content: space-between;
   }
 
-  /* Body becomes single scrollable column */
+  /* Presets — 2-column on mobile */
+  .a11y-panel__presets-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Theme list — 2-column on mobile */
+  .a11y-panel .a11y-theme-list {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
   .a11y-panel__body {
-    display: flex;
-    flex-direction: column;
-    grid-template-columns: unset;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Left sidebar (Color Theme) - first */
-  .a11y-panel__sidebar {
-    order: 1;
-    overflow-y: visible;
-    flex-shrink: 0;
-  }
-
-  /* Right sidebar (Quick Presets) - second, under Color Theme */
-  .a11y-panel__sidebar-right {
-    order: 2;
-    overflow-y: visible;
-    flex-shrink: 0;
-  }
-
-  /* Main content - third */
-  .a11y-panel__content {
-    order: 3;
-    padding: 16px;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    overflow-y: visible;
-    flex-shrink: 0;
+    padding: 12px 16px;
   }
 }
 
-/* Tablet/Small Desktop - full screen with sidebars side by side */
+/* Tablet — full-screen slide-down */
 @media (min-width: 769px) and (max-width: 1400px) {
   .a11y-panel {
     width: 100vw;
@@ -525,45 +490,6 @@ html body .a11y-panel {
   .a11y-panel__header {
     flex-shrink: 0;
   }
-
-  /* Body - flex wrap to put sidebars on same row */
-  .a11y-panel__body {
-    display: flex;
-    flex-wrap: wrap;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Left sidebar (Color Theme) - 50% width */
-  .a11y-panel__sidebar {
-    order: 1;
-    width: 50%;
-    flex-shrink: 0;
-    border-right: var(--border-width) solid color-mix(in srgb, var(--brand-c-text-dark) 15%, transparent);
-    border-bottom: var(--border-width) solid color-mix(in srgb, var(--brand-c-text-dark) 15%, transparent);
-    box-sizing: border-box;
-  }
-
-  /* Right sidebar (Quick Presets) - 50% width, same row */
-  .a11y-panel__sidebar-right {
-    order: 2;
-    width: 50%;
-    flex-shrink: 0;
-    border-left: none;
-    border-bottom: var(--border-width) solid color-mix(in srgb, var(--brand-c-text-dark) 15%, transparent);
-    box-sizing: border-box;
-  }
-
-  /* Main content - full width below */
-  .a11y-panel__content {
-    order: 3;
-    width: 100%;
-    padding: var(--space-md);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-  }
 }
 
 /* Very small screens */
@@ -578,7 +504,7 @@ html body .a11y-panel {
     letter-spacing: 0.08em !important;
   }
 
-  /* Hide button text, show icons only (keep .icon spans visible) */
+  /* Hide button text, show icons only */
   .a11y-panel__header-actions .btn span:not(.icon) {
     display: none !important;
   }
@@ -610,60 +536,31 @@ html body .a11y-panel {
     height: 24px;
   }
 
-  .a11y-panel__content {
-    padding: 10px !important;
-    gap: 10px !important;
-  }
-
-  .a11y-panel .a11y-panel__sidebar,
-  .a11y-panel .a11y-panel__sidebar-right {
+  .a11y-panel .a11y-panel__sidebar {
     padding: 10px !important;
   }
 
-  .a11y-panel .a11y-stepper {
-    gap: 8px !important;
-    padding: 8px 10px !important;
-  }
-
-  .a11y-panel .a11y-stepper__btn {
-    width: 32px !important;
-    height: 32px !important;
-  }
-
-  .a11y-panel .a11y-stepper__label {
-    font-size: 14px !important;
-  }
-
-  .a11y-panel .a11y-stepper__value {
-    font-size: 18px !important;
-  }
-
-  .a11y-panel .a11y-toggle-card {
-    padding: 10px !important;
-    gap: 10px !important;
-  }
-
-  .a11y-panel .a11y-font-card {
-    padding: 10px 12px !important;
-    gap: 8px !important;
+  /* Presets — 2-column at 480px */
+  .a11y-panel__presets-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 
   .a11y-panel .a11y-preset-btn {
-    padding: 10px 14px !important;
-    gap: 14px !important;
+    padding: 8px 10px !important;
+    gap: 6px !important;
   }
 
   .a11y-panel .a11y-preset-btn__icon {
-    width: 32px !important;
-    height: 32px !important;
+    width: 18px !important;
+    height: 18px !important;
   }
 
   .a11y-panel .a11y-preset-btn__title {
-    font-size: 15px !important;
+    font-size: 12px !important;
   }
 
-  .a11y-panel .a11y-section__title {
-    font-size: 15px !important;
+  .a11y-panel__all-settings-link {
+    font-size: 14px;
   }
 }
 
@@ -689,19 +586,62 @@ html body .a11y-panel {
     width: 20px;
     height: 20px;
   }
+}
 
-  .a11y-panel .a11y-stepper__btn {
-    width: 28px !important;
-    height: 28px !important;
+/* Under 300px — single column presets */
+@media (max-width: 300px) {
+  .a11y-panel__presets-grid {
+    grid-template-columns: 1fr !important;
+    padding: 6px 8px;
+    gap: 4px;
   }
 
-  .a11y-panel .a11y-stepper__label {
-    font-size: 12px !important;
+  .a11y-panel .a11y-preset-btn__title {
+    display: none !important;
   }
 
-  .a11y-panel .a11y-stepper__value {
-    font-size: 16px !important;
+  .a11y-panel .a11y-preset-btn {
+    padding: 6px 10px !important;
+    justify-content: center !important;
+  }
+
+  .a11y-panel .a11y-preset-btn__icon {
+    width: 18px !important;
+    height: 18px !important;
   }
 }
 
 }
+
+/* ============================================
+ * ALT TEXT MODE
+ * Controls visibility of .image-alt-word,
+ * .image-alt-descriptive, .image-alt-aac elements.
+ * Each mode shows its matching class and hides the others.
+ * ============================================ */
+
+/* Default (none) — hide all alt text elements */
+[data-alt-text-mode="none"] .image-alt-word,
+[data-alt-text-mode="none"] .image-alt-descriptive,
+[data-alt-text-mode="none"] .image-alt-aac {
+  display: none;
+}
+
+/* Simple — show .image-alt-word, hide others */
+[data-alt-text-mode="word"] .image-alt-descriptive,
+[data-alt-text-mode="word"] .image-alt-aac {
+  display: none;
+}
+
+/* Full — show .image-alt-descriptive, hide others */
+[data-alt-text-mode="descriptive"] .image-alt-word,
+[data-alt-text-mode="descriptive"] .image-alt-aac {
+  display: none;
+}
+
+/* AAC — show .image-alt-aac, hide others */
+[data-alt-text-mode="aac"] .image-alt-word,
+[data-alt-text-mode="aac"] .image-alt-descriptive {
+  display: none;
+}
+

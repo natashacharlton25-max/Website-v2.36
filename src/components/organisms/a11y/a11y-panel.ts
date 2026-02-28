@@ -22,6 +22,7 @@ export interface A11ySettings {
   enhancedFocus: boolean;
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
+  altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -39,7 +40,8 @@ export const defaultSettings: A11ySettings = {
   reduceMotion: false,
   enhancedFocus: false,
   screenReaderMode: false,
-  scrollbarEnhanced: false
+  scrollbarEnhanced: false,
+  altTextMode: 'none'
 };
 
 // ===================================
@@ -180,6 +182,11 @@ export function applySettings(settings: A11ySettings): void {
   target.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
   target.classList.toggle('a11y-scrollbar-enhanced', settings.scrollbarEnhanced);
 
+  // Alt Text Mode - apply as data attribute
+  const altMode = settings.altTextMode || 'none';
+  (target as HTMLElement).dataset.altTextMode = altMode;
+  document.documentElement.dataset.altTextMode = altMode;
+
   // Font Family - apply to wrapper
   target.classList.remove(
     'a11y-font-opendyslexic',
@@ -307,10 +314,143 @@ export const presets: Record<string, Partial<A11ySettings>> = {
   cognitive: {
     reduceMotion: true,
     fontSize: 110,
-    lineHeight: 160
+    lineHeight: 160,
+    altTextMode: 'word'
   },
   clear: { ...defaultSettings }
 };
+
+// ===================================
+// UPDATE UI — sync all controls to match settings
+// ===================================
+export function updateUI(container: HTMLElement, s: A11ySettings): void {
+  // Toggle cards
+  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'screenReaderMode', 'scrollbarEnhanced'];
+  toggleCardSettings.forEach(key => {
+    const card = container.querySelector(`.a11y-toggle-card[data-setting="${key}"]`);
+    if (card) {
+      card.setAttribute('aria-pressed', (s as any)[key] ? 'true' : 'false');
+    }
+  });
+
+  // Font cards
+  container.querySelectorAll('.a11y-font-card').forEach(card => {
+    const font = (card as HTMLButtonElement).dataset.font;
+    card.setAttribute('aria-pressed', font === s.fontFamily ? 'true' : 'false');
+  });
+
+  // Stepper values
+  const stepperSettings = ['fontSize', 'letterSpacing', 'wordSpacing', 'lineHeight'];
+  stepperSettings.forEach(key => {
+    const stepper = container.querySelector(`.a11y-stepper[data-setting="${key}"]`);
+    if (!stepper) return;
+
+    const value = (s as any)[key];
+    const min = parseInt(stepper.getAttribute('data-min') || '0', 10);
+    const max = parseInt(stepper.getAttribute('data-max') || '100', 10);
+    const hiddenInput = stepper.querySelector('input[type="hidden"]') as HTMLInputElement;
+    const valueEl = stepper.querySelector('.a11y-stepper__value') as HTMLElement;
+    const unit = valueEl?.getAttribute('data-unit') || '';
+    const minusBtn = stepper.querySelector('[data-action="decrement"]') as HTMLButtonElement;
+    const plusBtn = stepper.querySelector('[data-action="increment"]') as HTMLButtonElement;
+
+    if (hiddenInput) hiddenInput.value = value.toString();
+    if (valueEl) valueEl.textContent = `${value}${unit}`;
+    if (minusBtn) minusBtn.disabled = value <= min;
+    if (plusBtn) plusBtn.disabled = value >= max;
+  });
+
+  // Alt text cards
+  container.querySelectorAll('.a11y-alttext-card').forEach(card => {
+    const val = (card as HTMLButtonElement).dataset.alttext;
+    card.setAttribute('aria-pressed', val === s.altTextMode ? 'true' : 'false');
+  });
+
+  // Theme cards
+  container.querySelectorAll('.a11y-theme-card').forEach(btn => {
+    const theme = (btn as HTMLButtonElement).dataset.theme;
+    btn.setAttribute('aria-pressed', theme === s.theme ? 'true' : 'false');
+  });
+}
+
+// ===================================
+// HANDLE PRESET CLICK — shared preset logic
+// ===================================
+export function handlePresetClick(
+  container: HTMLElement,
+  settings: A11ySettings,
+  preset: string,
+  btn: Element,
+): A11ySettings {
+  if (preset === 'clear') {
+    settings = { ...defaultSettings };
+  } else if (preset === 'easyread') {
+    const enabling = !settings.textOnly;
+    if (enabling) {
+      settings.textOnly = true;
+      settings.fontSize = 120;
+      settings.letterSpacing = 2;
+      settings.wordSpacing = 3;
+      settings.lineHeight = 160;
+      settings.theme = 'cream';
+      settings.altTextMode = 'descriptive';
+    } else {
+      settings.textOnly = false;
+      settings.fontSize = defaultSettings.fontSize;
+      settings.letterSpacing = defaultSettings.letterSpacing;
+      settings.wordSpacing = defaultSettings.wordSpacing;
+      settings.lineHeight = defaultSettings.lineHeight;
+      settings.theme = defaultSettings.theme;
+      settings.altTextMode = defaultSettings.altTextMode;
+    }
+
+    saveSettings(settings);
+    applySettings(settings);
+
+    // Sync toggle card + stepper UI (null-safe if absent)
+    const textOnlyCard = container.querySelector('.a11y-toggle-card[data-setting="textOnly"]');
+    if (textOnlyCard) {
+      textOnlyCard.setAttribute('aria-pressed', settings.textOnly ? 'true' : 'false');
+    }
+    container.querySelectorAll('.a11y-stepper').forEach(stepper => {
+      const stepSetting = stepper.getAttribute('data-setting') as string;
+      const val = (settings as any)[stepSetting];
+      if (val !== undefined) {
+        const valueEl = stepper.querySelector('.a11y-stepper__value') as HTMLElement;
+        const hiddenInput = stepper.querySelector('input[type="hidden"]') as HTMLInputElement;
+        if (valueEl) valueEl.textContent = String(val) + (valueEl.getAttribute('data-unit') || '');
+        if (hiddenInput) hiddenInput.value = String(val);
+      }
+    });
+
+    if (enabling) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+
+    if (settings.screenReaderMode) {
+      announce(enabling ? 'Easy read mode enabled' : 'Easy read mode disabled');
+    }
+    return settings;
+  } else if (presets[preset]) {
+    settings = { ...settings, ...presets[preset] };
+  }
+
+  container.querySelectorAll('.a11y-preset-btn').forEach(b => b.classList.remove('active'));
+  if (preset !== 'clear') {
+    btn.classList.add('active');
+  }
+
+  saveSettings(settings);
+  applySettings(settings);
+  updateUI(container, settings);
+
+  if (settings.screenReaderMode) {
+    announce(`${btn.querySelector('.a11y-preset-btn__title')?.textContent} preset applied`);
+  }
+  return settings;
+}
 
 // ===================================
 // SLIDER VALUE FORMATTER

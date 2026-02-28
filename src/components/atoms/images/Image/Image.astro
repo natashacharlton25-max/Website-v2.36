@@ -8,27 +8,38 @@
  * Consumes theme tokens: --media-brightness, --media-saturation, --media-contrast
  * so monochrome/dark/high-contrast themes apply automatically.
  *
- * Styles: Image.style.css | Image.responsive.css | Image.a11y.css
+ * Styles: Image.css | Image.responsive.css | Image.a11y.css
+ *
+ * Props:
+ *   role      — "content" (default) wraps in <figure> with alt spans
+ *               "decorative" renders bare <img alt="" aria-hidden="true">
+ *   assetId   — Asset Library slug; fetches alt text data at build time
+ *   decorative — DEPRECATED alias for role="decorative"
  *
  * Usage:
  *   <Image src="/images/photo.jpg" alt="A sunset" />
  *   <Image src="/images/photo.jpg" alt="A sunset" fit="cover" />
  *   <Image src="/images/logo.svg" alt="Brand logo" fit="contain" />
- *   <Image src="/images/hero.jpg" alt="" decorative />
+ *   <Image src="/images/hero.jpg" role="decorative" />
  *   <Image src="/images/card.jpg" alt="Product" radius="lg" shadow="md" />
  *   <Image src="/images/card.jpg" alt="Product" hover />
  *   <Image src="/images/wide.jpg" alt="Banner" responsive />
  *   <Image src="/images/old.jpg" alt="Vintage" sepia="default" />
- *   <Image src="/images/bg.jpg" alt="" decorative blur="lg" />
+ *   <Image src="/images/bg.jpg" role="decorative" blur="lg" />
  *   <Image src="/images/hero.jpg" alt="Hero" gradientMask="fade-bottom" />
  *   <Image src="/images/avatar.jpg" alt="User" clipPath="circle" />
  *   <Image src="/images/card.jpg" alt="Card" tilt="sm" />
  *   <Image src="/images/avatar.jpg" alt="User" width="80" height="80" radius="full" />
+ *   <Image src="/images/sunset.jpg" assetId="sunset-photo" />
  */
+
+import { fetchAltData } from '../../../../lib/asset-api/fetch-alt';
 
 interface Props {
   src: string;
-  alt: string;
+  alt?: string;
+  role?: 'content' | 'decorative';
+  assetId?: string;
   width?: number | string;
   height?: number | string;
   fit?: 'cover' | 'contain' | 'fill' | 'none';
@@ -36,6 +47,7 @@ interface Props {
   shadow?: 'none' | 'sm' | 'md' | 'lg';
   hover?: boolean;
   responsive?: boolean;
+  /** @deprecated Use role="decorative" instead */
   decorative?: boolean;
   loading?: 'lazy' | 'eager';
   sepia?: 'light' | 'default' | 'heavy';
@@ -50,6 +62,8 @@ interface Props {
 const {
   src,
   alt,
+  role: roleProp,
+  assetId,
   width,
   height,
   fit,
@@ -68,13 +82,25 @@ const {
   ...rest
 } = Astro.props;
 
+// Resolve role — decorative boolean is deprecated alias
+const isDecorative = roleProp === 'decorative' || decorative;
+
 // Extract data-* attributes
 const dataAttrs = Object.fromEntries(
   Object.entries(rest).filter(([key]) => key.startsWith('data-'))
 );
 
-const classes = [
-  'image',
+// Fetch alt text data at build time (content images with assetId only)
+const altData = (!isDecorative && assetId) ? await fetchAltData(assetId) : null;
+
+// Resolve alt text: API word wins over manual alt prop
+const resolvedAlt = isDecorative
+  ? ''
+  : (altData?.word || alt || '');
+
+// Image element classes (visual treatment)
+const imgClasses = [
+  'image__img',
   fit ? `image--fit-${fit}` : '',
   radius ? `image--radius-${radius}` : '',
   shadow ? `image--shadow-${shadow}` : '',
@@ -89,14 +115,39 @@ const classes = [
 ].filter(Boolean);
 ---
 
-<img
-  src={src}
-  alt={decorative ? '' : alt}
-  width={width}
-  height={height}
-  loading={loading}
-  class:list={classes}
-  aria-hidden={decorative ? 'true' : undefined}
-  role={decorative ? 'presentation' : undefined}
-  {...dataAttrs}
-/>
+{isDecorative ? (
+  <img
+    src={src}
+    alt=""
+    width={width}
+    height={height}
+    loading={loading}
+    class:list={imgClasses}
+    aria-hidden="true"
+    role="presentation"
+    {...dataAttrs}
+  />
+) : (
+  <figure class="image" data-role="content">
+    <img
+      src={src}
+      alt={resolvedAlt}
+      width={width}
+      height={height}
+      loading={loading}
+      class:list={imgClasses}
+      {...dataAttrs}
+    />
+    {altData?.word && (
+      <span class="image-alt-word" hidden>{altData.word}</span>
+    )}
+    {altData?.descriptive && (
+      <span class="image-alt-descriptive" hidden>{altData.descriptive}</span>
+    )}
+    {altData?.aacHtml && (
+      <span class="image-alt-aac" hidden>
+        <Fragment set:html={altData.aacHtml} />
+      </span>
+    )}
+  </figure>
+)}

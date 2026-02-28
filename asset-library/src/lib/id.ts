@@ -23,4 +23,5 @@ export const makeId = {
   version: () => `v_${generate(ID_LENGTH)}`,
   tag: () => `t_${generate(8)}`,
   usage: () => `u_${generate(ID_LENGTH)}`,
+  symbol: () => `sym_${generate(ID_LENGTH)}`,
 };

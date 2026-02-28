@@ -1,0 +1,122 @@
+---
+/**
+ * /accessibility — Full Accessibility Settings Page
+ *
+ * Source of truth for all accessibility controls.
+ * The modal panel (AccessibilityPanel.astro) is the quick toolbar;
+ * this page has every setting with plain-English descriptions.
+ *
+ * Script: a11y-page.ts (targets #a11y-page)
+ * Settings engine: a11y-panel.ts (shared with modal)
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/pages/accessibility.css';
+import { aacInline } from '../lib/aac/aac-inline';
+
+// Section components (same ones the modal uses)
+import ThemeSidebar from '../components/organisms/a11y/ThemeSidebar.astro';
+import VisualSection from '../components/organisms/a11y/VisualSection.astro';
+import TypographySection from '../components/organisms/a11y/TypographySection.astro';
+import TypographyAdjustmentsSection from '../components/organisms/a11y/TypographyAdjustmentsSection.astro';
+import { PresetButton } from '../components/atoms/a11y/PresetButton';
+import AltTextCard from '../components/molecules/a11y/AltTextCard.astro';
+import Icon from '../components/atoms/icons/Icon/Icon.astro';
+
+// AAC heading — build-time render
+const headingAac = await aacInline('Accessibility Settings');
+---
+
+<BaseLayout title="Accessibility Settings" description="Customise how this site looks and feels. Adjust fonts, colours, motion, and more.">
+  <div id="a11y-page" class="a11y-page" aria-label="Accessibility settings">
+
+    <!-- Page Header -->
+    <header class="a11y-page__header">
+      <h1 class="a11y-page__title">Accessibility Settings</h1>
+      <div class="a11y-page__title-aac" aria-hidden="true" set:html={headingAac} />
+      <p class="a11y-page__intro">
+        Customise how this site looks and feels. Every setting saves automatically and persists across pages.
+      </p>
+      <div class="a11y-page__header-actions">
+        <button class="btn btn--sm btn--ghost" id="a11y-reset" aria-label="Reset all settings">
+          <Icon name="a11y-panel/arrow-counter-clockwise-fill" size={18} />
+          <span>Reset All</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Presets -->
+    <section class="a11y-page__section">
+      <h2 class="a11y-page__section-title">Quick Presets</h2>
+      <p class="a11y-page__section-desc">
+        One-click profiles that adjust multiple settings at once. Choose a preset, then fine-tune individual settings below.
+      </p>
+      <div class="a11y-page__presets-row">
+        <PresetButton preset="dyslexia" icon="text-aa-fill" title="Dyslexia" />
+        <PresetButton preset="low-vision" icon="eye-fill" title="Low Vision" />
+        <PresetButton preset="color-blind" icon="palette-fill" title="Color Blind" />
+        <PresetButton preset="motor" icon="hand-palm-fill" title="Motor" />
+        <PresetButton preset="cognitive" icon="brain-fill" title="Cognitive" />
+        <PresetButton preset="easyread" icon="book-open-fill" title="Easy Read" />
+      </div>
+    </section>
+
+    <!-- Colour Themes -->
+    <section class="a11y-page__section">
+      <h2 class="a11y-page__section-title">Colour Theme</h2>
+      <p class="a11y-page__section-desc">
+        Switch the entire site colour palette. Includes dark mode, high contrast, colour-blind-friendly themes, and a cream reading theme.
+      </p>
+      <ThemeSidebar />
+    </section>
+
+    <!-- Access Toggles -->
+    <section class="a11y-page__section">
+      <h2 class="a11y-page__section-title">Access Controls</h2>
+      <p class="a11y-page__section-desc">
+        Toggle individual features on or off. Text Only strips images and decoration for a clean reading view.
+        Reduce Motion stops all animation. Screen Reader enables all companion settings automatically.
+      </p>
+      <VisualSection />
+    </section>
+
+    <!-- Font Selection -->
+    <section class="a11y-page__section">
+      <h2 class="a11y-page__section-title">Font</h2>
+      <p class="a11y-page__section-desc">
+        Choose a typeface that works for you. OpenDyslexic and Atkinson Hyperlegible are designed for readability;
+        the others are familiar system fonts.
+      </p>
+      <TypographySection />
+    </section>
+
+    <!-- Typography Adjustments -->
+    <section class="a11y-page__section">
+      <h2 class="a11y-page__section-title">Typography</h2>
+      <p class="a11y-page__section-desc">
+        Fine-tune text size, letter spacing, word spacing, and line height.
+        These controls affect all page content without changing the accessibility panel itself.
+      </p>
+      <TypographyAdjustmentsSection />
+    </section>
+
+    <!-- Alt Text Mode -->
+    <section class="a11y-page__section">
+      <h2 class="a11y-page__section-title">Image Descriptions</h2>
+      <p class="a11y-page__section-desc">
+        Control how images are described. Off hides alt text. Simple shows short labels.
+        Full shows detailed descriptions. AAC shows pictogram symbols alongside words for augmented communication.
+      </p>
+      <div class="a11y-alttext-grid" data-setting="altTextMode">
+        <AltTextCard value="none" label="Off" description="Hidden" icon="a11y/eye-slash-fill" pressed={true} />
+        <AltTextCard value="word" label="Simple" description="Short labels" icon="a11y/text-aa-fill" />
+        <AltTextCard value="descriptive" label="Full" description="Descriptions" icon="a11y/article-fill" />
+        <AltTextCard value="aac" label="AAC" description="Pictograms" icon="a11y/chat-text-fill" />
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<script>
+  import '../components/organisms/a11y/a11y-page';
+</script>

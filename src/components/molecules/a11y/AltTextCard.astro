@@ -1,0 +1,160 @@
+---
+/**
+ * AltTextCard - Alt Text Mode Selection Card
+ *
+ * A radio-style card for selecting alt text display mode.
+ * Follows FontCard's single-select pattern (aria-pressed, data attribute)
+ * with ToggleCard's visual layout (icon + label + description).
+ *
+ * Usage:
+ * <AltTextCard
+ *   value="word"
+ *   label="Simple"
+ *   description="Short labels"
+ *   icon="text-aa-fill"
+ * />
+ */
+import Icon from '../../atoms/icons/Icon/Icon.astro';
+
+interface Props {
+  value: string;
+  label: string;
+  description?: string;
+  icon: string;
+  pressed?: boolean;
+  iconSize?: number;
+}
+
+const { value, label, description, icon, pressed = false, iconSize = 24 } = Astro.props;
+---
+
+<button
+  type="button"
+  class="a11y-alttext-card"
+  data-alttext={value}
+  aria-pressed={pressed ? 'true' : 'false'}
+  aria-label={`${label}${description ? ` - ${description}` : ''}`}
+>
+  <Icon name={icon} size={iconSize} color="var(--brand-c-primary)" class="a11y-alttext-card__icon" />
+  <div class="a11y-alttext-card__text">
+    <small class="a11y-alttext-card__label">{label}</small>
+    {description && <span class="a11y-alttext-card__desc">{description}</span>}
+  </div>
+</button>
+
+<style>
+  .a11y-alttext-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--brand-c-bg);
+    border: 2px solid color-mix(in srgb, var(--brand-c-text-dark) 20%, transparent);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-align: left;
+    box-shadow: 0 2px 8px color-mix(in oklch, var(--color-Black) 8%, transparent);
+  }
+
+  .a11y-alttext-card:hover {
+    background: var(--brand-c-bg);
+    border-color: var(--brand-c-primary);
+    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 12%, transparent);
+  }
+
+  .a11y-alttext-card:focus-visible {
+    outline: 2px solid var(--brand-c-primary);
+    outline-offset: 2px;
+  }
+
+  .a11y-alttext-card[aria-pressed="true"] {
+    background: var(--brand-c-bg);
+    border-color: var(--brand-c-primary);
+    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 15%, transparent);
+  }
+
+  .a11y-alttext-card[aria-pressed="true"] .a11y-alttext-card__icon {
+    color: var(--brand-c-primary);
+  }
+
+  .a11y-alttext-card[aria-pressed="true"] .a11y-alttext-card__label {
+    color: var(--brand-c-primary);
+  }
+
+  .a11y-alttext-card__icon {
+    flex-shrink: 0;
+    transition: var(--transition-fast);
+  }
+
+  .a11y-alttext-card__text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    min-width: 0;
+  }
+
+  .a11y-alttext-card__label {
+    font-weight: var(--font-bold);
+    color: var(--brand-c-text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .a11y-alttext-card__desc {
+    color: var(--brand-c-text-dark);
+    opacity: 0.7;
+  }
+
+  /* Responsive - tablet */
+  @media (min-width: 769px) and (max-width: 1400px) {
+    .a11y-alttext-card {
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    .a11y-alttext-card__icon {
+      width: 20px !important;
+      height: 20px !important;
+    }
+  }
+
+  /* Responsive - mobile */
+  @media (max-width: 768px) {
+    .a11y-alttext-card {
+      padding: var(--space-xs) var(--space-sm);
+      gap: var(--space-xs);
+    }
+
+    .a11y-alttext-card__icon {
+      width: 20px !important;
+      height: 20px !important;
+    }
+
+    .a11y-alttext-card__desc {
+      display: none;
+    }
+  }
+
+  /* Very small screens */
+  @media (max-width: 480px) {
+    .a11y-alttext-card__icon {
+      width: 18px !important;
+      height: 18px !important;
+    }
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .a11y-alttext-card,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .a11y-alttext-card__icon {
+    transition: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .a11y-alttext-card,
+    .a11y-alttext-card__icon {
+      transition: none;
+    }
+  }
+</style>

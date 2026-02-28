@@ -17,6 +17,8 @@ export interface AssetRow {
   license: string;
   license_url: string | null;
   base_name: string | null;
+  alt_symbol_id: string | null;
+  alt_descriptive: string | null;
   created_at: string;
   updated_at: string;
   archived: number;
@@ -52,6 +54,9 @@ export interface LicenseRow {
   permits: string;
   requires: string;
   notes: string | null;
+  attribution: string | null;
+  summary: string | null;
+  aac_summary: string | null;
 }
 
 /** Usage log row from D1 */
@@ -71,6 +76,17 @@ export interface BrandAssetRow {
   brand: string;
   asset_id: string;
   role: string;
+}
+
+/** Alt symbol row from D1 */
+export interface AltSymbolRow {
+  id: string;
+  word: string;
+  icon_id: string | null;
+  aac_id: number | null;
+  aac_url: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 /** Lottie mapping row from D1 */

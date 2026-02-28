@@ -93,8 +93,8 @@ function createThemeCard(theme, isActive = false) {
  * Render theme cards into the theme list container
  */
 export function renderThemeCards() {
-  const container = document.querySelector('.a11y-theme-list');
-  if (!container) {
+  const containers = document.querySelectorAll('.a11y-theme-list');
+  if (containers.length === 0) {
     console.warn('Theme list container not found');
     return;
   }
@@ -102,16 +102,16 @@ export function renderThemeCards() {
   // Get current active theme from body class
   const currentTheme = document.body.className.match(/a11y-theme-(\w+)/)?.[1] || 'default';
 
-  // Clear existing cards
-  container.innerHTML = '';
-
-  // Generate cards for all discovered themes
-  Object.keys(themeFiles).forEach(theme => {
-    const card = createThemeCard(theme, theme === currentTheme);
-    container.appendChild(card);
+  // Populate every .a11y-theme-list on the page (modal + /accessibility page)
+  containers.forEach(container => {
+    container.innerHTML = '';
+    Object.keys(themeFiles).forEach(theme => {
+      const card = createThemeCard(theme, theme === currentTheme);
+      container.appendChild(card);
+    });
   });
 
-  console.log(`✅ Rendered ${Object.keys(themeFiles).length} theme cards`);
+  console.log(`✅ Rendered ${Object.keys(themeFiles).length} theme cards in ${containers.length} container(s)`);
 }
 
 /**

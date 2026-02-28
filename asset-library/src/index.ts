@@ -5,13 +5,16 @@
  * Health check (/v1/health) is the only open endpoint.
  * To open reads for go-live, remove the global auth gate block.
  *
+ * Auth model: GET = public (no token needed), writes = Bearer token required.
+ * This lets Astro fetch assets at build time without env tokens.
+ *
  * Routes:
  *   GET    /v1/health              — health check (open)
- *   GET    /v1/assets              — list/search assets (auth)
- *   GET    /v1/assets/:slug        — get asset content (auth)
- *   GET    /v1/assets/:slug/meta   — get asset metadata (auth)
- *   GET    /v1/assets/:slug/versions — version history (auth)
- *   GET    /v1/assets/:slug/usage  — usage history (auth)
+ *   GET    /v1/assets              — list/search assets (open)
+ *   GET    /v1/assets/:slug        — get asset content (open)
+ *   GET    /v1/assets/:slug/meta   — get asset metadata (open)
+ *   GET    /v1/assets/:slug/versions — version history (open)
+ *   GET    /v1/assets/:slug/usage  — usage history (open)
  *   POST   /v1/assets              — create asset (auth)
  *   PUT    /v1/assets/:slug        — update asset / new version (auth)
  *   PATCH  /v1/assets/:slug        — update metadata only (auth)
@@ -19,14 +22,20 @@
  *   POST   /v1/assets/:slug/rollback — rollback to version (auth)
  *   POST   /v1/assets/bulk         — bulk import (auth)
  *   POST   /v1/assets/verify       — integrity check (auth)
- *   GET    /v1/tags                — list tags (auth)
+ *   GET    /v1/tags                — list tags (open)
  *   POST   /v1/tags                — create tag (auth)
- *   GET    /v1/brands/:brand/assets — brand assets (auth)
+ *   GET    /v1/brands/:brand/assets — brand assets (open)
  *   POST   /v1/brands/:brand/assets — assign brand asset (auth)
- *   GET    /v1/licenses            — list licenses (auth)
+ *   GET    /v1/licenses            — list licenses (open)
+ *   GET    /v1/licenses/:key      — get single license (open)
  *   POST   /v1/usage               — log usage event (auth)
  *   POST   /v1/usage/batch         — log usage batch (auth)
- *   GET    /v1/usage/orphans       — unused assets (auth)
+ *   GET    /v1/usage/orphans       — unused assets (open)
+ *   GET    /v1/alt-symbols         — list alt symbols (open)
+ *   GET    /v1/alt-symbols/:id     — get alt symbol (open)
+ *   POST   /v1/alt-symbols         — create alt symbol (auth)
+ *   PUT    /v1/alt-symbols/:id     — update alt symbol (auth)
+ *   DELETE /v1/alt-symbols/:id     — delete alt symbol (auth)
  */
 
 import type { Env } from './types';
@@ -38,10 +47,11 @@ import { handleAssetMeta } from './routes/assets';
 import { handleVersionList, handleRollback } from './routes/versions';
 import { handleTagList, handleTagCreate } from './routes/tags';
 import { handleBrandAssets, handleBrandAssetAssign } from './routes/brands';
-import { handleLicenseList } from './routes/licenses';
+import { handleLicenseList, handleLicenseGet } from './routes/licenses';
 import { handleUsageLog, handleUsageBatch, handleUsageGet, handleOrphans } from './routes/usage';
 import { handleVerify } from './routes/verify';
 import { handleBulkImport } from './routes/bulk';
+import { handleAltSymbolList, handleAltSymbolGet, handleAltSymbolCreate, handleAltSymbolUpdate, handleAltSymbolDelete } from './routes/alt-symbols';
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -61,14 +71,34 @@ export default {
       });
     }
 
-    // ─── Global auth gate (pre-launch lockdown) ─────
-    // ALL routes require Bearer token. Remove this block to open reads when going live.
-    const authErr = requireAuth(request, env);
-    if (authErr) return authErr;
+    // ─── Auth gate: writes only ─────────────────────
+    // GET requests are public (Astro build fetches without tokens).
+    // POST, PUT, PATCH, DELETE require Bearer token.
+    if (method !== 'GET') {
+      const authErr = requireAuth(request, env);
+      if (authErr) return authErr;
+    }
 
     try {
       // ─── Route matching ─────────────────────────────
       // Order matters: more specific routes first
+
+      // /v1/alt-symbols/:id
+      const altSymbolMatch = path.match(/^\/v1\/alt-symbols\/([^/]+)$/);
+      if (altSymbolMatch) {
+        const id = altSymbolMatch[1];
+        if (method === 'GET') return handleAltSymbolGet(request, env, id);
+        if (method === 'PUT') return handleAltSymbolUpdate(request, env, id);
+        if (method === 'DELETE') return handleAltSymbolDelete(request, env, id);
+        return jsonError(405, 'Method not allowed');
+      }
+
+      // /v1/alt-symbols (list or create)
+      if (path === '/v1/alt-symbols') {
+        if (method === 'GET') return handleAltSymbolList(request, env);
+        if (method === 'POST') return handleAltSymbolCreate(request, env);
+        return jsonError(405, 'Method not allowed');
+      }
 
       // POST /v1/assets/bulk
       if (method === 'POST' && path === '/v1/assets/bulk') {
@@ -153,6 +183,13 @@ export default {
       if (brandMatch) {
         if (method === 'GET') return handleBrandAssets(request, env, brandMatch[1]);
         if (method === 'POST') return handleBrandAssetAssign(request, env, brandMatch[1]);
+        return jsonError(405, 'Method not allowed');
+      }
+
+      // /v1/licenses/:key
+      const licenseMatch = path.match(/^\/v1\/licenses\/([^/]+)$/);
+      if (licenseMatch) {
+        if (method === 'GET') return handleLicenseGet(request, env, licenseMatch[1]);
         return jsonError(405, 'Method not allowed');
       }
 

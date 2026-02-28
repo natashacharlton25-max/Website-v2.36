@@ -70,6 +70,8 @@ function buildMetaResponse(asset: AssetRow, version: VersionRow, tags: string[],
     },
     tags,
     ...(usageCount !== undefined ? { usageCount } : {}),
+    altSymbolId: asset.alt_symbol_id ?? null,
+    altDescriptive: asset.alt_descriptive ?? null,
     createdAt: asset.created_at,
     updatedAt: asset.updated_at,
   };
@@ -480,6 +482,17 @@ export async function handleAssetPatch(request: Request, env: Env, slug: string)
   if (body.license_url !== undefined) {
     stmts.push(env.DB.prepare('UPDATE assets SET license_url = ?, updated_at = ? WHERE id = ?')
       .bind(body.license_url, now, asset.id));
+  }
+
+  // Update alt text fields
+  if (body.alt_symbol_id !== undefined) {
+    stmts.push(env.DB.prepare('UPDATE assets SET alt_symbol_id = ?, updated_at = ? WHERE id = ?')
+      .bind(body.alt_symbol_id, now, asset.id));
+  }
+
+  if (body.alt_descriptive !== undefined) {
+    stmts.push(env.DB.prepare('UPDATE assets SET alt_descriptive = ?, updated_at = ? WHERE id = ?')
+      .bind(body.alt_descriptive, now, asset.id));
   }
 
   // Replace tags

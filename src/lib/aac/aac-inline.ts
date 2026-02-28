@@ -1,0 +1,230 @@
+/**
+ * aac-inline.ts — Build-time AAC card renderer
+ *
+ * Two-tier word lookup (build-time only, never hits users):
+ *   1. Our alt_symbols API   — curated Phosphor→ARASAAC mappings (fast)
+ *   2. Open Symbols API      — broader English word coverage (fallback)
+ *
+ * Three card types for rendering:
+ *   - aac_url (from either source) → pictogram card  (<img>)
+ *   - icon_id (alt_symbols only)   → Phosphor icon card (inline <svg>)
+ *   - neither                      → text-only card
+ *
+ * All lookups cached per build — repeated words only fetch once.
+ * Open Symbols calls rate-limited with 100ms delay.
+ *
+ * Usage (Astro frontmatter):
+ *   import { aacInline } from '../../lib/aac/aac-inline';
+ *   const html = await aacInline('You can use this free', apiBaseUrl);
+ */
+
+import { pictogramCard, iconCard, textOnlyCard } from './aac-cards';
+
+const ASSET_API_URL =
+  import.meta.env.ASSET_API_URL || 'http://localhost:8787';
+
+const OPENSYMBOLS_BASE = 'https://www.opensymbols.org/api/v2';
+const OPENSYMBOLS_SECRET = import.meta.env.OPENSYMBOLS_SECRET || '';
+
+// ── Types ──
+
+type AacLookup =
+  | { type: 'aac'; src: string }
+  | { type: 'icon'; svg: string }
+  | { type: 'text' };
+
+// ── Build-wide cache (persists across all aacInline calls in one build) ──
+
+const cache = new Map<string, AacLookup>();
+
+// ── Open Symbols token management ──
+
+let openSymbolsToken: string | null = null;
+
+async function getOpenSymbolsToken(): Promise<string | null> {
+  if (openSymbolsToken) return openSymbolsToken;
+  if (!OPENSYMBOLS_SECRET) return null;
+
+  try {
+    const res = await fetch(
+      `${OPENSYMBOLS_BASE}/token?secret=${encodeURIComponent(OPENSYMBOLS_SECRET)}`,
+      { method: 'POST' },
+    );
+    if (res.ok) {
+      const data = (await res.json()) as { access_token?: string };
+      openSymbolsToken = data.access_token || null;
+      return openSymbolsToken;
+    }
+  } catch {
+    // Token fetch failed
+  }
+  return null;
+}
+
+async function refreshToken(): Promise<string | null> {
+  openSymbolsToken = null;
+  return getOpenSymbolsToken();
+}
+
+// ── Rate limiter for Open Symbols ──
+
+let lastOpenSymbolsCall = 0;
+
+async function rateLimitOpenSymbols(): Promise<void> {
+  const now = Date.now();
+  const elapsed = now - lastOpenSymbolsCall;
+  if (elapsed < 100) {
+    await new Promise((r) => setTimeout(r, 100 - elapsed));
+  }
+  lastOpenSymbolsCall = Date.now();
+}
+
+// ── Open Symbols lookup with 401 retry ──
+
+async function lookupOpenSymbols(
+  word: string,
+  retried = false,
+): Promise<string | null> {
+  const token = await getOpenSymbolsToken();
+  if (!token) return null;
+
+  await rateLimitOpenSymbols();
+
+  try {
+    const res = await fetch(
+      `${OPENSYMBOLS_BASE}/symbols?q=${encodeURIComponent(word)}&locale=en&access_token=${encodeURIComponent(token)}`,
+    );
+
+    if (res.status === 401 && !retried) {
+      await refreshToken();
+      return lookupOpenSymbols(word, true);
+    }
+
+    if (res.ok) {
+      const data = (await res.json()) as {
+        repo_key?: string;
+        image_url?: string;
+      }[];
+
+      if (Array.isArray(data)) {
+        const arasaac = data.find(
+          (s) => s.repo_key === 'arasaac' && s.image_url,
+        );
+        if (arasaac?.image_url) {
+          // Encode spaces in URLs (some ARASAAC filenames contain spaces)
+          return arasaac.image_url.replace(/ /g, '%20');
+        }
+      }
+    }
+  } catch {
+    // Open Symbols unreachable
+  }
+
+  return null;
+}
+
+// ── Per-word lookup ──
+
+async function lookupWord(
+  word: string,
+  apiBase: string,
+): Promise<AacLookup> {
+  const key = word.toLowerCase();
+  if (cache.has(key)) return cache.get(key)!;
+
+  // ── Tier 1: Our alt_symbols API (curated, fast) ──
+  try {
+    const res = await fetch(
+      `${apiBase}/v1/alt-symbols?word_exact=${encodeURIComponent(key)}`,
+    );
+
+    if (res.ok) {
+      const data = (await res.json()) as {
+        symbols?: { aac_url?: string | null; icon_id?: string | null }[];
+      };
+      const rows = data.symbols || [];
+
+      if (Array.isArray(rows) && rows.length > 0) {
+        const row = rows[0];
+
+        // Pictogram URL from ARASAAC (seeded into our DB)
+        if (row.aac_url && row.aac_url !== 'null') {
+          const result: AacLookup = { type: 'aac', src: row.aac_url };
+          cache.set(key, result);
+          return result;
+        }
+
+        // Phosphor icon SVG from our Asset Library
+        if (row.icon_id) {
+          try {
+            const svgRes = await fetch(`${apiBase}/v1/assets/${row.icon_id}`);
+            if (svgRes.ok) {
+              const asset = (await svgRes.json()) as { content?: string };
+              if (asset.content) {
+                const result: AacLookup = { type: 'icon', svg: asset.content };
+                cache.set(key, result);
+                return result;
+              }
+            }
+          } catch {
+            // SVG fetch failed — continue to Open Symbols fallback
+          }
+        }
+      }
+    }
+  } catch {
+    // Our API unreachable — continue to Open Symbols fallback
+  }
+
+  // ── Tier 2: Open Symbols fallback (broader English coverage, ARASAAC only) ──
+  const imageUrl = await lookupOpenSymbols(key);
+  if (imageUrl) {
+    const result: AacLookup = { type: 'aac', src: imageUrl };
+    cache.set(key, result);
+    return result;
+  }
+
+  // ── No pictogram found — text only ──
+  const result: AacLookup = { type: 'text' };
+  cache.set(key, result);
+  return result;
+}
+
+// Card renderers imported from ./aac-cards
+
+// ── Public API ──
+
+/**
+ * Convert a plain-text sentence into a row of AAC cards (HTML string).
+ *
+ * @param sentence  Plain text, e.g. "You can use this free"
+ * @param apiBase   Optional override for the Asset Library API base URL
+ * @returns         HTML string of `.aac-card` spans
+ */
+export async function aacInline(
+  sentence: string,
+  apiBase: string = ASSET_API_URL,
+): Promise<string> {
+  const words = sentence.split(/\s+/).filter((w) => w.length > 0);
+
+  // Process sequentially to respect Open Symbols rate limit
+  const cards: string[] = [];
+  for (const word of words) {
+    const clean = word.replace(/[.,!?;:]+$/, '');
+    const lookup = await lookupWord(clean, apiBase);
+
+    switch (lookup.type) {
+      case 'aac':
+        cards.push(pictogramCard(word, lookup.src));
+        break;
+      case 'icon':
+        cards.push(iconCard(word, lookup.svg));
+        break;
+      case 'text':
+        cards.push(textOnlyCard(word));
+        break;
+    }
+  }
+
+  return cards.join('\n');
+}

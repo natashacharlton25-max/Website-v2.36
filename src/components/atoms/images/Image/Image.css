@@ -1,21 +1,33 @@
 /**
- * Image — style.css
+ * Image — Image.css
  * @layer components
  *
  * Single source of truth for all image styling.
  * Consumes theme tokens for automatic monochrome/dark/contrast treatment.
- * Replaces: .img-default, .img-cover, .img-contain, .img-responsive,
- *           .img-hover, .svg-default, .svg-sm/md/lg/xl, .svg-shadow, .svg-hover
+ *
+ * Structure:
+ *   .image        — <figure> wrapper (content images)
+ *   .image__img   — <img> element (both content and decorative)
+ *   .image--*     — variant classes applied to <img>
  */
 
 @layer components {
 
   /* ==========================================================
-     BASE
-     Applies theme-aware filter to all images automatically.
+     FIGURE WRAPPER — reset for content images
      ========================================================== */
 
   .image {
+    margin: 0;
+    position: relative;
+    display: inline-block;
+  }
+
+  /* ==========================================================
+     IMG BASE — theme-aware filter
+     ========================================================== */
+
+  .image__img {
     display: block;
     max-width: 100%;
     height: auto;
@@ -212,5 +224,18 @@
   .image--tilt-sm { transform: var(--img-tilt-sm); }
   .image--tilt-md { transform: var(--img-tilt-md); }
   .image--tilt-lg { transform: var(--img-tilt-lg); }
+
+  /* ==========================================================
+     ALT TEXT SPANS — visible when alt text mode is active
+     Gating handled by a11y-panel.css [data-alt-text-mode]
+     ========================================================== */
+
+  .image-alt-word,
+  .image-alt-descriptive {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--brand-c-text-dark);
+    margin-top: var(--space-xs);
+  }
 
 }
