@@ -36,6 +36,7 @@ interface Props {
   altWord?: string;
   altDescriptive?: string;
   altAacHtml?: string;
+  semanticRole?: 'decorative' | 'ui-control' | 'content-symbol';
   width?: number | string;
   height?: number | string;
   fit?: 'cover' | 'contain' | 'fill' | 'none';
@@ -62,6 +63,7 @@ const {
   altWord,
   altDescriptive,
   altAacHtml,
+  semanticRole,
   width,
   height,
   fit,
@@ -88,10 +90,10 @@ const dataAttrs = Object.fromEntries(
   Object.entries(rest).filter(([key]) => key.startsWith('data-'))
 );
 
-// Resolve alt text: altWord wins over manual alt prop
+// Resolve alt text: richest description wins for screen readers
 const resolvedAlt = isDecorative
   ? ''
-  : (altWord || alt || '');
+  : (altDescriptive || altWord || alt || '');
 
 // Image element classes (visual treatment)
 const imgClasses = [
@@ -123,7 +125,7 @@ const imgClasses = [
     {...dataAttrs}
   />
 ) : (
-  <figure class="image" data-role="content">
+  <figure class="image" data-role="content" data-semantic-role={semanticRole}>
     <img
       src={src}
       alt={resolvedAlt}

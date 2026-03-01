@@ -24,6 +24,7 @@ export interface A11ySettings {
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
   altDisplayMode: 'hidden' | 'caption' | 'overlay' | 'tooltip' | 'subtitle' | 'replace';
+  cognitiveLevel: 'green' | 'yellow' | 'orange' | 'full';
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -43,7 +44,8 @@ export const defaultSettings: A11ySettings = {
   screenReaderMode: false,
   scrollbarEnhanced: false,
   altTextMode: 'none',
-  altDisplayMode: 'hidden'
+  altDisplayMode: 'hidden',
+  cognitiveLevel: 'full'
 };
 
 // ===================================
@@ -194,6 +196,11 @@ export function applySettings(settings: A11ySettings): void {
   (target as HTMLElement).dataset.altDisplayMode = displayMode;
   document.documentElement.dataset.altDisplayMode = displayMode;
 
+  // Cognitive Level - AAC vocabulary depth (green/yellow/orange/full)
+  const cogLevel = settings.cognitiveLevel || 'full';
+  (target as HTMLElement).dataset.cognitiveLevel = cogLevel;
+  document.documentElement.dataset.cognitiveLevel = cogLevel;
+
   // Font Family - apply to wrapper
   target.classList.remove(
     'a11y-font-opendyslexic',
@@ -322,7 +329,8 @@ export const presets: Record<string, Partial<A11ySettings>> = {
     reduceMotion: true,
     fontSize: 110,
     lineHeight: 160,
-    altTextMode: 'word'
+    altTextMode: 'word',
+    cognitiveLevel: 'green'
   },
   clear: { ...defaultSettings }
 };
@@ -379,6 +387,13 @@ export function updateUI(container: HTMLElement, s: A11ySettings): void {
   altDisplayGrid?.querySelectorAll('.a11y-alttext-card').forEach(card => {
     const val = (card as HTMLButtonElement).dataset.alttext;
     card.setAttribute('aria-pressed', val === s.altDisplayMode ? 'true' : 'false');
+  });
+
+  // Cognitive level cards (vocabulary depth)
+  const cogLevelGrid = container.querySelector('[data-setting="cognitiveLevel"]');
+  cogLevelGrid?.querySelectorAll('.a11y-alttext-card').forEach(card => {
+    const val = (card as HTMLButtonElement).dataset.alttext;
+    card.setAttribute('aria-pressed', val === s.cognitiveLevel ? 'true' : 'false');
   });
 
   // Theme cards

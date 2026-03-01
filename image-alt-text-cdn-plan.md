@@ -613,21 +613,21 @@ Script does:
 
 ## 8. Migration Path
 
-### Audit Snapshot (1 Mar 2026 — post Phase 4)
+### Audit Snapshot (1 Mar 2026 — post Phase 4b)
 
 **D1 `assets` table has:** id, slug, name, base_name, type, storage, current_version, license_key, alt_symbol_id, alt_descriptive, alt_aac_phrase, source, created_at, updated_at, file_hash, version, category, brand, semantic_role, new_id, url, mime_type, width, height, file_size
 **D1 `assets` count:** 4,567 rows (4,566 icons/lotties + 1 test image). IDs: `shared_{icon|anim}_{slug}_{hash}` for existing, `{brand}_{category}_{name}_{hash}` for images.
 **D1 `versions` table has:** r2_key, content (text storage for SVG/Lottie)
-**D1 `alt_symbols` table:** 1,579 rows (1,554 original + 25 new) + `verified` column (all 0). 6 words updated US→UK. Entries are valid resolver vocabulary — not for direct icon-name→pictogram matching.
+**D1 `alt_symbols` table:** 1,799 rows (1,579 fringe + 220 core vocabulary). `core_tier` column: 60 green, 88 yellow, 103 orange, 1,548 null/fringe. `verified` column (all 0). Stop words reduced to 5 (was 20).
 **Current IDs:** `shared_icon_{slug}_{hash}` / `shared_anim_{slug}_{hash}` — swap complete, all FKs updated
 **R2 bucket:** 1 image uploaded (`images/articles-hero_0aff4f/v1.png`). Worker route live with immutable caching.
 **API routes:** Full CRUD on /v1/assets, /v1/alt-symbols, /v1/tags, /v1/brands, /v1/licenses, /v1/usage, /v1/health
 **API fixes done:** `has_alt` WHERE wired, `include=alt` JOIN returns altWord/altDescriptive/altAacUrl
-**Resolver:** `src/lib/aac/aacResolver.ts` — pure function, two output types only (aac | text, no Phosphor icon fallback). 20 stop words, 20 lemma entries. Context guard with prefer_symbol fallback.
+**Resolver:** `src/lib/aac/aacResolver.ts` — pure function, two output types only (aac | text, no Phosphor icon fallback). 5 stop words. Lemma lookup via OpenAAC words-en.json (~8,800 inflection→base mappings, CC BY 4.0) + 4-entry supplement for move/stop gaps. Context guard with prefer_symbol fallback. `maxTier` param filters by cognitive level (green/yellow/orange/full).
 **AAC pipeline cleanup:** `iconCard()` removed from aac-cards.ts. `type: 'icon'` removed from aac-inline.ts and aacResolver.ts. Rule: ARASAAC pictogram or text. No Phosphor icons as AAC symbols.
 **Context overrides:** `alt_symbol_context_overrides` table — 5 rows (aviation blocks taxi), indexed on context_token
 **Semantic roles:** 463 content-symbol, 33 decorative, 4,071 ui-control
-**Build pipeline:** snapshot-alt-text.js → 3 JSON files → loadAllAltText() → resolver → static HTML. Zero unresolved words.
+**Build pipeline:** snapshot-alt-text.js → 3 JSON files (incl. core_tier) → loadAllAltText() → resolver with maxTier → static HTML with data-core-tier cards. Zero unresolved words.
 
 ### Phase 1 — Now (done)
 - [x] Alt symbols table — 1,554 words with ARASAAC pictogram URLs (1,553) and/or Phosphor icon links (1,512). Used as vocabulary lookup by the AAC resolver — alt text strings are resolved against this table at build time. Not used for direct icon-name→pictogram matching.
@@ -857,7 +857,7 @@ The resolver never processes `alt_descriptive` — that's long-form prose for si
 
 1. **Exact phrase match** — query `word = "airplane taxiing"` in alt_symbols
 2. **Exact individual tokens** — split into words, match each before any stemming
-3. **Controlled lemma fallback** — stem only if the lemma is in an allowlisted verb set
+3. **Lemma fallback via OpenAAC** — reverse-index lookup from `words-en.json` (~8,800 inflected→base mappings) + 4-entry supplement. Only resolves if base form exists in alt_symbols.
 4. **Context guard** — block incorrect fallbacks when co-occurring tokens indicate a different domain (aviation keywords block "taxi" car match)
 5. **Multi-card decomposition** — for 2+ word concepts, render primary noun + verb as separate cards
 
@@ -891,7 +891,7 @@ Icon categorisation:
 - [x] 6 US→UK word swaps applied (aeroplane, biscuit, torch, postbox, bin, lorry)
 - [x] 25 new alt_symbols created for compound base_names + gaps (UK English, 23/25 with ARASAAC pictograms)
 - [ ] Write AAC-mode CSS for three tiers (hide decorative, text-label ui-control, resolver-output content-symbol)
-- [x] Existing 1,579 alt_symbol entries positioned as vocabulary — valid resolver lookup targets
+- [x] Existing 1,799 alt_symbol entries positioned as vocabulary — valid resolver lookup targets (251 core + 1,548 fringe)
 
 Alt text quality:
 - [ ] Review existing alt text on content-symbol assets — ensure phrasing is meaningful, not decorative
@@ -901,11 +901,12 @@ Alt text quality:
 Resolver:
 - [x] Created `src/lib/aac/aacResolver.ts` with `resolveAACPhrase` + `resolveAACWord`
 - [x] `AACResolved` type defined (aac | icon | text)
-- [x] Resolution hierarchy: exact match → lemma fallback (20 entries, 10 verbs) → context guard with prefer_symbol → resolution
+- [x] Resolution hierarchy: exact match → OpenAAC lemma fallback (~8,800 entries + 4 supplement) → context guard with prefer_symbol → tier gate → resolution
 - [x] `alt_symbol_context_overrides` table created + 5 seed rows (aviation blocks taxi)
 - [x] Context guard checks prefer_symbol before falling to text
 - [x] `buildSymbolMap` deduplicates, verified entries take priority
-- [x] Stop words (20) and lemma allowlist hardcoded — intentionally small, governed expansion only
+- [x] Stop words reduced to 5 (a, an, the, was, were) — 15 removed as AAC core vocabulary
+- [x] Lemma: OpenAAC words-en.json (CC BY 4.0) reverse index replaces 20-entry hardcoded map. LEMMA_SUPPLEMENT for 4 forms (moving/moved→move, stopping/stopped→stop) absent from OpenAAC.
 - [ ] Support multi-card output for phrase decomposition
 - [ ] Update `.image-alt-aac` span to render multiple cards from resolved array
 - [ ] Add `aac_hint` field to AI content generation prompts/schemas
@@ -920,8 +921,8 @@ Resolver:
 - [ ] Clean up orphan "sunset" alt_symbol row
 
 Resolver performance:
-- [ ] Snapshot `alt_symbols` + `alt_symbol_context_overrides` into JSON alongside alt-text snapshot
-- [ ] Resolver loads both into memory once, indexed by token — zero DB calls inside resolver loop
+- [x] Snapshot `alt_symbols` + `alt_symbol_context_overrides` into JSON alongside alt-text snapshot
+- [x] Resolver loads both into memory once, indexed by token — zero DB calls inside resolver loop
 
 **Verification criteria:**
 - Decorative icons hidden in AAC mode
@@ -934,6 +935,12 @@ Resolver performance:
 - No client-side JS for resolution — all baked at build
 - Resolver is portable to runtime if architecture changes
 - Same resolver handles icons, images, and body copy — single pipeline
+- Green level: only ~60 survival words show pictograms, rest shows text
+- Yellow level: green + ~88 words show pictograms
+- Orange level: green + yellow + ~103 words show pictograms
+- Full level: all vocabulary including fringe/domain-specific
+- Every AAC card has `data-core-tier` attribute for CSS filtering
+- All 15 green feelings have pictograms (zero text-only at green level for feelings)
 
 ### Phase 4 — Content Integration (done)
 - [x] `snapshot-alt-text.js` pre-build script (D1 → three JSON files: alt-text, alt-symbols, context-overrides)
@@ -946,6 +953,76 @@ Resolver performance:
 - [ ] Spread aacInline to page content
 - [ ] Legal pages three content levels
 - [ ] `loadAllAltText()` scaling: partition by brand or add `modifiedSince` param if asset count reaches thousands
+
+### Phase 4b — Cognitive Levels (AAC Vocabulary Tiers) (done)
+
+**Principle:** One site-wide setting (Green/Yellow/Orange) controls the entire experience — AAC vocabulary depth, workbook response complexity, input sizing, content levels. The colour names match AssistiveWare's Ordered Core Words, which the AAC community already knows.
+
+**Vocabulary tiers (stored as `core_tier` on `alt_symbols`):**
+
+| Colour | Who | AAC vocabulary | Workbook responses (future) |
+|--------|-----|---------------|----------------------------|
+| Green | Just starting, single words | ~60 survival words: want, go, stop, help, happy, sad | 2-3 big icon cards, simple words |
+| Yellow | 1-2 word combinations | ~88 more: know, play, and, but, because | 4-6 options, short phrases |
+| Orange | Full sentences | ~103 more: remember, decide, between, while | Detailed text, nuanced options |
+| Full/fringe | All vocabulary | ~1,548 domain-specific nouns | Everything shown |
+
+**Core vocabulary seeded from AssistiveWare Ordered Core Words (3 PDFs):**
+
+| Tier | Total words | With ARASAAC pictogram | Text-only |
+|------|------------|----------------------|-----------|
+| Green | 60 | 32 (53%) | 28 |
+| Yellow | 88 | 46 (52%) | 42 |
+| Orange | 103 | 62 (60%) | 41 |
+| Fringe | 1,548 | varies | varies |
+| **Total** | **1,799** | | |
+
+Green feelings — all 15 have pictograms (including synonym lookups: afraid→"to scare", silly→"it's funny!", lonely→"alone", frustrated→"annoying", excited→Mulberry "excited man").
+
+**Stop words reduced:** 20 → 5 (`a`, `an`, `the`, `was`, `were`). The 15 removed are Green/Yellow AAC core vocabulary (not, in, on, is, and, but, or, for, to, with, at, of, are).
+
+**Tasks:**
+- [x] `core_tier` column added to `alt_symbols`
+- [x] 251/251 AssistiveWare core words exist in alt_symbols with correct tier tags
+- [x] 220 new alt_symbol rows created (47 green, 73 yellow, 100 orange) with ARASAAC/Open Symbols lookups
+- [x] Resolver `maxTier` param on `resolveAACPhrase` and `resolveAACWord`
+- [x] Tier hierarchy: green(0) < yellow(1) < orange(2) < fringe(3)
+- [x] Tier gate runs after context guard, before resolution
+- [x] `coreTier` field added to `AACResolved` type
+- [x] `pictogramCard()` and `textOnlyCard()` emit `data-core-tier` attribute on cards
+- [x] Snapshot includes `core_tier` from D1
+- [x] `loadAllAltText()` passes `core_tier` through to card renderers
+- [ ] CSS tier filtering: `data-cognitive-level` on `<html>`, hide cards above selected tier
+- [ ] A11y panel control for cognitive level (Green/Yellow/Orange/Full)
+- [ ] Wire cognitive level to workbook response libraries (future — when workbook system is built)
+- [ ] Wire cognitive level to CSS input sizing variables (future)
+
+**AAC card HTML pattern (baked at build, CSS toggles visibility):**
+```html
+<span class="aac-card" data-core-tier="green">
+  <img src="..." alt="help" />
+  <span>help</span>
+</span>
+<span class="aac-card" data-core-tier="orange">
+  <img src="..." alt="warm" />
+  <span>warm</span>
+</span>
+```
+
+**CSS tier filtering:**
+```css
+[data-cognitive-level="green"] .aac-card[data-core-tier="yellow"],
+[data-cognitive-level="green"] .aac-card[data-core-tier="orange"],
+[data-cognitive-level="green"] .aac-card:not([data-core-tier]) { display: none; }
+
+[data-cognitive-level="yellow"] .aac-card[data-core-tier="orange"],
+[data-cognitive-level="yellow"] .aac-card:not([data-core-tier]) { display: none; }
+
+[data-cognitive-level="orange"] .aac-card:not([data-core-tier]) { display: none; }
+
+/* Full — show everything */
+[data-cognitive-level="full"] .aac-card { display: inline-flex; }
+```
 
 ### Safeguarding — Alt Text Audit Trail
 
@@ -984,6 +1061,8 @@ CREATE TABLE alt_text_log (
 | Build data load | src/data/alt-text.json snapshot | Pre-build D1 query → JSON |
 | A11y toggle | CSS data attributes | Client-side, zero cost |
 | Icon AAC mode | semantic_role on assets | CSS tiers: hide / text-label / resolve |
-| AAC resolver | src/lib/aac/aacResolver.ts | Build time — single pipeline for all alt text |
+| AAC resolver | src/lib/aac/aacResolver.ts | Build time — single pipeline for all content |
+| Lemma lookup | src/data/words-en.json (OpenAAC, CC BY 4.0) | Module load — ~8,800 inflection→base reverse index |
+| Cognitive level | data-cognitive-level on html + data-core-tier on cards | CSS toggles vocabulary depth (green/yellow/orange/full) |
 | Image atom | Pure props | Receives data, no fetching |
 | Alt text audit | D1 alt_text_log | Every alt text change logged (safeguarding) |

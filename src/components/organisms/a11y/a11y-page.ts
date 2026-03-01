@@ -184,6 +184,30 @@ function initPage(): void {
     }
   });
 
+  // ── Cognitive level cards (vocabulary depth) ──
+
+  const cogLevelGrid = page.querySelector('[data-setting="cognitiveLevel"]');
+  cogLevelGrid?.addEventListener('click', (e) => {
+    const card = (e.target as HTMLElement).closest('.a11y-alttext-card') as HTMLButtonElement;
+    if (!card) return;
+
+    const value = card.dataset.alttext || 'full';
+    const label = card.querySelector('.a11y-alttext-card__label')?.textContent || 'Full';
+
+    cogLevelGrid.querySelectorAll('.a11y-alttext-card').forEach(btn => {
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    card.setAttribute('aria-pressed', 'true');
+
+    settings.cognitiveLevel = value as A11ySettings['cognitiveLevel'];
+    saveSettings(settings);
+    applySettings(settings);
+
+    if (settings.screenReaderMode) {
+      announce(`Vocabulary level changed to ${label}`);
+    }
+  });
+
   // ── Theme cards ──
 
   const themeList = page.querySelector('.a11y-theme-list');
