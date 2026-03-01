@@ -32,7 +32,7 @@ Every asset — icon, lottie, or image — gets a unique hashed ID. The identity
 
 ### Current State (as of Phase 2)
 
-- 4,566 existing assets (icons + lotties) — IDs now `shared_{icon|anim}_{slug}_{hash}` format
+- 4,567 assets (4,566 icons/lotties in D1 + 1 test image in R2) — all using hashed ID format
 - 1,554 alt_symbols seeded — each maps a `word` to up to two visual representations:
   - `aac_url`: ARASAAC pictogram PNG (1,553 have one, auto-matched by keyword — many are semantically wrong)
   - `icon_id`: FK to Phosphor icon in `assets` table (1,512 linked, 42 are AAC-only with no Phosphor equivalent)
@@ -41,8 +41,8 @@ Every asset — icon, lottie, or image — gets a unique hashed ID. The identity
   - **Architectural note:** These 1,554 entries are valid as resolver vocabulary — the resolver looks up words from alt text strings against this table. They should NOT be used for direct icon-name→pictogram matching. See Phase 3c: icons feed their alt text through the resolver, not their SVG name.
 - `versions` table has `r2_key` column; `assets` table does not
 - `storage` column on assets indicates where content lives
-- R2 bucket bound (`STORAGE` binding) but empty — all current assets stored as text in `versions.content`
-- No image assets exist yet
+- R2 bucket has 1 image (`mtb_hero_articles-hero_0aff4f`). All icon/lottie assets remain as text in `versions.content`.
+- First image asset uploaded: `mtb_hero_articles-hero_0aff4f` (R2, served via Worker with immutable caching)
 
 ### ID Format
 
@@ -606,11 +606,11 @@ Single command uploads image and creates all alt text automatically.
 ### Audit Snapshot (1 Mar 2026 — post Phase 3a)
 
 **D1 `assets` table has:** id, slug, name, base_name, type, storage, current_version, license_key, alt_symbol_id, alt_descriptive, source, created_at, updated_at, file_hash, version, category, brand, semantic_role, new_id
-**D1 `assets` count:** 4,566 rows. IDs swapped to `shared_{icon|anim}_{slug}_{hash}` format. `new_id` column still present (drop pending).
+**D1 `assets` count:** 4,567 rows (4,566 icons/lotties + 1 test image). IDs: `shared_{icon|anim}_{slug}_{hash}` for existing, `{brand}_{category}_{name}_{hash}` for images.
 **D1 `versions` table has:** r2_key, content (text storage for SVG/Lottie)
 **D1 `alt_symbols` table:** 1,554 rows + `verified` column (all 0). Entries are valid resolver vocabulary — not for direct icon-name→pictogram matching (Phase 3c).
 **Current IDs:** `shared_icon_{slug}_{hash}` / `shared_anim_{slug}_{hash}` — swap complete, all FKs updated
-**R2 bucket:** Bound as `STORAGE`, empty — no binary assets uploaded yet
+**R2 bucket:** 1 image uploaded (`images/articles-hero_0aff4f/v1.png`). Worker route live with immutable caching.
 **API routes:** Full CRUD on /v1/assets, /v1/alt-symbols, /v1/tags, /v1/brands, /v1/licenses, /v1/usage, /v1/health
 **API fixes done:** `has_alt` WHERE wired, `include=alt` JOIN returns altWord/altDescriptive/altAacUrl
 
@@ -640,7 +640,7 @@ Single command uploads image and creates all alt text automatically.
 - [x] Update a11y-panel.ts altDisplayMode to include 'subtitle' value
 - [x] Update overlay CSS background from translucent to solid
 
-### Phase 3a — Universal Asset Identity (retrofit all 4,566 existing assets)
+### Phase 3a — Universal Asset Identity (done)
 
 Schema migration:
 - [x] Add `file_hash`, `version`, `category`, `brand`, `semantic_role` columns to `assets` table
@@ -669,11 +669,13 @@ ID swap (done — atomic D1 transaction):
 - [x] Post-swap verification: zero orphans, zero row count changes across all FK tables
 - [x] Note: D1 file imports enforce FK constraints — use `PRAGMA foreign_keys = OFF` at top of migration
 
-### Phase 3b — Image Pipeline (R2 + CDN)
-- [ ] `/images/:key` Worker route — serve from R2 with `Cache-Control: immutable`
-- [ ] Image upload script: SHA-256 → ID → R2 upload → D1 insert (one command)
-- [ ] First test image: upload manually, verify full round-trip (R2 → Worker → CDN → Image atom)
-- [ ] Tooltip mode: add `:focus-within` on `.image` + touch toggle for keyboard/mobile users
+### Phase 3b — Image Pipeline (R2 + CDN) (done)
+- [x] `GET /images/:path+` Worker route — serves from R2 with `Cache-Control: immutable`, ETag
+- [x] `upload-image.ts` CLI script — three paths: new asset (R2 + D1 + versions), changed file (version bump), same file (metadata-only update)
+- [x] Migration 011: added `url`, `mime_type`, `width`, `height`, `file_size` to assets
+- [x] First test image: `mtb_hero_articles-hero_0aff4f` — 1600×550 PNG, full round-trip verified (R2 → Worker → CDN headers)
+- [ ] Tooltip mode: add `:focus-within` on `.image` + touch toggle for keyboard/mobile users (deferred)
+- [ ] `alt_text_log` table for safeguarding traceability — alt text changes on therapeutic content must be auditable
 
 ### Phase 3c — AAC Mode (language-first, not icon-swap)
 
@@ -911,6 +913,27 @@ Resolver performance:
 - [ ] Legal pages three content levels
 - [ ] `loadAllAltText()` scaling: partition by brand or add `modifiedSince` param if asset count reaches thousands
 
+### Safeguarding — Alt Text Audit Trail
+
+All alt text describes content aimed at vulnerable users. Changes must be traceable for safeguarding compliance.
+
+```sql
+CREATE TABLE alt_text_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  asset_id TEXT NOT NULL,
+  field TEXT NOT NULL,          -- 'alt_descriptive' | 'alt_word' | 'alt_symbol_id'
+  old_value TEXT,
+  new_value TEXT,
+  changed_by TEXT,             -- 'upload-script' | 'admin' | user identifier
+  changed_at TEXT DEFAULT (datetime('now'))
+);
+```
+
+- [ ] Create `alt_text_log` table in D1
+- [ ] Upload script logs alt text changes (insert row on every `alt_descriptive` write/update)
+- [ ] API PATCH routes for assets log alt field changes
+- [ ] Retention policy: logs kept indefinitely (safeguarding requirement)
+
 ---
 
 ## Summary
@@ -928,3 +951,4 @@ Resolver performance:
 | Icon AAC mode | semantic_role on assets | CSS tiers: hide / text-label / resolve |
 | AAC resolver | src/lib/aac/aacResolver.ts | Build time — single pipeline for all alt text |
 | Image atom | Pure props | Receives data, no fetching |
+| Alt text audit | D1 alt_text_log | Every alt text change logged (safeguarding) |

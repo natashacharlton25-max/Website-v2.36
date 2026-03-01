@@ -7,7 +7,8 @@
  *     --name therapy-room \
  *     --brand mtb \
  *     --category hero \
- *     --alt "A warm therapy room with soft lighting"
+ *     --alt "A warm therapy room with soft lighting" \
+ *     --aac-phrase "room warm light"
  */
 
 import { readFileSync } from 'node:fs';
@@ -39,6 +40,7 @@ const name = args.name;
 const brand = args.brand;
 const category = args.category;
 const altText = args.alt || null;
+const aacPhrase = args['aac-phrase'] || null;
 
 // ─── 1. Read file, compute SHA-256, take first 6 chars ──
 const fileBuffer = readFileSync(filePath);
@@ -103,6 +105,7 @@ if (metadataOnly) {
   // ─── Metadata-only: just update alt text + timestamps ──
   const setClauses = [`updated_at = '${now}'`];
   if (altText) setClauses.push(`alt_descriptive = '${escapeSql(altText)}'`);
+  if (aacPhrase) setClauses.push(`alt_aac_phrase = '${escapeSql(aacPhrase)}'`);
   d1Query(`UPDATE assets SET ${setClauses.join(', ')} WHERE id = '${id}'`);
   console.log('D1 assets row updated (metadata only)');
 } else {
@@ -117,15 +120,18 @@ if (metadataOnly) {
   if (version === 1) {
     const altCol = altText ? ', alt_descriptive' : '';
     const altVal = altText ? `, '${escapeSql(altText)}'` : '';
+    const aacCol = aacPhrase ? ', alt_aac_phrase' : '';
+    const aacVal = aacPhrase ? `, '${escapeSql(aacPhrase)}'` : '';
     d1Query(
-      `INSERT INTO assets (id, name, slug, base_name, type, storage, current_version, source, license, created_at, updated_at, archived, category, brand, version, file_hash, semantic_role, url, mime_type, width, height, file_size${altCol})` +
-      ` VALUES ('${id}', '${escapeSql(name)}', '${escapeSql(slug)}', '${escapeSql(name)}', 'image', 'r2', '${versionId}', 'upload-script', 'proprietary', '${now}', '${now}', 0, '${category}', '${brand}', ${version}, '${hash}', 'content-symbol', '${cdnUrl}', '${mimeType}', ${width}, ${height}, ${fileSize}${altVal})`,
+      `INSERT INTO assets (id, name, slug, base_name, type, storage, current_version, source, license, created_at, updated_at, archived, category, brand, version, file_hash, semantic_role, url, mime_type, width, height, file_size${altCol}${aacCol})` +
+      ` VALUES ('${id}', '${escapeSql(name)}', '${escapeSql(slug)}', '${escapeSql(name)}', 'image', 'r2', '${versionId}', 'upload-script', 'proprietary', '${now}', '${now}', 0, '${category}', '${brand}', ${version}, '${hash}', 'content-symbol', '${cdnUrl}', '${mimeType}', ${width}, ${height}, ${fileSize}${altVal}${aacVal})`,
     );
     console.log('D1 assets row inserted');
   } else {
     const altClause = altText ? `, alt_descriptive = '${escapeSql(altText)}'` : '';
+    const aacClause = aacPhrase ? `, alt_aac_phrase = '${escapeSql(aacPhrase)}'` : '';
     d1Query(
-      `UPDATE assets SET version = ${version}, file_hash = '${hash}', url = '${cdnUrl}', current_version = '${versionId}', mime_type = '${mimeType}', width = ${width}, height = ${height}, file_size = ${fileSize}, updated_at = '${now}'${altClause} WHERE id = '${id}'`,
+      `UPDATE assets SET version = ${version}, file_hash = '${hash}', url = '${cdnUrl}', current_version = '${versionId}', mime_type = '${mimeType}', width = ${width}, height = ${height}, file_size = ${fileSize}, updated_at = '${now}'${altClause}${aacClause} WHERE id = '${id}'`,
     );
     console.log('D1 assets row updated');
   }
@@ -161,4 +167,5 @@ console.log(`  R2 key:   ${r2Key}`);
 console.log(`  CDN URL:  ${cdnUrl}`);
 console.log(`  Size:     ${width}×${height}, ${(fileSize / 1024).toFixed(1)} KB`);
 console.log(`  Alt text: ${altText || '(none)'}`);
+console.log(`  AAC:      ${aacPhrase || '(none)'}`);
 console.log(`  Version:  ${version}`);
