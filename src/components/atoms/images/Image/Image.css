@@ -1,6 +1,5 @@
 /**
  * Image — Image.css
- * @layer components
  *
  * Single source of truth for all image styling.
  * Consumes theme tokens for automatic monochrome/dark/contrast treatment.
@@ -9,392 +8,399 @@
  *   .image        — <figure> wrapper (content images)
  *   .image__img   — <img> element (both content and decorative)
  *   .image--*     — variant classes applied to <img>
+ *
+ * Animation invariant:
+ *   Transition, hover transform, and tilt are gated behind .image--animate.
+ *   Reduced render never emits that class → zero motion at CSS level.
  */
 
-@layer components {
-
-  /* ==========================================================
-     FIGURE WRAPPER — reset for content images
-     ========================================================== */
-
-  .image {
-    margin: 0;
-    position: relative;
-    display: inline-block;
-  }
-
-  /* ==========================================================
-     IMG BASE — theme-aware filter
-     ========================================================== */
-
-  .image__img {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    border-width: var(--img-border-width);
-    border-style: var(--img-border-style);
-    border-color: var(--img-border-color);
-    border-radius: var(--img-radius);
-    filter:
-      brightness(var(--media-brightness, 1))
-      saturate(var(--media-saturation, 1))
-      contrast(var(--media-contrast, 1));
-    transition: var(--img-transition);
-  }
-
-  /* ==========================================================
-     FIT — object-fit variants
-     ========================================================== */
-
-  .image--fit-cover {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-  }
-
-  .image--fit-contain {
-    object-fit: contain;
-    width: 100%;
-    height: 100%;
-  }
-
-  .image--fit-fill {
-    object-fit: fill;
-    width: 100%;
-    height: 100%;
-  }
-
-  .image--fit-none {
-    object-fit: none;
-  }
-
-  /* ==========================================================
-     RESPONSIVE — fills container, overrides inline dimensions
-     ========================================================== */
-
-  .image--responsive {
-    width: 100%;
-    max-width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* ==========================================================
-     RADIUS
-     ========================================================== */
-
-  .image--radius-none { border-radius: 0; }
-  .image--radius-sm   { border-radius: var(--img-radius-sm); }
-  .image--radius-md   { border-radius: var(--img-radius); }
-  .image--radius-lg   { border-radius: var(--img-radius-lg); }
-  .image--radius-full { border-radius: var(--img-radius-full); }
-
-  /* ==========================================================
-     SHADOW
-     ========================================================== */
-
-  .image--shadow-none { box-shadow: none; }
-  .image--shadow-sm   { box-shadow: var(--img-shadow-sm); }
-  .image--shadow-md   { box-shadow: var(--img-shadow-md); }
-  .image--shadow-lg   { box-shadow: var(--img-shadow-lg); }
-
-  /* ==========================================================
-     HOVER — scale + shadow lift
-     ========================================================== */
-
-  .image--hover {
-    cursor: pointer;
-  }
-
-  .image--hover:hover {
-    transform: scale(var(--img-hover-scale));
-    box-shadow: var(--img-hover-shadow);
-    filter:
-      var(--img-hover-filter)
-      brightness(var(--media-brightness, 1))
-      saturate(var(--media-saturation, 1))
-      contrast(var(--media-contrast, 1));
-  }
-
-  /* ==========================================================
-     SEPIA — warm vintage tone
-     Composes with theme filters.
-     ========================================================== */
-
-  .image--sepia-light {
-    filter:
-      var(--img-sepia-light)
-      brightness(var(--media-brightness, 1))
-      saturate(var(--media-saturation, 1))
-      contrast(var(--media-contrast, 1));
-  }
-
-  .image--sepia-default {
-    filter:
-      var(--img-sepia)
-      brightness(var(--media-brightness, 1))
-      saturate(var(--media-saturation, 1))
-      contrast(var(--media-contrast, 1));
-  }
-
-  .image--sepia-heavy {
-    filter:
-      var(--img-sepia-heavy)
-      brightness(var(--media-brightness, 1))
-      saturate(var(--media-saturation, 1))
-      contrast(var(--media-contrast, 1));
-  }
-
-  /* ==========================================================
-     BLUR — loading placeholders, backgrounds
-     ========================================================== */
-
-  .image--blur-sm {
-    filter:
-      var(--img-blur-sm)
-      brightness(var(--media-brightness, 1))
-      saturate(var(--media-saturation, 1))
-      contrast(var(--media-contrast, 1));
-  }
-
-  .image--blur-md {
-    filter:
-      var(--img-blur-md)
-      brightness(var(--media-brightness, 1))
-      saturate(var(--media-saturation, 1))
-      contrast(var(--media-contrast, 1));
-  }
-
-  .image--blur-lg {
-    filter:
-      var(--img-blur-lg)
-      brightness(var(--media-brightness, 1))
-      saturate(var(--media-saturation, 1))
-      contrast(var(--media-contrast, 1));
-  }
-
-  .image--blur-xl {
-    filter:
-      var(--img-blur-xl)
-      brightness(var(--media-brightness, 1))
-      saturate(var(--media-saturation, 1))
-      contrast(var(--media-contrast, 1));
-  }
-
-  /* ==========================================================
-     GRADIENT MASK — soft fade edges
-     ========================================================== */
-
-  .image--mask-fade-bottom {
-    -webkit-mask-image: var(--img-mask-fade-bottom);
-    mask-image: var(--img-mask-fade-bottom);
-  }
-
-  .image--mask-fade-top {
-    -webkit-mask-image: var(--img-mask-fade-top);
-    mask-image: var(--img-mask-fade-top);
-  }
-
-  .image--mask-fade-edges {
-    -webkit-mask-image: var(--img-mask-fade-edges);
-    mask-image: var(--img-mask-fade-edges);
-  }
-
-  .image--mask-vignette {
-    -webkit-mask-image: var(--img-mask-vignette);
-    mask-image: var(--img-mask-vignette);
-  }
-
-  /* ==========================================================
-     CLIP-PATH — shaped crops
-     ========================================================== */
-
-  .image--clip-circle      { clip-path: var(--img-clip-circle); }
-  .image--clip-ellipse     { clip-path: var(--img-clip-ellipse); }
-  .image--clip-diamond     { clip-path: var(--img-clip-diamond); }
-  .image--clip-hexagon     { clip-path: var(--img-clip-hexagon); }
-  .image--clip-blob        { clip-path: var(--img-clip-blob); }
-  .image--clip-slant-left  { clip-path: var(--img-clip-slant-left); }
-  .image--clip-slant-right { clip-path: var(--img-clip-slant-right); }
-
-  /* ==========================================================
-     TILT / 3D — perspective rotation
-     ========================================================== */
-
-  .image--tilt-sm { transform: var(--img-tilt-sm); }
-  .image--tilt-md { transform: var(--img-tilt-md); }
-  .image--tilt-lg { transform: var(--img-tilt-lg); }
-
-  /* ==========================================================
-     ALT TEXT SPANS — two-axis gating
-
-     Axis 1: data-alt-text-mode  = what to show  (none/word/descriptive/aac)
-     Axis 2: data-alt-display-mode = how to show  (hidden/caption/overlay/tooltip/replace)
-
-     Both attributes live on #a11y-content-wrapper (+ mirrored to <html>).
-     Only the matching span for the active text-mode is ever visible.
-     The display-mode controls the visual presentation of that span.
-     ========================================================== */
-
-  /* ── Base: all spans hidden ── */
-  .image-alt-word,
-  .image-alt-descriptive,
-  .image-alt-aac {
-    display: none;
-    font-size: var(--font-size-sm);
-    color: var(--brand-c-text-dark);
-    margin-top: var(--space-xs);
-  }
-
-  /* ── Text mode: which span is eligible ──
-     Only the matching span gets display from the display-mode rules.
-     mode=none → nothing shown (default, no rules needed). */
-
-  /* ── Display mode: HIDDEN (default) ──
-     All spans stay display:none. Screen readers still read the img alt. */
-
-  /* ── Display mode: CAPTION — block below image ── */
-  [data-alt-display-mode="caption"][data-alt-text-mode="word"] .image-alt-word,
-  [data-alt-display-mode="caption"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
-  [data-alt-display-mode="caption"][data-alt-text-mode="aac"] .image-alt-aac {
-    display: block;
-  }
-
-  /* ── Display mode: OVERLAY — positioned over the image ── */
-  [data-alt-display-mode="overlay"][data-alt-text-mode="word"] .image-alt-word,
-  [data-alt-display-mode="overlay"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
-  [data-alt-display-mode="overlay"][data-alt-text-mode="aac"] .image-alt-aac {
-    display: block;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin-top: 0;
-    padding: var(--space-sm);
-    background: var(--color-surface-inverse, #000);
-    color: var(--color-White);
-  }
-
-  /* ── Display mode: TOOLTIP — visible on figure hover ── */
-  [data-alt-display-mode="tooltip"][data-alt-text-mode="word"] .image:hover .image-alt-word,
-  [data-alt-display-mode="tooltip"][data-alt-text-mode="descriptive"] .image:hover .image-alt-descriptive,
-  [data-alt-display-mode="tooltip"][data-alt-text-mode="aac"] .image:hover .image-alt-aac {
-    display: block;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin-top: 0;
-    padding: var(--space-sm);
-    background: color-mix(in srgb, var(--color-Black) 80%, transparent);
-    color: var(--color-White);
-  }
-
-  /* ── Display mode: SUBTITLE — image shrinks via flex, text below ──
-     Requires height constraint from parent (card, grid cell, aspect-ratio). */
-  [data-alt-display-mode="subtitle"] .image {
-    display: flex;
-    flex-direction: column;
-  }
-
-  [data-alt-display-mode="subtitle"] .image .image__img {
-    flex: 1 1 0;
-    min-height: 4rem;
-    object-fit: cover;
-  }
-
-  [data-alt-display-mode="subtitle"][data-alt-text-mode="word"] .image-alt-word,
-  [data-alt-display-mode="subtitle"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
-  [data-alt-display-mode="subtitle"][data-alt-text-mode="aac"] .image-alt-aac {
-    display: block;
-    flex: 0 0 auto;
-  }
-
-  /* ── Display mode: REPLACE — image visually-hidden, text shown ──
-     Uses visually-hidden (not display:none) so img stays in the
-     accessibility tree. Screen reader still reads img alt. */
-  [data-alt-display-mode="replace"] .image .image__img {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-  }
-
-  [data-alt-display-mode="replace"][data-alt-text-mode="word"] .image-alt-word,
-  [data-alt-display-mode="replace"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
-  [data-alt-display-mode="replace"][data-alt-text-mode="aac"] .image-alt-aac {
-    display: block;
-    padding: var(--space-md);
-    background: color-mix(in srgb, var(--brand-c-text-dark) 8%, transparent);
-    border-radius: var(--radius-md, 8px);
-    margin-top: 0;
-  }
-
-  /* ==========================================================
-     AAC MODE — semantic role tiers
-
-     data-semantic-role on wrapper elements controls what AAC
-     mode does to icons and images:
-       decorative     → hidden entirely
-       ui-control     → hide icon, show text label (needs markup)
-       content-symbol → hide icon, show AAC cards
-
-     NOTE: Icon.astro uses <span class="icon">, not .icon-svg.
-     There is no .icon-label element — ui-control label display
-     requires adding a label element to icon wrapper markup.
-     ========================================================== */
-
-  /* Decorative: hidden in AAC mode */
-  [data-alt-text-mode="aac"] [data-semantic-role="decorative"] {
-    display: none;
-  }
-
-  /* UI control: hide icon SVG */
-  [data-alt-text-mode="aac"] [data-semantic-role="ui-control"] .icon {
-    display: none;
-  }
-
-  /* Content symbol: hide icon/image, show AAC cards */
-  [data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .icon {
-    display: none;
-  }
-  [data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .image__img {
-    display: none;
-  }
-  [data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .image-alt-aac {
-    display: block;
-  }
-
-  /* ==========================================================
-     COGNITIVE LEVEL — vocabulary depth filtering
-
-     data-cognitive-level on <html> controls which AAC cards
-     are visible based on AssistiveWare core vocabulary tiers.
-     Cards carry data-core-tier="green|yellow|orange|fringe".
-
-     green  → survival vocabulary only (60 words)
-     yellow → + 1-2 word combiners (148 cumulative)
-     orange → + complex/later vocabulary (251 cumulative)
-     full   → all tiers including fringe domain nouns
-     ========================================================== */
-
-  [data-cognitive-level="green"] .aac-card[data-core-tier="yellow"],
-  [data-cognitive-level="green"] .aac-card[data-core-tier="orange"],
-  [data-cognitive-level="green"] .aac-card[data-core-tier="fringe"] {
-    display: none;
-  }
-
-  [data-cognitive-level="yellow"] .aac-card[data-core-tier="orange"],
-  [data-cognitive-level="yellow"] .aac-card[data-core-tier="fringe"] {
-    display: none;
-  }
-
-  [data-cognitive-level="orange"] .aac-card[data-core-tier="fringe"] {
-    display: none;
-  }
-
-  /* Full — show everything (default, no hiding needed) */
-
+/* ==========================================================
+   FIGURE WRAPPER — reset for content images
+   ========================================================== */
+
+.image {
+  margin: 0;
+  position: relative;
+  display: inline-block;
 }
+
+/* ==========================================================
+   IMG BASE — theme-aware filter
+   ========================================================== */
+
+.image__img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-width: var(--img-border-width);
+  border-style: var(--img-border-style);
+  border-color: var(--img-border-color);
+  border-radius: var(--img-radius);
+  filter:
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
+
+/* ==========================================================
+   ANIMATION-GATED — only active when .image--animate is present.
+   Reduced render never emits this class.
+   ========================================================== */
+
+.image--animate .image__img {
+  transition: var(--img-transition);
+}
+
+.image--animate .image--hover:hover {
+  transform: scale(var(--img-hover-scale));
+  box-shadow: var(--img-hover-shadow);
+  filter:
+    var(--img-hover-filter)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
+
+.image--animate .image--tilt-sm { transform: var(--img-tilt-sm); }
+.image--animate .image--tilt-md { transform: var(--img-tilt-md); }
+.image--animate .image--tilt-lg { transform: var(--img-tilt-lg); }
+
+/* ==========================================================
+   FIT — object-fit variants
+   ========================================================== */
+
+.image--fit-cover {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.image--fit-contain {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
+
+.image--fit-fill {
+  object-fit: fill;
+  width: 100%;
+  height: 100%;
+}
+
+.image--fit-none {
+  object-fit: none;
+}
+
+/* ==========================================================
+   RESPONSIVE — fills container, overrides inline dimensions
+   ========================================================== */
+
+.image--responsive {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ==========================================================
+   RADIUS
+   ========================================================== */
+
+.image--radius-none { border-radius: 0; }
+.image--radius-sm   { border-radius: var(--img-radius-sm); }
+.image--radius-md   { border-radius: var(--img-radius); }
+.image--radius-lg   { border-radius: var(--img-radius-lg); }
+.image--radius-full { border-radius: var(--img-radius-full); }
+
+/* ==========================================================
+   SHADOW
+   ========================================================== */
+
+.image--shadow-none { box-shadow: none; }
+.image--shadow-sm   { box-shadow: var(--img-shadow-sm); }
+.image--shadow-md   { box-shadow: var(--img-shadow-md); }
+.image--shadow-lg   { box-shadow: var(--img-shadow-lg); }
+
+/* ==========================================================
+   HOVER — cursor only (transform gated above under .image--animate)
+   ========================================================== */
+
+.image--hover {
+  cursor: pointer;
+}
+
+/* ==========================================================
+   SEPIA — warm vintage tone
+   Composes with theme filters.
+   ========================================================== */
+
+.image--sepia-light {
+  filter:
+    var(--img-sepia-light)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
+
+.image--sepia-default {
+  filter:
+    var(--img-sepia)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
+
+.image--sepia-heavy {
+  filter:
+    var(--img-sepia-heavy)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
+
+/* ==========================================================
+   BLUR — loading placeholders, backgrounds
+   ========================================================== */
+
+.image--blur-sm {
+  filter:
+    var(--img-blur-sm)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
+
+.image--blur-md {
+  filter:
+    var(--img-blur-md)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
+
+.image--blur-lg {
+  filter:
+    var(--img-blur-lg)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
+
+.image--blur-xl {
+  filter:
+    var(--img-blur-xl)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
+
+/* ==========================================================
+   GRADIENT MASK — soft fade edges
+   ========================================================== */
+
+.image--mask-fade-bottom {
+  -webkit-mask-image: var(--img-mask-fade-bottom);
+  mask-image: var(--img-mask-fade-bottom);
+}
+
+.image--mask-fade-top {
+  -webkit-mask-image: var(--img-mask-fade-top);
+  mask-image: var(--img-mask-fade-top);
+}
+
+.image--mask-fade-edges {
+  -webkit-mask-image: var(--img-mask-fade-edges);
+  mask-image: var(--img-mask-fade-edges);
+}
+
+.image--mask-vignette {
+  -webkit-mask-image: var(--img-mask-vignette);
+  mask-image: var(--img-mask-vignette);
+}
+
+/* ==========================================================
+   CLIP-PATH — shaped crops
+   ========================================================== */
+
+.image--clip-circle      { clip-path: var(--img-clip-circle); }
+.image--clip-ellipse     { clip-path: var(--img-clip-ellipse); }
+.image--clip-diamond     { clip-path: var(--img-clip-diamond); }
+.image--clip-hexagon     { clip-path: var(--img-clip-hexagon); }
+.image--clip-blob        { clip-path: var(--img-clip-blob); }
+.image--clip-slant-left  { clip-path: var(--img-clip-slant-left); }
+.image--clip-slant-right { clip-path: var(--img-clip-slant-right); }
+
+/* ==========================================================
+   ALT TEXT SPANS — two-axis gating
+
+   Axis 1: data-alt-text-mode  = what to show  (none/word/descriptive/aac)
+   Axis 2: data-alt-display-mode = how to show  (hidden/caption/overlay/tooltip/replace)
+
+   Both attributes live on #a11y-content-wrapper (+ mirrored to <html>).
+   Only the matching span for the active text-mode is ever visible.
+   The display-mode controls the visual presentation of that span.
+   ========================================================== */
+
+/* ── Base: all spans hidden ── */
+.image-alt-word,
+.image-alt-descriptive,
+.image-alt-aac {
+  display: none;
+  font-size: var(--font-size-sm);
+  color: var(--brand-c-text-dark);
+  margin-top: var(--space-xs);
+}
+
+/* ── Text mode: which span is eligible ──
+   Only the matching span gets display from the display-mode rules.
+   mode=none → nothing shown (default, no rules needed). */
+
+/* ── Display mode: HIDDEN (default) ──
+   All spans stay display:none. Screen readers still read the img alt. */
+
+/* ── Display mode: CAPTION — block below image ── */
+[data-alt-display-mode="caption"][data-alt-text-mode="word"] .image-alt-word,
+[data-alt-display-mode="caption"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
+[data-alt-display-mode="caption"][data-alt-text-mode="aac"] .image-alt-aac {
+  display: block;
+}
+
+/* ── Display mode: OVERLAY — positioned over the image ── */
+[data-alt-display-mode="overlay"][data-alt-text-mode="word"] .image-alt-word,
+[data-alt-display-mode="overlay"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
+[data-alt-display-mode="overlay"][data-alt-text-mode="aac"] .image-alt-aac {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-top: 0;
+  padding: var(--space-sm);
+  background: var(--color-surface-inverse, #000);
+  color: var(--color-White);
+}
+
+/* ── Display mode: TOOLTIP — visible on figure hover ── */
+[data-alt-display-mode="tooltip"][data-alt-text-mode="word"] .image:hover .image-alt-word,
+[data-alt-display-mode="tooltip"][data-alt-text-mode="descriptive"] .image:hover .image-alt-descriptive,
+[data-alt-display-mode="tooltip"][data-alt-text-mode="aac"] .image:hover .image-alt-aac,
+[data-alt-display-mode="tooltip"][data-alt-text-mode="word"] .image:focus-within .image-alt-word,
+[data-alt-display-mode="tooltip"][data-alt-text-mode="descriptive"] .image:focus-within .image-alt-descriptive,
+[data-alt-display-mode="tooltip"][data-alt-text-mode="aac"] .image:focus-within .image-alt-aac {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-top: 0;
+  padding: var(--space-sm);
+  background: color-mix(in srgb, var(--color-Black) 80%, transparent);
+  color: var(--color-White);
+}
+
+/* ── Display mode: SUBTITLE — image shrinks via flex, text below ──
+   Requires height constraint from parent (card, grid cell, aspect-ratio). */
+[data-alt-display-mode="subtitle"] .image {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-alt-display-mode="subtitle"] .image .image__img {
+  flex: 1 1 0;
+  min-height: 4rem;
+  object-fit: cover;
+}
+
+[data-alt-display-mode="subtitle"][data-alt-text-mode="word"] .image-alt-word,
+[data-alt-display-mode="subtitle"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
+[data-alt-display-mode="subtitle"][data-alt-text-mode="aac"] .image-alt-aac {
+  display: block;
+  flex: 0 0 auto;
+}
+
+/* ── Display mode: REPLACE — image visually-hidden, text shown ──
+   Uses visually-hidden (not display:none) so img stays in the
+   accessibility tree. Screen reader still reads img alt. */
+[data-alt-display-mode="replace"] .image .image__img {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+[data-alt-display-mode="replace"][data-alt-text-mode="word"] .image-alt-word,
+[data-alt-display-mode="replace"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
+[data-alt-display-mode="replace"][data-alt-text-mode="aac"] .image-alt-aac {
+  display: block;
+  padding: var(--space-md);
+  background: color-mix(in srgb, var(--brand-c-text-dark) 8%, transparent);
+  border-radius: var(--radius-md, 8px);
+  margin-top: 0;
+}
+
+/* ==========================================================
+   AAC MODE — semantic role tiers
+
+   data-semantic-role on wrapper elements controls what AAC
+   mode does to icons and images:
+     decorative     → hidden entirely
+     ui-control     → hide icon, show text label (needs markup)
+     content-symbol → hide icon, show AAC cards
+
+   NOTE: Icon.astro uses <span class="icon">, not .icon-svg.
+   There is no .icon-label element — ui-control label display
+   requires adding a label element to icon wrapper markup.
+   ========================================================== */
+
+/* Decorative: hidden in AAC mode */
+[data-alt-text-mode="aac"] [data-semantic-role="decorative"] {
+  display: none;
+}
+
+/* UI control: hide icon SVG */
+[data-alt-text-mode="aac"] [data-semantic-role="ui-control"] .icon {
+  display: none;
+}
+
+/* Content symbol: hide icon/image, show AAC cards */
+[data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .icon {
+  display: none;
+}
+[data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .image__img {
+  display: none;
+}
+[data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .image-alt-aac {
+  display: block;
+}
+
+/* ==========================================================
+   COGNITIVE LEVEL — vocabulary depth filtering
+
+   data-cognitive-level on <html> controls which AAC cards
+   are visible based on AssistiveWare core vocabulary tiers.
+   Cards carry data-core-tier="green|yellow|orange|fringe".
+
+   green  → survival vocabulary only (60 words)
+   yellow → + 1-2 word combiners (148 cumulative)
+   orange → + complex/later vocabulary (251 cumulative)
+   full   → all tiers including fringe domain nouns
+   ========================================================== */
+
+[data-cognitive-level="green"] .aac-card[data-core-tier="yellow"],
+[data-cognitive-level="green"] .aac-card[data-core-tier="orange"],
+[data-cognitive-level="green"] .aac-card[data-core-tier="fringe"] {
+  display: none;
+}
+
+[data-cognitive-level="yellow"] .aac-card[data-core-tier="orange"],
+[data-cognitive-level="yellow"] .aac-card[data-core-tier="fringe"] {
+  display: none;
+}
+
+[data-cognitive-level="orange"] .aac-card[data-core-tier="fringe"] {
+  display: none;
+}
+
+/* Full — show everything (default, no hiding needed) */

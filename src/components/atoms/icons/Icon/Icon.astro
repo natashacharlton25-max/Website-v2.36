@@ -64,13 +64,14 @@ interface Props {
   drawColor?: string;
   morphTo?: string;
   morphColor?: string;
+  semanticRole?: 'decorative' | 'ui-control' | 'content-symbol';
 }
 
 const {
   name, weight, size = 24, class: className = '', color,
   shadow, glow, gradient, spin, pulse, bounce, stroke,
   draw, drawOnScroll, drawScrub, drawColor,
-  morphTo, morphColor,
+  morphTo, morphColor, semanticRole,
 } = Astro.props;
 
 // ─── Weight suffixes (for slug detection) ───────────────
@@ -237,5 +238,7 @@ if (morphTo && morphTargetContent) {
   class={`icon ${effectClasses} ${className}`}
   style={`width: ${size}px; height: ${size}px;${color && !gradient ? ` color: ${color};` : ''}`}
   set:html={iconContent || fallbackIcon}
+  aria-hidden="true"
+  data-semantic-role={semanticRole}
   {...dataAttrs}
 />

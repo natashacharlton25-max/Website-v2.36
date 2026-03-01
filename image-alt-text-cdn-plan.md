@@ -36,7 +36,7 @@ Every asset — icon, lottie, or image — gets a unique hashed ID. The identity
 - 1,554 alt_symbols seeded — each maps a `word` to up to two visual representations:
   - `aac_url`: ARASAAC pictogram PNG (1,553 have one, auto-matched by keyword — many are semantically wrong)
   - `icon_id`: FK to Phosphor icon in `assets` table (1,512 linked, 42 are AAC-only with no Phosphor equivalent)
-  - 1 orphan row ("sunset") from deleted test seed — no AAC URL or icon_id
+  - 0 orphan rows
   - **Needs `verified` boolean** — all current entries are auto-seeded, not human-reviewed. Resolver should prefer verified entries when ambiguity exists.
   - **Architectural note:** These 1,554 entries are valid as resolver vocabulary — the resolver looks up words from alt text strings against this table. They should NOT be used for direct icon-name→pictogram matching. See Phase 3c: icons feed their alt text through the resolver, not their SVG name.
 - `versions` table has `r2_key` column; `assets` table does not
@@ -615,10 +615,10 @@ Script does:
 
 ### Audit Snapshot (1 Mar 2026 — post Phase 4b)
 
-**D1 `assets` table has:** id, slug, name, base_name, type, storage, current_version, license_key, alt_symbol_id, alt_descriptive, alt_aac_phrase, source, created_at, updated_at, file_hash, version, category, brand, semantic_role, new_id, url, mime_type, width, height, file_size
+**D1 `assets` table has:** id, slug, name, base_name, type, storage, current_version, license_key, alt_symbol_id, alt_descriptive, alt_aac_phrase, source, created_at, updated_at, file_hash, version, category, brand, semantic_role, url, mime_type, width, height, file_size
 **D1 `assets` count:** 4,567 rows (4,566 icons/lotties + 1 test image). IDs: `shared_{icon|anim}_{slug}_{hash}` for existing, `{brand}_{category}_{name}_{hash}` for images.
 **D1 `versions` table has:** r2_key, content (text storage for SVG/Lottie)
-**D1 `alt_symbols` table:** 1,799 rows (1,579 fringe + 220 core vocabulary). `core_tier` column: 60 green, 88 yellow, 103 orange, 1,548 null/fringe. `verified` column (all 0). Stop words reduced to 5 (was 20).
+**D1 `alt_symbols` table:** 1,799 rows (1,579 fringe + 220 core vocabulary). `core_tier` column: 60 green, 88 yellow, 103 orange, 1,548 null/fringe. `verified` column (all 0). Stop words reduced to 5 (was 20). All rows have `id` (222 backfilled with `sym_` prefix).
 **Current IDs:** `shared_icon_{slug}_{hash}` / `shared_anim_{slug}_{hash}` — swap complete, all FKs updated
 **R2 bucket:** 1 image uploaded (`images/articles-hero_0aff4f/v1.png`). Worker route live with immutable caching.
 **API routes:** Full CRUD on /v1/assets, /v1/alt-symbols, /v1/tags, /v1/brands, /v1/licenses, /v1/usage, /v1/health
@@ -628,6 +628,7 @@ Script does:
 **Context overrides:** `alt_symbol_context_overrides` table — 5 rows (aviation blocks taxi), indexed on context_token
 **Semantic roles:** 463 content-symbol, 33 decorative, 4,071 ui-control
 **Build pipeline:** snapshot-alt-text.js → 3 JSON files (incl. core_tier) → loadAllAltText() → resolver with maxTier → static HTML with data-core-tier cards. Zero unresolved words.
+**Image atom:** Audited + refactored to Badge pattern. No @layer, no ambient transitions, animation gated behind .image--animate. Schema with content/visual/animation split. a11y.css → _reference/. Test page verified full pipeline (D1 → snapshot → resolver → AAC pictogram cards → Image atom → HTML).
 
 ### Phase 1 — Now (done)
 - [x] Alt symbols table — 1,554 words with ARASAAC pictogram URLs (1,553) and/or Phosphor icon links (1,512). Used as vocabulary lookup by the AAC resolver — alt text strings are resolved against this table at build time. Not used for direct icon-name→pictogram matching.
@@ -680,7 +681,7 @@ ID swap (done — atomic D1 transaction):
 - [x] Updated `lottie_mappings.lottie_asset_id` + `static_asset_id` (33 rows)
 - [x] Updated `alt_symbols.icon_id` (1,512 rows WHERE NOT NULL)
 - [x] `brand_assets` + `usage_log` — 0 rows, guarded
-- [ ] Drop `new_id` column (redundant now — equals `id`)
+- [x] Drop `new_id` column (redundant now — equals `id`)
 - [x] Post-swap verification: zero orphans, zero row count changes across all FK tables
 - [x] Note: D1 file imports enforce FK constraints — use `PRAGMA foreign_keys = OFF` at top of migration
 
@@ -689,8 +690,9 @@ ID swap (done — atomic D1 transaction):
 - [x] `upload-image.ts` CLI script — three paths: new asset (R2 + D1 + versions), changed file (version bump), same file (metadata-only update). Accepts `--alt` and `--aac-phrase` arguments.
 - [x] Migration 011: added `url`, `mime_type`, `width`, `height`, `file_size` to assets
 - [x] First test image: `mtb_hero_articles-hero_0aff4f` — 1600×550 PNG, full round-trip verified (R2 → Worker → CDN headers)
-- [ ] Tooltip mode: add `:focus-within` on `.image` + touch toggle for keyboard/mobile users (deferred)
-- [ ] `alt_text_log` table for safeguarding traceability — alt text changes on therapeutic content must be auditable
+- [x] Tooltip mode: `:focus-within` added alongside `:hover` on Image.css tooltip selectors + `tabindex="0"` on figure for keyboard focus
+- [ ] Tooltip atom: replace all 4 scattered CSS tooltip patterns with a proper accessible component (see spec below)
+- [x] `alt_text_log` table for safeguarding traceability — alt text changes on therapeutic content auditable
 
 ### Phase 3c — AAC Mode (language-first, not icon-swap) (done)
 
@@ -890,12 +892,12 @@ Icon categorisation:
 - [x] Categorised 4,566 assets: 463 content-symbol (154 base_names × 3 weights + 1 test image), 33 decorative (lotties), 4,071 ui-control
 - [x] 6 US→UK word swaps applied (aeroplane, biscuit, torch, postbox, bin, lorry)
 - [x] 25 new alt_symbols created for compound base_names + gaps (UK English, 23/25 with ARASAAC pictograms)
-- [ ] Write AAC-mode CSS for three tiers (hide decorative, text-label ui-control, resolver-output content-symbol)
+- [x] Write AAC-mode CSS for three tiers (hide decorative, text-label ui-control, resolver-output content-symbol)
 - [x] Existing 1,799 alt_symbol entries positioned as vocabulary — valid resolver lookup targets (251 core + 1,548 fringe)
 
 Alt text quality:
-- [ ] Review existing alt text on content-symbol assets — ensure phrasing is meaningful, not decorative
-- [ ] Add AAC-friendly verb bias to AI content generation prompts
+- [x] Review existing alt text on content-symbol assets — 1 image (articles-hero): alt_descriptive good, alt_aac_phrase resolves fully (books/shelf/warm all have pictograms)
+- [x] Add AAC-friendly verb bias to AI content generation prompts (spec written: `spec-aac-friendly-writing-rules.md`)
 - [ ] Ensure scrollytelling step data includes alt text field per step
 
 Resolver:
@@ -907,10 +909,10 @@ Resolver:
 - [x] `buildSymbolMap` deduplicates, verified entries take priority
 - [x] Stop words reduced to 5 (a, an, the, was, were) — 15 removed as AAC core vocabulary
 - [x] Lemma: OpenAAC words-en.json (CC BY 4.0) reverse index replaces 20-entry hardcoded map. LEMMA_SUPPLEMENT for 4 forms (moving/moved→move, stopping/stopped→stop) absent from OpenAAC.
-- [ ] Support multi-card output for phrase decomposition
-- [ ] Update `.image-alt-aac` span to render multiple cards from resolved array
-- [ ] Add `aac_hint` field to AI content generation prompts/schemas
-- [ ] Wire resolver into page templates
+- [x] Support multi-card output for phrase decomposition
+- [x] Update `.image-alt-aac` span to render multiple cards from resolved array
+- [x] Add `aac_hint` field to AI content generation prompts/schemas (spec written: `spec-aac-hint-field.md`)
+- [x] Wire resolver into page templates (test page verified; production pages outstanding)
 - [x] `verified` boolean on `alt_symbols` (added Phase 3a)
 - [x] Resolver prefers verified entries when ambiguity exists
 - [x] Removed `type: 'icon'` from resolver, aac-inline.ts, and aac-cards.ts — AAC = ARASAAC pictogram or text only
@@ -918,7 +920,7 @@ Resolver:
 - [x] Added `alt_aac_phrase` column to assets — curated 3-4 word phrases for images (resolver input for multi-concept scenes)
 - [x] `upload-image.ts` accepts `--aac-phrase` argument
 - [x] `check-unresolved-words.ts` uses `alt_aac_phrase` (not `alt_descriptive`)
-- [ ] Clean up orphan "sunset" alt_symbol row
+- [x] Clean up orphan "sunset" alt_symbol row
 
 Resolver performance:
 - [x] Snapshot `alt_symbols` + `alt_symbol_context_overrides` into JSON alongside alt-text snapshot
@@ -949,7 +951,8 @@ Resolver performance:
 - [x] `loadAllAltText()` build utility reads from JSON snapshots, runs resolver, returns Map<string, AltData>
 - [x] Post-build: `check-unresolved-words.ts` — runs resolver against all `alt_aac_phrase` values. Current output: 0 unresolved.
 - [x] Page wiring pattern established (about.astro example) — loadAllAltText() once, .get(assetName) per image
-- [ ] Wire remaining pages — per-page migration from astro:assets Image to custom Image atom
+- [x] Test page (src/pages/test/image-alt.astro) verifies full vertical slice: loadAllAltText() → Image atom → descriptive alt, AAC pictogram cards with data-core-tier
+- [ ] Wire remaining 30 consumers — pages call loadAllAltText(), cascade through sections/cards to Image atom. Scale when content grows.
 - [ ] Spread aacInline to page content
 - [ ] Legal pages three content levels
 - [ ] `loadAllAltText()` scaling: partition by brand or add `modifiedSince` param if asset count reaches thousands
@@ -992,8 +995,8 @@ Green feelings — all 15 have pictograms (including synonym lookups: afraid→"
 - [x] `pictogramCard()` and `textOnlyCard()` emit `data-core-tier` attribute on cards
 - [x] Snapshot includes `core_tier` from D1
 - [x] `loadAllAltText()` passes `core_tier` through to card renderers
-- [ ] CSS tier filtering: `data-cognitive-level` on `<html>`, hide cards above selected tier
-- [ ] A11y panel control for cognitive level (Green/Yellow/Orange/Full)
+- [x] CSS tier filtering: `data-cognitive-level` on `<html>`, hide cards above selected tier
+- [x] A11y panel control for cognitive level (Green/Yellow/Orange/Full)
 - [ ] Wire cognitive level to workbook response libraries (future — when workbook system is built)
 - [ ] Wire cognitive level to CSS input sizing variables (future)
 
@@ -1009,20 +1012,116 @@ Green feelings — all 15 have pictograms (including synonym lookups: afraid→"
 </span>
 ```
 
-**CSS tier filtering:**
+**CSS tier filtering (implemented in Image.css):**
 ```css
 [data-cognitive-level="green"] .aac-card[data-core-tier="yellow"],
 [data-cognitive-level="green"] .aac-card[data-core-tier="orange"],
-[data-cognitive-level="green"] .aac-card:not([data-core-tier]) { display: none; }
+[data-cognitive-level="green"] .aac-card[data-core-tier="fringe"] { display: none; }
 
 [data-cognitive-level="yellow"] .aac-card[data-core-tier="orange"],
-[data-cognitive-level="yellow"] .aac-card:not([data-core-tier]) { display: none; }
+[data-cognitive-level="yellow"] .aac-card[data-core-tier="fringe"] { display: none; }
 
-[data-cognitive-level="orange"] .aac-card:not([data-core-tier]) { display: none; }
+[data-cognitive-level="orange"] .aac-card[data-core-tier="fringe"] { display: none; }
 
-/* Full — show everything */
-[data-cognitive-level="full"] .aac-card { display: inline-flex; }
+/* Full — show everything (default, no hiding needed) */
 ```
+
+### Phase 4c — Image Atom Refactor (done)
+
+Image atom fully audited and refactored to match Badge target pattern (render refactor plan).
+
+**File structure (matches Badge):**
+```
+Image/
+  Image.astro            ← pure, .image--animate gates motion
+  Image.css              ← no @layer, animation rules under .image--animate
+  Image.responsive.css   ← no @layer, breakpoints only
+  Image.schema.json      ← content/visual/animation split
+  index.ts               ← CSS imports + exports (no a11y import)
+  _reference/Image/      ← legacy a11y files preserved (not deleted)
+```
+
+**Changes applied:**
+- [x] Removed `@layer components` wrapper from Image.css and Image.responsive.css
+- [x] Gated transition, hover transform, and tilt behind `.image--animate` (CSS-level invariant)
+- [x] Added `semanticRole` prop to Image.astro (`data-semantic-role` on figure)
+- [x] Flipped `resolvedAlt` fallback to `altDescriptive || altWord || alt || ''` (richest text for screen readers)
+- [x] Moved Image.a11y.css and Image.a11y.recovery.css to `_reference/Image/` (extraction process followed — all 5 rules confirmed "already covered" by render pipeline)
+- [x] Removed `import './Image.a11y.css'` from index.ts
+- [x] Created Image.schema.json: content (src, alt, role, altWord, altDescriptive, altAacHtml, semanticRole, loading), visual (width, height, fit, radius, shadow, responsive, sepia, blur, gradientMask, clipPath), animation (hover, tilt)
+- [x] AAC semantic role CSS added to Image.css (decorative hidden, ui-control icon hidden, content-symbol shows AAC cards)
+- [x] Cognitive level tier CSS added to Image.css (green/yellow/orange/fringe filtering with corrected `[data-core-tier="fringe"]` selector)
+- [x] Test page verified full pipeline: `loadAllAltText()` → Image atom → descriptive alt + 3 AAC pictogram cards with `data-core-tier="fringe"`
+
+**Outstanding for Icon.astro (partially done):**
+- [x] `aria-hidden="true"` added to icon span (default — icons are decorative in most contexts)
+- [x] `semanticRole` prop + `data-semantic-role` attribute added (AAC CSS target)
+- [x] Schema `renders.textonly` changed to `null` (icons don't render in textonly mode)
+- [x] Icon atom re-audited against render refactor plan
+- [ ] Add `.icon-label` element + wrapper `<span class="icon-wrapper">` — 41-consumer blast radius, parked for Tooltip atom build
+
+### Future — Tooltip Atom (render refactor Phase 5/7)
+
+A learning site with AAC users needs a proper accessible tooltip component. Currently 4 scattered CSS-only tooltip patterns exist, all `:hover`-only with no keyboard or touch support.
+
+**Patterns to replace:**
+
+| Current pattern | Location | Replacement |
+|----------------|----------|-------------|
+| `[data-tooltip]` + `::after` | utilities.css ~line 230 | `<Tooltip>` wrapping trigger element |
+| Image alt tooltip mode | Image.css tooltip selectors | `<Tooltip>` wrapping `<Image>` (or keep CSS-only with `:focus-within` fix already applied) |
+| ReaderNav info tooltip | ReaderNav.css ~line 99 | `<Tooltip>` wrapping nav button |
+| Share button tooltips | ShareSection.astro ~line 153 | `<Tooltip>` wrapping share buttons |
+
+**Component spec:**
+
+```
+Tooltip/
+  Tooltip.astro          ← pure, slot-based wrapper
+  Tooltip.css            ← positioning, appearance
+  Tooltip.responsive.css ← mobile: bottom-sheet or tap-to-show
+  Tooltip.schema.json    ← content/visual/animation split
+  index.ts               ← exports
+```
+
+**Props (schema):**
+```json
+{
+  "content": {
+    "text": { "type": "string", "required": true, "description": "Tooltip content (plain text or simple HTML)" },
+    "id": { "type": "string", "description": "aria-describedby target — auto-generated if omitted" }
+  },
+  "visual": {
+    "position": { "type": "string", "enum": ["top", "bottom", "left", "right"], "default": "top" },
+    "variant": { "type": "string", "enum": ["default", "aac"], "default": "default", "description": "aac variant uses larger text, pictogram-friendly sizing" }
+  },
+  "animation": {
+    "fade": { "type": "boolean", "default": false, "description": "Fade in/out transition" }
+  }
+}
+```
+
+**Accessibility requirements:**
+- Trigger: `:hover` + `:focus-within` (keyboard) + touch tap (mobile)
+- `aria-describedby` links trigger to tooltip content
+- Dismiss on `Escape` key
+- Dismiss on outside click/tap (mobile)
+- `role="tooltip"` on the tooltip element
+- Respects `prefers-reduced-motion` via render pipeline (no fade in reduced render)
+- Touch: first tap shows tooltip, second tap activates trigger. Or long-press to show.
+
+**AAC variant:**
+- Larger font size for readability
+- Wider max-width to accommodate pictogram cards
+- Used when tooltip content includes AAC cards or vocabulary definitions
+- Supports HTML content (not just plain text) for inline pictograms
+
+**Learning site use cases:**
+- Vocabulary definitions on hover/focus ("What does this word mean?")
+- AAC symbol explanations ("This pictogram means...")
+- Help text for workbook inputs
+- Navigation labels for icon-only buttons
+- Alt text display (replaces current Image tooltip mode)
 
 ### Safeguarding — Alt Text Audit Trail
 
@@ -1040,10 +1139,11 @@ CREATE TABLE alt_text_log (
 );
 ```
 
-- [ ] Create `alt_text_log` table in D1
-- [ ] Upload script logs alt text changes (insert row on every `alt_descriptive` write/update)
-- [ ] API PATCH routes for assets log alt field changes
-- [ ] Retention policy: logs kept indefinitely (safeguarding requirement)
+- [x] Create `alt_text_log` table in D1 (Migration 013)
+- [x] Upload script logs alt text changes (4 write points: metadata update, new asset, version bump, alt_symbol_id link)
+- [x] API PATCH routes log alt field changes (alt_symbol_id, alt_descriptive, alt_aac_phrase). Gap fixed: alt_aac_phrase added to PATCH handler.
+- [x] Retention policy: logs kept indefinitely (safeguarding requirement)
+- [x] Backfilled 222 alt_symbol rows with missing IDs (sym_ prefix + random hex). Upload script symbol lookup now correctly links alt_symbol_id.
 
 ---
 
@@ -1064,5 +1164,5 @@ CREATE TABLE alt_text_log (
 | AAC resolver | src/lib/aac/aacResolver.ts | Build time — single pipeline for all content |
 | Lemma lookup | src/data/words-en.json (OpenAAC, CC BY 4.0) | Module load — ~8,800 inflection→base reverse index |
 | Cognitive level | data-cognitive-level on html + data-core-tier on cards | CSS toggles vocabulary depth (green/yellow/orange/full) |
-| Image atom | Pure props | Receives data, no fetching |
+| Image atom | Pure props, .image--animate gates motion | Matches Badge pattern — no @layer, no ambient transitions |
 | Alt text audit | D1 alt_text_log | Every alt text change logged (safeguarding) |

@@ -72,6 +72,7 @@ function buildMetaResponse(asset: AssetRow, version: VersionRow, tags: string[],
     ...(usageCount !== undefined ? { usageCount } : {}),
     altSymbolId: asset.alt_symbol_id ?? null,
     altDescriptive: asset.alt_descriptive ?? null,
+    altAacPhrase: asset.alt_aac_phrase ?? null,
     createdAt: asset.created_at,
     updatedAt: asset.updated_at,
   };
@@ -481,6 +482,7 @@ export async function handleAssetPatch(request: Request, env: Env, slug: string)
   const body = await request.json() as Record<string, any>;
   const now = new Date().toISOString();
   const stmts: D1PreparedStatement[] = [];
+  const altLogStmts: D1PreparedStatement[] = [];
 
   // Update name
   if (body.name) {
@@ -499,15 +501,35 @@ export async function handleAssetPatch(request: Request, env: Env, slug: string)
       .bind(body.license_url, now, asset.id));
   }
 
-  // Update alt text fields
+  // Update alt text fields (with audit logging)
   if (body.alt_symbol_id !== undefined) {
     stmts.push(env.DB.prepare('UPDATE assets SET alt_symbol_id = ?, updated_at = ? WHERE id = ?')
       .bind(body.alt_symbol_id, now, asset.id));
+    if ((body.alt_symbol_id ?? null) !== (asset.alt_symbol_id ?? null)) {
+      altLogStmts.push(env.DB.prepare(
+        'INSERT INTO alt_text_log (asset_id, field, old_value, new_value, changed_by) VALUES (?, ?, ?, ?, ?)'
+      ).bind(asset.id, 'alt_symbol_id', asset.alt_symbol_id ?? null, body.alt_symbol_id ?? null, 'api'));
+    }
   }
 
   if (body.alt_descriptive !== undefined) {
     stmts.push(env.DB.prepare('UPDATE assets SET alt_descriptive = ?, updated_at = ? WHERE id = ?')
       .bind(body.alt_descriptive, now, asset.id));
+    if ((body.alt_descriptive ?? null) !== (asset.alt_descriptive ?? null)) {
+      altLogStmts.push(env.DB.prepare(
+        'INSERT INTO alt_text_log (asset_id, field, old_value, new_value, changed_by) VALUES (?, ?, ?, ?, ?)'
+      ).bind(asset.id, 'alt_descriptive', asset.alt_descriptive ?? null, body.alt_descriptive ?? null, 'api'));
+    }
+  }
+
+  if (body.alt_aac_phrase !== undefined) {
+    stmts.push(env.DB.prepare('UPDATE assets SET alt_aac_phrase = ?, updated_at = ? WHERE id = ?')
+      .bind(body.alt_aac_phrase, now, asset.id));
+    if ((body.alt_aac_phrase ?? null) !== (asset.alt_aac_phrase ?? null)) {
+      altLogStmts.push(env.DB.prepare(
+        'INSERT INTO alt_text_log (asset_id, field, old_value, new_value, changed_by) VALUES (?, ?, ?, ?, ?)'
+      ).bind(asset.id, 'alt_aac_phrase', asset.alt_aac_phrase ?? null, body.alt_aac_phrase ?? null, 'api'));
+    }
   }
 
   // Replace tags
@@ -537,6 +559,11 @@ export async function handleAssetPatch(request: Request, env: Env, slug: string)
 
   if (stmts.length > 0) {
     await env.DB.batch(stmts);
+  }
+
+  // Write audit log entries (after main batch succeeds)
+  if (altLogStmts.length > 0) {
+    await env.DB.batch(altLogStmts);
   }
 
   return json({ slug, message: 'Metadata updated' });

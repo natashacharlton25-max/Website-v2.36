@@ -5,7 +5,7 @@
 ### atoms/icons/
 | Folder | Audited | Status | Notes |
 |--------|---------|--------|-------|
-| Icon | yes | done | Extraction complete. a11y.css deleted (before _reference rule). Schema + barrel updated. |
+| Icon | yes | done | Extraction complete. a11y.css deleted (before _reference rule). Re-audited: added `aria-hidden="true"`, `semanticRole` prop + `data-semantic-role` attribute, `renders.textonly: null`. Parked: `.icon-label` + wrapper span (41-consumer blast radius — do with Tooltip atom). |
 | LottieIcon | yes | done | Moved to own folder. Scoped `<style>` → LottieIcon.css (no @layer, no :global). Schema + barrel created. `renders.textonly: null` (decorative, not rendered). Imports updated in Button, GlassNav, ReaderNav, ShareSection → barrel. |
 
 ### atoms/ui/
@@ -63,7 +63,7 @@
 ### atoms/images/
 | Folder | Audited | Status | Notes |
 |--------|---------|--------|-------|
-| Image | | pending | |
+| Image | yes | done | Full extraction process followed. @layer unwrapped from Image.css + Image.responsive.css. Ambient transition + hover transform + tilt gated behind `.image--animate` (CSS-level invariant). a11y.css + a11y.recovery.css → _reference/Image/. All 5 a11y rules confirmed "already covered" by render pipeline. Schema created (content/visual/animation split — hover + tilt in animation). `semanticRole` prop added. `resolvedAlt` flipped to descriptive-first. AAC semantic role CSS + cognitive level tier CSS added. Test page verified full alt text pipeline. |
 
 ---
 

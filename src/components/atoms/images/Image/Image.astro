@@ -95,6 +95,9 @@ const resolvedAlt = isDecorative
   ? ''
   : (altDescriptive || altWord || alt || '');
 
+// Animation gate — true when any motion prop is set
+const hasMotion = hover || tilt;
+
 // Image element classes (visual treatment)
 const imgClasses = [
   'image__img',
@@ -109,6 +112,12 @@ const imgClasses = [
   clipPath ? `image--clip-${clipPath}` : '',
   tilt ? `image--tilt-${tilt}` : '',
   className,
+].filter(Boolean);
+
+// Figure wrapper classes
+const figureClasses = [
+  'image',
+  hasMotion ? 'image--animate' : '',
 ].filter(Boolean);
 ---
 
@@ -125,7 +134,7 @@ const imgClasses = [
     {...dataAttrs}
   />
 ) : (
-  <figure class="image" data-role="content" data-semantic-role={semanticRole}>
+  <figure class:list={figureClasses} data-role="content" data-semantic-role={semanticRole} tabindex="0">
     <img
       src={src}
       alt={resolvedAlt}

@@ -19,6 +19,7 @@ export interface AssetRow {
   base_name: string | null;
   alt_symbol_id: string | null;
   alt_descriptive: string | null;
+  alt_aac_phrase: string | null;
   created_at: string;
   updated_at: string;
   archived: number;

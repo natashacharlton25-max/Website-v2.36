@@ -89,6 +89,14 @@ try {
 }
 
 const escapeSql = (s: string) => s.replace(/'/g, "''");
+
+// ─── Alt text audit logging ─────────────
+function logAltChange(assetId: string, field: string, oldVal: string | null, newVal: string | null) {
+  if (oldVal === newVal) return;
+  const o = oldVal ? `'${escapeSql(oldVal)}'` : 'NULL';
+  const n = newVal ? `'${escapeSql(newVal)}'` : 'NULL';
+  d1Query(`INSERT INTO alt_text_log (asset_id, field, old_value, new_value, changed_by) VALUES ('${assetId}', '${field}', ${o}, ${n}, 'upload-script')`);
+}
 const now = new Date().toISOString();
 const slug = name;
 const versionId = `${id}_v${version}`;
@@ -103,11 +111,24 @@ const height = dimensions.height || 0;
 
 if (metadataOnly) {
   // ─── Metadata-only: just update alt text + timestamps ──
+  // Fetch current values for audit log
+  let currentAlt: string | null = null;
+  let currentAac: string | null = null;
+  try {
+    const cur = JSON.parse(d1Query(`SELECT alt_descriptive, alt_aac_phrase FROM assets WHERE id = '${id}'`));
+    currentAlt = cur[0]?.results?.[0]?.alt_descriptive ?? null;
+    currentAac = cur[0]?.results?.[0]?.alt_aac_phrase ?? null;
+  } catch {}
+
   const setClauses = [`updated_at = '${now}'`];
   if (altText) setClauses.push(`alt_descriptive = '${escapeSql(altText)}'`);
   if (aacPhrase) setClauses.push(`alt_aac_phrase = '${escapeSql(aacPhrase)}'`);
   d1Query(`UPDATE assets SET ${setClauses.join(', ')} WHERE id = '${id}'`);
   console.log('D1 assets row updated (metadata only)');
+
+  // Audit log
+  if (altText) logAltChange(id, 'alt_descriptive', currentAlt, altText);
+  if (aacPhrase) logAltChange(id, 'alt_aac_phrase', currentAac, aacPhrase);
 } else {
   // ─── 5. Upload to R2 ───────────────────────
   console.log(`R2 key: ${r2Key}`);
@@ -127,13 +148,30 @@ if (metadataOnly) {
       ` VALUES ('${id}', '${escapeSql(name)}', '${escapeSql(slug)}', '${escapeSql(name)}', 'image', 'r2', '${versionId}', 'upload-script', 'proprietary', '${now}', '${now}', 0, '${category}', '${brand}', ${version}, '${hash}', 'content-symbol', '${cdnUrl}', '${mimeType}', ${width}, ${height}, ${fileSize}${altVal}${aacVal})`,
     );
     console.log('D1 assets row inserted');
+
+    // Audit log — new asset, old values are NULL
+    if (altText) logAltChange(id, 'alt_descriptive', null, altText);
+    if (aacPhrase) logAltChange(id, 'alt_aac_phrase', null, aacPhrase);
   } else {
+    // Fetch current values for audit log
+    let prevAlt: string | null = null;
+    let prevAac: string | null = null;
+    try {
+      const prev = JSON.parse(d1Query(`SELECT alt_descriptive, alt_aac_phrase FROM assets WHERE id = '${id}'`));
+      prevAlt = prev[0]?.results?.[0]?.alt_descriptive ?? null;
+      prevAac = prev[0]?.results?.[0]?.alt_aac_phrase ?? null;
+    } catch {}
+
     const altClause = altText ? `, alt_descriptive = '${escapeSql(altText)}'` : '';
     const aacClause = aacPhrase ? `, alt_aac_phrase = '${escapeSql(aacPhrase)}'` : '';
     d1Query(
       `UPDATE assets SET version = ${version}, file_hash = '${hash}', url = '${cdnUrl}', current_version = '${versionId}', mime_type = '${mimeType}', width = ${width}, height = ${height}, file_size = ${fileSize}, updated_at = '${now}'${altClause}${aacClause} WHERE id = '${id}'`,
     );
     console.log('D1 assets row updated');
+
+    // Audit log
+    if (altText) logAltChange(id, 'alt_descriptive', prevAlt, altText);
+    if (aacPhrase) logAltChange(id, 'alt_aac_phrase', prevAac, aacPhrase);
   }
 
   // ─── 7. Insert versions row ─────────────────
@@ -151,7 +189,14 @@ try {
   const altRows = altResult[0]?.results;
   if (altRows && altRows.length > 0) {
     const symbolId = altRows[0].id;
+    // Fetch current alt_symbol_id for audit log
+    let prevSymbol: string | null = null;
+    try {
+      const prev = JSON.parse(d1Query(`SELECT alt_symbol_id FROM assets WHERE id = '${id}'`));
+      prevSymbol = prev[0]?.results?.[0]?.alt_symbol_id ?? null;
+    } catch {}
     d1Query(`UPDATE assets SET alt_symbol_id = '${symbolId}' WHERE id = '${id}'`);
+    logAltChange(id, 'alt_symbol_id', prevSymbol, symbolId);
     console.log(`Linked alt_symbol: "${altRows[0].word}" (${symbolId})`);
   } else {
     console.log(`No alt_symbol match for "${wordForm}"`);

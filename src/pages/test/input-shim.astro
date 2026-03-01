@@ -1,0 +1,115 @@
+---
+/**
+ * Test page for AAC Input Shim
+ *
+ * How to test:
+ *   1. Open browser console
+ *   2. Run: localStorage.setItem('a11y-settings', JSON.stringify({inputMethod:'switch', scanSpeed: 1200}))
+ *   3. Reload page — switch scanner auto-starts, cycling through all focusable elements
+ *   4. Press Space to "click" the highlighted element
+ *
+ * For dwell mode:
+ *   localStorage.setItem('a11y-settings', JSON.stringify({inputMethod:'dwell', dwellTime: 800}))
+ *
+ * To stop:
+ *   localStorage.setItem('a11y-settings', JSON.stringify({inputMethod:'off'}))
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="AAC Input Shim Test">
+  <div class="shim-test">
+    <h1>AAC Input Shim Test</h1>
+
+    <p class="shim-test__intro">
+      Open the browser console and paste one of these to activate:
+    </p>
+
+    <pre class="shim-test__code">{`// Switch scanning (press Space to select)
+localStorage.setItem('a11y-settings',
+  JSON.stringify({inputMethod:'switch', scanSpeed: 1200}));
+location.reload();
+
+// Dwell-to-click (hover 800ms to select)
+localStorage.setItem('a11y-settings',
+  JSON.stringify({inputMethod:'dwell', dwellTime: 800}));
+location.reload();
+
+// Turn off
+localStorage.setItem('a11y-settings',
+  JSON.stringify({inputMethod:'off'}));
+location.reload();`}</pre>
+
+    <h2>Test targets</h2>
+
+    <div class="shim-test__buttons">
+      <button class="shim-test__btn" data-label="Button 1">Button 1</button>
+      <button class="shim-test__btn" data-label="Button 2">Button 2</button>
+      <button class="shim-test__btn" data-label="Button 3">Button 3</button>
+    </div>
+
+    <div class="shim-test__links">
+      <a href="#" class="shim-test__link" data-label="Link A">Link A — test anchor</a>
+      <a href="#" class="shim-test__link" data-label="Link B">Link B — test anchor</a>
+    </div>
+
+    <div class="shim-test__field">
+      <label for="test-input">Text input:</label>
+      <input id="test-input" type="text" placeholder="Focus lands here too" />
+    </div>
+
+    <div class="shim-test__field">
+      <label for="test-select">Select dropdown:</label>
+      <select id="test-select">
+        <option>Option 1</option>
+        <option>Option 2</option>
+        <option>Option 3</option>
+      </select>
+    </div>
+
+    <h2>Output</h2>
+    <div id="output" class="shim-test__output">(nothing clicked yet)</div>
+
+    <h2>What to look for</h2>
+    <ul class="shim-test__checklist">
+      <li><strong>Switch mode:</strong> Blue highlight ring cycles through every button, link, and input. Press Space to click.</li>
+      <li><strong>Dwell mode:</strong> Hover over any element — blue ring appears, pulses, then auto-clicks after 800ms.</li>
+      <li><strong>Top bar:</strong> Blue bar (switch) or orange bar (dwell) appears at top of page when active.</li>
+      <li><strong>Feedback:</strong> Green flash on selection.</li>
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .shim-test { max-width: 700px; margin: 6rem auto 2rem; padding: 0 1rem; font-family: system-ui; }
+  .shim-test__intro { margin-bottom: 2rem; color: #666; }
+  .shim-test__code { background: #f5f5f5; padding: 1rem; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; overflow-x: auto; }
+  .shim-test__buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 2rem; }
+  .shim-test__btn { padding: 12px 24px; font-size: 16px; border-radius: 8px; border: 2px solid #333; background: white; cursor: pointer; }
+  .shim-test__links { display: flex; flex-direction: column; gap: 12px; margin-bottom: 2rem; }
+  .shim-test__link { color: #0066ff; font-size: 16px; }
+  .shim-test__field { margin-bottom: 1rem; }
+  .shim-test__field label { display: block; margin-bottom: 4px; font-weight: bold; }
+  .shim-test__field input,
+  .shim-test__field select { padding: 10px; font-size: 16px; border: 2px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; }
+  .shim-test__output { padding: 1rem; background: #e8f5e9; border-radius: 8px; font-size: 18px; font-weight: bold; min-height: 3rem; }
+  .shim-test__checklist { line-height: 1.8; }
+  h2 { margin-top: 2rem; }
+</style>
+
+<script>
+  const output = document.getElementById('output');
+
+  document.querySelectorAll('.shim-test__btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (output) output.textContent = `${btn.getAttribute('data-label')} clicked!`;
+    });
+  });
+
+  document.querySelectorAll('.shim-test__link').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (output) output.textContent = `${link.getAttribute('data-label')} clicked!`;
+    });
+  });
+</script>
