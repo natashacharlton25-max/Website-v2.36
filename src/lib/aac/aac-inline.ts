@@ -2,13 +2,12 @@
  * aac-inline.ts — Build-time AAC card renderer
  *
  * Two-tier word lookup (build-time only, never hits users):
- *   1. Our alt_symbols API   — curated Phosphor→ARASAAC mappings (fast)
+ *   1. Our alt_symbols API   — curated ARASAAC mappings (fast)
  *   2. Open Symbols API      — broader English word coverage (fallback)
  *
- * Three card types for rendering:
+ * Two card types for rendering:
  *   - aac_url (from either source) → pictogram card  (<img>)
- *   - icon_id (alt_symbols only)   → Phosphor icon card (inline <svg>)
- *   - neither                      → text-only card
+ *   - no aac_url                   → text-only card
  *
  * All lookups cached per build — repeated words only fetch once.
  * Open Symbols calls rate-limited with 100ms delay.
@@ -18,7 +17,7 @@
  *   const html = await aacInline('You can use this free', apiBaseUrl);
  */
 
-import { pictogramCard, iconCard, textOnlyCard } from './aac-cards';
+import { pictogramCard, textOnlyCard } from './aac-cards';
 
 const ASSET_API_URL =
   import.meta.env.ASSET_API_URL || 'http://localhost:8787';
@@ -30,7 +29,6 @@ const OPENSYMBOLS_SECRET = import.meta.env.OPENSYMBOLS_SECRET || '';
 
 type AacLookup =
   | { type: 'aac'; src: string }
-  | { type: 'icon'; svg: string }
   | { type: 'text' };
 
 // ── Build-wide cache (persists across all aacInline calls in one build) ──
@@ -140,35 +138,17 @@ async function lookupWord(
 
     if (res.ok) {
       const data = (await res.json()) as {
-        symbols?: { aac_url?: string | null; icon_id?: string | null }[];
+        symbols?: { aac_url?: string | null }[];
       };
       const rows = data.symbols || [];
 
       if (Array.isArray(rows) && rows.length > 0) {
         const row = rows[0];
 
-        // Pictogram URL from ARASAAC (seeded into our DB)
         if (row.aac_url && row.aac_url !== 'null') {
           const result: AacLookup = { type: 'aac', src: row.aac_url };
           cache.set(key, result);
           return result;
-        }
-
-        // Phosphor icon SVG from our Asset Library
-        if (row.icon_id) {
-          try {
-            const svgRes = await fetch(`${apiBase}/v1/assets/${row.icon_id}`);
-            if (svgRes.ok) {
-              const asset = (await svgRes.json()) as { content?: string };
-              if (asset.content) {
-                const result: AacLookup = { type: 'icon', svg: asset.content };
-                cache.set(key, result);
-                return result;
-              }
-            }
-          } catch {
-            // SVG fetch failed — continue to Open Symbols fallback
-          }
         }
       }
     }
@@ -216,9 +196,6 @@ export async function aacInline(
     switch (lookup.type) {
       case 'aac':
         cards.push(pictogramCard(word, lookup.src));
-        break;
-      case 'icon':
-        cards.push(iconCard(word, lookup.svg));
         break;
       case 'text':
         cards.push(textOnlyCard(word));
