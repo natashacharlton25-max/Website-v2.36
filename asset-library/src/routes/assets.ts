@@ -177,6 +177,7 @@ export async function handleAssetList(request: Request, env: Env): Promise<Respo
   const sourceFilter = url.searchParams.get('source');
   const licenseFilter = url.searchParams.get('license');
   const baseNameFilter = url.searchParams.get('base_name');
+  const hasAlt = url.searchParams.get('has_alt');
   const query = url.searchParams.get('q');
   const updatedAfter = url.searchParams.get('updated_after');
   const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '50', 10), 200);

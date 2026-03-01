@@ -136,9 +136,9 @@ function initPage(): void {
     }
   });
 
-  // ── Alt text cards ──
+  // ── Alt text cards (what to show) ──
 
-  const altTextGrid = page.querySelector('.a11y-alttext-grid');
+  const altTextGrid = page.querySelector('[data-setting="altTextMode"]');
   altTextGrid?.addEventListener('click', (e) => {
     const card = (e.target as HTMLElement).closest('.a11y-alttext-card') as HTMLButtonElement;
     if (!card) return;
@@ -157,6 +157,30 @@ function initPage(): void {
 
     if (settings.screenReaderMode) {
       announce(`Image text mode changed to ${label}`);
+    }
+  });
+
+  // ── Alt display mode cards (how to show) ──
+
+  const altDisplayGrid = page.querySelector('[data-setting="altDisplayMode"]');
+  altDisplayGrid?.addEventListener('click', (e) => {
+    const card = (e.target as HTMLElement).closest('.a11y-alttext-card') as HTMLButtonElement;
+    if (!card) return;
+
+    const value = card.dataset.alttext || 'hidden';
+    const label = card.querySelector('.a11y-alttext-card__label')?.textContent || 'Hidden';
+
+    altDisplayGrid.querySelectorAll('.a11y-alttext-card').forEach(btn => {
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    card.setAttribute('aria-pressed', 'true');
+
+    settings.altDisplayMode = value as A11ySettings['altDisplayMode'];
+    saveSettings(settings);
+    applySettings(settings);
+
+    if (settings.screenReaderMode) {
+      announce(`Image display mode changed to ${label}`);
     }
   });
 

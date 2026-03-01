@@ -1,6 +1,6 @@
 ---
 /**
- * Image — Atomic image primitive
+ * Image — Atomic image primitive (pure, no fetching)
  *
  * Every image (photos, illustrations, decorative SVGs, logos)
  * should go through this component. Icon SVGs use Icon.astro instead.
@@ -8,38 +8,34 @@
  * Consumes theme tokens: --media-brightness, --media-saturation, --media-contrast
  * so monochrome/dark/high-contrast themes apply automatically.
  *
- * Styles: Image.css | Image.responsive.css | Image.a11y.css
+ * Styles: Image.css | Image.responsive.css
+ *
+ * Alt text data comes from the page/section that fetches it, not this atom.
+ * Pages call fetchAltData() and pass results as altWord/altDescriptive/altAacHtml.
  *
  * Props:
  *   role      — "content" (default) wraps in <figure> with alt spans
  *               "decorative" renders bare <img alt="" aria-hidden="true">
- *   assetId   — Asset Library slug; fetches alt text data at build time
- *   decorative — DEPRECATED alias for role="decorative"
+ *   altWord        — Short word-level alt text (from API or manual)
+ *   altDescriptive — Long descriptive alt text
+ *   altAacHtml     — Pre-rendered AAC card HTML
+ *   decorative     — DEPRECATED alias for role="decorative"
  *
  * Usage:
  *   <Image src="/images/photo.jpg" alt="A sunset" />
  *   <Image src="/images/photo.jpg" alt="A sunset" fit="cover" />
- *   <Image src="/images/logo.svg" alt="Brand logo" fit="contain" />
  *   <Image src="/images/hero.jpg" role="decorative" />
  *   <Image src="/images/card.jpg" alt="Product" radius="lg" shadow="md" />
- *   <Image src="/images/card.jpg" alt="Product" hover />
- *   <Image src="/images/wide.jpg" alt="Banner" responsive />
- *   <Image src="/images/old.jpg" alt="Vintage" sepia="default" />
- *   <Image src="/images/bg.jpg" role="decorative" blur="lg" />
- *   <Image src="/images/hero.jpg" alt="Hero" gradientMask="fade-bottom" />
- *   <Image src="/images/avatar.jpg" alt="User" clipPath="circle" />
- *   <Image src="/images/card.jpg" alt="Card" tilt="sm" />
- *   <Image src="/images/avatar.jpg" alt="User" width="80" height="80" radius="full" />
- *   <Image src="/images/sunset.jpg" assetId="sunset-photo" />
+ *   <Image src="/images/sunset.jpg" altWord="sunset" altDescriptive="A golden sunset" />
  */
-
-import { fetchAltData } from '../../../../lib/asset-api/fetch-alt';
 
 interface Props {
   src: string;
   alt?: string;
   role?: 'content' | 'decorative';
-  assetId?: string;
+  altWord?: string;
+  altDescriptive?: string;
+  altAacHtml?: string;
   width?: number | string;
   height?: number | string;
   fit?: 'cover' | 'contain' | 'fill' | 'none';
@@ -63,7 +59,9 @@ const {
   src,
   alt,
   role: roleProp,
-  assetId,
+  altWord,
+  altDescriptive,
+  altAacHtml,
   width,
   height,
   fit,
@@ -90,13 +88,10 @@ const dataAttrs = Object.fromEntries(
   Object.entries(rest).filter(([key]) => key.startsWith('data-'))
 );
 
-// Fetch alt text data at build time (content images with assetId only)
-const altData = (!isDecorative && assetId) ? await fetchAltData(assetId) : null;
-
-// Resolve alt text: API word wins over manual alt prop
+// Resolve alt text: altWord wins over manual alt prop
 const resolvedAlt = isDecorative
   ? ''
-  : (altData?.word || alt || '');
+  : (altWord || alt || '');
 
 // Image element classes (visual treatment)
 const imgClasses = [
@@ -138,15 +133,15 @@ const imgClasses = [
       class:list={imgClasses}
       {...dataAttrs}
     />
-    {altData?.word && (
-      <span class="image-alt-word" hidden>{altData.word}</span>
+    {altWord && (
+      <span class="image-alt-word" aria-hidden="true">{altWord}</span>
     )}
-    {altData?.descriptive && (
-      <span class="image-alt-descriptive" hidden>{altData.descriptive}</span>
+    {altDescriptive && (
+      <span class="image-alt-descriptive" aria-hidden="true">{altDescriptive}</span>
     )}
-    {altData?.aacHtml && (
-      <span class="image-alt-aac" hidden>
-        <Fragment set:html={altData.aacHtml} />
+    {altAacHtml && (
+      <span class="image-alt-aac" aria-hidden="true">
+        <Fragment set:html={altAacHtml} />
       </span>
     )}
   </figure>

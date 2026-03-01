@@ -23,6 +23,7 @@ export interface A11ySettings {
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
+  altDisplayMode: 'hidden' | 'caption' | 'overlay' | 'tooltip' | 'replace';
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -41,7 +42,8 @@ export const defaultSettings: A11ySettings = {
   enhancedFocus: false,
   screenReaderMode: false,
   scrollbarEnhanced: false,
-  altTextMode: 'none'
+  altTextMode: 'none',
+  altDisplayMode: 'hidden'
 };
 
 // ===================================
@@ -186,6 +188,11 @@ export function applySettings(settings: A11ySettings): void {
   const altMode = settings.altTextMode || 'none';
   (target as HTMLElement).dataset.altTextMode = altMode;
   document.documentElement.dataset.altTextMode = altMode;
+
+  // Alt Display Mode - how alt text is shown (caption, overlay, etc.)
+  const displayMode = settings.altDisplayMode || 'hidden';
+  (target as HTMLElement).dataset.altDisplayMode = displayMode;
+  document.documentElement.dataset.altDisplayMode = displayMode;
 
   // Font Family - apply to wrapper
   target.classList.remove(
@@ -360,10 +367,18 @@ export function updateUI(container: HTMLElement, s: A11ySettings): void {
     if (plusBtn) plusBtn.disabled = value >= max;
   });
 
-  // Alt text cards
-  container.querySelectorAll('.a11y-alttext-card').forEach(card => {
+  // Alt text mode cards (what to show)
+  const altTextGrid = container.querySelector('[data-setting="altTextMode"]');
+  altTextGrid?.querySelectorAll('.a11y-alttext-card').forEach(card => {
     const val = (card as HTMLButtonElement).dataset.alttext;
     card.setAttribute('aria-pressed', val === s.altTextMode ? 'true' : 'false');
+  });
+
+  // Alt display mode cards (how to show)
+  const altDisplayGrid = container.querySelector('[data-setting="altDisplayMode"]');
+  altDisplayGrid?.querySelectorAll('.a11y-alttext-card').forEach(card => {
+    const val = (card as HTMLButtonElement).dataset.alttext;
+    card.setAttribute('aria-pressed', val === s.altDisplayMode ? 'true' : 'false');
   });
 
   // Theme cards

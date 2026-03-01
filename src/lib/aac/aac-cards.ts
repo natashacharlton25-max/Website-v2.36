@@ -1,7 +1,7 @@
 /**
  * aac-cards.ts — Shared AAC card renderers
  *
- * Used by aac-inline.ts (sentence → cards) and fetch-alt.ts (asset → card).
+ * Used by aac-inline.ts (sentence → cards) and loadAllAltText (asset → card).
  * Three card types: pictogram (ARASAAC PNG), icon (Phosphor SVG), text-only.
  */
 

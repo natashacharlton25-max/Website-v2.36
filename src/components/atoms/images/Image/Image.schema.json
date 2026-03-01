@@ -1,29 +1,39 @@
 {
   "component": "Image",
   "category": "atoms/images",
-  "renders": {
-    "base": "Image.astro"
-  },
-  "reducedMotion": "Hover scale transition killed.",
+  "renders": { "full": "Image.astro", "reduced": "Image.astro", "textonly": "Image.astro" },
+  "notes": "Pure atom — receives alt text data as props, never fetches. Pages call loadAllAltText() and pass results down.",
+
   "props": {
-    "src":          { "type": "string",  "required": true },
-    "alt":          { "type": "string",  "required": false },
-    "role":         { "type": "string",  "required": false, "default": "content", "enum": ["content", "decorative"] },
-    "assetId":      { "type": "string",  "required": false },
-    "width":        { "type": "string",  "required": false },
-    "height":       { "type": "string",  "required": false },
-    "fit":          { "type": "string",  "required": false, "enum": ["cover", "contain", "fill", "none"] },
-    "radius":       { "type": "string",  "required": false, "enum": ["none", "sm", "md", "lg", "full"] },
-    "shadow":       { "type": "string",  "required": false, "enum": ["none", "sm", "md", "lg"] },
-    "hover":        { "type": "boolean", "required": false, "default": false },
-    "responsive":   { "type": "boolean", "required": false, "default": false },
-    "decorative":   { "type": "boolean", "required": false, "default": false, "deprecated": "Use role=\"decorative\" instead" },
-    "loading":      { "type": "string",  "required": false, "default": "lazy", "enum": ["lazy", "eager"] },
-    "sepia":        { "type": "string",  "required": false, "enum": ["light", "default", "heavy"] },
-    "blur":         { "type": "string",  "required": false, "enum": ["sm", "md", "lg", "xl"] },
-    "gradientMask": { "type": "string",  "required": false, "enum": ["fade-bottom", "fade-top", "fade-edges", "vignette"] },
-    "clipPath":     { "type": "string",  "required": false, "enum": ["circle", "ellipse", "diamond", "hexagon", "blob", "slant-left", "slant-right"] },
-    "tilt":         { "type": "string",  "required": false, "enum": ["sm", "md", "lg"] },
-    "class":        { "type": "string",  "required": false, "default": "" }
+    "content": {
+      "_description": "What the image communicates",
+      "src":            { "type": "string",  "required": true, "asset": true, "description": "Image URL (CDN or local path)." },
+      "alt":            { "type": "string",  "required": false, "text": true, "description": "Manual alt text. Overridden by altWord when provided." },
+      "role":           { "type": "string",  "required": false, "default": "content", "enum": ["content", "decorative"], "description": "Content wraps in <figure> with alt spans. Decorative renders bare <img alt=\"\">." },
+      "altWord":        { "type": "string",  "required": false, "text": true, "description": "Short word-level alt text from D1." },
+      "altDescriptive": { "type": "string",  "required": false, "text": true, "description": "Long descriptive alt text from D1." },
+      "altAacHtml":     { "type": "string",  "required": false, "description": "Pre-rendered AAC card HTML from D1." },
+      "decorative":     { "type": "boolean", "required": false, "default": false, "deprecated": "Use role=\"decorative\" instead." }
+    },
+
+    "visual": {
+      "_description": "How the image looks",
+      "fit":          { "type": "string",  "required": false, "enum": ["cover", "contain", "fill", "none"], "description": "Object-fit mode." },
+      "radius":       { "type": "string",  "required": false, "enum": ["none", "sm", "md", "lg", "full"], "description": "Border radius." },
+      "shadow":       { "type": "string",  "required": false, "enum": ["none", "sm", "md", "lg"], "description": "Box shadow." },
+      "hover":        { "type": "boolean", "required": false, "default": false, "description": "Scale-up on hover." },
+      "responsive":   { "type": "boolean", "required": false, "default": false, "description": "Full-width responsive scaling." },
+      "loading":      { "type": "string",  "required": false, "default": "lazy", "enum": ["lazy", "eager"], "description": "Native lazy loading." },
+      "sepia":        { "type": "string",  "required": false, "enum": ["light", "default", "heavy"], "description": "Sepia filter." },
+      "blur":         { "type": "string",  "required": false, "enum": ["sm", "md", "lg", "xl"], "description": "Blur filter." },
+      "gradientMask": { "type": "string",  "required": false, "enum": ["fade-bottom", "fade-top", "fade-edges", "vignette"], "description": "CSS mask gradient." },
+      "clipPath":     { "type": "string",  "required": false, "enum": ["circle", "ellipse", "diamond", "hexagon", "blob", "slant-left", "slant-right"], "description": "CSS clip-path shape." },
+      "tilt":         { "type": "string",  "required": false, "enum": ["sm", "md", "lg"], "description": "CSS perspective tilt." },
+      "width":        { "type": "string",  "required": false, "description": "Explicit width attribute." },
+      "height":       { "type": "string",  "required": false, "description": "Explicit height attribute." },
+      "class":        { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "animation": {}
   }
 }
