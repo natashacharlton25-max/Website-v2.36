@@ -178,15 +178,22 @@ export async function handleAssetList(request: Request, env: Env): Promise<Respo
   const licenseFilter = url.searchParams.get('license');
   const baseNameFilter = url.searchParams.get('base_name');
   const hasAlt = url.searchParams.get('has_alt');
+  const includeAlt = url.searchParams.get('include') === 'alt';
   const query = url.searchParams.get('q');
   const updatedAfter = url.searchParams.get('updated_after');
   const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '50', 10), 200);
   const offset = parseInt(url.searchParams.get('offset') ?? '0', 10);
 
-  let sql = 'SELECT DISTINCT a.* FROM assets a';
+  let sql = includeAlt
+    ? 'SELECT DISTINCT a.*, s.word AS alt_word, s.aac_url AS alt_aac_url FROM assets a'
+    : 'SELECT DISTINCT a.* FROM assets a';
   const params: any[] = [];
   const joins: string[] = [];
   const wheres: string[] = ['a.archived = 0'];
+
+  if (includeAlt) {
+    joins.push('LEFT JOIN alt_symbols s ON a.alt_symbol_id = s.id');
+  }
 
   // Tag filtering (join per tag for AND logic)
   if (tagFilter.length > 0) {
@@ -203,6 +210,8 @@ export async function handleAssetList(request: Request, env: Env): Promise<Respo
   if (sourceFilter) { wheres.push('a.source = ?'); params.push(sourceFilter); }
   if (licenseFilter) { wheres.push('a.license = ?'); params.push(licenseFilter); }
   if (baseNameFilter) { wheres.push('a.base_name = ?'); params.push(baseNameFilter); }
+  if (hasAlt === 'true') { wheres.push('(a.alt_symbol_id IS NOT NULL OR a.alt_descriptive IS NOT NULL)'); }
+  if (hasAlt === 'false') { wheres.push('a.alt_symbol_id IS NULL AND a.alt_descriptive IS NULL'); }
   if (query) { wheres.push('(a.name LIKE ? OR a.slug LIKE ? OR a.base_name LIKE ?)'); params.push(`%${query}%`, `%${query}%`, `%${query}%`); }
   if (updatedAfter) { wheres.push('a.updated_at > ?'); params.push(updatedAfter); }
 
@@ -214,7 +223,7 @@ export async function handleAssetList(request: Request, env: Env): Promise<Respo
   const { results } = await env.DB.prepare(sql).bind(...params).all<AssetRow>();
 
   // Minimal response — no content bodies in list
-  const items = results.map(a => ({
+  const items = results.map((a: any) => ({
     id: a.id,
     name: a.name,
     slug: a.slug,
@@ -224,6 +233,11 @@ export async function handleAssetList(request: Request, env: Env): Promise<Respo
     license: a.license,
     createdAt: a.created_at,
     updatedAt: a.updated_at,
+    ...(includeAlt ? {
+      altWord: a.alt_word ?? null,
+      altDescriptive: a.alt_descriptive ?? null,
+      altAacUrl: a.alt_aac_url ?? null,
+    } : {}),
   }));
 
   return json({ assets: items, count: items.length, limit, offset });

@@ -80,6 +80,25 @@ export default {
     }
 
     try {
+      // ─── Image serving (R2) ─────────────────────────
+      const imageMatch = path.match(/^\/images\/(.+)$/);
+      if (imageMatch && method === 'GET') {
+        const r2Key = `images/${imageMatch[1]}`;
+        const object = await env.STORAGE!.get(r2Key);
+
+        if (!object) {
+          return jsonError(404, 'Image not found');
+        }
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': object.httpMetadata?.contentType || 'image/jpeg',
+            'Cache-Control': 'public, max-age=31536000, immutable',
+            'ETag': object.etag,
+          },
+        });
+      }
+
       // ─── Route matching ─────────────────────────────
       // Order matters: more specific routes first
 

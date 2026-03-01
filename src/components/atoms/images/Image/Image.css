@@ -271,7 +271,7 @@
     right: 0;
     margin-top: 0;
     padding: var(--space-sm);
-    background: color-mix(in srgb, var(--color-Black) 70%, transparent);
+    background: var(--color-surface-inverse, #000);
     color: var(--color-White);
   }
 
@@ -290,9 +290,36 @@
     color: var(--color-White);
   }
 
-  /* ── Display mode: REPLACE — image hidden, text shown ── */
+  /* ── Display mode: SUBTITLE — image shrinks via flex, text below ──
+     Requires height constraint from parent (card, grid cell, aspect-ratio). */
+  [data-alt-display-mode="subtitle"] .image {
+    display: flex;
+    flex-direction: column;
+  }
+
+  [data-alt-display-mode="subtitle"] .image .image__img {
+    flex: 1 1 0;
+    min-height: 4rem;
+    object-fit: cover;
+  }
+
+  [data-alt-display-mode="subtitle"][data-alt-text-mode="word"] .image-alt-word,
+  [data-alt-display-mode="subtitle"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
+  [data-alt-display-mode="subtitle"][data-alt-text-mode="aac"] .image-alt-aac {
+    display: block;
+    flex: 0 0 auto;
+  }
+
+  /* ── Display mode: REPLACE — image visually-hidden, text shown ──
+     Uses visually-hidden (not display:none) so img stays in the
+     accessibility tree. Screen reader still reads img alt. */
   [data-alt-display-mode="replace"] .image .image__img {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
 
   [data-alt-display-mode="replace"][data-alt-text-mode="word"] .image-alt-word,

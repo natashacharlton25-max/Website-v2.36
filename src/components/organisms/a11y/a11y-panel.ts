@@ -23,7 +23,7 @@ export interface A11ySettings {
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
-  altDisplayMode: 'hidden' | 'caption' | 'overlay' | 'tooltip' | 'replace';
+  altDisplayMode: 'hidden' | 'caption' | 'overlay' | 'tooltip' | 'subtitle' | 'replace';
 }
 
 const STORAGE_KEY = 'a11y-settings';

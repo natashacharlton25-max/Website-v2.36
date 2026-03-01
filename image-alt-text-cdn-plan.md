@@ -32,7 +32,7 @@ Every asset — icon, lottie, or image — gets a unique hashed ID. The identity
 
 ### Current State (as of Phase 2)
 
-- 4,533 existing assets (icons + lotties) use `a_` + random string IDs via `makeId.asset()`
+- 4,566 existing assets (icons + lotties) — IDs now `shared_{icon|anim}_{slug}_{hash}` format
 - 1,554 alt_symbols seeded — each maps a `word` to up to two visual representations:
   - `aac_url`: ARASAAC pictogram PNG (1,553 have one, auto-matched by keyword — many are semantically wrong)
   - `icon_id`: FK to Phosphor icon in `assets` table (1,512 linked, 42 are AAC-only with no Phosphor equivalent)
@@ -44,7 +44,9 @@ Every asset — icon, lottie, or image — gets a unique hashed ID. The identity
 - R2 bucket bound (`STORAGE` binding) but empty — all current assets stored as text in `versions.content`
 - No image assets exist yet
 
-### Target ID Format
+### ID Format
+
+Asset primary key uses the hashed format directly:
 
 ```
 {brand}_{category}_{name}_{hash}
@@ -52,10 +54,10 @@ Every asset — icon, lottie, or image — gets a unique hashed ID. The identity
 
 Examples:
 ```
-mtb_icon_arrow-right_a3f8c2      ← icon (SVG in D1)
-mtb_hero_therapy-room_7d1e4b     ← image (binary in R2)
-bylw_blog_sunset-ocean_9b2f11    ← image (binary in R2)
-freq_anim_loading-dots_c4e2a1    ← lottie (JSON in D1)
+shared_icon_arrow-right_a3f8c2   ← icon (SVG in D1)
+mtb_hero_therapy-room_7d1e4b     ← image (binary in R2, future)
+bylw_blog_sunset-ocean_9b2f11    ← image (binary in R2, future)
+shared_anim_loading-dots_c4e2a1  ← lottie (JSON in D1)
 ```
 
 ### Hash Generation
@@ -86,7 +88,7 @@ When an image is replaced (same concept, new file):
 ```sql
 CREATE TABLE assets (
   -- Existing columns
-  id              TEXT PRIMARY KEY,     -- currently a_ + random, migrating to {brand}_{category}_{name}_{hash}
+  id              TEXT PRIMARY KEY,     -- format: shared_{icon|anim}_{slug}_{hash}
   name            TEXT NOT NULL,
   base_name       TEXT NOT NULL,
   type            TEXT NOT NULL,        -- 'icon' | 'image' | 'lottie'
@@ -99,7 +101,7 @@ CREATE TABLE assets (
   created_at      TEXT DEFAULT (datetime('now')),
   updated_at      TEXT DEFAULT (datetime('now')),
 
-  -- Phase 3a: columns to ADD
+  -- Phase 3a: columns added
   category        TEXT,                 -- hero, blog, product, icon, etc.
   brand           TEXT,                 -- mtb, bylw, freq — null = shared
   version         INTEGER DEFAULT 1,
@@ -601,21 +603,21 @@ Single command uploads image and creates all alt text automatically.
 
 ## 8. Migration Path
 
-### Audit Snapshot (28 Feb 2026)
+### Audit Snapshot (1 Mar 2026 — post Phase 3a)
 
-**D1 `assets` table has:** id, slug, name, base_name, type, storage, current_version, license_key, alt_symbol_id, alt_descriptive, source, created_at, updated_at
-**D1 `assets` table missing:** version, file_hash, url, width, height, category, brand, semantic_role
+**D1 `assets` table has:** id, slug, name, base_name, type, storage, current_version, license_key, alt_symbol_id, alt_descriptive, source, created_at, updated_at, file_hash, version, category, brand, semantic_role, new_id
+**D1 `assets` count:** 4,566 rows. IDs swapped to `shared_{icon|anim}_{slug}_{hash}` format. `new_id` column still present (drop pending).
 **D1 `versions` table has:** r2_key, content (text storage for SVG/Lottie)
-**D1 `alt_symbols` table:** 1,554 rows. Each maps a `word` to ARASAAC pictogram (`aac_url`) and/or Phosphor icon (`icon_id`). Coverage: 1,553 have AAC URLs, 1,512 have icon_ids, 42 AAC-only, 1 orphan ("sunset"). Entries are valid as resolver vocabulary — the issue was using them for direct icon-name→pictogram matching (Phase 3c corrects this).
-**Current IDs:** `a_` + random string via `makeId.asset()`
+**D1 `alt_symbols` table:** 1,554 rows + `verified` column (all 0). Entries are valid resolver vocabulary — not for direct icon-name→pictogram matching (Phase 3c).
+**Current IDs:** `shared_icon_{slug}_{hash}` / `shared_anim_{slug}_{hash}` — swap complete, all FKs updated
 **R2 bucket:** Bound as `STORAGE`, empty — no binary assets uploaded yet
-**API routes that exist:** Full CRUD on /v1/assets, /v1/alt-symbols, /v1/tags, /v1/brands, /v1/licenses, /v1/usage, /v1/health
-**API gaps:** No `/images/:key` route, no `include=alt` JOIN, `has_alt` parsed but not wired to WHERE clause
+**API routes:** Full CRUD on /v1/assets, /v1/alt-symbols, /v1/tags, /v1/brands, /v1/licenses, /v1/usage, /v1/health
+**API fixes done:** `has_alt` WHERE wired, `include=alt` JOIN returns altWord/altDescriptive/altAacUrl
 
 ### Phase 1 — Now (done)
 - [x] Alt symbols table — 1,554 words with ARASAAC pictogram URLs (1,553) and/or Phosphor icon links (1,512). Used as vocabulary lookup by the AAC resolver — alt text strings are resolved against this table at build time. Not used for direct icon-name→pictogram matching.
 - [x] 1 orphan alt_symbol ("sunset") to clean up
-- [x] 4,533 assets seeded (icons + lotties, all stored as text in D1)
+- [x] 4,566 assets seeded (icons + lotties, all stored as text in D1)
 - [x] License library with 4 communication levels
 - [x] aacInline utility with Open Symbols
 - [x] AAC cards (pictogram/icon/text-only)
@@ -630,33 +632,42 @@ Single command uploads image and creates all alt text automatically.
 - [x] Write CSS for caption/overlay/tooltip/replace modes
 - [x] Update Image schema with content/visual/animation groups
 
-### Phase 2.5 — Accessibility + Subtitle (immediate)
-- [ ] Add `aria-hidden="true"` to all three alt spans in Image.astro
-- [ ] Replace `display: none` with visually-hidden on img in replace mode CSS
-- [ ] Add subtitle display mode CSS (flex column, image shrinks, text below)
-- [ ] Add sixth AltTextCard ("Subtitle") to /accessibility page
-- [ ] Update a11y-panel.ts altDisplayMode to include 'subtitle' value
-- [ ] Update overlay CSS background from translucent to solid rectangle
+### Phase 2.5 — Accessibility + Subtitle (done)
+- [x] Add `aria-hidden="true"` to all three alt spans in Image.astro
+- [x] Replace `display: none` with visually-hidden on img in replace mode CSS
+- [x] Add subtitle display mode CSS (flex column, image shrinks, text below)
+- [x] Add sixth AltTextCard ("Subtitle") to /accessibility page
+- [x] Update a11y-panel.ts altDisplayMode to include 'subtitle' value
+- [x] Update overlay CSS background from translucent to solid
 
-### Phase 3a — Universal Asset Identity (retrofit all 4,533 existing assets)
+### Phase 3a — Universal Asset Identity (retrofit all 4,566 existing assets)
 
 Schema migration:
-- [ ] Add `file_hash`, `version`, `category`, `brand`, `semantic_role` columns to `assets` table
-- [ ] Add `verified` boolean to `alt_symbols` table (default false)
-- [ ] Note: `r2_key` already exists on `versions` table — decide if that's sufficient or also needed on `assets`
+- [x] Add `file_hash`, `version`, `category`, `brand`, `semantic_role` columns to `assets` table
+- [x] Add `verified` boolean to `alt_symbols` table (default false)
+- [x] Note: `r2_key` stays on `versions` table only — not needed on `assets`
 
-Backfill script (highest-risk step — migrate atomically, not partially):
-- [ ] Generate SHA-256 hash (first 6 chars) for all existing SVG/Lottie content in `versions.content`
-- [ ] Add temporary `new_id` column — populate with `{brand}_{category}_{name}_{hash}` format
-- [ ] Update all FK references atomically: `alt_symbols.icon_id`, usage tables, scrollytelling data, JSON content refs
-- [ ] Swap: rename `new_id` → `id`, drop legacy `a_` format
-- [ ] Populate `version` and `file_hash` columns for existing rows
-- [ ] Do NOT partial-migrate — all references update in one transaction or none
+Backfill:
+- [x] `file_hash` — derived from `versions.hash` (SUBSTR strip `sha256:` prefix, first 6 hex chars). 4,566/4,566, 0 nulls.
+- [x] `category` — SVGs → `icon`, Lotties → `anim`
+- [x] `brand` — all current assets shared (column NULL, ID string uses `shared`)
+- [x] `new_id` populated — format `shared_icon_{slug}_{hash}` / `shared_anim_{slug}_{hash}`. 4,566 unique, 0 collisions.
 
-API fixes (already half-wired):
-- [ ] Wire `has_alt` WHERE clause in `assets.ts` (parsed at line 180, never added to query)
-- [ ] Add `include=alt` JOIN — assets LEFT JOIN alt_symbols to return word/aac_url
-- [ ] Update list response shape to include alt fields alongside id, name, slug, etc.
+API fixes:
+- [x] `has_alt` WHERE clause wired in `assets.ts` (was parsed but unused)
+- [x] `include=alt` JOIN — LEFT JOIN alt_symbols, returns `altWord`, `altDescriptive`, `altAacUrl`
+- [x] Response shape updated to include alt fields conditionally
+
+ID swap (done — atomic D1 transaction):
+- [x] Updated `assets.id` = `new_id` (4,566 rows)
+- [x] Updated `versions.asset_id` (4,566 rows)
+- [x] Updated `asset_tags.asset_id` (13,887 rows)
+- [x] Updated `lottie_mappings.lottie_asset_id` + `static_asset_id` (33 rows)
+- [x] Updated `alt_symbols.icon_id` (1,512 rows WHERE NOT NULL)
+- [x] `brand_assets` + `usage_log` — 0 rows, guarded
+- [ ] Drop `new_id` column (redundant now — equals `id`)
+- [x] Post-swap verification: zero orphans, zero row count changes across all FK tables
+- [x] Note: D1 file imports enforce FK constraints — use `PRAGMA foreign_keys = OFF` at top of migration
 
 ### Phase 3b — Image Pipeline (R2 + CDN)
 - [ ] `/images/:key` Worker route — serve from R2 with `Cache-Control: immutable`
@@ -713,7 +724,7 @@ ALTER TABLE assets ADD COLUMN semantic_role TEXT DEFAULT 'ui-control';
 -- rather than being hidden in AAC mode
 ```
 
-Backfill: categorise existing 4,533 assets. Most Phosphor icons → `ui-control`. Icons used in scrollytelling/narrative content → `content-symbol`.
+Backfill: categorise existing 4,566 assets. Most Phosphor icons → `ui-control`. Icons used in scrollytelling/narrative content → `content-symbol`.
 
 **In AAC mode CSS:**
 ```css
@@ -854,7 +865,7 @@ When resolver sees "airplane" in the phrase → looks up overrides → blocks "t
 
 Icon categorisation:
 - [ ] Add `semantic_role` column to `assets` table (`decorative` | `ui-control` | `content-symbol`)
-- [ ] Categorise existing 4,533 assets (bulk: most icons → `ui-control`, scrollytelling/narrative icons → `content-symbol`)
+- [ ] Categorise existing 4,566 assets (bulk: most icons → `ui-control`, scrollytelling/narrative icons → `content-symbol`)
 - [ ] Write AAC-mode CSS for three tiers (hide decorative, text-label ui-control, resolver-output content-symbol)
 - [ ] Existing 1,554 alt_symbol entries remain as vocabulary — they're valid resolver lookup targets, just no longer used for direct icon-name→pictogram matching
 
