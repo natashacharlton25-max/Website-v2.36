@@ -97,6 +97,7 @@ CREATE TABLE assets (
   license_key     TEXT,
   alt_symbol_id   TEXT,
   alt_descriptive TEXT,                 -- from image generation prompt
+  alt_aac_phrase  TEXT,                 -- curated 3-4 word phrase for AAC resolver (e.g. "books shelf warm")
   source          TEXT,
   created_at      TEXT DEFAULT (datetime('now')),
   updated_at      TEXT DEFAULT (datetime('now')),
@@ -127,11 +128,12 @@ All alt text lives in D1. No sidecar files, no R2 metadata, no frontmatter dupli
 
 ### Three Layers per Image
 
-| Layer | Source | Stored in |
-|-------|--------|-----------|
-| Word | Auto-matched from base_name or manually set | `alt_symbols.word` via `assets.alt_symbol_id` |
-| Descriptive | Image generation prompt or manual entry | `assets.alt_descriptive` |
-| AAC | Looked up at seed time from Open Symbols | `alt_symbols.aac_url` |
+| Layer | Source | Stored in | Used by |
+|-------|--------|-----------|---------|
+| Word | Auto-matched from base_name or manually set | `alt_symbols.word` via `assets.alt_symbol_id` | Icons (single concept → single pictogram swap) |
+| Descriptive | Image generation prompt or manual entry | `assets.alt_descriptive` | Screen readers, caption/overlay/subtitle modes |
+| AAC phrase | Curated 3-4 concrete words for resolver | `assets.alt_aac_phrase` | Images (multi-concept → multiple pictogram cards) |
+| AAC pictogram | Looked up from Open Symbols / ARASAAC | `alt_symbols.aac_url` | Resolver output — real pictograms only, no Phosphor icon fallback |
 
 ### Seeding Flow
 
@@ -166,6 +168,7 @@ Astro build: load-alt-text.ts reads local JSON → cached Map
 
 const results = await db.prepare(`
   SELECT a.name, a.alt_descriptive AS descriptive,
+         a.alt_aac_phrase AS aacPhrase,
          s.word, s.aac_url AS aacUrl
   FROM assets a
   LEFT JOIN alt_symbols s ON a.alt_symbol_id = s.id
@@ -192,11 +195,15 @@ export function loadAllAltText(): Map<string, AltData> {
     cache.set(asset.name, {
       word: asset.word,
       descriptive: asset.descriptive,
+      aacPhrase: asset.aacPhrase,   // curated 3-4 words for resolver
       aacUrl: asset.aacUrl,
-      // Phase 3c: evolves to resolveAACPhrase(asset.descriptive)
-      aacHtml: asset.aacUrl 
-        ? pictogramCard(asset.word, asset.aacUrl)
-        : textOnlyCard(asset.word)
+      // Icons (single word): pictogramCard from alt_symbols.word
+      // Images (multi-word): resolveAACPhrase(asset.aacPhrase, symbols, overrides)
+      aacHtml: asset.aacPhrase
+        ? renderResolvedCards(resolveAACPhrase(asset.aacPhrase, symbols, overrides))
+        : asset.aacUrl 
+          ? pictogramCard(asset.word, asset.aacUrl)
+          : textOnlyCard(asset.word)
     });
   }
   
@@ -580,39 +587,47 @@ Note: `.image` **is** the `<figure>` element (not a wrapper around it), so selec
 
 ---
 
-## 7. Upload Pipeline (Future)
+## 7. Upload Pipeline (done)
 
 ```
-Generate image (AI or manual)
-    ↓
-Upload script:
+npx tsx scripts/upload-image.ts \
+  --file path/to/image.jpg \
+  --name therapy-room \
+  --brand mtb \
+  --category hero \
+  --alt "A warm therapy room with soft lighting and indoor plants" \
+  --aac-phrase "warm room light plants"
+
+Script does:
   1. SHA-256 hash → first 6 chars
   2. Build ID: {brand}_{category}_{name}_{hash}
-  3. Upload to R2: images/{name}_{hash}/v1.jpg
-  4. Search Open Symbols for word + AAC pictogram
-  5. Insert D1 assets row:
-     - url = CDN URL
-     - alt_descriptive = generation prompt
-     - alt_symbol_id = linked or new symbol
-     - file_hash, version, dimensions
+  3. Check if asset exists + compare hash:
+     - New asset → R2 upload + D1 insert + versions row
+     - Changed file → R2 upload + version bump + versions row
+     - Same file → metadata-only update (no R2, no version bump)
+  4. Look up base_name in alt_symbols → link if match
+  5. Store: url, alt_descriptive, alt_aac_phrase, file_hash, version, dimensions
 ```
-
-Single command uploads image and creates all alt text automatically.
 
 ---
 
 ## 8. Migration Path
 
-### Audit Snapshot (1 Mar 2026 — post Phase 3a)
+### Audit Snapshot (1 Mar 2026 — post Phase 4)
 
-**D1 `assets` table has:** id, slug, name, base_name, type, storage, current_version, license_key, alt_symbol_id, alt_descriptive, source, created_at, updated_at, file_hash, version, category, brand, semantic_role, new_id
+**D1 `assets` table has:** id, slug, name, base_name, type, storage, current_version, license_key, alt_symbol_id, alt_descriptive, alt_aac_phrase, source, created_at, updated_at, file_hash, version, category, brand, semantic_role, new_id, url, mime_type, width, height, file_size
 **D1 `assets` count:** 4,567 rows (4,566 icons/lotties + 1 test image). IDs: `shared_{icon|anim}_{slug}_{hash}` for existing, `{brand}_{category}_{name}_{hash}` for images.
 **D1 `versions` table has:** r2_key, content (text storage for SVG/Lottie)
-**D1 `alt_symbols` table:** 1,554 rows + `verified` column (all 0). Entries are valid resolver vocabulary — not for direct icon-name→pictogram matching (Phase 3c).
+**D1 `alt_symbols` table:** 1,579 rows (1,554 original + 25 new) + `verified` column (all 0). 6 words updated US→UK. Entries are valid resolver vocabulary — not for direct icon-name→pictogram matching.
 **Current IDs:** `shared_icon_{slug}_{hash}` / `shared_anim_{slug}_{hash}` — swap complete, all FKs updated
 **R2 bucket:** 1 image uploaded (`images/articles-hero_0aff4f/v1.png`). Worker route live with immutable caching.
 **API routes:** Full CRUD on /v1/assets, /v1/alt-symbols, /v1/tags, /v1/brands, /v1/licenses, /v1/usage, /v1/health
 **API fixes done:** `has_alt` WHERE wired, `include=alt` JOIN returns altWord/altDescriptive/altAacUrl
+**Resolver:** `src/lib/aac/aacResolver.ts` — pure function, two output types only (aac | text, no Phosphor icon fallback). 20 stop words, 20 lemma entries. Context guard with prefer_symbol fallback.
+**AAC pipeline cleanup:** `iconCard()` removed from aac-cards.ts. `type: 'icon'` removed from aac-inline.ts and aacResolver.ts. Rule: ARASAAC pictogram or text. No Phosphor icons as AAC symbols.
+**Context overrides:** `alt_symbol_context_overrides` table — 5 rows (aviation blocks taxi), indexed on context_token
+**Semantic roles:** 463 content-symbol, 33 decorative, 4,071 ui-control
+**Build pipeline:** snapshot-alt-text.js → 3 JSON files → loadAllAltText() → resolver → static HTML. Zero unresolved words.
 
 ### Phase 1 — Now (done)
 - [x] Alt symbols table — 1,554 words with ARASAAC pictogram URLs (1,553) and/or Phosphor icon links (1,512). Used as vocabulary lookup by the AAC resolver — alt text strings are resolved against this table at build time. Not used for direct icon-name→pictogram matching.
@@ -671,13 +686,13 @@ ID swap (done — atomic D1 transaction):
 
 ### Phase 3b — Image Pipeline (R2 + CDN) (done)
 - [x] `GET /images/:path+` Worker route — serves from R2 with `Cache-Control: immutable`, ETag
-- [x] `upload-image.ts` CLI script — three paths: new asset (R2 + D1 + versions), changed file (version bump), same file (metadata-only update)
+- [x] `upload-image.ts` CLI script — three paths: new asset (R2 + D1 + versions), changed file (version bump), same file (metadata-only update). Accepts `--alt` and `--aac-phrase` arguments.
 - [x] Migration 011: added `url`, `mime_type`, `width`, `height`, `file_size` to assets
 - [x] First test image: `mtb_hero_articles-hero_0aff4f` — 1600×550 PNG, full round-trip verified (R2 → Worker → CDN headers)
 - [ ] Tooltip mode: add `:focus-within` on `.image` + touch toggle for keyboard/mobile users (deferred)
 - [ ] `alt_text_log` table for safeguarding traceability — alt text changes on therapeutic content must be auditable
 
-### Phase 3c — AAC Mode (language-first, not icon-swap)
+### Phase 3c — AAC Mode (language-first, not icon-swap) (done)
 
 **Fundamental principle:** AAC mode is a communication layer, not a symbol-swap engine. The AAC pipeline resolves *meaning* (alt text), not *assets* (icon names).
 
@@ -820,11 +835,16 @@ User toggles altTextMode → CSS shows/hides pre-built AAC cards
 ```typescript
 type AACResolved =
   | { type: 'aac'; word: string; src: string }   // ARASAAC pictogram
-  | { type: 'icon'; word: string; svg: string }   // Phosphor icon (content-symbol only)
-  | { type: 'text'; word: string }                // text-only fallback
+  | { type: 'text'; word: string }                // text-only fallback (no Phosphor icon fallback — icons aren't AAC symbols)
 
-export async function resolveAACPhrase(phrase: string): Promise<AACResolved[]>
+export function resolveAACPhrase(phrase: string, symbols: AltSymbol[], overrides: ContextOverride[]): AACResolved[]
 ```
+
+**Resolver inputs — two paths, same function:**
+- **Icons** (content-symbol): `alt_symbols.word` → single word → single pictogram swap
+- **Images**: `assets.alt_aac_phrase` → curated 3-4 words → multiple pictogram cards
+
+The resolver never processes `alt_descriptive` — that's long-form prose for sighted users and screen readers, not AAC vocabulary.
 
 **Purity constraints — the resolver must NOT:**
 - Read DOM
@@ -866,27 +886,37 @@ When resolver sees "airplane" in the phrase → looks up overrides → blocks "t
 **Tasks:**
 
 Icon categorisation:
-- [ ] Add `semantic_role` column to `assets` table (`decorative` | `ui-control` | `content-symbol`)
-- [ ] Categorise existing 4,566 assets (bulk: most icons → `ui-control`, scrollytelling/narrative icons → `content-symbol`)
+- [x] `semantic_role` column on `assets` (added in Phase 3a, default `ui-control`)
+- [x] Categorised 4,566 assets: 463 content-symbol (154 base_names × 3 weights + 1 test image), 33 decorative (lotties), 4,071 ui-control
+- [x] 6 US→UK word swaps applied (aeroplane, biscuit, torch, postbox, bin, lorry)
+- [x] 25 new alt_symbols created for compound base_names + gaps (UK English, 23/25 with ARASAAC pictograms)
 - [ ] Write AAC-mode CSS for three tiers (hide decorative, text-label ui-control, resolver-output content-symbol)
-- [ ] Existing 1,554 alt_symbol entries remain as vocabulary — they're valid resolver lookup targets, just no longer used for direct icon-name→pictogram matching
+- [x] Existing 1,579 alt_symbol entries positioned as vocabulary — valid resolver lookup targets
 
 Alt text quality:
-- [ ] Review existing alt text on content-symbol assets — ensure phrasing is meaningful, not decorative ("airplane moving on runway" not "airplane icon")
-- [ ] Add AAC-friendly verb bias to AI content generation prompts (move, go, stop, fly, help, feel, etc.)
+- [ ] Review existing alt text on content-symbol assets — ensure phrasing is meaningful, not decorative
+- [ ] Add AAC-friendly verb bias to AI content generation prompts
 - [ ] Ensure scrollytelling step data includes alt text field per step
 
 Resolver:
-- [ ] Create `src/lib/aac/aacResolver.ts` with `resolveAACPhrase` + `resolveAACWord`
-- [ ] Define `AACResolved` type
-- [ ] Implement 5-tier resolution hierarchy
-- [ ] Create `alt_symbol_context_overrides` table in D1
+- [x] Created `src/lib/aac/aacResolver.ts` with `resolveAACPhrase` + `resolveAACWord`
+- [x] `AACResolved` type defined (aac | icon | text)
+- [x] Resolution hierarchy: exact match → lemma fallback (20 entries, 10 verbs) → context guard with prefer_symbol → resolution
+- [x] `alt_symbol_context_overrides` table created + 5 seed rows (aviation blocks taxi)
+- [x] Context guard checks prefer_symbol before falling to text
+- [x] `buildSymbolMap` deduplicates, verified entries take priority
+- [x] Stop words (20) and lemma allowlist hardcoded — intentionally small, governed expansion only
 - [ ] Support multi-card output for phrase decomposition
 - [ ] Update `.image-alt-aac` span to render multiple cards from resolved array
 - [ ] Add `aac_hint` field to AI content generation prompts/schemas
-- [ ] Wire resolver into page templates (imported like `loadAllAltText()`)
-- [ ] Add `verified` boolean to `alt_symbols` table (default false — all current entries are auto-seeded)
-- [ ] Resolver prefers verified entries when ambiguity exists
+- [ ] Wire resolver into page templates
+- [x] `verified` boolean on `alt_symbols` (added Phase 3a)
+- [x] Resolver prefers verified entries when ambiguity exists
+- [x] Removed `type: 'icon'` from resolver, aac-inline.ts, and aac-cards.ts — AAC = ARASAAC pictogram or text only
+- [x] Removed `iconCard()` from aac-cards.ts
+- [x] Added `alt_aac_phrase` column to assets — curated 3-4 word phrases for images (resolver input for multi-concept scenes)
+- [x] `upload-image.ts` accepts `--aac-phrase` argument
+- [x] `check-unresolved-words.ts` uses `alt_aac_phrase` (not `alt_descriptive`)
 - [ ] Clean up orphan "sunset" alt_symbol row
 
 Resolver performance:
@@ -905,10 +935,14 @@ Resolver performance:
 - Resolver is portable to runtime if architecture changes
 - Same resolver handles icons, images, and body copy — single pipeline
 
-### Phase 4 — Content Integration
-- [ ] `snapshot-alt-text.js` pre-build script (D1 → src/data/alt-text.json)
-- [ ] `loadAllAltText()` build utility reads from JSON snapshot (src/data/load-alt-text.ts)
-- [ ] Wire content collections to use image IDs in frontmatter (currently `cardImage: ./card.png`)
+### Phase 4 — Content Integration (done)
+- [x] `snapshot-alt-text.js` pre-build script (D1 → three JSON files: alt-text, alt-symbols, context-overrides)
+- [x] Safeguard: exits non-zero if alt_symbols empty — blocks build
+- [x] Also snapshot `alt_symbols` + `alt_symbol_context_overrides` into JSON for resolver
+- [x] `loadAllAltText()` build utility reads from JSON snapshots, runs resolver, returns Map<string, AltData>
+- [x] Post-build: `check-unresolved-words.ts` — runs resolver against all `alt_aac_phrase` values. Current output: 0 unresolved.
+- [x] Page wiring pattern established (about.astro example) — loadAllAltText() once, .get(assetName) per image
+- [ ] Wire remaining pages — per-page migration from astro:assets Image to custom Image atom
 - [ ] Spread aacInline to page content
 - [ ] Legal pages three content levels
 - [ ] `loadAllAltText()` scaling: partition by brand or add `modifiedSince` param if asset count reaches thousands
@@ -921,7 +955,7 @@ All alt text describes content aimed at vulnerable users. Changes must be tracea
 CREATE TABLE alt_text_log (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   asset_id TEXT NOT NULL,
-  field TEXT NOT NULL,          -- 'alt_descriptive' | 'alt_word' | 'alt_symbol_id'
+  field TEXT NOT NULL,          -- 'alt_descriptive' | 'alt_aac_phrase' | 'alt_word' | 'alt_symbol_id'
   old_value TEXT,
   new_value TEXT,
   changed_by TEXT,             -- 'upload-script' | 'admin' | user identifier
@@ -942,9 +976,10 @@ CREATE TABLE alt_text_log (
 |---------|---------------|-------------|
 | Image file | R2 bucket | Uploaded once |
 | Image URL | D1 assets.url | Set at upload |
-| Alt word | D1 alt_symbols.word | Seeded at upload |
-| Alt descriptive | D1 assets.alt_descriptive | Set at upload (from prompt) |
-| AAC pictogram | D1 alt_symbols.aac_url | Looked up at upload via Open Symbols |
+| Alt word | D1 alt_symbols.word | Seeded at upload — icons: single concept |
+| Alt descriptive | D1 assets.alt_descriptive | Set at upload — prose for screen readers |
+| Alt AAC phrase | D1 assets.alt_aac_phrase | Curated 3-4 words — images: multi-concept resolver input |
+| AAC pictogram | D1 alt_symbols.aac_url | ARASAAC only — no Phosphor icon fallback |
 | CDN cache | Cloudflare edge | Automatic, immutable |
 | Build data load | src/data/alt-text.json snapshot | Pre-build D1 query → JSON |
 | A11y toggle | CSS data attributes | Client-side, zero cost |
