@@ -9,6 +9,20 @@
 
 ---
 
+## Key Documents
+
+| Document | Purpose |
+|----------|---------|
+| `render-refactor-phases-plan.md` | 11-phase refactor plan — phase order, Claude Code prompts, decision log |
+| `src/components/audit-log.md` | Per-component audit status — update after every component is completed |
+| `component-audit-spec.md` | Full per-component audit checklist — run against every component |
+| `component-audit-checklist.md` | Accessibility + render questions — part of component-audit-spec.md |
+| `AAC-Shim-Print-Traceability-Spec.md` | AAC form inputs, assistive tech layer, print traceability architecture |
+
+After completing any component: update `src/components/audit-log.md` with status and notes.
+
+---
+
 ## CRITICAL: Extraction Process for Component Refactoring
 
 ### NEVER do these during refactoring:
@@ -103,8 +117,61 @@ For categories:
 
 ### Schema Structure:
 - Every component schema uses three prop groups: `content`, `visual`, `animation`
-- Plus a `renders` block: `{ full, reduced, textonly }` pointing to the .astro file
+- Plus a `renders` block: `{ full, reduced, assistive, textonly }` pointing to the .astro file
 - Empty `animation: {}` is correct for components with no motion
+- `textonly: null` = decorative component, skip entirely in text-only render
+- `assistive` render uses the same .astro but receives filtered props (no animation, stacked layout)
+
+---
+
+## Assistive-Input Render (Easy Click)
+
+The platform has **four** render modes:
+
+| Render | User-facing name | What it does |
+|--------|-----------------|--------------|
+| `full` | Default | All CSS, animations, hover effects |
+| `reduced` | Calm Mode | No animation CSS loaded |
+| `assistive` | Easy Click | Large targets, no hover-only interactions, single-column layout |
+| `textonly` | Reading Mode | Minimal CSS, content only |
+
+**OS-level AT handles input translation — no custom JS shim exists or is needed.**
+iOS Switch Control, Windows Eye Control, Android Switch Access, eye gaze trackers and head trackers all translate their input into standard `focus` / `click` / `keydown` events at the OS level before the browser sees them. Any properly focusable, keyboard-operable element works automatically.
+
+**The platform's job is to ensure every component:**
+- Has correct `tabindex` and semantic HTML so OS AT can find it
+- Has `:focus-within` equivalents for all hover-triggered interactions
+- Has `aria-hidden="true"` on decorative elements
+- Has `data-semantic-role` attribute for content-symbol images
+- Has sufficient touch target size (44×44px default, 64×64px in `assistive` render)
+
+**CSS rules for assistive render:**
+- No hover-only content without a `:focus-within` or click alternative
+- All touch targets scale via CSS when `data-render="assistive"` on body
+- Grid layouts collapse to single column
+- Focus indicators enlarged (min 3px, high contrast)
+- Scoped to `[data-render="assistive"] .component { ... }` in `Component.css`
+
+**Component checklist for assistive render:** see `component-audit-spec.md` section 8.
+
+---
+
+## Alt Text Architecture
+
+Every Image component rendering user content must satisfy:
+
+- Props: `altDescriptive`, `altAacPhrase`, `altSymbolId` (from Asset Library API)
+- Five display modes: `hover` | `overlay` | `underneath` | `replace` | `off`
+- `tabindex="0"` on the `<figure>` element — makes it focusable for switch/keyboard
+- `:focus-within` on all hover-mode CSS rules — keyboard and OS AT trigger the same tooltip
+- `data-semantic-role` attribute on the figure
+- AAC pictogram cards render from `alt_symbols` table via the aacResolver
+
+**Asset API fields:**
+- `alt_descriptive` — full descriptive sentence for screen readers
+- `alt_aac_phrase` — space-separated simple words for AAC pictogram cards
+- `alt_symbol_id` — foreign key to `alt_symbols` table (backfilled for all 1,798 symbols)
+- `alt_text_log` table — every change to any alt field is audited (migration 013)
 
 ---
 
