@@ -1,26 +1,33 @@
 {
   "component": "LottieIcon",
-  "category": "atoms/icons",
-  "renders": { "full": "LottieIcon.astro", "reduced": "LottieIcon.reduced.astro", "textonly": null },
-  "notes": "API-backed animated icon using Lottie. Fetches JSON at build time and inlines as animationData. Entirely decorative — not rendered in textonly mode. Reduced render uses lottie_mappings table to show a static Icon fallback via LottieIcon.reduced.astro.",
+  "category": "atom",
+  "renders": {
+    "full": "LottieIcon.astro",
+    "reduced": "Icon",
+    "assistive": "Icon",
+    "textonly": "Text"
+  },
+  "notes": "API-backed animated icon using Lottie. Fetches JSON at build time and inlines as animationData. JSON content can declare up to three dimensions: the Lottie animation (full render), a Phosphor fallback icon name (reduced/assistive — pipeline routes to Icon atom), and a text label (textonly — pipeline routes to Text or Link atom, and used as aria-label on LottieIcon). All optional — decorative instances may only have the animation. The render pipeline handles mode switching, LottieIcon only renders the animation.",
 
   "props": {
     "content": {
-      "_description": "What animation to load",
+      "_description": "What this icon is and what it represents",
       "slug": { "type": "string", "required": false, "default": null, "description": "Asset Library slug for the Lottie JSON." },
-      "src":  { "type": "string", "required": false, "default": null, "description": "Legacy filesystem path fallback." }
+      "src": { "type": "string", "required": false, "default": null, "description": "Legacy filesystem path fallback. Migrate to slug." },
+      "fallbackIcon": { "type": "string", "required": false, "default": null, "description": "Phosphor icon name for reduced/assistive render. Pipeline routes this to Icon atom — LottieIcon.astro never sees this prop." },
+      "label": { "type": "string", "required": false, "default": null, "description": "Human-readable label. Used as aria-label on LottieIcon in full render. Pipeline routes to Text or Link atom in textonly mode. Absent = decorative (aria-hidden)." }
     },
 
     "visual": {
       "_description": "How the icon looks",
-      "size":  { "type": "number", "required": false, "default": 24, "description": "Width and height in px." },
+      "size": { "type": "number", "required": false, "default": 24, "description": "Width and height in px." },
       "class": { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." },
-      "id":    { "type": "string", "required": false, "default": null, "description": "HTML id attribute." }
+      "id": { "type": "string", "required": false, "default": null, "description": "HTML id attribute." }
     },
 
     "animation": {
       "_description": "Motion behaviour — stripped in reduced render",
-      "loop":     { "type": "boolean", "required": false, "default": false, "description": "Loop the animation continuously." },
+      "loop": { "type": "boolean", "required": false, "default": false, "description": "Loop the animation continuously." },
       "autoplay": { "type": "boolean", "required": false, "default": false, "description": "Start playing on load." }
     }
   }

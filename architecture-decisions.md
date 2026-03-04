@@ -1,0 +1,416 @@
+# Architecture Decisions — Mind the Box Platform
+
+**What this document is:** A record of every major design decision for the website architecture, written in plain language. If you paste this into a new conversation with Claude (app or Code), it should understand the full architecture without further explanation.
+
+**Last updated:** 4 March 2026
+
+---
+
+## 1. The Building Blocks (Atoms)
+
+### Decision: Ten building blocks, used everywhere
+
+The entire site — across all three brands (Mind the Box, Be You Love Wins, Frequency) — is built from just ten small reusable pieces called atoms:
+
+**Fixed atoms** (their internal structure is set, you just toggle parts on or off):
+- **Text** — paragraphs, descriptions, any body text
+- **Heading** — titles at any level
+- **Button** — always contains an icon slot and a text slot, either can be hidden
+- **Badge** — small labels like "6 sections" or "New"
+- **Link** — clickable text that goes somewhere
+- **Icon** — SVG symbols fetched from the asset library API
+- **Image** — photos, illustrations, logos, decorative graphics
+
+**Container atoms** (their contents are defined entirely by the JSON data):
+- **Card** — a wrapper that can contain any combination of other atoms
+- **List** — an ordered or unordered arrangement of items
+- **FormField** — the universal input (text boxes, radio buttons, checkboxes, sliders, card-select grids)
+
+### Why: 
+Instead of building dozens of specialised components (a blog card, a testimonial card, a pricing card), we have one Card atom that gets filled with different atoms depending on what the JSON says. This means every visual variation on the site resolves to the same ten pieces. Fix an accessibility issue on the Image atom and it's fixed everywhere images appear — in cards, in heroes, in galleries, in blog posts, everywhere.
+
+### The key distinction:
+A Button always equals icon + text. You can hide either part, but you can't put an image inside a button. Its structure is fixed.
+
+A Card equals whatever you put in it. The same Card atom renders a blog preview, a team member profile, a product listing, and an AAC pictogram selector — because the JSON defines different child atoms for each use. The Card itself is just a container with styling props (shadow, padding, radius, variant).
+
+---
+
+## 2. Responsive Layout Lives on Containers, Not Atoms
+
+### Decision: Only container atoms (Card, Grid, List, Form) have responsive CSS. Fixed atoms never have media queries.
+
+### Why:
+A heading doesn't know what screen it's on. It doesn't need to. It just says "I am a heading, this size, this colour." The Card or Grid it sits inside decides whether to show two columns or one column based on screen width.
+
+This means:
+- The Text atom never has a breakpoint
+- The Button atom never has a media query
+- The Icon atom doesn't know what screen size it's on
+- None of them need to
+
+One set of responsive rules on a handful of containers. Everything inside just works because it doesn't try to control its own layout.
+
+### Exception:
+The Image atom has `Image.responsive.css` but it only scales decorative properties (border-radius gets flatter on tiny screens, shadows shrink). It never changes layout — that's still the container's job.
+
+---
+
+## 3. Four Ways to View the Site (Render Modes)
+
+### Decision: The platform has four render modes, controlled by the user from the "Your View" panel.
+
+| Mode | User-facing name | What it does |
+|------|-----------------|--------------|
+| Full | Default | Everything — animations, hover effects, parallax, glass, all CSS |
+| Reduced | Calm Mode | Same layout, but no movement. Animation props are stripped so animation classes are never emitted — rules never match. |
+| Assistive | Easy Click | Large touch targets (64×64px), single-column layout, no hover-only interactions, thick focus outlines. For people using switches, eye trackers, head pointers, or anyone with motor difficulties. |
+| Text-only | Reading Mode | Just headings and text. No images, no cards, no decorative elements. Clean single-column reading. |
+
+### Why four, not three:
+Originally there were three (full, reduced, text-only). Easy Click was added because reduced motion and physical accessibility are different needs. Someone might want full visual design but need larger targets. Someone might want calm mode but still need images. Easy Click is specifically about how you physically interact with the site, separate from how it looks.
+
+### How it works — the critical principle:
+The atoms don't know which render mode is active. They are "pure" — they receive props from JSON and output HTML. The render pipeline above them controls which CSS files load and which props get passed through. In Calm Mode, animation props are simply never sent to the component, so animation classes never appear in the HTML, so animation CSS never matches anything. Nothing to undo, nothing to override.
+
+This was a breakthrough moment. The old approach tried to load everything and then use CSS to hide/disable parts — fighting specificity, missing things, breaking things. The new approach loads only what's needed. Text-only mode doesn't load Card CSS and then hide it — it simply never renders the Card component. Nothing to strip because it was never there.
+
+---
+
+## 4. Animation: JSON Prop → Class → CSS (Nothing Else)
+
+### Decision: Animation is entirely controlled by whether a JSON prop exists.
+
+The chain is:
+1. JSON has an animation prop (e.g. `"hover": true`) → 
+2. The Astro component adds a class (e.g. `class="image--animate"`) → 
+3. CSS rules gated behind that class fire (e.g. `.image--animate .image__img { transition: ... }`)
+
+If the JSON doesn't include the animation prop, the class never appears, and the CSS rule never matches. Zero motion. No `!important` overrides, no "undo" rules, no specificity battles.
+
+### Why:
+In reduced render, the pipeline simply doesn't pass animation props. The component never knows it was supposed to animate. This is much cleaner than loading animations and then trying to suppress them with `prefers-reduced-motion` media queries or `.a11y-reduce-motion` override classes.
+
+---
+
+## 5. Alt Text: Three Layers, Resolved Before the Component Sees Them
+
+### Decision: Every content image carries three layers of description, but the Image atom only receives the finished result — never raw database fields.
+
+**The three layers:**
+- **Word** — a single short word describing the concept (e.g. "Wardrobe")
+- **Descriptive** — a full sentence for screen readers (e.g. "A winding path through an autumn forest")
+- **AAC HTML** — pre-built pictogram cards showing the concept as simple picture-symbols
+
+**What lives in the database (the data layer):**
+- `alt_aac_phrase` — curated simple words like "clothes choose safe" that the resolver uses to find matching pictograms
+- `alt_symbol_id` — a reference number pointing to the pictogram library (1,798 symbols)
+- `alt_descriptive` — the full description sentence
+
+**What the Image component actually receives (resolved props):**
+- `altWord` — the short word
+- `altDescriptive` — the full sentence
+- `altAacHtml` — finished HTML for the pictogram cards, already built by the resolver at build time
+
+### Why the separation matters:
+The Image atom is pure. It doesn't query databases, it doesn't run resolvers, it doesn't know about foreign keys. At build time, a resolver reads the database, looks up the matching pictograms, assembles the HTML cards, and passes the finished result to the component. The component just renders what it's given.
+
+This means the Image atom works the same whether the data came from a database, a JSON file, a CMS, or was hardcoded for testing. It doesn't care about the source.
+
+### Alt text display — two independent axes:
+The user controls both from the Your View panel:
+
+**What to show** (which layer of description):
+- None (screen reader only, no visual text)
+- Word (short label)
+- Descriptive (full sentence)
+- AAC (pictogram cards)
+
+**How to show it** (visual presentation):
+- Hidden (default — nothing visible)
+- Caption (block of text below the image)
+- Overlay (text floating over the bottom of the image)
+- Tooltip (appears on hover or keyboard focus)
+- Subtitle (image shrinks to make room, text below)
+- Replace (image visually hidden, text takes its place)
+
+That's 4 × 6 = 24 combinations. All handled by CSS using two data attributes on the page root. The Image atom doesn't know which combination is active — the CSS just matches the right selectors.
+
+### Why the checklist was wrong about this:
+The original audit checklist expected `altAacPhrase` and `altSymbolId` as Image component props. That's wrong — those are database fields consumed by the resolver at build time. The Image atom never sees them. The checklist has been corrected.
+
+The checklist also listed five display modes with old names. The actual CSS has six modes with different names. The CSS is the source of truth. The checklist has been corrected.
+
+---
+
+## 6. AAC Pictogram Cards: Same Atoms, Different JSON
+
+### Decision: AAC pictogram cards are not a separate component. They're the same Card atom containing an Image atom (the pictogram) and a Text atom (the word), assembled by the build pipeline.
+
+In standard mode, a content card might contain: Image + Heading + Text + Badge.
+In AAC mode, the same card slot contains: Image (pictogram) + Text (simple word).
+
+The Card atom doesn't know it's showing AAC content. It just renders whatever child atoms the JSON defines. The JSON carries both variants — `blocks` for standard view and `blocks_aac` for AAC view. The render mode determines which array the card reads.
+
+### Current state:
+Right now, `aac-cards.ts` outputs raw HTML strings that get injected into JSON at build time and rendered via `set:html` in the Image component. The HTML templates need updating to match the markup patterns that the Card, Image, and Text atoms produce — same class names, same attributes, same structure. This is deferred to the final atom render pass (after all atoms are individually audited).
+
+### Cognitive level filtering:
+AAC pictogram cards are tagged with a vocabulary tier:
+- **Green** — 60 survival words (yes, no, help, want, stop, more...)
+- **Yellow** — 148 words including basic combiners
+- **Orange** — 251 words including more complex vocabulary
+- **Full** — everything including specialist domain words
+
+The user's cognitive level setting (on the Your View panel) controls which cards are visible. At Green level, only the 60 most essential words show. CSS hides the rest using `data-core-tier` attributes on each card. No JavaScript needed — pure CSS filtering.
+
+---
+
+## 7. Semantic Roles: What Happens to Icons and Images in AAC Mode
+
+### Decision: Every icon and image has a semantic role that controls what AAC mode does to it.
+
+Three roles:
+- **Decorative** — hidden completely in AAC mode (e.g. background flourishes, divider icons)
+- **UI control** — the icon is hidden but its text label stays (e.g. a menu hamburger icon — the word "Menu" replaces it)
+- **Content symbol** — the icon/image is hidden and AAC pictogram cards replace it (e.g. an image representing "The Wardrobe Framework" gets replaced by pictogram cards for wardrobe + choices)
+
+### Why:
+Not all images are equal. A decorative border pattern shouldn't clutter an AAC user's view. A navigation icon needs to become a readable word. A content image needs to become pictogram symbols. The semantic role tells the system which treatment to apply.
+
+---
+
+## 8. FormField: One Atom for Every Kind of Input
+
+### Decision: FormField is the only atom allowed to create interactive input elements (text boxes, radio buttons, checkboxes, sliders, dropdowns). Everything else that accepts user input uses FormField.
+
+### Cognitive level changes what renders:
+The same FormField atom renders differently based on the user's cognitive level:
+
+| Standard type | Green level | Yellow level | Orange level | Full level |
+|--------------|-------------|--------------|--------------|------------|
+| Text area | Symbol grid or card-select | Large button choices | Radio buttons | Text area |
+| Radio buttons | Card-select with icons | Large button choices | Radio buttons | Radio buttons |
+| Dropdown | Card-select with icons | Large button choices | Dropdown | Dropdown |
+| Checkbox | Large toggle card | Large toggle | Checkbox | Checkbox |
+| Slider | 3-option cards (low/med/high) | 5-step large buttons | Slider | Slider |
+
+The JSON carries both the standard input configuration and the AAC variant options. The atom checks the cognitive level attribute on the page and renders the appropriate version.
+
+### Why one atom, not many:
+A quiz is just a page that renders multiple FormFields from JSON. A long-answer workbook page is just one FormField. Multiple choice is FormFields configured as card-select. The JSON schema determines what the page looks like. The atom is always the same atom. No QuizInput component, no WorkbookAnswer component, no MultipleChoice component — just FormField with different props.
+
+---
+
+## 9. Data Storage: Zero Personal Data on Our Servers
+
+### Decision: User answers (workbook responses, quiz results, reflections) never touch our servers. Two storage paths, user chooses:
+
+**Local:** Saved to the user's own browser storage (IndexedDB). They can export it as a JSON file. They can clear it. We never see it.
+
+**Google Drive:** User signs in with Google. Their answers save to a hidden folder in their own Google Drive that only our app can read. We store their Google ID for licensing only — we never store, access, or process their answers. They can revoke access anytime.
+
+### Why:
+Mind the Box provides therapeutic resources. Workbook answers could contain deeply personal mental health content. Under GDPR, holding that data would make us a data processor with significant compliance obligations. By ensuring the data never reaches our servers, we avoid that entirely. The user is both the data controller and data subject for their own content. Google is the processor if they choose Drive storage, and that's between the user and Google.
+
+The "seat" concept is minimal — it's either anonymous (local storage, no identity at all) or a Google ID (for licensing and print traceability only). It's never a row in our database containing personal data.
+
+---
+
+## 10. Assistive Technology: The Operating System Does the Hard Work
+
+### Decision: We do NOT build custom JavaScript for switch scanning, eye tracking input translation, or screen reader integration. The operating system handles all of that.
+
+iOS Switch Control, Windows Eye Control, Android Switch Access, Tobii eye trackers, head trackers — they all translate their input into standard focus, click, and keyboard events at the OS level before the browser ever sees them. Any properly focusable, keyboard-operable element works automatically with all of these.
+
+### Our job is simpler:
+- Every interactive element must be focusable (correct `tabindex`, semantic HTML)
+- Every interactive element must respond to keyboard (Enter/Space to activate)
+- Every hover interaction must also work on focus (`:focus-within` alongside `:hover`)
+- Decorative elements must be marked `aria-hidden="true"` so assistive tech skips them
+- Touch targets must be large enough (44×44px default, 64×64px in Easy Click mode)
+- Focus indicators must be visible (2px outline default, 3px in Easy Click mode)
+
+### One exception — future webcam eye tracking:
+A future spec exists for WebGazer.js integration (webcam-based gaze tracking that runs in the browser). This would be for users who don't have a dedicated eye tracker device. It needs calibration, has ~100px accuracy (which is why 64×64px targets are mandatory in Easy Click), and would feed gaze coordinates into the existing dwell-to-click pipeline. This is specced but not built yet.
+
+---
+
+## 11. Two Types of CSS File Per Component
+
+### Decision: Each component has up to two CSS files:
+
+- **Component.css** — all styles including animation, loads in ALL render modes
+- **Component.responsive.css** — screen size adjustments (if needed)
+
+Animation rules live in the base CSS file, gated behind classes that only appear when JSON passes animation props. No prop = no class in HTML = animation rule never matches = zero motion. The gating is structural (class presence), not file-based (file loading). There is no separate `Component.animation.css` file.
+
+### What we stopped doing:
+Previously, each component had an `a11y.css` file that contained overrides for accessibility modes — dark theme rules, highlight-links rules, reduced motion rules, text-only hiding. These files are now legacy. Their contents have been extracted to global files:
+
+- Dark theme rules → `src/styles/zones/theme-luminance-dark.css`
+- Highlight links rules → `src/styles/global/highlight-links.css`
+- Reduced motion → handled by the render pipeline (animation props stripped, so animation classes never emitted)
+- Text-only → handled by the render pipeline (component simply doesn't render)
+
+The old `a11y.css` files are moved to `_reference/` during refactoring — never deleted, because they contain real design decisions that inform the extraction.
+
+### No hardcoded values in component CSS:
+Every colour, spacing, radius, shadow, font size, transition, and breakpoint must use a design token (`var(--token-name)`). If a token doesn't exist for the value needed, flag it — don't invent a magic number. The only exceptions are `0`, `none`, `100%`, `auto`, `1px` for borders, and unitless values like `flex: 1`. No `var(--token, #hex)` fallbacks either — if the token is missing, you want it to break visibly so the token gets fixed.
+
+### Banned patterns in new CSS:
+- No `@layer` wrappers
+- No `!important` declarations
+- No `@media (prefers-reduced-motion)` in component CSS
+- No `.a11y-*` class selectors
+- No `#a11y-content-wrapper` references
+- No scoped `<style>` blocks in `.astro` files
+- No `:global()` selectors
+- No `var(--token, hardcoded-fallback)` — no fallback values on design tokens
+
+---
+
+## 12. Schema Structure: Content, Visual, Animation
+
+### Decision: Every component schema splits its props into three groups:
+
+- **Content** — what the component says (text, src, alt, options)
+- **Visual** — how it looks (size, colour, radius, shadow, variant)
+- **Animation** — how it moves (hover, tilt, parallax type)
+
+Plus a **renders** block listing which `.astro` file to use in each render mode:
+```
+renders: { full, reduced, assistive, textonly }
+```
+
+Most components use the same `.astro` file for all four modes — the render pipeline filters the props, not the template. `textonly: null` means the component is purely decorative and gets skipped entirely in Reading Mode.
+
+### Pipeline routing — schemas that declare props for OTHER atoms:
+Some components declare props that they never use themselves. The schema describes the full content model, and the pipeline routes different props to different atoms per render mode.
+
+Example — LottieIcon schema:
+```
+renders: { full: "LottieIcon.astro", reduced: "Icon", assistive: "Icon", textonly: "Text" }
+props.content: { slug, src, fallbackIcon, label }
+```
+
+- In **full** render: pipeline passes slug/src/label to `LottieIcon.astro` (label becomes aria-label)
+- In **reduced/assistive** render: pipeline passes `fallbackIcon` to the `Icon` atom (a completely different component)
+- In **textonly** render: pipeline passes `label` to the `Text` atom
+
+`fallbackIcon` never reaches `LottieIcon.astro` — it's a pipeline-only prop. The schema is the single source of truth for everything the content author needs to provide. The pipeline reads the render mode and routes the right props to the right atom.
+
+This pattern applies when a component has fundamentally different representations across render modes — not just filtered props, but entirely different atoms. The key principle: the JSON author declares all dimensions of what the content IS. The pipeline decides how to render it.
+
+Props can be optional — decorative instances may only have the animation (no fallbackIcon, no label). The component adapts: label present = `role="img"` + `aria-label`, label absent = `aria-hidden="true"`.
+
+### Why the three-group split:
+It maps cleanly to the render pipeline. Full render passes all three groups. Reduced render passes content + visual but not animation. Text-only passes content only. The pipeline can filter at the group level without knowing what's inside each group.
+
+---
+
+## 13. Print: A Global Layer, Not Per-Component
+
+### Decision: Print styling is NOT done per component. It's a thin global CSS layer that sits on top of the Reduced or Text-only render mode.
+
+### Why:
+A printed page doesn't need its own version of every component. It needs one of the existing simplified renders (reduced or text-only) with a few adjustments: hide navigation, hide the accessibility panel, ensure black text on white background, handle page breaks. That's a single global stylesheet, not 30 component-specific print files.
+
+This is built after all component audits are complete and the render pipeline is fully working.
+
+---
+
+## 14. Audit Workflow: Atoms First, Then Connect
+
+### Decision: The component audit follows a strict three-phase order:
+
+**Phase 1 — Individual atom audits:**
+Each of the ten atoms is audited alone against the v2 checklist. Fix what's wrong with that atom only. If a fix requires changing another atom (e.g. Image needs to use Text atom for alt text spans), log it as deferred. Don't touch other atoms.
+
+**Phase 2 — Final atom render pass:**
+After all ten atoms pass individually, go back and resolve all the cross-atom dependencies from the deferred logs. This is where Image gets its Text atom alt text spans, AAC cards get their Card + Image + Text atom markup, Button's icon passthrough gets verified, etc.
+
+**Phase 3 — Molecules and organisms:**
+Work up through larger components. Each one gets checked for: does it use atoms instead of raw HTML? Does it pass through the right props (especially alt text)? Does it have rules for each render mode? The molecules inherit atom-level accessibility for free — they only need to handle their own container concerns (layout, overflow clipping, spacing).
+
+### Why this order:
+If you fix a molecule before the atoms inside it are clean, you're building on an unreliable foundation. If you wire up cross-atom dependencies before each atom is individually solid, one atom's changes can break another's assumptions. Atoms first, connections second, compositions third.
+
+---
+
+## 15. Brand System: Same Atoms, Different Tokens
+
+### Decision: All three brands (Mind the Box, Be You Love Wins, Frequency) use exactly the same atoms. Brand differences come entirely from design tokens — colours, fonts, spacing values, border radius.
+
+A Button atom on Mind the Box and a Button atom on Frequency are the same component. They look different because the CSS custom properties (`--brand-c-primary`, `--img-radius`, etc.) resolve to different values based on which theme CSS file is loaded.
+
+### Theme loading:
+The theme is a single CSS file that sets all the token values. Pick a theme, that file loads, colours and typography work across all renders automatically. The theme system is completely separate from the render mode system and the accessibility settings. They layer independently.
+
+---
+
+## 16. Workbook + Scrollytelling: Two Compositions, Same Content
+
+### Decision: Learning content can be viewed as either a workbook (linear, fill-in-the-answers) or a scrollytelling presentation (animated, scroll-triggered) — from the same JSON data.
+
+The JSON holds all the content: headings, body text, images, questions. Two composition templates read that JSON differently:
+
+- **Workbook composition** — renders everything in a single column: heading, text, image, question, repeat. Uses reduced render CSS. No animation. FormField atoms handle the answers with local or Drive persistence.
+- **Scrollytelling composition** — pins sections to the viewport, text slides in as you scroll, images transition. Uses full render CSS with GSAP ScrollTrigger.
+
+The scrollytelling composition already exists and works. The workbook composition needs building — it's one layout wrapper and one spacing CSS file. Both use the same atoms, so all accessibility settings carry through to both views automatically.
+
+The user could switch between them: learn via scrollytelling, then switch to workbook to do the exercises.
+
+---
+
+## 17. Content Pipeline: JSON Describes, System Renders
+
+### Decision: Content is stored as JSON with section arrays. Each section says what type of content it contains and which atoms to use. The system does all the rendering.
+
+**Templated content** (like blog posts) has a fixed section structure. The JSON only carries content — the template owns the layout, composition, design, and animation.
+
+**Dynamic content** (like generated workbooks) has a flexible section structure defined in the JSON: page name, section types, section order, which atoms each section uses.
+
+Either way, the atoms are the same. The JSON never contains HTML (except for the pre-rendered `altAacHtml` from the resolver). It contains content and configuration. The Astro build step reads the JSON and renders the appropriate atoms with the appropriate props.
+
+---
+
+## 18. The "Your View" Panel: User Preferences, Not Disability Accommodations
+
+### Decision: The accessibility settings panel is called "Your View" and framed as personal preferences, not disability categories.
+
+It offers 24 combinable settings including:
+- Render mode (Default / Calm Mode / Easy Click / Reading Mode)
+- Alt text display (what to show + how to show it)
+- Cognitive level
+- Theme / dark mode
+- Highlight links
+- Text size
+- Colour vision filters
+- High contrast
+
+### Why the framing matters:
+Someone choosing Calm Mode might have anxiety, might have a migraine, might simply prefer less visual noise, or might be showing the site to a client in a quiet setting. Labelling it "Reduced Motion for Vestibular Disorders" medicalises a preference and discourages use by people who'd benefit from it but don't identify with the clinical label. "Calm Mode" is just a nicer way to browse. Anyone might want it.
+
+This philosophy runs through everything: addition not subtraction. The site doesn't take things away from people with disabilities — it gives everyone options to customise how they experience the content.
+
+---
+
+## Decision Log — Corrections and Clarifications
+
+These are specific decisions made during audits that clarify or correct earlier assumptions:
+
+| Date | Decision | Context |
+|------|----------|---------|
+| 4 Mar 2026 | `altAacPhrase` and `altSymbolId` are NOT Image component props | They're database fields consumed by the resolver at build time. Image receives `altAacHtml` (pre-rendered). Checklist sections 9.2 and 9.3 corrected. |
+| 4 Mar 2026 | Display modes are 6, not 5 | Actual CSS: hidden, caption, overlay, tooltip, subtitle, replace. Old checklist said: hover, overlay, underneath, replace, off. CSS is source of truth. Checklist section 9.4 corrected. |
+| 4 Mar 2026 | `--font-size-sm` is not a global token | Only exists inside `a11y-panel.css` (14px, scoped). Global equivalent is `--text-small: 0.875rem` in `src/styles/tokens/typography.css`. Any component using `--font-size-sm` outside the panel has a broken reference. |
+| 4 Mar 2026 | `[data-render="assistive"]` CSS doesn't exist yet for any component | Image atom is the first to get it, establishing the pattern. Every interactive atom will need equivalent rules. |
+| 4 Mar 2026 | `[data-text-xl]` threshold system doesn't exist yet | XL text reflow rules added as placeholder with TODO. Needs a system to set this attribute when root font size exceeds a threshold. |
+| 4 Mar 2026 | Print is a global layer, not per-component | Uses reduced/textonly render as base + thin print CSS on top. Not part of individual component audits. Built after render pipeline is complete. |
+| 4 Mar 2026 | Cross-atom fixes deferred to final render pass | Image alt text spans need Text atom. AAC cards in aac-cards.ts need Card + Image + Text atom markup. These wait until all atoms are individually audited. |
+| 4 Mar 2026 | No separate `Component.animation.css` file | Animation rules live in base `Component.css`, gated by prop-driven classes. The old pattern (separate animation file loaded only in full render) was wrong — gating is structural (class presence), not file-based (file loading). `Icon.animation.css` deleted and merged into `Icon.css` as first correction. |
+| 4 Mar 2026 | No hardcoded values in component CSS | Every value must use a design token. No `var(--token, #hex)` fallbacks — if the token is missing, it should break visibly. Exceptions: `0`, `none`, `100%`, `auto`, `1px` borders, unitless values. Two fallbacks stripped from Image.css (`--color-surface-inverse, #000` and `--radius-md, 8px`). |
+| 4 Mar 2026 | Pipeline routing: schemas can declare props for OTHER atoms | A schema's `renders` block can point to other atom names (not just `.astro` files). The pipeline routes the right props to the right atom per render mode. LottieIcon is the first example: `reduced/assistive → "Icon"` (routes `fallbackIcon`), `textonly → "Text"` (routes `label`). `fallbackIcon` never reaches `LottieIcon.astro`. Props can be optional — decorative instances pass neither `fallbackIcon` nor `label`. |
+| 4 Mar 2026 | LottieIcon is not always decorative | LottieIcon carries an optional `label` prop. Present = `role="img"` + `aria-label` (meaningful). Absent = `aria-hidden="true"` (decorative). Same pattern as `<img alt="...">` vs `<img alt="">`. The JSON author decides per instance. `LottieIcon.reduced.astro` deleted — no separate template files needed. |

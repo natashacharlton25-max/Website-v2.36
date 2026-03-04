@@ -148,8 +148,8 @@ Test this component in each render mode. Mark each cell PASS / FAIL / N/A.
 
 | Render | content props | visual props | animation props | CSS loaded |
 |--------|--------------|-------------|----------------|-----------|
-| full | ✓ | ✓ | ✓ | base + animation + responsive |
-| reduced | ✓ | ✓ | ✗ stripped | base + responsive (no animation.css) |
+| full | ✓ | ✓ | ✓ | base + responsive (animation classes emitted) |
+| reduced | ✓ | ✓ | ✗ stripped | base + responsive (no animation classes emitted) |
 | assistive | ✓ | ✓ (stacked) | ✗ stripped | base + responsive + assistive overrides |
 | textonly | ✓ | ✗ stripped | ✗ stripped | minimal base only |
 

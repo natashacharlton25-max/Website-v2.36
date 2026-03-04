@@ -15,11 +15,25 @@
 |----------|---------|
 | `render-refactor-phases-plan.md` | 11-phase refactor plan — phase order, Claude Code prompts, decision log |
 | `src/components/audit-log.md` | Per-component audit status — update after every component is completed |
-| `component-audit-spec.md` | Full per-component audit checklist — run against every component |
-| `component-audit-checklist.md` | Accessibility + render questions — part of component-audit-spec.md |
+| `component-audit-checklist-v2.md` | **Current** — full per-component audit checklist (16 sections). Run against every component. |
+| `component-audit-spec.md` | Older audit spec — superseded by v2 checklist for per-component audits |
+| `component-audit-checklist.md` | Older checklist — superseded by v2 |
+| `image-alt-text-cdn-plan.md` | Alt text architecture, display modes, AAC resolver pipeline, CDN plan |
 | `AAC-Shim-Print-Traceability-Spec.md` | AAC form inputs, assistive tech layer, print traceability architecture |
 
 After completing any component: update `src/components/audit-log.md` with status and notes.
+
+### Audit Workflow
+1. Audit each atom individually against `component-audit-checklist-v2.md`
+2. Fix issues specific to that atom only
+3. Log cross-atom dependencies as **deferred** in `src/components/audit-log.md` (e.g. "raw `<span>` should use Text atom")
+4. After ALL atoms pass individually, run a **final atom render pass** to resolve all deferred cross-atom dependencies
+5. Print stylesheet is a global layer built after all atoms pass — not per-component
+
+### Known v2 checklist corrections (apply when auditing):
+- **Section 9.2** — checklist expects `altAacPhrase` as Image prop. WRONG. `alt_aac_phrase` is a D1 field consumed by the resolver at build time. Image receives `altAacHtml` (pre-rendered). Not a component prop.
+- **Section 9.3** — checklist expects `altSymbolId` as Image prop. WRONG. `alt_symbol_id` is a D1 FK used at the data layer. Never reaches the component.
+- **Section 9.4** — checklist lists display modes as `hover | overlay | underneath | replace | off`. STALE. Actual CSS modes are `hidden | caption | overlay | tooltip | subtitle | replace` (6 modes, not 5). See Alt Text Architecture below for the correct mapping.
 
 ---
 
@@ -46,7 +60,7 @@ Present a table:
 For categories:
 - `dark-theme` → extract to `src/styles/zones/theme-luminance-dark.css`
 - `highlight-links` → extract to `src/styles/global/highlight-links.css`
-- `reduce-motion` → informs `Component.animation.css` (render pipeline gates it)
+- `reduce-motion` → animation is gated by prop-driven classes in `Component.css` (no separate file needed)
 - `text-only` → informs the `renders.textonly` template (not CSS)
 - `high-contrast` → extract to `src/styles/zones/high-contrast.css`
 - `base-style` → stays in `Component.css` (remove @layer wrapper only)
@@ -80,6 +94,9 @@ For categories:
 
 ## Render Architecture Contract
 
+### No hardcoded values in component CSS:
+Every colour, spacing, radius, shadow, font size, transition, and breakpoint must use a design token (`var(--token-name)`). If a token doesn't exist for the value needed, flag it — don't invent a magic number. The only exceptions are `0`, `none`, `100%`, `auto`, `1px` for borders, and unitless values like `flex: 1`. No `var(--token, #hex)` fallbacks either — if the token is missing, you want it to break visibly so the token gets fixed.
+
 ### CSS Rules — NEVER create these in NEW component CSS:
 - No `@layer` wrappers
 - No `a11y.css` files — the render pipeline replaces per-component a11y files
@@ -96,17 +113,17 @@ For categories:
 - Follow the extraction process above — never skip it
 
 ### CSS Files — New component structure (after extraction):
-- `Component.css` — base styles, loads in ALL renders
-- `Component.animation.css` — motion-gated styles, loads in full-motion render ONLY
+- `Component.css` — all styles including animation, loads in ALL renders
 - `Component.responsive.css` — breakpoint styles (if needed)
+- NO `Component.animation.css` — animation rules live in base CSS, gated by prop-driven classes
 - NO `Component.a11y.css` — the extraction process distributes these rules elsewhere
 
 ### Animation Architecture:
-- Animation = JSON prop → class on element → CSS rule
-- No prop = no animation class = no motion
-- Three renders filter what loads: full (all CSS), reduced (no animation CSS), textonly (minimal CSS)
+- Animation = JSON prop → class on element → CSS rule in `Component.css`
+- No prop = no class in HTML = animation rules never match = zero motion
+- There is NO separate animation CSS file. All animation keyframes and triggers live in the base CSS.
+- The gating is structural (class presence), not file-based (file loading).
 - Components are PURE — they don't detect render mode, brand, or motion preference
-- The render pipeline controls what CSS files load, not the component
 
 ### Icon System:
 - Icons are served from the Asset Library API (D1/R2 on Cloudflare)
@@ -117,10 +134,18 @@ For categories:
 
 ### Schema Structure:
 - Every component schema uses three prop groups: `content`, `visual`, `animation`
-- Plus a `renders` block: `{ full, reduced, assistive, textonly }` pointing to the .astro file
+- Plus a `renders` block: `{ full, reduced, assistive, textonly }` pointing to the .astro file or an atom name
 - Empty `animation: {}` is correct for components with no motion
 - `textonly: null` = decorative component, skip entirely in text-only render
 - `assistive` render uses the same .astro but receives filtered props (no animation, stacked layout)
+
+### Pipeline Routing — schemas that declare props for OTHER atoms:
+- A `renders` value can be an atom name (e.g. `"Icon"`, `"Text"`) instead of a `.astro` file
+- The pipeline reads the render mode and routes the right props to the right atom
+- Schema props marked as pipeline-only (e.g. `fallbackIcon`) never reach the component's `.astro` file
+- Example: LottieIcon schema has `reduced: "Icon"` — pipeline passes `fallbackIcon` to Icon atom in reduced/assistive mode
+- Props can be optional — decorative instances may only declare the animation, no fallback or label
+- The JSON content author decides per instance what dimensions to provide
 
 ---
 
@@ -131,7 +156,7 @@ The platform has **four** render modes:
 | Render | User-facing name | What it does |
 |--------|-----------------|--------------|
 | `full` | Default | All CSS, animations, hover effects |
-| `reduced` | Calm Mode | No animation CSS loaded |
+| `reduced` | Calm Mode | Animation props stripped — no animation classes emitted |
 | `assistive` | Easy Click | Large targets, no hover-only interactions, single-column layout |
 | `textonly` | Reading Mode | Minimal CSS, content only |
 
@@ -152,26 +177,54 @@ iOS Switch Control, Windows Eye Control, Android Switch Access, eye gaze tracker
 - Focus indicators enlarged (min 3px, high contrast)
 - Scoped to `[data-render="assistive"] .component { ... }` in `Component.css`
 
-**Component checklist for assistive render:** see `component-audit-spec.md` section 8.
+**Component checklist for assistive render:** see `component-audit-checklist-v2.md` sections 7, 8, 10.
 
 ---
 
 ## Alt Text Architecture
 
-Every Image component rendering user content must satisfy:
+### Image atom props (what the component accepts):
+- `altWord` — short word-level alt text
+- `altDescriptive` — long descriptive alt text (richest text for screen readers)
+- `altAacHtml` — pre-rendered AAC card HTML (built by aacResolver at build time)
+- `semanticRole` — `decorative` | `ui-control` | `content-symbol`
 
-- Props: `altDescriptive`, `altAacPhrase`, `altSymbolId` (from Asset Library API)
-- Five display modes: `hover` | `overlay` | `underneath` | `replace` | `off`
-- `tabindex="0"` on the `<figure>` element — makes it focusable for switch/keyboard
-- `:focus-within` on all hover-mode CSS rules — keyboard and OS AT trigger the same tooltip
-- `data-semantic-role` attribute on the figure
-- AAC pictogram cards render from `alt_symbols` table via the aacResolver
-
-**Asset API fields:**
-- `alt_descriptive` — full descriptive sentence for screen readers
-- `alt_aac_phrase` — space-separated simple words for AAC pictogram cards
-- `alt_symbol_id` — foreign key to `alt_symbols` table (backfilled for all 1,798 symbols)
+### Asset API / D1 fields (data layer — NOT component props):
+- `alt_descriptive` — full descriptive sentence, stored on `assets` table
+- `alt_aac_phrase` — curated 3-4 word phrase, stored on `assets` table, consumed by aacResolver at build time
+- `alt_symbol_id` — FK to `alt_symbols` table, used for resolver lookup
 - `alt_text_log` table — every change to any alt field is audited (migration 013)
+
+**Data flow:** D1 → `snapshot-alt-text.js` → JSON → `loadAllAltText()` → aacResolver → Image atom props. The atom never sees raw API data.
+
+### Alt text display — two-axis system (CSS, not component props):
+Both axes set as `data-*` attributes on `<html>`, controlled by the Your View panel.
+
+**What to show** (`data-alt-text-mode`):
+| Value | Shows |
+|-------|-------|
+| `none` | Nothing (screen reader alt only) |
+| `word` | `.image-alt-word` span |
+| `descriptive` | `.image-alt-descriptive` span |
+| `aac` | `.image-alt-aac` span (AAC pictogram cards) |
+
+**How to show it** (`data-alt-display-mode`):
+| Value | Behaviour |
+|-------|-----------|
+| `hidden` | `display: none` (default) |
+| `caption` | Block below image |
+| `overlay` | Positioned over image bottom (solid background) |
+| `tooltip` | Visible on hover + focus-within |
+| `subtitle` | Image shrinks via flex, text below |
+| `replace` | Image visually-hidden, text shown (img stays in a11y tree) |
+
+### Component requirements:
+- `tabindex="0"` on the `<figure>` element — makes it focusable for switch/keyboard
+- `:focus-within` on all tooltip-mode CSS rules — keyboard and OS AT trigger the same display
+- `data-semantic-role` attribute on the figure
+- All alt text spans have `aria-hidden="true"` — screen readers always use `img alt`, never the visual spans
+- AAC pictogram cards built by `aacResolver` via `aac-cards.ts`, rendered from `alt_symbols` table
+- Cognitive level filtering via `data-cognitive-level` on `<html>` + `data-core-tier` on AAC cards
 
 ---
 
@@ -196,7 +249,7 @@ Every Image component rendering user content must satisfy:
 | `@media (prefers-reduced-motion) { ... }` | Nowhere — render pipeline handles this |
 | `@layer a11y.dark { ... }` | Unwrap, extract dark rule to zone file |
 | `@layer a11y.highlight { ... }` | Unwrap, extract rule to highlight-links file |
-| `@layer a11y.reduce-motion { ... }` | Check if animation.css covers it, else ask |
+| `@layer a11y.reduce-motion { ... }` | Animation gated by prop-driven classes — check if already covered, else ask |
 | `@layer a11y.text-only { ... }` | Check if textonly render omits it, else ask |
 | `@layer component { .badge { ... } }` | Remove @layer wrapper, keep rule in Component.css |
 | Dark theme CSS custom properties | `src/styles/zones/theme-luminance-dark.css` |

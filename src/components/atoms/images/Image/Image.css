@@ -24,6 +24,11 @@
   display: inline-block;
 }
 
+.image:focus-visible {
+  outline: 2px solid var(--brand-c-primary);
+  outline-offset: 2px;
+}
+
 /* ==========================================================
    IMG BASE — theme-aware filter
    ========================================================== */
@@ -236,7 +241,7 @@
    Axis 1: data-alt-text-mode  = what to show  (none/word/descriptive/aac)
    Axis 2: data-alt-display-mode = how to show  (hidden/caption/overlay/tooltip/replace)
 
-   Both attributes live on #a11y-content-wrapper (+ mirrored to <html>).
+   Both attributes are set as data-* attributes on the document root element (<html>).
    Only the matching span for the active text-mode is ever visible.
    The display-mode controls the visual presentation of that span.
    ========================================================== */
@@ -246,7 +251,7 @@
 .image-alt-descriptive,
 .image-alt-aac {
   display: none;
-  font-size: var(--font-size-sm);
+  font-size: var(--text-small);
   color: var(--brand-c-text-dark);
   margin-top: var(--space-xs);
 }
@@ -276,7 +281,7 @@
   right: 0;
   margin-top: 0;
   padding: var(--space-sm);
-  background: var(--color-surface-inverse, #000);
+  background: var(--color-surface-inverse);
   color: var(--color-White);
 }
 
@@ -336,7 +341,7 @@
   display: block;
   padding: var(--space-md);
   background: color-mix(in srgb, var(--brand-c-text-dark) 8%, transparent);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   margin-top: 0;
 }
 
@@ -404,3 +409,33 @@
 }
 
 /* Full — show everything (default, no hiding needed) */
+
+/* ==========================================================
+   ASSISTIVE RENDER (Easy Click) + XL TEXT REFLOW
+   ========================================================== */
+
+[data-render="assistive"] .image,
+[data-text-xl] .image {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-render="assistive"] .image .image__img {
+  width: 100%;
+  height: auto;
+}
+
+[data-render="assistive"] .image:focus-visible {
+  outline-width: 3px;
+}
+
+/* XL TEXT — overlay alt text falls back to static position
+   TODO: Wire [data-text-xl] to XL threshold system when established */
+
+[data-text-xl] [data-alt-display-mode="overlay"][data-alt-text-mode] .image-alt-word,
+[data-text-xl] [data-alt-display-mode="overlay"][data-alt-text-mode] .image-alt-descriptive,
+[data-text-xl] [data-alt-display-mode="overlay"][data-alt-text-mode] .image-alt-aac {
+  position: static;
+  background: transparent;
+  color: var(--brand-c-text-dark);
+}

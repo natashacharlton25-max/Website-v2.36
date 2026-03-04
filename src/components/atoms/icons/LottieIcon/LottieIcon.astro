@@ -26,6 +26,7 @@ const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
 interface Props {
   slug?: string;
   src?: string;
+  label?: string;
   size?: number;
   loop?: boolean;
   autoplay?: boolean;
@@ -36,6 +37,7 @@ interface Props {
 const {
   slug,
   src,
+  label,
   size = 24,
   loop = false,
   autoplay = false,
@@ -67,6 +69,8 @@ if (slug) {
   data-lottie-icon
   data-lottie-loop={loop}
   data-lottie-autoplay={autoplay}
+  data-semantic-role="decorative"
+  {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': 'true' })}
   style={`width: ${size}px; height: ${size}px;`}
   id={id}
   {...(src && !animationData ? { 'data-lottie-src': src } : {})}
