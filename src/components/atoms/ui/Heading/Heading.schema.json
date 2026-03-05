@@ -1,7 +1,7 @@
 {
   "component": "Heading",
-  "category": "atoms/ui",
-  "renders": { "full": "Heading.astro", "reduced": "Heading.astro", "textonly": "Heading.textonly.astro" },
+  "category": "atom",
+  "renders": { "full": "Heading.astro", "reduced": "Heading.astro", "assistive": "Heading.astro", "textonly": "Heading.astro" },
   "notes": "Every heading on the site should go through this component. Heading.css is the single source of truth for all heading typography.",
 
   "props": {
@@ -31,7 +31,6 @@
       "dividerColor":   { "type": "string",  "required": false, "default": "primary", "enum": ["primary","secondary","text","neutral","gradient"], "description": "Divider colour." },
       "dividerStyle":   { "type": "string",  "required": false, "default": "solid", "enum": ["solid","dashed","dotted"], "description": "Divider pattern." },
       "dividerEnds":    { "type": "string",  "required": false, "default": "rounded", "enum": ["rounded","square"], "description": "Divider end caps." },
-      "dividerLength":  { "type": "string",  "required": false, "default": "auto", "enum": ["auto","xs","sm","md","lg","xl"], "description": "Divider height." },
       "mediaPosition":  { "type": "string",  "required": false, "default": "left", "enum": ["left","right"], "description": "Icon/image position." },
       "mediaSize":      { "type": "string",  "required": false, "default": "auto", "enum": ["sm","md","lg","auto"], "description": "Media container size." },
       "iconColor":      { "type": "string",  "required": false, "default": "text", "enum": ["primary","secondary","neutral","text"], "description": "Icon colour." },
@@ -40,7 +39,10 @@
       "class":          { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
     },
 
-    "animation": {}
+    "animation": {
+      "_description": "Motion behaviour — stripped in reduced/assistive/textonly renders",
+      "lottieIcon": { "type": "string", "required": false, "default": null, "description": "Lottie animation slug for media slot. When present, renders LottieIcon instead of static Icon. Stripped in reduced/assistive (falls back to content.icon) and textonly (no media). Only rendered when full animation props are available." }
+    }
   },
 
   "slots": {

@@ -21,6 +21,8 @@
  * For body text, use <Text>. For lists, use <List>.
  */
 import { Icon } from '../../icons/Icon';
+import { LottieIcon } from '../../icons/LottieIcon';
+import { Text } from '../Text';
 
 interface Props {
   // ── Core typography ──────────────────────────────────────
@@ -42,7 +44,6 @@ interface Props {
   dividerColor?: 'primary' | 'secondary' | 'text' | 'neutral' | 'gradient';
   dividerStyle?: 'solid' | 'dashed' | 'dotted';
   dividerEnds?: 'rounded' | 'square';
-  dividerLength?: 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
   // ── Variant ──────────────────────────────────────────────
   variant?: 'default' | 'underline' | 'badge' | 'highlight' | 'minimal';
@@ -51,6 +52,7 @@ interface Props {
   highlightColor?: 'primary' | 'secondary' | 'neutral';
 
   // ── Media ────────────────────────────────────────────────
+  lottieIcon?: string;
   image?: string;
   icon?: string;
   mediaPosition?: 'left' | 'right';
@@ -80,11 +82,11 @@ const {
   dividerColor = 'primary',
   dividerStyle = 'solid',
   dividerEnds = 'rounded',
-  dividerLength = 'auto',
   variant = 'default',
   underlineStyle = 'solid',
   badgeColor = 'primary',
   highlightColor = 'primary',
+  lottieIcon,
   image,
   icon,
   mediaPosition = 'left',
@@ -98,7 +100,7 @@ const {
 
 const Tag = `h${level}` as any;
 const visualSize = size ?? `h${level}`;
-const isDecorated = !!(divider || image || icon || subtitle || variant !== 'default');
+const isDecorated = !!(divider || image || icon || lottieIcon || subtitle || variant !== 'default');
 
 const sizeKey = visualSize.replace('h', '');
 const iconSizeMap: Record<string, number> = { '1': 56, '2': 44, '3': 32, '4': 28, '5': 24, '6': 20 };
@@ -126,26 +128,27 @@ const wrapperClasses = isDecorated ? [
   divider ? `heading-wrap--divider-${divider}` : '',
   divider ? `heading-wrap--divider-color-${dividerColor}` : '',
   divider ? `heading-wrap--divider-ends-${dividerEnds}` : '',
-  divider ? `heading-wrap--divider-length-${dividerLength}` : '',
   divider && dividerStyle !== 'solid' ? `heading-wrap--divider-style-${dividerStyle}` : '',
   variant === 'underline' ? `heading-wrap--underline-${underlineStyle}` : '',
   variant === 'badge' ? `heading-wrap--badge-${badgeColor}` : '',
   variant === 'highlight' ? `heading-wrap--highlight-${highlightColor}` : '',
-  (image || icon) ? 'heading-wrap--has-media' : '',
-  (image || icon) ? `heading-wrap--media-${mediaPosition}` : '',
-  (image || icon) ? `heading-wrap--media-size-${computedMediaSize}` : '',
-  icon ? `heading-wrap--icon-${iconColor}` : '',
-  icon ? `heading-wrap--icon-${iconStyle}` : '',
+  (image || icon || lottieIcon) ? 'heading-wrap--has-media' : '',
+  (image || icon || lottieIcon) ? `heading-wrap--media-${mediaPosition}` : '',
+  (image || icon || lottieIcon) ? `heading-wrap--media-size-${computedMediaSize}` : '',
+  (icon || lottieIcon) ? `heading-wrap--icon-${iconColor}` : '',
+  (icon || lottieIcon) ? `heading-wrap--icon-${iconStyle}` : '',
   className,
 ].filter(Boolean).join(' ') : '';
 ---
 
 {isDecorated ? (
   <div class={wrapperClasses}>
-    {(image || icon) && mediaPosition === 'left' && (
+    {(image || icon || lottieIcon) && mediaPosition === 'left' && (
       <div class="heading-wrap__media">
         {image ? (
           <img src={image} alt="" class="heading-wrap__img" />
+        ) : lottieIcon ? (
+          <LottieIcon slug={lottieIcon} size={computedIconSize} class="heading-wrap__icon" />
         ) : icon ? (
           <Icon name={icon} size={computedIconSize} class="heading-wrap__icon" />
         ) : null}
@@ -161,7 +164,7 @@ const wrapperClasses = isDecorated ? [
         {variant === 'highlight' && <span class="heading-wrap__highlight" aria-hidden="true"></span>}
         <span class="heading-wrap__text-inner"><slot /></span>
       </Tag>
-      {subtitle && <p class="heading-wrap__subtitle">{subtitle}</p>}
+      {subtitle && <Text as="p" size="sm" color="text-light" flush class="heading-wrap__subtitle">{subtitle}</Text>}
       {variant === 'underline' && <div class="heading-wrap__underline" aria-hidden="true"></div>}
     </div>
 
@@ -169,10 +172,12 @@ const wrapperClasses = isDecorated ? [
       <div class="heading-wrap__divider" aria-hidden="true"></div>
     )}
 
-    {(image || icon) && mediaPosition === 'right' && (
+    {(image || icon || lottieIcon) && mediaPosition === 'right' && (
       <div class="heading-wrap__media">
         {image ? (
           <img src={image} alt="" class="heading-wrap__img" />
+        ) : lottieIcon ? (
+          <LottieIcon slug={lottieIcon} size={computedIconSize} class="heading-wrap__icon" />
         ) : icon ? (
           <Icon name={icon} size={computedIconSize} class="heading-wrap__icon" />
         ) : null}

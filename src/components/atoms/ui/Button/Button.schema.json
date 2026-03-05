@@ -1,38 +1,57 @@
 {
   "component": "Button",
-  "category": "atoms/ui",
-  "notes": "Extends .text class from Text atom. Renders as <button>, <a>, or dropdown wrapper depending on props.",
-  "reducedMotion": "All transitions killed. Expand/spot/glow animations disabled. Hover states instant.",
-  "renders": { "base": "Button.astro" },
-  "slots": { "default": "Button label text" },
+  "category": "atom",
+  "renders": {
+    "full": "Button.astro",
+    "reduced": "Button.astro",
+    "assistive": "Button.astro",
+    "textonly": "Button.astro"
+  },
+  "notes": "Renders as <button>, <a>, or dropdown wrapper depending on props. Label renders through Text atom. Icon/LottieIcon for media. All motion gated behind animation props.",
+
   "props": {
-    "variant":        { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "outline", "ghost", "glass", "glow", "neumorphic"] },
-    "shape":          { "type": "string",  "required": false, "default": "rounded", "enum": ["rounded", "pill", "circle", "square", "sharp", "dropdown"] },
-    "size":           { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"] },
-    "effect":         { "type": "string",  "required": false, "enum": ["glint", "colour-flow", "jump", "comic", "tech", "expand", "underline", "magnetic", "spotlight", "split"] },
-    "speed":          { "type": "string",  "required": false, "enum": ["slow", "normal", "fast"] },
-    "alignment":      { "type": "string",  "required": false, "enum": ["left", "center"] },
-    "href":           { "type": "string",  "required": false },
-    "target":         { "type": "string",  "required": false },
-    "download":       { "type": "string",  "required": false },
-    "type":           { "type": "string",  "required": false, "default": "button", "enum": ["button", "submit", "reset"] },
-    "disabled":       { "type": "boolean", "required": false, "default": false },
-    "id":             { "type": "string",  "required": false },
-    "icon":           { "type": "string",  "required": false },
-    "iconPosition":   { "type": "string",  "required": false, "default": "left", "enum": ["left", "right"] },
-    "iconCollection": { "type": "string",  "required": false },
-    "iconMorphTo":    { "type": "string",  "required": false },
-    "iconMorphColor": { "type": "string",  "required": false },
-    "iconDraw":       { "type": "string",  "required": false, "enum": ["draw", "drawcenter", "chachaslide", "flashgordon", "rainbowchase", "pulse"] },
-    "iconDrawColor":  { "type": "string",  "required": false },
-    "lottieIcon":     { "type": "string",  "required": false },
-    "lottieLoop":     { "type": "boolean", "required": false, "default": false },
-    "ariaLabel":      { "type": "string",  "required": false },
-    "confetti":       { "type": "string",  "required": false, "enum": ["confetti", "hearts", "celebration", "mixed"] },
-    "confettiTrigger":{ "type": "string",  "required": false, "default": "click", "enum": ["click", "hover"] },
-    "confettiCount":  { "type": "number",  "required": false, "default": 30 },
-    "confettiSpread": { "type": "number",  "required": false, "default": 150 },
-    "dropdownItems":  { "type": "array",   "required": false, "default": [] },
-    "class":          { "type": "string",  "required": false, "default": "" }
+    "content": {
+      "_description": "What the button communicates and does",
+      "href":           { "type": "string",  "required": false, "default": null, "description": "Makes it an <a> tag." },
+      "target":         { "type": "string",  "required": false, "default": null, "description": "Link target." },
+      "download":       { "type": "string",  "required": false, "default": null, "description": "Download attribute." },
+      "type":           { "type": "string",  "required": false, "default": "button", "enum": ["button", "submit", "reset"], "description": "Button type." },
+      "disabled":       { "type": "boolean", "required": false, "default": false, "description": "Disabled state." },
+      "id":             { "type": "string",  "required": false, "default": null, "description": "Element ID." },
+      "ariaLabel":      { "type": "string",  "required": false, "default": null, "description": "Accessible label for icon-only buttons." },
+      "icon":           { "type": "string",  "required": false, "default": null, "description": "Phosphor icon slug. Decorative — aria-hidden via Icon atom." },
+      "iconPosition":   { "type": "string",  "required": false, "default": "left", "enum": ["left", "right"], "description": "Icon position." },
+      "iconCollection": { "type": "string",  "required": false, "default": null, "description": "Icon collection override." },
+      "dropdownItems":  { "type": "array",   "required": false, "default": [], "description": "Array of {label, href?, value?, fontFamily?} for dropdown mode." }
+    },
+
+    "visual": {
+      "_description": "How the button looks",
+      "variant":   { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "outline", "ghost", "glass", "glow", "neumorphic"], "description": "Colour variant." },
+      "shape":     { "type": "string",  "required": false, "default": "rounded", "enum": ["rounded", "pill", "circle", "square", "sharp", "dropdown"], "description": "Border radius shape." },
+      "size":      { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Size variant." },
+      "alignment": { "type": "string",  "required": false, "default": null, "enum": ["left", "center"], "description": "Button alignment in container." },
+      "class":     { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "animation": {
+      "_description": "Motion behaviour — stripped in reduced/assistive/textonly renders",
+      "effect":         { "type": "string",  "required": false, "default": null, "enum": ["glint", "colour-flow", "jump", "comic", "tech", "expand", "underline", "magnetic", "spotlight", "split"], "description": "Hover/interaction effect." },
+      "speed":          { "type": "string",  "required": false, "default": null, "enum": ["slow", "normal", "fast"], "description": "Effect speed." },
+      "iconMorphTo":    { "type": "string",  "required": false, "default": null, "description": "Icon morph target on hover." },
+      "iconMorphColor": { "type": "string",  "required": false, "default": null, "description": "Icon morph colour." },
+      "iconDraw":       { "type": "string",  "required": false, "default": null, "enum": ["draw", "drawcenter", "chachaslide", "flashgordon", "rainbowchase", "pulse"], "description": "Icon draw animation." },
+      "iconDrawColor":  { "type": "string",  "required": false, "default": null, "description": "Icon draw colour." },
+      "lottieIcon":     { "type": "string",  "required": false, "default": null, "description": "Lottie animation slug for icon slot. Stripped in non-full renders, falls back to content.icon." },
+      "lottieLoop":     { "type": "boolean", "required": false, "default": false, "description": "Loop Lottie animation." },
+      "confetti":       { "type": "string",  "required": false, "default": null, "enum": ["confetti", "hearts", "celebration", "mixed"], "description": "Particle burst type." },
+      "confettiTrigger":{ "type": "string",  "required": false, "default": "click", "enum": ["click", "hover"], "description": "Particle trigger." },
+      "confettiCount":  { "type": "number",  "required": false, "default": 30, "description": "Particle count." },
+      "confettiSpread": { "type": "number",  "required": false, "default": 150, "description": "Particle spread." }
+    }
+  },
+
+  "slots": {
+    "default": "Button label text"
   }
 }

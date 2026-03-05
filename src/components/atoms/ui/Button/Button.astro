@@ -27,6 +27,7 @@
  */
 import { Icon } from '../../icons/Icon';
 import { LottieIcon } from '../../icons/LottieIcon';
+import { Text } from '../Text';
 
 export interface DropdownItem {
   label: string;
@@ -126,7 +127,6 @@ const iconAnimProps = {
 
 // Build classes
 const classes = [
-  'text',
   'btn',
   `btn--${variant}`,
   `btn--${shape}`,
@@ -173,9 +173,9 @@ const iconRight = iconPosition === 'right' && hasIcon;
       {...dataAttrs}
       {...confettiAttrs}
     >
-      {iconLeft && (useLottie ? <LottieIcon src={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
-      <span class="btn__label"><slot /></span>
-      {iconRight && (useLottie ? <LottieIcon src={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      <Text as="span" class="btn__label" flush><slot /></Text>
+      {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
       <Icon name="caret-down-fill" size={14} class="btn__chevron" />
     </button>
 
@@ -210,9 +210,9 @@ const iconRight = iconPosition === 'right' && hasIcon;
     {...dataAttrs}
     {...confettiAttrs}
   >
-    {iconLeft && (useLottie ? <LottieIcon src={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
-    <span class="btn__label"><slot /></span>
-    {iconRight && (useLottie ? <LottieIcon src={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+    {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+    <Text as="span" class="btn__label" flush><slot /></Text>
+    {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
   </a>
 ) : (
   <button
@@ -224,9 +224,9 @@ const iconRight = iconPosition === 'right' && hasIcon;
     {...dataAttrs}
     {...confettiAttrs}
   >
-    {iconLeft && (useLottie ? <LottieIcon src={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
-    <span class="btn__label"><slot /></span>
-    {iconRight && (useLottie ? <LottieIcon src={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+    {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+    <Text as="span" class="btn__label" flush><slot /></Text>
+    {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
   </button>
 )}
 
@@ -294,14 +294,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
 </script>
 
 <script>
-  // Confetti — direct binding (a11y: skip when reduce-motion or text-only)
-  function isA11yActive(): boolean {
-    const wrapper = document.querySelector('#a11y-content-wrapper');
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-      wrapper?.classList.contains('a11y-reduce-motion') === true ||
-      wrapper?.classList.contains('a11y-text-only') === true;
-  }
-
+  // Confetti — direct binding
   async function initConfetti() {
     const els = document.querySelectorAll<HTMLElement>('[data-particle-burst]:not([data-confetti-bound])');
     if (els.length === 0) return;
@@ -320,36 +313,25 @@ const iconRight = iconPosition === 'right' && hasIcon;
       if (trigger === 'hover') {
         let cooldown = false;
         el.addEventListener('mouseenter', () => {
-          if (cooldown || isA11yActive()) return;
+          if (cooldown) return;
           createParticleBurst(el, opts);
           cooldown = true;
           setTimeout(() => { cooldown = false; }, 2000);
         });
       } else {
         el.addEventListener('click', () => {
-          if (isA11yActive()) return;
           createParticleBurst(el, opts);
         });
       }
     });
   }
 
-  // Run immediately (module scripts are deferred — DOM is ready)
   initConfetti();
-  // Also support ClientRouter navigations
   document.addEventListener('astro:page-load', initConfetti);
 </script>
 
 <script>
   // Magnetic + Spotlight — cursor-tracking effects
-  // A11y: skip when reduce-motion or text-only
-  function isCursorA11yActive(): boolean {
-    const wrapper = document.querySelector('#a11y-content-wrapper');
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-      wrapper?.classList.contains('a11y-reduce-motion') === true ||
-      wrapper?.classList.contains('a11y-text-only') === true;
-  }
-
   function initCursorEffects() {
     // Magnetic: shift button toward cursor
     document.querySelectorAll<HTMLElement>('.btn--magnetic:not([data-mag-bound])').forEach(el => {
@@ -357,7 +339,6 @@ const iconRight = iconPosition === 'right' && hasIcon;
       const strength = 8; // max px shift
 
       el.addEventListener('mousemove', (e) => {
-        if (isCursorA11yActive()) return;
         const rect = el.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
@@ -376,7 +357,6 @@ const iconRight = iconPosition === 'right' && hasIcon;
       el.setAttribute('data-spot-bound', '1');
 
       el.addEventListener('mousemove', (e) => {
-        if (isCursorA11yActive()) return;
         const rect = el.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
@@ -396,26 +376,22 @@ const iconRight = iconPosition === 'right' && hasIcon;
 </script>
 
 <script>
-  // Lottie icons inside buttons — play on hover, reverse on leave
-  // A11y: skip when reduce-motion or text-only
-  function isLottieA11yActive(): boolean {
-    const wrapper = document.querySelector('#a11y-content-wrapper');
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-      wrapper?.classList.contains('a11y-reduce-motion') === true ||
-      wrapper?.classList.contains('a11y-text-only') === true;
-  }
-
+  // Lottie icons inside buttons — play on hover/focus, reverse on leave/blur
   function initButtonLottie() {
     document.querySelectorAll<HTMLElement>('.btn [data-lottie-icon]:not([data-btn-lottie-bound])').forEach(el => {
       el.setAttribute('data-btn-lottie-bound', '1');
       const trigger = el.closest('button, a') || el;
 
       trigger.addEventListener('mouseenter', () => {
-        if (isLottieA11yActive()) return;
         el.dispatchEvent(new CustomEvent('lottie:play'));
       });
       trigger.addEventListener('mouseleave', () => {
-        if (isLottieA11yActive()) return;
+        el.dispatchEvent(new CustomEvent('lottie:playReverse'));
+      });
+      trigger.addEventListener('focusin', () => {
+        el.dispatchEvent(new CustomEvent('lottie:play'));
+      });
+      trigger.addEventListener('focusout', () => {
         el.dispatchEvent(new CustomEvent('lottie:playReverse'));
       });
     });

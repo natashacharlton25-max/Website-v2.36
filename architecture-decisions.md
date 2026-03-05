@@ -2,7 +2,7 @@
 
 **What this document is:** A record of every major design decision for the website architecture, written in plain language. If you paste this into a new conversation with Claude (app or Code), it should understand the full architecture without further explanation.
 
-**Last updated:** 4 March 2026
+**Last updated:** 5 March 2026
 
 ---
 
@@ -36,23 +36,20 @@ A Card equals whatever you put in it. The same Card atom renders a blog preview,
 
 ---
 
-## 2. Responsive Layout Lives on Containers, Not Atoms
+## 2. Responsive Layout Lives on Containers — Atoms Own Their Own Visual Scaling
 
-### Decision: Only container atoms (Card, Grid, List, Form) have responsive CSS. Fixed atoms never have media queries.
+### Decision: Layout responsiveness lives on containers. Atoms own their own visual scaling.
+
+Containers (Card, Grid, List) control column counts, stacking, and spatial layout via media queries. Atoms have `Component.responsive.css` for scaling their own visual properties — heading font sizes step down at tablet/mobile, text gets word-break rules on small screens, image decorative properties shrink. But atoms never change layout — they never switch from row to column, never control grid columns. They scale themselves; containers position them.
 
 ### Why:
-A heading doesn't know what screen it's on. It doesn't need to. It just says "I am a heading, this size, this colour." The Card or Grid it sits inside decides whether to show two columns or one column based on screen width.
+A heading doesn't know what column it's in. It doesn't need to. It just says "I am a heading, this size, this colour." The Card or Grid it sits inside decides whether to show two columns or one column based on screen width.
 
-This means:
-- The Text atom never has a breakpoint
-- The Button atom never has a media query
-- The Icon atom doesn't know what screen size it's on
-- None of them need to
+The atom's responsive file handles things like: h1 drops from 48px to 36px on mobile, word-break kicks in on small screens, decorative border-radius flattens on tiny viewports. These are the atom's own visual properties scaling — not layout decisions.
 
-One set of responsive rules on a handful of containers. Everything inside just works because it doesn't try to control its own layout.
-
-### Exception:
-The Image atom has `Image.responsive.css` but it only scales decorative properties (border-radius gets flatter on tiny screens, shadows shrink). It never changes layout — that's still the container's job.
+### The key distinction:
+- **Container responsive CSS** = column counts, flex direction, grid templates, stacking order
+- **Atom responsive CSS** = font size scaling, word-break rules, decorative property adjustments
 
 ---
 
@@ -411,6 +408,20 @@ These are specific decisions made during audits that clarify or correct earlier 
 | 4 Mar 2026 | Print is a global layer, not per-component | Uses reduced/textonly render as base + thin print CSS on top. Not part of individual component audits. Built after render pipeline is complete. |
 | 4 Mar 2026 | Cross-atom fixes deferred to final render pass | Image alt text spans need Text atom. AAC cards in aac-cards.ts need Card + Image + Text atom markup. These wait until all atoms are individually audited. |
 | 4 Mar 2026 | No separate `Component.animation.css` file | Animation rules live in base `Component.css`, gated by prop-driven classes. The old pattern (separate animation file loaded only in full render) was wrong — gating is structural (class presence), not file-based (file loading). `Icon.animation.css` deleted and merged into `Icon.css` as first correction. |
-| 4 Mar 2026 | No hardcoded values in component CSS | Every value must use a design token. No `var(--token, #hex)` fallbacks — if the token is missing, it should break visibly. Exceptions: `0`, `none`, `100%`, `auto`, `1px` borders, unitless values. Two fallbacks stripped from Image.css (`--color-surface-inverse, #000` and `--radius-md, 8px`). |
+| 4 Mar 2026 | No hardcoded values in component CSS | Every value must use a design token. No `var(--token, #hex)` fallbacks — if the token is missing, it should break visibly. Exceptions: `0`, `none`, `100%`, `auto`, `1px` borders, unitless values, and `em`-based relative values that intentionally scale with parent font size. Two fallbacks stripped from Image.css (`--color-surface-inverse, #000` and `--radius-md, 8px`). |
 | 4 Mar 2026 | Pipeline routing: schemas can declare props for OTHER atoms | A schema's `renders` block can point to other atom names (not just `.astro` files). The pipeline routes the right props to the right atom per render mode. LottieIcon is the first example: `reduced/assistive → "Icon"` (routes `fallbackIcon`), `textonly → "Text"` (routes `label`). `fallbackIcon` never reaches `LottieIcon.astro`. Props can be optional — decorative instances pass neither `fallbackIcon` nor `label`. |
 | 4 Mar 2026 | LottieIcon is not always decorative | LottieIcon carries an optional `label` prop. Present = `role="img"` + `aria-label` (meaningful). Absent = `aria-hidden="true"` (decorative). Same pattern as `<img alt="...">` vs `<img alt="">`. The JSON author decides per instance. `LottieIcon.reduced.astro` deleted — no separate template files needed. |
+| 4 Mar 2026 | Relative sizing for decorative line elements | Dividers, underlines, decorative borders use `em` for thickness/rhythm (scales with parent font size), percentage for width (90% = shorter than text, 100% = match text), `align-self: stretch` for height. No hardcoded pixel size scales. Heading divider + underline are the reference implementation. |
+| 4 Mar 2026 | Context overrides don't belong on atoms | Atoms should not adjust themselves based on parent context (e.g. `.card .text { font-size: ... }`). Consumers pass the correct props via JSON instead. Context override rules deleted from Text.css and flagged for deletion from Heading.css during consumer audits. |
+| 4 Mar 2026 | Atoms can compose other atoms | Heading imports Icon, LottieIcon, and Text. This is correct atom-to-atom composition. Text sub-elements inside atoms render through the Text atom, not raw HTML (e.g. Heading subtitle uses `<Text as="p">` not `<p>`). |
+| 4 Mar 2026 | SectionTitle.astro deprecated — use Heading | SectionTitle duplicates Heading's decorated mode (same divider, variant, media slot systems). SectionTitle has banned patterns (scoped `<style>`, `!important`, `var(--token, fallback)`, hardcoded `letter-spacing`). Consumers migrate to `<Heading>` with decoration props, then SectionTitle is deleted. |
+| 4 Mar 2026 | Heading media slot priority: image → lottieIcon → icon | Media slot renders first match in priority order. `lottieIcon` is in the animation group — stripped in reduced/assistive/textonly. Static `icon` in content group auto-becomes the fallback. No separate fallbackIcon prop needed on Heading. |
+| 4 Mar 2026 | Post-audit token coverage grep required | After all atom audits complete, grep every `var(--token-name)` in component CSS and verify each resolves to a definition in `src/styles/`. Automate as build-time check. First cases caught: `--font-body-alt` and `--font-handwriting` missing (now fixed), `--color-surface-inverse` and `--radius-md` had hex fallbacks masking whether tokens exist (fallbacks stripped). |
+| 5 Mar 2026 | Base button hover is colour-only — no transform on base | `transition: all` replaced with explicit `background-color, color, border-color`. All `translateY(-1px)` removed from base `.btn:hover`/`:active`. Transform and box-shadow transitions only exist on effect classes (jump, comic, tech, etc.) which are gated by the effect prop. |
+| 5 Mar 2026 | Runtime a11y checks (`isA11yActive()`) are redundant | Scripts that query `#a11y-content-wrapper` for `.a11y-reduce-motion` / `.a11y-text-only` classes bypass the render pipeline. The pipeline strips animation props → no animation classes emitted → scripts find nothing to bind to. Three duplicate functions deleted from Button.astro. Pattern: if a script only binds to prop-gated classes, no runtime check is needed. |
+| 5 Mar 2026 | Global token files for confetti, high-contrast, highlight-links | `confetti.css` relocated from Button/ to `src/styles/tokens/` — confetti colour tokens are global, not component-scoped. `src/styles/zones/high-contrast.css` created — atoms add `[data-high-contrast]` rules during their audits. `src/styles/global/highlight-links.css` created — atoms add `[data-highlight-links]` rules during their audits. |
+| 5 Mar 2026 | Button label renders through Text atom | `<span class="btn__label"><slot /></span>` replaced with `<Text as="span" class="btn__label" flush><slot /></Text>`. Button's `'text'` CSS class removed — Text atom handles typography. `.btn__label` retains layout-only rules (position, z-index, colour transitions). |
+| 5 Mar 2026 | a11y.css extraction pattern established | Extraction targets for component a11y.css rules: reduce-motion → render pipeline handles (no CSS needed), text-only → `[data-render="textonly"]` rules in component CSS, high-contrast → `src/styles/zones/high-contrast.css`, highlight-links → `src/styles/global/highlight-links.css`. Original a11y.css files moved to `_reference/ComponentName/`. Button is the first full extraction. |
+| 5 Mar 2026 | `data-semantic-role="status"` for Badge | Badges communicate meaningful status/category information ("New", "Beta", "6 sections") — not decorative. `data-semantic-role="status"` chosen over `"decorative"`. |
+| 5 Mar 2026 | Glass token variants: light and dark | Base `--glass-bg`/`--glass-border` tokens (10%/20% white) too subtle for all use cases. New tokens added to shadows.css: `--glass-bg-light`/`--glass-border-light` (50% white, for dark-text-on-light-glass) and `--glass-bg-dark`/`--glass-border-dark` (30%/20% black, for light-text-on-dark-glass). Components should use tokens, not inline `color-mix()`. |
+| 5 Mar 2026 | Badge label renders through Text atom | Same pattern as Button: `<span class="badge__label">` → `<Text as="span" class="badge__label" flush>`. Raw `text` CSS class removed from Badge class list. `.badge__label { font: inherit; color: inherit; }` rule deleted — Text atom handles typography. |

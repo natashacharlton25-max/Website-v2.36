@@ -54,7 +54,17 @@ Grep the component's CSS files. All must return zero matches.
 | 2.13 | `.dark-theme` selector | `\.dark-theme` — extract to theme-luminance-dark.css |
 | 2.14 | `highlight-links` selector | `highlight-links` — extract to highlight-links.css |
 | 2.15 | Old numbered palette tokens | `--color-Primary` / `--color-Neutral` / `--color-AccentOne` |
-| 2.16 | Fallback values on brand tokens | `var(--brand-c-[^)]+,\s*#` |
+| 2.16 | Fallback values on brand tokens | `var(--brand-c-[^)]+,\s*#` (subset of 2.19 — kept for reference) |
+| 2.17 | Hardcoded colour values | `#[0-9a-fA-F]` in component CSS (not in comments) |
+| 2.18 | Hardcoded px spacing (non-exempt) | Check for px values that should be tokens. EXEMPT: `0`, `1px` borders, em-based values. Flag anything else. |
+| 2.19 | Any var(--token, fallback) pattern | `var(--[^)]+,` — no fallback values on any design token, not just brand tokens |
+
+**Acceptable values (not flagged by these checks):**
+- `0`, `none`, `100%`, `auto` — universal CSS values
+- `1px` — hairline borders
+- Unitless values — `flex: 1`, `opacity: 0.3` (when tokenized), `z-index`
+- `em`-based values — intentionally scale with parent font size (e.g. `0.15em` divider width, `0.25em` dash rhythm)
+- Percentages — relative to parent (e.g. `90%` underline width, `35%` highlight height)
 
 ---
 
@@ -63,7 +73,7 @@ Grep the component's CSS files. All must return zero matches.
 | # | Check | Pass | Fail indicator |
 |---|-------|------|---------------|
 | 3.1 | Has `"component"` field | | Missing |
-| 3.2 | Has `"category"` field | | Missing |
+| 3.2 | Has `"category": "atom"` for atoms | | Missing or wrong value (e.g. "atoms/ui", "atoms/icons") |
 | 3.3 | Has `"renders"` block with all 4 keys: `full`, `reduced`, `assistive`, `textonly` | | Missing keys or old 3-key format |
 | 3.4 | `textonly: null` for decorative/effect components | | Decorative component has a .astro target |
 | 3.5 | `assistive` render points to same .astro (props are filtered, not a separate template) | | Separate assistive template file |
@@ -214,9 +224,9 @@ Skip for non-Image components.
 | # | Check | Pass | Fail indicator |
 |---|-------|------|---------------|
 | 9.1 | Accepts `altDescriptive` prop | | Only generic `alt` prop |
-| 9.2 | Accepts `altAacPhrase` prop | | Missing |
-| 9.3 | Accepts `altSymbolId` prop | | Missing |
-| 9.4 | Accepts `altDisplayMode` prop (`hover` / `overlay` / `underneath` / `replace` / `off`) | | Missing |
+| 9.2 | `alt_aac_phrase` resolved at build time by aacResolver (NOT a component prop) | | Component accepts this directly instead of `altAacHtml` |
+| 9.3 | `alt_symbol_id` is a D1 FK used at data layer (NOT a component prop) | | Component accepts this directly |
+| 9.4 | Alt display handled by CSS via `data-alt-display-mode` attribute on `<html>` — 6 modes: `hidden`, `caption`, `overlay`, `tooltip`, `subtitle`, `replace` | | Component has hardcoded display mode |
 | 9.5 | `tabindex="0"` on `<figure>` element | | Missing — blocks keyboard/AT access |
 | 9.6 | `:focus-within` on all hover-mode CSS rules | | Only `:hover` — keyboard can't trigger |
 | 9.7 | `data-semantic-role` on figure | | Missing |

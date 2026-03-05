@@ -1,8 +1,7 @@
 /**
  * Button — base styles
- * @layer components
  *
- * Inherits font-family from .text (Text atom).
+ * Label typography handled by Text atom wrapper.
  * Colour is set per-variant — buttons always need explicit contrast.
  *
  * Variants: primary, secondary, neutral, outline, ghost, glass, glow, neumorphic
@@ -10,853 +9,890 @@
  * Sizes: sm, md, lg
  */
 
-@layer components {
-
-  /* ==========================================================
-     BASE
-     ========================================================== */
-
-  .btn {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    padding: var(--space-md) var(--space-lg);
-    min-height: 2.75rem;
-    font-weight: 500;
-    font-size: inherit;
-    font-family: var(--font-body);
-    line-height: var(--leading-tight);
-    text-decoration: none;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 0.075em;
-    cursor: pointer;
-    border: none;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    isolation: isolate;
-    margin: 0;
-    overflow-wrap: normal;
-    --_btn-brand: var(--brand-c-primary);
-    --_btn-brand-dark: var(--brand-c-primary-dark);
-    --_btn-brand-light: var(--brand-c-primary-light);
-    background-color: var(--_btn-brand);
-    color: var(--color-White);
-    box-shadow: var(--shadow-md);
-    transition: all var(--transition-fast);
-  }
-
-  .btn:hover {
-    background-color: var(--_btn-brand-dark);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .btn:focus-visible {
-    outline: 2px solid var(--_btn-brand);
-    outline-offset: 2px;
-  }
-
-  .btn:active {
-    background-color: var(--_btn-brand-dark);
-    transform: translateY(0);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .btn:disabled,
-  .btn[aria-disabled="true"] {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .btn:disabled:hover,
-  .btn[aria-disabled="true"]:hover {
-    background-color: var(--_btn-brand);
-    transform: none;
-    box-shadow: var(--shadow-md);
-  }
-
-  /* ==========================================================
-     EFFECT: GLINT — opt-in via .btn--glint
-     Diagonal light sweep on hover using ::before.
-     ========================================================== */
-
-  .btn--glint::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: var(--glint-gradient);
-    transition: left var(--glint-speed) ease;
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  .btn--glint:hover::before {
-    left: 100%;
-  }
-
-  /* ==========================================================
-     ICON
-     ========================================================== */
-
-  .btn__icon {
-    width: 1.25em;
-    height: 1.25em;
-    flex-shrink: 0;
-    color: inherit;
-    fill: currentColor;
-  }
-
-  /* Icon position is handled by DOM order (iconLeft / iconRight) — no flex-direction needed */
-
-  .btn__chevron {
-    width: 0.85em;
-    height: 0.85em;
-    flex-shrink: 0;
-    color: inherit;
-    fill: currentColor;
-    transition: transform var(--transition-base);
-  }
-
-  /* Hover: 90° anticlockwise (down → right) */
-  .dropdown-wrapper:hover .btn__chevron {
-    transform: rotate(-90deg);
-  }
-
-  /* Click-locked: 180° anticlockwise (right → up) */
-  .dropdown-wrapper.open .btn__chevron {
-    transform: rotate(-180deg);
-  }
-
-  /* ==========================================================
-     COLOUR VARIANTS — just swap tokens, base handles the rest
-     ========================================================== */
-
-  .btn--primary {
-    --_btn-brand: var(--brand-c-primary);
-    --_btn-brand-dark: var(--brand-c-primary-dark);
-    --_btn-brand-light: var(--brand-c-primary-light);
-  }
-
-  .btn--secondary {
-    --_btn-brand: var(--brand-c-secondary);
-    --_btn-brand-dark: var(--brand-c-secondary-dark);
-    --_btn-brand-light: var(--brand-c-secondary-light);
-  }
-
-  .btn--neutral {
-    --_btn-brand: var(--brand-c-neutral);
-    --_btn-brand-dark: var(--brand-c-neutral-dark);
-    --_btn-brand-light: var(--brand-c-neutral-light);
-  }
-
-  /* ==========================================================
-     STYLE VARIANTS — override base appearance, inherit colour
-     from --_btn-brand tokens set above
-     ========================================================== */
-
-  .btn--outline {
-    background-color: transparent;
-    color: var(--_btn-brand-dark);
-    border: 2px solid var(--_btn-brand);
-    box-shadow: none;
-  }
-
-  .btn--outline:hover {
-    background-color: var(--_btn-brand-light);
-    color: var(--_btn-brand-dark);
-    border-color: var(--_btn-brand-dark);
-  }
-
-  .btn--outline:active {
-    background-color: var(--_btn-brand-light);
-    transform: translateY(0);
-    box-shadow: none;
-  }
-
-  .btn--ghost {
-    background-color: var(--brand-c-neutral-light);
-    color: var(--brand-c-text);
-    border: 1px solid var(--brand-c-neutral-light);
-    box-shadow: none;
-  }
-
-  .btn--ghost:hover {
-    background-color: var(--_btn-brand-light);
-    color: var(--_btn-brand-dark);
-    border-color: var(--_btn-brand-light);
-  }
-
-  .btn--ghost:active {
-    background-color: var(--_btn-brand-light);
-    transform: translateY(0);
-    box-shadow: none;
-  }
-
-  .btn--glass {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    color: var(--brand-c-text);
-    box-shadow: var(--shadow-md);
-  }
-
-  .btn--glass:hover {
-    background: var(--_btn-brand-dark);
-    color: var(--color-White);
-    border-color: var(--_btn-brand);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .btn--glass:active {
-    background: var(--_btn-brand-dark);
-    color: var(--color-White);
-    transform: translateY(0);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .btn--glow:hover {
-    box-shadow:
-      0 6px 20px color-mix(in oklch, var(--_btn-brand) 65%, transparent),
-      0 0 40px color-mix(in oklch, var(--_btn-brand) 30%, transparent);
-  }
-
-  .btn--glow:active {
-    transform: translateY(0);
-    box-shadow:
-      inset 2px 2px 6px color-mix(in oklch, var(--color-Black) 15%, transparent);
-  }
-
-  .btn--neumorphic {
-    box-shadow: var(--shadow-neu-raised);
-  }
-
-  .btn--neumorphic:hover {
-    box-shadow: var(--shadow-neu-hover);
-  }
-
-  .btn--neumorphic:active {
-    transform: translateY(0);
-    box-shadow: var(--shadow-neu-pressed);
-  }
-
-  /* ==========================================================
-     EFFECT: COLOUR FLOW — opt-in via .btn--colour-flow
-     Two translucent blobs rise from below on hover.
-     Inherits colour from --_btn-brand tokens.
-     ========================================================== */
-
-  .btn--colour-flow::before,
-  .btn--colour-flow::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    width: 160%;
-    height: 200%;
-    border-radius: 50%;
-    display: block;
-    z-index: -1;
-  }
-
-  .btn--colour-flow::before {
-    top: 100%;
-    transform: translateX(-50%) scaleY(1) scaleX(1.25);
-    background: color-mix(in oklch, var(--_btn-brand-light) 55%, transparent);
-  }
-
-  .btn--colour-flow::after {
-    top: 180%;
-    transform: translateX(-50%) scaleY(1) scaleX(1.45);
-    background: var(--_btn-brand-dark);
-  }
-
-  /* Speed variants — default is normal */
-  .btn--colour-flow::before,
-  .btn--colour-flow::after {
-    transition: all var(--transition-extralong);
-  }
-
-  .btn--speed-slow::before,
-  .btn--speed-slow::after {
-    transition: all 3s ease;
-  }
-
-  .btn--speed-fast::before,
-  .btn--speed-fast::after {
-    transition: all 0.6s ease;
-  }
-
-  /* Keep base colour on hover — let blobs do the visual work */
-  .btn--colour-flow:hover {
-    background-color: var(--_btn-brand);
-  }
-
-  .btn--colour-flow:hover::before {
-    top: -35%;
-    transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
-  }
-
-  .btn--colour-flow:hover::after {
-    top: -45%;
-    transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
-  }
-
-  .btn--colour-flow:active {
-    transform: translateY(0);
-    box-shadow:
-      inset 2px 2px 6px color-mix(in oklch, var(--color-Black) 15%, transparent);
-  }
-
-  /* ==========================================================
-     EFFECT: JUMP — opt-in via .btn--jump
-     Springy lift on hover, slams down on active.
-     ========================================================== */
-
-  .btn--jump {
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease,
-      background-color 0.2s ease;
-  }
-
-  .btn--jump:hover {
-    transform: translateY(-10px);
-    box-shadow:
-      0 7px 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, transparent);
-  }
-
-  .btn--jump:active {
-    transform: translateY(4px);
-    box-shadow:
-      0 1px 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, transparent);
-  }
-
-  /* ==========================================================
-     EFFECT: COMIC — opt-in via .btn--comic
-     Hard shadow, thick border, colour sweep from left.
-     ========================================================== */
-
-  .btn--comic {
-    border: 3px solid color-mix(in oklch, var(--_btn-brand-dark) 90%, var(--color-Black));
-    box-shadow: 4px 6px 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
-    transition:
-      transform 0.25s ease,
-      box-shadow 0.25s ease,
-      filter 0.05s ease,
-      background-color 0.2s ease;
-  }
-
-  .btn--comic:hover {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 3px 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
-    background-color: var(--_btn-brand);
-  }
-
-  .btn--comic:active {
-    transform: translate(4px, 6px);
-    box-shadow: 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
-    filter: saturate(0.75);
-  }
-
-  /* Colour sweep from left */
-  .btn--comic::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--_btn-brand-dark);
-    z-index: -1;
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
-    pointer-events: none;
-  }
-
-  .btn--comic:hover::after {
-    transform: translateX(0);
-  }
-
-  /* ==========================================================
-     EFFECT: TECH — opt-in via .btn--tech
-     Offset border frame swaps position on hover.
-     ========================================================== */
-
-  .btn--tech {
-    overflow: visible;
-    transition: transform 0.25s ease, background-color 0.25s ease;
-  }
-
-  /* Offset border frame via ::before */
-  .btn--tech::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 1px solid var(--_btn-brand-dark);
-    border-radius: inherit;
-    background: none;
-    transform: translate(-5px, -5px);
-    transition: transform 0.25s ease;
-    pointer-events: none;
-  }
-
-  .btn--tech:hover {
-    transform: translate(-5px, -5px);
-    background-color: var(--_btn-brand);
-  }
-
-  .btn--tech:hover::before {
-    left: 0;
-    transform: translate(5px, 5px);
-  }
-
-  .btn--tech:active {
-    transform: translate(-3px, -3px);
-  }
-
-  .btn--tech:active::before {
-    transform: translate(3px, 3px);
-  }
-
-  /* ==========================================================
-     EFFECT: EXPAND — opt-in via .btn--expand
-     SCB-style: circle sits left, expands to fill on hover.
-     Button size stays fixed — zero layout shift.
-     ========================================================== */
-
-  .btn--expand {
-    --_expand-circle: 2.75rem;
-    background: transparent;
-    box-shadow: none;
-    padding: 1.1rem 1.4rem 1.1rem calc(var(--_expand-circle) + 0.5rem);
-    overflow: visible;
-    isolation: auto;
-  }
-
-  /* Kill base hover bg — circle handles it */
-  .btn--expand:hover,
-  .btn--expand:active {
-    background: transparent;
-    box-shadow: none;
-    transform: none;
-  }
-
-  /* Shape element via ::before — anchored left, grows right only */
-  .btn--expand::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: var(--_expand-circle);
-    height: var(--_expand-circle);
-    transform: translateY(-50%);
-    border-radius: var(--_expand-r-start, 999px);
-    background-color: var(--_btn-brand);
-    transition: width 0.45s cubic-bezier(0.65, 0, 0.076, 1),
-                border-radius 0.45s cubic-bezier(0.65, 0, 0.076, 1),
-                background-color 0.3s ease;
-    pointer-events: none;
-  }
-
-  .btn--expand:hover::before {
-    width: 100%;
-    border-radius: var(--_expand-r-end, 999px);
-    background-color: var(--_btn-brand-dark);
-  }
-
-  /* Default (pill shape): circle → pill */
-  /* No extra rules needed — defaults are 999px → 999px */
-
-  /* Rounded shape: rounded square → rounded rect */
-  .btn--rounded.btn--expand {
-    --_expand-r-start: var(--radius-md);
-    --_expand-r-end: var(--radius-md);
-  }
-
-  /* Sharp shape: square → sharp rect */
-  .btn--sharp.btn--expand {
-    --_expand-r-start: 0;
-    --_expand-r-end: 0;
-  }
-
-  /* Icon pinned to circle centre */
-  .btn--expand .btn__icon {
-    position: absolute;
-    left: calc(var(--_expand-circle) / 2);
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-    color: var(--color-White);
-    transition: transform 0.45s cubic-bezier(0.65, 0, 0.076, 1), opacity 0.2s ease;
-  }
-
-  /* Text — brand colour by default, white on hover */
-  .btn--expand .btn__label {
-    position: relative;
-    z-index: 2;
-    color: var(--_btn-brand);
-    transition: color 0.3s ease;
-  }
-
-  .btn--expand:hover .btn__label {
-    color: var(--color-White);
-  }
-
-  /* Size variants */
-  .btn--sm.btn--expand {
-    --_expand-circle: 2rem;
-    padding: 0.8rem 1rem 0.8rem calc(var(--_expand-circle) + 0.4rem);
-  }
-
-  .btn--lg.btn--expand {
-    --_expand-circle: 3.5rem;
-    padding: 1.4rem 1.8rem 1.4rem calc(var(--_expand-circle) + 0.6rem);
-  }
-
-  /* ==========================================================
-     EFFECT: UNDERLINE — opt-in via .btn--underline
-     Minimal text-link style. Underline slides in from left.
-     ========================================================== */
-
-  .btn--underline {
-    background: transparent;
-    color: var(--_btn-brand);
-    box-shadow: none;
-    border-radius: 0;
-    overflow: visible;
-    isolation: auto;
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .btn--underline::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--_btn-brand);
-    transition: width 0.35s cubic-bezier(0.65, 0, 0.076, 1);
-    pointer-events: none;
-  }
-
-  .btn--underline:hover {
-    background: transparent;
-    color: var(--_btn-brand-dark);
-    box-shadow: none;
-    transform: none;
-  }
-
-  .btn--underline:hover::after {
-    width: 100%;
-  }
-
-  .btn--underline:active {
-    background: transparent;
-    transform: none;
-  }
-
-  /* ==========================================================
-     EFFECT: MAGNETIC — opt-in via .btn--magnetic
-     Button shifts toward cursor on hover. JS sets custom props.
-     ========================================================== */
-
-  .btn--magnetic {
-    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                background-color 0.2s ease, box-shadow 0.2s ease;
-    will-change: transform;
-  }
-
-  /* ==========================================================
-     EFFECT: SPOTLIGHT — opt-in via .btn--spotlight
-     Radial gradient follows cursor inside button via ::before.
-     ========================================================== */
-
-  .btn--spotlight::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: radial-gradient(
-      circle 80px at var(--_spot-x, 50%) var(--_spot-y, 50%),
-      color-mix(in oklch, var(--color-White) 25%, transparent),
-      transparent
-    );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  .btn--spotlight:hover::before {
-    opacity: 1;
-  }
-
-  /* ==========================================================
-     EFFECT: SPLIT — opt-in via .btn--split
-     Top/bottom halves slide apart revealing darker bg beneath.
-     ========================================================== */
-
-  .btn--split {
-    background: var(--_btn-brand-dark);
-    overflow: visible;
-  }
-
-  .btn--split::before,
-  .btn--split::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 50%;
-    background: var(--_btn-brand);
-    transition: transform 0.35s cubic-bezier(0.65, 0, 0.076, 1);
-    pointer-events: none;
-  }
-
-  .btn--split::before {
-    top: 0;
-    border-radius: inherit;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  .btn--split::after {
-    bottom: 0;
-    border-radius: inherit;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
-
-  .btn--split:hover {
-    background: var(--_btn-brand-dark);
-    transform: none;
-  }
-
-  .btn--split:hover::before {
-    transform: translate(-24px, -24px);
-  }
-
-  .btn--split:hover::after {
-    transform: translate(24px, 24px);
-  }
-
-  .btn--split:active {
-    transform: none;
-  }
-
-  .btn--split:active::before {
-    transform: translate(-12px, -12px);
-  }
-
-  .btn--split:active::after {
-    transform: translate(12px, 12px);
-  }
-
-  /* ==========================================================
-     SIZE
-     ========================================================== */
-
-  .btn--sm {
-    padding: var(--space-sm) var(--space-md);
-    min-height: 2rem;
-  }
-
-  .btn--lg {
-    padding: var(--space-lg) var(--space-2xl);
-    min-height: 3.5rem;
-  }
-
-  /* ==========================================================
-     SHAPE
-     ========================================================== */
-
-  .btn--rounded { border-radius: var(--radius-xl); }
-  .btn--pill    { border-radius: var(--radius-full); }
-  .btn--sharp   { border-radius: 0; }
-
-  .btn--circle,
-  .btn--square {
-    width: 2.75rem;
-    height: 2.75rem;
-    padding: 0;
-  }
-
-  .btn--circle { border-radius: 50%; }
-
-  .btn--sm.btn--circle,
-  .btn--sm.btn--square {
-    width: 2rem;
-    height: 2rem;
-  }
-
-  .btn--lg.btn--circle,
-  .btn--lg.btn--square {
-    width: 3.5rem;
-    height: 3.5rem;
-  }
-
-  /* Icon-only — hide text overflow */
-  .btn--icon-only {
-    gap: 0;
-  }
-
-  /* ==========================================================
-     DROPDOWN
-     ========================================================== */
-
-  .dropdown-wrapper {
-    position: relative;
-    display: inline-flex;
-  }
-
-  .btn--dropdown {
-    border-radius: var(--radius-md);
-    transition: border-radius 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .dropdown-wrapper:hover .btn--dropdown,
-  .dropdown-wrapper.open .btn--dropdown {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  .dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: var(--brand-c-bg);
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
-    box-shadow: var(--shadow-dropdown-md);
-    z-index: var(--z-dropdown);
-    padding: 0;
-    border: var(--border-width) solid var(--brand-c-primary);
-    border-top: none;
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    visibility: hidden;
-    transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0s 0.35s;
-  }
-
-  .dropdown-wrapper:hover .dropdown-menu,
-  .dropdown-menu.show {
-    max-height: 20rem;
-    opacity: 1;
-    visibility: visible;
-    transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0s;
-  }
-
-  .dropdown-item {
-    display: block;
-    width: 100%;
-    padding: var(--space-md) var(--space-lg);
-    color: var(--brand-c-text);
-    text-decoration: none;
-    font-family: var(--font-body);
-    font-weight: var(--font-medium);
-    text-align: left;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    transition: background 0.2s ease;
-  }
-
-  .dropdown-item:hover {
-    background-color: var(--brand-c-primary-light);
-    color: var(--brand-c-primary-dark);
-    text-decoration: none;
-  }
-
-  .dropdown-item:last-child {
-    border-radius: 0 0 var(--radius-md) var(--radius-md);
-  }
-
-  .dropdown-item:focus-visible {
-    outline: var(--border-width-2) solid var(--brand-c-primary);
-    outline-offset: calc(-1 * var(--border-width-2));
-  }
-
-  /* Theme borders on dropdown */
-  .dropdown-theme--secondary { border-color: var(--brand-c-secondary); }
-  .dropdown-theme--neutral   { border-color: var(--brand-c-neutral); }
-  .dropdown-theme--outline   { border-color: var(--brand-c-primary); }
-  .dropdown-theme--ghost     { border-color: var(--brand-c-neutral-light); }
-
-  .dropdown-theme--secondary .dropdown-item:hover {
-    background-color: var(--brand-c-secondary-light);
-    color: var(--brand-c-secondary-dark);
-  }
-
-  .dropdown-theme--neutral .dropdown-item:hover {
-    background-color: var(--brand-c-neutral-light);
-    color: var(--brand-c-neutral-dark);
-  }
-
-  /* ==========================================================
-     CONFETTI — opt-in via .btn--confetti
-     ========================================================== */
-
-  .btn--confetti {
-    z-index: 10;
-  }
-
-  .btn--confetti::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 8px;
-    height: 8px;
-    background: var(--confetti-secondary);
-    border-radius: 50%;
-    opacity: 0;
-    transform: scale(0);
-    transition: all var(--transition-base);
-  }
-
-  .btn--confetti:hover::after {
-    opacity: 0.8;
-    transform: scale(1);
-    animation: confetti-sparkle 1.5s ease-in-out infinite;
-  }
-
-  @keyframes confetti-sparkle {
-    0%, 100% { opacity: 0.8; transform: scale(1); }
-    50%      { opacity: 1; transform: scale(1.2); }
-  }
-
-  .btn--confetti-hearts::after {
-    background: var(--confetti-light);
-  }
-
-  .btn--confetti-celebration::after {
-    box-shadow:
-      12px 4px 0 0 var(--confetti-mid),
-      -8px 8px 0 0 var(--confetti-primary);
-  }
-
-  /* ==========================================================
-     ALIGNMENT — positions button within its container
-     ========================================================== */
-
-  .btn-align--center {
-    display: flex;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .btn-align--left {
-    display: flex;
-    margin-right: auto;
-  }
-
+/* ==========================================================
+ BASE
+ ========================================================== */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  min-height: 2.75rem;
+  font-weight: var(--font-medium);
+  font-size: inherit;
+  font-family: var(--font-body);
+  line-height: var(--leading-tight);
+  text-decoration: none;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  isolation: isolate;
+  margin: 0;
+  overflow-wrap: normal;
+  --_btn-brand: var(--brand-c-primary);
+  --_btn-brand-dark: var(--brand-c-primary-dark);
+  --_btn-brand-light: var(--brand-c-primary-light);
+  background-color: var(--_btn-brand);
+  color: var(--color-White);
+  box-shadow: var(--shadow-md);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.btn:hover {
+  background-color: var(--_btn-brand-dark);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--_btn-brand);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  background-color: var(--_btn-brand-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover,
+.btn[aria-disabled="true"]:hover {
+  background-color: var(--_btn-brand);
+  box-shadow: var(--shadow-md);
+}
+
+/* ==========================================================
+   EFFECT: GLINT — opt-in via .btn--glint
+   Diagonal light sweep on hover using ::before.
+   ========================================================== */
+
+.btn--glint::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--glint-gradient);
+  transition: left var(--glint-speed) ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.btn--glint:hover::before {
+  left: 100%;
+}
+
+/* ==========================================================
+   ICON
+   ========================================================== */
+
+.btn__icon {
+  width: 1.25em;
+  height: 1.25em;
+  flex-shrink: 0;
+  color: inherit;
+  fill: currentColor;
+}
+
+/* Icon position is handled by DOM order (iconLeft / iconRight) — no flex-direction needed */
+
+.btn__chevron {
+  width: 0.85em;
+  height: 0.85em;
+  flex-shrink: 0;
+  color: inherit;
+  fill: currentColor;
+  transition: transform var(--transition-base);
+}
+
+/* Hover: 90° anticlockwise (down → right) */
+.dropdown-wrapper:hover .btn__chevron {
+  transform: rotate(-90deg);
+}
+
+/* Click-locked: 180° anticlockwise (right → up) */
+.dropdown-wrapper.open .btn__chevron {
+  transform: rotate(-180deg);
+}
+
+/* ==========================================================
+   COLOUR VARIANTS — just swap tokens, base handles the rest
+   ========================================================== */
+
+.btn--primary {
+  --_btn-brand: var(--brand-c-primary);
+  --_btn-brand-dark: var(--brand-c-primary-dark);
+  --_btn-brand-light: var(--brand-c-primary-light);
+}
+
+.btn--secondary {
+  --_btn-brand: var(--brand-c-secondary);
+  --_btn-brand-dark: var(--brand-c-secondary-dark);
+  --_btn-brand-light: var(--brand-c-secondary-light);
+}
+
+.btn--neutral {
+  --_btn-brand: var(--brand-c-neutral);
+  --_btn-brand-dark: var(--brand-c-neutral-dark);
+  --_btn-brand-light: var(--brand-c-neutral-light);
+}
+
+/* ==========================================================
+   STYLE VARIANTS — override base appearance, inherit colour
+   from --_btn-brand tokens set above
+   ========================================================== */
+
+.btn--outline {
+  background-color: transparent;
+  color: var(--_btn-brand-dark);
+  border: 2px solid var(--_btn-brand);
+  box-shadow: none;
+}
+
+.btn--outline:hover {
+  background-color: var(--_btn-brand-light);
+  color: var(--_btn-brand-dark);
+  border-color: var(--_btn-brand-dark);
+}
+
+.btn--outline:active {
+  background-color: var(--_btn-brand-light);
+  box-shadow: none;
+}
+
+.btn--ghost {
+  background-color: var(--brand-c-neutral-light);
+  color: var(--brand-c-text);
+  border: 1px solid var(--brand-c-neutral-light);
+  box-shadow: none;
+}
+
+.btn--ghost:hover {
+  background-color: var(--_btn-brand-light);
+  color: var(--_btn-brand-dark);
+  border-color: var(--_btn-brand-light);
+}
+
+.btn--ghost:active {
+  background-color: var(--_btn-brand-light);
+  box-shadow: none;
+}
+
+.btn--glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  color: var(--brand-c-text);
+  box-shadow: var(--shadow-md);
+}
+
+.btn--glass:hover {
+  background: var(--_btn-brand-dark);
+  color: var(--color-White);
+  border-color: var(--_btn-brand);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn--glass:active {
+  background: var(--_btn-brand-dark);
+  color: var(--color-White);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--glow:hover {
+  box-shadow:
+    0 6px 20px color-mix(in oklch, var(--_btn-brand) 65%, transparent),
+    0 0 40px color-mix(in oklch, var(--_btn-brand) 30%, transparent);
+}
+
+.btn--glow:active {
+  box-shadow:
+    inset 2px 2px 6px color-mix(in oklch, var(--color-Black) 15%, transparent);
+}
+
+.btn--neumorphic {
+  box-shadow: var(--shadow-neu-raised);
+}
+
+.btn--neumorphic:hover {
+  box-shadow: var(--shadow-neu-hover);
+}
+
+.btn--neumorphic:active {
+  box-shadow: var(--shadow-neu-pressed);
+}
+
+/* ==========================================================
+   EFFECT: COLOUR FLOW — opt-in via .btn--colour-flow
+   Two translucent blobs rise from below on hover.
+   Inherits colour from --_btn-brand tokens.
+   ========================================================== */
+
+.btn--colour-flow::before,
+.btn--colour-flow::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 160%;
+  height: 200%;
+  border-radius: 50%;
+  display: block;
+  z-index: -1;
+}
+
+.btn--colour-flow::before {
+  top: 100%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.25);
+  background: color-mix(in oklch, var(--_btn-brand-light) 55%, transparent);
+}
+
+.btn--colour-flow::after {
+  top: 180%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.45);
+  background: var(--_btn-brand-dark);
+}
+
+/* Speed variants — default is normal */
+.btn--colour-flow::before,
+.btn--colour-flow::after {
+  transition: all var(--transition-extralong);
+}
+
+.btn--speed-slow::before,
+.btn--speed-slow::after {
+  transition: all 3s ease;
+}
+
+.btn--speed-fast::before,
+.btn--speed-fast::after {
+  transition: all 0.6s ease;
+}
+
+/* Keep base colour on hover — let blobs do the visual work */
+.btn--colour-flow:hover {
+  background-color: var(--_btn-brand);
+}
+
+.btn--colour-flow:hover::before {
+  top: -35%;
+  transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+}
+
+.btn--colour-flow:hover::after {
+  top: -45%;
+  transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
+}
+
+.btn--colour-flow:active {
+  box-shadow:
+    inset 2px 2px 6px color-mix(in oklch, var(--color-Black) 15%, transparent);
+}
+
+/* ==========================================================
+   EFFECT: JUMP — opt-in via .btn--jump
+   Springy lift on hover, slams down on active.
+   ========================================================== */
+
+.btn--jump {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background-color 0.2s ease;
+}
+
+.btn--jump:hover {
+  transform: translateY(-10px);
+  box-shadow:
+    0 7px 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, transparent);
+}
+
+.btn--jump:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, transparent);
+}
+
+/* ==========================================================
+   EFFECT: COMIC — opt-in via .btn--comic
+   Hard shadow, thick border, colour sweep from left.
+   ========================================================== */
+
+.btn--comic {
+  border: 3px solid color-mix(in oklch, var(--_btn-brand-dark) 90%, var(--color-Black));
+  box-shadow: 4px 6px 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    filter 0.05s ease,
+    background-color 0.2s ease;
+}
+
+.btn--comic:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 3px 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
+  background-color: var(--_btn-brand);
+}
+
+.btn--comic:active {
+  transform: translate(4px, 6px);
+  box-shadow: 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
+  filter: saturate(0.75);
+}
+
+/* Colour sweep from left */
+.btn--comic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--_btn-brand-dark);
+  z-index: -1;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  pointer-events: none;
+}
+
+.btn--comic:hover::after {
+  transform: translateX(0);
+}
+
+/* ==========================================================
+   EFFECT: TECH — opt-in via .btn--tech
+   Offset border frame swaps position on hover.
+   ========================================================== */
+
+.btn--tech {
+  overflow: visible;
+  transition: transform 0.25s ease, background-color 0.25s ease;
+}
+
+/* Offset border frame via ::before */
+.btn--tech::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--_btn-brand-dark);
+  border-radius: inherit;
+  background: none;
+  transform: translate(-5px, -5px);
+  transition: transform 0.25s ease;
+  pointer-events: none;
+}
+
+.btn--tech:hover {
+  transform: translate(-5px, -5px);
+  background-color: var(--_btn-brand);
+}
+
+.btn--tech:hover::before {
+  left: 0;
+  transform: translate(5px, 5px);
+}
+
+.btn--tech:active {
+  transform: translate(-3px, -3px);
+}
+
+.btn--tech:active::before {
+  transform: translate(3px, 3px);
+}
+
+/* ==========================================================
+   EFFECT: EXPAND — opt-in via .btn--expand
+   SCB-style: circle sits left, expands to fill on hover.
+   Button size stays fixed — zero layout shift.
+   ========================================================== */
+
+.btn--expand {
+  --_expand-circle: 2.75rem;
+  --_expand-r-start: 999px;
+  --_expand-r-end: 999px;
+  background: transparent;
+  box-shadow: none;
+  padding: 1.1rem 1.4rem 1.1rem calc(var(--_expand-circle) + 0.5rem);
+  overflow: visible;
+  isolation: auto;
+}
+
+/* Kill base hover bg — circle handles it */
+.btn--expand:hover,
+.btn--expand:active {
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Shape element via ::before — anchored left, grows right only */
+.btn--expand::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--_expand-circle);
+  height: var(--_expand-circle);
+  transform: translateY(-50%);
+  border-radius: var(--_expand-r-start);
+  background-color: var(--_btn-brand);
+  transition: width 0.45s cubic-bezier(0.65, 0, 0.076, 1),
+              border-radius 0.45s cubic-bezier(0.65, 0, 0.076, 1),
+              background-color 0.3s ease;
+  pointer-events: none;
+}
+
+.btn--expand:hover::before {
+  width: 100%;
+  border-radius: var(--_expand-r-end);
+  background-color: var(--_btn-brand-dark);
+}
+
+/* Default (pill shape): circle → pill */
+/* No extra rules needed — defaults are 999px → 999px */
+
+/* Rounded shape: rounded square → rounded rect */
+.btn--rounded.btn--expand {
+  --_expand-r-start: var(--radius-md);
+  --_expand-r-end: var(--radius-md);
+}
+
+/* Sharp shape: square → sharp rect */
+.btn--sharp.btn--expand {
+  --_expand-r-start: 0;
+  --_expand-r-end: 0;
+}
+
+/* Icon pinned to circle centre */
+.btn--expand .btn__icon {
+  position: absolute;
+  left: calc(var(--_expand-circle) / 2);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  color: var(--color-White);
+  transition: transform 0.45s cubic-bezier(0.65, 0, 0.076, 1), opacity 0.2s ease;
+}
+
+/* Text — brand colour by default, white on hover */
+.btn--expand .btn__label {
+  position: relative;
+  z-index: 2;
+  color: var(--_btn-brand);
+  transition: color 0.3s ease;
+}
+
+.btn--expand:hover .btn__label {
+  color: var(--color-White);
+}
+
+/* Size variants */
+.btn--sm.btn--expand {
+  --_expand-circle: 2rem;
+  padding: 0.8rem 1rem 0.8rem calc(var(--_expand-circle) + 0.4rem);
+}
+
+.btn--lg.btn--expand {
+  --_expand-circle: 3.5rem;
+  padding: 1.4rem 1.8rem 1.4rem calc(var(--_expand-circle) + 0.6rem);
+}
+
+/* ==========================================================
+   EFFECT: UNDERLINE — opt-in via .btn--underline
+   Minimal text-link style. Underline slides in from left.
+   ========================================================== */
+
+.btn--underline {
+  background: transparent;
+  color: var(--_btn-brand);
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+  isolation: auto;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.btn--underline::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--_btn-brand);
+  transition: width 0.35s cubic-bezier(0.65, 0, 0.076, 1);
+  pointer-events: none;
+}
+
+.btn--underline:hover {
+  background: transparent;
+  color: var(--_btn-brand-dark);
+  box-shadow: none;
+  transform: none;
+}
+
+.btn--underline:hover::after {
+  width: 100%;
+}
+
+.btn--underline:active {
+  background: transparent;
+  transform: none;
+}
+
+/* ==========================================================
+   EFFECT: MAGNETIC — opt-in via .btn--magnetic
+   Button shifts toward cursor on hover. JS sets custom props.
+   ========================================================== */
+
+.btn--magnetic {
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              background-color 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+/* ==========================================================
+   EFFECT: SPOTLIGHT — opt-in via .btn--spotlight
+   Radial gradient follows cursor inside button via ::before.
+   ========================================================== */
+
+.btn--spotlight {
+  --_spot-x: 50%;
+  --_spot-y: 50%;
+}
+
+.btn--spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle 80px at var(--_spot-x) var(--_spot-y),
+    color-mix(in oklch, var(--color-White) 25%, transparent),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn--spotlight:hover::before {
+  opacity: 1;
+}
+
+/* ==========================================================
+   EFFECT: SPLIT — opt-in via .btn--split
+   Top/bottom halves slide apart revealing darker bg beneath.
+   ========================================================== */
+
+.btn--split {
+  background: var(--_btn-brand-dark);
+  overflow: visible;
+}
+
+.btn--split::before,
+.btn--split::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: var(--_btn-brand);
+  transition: transform 0.35s cubic-bezier(0.65, 0, 0.076, 1);
+  pointer-events: none;
+}
+
+.btn--split::before {
+  top: 0;
+  border-radius: inherit;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.btn--split::after {
+  bottom: 0;
+  border-radius: inherit;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.btn--split:hover {
+  background: var(--_btn-brand-dark);
+  transform: none;
+}
+
+.btn--split:hover::before {
+  transform: translate(-24px, -24px);
+}
+
+.btn--split:hover::after {
+  transform: translate(24px, 24px);
+}
+
+.btn--split:active {
+  transform: none;
+}
+
+.btn--split:active::before {
+  transform: translate(-12px, -12px);
+}
+
+.btn--split:active::after {
+  transform: translate(12px, 12px);
+}
+
+/* ==========================================================
+   SIZE
+   ========================================================== */
+
+.btn--sm {
+  padding: var(--space-sm) var(--space-md);
+  min-height: 2rem;
+}
+
+.btn--lg {
+  padding: var(--space-lg) var(--space-2xl);
+  min-height: 3.5rem;
+}
+
+/* ==========================================================
+   SHAPE
+   ========================================================== */
+
+.btn--rounded { border-radius: var(--radius-xl); }
+.btn--pill    { border-radius: var(--radius-full); }
+.btn--sharp   { border-radius: 0; }
+
+.btn--circle,
+.btn--square {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+}
+
+.btn--circle { border-radius: 50%; }
+
+.btn--sm.btn--circle,
+.btn--sm.btn--square {
+  width: 2rem;
+  height: 2rem;
+}
+
+.btn--lg.btn--circle,
+.btn--lg.btn--square {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+/* Icon-only — hide text overflow */
+.btn--icon-only {
+  gap: 0;
+}
+
+/* ==========================================================
+   DROPDOWN
+   ========================================================== */
+
+.dropdown-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.btn--dropdown {
+  border-radius: var(--radius-md);
+  transition: border-radius 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dropdown-wrapper:hover .btn--dropdown,
+.dropdown-wrapper.open .btn--dropdown {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: var(--brand-c-bg);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: var(--shadow-dropdown-md);
+  z-index: var(--z-dropdown);
+  padding: 0;
+  border: var(--border-width) solid var(--brand-c-primary);
+  border-top: none;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0s 0.35s;
+}
+
+.dropdown-wrapper:hover .dropdown-menu,
+.dropdown-menu.show {
+  max-height: 20rem;
+  opacity: 1;
+  visibility: visible;
+  transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0s;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  color: var(--brand-c-text);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-weight: var(--font-medium);
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: var(--brand-c-primary-light);
+  color: var(--brand-c-primary-dark);
+  text-decoration: none;
+}
+
+.dropdown-item:last-child {
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.dropdown-item:focus-visible {
+  outline: var(--border-width-2) solid var(--brand-c-primary);
+  outline-offset: calc(-1 * var(--border-width-2));
+}
+
+/* Theme borders on dropdown */
+.dropdown-theme--secondary { border-color: var(--brand-c-secondary); }
+.dropdown-theme--neutral   { border-color: var(--brand-c-neutral); }
+.dropdown-theme--outline   { border-color: var(--brand-c-primary); }
+.dropdown-theme--ghost     { border-color: var(--brand-c-neutral-light); }
+
+.dropdown-theme--secondary .dropdown-item:hover {
+  background-color: var(--brand-c-secondary-light);
+  color: var(--brand-c-secondary-dark);
+}
+
+.dropdown-theme--neutral .dropdown-item:hover {
+  background-color: var(--brand-c-neutral-light);
+  color: var(--brand-c-neutral-dark);
+}
+
+/* ==========================================================
+   CONFETTI — opt-in via .btn--confetti
+   ========================================================== */
+
+.btn--confetti {
+  z-index: 10;
+}
+
+.btn--confetti::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: var(--confetti-secondary);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0);
+  transition: all var(--transition-base);
+}
+
+.btn--confetti:hover::after {
+  opacity: 0.8;
+  transform: scale(1);
+  animation: confetti-sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes confetti-sparkle {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.2); }
+}
+
+.btn--confetti-hearts::after {
+  background: var(--confetti-light);
+}
+
+.btn--confetti-celebration::after {
+  box-shadow:
+    12px 4px 0 0 var(--confetti-mid),
+    -8px 8px 0 0 var(--confetti-primary);
+}
+
+/* ==========================================================
+   ALIGNMENT — positions button within its container
+   ========================================================== */
+
+.btn-align--center {
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn-align--left {
+  display: flex;
+  margin-right: auto;
+}
+
+/* ==========================================================
+   RENDER MODE OVERRIDES
+   ========================================================== */
+
+/* Reduced — interactive transitions killed, colour-only state changes */
+[data-render="reduced"] .dropdown-menu { transition: none; }
+[data-render="reduced"] .btn__chevron { transition: none; }
+
+/* Assistive — enlarged targets, simplified appearance */
+[data-render="assistive"] .btn {
+  min-width: 64px;
+  min-height: 64px;
+}
+[data-render="assistive"] .btn:focus-visible {
+  outline-width: 3px;
+}
+
+/* Textonly — plain outline button, zero decoration */
+[data-render="textonly"] .btn {
+  background: transparent;
+  color: var(--_btn-brand-dark);
+  border: 2px solid var(--_btn-brand);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  filter: none;
+  clip-path: none;
+  max-width: none;
+}
+[data-render="textonly"] .btn:hover {
+  background: transparent;
+  color: var(--_btn-brand-dark);
+  border-color: var(--_btn-brand-dark);
+  box-shadow: none;
+  filter: none;
+}
+[data-render="textonly"] .btn--icon-only {
+  justify-content: center;
+}
+[data-render="textonly"] .btn--icon-only .btn__label {
+  display: none;
 }

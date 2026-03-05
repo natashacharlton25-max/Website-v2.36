@@ -95,7 +95,7 @@ For categories:
 ## Render Architecture Contract
 
 ### No hardcoded values in component CSS:
-Every colour, spacing, radius, shadow, font size, transition, and breakpoint must use a design token (`var(--token-name)`). If a token doesn't exist for the value needed, flag it — don't invent a magic number. The only exceptions are `0`, `none`, `100%`, `auto`, `1px` for borders, and unitless values like `flex: 1`. No `var(--token, #hex)` fallbacks either — if the token is missing, you want it to break visibly so the token gets fixed.
+Every colour, spacing, radius, shadow, font size, transition, and breakpoint must use a design token (`var(--token-name)`). If a token doesn't exist for the value needed, flag it — don't invent a magic number. The only exceptions are `0`, `none`, `100%`, `auto`, `1px` for borders, unitless values like `flex: 1`, and `em`-based relative values (e.g. `0.15em` for divider thickness, `0.25em` for dash rhythm) where the value intentionally scales with the parent's font size. No `var(--token, #hex)` fallbacks either — if the token is missing, you want it to break visibly so the token gets fixed.
 
 ### CSS Rules — NEVER create these in NEW component CSS:
 - No `@layer` wrappers
@@ -134,6 +134,7 @@ Every colour, spacing, radius, shadow, font size, transition, and breakpoint mus
 
 ### Schema Structure:
 - Every component schema uses three prop groups: `content`, `visual`, `animation`
+- The `"category"` field must be `"atom"` for all atoms — not subcategory paths like `"atoms/ui"` or `"atoms/icons"`
 - Plus a `renders` block: `{ full, reduced, assistive, textonly }` pointing to the .astro file or an atom name
 - Empty `animation: {}` is correct for components with no motion
 - `textonly: null` = decorative component, skip entirely in text-only render
@@ -143,7 +144,11 @@ Every colour, spacing, radius, shadow, font size, transition, and breakpoint mus
 - A `renders` value can be an atom name (e.g. `"Icon"`, `"Text"`) instead of a `.astro` file
 - The pipeline reads the render mode and routes the right props to the right atom
 - Schema props marked as pipeline-only (e.g. `fallbackIcon`) never reach the component's `.astro` file
-- Example: LottieIcon schema has `reduced: "Icon"` — pipeline passes `fallbackIcon` to Icon atom in reduced/assistive mode
+- Example: LottieIcon schema declares `slug` (animation), `fallbackIcon` (static Icon), `label` (text):
+  - `full` → LottieIcon.astro receives slug, label, visual/animation props
+  - `reduced/assistive` → pipeline passes `fallbackIcon` to Icon atom
+  - `textonly` → pipeline passes `label` to Text atom
+- No separate template files per render mode — the pipeline routes to existing atoms
 - Props can be optional — decorative instances may only declare the animation, no fallback or label
 - The JSON content author decides per instance what dimensions to provide
 

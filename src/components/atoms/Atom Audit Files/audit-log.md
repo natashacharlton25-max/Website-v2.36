@@ -46,6 +46,7 @@ After all atoms pass individually, run the **final cross-atom audit** using the 
 - DEFERRED: lottie_mappings has shared fallbacks (a_38uz8cvrxpo7 x4, a_y99i2lyj67xi x5) — verify semantic correctness during consumer audits.
 - DEFERRED: lottie-web JS bundle gating — render pipeline should exclude `<script>` from non-full renders.
 - Consumer migration: GlassNav, ReaderNav, ShareSection currently have hardcoded static Icon fallbacks alongside LottieIcons. Once consumers pass fallbackIcon and label through JSON, the hardcoded fallbacks become redundant.
+- TEXTONLY LABELS: When consumers migrate to slug + fallbackIcon + label props, each LottieIcon instance that is meaningful (not decorative) MUST include a label string. Without it, textonly render shows nothing — buttons/links become empty. GlassNav hamburger, ReaderNav icons, and ShareSection icons all need visible text labels for textonly mode.
 - TEXTONLY: Pipeline routes label to Text atom in textonly mode. Parent context (Link, Button) provides the wrapper. LottieIcon itself renders null in textonly (decorative instances) or Text renders the label (meaningful instances).
 
 ---
@@ -54,24 +55,63 @@ After all atoms pass individually, run the **final cross-atom audit** using the 
 
 | Component | Status | Date | Notes |
 |-----------|--------|------|-------|
-| Badge | pending | | Previously audited v1. Needs v2 re-audit. |
-| Button | pending | | Has a11y.css + confetti.css. Wraps Icon + LottieIcon. |
+| Badge | PASS | 2026-03-05 | Fixes 1-5 applied + post-fix verification (16 sections). All sections pass. Schema: category → "atom", 4 render keys. Label through Text atom, 'text' class removed. data-semantic-role="status". Render mode CSS: assistive (larger text, solid bg, position reset), textonly (solid bg, position reset, no glass). Glass variants tokenised (--glass-bg/border/blur + new --glass-bg-light/dark, --glass-border-light/dark). badge__label inherit rule removed. No animation, no JS, no a11y.css. BONUS: --glass-shadow fallback stripped. DEFERRED: Badge-in-Card alt text integration (Card audit), Icon inheritance (cross-atom), print (global layer). |
+| Button | PASS | 2026-03-05 | 13 fixes applied + post-fix verification (16 sections). All sections pass. Schema restructured (category, 4 renders, content/visual/animation groups). @layer removed. Base hover colour-only (no translateY). var fallbacks stripped. Dead code deleted (tray-3d, rainbow-wrap). a11y.css extracted (high-contrast → zones, highlight-links → global, render-mode rules → Button.css, rest → pipeline handles). 3 isA11yActive() functions deleted. Lottie focusin/focusout added. LottieIcon src→slug. Label through Text atom. confetti.css → tokens. font-weight tokenised (var(--font-medium)). DEFERRED: Consumer context override cleanup, LottieIcon animation passthrough verification, print (global layer), atom inheritance (cross-atom pass). |
 | Card | pending | | Has a11y.css. Used by ~22 molecule cards. |
-| Heading | pending | | Previously audited v1. Needs v2 re-audit. |
+| Heading | PARTIAL | 2026-03-04 | Fixes 1-8 applied. Schema: category → "atom", 4 render keys, dividerLength removed, lottieIcon added to animation group. Subtitle through Text atom. Divider em-based (0.15em thickness, auto height via stretch). Underline percentage-based (90%/100% of fit-content parent). Dashed/dotted stops em-based. Highlight opacity tokenized (--opacity-low). LottieIcon support in media slot — falls back to static Icon when animation props stripped. ACCEPTED: Icon/LottieIcon imports (atom composition), icon size map (parent sizing). DEFERRED: Context overrides, SectionTitle deprecation, raw heading migration, token consistency, fit-content alignment test. |
 | Link | pending | | Has a11y.css. Used across entire site. |
 | List | pending | | Has a11y.css. |
-| Text | pending | | Previously audited v1. Needs v2 re-audit. |
+| Text | PARTIAL | 2026-03-04 | All fixes applied. Schema: category corrected, 4 render keys (all → Text.astro, pipeline strips visual props in textonly). CSS: font family fallbacks stripped (expose missing --font-body-alt/--font-handwriting tokens), context overrides deleted (consumers pass size/leading props), blockquote border tokenized (--border-width-lg). No animation, no JS, no a11y concerns. DEFERRED: Verify Card and nav consumers pass correct size/leading props to Text children. Token coverage check: --font-body-alt and --font-handwriting must be defined for every brand. |
 | Toast | pending | | Has a11y.css. Uses Icon. |
 | Menu/DPadMenu | pending | | Has a11y.css. Uses .style.css naming. No schema/barrel. |
 | Menu/RadialMenu | pending | | Has a11y.css. Uses .style.css naming. No schema/barrel. |
 | Menu/ShareMenu | pending | | Standalone .astro only. No folder structure. |
 
+**Button v2 audit findings (2026-03-05):**
+- FIXED: Section 2 — @layer wrappers removed from Button.css and Button.responsive.css
+- FIXED: Section 2.17-2.19 — var(--token, fallback) patterns moved to property definitions. Dead code (tray-3d hex, rainbow-wrap) deleted.
+- FIXED: Section 3 — schema restructured: category → "atom", 4 render keys, props grouped into content/visual/animation
+- FIXED: Section 5 — 3 isA11yActive() functions deleted. Pipeline gating makes runtime a11y checks redundant. Scripts' class selectors (.btn--confetti, .btn--magnetic, etc.) already gate correctly.
+- FIXED: Section 6 — Lottie hover now has focusin/focusout equivalents for keyboard/AT access
+- FIXED: Section 7/8/10 — [data-render] rules added: reduced (kill dropdown/chevron transitions), assistive (64px min targets, 3px focus), textonly (outline button style)
+- FIXED: Base .btn hover — colour-only transition. All translateY removed from base. Transform/box-shadow transitions only on effect classes (jump, comic, tech, etc.).
+- FIXED: Label renders through Text atom via `<Text as="span" class="btn__label" flush>`
+- FIXED: LottieIcon src → slug on all 3 instances
+- FIXED: confetti.css relocated from Button/ to src/styles/tokens/ (global tokens)
+- FIXED: 'text' class removed from Button class list (Text atom handles typography)
+- EXTRACTED: high-contrast rules → src/styles/zones/high-contrast.css (new file)
+- EXTRACTED: highlight-links rules (outline + label underline only) → src/styles/global/highlight-links.css (new file)
+- MOVED: Button.a11y.css + Button.a11y.recovery.css → _reference/Button/
+
 **Cross-atom notes:**
 - Button wraps Icon + LottieIcon — animation prop passthrough needs checking after those atoms pass
+- DEFERRED: Consumer context overrides for Button — delete during consumer audits
+- NEW FILE: src/styles/zones/high-contrast.css — other atoms add their rules during audits
+- NEW FILE: src/styles/global/highlight-links.css — other atoms add their rules during audits
 - Card is the base for ~22 molecule-level cards — Card focus/assistive sizing propagates to all of them
 - Link + highlight-links global setting — needs cross-check with `src/styles/global/highlight-links.css`
 - Text + Heading — font token consistency check (both should use same scale)
+- Text context overrides (.card .text, nav .text) DELETED from Text.css. Card and nav consumers must pass size="sm" (and leading="snug" for nav) as props to their Text children. Verify during Card and nav audits.
+- Text font tokens: --font-body-alt and --font-handwriting added to typography.css with default var(--font-body). Brands override in their brand file if needed.
+- DEFERRED: 32+ raw `<small>` and 4 raw `<blockquote>` elements across molecules/organisms bypass Text atom. Migrate to `<Text as="small">` / `<Text as="blockquote">`, then remove duplicate element rules from global.css. Text.css element variants (small.text, blockquote.text, etc.) are the canonical source — global.css copies are legacy.
 - Toast uses Icon — verify Icon atom inheritance (section 16) after Icon passes
+- DEFERRED: Heading context overrides (.card .heading, nav .heading, mega menu) — delete during consumer audits. Consumers pass size/weight props.
+- DEFERRED: SectionTitle.astro deprecated. Migrate consumers to `<Heading>`, then delete.
+- DEFERRED: Visually test fit-content + alignment variants (center, right) after heading fixes.
+- ARCHITECTURE NOTE: Heading media slot priority: image → lottieIcon → icon. Pipeline strips lottieIcon in reduced/assistive/textonly, static icon auto-fallback via content prop. No separate fallbackIcon needed — content.icon IS the fallback.
+- ARCHITECTURE NOTE: Divider/underline sizing is relative — em for thickness/rhythm, percentage for underline width, stretch for divider height. Pattern for all future decorative line elements.
+
+**Badge v2 audit findings (2026-03-05):**
+- FIXED: Section 3.2: `"category": "atom"` (was `"atoms/ui"`)
+- FIXED: Section 3.3/3.5: `"assistive": "Badge.astro"` render key added
+- FIXED: Section 5/13: `'text'` CSS class removed from class list. Label wrapped in `<Text as="span" class="badge__label" flush>`. Text atom import added.
+- FIXED: Section 6.2: `data-semantic-role="status"` added to badge element — badges are meaningful content (status/category labels), not decorative
+- FIXED: Section 7/8: Render mode CSS added — assistive (larger text via --text-body, solid bg, position reset), textonly (solid bg, position reset, glass stripped)
+- FIXED: CSS cleanup — `.badge__label { font: inherit; color: inherit; }` removed (Text atom handles typography)
+- FIXED: Glass variants tokenised — `.badge--glass` now uses `var(--glass-bg)`, `var(--glass-blur)`, `var(--glass-border)`. New tokens `--glass-bg-light`, `--glass-border-light`, `--glass-bg-dark`, `--glass-border-dark` added to shadows.css for light/dark glass variants.
+- BONUS: `--glass-shadow` had banned `var(--color-Black, #121212)` fallback — stripped to `var(--color-Black)`
+- DEFERRED: Badge-in-Card alt text integration — when Badge overlays an Image in Card, assistive/textonly renders should flow badge in normal document order. `position: static` in render overrides handles this. Card audit will verify.
+- DEFERRED: Icon inside Badge — verify Icon atom's aria-hidden and data-semantic-role propagate correctly (cross-atom Section 16)
 
 ---
 
@@ -202,3 +242,4 @@ Run these checks once every atom has passed its individual v2 audit:
 - [ ] Print: all atoms have appropriate print rules or inherit from global print stylesheet
 - [ ] `--font-size-sm` token: resolve globally or replace in all atoms that reference it
 - [ ] `[data-render="assistive"]` rules: confirm pattern exists in all interactive atoms
+- [ ] Token coverage grep: every `var(--token-name)` in component CSS resolves to a definition in `src/styles/`. Automate as build-time check.

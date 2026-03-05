@@ -42,11 +42,6 @@
   flex-shrink: 0;
 }
 
-.badge__label {
-  font: inherit;
-  color: inherit;
-}
-
 /* ========== COLOUR VARIANTS ========== */
 
 .badge--c-secondary {
@@ -124,30 +119,30 @@
 /* ========== VARIANT: Glass (light text for dark backgrounds) ========== */
 
 .badge--glass {
-  background: color-mix(in oklch, var(--color-White) 15%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid color-mix(in oklch, var(--color-White) 30%, transparent);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   color: var(--color-White);
 }
 
 /* ========== VARIANT: Glass Light (dark text for light backgrounds) ========== */
 
 .badge--glass-light {
-  background: color-mix(in oklch, var(--color-White) 50%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid color-mix(in oklch, var(--color-White) 50%, transparent);
+  background: var(--glass-bg-light);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border-light);
   color: var(--brand-c-text-dark);
 }
 
 /* ========== VARIANT: Glass Dark (white text for dark backgrounds) ========== */
 
 .badge--glass-dark {
-  background: color-mix(in oklch, var(--color-Black) 30%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid color-mix(in oklch, var(--color-Black) 20%, transparent);
+  background: var(--glass-bg-dark);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border-dark);
   color: var(--color-White);
 }
 
@@ -157,4 +152,30 @@
   padding: var(--space-sm);
   aspect-ratio: 1;
   justify-content: center;
+}
+
+/* ================================================================
+   RENDER MODE OVERRIDES
+   ================================================================ */
+
+/* Assistive — larger text, solid background, normal flow */
+[data-render="assistive"] .badge {
+  font-size: var(--text-body);
+  padding: var(--space-md);
+  background: var(--brand-c-text);
+  color: var(--color-White);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  position: static;
+}
+
+/* Textonly — plain solid badge, normal flow */
+[data-render="textonly"] .badge {
+  background: var(--brand-c-text);
+  color: var(--color-White);
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  position: static;
 }
