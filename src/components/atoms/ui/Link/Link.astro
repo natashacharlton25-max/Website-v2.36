@@ -3,25 +3,23 @@
  * Link — Atomic link primitive
  *
  * Every link should go through this component (except buttons — use <Button href>).
- * Uses .text as base class for font-family inheritance.
- * Link.css replaces a:not(.btn) rules from global.css.
+ * For links that need visual weight (glass, pill, padding), use Button with href.
+ * Renders slot through Text atom for typography inheritance.
  *
- * Styles: Link.css | Link.responsive.css | Link.a11y.css
+ * Styles: Link.css | Link.responsive.css
  *
  * Usage:
  *   <Link href="/about">About</Link>
  *   <Link href="/about" variant="underline">About</Link>
- *   <Link href="/legal" variant="glass">Legal</Link>
- *   <Link href="/legal" variant="glass" uppercase>LEGAL</Link>
+ *   <Link href="/about" variant="underline" underlineGrow>About</Link>
+ *   <Link href="/legal" variant="ghost" color="text-light">Quiet link</Link>
  *   <Link href="https://example.com" external>External</Link>
- *   <Link href="/about" variant="ghost" color="text-light">Quiet link</Link>
- *
- * For buttons that look like links, use <Button variant="ghost">.
  */
+import { Text } from '../Text';
 
 interface Props {
   href: string;
-  variant?: 'default' | 'underline' | 'glass' | 'ghost';
+  variant?: 'default' | 'underline' | 'highlight' | 'border' | 'ghost';
   color?: 'primary' | 'primary-dark' | 'secondary' | 'text' | 'text-light' | 'inherit';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
   uppercase?: boolean;
@@ -33,6 +31,10 @@ interface Props {
   id?: string;
   role?: string;
   ariaLabel?: string;
+  underlineGrow?: boolean;
+  highlightGrow?: boolean;
+  shadowFill?: boolean;
+  textSlide?: boolean;
   class?: string;
   [key: string]: any;
 }
@@ -51,6 +53,10 @@ const {
   id,
   role,
   ariaLabel,
+  underlineGrow = false,
+  highlightGrow = false,
+  shadowFill = false,
+  textSlide = false,
   class: className,
   ...rest
 } = Astro.props;
@@ -65,13 +71,16 @@ const dataAttrs = Object.fromEntries(
 );
 
 const classes = [
-  'text',
   'link',
   `link--${variant}`,
   color ? `link--color-${color}` : '',
   weight ? `link--weight-${weight}` : '',
   uppercase ? 'link--uppercase' : '',
-  flush ? 'text--flush' : '',
+  flush ? 'link--flush' : '',
+  underlineGrow && 'link--animate-underline-grow',
+  highlightGrow && 'link--animate-highlight-grow',
+  shadowFill && 'link--animate-shadow-fill',
+  textSlide && 'link--animate-text-slide',
   className,
 ].filter(Boolean);
 ---
@@ -83,9 +92,9 @@ const classes = [
   download={download}
   rel={rel}
   id={id}
-  role={role}
+  role={role as astroHTML.JSX.HTMLAttributes['role']}
   aria-label={ariaLabel}
   {...dataAttrs}
 >
-  <slot />
+  <Text as="span" flush><slot /></Text>
 </a>

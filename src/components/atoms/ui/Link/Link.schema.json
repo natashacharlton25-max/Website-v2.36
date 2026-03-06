@@ -1,25 +1,46 @@
 {
   "component": "Link",
-  "category": "atoms/ui",
-  "renders": { "base": "Link.astro" },
-  "notes": "Extends .text class from Text atom for base typography defaults. Central definition for link a11y — bare <a> components (GlassNav, Breadcrumbs) need their own a11y rules.",
-  "reducedMotion": "All transitions killed. Underline animation disabled. Glass backdrop immediate.",
-  "props": {
-    "href":      { "type": "string", "required": true },
-    "variant":   { "type": "string", "enum": ["default","underline","glass","ghost"], "default": "default" },
-    "color":     { "type": "string", "enum": ["primary","primary-dark","secondary","text","text-light","inherit"], "default": null },
-    "weight":    { "type": "string", "enum": ["normal","medium","semibold","bold","extrabold"], "default": null },
-    "uppercase": { "type": "boolean", "default": false },
-    "flush":     { "type": "boolean", "default": false },
-    "external":  { "type": "boolean", "default": false },
-    "target":    { "type": "string", "default": null },
-    "download":  { "type": ["string","boolean"], "default": null },
-    "rel":       { "type": "string", "default": null },
-    "id":        { "type": "string", "default": null },
-    "role":      { "type": "string", "default": null },
-    "ariaLabel": { "type": "string", "default": null },
-    "class":     { "type": "string" }
+  "category": "atom",
+  "renders": {
+    "full": "Link.astro",
+    "reduced": "Link.astro",
+    "assistive": "Link.astro",
+    "textonly": "Link.astro"
   },
+  "notes": "Inline text link. Renders through Text atom for typography. For links that need visual weight (glass, pill, padding), use Button with href instead.",
+
+  "props": {
+    "content": {
+      "_description": "Where the link goes and how it identifies itself",
+      "href":      { "type": "string",  "required": true, "description": "Link destination." },
+      "target":    { "type": "string",  "required": false, "default": null, "description": "Link target." },
+      "download":  { "type": "string",  "required": false, "default": null, "description": "Download attribute." },
+      "rel":       { "type": "string",  "required": false, "default": null, "description": "Relationship attribute." },
+      "external":  { "type": "boolean", "required": false, "default": false, "description": "External link — adds target=_blank and rel=noopener noreferrer." },
+      "id":        { "type": "string",  "required": false, "default": null, "description": "Element ID." },
+      "role":      { "type": "string",  "required": false, "default": null, "description": "ARIA role override." },
+      "ariaLabel": { "type": "string",  "required": false, "default": null, "description": "Accessible label." }
+    },
+
+    "visual": {
+      "_description": "How the link looks",
+      "variant":   { "type": "string",  "required": false, "default": "default", "enum": ["default", "underline", "highlight", "border", "ghost"], "description": "Visual indicator style. default=colour only, underline=static underline, highlight=subtle background, border=thin border, ghost=subtle colour." },
+      "color":     { "type": "string",  "required": false, "default": null, "enum": ["primary", "primary-dark", "secondary", "text", "text-light", "inherit"], "description": "Text colour override." },
+      "weight":    { "type": "string",  "required": false, "default": null, "enum": ["normal", "medium", "semibold", "bold", "extrabold"], "description": "Font weight override." },
+      "uppercase": { "type": "boolean", "required": false, "default": false, "description": "Uppercase text transform." },
+      "flush":     { "type": "boolean", "required": false, "default": false, "description": "Remove margin." },
+      "class":     { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "animation": {
+      "_description": "Motion behaviour — stripped in reduced/assistive/textonly renders",
+      "underlineGrow":  { "type": "boolean", "required": false, "default": false, "description": "Underline scales from left on hover. Requires variant=underline for static fallback." },
+      "highlightGrow":  { "type": "boolean", "required": false, "default": false, "description": "Background highlight grows from bar to full coverage on hover. Requires variant=highlight for static fallback." },
+      "shadowFill":     { "type": "boolean", "required": false, "default": false, "description": "Box-shadow inset fills from left on hover. Works with any variant." },
+      "textSlide":      { "type": "boolean", "required": false, "default": false, "description": "Text colour sweeps from left via background-clip, with coordinated underline grow." }
+    }
+  },
+
   "slots": {
     "default": "Link text content"
   }

@@ -57,10 +57,10 @@ After all atoms pass individually, run the **final cross-atom audit** using the 
 |-----------|--------|------|-------|
 | Badge | PASS | 2026-03-05 | Fixes 1-5 applied + post-fix verification (16 sections). All sections pass. Schema: category → "atom", 4 render keys. Label through Text atom, 'text' class removed. data-semantic-role="status". Render mode CSS: assistive (larger text, solid bg, position reset), textonly (solid bg, position reset, no glass). Glass variants tokenised (--glass-bg/border/blur + new --glass-bg-light/dark, --glass-border-light/dark). badge__label inherit rule removed. No animation, no JS, no a11y.css. BONUS: --glass-shadow fallback stripped. DEFERRED: Badge-in-Card alt text integration (Card audit), Icon inheritance (cross-atom), print (global layer). |
 | Button | PASS | 2026-03-05 | 13 fixes applied + post-fix verification (16 sections). All sections pass. Schema restructured (category, 4 renders, content/visual/animation groups). @layer removed. Base hover colour-only (no translateY). var fallbacks stripped. Dead code deleted (tray-3d, rainbow-wrap). a11y.css extracted (high-contrast → zones, highlight-links → global, render-mode rules → Button.css, rest → pipeline handles). 3 isA11yActive() functions deleted. Lottie focusin/focusout added. LottieIcon src→slug. Label through Text atom. confetti.css → tokens. font-weight tokenised (var(--font-medium)). DEFERRED: Consumer context override cleanup, LottieIcon animation passthrough verification, print (global layer), atom inheritance (cross-atom pass). |
-| Card | pending | | Has a11y.css. Used by ~22 molecule cards. |
+| Card | pending | | Has a11y.css. Used by ~22 molecule cards. NOTE: Badge text overlaying images must be included in Image alt text (e.g. "Featured" badge → alt includes "Featured"). |
 | Heading | PARTIAL | 2026-03-04 | Fixes 1-8 applied. Schema: category → "atom", 4 render keys, dividerLength removed, lottieIcon added to animation group. Subtitle through Text atom. Divider em-based (0.15em thickness, auto height via stretch). Underline percentage-based (90%/100% of fit-content parent). Dashed/dotted stops em-based. Highlight opacity tokenized (--opacity-low). LottieIcon support in media slot — falls back to static Icon when animation props stripped. ACCEPTED: Icon/LottieIcon imports (atom composition), icon size map (parent sizing). DEFERRED: Context overrides, SectionTitle deprecation, raw heading migration, token consistency, fit-content alignment test. |
-| Link | pending | | Has a11y.css. Used across entire site. |
-| List | pending | | Has a11y.css. |
+| Link | PASS | 2026-03-05 | Fixes 1-11 applied + post-fix verification (16 sections). All sections pass. Schema: category → "atom", 4 render keys, props grouped (content/visual/animation). Glass variant REMOVED (consumers → Button with href). New visual variants: highlight, border. Underline split: static variant + animated underlineGrow gated by prop. 4 animation props: underlineGrow, highlightGrow, shadowFill, textSlide. Text atom wraps slot. 'text' class removed. @layer removed. a11y.css extracted (highlight-links → global, render-mode → Link.css, a11y files → _reference/). Responsive simplified (glass rules removed). DEFERRED: Glass consumer migration (Footer, GlassNav), animation visual testing, print (global layer). |
+| List | PASS | 2026-03-05 | Fixes 1-10 applied + post-fix verification (16 sections). All sections pass. Schema: category → "atom", 4 render keys, props grouped (content/visual/animation). @layer removed from CSS + responsive. Dot sizes em-based (0.375em/0.5em/0.75em). a11y-dot deleted (dead code). Text atom wraps item content, 'text' class removed. Icon barrel import. a11y.css extracted (textonly → List.css, a11y files → _reference/). Assistive render: vertical stacking, CSS ::before dots (0.75em), icons hidden. Textonly render: native bullets, inline collapses, icons hidden. No animation, no JS. DEFERRED: Icon inheritance (cross-atom), slot consumer migration, print (global layer). |
 | Text | PARTIAL | 2026-03-04 | All fixes applied. Schema: category corrected, 4 render keys (all → Text.astro, pipeline strips visual props in textonly). CSS: font family fallbacks stripped (expose missing --font-body-alt/--font-handwriting tokens), context overrides deleted (consumers pass size/leading props), blockquote border tokenized (--border-width-lg). No animation, no JS, no a11y concerns. DEFERRED: Verify Card and nav consumers pass correct size/leading props to Text children. Token coverage check: --font-body-alt and --font-handwriting must be defined for every brand. |
 | Toast | pending | | Has a11y.css. Uses Icon. |
 | Menu/DPadMenu | pending | | Has a11y.css. Uses .style.css naming. No schema/barrel. |
@@ -112,6 +112,43 @@ After all atoms pass individually, run the **final cross-atom audit** using the 
 - BONUS: `--glass-shadow` had banned `var(--color-Black, #121212)` fallback — stripped to `var(--color-Black)`
 - DEFERRED: Badge-in-Card alt text integration — when Badge overlays an Image in Card, assistive/textonly renders should flow badge in normal document order. `position: static` in render overrides handles this. Card audit will verify.
 - DEFERRED: Icon inside Badge — verify Icon atom's aria-hidden and data-semantic-role propagate correctly (cross-atom Section 16)
+
+**Link v2 audit findings (2026-03-05):**
+- FIXED: Section 1.6/1.7: a11y.css + recovery moved to `_reference/Link/`
+- FIXED: Section 1.10: `import './Link.a11y.css'` removed from index.ts
+- FIXED: Section 2.1: @layer wrappers removed from Link.css + Link.responsive.css
+- FIXED: Section 3: Schema restructured — category → "atom", 4 render keys, props split into content/visual/animation. Stale `"reducedMotion"` key removed.
+- FIXED: Section 5/13: `'text'` class removed. Slot wrapped in `<Text as="span" flush>`. Text atom import added.
+- FIXED: Section 4/7: Underline animation split — static `text-decoration: underline` as visual variant, `scaleX(0)→scaleX(1)` animation gated by `underlineGrow` prop. Three more animations added: highlightGrow, shadowFill, textSlide.
+- REMOVED: Glass variant — Link is inline text only. Consumers using `<Link variant="glass">` migrate to `<Button variant="glass" shape="pill" href="...">`.
+- ADDED: New visual variants — `highlight` (subtle background bar), `border` (thin bottom border). Static, no-motion indicators.
+- EXTRACTED: highlight-links rules → `src/styles/global/highlight-links.css` (inline variants get underline, kill animated ::after)
+- EXTRACTED: text-only rules → `[data-render="textonly"]` in Link.css (strip uppercase, weight, colour overrides)
+- EXTRACTED: reduce-motion → `[data-render="reduced"] .link { transition: none; }`
+- CLEANED: responsive.css — all glass rules removed, @layer removed, underline adjustments kept
+
+- MIGRATION: All consumers of `<Link variant="glass">` must migrate to `<Button variant="glass" shape="pill" href="...">`. Known consumers: Footer, possibly GlassNav. Check during consumer audits.
+- DEFERRED: Link animation effects CSS implemented but needs visual testing across all themes and render modes.
+- DEFERRED: highlight-links.css needs Link rules for new variants (highlight, border) — added during this audit.
+- ARCHITECTURE: Link is inline text only. Anything needing visual weight (padding, background, border-radius) is a Button with href. Clean separation.
+
+**List v2 audit findings (2026-03-05):**
+- FIXED: Section 1.6/1.7: a11y.css + recovery moved to `_reference/List/`
+- FIXED: Section 1.10: `import './List.a11y.css'` removed from index.ts
+- FIXED: Section 2.1: @layer wrappers removed from List.css + List.responsive.css
+- FIXED: Section 2.18: Dot sizes converted from px to em (0.375em/0.5em/0.75em) — same relative sizing pattern as Heading dividers
+- FIXED: Section 3: Schema restructured — category → "atom", 4 render keys, props split into content/visual/animation
+- FIXED: Section 5/13: `'text'` class removed from `<li>`. Item content wrapped in `<Text as="span" class="list__content" flush>`. Text atom import added.
+- FIXED: Section 5/13: Icon import changed to barrel (`from '../../icons/Icon'`). TODO comment removed.
+- FIXED: Section 7: Assistive render — vertical stacking, CSS `::before` dots (0.75em), icons and variant dots hidden. Inline collapses to block.
+- FIXED: Section 7: Textonly render — extracted from a11y.css. Native disc bullets, icon lists revert to `list-item`, icons hidden, inline collapses with bullets, none variant gets bullets.
+- DELETED: `.list__a11y-dot` element and CSS — dead code. Never displayed in any render mode. Textonly uses native bullets, assistive uses CSS `::before` dots.
+- FIXED: Responsive dot sizes converted to em. @layer removed.
+- ARCHITECTURE: Dot sizes em-based — same relative sizing pattern as Heading dividers. Scales with parent text size.
+- ARCHITECTURE: Assistive render uses CSS `::before` dots on all list variants for consistency. 0.75em scales with text. Icons and variant dots hidden.
+- MIGRATION: Slot usage instructions updated — consumers should use `<li class="list__item"><Text as="span" flush>content</Text></li>` instead of `<li class="text list__item">`.
+- DEFERRED: Icon inside List — verify Icon atom's aria-hidden propagates correctly (cross-atom Section 16).
+- DEFERRED: Print layer — lists need `page-break-inside: avoid` on list items.
 
 ---
 

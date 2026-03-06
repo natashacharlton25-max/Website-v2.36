@@ -1,21 +1,37 @@
 {
   "component": "List",
-  "category": "atoms/ui",
-  "renders": { "base": "List.astro" },
-  "notes": "Each <li> uses .text class from Text atom for base typography defaults. Icon variant includes hidden .list__a11y-dot for text-only mode fallback.",
-  "props": {
-    "as":             { "type": "string", "enum": ["ul","ol"], "default": "ul" },
-    "variant":        { "type": "string", "enum": ["default","none","inline","dot"], "default": "default" },
-    "dotSize":        { "type": "string", "enum": ["sm","md","lg"], "default": "md" },
-    "icon":           { "type": "string", "default": null },
-    "iconCollection": { "type": "string", "default": "interface" },
-    "iconColor":      { "type": "string", "enum": ["primary","primary-dark","secondary","text","inherit"], "default": "primary" },
-    "spacing":        { "type": "string", "enum": ["tight","normal","loose"], "default": "normal" },
-    "flush":          { "type": "boolean", "default": false },
-    "class":          { "type": "string" },
-    "items":          { "type": "array", "items": { "type": "string" }, "default": null }
+  "category": "atom",
+  "renders": {
+    "full": "List.astro",
+    "reduced": "List.astro",
+    "assistive": "List.astro",
+    "textonly": "List.astro"
   },
+  "notes": "Every list on the site goes through this component. Items render through Text atom. Icon variant uses Icon atom for decorative markers. No animation.",
+
+  "props": {
+    "content": {
+      "_description": "What the list contains",
+      "as":             { "type": "string",  "required": false, "default": "ul", "enum": ["ul", "ol"], "description": "HTML element — unordered or ordered." },
+      "items":          { "type": "array",   "required": false, "default": null, "description": "Simple string items. For complex content, use slot instead." },
+      "icon":           { "type": "string",  "required": false, "default": null, "textonly": false, "description": "Phosphor icon slug for list markers. Decorative — stripped in textonly, native bullets replace." },
+      "iconCollection": { "type": "string",  "required": false, "default": "interface", "description": "Icon collection override." }
+    },
+
+    "visual": {
+      "_description": "How the list looks",
+      "variant":   { "type": "string",  "required": false, "default": "default", "enum": ["default", "none", "inline", "dot"], "description": "List style variant." },
+      "dotSize":   { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Dot variant marker size." },
+      "iconColor": { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "primary-dark", "secondary", "text", "inherit"], "description": "Icon/dot colour." },
+      "spacing":   { "type": "string",  "required": false, "default": "normal", "enum": ["tight", "normal", "loose"], "description": "Item spacing." },
+      "flush":     { "type": "boolean", "required": false, "default": false, "description": "Remove outer margin." },
+      "class":     { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "animation": {}
+  },
+
   "slots": {
-    "default": "Complex list items — use <li class=\"text list__item\"> for each"
+    "default": "Complex list items — use <li class=\"list__item\"><Text as=\"span\" flush>content</Text></li> for each"
   }
 }

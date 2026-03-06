@@ -1,153 +1,272 @@
 /**
  * Link — css
- * @layer components
  *
- * Replaces a:not(.btn) rules from global.css.
- * Uses .text as base for font-family inheritance.
- * Variants: default, underline, glass, ghost.
+ * Inline text link primitive. Renders through Text atom for typography.
+ * For links that need visual weight (glass, pill, padding), use Button with href.
+ *
+ * Variants: default, underline, highlight, border, ghost
+ * Animations: underlineGrow, highlightGrow, shadowFill, textSlide
  */
 
-@layer components {
+/* ==========================================================
+   BASE — All links
+   ========================================================== */
 
-  /* ==========================================================
-     BASE — All links
-     Overrides .text defaults that don't suit links.
-     ========================================================== */
+.link {
+  display: inline;
+  margin: 0;
+  text-decoration: none;
+  cursor: pointer;
+  color: var(--brand-c-primary);
+  transition: color 0.35s ease;
+}
 
-  .link {
-    display: inline;
-    margin: 0;
-    text-decoration: none;
-    cursor: pointer;
-    color: var(--brand-c-primary);
-    transition: color 0.35s ease;
-  }
+.link:hover {
+  color: var(--brand-c-primary-dark);
+}
 
-  .link:hover {
-    color: var(--brand-c-primary-dark);
-  }
+.link:focus-visible {
+  outline: var(--border-width-2) solid var(--brand-c-primary);
+  outline-offset: var(--border-width-2);
+  border-radius: var(--radius-xs);
+}
 
-  .link:focus-visible {
-    outline: var(--border-width-2) solid var(--brand-c-primary);
-    outline-offset: var(--border-width-2);
-    border-radius: var(--radius-xs);
-  }
+/* ==========================================================
+   FLUSH — remove margin
+   ========================================================== */
 
+.link--flush { margin: 0; }
 
-  /* ==========================================================
-     VARIANT: Default
-     Inline colour link, no underline. Matches old a:not(.btn).
-     ========================================================== */
+/* ==========================================================
+   VARIANT: Default
+   Inline colour link, no underline.
+   ========================================================== */
 
-  .link--default {
-    color: var(--brand-c-primary);
-  }
+.link--default {
+  color: var(--brand-c-primary);
+}
 
-  .link--default:hover {
-    color: var(--brand-c-primary-dark);
-  }
+.link--default:hover {
+  color: var(--brand-c-primary-dark);
+}
 
+/* ==========================================================
+   VARIANT: Underline
+   Static underline — always visible. Animation replaces it
+   when underlineGrow prop is passed.
+   ========================================================== */
 
-  /* ==========================================================
-     VARIANT: Underline
-     Animated underline that grows from left on hover.
-     ========================================================== */
+.link--underline {
+  position: relative;
+  color: var(--brand-c-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+  text-decoration-color: currentColor;
+}
 
-  .link--underline {
-    position: relative;
-    color: var(--brand-c-primary);
-  }
+.link--underline:hover {
+  color: var(--brand-c-primary-dark);
+}
 
-  .link--underline::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: currentColor;
-    border-radius: var(--radius-full);
-    transition: width 0.35s ease;
-  }
+/* ==========================================================
+   VARIANT: Highlight
+   Subtle background bar behind text.
+   ========================================================== */
 
-  .link--underline:hover::after {
-    width: 100%;
-  }
+.link--highlight {
+  color: var(--brand-c-primary);
+  position: relative;
+}
 
-  .link--underline:hover {
-    color: var(--brand-c-primary-dark);
-  }
+.link--highlight::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 3px;
+  width: 100%;
+  height: 8px;
+  z-index: -1;
+  background-color: var(--brand-c-primary-light);
+  opacity: var(--opacity-low);
+}
 
+/* ==========================================================
+   VARIANT: Border
+   Thin bottom border.
+   ========================================================== */
 
-  /* ==========================================================
-     VARIANT: Glass
-     Pill-shaped, backdrop blur, semi-transparent bg.
-     Like footer nav links.
-     ========================================================== */
+.link--border {
+  color: var(--brand-c-primary);
+  border-bottom: var(--border-width) solid var(--brand-c-primary);
+  padding-bottom: 1px;
+}
 
-  .link--glass {
-    display: inline-flex;
-    align-items: center;
-    color: var(--brand-c-primary-dark);
-    background: color-mix(in srgb, var(--brand-c-bg) 50%, transparent);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid transparent;
-    border-radius: var(--radius-full);
-    padding: var(--space-xs) var(--space-lg);
-    line-height: 1;
-    transition: color 0.35s ease, background 0.35s ease, border-color 0.35s ease;
-  }
+.link--border:hover {
+  color: var(--brand-c-primary-dark);
+  border-color: var(--brand-c-primary-dark);
+}
 
-  .link--glass:hover {
-    color: var(--brand-c-text-dark);
-  }
+/* ==========================================================
+   VARIANT: Ghost
+   Just colour, no decoration, no background.
+   ========================================================== */
 
+.link--ghost {
+  color: var(--brand-c-text);
+}
 
-  /* ==========================================================
-     VARIANT: Ghost
-     Just colour, no decoration, no background.
-     ========================================================== */
+.link--ghost:hover {
+  color: var(--brand-c-primary);
+}
 
-  .link--ghost {
-    color: var(--brand-c-text);
-  }
+/* ==========================================================
+   COLOUR OVERRIDES
+   ========================================================== */
 
-  .link--ghost:hover {
-    color: var(--brand-c-primary);
-  }
+.link--color-primary      { color: var(--brand-c-primary); }
+.link--color-primary-dark { color: var(--brand-c-primary-dark); }
+.link--color-secondary    { color: var(--brand-c-secondary); }
+.link--color-text         { color: var(--brand-c-text); }
+.link--color-text-light   { color: var(--brand-c-text-light); }
+.link--color-inherit      { color: inherit; }
 
+/* ==========================================================
+   WEIGHT OVERRIDES
+   ========================================================== */
 
-  /* ==========================================================
-     COLOUR OVERRIDES
-     ========================================================== */
+.link--weight-normal    { font-weight: var(--font-normal); }
+.link--weight-medium    { font-weight: var(--font-medium); }
+.link--weight-semibold  { font-weight: var(--font-semibold); }
+.link--weight-bold      { font-weight: var(--font-bold); }
+.link--weight-extrabold { font-weight: var(--font-extrabold); }
 
-  .link--color-primary      { color: var(--brand-c-primary); }
-  .link--color-primary-dark { color: var(--brand-c-primary-dark); }
-  .link--color-secondary    { color: var(--brand-c-secondary); }
-  .link--color-text         { color: var(--brand-c-text); }
-  .link--color-text-light   { color: var(--brand-c-text-light); }
-  .link--color-inherit      { color: inherit; }
+/* ==========================================================
+   UPPERCASE
+   ========================================================== */
 
+.link--uppercase {
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
 
-  /* ==========================================================
-     WEIGHT OVERRIDES
-     ========================================================== */
+/* ================================================================
+   ANIMATION EFFECTS — gated by animation props
+   Only rendered when JSON passes the animation prop.
+   Pipeline strips animation group in reduced/assistive/textonly.
+   ================================================================ */
 
-  .link--weight-normal    { font-weight: var(--font-normal); }
-  .link--weight-medium    { font-weight: var(--font-medium); }
-  .link--weight-semibold  { font-weight: var(--font-semibold); }
-  .link--weight-bold      { font-weight: var(--font-bold); }
-  .link--weight-extrabold { font-weight: var(--font-extrabold); }
+/* Animation: underlineGrow — underline scales from left on hover */
+.link--animate-underline-grow {
+  text-decoration: none; /* override static underline — animation replaces it */
+}
 
+.link--animate-underline-grow::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  border-radius: var(--radius-full);
+  transform-origin: 0% 50%;
+  transform: scaleX(0);
+  transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1);
+}
 
-  /* ==========================================================
-     UPPERCASE
-     ========================================================== */
+.link--animate-underline-grow:hover::after {
+  transform: scaleX(1);
+}
 
-  .link--uppercase {
-    text-transform: uppercase;
-    letter-spacing: var(--letter-spacing-wide);
-  }
+/* Animation: highlightGrow — background grows from bar to full on hover */
+.link--animate-highlight-grow::before {
+  transition: all 0.3s ease-in-out;
+}
+.link--animate-highlight-grow:hover::before {
+  bottom: 0;
+  height: 100%;
+}
 
+/* Animation: shadowFill — box-shadow inset fills from left */
+.link--animate-shadow-fill {
+  transition: color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  padding: 0 0.25rem;
+  margin: 0 -0.25rem;
+}
+.link--animate-shadow-fill:hover {
+  color: var(--color-White);
+  box-shadow: inset 200px 0 0 0 var(--brand-c-primary);
+}
+
+/* Animation: textSlide — text colour sweeps from left + underline grows */
+.link--animate-text-slide {
+  background-image: linear-gradient(
+    to right,
+    var(--brand-c-primary),
+    var(--brand-c-primary) 50%,
+    var(--brand-c-text) 50%
+  );
+  background-size: 200% 100%;
+  background-position: -100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease-in-out;
+}
+.link--animate-text-slide::before {
+  content: '';
+  background: var(--brand-c-primary);
+  display: block;
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 3px;
+  transition: all 0.3s ease-in-out;
+}
+.link--animate-text-slide:hover {
+  background-position: 0;
+}
+.link--animate-text-slide:hover::before {
+  width: 100%;
+}
+
+/* ================================================================
+   RENDER MODE OVERRIDES
+   ================================================================ */
+
+/* Reduced — all transitions instant */
+[data-render="reduced"] .link { transition: none; }
+
+/* Textonly — all links become plain underlined text */
+[data-render="textonly"] .link {
+  color: var(--brand-c-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: normal;
+}
+
+[data-render="textonly"] .link--uppercase {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+[data-render="textonly"] .link--weight-normal,
+[data-render="textonly"] .link--weight-medium,
+[data-render="textonly"] .link--weight-semibold,
+[data-render="textonly"] .link--weight-bold,
+[data-render="textonly"] .link--weight-extrabold {
+  font-weight: normal;
+}
+
+[data-render="textonly"] .link--color-primary,
+[data-render="textonly"] .link--color-primary-dark,
+[data-render="textonly"] .link--color-secondary,
+[data-render="textonly"] .link--color-text,
+[data-render="textonly"] .link--color-text-light {
+  color: var(--brand-c-primary);
 }

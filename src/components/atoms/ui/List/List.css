@@ -1,181 +1,269 @@
 /**
  * List — css
- * @layer components
  *
  * Single source of truth for all list styling.
- * Each .list__item uses .text as base for font-family inheritance.
+ * Item text renders through Text atom.
  *
  * Variants: default (disc/decimal), none, inline, dot (sized circles).
  * Icon prop: works on default variant — replaces native markers with icons.
- * A11y text-only: icons hidden, .list__a11y-dot shown as replacement.
  */
 
-@layer components {
+/* ==========================================================
+   BASE
+   ========================================================== */
 
-  /* ==========================================================
-     BASE
-     ========================================================== */
+.list {
+  margin: 0 0 var(--space-md) 0;
+  padding-left: var(--space-xl);
+}
 
-  .list {
-    margin: 0 0 var(--space-md) 0;
-    padding-left: var(--space-xl);
-  }
+.list__item {
+  margin: 0;
+  padding: var(--space-xs) 0;
+}
 
-  .list__item {
-    margin: 0;
-    padding: var(--space-xs) 0;
-  }
+.list__content {
+  vertical-align: middle;
+}
 
-  .list__content {
-    vertical-align: middle;
-  }
+/* ==========================================================
+   VARIANT: Default
+   ul gets disc, ol gets decimal. Standard list appearance.
+   ========================================================== */
 
-  /* ==========================================================
-     VARIANT: Default
-     ul gets disc, ol gets decimal. Standard list appearance.
-     ========================================================== */
+ul.list--default {
+  list-style-type: disc;
+}
 
-  ul.list--default {
-    list-style-type: disc;
-  }
+ol.list--default {
+  list-style-type: decimal;
+}
 
-  ol.list--default {
-    list-style-type: decimal;
-  }
+.list--default .list__item::marker {
+  color: var(--brand-c-primary);
+}
 
-  .list--default .list__item::marker {
-    color: var(--brand-c-primary);
-  }
+/* ==========================================================
+   ICON — default variant with icon prop
+   Replaces native disc/decimal with Phosphor icons.
+   Textonly render hides icons and reverts to native bullets.
+   ========================================================== */
 
-  /* ==========================================================
-     ICON — default variant with icon prop
-     Replaces native disc/decimal with Phosphor icons.
-     Text-only a11y hides icons and shows .list__a11y-dot instead.
-     ========================================================== */
+.list--has-icon {
+  list-style: none;
+  padding-left: 0;
+}
 
-  .list--has-icon {
-    list-style: none;
-    padding-left: 0;
-  }
+.list--has-icon .list__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
 
-  .list--has-icon .list__item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-  }
+.list__icon {
+  flex-shrink: 0;
+  color: var(--brand-c-primary);
+  fill: currentColor;
+}
 
-  .list__icon {
-    flex-shrink: 0;
-    color: var(--brand-c-primary);
-    fill: currentColor;
-  }
+/* Icon colour overrides */
+.list--icon-color-primary-dark .list__icon { color: var(--brand-c-primary-dark); }
+.list--icon-color-secondary .list__icon    { color: var(--brand-c-secondary); }
+.list--icon-color-text .list__icon         { color: var(--brand-c-text); }
+.list--icon-color-inherit .list__icon      { color: inherit; }
 
-  /* Icon colour overrides */
-  .list--icon-color-primary-dark .list__icon { color: var(--brand-c-primary-dark); }
-  .list--icon-color-secondary .list__icon    { color: var(--brand-c-secondary); }
-  .list--icon-color-text .list__icon         { color: var(--brand-c-text); }
-  .list--icon-color-inherit .list__icon      { color: inherit; }
+/* ==========================================================
+   VARIANT: None
+   No markers, no padding. For nav lists, card content, etc.
+   ========================================================== */
 
-  /* A11y replacement dot — hidden by default, shown in text-only */
-  .list__a11y-dot {
-    display: none;
-    width: 8px;
-    height: 8px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: var(--brand-c-primary);
-  }
+.list--none {
+  list-style: none;
+  padding-left: 0;
+}
 
-  /* ==========================================================
-     VARIANT: None
-     No markers, no padding. For nav lists, card content, etc.
-     ========================================================== */
+/* ==========================================================
+   VARIANT: Inline
+   Horizontal flow, items side by side.
+   ========================================================== */
 
-  .list--none {
-    list-style: none;
-    padding-left: 0;
-  }
+.list--inline {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
 
-  /* ==========================================================
-     VARIANT: Inline
-     Horizontal flow, items side by side.
-     ========================================================== */
+.list--inline .list__item {
+  padding: 0;
+}
 
-  .list--inline {
-    list-style: none;
-    padding-left: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-sm);
-  }
+/* ==========================================================
+   VARIANT: Dot
+   Custom circle markers with size control.
+   ========================================================== */
 
-  .list--inline .list__item {
-    padding: 0;
-  }
+.list--dot {
+  list-style: none;
+  padding-left: 0;
+}
 
-  /* ==========================================================
-     VARIANT: Dot
-     Custom circle markers with size control.
-     ========================================================== */
+.list--dot .list__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
 
-  .list--dot {
-    list-style: none;
-    padding-left: 0;
-  }
+.list__dot {
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--brand-c-primary);
+}
 
-  .list--dot .list__item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-  }
+/* Dot sizes — em-based, scales with parent text size */
+.list--dot-sm .list__dot {
+  width: 0.375em;
+  height: 0.375em;
+}
 
-  .list__dot {
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: var(--brand-c-primary);
-  }
+.list--dot-md .list__dot {
+  width: 0.5em;
+  height: 0.5em;
+}
 
-  /* Dot sizes */
-  .list--dot-sm .list__dot {
-    width: 6px;
-    height: 6px;
-  }
+.list--dot-lg .list__dot {
+  width: 0.75em;
+  height: 0.75em;
+}
 
-  .list--dot-md .list__dot {
-    width: 8px;
-    height: 8px;
-  }
+/* Dot colour follows icon colour overrides */
+.list--icon-color-primary-dark .list__dot { background: var(--brand-c-primary-dark); }
+.list--icon-color-secondary .list__dot    { background: var(--brand-c-secondary); }
+.list--icon-color-text .list__dot         { background: var(--brand-c-text); }
+.list--icon-color-inherit .list__dot      { background: currentColor; }
 
-  .list--dot-lg .list__dot {
-    width: 12px;
-    height: 12px;
-  }
+/* ==========================================================
+   SPACING
+   ========================================================== */
 
-  /* Dot colour follows icon colour overrides */
-  .list--icon-color-primary-dark .list__dot { background: var(--brand-c-primary-dark); }
-  .list--icon-color-secondary .list__dot    { background: var(--brand-c-secondary); }
-  .list--icon-color-text .list__dot         { background: var(--brand-c-text); }
-  .list--icon-color-inherit .list__dot      { background: currentColor; }
+.list--spacing-tight .list__item {
+  padding: 0;
+}
 
-  /* ==========================================================
-     SPACING
-     ========================================================== */
+.list--spacing-loose .list__item {
+  padding: var(--space-sm) 0;
+}
 
-  .list--spacing-tight .list__item {
-    padding: 0;
-  }
+/* ==========================================================
+   FLUSH — no outer margin
+   ========================================================== */
 
-  .list--spacing-loose .list__item {
-    padding: var(--space-sm) 0;
-  }
+.list--flush {
+  margin: 0;
+}
 
-  /* ==========================================================
-     FLUSH — no outer margin
-     ========================================================== */
+/* ================================================================
+   RENDER MODE OVERRIDES
+   ================================================================ */
 
-  .list--flush {
-    margin: 0;
-  }
+/* ── Assistive — vertical stacked, large dot markers, easy scanning ── */
 
+[data-render="assistive"] .list {
+  list-style: none;
+  padding-left: 0;
+}
+
+[data-render="assistive"] .list__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+}
+
+[data-render="assistive"] .list__item::before {
+  content: '';
+  width: 0.75em;
+  height: 0.75em;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--brand-c-primary);
+}
+
+/* Inline collapses to vertical */
+[data-render="assistive"] .list--inline {
+  display: block;
+}
+
+/* Icons hidden — large CSS dot replaces them */
+[data-render="assistive"] .list__icon {
+  display: none;
+}
+
+/* Variant dots hidden — CSS ::before dot replaces for consistency */
+[data-render="assistive"] .list__dot {
+  display: none;
+}
+
+/* ── Textonly — native bullets, plain text, vertical structure ── */
+
+[data-render="textonly"] ul.list--default {
+  list-style-type: disc;
+  padding-left: var(--space-lg);
+}
+
+[data-render="textonly"] ol.list--default {
+  list-style-type: decimal;
+  padding-left: var(--space-lg);
+}
+
+[data-render="textonly"] .list--default .list__item::marker {
+  color: var(--brand-c-primary);
+}
+
+/* Icon lists revert to native bullets */
+[data-render="textonly"] .list--has-icon {
+  list-style-type: disc;
+  padding-left: var(--space-lg);
+}
+
+[data-render="textonly"] .list--has-icon .list__item {
+  display: list-item;
+}
+
+[data-render="textonly"] .list--has-icon .list__item::marker {
+  color: var(--brand-c-primary);
+}
+
+[data-render="textonly"] .list--has-icon .list__icon {
+  display: none;
+}
+
+/* Dot variant normalised */
+[data-render="textonly"] .list--dot .list__dot {
+  width: 0.5em;
+  height: 0.5em;
+}
+
+/* None variant gets bullets for structure */
+[data-render="textonly"] .list--none {
+  list-style-type: disc;
+  padding-left: var(--space-lg);
+}
+
+/* Inline collapses to vertical with bullets */
+[data-render="textonly"] .list--inline {
+  display: block;
+  list-style-type: disc;
+  padding-left: var(--space-lg);
+}
+
+[data-render="textonly"] .list--inline .list__item {
+  padding: var(--space-xs) 0;
+}
+
+/* Global text normalisation */
+[data-render="textonly"] .list__item {
+  text-align: left;
 }

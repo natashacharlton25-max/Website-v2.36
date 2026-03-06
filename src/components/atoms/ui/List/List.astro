@@ -3,10 +3,10 @@
  * List — Atomic list primitive
  *
  * Every list should go through this component.
- * Each <li> uses .text as base class for font-family inheritance.
+ * Item text renders through Text atom.
  * List.css is the single source of truth for list styling.
  *
- * Styles: List.css | List.responsive.css | List.a11y.css
+ * Styles: List.css | List.responsive.css
  *
  * Usage:
  *   <List items={['One', 'Two', 'Three']} />
@@ -21,11 +21,11 @@
  *
  *   <!-- Slot for complex content -->
  *   <List>
- *     <li class="text list__item">Complex <strong>content</strong></li>
+ *     <li class="list__item"><Text as="span" flush>Complex <strong>content</strong></Text></li>
  *   </List>
  */
-// TODO: update to barrel import once Icon/D1 built
-import Icon from '../../icons/Icon/Icon.astro';
+import { Icon } from '../../icons/Icon';
+import { Text } from '../Text';
 
 interface Props {
   as?: 'ul' | 'ol';
@@ -81,18 +81,14 @@ const classes = [
 <Tag class:list={classes} {...dataAttrs}>
   {items ? (
     items.map((item) => (
-      <li class="text list__item">
+      <li class="list__item">
         {hasIcon && (
           <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="list__icon" />
         )}
         {variant === 'dot' && (
           <span class="list__dot" aria-hidden="true"></span>
         )}
-        {/* A11y dot — hidden by default, shown in text-only mode to replace icons */}
-        {hasIcon && (
-          <span class="list__a11y-dot" aria-hidden="true"></span>
-        )}
-        <span class="list__content">{item}</span>
+        <Text as="span" class="list__content" flush>{item}</Text>
       </li>
     ))
   ) : (
