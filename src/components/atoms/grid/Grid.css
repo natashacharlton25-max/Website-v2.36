@@ -1,150 +1,306 @@
 /**
- * Grid — style.css
- * @layer components
+ * Grid — Grid.css
+ *
+ * Pure layout shell. Handles column count, gap, alignment.
+ * Grid never reaches into children — all child render mode
+ * behaviour handled by their own atoms (Card, Image, Badge, etc.).
  *
  * Modes: fixed (explicit column count), auto (auto-fit with minWidth)
- * All sizing via custom properties set inline by Grid.astro
+ * All sizing via custom properties set inline by Grid.astro.
+ *
+ * Render modes (reduced, textonly, assistive) appended at end of file.
  */
 
-@layer components {
+/* ==========================================================
+   BASE
+   ========================================================== */
 
-  /* ==========================================================
-     BASE
-     ========================================================== */
+.base-grid {
+  display: grid;
+  gap: var(--grid-gap, var(--space-xl));
+  align-items: var(--grid-align, stretch);
+  width: 100%;
+}
 
-  .base-grid {
-    display: grid;
-    gap: var(--grid-gap, var(--space-xl));
-    align-items: var(--grid-align, stretch);
-    width: 100%;
-  }
+/* Fixed columns: explicit repeat(n) */
+.base-grid--fixed {
+  grid-template-columns: repeat(var(--grid-cols, 3), 1fr);
+}
 
-  /* Fixed columns: explicit repeat(n) */
-  .base-grid--fixed {
-    grid-template-columns: repeat(var(--grid-cols, 3), 1fr);
-  }
-
-  /* Auto-fit: responsive intrinsic sizing */
-  .base-grid--auto {
-    grid-template-columns: repeat(auto-fit, minmax(var(--grid-min, 280px), 1fr));
-  }
+/* Auto-fit: responsive intrinsic sizing */
+.base-grid--auto {
+  grid-template-columns: repeat(auto-fit, minmax(var(--grid-min, 280px), 1fr));
+}
 
 
-  /* ==========================================================
-     FLOW MODES
-     ========================================================== */
+/* ==========================================================
+   FLOW MODES
+   ========================================================== */
 
-  /* Dense: pack items into gaps (masonry-like packing) */
-  .base-grid--dense {
-    grid-auto-flow: dense;
-    grid-auto-rows: minmax(var(--grid-row-min, auto), auto);
-  }
+/* Dense: pack items into gaps (masonry-like packing) */
+.base-grid--dense {
+  grid-auto-flow: dense;
+  grid-auto-rows: minmax(var(--grid-row-min, auto), auto);
+}
 
-  /* Column: flow items into columns instead of rows */
-  .base-grid--column {
-    grid-auto-flow: column;
-  }
+/* Column: flow items into columns instead of rows */
+.base-grid--column {
+  grid-auto-flow: column;
+}
 
-  /* Masonry: CSS multi-column layout (true masonry, variable-height items) */
-  .base-grid--masonry {
-    display: block;
-    column-count: var(--grid-cols, 3);
-    column-gap: var(--grid-gap, var(--space-xl));
-    padding: var(--space-sm);
-  }
+/* Masonry: CSS multi-column layout (true masonry, variable-height items) */
+.base-grid--masonry {
+  display: block;
+  column-count: var(--grid-cols, 3);
+  column-gap: var(--grid-gap, var(--space-xl));
+  padding: var(--space-sm);
+}
 
-  /* Prevent children from breaking across columns */
-  .base-grid--masonry > * {
-    break-inside: avoid;
-    margin-bottom: var(--grid-gap, var(--space-xl));
-  }
-
-
-  /* ==========================================================
-     GALLERY MODES
-     Layout-only rules. Item styling lives in gallery card CSS.
-     JS targets [data-gallery] attribute.
-     ========================================================== */
-
-  /* Shared gallery base */
-  .base-grid--gallery {
-    position: relative;
-  }
-
-  /* ---- Showcase: 1 large + N thumbnails, carousel rotation ---- */
-  .base-grid--gallery-showcase {
-    grid-template-columns: minmax(auto, 480px) 120px;
-    grid-template-rows: repeat(3, 1fr);
-    grid-auto-flow: dense;
-    height: 650px;
-    min-height: 650px;
-  }
-
-  /* Expanded item spans full left column */
-  .base-grid--gallery-showcase > :first-child,
-  .base-grid--gallery-showcase > .is-expanded {
-    grid-column: 1;
-    grid-row: 1 / span 3;
-  }
-
-  /* Thumbnails stack in right column */
-  .base-grid--gallery-showcase > :not(:first-child):not(.is-expanded) {
-    grid-column: 2;
-  }
-
-  /* ---- Product: 6-col expand/collapse thumbnails ---- */
-  .base-grid--gallery-product {
-    grid-template-columns: repeat(6, 1fr);
-    grid-auto-flow: dense;
-  }
-
-  /* Default thumbnail: 2-col span */
-  .base-grid--gallery-product > * {
-    grid-column: span 2;
-  }
-
-  /* Active: full width, taller */
-  .base-grid--gallery-product > .is-active {
-    grid-row: 1;
-    grid-column: 1 / span 6;
-    order: 0;
-  }
-
-  /* Inactive: 2-col span (explicit for GSAP Flip) */
-  .base-grid--gallery-product > .is-inactive {
-    grid-column: span 2;
-  }
+/* Prevent children from breaking across columns */
+.base-grid--masonry > * {
+  break-inside: avoid;
+  margin-bottom: var(--grid-gap, var(--space-xl));
+}
 
 
-  /* ==========================================================
-     COLUMN SPANNING
-     ========================================================== */
+/* ==========================================================
+   GALLERY MODES
+   Layout-only rules. Item styling lives in gallery card CSS.
+   JS targets [data-gallery] attribute.
+   ========================================================== */
 
-  /* Dynamic via custom property */
-  .base-grid > [style*="--span"] {
-    grid-column: span var(--span, 1);
-  }
+/* Shared gallery base */
+.base-grid--gallery {
+  position: relative;
+}
 
-  /* Utility classes */
-  .grid-span-2    { grid-column: span 2; }
-  .grid-span-3    { grid-column: span 3; }
-  .grid-span-4    { grid-column: span 4; }
-  .grid-span-5    { grid-column: span 5; }
-  .grid-span-6    { grid-column: span 6; }
-  .grid-span-full { grid-column: 1 / -1; }
+/* ---- Showcase: 1 large + N thumbnails, carousel rotation ---- */
+/* Gallery showcase layout — container-specific dimensions, not spacing tokens */
+.base-grid--gallery-showcase {
+  grid-template-columns: minmax(auto, 480px) 120px; /* 480px expanded image, 120px thumbnail column */
+  grid-template-rows: repeat(3, 1fr);
+  grid-auto-flow: dense;
+  height: 650px;    /* Fixed viewport height for carousel layout */
+  min-height: 650px;
+}
+
+/* Expanded item spans full left column */
+.base-grid--gallery-showcase > :first-child,
+.base-grid--gallery-showcase > .is-expanded {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+}
+
+/* Thumbnails stack in right column */
+.base-grid--gallery-showcase > :not(:first-child):not(.is-expanded) {
+  grid-column: 2;
+}
+
+/* ---- Product: 6-col expand/collapse thumbnails ---- */
+.base-grid--gallery-product {
+  grid-template-columns: repeat(6, 1fr);
+  grid-auto-flow: dense;
+}
+
+/* Default thumbnail: 2-col span */
+.base-grid--gallery-product > * {
+  grid-column: span 2;
+}
+
+/* Active: full width, taller */
+.base-grid--gallery-product > .is-active {
+  grid-row: 1;
+  grid-column: 1 / span 6;
+  order: 0;
+}
+
+/* Inactive: 2-col span (explicit for GSAP Flip) */
+.base-grid--gallery-product > .is-inactive {
+  grid-column: span 2;
+}
 
 
-  /* ==========================================================
-     ROW SPANNING
-     ========================================================== */
+/* ==========================================================
+   COLUMN SPANNING
+   ========================================================== */
 
-  /* Dynamic via custom property */
-  .base-grid > [style*="--row-span"] {
-    grid-row: span var(--row-span, 1);
-  }
+/* Dynamic via custom property */
+.base-grid > [style*="--span"] {
+  grid-column: span var(--span, 1);
+}
 
-  /* Utility classes */
-  .grid-row-span-2 { grid-row: span 2; }
-  .grid-row-span-3 { grid-row: span 3; }
+/* Utility classes */
+.grid-span-2    { grid-column: span 2; }
+.grid-span-3    { grid-column: span 3; }
+.grid-span-4    { grid-column: span 4; }
+.grid-span-5    { grid-column: span 5; }
+.grid-span-6    { grid-column: span 6; }
+.grid-span-full { grid-column: 1 / -1; }
 
+
+/* ==========================================================
+   ROW SPANNING
+   ========================================================== */
+
+/* Dynamic via custom property */
+.base-grid > [style*="--row-span"] {
+  grid-row: span var(--row-span, 1);
+}
+
+/* Utility classes */
+.grid-row-span-2 { grid-row: span 2; }
+.grid-row-span-3 { grid-row: span 3; }
+
+
+/* ==========================================================
+   REDUCED — kill transitions and hover transforms
+   Grid never reaches into children — only grid-level motion.
+   ========================================================== */
+
+[data-render="reduced"] .base-grid {
+  transition: none;
+}
+
+[data-render="reduced"] .base-grid > * {
+  transition: none;
+}
+
+[data-render="reduced"] .base-grid > *:hover {
+  transform: none;
+}
+
+[data-render="reduced"] [data-gallery] {
+  --gallery-animate: 0;
+}
+
+[data-render="reduced"] [data-gallery] > * {
+  transition: none;
+}
+
+[data-render="reduced"] .base-grid--gallery-product > .is-inactive {
+  opacity: 1;
+  filter: none;
+}
+
+
+/* ==========================================================
+   TEXTONLY — single column vertical stack
+   Grid controls layout only. Children handle their own
+   textonly rendering (Card, Image, Badge, Button atoms).
+   ========================================================== */
+
+[data-render="textonly"] .base-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+[data-render="textonly"] .base-grid--masonry {
+  display: flex;
+  flex-direction: column;
+  column-count: unset;
+  column-gap: unset;
+  padding: 0;
+}
+
+[data-render="textonly"] .base-grid--masonry > * {
+  margin-bottom: var(--space-sm);
+  break-inside: unset;
+}
+
+/* Showcase gallery: purely visual carousel — hide entirely */
+[data-render="textonly"] .base-grid--gallery-showcase {
+  display: none;
+}
+
+/* Product gallery: vertical stack */
+[data-render="textonly"] .base-grid--gallery-product {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-render="textonly"] .base-grid--gallery-product > .is-active,
+[data-render="textonly"] .base-grid--gallery-product > .is-inactive {
+  opacity: 1;
+  filter: none;
+  height: auto;
+}
+
+/* Kill column/row spanning — single column */
+[data-render="textonly"] .base-grid > [class*="grid-span"],
+[data-render="textonly"] .base-grid > [class*="grid-row-span"],
+[data-render="textonly"] .base-grid > [style*="--span"],
+[data-render="textonly"] .base-grid > [style*="--row-span"] {
+  flex: none;
+  width: 100%;
+}
+
+/* Separator between stacked items */
+[data-render="textonly"] .base-grid--separator > * + * {
+  border-top: 1px solid currentColor;
+  padding-top: var(--space-sm);
+}
+
+
+/* ==========================================================
+   ASSISTIVE — single column, children keep visual chrome
+   Same column collapse as textonly but with spacing for
+   larger touch targets. Gallery animation killed.
+   ========================================================== */
+
+[data-render="assistive"] .base-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+[data-render="assistive"] .base-grid--masonry {
+  display: flex;
+  flex-direction: column;
+  column-count: unset;
+  column-gap: unset;
+  padding: 0;
+}
+
+[data-render="assistive"] .base-grid--masonry > * {
+  margin-bottom: var(--space-md);
+  break-inside: unset;
+}
+
+/* Kill gallery animation */
+[data-render="assistive"] [data-gallery] {
+  --gallery-animate: 0;
+}
+
+/* Showcase: hide carousel, same as textonly */
+[data-render="assistive"] .base-grid--gallery-showcase {
+  display: none;
+}
+
+/* Product: vertical stack */
+[data-render="assistive"] .base-grid--gallery-product {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-render="assistive"] .base-grid--gallery-product > .is-active,
+[data-render="assistive"] .base-grid--gallery-product > .is-inactive {
+  opacity: 1;
+  filter: none;
+  height: auto;
+}
+
+/* Kill spanning */
+[data-render="assistive"] .base-grid > [class*="grid-span"],
+[data-render="assistive"] .base-grid > [class*="grid-row-span"],
+[data-render="assistive"] .base-grid > [style*="--span"],
+[data-render="assistive"] .base-grid > [style*="--row-span"] {
+  flex: none;
+  width: 100%;
+}
+
+/* Separator */
+[data-render="assistive"] .base-grid--separator > * + * {
+  border-top: 1px solid var(--brand-c-neutral-light);
+  padding-top: var(--space-sm);
 }

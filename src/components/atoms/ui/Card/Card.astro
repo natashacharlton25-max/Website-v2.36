@@ -1,17 +1,17 @@
 ---
 /**
  * Card — Atomic container shell
- * @layer components
  *
- * Pure container with visual chrome (background, border, radius, shadow, hover).
- * Children handle their own internal layout.
+ * Pure container with visual chrome (background, border, radius, shadow).
+ * Children handle their own internal layout. Hover is animation — stripped in reduced render.
  *
- * Molecule cards render <Card> as their outer wrapper instead of raw `.card` class.
+ * Molecule cards render <Card> as their outer wrapper.
  * Grid handles external layout. Card handles the box itself.
+ * In textonly, card becomes transparent bordered box — child atoms handle their own visibility.
  *
  * @param as          - HTML element: div | article | section | aside | li (default: div)
  * @param variant     - Visual style: default | transparent | outline | glass | liquid-glass | neumorphic | neumorphic-pressed | comic | tech
- * @param hover       - Hover effect: true (lift), 'border' (border-color change), 'glow' (box-shadow glow)
+ * @param hover       - Hover effect (animation group): true (lift), 'border', 'glow'. Stripped in reduced/assistive/textonly.
  * @param shadow      - Box shadow: none | sm | md | lg | xl
  * @param dropShadow  - Filter drop-shadow (better for non-rect shapes): none | sm | md | lg | xl
  * @param radius      - Border radius: none | sm | md | lg | xl | full
@@ -22,21 +22,10 @@
  * @param href        - If set, renders as <a> with .card--link styles
  * @param separator   - Visible border between .card__header / .card__body / .card__footer
  *
- * Inner structure (optional classes on children):
- *   .card__header     — top section
- *   .card__body       — main content area
- *   .card__footer     — bottom section
- *   .card__image      — image container (aspect-ratio, object-fit)
- *   .card__overlay    — absolute overlay on image (gradient scrim)
- *   .card__content    — text content wrapper (padding, flex column)
- *   .card__icon-wrapper — centered icon container
+ * Use Heading, Text, Badge, Button, Image atoms inside.
+ * Structure with .card__header / .card__body / .card__footer.
  *
- * Typography primitives (classes for children):
- *   .card__heading  .card__title  .card__label  .card__text
- *   .card__value    .card__quote  .card__author .card__badge
- *   .card__button   .card__icon   .card__arrow
- *
- * Styles: Card.css | Card.responsive.css | Card.a11y.css
+ * Styles: Card.css | Card.responsive.css
  */
 
 export interface Props {

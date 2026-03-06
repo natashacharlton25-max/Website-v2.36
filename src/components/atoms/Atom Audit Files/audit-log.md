@@ -57,12 +57,12 @@ After all atoms pass individually, run the **final cross-atom audit** using the 
 |-----------|--------|------|-------|
 | Badge | PASS | 2026-03-05 | Fixes 1-5 applied + post-fix verification (16 sections). All sections pass. Schema: category → "atom", 4 render keys. Label through Text atom, 'text' class removed. data-semantic-role="status". Render mode CSS: assistive (larger text, solid bg, position reset), textonly (solid bg, position reset, no glass). Glass variants tokenised (--glass-bg/border/blur + new --glass-bg-light/dark, --glass-border-light/dark). badge__label inherit rule removed. No animation, no JS, no a11y.css. BONUS: --glass-shadow fallback stripped. DEFERRED: Badge-in-Card alt text integration (Card audit), Icon inheritance (cross-atom), print (global layer). |
 | Button | PASS | 2026-03-05 | 13 fixes applied + post-fix verification (16 sections). All sections pass. Schema restructured (category, 4 renders, content/visual/animation groups). @layer removed. Base hover colour-only (no translateY). var fallbacks stripped. Dead code deleted (tray-3d, rainbow-wrap). a11y.css extracted (high-contrast → zones, highlight-links → global, render-mode rules → Button.css, rest → pipeline handles). 3 isA11yActive() functions deleted. Lottie focusin/focusout added. LottieIcon src→slug. Label through Text atom. confetti.css → tokens. font-weight tokenised (var(--font-medium)). DEFERRED: Consumer context override cleanup, LottieIcon animation passthrough verification, print (global layer), atom inheritance (cross-atom pass). |
-| Card | pending | | Has a11y.css. Used by ~22 molecule cards. NOTE: Badge text overlaying images must be included in Image alt text (e.g. "Featured" badge → alt includes "Featured"). |
+| Card | PASS | 2026-03-06 | Fixes 1-11 applied + post-fix verification (10 checks). All sections pass. Schema: category → "atom", 4 render keys, props grouped (content/visual/animation). hover moved to animation group — stripped in reduced/assistive/textonly. @layer removed from Card.css + Card.responsive.css. Glass variant tokenised (--glass-bg-brand, --glass-border-brand, --glass-blur). Base transition split — border-color only on .card, transform+box-shadow on hover effect classes. Fallback removed (--card-hover-border default set on class). Hardcoded values commented (comic 3px/5px 7px, tech 6px, hover-lift 4px). a11y.css extracted → render mode rules in Card.css (reduced: transition+hover killed; assistive: 64px link targets, 3px focus; textonly: transparent bordered box, no .card__image hide). highlight-links rule appended. index.ts cleaned (a11y import removed). a11y files → _reference/Card/. |
 | Heading | PARTIAL | 2026-03-04 | Fixes 1-8 applied. Schema: category → "atom", 4 render keys, dividerLength removed, lottieIcon added to animation group. Subtitle through Text atom. Divider em-based (0.15em thickness, auto height via stretch). Underline percentage-based (90%/100% of fit-content parent). Dashed/dotted stops em-based. Highlight opacity tokenized (--opacity-low). LottieIcon support in media slot — falls back to static Icon when animation props stripped. ACCEPTED: Icon/LottieIcon imports (atom composition), icon size map (parent sizing). DEFERRED: Context overrides, SectionTitle deprecation, raw heading migration, token consistency, fit-content alignment test. |
 | Link | PASS | 2026-03-05 | Fixes 1-11 applied + post-fix verification (16 sections). All sections pass. Schema: category → "atom", 4 render keys, props grouped (content/visual/animation). Glass variant REMOVED (consumers → Button with href). New visual variants: highlight, border. Underline split: static variant + animated underlineGrow gated by prop. 4 animation props: underlineGrow, highlightGrow, shadowFill, textSlide. Text atom wraps slot. 'text' class removed. @layer removed. a11y.css extracted (highlight-links → global, render-mode → Link.css, a11y files → _reference/). Responsive simplified (glass rules removed). DEFERRED: Glass consumer migration (Footer, GlassNav), animation visual testing, print (global layer). |
 | List | PASS | 2026-03-05 | Fixes 1-10 applied + post-fix verification (16 sections). All sections pass. Schema: category → "atom", 4 render keys, props grouped (content/visual/animation). @layer removed from CSS + responsive. Dot sizes em-based (0.375em/0.5em/0.75em). a11y-dot deleted (dead code). Text atom wraps item content, 'text' class removed. Icon barrel import. a11y.css extracted (textonly → List.css, a11y files → _reference/). Assistive render: vertical stacking, CSS ::before dots (0.75em), icons hidden. Textonly render: native bullets, inline collapses, icons hidden. No animation, no JS. DEFERRED: Icon inheritance (cross-atom), slot consumer migration, print (global layer). |
-| Text | PARTIAL | 2026-03-04 | All fixes applied. Schema: category corrected, 4 render keys (all → Text.astro, pipeline strips visual props in textonly). CSS: font family fallbacks stripped (expose missing --font-body-alt/--font-handwriting tokens), context overrides deleted (consumers pass size/leading props), blockquote border tokenized (--border-width-lg). No animation, no JS, no a11y concerns. DEFERRED: Verify Card and nav consumers pass correct size/leading props to Text children. Token coverage check: --font-body-alt and --font-handwriting must be defined for every brand. |
-| Toast | pending | | Has a11y.css. Uses Icon. |
+| Text | PARTIAL | 2026-03-06 | All fixes applied. Schema: category corrected, 4 render keys (all → Text.astro, pipeline strips visual props in textonly). CSS: font family fallbacks stripped (expose missing --font-body-alt/--font-handwriting tokens), context overrides deleted (consumers pass size/leading props), blockquote border tokenized (--border-width-lg). `textTone` prop added (visual group): `"light"` → `text--tone-light` → `var(--glass-text-on-dark)`, `"dark"` → `text--tone-dark` → `var(--glass-text-on-light)`. Content author declares contrast for glass surfaces — Text owns its own colour, glass container owns background. Toast migrated: glass/neon `color` removed from Toast.css, `textTone="light"` passed from Toast.astro + `text--tone-light` class in toast.ts. No animation, no JS, no a11y concerns. DEFERRED: Verify Card and nav consumers pass correct size/leading props to Text children. Token coverage check: --font-body-alt and --font-handwriting must be defined for every brand. |
+| Toast | PASS | 2026-03-06 | Full rebuild — 7 fixes across schema, astro, CSS, JS, consumers. Glass+glow tokenised (--glass-bg-brand-tint, --glass-border-brand, --glass-blur-heavy, --glass-shadow, --glass-shadow-inset, --glow-neon, --glow-neon-hover, --glow-text). Toast.astro rebuilt as canonical template (Icon + Text atoms, aria-atomic, tabindex, data-semantic-role). Toast.css: @layer removed, BEM class rename (toast-* → toast__*/toast--*), internal tokens (--_toast-icon-size/max-width/z/radius/icon-color), !important removed, 3 render mode blocks. Glass/neon `color` removed — delegated to Text atom via `textTone="light"`. toast.ts: `text--tone-light` class added for glass/neon runtime toasts. Toast.responsive.css: @layer removed, !important removed, BEM classes. toast.ts: legacy isA11yMode()/isReducedMotion() deleted → document.body.dataset.render, BEM class names, keyboard dismiss (Escape/Enter), render-mode-aware icon display + dismiss animation, duration default 30000→5000. contact-popup.js: wrong showToast(msg,type) signature → {message,theme} object. a11y files → _reference/Toast/. global.css stale import removed. |
 | Menu/DPadMenu | pending | | Has a11y.css. Uses .style.css naming. No schema/barrel. |
 | Menu/RadialMenu | pending | | Has a11y.css. Uses .style.css naming. No schema/barrel. |
 | Menu/ShareMenu | pending | | Standalone .astro only. No folder structure. |
@@ -226,13 +226,83 @@ After all atoms pass individually, run the **final cross-atom audit** using the 
 
 | Component | Status | Date | Notes |
 |-----------|--------|------|-------|
-| FormField | pending | | Has a11y.css + recovery. Complex token system. |
+| FormField | PASS | 2026-03-06 | Fixes 1-11 applied + post-fix verification (16 sections). All sections pass. Files moved to atoms/form/FormField/ subfolder. Schema: category → "atom", 4 render keys, card-select type + maxSelections/cardSize/cardColumns props. @layer removed. Legacy form utilities deleted. Dark theme extracted → theme-luminance-dark.css. High contrast → high-contrast.css. Highlight-links → highlight-links.css. Label/desc/error through Text atom, 'text' class removed. Forced-colours fix (outline: 2px solid transparent). Card-select: pictogram/text cards with hidden native radio/checkbox, aacResolver symbols, em-based symbol sizes. Render mode CSS: reduced (kill transitions, strip effects), assistive (64px targets, 32px controls, single-column cards), textonly (native controls, plain card list). Responsive: token overrides not property bypasses, card-select collapse rules. DEFERRED: Save-draft for AAC users, input tolerance testing, print (global layer), consumer migration. |
 
-**Cross-atom notes:**
-- FormField is the ONLY atom allowed raw `<input>`, `<select>`, `<textarea>` (exception in section 13)
-- Used by ContactForm, search, checkout — all forms depend on this
-- Has its own `outline: none` with box-shadow replacement (line 158, 523) — verify focus is visible
-- Colour/contrast/style variant matrix is large — assistive render needs checking across all variants
+**FormField v2 audit findings (2026-03-06):**
+- FIXED: Section 1: Files moved to `atoms/form/FormField/` subfolder. Re-export barrel at `atoms/form/index.ts` preserves consumer import path.
+- FIXED: Section 2.1: @layer wrappers removed from FormField.css + FormField.responsive.css
+- FIXED: Section 2.6: `.a11y-theme-dark` / `.a11y-theme-high-contrast` selectors extracted to theme-luminance-dark.css
+- FIXED: Section 3: Schema restructured — category → "atom", 4 render keys, content/visual/animation groups. card-select type added with maxSelections, cardSize, cardColumns props.
+- FIXED: Section 4: index.ts — a11y.css import removed
+- FIXED: Section 5/13: `'text'` CSS class removed. Label, description, error, and label-text (3 instances) wrapped in `<Text as="span" flush>`. Text atom import added.
+- FIXED: Section 6: `outline: 2px solid transparent` added to `.form-field__input:focus` for Windows High Contrast / forced-colours mode compatibility (outline becomes visible when box-shadow is stripped).
+- FIXED: Section 7: Render mode CSS added — reduced (all transitions killed, glass/neumorphic/glow stripped, controls enlarged), assistive (64px min input height, 32px controls, 3px focus outlines, single-column cards, generous spacing), textonly (native browser controls, custom widgets hidden, underlined inputs only)
+- FIXED: Section 10: Responsive token overrides — checkmark sizes now override `--_field-control-size` token instead of bypassing it with direct width/height
+- FIXED: Section 11: Card-select responsive — 4/3 columns → 2 at 480px, single column at 280px
+- DELETED: Legacy form utilities (`.form-group`, `.form-label`, `.form-input`, `.form-textarea`, `.form-select`, `.form-error`) — pre-atom global.css selectors
+- ADDED: Card-select type — pictogram/text cards with hidden native radio/checkbox for AT compatibility. Symbol images resolved by aacResolver. Em-based symbol sizes (2em/3em/4em). Single-select = radio, multi-select = checkbox.
+- EXTRACTED: Dark theme rules → `src/styles/zones/theme-luminance-dark.css`
+- EXTRACTED: High contrast rules → `src/styles/zones/high-contrast.css`
+- EXTRACTED: Highlight-links rules → `src/styles/global/highlight-links.css`
+- MOVED: FormField.a11y.css + FormField.a11y.recovery.css → `_reference/FormField/`
+- ACCEPTED: Internal `--_field-*` px values (22px, 44px, etc.) — custom property token definitions swapped by contrast variant, not direct hardcoded values
+- ACCEPTED: Select arrow SVG with hardcoded `#6b6b6b` — CSS custom properties don't work in data URIs. Comment documents the limitation.
+- ACCEPTED: Form control state transitions (border-color, box-shadow, background-color) — same exemption as Button/Link colour transitions. Killed in reduced render.
+- ARCHITECTURE: FormField is the ONLY atom allowed raw `<input>`, `<select>`, `<textarea>`.
+- ARCHITECTURE: Card-select type renders choices as pictogram cards. Hidden native radio/checkbox behind each card for AT compatibility and form submission. Symbol images resolved by aacResolver at build time.
+- ARCHITECTURE: AAC devices send standard browser events. No custom AAC input handling needed.
+- ARCHITECTURE: Textonly render shows native browser controls. Card-select becomes plain radio/checkbox list with text labels, no pictograms.
+- ARCHITECTURE: Assistive render forces single-column card grid, 64px minimum targets, 3px focus outlines.
+- DEFERRED: Save-draft behaviour for AAC users composing long textarea responses.
+- DEFERRED: Input tolerance testing — verify no paste blocking, no keystroke validation.
+- MIGRATION: Consumers using legacy `.form-group`/`.form-label` classes need migrating to FormField atom.
+- MIGRATION: Files moved from `atoms/form/` to `atoms/form/FormField/` — re-export barrel preserves existing import path.
+
+**Card v2 audit findings (2026-03-06):**
+- FIXED: Section 2: @layer removed from Card.css + Card.responsive.css
+- FIXED: Section 2: Glass variant tokenised — `var(--glass-bg-brand)`, `var(--glass-border-brand)`, `var(--glass-blur)`. New tokens `--glass-bg-brand` and `--glass-border-brand` added to shadows.css (brand-tinted glass, distinct from standard white-based glass)
+- FIXED: Section 2: `var(--card-hover-border, var(--brand-c-primary))` fallback removed — default set on `.card--hover-border` class
+- FIXED: Section 3: Schema restructured — category → "atom", 4 render keys (full/reduced/assistive/textonly), props grouped into content/visual/animation. `hover` moved to animation group. Stale `reducedMotion` key removed.
+- FIXED: Section 4: Base `.card` transition split — border-color only on base. Transform + box-shadow transitions moved to `.card--hover-lift` and `.card--hover-glow` effect classes.
+- FIXED: Section 7: Render mode CSS added — reduced (transition + hover killed), assistive (64px link targets, 3px focus outlines), textonly (transparent bordered box, link cards get primary border, overlay/decorative icons/arrow hidden, content chrome stripped)
+- FIXED: Section 9: index.ts cleaned — `Card.a11y.css` import removed
+- FIXED: Section 11: Doc comments updated — @layer references removed, render modes documented, slot description updated to reference atoms
+- ADDED: Hardcoded value comments for comic (3px border, 5px 7px shadow), tech (6px offset), hover-lift (4px translateY) — all intentional variant-specific design values
+- EXTRACTED: highlight-links rule → `src/styles/global/highlight-links.css` (link cards get 2px primary border)
+- MOVED: Card.a11y.css and Card.a11y.recovery.css → `_reference/Card/` (1173 lines each, ~80% molecule rules for FlipCard, SlideCard, BlogCard, TeamCard, GlowCard, InfoCard, ChoiceCard, ImageRevealCard, AssetCard, RainbowBorderCard)
+- ARCHITECTURE: Card is a dumb container — does NOT hide child images in textonly. Image atom handles its own visibility via semanticRole. Decorative → hidden. Meaningful → alt text via replace mode.
+- ARCHITECTURE: Textonly card keeps thin neutral border for structure. Link cards get primary border for click indication. No !important needed — pipeline strips visual props so variant classes don't exist in textonly HTML.
+- ARCHITECTURE: hover prop is animation, not visual. Pipeline strips in reduced/assistive/textonly. No hover class = no motion on card.
+- ARCHITECTURE: Base .card transition is border-color only. Transform + box-shadow transitions live on individual hover/variant effect classes.
+- ARCHITECTURE: Badge + Image in textonly — no special wiring needed. Both atoms render in their own textonly modes (Badge as solid label, Image as alt text via replace mode for meaningful images). DOM order ensures sequential reading. Card textonly just strips chrome.
+- DEFERRED: Typography primitives (.card__heading, .card__title, .card__text, .card__value, .card__quote, .card__author) — consumers should migrate to Heading, Text atoms. Delete when all 22 molecule consumers updated.
+- DEFERRED: .card__button and .card__badge — consumers should use Button and Badge atoms. Delete when molecule consumers updated.
+- DEFERRED: Molecule card rules (FlipCard, SlideCard, BlogCard, TeamCard, GlowCard, InfoCard, ChoiceCard, ImageRevealCard, AssetCard, RainbowBorderCard) — all in _reference/Card/Card.a11y.css. Extract during each molecule's audit.
+- DEFERRED: Badge text on images — molecule cards that render Badge + Image should ensure Badge label appended to Image altWord. Implement during molecule audit.
+- DEFERRED: Card textonly should ensure child Image atoms use data-alt-display-mode="replace" for meaningful images. Molecule passes semanticRole and display mode props to Image.
+- MIGRATION: Glass variant uses brand-tinted tokens (--glass-bg-brand, --glass-border-brand) distinct from standard glass tokens — Card glass intentionally uses brand background at 60% opacity instead of white at 10%.
+
+**Toast v2 audit findings (2026-03-06):**
+- REBUILT: Toast.astro — dead template replaced with canonical atom template. Uses Icon atom (barrel import), Text atom for message. aria-atomic="true", tabindex="0", data-semantic-role="status". data-lottie-slug for JS targeting.
+- REBUILT: Toast.css — @layer removed, BEM class rename throughout (toast-message → toast__message, toast-${theme} → toast--${theme}, etc.). Internal tokens: --_toast-icon-size (32px), --_toast-max-width (320px), --_toast-z (9999), --_toast-radius, --_toast-icon-color. Render modes override these tokens (e.g. --_toast-max-width: 100% for bar layout). !important removed (was on Lottie SVG fill/stroke — toast.ts handles this directly).
+- REBUILT: toast.ts — legacy isA11yMode()/isReducedMotion() deleted. Now reads document.body.dataset.render. BEM class names match Toast.astro. Keyboard dismiss via Escape/Enter. toast.focus() on creation. Render-mode-aware: textonly=no icons, reduced/assistive=static Phosphor only, full=lottie+glow. Dismiss animation: non-full=slow fade 1.2s, full=slide-right 0.3s. Duration default changed 30000→5000.
+- FIXED: Toast.responsive.css — @layer removed, !important removed, BEM class names.
+- FIXED: contact-popup.js — wrong showToast(message, type) → showToast({ message, theme }) object signature.
+- FIXED: index.ts — a11y import removed. Re-exports showToast and types from toast.ts.
+- MOVED: Toast.a11y.css + Toast.a11y.recovery.css → _reference/Toast/
+- REMOVED: Stale @import in global.css for Toast.a11y.css
+- ARCHITECTURE: Toast is dynamic — DOM created at runtime by toast.ts. Toast.astro is canonical template defining correct HTML structure. Both share Toast.css. One source of truth for class names and attributes.
+- ARCHITECTURE: All non-full render modes use full-width bar layout. Floating pill toast invisible to Easy Click/Reading Mode users — bar is unmissable, easy to scan, easy to dismiss.
+- ARCHITECTURE: toast.ts reads document.body.dataset.render for render mode detection. No legacy #a11y-content-wrapper class checks.
+- ARCHITECTURE: Keyboard dismiss via Escape/Enter. Toast receives focus on creation. tabindex="0" enables keyboard interaction for switch/eye gaze users.
+- ARCHITECTURE: Icon presets keep public/ filesystem paths for now — toast.ts is client-side JS, can't use server-side ASSET_API_URL env var. Lottie loaded via lottie-web directly (not LottieIcon atom, which is server-side Astro).
+- ARCHITECTURE: Internal tokens (--_toast-*) use underscore prefix convention — component-private, not for external override. Render modes override them to switch between pill and bar layouts.
+- ACCEPTED: Hardcoded values in themes (4px/6px offset shadows, 3px border, 1.5px neon border, letter-spacing em values) — design-specific variant styling, not spacing tokens.
+- ACCEPTED: Lottie SVG fill/stroke handling via JS (setAttribute on paths after lottie-web renders) rather than CSS !important — lottie-web sets inline styles that CSS can't beat without !important.
+- ACCEPTED: #toast-container ID selector — only one container per page, created dynamically by JS. ID is the correct selector.
+- DEFERRED: Asset API migration for toast icons — when client-side asset routes exist, migrate from public/ filesystem paths to API slugs.
+- DEFERRED: LottieIcon atom can't run in client JS (server-side Astro). If LottieIcon gets a client-side API, Toast should migrate.
+- MIGRATION: contact-popup.js updated to new showToast({ message, theme }) signature. checkout-form.ts and cookie-banner.ts already use correct object format.
 
 ---
 
@@ -252,12 +322,28 @@ After all atoms pass individually, run the **final cross-atom audit** using the 
 
 | Component | Status | Date | Notes |
 |-----------|--------|------|-------|
-| Grid | pending | | Has a11y.css + recovery. |
+| Grid | PASS | 2026-03-06 | Fixes 1-7 applied + post-fix verification (10 checks). All sections pass. Schema: category → "atom", 4 render keys, gallery moved to animation group (GSAP-dependent). @layer removed from Grid.css + Grid.responsive.css. a11y.css extracted — Grid-only layout rules to render mode blocks in Grid.css, all child-reaching rules DELETED (Card, Image, Badge, Button atoms handle themselves). Hardcoded gallery dimensions commented. Separator tokenised (0.75rem → --space-sm). Render mode CSS: reduced (transitions killed, --gallery-animate: 0), textonly (single column flex, showcase hidden, product vertical stack, spanning killed, separator with currentColor), assistive (single column flex with --space-md gap, gallery killed, spanning killed, separator with --brand-c-neutral-light). a11y files → _reference/Grid/. global.css stale import removed. |
 
-**Cross-atom notes:**
-- Grid is structural — used by many organisms for layout
-- Assistive render single-column collapse (section 10.6) is critical here — Grid probably needs the `[data-render="assistive"]` 1fr rule
-- XL text reflow (section 8c.3) also depends on Grid responding to text size
+**Grid v2 audit findings (2026-03-06):**
+- FIXED: Section 2.1: @layer wrappers removed from Grid.css + Grid.responsive.css
+- FIXED: Section 3: Schema restructured — category → "atom", 4 render keys, props grouped into content/visual/animation. gallery moved to animation group (GSAP-dependent interactive behaviour). slots documented.
+- FIXED: Section 4: index.ts cleaned — Grid.a11y.css import removed
+- FIXED: Section 7: Render mode CSS added — reduced (transitions + hover transforms killed, --gallery-animate: 0, inactive opacity reset), textonly (single column flex, showcase hidden, product vertical stack, spanning killed, separator), assistive (single column flex, gallery killed, spanning killed, separator)
+- FIXED: Separator tokenised — hardcoded 0.75rem → var(--space-sm)
+- ADDED: Hardcoded gallery dimension comments (480px, 120px, 650px in Grid.css; 140px, 100px, 400px, 300px in Grid.responsive.css)
+- EXTRACTED: Grid-only reduce-motion rules → [data-render="reduced"] in Grid.css
+- EXTRACTED: Grid-only textonly rules → [data-render="textonly"] in Grid.css
+- ADDED: Assistive render rules (new — not in original a11y.css)
+- DELETED: All child-reaching rules from Grid textonly — card chrome stripping, image hiding, badge/button overrides, text alignment overrides, gallery img/badge rules, content wrapper overrides. ~120 lines of molecule-level CSS that violated atom boundaries.
+- MOVED: Grid.a11y.css + Grid.a11y.recovery.css → _reference/Grid/
+- REMOVED: Stale @import in global.css for Grid.a11y.css
+- ACCEPTED: Component-scoped CSS custom property fallbacks (--grid-gap, --grid-cols, --grid-min, --grid-align etc.) — inline-style safety nets, not brand token fallbacks. Same pattern as FormField.
+- ACCEPTED: Hardcoded px values in gallery modes (480px, 120px, 650px, 400px, 300px etc.) — container-specific layout dimensions, not spacing tokens.
+- ARCHITECTURE: Grid NEVER reaches into children. Card, Image, Badge, Button, Text, Heading atoms all handle their own render mode behaviour. Grid only controls layout — column collapse, gap, spanning.
+- ARCHITECTURE: gallery prop moved to animation group — GSAP-dependent interactive behaviour. Pipeline strips in reduced render (--gallery-animate: 0 kills GSAP). Showcase hidden entirely in textonly/assistive.
+- ARCHITECTURE: Textonly and assistive both collapse to single-column flex. Textonly strips all chrome (children handle themselves). Assistive keeps visual chrome but forces single column for easy scanning.
+- DEFERRED: Showcase gallery content accessibility — if showcase items contain meaningful content not available elsewhere on page, textonly display:none loses that content. Verify during gallery molecule audit.
+- DEFERRED: XL text reflow (section 8c.3) — Grid should respond to text size increases. May need future [data-text-xl] rules. Verify after all atoms pass.
 
 ---
 
@@ -280,3 +366,6 @@ Run these checks once every atom has passed its individual v2 audit:
 - [ ] `--font-size-sm` token: resolve globally or replace in all atoms that reference it
 - [ ] `[data-render="assistive"]` rules: confirm pattern exists in all interactive atoms
 - [ ] Token coverage grep: every `var(--token-name)` in component CSS resolves to a definition in `src/styles/`. Automate as build-time check.
+- [ ] Glass/glow token pass: every inline `color-mix()` in atom CSS that matches a glass or glow pattern should use the token from `shadows.css` instead. Tokens: `--glass-bg`, `--glass-bg-light`, `--glass-bg-dark`, `--glass-bg-frosted`, `--glass-bg-brand`, `--glass-bg-brand-tint`, `--glass-bg-primary`, `--glass-border-*`, `--glass-blur-*`, `--glass-shadow-inset`, `--glow-ambient`, `--glow-neon`, `--glow-neon-hover`, `--glow-spread`, `--glow-text`. Known atoms with inline glass/glow: Toast (glass + neon themes), Card (liquid-glass), FormField (dark glass in theme-luminance-dark.css). Also check organisms: ReaderNav (5 glass bg variants, glow/spread shadows), GlassNav (base glass bg).
+- [ ] Dark luminance token check: glass tokens overridden in `theme-luminance-dark.css` (`--glass-bg`, `--glass-bg-light`, `--glass-bg-frosted`, `--glass-bg-brand-tint`, `--glass-border`, `--glass-border-frosted`, `--glass-shadow-inset`). Verify all atoms using these tokens render correctly in both light (BrandDefault) and dark (a11y-dark, a11y-high-contrast) themes. Use toast-demo.astro for visual comparison.
+- [ ] Glow token consistency: verify `--glow-neon` / `--glow-spread` used consistently across Toast neon theme and ReaderNav glow shadow variant. Fix ReaderNav line 875 `rgba()` bug (hardcoded fallback `99, 102, 241` — should use `color-mix` like all other glow rules).

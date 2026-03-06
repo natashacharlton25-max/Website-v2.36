@@ -168,7 +168,7 @@ class ContactPopup {
       const contactEmail = this.popup?.getAttribute('data-contact-email') || '';
 
       if (window.showToast) {
-        window.showToast('Failed to send message. Please try again or email us directly.', 'error');
+        window.showToast({ message: 'Failed to send message. Please try again or email us directly.', theme: 'professional' });
       } else {
         alert(`Failed to send message. Please try again or email us directly at ${contactEmail}`);
       }

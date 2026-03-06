@@ -7,7 +7,22 @@
  *
  * Components extracted so far:
  *   - Badge (rules 19-20)
+ *   - FormField (neumorphic + glass dark fallbacks)
  */
+
+/* ── Glass + Glow token overrides (dark luminance) ───── */
+/* On dark themes, glass tints swap direction: White→Black for bg,
+   borders get fainter, inset highlight becomes a subtle White edge. */
+
+:is(.a11y-theme-dark, .a11y-theme-high-contrast) {
+  --glass-bg: color-mix(in oklch, var(--color-Black) 15%, transparent);
+  --glass-bg-light: color-mix(in oklch, var(--color-Black) 10%, transparent);
+  --glass-bg-frosted: color-mix(in oklch, var(--color-Black) 25%, transparent);
+  --glass-bg-brand-tint: color-mix(in oklch, var(--brand-c-bg-dark) 75%, transparent);
+  --glass-border: color-mix(in oklch, var(--color-White) 8%, transparent);
+  --glass-border-frosted: color-mix(in oklch, var(--color-White) 12%, transparent);
+  --glass-shadow-inset: inset 0 1px 0 color-mix(in oklch, var(--color-White) 3%, transparent);
+}
 
 /* ── Badge ────────────────────────────────────────────── */
 
@@ -19,4 +34,33 @@
 #a11y-content-wrapper:is(.a11y-theme-dark, .a11y-theme-high-contrast) .badge--outline {
   border-width: 2px;
   box-shadow: 0 0 8px color-mix(in oklch, var(--_badge-text) 35%, transparent);
+}
+
+/* ── FormField ────────────────────────────────────────── */
+
+:is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--neumorphic .form-field__input {
+  box-shadow: none;
+  border: var(--border-width-2) solid var(--_field-border);
+}
+
+:is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--neumorphic .form-field__input:focus {
+  border-color: var(--_field-brand);
+  box-shadow:
+    0 4px 16px color-mix(in oklch, var(--_field-brand) 50%, transparent),
+    0 0 30px color-mix(in oklch, var(--_field-brand) 20%, transparent);
+}
+
+:is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--glass .form-field__input {
+  background: color-mix(in oklch, var(--color-White) 6%, transparent);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid color-mix(in oklch, var(--color-White) 15%, transparent);
+  box-shadow: none;
+}
+
+:is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--glass .form-field__input:focus {
+  border-color: var(--_field-brand);
+  box-shadow:
+    0 4px 16px color-mix(in oklch, var(--_field-brand) 50%, transparent),
+    0 0 30px color-mix(in oklch, var(--_field-brand) 20%, transparent);
 }

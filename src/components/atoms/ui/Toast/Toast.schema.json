@@ -1,15 +1,31 @@
 {
   "component": "Toast",
-  "category": "atoms/ui",
-  "renders": { "base": "Toast.astro" },
-  "notes": "Lottie icon plays 3 times max 10s. Static icon is Phosphor fallback shown in RM mode. Toast auto-dismisses after duration ms. TO mode strips all themes to plain dark bar and hides all icons.",
-  "reducedMotion": "Slide/bounce/flip/zoom replaced with slow fade. Lottie hidden, static Phosphor icon shown.",
+  "category": "atom",
+  "renders": {
+    "full": "Toast.astro",
+    "reduced": "Toast.astro",
+    "assistive": "Toast.astro",
+    "textonly": "Toast.astro"
+  },
+  "notes": "Dynamic notification atom. Composes LottieIcon, Icon, Text atoms — each atom handles its own render mode behaviour. Toast handles layout (pill vs full-width bar), chrome (glow, backdrop-filter, theme), and animation gating. toast.ts is the runtime orchestrator. Icon slugs resolved from Asset Library API at build time.",
+
   "props": {
-    "theme":      { "type": "string", "enum": ["arcade","professional","brutalist","glass","neon"], "default": "professional" },
-    "icon":       { "type": "string", "enum": ["activity","notification","alert","info","thumbup"], "default": "notification" },
-    "staticIcon": { "type": "string", "default": null },
-    "animation":  { "type": "string", "enum": ["slide","bounce","fade","flip","zoom"], "default": "slide" },
-    "message":    { "type": "string", "required": true },
-    "duration":   { "type": "number", "default": 30000 }
+    "content": {
+      "_description": "What the toast says",
+      "message":  { "type": "string",  "required": true, "description": "Notification text." },
+      "icon":     { "type": "string",  "required": false, "default": "notification", "description": "Lottie animation slug from Asset Library API. Library returns paired data (lottie + Phosphor fallback). Pipeline routes: full → LottieIcon atom, reduced/assistive → Icon atom (via fallbackIcon), textonly → hidden (decorative). Toast does not manage routing." },
+      "duration": { "type": "number",  "required": false, "default": 5000, "description": "Auto-dismiss milliseconds. 0 = manual dismiss only." }
+    },
+
+    "visual": {
+      "_description": "How the toast looks",
+      "theme":     { "type": "string", "required": false, "default": "professional", "enum": ["arcade", "professional", "brutalist", "glass", "neon"], "description": "Visual theme. Stripped to professional in reduced/assistive/textonly." },
+      "class":     { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "animation": {
+      "_description": "Motion behaviour — stripped in reduced/assistive/textonly renders",
+      "animation": { "type": "string", "required": false, "default": "slide", "enum": ["slide", "bounce", "fade", "flip", "zoom"], "description": "Entrance animation. Stripped in reduced render — toast appears instantly." }
+    }
   }
 }

@@ -1,19 +1,39 @@
 {
   "component": "Grid",
-  "category": "atoms/grid",
+  "category": "atom",
   "renders": {
-    "base": "Grid.astro"
+    "full": "Grid.astro",
+    "reduced": "Grid.astro",
+    "assistive": "Grid.astro",
+    "textonly": "Grid.astro"
   },
+  "notes": "Pure layout shell. Handles column count, gap, alignment. Children handle their own content and render mode behaviour. Grid never reaches into children — Card, Image, Badge, Button atoms handle their own textonly/assistive/reduced rendering.",
+
   "props": {
-    "columns":   { "type": "number",  "required": false, "default": 3, "enum": [1, 2, 3, 4, 5, 6] },
-    "gap":       { "type": "string",  "required": false, "default": "var(--space-xl)" },
-    "align":     { "type": "string",  "required": false, "default": "stretch", "enum": ["stretch", "start", "center", "end"] },
-    "minWidth":  { "type": "string",  "required": false },
-    "container": { "type": "string",  "required": false, "default": "none", "enum": ["4xl", "6xl", "7xl", "full", "none"] },
-    "flow":      { "type": "string",  "required": false, "default": "row", "enum": ["row", "dense", "column", "masonry"] },
-    "gallery":   { "type": "string",  "required": false, "enum": ["showcase", "product"] },
-    "separator": { "type": "boolean", "required": false, "default": true },
-    "class":     { "type": "string",  "required": false, "default": "" },
-    "id":        { "type": "string",  "required": false }
+    "content": {
+      "_description": "Structural identity",
+      "id":        { "type": "string",  "required": false, "default": null, "description": "Element ID." },
+      "separator": { "type": "boolean", "required": false, "default": true, "description": "Show border between stacked items in textonly/assistive." }
+    },
+
+    "visual": {
+      "_description": "How the grid looks",
+      "columns":   { "type": "number",  "required": false, "default": 3, "enum": [1, 2, 3, 4, 5, 6], "description": "Fixed column count." },
+      "gap":       { "type": "string",  "required": false, "default": "var(--space-xl)", "description": "Gap size token or value." },
+      "align":     { "type": "string",  "required": false, "default": "stretch", "enum": ["stretch", "start", "center", "end"], "description": "Vertical alignment." },
+      "minWidth":  { "type": "string",  "required": false, "default": null, "description": "Min column width for auto-fit. Overrides columns with auto-fit." },
+      "container": { "type": "string",  "required": false, "default": "none", "enum": ["4xl", "6xl", "7xl", "full", "none"], "description": "Wrapper width constraint." },
+      "flow":      { "type": "string",  "required": false, "default": "row", "enum": ["row", "dense", "column", "masonry"], "description": "Grid auto-flow mode." },
+      "class":     { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "animation": {
+      "_description": "Motion behaviour — stripped in reduced/assistive/textonly renders",
+      "gallery": { "type": "string", "required": false, "default": null, "enum": ["showcase", "product"], "description": "Interactive gallery mode. Requires GSAP + Flip. Stripped in reduced render (--gallery-animate: 0)." }
+    }
+  },
+
+  "slots": {
+    "default": "Grid children — Card atoms, text blocks, media. Children handle their own render mode behaviour."
   }
 }

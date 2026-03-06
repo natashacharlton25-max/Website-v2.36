@@ -1,0 +1,48 @@
+{
+  "component": "FormField",
+  "category": "atom",
+  "renders": {
+    "full": "FormField.astro",
+    "reduced": "FormField.astro",
+    "assistive": "FormField.astro",
+    "textonly": "FormField.astro"
+  },
+  "notes": "The only atom allowed raw <input>, <select>, <textarea> elements. Label, description, and error render through Text atom. Native HTML controls for AT/AAC compatibility. Card-select type renders choices as pictogram cards at lower cognitive levels — aacResolver maps option words to OpenAAC symbols at build time.",
+
+  "props": {
+    "content": {
+      "_description": "What the field asks and how it identifies itself",
+      "id":          { "type": "string",  "required": true, "description": "Element ID — also generates aria-describedby IDs." },
+      "name":        { "type": "string",  "required": false, "default": null, "description": "Form field name. Defaults to id if omitted." },
+      "label":       { "type": "string",  "required": true, "description": "Visible label text." },
+      "type":        { "type": "string",  "required": false, "default": "text", "enum": ["text", "email", "textarea", "checkbox", "radio", "toggle", "search", "select", "number", "tel", "url", "password", "card-select"], "description": "Input type. card-select renders options as tappable pictogram/text cards." },
+      "placeholder": { "type": "string",  "required": false, "default": null, "description": "Placeholder text." },
+      "required":    { "type": "boolean", "required": false, "default": false, "description": "Required field." },
+      "disabled":    { "type": "boolean", "required": false, "default": false, "description": "Disabled state." },
+      "error":       { "type": "string",  "required": false, "default": null, "description": "Error message — linked via aria-describedby." },
+      "description": { "type": "string",  "required": false, "default": null, "description": "Help text — linked via aria-describedby." },
+      "value":       { "type": "string",  "required": false, "default": null, "description": "Current value." },
+      "checked":     { "type": "boolean", "required": false, "default": false, "description": "Checked state for checkbox/radio/toggle." },
+      "rows":        { "type": "number",  "required": false, "default": 3, "description": "Textarea rows." },
+      "min":         { "type": "number",  "required": false, "default": null, "description": "Number/range min." },
+      "max":         { "type": "number",  "required": false, "default": null, "description": "Number/range max." },
+      "step":        { "type": "number",  "required": false, "default": null, "description": "Number/range step." },
+      "options":     { "type": "array",   "required": false, "default": [], "description": "Options for select or card-select. Select: [{value, label}]. Card-select: [{value, label, symbol?, simple?}] where symbol is aacResolver keyword." },
+      "radioValue":  { "type": "string",  "required": false, "default": null, "description": "Value for radio inputs." },
+      "hideLabel":   { "type": "boolean", "required": false, "default": false, "description": "Visually hide label (still accessible via sr-only)." },
+      "maxSelections": { "type": "number", "required": false, "default": 1, "description": "Card-select: max number of selections. 1 = radio behaviour. >1 = checkbox behaviour." }
+    },
+
+    "visual": {
+      "_description": "How the field looks",
+      "variant":    { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral"], "description": "Colour variant." },
+      "contrast":   { "type": "string",  "required": false, "default": "normal", "enum": ["normal", "high"], "description": "Border contrast. High = darker borders, larger controls." },
+      "fieldStyle": { "type": "string",  "required": false, "default": "outlined", "enum": ["outlined", "filled", "underlined", "glass", "neumorphic", "glow"], "description": "Visual style." },
+      "cardSize":   { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Card-select: card size." },
+      "cardColumns": { "type": "number", "required": false, "default": 3, "description": "Card-select: grid columns in full render. Assistive forces 1 column." },
+      "class":      { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "animation": {}
+  }
+}

@@ -1,94 +1,67 @@
 ---
 /**
- * Toast Notification Component
- * Enhanced with Lottie animations using @lottiefiles/lottie-player web component
+ * Toast — Notification atom
  *
- * Features:
- * - Lottie animation plays 3 times or max 10 seconds
- * - Toast displays for 30 seconds
- * - Click to dismiss instantly
- * - Static Phosphor icon fallback for a11y modes
- * - Styles: Toast.css | Toast.responsive.css | Toast.a11y.css
+ * Dynamic notification — appears at runtime via toast.ts.
+ * This template is the canonical HTML structure.
+ * toast.ts creates matching DOM imperatively.
  *
- * Lottie icons from: public/Icons/Animated Icons/Toast Icons/
- * Static icons from: public/Icons/phosphor/toast/
+ * Render modes:
+ *   Full:      themed pill, animated entrance, lottie icon, glow
+ *   Reduced:   professional theme, no animation, static icon, no glow
+ *   Assistive: full-width bar, large text, large icon, thick focus
+ *   Textonly:  full-width bar, no icons, plain background, text only
  *
- * @param theme - Visual theme (arcade, professional, brutalist, glass, neon)
- * @param icon - Lottie icon (activity, notification, alert, info, thumbup)
- * @param staticIcon - Phosphor icon name for a11y fallback (e.g., "check-circle-fill")
- * @param animation - Animation style (slide, bounce, fade, flip, zoom)
- * @param message - Message to display
- * @param duration - How long to show the toast (ms), default 30000
- *
- * Usage:
- * <Toast message="Success!" theme="professional" icon="thumbup" staticIcon="check-circle-fill" />
- * <Toast message="Warning!" theme="brutalist" icon="alert" staticIcon="warning-fill" />
- * <Toast message="Info" theme="neon" icon="info" staticIcon="info-fill" animation="bounce" />
+ * Styles: Toast.css | Toast.responsive.css
  */
-// TODO: update to barrel import once Icon/D1 built
-import Icon from '../../icons/Icon/Icon.astro';
+import { LottieIcon } from '../../icons/LottieIcon';
+import { Text } from '../Text';
 
-export type ToastTheme = 'arcade' | 'professional' | 'brutalist' | 'glass' | 'neon';
-export type ToastIcon = 'activity' | 'notification' | 'alert' | 'info' | 'thumbup';
-export type ToastAnimation = 'slide' | 'bounce' | 'fade' | 'flip' | 'zoom';
-
-export interface Props {
-  theme?: ToastTheme;
-  icon?: ToastIcon;
-  staticIcon?: string;
-  animation?: ToastAnimation;
+interface Props {
   message: string;
+  icon?: string;
   duration?: number;
+  theme?: 'arcade' | 'professional' | 'brutalist' | 'glass' | 'neon';
+  animation?: 'slide' | 'bounce' | 'fade' | 'flip' | 'zoom';
+  class?: string;
 }
 
 const {
-  theme = 'professional',
-  icon = 'notification',
-  staticIcon,
-  animation = 'slide',
   message,
-  duration = 30000
+  icon = 'notification',
+  duration = 5000,
+  theme = 'professional',
+  animation = 'slide',
+  class: className,
 } = Astro.props;
 
-// Lottie icon presets from public/Icons/Animated Icons/Toast Icons/
-const lottiePresets: Record<ToastIcon, string> = {
-  activity: '/Icons/Animated Icons/Toast Icons/Activity/Lottie-toast-activity.json',
-  notification: '/Icons/Animated Icons/Toast Icons/NotificationV3/Lottie-toast-notification-v3.json',
-  alert: '/Icons/Animated Icons/Toast Icons/Alert triangle/Lottie-toast-alert-triangle.json',
-  info: '/Icons/Animated Icons/Toast Icons/Info/Lottie-toast-info.json',
-  thumbup: '/Icons/Animated Icons/Toast Icons/Thumb up/Lottie-toast-thumb-up.json'
-};
+const classes = [
+  'toast',
+  `toast--${theme}`,
+  animation && `toast--animate-${animation}`,
+  className,
+].filter(Boolean);
 
-// Default static icon fallbacks for each Lottie icon (from public/Icons/phosphor/toast/)
-const staticFallbacks: Record<ToastIcon, string> = {
-  activity: 'toast/circle-notch-fill',
-  notification: 'toast/bell-ringing-fill',
-  alert: 'toast/warning-fill',
-  info: 'toast/info-fill',
-  thumbup: 'toast/thumbs-up-fill'
-};
-
-const lottieUrl = lottiePresets[icon];
-const fallbackIcon = staticIcon || staticFallbacks[icon];
+// Neon sets color: white on container — Text inherits via color="inherit".
+// Glass at 75% opacity uses default text (adapts with theme).
+const messageColor = theme === 'neon' ? 'inherit' as const : undefined;
 ---
 
 <div
-  class={`toast toast-${theme} toast-${animation}-animation`}
-  data-duration={duration}
+  class:list={classes}
   role="alert"
   aria-live="polite"
+  aria-atomic="true"
+  data-semantic-role="status"
+  data-duration={duration}
+  tabindex="0"
 >
-  <lottie-player
-    src={lottieUrl}
-    background="transparent"
-    speed="1"
-    style="width: 32px; height: 32px;"
-    autoplay
-    loop
-    count="3"
-    class="toast__lottie"
-  ></lottie-player>
-  <Icon name={fallbackIcon} size={24} class="toast__static-icon" />
-  <span class="toast-message">{message}</span>
-  <div class="toast-glow"></div>
+  {/* Lottie icon — pipeline routes: full → animation, reduced/assistive → Icon fallback, textonly → hidden */}
+  <LottieIcon slug={icon} class="toast__lottie" aria-hidden="true" />
+
+  {/* Message */}
+  <Text as="span" class="toast__message" color={messageColor} flush>{message}</Text>
+
+  {/* Glow effect — decorative, hidden in all non-full renders */}
+  <div class="toast__glow" aria-hidden="true"></div>
 </div>

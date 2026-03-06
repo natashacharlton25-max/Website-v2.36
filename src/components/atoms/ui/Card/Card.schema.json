@@ -1,25 +1,42 @@
 {
   "component": "Card",
-  "category": "atoms/ui",
-  "renders": { "base": "Card.astro" },
-  "notes": "Pure container shell — visual chrome only (bg, border, radius, shadow, hover). Children handle their own internal layout. Molecule cards render <Card> as their outer wrapper.",
-  "reducedMotion": "Hover lift/border/glow transitions killed. All state changes instant.",
-  "props": {
-    "as":         { "type": "string", "enum": ["div","article","section","aside","li"], "default": "div" },
-    "variant":    { "type": "string", "enum": ["default","transparent","outline","glass","liquid-glass","neumorphic","neumorphic-pressed","comic","tech"], "default": "default" },
-    "hover":      { "type": ["boolean","string"], "enum": [true,"border","glow"], "default": null },
-    "shadow":     { "type": "string", "enum": ["none","sm","md","lg","xl"], "default": null },
-    "dropShadow": { "type": "string", "enum": ["none","sm","md","lg","xl"], "default": null },
-    "radius":     { "type": "string", "enum": ["none","sm","md","lg","xl","full"], "default": null },
-    "padding":    { "type": "string", "enum": ["none","xs","sm","md","lg","xl","2xl"], "default": null },
-    "border":     { "type": "string", "enum": ["none","thin","medium","thick"], "default": null },
-    "layout":     { "type": "string", "enum": ["masonry"], "default": null },
-    "flush":      { "type": "boolean", "default": false },
-    "href":       { "type": "string", "default": null },
-    "separator":  { "type": "boolean", "default": false },
-    "class":      { "type": "string" }
+  "category": "atom",
+  "renders": {
+    "full": "Card.astro",
+    "reduced": "Card.astro",
+    "assistive": "Card.astro",
+    "textonly": "Card.astro"
   },
+  "notes": "Pure container shell — visual chrome only (bg, border, radius, shadow). Children handle their own layout and content. Molecule cards use <Card> as outer wrapper. In textonly render, card becomes transparent bordered box — Image atoms inside handle their own visibility via semanticRole.",
+
+  "props": {
+    "content": {
+      "_description": "What the card is and where it goes",
+      "as":         { "type": "string",  "required": false, "default": "div", "enum": ["div", "article", "section", "aside", "li"], "description": "HTML element." },
+      "href":       { "type": "string",  "required": false, "default": null, "description": "Makes card a link. Renders as <a>." },
+      "separator":  { "type": "boolean", "required": false, "default": false, "description": "Visible border between header/body/footer." },
+      "flush":      { "type": "boolean", "required": false, "default": false, "description": "Remove margin-bottom." }
+    },
+
+    "visual": {
+      "_description": "How the card looks",
+      "variant":    { "type": "string",  "required": false, "default": "default", "enum": ["default", "transparent", "outline", "glass", "liquid-glass", "neumorphic", "neumorphic-pressed", "comic", "tech"], "description": "Visual style." },
+      "shadow":     { "type": "string",  "required": false, "default": null, "enum": ["none", "sm", "md", "lg", "xl"], "description": "Box shadow." },
+      "dropShadow": { "type": "string",  "required": false, "default": null, "enum": ["none", "sm", "md", "lg", "xl"], "description": "Filter drop-shadow for non-rect shapes." },
+      "radius":     { "type": "string",  "required": false, "default": null, "enum": ["none", "sm", "md", "lg", "xl", "full"], "description": "Border radius." },
+      "padding":    { "type": "string",  "required": false, "default": null, "enum": ["none", "xs", "sm", "md", "lg", "xl", "2xl"], "description": "Internal padding." },
+      "border":     { "type": "string",  "required": false, "default": null, "enum": ["none", "thin", "medium", "thick"], "description": "Border width." },
+      "layout":     { "type": "string",  "required": false, "default": null, "enum": ["masonry"], "description": "Layout context." },
+      "class":      { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "animation": {
+      "_description": "Motion behaviour — stripped in reduced/assistive/textonly renders",
+      "hover": { "type": ["boolean", "string"], "required": false, "default": null, "enum": [true, "border", "glow"], "description": "Hover effect: true=lift, 'border'=border-color change, 'glow'=box-shadow glow. Stripped in reduced render — card has no hover motion." }
+    }
+  },
+
   "slots": {
-    "default": "Card content — use .card__header / .card__body / .card__footer for structure"
+    "default": "Card content — use Heading, Text, Badge, Button, Image atoms inside. Structure with .card__header / .card__body / .card__footer."
   }
 }
