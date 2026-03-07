@@ -1,0 +1,220 @@
+---
+/**
+ * ToggleCard - Accessible Toggle Button Card
+ *
+ * A button-style toggle with icon for better cognitive accessibility.
+ * Visually similar to preset buttons but functions as an on/off toggle.
+ *
+ * Usage:
+ * <ToggleCard
+ *   id="text-only"
+ *   setting="textOnly"
+ *   icon="eye-slash-fill"
+ *   label="Text Only"
+ *   description="Hide images"
+ * />
+ */
+import Icon from '../atoms/Icon/Icon.astro';
+
+interface Props {
+  id: string;
+  setting: string;
+  icon: string;
+  label: string;
+  description?: string;
+  checked?: boolean;
+  iconSize?: number;
+}
+
+const { id, setting, icon, label, description, checked = false, iconSize = 28 } = Astro.props;
+---
+
+<button
+  type="button"
+  class="a11y-toggle-card"
+  id={id}
+  data-setting={setting}
+  aria-pressed={checked ? 'true' : 'false'}
+  aria-label={`${label}${description ? ` - ${description}` : ''}`}
+>
+  <Icon name={icon} size={iconSize} color="var(--brand-c-primary)" class="a11y-toggle-card__icon" />
+  <div class="a11y-toggle-card__text">
+    <small class="a11y-toggle-card__label">{label}</small>
+    {description && <span class="a11y-toggle-card__desc">{description}</span>}
+  </div>
+  <span class="a11y-toggle-card__indicator" aria-hidden="true">
+    <svg class="a11y-toggle-card__check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  </span>
+</button>
+
+<style>
+  .a11y-toggle-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--brand-c-bg);
+    border: 2px solid color-mix(in srgb, var(--brand-c-text-dark) 20%, transparent);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-align: left;
+    box-shadow: 0 2px 8px color-mix(in oklch, var(--color-Black) 8%, transparent);
+  }
+
+  .a11y-toggle-card:hover {
+    background: var(--brand-c-bg);
+    border-color: var(--brand-c-primary);
+    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 12%, transparent);
+  }
+
+  .a11y-toggle-card:focus-visible {
+    outline: 2px solid var(--brand-c-primary);
+    outline-offset: 2px;
+  }
+
+  /* Active/On state */
+  .a11y-toggle-card[aria-pressed="true"] {
+    background: var(--brand-c-bg);
+    border-color: var(--brand-c-primary);
+    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 15%, transparent);
+  }
+
+  .a11y-toggle-card[aria-pressed="true"] .a11y-toggle-card__icon {
+    color: var(--brand-c-primary);
+  }
+
+  .a11y-toggle-card[aria-pressed="true"] .a11y-toggle-card__indicator {
+    background: var(--brand-c-primary);
+    border-color: var(--brand-c-primary);
+  }
+
+  .a11y-toggle-card[aria-pressed="true"] .a11y-toggle-card__check {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .a11y-toggle-card__icon {
+    flex-shrink: 0;
+    transition: var(--transition-fast);
+  }
+
+  .a11y-toggle-card__text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    min-width: 0;
+  }
+
+  .a11y-toggle-card__label {
+    font-weight: var(--font-bold);
+    color: var(--brand-c-text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .a11y-toggle-card__desc {
+    color: var(--brand-c-text-dark);
+    opacity: 0.7;
+  }
+
+  .a11y-toggle-card__indicator {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--brand-c-bg);
+    border: var(--border-width-2) solid color-mix(in srgb, var(--brand-c-text-dark) 25%, transparent);
+    border-radius: var(--radius-sm);
+    transition: var(--transition-fast);
+  }
+
+  .a11y-toggle-card__check {
+    color: var(--brand-c-bg);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: var(--transition-fast);
+  }
+
+  /* Responsive - tablet */
+  @media (min-width: 769px) and (max-width: 1400px) {
+    .a11y-toggle-card {
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    .a11y-toggle-card__icon {
+      width: 24px !important;
+      height: 24px !important;
+    }
+
+    .a11y-toggle-card__label {
+    }
+
+    .a11y-toggle-card__desc {
+    }
+  }
+
+  /* Responsive - mobile */
+  @media (max-width: 768px) {
+    .a11y-toggle-card {
+      padding: var(--space-xs) var(--space-sm);
+      gap: var(--space-xs);
+    }
+
+    .a11y-toggle-card__icon {
+      width: 22px !important;
+      height: 22px !important;
+    }
+
+    .a11y-toggle-card__label {
+    }
+
+    .a11y-toggle-card__desc {
+      display: none;
+    }
+
+    .a11y-toggle-card__indicator {
+      width: 20px;
+      height: 20px;
+    }
+
+    .a11y-toggle-card__check {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  /* Very small screens */
+  @media (max-width: 480px) {
+    .a11y-toggle-card__icon {
+      width: 20px !important;
+      height: 20px !important;
+    }
+
+    .a11y-toggle-card__label {
+    }
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .a11y-toggle-card,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .a11y-toggle-card__icon,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .a11y-toggle-card__indicator,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .a11y-toggle-card__check {
+    transition: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .a11y-toggle-card,
+    .a11y-toggle-card__icon,
+    .a11y-toggle-card__indicator,
+    .a11y-toggle-card__check {
+      transition: none;
+    }
+  }
+</style>

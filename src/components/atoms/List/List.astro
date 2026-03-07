@@ -1,0 +1,97 @@
+---
+/**
+ * List — Atomic list primitive
+ *
+ * Every list should go through this component.
+ * Item text renders through Text atom.
+ * List.css is the single source of truth for list styling.
+ *
+ * Styles: List.css | List.responsive.css
+ *
+ * Usage:
+ *   <List items={['One', 'Two', 'Three']} />
+ *   <List as="ol" items={['First', 'Second']} />
+ *   <List icon="check-circle-fill" items={['Done', 'Done']} />
+ *   <List icon="arrow-right-fill" iconColor="secondary" items={['Go', 'Go']} />
+ *   <List variant="dot" items={['Custom dots']} />
+ *   <List variant="dot" dotSize="lg" items={['Big dots']} />
+ *   <List variant="none" items={['Clean', 'No bullets']} />
+ *   <List variant="inline" items={['Tag', 'Tag', 'Tag']} />
+ *   <List flush items={['Tight', 'No margin']} />
+ *
+ *   <!-- Slot for complex content -->
+ *   <List>
+ *     <li class="list__item"><Text as="span" flush>Complex <strong>content</strong></Text></li>
+ *   </List>
+ */
+import { Icon } from '../Icon';
+import { Text } from '../Text';
+
+interface Props {
+  as?: 'ul' | 'ol';
+  variant?: 'default' | 'none' | 'inline' | 'dot';
+  dotSize?: 'sm' | 'md' | 'lg';
+  icon?: string;
+  iconCollection?: string;
+  iconColor?: 'primary' | 'primary-dark' | 'secondary' | 'text' | 'inherit';
+  spacing?: 'tight' | 'normal' | 'loose';
+  flush?: boolean;
+  class?: string;
+  items?: string[];
+  [key: string]: any;
+}
+
+const {
+  as: Tag = 'ul',
+  variant = 'default',
+  dotSize = 'md',
+  icon,
+  iconCollection = 'interface',
+  iconColor = 'primary',
+  spacing = 'normal',
+  flush = false,
+  class: className,
+  items,
+  ...rest
+} = Astro.props;
+
+// Extract data-* attributes
+const dataAttrs = Object.fromEntries(
+  Object.entries(rest).filter(([key]) => key.startsWith('data-'))
+);
+
+const hasIcon = !!icon;
+
+// Icon sizes per dot size
+const iconSizes: Record<string, number> = { sm: 14, md: 16, lg: 20 };
+const iconSize = iconSizes[dotSize] || 16;
+
+const classes = [
+  'list',
+  `list--${variant}`,
+  hasIcon ? 'list--has-icon' : '',
+  variant === 'dot' ? `list--dot-${dotSize}` : '',
+  iconColor !== 'primary' ? `list--icon-color-${iconColor}` : '',
+  spacing !== 'normal' ? `list--spacing-${spacing}` : '',
+  flush ? 'list--flush' : '',
+  className,
+].filter(Boolean);
+---
+
+<Tag class:list={classes} {...dataAttrs}>
+  {items ? (
+    items.map((item) => (
+      <li class="list__item">
+        {hasIcon && (
+          <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="list__icon" />
+        )}
+        {variant === 'dot' && (
+          <span class="list__dot" aria-hidden="true"></span>
+        )}
+        <Text as="span" class="list__content" flush>{item}</Text>
+      </li>
+    ))
+  ) : (
+    <slot />
+  )}
+</Tag>

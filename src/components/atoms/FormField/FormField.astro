@@ -1,0 +1,285 @@
+---
+/**
+ * FormField - Reusable Form Input Atom
+ *
+ * Covers: text, email, textarea, checkbox, radio, toggle, search, select,
+ *         number, tel, url, password, card-select
+ * Label, description, error render through Text atom.
+ * Native HTML controls for AT/AAC compatibility.
+ * Card-select renders choices as pictogram/text cards with hidden native inputs.
+ *
+ * Token system: --_field-brand / --_field-brand-dark / --_field-brand-light / --_field-border
+ * Colour variants: primary (default), secondary, neutral
+ * Contrast variants: normal (default), high (darker borders, larger controls)
+ * Style variants: outlined (default), filled, underlined, glass, neumorphic, glow
+ */
+
+import { Text } from '../Text';
+import { Button } from '../Button';
+import { Image } from '../Image';
+
+interface SelectOption {
+  value: string;
+  label: string;
+  symbol?: string;
+  simple?: string;
+}
+
+interface Props {
+  id: string;
+  name?: string;
+  label: string;
+  type?: 'text' | 'email' | 'textarea' | 'checkbox' | 'radio' | 'toggle' | 'search' | 'select' | 'number' | 'tel' | 'url' | 'password' | 'card-select';
+  variant?: 'primary' | 'secondary' | 'neutral';
+  contrast?: 'normal' | 'high';
+  fieldStyle?: 'outlined' | 'filled' | 'underlined' | 'glass' | 'neumorphic' | 'glow';
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  error?: string;
+  description?: string;
+  value?: string;
+  checked?: boolean;
+  rows?: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  options?: SelectOption[];
+  hideLabel?: boolean;
+  radioValue?: string;
+  maxSelections?: number;
+  cardSize?: 'sm' | 'md' | 'lg';
+  cardColumns?: number;
+  class?: string;
+}
+
+const {
+  id,
+  name,
+  label,
+  type = 'text',
+  variant = 'primary',
+  contrast = 'normal',
+  fieldStyle = 'outlined',
+  placeholder,
+  required = false,
+  disabled = false,
+  error,
+  description,
+  value,
+  checked = false,
+  rows = 3,
+  min,
+  max,
+  step,
+  options = [],
+  hideLabel = false,
+  radioValue,
+  maxSelections = 1,
+  cardSize = 'md',
+  cardColumns = 3,
+  class: className,
+} = Astro.props;
+
+const isCheckbox = type === 'checkbox';
+const isRadio = type === 'radio';
+const isToggle = type === 'toggle';
+const isTextarea = type === 'textarea';
+const isSelect = type === 'select';
+const isCardSelect = type === 'card-select';
+const isSingleSelect = (maxSelections ?? 1) === 1;
+const fieldName = name || id;
+
+const describedBy = [
+  error && `${id}-error`,
+  description && `${id}-desc`,
+].filter(Boolean).join(' ') || undefined;
+
+const groupClasses = [
+  'form-field',
+  isCheckbox && 'form-field--checkbox',
+  isRadio && 'form-field--radio',
+  isToggle && 'form-field--toggle',
+  error && 'form-field--error',
+  disabled && 'form-field--disabled',
+  variant !== 'primary' && `form-field--${variant}`,
+  contrast === 'high' && 'form-field--high-contrast',
+  fieldStyle !== 'outlined' && `form-field--${fieldStyle}`,
+  isCardSelect && 'form-field--card-select',
+  isCardSelect && `form-field--card-cols-${cardColumns}`,
+  isCardSelect && `form-field--card-size-${cardSize}`,
+  className,
+].filter(Boolean).join(' ');
+---
+
+<div class={groupClasses}>
+
+  {isCheckbox ? (
+    <!-- Checkbox: input + label inline -->
+    <label class="form-field__checkbox-wrap" for={id}>
+      <input
+        type="checkbox"
+        id={id}
+        name={fieldName}
+        checked={checked}
+        required={required}
+        disabled={disabled}
+        class="form-field__checkbox"
+        aria-describedby={describedBy}
+        aria-invalid={error ? 'true' : undefined}
+      />
+      <span class="form-field__checkmark" aria-hidden="true"></span>
+      <Text as="span" class="form-field__label-text" flush>{label}</Text>
+    </label>
+  ) : isRadio ? (
+    <!-- Radio: input + label inline -->
+    <label class="form-field__radio-wrap" for={id}>
+      <input
+        type="radio"
+        id={id}
+        name={fieldName}
+        value={radioValue || value}
+        checked={checked}
+        required={required}
+        disabled={disabled}
+        class="form-field__radio"
+        aria-describedby={describedBy}
+        aria-invalid={error ? 'true' : undefined}
+      />
+      <span class="form-field__radio-indicator" aria-hidden="true"></span>
+      <Text as="span" class="form-field__label-text" flush>{label}</Text>
+    </label>
+  ) : isToggle ? (
+    <!-- Toggle: checkbox-backed switch -->
+    <label class="form-field__toggle-wrap" for={id}>
+      <input
+        type="checkbox"
+        id={id}
+        name={fieldName}
+        checked={checked}
+        required={required}
+        disabled={disabled}
+        class="form-field__toggle"
+        role="switch"
+        aria-checked={checked ? 'true' : 'false'}
+        aria-describedby={describedBy}
+        aria-invalid={error ? 'true' : undefined}
+      />
+      <span class="form-field__toggle-track" aria-hidden="true">
+        <span class="form-field__toggle-thumb"></span>
+      </span>
+      <Text as="span" class="form-field__label-text" flush>{label}</Text>
+    </label>
+  ) : (
+    <Fragment>
+      <!-- Label -->
+      <label
+        for={id}
+        class:list={['form-field__label', hideLabel && 'sr-only']}
+      >
+        <Text as="span" flush>{label}</Text>
+        {required && <span class="form-field__required" aria-hidden="true">*</span>}
+      </label>
+
+      <!-- Description -->
+      {description && (
+        <Text as="span" class="form-field__desc" id={`${id}-desc`} size="sm" flush>{description}</Text>
+      )}
+
+      <!-- Textarea -->
+      {isTextarea && (
+        <textarea
+          id={id}
+          name={fieldName}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          rows={rows}
+          class="form-field__input form-field__input--textarea"
+          aria-describedby={describedBy}
+          aria-invalid={error ? 'true' : undefined}
+        >{value}</textarea>
+      )}
+
+      <!-- Select — use Button component with shape="dropdown" instead -->
+      {isSelect && (
+        <select
+          id={id}
+          name={fieldName}
+          required={required}
+          disabled={disabled}
+          class="form-field__input form-field__input--select"
+          aria-describedby={describedBy}
+          aria-invalid={error ? 'true' : undefined}
+        >
+          {placeholder && <option value="" disabled selected>{placeholder}</option>}
+          {options.map((opt) => (
+            <option value={opt.value} selected={value === opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      )}
+
+      {/* Card-select — pictogram/text cards for reflective inputs */}
+      {isCardSelect && (
+        <div class="form-field__card-grid" role="group" aria-labelledby={`${id}-label`}>
+          {options.map((opt, i) => {
+            const cardId = `${id}-card-${i}`;
+            const inputType = isSingleSelect ? 'radio' : 'checkbox';
+            return (
+              <label class="form-field__card" for={cardId}>
+                <input
+                  type={inputType}
+                  id={cardId}
+                  name={fieldName}
+                  value={opt.value}
+                  checked={isSingleSelect ? value === opt.value : false}
+                  class="form-field__card-input"
+                  aria-describedby={describedBy}
+                />
+                <span class="form-field__card-face" aria-hidden="true">
+                  {opt.symbol && (
+                    <Image
+                      src={`/api/aac/symbol/${opt.symbol}`}
+                      alt=""
+                      class="form-field__card-symbol"
+                      semanticRole="decorative"
+                    />
+                  )}
+                  <Text as="span" class="form-field__card-label" flush>
+                    {opt.simple || opt.label}
+                  </Text>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+
+      <!-- Standard input -->
+      {!isTextarea && !isSelect && !isCardSelect && (
+        <input
+          type={type}
+          id={id}
+          name={fieldName}
+          value={value}
+          placeholder={placeholder}
+          required={required}
+          disabled={disabled}
+          min={min}
+          max={max}
+          step={step}
+          class="form-field__input"
+          aria-describedby={describedBy}
+          aria-invalid={error ? 'true' : undefined}
+        />
+      )}
+    </Fragment>
+  )}
+
+  <!-- Error message -->
+  {error && (
+    <Text as="span" class="form-field__error" id={`${id}-error`} role="alert" size="sm" flush>{error}</Text>
+  )}
+</div>
+
+<!-- Styles: FormField.css | FormField.responsive.css -->

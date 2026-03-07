@@ -1,0 +1,71 @@
+---
+/**
+ * DPadMenu — PlayStation-style 4-button circular menu
+ *
+ * Expands on hover, shows labels, glows on active.
+ * Always exactly 4 items: top, right, bottom, left.
+ *
+ * @param items - Array of 4: [top, right, bottom, left]
+ *   Each: { icon?, symbol?, label?, href?, color? }
+ *   Use `symbol` for text characters (×, ○, △, □) or `icon` for Phosphor icons.
+ */
+import Icon from '../../../atoms/Icon/Icon.astro';
+
+export interface DPadItem {
+  icon?: string;
+  symbol?: string;
+  label?: string;
+  href?: string;
+  color?: string;
+}
+
+export interface Props {
+  items: [DPadItem, DPadItem, DPadItem, DPadItem];
+}
+
+const { items } = Astro.props;
+
+const positions = ['top', 'right', 'bottom', 'left'];
+const coords = [
+  { top: '20%', left: '50%' },
+  { top: '50%', left: '80%' },
+  { top: '80%', left: '50%' },
+  { top: '50%', left: '20%' },
+];
+
+const defaultColors = [
+  'var(--brand-c-primary-light)',
+  'var(--brand-c-secondary)',
+  'var(--brand-c-secondary-light)',
+  'var(--brand-c-primary)',
+];
+---
+
+<div class="dpad-menu">
+  {items.map((item, i) => (
+    <div
+      class={`dpad-menu__slot dpad-menu__slot--${positions[i]}`}
+      style={`top: ${coords[i].top}; left: ${coords[i].left}; --_glow: ${item.color || defaultColors[i]};`}
+    >
+      {item.label && <span class="dpad-menu__label">{item.label}</span>}
+      {item.href ? (
+        <a href={item.href} class="dpad-menu__btn" aria-label={item.label || item.symbol || item.icon}>
+          {item.icon ? (
+            <Icon name={item.icon} size={20} />
+          ) : (
+            <span class="dpad-menu__symbol">{item.symbol}</span>
+          )}
+        </a>
+      ) : (
+        <button type="button" class="dpad-menu__btn" aria-label={item.label || item.symbol || item.icon}>
+          {item.icon ? (
+            <Icon name={item.icon} size={20} />
+          ) : (
+            <span class="dpad-menu__symbol">{item.symbol}</span>
+          )}
+        </button>
+      )}
+    </div>
+  ))}
+</div>
+

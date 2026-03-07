@@ -1,0 +1,83 @@
+---
+/**
+ * AccessibilityPanel - Quick-access modal toolbar
+ *
+ * Slim modal with presets, themes, and reset.
+ * Full controls live on /accessibility (a11y-page.ts).
+ *
+ * Rendered on every page via BaseLayout, outside #a11y-content-wrapper
+ * so it's immune to its own settings.
+ */
+import { Announcer } from './Announcer';
+import ThemeSidebar from './ThemeSidebar.astro';
+import { PresetButton } from './PresetButton';
+import Icon from '../atoms/Icon/Icon.astro';
+---
+
+<!-- Screen Reader Announcer -->
+<Announcer />
+
+<!-- Accessibility Panel (modal) -->
+<div
+  class="a11y-panel"
+  id="a11y-panel"
+  role="dialog"
+  aria-label="Accessibility settings"
+  aria-modal="true"
+  hidden
+>
+  <div class="a11y-panel__header">
+    <h2 class="a11y-panel__title">
+      Accessibility Panel
+    </h2>
+    <div class="a11y-panel__header-actions">
+      <button class="btn btn--sm btn--primary" id="a11y-download-pdf" aria-label="Download page as PDF">
+        <Icon name="a11y-panel/download-fill" size={18} />
+        <span>Download Page as PDF</span>
+      </button>
+      <button class="btn btn--sm btn--ghost" id="a11y-reset" aria-label="Reset all settings">
+        <Icon name="a11y-panel/arrow-counter-clockwise-fill" size={18} />
+        <span>Reset All</span>
+      </button>
+      <button class="a11y-panel__close" type="button" aria-label="Close accessibility panel">
+        <Icon name="x-circle-fill" size={40} />
+      </button>
+    </div>
+  </div>
+
+  <div class="a11y-panel__body">
+    <!-- Quick Presets -->
+    <div class="a11y-panel__section">
+      <h3 class="a11y-panel__section-title">Presets</h3>
+      <div class="a11y-panel__presets-grid">
+        <PresetButton preset="dyslexia" icon="text-aa-fill" title="Dyslexia" />
+        <PresetButton preset="low-vision" icon="eye-fill" title="Low Vision" />
+        <PresetButton preset="color-blind" icon="palette-fill" title="Color Blind" />
+        <PresetButton preset="motor" icon="hand-palm-fill" title="Motor" />
+        <PresetButton preset="cognitive" icon="brain-fill" title="Cognitive" />
+        <PresetButton preset="easyread" icon="book-open-fill" title="Easy Read" />
+      </div>
+    </div>
+
+    <!-- Theme Cards -->
+    <div class="a11y-panel__section">
+      <h3 class="a11y-panel__section-title">Theme</h3>
+      <ThemeSidebar />
+    </div>
+  </div>
+
+  <!-- Link to full settings page -->
+  <div class="a11y-panel__footer">
+    <a href="/accessibility" class="a11y-panel__all-settings-link">
+      All accessibility settings
+      <Icon name="arrow-right-fill" size={18} />
+    </a>
+  </div>
+</div>
+
+<!-- Backdrop -->
+<div class="a11y-panel__backdrop" hidden></div>
+
+<script>
+  import './a11y-modal';
+</script>

@@ -1,0 +1,134 @@
+---
+/**
+ * PhysicsOverlay — Matter.js physics-driven icon particles
+ *
+ * A "ball pit" of Phosphor icons that fall, bounce, collide, and
+ * respond to cursor proximity. Purely decorative, always aria-hidden.
+ *
+ * Reuses:
+ * - RevealCanvas proximity pattern (cursor repel/attract)
+ * - scroll-color-background colour sync (icons tint on scroll)
+ * - iconMapper.ts for themed icon selection
+ *
+ * Features:
+ * - Phosphor SVGs as Matter.js body sprites
+ * - Invisible boundary walls (viewport edges)
+ * - Cursor repel/attract force (mousemove)
+ * - Configurable gravity, bounce, friction, icon count
+ * - Lifespan/limit for performance (settled icons get removed)
+ * - Scroll-synced icon tinting via GSAP
+ * - Spawn-on-event support via data attributes
+ *
+ * CSS: PhysicsOverlay.css, PhysicsOverlay.responsive.css, PhysicsOverlay.a11y.css
+ * JS:  lib/animation/physics-overlay.ts
+ *
+ * @example
+ * <!-- Basic falling icons -->
+ * <PhysicsOverlay icons={['heart', 'star', 'flower-lotus']} count={30} />
+ *
+ * <!-- Heavy gravity, bouncy, attract to cursor -->
+ * <PhysicsOverlay icons={['sparkle']} count={50} gravity={1.5} bounce={0.8} cursorMode="attract" />
+ *
+ * <!-- Scroll-synced colour -->
+ * <PhysicsOverlay icons={['heart']} scrollColor />
+ *
+ * <!-- Contained to parent (not viewport) -->
+ * <PhysicsOverlay icons={['cube', 'diamond']} contained count={20} />
+ */
+
+interface Props {
+  /* ---- Icons ---- */
+  icons: string[];
+  iconWeight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone';
+  count?: number;
+  maxCount?: number;
+
+  /* ---- Physics ---- */
+  gravity?: number;
+  bounce?: number;
+  friction?: number;
+  airFriction?: number;
+  iconSize?: number;
+
+  /* ---- Cursor ---- */
+  cursorMode?: 'repel' | 'attract' | 'none';
+  cursorRadius?: number;
+  cursorStrength?: number;
+
+  /* ---- Appearance ---- */
+  color?: string | string[];
+  opacity?: number;
+  scrollColor?: boolean;
+
+  /* ---- Behaviour ---- */
+  contained?: boolean;
+  lifespan?: number;
+  spawnDelay?: number;
+  spawnStagger?: number;
+
+  /* ---- HTML ---- */
+  class?: string;
+}
+
+const {
+  icons,
+  iconWeight = 'light',
+  count = 30,
+  maxCount = 80,
+  gravity = 1,
+  bounce = 0.6,
+  friction = 0.1,
+  airFriction = 0.01,
+  iconSize = 24,
+  cursorMode = 'repel',
+  cursorRadius = 150,
+  cursorStrength = 0.005,
+  color = 'var(--brand-c-primary)',
+  opacity = 0.15,
+  scrollColor = false,
+  contained = false,
+  lifespan = 0,
+  spawnDelay = 0,
+  spawnStagger = 80,
+  class: className = '',
+} = Astro.props;
+
+/* ---- Build icon paths for sprites ---- */
+const iconPaths = icons.map(name =>
+  `/Icons/phosphor/${name}${iconWeight !== 'regular' ? `-${iconWeight}` : ''}.svg`
+);
+
+/* ---- Serialise config as data attributes for JS ---- */
+const config = JSON.stringify({
+  iconPaths,
+  count,
+  maxCount,
+  gravity,
+  bounce,
+  friction,
+  airFriction,
+  iconSize,
+  cursorMode,
+  cursorRadius,
+  cursorStrength,
+  color,
+  opacity,
+  scrollColor,
+  contained,
+  lifespan,
+  spawnDelay,
+  spawnStagger,
+});
+---
+
+<div
+  class:list={['physics-overlay', className]}
+  data-physics-config={config}
+  aria-hidden="true"
+>
+  <canvas class="physics-overlay__canvas"></canvas>
+</div>
+
+<script>
+  import '../../../lib/animation/physics-overlay';
+</script>

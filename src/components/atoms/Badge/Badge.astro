@@ -1,0 +1,55 @@
+---
+/**
+ * Badge — Simple inline label
+ *
+ * Token system: --_badge-bg / --_badge-text / --_badge-border
+ * Zone colour tokens give a rich palette across all themes.
+ *
+ * @param label - Display text
+ * @param color - 'primary' (default), 'secondary', 'earth', 'forest', 'dusk', 'neutral', 'mist'
+ * @param variant - 'fill' (default), 'outline', 'glass', 'glass-light', 'glass-dark'
+ * @param shape - 'rounded' (default), 'pill', 'squared'
+ * @param icon - Optional Phosphor icon slug e.g. 'shield-check-fill'
+ * @param uppercase - Uppercase text (default true)
+ */
+import { Icon } from '../Icon';
+import { Text } from '../Text';
+
+interface Props {
+  label: string;
+  color?: 'primary' | 'secondary' | 'earth' | 'forest' | 'dusk' | 'neutral' | 'mist';
+  variant?: 'fill' | 'outline' | 'glass' | 'glass-light' | 'glass-dark';
+  shape?: 'rounded' | 'pill' | 'squared';
+  icon?: string;
+  uppercase?: boolean;
+  class?: string;
+}
+
+const {
+  label,
+  color = 'primary',
+  variant = 'fill',
+  shape = 'rounded',
+  icon,
+  uppercase = true,
+  class: className,
+} = Astro.props;
+---
+
+<span
+  data-semantic-role="status"
+  class:list={[
+    'badge',
+    `badge--${variant}`,
+    `badge--${shape}`,
+    color !== 'primary' && `badge--c-${color}`,
+    icon && 'badge--has-icon',
+    !uppercase && 'badge--lowercase',
+    className,
+  ]}
+>
+  {icon && (
+    <Icon name={icon} class="badge__icon" aria-hidden="true" />
+  )}
+  <Text as="span" class="badge__label" flush>{label}</Text>
+</span>

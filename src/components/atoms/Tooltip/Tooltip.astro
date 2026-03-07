@@ -1,0 +1,86 @@
+---
+/**
+ * Tooltip — Passive contextual display atom
+ *
+ * Wraps a trigger element and shows content on hover/focus.
+ * Two purpose modes:
+ *   label — visual duplicate of trigger's aria-label (aria-hidden, decorative)
+ *   info  — real content (consumer links via aria-describedby on their focusable)
+ *
+ * CSS-only visibility — no JS. Animation gated by entrance prop.
+ *
+ * Styles: Tooltip.css | Tooltip.responsive.css
+ *
+ * Usage:
+ *   <Tooltip text="Search" purpose="label">
+ *     <Button aria-label="Search"><Icon name="magnifying-glass" /></Button>
+ *   </Tooltip>
+ *
+ *   <Tooltip text="We'll email your links" purpose="info" id="email-tip">
+ *     <FormField label="Email" type="email" aria-describedby="email-tip" />
+ *   </Tooltip>
+ *
+ *   <Tooltip purpose="info" id="aac-tip">
+ *     <Image slot="default" ... />
+ *     <div slot="content">{aacCards}</div>
+ *   </Tooltip>
+ */
+import { Text } from '../Text';
+
+interface Props {
+  text?: string;
+  purpose: 'label' | 'info';
+  id?: string;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+  theme?: 'professional' | 'glass' | 'neon' | 'brutalist';
+  size?: 'sm' | 'md' | 'lg';
+  textTone?: 'light' | 'dark';
+  entrance?: 'fade' | 'scale' | 'slide';
+  class?: string;
+}
+
+const {
+  text,
+  purpose,
+  id = `tooltip-${Math.random().toString(36).slice(2, 8)}`,
+  position = 'top',
+  theme = 'professional',
+  size = 'md',
+  textTone,
+  entrance,
+  class: className,
+} = Astro.props;
+
+const isLabel = purpose === 'label';
+
+const wrapperClasses = [
+  'tooltip',
+  `tooltip--${purpose}`,
+  `tooltip--${position}`,
+  `tooltip--${theme}`,
+  `tooltip--${size}`,
+  entrance && `tooltip--animate-${entrance}`,
+  className,
+].filter(Boolean);
+---
+
+<span class:list={wrapperClasses}>
+  <span class="tooltip__trigger">
+    <slot />
+  </span>
+
+  <span
+    class="tooltip__content"
+    id={id}
+    role="tooltip"
+    {...(isLabel && { 'aria-hidden': 'true' })}
+  >
+    {text ? (
+      <Text as="span" class="tooltip__text" textTone={textTone} flush>
+        {text}
+      </Text>
+    ) : (
+      <slot name="content" />
+    )}
+  </span>
+</span>

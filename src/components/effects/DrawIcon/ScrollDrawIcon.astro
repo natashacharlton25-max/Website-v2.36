@@ -1,0 +1,58 @@
+---
+/**
+ * ScrollDrawIcon
+ * src/components/atoms/effects/ScrollDrawIcon/ScrollDrawIcon.astro
+ *
+ * A Phosphor icon that draws itself on scroll via DrawSVG.
+ * Wraps Icon (stroke mode) + scroll-draw.ts data attributes.
+ *
+ * Usage:
+ * <ScrollDrawIcon name="heart" variant="draw" />
+ * <ScrollDrawIcon name="star" variant="rainbowchase" scrub />
+ * <ScrollDrawIcon name="flower-lotus" variant="chachaslide" size={80} />
+ *
+ * Python JSON: { "component": "ScrollDrawIcon", "props": { "name": "heart", "variant": "rainbowchase" } }
+ */
+import Icon from '../../atoms/Icon/Icon.astro';
+
+interface Props {
+  name: string;
+  variant?: 'draw' | 'drawcenter' | 'chachaslide' | 'flashgordon' | 'rainbowchase' | 'pulse';
+  size?: number;
+  scrub?: boolean;
+  start?: string;
+  end?: string;
+  color?: string;
+  strokeWidth?: number;
+  repeat?: boolean;
+  class?: string;
+}
+
+const {
+  name,
+  variant = 'draw',
+  size = 120,
+  scrub = false,
+  start = 'top 90%',
+  end = 'top 20%',
+  color,
+  strokeWidth,
+  repeat = false,
+  class: className = '',
+} = Astro.props;
+---
+
+<div
+  class={`scroll-draw-icon ${className}`}
+  data-scroll-draw
+  data-draw-variant={variant}
+  data-draw-scrub={String(scrub)}
+  data-draw-start={start}
+  data-draw-end={end}
+  data-draw-once={String(!repeat)}
+  data-draw-color={color || undefined}
+  data-draw-stroke-width={strokeWidth ? String(strokeWidth) : undefined}
+  style={`width: ${size}px; height: ${size}px;`}
+>
+  <Icon name={name} size={size} stroke />
+</div>

@@ -1,0 +1,67 @@
+---
+/**
+ * Toast — Notification atom
+ *
+ * Dynamic notification — appears at runtime via toast.ts.
+ * This template is the canonical HTML structure.
+ * toast.ts creates matching DOM imperatively.
+ *
+ * Render modes:
+ *   Full:      themed pill, animated entrance, lottie icon, glow
+ *   Reduced:   professional theme, no animation, static icon, no glow
+ *   Assistive: full-width bar, large text, large icon, thick focus
+ *   Textonly:  full-width bar, no icons, plain background, text only
+ *
+ * Styles: Toast.css | Toast.responsive.css
+ */
+import { LottieIcon } from '../../atoms/LottieIcon';
+import { Text } from '../../atoms/Text';
+
+interface Props {
+  message: string;
+  icon?: string;
+  duration?: number;
+  theme?: 'arcade' | 'professional' | 'brutalist' | 'glass' | 'neon';
+  animation?: 'slide' | 'bounce' | 'fade' | 'flip' | 'zoom';
+  class?: string;
+}
+
+const {
+  message,
+  icon = 'notification',
+  duration = 5000,
+  theme = 'professional',
+  animation = 'slide',
+  class: className,
+} = Astro.props;
+
+const classes = [
+  'toast',
+  `toast--${theme}`,
+  animation && `toast--animate-${animation}`,
+  className,
+].filter(Boolean);
+
+// Neon sets color: white on container — Text inherits via color="inherit".
+// Glass at 75% opacity uses default text (adapts with theme).
+const messageColor = theme === 'neon' ? 'inherit' as const : undefined;
+---
+
+<div
+  class:list={classes}
+  role="alert"
+  aria-live="polite"
+  aria-atomic="true"
+  data-semantic-role="status"
+  data-duration={duration}
+  tabindex="0"
+>
+  {/* Lottie icon — pipeline routes: full → animation, reduced/assistive → Icon fallback, textonly → hidden */}
+  <LottieIcon slug={icon} class="toast__lottie" aria-hidden="true" />
+
+  {/* Message */}
+  <Text as="span" class="toast__message" color={messageColor} flush>{message}</Text>
+
+  {/* Glow effect — decorative, hidden in all non-full renders */}
+  <div class="toast__glow" aria-hidden="true"></div>
+</div>
