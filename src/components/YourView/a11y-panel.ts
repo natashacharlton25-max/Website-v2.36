@@ -237,18 +237,16 @@ export function applySettings(settings: A11ySettings): void {
   }
 
   // Theme - Use ThemeSwitcher for dynamic CSS loading
-  const themeMap: Record<string, string> = {
-    'default': 'default',
-    'dark': 'a11y-dark',
-    'cream': 'a11y-cream',
-    'high-contrast': 'a11y-high-contrast',
-    'protanopia': 'a11y-protanopia',
-    'deuteranopia': 'a11y-deuteranopia',
-    'tritanopia': 'a11y-tritanopia',
-    'monochrome': 'a11y-monochrome'
+  // Legacy migration: old stored names → new names (for users with old localStorage)
+  const legacyThemeMap: Record<string, string> = {
+    'dark': 'default-dark',
+    'protanopia': 'default-protan',
+    'deuteranopia': 'default-protan',
+    'tritanopia': 'default-tritan',
+    'monochrome': 'monochrome-warm'
   };
 
-  const switcherTheme = themeMap[settings.theme] || 'default';
+  const switcherTheme = legacyThemeMap[settings.theme] || settings.theme;
   if ((window as any).themeSwitcher) {
     (window as any).themeSwitcher.switchTheme(switcherTheme);
   } else {
@@ -260,18 +258,15 @@ export function applySettings(settings: A11ySettings): void {
   }
 
   // Theme class - apply to wrapper
-  const themeClasses = [
-    'a11y-theme-dark',
-    'a11y-theme-cream',
-    'a11y-theme-high-contrast',
-    'a11y-theme-protanopia',
-    'a11y-theme-deuteranopia',
-    'a11y-theme-tritanopia',
-    'a11y-theme-monochrome'
-  ];
-  target.classList.remove(...themeClasses);
-  if (settings.theme !== 'default') {
-    target.classList.add(`a11y-theme-${settings.theme}`);
+  // Remove any existing a11y-theme-* class (covers all 112 themes)
+  const removeThemeClasses = (el: Element) => {
+    const toRemove = [...el.classList].filter(c => c.startsWith('a11y-theme-'));
+    toRemove.forEach(c => el.classList.remove(c));
+  };
+
+  removeThemeClasses(target);
+  if (switcherTheme !== 'default') {
+    target.classList.add(`a11y-theme-${switcherTheme}`);
   }
 
   // Mirror a11y classes to <html> so OverlayScrollbars CSS selectors
@@ -279,9 +274,10 @@ export function applySettings(settings: A11ySettings): void {
   // elements are direct children of <body>, outside #a11y-content-wrapper,
   // so they need an ancestor above <body> to carry the class.
   const root = document.documentElement;
-  root.classList.remove(...themeClasses, 'a11y-text-only', 'a11y-reduce-motion');
-  if (settings.theme !== 'default') {
-    root.classList.add(`a11y-theme-${settings.theme}`);
+  removeThemeClasses(root);
+  root.classList.remove('a11y-text-only', 'a11y-reduce-motion');
+  if (switcherTheme !== 'default') {
+    root.classList.add(`a11y-theme-${switcherTheme}`);
   }
   if (settings.textOnly) root.classList.add('a11y-text-only');
   if (settings.reduceMotion) root.classList.add('a11y-reduce-motion');
@@ -422,7 +418,7 @@ export function handlePresetClick(
       settings.letterSpacing = 2;
       settings.wordSpacing = 3;
       settings.lineHeight = 160;
-      settings.theme = 'cream';
+      settings.theme = 'calm';
       settings.altTextMode = 'descriptive';
     } else {
       settings.textOnly = false;

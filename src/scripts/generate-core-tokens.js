@@ -1,8 +1,12 @@
 /**
- * Build Script: Generate Core Tokens CSS
+ * Build Script: Generate Core Tokens CSS + Theme Cards CSS
  *
- * Extracts all -c- prefixed tokens from theme CSS files
- * and generates a coretokens.css file with preview tokens
+ * Reads all theme CSS files, extracts brand-c-* tokens (resolving var() refs),
+ * and generates:
+ *   - coretokens.css — static hex values for each theme's bg/text/primary/secondary
+ *   - theme-cards.css — per-theme card styles for the theme picker UI
+ *
+ * Run: node src/scripts/generate-core-tokens.js
  */
 
 import fs from 'fs';
@@ -12,25 +16,58 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const themesDir = path.join(__dirname, '../styles/themes');
 const outputDir = path.join(__dirname, '../styles/themes/Preview');
-const outputPath = path.join(outputDir, 'coretokens.css');
+const coreTokensPath = path.join(outputDir, 'coretokens.css');
+const themeCardsPath = path.join(outputDir, 'theme-cards.css');
 
 /**
- * Extract core tokens from CSS text
+ * Build a map of all --token: value declarations from CSS text
+ */
+function buildTokenMap(cssText) {
+  const map = {};
+  const re = /--([\w-]+)\s*:\s*([^;]+);/g;
+  let m;
+  while ((m = re.exec(cssText)) !== null) {
+    map[m[1]] = m[2].trim();
+  }
+  return map;
+}
+
+/**
+ * Resolve a value that might be a var() reference, following one level deep
+ */
+function resolveValue(value, tokenMap) {
+  if (!value) return null;
+  const varMatch = value.match(/^var\(--([\w-]+)\)$/);
+  if (varMatch) {
+    const resolved = tokenMap[varMatch[1]];
+    // Don't follow deeper than one level; must resolve to a non-var value
+    if (resolved && !resolved.startsWith('var(')) {
+      return resolved;
+    }
+    return null; // Unresolvable
+  }
+  return value; // Already a literal (hex, rgb, etc.)
+}
+
+/**
+ * Extract the 4 core preview tokens from a CSS file
+ * Two-pass: first build full token map, then resolve -c- tokens
  */
 function extractCoreTokens(cssText) {
+  const tokenMap = buildTokenMap(cssText);
   const tokens = { bg: null, text: null, primary: null, secondary: null };
-  const lines = cssText.split('\n');
 
-  for (const line of lines) {
-    const bgMatch = line.match(/--[\w-]+-c-bg\s*:\s*([^;]+);/i);
-    const textMatch = line.match(/--[\w-]+-c-text\s*:\s*([^;]+);/i);
-    const primaryMatch = line.match(/--[\w-]+-c-primary\s*:\s*([^;]+);/i);
-    const secondaryMatch = line.match(/--[\w-]+-c-secondary\s*:\s*([^;]+);/i);
-
-    if (bgMatch && !bgMatch[1].includes('var(')) tokens.bg = bgMatch[1].trim();
-    if (textMatch && !textMatch[1].includes('var(')) tokens.text = textMatch[1].trim();
-    if (primaryMatch && !primaryMatch[1].includes('var(')) tokens.primary = primaryMatch[1].trim();
-    if (secondaryMatch && !secondaryMatch[1].includes('var(')) tokens.secondary = secondaryMatch[1].trim();
+  // Find -c-bg, -c-text, -c-primary, -c-secondary declarations
+  for (const [name, value] of Object.entries(tokenMap)) {
+    if (name.endsWith('-c-bg') && !tokens.bg) {
+      tokens.bg = resolveValue(value, tokenMap);
+    } else if (name.endsWith('-c-text') && !tokens.text) {
+      tokens.text = resolveValue(value, tokenMap);
+    } else if (name.endsWith('-c-primary') && !name.endsWith('-c-primary-light') && !name.endsWith('-c-primary-dark') && !tokens.primary) {
+      tokens.primary = resolveValue(value, tokenMap);
+    } else if (name.endsWith('-c-secondary') && !name.endsWith('-c-secondary-light') && !name.endsWith('-c-secondary-dark') && !tokens.secondary) {
+      tokens.secondary = resolveValue(value, tokenMap);
+    }
   }
 
   return tokens;
@@ -38,7 +75,7 @@ function extractCoreTokens(cssText) {
 
 /**
  * Recursively find all CSS files in themes directory
- * Excludes the Preview folder to avoid processing coretokens.css
+ * Excludes the Preview folder to avoid processing our own output
  */
 function findThemeFiles(dir) {
   const files = [];
@@ -49,7 +86,6 @@ function findThemeFiles(dir) {
     const stat = fs.statSync(fullPath);
 
     if (stat.isDirectory()) {
-      // Skip the Preview folder to avoid circular processing
       if (item !== 'Preview') {
         files.push(...findThemeFiles(fullPath));
       }
@@ -66,26 +102,192 @@ function findThemeFiles(dir) {
  */
 function getThemeName(filePath) {
   const fileName = path.basename(filePath, '.css');
-
-  // Special handling for BrandDefault -> 'default'
-  if (fileName === 'BrandDefault') {
-    return 'default';
-  }
-
-  // Remove 'a11y-' prefix from a11y themes
-  return fileName.replace(/^a11y-/, '');
+  if (fileName === 'BrandDefault') return 'default';
+  return fileName;
 }
 
 /**
- * Generate core tokens CSS file
+ * Generate coretokens.css — static hex tokens for all themes on :root
  */
-function generateCoreTokensCSS() {
-  console.log('🎨 Generating core tokens CSS...');
+function generateCoreTokensCSS(allTokens) {
+  let css = `/**
+ * Core Theme Tokens - Auto-generated
+ * DO NOT EDIT MANUALLY
+ *
+ * Static hex values for theme card previews.
+ * Run: node src/scripts/generate-core-tokens.js
+ */
+
+:root {\n`;
+
+  for (const { theme, tokens } of allTokens) {
+    const prefix = theme === 'default' ? 'brand' : `a11y-${theme}`;
+    css += `\n  /* ${theme} */\n`;
+    if (tokens.bg) css += `  --${prefix}-c-bg: ${tokens.bg};\n`;
+    if (tokens.text) css += `  --${prefix}-c-text: ${tokens.text};\n`;
+    if (tokens.primary) css += `  --${prefix}-c-primary: ${tokens.primary};\n`;
+    if (tokens.secondary) css += `  --${prefix}-c-secondary: ${tokens.secondary};\n`;
+  }
+
+  css += `}\n`;
+  return css;
+}
+
+/**
+ * Generate theme-cards.css — per-theme card styles using the static hex values
+ */
+function generateThemeCardsCSS(allTokens) {
+  let css = `/**
+ * Theme Card Styles - Auto-generated
+ * DO NOT EDIT MANUALLY
+ *
+ * Per-theme card styles for the theme picker UI.
+ * Run: node src/scripts/generate-core-tokens.js
+ */
+
+/* ===================================
+ * THEME CARDS - Base Styles
+ * =================================== */
+.a11y-theme-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border: 2px solid color-mix(in oklch, var(--color-Black, #121212) 10%, transparent);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.a11y-theme-card:hover {
+  border-color: var(--brand-c-primary);
+  box-shadow: 0 2px 8px color-mix(in oklch, var(--color-Black) 12%, transparent);
+}
+
+.a11y-theme-card:focus-visible {
+  outline: 2px solid var(--brand-c-primary);
+  outline-offset: 2px;
+}
+
+.a11y-theme-card[aria-pressed="true"] {
+  border-color: var(--brand-c-primary);
+}
+
+.a11y-theme-card__logo {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.a11y-theme-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.a11y-theme-card__title {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.a11y-theme-card__sample {
+  display: none;
+}
+
+/* Color Swatches */
+.a11y-theme-card__swatches {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.a11y-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in oklch, var(--color-Black, #121212) 12%, transparent);
+  box-shadow: inset 0 1px 2px color-mix(in oklch, var(--color-White) 30%, transparent);
+}
+
+/* Category headings */
+.a11y-theme-list__heading {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 8px 0 4px;
+  color: var(--brand-c-text, #333);
+}
+
+/* ===================================
+ * Per-Theme Card Colors (auto-generated)
+ * =================================== */
+`;
+
+  for (const { theme, tokens } of allTokens) {
+    const bg = tokens.bg || '#f5f4f0';
+    const text = tokens.text || '#333';
+    const primary = tokens.primary || '#666';
+    const secondary = tokens.secondary || '#999';
+
+    css += `
+.a11y-theme-card--${theme} {
+  background: ${bg};
+  color: ${text};
+}
+.a11y-theme-card--${theme} .a11y-theme-card__logo { fill: ${primary}; }
+.a11y-theme-card--${theme} .a11y-swatch--primary { background: ${primary}; }
+.a11y-theme-card--${theme} .a11y-swatch--secondary { background: ${secondary}; }
+`;
+  }
+
+  css += `
+/* ===================================
+ * Responsive Styles
+ * =================================== */
+@media (max-width: 768px) {
+  .a11y-theme-card {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .a11y-theme-card__logo {
+    width: 22px;
+    height: 22px;
+  }
+
+  .a11y-theme-card__swatches {
+    flex-direction: row;
+    gap: 3px;
+  }
+
+  .a11y-swatch {
+    width: 10px;
+    height: 10px;
+  }
+}
+`;
+
+  return css;
+}
+
+/**
+ * Main entry
+ */
+function main() {
+  console.log('Generating core tokens + theme cards CSS...\n');
 
   const themeFiles = findThemeFiles(themesDir);
   const allTokens = [];
 
-  // Extract tokens from each theme
   for (const filePath of themeFiles) {
     const themeName = getThemeName(filePath);
     const cssText = fs.readFileSync(filePath, 'utf-8');
@@ -93,46 +295,30 @@ function generateCoreTokensCSS() {
 
     if (tokens.bg || tokens.text || tokens.primary || tokens.secondary) {
       allTokens.push({ theme: themeName, tokens });
-      console.log(`  ✓ Extracted tokens for: ${themeName}`);
+      console.log(`  ${themeName}: bg=${tokens.bg || '?'} text=${tokens.text || '?'} pri=${tokens.primary || '?'} sec=${tokens.secondary || '?'}`);
+    } else {
+      console.log(`  ${themeName}: (no tokens found)`);
     }
   }
 
-  // Generate CSS content - use original token names with prefix
-  let cssContent = `/**
- * Core Theme Tokens - Auto-generated
- * DO NOT EDIT MANUALLY
- *
- * Generated from theme CSS files at build time
- * Run: node scripts/generate-core-tokens.js
- */
+  // Sort by theme name for stable output
+  allTokens.sort((a, b) => a.theme.localeCompare(b.theme));
 
-:root {
-  /* Core theme tokens - extracted from all theme files */
-`;
-
-  for (const { theme, tokens } of allTokens) {
-    // Use original naming convention from theme files
-    const prefix = theme === 'default' ? 'brand' : `a11y-${theme}`;
-
-    cssContent += `\n  /* ${theme} theme */\n`;
-    if (tokens.bg) cssContent += `  --${prefix}-c-bg: ${tokens.bg};\n`;
-    if (tokens.text) cssContent += `  --${prefix}-c-text: ${tokens.text};\n`;
-    if (tokens.primary) cssContent += `  --${prefix}-c-primary: ${tokens.primary};\n`;
-    if (tokens.secondary) cssContent += `  --${prefix}-c-secondary: ${tokens.secondary};\n`;
-  }
-
-  cssContent += `}\n`;
-
-  // Ensure output directory exists
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  // Write to themes/core folder
-  fs.writeFileSync(outputPath, cssContent);
-  console.log(`\n✅ Generated ${outputPath}`);
-  console.log(`📦 ${allTokens.length} themes processed\n`);
+  // Write coretokens.css
+  const coreCSS = generateCoreTokensCSS(allTokens);
+  fs.writeFileSync(coreTokensPath, coreCSS);
+  console.log(`\nWrote ${coreTokensPath}`);
+
+  // Write theme-cards.css
+  const cardsCSS = generateThemeCardsCSS(allTokens);
+  fs.writeFileSync(themeCardsPath, cardsCSS);
+  console.log(`Wrote ${themeCardsPath}`);
+
+  console.log(`\n${allTokens.length} themes processed\n`);
 }
 
-// Run the generator
-generateCoreTokensCSS();
+main();

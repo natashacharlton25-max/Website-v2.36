@@ -58,20 +58,20 @@
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 
   /* Default colours */
-  background: var(--brand-c-neutral-dark);
-  color: var(--brand-c-neutral-light);
-  box-shadow: var(--shadow-2xl);
+  background: var(--toast-bg, var(--page-bg-raised));
+  color: var(--toast-text, var(--brand-c-text));
+  box-shadow: var(--toast-shadow, var(--shadow-lg));
 }
 
 .toast:hover {
   transform: translateY(-2px); /* Subtle lift — hover effect, not spacing */
   box-shadow:
-    var(--shadow-2xl),
-    0 0 0 2px var(--brand-c-primary);
+    var(--toast-shadow, var(--shadow-lg)),
+    0 0 0 2px var(--toast-accent, var(--brand-c-primary));
 }
 
 .toast:focus-visible {
-  outline: 2px solid var(--brand-c-primary);
+  outline: 2px solid var(--toast-accent, var(--brand-c-primary));
   outline-offset: 2px;
 }
 
@@ -99,7 +99,7 @@
   border-radius: 20px;
   background: radial-gradient(
     circle,
-    color-mix(in oklch, var(--brand-c-primary) 20%, transparent),
+    color-mix(in oklch, var(--toast-accent, var(--brand-c-primary)) 20%, transparent),
     transparent 70%
   );
   pointer-events: none;
@@ -116,56 +116,56 @@
 
 /* ---- Arcade ---- */
 .toast--arcade {
-  background: var(--brand-c-neutral-dark);
-  color: var(--brand-c-neutral-light);
+  background: var(--toast-bg, var(--page-bg-raised));
+  color: var(--toast-text, var(--brand-c-text));
   border-radius: var(--radius-sm);
   font-family: 'Press Start 2P', var(--font-body);
   font-size: var(--text-fine);
   letter-spacing: 0.05em;
   box-shadow:
-    4px 4px 0 var(--brand-c-primary),  /* Retro offset shadow — design-specific */
-    var(--shadow-2xl);
+    4px 4px 0 var(--toast-accent, var(--brand-c-primary)),  /* Retro offset shadow — design-specific */
+    var(--toast-shadow, var(--shadow-lg));
 }
 
 .toast--arcade:hover {
   box-shadow:
-    4px 4px 0 var(--brand-c-primary),
-    var(--shadow-2xl),
-    0 0 0 2px var(--brand-c-primary);
+    4px 4px 0 var(--toast-accent, var(--brand-c-primary)),
+    var(--toast-shadow, var(--shadow-lg)),
+    0 0 0 2px var(--toast-accent, var(--brand-c-primary));
 }
 
 .toast--arcade .toast__glow {
   background: radial-gradient(
     circle,
-    color-mix(in oklch, var(--brand-c-primary) 25%, transparent),
+    color-mix(in oklch, var(--toast-accent, var(--brand-c-primary)) 25%, transparent),
     transparent 70%
   );
 }
 
 /* ---- Professional ---- */
 .toast--professional {
-  background: var(--brand-c-neutral-dark);
-  color: var(--brand-c-neutral-light);
+  background: var(--toast-bg, var(--page-bg-raised));
+  color: var(--toast-text, var(--brand-c-text));
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-2xl);
+  box-shadow: var(--toast-shadow, var(--shadow-lg));
 }
 
 /* ---- Brutalist ---- */
 .toast--brutalist {
-  background: var(--brand-c-neutral-light);
-  color: var(--brand-c-text-dark);
+  background: var(--toast-bg, var(--page-bg-raised));
+  color: var(--toast-text, var(--brand-c-text));
   font-family: var(--font-mono);
-  border: 3px solid var(--brand-c-text-dark);  /* Thick border — brutalist design */
+  border: 3px solid var(--toast-border, var(--brand-c-neutral-light));  /* Thick border — brutalist design */
   border-radius: 0;
-  box-shadow: 6px 6px 0 var(--brand-c-text-dark);  /* Hard offset shadow — brutalist design */
+  box-shadow: 6px 6px 0 var(--toast-border, var(--brand-c-neutral-light));  /* Hard offset shadow — brutalist design */
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .toast--brutalist:hover {
   box-shadow:
-    6px 6px 0 var(--brand-c-text-dark),
-    0 0 0 2px var(--brand-c-primary);
+    6px 6px 0 var(--toast-border, var(--brand-c-neutral-light)),
+    0 0 0 2px var(--toast-accent, var(--brand-c-primary));
 }
 
 .toast--brutalist .toast__glow {
@@ -174,52 +174,49 @@
 
 /* ---- Glass ---- */
 .toast--glass {
-  background: var(--glass-bg-brand-tint);
-  border: 1px solid var(--glass-border-brand);
+  background: var(--toast-glass-bg, var(--glass-bg));
+  border: 1px solid var(--toast-glass-border, var(--glass-border));
   border-radius: var(--radius-xl);
-  backdrop-filter: var(--glass-blur-heavy) saturate(160%);
-  -webkit-backdrop-filter: var(--glass-blur-heavy) saturate(160%);
-  box-shadow:
-    var(--glass-shadow),
-    var(--glass-shadow-inset);
+  backdrop-filter: var(--toast-glass-blur, var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: var(--toast-glass-blur, var(--glass-blur)) saturate(160%);
+  box-shadow: var(--toast-glass-shadow, var(--glass-shadow));
 }
 
 .toast--glass:hover {
   box-shadow:
-    var(--glass-shadow),
-    var(--glass-shadow-inset),
-    0 0 0 2px var(--brand-c-primary);
+    var(--toast-glass-shadow, var(--glass-shadow)),
+    0 0 0 2px var(--toast-accent, var(--brand-c-primary));
 }
 
 .toast--glass .toast__glow {
   background: radial-gradient(
     circle,
-    color-mix(in oklch, var(--brand-c-primary) 15%, transparent),
+    color-mix(in oklch, var(--toast-accent, var(--brand-c-primary)) 15%, transparent),
     transparent 70%
   );
 }
 
 /* ---- Neon ---- */
 .toast--neon {
-  color: var(--color-White);  /* Solid dark bg — always needs white text, not glass-adaptive */
-  background: var(--brand-c-bg-dark);
-  border: 1.5px solid var(--brand-c-primary);  /* Neon border glow — design-specific */
+  color: var(--toast-text, var(--brand-c-text));
+  background: var(--toast-bg, var(--page-bg-raised));
+  border: 1.5px solid var(--toast-accent, var(--brand-c-primary));  /* Neon border glow — design-specific */
   border-radius: var(--radius-lg);
-  text-shadow: var(--glow-text);
+  text-shadow: var(--toast-glow, var(--glow-neon));
   letter-spacing: 0.06em;
-  box-shadow: var(--glow-neon);
+  box-shadow: var(--toast-glow, var(--glow-neon));
 }
 
 .toast--neon:hover {
   box-shadow:
-    var(--glow-neon-hover),
-    0 0 0 2px var(--brand-c-primary);
+    var(--toast-glow, var(--glow-neon)),
+    0 0 0 2px var(--toast-accent, var(--brand-c-primary));
 }
 
 .toast--neon .toast__glow {
   background: radial-gradient(
     circle,
-    color-mix(in oklch, var(--brand-c-primary) 25%, transparent),
+    color-mix(in oklch, var(--toast-accent, var(--brand-c-primary)) 25%, transparent),
     transparent 70%
   );
 }
@@ -314,10 +311,10 @@
   --_toast-radius: 0;
   animation: none;
   transition: none;
-  background: var(--brand-c-bg);
-  color: var(--brand-c-text);
-  border: 1px solid var(--brand-c-neutral-light);
-  box-shadow: var(--shadow-md);
+  background: var(--toast-bg, var(--page-bg-raised));
+  color: var(--toast-text, var(--brand-c-text));
+  border: 1px solid var(--toast-border, var(--brand-c-neutral-light));
+  box-shadow: var(--toast-shadow, var(--shadow-lg));
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   text-shadow: none;
@@ -328,7 +325,7 @@
 
 [data-render="reduced"] .toast:hover {
   transform: none;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--toast-shadow, var(--shadow-lg));
 }
 
 [data-render="reduced"] .toast__glow {
@@ -349,9 +346,9 @@
   padding: var(--space-lg);
   font-size: var(--text-body);
   min-height: 64px;  /* Touch target minimum */
-  background: var(--brand-c-bg);
-  color: var(--brand-c-text);
-  border: 1px solid var(--brand-c-neutral-light);
+  background: var(--toast-bg, var(--page-bg-raised));
+  color: var(--toast-text, var(--brand-c-text));
+  border: 1px solid var(--toast-border, var(--brand-c-neutral-light));
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -371,7 +368,7 @@
 }
 
 [data-render="assistive"] .toast:focus-visible {
-  outline: 3px solid var(--brand-c-primary);
+  outline: 3px solid var(--toast-accent, var(--brand-c-primary));
   outline-offset: 2px;
 }
 
@@ -386,9 +383,9 @@
   animation: none;
   transition: none;
   padding: var(--space-md);
-  background: var(--brand-c-bg);
-  color: var(--brand-c-text);
-  border: 1px solid var(--brand-c-text);
+  background: var(--toast-bg, var(--page-bg-raised));
+  color: var(--toast-text, var(--brand-c-text));
+  border: 1px solid var(--toast-border, var(--brand-c-neutral-light));
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;

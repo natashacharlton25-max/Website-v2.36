@@ -5,6 +5,23 @@
  * Selectors use #a11y-content-wrapper:is(.a11y-theme-dark, .a11y-theme-high-contrast)
  * to match the legacy a11y system — will be adapted when render pipeline is final.
  *
+ * MIGRATION NOTES:
+ * - Glass tints swap from white-based to black-based, borders go fainter,
+ *   inset highlight flips to white edge. All using color-mix against brand tokens.
+ *
+ * 1. Selectors use .a11y-theme-dark class names (banned in new code).
+ *    Should migrate to [data-theme-luminance="dark"] — one selector catches
+ *    every dark theme (a11y, fun, user-custom). No need to list class names.
+ *
+ * 2. References --color-Black / --color-White which the engine outputs per theme
+ *    as warm neutral endpoints. HC theme overrides to pure #000/#fff automatically.
+ *
+ * Migration path:
+ *   - Replace .a11y-theme-dark / .a11y-theme-high-contrast with [data-theme-luminance="dark"]
+ *   - Add shadow kills, glow system, surface mappings, media filters to same block
+ *   - Everything references brand tokens + neutral scale — auto-adapts to any theme
+ *   - Separate task from engine rewrite — logged for dark mode CSS migration
+ *
  * Components extracted so far:
  *   - Badge (rules 19-20)
  *   - FormField (neumorphic + glass dark fallbacks)
@@ -63,4 +80,21 @@
   box-shadow:
     0 4px 16px color-mix(in oklch, var(--_field-brand) 50%, transparent),
     0 0 30px color-mix(in oklch, var(--_field-brand) 20%, transparent);
+}
+
+/* ── Shadow kills (dark luminance) ── */
+
+[data-theme-luminance="dark"] {
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-base: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-btn: none;
+  --shadow-btn-hover: 0 0 12px color-mix(in oklch, var(--brand-c-primary) 40%, transparent);
+  --shadow-glow-primary: 0 0 14px color-mix(in oklch, var(--brand-c-primary) 50%, transparent);
+  --shadow-glow-secondary: 0 0 14px color-mix(in oklch, var(--brand-c-secondary) 50%, transparent);
 }

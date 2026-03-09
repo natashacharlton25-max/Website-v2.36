@@ -11,12 +11,13 @@
 import lottie from 'lottie-web';
 import type { AnimationItem } from 'lottie-web';
 
-// Animation paths
+// Animation slugs — fetched from Asset Library API
+const API_URL = import.meta.env?.ASSET_API_URL || 'https://asset-library.natashacharlton25.workers.dev';
 const animations = {
-  reveal: '/Icons/Animated%20Icons/Basket%20Icons/lottie-basket-in-reveal.json',
-  loop: '/Icons/Animated%20Icons/Basket%20Icons/lottie-basket-loop-cycle.json',
-  hover: '/Icons/Animated%20Icons/Basket%20Icons/lottie-basket-hover-pinch.json',
-  addToCart: '/Icons/Animated%20Icons/Basket%20Icons/lottie-basket-morph-fill.json',
+  reveal: `${API_URL}/v1/assets/lottie-basket-reveal`,
+  loop: `${API_URL}/v1/assets/lottie-basket-loop`,
+  hover: `${API_URL}/v1/assets/lottie-basket-hover`,
+  addToCart: `${API_URL}/v1/assets/lottie-basket-morph`,
 };
 
 let currentAnimation: AnimationItem | null = null;

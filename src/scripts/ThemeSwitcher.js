@@ -1,33 +1,40 @@
-// Import theme CSS files as URLs
-import brandDefaultUrl from '../Styles/themes/brand/BrandDefault.css?url';
-import a11yDarkUrl from '../Styles/themes/a11y/a11y-dark.css?url';
-import a11yHighContrastUrl from '../Styles/themes/a11y/a11y-high-contrast.css?url';
-import a11yCreamUrl from '../Styles/themes/a11y/a11y-cream.css?url';
-import a11yMonochromeUrl from '../Styles/themes/a11y/a11y-monochrome.css?url';
-import a11yProtanopiaUrl from '../Styles/themes/a11y/a11y-protanopia.css?url';
-import a11yDeuteranopiaUrl from '../Styles/themes/a11y/a11y-deuteranopia.css?url';
-import a11yTritanopiaUrl from '../Styles/themes/a11y/a11y-tritanopia.css?url';
+// Import all theme CSS files dynamically via Vite glob
+const themeModules = import.meta.glob('../styles/themes/**/*.css', {
+  query: '?url',
+  import: 'default',
+  eager: true
+});
+
+// Build themes map from glob results
+function buildThemeMap(modules) {
+  const themes = {};
+  for (const [path, url] of Object.entries(modules)) {
+    // Skip Preview folder
+    if (path.includes('/Preview/')) continue;
+    // Extract filename as theme name from subfolder structure:
+    //   '../styles/themes/brand/mind-the-box/BrandDefault.css' -> 'default'
+    //   '../styles/themes/a11y/calm/calm-dark.css' -> 'calm-dark'
+    //   '../styles/themes/fun/ocean/ocean.css' -> 'ocean'
+    const match = path.match(/(?:a11y|fun|brand)\/.+\/([^/]+)\.css$/);
+    if (match) {
+      let name = match[1];
+      if (name === 'BrandDefault') name = 'default';
+      themes[name] = url;
+    }
+  }
+  return themes;
+}
 
 /**
  * ThemeSwitcher - Dynamic CSS File Theme Switching
  * Uses Link Tag Swapping for optimal performance and reliability
+ *
+ * Theme resolution: base theme + luminance + CVD mode
+ * e.g. 'forest' + 'dark' + 'protan' -> 'forest-dark-protan'
  */
 export class ThemeSwitcher {
   constructor() {
-    this.themes = {
-// Brand theme (default)
-      'default': brandDefaultUrl,
-      // Accessibility themes
-      'a11y-dark': a11yDarkUrl,
-      'a11y-high-contrast': a11yHighContrastUrl,
-      'a11y-cream': a11yCreamUrl,
-      'a11y-monochrome': a11yMonochromeUrl,
-      'a11y-protanopia': a11yProtanopiaUrl,
-      'a11y-deuteranopia': a11yDeuteranopiaUrl,
-      'a11y-tritanopia': a11yTritanopiaUrl,
-      'brand/BrandDefault': brandDefaultUrl,
-      'BrandDefault': brandDefaultUrl
-    };
+    this.themes = buildThemeMap(themeModules);
 
     this.currentTheme = null;  // Start as null so first switchTheme always loads CSS
     this.themeLink = null;
@@ -57,7 +64,14 @@ export class ThemeSwitcher {
     // Load saved theme or default
     // Migrate old theme names to new ones
     const themeNameMigration = {
-      'walking-with-a-smile': 'default'
+      'walking-with-a-smile': 'default',
+      'a11y-dark': 'default-dark',
+      'a11y-high-contrast': 'high-contrast',
+      'a11y-calm': 'calm',
+      'a11y-monochrome': 'monochrome-warm',
+      'a11y-protanopia': 'default-protan',
+      'a11y-deuteranopia': 'default-protan',
+      'a11y-tritanopia': 'default-tritan',
     };
     let savedTheme = localStorage.getItem('color-theme');
     if (savedTheme && themeNameMigration[savedTheme]) {
@@ -206,16 +220,9 @@ export class ThemeSwitcher {
   announceThemeChange(themeName) {
     const announcer = document.getElementById('theme-announcer');
     if (announcer) {
-      const friendlyNames = {
-        'default': 'Default Theme',
-        'a11y-dark': 'Dark Mode',
-        'a11y-high-contrast': 'High Contrast',
-        'a11y-cream': 'Cream',
-        'a11y-monochrome': 'Monochrome',
-        'a11y-protanopia': 'Protanopia (Red-blind)',
-        'a11y-deuteranopia': 'Deuteranopia (Green-blind)',
-        'a11y-tritanopia': 'Tritanopia (Blue-blind)'
-      };
+      // Import theme-names.json for friendly names (generated at build time)
+      // Fall back to theme key if not found
+      const friendlyNames = {};
 
       announcer.textContent = `Color theme changed to ${friendlyNames[themeName] || themeName}`;
 
@@ -237,7 +244,7 @@ export class ThemeSwitcher {
   }
 
   cycleTheme() {
-    const themeNames = Object.keys(this.themes);
+    const themeNames = Object.keys(this.themes).sort();
     const currentIndex = themeNames.indexOf(this.currentTheme);
     const nextIndex = (currentIndex + 1) % themeNames.length;
     const nextTheme = themeNames[nextIndex];

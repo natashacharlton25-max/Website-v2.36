@@ -82,26 +82,24 @@ function resolveColor(cssVar: string): string {
 function getAccentColors(): string[] {
   const cs = getComputedStyle(document.documentElement);
   return [
-    cs.getPropertyValue('--zone-pattern-primary').trim() || '#5e6f5a',
-    cs.getPropertyValue('--zone-pattern-secondary').trim() || '#856356',
-    cs.getPropertyValue('--zone-pattern-earth').trim() || '#756a4a',
-    cs.getPropertyValue('--zone-pattern-forest').trim() || '#6a6d4e',
-    cs.getPropertyValue('--zone-pattern-dusk').trim() || '#6d677e',
-  ];
+    cs.getPropertyValue('--rainbow-1').trim(),
+    cs.getPropertyValue('--rainbow-2').trim(),
+    cs.getPropertyValue('--rainbow-3').trim(),
+    cs.getPropertyValue('--rainbow-4').trim(),
+    cs.getPropertyValue('--rainbow-5').trim(),
+  ].filter(Boolean);
 }
 
 function getRainbowColors(): string[] {
   const cs = getComputedStyle(document.documentElement);
   return [
-    cs.getPropertyValue('--zone-pattern-primary').trim() || '#5e6f5a',
-    cs.getPropertyValue('--zone-pattern-primary-vivid').trim() || '#63564e',
-    cs.getPropertyValue('--zone-pattern-secondary').trim() || '#856356',
-    cs.getPropertyValue('--zone-pattern-secondary-vivid').trim() || '#78574a',
-    cs.getPropertyValue('--zone-pattern-earth').trim() || '#756a4a',
-    cs.getPropertyValue('--zone-pattern-forest').trim() || '#6a6d4e',
-    cs.getPropertyValue('--zone-pattern-dusk').trim() || '#6d677e',
-    cs.getPropertyValue('--zone-pattern-mist').trim() || '#626a7f',
-  ];
+    cs.getPropertyValue('--rainbow-1').trim(),
+    cs.getPropertyValue('--rainbow-2').trim(),
+    cs.getPropertyValue('--rainbow-3').trim(),
+    cs.getPropertyValue('--rainbow-4').trim(),
+    cs.getPropertyValue('--rainbow-5').trim(),
+    cs.getPropertyValue('--rainbow-6').trim(),
+  ].filter(Boolean);
 }
 
 function prefersReducedMotion(): boolean {

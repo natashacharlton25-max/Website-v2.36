@@ -208,10 +208,15 @@ function computeZonePalette(tokens, zone) {
   hues.neutral = txtHct.hue;
 
   // ── Chroma rules ──
+  // Minimum chroma floors — prevents all hues collapsing to grey on low-chroma brands
+  const BG_CHROMA_FLOOR      = dark ? 8 : 12;     // backgrounds: subtle but hue-identifiable
+  const PAT_CHROMA_FLOOR     = dark ? 15 : 20;    // patterns: visually distinct from bg
+  // Rainbow tokens now global (Okabe-Ito) — see src/styles/tokens/rainbow.css
+
   const brandChroma = priHct.chroma;
-  const bgChroma      = brandChroma * (dark ? 0.50 : 0.65);   // backgrounds: muted
-  const patChroma     = brandChroma * (dark ? 0.70 : 0.85);   // patterns: slightly vivid
-  const neutralChroma = brandChroma * 0.15;                     // neutral: barely tinted
+  const bgChroma      = Math.max(brandChroma * (dark ? 0.50 : 0.65), BG_CHROMA_FLOOR);
+  const patChroma     = Math.max(brandChroma * (dark ? 0.70 : 0.85), PAT_CHROMA_FLOOR);
+  const neutralChroma = Math.max(brandChroma * 0.15, 3);  // neutral stays near-achromatic but not dead
 
   // ── Tone rules ──
   // 4 depth levels: deep / mid / base / soft
@@ -386,7 +391,7 @@ function makeDark() {
     meta: { title: 'Dark', sample: 'Low strain' },
     tokens: darkTokens(pp, sp, np),
     zone: { luminance: 'dark', hue: '30%', mixDark: 'var(--brand-c-bg)', mixLight: 'var(--brand-c-text)' },
-    shadows: true, darkCards: true,
+    shadows: true,
   };
 }
 
@@ -448,15 +453,15 @@ function makeMonochrome() {
   };
 }
 
-function makeCream() {
+function makeCalm() {
   // Soft beige: hue 75 (sand), low chroma 10
   const bp = TonalPalette.fromHueAndChroma(75, 10);
   // Complement: muted sage
   const sp = TonalPalette.fromHueAndChroma(150, 10);
 
   return {
-    name: 'cream',
-    meta: { title: 'Cream', sample: 'Warm paper' },
+    name: 'calm',
+    meta: { title: 'Calm Mode', sample: 'Warm paper' },
     tokens: lightTokens(bp, sp, bp, {
       bg: tone(bp, 93),          // soft beige
       text: tone(bp, 20),        // dark warm brown
@@ -492,7 +497,7 @@ function makeCVD(type) {
 /* ── CSS FILE GENERATION ─────────────────────────────────────── */
 
 function generateThemeCSS(theme) {
-  const { name, meta, tokens, zone, shadows, darkCards, extras } = theme;
+  const { name, meta, tokens, zone, shadows, extras } = theme;
   const dark = zone.luminance === 'dark';
   const L = [];
   const ln = (s = '') => L.push(s);
@@ -534,10 +539,10 @@ function generateThemeCSS(theme) {
   const bgKeys = Object.keys(zonePalette).filter(k => k.startsWith('zone-bg-'));
   const patKeys = Object.keys(zonePalette).filter(k => k.startsWith('zone-pattern-'));
 
-  ln(`  /* ── ZONE BACKGROUNDS (pre-computed hex) ──── */`);
+  ln(`  /* ── ZONE BACKGROUNDS (section/page — low chroma, 4 depths) ── */`);
   for (const k of bgKeys) ln(`  --${k}: ${zonePalette[k]};`);
   ln();
-  ln(`  /* ── ZONE PATTERNS (pre-computed hex) ─────── */`);
+  ln(`  /* ── ZONE PATTERNS (icon/decoration overlays — mid chroma) ── */`);
   for (const k of patKeys) ln(`  --${k}: ${zonePalette[k]};`);
   ln();
 
@@ -570,33 +575,9 @@ function generateThemeCSS(theme) {
   ln(`  --media-saturation: ${extras?.mediaSaturation || (dark ? '0.90' : '1')};`);
   ln(`  --media-contrast: ${extras?.mediaContrast || (dark ? '0.98' : '1')};`);
 
-  if (shadows || dark) {
-    ln();
-    ln(`  /* ── SHADOWS ─────────────────────────────── */`);
-    for (const s of ['shadow-xs','shadow-sm','shadow','shadow-base','shadow-md','shadow-lg','shadow-xl','shadow-2xl','shadow-btn'])
-      ln(`  --${s}: none;`);
-    ln(`  --shadow-btn-hover: 0 0 12px color-mix(in oklch, var(--brand-c-primary) 40%, transparent);`);
-    ln(`  --shadow-glow-primary: 0 0 14px color-mix(in oklch, var(--brand-c-primary) 50%, transparent);`);
-    ln(`  --shadow-glow-secondary: 0 0 14px color-mix(in oklch, var(--brand-c-secondary) 50%, transparent);`);
-  }
+  // Shadows now live in src/styles/zones/theme-luminance-dark.css
 
   ln(`}`);
-
-  if (darkCards) {
-    ln();
-    ln(`#a11y-content-wrapper.a11y-theme-dark .card {`);
-    ln(`  background: var(--brand-c-bg) !important;`);
-    ln(`  border: 1px solid var(--brand-c-neutral-dark) !important;`);
-    ln(`  box-shadow: none !important;`);
-    ln(`}`);
-    ln(`#a11y-content-wrapper.a11y-theme-dark .card:hover {`);
-    ln(`  border-color: var(--brand-c-primary) !important;`);
-    ln(`  box-shadow: 0 0 16px color-mix(in oklch, var(--brand-c-primary) 30%, transparent) !important;`);
-    ln(`}`);
-    ln(`#a11y-content-wrapper.a11y-theme-dark .btn { color: var(--brand-c-bg) !important; }`);
-    ln(`#a11y-content-wrapper.a11y-theme-dark .btn--ghost,`);
-    ln(`#a11y-content-wrapper.a11y-theme-dark .btn--outline { color: var(--brand-c-primary) !important; }`);
-  }
 
   return L.join('\n');
 }
@@ -651,7 +632,7 @@ console.log('🎨 generate-theme-tokens.js (M3 colour system)');
 console.log(`   Brand: primary=${BRAND.primary}  secondary=${BRAND.secondary}\n`);
 
 const themes = [
-  makeDefault(), makeCream(), makeDark(), makeHighContrast(),
+  makeDefault(), makeCalm(), makeDark(), makeHighContrast(),
   makeMonochrome(), makeCVD('protanopia'), makeCVD('deuteranopia'), makeCVD('tritanopia'),
 ];
 

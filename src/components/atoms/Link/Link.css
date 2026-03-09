@@ -17,16 +17,16 @@
   margin: 0;
   text-decoration: none;
   cursor: pointer;
-  color: var(--brand-c-primary);
+  color: var(--link-color, var(--brand-c-primary));
   transition: color 0.35s ease;
 }
 
 .link:hover {
-  color: var(--brand-c-primary-dark);
+  color: var(--link-hover, var(--brand-c-primary-dark));
 }
 
 .link:focus-visible {
-  outline: var(--border-width-2) solid var(--brand-c-primary);
+  outline: var(--border-width-2) solid var(--link-focus, var(--brand-c-primary));
   outline-offset: var(--border-width-2);
   border-radius: var(--radius-xs);
 }
@@ -43,11 +43,11 @@
    ========================================================== */
 
 .link--default {
-  color: var(--brand-c-primary);
+  color: var(--link-color, var(--brand-c-primary));
 }
 
 .link--default:hover {
-  color: var(--brand-c-primary-dark);
+  color: var(--link-hover, var(--brand-c-primary-dark));
 }
 
 /* ==========================================================
@@ -58,7 +58,7 @@
 
 .link--underline {
   position: relative;
-  color: var(--brand-c-primary);
+  color: var(--link-color, var(--brand-c-primary));
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 2px;
@@ -66,7 +66,7 @@
 }
 
 .link--underline:hover {
-  color: var(--brand-c-primary-dark);
+  color: var(--link-hover, var(--brand-c-primary-dark));
 }
 
 /* ==========================================================
@@ -75,7 +75,7 @@
    ========================================================== */
 
 .link--highlight {
-  color: var(--brand-c-primary);
+  color: var(--link-color, var(--brand-c-primary));
   position: relative;
 }
 
@@ -87,7 +87,7 @@
   width: 100%;
   height: 8px;
   z-index: -1;
-  background-color: var(--brand-c-primary-light);
+  background-color: var(--link-highlight, var(--brand-c-primary-light));
   opacity: var(--opacity-low);
 }
 
@@ -97,14 +97,14 @@
    ========================================================== */
 
 .link--border {
-  color: var(--brand-c-primary);
-  border-bottom: var(--border-width) solid var(--brand-c-primary);
+  color: var(--link-color, var(--brand-c-primary));
+  border-bottom: var(--border-width) solid var(--link-color, var(--brand-c-primary));
   padding-bottom: 1px;
 }
 
 .link--border:hover {
-  color: var(--brand-c-primary-dark);
-  border-color: var(--brand-c-primary-dark);
+  color: var(--link-hover, var(--brand-c-primary-dark));
+  border-color: var(--link-hover, var(--brand-c-primary-dark));
 }
 
 /* ==========================================================
@@ -113,23 +113,22 @@
    ========================================================== */
 
 .link--ghost {
-  color: var(--brand-c-text);
+  color: var(--text-color);
 }
 
 .link--ghost:hover {
-  color: var(--brand-c-primary);
+  color: var(--link-color, var(--brand-c-primary));
 }
 
 /* ==========================================================
    COLOUR OVERRIDES
    ========================================================== */
 
-.link--color-primary      { color: var(--brand-c-primary); }
-.link--color-primary-dark { color: var(--brand-c-primary-dark); }
-.link--color-secondary    { color: var(--brand-c-secondary); }
-.link--color-text         { color: var(--brand-c-text); }
-.link--color-text-light   { color: var(--brand-c-text-light); }
-.link--color-inherit      { color: inherit; }
+.link--color-primary   { color: var(--link-color, var(--brand-c-primary)); }
+.link--color-accent    { color: var(--link-accent, var(--brand-c-secondary)); }
+.link--color-text      { color: var(--text-color); }
+.link--color-muted     { color: var(--text-secondary); }
+.link--color-inherit   { color: inherit; }
 
 /* ==========================================================
    WEIGHT OVERRIDES
@@ -195,17 +194,17 @@
   margin: 0 -0.25rem;
 }
 .link--animate-shadow-fill:hover {
-  color: var(--color-White);
-  box-shadow: inset 200px 0 0 0 var(--brand-c-primary);
+  color: var(--link-fill-text, var(--color-White));
+  box-shadow: inset 200px 0 0 0 var(--link-color, var(--brand-c-primary));
 }
 
 /* Animation: textSlide — text colour sweeps from left + underline grows */
 .link--animate-text-slide {
   background-image: linear-gradient(
     to right,
-    var(--brand-c-primary),
-    var(--brand-c-primary) 50%,
-    var(--brand-c-text) 50%
+    var(--link-color, var(--brand-c-primary)),
+    var(--link-color, var(--brand-c-primary)) 50%,
+    var(--text-color) 50%
   );
   background-size: 200% 100%;
   background-position: -100%;
@@ -216,7 +215,7 @@
 }
 .link--animate-text-slide::before {
   content: '';
-  background: var(--brand-c-primary);
+  background: var(--link-color, var(--brand-c-primary));
   display: block;
   position: absolute;
   bottom: -3px;
@@ -241,7 +240,7 @@
 
 /* Textonly — all links become plain underlined text */
 [data-render="textonly"] .link {
-  color: var(--brand-c-primary);
+  color: var(--link-color, var(--brand-c-primary));
   text-decoration: underline;
   text-underline-offset: 3px;
   text-align: left;
@@ -264,9 +263,8 @@
 }
 
 [data-render="textonly"] .link--color-primary,
-[data-render="textonly"] .link--color-primary-dark,
-[data-render="textonly"] .link--color-secondary,
+[data-render="textonly"] .link--color-accent,
 [data-render="textonly"] .link--color-text,
-[data-render="textonly"] .link--color-text-light {
-  color: var(--brand-c-primary);
+[data-render="textonly"] .link--color-muted {
+  color: var(--link-color, var(--brand-c-primary));
 }

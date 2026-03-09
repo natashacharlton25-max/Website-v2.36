@@ -3,46 +3,49 @@
  * Badge — Simple inline label
  *
  * Token system: --_badge-bg / --_badge-text / --_badge-border
- * Zone colour tokens give a rich palette across all themes.
+ * Colour set by JSON pipeline via inline style.
  *
  * @param label - Display text
- * @param color - 'primary' (default), 'secondary', 'earth', 'forest', 'dusk', 'neutral', 'mist'
- * @param variant - 'fill' (default), 'outline', 'glass', 'glass-light', 'glass-dark'
+ * @param variant - 'fill' (default), 'outline', 'glass'
+ * @param size - 'sm', 'md' (default), 'lg'
  * @param shape - 'rounded' (default), 'pill', 'squared'
  * @param icon - Optional Phosphor icon slug e.g. 'shield-check-fill'
  * @param uppercase - Uppercase text (default true)
+ * @param semanticRole - 'status' (default), 'tag', 'label', 'none'
  */
 import { Icon } from '../Icon';
 import { Text } from '../Text';
 
 interface Props {
   label: string;
-  color?: 'primary' | 'secondary' | 'earth' | 'forest' | 'dusk' | 'neutral' | 'mist';
-  variant?: 'fill' | 'outline' | 'glass' | 'glass-light' | 'glass-dark';
+  variant?: 'fill' | 'outline' | 'glass';
+  size?: 'sm' | 'md' | 'lg';
   shape?: 'rounded' | 'pill' | 'squared';
   icon?: string;
   uppercase?: boolean;
+  semanticRole?: 'status' | 'tag' | 'label' | 'none';
   class?: string;
 }
 
 const {
   label,
-  color = 'primary',
   variant = 'fill',
+  size = 'md',
   shape = 'rounded',
   icon,
   uppercase = true,
+  semanticRole = 'status',
   class: className,
 } = Astro.props;
 ---
 
 <span
-  data-semantic-role="status"
+  data-semantic-role={semanticRole !== 'none' ? semanticRole : undefined}
   class:list={[
     'badge',
     `badge--${variant}`,
+    size !== 'md' && `badge--${size}`,
     `badge--${shape}`,
-    color !== 'primary' && `badge--c-${color}`,
     icon && 'badge--has-icon',
     !uppercase && 'badge--lowercase',
     className,
