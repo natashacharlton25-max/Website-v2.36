@@ -12,6 +12,9 @@
  * Animation invariant:
  *   Transition, hover transform, and tilt are gated behind .image--animate.
  *   Reduced render never emits that class → zero motion at CSS level.
+ *
+ * Internal tokens (--_image-*):
+ *   --_image-border, --_image-caption, --_image-overlay
  */
 
 /* ==========================================================
@@ -19,14 +22,19 @@
    ========================================================== */
 
 .image {
+  /* ── Internal tokens (bridge → internal, single point of truth) ── */
+  --_image-border:  var(--img-border, var(--brand-c-primary));
+  --_image-caption: var(--img-caption, var(--text-secondary));
+  --_image-overlay: var(--img-overlay, var(--color-Black));
+
   margin: 0;
   position: relative;
   display: inline-block;
 }
 
 .image:focus-visible {
-  outline: 2px solid var(--img-border, var(--brand-c-primary));
-  outline-offset: 2px;
+  outline: var(--border-width-2) solid var(--_image-border);
+  outline-offset: var(--border-width-2);
 }
 
 /* ==========================================================
@@ -252,7 +260,7 @@
 .image-alt-aac {
   display: none;
   font-size: var(--text-small);
-  color: var(--img-caption, var(--text-secondary));
+  color: var(--_image-caption);
   margin-top: var(--space-xs);
 }
 
@@ -281,7 +289,7 @@
   right: 0;
   margin-top: 0;
   padding: var(--space-sm);
-  background: var(--img-overlay, var(--color-Black));
+  background: var(--_image-overlay);
   color: var(--text-inverse);
 }
 
@@ -299,7 +307,7 @@
   right: 0;
   margin-top: 0;
   padding: var(--space-sm);
-  background: var(--img-overlay, var(--color-Black));
+  background: var(--_image-overlay);
   color: var(--text-inverse);
 }
 
@@ -340,7 +348,7 @@
 [data-alt-display-mode="replace"][data-alt-text-mode="aac"] .image-alt-aac {
   display: block;
   padding: var(--space-md);
-  background: color-mix(in srgb, var(--img-caption, var(--text-secondary)) 8%, transparent);
+  background: color-mix(in srgb, var(--_image-caption) 8%, transparent);
   border-radius: var(--radius-md);
   margin-top: 0;
 }
@@ -437,5 +445,5 @@
 [data-text-xl] [data-alt-display-mode="overlay"][data-alt-text-mode] .image-alt-aac {
   position: static;
   background: transparent;
-  color: var(--img-caption, var(--text-secondary));
+  color: var(--_image-caption);
 }

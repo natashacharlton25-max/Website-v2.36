@@ -20,7 +20,7 @@ import { Text } from '../Text';
 interface Props {
   href: string;
   variant?: 'default' | 'underline' | 'highlight' | 'border' | 'ghost';
-  color?: 'primary' | 'primary-dark' | 'secondary' | 'text' | 'text-light' | 'inherit';
+  color?: 'primary' | 'accent' | 'text' | 'muted' | 'inherit';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
   uppercase?: boolean;
   flush?: boolean;
@@ -73,16 +73,16 @@ const dataAttrs = Object.fromEntries(
 const classes = [
   'link',
   `link--${variant}`,
-  color ? `link--color-${color}` : '',
-  weight ? `link--weight-${weight}` : '',
-  uppercase ? 'link--uppercase' : '',
-  flush ? 'link--flush' : '',
+  color && `link--color-${color}`,
+  weight && `link--weight-${weight}`,
+  uppercase && 'link--uppercase',
+  flush && 'link--flush',
   underlineGrow && 'link--animate-underline-grow',
   highlightGrow && 'link--animate-highlight-grow',
   shadowFill && 'link--animate-shadow-fill',
   textSlide && 'link--animate-text-slide',
   className,
-].filter(Boolean);
+];
 ---
 
 <a

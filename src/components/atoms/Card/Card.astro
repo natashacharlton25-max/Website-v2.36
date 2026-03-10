@@ -10,7 +10,7 @@
  * In textonly, card becomes transparent bordered box — child atoms handle their own visibility.
  *
  * @param as          - HTML element: div | article | section | aside | li (default: div)
- * @param variant     - Visual style: default | transparent | outline | glass | liquid-glass | neumorphic | neumorphic-pressed | comic | tech
+ * @param variant     - Visual style: default | transparent | outline | glass | liquid | neumorphic | pressed | comic | tech
  * @param hover       - Hover effect (animation group): true (lift), 'border', 'glow'. Stripped in reduced/assistive/textonly.
  * @param shadow      - Box shadow: none | sm | md | lg | xl
  * @param dropShadow  - Filter drop-shadow (better for non-rect shapes): none | sm | md | lg | xl
@@ -30,7 +30,7 @@
 
 export interface Props {
   as?: 'div' | 'article' | 'section' | 'aside' | 'li';
-  variant?: 'default' | 'transparent' | 'outline' | 'glass' | 'liquid-glass' | 'neumorphic' | 'neumorphic-pressed' | 'comic' | 'tech';
+  variant?: 'default' | 'transparent' | 'outline' | 'glass' | 'liquid' | 'neumorphic' | 'pressed' | 'comic' | 'tech';
   hover?: boolean | 'border' | 'glow';
   shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   dropShadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
@@ -42,7 +42,7 @@ export interface Props {
   href?: string;
   separator?: boolean;
   class?: string;
-  [key: string]: any;
+  [key: `data-${string}`]: string | undefined;
 }
 
 const {
@@ -90,6 +90,34 @@ const linkAttrs = href ? {
   ...(href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {}),
 } : {};
 ---
+
+{variant === 'liquid' && (
+  <svg width="0" height="0" style="position: absolute;" aria-hidden="true">
+    <defs>
+      <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.02 0.02"
+          numOctaves="2"
+          seed="92"
+          result="noise"
+        />
+        <feGaussianBlur
+          in="noise"
+          stdDeviation="2"
+          result="blurred"
+        />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="blurred"
+          scale="200"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
+    </defs>
+  </svg>
+)}
 
 <Tag
   class:list={classes}

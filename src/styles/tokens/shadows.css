@@ -12,6 +12,16 @@
   --shadow-xl: 0 20px 25px -5px color-mix(in oklch, var(--brand-c-bg-dark) 10%, transparent), 0 10px 10px -5px color-mix(in oklch, var(--brand-c-bg-dark) 4%, transparent);
   --shadow-2xl: 0 25px 50px -12px color-mix(in oklch, var(--brand-c-bg-dark) 25%, transparent);
 
+  /* Elevated surface — self-adapting to light/dark via White/Black endpoints.
+     Light mode: white inset invisible, black shadows give depth.
+     Dark mode: white inset gives subtle highlight, black shadows invisible. */
+  --shadow-elevated:
+    inset 0 0 0.5px 1px color-mix(in oklch, var(--color-White) 12%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--color-Black) 8%, transparent),
+    0 0.5px 0.8px color-mix(in oklch, var(--color-Black) 6%, transparent),
+    0 1.5px 3px color-mix(in oklch, var(--color-Black) 10%, transparent),
+    0 6px 12px color-mix(in oklch, var(--color-Black) 16%, transparent);
+
   /* Inset / inner surface shadows */
   --shadow-inner-sm: inset 0 0 6px 2px
     color-mix(in oklch, var(--color-Black) 4%, transparent);
@@ -110,6 +120,18 @@
 
   /* ── Glass overlay ── */
   --glass-overlay-blur: 8px;
+
+  /* ========== LIQUID GLASS ========== */
+  /* Two-layer pseudo approach: ::before = tint + inner glow,
+     ::after = backdrop-blur + SVG distortion filter.
+     Reusable by any component — Card, Toast, molecules, etc. */
+  --liquid-blur: 10px;
+  --liquid-tint: color-mix(in oklch, var(--color-White) 0%, transparent);
+  --liquid-inner-glow: color-mix(in oklch, var(--color-White) 70%, transparent);
+  --liquid-outer-glow: color-mix(in oklch, var(--color-White) 30%, transparent);
+  --liquid-border: color-mix(in oklch, var(--color-White) 20%, transparent);
+  --liquid-inner-shadow: inset 0 0 44px -15px var(--liquid-inner-glow);
+  --liquid-outer-shadow: 0 0 42px -12px var(--liquid-outer-glow);
 }
 
 

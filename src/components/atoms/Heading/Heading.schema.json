@@ -2,7 +2,7 @@
   "component": "Heading",
   "category": "atom",
   "renders": { "full": "Heading.astro", "reduced": "Heading.astro", "assistive": "Heading.astro", "textonly": "Heading.astro" },
-  "notes": "Every heading on the site should go through this component. Heading.css is the single source of truth for all heading typography.",
+  "notes": "Every heading on the site should go through this component. Heading.css is the single source of truth for all heading typography. All 4 renders use the same Heading.astro — pipeline strips visual/animation props in textonly (plain semantic heading). Subtitle passes through in textonly (semantic content) and renders via Text atom — triggers the decorated wrapper path but produces clean flex-column markup with no visual decoration.",
 
   "props": {
     "content": {
@@ -17,7 +17,7 @@
       "_description": "How the heading looks",
       "size":           { "type": "string",  "required": false, "default": "matches level", "enum": ["h1","h2","h3","h4","h5","h6"], "description": "Visual size override." },
       "weight":         { "type": "string",  "required": false, "default": null, "enum": ["normal","medium","semibold","bold","extrabold"], "description": "Font weight override." },
-      "color":          { "type": "string",  "required": false, "default": null, "enum": ["primary","primary-dark","secondary","text","text-light","neutral","inherit"], "description": "Text colour override." },
+      "color":          { "type": "string",  "required": false, "default": null, "enum": ["accent","text","muted","inherit"], "description": "Semantic text colour override. accent = brand primary, text = body text, muted = secondary text, inherit = parent colour." },
       "family":         { "type": "string",  "required": false, "default": null, "enum": ["heading","body","mono"], "description": "Font family override." },
       "align":          { "type": "string",  "required": false, "default": null, "enum": ["left","center","right"], "description": "Text alignment." },
       "tracking":       { "type": "string",  "required": false, "default": null, "enum": ["normal","wide","wider"], "description": "Letter spacing." },
@@ -37,6 +37,18 @@
       "iconStyle":      { "type": "string",  "required": false, "default": "contained", "enum": ["contained","bare"], "description": "Icon container style." },
       "spacing":        { "type": "string",  "required": false, "default": "normal", "enum": ["tight","normal","loose"], "description": "Wrapper gap size." },
       "class":          { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "colour": {
+      "_description": "Pipeline colour tokens — set as inline styles. 'auto' = pipeline resolves from variant/level defaults.",
+      "headingColor":      { "type": "token", "required": false, "default": "auto", "cssProperty": "--heading-color",      "description": "Default heading text colour (h1, h3–h5 levels)." },
+      "headingAccent":     { "type": "token", "required": false, "default": "auto", "cssProperty": "--heading-accent",     "description": "Accent heading colour (h2, h6 levels)." },
+      "headingUnderline":  { "type": "token", "required": false, "default": "auto", "cssProperty": "--heading-underline",  "description": "Underline and divider colour." },
+      "headingBadgeBg":    { "type": "token", "required": false, "default": "auto", "cssProperty": "--heading-badge-bg",   "description": "Badge variant background." },
+      "headingBadgeText":  { "type": "token", "required": false, "default": "auto", "cssProperty": "--heading-badge-text", "description": "Badge variant text colour." },
+      "headingHighlight":  { "type": "token", "required": false, "default": "auto", "cssProperty": "--heading-highlight",  "description": "Highlight variant background." },
+      "headingIcon":       { "type": "token", "required": false, "default": "auto", "cssProperty": "--heading-icon",       "description": "Icon colour in media slot." },
+      "headingMediaBg":    { "type": "token", "required": false, "default": "auto", "cssProperty": "--heading-media-bg",   "description": "Media container background." }
     },
 
     "animation": {

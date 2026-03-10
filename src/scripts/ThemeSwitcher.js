@@ -183,14 +183,26 @@ export class ThemeSwitcher {
       button.setAttribute('aria-pressed', isActive.toString());
     });
 
-    // Update body class for a11y.css component-specific styles
-    // Remove all a11y-theme-* classes first
+    // Set data-mode and data-theme on body
+    // Theme files output --theme-luminance: light|dark — read after CSS loads
+    document.body.setAttribute('data-theme', themeName);
+    setTimeout(() => {
+      const luminance = getComputedStyle(document.documentElement)
+        .getPropertyValue('--theme-luminance').trim();
+      if (luminance) {
+        document.body.setAttribute('data-mode', luminance);
+      } else {
+        document.body.removeAttribute('data-mode');
+      }
+    }, 0);
+
+    // Legacy: body classes for components still using .a11y-theme-* selectors
+    // TODO: Remove once all selectors migrated to [data-mode] etc.
     document.body.classList.forEach(cls => {
       if (cls.startsWith('a11y-theme-')) {
         document.body.classList.remove(cls);
       }
     });
-    // Add new theme class (convert 'a11y-dark' to 'a11y-theme-dark')
     if (themeName !== 'default') {
       const bodyClass = themeName.replace('a11y-', 'a11y-theme-');
       document.body.classList.add(bodyClass);

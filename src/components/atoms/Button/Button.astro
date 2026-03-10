@@ -111,6 +111,9 @@ const hasIcon = !!icon || !!lottieIcon;
 const isIconOnly = hasIcon && (shape === 'circle' || shape === 'square');
 
 // Icon sizes per button size
+// Semantic role for AT context
+const semanticRole = type === 'submit' ? 'form-submit' : isIconOnly && ariaLabel ? 'control' : 'action';
+
 const iconSizes: Record<string, number> = { sm: 18, md: 22, lg: 26 };
 const iconSize = iconSizes[size] || 18;
 
@@ -170,6 +173,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
       aria-label={ariaLabel}
       aria-expanded="false"
       aria-haspopup="true"
+      data-semantic-role={semanticRole}
       {...dataAttrs}
       {...confettiAttrs}
     >
@@ -207,6 +211,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     id={id}
     aria-disabled={disabled}
     aria-label={ariaLabel}
+    data-semantic-role={semanticRole}
     {...dataAttrs}
     {...confettiAttrs}
   >
@@ -221,6 +226,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     disabled={disabled}
     id={id}
     aria-label={ariaLabel}
+    data-semantic-role={semanticRole}
     {...dataAttrs}
     {...confettiAttrs}
   >

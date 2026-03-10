@@ -9,6 +9,14 @@
  *
  * Tokens are defined in tokens/typography.css.
  * This file applies those tokens to actual elements.
+ *
+ * Internal tokens (--_heading-*):
+ *   --_heading-color, --_heading-accent, --_heading-underline,
+ *   --_heading-underline-gradient, --_heading-badge-bg, --_heading-badge-bg-alt,
+ *   --_heading-badge-bg-neutral, --_heading-badge-text, --_heading-highlight,
+ *   --_heading-highlight-alt, --_heading-highlight-neutral, --_heading-icon,
+ *   --_heading-icon-alt, --_heading-icon-neutral, --_heading-icon-text,
+ *   --_heading-media-bg
  */
 
 /* ================================================================
@@ -17,6 +25,24 @@
    ================================================================ */
 
 .heading {
+  /* ── Internal tokens (bridge → internal, single point of truth) ── */
+  --_heading-color:            var(--heading-color, var(--brand-c-text));
+  --_heading-accent:           var(--heading-accent, var(--brand-c-primary));
+  --_heading-underline:        var(--heading-underline, var(--brand-c-primary));
+  --_heading-badge-bg:         var(--heading-badge-bg, var(--brand-c-primary));
+  --_heading-badge-bg-alt:     var(--heading-badge-bg-alt, var(--brand-c-secondary));
+  --_heading-badge-bg-neutral: var(--heading-badge-bg-neutral, var(--brand-c-neutral));
+  --_heading-badge-text:       var(--heading-badge-text, var(--color-White));
+  --_heading-highlight:        var(--heading-highlight, var(--brand-c-primary-light));
+  --_heading-highlight-alt:    var(--heading-highlight-alt, var(--brand-c-secondary-light));
+  --_heading-highlight-neutral: var(--heading-highlight-neutral, var(--brand-c-neutral-light));
+  --_heading-icon:             var(--heading-icon, var(--brand-c-primary));
+  --_heading-icon-alt:         var(--heading-icon-alt, var(--brand-c-secondary));
+  --_heading-icon-neutral:     var(--heading-icon-neutral, var(--brand-c-neutral));
+  --_heading-icon-text:        var(--heading-icon-text, var(--brand-c-text));
+  --_heading-media-bg:         var(--heading-media-bg, var(--brand-c-bg-light));
+  --_heading-underline-gradient: var(--heading-underline-gradient, var(--gradient-hero));
+
   font-family: var(--font-heading);
   letter-spacing: var(--letter-spacing-wide);   /* 0.05em — all headings */
   overflow-wrap: break-word;
@@ -33,7 +59,7 @@
   font-size: var(--text-h1);               /* 48px */
   font-weight: var(--font-extrabold);      /* 800 */
   line-height: var(--leading-tight);       /* 1.25 */
-  color: var(--heading-color, var(--brand-c-text));
+  color: var(--_heading-color);
   margin-bottom: var(--space-md);
 }
 
@@ -41,7 +67,7 @@
   font-size: var(--text-h2);               /* 32px */
   font-weight: var(--font-semibold);       /* 600 */
   line-height: var(--leading-tight);       /* 1.25 */
-  color: var(--heading-accent, var(--brand-c-primary));
+  color: var(--_heading-accent);
   margin-bottom: var(--space-md);
 }
 
@@ -49,7 +75,7 @@
   font-size: var(--text-h3);               /* 24px */
   font-weight: var(--font-semibold);       /* 600 */
   line-height: var(--leading-snug);        /* 1.375 */
-  color: var(--heading-color, var(--brand-c-text));
+  color: var(--_heading-color);
   margin-bottom: var(--space-md);
 }
 
@@ -57,7 +83,7 @@
   font-size: var(--text-h4);               /* 20px */
   font-weight: var(--font-medium);         /* 500 */
   line-height: var(--leading-snug);        /* 1.375 */
-  color: var(--heading-color, var(--brand-c-text));
+  color: var(--_heading-color);
   margin-bottom: var(--space-sm);
 }
 
@@ -65,7 +91,7 @@
   font-size: var(--text-h5);               /* 18px */
   font-weight: var(--font-medium);         /* 500 */
   line-height: var(--leading-snug);        /* 1.375 */
-  color: var(--heading-color, var(--brand-c-text));
+  color: var(--_heading-color);
   margin-bottom: var(--space-sm);
 }
 
@@ -73,7 +99,7 @@
   font-size: var(--text-small);            /* 14px */
   font-weight: var(--font-bold);           /* 700 */
   line-height: var(--leading-snug);        /* 1.375 */
-  color: var(--heading-accent, var(--brand-c-primary));
+  color: var(--_heading-accent);
   margin-bottom: var(--space-sm);
 }
 
@@ -93,8 +119,8 @@
 
 /* ── Colour ─────────────────────────────────────────────────── */
 
-.heading--color-accent       { color: var(--heading-accent, var(--brand-c-primary)); }
-.heading--color-text         { color: var(--heading-color, var(--brand-c-text)); }
+.heading--color-accent       { color: var(--_heading-accent); }
+.heading--color-text         { color: var(--_heading-color); }
 .heading--color-muted        { color: var(--text-secondary); }
 .heading--color-inherit      { color: inherit; }
 
@@ -187,9 +213,7 @@ nav .heading {
   z-index: 1;
 }
 
-.heading-wrap__subtitle {
-  /* Typography handled by Text atom — only layout-specific styles here */
-}
+/* .heading-wrap__subtitle — typography handled by Text atom, no layout-specific styles needed */
 
 /* ── Spacing ────────────────────────────────────────────────── */
 
@@ -216,23 +240,23 @@ nav .heading {
 .heading-wrap--divider-ends-rounded .heading-wrap__divider { border-radius: var(--radius-full); }
 .heading-wrap--divider-ends-square .heading-wrap__divider  { border-radius: 0; }
 
-.heading-wrap--divider-color-primary .heading-wrap__divider   { background: var(--heading-underline, var(--brand-c-primary)); }
-.heading-wrap--divider-color-secondary .heading-wrap__divider { background: var(--heading-accent, var(--brand-c-primary)); }
+.heading-wrap--divider-color-primary .heading-wrap__divider   { background: var(--_heading-underline); }
+.heading-wrap--divider-color-secondary .heading-wrap__divider { background: var(--_heading-accent); }
 .heading-wrap--divider-color-text .heading-wrap__divider      { background: var(--text-secondary); }
 .heading-wrap--divider-color-neutral .heading-wrap__divider   { background: var(--text-secondary); }
-.heading-wrap--divider-color-gradient .heading-wrap__divider  { background: var(--heading-underline, var(--brand-c-primary)); }
+.heading-wrap--divider-color-gradient .heading-wrap__divider  { background: var(--_heading-underline); }
 .heading-wrap--divider-none .heading-wrap__divider            { display: none; }
 
 .heading-wrap--divider-style-dashed .heading-wrap__divider {
   background: repeating-linear-gradient(
-    to bottom, var(--heading-underline, var(--brand-c-primary)) 0, var(--heading-underline, var(--brand-c-primary)) 0.25em,
+    to bottom, var(--_heading-underline) 0, var(--_heading-underline) 0.25em,
     transparent 0.25em, transparent 0.4em
   );
 }
 
 .heading-wrap--divider-style-dotted .heading-wrap__divider {
   background: repeating-linear-gradient(
-    to bottom, var(--heading-underline, var(--brand-c-primary)) 0, var(--heading-underline, var(--brand-c-primary)) 0.15em,
+    to bottom, var(--_heading-underline) 0, var(--_heading-underline) 0.15em,
     transparent 0.15em, transparent 0.35em
   );
   border-radius: 0;
@@ -247,14 +271,14 @@ nav .heading {
   width: 90%;
   margin-top: var(--space-sm);
   border-radius: var(--radius-full);
-  background: var(--heading-underline, var(--brand-c-primary));
+  background: var(--_heading-underline);
 }
 
-.heading-wrap--underline-gradient .heading-wrap__underline { background: var(--heading-underline-gradient, var(--gradient-hero)); width: 100%; }
+.heading-wrap--underline-gradient .heading-wrap__underline { background: var(--_heading-underline-gradient); width: 100%; }
 
 .heading-wrap--underline-dashed .heading-wrap__underline {
   background: repeating-linear-gradient(
-    to right, var(--heading-underline, var(--brand-c-primary)) 0, var(--heading-underline, var(--brand-c-primary)) 0.35em,
+    to right, var(--_heading-underline) 0, var(--_heading-underline) 0.35em,
     transparent 0.35em, transparent 0.55em
   );
   width: 100%;
@@ -274,12 +298,12 @@ nav .heading {
   letter-spacing: var(--letter-spacing-wider);
   padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-full);
-  color: var(--heading-badge-text, var(--color-White));
+  color: var(--_heading-badge-text);
 }
 
-.heading-wrap--badge-primary .heading   { background: var(--heading-badge-bg, var(--brand-c-primary)); }
-.heading-wrap--badge-secondary .heading { background: var(--heading-badge-bg-alt, var(--brand-c-secondary)); }
-.heading-wrap--badge-neutral .heading   { background: var(--heading-badge-bg-neutral, var(--brand-c-neutral)); }
+.heading-wrap--badge-primary .heading   { background: var(--_heading-badge-bg); }
+.heading-wrap--badge-secondary .heading { background: var(--_heading-badge-bg-alt); }
+.heading-wrap--badge-neutral .heading   { background: var(--_heading-badge-bg-neutral); }
 
 
 /* ── Variant: Highlight ─────────────────────────────────────── */
@@ -296,9 +320,9 @@ nav .heading {
   opacity: var(--opacity-low);
 }
 
-.heading-wrap--highlight-primary .heading-wrap__highlight   { background: var(--heading-highlight, var(--brand-c-primary-light)); }
-.heading-wrap--highlight-secondary .heading-wrap__highlight { background: var(--heading-highlight-alt, var(--brand-c-secondary-light)); }
-.heading-wrap--highlight-neutral .heading-wrap__highlight   { background: var(--heading-highlight-neutral, var(--brand-c-neutral-light)); }
+.heading-wrap--highlight-primary .heading-wrap__highlight   { background: var(--_heading-highlight); }
+.heading-wrap--highlight-secondary .heading-wrap__highlight { background: var(--_heading-highlight-alt); }
+.heading-wrap--highlight-neutral .heading-wrap__highlight   { background: var(--_heading-highlight-neutral); }
 
 
 /* ── Variant: Minimal ───────────────────────────────────────── */
@@ -318,7 +342,7 @@ nav .heading {
   justify-content: center;
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: var(--heading-media-bg, var(--brand-c-bg-light));
+  background: var(--_heading-media-bg);
 }
 
 .heading-wrap__img {
@@ -327,12 +351,12 @@ nav .heading {
   object-fit: cover;
 }
 
-.heading-wrap__icon { color: var(--heading-icon, var(--brand-c-primary)); }
+.heading-wrap__icon { color: var(--_heading-icon); }
 
-.heading-wrap--icon-primary .heading-wrap__icon   { color: var(--heading-icon, var(--brand-c-primary)); }
-.heading-wrap--icon-secondary .heading-wrap__icon { color: var(--heading-icon-alt, var(--brand-c-secondary)); }
-.heading-wrap--icon-neutral .heading-wrap__icon   { color: var(--heading-icon-neutral, var(--brand-c-neutral)); }
-.heading-wrap--icon-text .heading-wrap__icon      { color: var(--heading-icon-text, var(--brand-c-text)); }
+.heading-wrap--icon-primary .heading-wrap__icon   { color: var(--_heading-icon); }
+.heading-wrap--icon-secondary .heading-wrap__icon { color: var(--_heading-icon-alt); }
+.heading-wrap--icon-neutral .heading-wrap__icon   { color: var(--_heading-icon-neutral); }
+.heading-wrap--icon-text .heading-wrap__icon      { color: var(--_heading-icon-text); }
 
 .heading-wrap--icon-bare .heading-wrap__media {
   background: transparent;

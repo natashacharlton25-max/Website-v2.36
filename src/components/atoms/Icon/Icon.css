@@ -1,13 +1,19 @@
 /* Icon.css — Base styles for the Icon component.
  * Animation is gated by JSON props → CSS classes.
  * No prop = no class in HTML = animation rules never match.
+ *
+ * Internal tokens (--_icon-*):
+ *   --_icon-color
  */
 
 .icon {
+  /* ── Internal tokens (bridge → internal, single point of truth) ── */
+  --_icon-color: var(--icon-color, inherit);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: inherit;
+  color: var(--_icon-color);
 }
 
 .icon svg {
@@ -30,17 +36,17 @@
 
 /* ── Shadow ──────────────────────────────────────────── */
 
-.icon--shadow-sm { filter: var(--icon-shadow, var(--svg-drop-shadow-md)); }
+.icon--shadow-sm { filter: var(--icon-shadow, var(--svg-drop-shadow)); }
 .icon--shadow-md { filter: var(--icon-shadow, var(--svg-drop-shadow-md)); }
-.icon--shadow-lg { filter: var(--icon-shadow, var(--svg-drop-shadow-md)); }
+.icon--shadow-lg { filter: var(--icon-shadow, var(--svg-drop-shadow-lg)); }
 
 /* ── Glow ────────────────────────────────────────────── */
 
-.icon--glow-sm        { filter: var(--icon-glow, var(--svg-glow-md)); }
+.icon--glow-sm        { filter: var(--icon-glow, var(--svg-glow-sm)); }
 .icon--glow-md        { filter: var(--icon-glow, var(--svg-glow-md)); }
-.icon--glow-lg        { filter: var(--icon-glow, var(--svg-glow-md)); }
-.icon--glow-secondary { filter: var(--icon-glow, var(--svg-glow-md)); }
-.icon--glow-white     { filter: var(--icon-glow, var(--svg-glow-md)); }
+.icon--glow-lg        { filter: var(--icon-glow, var(--svg-glow-lg)); }
+.icon--glow-secondary { filter: var(--icon-glow, var(--svg-glow-secondary)); }
+.icon--glow-white     { filter: var(--icon-glow, var(--svg-glow-white)); }
 
 /* ==========================================================
    ANIMATION — gated by JSON props → CSS classes

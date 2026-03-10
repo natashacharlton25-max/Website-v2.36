@@ -1,14 +1,15 @@
 {
   "component": "Icon",
-  "category": "atoms/icons",
+  "category": "atom",
   "renders": { "full": "Icon.astro", "reduced": "Icon.astro", "assistive": "Icon.astro", "textonly": null },
-  "notes": "API-backed icon atom. Fetches SVG from Asset Library Worker at build/render time. Weight resolved via brand config or explicit override. All SVG transforms (stroke, gradient, draw, morph) happen server-side before inlining.",
+  "notes": "API-backed icon atom. Fetches SVG from Asset Library Worker at build/render time. Weight resolved via brand config or explicit override. All SVG transforms (stroke, gradient, draw, morph) happen server-side before inlining. textonly: null — decorative, skipped entirely.",
 
   "props": {
     "content": {
       "_description": "What icon to render",
-      "name":   { "type": "string",  "required": true, "description": "Icon base name or full slug (e.g. 'heart' or 'heart-fill'). Folder prefixes and ph: prefix stripped automatically." },
-      "weight": { "type": "string",  "required": false, "enum": ["fill", "duotone", "regular", "bold", "thin", "light"], "description": "Override weight. Defaults to brand config (ICON_WEIGHT env var, usually 'fill')." }
+      "name":         { "type": "string",  "required": true, "description": "Icon base name or full slug (e.g. 'heart' or 'heart-fill'). Folder prefixes and ph: prefix stripped automatically." },
+      "weight":       { "type": "string",  "required": false, "enum": ["fill", "duotone", "regular", "bold", "thin", "light"], "description": "Override weight. Defaults to brand config (ICON_WEIGHT env var, usually 'fill')." },
+      "semanticRole": { "type": "string",  "required": false, "enum": ["decorative", "ui-control", "content-symbol"], "description": "Semantic role for assistive tech. Decorative icons get aria-hidden. Content-symbol icons participate in AAC display." }
     },
 
     "visual": {
@@ -23,7 +24,7 @@
     },
 
     "animation": {
-      "_description": "Motion behaviour (all gated by a11y reduce-motion)",
+      "_description": "Motion behaviour — gated by prop-driven classes (no prop = no class = no motion)",
       "spin":         { "type": "boolean", "required": false, "description": "Continuous rotation on hover." },
       "pulse":        { "type": "boolean", "required": false, "description": "Scale pulse on hover for attention." },
       "bounce":       { "type": "boolean", "required": false, "description": "Subtle bounce on hover." },
@@ -33,6 +34,13 @@
       "drawColor":    { "type": "string",  "required": false, "description": "Stroke colour for draw animation." },
       "morphTo":      { "type": "string",  "required": false, "description": "Target icon name for MorphSVG on hover. Fetches target SVG from API." },
       "morphColor":   { "type": "string",  "required": false, "description": "Fill colour for morph target state." }
+    },
+
+    "colour": {
+      "_description": "Pipeline colour tokens — set as inline styles. 'auto' = pipeline resolves from context.",
+      "iconColor":  { "type": "token", "required": false, "default": "auto", "cssProperty": "--icon-color",  "description": "Icon fill/stroke colour." },
+      "iconShadow": { "type": "token", "required": false, "default": "auto", "cssProperty": "--icon-shadow", "description": "Drop shadow filter override." },
+      "iconGlow":   { "type": "token", "required": false, "default": "auto", "cssProperty": "--icon-glow",   "description": "Glow filter override." }
     }
   }
 }

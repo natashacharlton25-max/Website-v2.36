@@ -1,39 +1,48 @@
 {
   "component": "Image",
   "category": "atom",
-  "description": "Atomic image primitive — photos, illustrations, decorative SVGs, logos. Icon SVGs use Icon.astro.",
+  "renders": { "full": "Image.astro", "reduced": "Image.astro", "assistive": "Image.astro", "textonly": "Image.astro" },
+  "notes": "Atomic image primitive — photos, illustrations, decorative SVGs, logos. Icon SVGs use Icon.astro. All 4 renders use the same Image.astro — pipeline strips animation props in reduced (no hover/tilt classes emitted). Textonly render keeps the image in the a11y tree but the alt text display system (data-alt-display-mode) controls visual presentation. Consumes theme tokens (--media-brightness, --media-saturation, --media-contrast) so monochrome/dark/high-contrast themes apply automatically.",
+
   "props": {
     "content": {
-      "src": { "type": "string", "required": true },
-      "alt": { "type": "string" },
-      "role": { "type": "string", "enum": ["content", "decorative"], "default": "content" },
-      "altWord": { "type": "string" },
-      "altDescriptive": { "type": "string" },
-      "altAacHtml": { "type": "string" },
-      "semanticRole": { "type": "string", "enum": ["decorative", "ui-control", "content-symbol"] },
-      "loading": { "type": "string", "enum": ["lazy", "eager"], "default": "lazy" }
+      "_description": "What the image shows and how it's described",
+      "src":            { "type": "string",  "required": true, "description": "Image URL." },
+      "alt":            { "type": "string",  "required": false, "description": "Standard alt text for screen readers." },
+      "role":           { "type": "string",  "required": false, "default": "content", "enum": ["content", "decorative"], "description": "Content wraps in <figure> with alt spans. Decorative renders bare <img alt='' aria-hidden>." },
+      "altWord":        { "type": "string",  "required": false, "description": "Short word-level alt text (from API or manual)." },
+      "altDescriptive": { "type": "string",  "required": false, "description": "Long descriptive alt text." },
+      "altAacHtml":     { "type": "string",  "required": false, "description": "Pre-rendered AAC card HTML (built by aacResolver at build time)." },
+      "semanticRole":   { "type": "string",  "required": false, "enum": ["decorative", "ui-control", "content-symbol"], "description": "Semantic role for assistive tech and AAC display mode." },
+      "loading":        { "type": "string",  "required": false, "default": "lazy", "enum": ["lazy", "eager"], "description": "Loading strategy." }
     },
+
     "visual": {
-      "width": { "type": ["number", "string"] },
-      "height": { "type": ["number", "string"] },
-      "fit": { "type": "string", "enum": ["cover", "contain", "fill", "none"] },
-      "radius": { "type": "string", "enum": ["none", "sm", "md", "lg", "full"] },
-      "shadow": { "type": "string", "enum": ["none", "sm", "md", "lg"] },
-      "responsive": { "type": "boolean", "default": false },
-      "sepia": { "type": "string", "enum": ["light", "default", "heavy"] },
-      "blur": { "type": "string", "enum": ["sm", "md", "lg", "xl"] },
-      "gradientMask": { "type": "string", "enum": ["fade-bottom", "fade-top", "fade-edges", "vignette"] },
-      "clipPath": { "type": "string", "enum": ["circle", "ellipse", "diamond", "hexagon", "blob", "slant-left", "slant-right"] }
+      "_description": "How the image looks",
+      "width":        { "type": ["number", "string"], "required": false, "description": "Image width." },
+      "height":       { "type": ["number", "string"], "required": false, "description": "Image height." },
+      "fit":          { "type": "string",  "required": false, "enum": ["cover", "contain", "fill", "none"], "description": "Object-fit mode." },
+      "radius":       { "type": "string",  "required": false, "enum": ["none", "sm", "md", "lg", "full"], "description": "Border radius." },
+      "shadow":       { "type": "string",  "required": false, "enum": ["none", "sm", "md", "lg"], "description": "Box shadow." },
+      "responsive":   { "type": "boolean", "required": false, "default": false, "description": "Fill container, override inline dimensions." },
+      "sepia":        { "type": "string",  "required": false, "enum": ["light", "default", "heavy"], "description": "Warm vintage tone filter." },
+      "blur":         { "type": "string",  "required": false, "enum": ["sm", "md", "lg", "xl"], "description": "Blur filter." },
+      "gradientMask": { "type": "string",  "required": false, "enum": ["fade-bottom", "fade-top", "fade-edges", "vignette"], "description": "Soft fade mask." },
+      "clipPath":     { "type": "string",  "required": false, "enum": ["circle", "ellipse", "diamond", "hexagon", "blob", "slant-left", "slant-right"], "description": "Shaped crop." },
+      "class":        { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
     },
+
     "animation": {
-      "hover": { "type": "boolean", "default": false },
-      "tilt": { "type": "string", "enum": ["sm", "md", "lg"] }
+      "_description": "Motion behaviour — gated by .image--animate class (no prop = no class = no motion)",
+      "hover": { "type": "boolean", "required": false, "default": false, "textonly": false, "description": "Scale + shadow on hover." },
+      "tilt":  { "type": "string",  "required": false, "enum": ["sm", "md", "lg"], "textonly": false, "description": "Static tilt transform." }
+    },
+
+    "colour": {
+      "_description": "Pipeline colour tokens — set as inline styles. 'auto' = pipeline resolves from context.",
+      "imgBorder":  { "type": "token", "required": false, "default": "auto", "cssProperty": "--img-border",  "description": "Focus outline colour." },
+      "imgCaption": { "type": "token", "required": false, "default": "auto", "cssProperty": "--img-caption", "description": "Alt text caption colour." },
+      "imgOverlay": { "type": "token", "required": false, "default": "auto", "cssProperty": "--img-overlay", "description": "Overlay/tooltip background colour." }
     }
-  },
-  "renders": {
-    "full": "Image.astro",
-    "reduced": "Image.astro",
-    "assistive": "Image.astro",
-    "textonly": "Image.astro"
   }
 }

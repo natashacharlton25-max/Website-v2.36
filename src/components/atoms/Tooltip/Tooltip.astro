@@ -7,7 +7,9 @@
  *   label — visual duplicate of trigger's aria-label (aria-hidden, decorative)
  *   info  — real content (consumer links via aria-describedby on their focusable)
  *
- * CSS-only visibility — no JS. Animation gated by entrance prop.
+ * Fixed-position (viewport-level) — never clipped by overflow:hidden.
+ * Tiny inline script reads trigger rect on hover/focus, sets CSS vars.
+ * Animation gated by entrance prop.
  *
  * Styles: Tooltip.css | Tooltip.responsive.css
  *
@@ -64,7 +66,7 @@ const wrapperClasses = [
 ].filter(Boolean);
 ---
 
-<span class:list={wrapperClasses}>
+<span class:list={wrapperClasses} data-tooltip-position={position}>
   <span class="tooltip__trigger">
     <slot />
   </span>
@@ -84,3 +86,51 @@ const wrapperClasses = [
     )}
   </span>
 </span>
+
+<script>
+  function initTooltips() {
+    document.querySelectorAll('.tooltip').forEach((wrapper) => {
+      if (wrapper.dataset.tooltipInit) return;
+      wrapper.dataset.tooltipInit = 'true';
+
+      const trigger = wrapper.querySelector('.tooltip__trigger');
+      const content = wrapper.querySelector('.tooltip__content');
+      if (!trigger || !content) return;
+
+      const position = wrapper.dataset.tooltipPosition || 'top';
+
+      function updatePosition() {
+        const rect = trigger.getBoundingClientRect();
+        let x, y;
+
+        switch (position) {
+          case 'top':
+            x = rect.left + rect.width / 2;
+            y = rect.top;
+            break;
+          case 'bottom':
+            x = rect.left + rect.width / 2;
+            y = rect.bottom;
+            break;
+          case 'left':
+            x = rect.left;
+            y = rect.top + rect.height / 2;
+            break;
+          case 'right':
+            x = rect.right;
+            y = rect.top + rect.height / 2;
+            break;
+        }
+
+        content.style.setProperty('--_tooltip-x', `${x}px`);
+        content.style.setProperty('--_tooltip-y', `${y}px`);
+      }
+
+      wrapper.addEventListener('mouseenter', updatePosition);
+      wrapper.addEventListener('focusin', updatePosition);
+    });
+  }
+
+  initTooltips();
+  document.addEventListener('astro:page-load', initTooltips);
+</script>

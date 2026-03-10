@@ -114,6 +114,89 @@ const whoSliderImages = [slider1Image, slider2Image, slider3Image, slider4Image,
     ctaHref={approachData.ctaHref}
   />
 
+  <!-- Card variant visual test — DELETE after visual check -->
+  <section style="padding: var(--space-2xl) var(--space-xl);">
+    <h2 style="text-align: center; color: var(--brand-c-text); margin-bottom: var(--space-xl);">Card Variant Test</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-xl); max-width: 1200px; margin: 0 auto;">
+
+      <!-- Default -->
+      <div class="card card--default card--radius-lg card--pad-xl" style="box-shadow: var(--shadow-elevated);">
+        <h3 style="margin: 0 0 var(--space-md); color: var(--brand-c-text);">Default</h3>
+        <p style="margin: 0 0 var(--space-lg); color: var(--brand-c-text);">Self-adapting --shadow-elevated. Light=black shadows, dark=black on #121212, HC dark=white glow.</p>
+        <button class="btn btn--primary btn--pill" type="button">Button</button>
+      </div>
+
+      <!-- Neumorphic -->
+      <div class="card card--neumorphic card--hover-glow card--radius-lg card--pad-xl">
+        <h3 style="margin: 0 0 var(--space-md); color: var(--brand-c-text);">Neumorphic</h3>
+        <p style="margin: 0 0 var(--space-lg); color: var(--brand-c-text);">Raised shadow + glow border on hover. Uses --shadow-elevated.</p>
+        <button class="btn btn--primary btn--pill" type="button">Button</button>
+      </div>
+
+      <!-- Neumorphic Pressed -->
+      <div class="card card--pressed card--hover-glow card--radius-lg card--pad-xl">
+        <h3 style="margin: 0 0 var(--space-md); color: var(--brand-c-text);">Neumorphic Pressed</h3>
+        <p style="margin: 0 0 var(--space-lg); color: var(--brand-c-text);">Inset/carved shadow (--shadow-neu-pressed). Glow border on hover.</p>
+        <button class="btn btn--primary btn--pill" type="button">Button</button>
+      </div>
+
+      <!-- Comic -->
+      <div class="card card--comic card--radius-lg card--pad-xl card--hover-lift">
+        <h3 style="margin: 0 0 var(--space-md); color: var(--brand-c-text);">Comic</h3>
+        <p style="margin: 0 0 var(--space-lg); color: var(--brand-c-text);">Thick border + hard offset shadow. Hover shifts on press (gated by animation prop).</p>
+        <button class="btn btn--primary btn--pill" type="button">Button</button>
+      </div>
+
+      <!-- Tech -->
+      <div class="card card--tech card--radius-lg card--pad-xl card--hover-lift">
+        <h3 style="margin: 0 0 var(--space-md); color: var(--brand-c-text);">Tech</h3>
+        <p style="margin: 0 0 var(--space-lg); color: var(--brand-c-text);">Accent border frame offset. Frame swap on hover (gated by animation prop).</p>
+        <button class="btn btn--primary btn--pill" type="button">Button</button>
+      </div>
+
+      <!-- Outline -->
+      <div class="card card--outline card--radius-lg card--pad-xl">
+        <h3 style="margin: 0 0 var(--space-md); color: var(--brand-c-text);">Outline</h3>
+        <p style="margin: 0 0 var(--space-lg); color: var(--brand-c-text);">Transparent bg, border only. No shadow.</p>
+        <button class="btn btn--primary btn--pill" type="button">Button</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Glass variant test — full image with cards on top -->
+  <section style={`position: relative; min-height: 500px; background: url('${bridgeImage.src}') center/cover no-repeat; padding: var(--space-2xl) var(--space-xl);`}>
+    <!-- SVG distortion filter for liquid glass -->
+    <svg width="0" height="0" style="position: absolute;" aria-hidden="true">
+      <defs>
+        <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="2" seed="92" result="noise" />
+          <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="200" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+
+    <h2 style="text-align: center; color: white; margin-bottom: var(--space-xl); text-shadow: 0 2px 8px rgba(0,0,0,0.5);">Glass Variants Over Image</h2>
+    <div style="display: flex; gap: var(--space-xl); justify-content: center; flex-wrap: wrap;">
+
+      <!-- Glass (frosted) -->
+      <div class="card card--glass card--radius-lg card--pad-xl" style="width: 360px;">
+        <h3 style="margin: 0 0 var(--space-md); color: white;">Glass</h3>
+        <p style="margin: 0 0 var(--space-lg); color: white; opacity: 0.85;">Frosted glassmorphism. Backdrop-blur frosts the image beneath.</p>
+        <button class="btn btn--primary btn--pill" type="button">Button</button>
+      </div>
+
+      <!-- Liquid Glass (distortion) -->
+      <div class="card card--liquid card--radius-lg card--pad-xl" style="width: 360px;">
+        <h3 style="margin: 0 0 var(--space-md); color: white;">Liquid Glass</h3>
+        <p style="margin: 0 0 var(--space-lg); color: white; opacity: 0.85;">SVG distortion + blur. Inner white glow edges. Liquid warp effect.</p>
+        <button class="btn btn--primary btn--pill" type="button">Button</button>
+      </div>
+
+    </div>
+  </section>
+
   <!-- Final CTA -->
   <CTASection
     title={ctaData.title}

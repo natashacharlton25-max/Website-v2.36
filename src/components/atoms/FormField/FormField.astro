@@ -10,12 +10,11 @@
  *
  * Token system: --_field-brand / --_field-brand-dark / --_field-brand-light / --_field-border
  * Colour variants: primary (default), secondary, neutral
- * Contrast variants: normal (default), high (darker borders, larger controls)
  * Style variants: outlined (default), filled, underlined, glass, neumorphic, glow
+ * High contrast + dark mode: gated by zone data attributes, not component props
  */
 
 import { Text } from '../Text';
-import { Button } from '../Button';
 import { Image } from '../Image';
 
 interface SelectOption {
@@ -31,7 +30,7 @@ interface Props {
   label: string;
   type?: 'text' | 'email' | 'textarea' | 'checkbox' | 'radio' | 'toggle' | 'search' | 'select' | 'number' | 'tel' | 'url' | 'password' | 'card-select';
   variant?: 'primary' | 'secondary' | 'neutral';
-  contrast?: 'normal' | 'high';
+
   fieldStyle?: 'outlined' | 'filled' | 'underlined' | 'glass' | 'neumorphic' | 'glow';
   placeholder?: string;
   required?: boolean;
@@ -59,7 +58,7 @@ const {
   label,
   type = 'text',
   variant = 'primary',
-  contrast = 'normal',
+
   fieldStyle = 'outlined',
   placeholder,
   required = false,
@@ -95,7 +94,9 @@ const describedBy = [
   description && `${id}-desc`,
 ].filter(Boolean).join(' ') || undefined;
 
-const groupClasses = [
+---
+
+<div class:list={[
   'form-field',
   isCheckbox && 'form-field--checkbox',
   isRadio && 'form-field--radio',
@@ -103,16 +104,12 @@ const groupClasses = [
   error && 'form-field--error',
   disabled && 'form-field--disabled',
   variant !== 'primary' && `form-field--${variant}`,
-  contrast === 'high' && 'form-field--high-contrast',
   fieldStyle !== 'outlined' && `form-field--${fieldStyle}`,
   isCardSelect && 'form-field--card-select',
   isCardSelect && `form-field--card-cols-${cardColumns}`,
   isCardSelect && `form-field--card-size-${cardSize}`,
   className,
-].filter(Boolean).join(' ');
----
-
-<div class={groupClasses}>
+]}>
 
   {isCheckbox ? (
     <!-- Checkbox: input + label inline -->
@@ -174,6 +171,7 @@ const groupClasses = [
     <Fragment>
       <!-- Label -->
       <label
+        id={`${id}-label`}
         for={id}
         class:list={['form-field__label', hideLabel && 'sr-only']}
       >

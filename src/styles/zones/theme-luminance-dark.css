@@ -1,81 +1,75 @@
 /**
  * theme-luminance-dark.css
  *
- * Dark theme overrides extracted from component CSS during render refactor.
- * Selectors use #a11y-content-wrapper:is(.a11y-theme-dark, .a11y-theme-high-contrast)
- * to match the legacy a11y system — will be adapted when render pipeline is final.
+ * Dark theme overrides — applies to ANY dark theme via [data-mode="dark"].
+ * ThemeSwitcher reads --theme-luminance from the active theme CSS and sets the
+ * data attribute on <body>. One selector catches every dark theme automatically.
  *
- * MIGRATION NOTES:
- * - Glass tints swap from white-based to black-based, borders go fainter,
- *   inset highlight flips to white edge. All using color-mix against brand tokens.
  *
- * 1. Selectors use .a11y-theme-dark class names (banned in new code).
- *    Should migrate to [data-theme-luminance="dark"] — one selector catches
- *    every dark theme (a11y, fun, user-custom). No need to list class names.
- *
- * 2. References --color-Black / --color-White which the engine outputs per theme
- *    as warm neutral endpoints. HC theme overrides to pure #000/#fff automatically.
- *
- * Migration path:
- *   - Replace .a11y-theme-dark / .a11y-theme-high-contrast with [data-theme-luminance="dark"]
- *   - Add shadow kills, glow system, surface mappings, media filters to same block
- *   - Everything references brand tokens + neutral scale — auto-adapts to any theme
- *   - Separate task from engine rewrite — logged for dark mode CSS migration
+ * References --color-Black / --color-White which the engine outputs per theme
+ * as warm neutral endpoints. HC theme overrides to pure #000/#fff automatically.
  *
  * Components extracted so far:
- *   - Badge (rules 19-20)
+ *   - Badge
  *   - FormField (neumorphic + glass dark fallbacks)
+ *   - Button (shadow kills, hover lightness shift)
+ *   - Heading (text headings → primary-600)
  */
 
 /* ── Glass + Glow token overrides (dark luminance) ───── */
 /* On dark themes, glass tints swap direction: White→Black for bg,
    borders get fainter, inset highlight becomes a subtle White edge. */
 
-:is(.a11y-theme-dark, .a11y-theme-high-contrast) {
-  --glass-bg: color-mix(in oklch, var(--color-Black) 15%, transparent);
-  --glass-bg-light: color-mix(in oklch, var(--color-Black) 10%, transparent);
-  --glass-bg-frosted: color-mix(in oklch, var(--color-Black) 25%, transparent);
+[data-mode="dark"] {
+  /* Glass bg — almost transparent, let blur do the work */
+  --glass-bg: color-mix(in oklch, var(--color-White) 4%, transparent);
+  --glass-bg-light: color-mix(in oklch, var(--color-White) 3%, transparent);
+  --glass-bg-frosted: color-mix(in oklch, var(--color-White) 6%, transparent);
   --glass-bg-brand-tint: color-mix(in oklch, var(--brand-c-bg-dark) 75%, transparent);
-  --glass-border: color-mix(in oklch, var(--color-White) 8%, transparent);
+  /* Glass borders — subtle white edges for depth */
+  --glass-border: color-mix(in oklch, var(--color-White) 10%, transparent);
+  --glass-border-light: color-mix(in oklch, var(--color-White) 15%, transparent);
   --glass-border-frosted: color-mix(in oklch, var(--color-White) 12%, transparent);
-  --glass-shadow-inset: inset 0 1px 0 color-mix(in oklch, var(--color-White) 3%, transparent);
+  /* Glass highlights */
+  --glass-shadow: 0 8px 32px 0 color-mix(in oklch, var(--color-Black) 40%, transparent);
+  --glass-shadow-inset: inset 0 1px 0 color-mix(in oklch, var(--color-White) 6%, transparent);
 }
 
 /* ── Badge ────────────────────────────────────────────── */
 
-#a11y-content-wrapper:is(.a11y-theme-dark, .a11y-theme-high-contrast) .badge--fill {
-  border: 2px solid var(--_badge-border);
+[data-mode="dark"] .badge--fill {
+  border: var(--border-width-2) solid var(--_badge-border);
   box-shadow: 0 0 8px color-mix(in oklch, var(--_badge-text) 35%, transparent);
 }
 
-#a11y-content-wrapper:is(.a11y-theme-dark, .a11y-theme-high-contrast) .badge--outline {
-  border-width: 2px;
+[data-mode="dark"] .badge--outline {
+  border-width: var(--border-width-2);
   box-shadow: 0 0 8px color-mix(in oklch, var(--_badge-text) 35%, transparent);
 }
 
 /* ── FormField ────────────────────────────────────────── */
 
-:is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--neumorphic .form-field__input {
+[data-mode="dark"] .form-field--neumorphic .form-field__input {
   box-shadow: none;
   border: var(--border-width-2) solid var(--_field-border);
 }
 
-:is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--neumorphic .form-field__input:focus {
+[data-mode="dark"] .form-field--neumorphic .form-field__input:focus {
   border-color: var(--_field-brand);
   box-shadow:
     0 4px 16px color-mix(in oklch, var(--_field-brand) 50%, transparent),
     0 0 30px color-mix(in oklch, var(--_field-brand) 20%, transparent);
 }
 
-:is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--glass .form-field__input {
-  background: color-mix(in oklch, var(--color-White) 6%, transparent);
+[data-mode="dark"] .form-field--glass .form-field__input {
+  background: var(--glass-bg-frosted);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid color-mix(in oklch, var(--color-White) 15%, transparent);
+  border: var(--border-width) solid var(--glass-border-light);
   box-shadow: none;
 }
 
-:is(.a11y-theme-dark, .a11y-theme-high-contrast) .form-field--glass .form-field__input:focus {
+[data-mode="dark"] .form-field--glass .form-field__input:focus {
   border-color: var(--_field-brand);
   box-shadow:
     0 4px 16px color-mix(in oklch, var(--_field-brand) 50%, transparent),
@@ -84,7 +78,7 @@
 
 /* ── Shadow kills (dark luminance) ── */
 
-[data-theme-luminance="dark"] {
+[data-mode="dark"] {
   --shadow-xs: none;
   --shadow-sm: none;
   --shadow: none;
@@ -94,7 +88,87 @@
   --shadow-xl: none;
   --shadow-2xl: none;
   --shadow-btn: none;
-  --shadow-btn-hover: 0 0 12px color-mix(in oklch, var(--brand-c-primary) 40%, transparent);
+  --shadow-btn-hover: none;
   --shadow-glow-primary: 0 0 14px color-mix(in oklch, var(--brand-c-primary) 50%, transparent);
   --shadow-glow-secondary: 0 0 14px color-mix(in oklch, var(--brand-c-secondary) 50%, transparent);
+
+  /* Elevated — high-opacity black shadows visible on dark bg */
+  --shadow-elevated:
+    inset 0 0 0.5px 1px color-mix(in oklch, var(--color-White) 8%, transparent),
+    0 2px 4px color-mix(in oklch, var(--color-Black) 80%, transparent),
+    0 8px 16px color-mix(in oklch, var(--color-Black) 40%, transparent);
+}
+
+/* ── HC dark — stronger white glow on pure black (can't go darker) ── */
+
+[data-mode="dark"][data-theme="high-contrast"],
+[data-mode="dark"][data-theme="high-contrast-protan"],
+[data-mode="dark"][data-theme="high-contrast-tritan"] {
+  --shadow-elevated:
+    inset 0 0 1px 0.5px color-mix(in oklch, var(--color-White) 20%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--color-White) 15%, transparent),
+    0 0 8px color-mix(in oklch, var(--color-White) 10%, transparent),
+    0 0 20px color-mix(in oklch, var(--color-White) 8%, transparent),
+    0 0 40px color-mix(in oklch, var(--color-White) 5%, transparent);
+}
+
+/* ── Neumorphic pressed — dark bg can't show black inset, use deeper dark ── */
+
+[data-mode="dark"] {
+  --shadow-neu-pressed: inset 2px 5px 10px var(--color-Black);
+  --shadow-neu-raised:
+    8px 8px 16px var(--color-Black),
+    -8px -8px 16px color-mix(in oklch, var(--color-White) 4%, transparent);
+}
+
+/* ── Comic — border invisible when --color-Black matches bg ── */
+
+[data-mode="dark"] .card--comic {
+  border-color: var(--card-comic-border, var(--color-White));
+  box-shadow: 5px 7px 0 var(--card-comic-shadow, var(--brand-c-primary));
+}
+
+[data-mode="dark"] .card--comic.card--hover-lift:hover {
+  box-shadow: 3px 4px 0 var(--card-comic-shadow, var(--brand-c-primary));
+}
+
+[data-mode="dark"] .card--comic.card--hover-lift:active {
+  box-shadow: 0 0 0 var(--card-comic-shadow, var(--brand-c-primary));
+}
+
+/* ── Liquid Glass — boost glow on dark bg (global, not card-scoped) ── */
+
+[data-mode="dark"] {
+  --liquid-inner-glow: color-mix(in oklch, var(--color-White) 50%, transparent);
+  --liquid-outer-glow: color-mix(in oklch, var(--color-White) 20%, transparent);
+  --liquid-inner-shadow: inset 0 0 44px -15px var(--liquid-inner-glow);
+  --liquid-outer-shadow: 0 0 42px -12px var(--liquid-outer-glow);
+}
+
+/* ── Liquid Glass HC dark — stronger edges on pure black ── */
+
+[data-mode="dark"][data-theme="high-contrast"],
+[data-mode="dark"][data-theme="high-contrast-protan"],
+[data-mode="dark"][data-theme="high-contrast-tritan"] {
+  --liquid-inner-glow: color-mix(in oklch, var(--color-White) 90%, transparent);
+  --liquid-outer-glow: color-mix(in oklch, var(--color-White) 50%, transparent);
+  --liquid-tint: color-mix(in oklch, var(--color-White) 3%, transparent);
+  --liquid-inner-shadow: inset 0 0 44px -15px var(--liquid-inner-glow);
+  --liquid-outer-shadow: 0 0 42px -12px var(--liquid-outer-glow);
+}
+
+/* ── Button dark hover — subtle lightness shift, not glow ── */
+/* Glow only on .btn--glow variant (has its own explicit box-shadow) */
+
+[data-mode="dark"] .btn:hover {
+  background-color: color-mix(in oklch, var(--_btn-brand) 85%, var(--color-White));
+}
+
+/* ── Heading dark — text headings use primary-600 instead of body text colour ── */
+/* Prevents white-on-dark headings blending into body text.                       */
+/* Accent headings (h2, h6) already use --_heading-accent which resolves          */
+/* to brand primary — no override needed for those.                               */
+
+[data-mode="dark"] .heading {
+  --_heading-color: var(--heading-color, var(--primary-600));
 }

@@ -216,7 +216,7 @@ Delete the `groupClasses` const.
 In `FormField.schema.json`, update the `fieldStyle` description to:
 
 ```json
-"description": "Visual style. Reduced render strips glass/neumorphic to outlined fallback. Textonly render forces underlined. Assistive render preserves all styles."
+"description": "Visual style. In reduced/assistive/textonly renders, glass/neumorphic/glow revert to outlined appearance via CSS overrides."
 ```
 
 ---

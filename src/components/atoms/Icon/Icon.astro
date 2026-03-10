@@ -207,16 +207,16 @@ const fallbackIcon = `<svg viewBox="0 0 256 256" width="${size}" height="${size}
 const drawVariant = typeof draw === 'string' ? draw : 'draw';
 
 const effectClasses = [
-  shadow ? `icon--shadow-${shadow}` : '',
-  glow ? `icon--glow-${glow}` : '',
-  gradient ? 'icon--has-gradient' : '',
-  spin ? 'icon--spin' : '',
-  pulse ? 'icon--pulse' : '',
-  bounce ? 'icon--bounce' : '',
-  stroke || draw ? 'icon--stroke' : '',
-  draw ? 'icon--draw' : '',
-  morphTo ? 'icon--morph' : '',
-].filter(Boolean).join(' ');
+  shadow && `icon--shadow-${shadow}`,
+  glow && `icon--glow-${glow}`,
+  gradient && 'icon--has-gradient',
+  spin && 'icon--spin',
+  pulse && 'icon--pulse',
+  bounce && 'icon--bounce',
+  (stroke || draw) && 'icon--stroke',
+  draw && 'icon--draw',
+  morphTo && 'icon--morph',
+];
 
 const dataAttrs: Record<string, string | undefined> = {};
 
@@ -235,7 +235,7 @@ if (morphTo && morphTargetContent) {
 ---
 
 <span
-  class={`icon ${effectClasses} ${className}`}
+  class:list={['icon', ...effectClasses, className]}
   style={`width: ${size}px; height: ${size}px;${color && !gradient ? ` color: ${color};` : ''}`}
   set:html={iconContent || fallbackIcon}
   aria-hidden="true"

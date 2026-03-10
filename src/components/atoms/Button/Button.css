@@ -38,7 +38,7 @@
   overflow-wrap: normal;
   --_btn-brand: var(--btn-bg, var(--brand-c-primary));
   --_btn-brand-dark: var(--btn-hover-bg, var(--brand-c-primary-dark));
-  --_btn-brand-light: var(--btn-hover-bg, var(--brand-c-primary-dark));
+  --_btn-brand-light: var(--btn-light-bg, var(--brand-c-primary-light));
   background-color: var(--_btn-brand);
   color: var(--btn-text, var(--btn-filled-text));
   box-shadow: var(--btn-shadow, var(--shadow-btn));
@@ -134,19 +134,19 @@
 .btn--primary {
   --_btn-brand: var(--btn-bg, var(--brand-c-primary));
   --_btn-brand-dark: var(--btn-hover-bg, var(--brand-c-primary-dark));
-  --_btn-brand-light: var(--btn-hover-bg, var(--brand-c-primary-dark));
+  --_btn-brand-light: var(--btn-light-bg, var(--brand-c-primary-light));
 }
 
 .btn--secondary {
-  --_btn-brand: var(--btn-bg, var(--brand-c-primary));
-  --_btn-brand-dark: var(--btn-hover-bg, var(--brand-c-primary-dark));
-  --_btn-brand-light: var(--btn-hover-bg, var(--brand-c-primary-dark));
+  --_btn-brand: var(--btn-bg, var(--brand-c-secondary));
+  --_btn-brand-dark: var(--btn-hover-bg, var(--brand-c-secondary-dark));
+  --_btn-brand-light: var(--btn-light-bg, var(--brand-c-secondary-light));
 }
 
 .btn--neutral {
-  --_btn-brand: var(--btn-bg, var(--brand-c-primary));
-  --_btn-brand-dark: var(--btn-hover-bg, var(--brand-c-primary-dark));
-  --_btn-brand-light: var(--btn-hover-bg, var(--brand-c-primary-dark));
+  --_btn-brand: var(--btn-bg, var(--brand-c-neutral));
+  --_btn-brand-dark: var(--btn-hover-bg, var(--brand-c-neutral-dark));
+  --_btn-brand-light: var(--btn-light-bg, var(--brand-c-neutral-light));
 }
 
 /* ==========================================================
@@ -162,13 +162,13 @@
 }
 
 .btn--outline:hover {
-  background-color: var(--_btn-brand-light);
-  color: var(--_btn-brand-dark);
-  border-color: var(--_btn-brand-dark);
+  background-color: var(--_btn-brand);
+  color: var(--btn-text, var(--btn-filled-text));
+  border-color: var(--_btn-brand);
 }
 
 .btn--outline:active {
-  background-color: var(--_btn-brand-light);
+  background-color: var(--_btn-brand-dark);
   box-shadow: none;
 }
 
@@ -195,7 +195,7 @@
   backdrop-filter: var(--btn-glass-blur, var(--glass-blur));
   -webkit-backdrop-filter: var(--btn-glass-blur, var(--glass-blur));
   border: 1px solid var(--btn-glass-border, var(--glass-border));
-  color: var(--btn-ghost-text, var(--brand-c-text));
+  color: var(--btn-glass-text, var(--brand-c-text));
   box-shadow: var(--btn-shadow, var(--shadow-btn));
 }
 
@@ -780,21 +780,8 @@
   outline-offset: calc(-1 * var(--border-width-2));
 }
 
-/* Theme borders on dropdown — all use --btn-dropdown-border from pipeline */
-.dropdown-theme--secondary { border-color: var(--btn-dropdown-border, var(--brand-c-neutral-light)); }
-.dropdown-theme--neutral   { border-color: var(--btn-dropdown-border, var(--brand-c-neutral-light)); }
-.dropdown-theme--outline   { border-color: var(--btn-dropdown-border, var(--brand-c-neutral-light)); }
-.dropdown-theme--ghost     { border-color: var(--btn-dropdown-border, var(--brand-c-neutral-light)); }
-
-.dropdown-theme--secondary .dropdown-item:hover {
-  background-color: var(--btn-dropdown-hover, var(--brand-c-primary-light));
-  color: var(--btn-dropdown-hover-text, var(--brand-c-primary-dark));
-}
-
-.dropdown-theme--neutral .dropdown-item:hover {
-  background-color: var(--btn-dropdown-hover, var(--brand-c-primary-light));
-  color: var(--btn-dropdown-hover-text, var(--brand-c-primary-dark));
-}
+/* Dropdown theme variants — all inherit from base .dropdown-menu border
+   and .dropdown-item:hover. Pipeline overrides via --btn-dropdown-* tokens. */
 
 /* ==========================================================
    CONFETTI — opt-in via .btn--confetti
@@ -892,7 +879,4 @@
 }
 [data-render="textonly"] .btn--icon-only {
   justify-content: center;
-}
-[data-render="textonly"] .btn--icon-only .btn__label {
-  display: none;
 }

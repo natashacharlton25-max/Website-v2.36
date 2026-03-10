@@ -6,15 +6,20 @@
  * Label, description, error render through Text atom.
  * Card-select renders choices as pictogram/text cards with hidden native inputs.
  *
- * Token system:
- *   --_field-brand / --_field-brand-dark / --_field-brand-light  (colour)
- *   --_field-border                                               (border colour)
- *   --_field-control-size                                         (checkbox/radio size)
- *   --_field-toggle-w / --_field-toggle-h / --_field-thumb-size   (toggle dims)
+ * Token system (all bridge via --field-* → --_field-*):
+ *   --_field-brand / -dark / -light      colour (variant-swapped)
+ *   --_field-bg / -text / -label         surface + text
+ *   --_field-placeholder / -error        states
+ *   --_field-control-mark                tick/dot colour
+ *   --_field-border                      border colour
+ *   --_field-glass-bg / -blur / -border  glass variant
+ *   --_field-shadow                      neumorphic/glass/toggle
+ *   --_field-control-size                checkbox/radio size
+ *   --_field-toggle-w / -h / -thumb-size toggle dims
  *
  * Colour variants swap brand tokens: primary (default), secondary, neutral
- * Contrast variants swap border token: normal (default), high
  * Style variants: outlined (default), filled, underlined, glass, neumorphic, glow
+ * High contrast + dark mode: zone files (high-contrast.css, theme-luminance-dark.css)
  */
 
 /* ==========================================================
@@ -25,13 +30,29 @@
   flex-direction: column;
   gap: var(--space-xs);
 
-  /* Colour tokens */
+  /* Colour tokens — default = primary */
   --_field-brand: var(--field-focus, var(--brand-c-primary));
-  --_field-brand-dark: var(--field-focus, var(--brand-c-primary));
-  --_field-brand-light: var(--field-focus, var(--brand-c-primary));
+  --_field-brand-dark: var(--field-focus-dark, var(--brand-c-primary-dark));
+  --_field-brand-light: var(--field-focus-light, var(--brand-c-primary-light));
+
+  /* Surface / text tokens */
+  --_field-bg: var(--field-bg, var(--page-bg-raised));
+  --_field-text: var(--field-text, var(--brand-c-text));
+  --_field-label: var(--field-label, var(--brand-c-text));
+  --_field-placeholder: var(--field-placeholder, var(--brand-c-text-light));
+  --_field-error: var(--field-error, var(--color-Error));
+  --_field-control-mark: var(--field-control-mark, var(--color-White));
 
   /* Border / contrast token */
   --_field-border: var(--field-border, var(--brand-c-neutral-light));
+
+  /* Glass tokens — only consumed by .form-field--glass */
+  --_field-glass-bg: var(--field-glass-bg, var(--glass-bg));
+  --_field-glass-blur: var(--field-glass-blur, var(--glass-blur));
+  --_field-glass-border: var(--field-glass-border, var(--glass-border));
+
+  /* Shadow token — consumed by neumorphic, glass, toggle */
+  --_field-shadow: var(--field-shadow, var(--shadow-neu-raised));
 
   /* Control size tokens */
   --_field-control-size: 22px;
@@ -44,57 +65,36 @@
    COLOUR VARIANTS
    ========================================================== */
 .form-field--secondary {
-  --_field-brand: var(--field-focus, var(--brand-c-primary));
-  --_field-brand-dark: var(--field-focus, var(--brand-c-primary));
-  --_field-brand-light: var(--field-focus, var(--brand-c-primary));
+  --_field-brand: var(--field-focus, var(--brand-c-secondary));
+  --_field-brand-dark: var(--field-focus-dark, var(--brand-c-secondary-dark));
+  --_field-brand-light: var(--field-focus-light, var(--brand-c-secondary-light));
 }
 
 .form-field--neutral {
-  --_field-brand: var(--field-focus, var(--brand-c-primary));
-  --_field-brand-dark: var(--field-focus, var(--brand-c-primary));
-  --_field-brand-light: var(--field-focus, var(--brand-c-primary));
+  --_field-brand: var(--field-focus, var(--brand-c-neutral));
+  --_field-brand-dark: var(--field-focus-dark, var(--brand-c-neutral-dark));
+  --_field-brand-light: var(--field-focus-light, var(--brand-c-neutral-light));
 }
 
-/* ==========================================================
-   CONTRAST VARIANT
-   ========================================================== */
-.form-field--high-contrast {
-  --_field-border: var(--field-border, var(--brand-c-neutral-light));
-  --_field-control-size: 28px;
-  --_field-toggle-w: 52px;
-  --_field-toggle-h: 28px;
-  --_field-thumb-size: 20px;
-}
-
-/* High contrast: strip neumorphic + glow back to outlined */
-.form-field--high-contrast.form-field--neumorphic .form-field__input {
-  box-shadow: none;
-  border: var(--border-width-2) solid var(--_field-border);
-}
-
-.form-field--high-contrast.form-field--neumorphic .form-field__input:focus {
-  box-shadow: none;
-}
-
-.form-field--high-contrast.form-field--glow .form-field__input:focus {
-  box-shadow: none;
-}
+/* High contrast + dark mode rules live in zone files:
+   src/styles/zones/high-contrast.css
+   src/styles/zones/theme-luminance-dark.css */
 
 /* ==========================================================
    LABEL
    ========================================================== */
 .form-field__label {
   font-weight: var(--font-semibold);
-  color: var(--field-label, var(--brand-c-text));
+  color: var(--_field-label);
 }
 
 .form-field__required {
-  color: var(--field-error, var(--color-Error));
+  color: var(--_field-error);
   margin-left: 2px;
 }
 
 .form-field__desc {
-  color: var(--field-placeholder, var(--brand-c-text-light));
+  color: var(--_field-placeholder);
 }
 
 /* ==========================================================
@@ -106,14 +106,14 @@
   border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: var(--text-base);
-  background: var(--field-bg, var(--page-bg-raised));
-  color: var(--field-text, var(--brand-c-text));
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: var(--_field-bg);
+  color: var(--_field-text);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   width: 100%;
 }
 
 .form-field__input::placeholder {
-  color: var(--field-placeholder, var(--brand-c-text-light));
+  color: var(--_field-placeholder);
   opacity: 0.6;
 }
 
@@ -126,7 +126,7 @@
 .form-field__input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: color-mix(in oklch, var(--field-bg, var(--page-bg-raised)) 90%, var(--field-border, var(--brand-c-neutral-light)));
+  background: color-mix(in oklch, var(--_field-bg) 90%, var(--_field-border));
 }
 
 /* ---- Textarea ---- */
@@ -152,13 +152,13 @@
    STYLE VARIANT: FILLED
    ========================================================== */
 .form-field--filled .form-field__input {
-  background: color-mix(in oklch, var(--_field-brand) 8%, var(--field-bg, var(--page-bg-raised)));
+  background: color-mix(in oklch, var(--_field-brand) 8%, var(--_field-bg));
   border-color: transparent;
 }
 
 .form-field--filled .form-field__input:focus {
   border-color: var(--_field-brand);
-  background: color-mix(in oklch, var(--_field-brand) 4%, var(--field-bg, var(--page-bg-raised)));
+  background: color-mix(in oklch, var(--_field-brand) 4%, var(--_field-bg));
 }
 
 /* ==========================================================
@@ -186,12 +186,12 @@
    STYLE VARIANT: GLASS
    ========================================================== */
 .form-field--glass .form-field__input {
-  background: var(--field-glass-bg, var(--glass-bg));
-  backdrop-filter: var(--field-glass-blur, var(--glass-blur));
-  -webkit-backdrop-filter: var(--field-glass-blur, var(--glass-blur));
-  border: 1px solid var(--field-glass-border, var(--glass-border));
-  color: var(--field-text, var(--brand-c-text));
-  box-shadow: var(--field-shadow, var(--shadow-neu-raised));
+  background: var(--_field-glass-bg);
+  backdrop-filter: var(--_field-glass-blur);
+  -webkit-backdrop-filter: var(--_field-glass-blur);
+  border: 1px solid var(--_field-glass-border);
+  color: var(--_field-text);
+  box-shadow: var(--_field-shadow);
 }
 
 .form-field--glass .form-field__input:focus {
@@ -204,12 +204,12 @@
    ========================================================== */
 .form-field--neumorphic .form-field__input {
   border: none;
-  background: var(--field-bg, var(--page-bg-raised));
-  box-shadow: var(--field-shadow, var(--shadow-neu-raised));
+  background: var(--_field-bg);
+  box-shadow: var(--_field-shadow);
 }
 
 .form-field--neumorphic .form-field__input:focus {
-  box-shadow: var(--field-shadow, var(--shadow-neu-raised));
+  box-shadow: var(--_field-shadow);
   border-color: transparent;
   outline: 2px solid var(--_field-brand);
   outline-offset: 2px;
@@ -252,8 +252,8 @@
   flex-shrink: 0;
   border: var(--border-width-2) solid var(--_field-border);
   border-radius: var(--radius-sm);
-  background: var(--field-bg, var(--page-bg-raised));
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  background: var(--_field-bg);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
   position: relative;
 }
 
@@ -266,7 +266,7 @@
   top: calc(var(--_field-control-size) * 0.12);
   width: calc(var(--_field-control-size) * 0.23);
   height: calc(var(--_field-control-size) * 0.46);
-  border: solid var(--field-control-mark, var(--color-White));
+  border: solid var(--_field-control-mark);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -291,7 +291,7 @@
 }
 
 .form-field__label-text {
-  color: var(--field-label, var(--brand-c-text));
+  color: var(--_field-label);
 }
 
 /* ==========================================================
@@ -322,8 +322,8 @@
   flex-shrink: 0;
   border: var(--border-width-2) solid var(--_field-border);
   border-radius: 50%;
-  background: var(--field-bg, var(--page-bg-raised));
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  background: var(--_field-bg);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
   position: relative;
 }
 
@@ -337,7 +337,7 @@
   width: calc(var(--_field-control-size) * 0.45);
   height: calc(var(--_field-control-size) * 0.45);
   border-radius: 50%;
-  background: var(--field-control-mark, var(--color-White));
+  background: var(--_field-control-mark);
   transform: translate(-50%, -50%);
 }
 
@@ -386,9 +386,9 @@
   width: var(--_field-toggle-w);
   height: var(--_field-toggle-h);
   flex-shrink: 0;
-  border-radius: 999px;
-  background: var(--field-border, var(--brand-c-neutral-light));
-  transition: background-color 0.2s ease;
+  border-radius: var(--radius-full);
+  background: var(--_field-border);
+  transition: background-color var(--transition-fast);
   position: relative;
 }
 
@@ -399,9 +399,9 @@
   width: var(--_field-thumb-size);
   height: var(--_field-thumb-size);
   border-radius: 50%;
-  background: var(--field-control-mark, var(--color-White));
-  box-shadow: var(--field-shadow, var(--shadow-neu-raised));
-  transition: transform 0.2s ease;
+  background: var(--_field-control-mark);
+  box-shadow: var(--_field-shadow);
+  transition: transform var(--transition-fast);
 }
 
 .form-field__toggle:checked + .form-field__toggle-track {
@@ -426,28 +426,28 @@
    ERROR STATE
    ========================================================== */
 .form-field--error .form-field__input {
-  border-color: var(--field-error, var(--color-Error));
+  border-color: var(--_field-error);
 }
 
 .form-field--error .form-field__input:focus {
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--field-error, var(--color-Error)) 15%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--_field-error) 15%, transparent);
 }
 
 .form-field--error .form-field__checkmark {
-  border-color: var(--field-error, var(--color-Error));
+  border-color: var(--_field-error);
 }
 
 .form-field--error .form-field__radio-indicator {
-  border-color: var(--field-error, var(--color-Error));
+  border-color: var(--_field-error);
 }
 
 .form-field--error .form-field__toggle-track {
-  outline: 2px solid var(--field-error, var(--color-Error));
+  outline: 2px solid var(--_field-error);
   outline-offset: 2px;
 }
 
 .form-field__error {
-  color: var(--field-error, var(--color-Error));
+  color: var(--_field-error);
   font-weight: var(--font-medium);
 }
 
@@ -496,7 +496,7 @@
   padding: var(--space-lg);
   border: var(--border-width-2) solid var(--_field-border);
   border-radius: var(--radius-lg);
-  background: var(--field-bg, var(--page-bg-raised));
+  background: var(--_field-bg);
   text-align: center;
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
@@ -547,7 +547,6 @@
 /* ── Reduced — all transitions instant, strip effects, enlarge controls ── */
 
 [data-render="reduced"] .form-field {
-  --_field-border: var(--field-border, var(--brand-c-neutral-light));
   --_field-control-size: 28px;
   --_field-toggle-w: 52px;
   --_field-toggle-h: 28px;
@@ -563,14 +562,14 @@
 [data-render="reduced"] .form-field--glass .form-field__input {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  background: var(--field-bg, var(--page-bg-raised));
-  border: 2px solid var(--_field-border);
+  background: var(--_field-bg);
+  border: var(--border-width-2) solid var(--_field-border);
   box-shadow: none;
 }
 
 [data-render="reduced"] .form-field--neumorphic .form-field__input {
   box-shadow: none;
-  border: 2px solid var(--_field-border);
+  border: var(--border-width-2) solid var(--_field-border);
 }
 
 [data-render="reduced"] .form-field--glow .form-field__input:focus {
@@ -636,9 +635,9 @@
 /* ── Textonly — native controls, no custom widgets ── */
 
 [data-render="textonly"] .form-field__input {
-  background: color-mix(in oklch, var(--field-text, var(--brand-c-text)) 6%, transparent);
+  background: color-mix(in oklch, var(--_field-text) 6%, transparent);
   border: none;
-  border-bottom: 2px solid var(--field-border, var(--brand-c-neutral-light));
+  border-bottom: 2px solid var(--_field-border);
   border-radius: 0;
   box-shadow: none;
   backdrop-filter: none;

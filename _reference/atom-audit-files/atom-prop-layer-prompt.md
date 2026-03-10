@@ -292,8 +292,18 @@ Badge last — it has the most complex migration (zone tokens → rainbow).
 
 ## Do NOT
 
-- Add fallback values — no `var(--card-bg, var(--brand-c-bg))`
+- Add hardcoded hex fallbacks — no `var(--card-bg, #1a1a2e)`
 - Change spacing, typography, radius, transition, z-index, or border-width tokens
 - Change structural CSS (display, position, flex, grid)
 - Rename existing non-colour props that already work
 - Touch the a11y, responsive, or recovery CSS files in this pass — colour props only on the main CSS file
+
+## DO use bridge fallbacks (temporary)
+
+Token-to-token fallbacks are the bridge pattern until JSON pipeline is built:
+```css
+var(--card-bg, var(--brand-c-bg))       /* ✅ bridge — prop layer wraps brand token */
+var(--card-bg, #1a1a2e)                 /* ❌ banned — hardcoded hex */
+var(--brand-c-bg)                       /* ❌ banned — naked brand token without prop wrapper */
+```
+FormField already uses this pattern throughout. Follow it for all atoms.
