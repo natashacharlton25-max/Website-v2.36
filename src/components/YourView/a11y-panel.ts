@@ -25,6 +25,10 @@ export interface A11ySettings {
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
   altDisplayMode: 'hidden' | 'caption' | 'overlay' | 'tooltip' | 'subtitle' | 'replace';
   cognitiveLevel: 'green' | 'yellow' | 'orange' | 'full';
+  /** Which symbol pictures to show — OpenAAC is the bundled default */
+  symbolSet: 'openaac' | 'widgit' | 'pcs' | 'bliss' | 'makaton' | 'custom';
+  /** URL to a user-provided custom symbol mapping JSON file */
+  customSymbolsUrl: string;
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -45,7 +49,9 @@ export const defaultSettings: A11ySettings = {
   scrollbarEnhanced: false,
   altTextMode: 'none',
   altDisplayMode: 'hidden',
-  cognitiveLevel: 'full'
+  cognitiveLevel: 'full',
+  symbolSet: 'openaac',
+  customSymbolsUrl: ''
 };
 
 // ===================================
@@ -200,6 +206,20 @@ export function applySettings(settings: A11ySettings): void {
   const cogLevel = settings.cognitiveLevel || 'full';
   (target as HTMLElement).dataset.cognitiveLevel = cogLevel;
   document.documentElement.dataset.cognitiveLevel = cogLevel;
+
+  // Symbol Set — which AAC pictures to display
+  const symbolSet = settings.symbolSet || 'openaac';
+  (target as HTMLElement).dataset.symbolSet = symbolSet;
+  document.documentElement.dataset.symbolSet = symbolSet;
+
+  // Custom Symbols — user-provided JSON mapping file
+  // When symbolSet is 'custom' and a URL is provided, load the mapping
+  // and swap AacCard pictogram sources via data-bci attribute matching.
+  // The JSON file format: { "12321": "https://example.com/symbol.png", ... }
+  // Keys are BCI reference numbers, values are image URLs.
+  if (symbolSet === 'custom' && settings.customSymbolsUrl) {
+    loadCustomSymbols(settings.customSymbolsUrl);
+  }
 
   // Font Family - apply to wrapper
   target.classList.remove(
@@ -397,6 +417,24 @@ export function updateUI(container: HTMLElement, s: A11ySettings): void {
     const theme = (btn as HTMLButtonElement).dataset.theme;
     btn.setAttribute('aria-pressed', theme === s.theme ? 'true' : 'false');
   });
+
+  // Symbol set cards (which pictures do you use?)
+  const symbolSetGrid = container.querySelector('[data-setting="symbolSet"]');
+  symbolSetGrid?.querySelectorAll('.a11y-alttext-card').forEach(card => {
+    const val = (card as HTMLButtonElement).dataset.alttext;
+    card.setAttribute('aria-pressed', val === s.symbolSet ? 'true' : 'false');
+  });
+
+  // Custom symbols URL input
+  const customUrlInput = container.querySelector<HTMLInputElement>('[data-setting="customSymbolsUrl"]');
+  if (customUrlInput) {
+    customUrlInput.value = s.customSymbolsUrl || '';
+    // Show/hide the custom URL input based on whether 'custom' is selected
+    const customUrlRow = customUrlInput.closest('.a11y-custom-symbols-row') as HTMLElement;
+    if (customUrlRow) {
+      customUrlRow.style.display = s.symbolSet === 'custom' ? '' : 'none';
+    }
+  }
 }
 
 // ===================================
@@ -496,6 +534,74 @@ export function formatSliderValue(setting: string, value: number): string {
 }
 
 // ===================================
+// CUSTOM SYMBOL SET LOADER
+// ===================================
+
+/**
+ * Cache for loaded custom symbol mappings.
+ * Key: URL, Value: mapping of BCI index → image URL.
+ */
+let customSymbolCache: { url: string; map: Record<string, string> } | null = null;
+
+/**
+ * Load a user-provided custom symbol JSON file and swap AacCard pictograms.
+ *
+ * The JSON format is: { "12321": "https://example.com/my-symbol.png", ... }
+ * Keys are BCI reference numbers (as strings), values are image URLs.
+ * The file can be hosted anywhere — the browser fetches it client-side.
+ * Images are loaded directly by the browser from the URLs in the file,
+ * so the user just points to wherever their symbol images live.
+ *
+ * Matching: finds all .aac-card[data-bci] elements on the page,
+ * swaps the .aac-card__pictogram src if a match exists in the mapping.
+ */
+async function loadCustomSymbols(url: string): Promise<void> {
+  // Use cache if same URL already loaded
+  if (customSymbolCache && customSymbolCache.url === url) {
+    applyCustomSymbolMap(customSymbolCache.map);
+    return;
+  }
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.warn(`Custom symbols: failed to fetch ${url} (${response.status})`);
+      return;
+    }
+
+    const map = await response.json() as Record<string, string>;
+
+    // Validate: must be a plain object with string values
+    if (typeof map !== 'object' || Array.isArray(map)) {
+      console.warn('Custom symbols: JSON must be an object { "bci_index": "image_url", ... }');
+      return;
+    }
+
+    customSymbolCache = { url, map };
+    applyCustomSymbolMap(map);
+    announce('Custom symbol pictures loaded');
+  } catch (err) {
+    console.warn('Custom symbols: failed to load', err);
+  }
+}
+
+/**
+ * Apply a custom symbol mapping to all AacCard elements on the page.
+ * Finds cards by data-bci attribute, swaps pictogram src.
+ */
+function applyCustomSymbolMap(map: Record<string, string>): void {
+  document.querySelectorAll<HTMLElement>('.aac-card[data-bci]').forEach((card) => {
+    const bci = card.dataset.bci;
+    if (!bci || !map[bci]) return;
+
+    const img = card.querySelector<HTMLImageElement>('.aac-card__pictogram');
+    if (img) {
+      img.src = map[bci];
+    }
+  });
+}
+
+// ===================================
 // KEYBOARD DETECTION
 // ===================================
 export function initKeyboardDetection(): void {
@@ -520,6 +626,7 @@ if (typeof window !== 'undefined') {
     prefersReducedMotion,
     prefersHighContrast,
     getSettings,
-    applySettings
+    applySettings,
+    loadCustomSymbols
   };
 }

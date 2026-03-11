@@ -1,0 +1,90 @@
+/**
+ * AacCard — AAC pictogram card styles
+ *
+ * Inline-flex card: pictogram image above word label.
+ * Cognitive level filtering handled by aac-mode.css (global).
+ * Dark mode overrides in theme-luminance-dark.css.
+ *
+ * Sizes: sm (24px), md (32px), lg (48px)
+ * Variants: default (pictogram), text-only (dashed border, no image)
+ */
+
+
+/* ==========================================================
+   Base card
+   ========================================================== */
+
+.aac-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--_aac-card-bg, var(--brand-c-bg));
+  border: 1px solid var(--_aac-card-border, var(--brand-c-neutral-light));
+  border-radius: var(--radius-md);
+  vertical-align: top;
+  text-align: center;
+  min-width: 3.5em;
+}
+
+
+/* ==========================================================
+   Pictogram image
+   ========================================================== */
+
+.aac-card__pictogram {
+  display: block;
+  object-fit: contain;
+}
+
+/* Size variants — pictogram dimensions */
+.aac-card--sm .aac-card__pictogram {
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.aac-card--md .aac-card__pictogram {
+  width: 2em;
+  height: 2em;
+}
+
+.aac-card--lg .aac-card__pictogram {
+  width: 3em;
+  height: 3em;
+}
+
+
+/* ==========================================================
+   Word label
+   ========================================================== */
+
+.aac-card__word {
+  line-height: 1.2;
+  color: var(--_aac-card-text, var(--brand-c-text));
+}
+
+
+/* ==========================================================
+   Text-only variant (no pictogram available)
+   ========================================================== */
+
+.aac-card--text-only {
+  --_aac-card-bg: var(--page-bg-raised);
+  border-style: dashed;
+}
+
+
+/* ==========================================================
+   Assistive render — larger targets
+   ========================================================== */
+
+[data-render="assistive"] .aac-card {
+  padding: var(--space-sm) var(--space-md);
+  min-width: 4.5em;
+}
+
+[data-render="assistive"] .aac-card__pictogram {
+  width: 3em;
+  height: 3em;
+}

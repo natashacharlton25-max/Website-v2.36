@@ -1,0 +1,73 @@
+/**
+ * AAC Mode — global rules
+ *
+ * Controls visibility of icons, images, and AAC cards based on
+ * data-alt-text-mode="aac" and data-cognitive-level on <html>.
+ *
+ * These rules are global — they target .icon (Icon atom) and
+ * .image__img / .image-alt-aac (Image atom) across all contexts.
+ * Extracted from Image.css during cross-atom audit (2026-03-10).
+ *
+ * Semantic roles (data-semantic-role on wrapper elements):
+ *   decorative     → hidden entirely in AAC mode
+ *   ui-control     → hide icon SVG, show text label
+ *   content-symbol → hide icon/image, show AAC cards
+ *
+ * Cognitive levels (data-cognitive-level on <html>):
+ *   green  → survival vocabulary only (60 words)
+ *   yellow → + 1-2 word combiners (148 cumulative)
+ *   orange → + complex/later vocabulary (251 cumulative)
+ *   full   → all tiers including fringe domain nouns
+ *
+ * NOTE: Icon.astro uses <span class="icon">, not .icon-svg.
+ * There is no .icon-label element — ui-control label display
+ * requires adding a label element to icon wrapper markup.
+ */
+
+
+/* ==========================================================
+   AAC MODE — semantic role tiers
+   ========================================================== */
+
+/* Decorative: hidden in AAC mode */
+[data-alt-text-mode="aac"] [data-semantic-role="decorative"] {
+  display: none;
+}
+
+/* UI control: hide icon SVG */
+[data-alt-text-mode="aac"] [data-semantic-role="ui-control"] .icon {
+  display: none;
+}
+
+/* Content symbol: hide icon/image, show AAC cards */
+[data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .icon {
+  display: none;
+}
+[data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .image__img {
+  display: none;
+}
+[data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .image-alt-aac {
+  display: block;
+}
+
+
+/* ==========================================================
+   COGNITIVE LEVEL — vocabulary depth filtering
+   ========================================================== */
+
+[data-cognitive-level="green"] .aac-card[data-core-tier="yellow"],
+[data-cognitive-level="green"] .aac-card[data-core-tier="orange"],
+[data-cognitive-level="green"] .aac-card[data-core-tier="fringe"] {
+  display: none;
+}
+
+[data-cognitive-level="yellow"] .aac-card[data-core-tier="orange"],
+[data-cognitive-level="yellow"] .aac-card[data-core-tier="fringe"] {
+  display: none;
+}
+
+[data-cognitive-level="orange"] .aac-card[data-core-tier="fringe"] {
+  display: none;
+}
+
+/* Full — show everything (default, no hiding needed) */

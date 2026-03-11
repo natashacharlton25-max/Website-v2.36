@@ -33,7 +33,7 @@ interface Props {
   dotSize?: 'sm' | 'md' | 'lg';
   icon?: string;
   iconCollection?: string;
-  iconColor?: 'primary' | 'primary-dark' | 'secondary' | 'text' | 'inherit';
+  iconColor?: 'primary' | 'accent' | 'text' | 'inherit';
   spacing?: 'tight' | 'normal' | 'loose';
   flush?: boolean;
   class?: string;
@@ -69,18 +69,18 @@ const iconSize = iconSizes[dotSize] || 16;
 const classes = [
   'list',
   `list--${variant}`,
-  hasIcon ? 'list--has-icon' : '',
-  variant === 'dot' ? `list--dot-${dotSize}` : '',
-  iconColor !== 'primary' ? `list--icon-color-${iconColor}` : '',
-  spacing !== 'normal' ? `list--spacing-${spacing}` : '',
-  flush ? 'list--flush' : '',
+  hasIcon && 'list--has-icon',
+  variant === 'dot' && `list--dot-${dotSize}`,
+  iconColor !== 'primary' && `list--icon-color-${iconColor}`,
+  spacing !== 'normal' && `list--spacing-${spacing}`,
+  flush && 'list--flush',
   className,
-].filter(Boolean);
+];
 ---
 
 <Tag class:list={classes} {...dataAttrs}>
   {items ? (
-    items.map((item) => (
+    items.map((item: string) => (
       <li class="list__item">
         {hasIcon && (
           <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="list__icon" />

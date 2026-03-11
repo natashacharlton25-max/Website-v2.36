@@ -1,6 +1,12 @@
 /* ══════════════════════════════════════════════════════════════
    Tooltip — passive contextual display
    Extracted from utilities.css, rebuilt with real DOM elements.
+
+   Internal tokens (--_tooltip-*):
+     --_tooltip-bg, --_tooltip-text, --_tooltip-border,
+     --_tooltip-arrow, --_tooltip-shadow, --_tooltip-accent,
+     --_tooltip-radius, --_tooltip-padding, --_tooltip-max-width,
+     --_tooltip-offset, --_tooltip-z
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Base ── */
@@ -13,6 +19,8 @@
   --_tooltip-max-width: 200px;
   --_tooltip-offset: var(--space-xs);
   --_tooltip-z: var(--z-tooltip);
+  --_tooltip-arrow: var(--_tooltip-bg);
+  --_tooltip-shadow: var(--tooltip-shadow, var(--shadow-lg));
 
   position: relative;
   display: inline-flex;
@@ -36,8 +44,8 @@
   color: var(--_tooltip-text);
   border: 1px solid var(--_tooltip-border);
   border-radius: var(--_tooltip-radius);
-  box-shadow: var(--tooltip-shadow, var(--shadow-lg));
-  font-weight: 500;
+  box-shadow: var(--_tooltip-shadow);
+  font-weight: var(--font-medium);
   line-height: var(--leading-relaxed);
   text-align: center;
   white-space: nowrap;
@@ -78,7 +86,7 @@
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  border-top-color: var(--_tooltip-bg);
+  border-top-color: var(--_tooltip-arrow);
 }
 
 /* ── Bottom ── */
@@ -90,7 +98,7 @@
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  border-bottom-color: var(--_tooltip-bg);
+  border-bottom-color: var(--_tooltip-arrow);
 }
 
 /* ── Left ── */
@@ -102,7 +110,7 @@
   left: 100%;
   top: 50%;
   transform: translateY(-50%);
-  border-left-color: var(--_tooltip-bg);
+  border-left-color: var(--_tooltip-arrow);
 }
 
 /* ── Right ── */
@@ -114,7 +122,7 @@
   right: 100%;
   top: 50%;
   transform: translateY(-50%);
-  border-right-color: var(--_tooltip-bg);
+  border-right-color: var(--_tooltip-arrow);
 }
 
 
@@ -150,58 +158,22 @@
 }
 
 .tooltip--glass .tooltip__content {
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-}
-
-.tooltip--glass .tooltip__content::before {
-  border-top-color: var(--tooltip-glass-bg, var(--glass-bg));
-}
-
-.tooltip--glass.tooltip--bottom .tooltip__content::before {
-  border-top-color: transparent;
-  border-bottom-color: var(--tooltip-glass-bg, var(--glass-bg));
-}
-
-.tooltip--glass.tooltip--left .tooltip__content::before {
-  border-top-color: transparent;
-  border-left-color: var(--tooltip-glass-bg, var(--glass-bg));
-}
-
-.tooltip--glass.tooltip--right .tooltip__content::before {
-  border-top-color: transparent;
-  border-right-color: var(--tooltip-glass-bg, var(--glass-bg));
+  backdrop-filter: var(--tooltip-glass-blur, var(--glass-blur-heavy)) saturate(160%);
+  -webkit-backdrop-filter: var(--tooltip-glass-blur, var(--glass-blur-heavy)) saturate(160%);
 }
 
 /* ── Neon ── */
 .tooltip--neon {
   --_tooltip-bg: var(--tooltip-bg, var(--brand-c-bg-dark));
-  --_tooltip-text: var(--tooltip-accent, var(--brand-c-primary));
-  --_tooltip-border: var(--tooltip-accent, var(--brand-c-primary));
+  --_tooltip-accent: var(--tooltip-accent, var(--brand-c-primary));
+  --_tooltip-text: var(--_tooltip-accent);
+  --_tooltip-border: var(--_tooltip-accent);
+  --_tooltip-arrow: var(--_tooltip-accent);
+  --_tooltip-shadow: var(--tooltip-glow, var(--glow-neon));
 }
 
 .tooltip--neon .tooltip__content {
-  text-shadow: 0 0 4px var(--tooltip-accent, var(--brand-c-primary));
-  box-shadow: var(--tooltip-glow, var(--glow-neon));
-}
-
-.tooltip--neon .tooltip__content::before {
-  border-top-color: var(--tooltip-accent, var(--brand-c-primary));
-}
-
-.tooltip--neon.tooltip--bottom .tooltip__content::before {
-  border-top-color: transparent;
-  border-bottom-color: var(--tooltip-accent, var(--brand-c-primary));
-}
-
-.tooltip--neon.tooltip--left .tooltip__content::before {
-  border-top-color: transparent;
-  border-left-color: var(--tooltip-accent, var(--brand-c-primary));
-}
-
-.tooltip--neon.tooltip--right .tooltip__content::before {
-  border-top-color: transparent;
-  border-right-color: var(--tooltip-accent, var(--brand-c-primary));
+  text-shadow: 0 0 4px var(--_tooltip-accent);
 }
 
 /* ── Brutalist ── */
@@ -209,31 +181,13 @@
   --_tooltip-bg: var(--tooltip-bg, var(--brand-c-bg-dark));
   --_tooltip-text: var(--tooltip-text, var(--color-White));
   --_tooltip-border: var(--tooltip-border, var(--brand-c-neutral));
+  --_tooltip-arrow: var(--_tooltip-border);
   --_tooltip-radius: 0;
 }
 
 .tooltip--brutalist .tooltip__content {
   border-width: 2px;
-  font-family: monospace;
-}
-
-.tooltip--brutalist .tooltip__content::before {
-  border-top-color: var(--tooltip-border, var(--brand-c-neutral));
-}
-
-.tooltip--brutalist.tooltip--bottom .tooltip__content::before {
-  border-top-color: transparent;
-  border-bottom-color: var(--tooltip-border, var(--brand-c-neutral));
-}
-
-.tooltip--brutalist.tooltip--left .tooltip__content::before {
-  border-top-color: transparent;
-  border-left-color: var(--tooltip-border, var(--brand-c-neutral));
-}
-
-.tooltip--brutalist.tooltip--right .tooltip__content::before {
-  border-top-color: transparent;
-  border-right-color: var(--tooltip-border, var(--brand-c-neutral));
+  font-family: var(--font-mono);
 }
 
 
@@ -332,6 +286,38 @@
 
 
 /* ══════════════════════════════════════════════════════════════
+   Dialog context — absolute positioning (no JS coords needed)
+   Dialogs in the top layer break position:fixed offsets.
+   Switch to CSS-only relative anchoring via the .tooltip wrapper.
+   Existing transforms handle centering + offset unchanged.
+   ══════════════════════════════════════════════════════════════ */
+
+dialog .tooltip__content {
+  position: absolute;
+}
+
+dialog .tooltip--top .tooltip__content {
+  left: 50%;
+  top: 0;
+}
+
+dialog .tooltip--bottom .tooltip__content {
+  left: 50%;
+  top: 100%;
+}
+
+dialog .tooltip--left .tooltip__content {
+  left: 0;
+  top: 50%;
+}
+
+dialog .tooltip--right .tooltip__content {
+  left: 100%;
+  top: 50%;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
    Render modes
    ══════════════════════════════════════════════════════════════ */
 
@@ -352,9 +338,9 @@
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  background: var(--tooltip-bg, var(--brand-c-bg-dark));
-  color: var(--tooltip-text, var(--color-White));
-  border: 1px solid var(--tooltip-border, var(--brand-c-neutral));
+  background: var(--_tooltip-bg);
+  color: var(--_tooltip-text);
+  border: 1px solid var(--_tooltip-border);
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;

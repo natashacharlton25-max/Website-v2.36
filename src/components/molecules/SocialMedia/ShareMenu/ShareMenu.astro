@@ -1,0 +1,250 @@
+---
+/**
+ * ShareMenu — Modal share panel
+ *
+ * Click trigger to open a share dialog with social platform links + copy-link input.
+ * Uses native <dialog> for free focus trap, Escape close, and aria-modal.
+ * Full-screen on mobile, centered card on desktop.
+ *
+ * Icons: Lottie animated (plays on hover) with Phosphor static fallback.
+ * Labels via Tooltip atom (hover/focus reveal, less visual clutter).
+ * Icons are decorative (aria-hidden) — screen readers use aria-label on links.
+ *
+ * Platforms loaded from BRAND_CONFIG — override via platforms prop.
+ *
+ * Styles: ShareMenu.css | ShareMenu.responsive.css
+ *
+ * Usage:
+ *   <ShareMenu url="https://example.com/page" />
+ *   <ShareMenu url="https://example.com/page" title="Check this out" :platforms={customPlatforms} />
+ */
+
+import './ShareMenu.css';
+import './ShareMenu.responsive.css';
+
+import Button from '../../../atoms/Button/Button.astro';
+import Icon from '../../../atoms/Icon/Icon.astro';
+import LottieIcon from '../../../atoms/LottieIcon/LottieIcon.astro';
+import Link from '../../../atoms/Link/Link.astro';
+import Heading from '../../../atoms/Heading/Heading.astro';
+import Tooltip from '../../../atoms/Tooltip/Tooltip.astro';
+import { BRAND_CONFIG } from '../../../../lib/config/brand';
+import type { SharePlatform } from '../../../../lib/config/brand';
+
+export interface Props {
+  url: string;
+  title?: string;
+  /** Override brand-default platforms for this instance */
+  platforms?: SharePlatform[];
+  class?: string;
+}
+
+const {
+  url,
+  title = 'Share this page',
+  platforms = BRAND_CONFIG.sharing.platforms,
+  class: className = ''
+} = Astro.props;
+
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+
+function buildShareHref(template: string): string {
+  return template
+    .replace('{url}', encodedUrl)
+    .replace('{title}', encodedTitle);
+}
+---
+
+<div class:list={['share-menu', className]}>
+  <Button
+    variant="primary"
+    shape="rounded"
+    class="share-menu__trigger share-menu__trigger--text"
+  >Share</Button>
+  <button
+    type="button"
+    class="share-menu__trigger share-menu__trigger--icon"
+    aria-label="Share"
+  >
+    <Icon name="share-network" weight="regular" size={24} />
+  </button>
+
+  <dialog class="share-menu__dialog">
+    <div class="share-menu__panel">
+      <div class="share-menu__header">
+        <Heading level={3} size="h5" weight="semibold" flush>
+          <span class="share-menu__title-full">{title}</span>
+          <span class="share-menu__title-short">Share</span>
+        </Heading>
+        <button
+          type="button"
+          class="share-menu__close"
+          aria-label="Close share panel"
+        >
+          <Icon name="x" weight="regular" size={22} />
+        </button>
+      </div>
+
+      <ul class="share-menu__options">
+        {platforms.map(platform => (
+          <li class="share-menu__item">
+            <Tooltip text={platform.name} purpose="label" position="bottom" entrance="fade">
+              <Link
+                href={buildShareHref(platform.shareUrl)}
+                external
+                ariaLabel={`Share on ${platform.name}`}
+                class="share-menu__link"
+                variant="ghost"
+              >
+                <span
+                  class="share-menu__icon-holder"
+                  style={platform.color ? `--_share-icon-bg: ${platform.color};` : ''}
+                >
+                  <span class="share-menu__icon-toggle" aria-hidden="true">
+                    {platform.lottieSlug ? (
+                      <LottieIcon
+                        slug={platform.lottieSlug}
+                        size={40}
+                        class="share-menu__icon--lottie"
+                      />
+                    ) : null}
+                    {platform.staticIcon ? (
+                      <Icon
+                        name={platform.staticIcon}
+                        size={32}
+                        class="share-menu__icon--static"
+                      />
+                    ) : platform.svg ? (
+                      <Fragment set:html={platform.svg} />
+                    ) : null}
+                  </span>
+                </span>
+              </Link>
+            </Tooltip>
+          </li>
+        ))}
+      </ul>
+
+      {/* Full copy section — hidden on narrow screens */}
+      <div class="share-menu__copy share-menu__copy--full">
+        <Heading level={4} size="h6" weight="semibold" flush>Page link</Heading>
+        <div class="share-menu__copy-input-wrap">
+          <input
+            type="text"
+            class="share-menu__copy-input"
+            value={url}
+            readonly
+            aria-label="Page URL"
+          />
+          <button
+            type="button"
+            class="share-menu__copy-btn"
+            aria-label="Copy link"
+          >
+            <Icon name="copy" size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* Compact copy button — shown only on narrow screens */}
+      <button
+        type="button"
+        class="share-menu__copy-compact share-menu__link"
+        aria-label="Copy link"
+      >
+        <span class="share-menu__icon-holder">
+          <span class="share-menu__icon-toggle" aria-hidden="true">
+            <LottieIcon
+              slug="lottie-share"
+              size={40}
+              class="share-menu__icon--lottie"
+            />
+            <Icon name="share-network" size={32} class="share-menu__icon--static" />
+          </span>
+        </span>
+      </button>
+    </div>
+  </dialog>
+</div>
+
+<script>
+  function initShareMenus() {
+    document.querySelectorAll<HTMLElement>('.share-menu:not([data-share-init])').forEach(menu => {
+      menu.setAttribute('data-share-init', '1');
+      const triggers = menu.querySelectorAll<HTMLElement>('.share-menu__trigger');
+      const dialog = menu.querySelector<HTMLDialogElement>('.share-menu__dialog');
+      const closeBtn = menu.querySelector<HTMLElement>('.share-menu__close');
+      const copyBtn = menu.querySelector<HTMLElement>('.share-menu__copy-btn');
+      const copyInput = menu.querySelector<HTMLInputElement>('.share-menu__copy-input');
+      const copyCompact = menu.querySelector<HTMLElement>('.share-menu__copy-compact');
+
+      if (!triggers.length || !dialog) return;
+
+      triggers.forEach(trigger => {
+        trigger.addEventListener('click', () => {
+          dialog.showModal();
+        });
+      });
+
+      closeBtn?.addEventListener('click', () => {
+        dialog.close();
+      });
+
+      dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+          dialog.close();
+        }
+      });
+
+      // Lottie hover/focus animation on share links
+      menu.querySelectorAll<HTMLElement>('.share-menu__link').forEach(link => {
+        const lottieEl = link.querySelector<HTMLElement>('[data-lottie-icon]');
+        if (!lottieEl) return;
+
+        link.addEventListener('mouseenter', () => {
+          lottieEl.dispatchEvent(new CustomEvent('lottie:play'));
+        });
+        link.addEventListener('mouseleave', () => {
+          lottieEl.dispatchEvent(new CustomEvent('lottie:playReverse'));
+        });
+        link.addEventListener('focusin', () => {
+          lottieEl.dispatchEvent(new CustomEvent('lottie:play'));
+        });
+        link.addEventListener('focusout', () => {
+          lottieEl.dispatchEvent(new CustomEvent('lottie:playReverse'));
+        });
+      });
+
+      // Copy link — full input version
+      copyBtn?.addEventListener('click', () => {
+        if (!copyInput) return;
+        const originalValue = copyInput.value;
+        navigator.clipboard.writeText(originalValue).then(() => {
+          copyInput.value = 'Link copied!';
+          copyInput.classList.add('share-menu__copy-input--success');
+          copyBtn.classList.add('share-menu__copy-btn--copied');
+          setTimeout(() => {
+            copyInput.value = originalValue;
+            copyInput.classList.remove('share-menu__copy-input--success');
+            copyBtn.classList.remove('share-menu__copy-btn--copied');
+          }, 2000);
+        });
+      });
+
+      // Copy link — compact button version
+      copyCompact?.addEventListener('click', () => {
+        if (!copyInput) return;
+        navigator.clipboard.writeText(copyInput.value).then(() => {
+          copyCompact.classList.add('share-menu__copy-compact--copied');
+          setTimeout(() => {
+            copyCompact.classList.remove('share-menu__copy-compact--copied');
+          }, 2000);
+        });
+      });
+    });
+  }
+
+  initShareMenus();
+  document.addEventListener('astro:page-load', initShareMenus);
+</script>

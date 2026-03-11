@@ -41,7 +41,7 @@ function d1Query(sql) {
 const altTextRows = d1Query(`
   SELECT a.name, a.alt_descriptive AS descriptive,
          a.alt_aac_phrase AS aacPhrase,
-         s.word, s.aac_url AS aacUrl
+         s.word, s.aac_url AS aacUrl, s.bci_index AS symbolId
   FROM assets a
   LEFT JOIN alt_symbols s ON a.alt_symbol_id = s.id
   WHERE a.type = 'image'
@@ -57,7 +57,7 @@ if (altTextRows.length === 0) {
 // ── 2. Full alt_symbols vocabulary ──
 
 const symbolRows = d1Query(
-  'SELECT word, aac_url, icon_id, verified, core_tier FROM alt_symbols'
+  'SELECT word, aac_url, icon_id, verified, core_tier, bci_index FROM alt_symbols'
 );
 
 console.log(`Symbol rows: ${symbolRows.length}`);

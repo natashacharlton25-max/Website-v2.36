@@ -1,0 +1,28 @@
+**Architecture Summary (AMD – Architecture / Model Description)**
+
+The platform operates as a **seat-based SaaS system with tenant-owned subscribers and external billing**.
+
+Tenants (for example tarot readers) connect their own billing provider such as **Stripe** or **Paddle**. Subscribers purchase the tenant’s service through the platform interface, but the payment is processed entirely through the tenant’s billing account.
+
+When a subscriber completes checkout, the billing provider sends a webhook to the platform confirming that a subscription was created. The webhook includes a tenant identifier and the billing provider’s subscription reference.
+
+Upon receiving the webhook, the platform generates a **pseudonymous seat ID** and assigns it to the tenant. The platform stores only minimal data required for entitlement management:
+
+* tenant identifier
+* seat identifier
+* billing subscription reference
+* seat status
+
+No personal data (such as email, name, or payment details) is stored by the platform.
+
+Subscriber identity and contact details remain entirely within the tenant’s billing provider account. The tenant can retrieve subscriber emails and map them to seat IDs using the billing provider’s dashboard or API.
+
+The platform then bills the tenant based on **seat usage**, independent of the tenant’s own customer billing.
+
+Data responsibility separation:
+
+Customer data → stored by tenant and billing provider
+Payments and tax compliance → handled by Stripe/Paddle
+Platform database → stores only tenant IDs, seat IDs, and entitlement state
+
+This design supports **privacy-minimised operation**, tenant ownership of subscribers, and scalable seat-based billing for the platform.

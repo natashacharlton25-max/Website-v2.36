@@ -1,0 +1,60 @@
+{
+  "component": "AacCard",
+  "category": "molecule",
+  "renders": {
+    "full": "AacCard.astro",
+    "reduced": "AacCard.astro",
+    "assistive": "AacCard.astro",
+    "textonly": "Text"
+  },
+  "notes": "AAC pictogram card — single concept display. Composes Text atom for word label. Pipeline resolves symbolId (BCI index) to symbolSrc based on user's symbol set preference (OpenAAC default). Cognitive filtering via data-core-tier + aac-mode.css. In textonly render, pipeline passes word to Text atom — no pictogram.",
+
+  "props": {
+    "content": {
+      "_description": "What this card represents — concept identity and symbol source",
+      "word":       { "type": "string",  "required": true,  "description": "English concept word displayed below the pictogram." },
+      "symbolSrc":  { "type": "string",  "required": false, "default": null, "description": "Resolved symbol image URL. Pipeline resolves from symbolId + user's symbol set preference. Null = text-only card." },
+      "symbolId":   { "type": "number",  "required": false, "default": null, "description": "BCI reference number (W3C AAC Symbol Registry). Universal cross-reference key for multi-symbol-set resolution. Maps to alt_symbol_id in D1." },
+      "coreTier":   { "type": "string",  "required": false, "default": null, "enum": ["green", "yellow", "orange", null], "description": "Cognitive vocabulary tier. green=core 60 words, yellow=148 cumulative, orange=251, null=fringe. Used by aac-mode.css for cognitive level filtering." }
+    },
+
+    "visual": {
+      "_description": "How the card looks",
+      "size":   { "type": "string", "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Pictogram size: sm (24px), md (32px), lg (48px)." },
+      "class":  { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "colour": {
+      "_description": "Colour tokens — consumed as CSS custom properties via internal bridge tokens",
+      "bg":     { "type": "token", "required": false, "default": "brand-c-bg", "description": "Card background (--_aac-card-bg)." },
+      "border": { "type": "token", "required": false, "default": "brand-c-neutral-light", "description": "Card border (--_aac-card-border)." },
+      "text":   { "type": "token", "required": false, "default": "brand-c-text", "description": "Word label colour (--_aac-card-text)." }
+    },
+
+    "animation": {}
+  },
+
+  "data_attributes": {
+    "data-core-tier": "green | yellow | orange | fringe — cognitive vocabulary tier, used by aac-mode.css for filtering",
+    "data-bci": "BCI reference number (integer) — W3C AAC Symbol Registry index. Enables WAI-Adapt personalization agents to resolve the concept to the user's configured symbol set."
+  },
+
+  "pipeline": {
+    "_description": "How the content pipeline resolves symbol sources",
+    "resolution_order": [
+      "1. Read symbolId (BCI index) from content data",
+      "2. Check user's symbol set preference (Your View panel → data-symbol-set on <html>)",
+      "3. If preferred set available: resolve BCI index → that set's symbol URL",
+      "4. If no preference or set unavailable: resolve via OpenAAC (default)",
+      "5. If no symbolId: fall back to alt_symbols.aac_url (legacy ARASAAC path)",
+      "6. If nothing resolves: symbolSrc = null → text-only card"
+    ],
+    "symbol_sets": {
+      "openaac": "Default — open-source, bundled. No licence required.",
+      "widgit": "Commercial — requires licence. User provides via AAC device.",
+      "pcs": "Commercial (Tobii Dynavox) — requires licence.",
+      "bliss": "Blissymbolics — BCI native set.",
+      "makaton": "Commercial (The Makaton Charity) — requires licence."
+    }
+  }
+}

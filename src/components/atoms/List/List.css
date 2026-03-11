@@ -6,6 +6,9 @@
  *
  * Variants: default (disc/decimal), none, inline, dot (sized circles).
  * Icon prop: works on default variant — replaces native markers with icons.
+ *
+ * Internal tokens (--_list-*):
+ *   --_list-marker, --_list-marker-accent, --_list-text
  */
 
 /* ==========================================================
@@ -13,6 +16,11 @@
    ========================================================== */
 
 .list {
+  /* ── Internal tokens (bridge → internal, single point of truth) ── */
+  --_list-marker:        var(--list-marker, var(--brand-c-primary));
+  --_list-marker-accent: var(--list-marker-accent, var(--brand-c-secondary));
+  --_list-text:          var(--list-text, var(--text-body));
+
   margin: 0 0 var(--space-md) 0;
   padding-left: var(--space-xl);
 }
@@ -40,7 +48,7 @@ ol.list--default {
 }
 
 .list--default .list__item::marker {
-  color: var(--list-marker, var(--brand-c-primary));
+  color: var(--_list-marker);
 }
 
 /* ==========================================================
@@ -62,13 +70,13 @@ ol.list--default {
 
 .list__icon {
   flex-shrink: 0;
-  color: var(--list-marker, var(--brand-c-primary));
+  color: var(--_list-marker);
   fill: currentColor;
 }
 
 /* Icon colour overrides */
-.list--icon-color-accent .list__icon   { color: var(--list-marker-accent, var(--brand-c-secondary)); }
-.list--icon-color-text .list__icon     { color: var(--list-text, var(--brand-c-text)); }
+.list--icon-color-accent .list__icon   { color: var(--_list-marker-accent); }
+.list--icon-color-text .list__icon     { color: var(--_list-text); }
 .list--icon-color-inherit .list__icon  { color: inherit; }
 
 /* ==========================================================
@@ -118,7 +126,7 @@ ol.list--default {
 .list__dot {
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--list-marker, var(--brand-c-primary));
+  background: var(--_list-marker);
 }
 
 /* Dot sizes — em-based, scales with parent text size */
@@ -138,8 +146,8 @@ ol.list--default {
 }
 
 /* Dot colour follows icon colour overrides */
-.list--icon-color-accent .list__dot   { background: var(--list-marker-accent, var(--brand-c-secondary)); }
-.list--icon-color-text .list__dot     { background: var(--list-text, var(--brand-c-text)); }
+.list--icon-color-accent .list__dot   { background: var(--_list-marker-accent); }
+.list--icon-color-text .list__dot     { background: var(--_list-text); }
 .list--icon-color-inherit .list__dot  { background: currentColor; }
 
 /* ==========================================================
@@ -186,7 +194,7 @@ ol.list--default {
   height: 0.75em;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--list-marker, var(--brand-c-primary));
+  background: var(--_list-marker);
 }
 
 /* Inline collapses to vertical */
@@ -217,7 +225,7 @@ ol.list--default {
 }
 
 [data-render="textonly"] .list--default .list__item::marker {
-  color: var(--list-marker, var(--brand-c-primary));
+  color: var(--_list-marker);
 }
 
 /* Icon lists revert to native bullets */
@@ -231,7 +239,7 @@ ol.list--default {
 }
 
 [data-render="textonly"] .list--has-icon .list__item::marker {
-  color: var(--list-marker, var(--brand-c-primary));
+  color: var(--_list-marker);
 }
 
 [data-render="textonly"] .list--has-icon .list__icon {

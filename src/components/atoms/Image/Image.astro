@@ -18,7 +18,8 @@
  *               "decorative" renders bare <img alt="" aria-hidden="true">
  *   altWord        — Short word-level alt text (from API or manual)
  *   altDescriptive — Long descriptive alt text
- *   altAacHtml     — Pre-rendered AAC card HTML
+ *   altAacCards    — Array of AacCardData objects (from load-alt-text.ts cards[])
+ *   altAacHtml     — DEPRECATED: Pre-rendered AAC card HTML (use altAacCards)
  *   decorative     — DEPRECATED alias for role="decorative"
  *
  * Usage:
@@ -29,12 +30,17 @@
  *   <Image src="/images/sunset.jpg" altWord="sunset" altDescriptive="A golden sunset" />
  */
 
+import { AacCard } from '../../molecules/aac/AacCard';
+import type { AacCardData } from '../../../data/load-alt-text';
+
 interface Props {
   src: string;
   alt?: string;
   role?: 'content' | 'decorative';
   altWord?: string;
   altDescriptive?: string;
+  altAacCards?: AacCardData[];
+  /** @deprecated Use altAacCards instead */
   altAacHtml?: string;
   semanticRole?: 'decorative' | 'ui-control' | 'content-symbol';
   width?: number | string;
@@ -62,6 +68,7 @@ const {
   role: roleProp,
   altWord,
   altDescriptive,
+  altAacCards,
   altAacHtml,
   semanticRole,
   width,
@@ -150,10 +157,21 @@ const figureClasses = [
     {altDescriptive && (
       <span class="image-alt-descriptive" aria-hidden="true">{altDescriptive}</span>
     )}
-    {altAacHtml && (
+    {altAacCards && altAacCards.length > 0 ? (
+      <span class="image-alt-aac" aria-hidden="true">
+        {altAacCards.map((card) => (
+          <AacCard
+            word={card.word}
+            symbolSrc={card.symbolSrc ?? undefined}
+            symbolId={card.symbolId ?? undefined}
+            coreTier={card.coreTier}
+          />
+        ))}
+      </span>
+    ) : altAacHtml ? (
       <span class="image-alt-aac" aria-hidden="true">
         <Fragment set:html={altAacHtml} />
       </span>
-    )}
+    ) : null}
   </figure>
 )}

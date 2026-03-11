@@ -16,9 +16,9 @@ These passed all 16 v2 checklist sections. Only deferred items remain.
 | FormField | 2026-03-10 | Save-draft for AAC. Input tolerance testing. Consumer migration from legacy `.form-group`. Print (global). |
 | Grid | 2026-03-06 | Showcase gallery content in textonly. XL text reflow. Print (global). |
 | Link | 2026-03-10 | Pass 2: internal tokens, colour group, color enum fixed, --text-color bug fixed, transitions tokenised. Glass consumer migration (Footer, GlassNav → Button). Animation visual testing. Print (global). |
-| List | 2026-03-05 | Icon inheritance (cross-atom). Slot consumer migration. Print (global). |
+| List | 2026-03-10 | Pass 2: internal tokens (3 `--_list-*`), colour group, iconColor enum fixed, class:list cleaned. Icon inheritance (cross-atom). Slot consumer migration. Print (global). |
 | Toast | 2026-03-06 | Asset API migration for toast icons. LottieIcon client-side migration. Print (global). |
-| Tooltip | 2026-03-07 | utilities.css tooltip block removal after consumer migration. Print (global). |
+| Tooltip | 2026-03-10 | Pass 2: arrow consolidation (~50 lines deleted), `--_tooltip-arrow`/`--_tooltip-shadow`/`--_tooltip-accent` tokens, glass blur tokenised, font-weight/font-family tokenised, assistive render routed, colour group added. utilities.css tooltip block removal after consumer migration. Print (global). |
 
 ---
 
@@ -37,16 +37,18 @@ Audit started, fixes applied, but outstanding items remain.
 - [x] Shadow/glow CSS routing fixed (all pointed to `-md`, now correct per size)
 - [x] Internal `--_icon-color` token added
 - [x] `class:list` migration on `<span>`
-- [ ] AAC semantic role rules → move from Image.css to `src/styles/global/aac-mode.css`
+- [x] AAC semantic role rules → moved from Image.css to `src/styles/global/aac-mode.css` (2026-03-10)
 - [ ] Inline px style → future `--icon-size` CSS custom property pattern
 
-### LottieIcon — PARTIAL (2026-03-04)
+### LottieIcon — PASS (2026-03-10)
 - [x] Schema: 3 optional content dimensions (slug, fallbackIcon, label)
 - [x] Renders: full→LottieIcon, reduced/assistive→Icon, textonly→Text
+- [x] `class:list` migration (string concatenation → class:list)
+- [x] No colour group needed (inherits from parent via currentColor)
+- [x] No internal tokens needed (CSS structural only)
 - [ ] Consumer migration from `src="/Icons/..."` paths to slug props (GlassNav, ReaderNav, ShareSection, Button)
 - [ ] lottie_mappings shared fallback verification
 - [ ] lottie-web JS bundle gating per render mode
-- [ ] Colour group in schema (pipeline tokens)
 
 ### Image — PARTIAL (2026-03-10)
 - [x] Schema corrected, focus-visible added, --font-size-sm fixed
@@ -57,10 +59,8 @@ Audit started, fixes applied, but outstanding items remain.
 - [x] All bridge chains replaced with internal tokens
 - [x] Focus-visible 2px → var(--border-width-2)
 - [x] Class arrays cleaned (.filter(Boolean) removed)
-- [ ] Alt text word + descriptive spans → Text atom
-- [ ] AAC pictogram card → Card+Image+Text markup in aac-cards.ts
-- [ ] AAC text-only fallback → Text atom markup
-- [ ] Pictogram img in AAC cards → Image atom markup
+- [ ] Alt text word + descriptive spans → Text atom (deferred: wait for AacCard molecule)
+- [ ] AAC items 6-8 → replaced by AacCard molecule build (see cross-atom deferred #15)
 
 ### Heading — PARTIAL (2026-03-10)
 - [x] Schema restructured, divider em-based, underline percentage-based
@@ -76,13 +76,17 @@ Audit started, fixes applied, but outstanding items remain.
 - [ ] Token consistency check with Text
 - [ ] fit-content alignment visual test
 
-### Text — PARTIAL (2026-03-06)
+### Text — PASS (2026-03-10)
 - [x] Schema corrected, context overrides deleted, textTone prop added
 - [x] Toast glass/neon delegated to textTone
+- [x] 3 phantom tokens fixed: `--text-color` → `--text-body`, `--text-accent` → `--brand-c-secondary`, `--text-link` → `--link-color`
+- [x] Schema `color` enum aligned to CSS: `[text, muted, accent, link, inherit]`
+- [x] `class:list` migration (falsy-friendly, no .filter/.join)
+- [x] Schema notes updated with render behaviour
+- [x] No colour group needed — `color` prop handles pipeline control via class selection
 - [ ] Verify Card and nav consumers pass correct size/leading props
 - [ ] Token coverage: --font-body-alt and --font-handwriting must be defined for every brand
 - [ ] 32+ raw `<small>` and 4 raw `<blockquote>` → migrate to `<Text as="small/blockquote">`
-- [ ] Colour group in schema (pipeline tokens)
 
 ---
 
@@ -124,11 +128,11 @@ Not yet audited.
 
 These were originally listed in the audit log but are molecule-level:
 
-| Component | Location | Notes |
-|-----------|----------|-------|
-| DPadMenu | molecules/Menu/ | Has a11y.css. No schema/barrel. |
-| RadialMenu | molecules/Menu/ | Has a11y.css. No schema/barrel. |
-| ShareMenu | molecules/Menu/ | Standalone .astro only. |
+| Component | Location | Status | Notes |
+|-----------|----------|--------|-------|
+| DPadMenu | molecules/Menu/ | Pending | Has a11y.css. No schema/barrel. |
+| RadialMenu | molecules/Menu/ | Pending | Has a11y.css. No schema/barrel. |
+| ShareMenu | molecules/SocialMedia/ShareMenu/ | **PASS** 2026-03-10 | Full rebuild. Modal `<dialog>`, Lottie+Phosphor icons, Tooltip labels, responsive 767→200px, dark/HC zone overrides. No `!important`, no `@layer`. |
 
 ---
 
@@ -158,6 +162,18 @@ These were logged as DEFERRED during individual audits:
 - [ ] Legacy `.form-group`/`.form-label` consumers → FormField atom
 - [ ] utilities.css tooltip block (lines 230-492) removal after Tooltip atom migration
 - [ ] Tooltip consumers: ReaderNav (.info-tooltip), ShareSection (inline tooltip CSS), data-tooltip elements
+- [x] Build `AacCard` molecule (2026-03-10) — `molecules/aac/AacCard/`. Composes Text atom. BCI reference number support (W3C AAC Symbol Registry). `load-alt-text.ts` now exports `cards[]` data objects alongside legacy `aacHtml`. Pipeline ready for consumer migration.
+- [x] Migrate Image.astro from `altAacHtml` (set:html) → AacCard molecule rendering via `cards[]` data (2026-03-10). Legacy `altAacHtml` kept as fallback.
+- [x] Add `bci_index` column to `alt_symbols` D1 table (2026-03-10) — migration 014. API routes + snapshot + types updated. BCI index flows through: D1 → snapshot → load-alt-text → AacCard `data-bci` attribute.
+- [x] Add symbol set preference to Your View panel (2026-03-10) — `symbolSet` setting, `data-symbol-set` on `<html>`, custom symbol JSON file loader. User picks "Which pictures do you use?" — OpenAAC default, or custom URL pointing to their own BCI→image mapping.
+- [ ] Run migration 014 on D1: `npx wrangler d1 execute asset-library --remote --file=src/schema/migrations/014_bci_index.sql`
+- [ ] Backfill `bci_index` values on existing `alt_symbols` rows (match word→BCI concept from W3C registry)
+- [ ] Build symbol set picker UI cards in AccessibilityPanel.astro (markup for `[data-setting="symbolSet"]` grid)
+
+### Token consistency notes (2026-03-10)
+- Heading accent = `--brand-c-primary`, Text accent = `--brand-c-secondary` — intentional hierarchy decision, not a bug
+- Text consumes globals directly (no internal tokens) — confirmed deliberate during pass 2
+- Size token naming differs by design: Heading uses `--text-h1`–`--text-h5`, Text uses `--text-body`/`--text-sm`/`--text-fine`
 
 ### Theme engine cleanup
 - [ ] Remove dead rainbow code from `src/utils/theme-engine.js`: `computeRainbow()`, `RAINBOW_PALETTES`, `getRainbowPalette()`, `auditRainbowContrast()`, rainbow from `buildCSS()` and `generateThemeData()`
@@ -165,7 +181,7 @@ These were logged as DEFERRED during individual audits:
 
 ### Global layers (build after all atoms pass)
 - [ ] Print stylesheet
-- [ ] `src/styles/global/aac-mode.css` — AAC semantic role rules from Image.css
+- [x] `src/styles/global/aac-mode.css` — AAC semantic role rules extracted from Image.css (2026-03-10)
 - [ ] Glass/glow token pass — replace inline `color-mix()` with `shadows.css` tokens
 - [ ] Dark luminance token check — verify all atoms render in light + dark themes
 - [ ] Glow token consistency — ReaderNav line 875 rgba() bug

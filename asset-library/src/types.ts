@@ -86,6 +86,9 @@ export interface AltSymbolRow {
   icon_id: string | null;
   aac_id: number | null;
   aac_url: string | null;
+  bci_index: number | null;
+  verified: number;
+  core_tier: string | null;
   created_at: string;
   updated_at: string;
 }

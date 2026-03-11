@@ -53,7 +53,7 @@ export async function handleAltSymbolCreate(request: Request, env: Env): Promise
   if (authErr) return authErr;
 
   const body = await request.json() as Record<string, any>;
-  const { word, icon_id, aac_id, aac_url } = body;
+  const { word, icon_id, aac_id, aac_url, bci_index, verified, core_tier } = body;
 
   if (!word) {
     return jsonError(400, 'Required field: word');
@@ -63,9 +63,9 @@ export async function handleAltSymbolCreate(request: Request, env: Env): Promise
   const now = new Date().toISOString();
 
   await env.DB.prepare(
-    `INSERT INTO alt_symbols (id, word, icon_id, aac_id, aac_url, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).bind(id, word, icon_id ?? null, aac_id ?? null, aac_url ?? null, now, now).run();
+    `INSERT INTO alt_symbols (id, word, icon_id, aac_id, aac_url, bci_index, verified, core_tier, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(id, word, icon_id ?? null, aac_id ?? null, aac_url ?? null, bci_index ?? null, verified ? 1 : 0, core_tier ?? null, now, now).run();
 
   return json({ id, word, message: 'Alt symbol created' }, 201);
 }
@@ -99,6 +99,18 @@ export async function handleAltSymbolUpdate(request: Request, env: Env, id: stri
   if (body.aac_url !== undefined) {
     stmts.push(env.DB.prepare('UPDATE alt_symbols SET aac_url = ?, updated_at = ? WHERE id = ?')
       .bind(body.aac_url, now, id));
+  }
+  if (body.bci_index !== undefined) {
+    stmts.push(env.DB.prepare('UPDATE alt_symbols SET bci_index = ?, updated_at = ? WHERE id = ?')
+      .bind(body.bci_index, now, id));
+  }
+  if (body.verified !== undefined) {
+    stmts.push(env.DB.prepare('UPDATE alt_symbols SET verified = ?, updated_at = ? WHERE id = ?')
+      .bind(body.verified ? 1 : 0, now, id));
+  }
+  if (body.core_tier !== undefined) {
+    stmts.push(env.DB.prepare('UPDATE alt_symbols SET core_tier = ?, updated_at = ? WHERE id = ?')
+      .bind(body.core_tier, now, id));
   }
 
   if (stmts.length > 0) {

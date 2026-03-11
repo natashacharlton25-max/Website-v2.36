@@ -125,26 +125,26 @@ If visual props are stripped or reverted in non-full renders, the schema descrip
 
 | Atom | Pass 1 | Pass 2 | Notes |
 |---|---|---|---|
-| **Text** | ✅ | ⬜ | |
-| **Heading** | ✅ | ⬜ | |
-| **Button** | ✅ | ✅ | `.btn .text { color: inherit }` specificity fix. Confetti → rainbow. Base hover colour-only. |
-| **Badge** | ✅ | ✅ | `--_badge-bg/text/border` internal tokens. pipelineRules.altTextRule. semanticRole expanded. Label via Text atom. |
-| **Link** | ✅ | ⬜ | |
-| **Icon** | ⬜ PARTIAL | ⬜ | AAC rules deferred. Inline px sizing deferred. |
-| **Image** | ⬜ PARTIAL | ⬜ | Alt text spans → Text atom deferred. AAC cards deferred. |
-| **Card** | ✅ | ✅ | Liquid glass. Glass tint. Legacy sections deleted. Variant renames. Dumb container confirmed. |
-| **List** | ✅ | ⬜ | |
-| **FormField** | ✅ | ⬜ PROMPT WRITTEN | 8 tasks. Internal token consolidation is the big one (~25 replacements). |
+| **Text** | ✅ | ✅ DONE | No atom-specific items remaining. 3 phantom tokens fixed (--text-color→--text-body, --text-accent→--brand-c-secondary, --text-link→--link-color), colour enum aligned, no internal bridge tokens (global text tokens consumed directly). Deferred: 32+ raw `<small>` and 4 raw `<blockquote>` across molecules → migrate to `<Text>` (consumer migration). |
+| **Heading** | ✅ | ✅ DONE | No atom-specific items remaining. 16 internal tokens, colour enum aligned (accent/text/muted/inherit), colour group added, class:list, render notes documented. Deferred: context overrides deletion (consumer audits), SectionTitle deprecation (consumer migration), raw `<img>` → Image atom (cross-atom), fit-content visual test (browser), `[key: string]: any` confirmation. |
+| **Button** | ✅ | ✅ DONE | No atom-specific items remaining. Deferred: consumer context override cleanup (consumer audits), LottieIcon animation passthrough verify (cross-atom), print (global). |
+| **Badge** | ✅ | ✅ DONE | No atom-specific items remaining. Deferred: contrast calc needs pipeline, Badge-in-Card alt text (Card molecule audit), Icon inheritance (cross-atom). |
+| **Link** | ✅ | ✅ DONE | No atom-specific items remaining. 7 internal tokens, colour enum aligned (primary/accent/text/muted/inherit), `--text-color` bug fixed to `--text-body`, transitions tokenised. Deferred: animation visual testing across themes, highlight-links.css needs rules for new variants. |
+| **Icon** | ✅ | ✅ DONE | No atom-specific items remaining. 3 colour tokens, shadow/glow differentiated, internal `--_icon-color` token. Deferred: inline px → `--icon-size`, AAC rules → global file, aria-hidden conditionality (cross-atom). |
+| **Image** | ✅ | ✅ DONE | No atom-specific items remaining. 3 colour tokens (border, caption, overlay), internal tokens, focus-visible tokenised. Self-referential token bug caught and fixed. Deferred: alt text spans → Text atom, AAC cards → Card+Image+Text, AAC/cognitive rules → global file. |
+| **Card** | ✅ | ✅ DONE | No atom-specific items remaining. Deferred: print (global), molecule card rules in `_reference/Card/` (extract per molecule audit). |
+| **List** | ✅ | ✅ DONE | No atom-specific items remaining. 3 internal tokens, colour enum aligned, render notes documented. Self-referential token bug caught and fixed (same as Image). Deferred: Icon inside List aria-hidden propagation (cross-atom), print page-break-inside (global). |
+| **FormField** | ✅ | ✅ DONE | No atom-specific items remaining. Deferred: save-draft for AAC (functional testing), input tolerance testing, print (global). |
 
 ### Supporting Atoms
 
 | Atom | Pass 1 | Pass 2 | Notes |
 |---|---|---|---|
 | **Toast** | ✅ | ⬜ | Glass tokens need internal routing. textTone via Text atom done. |
-| **Tooltip** | ✅ | ⬜ | 8 findings identified. Internal tokens not routed in render/theme blocks. Arrow colours duplicate chains. Neon needs `--_tooltip-accent`. |
+| **Tooltip** | ✅ | ✅ DONE | No atom-specific items remaining. Arrow consolidation via `--_tooltip-arrow` token (~20 lines deleted). 8 colour pipeline tokens. Glass blur tokenised, neon accent/glow internal routed. Deferred: script runs in all renders (JS bundle gating, global layer). |
 | **Grid** | ✅ | ⬜ | XL text reflow deferred. |
 | **ScrollDrawIcon** | ⬜ PARTIAL | ⬜ | Legacy patterns. Banned patterns throughout. |
-| **LottieIcon** | ⬜ PARTIAL | ⬜ | Consumer migration needed. JS bundle gating deferred. |
+| **LottieIcon** | ⬜ PARTIAL | ⬜ 1 FIX | class:list migration only. Deferred: consumer migration (GlassNav, ReaderNav, ShareSection, Button), lottie_mappings fallbacks, JS bundle gating, data-semantic-role conditionality (cross-atom). |
 
 ---
 

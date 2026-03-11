@@ -353,70 +353,7 @@
   margin-top: 0;
 }
 
-/* ==========================================================
-   AAC MODE — semantic role tiers
-
-   data-semantic-role on wrapper elements controls what AAC
-   mode does to icons and images:
-     decorative     → hidden entirely
-     ui-control     → hide icon, show text label (needs markup)
-     content-symbol → hide icon, show AAC cards
-
-   NOTE: Icon.astro uses <span class="icon">, not .icon-svg.
-   There is no .icon-label element — ui-control label display
-   requires adding a label element to icon wrapper markup.
-   ========================================================== */
-
-/* Decorative: hidden in AAC mode */
-[data-alt-text-mode="aac"] [data-semantic-role="decorative"] {
-  display: none;
-}
-
-/* UI control: hide icon SVG */
-[data-alt-text-mode="aac"] [data-semantic-role="ui-control"] .icon {
-  display: none;
-}
-
-/* Content symbol: hide icon/image, show AAC cards */
-[data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .icon {
-  display: none;
-}
-[data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .image__img {
-  display: none;
-}
-[data-alt-text-mode="aac"] [data-semantic-role="content-symbol"] .image-alt-aac {
-  display: block;
-}
-
-/* ==========================================================
-   COGNITIVE LEVEL — vocabulary depth filtering
-
-   data-cognitive-level on <html> controls which AAC cards
-   are visible based on AssistiveWare core vocabulary tiers.
-   Cards carry data-core-tier="green|yellow|orange|fringe".
-
-   green  → survival vocabulary only (60 words)
-   yellow → + 1-2 word combiners (148 cumulative)
-   orange → + complex/later vocabulary (251 cumulative)
-   full   → all tiers including fringe domain nouns
-   ========================================================== */
-
-[data-cognitive-level="green"] .aac-card[data-core-tier="yellow"],
-[data-cognitive-level="green"] .aac-card[data-core-tier="orange"],
-[data-cognitive-level="green"] .aac-card[data-core-tier="fringe"] {
-  display: none;
-}
-
-[data-cognitive-level="yellow"] .aac-card[data-core-tier="orange"],
-[data-cognitive-level="yellow"] .aac-card[data-core-tier="fringe"] {
-  display: none;
-}
-
-[data-cognitive-level="orange"] .aac-card[data-core-tier="fringe"] {
-  display: none;
-}
-
-/* Full — show everything (default, no hiding needed) */
+/* AAC mode + cognitive level rules extracted to src/styles/global/aac-mode.css */
 
 /* ==========================================================
    ASSISTIVE RENDER (Easy Click) + XL TEXT REFLOW

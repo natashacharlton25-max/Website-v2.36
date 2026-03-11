@@ -1,0 +1,450 @@
+/**
+ * ShareMenu — base styles
+ *
+ * Modal share panel using native <dialog>.
+ * Lottie icons with Phosphor static fallback. Tooltip labels on hover.
+ *
+ * Sections:
+ *   1. Dialog reset + backdrop
+ *   2. Panel container
+ *   3. Header (title + close)
+ *   4. Options grid (platform icons)
+ *   5. Icon holder + icon toggle (Lottie / static)
+ *   6. Hover + focus states
+ *   7. Copy-link section (icon inside input)
+ *   8. Copy feedback state
+ *   9. Render mode overrides
+ */
+
+/* ==========================================================
+   1. DIALOG RESET + BACKDROP
+   ========================================================== */
+
+/* Icon trigger — hidden by default, shown at micro sizes */
+.share-menu__trigger--icon {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.5em;
+  height: 2.5em;
+  border-radius: 50%;
+  background: var(--page-bg-raised);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--brand-c-text);
+  box-shadow: var(--shadow-md);
+  transition: box-shadow var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.share-menu__trigger--icon:hover {
+  color: var(--brand-c-primary);
+  box-shadow: var(--shadow-lg);
+  transform: scale(1.06);
+}
+
+.share-menu__trigger--icon:active {
+  transform: scale(0.96);
+}
+
+.share-menu__trigger--icon:focus-visible {
+  outline: 2px solid var(--brand-c-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--brand-c-primary) 20%, transparent);
+}
+
+
+.share-menu__dialog {
+  position: fixed;
+  inset: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  background: transparent;
+  overflow: visible;
+  z-index: var(--z-modal);
+}
+
+.share-menu__dialog::backdrop {
+  background: color-mix(in oklch, var(--color-Black) 40%, transparent);
+}
+
+.share-menu__dialog[open] {
+  display: grid;
+  place-items: center;
+}
+
+
+/* ==========================================================
+   2. PANEL CONTAINER
+   ========================================================== */
+
+.share-menu__panel {
+  background: var(--page-bg-raised);
+  color: var(--brand-c-text);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  width: fit-content;
+  min-width: 20em;
+  max-width: calc(100vw - var(--space-lg) * 2);
+  max-height: calc(100vh - var(--space-lg) * 2);
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
+}
+
+
+/* ==========================================================
+   3. HEADER
+   ========================================================== */
+
+.share-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Title toggle — short hidden by default */
+.share-menu__title-short {
+  display: none;
+}
+
+.share-menu__close {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--brand-c-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.share-menu__close:hover {
+  color: var(--brand-c-primary);
+}
+
+.share-menu__close:focus-visible {
+  outline: 2px solid var(--brand-c-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+
+/* ==========================================================
+   4. OPTIONS GRID
+   ========================================================== */
+
+.share-menu__options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  row-gap: var(--space-xl);
+  column-gap: var(--space-lg);
+}
+
+.share-menu__item {
+  display: flex;
+  justify-content: center;
+}
+
+/* Lighter tooltip within share menu */
+.share-menu__item .tooltip {
+  --tooltip-bg: var(--brand-c-neutral-light);
+  --tooltip-text: var(--brand-c-text-light);
+  --tooltip-shadow: var(--shadow-sm);
+}
+
+.share-menu__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: var(--brand-c-text);
+  cursor: pointer;
+  border: 2px solid transparent;
+  background: transparent;
+  padding: var(--space-xs);
+  border-radius: var(--radius-xl);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+
+/* ==========================================================
+   5. ICON HOLDER + ICON TOGGLE
+   ========================================================== */
+
+.share-menu__icon-holder {
+  --_share-icon-bg: var(--brand-c-neutral-light);
+
+  width: 4.5em;
+  height: 4.5em;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--_share-icon-bg);
+  color: var(--brand-c-text);
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+
+/* Icon toggle container */
+.share-menu__icon-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Default: show Lottie, hide static */
+.share-menu__icon--lottie {
+  display: flex;
+}
+
+.share-menu__icon--static {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* If no Lottie rendered (missing or failed), show static fallback */
+.share-menu__icon-toggle:not(:has(.share-menu__icon--lottie svg)) .share-menu__icon--static {
+  display: flex;
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+}
+
+
+/* ==========================================================
+   6. HOVER + FOCUS STATES
+   ========================================================== */
+
+.share-menu__link:hover .share-menu__icon-holder {
+  transform: scale(1.06);
+}
+
+.share-menu__link:hover {
+  border-color: var(--brand-c-primary);
+  box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 8%, transparent);
+}
+
+.share-menu__link:focus-visible {
+  outline: 2px solid var(--brand-c-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--brand-c-primary) 20%, transparent);
+}
+
+.share-menu__link:active .share-menu__icon-holder {
+  transform: scale(0.96);
+}
+
+
+/* ==========================================================
+   7. COPY-LINK SECTION — icon inside input
+   ========================================================== */
+
+.share-menu__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.share-menu__copy-input-wrap {
+  position: relative;
+}
+
+.share-menu__copy-input {
+  width: 100%;
+  background: var(--brand-c-bg);
+  color: var(--brand-c-text-light);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  padding-right: var(--space-3xl);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  outline: none;
+}
+
+.share-menu__copy-input:focus-visible {
+  outline: 2px solid var(--brand-c-primary);
+  outline-offset: -2px;
+}
+
+.share-menu__copy-btn {
+  position: absolute;
+  right: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--brand-c-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.share-menu__copy-btn:hover {
+  color: var(--brand-c-primary);
+}
+
+.share-menu__copy-btn:focus-visible {
+  outline: 2px solid var(--brand-c-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+
+/* ==========================================================
+   8. COPY FEEDBACK STATE
+   ========================================================== */
+
+.share-menu__copy-btn--copied {
+  color: var(--color-Success);
+}
+
+.share-menu__copy-input--success {
+  color: var(--color-Success);
+  font-weight: var(--font-medium);
+}
+
+/* Compact copy button — reuses .share-menu__link + icon-holder, hidden by default */
+.share-menu__copy-compact {
+  display: none;
+  align-self: center;
+}
+
+.share-menu__copy-compact .share-menu__icon-holder {
+  --_share-icon-bg: transparent;
+}
+
+.share-menu__copy-compact--copied .share-menu__icon-holder {
+  background-color: var(--color-Success);
+  color: var(--color-White);
+}
+
+
+/* ==========================================================
+   9. RENDER MODE OVERRIDES
+   ========================================================== */
+
+/* ── Reduced — static icons only, no hover motion ── */
+
+[data-render="reduced"] .share-menu__icon-holder {
+  transition: none;
+}
+
+[data-render="reduced"] .share-menu__link:hover .share-menu__icon-holder {
+  transform: none;
+}
+
+[data-render="reduced"] .share-menu__link {
+  transition: none;
+}
+
+[data-render="reduced"] .share-menu__link:hover {
+  border-color: var(--brand-c-primary);
+  box-shadow: none;
+}
+
+/* Show static, hide Lottie in reduced */
+[data-render="reduced"] .share-menu__icon--lottie {
+  display: none;
+}
+
+[data-render="reduced"] .share-menu__icon--static {
+  display: flex;
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+}
+
+
+/* ── Assistive — larger targets, single column list ── */
+
+[data-render="assistive"] .share-menu__options {
+  grid-template-columns: 1fr;
+}
+
+[data-render="assistive"] .share-menu__link {
+  flex-direction: row;
+  gap: var(--space-md);
+  min-height: 64px;
+  padding: var(--space-md);
+}
+
+[data-render="assistive"] .share-menu__icon-holder {
+  width: 4.5em;
+  height: 4.5em;
+}
+
+[data-render="assistive"] .share-menu__link:focus-visible {
+  outline-width: 3px;
+}
+
+/* Show static, hide Lottie in assistive */
+[data-render="assistive"] .share-menu__icon--lottie {
+  display: none;
+}
+
+[data-render="assistive"] .share-menu__icon--static {
+  display: flex;
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+}
+
+
+/* ── Textonly — plain list, no icons, instant colour ── */
+
+[data-render="textonly"] .share-menu__panel {
+  background: transparent;
+  border: 1px solid var(--brand-c-neutral-light);
+  border-radius: 0;
+  box-shadow: none;
+  padding: var(--space-md);
+}
+
+[data-render="textonly"] .share-menu__icon-holder {
+  display: none;
+}
+
+[data-render="textonly"] .share-menu__options {
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+}
+
+[data-render="textonly"] .share-menu__link {
+  flex-direction: row;
+  padding: var(--space-sm);
+  border: 1px solid var(--brand-c-neutral-light);
+  transition: none;
+}
+
+[data-render="textonly"] .share-menu__link:hover {
+  border-color: var(--brand-c-primary);
+  color: var(--brand-c-primary);
+  box-shadow: none;
+}
+
+[data-render="textonly"] .share-menu__dialog::backdrop {
+  background: color-mix(in oklch, var(--color-Black) 30%, transparent);
+}

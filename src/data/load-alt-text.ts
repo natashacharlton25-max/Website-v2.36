@@ -23,10 +23,20 @@ import { pictogramCard, textOnlyCard } from '../lib/aac/aac-cards';
 
 // ── Types ──
 
+/** Card data for AacCard molecule rendering (no HTML) */
+export interface AacCardData {
+  word: string;
+  symbolSrc: string | null;
+  symbolId: number | null;
+  coreTier: CoreTier;
+}
+
 export interface AltData {
   word: string | null;
   descriptive: string | null;
   aacHtml: string;
+  /** Resolved card data — use with AacCard molecule instead of aacHtml */
+  cards: AacCardData[];
 }
 
 interface AltTextRow {
@@ -35,6 +45,7 @@ interface AltTextRow {
   aacPhrase: string | null;
   word: string | null;
   aacUrl: string | null;
+  symbolId: number | null;
 }
 
 // ── Prepare resolver inputs (once per build) ──
@@ -49,7 +60,18 @@ const symbols: AltSymbol[] = (symbolData as any[]).map((r) => ({
 
 const overrides: ContextOverride[] = overrideData as ContextOverride[];
 
-// ── Render resolved cards to HTML ──
+// ── Convert resolved cards to data objects ──
+
+function toCardData(resolved: AACResolved[]): AacCardData[] {
+  return resolved.map((card) => ({
+    word: card.word,
+    symbolSrc: card.type === 'aac' ? card.src : null,
+    symbolId: null, // BCI index resolved at snapshot level, not per-word
+    coreTier: card.coreTier,
+  }));
+}
+
+// ── Render resolved cards to HTML (legacy — use cards[] for AacCard molecule) ──
 
 function renderCards(resolved: AACResolved[]): string {
   return resolved
@@ -71,25 +93,35 @@ export function loadAllAltText(): Map<string, AltData> {
 
   for (const asset of altTextData as AltTextRow[]) {
     let aacHtml: string;
+    let cards: AacCardData[];
 
     if (asset.aacPhrase) {
-      // Multi-word AAC phrase → resolve through pipeline → multi-card HTML
+      // Multi-word AAC phrase → resolve through pipeline → multi-card sequence
       const resolved = resolveAACPhrase(asset.aacPhrase, symbols, overrides);
-      aacHtml = resolved.length > 0
-        ? renderCards(resolved)
-        : textOnlyCard(asset.word || asset.name);
+      if (resolved.length > 0) {
+        aacHtml = renderCards(resolved);
+        cards = toCardData(resolved);
+      } else {
+        const fallbackWord = asset.word || asset.name;
+        aacHtml = textOnlyCard(fallbackWord);
+        cards = [{ word: fallbackWord, symbolSrc: null, symbolId: null, coreTier: null }];
+      }
     } else if (asset.aacUrl && asset.word) {
-      // Single symbol with ARASAAC pictogram → single card
+      // Single symbol with pictogram → single card
       aacHtml = pictogramCard(asset.word, asset.aacUrl);
+      cards = [{ word: asset.word, symbolSrc: asset.aacUrl, symbolId: asset.symbolId ?? null, coreTier: null }];
     } else {
       // No AAC data → text-only fallback
-      aacHtml = textOnlyCard(asset.word || asset.name);
+      const fallbackWord = asset.word || asset.name;
+      aacHtml = textOnlyCard(fallbackWord);
+      cards = [{ word: fallbackWord, symbolSrc: null, symbolId: null, coreTier: null }];
     }
 
     cache.set(asset.name, {
       word: asset.word,
       descriptive: asset.descriptive,
       aacHtml,
+      cards,
     });
   }
 

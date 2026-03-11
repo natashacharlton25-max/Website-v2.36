@@ -36,7 +36,7 @@ interface Props {
   leading?: 'tight' | 'snug' | 'normal' | 'relaxed';
 
   /** Colour token */
-  color?: 'text' | 'text-light' | 'primary' | 'secondary' | 'neutral' | 'inherit';
+  color?: 'text' | 'muted' | 'accent' | 'link' | 'inherit';
 
   /** Font family variant */
   family?: 'body' | 'body-alt' | 'handwriting' | 'mono';
@@ -81,22 +81,22 @@ const {
 
 const classes = [
   'text',
-  size ? `text--${size}` : '',
-  weight ? `text--weight-${weight}` : '',
-  leading ? `text--leading-${leading}` : '',
-  color ? `text--color-${color}` : '',
-  family ? `text--family-${family}` : '',
-  align ? `text--align-${align}` : '',
-  textTone ? `text--tone-${textTone}` : '',
-  uppercase ? 'text--uppercase' : '',
-  clamp ? 'text--clamp' : '',
-  flush ? 'text--flush' : '',
+  size && `text--${size}`,
+  weight && `text--weight-${weight}`,
+  leading && `text--leading-${leading}`,
+  color && `text--color-${color}`,
+  family && `text--family-${family}`,
+  align && `text--align-${align}`,
+  textTone && `text--tone-${textTone}`,
+  uppercase && 'text--uppercase',
+  clamp && 'text--clamp',
+  flush && 'text--flush',
   className,
-].filter(Boolean).join(' ');
+];
 
 const inlineStyle = clamp ? `--text-clamp: ${clamp}` : undefined;
 ---
 
-<Tag class={classes} style={inlineStyle} {...rest}>
+<Tag class:list={classes} style={inlineStyle} {...rest}>
   <slot />
 </Tag>

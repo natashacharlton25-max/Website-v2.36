@@ -63,7 +63,7 @@ const wrapperClasses = [
   `tooltip--${size}`,
   entrance && `tooltip--animate-${entrance}`,
   className,
-].filter(Boolean);
+];
 ---
 
 <span class:list={wrapperClasses} data-tooltip-position={position}>
@@ -89,19 +89,25 @@ const wrapperClasses = [
 
 <script>
   function initTooltips() {
-    document.querySelectorAll('.tooltip').forEach((wrapper) => {
+    document.querySelectorAll<HTMLElement>('.tooltip').forEach((wrapper) => {
       if (wrapper.dataset.tooltipInit) return;
       wrapper.dataset.tooltipInit = 'true';
 
-      const trigger = wrapper.querySelector('.tooltip__trigger');
-      const content = wrapper.querySelector('.tooltip__content');
-      if (!trigger || !content) return;
+      const triggerEl = wrapper.querySelector<HTMLElement>('.tooltip__trigger')!;
+      const contentEl = wrapper.querySelector<HTMLElement>('.tooltip__content')!;
+      if (!triggerEl || !contentEl) return;
 
       const position = wrapper.dataset.tooltipPosition || 'top';
 
+      // Inside dialogs, CSS switches to position:absolute (no JS coords needed).
+      // JS positioning only runs for non-dialog tooltips.
+      const inDialog = !!wrapper.closest('dialog');
+
       function updatePosition() {
-        const rect = trigger.getBoundingClientRect();
-        let x, y;
+        if (inDialog) return;
+
+        const rect = triggerEl.getBoundingClientRect();
+        let x = 0, y = 0;
 
         switch (position) {
           case 'top':
@@ -122,12 +128,24 @@ const wrapperClasses = [
             break;
         }
 
-        content.style.setProperty('--_tooltip-x', `${x}px`);
-        content.style.setProperty('--_tooltip-y', `${y}px`);
+        contentEl.style.setProperty('--_tooltip-x', `${x}px`);
+        contentEl.style.setProperty('--_tooltip-y', `${y}px`);
       }
 
       wrapper.addEventListener('mouseenter', updatePosition);
       wrapper.addEventListener('focusin', updatePosition);
+
+      // Reposition when trigger resizes (text-size change, zoom, layout shift)
+      let isVisible = false;
+      wrapper.addEventListener('mouseenter', () => { isVisible = true; });
+      wrapper.addEventListener('mouseleave', () => { isVisible = false; });
+      wrapper.addEventListener('focusin', () => { isVisible = true; });
+      wrapper.addEventListener('focusout', () => { isVisible = false; });
+
+      const ro = new ResizeObserver(() => {
+        if (isVisible) updatePosition();
+      });
+      ro.observe(triggerEl);
     });
   }
 
