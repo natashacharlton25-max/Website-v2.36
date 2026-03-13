@@ -28,12 +28,26 @@ function d1Query(sql) {
   const flat = sql.replace(/\s+/g, ' ').trim();
   const escaped = flat.replace(/"/g, '\\"');
   const cmd = `npx wrangler d1 execute asset-library --remote --command="${escaped}" --json`;
-  const raw = execSync(cmd, { encoding: 'utf-8', cwd: WORKER_DIR });
+  const raw = execSync(cmd, { encoding: 'utf-8', cwd: WORKER_DIR, maxBuffer: 50 * 1024 * 1024 });
   const parsed = JSON.parse(raw);
   if (!parsed[0] || !parsed[0].success) {
     throw new Error(`D1 query failed: ${flat}`);
   }
   return parsed[0].results;
+}
+
+// Paginated query for large tables — avoids ENOBUFS on execSync
+function d1QueryPaginated(sql, pageSize = 2000) {
+  const allResults = [];
+  let offset = 0;
+  while (true) {
+    const pageSql = `${sql} LIMIT ${pageSize} OFFSET ${offset}`;
+    const rows = d1Query(pageSql);
+    allResults.push(...rows);
+    if (rows.length < pageSize) break;
+    offset += pageSize;
+  }
+  return allResults;
 }
 
 // ── 1. Image assets with alt text ──
@@ -56,7 +70,7 @@ if (altTextRows.length === 0) {
 
 // ── 2. Full alt_symbols vocabulary ──
 
-const symbolRows = d1Query(
+const symbolRows = d1QueryPaginated(
   'SELECT s.word, s.aac_url, s.icon_id, s.verified, s.core_tier, s.bci_index, c.pos AS bci_pos FROM alt_symbols s LEFT JOIN bci_concepts c ON s.bci_index = c.bci_index'
 );
 
