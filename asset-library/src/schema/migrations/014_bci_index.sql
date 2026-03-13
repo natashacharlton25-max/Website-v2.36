@@ -4,11 +4,9 @@
 -- universal key defined by the W3C AAC Symbol Registry, enabling
 -- WAI-Adapt personalization agents to map concepts across symbol sets.
 --
--- Also adds verified and core_tier columns that were previously only
--- in snapshot JSON (added by seed scripts) but missing from the schema.
+-- Note: verified and core_tier columns already exist (added by seed scripts
+-- before formal migration). Only bci_index is new.
 
 ALTER TABLE alt_symbols ADD COLUMN bci_index INTEGER;
-ALTER TABLE alt_symbols ADD COLUMN verified INTEGER DEFAULT 0;
-ALTER TABLE alt_symbols ADD COLUMN core_tier TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_alt_symbols_bci ON alt_symbols(bci_index);
