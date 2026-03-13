@@ -7,20 +7,22 @@
     "assistive": "AacCard.astro",
     "textonly": "Text"
   },
-  "notes": "AAC pictogram card — single concept display. Composes Text atom for word label. Pipeline resolves symbolId (BCI index) to symbolSrc based on user's symbol set preference (OpenAAC default). Cognitive filtering via data-core-tier + aac-mode.css. In textonly render, pipeline passes word to Text atom — no pictogram.",
+  "notes": "AAC pictogram card — single concept display. Composes Image atom (content-symbol) for the pictogram and Text atom for word label. Pipeline resolves bciIndex (BCI reference number) to symbolSrc based on user's symbol set preference (OpenAAC default). Bliss grammar indicators are rendered as separate AacCard instances with isIndicator: true — NOT as overlay elements within content cards. Cognitive filtering via data-core-tier + aac-mode.css. In textonly render, pipeline passes word to Text atom — no pictogram.",
 
   "props": {
     "content": {
       "_description": "What this card represents — concept identity and symbol source",
-      "word":       { "type": "string",  "required": true,  "description": "English concept word displayed below the pictogram." },
-      "symbolSrc":  { "type": "string",  "required": false, "default": null, "description": "Resolved symbol image URL. Pipeline resolves from symbolId + user's symbol set preference. Null = text-only card." },
-      "symbolId":   { "type": "number",  "required": false, "default": null, "description": "BCI reference number (W3C AAC Symbol Registry). Universal cross-reference key for multi-symbol-set resolution. Maps to alt_symbol_id in D1." },
-      "coreTier":   { "type": "string",  "required": false, "default": null, "enum": ["green", "yellow", "orange", null], "description": "Cognitive vocabulary tier. green=core 60 words, yellow=148 cumulative, orange=251, null=fringe. Used by aac-mode.css for cognitive level filtering." }
+      "word":         { "type": "string",  "required": true,  "description": "English concept word displayed below the pictogram." },
+      "bciIndex":     { "type": "number",  "required": false, "default": null, "description": "BCI reference number (W3C AAC Symbol Registry). Universal cross-reference key for multi-symbol-set resolution." },
+      "symbolSrc":    { "type": "string",  "required": false, "default": null, "description": "Resolved symbol image URL. Pipeline resolves from bciIndex + user's symbol set preference. Null = text-only card." },
+      "symbolId":     { "type": "number",  "required": false, "default": null, "description": "DEPRECATED — use bciIndex instead. Kept for backward compatibility." },
+      "coreTier":     { "type": "string",  "required": false, "default": null, "enum": ["green", "yellow", "orange", null], "description": "Cognitive vocabulary tier. green=core 60 words, yellow=148 cumulative, orange=251, null=fringe. Used by aac-mode.css for cognitive level filtering." },
+      "isIndicator":  { "type": "boolean", "required": false, "default": false, "description": "True for Bliss grammar indicator cards (tense, plural, possessive, etc). Renders smaller with lighter styling and no tier border colour. These are separate cards in the sequence, not overlays." }
     },
 
     "visual": {
       "_description": "How the card looks",
-      "size":   { "type": "string", "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Pictogram size: sm (24px), md (32px), lg (48px)." },
+      "size":   { "type": "string", "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Pictogram size: sm (24px), md (32px), lg (48px). Overridden to sm for indicator cards." },
       "class":  { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." }
     },
 
@@ -35,25 +37,32 @@
   },
 
   "data_attributes": {
-    "data-core-tier": "green | yellow | orange | fringe — cognitive vocabulary tier, used by aac-mode.css for filtering",
+    "data-core-tier": "green | yellow | orange | fringe — cognitive vocabulary tier, used by aac-mode.css for filtering. Not set on indicator cards.",
     "data-bci": "BCI reference number (integer) — W3C AAC Symbol Registry index. Enables WAI-Adapt personalization agents to resolve the concept to the user's configured symbol set."
   },
 
   "pipeline": {
-    "_description": "How the content pipeline resolves symbol sources",
+    "_description": "How the content pipeline resolves symbol sources and generates indicator cards",
     "resolution_order": [
-      "1. Read symbolId (BCI index) from content data",
-      "2. Check user's symbol set preference (Your View panel → data-symbol-set on <html>)",
-      "3. If preferred set available: resolve BCI index → that set's symbol URL",
+      "1. Read bciIndex (BCI reference number) from content data",
+      "2. Check user's symbol set preference (Your View panel -> data-symbol-set on <html>)",
+      "3. If preferred set available: resolve BCI index -> that set's symbol URL",
       "4. If no preference or set unavailable: resolve via OpenAAC (default)",
-      "5. If no symbolId: fall back to alt_symbols.aac_url (legacy ARASAAC path)",
-      "6. If nothing resolves: symbolSrc = null → text-only card"
+      "5. If no bciIndex: fall back to alt_symbols.aac_url (legacy ARASAAC path)",
+      "6. If nothing resolves: symbolSrc = null -> text-only card"
+    ],
+    "bliss_indicators": [
+      "1. For Bliss symbol set, pipeline calls detectBlissIndicators() per word",
+      "2. Returns array of BlissIndicator objects (bci, type, url)",
+      "3. Each indicator becomes an additional AacCard with isIndicator: true",
+      "4. Indicator cards are inserted after the content card they modify",
+      "5. Example: 'cats' -> [AacCard(cat)] [AacCard(plural, isIndicator)]"
     ],
     "symbol_sets": {
       "openaac": "Default — open-source, bundled. No licence required.",
       "widgit": "Commercial — requires licence. User provides via AAC device.",
       "pcs": "Commercial (Tobii Dynavox) — requires licence.",
-      "bliss": "Blissymbolics — BCI native set.",
+      "bliss": "Blissymbolics — BCI native set. Grammar indicators rendered as separate cards.",
       "makaton": "Commercial (The Makaton Charity) — requires licence."
     }
   }

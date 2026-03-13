@@ -57,7 +57,7 @@ if (altTextRows.length === 0) {
 // ── 2. Full alt_symbols vocabulary ──
 
 const symbolRows = d1Query(
-  'SELECT word, aac_url, icon_id, verified, core_tier, bci_index FROM alt_symbols'
+  'SELECT s.word, s.aac_url, s.icon_id, s.verified, s.core_tier, s.bci_index, c.pos AS bci_pos FROM alt_symbols s LEFT JOIN bci_concepts c ON s.bci_index = c.bci_index'
 );
 
 console.log(`Symbol rows: ${symbolRows.length}`);

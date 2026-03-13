@@ -2,81 +2,105 @@
 /**
  * AacCard — AAC pictogram card molecule
  *
- * Renders a single AAC concept: pictogram image + word label.
- * Composes Text atom for the word. Pictogram is a bare <img> —
- * Image atom is for content images with alt text displays, not symbols.
+ * Renders a single AAC concept: symbol image + word label.
+ * Composes Image atom (content-symbol) for the pictogram and Text atom
+ * for the word label. These serve different accessibility paths:
+ *   Image alt = describes what the symbol picture IS ("pictogram of a cat")
+ *   Text label = the word itself ("cat")
  *
- * Two display modes:
- *   pictogram — symbol image above word label (default)
- *   text-only — word label with dashed border (no image available)
+ * Three display modes:
+ *   pictogram  — symbol image above word label (default)
+ *   text-only  — word label with dashed border (no image available)
+ *   indicator  — Bliss grammar marker (smaller, lighter styling)
  *
  * BCI reference number integration (W3C AAC Symbol Registry):
- *   symbolId = BCI index number — the universal cross-reference key.
- *   Pipeline resolves symbolId → symbolSrc based on user's symbol set
+ *   bciIndex = BCI index number — the universal cross-reference key.
+ *   Pipeline resolves bciIndex -> symbolSrc based on user's symbol set
  *   preference (OpenAAC default, or Widgit/PCS/Bliss/Makaton if configured).
  *   The data-bci attribute enables WAI-Adapt personalization agents to
  *   resolve the concept to the user's familiar symbol set.
  *
+ * Indicator cards (isIndicator: true):
+ *   Bliss grammar indicators (tense, plural, possessive, etc.) are rendered
+ *   as separate AacCard instances in the sequence, not overlays. The pipeline
+ *   emits additional entries with isIndicator: true. These render smaller,
+ *   with lighter styling and no tier border colour.
+ *
  * Cognitive level filtering:
  *   data-core-tier on the card + data-cognitive-level on <html>
- *   → CSS in aac-mode.css hides cards above the user's vocabulary tier.
+ *   -> CSS in aac-mode.css hides cards above the user's vocabulary tier.
  *
- * @param word       — English word/concept label (required)
- * @param symbolSrc  — Resolved symbol image URL (from pipeline)
- * @param symbolId   — BCI reference number (W3C AAC Symbol Registry index)
- * @param coreTier   — Cognitive vocabulary tier: green | yellow | orange | null (fringe)
- * @param size       — Pictogram size: sm (24px) | md (32px) | lg (48px)
+ * @param word        — English word/concept label (required)
+ * @param bciIndex    — BCI reference number (W3C AAC Symbol Registry index)
+ * @param symbolSrc   — Resolved symbol image URL (from pipeline)
+ * @param symbolId    — @deprecated Use bciIndex instead
+ * @param coreTier    — Cognitive vocabulary tier: green | yellow | orange | null (fringe)
+ * @param isIndicator — True for Bliss grammar indicator cards (smaller, lighter)
+ * @param size        — Pictogram size: sm (24px) | md (32px) | lg (48px)
  *
- * Styles: AacCard.css
+ * Styles: AacCard.css | AacCard.responsive.css
  */
+import { Image } from '../../atoms/Image';
 import { Text } from '../../atoms/Text';
 
 interface Props {
   word: string;
+  bciIndex?: number;
   symbolSrc?: string;
+  /** @deprecated Use bciIndex instead */
   symbolId?: number;
   coreTier?: 'green' | 'yellow' | 'orange' | null;
+  isIndicator?: boolean;
   size?: 'sm' | 'md' | 'lg';
   class?: string;
 }
 
 const {
   word,
+  bciIndex,
   symbolSrc,
   symbolId,
   coreTier = null,
+  isIndicator = false,
   size = 'md',
   class: className,
 } = Astro.props;
 
+// bciIndex is primary, symbolId is deprecated alias
+const resolvedBci = bciIndex ?? symbolId ?? null;
+
 const isTextOnly = !symbolSrc;
 
-const tierValue = coreTier ?? 'fringe';
+const tierValue = isIndicator ? undefined : (coreTier ?? 'fringe');
 
 const sizeMap = { sm: 24, md: 32, lg: 48 };
-const px = sizeMap[size] ?? sizeMap.md;
+const effectiveSize = isIndicator ? 'sm' : size;
+const px = sizeMap[effectiveSize] ?? sizeMap.md;
 
 const classes = [
   'aac-card',
   isTextOnly && 'aac-card--text-only',
-  `aac-card--${size}`,
+  isIndicator && 'aac-card--indicator',
+  `aac-card--${effectiveSize}`,
   className,
 ];
 ---
 
 <span
   class:list={classes}
-  data-core-tier={tierValue}
-  {...(symbolId != null && { 'data-bci': String(symbolId) })}
+  {...(tierValue && { 'data-core-tier': tierValue })}
+  {...(resolvedBci != null && { 'data-bci': String(resolvedBci) })}
 >
   {symbolSrc && (
-    <img
-      class="aac-card__pictogram"
+    <Image
       src={symbolSrc}
-      alt={word}
+      alt={`pictogram of ${word}`}
       width={px}
       height={px}
+      fit="contain"
       loading="lazy"
+      semanticRole="content-symbol"
+      class="aac-card__pictogram"
     />
   )}
   <Text as="span" class="aac-card__word" size="sm" flush>

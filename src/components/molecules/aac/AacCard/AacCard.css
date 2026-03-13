@@ -6,7 +6,8 @@
  * Dark mode overrides in theme-luminance-dark.css.
  *
  * Sizes: sm (24px), md (32px), lg (48px)
- * Variants: default (pictogram), text-only (dashed border, no image)
+ * Variants: default (pictogram), text-only (dashed border), indicator (grammar marker)
+ * Render modes: full/reduced (default), assistive (larger), textonly (symbol hidden)
  */
 
 
@@ -76,15 +77,79 @@
 
 
 /* ==========================================================
-   Assistive render — larger targets
+   Core tier border colours
    ========================================================== */
 
-[data-render="assistive"] .aac-card {
+.aac-card[data-core-tier="green"] {
+  border-color: var(--color-Success);
+}
+
+.aac-card[data-core-tier="yellow"] {
+  border-color: var(--color-Warning);
+}
+
+.aac-card[data-core-tier="orange"] {
+  border-color: var(--color-Warning);
+}
+
+.aac-card[data-core-tier="fringe"] {
+  border-color: var(--brand-c-neutral);
+}
+
+
+/* ==========================================================
+   Indicator variant (Bliss grammar markers)
+
+   Rendered as separate cards in the sequence — smaller, lighter
+   styling to visually distinguish from content cards. No tier
+   border colour since indicators are grammatical, not vocabulary.
+   ========================================================== */
+
+.aac-card--indicator {
+  --_aac-card-bg: var(--page-bg-tint);
+  --_aac-card-border: var(--brand-c-neutral-light);
+  padding: var(--space-2xs) var(--space-xs);
+  min-width: 2.5em;
+  opacity: 0.85;
+}
+
+.aac-card--indicator .aac-card__word {
+  font-size: var(--text-xs);
+  font-style: italic;
+}
+
+
+/* ==========================================================
+   Render modes
+   ========================================================== */
+
+/* Reduced — no transitions */
+[data-render="reduced"] .aac-card,
+[data-render="calm"] .aac-card {
+  transition: none;
+}
+
+/* Assistive — larger targets */
+[data-render="assistive"] .aac-card,
+[data-render="easy-click"] .aac-card {
   padding: var(--space-sm) var(--space-md);
   min-width: 4.5em;
 }
 
-[data-render="assistive"] .aac-card__pictogram {
+[data-render="assistive"] .aac-card__pictogram,
+[data-render="easy-click"] .aac-card__pictogram {
   width: 3em;
   height: 3em;
+}
+
+/* Textonly — symbol hidden, word label only */
+[data-render="textonly"] .aac-card__pictogram,
+[data-render="reading"] .aac-card__pictogram {
+  display: none;
+}
+
+[data-render="textonly"] .aac-card,
+[data-render="reading"] .aac-card {
+  padding: var(--space-2xs) var(--space-xs);
+  border-width: 1px;
 }

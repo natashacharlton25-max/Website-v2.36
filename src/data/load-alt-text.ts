@@ -17,18 +17,24 @@
 import altTextData from './alt-text.json';
 import symbolData from './alt-symbols.json';
 import overrideData from './context-overrides.json';
-import { resolveAACPhrase } from '../lib/aac/aacResolver';
+import { resolveAACPhrase, lemmatise } from '../lib/aac/aacResolver';
 import type { AltSymbol, ContextOverride, AACResolved, CoreTier } from '../lib/aac/aacResolver';
 import { pictogramCard, textOnlyCard } from '../lib/aac/aac-cards';
+import { detectBlissIndicators } from '../lib/aac/blissGrammar';
 
 // ── Types ──
 
 /** Card data for AacCard molecule rendering (no HTML) */
 export interface AacCardData {
   word: string;
+  /** BCI reference number (W3C AAC Symbol Registry) */
+  bciIndex: number | null;
   symbolSrc: string | null;
+  /** @deprecated Use bciIndex instead */
   symbolId: number | null;
   coreTier: CoreTier;
+  /** True for Bliss grammar indicator cards (tense, plural, etc.) */
+  isIndicator?: boolean;
 }
 
 export interface AltData {
@@ -56,19 +62,70 @@ const symbols: AltSymbol[] = (symbolData as any[]).map((r) => ({
   icon_id: r.icon_id,
   verified: Boolean(r.verified),
   core_tier: (r.core_tier as CoreTier) ?? null,
+  bci_index: r.bci_index ?? null,
+  bci_pos: r.bci_pos ?? null,
 }));
 
 const overrides: ContextOverride[] = overrideData as ContextOverride[];
 
+// ── BCI lookup map (word → bci_index + pos) for indicator detection ──
+
+type BciLookup = { bci_index: number; pos: string };
+const bciByWord = new Map<string, BciLookup>();
+for (const sym of symbols) {
+  if (sym.bci_index && sym.bci_pos) {
+    bciByWord.set(sym.word.toLowerCase(), {
+      bci_index: sym.bci_index,
+      pos: sym.bci_pos,
+    });
+  }
+}
+
 // ── Convert resolved cards to data objects ──
+// Includes Bliss grammar indicator cards when POS data is available.
+// Indicators are emitted as separate AacCard entries after each content card.
 
 function toCardData(resolved: AACResolved[]): AacCardData[] {
-  return resolved.map((card) => ({
-    word: card.word,
-    symbolSrc: card.type === 'aac' ? card.src : null,
-    symbolId: null, // BCI index resolved at snapshot level, not per-word
-    coreTier: card.coreTier,
-  }));
+  const cards: AacCardData[] = [];
+  const words = resolved.map((c) => c.word);
+
+  for (let i = 0; i < resolved.length; i++) {
+    const card = resolved[i];
+    const baseForm = lemmatise(card.word);
+    const bci = bciByWord.get(baseForm) ?? bciByWord.get(card.word.toLowerCase());
+
+    // Content card
+    cards.push({
+      word: card.word,
+      bciIndex: bci?.bci_index ?? null,
+      symbolSrc: card.type === 'aac' ? card.src : null,
+      symbolId: bci?.bci_index ?? null,
+      coreTier: card.coreTier,
+      isIndicator: false,
+    });
+
+    // Bliss grammar indicators (emitted as additional cards after the content card)
+    if (bci?.pos) {
+      const indicators = detectBlissIndicators(
+        card.word,
+        baseForm,
+        bci.pos,
+        { prevWord: words[i - 1], nextWord: words[i + 1] },
+      );
+      for (const ind of indicators) {
+        cards.push({
+          word: ind.type,
+          bciIndex: ind.bci,
+          symbolSrc: ind.url,
+          symbolId: ind.bci,
+          coreTier: null,
+          isIndicator: true,
+        });
+      }
+    }
+  }
+
+  return cards;
 }
 
 // ── Render resolved cards to HTML (legacy — use cards[] for AacCard molecule) ──
@@ -104,17 +161,17 @@ export function loadAllAltText(): Map<string, AltData> {
       } else {
         const fallbackWord = asset.word || asset.name;
         aacHtml = textOnlyCard(fallbackWord);
-        cards = [{ word: fallbackWord, symbolSrc: null, symbolId: null, coreTier: null }];
+        cards = [{ word: fallbackWord, bciIndex: null, symbolSrc: null, symbolId: null, coreTier: null }];
       }
     } else if (asset.aacUrl && asset.word) {
       // Single symbol with pictogram → single card
       aacHtml = pictogramCard(asset.word, asset.aacUrl);
-      cards = [{ word: asset.word, symbolSrc: asset.aacUrl, symbolId: asset.symbolId ?? null, coreTier: null }];
+      cards = [{ word: asset.word, bciIndex: asset.symbolId ?? null, symbolSrc: asset.aacUrl, symbolId: asset.symbolId ?? null, coreTier: null }];
     } else {
       // No AAC data → text-only fallback
       const fallbackWord = asset.word || asset.name;
       aacHtml = textOnlyCard(fallbackWord);
-      cards = [{ word: fallbackWord, symbolSrc: null, symbolId: null, coreTier: null }];
+      cards = [{ word: fallbackWord, bciIndex: null, symbolSrc: null, symbolId: null, coreTier: null }];
     }
 
     cache.set(asset.name, {

@@ -147,9 +147,11 @@ The `licenses` table in D1 includes `cc-by-sa-3` for BCI.
 
 | File | Description |
 |---|---|
-| `BlissSymbols2026 - 8483-29642.csv` | Official BCI-AV 2025-02-15 CSV (project root) |
+| BCI-AV 2025-02-15 CSV | Imported to D1 `bci_concepts` table, CSV removed from repo. Source: [blissymbolics.org/symbol-files-2025](https://blissymbolics.org/index.php/symbol-files-2025) |
 | `src/styles/global/aac-mode.css` | Global AAC semantic role + cognitive level CSS |
-| `src/lib/aac/aacResolver.ts` | Word→symbol resolution pipeline |
-| `src/lib/aac/aac-cards.ts` | Legacy HTML string renderer (deprecated) |
+| `src/lib/aac/aacResolver.ts` | Word→symbol resolution pipeline + `lemmatise()` export |
+| `src/lib/aac/blissGrammar.ts` | Bliss grammar indicator detection (`detectBlissIndicators()`) |
+| `src/lib/aac/aac-cards.ts` | Legacy HTML string renderer (deprecated — use AacCard molecule) |
+| `src/components/molecules/aac/AacCard/` | AacCard molecule (Image + Text atoms, indicator support) |
 | `src/components/YourView/a11y-panel.ts` | Your View panel (symbolSet + customSymbolsUrl settings) |
 | `src/components/atoms/Image/Image.astro` | Image atom (altAacCards prop) |

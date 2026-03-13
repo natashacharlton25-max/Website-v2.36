@@ -25,6 +25,9 @@ export type AltSymbol = {
   icon_id: string | null;
   verified: boolean;
   core_tier: CoreTier;
+  bci_index?: number | null;
+  /** BCI part of speech (RED=verb, YELLOW=noun, GREEN=adj, BLUE=pronoun, etc.) */
+  bci_pos?: string | null;
 };
 
 export type ContextOverride = {
@@ -100,6 +103,17 @@ function tierRank(tier: CoreTier): number {
 function withinTier(symbolTier: CoreTier, maxTier: CoreTier): boolean {
   if (maxTier === null) return true; // null = show all tiers
   return tierRank(symbolTier) <= tierRank(maxTier);
+}
+
+// ─── Lemmatisation (public) ──────────────────
+
+/**
+ * Lemmatise a word to its base form using the OpenAAC dictionary.
+ * Returns the base form if found, otherwise the original word (lowercased).
+ */
+export function lemmatise(word: string): string {
+  const lower = word.toLowerCase().trim();
+  return LEMMA_MAP.get(lower) ?? lower;
 }
 
 // ─── Internal helpers ───────────────────────
