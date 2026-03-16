@@ -12,7 +12,7 @@ All 12 atoms are pass 2 clean. Hover gate system implemented today.
 | 1 | AssetCard | **DELETED** | Not a molecule — just atoms composed together. Page-level composition with RainbowBorderCard wrapper. | |
 | 2 | AuthorCard | **PASS** | Folder structure, scoped style extracted, raw HTML→atoms (Image, Heading, Text), photo size via `--img-width-*` tokens, collection fields (longBio, credentials, specialties), `ImageMetadata` support | Offset photo pattern → future Card atom `mediaPosition` prop |
 | 3 | BlogCard | **PASS** | Folder structure, atoms used, token chain (7 tokens), hover gate, render modes, glass badge on image, fill tags, author icon+bold. Dark/HC rules in zone files. | Image atom figure needs border-radius:0 inside cards (global pattern) |
-| 4 | ChoiceCard | pending | | |
+| 4 | ChoiceCard | **PASS** | Folder structure, Card atom wrapper, FormField atom for checkbox/radio/toggle, Image atom, inputType prop, description prop, active border state, tokens, hover gate, render modes | Inner curve mask as global token (deferred) |
 | 5 | CompactToolCard | pending | | |
 | 6 | FlipCard | pending | | |
 | 7 | GlowCard | pending | | |

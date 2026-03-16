@@ -1,0 +1,105 @@
+/* ══════════════════════════════════════════════════════════════
+   ChoiceCard — selectable image card
+
+   Card atom handles chrome. ChoiceCard adds:
+   image area, footer (label + checkbox), active state.
+
+   Internal tokens (--_choice-*):
+     --_choice-active-border
+   ══════════════════════════════════════════════════════════════ */
+
+.choice-card {
+  --_choice-active-border: var(--choice-active-border, var(--brand-c-primary));
+
+  cursor: pointer;
+  min-width: 0;
+  width: 100%;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  transition: outline-color var(--hover-duration-fast);
+}
+
+.choice-card.active {
+  outline-color: var(--_choice-active-border);
+}
+
+
+/* ── Image ── */
+.choice-card__image {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.choice-card__image .image,
+.choice-card__image .image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Icon — centred, no image ── */
+.choice-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md);
+  color: var(--brand-c-primary);
+}
+
+/* ── Footer — centred ── */
+.choice-card__footer {
+  padding-top: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.choice-card__footer .form-field__checkbox-wrap,
+.choice-card__footer .form-field__radio-wrap,
+.choice-card__footer .form-field__toggle-wrap {
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+/* ── Suppress FormField's own border — Card border is the feedback ── */
+.choice-card .form-field {
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+}
+
+/* ── Description — centred ── */
+.choice-card__desc {
+  text-align: center;
+}
+
+.choice-card__footer .form-field__label-text {
+  font-weight: var(--font-bold);
+}
+
+/* ── Description ── */
+.choice-card__desc {
+  padding-top: var(--space-xs);
+}
+
+/* ── Focus ── */
+.choice-card:focus-within {
+  outline: 2px solid var(--_choice-active-border);
+  outline-offset: 2px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Render modes
+   ══════════════════════════════════════════════════════════════ */
+
+[data-render="textonly"] .choice-card__image {
+  display: none;
+}

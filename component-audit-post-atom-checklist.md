@@ -536,7 +536,7 @@ Badge, Button, Card, FormField, Heading, Icon, Image, Link, List, LottieIcon, Te
 | ~~AssetCard~~ | ~~`molecules/cards/`~~ | — | **DELETED** 2026-03-16 — not a molecule, compose in section organism |
 | AuthorCard | `molecules/cards/AuthorCard/` | No | **PASS** 2026-03-16 |
 | BlogCard | `molecules/cards/BlogCard/` | No | **PASS** 2026-03-16 |
-| ChoiceCard | `molecules/cards/` | No | pending |
+| ChoiceCard | `molecules/cards/ChoiceCard/` | No | **PASS** 2026-03-16 |
 | CompactToolCard | `molecules/cards/` | No | pending |
 | FlipCard | `molecules/cards/` | No | pending |
 | GlowCard | `molecules/cards/` | No | pending |

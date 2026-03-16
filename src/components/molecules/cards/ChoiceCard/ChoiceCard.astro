@@ -1,0 +1,114 @@
+---
+/**
+ * ChoiceCard — Selectable image card
+ *
+ * Card + Image + Text + FormField checkbox.
+ * Click anywhere to toggle. Simple, clean.
+ *
+ * Styles: ChoiceCard.css | ChoiceCard.responsive.css
+ */
+import Card from '../../../atoms/Card/Card.astro';
+import Image from '../../../atoms/Image/Image.astro';
+import Icon from '../../../atoms/Icon/Icon.astro';
+import Text from '../../../atoms/Text/Text.astro';
+import FormField from '../../../atoms/FormField/FormField.astro';
+
+interface Props {
+  image?: string;
+  imageAlt?: string;
+  icon?: string;
+  label: string;
+  description?: string;
+  inputType?: 'checkbox' | 'radio' | 'toggle';
+  name?: string;
+  value?: string;
+  checked?: boolean;
+  cardVariant?: 'default' | 'transparent' | 'outline' | 'glass' | 'liquid' | 'neumorphic' | 'pressed' | 'comic' | 'tech';
+  class?: string;
+}
+
+const {
+  image,
+  imageAlt = '',
+  icon,
+  label,
+  description,
+  inputType = 'checkbox',
+  name = 'choice',
+  value = '',
+  checked = false,
+  cardVariant = 'default',
+  class: className = '',
+} = Astro.props;
+---
+
+<Card
+  variant={cardVariant}
+  padding="sm"
+  radius="lg"
+  shadow="sm"
+  class:list={['choice-card', checked && 'active', className]}
+  data-choice-card=""
+>
+  {image && (
+    <div class="choice-card__image">
+      <Image src={image} alt={imageAlt} fit="cover" role="decorative" />
+    </div>
+  )}
+
+  {!image && icon && (
+    <div class="choice-card__icon">
+      <Icon name={icon} size={48} />
+    </div>
+  )}
+
+  <div class="choice-card__footer">
+    <FormField type={inputType} id={`${name}-${value || label}`} label={label} name={name} value={value || label} checked={checked} class="choice-card__field" style="--_field-border: transparent; --_field-brand: transparent;" />
+  </div>
+
+  {description && (
+    <Text size="sm" color="muted" flush class="choice-card__desc">{description}</Text>
+  )}
+</Card>
+
+<script>
+  function initChoiceCards(): void {
+    document.querySelectorAll<HTMLElement>('[data-choice-card]:not([data-choice-bound])').forEach(card => {
+      card.setAttribute('data-choice-bound', '1');
+
+      const input = card.querySelector<HTMLInputElement>('input[type="checkbox"], input[type="radio"]');
+      if (!input) return;
+
+      function syncAll(): void {
+        if (input!.type === 'radio') {
+          document.querySelectorAll<HTMLElement>('[data-choice-card]').forEach(c => {
+            const other = c.querySelector<HTMLInputElement>(`input[name="${input!.name}"]`);
+            if (other) c.classList.toggle('active', other.checked);
+          });
+        } else {
+          card.classList.toggle('active', input!.checked);
+        }
+      }
+
+      // Sync on input change (native label click, keyboard)
+      input.addEventListener('change', syncAll);
+
+      // Card click — toggle input then sync
+      card.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        // Skip if clicking inside FormField (it handles its own toggle)
+        if (target.closest('.form-field')) return;
+
+        input.checked = input.type === 'radio' ? true : !input.checked;
+        syncAll();
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initChoiceCards);
+  } else {
+    initChoiceCards();
+  }
+  document.addEventListener('astro:page-load', initChoiceCards);
+</script>
