@@ -529,7 +529,7 @@ Panel name: **Your View** | Icon: **Eye**
 
 Badge, Button, Card, FormField, Heading, Icon, Image, Link, List, LottieIcon, Text, Tooltip
 
-### Molecule Cards (21 — was 22, AssetCard deleted)
+### Molecule Cards (19 — was 22: AssetCard + ChoiceCard deleted, merged)
 
 | Component | Location | Legacy files? | Status |
 |---|---|---|---|
