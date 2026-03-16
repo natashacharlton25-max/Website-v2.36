@@ -16,12 +16,17 @@
 
 import { Text } from '../Text';
 import { Image } from '../Image';
+import Icon from '../Icon/Icon.astro';
 
 interface SelectOption {
   value: string;
   label: string;
   symbol?: string;
   simple?: string;
+  image?: string;
+  icon?: string;
+  description?: string;
+  display?: 'checkbox' | 'radio' | 'toggle';
 }
 
 interface Props {
@@ -234,8 +239,22 @@ const describedBy = [
                   class="form-field__card-input"
                   aria-describedby={describedBy}
                 />
-                <span class="form-field__card-face" aria-hidden="true">
-                  {opt.symbol && (
+                <span class="form-field__card-face">
+                  {opt.image && (
+                    <Image
+                      src={opt.image}
+                      alt=""
+                      class="form-field__card-image"
+                      semanticRole="decorative"
+                      fit="cover"
+                    />
+                  )}
+                  {!opt.image && opt.icon && (
+                    <span class="form-field__card-icon">
+                      <Icon name={opt.icon} size={36} />
+                    </span>
+                  )}
+                  {!opt.image && opt.symbol && (
                     <Image
                       src={`/api/aac/symbol/${opt.symbol}`}
                       alt=""
@@ -243,9 +262,17 @@ const describedBy = [
                       semanticRole="decorative"
                     />
                   )}
-                  <Text as="span" class="form-field__card-label" flush>
-                    {opt.simple || opt.label}
-                  </Text>
+                  <span class="form-field__card-footer">
+                    <span class:list={['form-field__card-check', `form-field__card-check--${opt.display || (isSingleSelect ? 'radio' : 'checkbox')}`]} aria-hidden="true"></span>
+                    <Text as="span" class="form-field__card-label" weight="bold" flush>
+                      {opt.simple || opt.label}
+                    </Text>
+                  </span>
+                  {opt.description && (
+                    <Text as="span" size="sm" color="muted" class="form-field__card-desc" flush>
+                      {opt.description}
+                    </Text>
+                  )}
                 </span>
               </label>
             );

@@ -8,7 +8,7 @@ import CTASection from '../components/organisms/sections/CTASection.astro';
 import Footer from '../components/organisms/Footer/Footer.astro';
 import RainbowBorderCard from '../components/molecules/cards/RainbowBorderCard/RainbowBorderCard.astro';
 import BlogCard from '../components/molecules/cards/BlogCard/BlogCard.astro';
-import ChoiceCard from '../components/molecules/cards/ChoiceCard/ChoiceCard.astro';
+import FormField from '../components/atoms/FormField/FormField.astro';
 import Card from '../components/atoms/Card/Card.astro';
 import Badge from '../components/atoms/Badge/Badge.astro';
 import Heading from '../components/atoms/Heading/Heading.astro';
@@ -295,62 +295,75 @@ const whoSliderImages = [slider1Image, slider2Image, slider3Image, slider4Image,
     </div>
   </section>
 
-  <!-- Choice Cards — audit test section (DELETE before production) -->
+  <!-- Card Select — FormField atom test (DELETE before production) -->
   <section style="padding: var(--space-2xl) var(--space-sm); max-width: 1200px; margin: 0 auto;">
-    <h2 style="margin-bottom: var(--space-xl); text-align: center;">Choice Cards (Audit Test)</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: var(--space-lg); align-items: start;">
-      <!-- Image + radio -->
-      <ChoiceCard
-        image="/_Unused Images/3.jpg"
-        label="Abstract"
-        inputType="radio"
-        name="style"
-        value="abstract"
-        checked
-      />
-      <!-- Image + checkbox -->
-      <ChoiceCard
-        image="/_Unused Images/7.jpg"
-        label="Colourful"
-        inputType="checkbox"
-        name="extras"
-        value="colourful"
-      />
-      <!-- Icon + radio -->
-      <ChoiceCard
-        icon="heart-fill"
-        label="Favourite"
-        inputType="radio"
-        name="style"
-        value="favourite"
-      />
-      <!-- Label only + toggle -->
-      <ChoiceCard
-        label="Dark Mode"
-        description="Switch to dark colour scheme"
-        inputType="toggle"
-        name="darkmode"
-        value="on"
-      />
-      <!-- Icon + checkbox -->
-      <ChoiceCard
-        icon="star-fill"
-        label="Premium"
-        description="Unlock all features"
-        inputType="checkbox"
-        name="extras"
-        value="premium"
-      />
-      <!-- Image + toggle -->
-      <ChoiceCard
-        image="/_Unused Images/6.png"
-        label="Minimal"
-        description="Clean and simple aesthetic"
-        inputType="toggle"
-        name="minimal"
-        value="on"
-      />
-    </div>
+    <h2 style="margin-bottom: var(--space-xl); text-align: center;">Card Select — FormField (Audit Test)</h2>
+
+    <h3 style="margin-bottom: var(--space-md);">Image cards (radio — pick one)</h3>
+    <FormField
+      id="theme-select"
+      type="card-select"
+      label="Choose a theme"
+      name="theme"
+      cardColumns={4}
+      cardSize="md"
+      options={[
+        { value: 'abstract', label: 'Abstract', image: '/_Unused Images/3.jpg' },
+        { value: 'colourful', label: 'Colourful', image: '/_Unused Images/7.jpg', description: 'Bold and expressive' },
+        { value: 'minimal', label: 'Minimal', image: '/_Unused Images/6.png' },
+        { value: 'nature', label: 'Nature', image: '/_Unused Images/9.jpg' },
+      ]}
+      value="abstract"
+    />
+
+    <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-md);">Icon cards (checkbox — pick many)</h3>
+    <FormField
+      id="features-select"
+      type="card-select"
+      label="Choose features"
+      name="features"
+      maxSelections={3}
+      cardColumns={3}
+      cardSize="sm"
+      options={[
+        { value: 'favourite', label: 'Favourite', icon: 'heart-fill' },
+        { value: 'premium', label: 'Premium', icon: 'star-fill', description: 'Unlock all features' },
+        { value: 'share', label: 'Share', icon: 'share-network-fill' },
+      ]}
+    />
+
+    <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-md);">Toggle cards</h3>
+    <FormField
+      id="settings-select"
+      type="card-select"
+      label="Settings"
+      name="settings"
+      maxSelections={4}
+      cardColumns={3}
+      cardSize="sm"
+      options={[
+        { value: 'dark', label: 'Dark Mode', icon: 'moon-fill', display: 'toggle' },
+        { value: 'notifications', label: 'Notifications', icon: 'bell-fill', display: 'toggle', description: 'Get updates' },
+        { value: 'sound', label: 'Sound', icon: 'speaker-high-fill', display: 'toggle' },
+      ]}
+    />
+
+    <h3 style="margin-top: var(--space-xl); margin-bottom: var(--space-md);">Label only (radio)</h3>
+    <FormField
+      id="mood-select"
+      type="card-select"
+      label="How are you feeling?"
+      name="mood"
+      cardColumns={4}
+      cardSize="sm"
+      options={[
+        { value: 'great', label: 'Great' },
+        { value: 'okay', label: 'Okay' },
+        { value: 'struggling', label: 'Struggling' },
+        { value: 'unsure', label: 'Not sure' },
+      ]}
+      value="okay"
+    />
   </section>
 
   <!-- Final CTA -->

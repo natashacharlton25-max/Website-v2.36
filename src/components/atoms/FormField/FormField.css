@@ -513,6 +513,7 @@
   background: var(--_field-bg);
   text-align: center;
   transition: border-color var(--hover-duration-fast), background-color var(--hover-duration-fast);
+  position: relative;
 }
 
 /* Hover */
@@ -521,10 +522,40 @@
   background: var(--_field-brand-light);
 }
 
-/* ── Hover gate: none — suppress card-face hover ── */
+/* ── Hover gate: none — card stays static, only check indicator changes ── */
+[data-hover="none"] .form-field__card-face {
+  transition: none;
+}
+
 [data-hover="none"] .form-field__card-face:hover {
   border-color: var(--_field-border);
   background: var(--_field-bg);
+}
+
+[data-hover="none"] .form-field__card-input:checked + .form-field__card-face {
+  border-color: var(--_field-border);
+  background: var(--_field-bg);
+  box-shadow: none;
+}
+
+/* ── Hover gate: instant — everything snaps, no transition ── */
+[data-hover="instant"] .form-field__card-face,
+[data-hover="instant"] .form-field__card-check,
+[data-hover="instant"] .form-field__card-check--toggle,
+[data-hover="instant"] .form-field__card-check--toggle::before {
+  transition: none;
+}
+
+/* Instant: no hover bg change, only checked state */
+[data-hover="instant"] .form-field__card-face:hover {
+  border-color: var(--_field-border);
+  background: var(--_field-bg);
+}
+
+/* ── None mode: check indicators still animate ── */
+[data-hover="none"] .form-field__card-check--toggle,
+[data-hover="none"] .form-field__card-check--toggle::before {
+  transition: all var(--hover-duration-fast);
 }
 
 /* Selected state */
@@ -534,10 +565,137 @@
   box-shadow: 0 0 0 2px var(--_field-brand);
 }
 
+/* ── Reduced render — no transitions ── */
+[data-render="reduced"] .form-field__card-check,
+[data-render="reduced"] .form-field__card-check--toggle,
+[data-render="reduced"] .form-field__card-check--toggle::before {
+  transition: none;
+}
+
+/* ── Card footer — label + check indicator inline ── */
+.form-field__card-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Check indicator — inline with label ── */
+.form-field__card-check {
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid var(--_field-brand);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: all var(--hover-duration-fast);
+  position: relative;
+}
+
+/* Checked — filled (checkbox + radio only, not toggle) */
+.form-field__card-input:checked + .form-field__card-face .form-field__card-check--checkbox,
+.form-field__card-input:checked + .form-field__card-face .form-field__card-check--radio {
+  background: var(--_field-brand);
+  border-color: var(--_field-brand);
+}
+
+/* Checkbox tick (exclude toggle) */
+.form-field__card-input[type="checkbox"]:checked + .form-field__card-face .form-field__card-check--checkbox::after {
+  content: "";
+  position: absolute;
+  left: 0.3rem;
+  top: 0.1rem;
+  width: 0.25rem;
+  height: 0.5rem;
+  border: solid var(--color-White);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Radio check gets circle */
+.form-field__card-check--radio {
+  border-radius: 50%;
+}
+
+/* Toggle check — iOS-style slider */
+.form-field__card-check--toggle {
+  width: 2.5rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full);
+  background: var(--_field-brand-light);
+  border: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 0 4px color-mix(in oklch, var(--color-Black) 15%, transparent);
+  transition: background var(--hover-duration-fast);
+}
+
+.form-field__card-check--toggle::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--color-White);
+  border-radius: var(--radius-full);
+  transform: translateX(-1.25rem);
+  transition: transform var(--hover-duration-fast);
+  box-shadow: 0 0 4px color-mix(in oklch, var(--color-Black) 20%, transparent);
+}
+
+.form-field__card-input:checked + .form-field__card-face .form-field__card-check--toggle {
+  background: var(--_field-brand);
+}
+
+.form-field__card-input:checked + .form-field__card-face .form-field__card-check--toggle::before {
+  transform: translateX(1.25rem);
+}
+
+/* Radio dot */
+.form-field__card-input[type="radio"]:checked + .form-field__card-face .form-field__card-check::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--color-White);
+}
+
 /* Focus visible on card */
 .form-field__card-input:focus-visible + .form-field__card-face {
   outline: 2px solid var(--_field-brand);
   outline-offset: 2px;
+}
+
+/* Card image — full-bleed top */
+.form-field__card-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.form-field__card-image .image,
+.form-field__card-image .image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Card icon — centred */
+.form-field__card-icon {
+  color: var(--_field-brand);
+}
+
+/* Card description */
+.form-field__card-desc {
+  margin-top: var(--space-xs);
 }
 
 /* Disabled */
