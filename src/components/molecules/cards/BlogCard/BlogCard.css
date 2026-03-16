@@ -1,0 +1,153 @@
+/* ══════════════════════════════════════════════════════════════
+   BlogCard — article preview card
+
+   Layout only. Card atom handles all chrome (bg, shadow, border,
+   hover, dark mode, HC, render modes).
+   BlogCard only adds: image area, meta row, tags, author footer.
+
+   Internal tokens (--_blog-*):
+     --_blog-border, --_blog-tag-bg
+   ══════════════════════════════════════════════════════════════ */
+
+.blog-card {
+  --_blog-border: var(--blog-border, var(--brand-c-neutral-light));
+  --_blog-tag-bg: var(--blog-tag-bg, var(--page-bg-sunken));
+  --card-hover-border: var(--brand-c-secondary);
+
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Link wrapper — fills card ── */
+.blog-card__link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ── Image — full-bleed hero, card overflow:hidden clips top corners ── */
+.blog-card__image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+/* Strip Image atom figure defaults inside card */
+.blog-card__image .image,
+.blog-card__image .image img {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+/* ── Category badge — two instances, swap visibility ── */
+.blog-card__category--image {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  z-index: 1;
+}
+
+.blog-card__category--content {
+  display: none;
+  align-self: flex-start;
+}
+
+/* ── Content area ── */
+.blog-card__content {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  flex: 1;
+}
+
+/* ── Meta row (date + read time) ── */
+.blog-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.blog-card__meta-icon {
+  vertical-align: -2px;
+  margin-right: var(--space-xs);
+  color: var(--brand-c-primary);
+}
+
+/* ── Image zoom on hover — BlogCard layout concern ── */
+.blog-card__image .image img {
+  transition: transform var(--hover-duration);
+}
+
+.blog-card:hover .blog-card__image .image img {
+  transform: scale(1.05);
+}
+
+[data-hover="none"] .blog-card:hover .blog-card__image .image img {
+  transform: none;
+}
+
+[data-hover="instant"] .blog-card:hover .blog-card__image .image img {
+  transform: none;
+}
+
+/* ── Title ── */
+.blog-card__title {
+  line-height: var(--leading-tight);
+}
+
+/* ── Tags row ── */
+.blog-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.blog-card__tag {
+  --badge-bg: var(--_blog-tag-bg);
+  --badge-text: var(--brand-c-text);
+}
+
+/* ── Author footer — pinned to bottom ── */
+.blog-card__author {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--_blog-border);
+  margin-top: auto;
+}
+
+.blog-card__author-icon {
+  color: var(--brand-c-primary);
+}
+
+/* ── Featured — accent border ── */
+.blog-card--featured {
+  border: 2px solid var(--brand-c-primary);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Render modes — layout adjustments only.
+   Card atom handles its own chrome per render mode.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Assistive — larger targets ── */
+[data-render="assistive"] .blog-card__content {
+  padding: var(--space-xl);
+}
+
+/* ── Textonly — no image ── */
+[data-render="textonly"] .blog-card__image {
+  display: none;
+}

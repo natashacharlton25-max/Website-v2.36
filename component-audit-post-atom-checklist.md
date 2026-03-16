@@ -71,10 +71,13 @@ Claude Code fills this out per component:
 - [ ] No `.a11y.css` / `.a11y.recovery.css` (extract via 6-step process, move to `_reference/`)
 
 ## Section 3: Token Routing
-- Bridge tokens present: (list any `var(--component-prop, var(--fallback))` patterns)
-- Internal `--_component-*` tokens: yes/no
-- Raw bridge chains outside base block: (count)
-- Colour group in schema: yes/no
+- Internal `--_component-*` tokens for ALL visual properties: yes/no (list)
+- Bridge `--component-*` tokens in base selector: yes/no
+- Raw `var(--brand-c-*)` or `var(--page-bg-*)` outside token block: (count — should be 0)
+- Render modes override internal tokens: yes/no
+- Colour group in schema with `cssProperty` fields: yes/no
+- Self-referential token bug: (check for `--_x: var(--_x)`)
+- Priority chain correct (render mode > JSON > defaults): yes/no
 
 ## Section 4: CSS Quality
 - class:list or manual string building: which
@@ -153,7 +156,17 @@ Claude Code fills this out per component:
 - Colour scheme prints legibly on white paper: yes/no
 - Page breaks don't split content mid-component: yes/no/N/A
 
-## Section 14: Atom Inheritance Verification
+## Section 14: Hover Gate
+- Component has `:hover` rules: yes/no
+- Decorative hovers read `--hover-duration` / `--hover-duration-fast` tokens: yes/no
+- `[data-hover="none"]` block resets all hover properties to default state: yes/no
+- Functional hovers (tooltip reveal, dropdown open) left ungated: yes/no/N/A
+- Hover independent from animation prop: yes/no
+- No hardcoded transition durations on hover properties: yes/no
+- Highlight link check (if component renders links):
+  - Links respond to `[data-highlight="static"]` / `[data-highlight="animated"]`: yes/no/N/A
+
+## Section 15: Atom Inheritance Verification
 - Atom touch target sizing propagates (not overridden): yes/no
 - Atom focus styles propagate (not overridden): yes/no
 - Atom aria attributes not overridden: yes/no
@@ -221,13 +234,32 @@ Identical to atom audit, plus molecule-specific patterns. Any component with the
 
 ### 3. Token Routing
 
-Same pass 2 pattern as atoms. If the component has colour tokens:
+**Every molecule MUST have internal tokens for all visual properties.** Not just colour — bg, border, shadow, text, sizing. This enables JSON override AND render mode gating.
 
+**Token chain pattern:**
+```css
+.component {
+  /* Bridge → internal (one per visual property) */
+  --_comp-bg: var(--comp-bg, var(--page-bg-sunken));
+  --_comp-shadow: var(--comp-shadow, var(--shadow-md));
+  --_comp-text: var(--comp-text, var(--brand-c-text));
+}
+```
+
+**Rules:**
 1. Define internal `--_component-*` tokens in the base selector
-2. Every consumption point uses internal tokens
+2. Every consumption point uses internal tokens — never raw `var(--brand-c-*)` or `var(--page-bg-*)` directly
 3. Raw bridge chains only in the base token block
-4. Schema `colour` group declares pipeline-overridable tokens
-5. Watch for the self-referential token bug: `--_comp-x: var(--_comp-x)` — WRONG. Must be `--_comp-x: var(--comp-x, var(--fallback))`.
+4. Schema `colour` group declares ALL pipeline-overridable tokens with `cssProperty` field
+5. Watch for the self-referential token bug: `--_comp-x: var(--_comp-x)` — WRONG. Must be `--_comp-x: var(--comp-x, var(--fallback))`
+6. Render modes override internal tokens (higher specificity wins over JSON):
+```css
+[data-render="reduced"] .component { --_comp-shadow: none; }
+[data-render="textonly"] .component { --_comp-bg: transparent; }
+```
+7. Priority: render mode > JSON/pipeline > CSS defaults
+
+**Why this matters:** Without internal tokens, render modes can't suppress visual properties, JSON can't override colours, and dark mode can't adapt. The token chain is the foundation for everything.
 
 ### 4. CSS Quality
 
@@ -396,18 +428,34 @@ For components that contain user content, therapeutic evidence, or completed exe
 | 13.7 | Evidence/traceability IDs visible in print output | | Goal ID, seat ID, timestamp not shown |
 | 13.8 | AAC pictogram cards print with symbol + word label | | Symbol only or word only |
 
-### 14. Atom Inheritance Verification
+### 14. Hover Gate
+
+Every component with `:hover` rules must read the hover gate tokens so `data-hover="none"` suppresses decorative hover globally.
+
+| # | Check | Pass | Fail indicator |
+|---|-------|------|---------------|
+| 14.1 | Component has `:hover` rules | | — (audit only, not a pass/fail) |
+| 14.2 | Decorative hover transitions use `var(--hover-duration)` / `var(--hover-duration-fast)` | | Hardcoded `0.3s ease` or `var(--transition-base)` on hover properties |
+| 14.3 | `[data-hover="none"]` block resets ALL hover properties to default state | | Hover colour/shadow/transform still changes with `data-hover="none"` on body |
+| 14.4 | `box-shadow` and `transform` included in transition shorthand | | Shadow/transform animates outside duration token control |
+| 14.5 | Functional hovers (content reveal) left ungated | | Tooltip or dropdown suppressed by hover gate |
+| 14.6 | Hover is independent from animation prop | | Hover suppressed when only animation is stripped |
+| 14.7 | Links respond to `[data-highlight="static/animated"]` | | Link-containing component ignores highlight mode (N/A if no links) |
+
+**Quick fail:** Any `:hover` rule with a hardcoded duration → replace with `var(--hover-duration)`. Any `:hover` that changes visual properties → add `[data-hover="none"]` reset block.
+
+### 15. Atom Inheritance Verification
 
 For components that use atoms (Button, Icon, Image, Link, Text, Heading, FormField, Card, Badge, Tooltip, List, LottieIcon).
 
 | # | Check | Pass | Fail indicator |
 |---|-------|------|---------------|
-| 14.1 | Atom-level touch target sizing propagates into this component | | Component overrides atom's min-width/height |
-| 14.2 | Atom-level focus styles propagate (not overridden) | | Component sets `outline: none` on atom's element |
-| 14.3 | Atom-level aria attributes not overridden | | Component removes or replaces atom's aria-label |
-| 14.4 | Atom-level `data-semantic-role` preserved | | Component strips it |
-| 14.5 | Atom-level assistive render scaling works within this component | | Atom grows to 64px but component's container clips it |
-| 14.6 | Atom-level alt text display modes work within component layout | | Alt text overlay clipped by component overflow:hidden |
+| 15.1 | Atom-level touch target sizing propagates into this component | | Component overrides atom's min-width/height |
+| 15.2 | Atom-level focus styles propagate (not overridden) | | Component sets `outline: none` on atom's element |
+| 15.3 | Atom-level aria attributes not overridden | | Component removes or replaces atom's aria-label |
+| 15.4 | Atom-level `data-semantic-role` preserved | | Component strips it |
+| 15.5 | Atom-level assistive render scaling works within this component | | Atom grows to 64px but component's container clips it |
+| 15.6 | Atom-level alt text display modes work within component layout | | Alt text overlay clipped by component overflow:hidden |
 
 ---
 
@@ -451,6 +499,9 @@ Stop and fix before continuing:
 | `<div onclick>` acting as button | Replace with `<button>` or `<Button>` atom |
 | Missing `aria-label` on icon button | Add label |
 | `tabindex` > 0 | Change to 0 and fix DOM order |
+| Hardcoded duration on `:hover` transition | Replace with `var(--hover-duration)` |
+| `:hover` with no `[data-hover="none"]` reset | Add gate block resetting to default state |
+| `var(--transition-base)` on hover transition | Replace with `var(--hover-duration)` |
 
 ---
 
@@ -478,32 +529,32 @@ Panel name: **Your View** | Icon: **Eye**
 
 Badge, Button, Card, FormField, Heading, Icon, Image, Link, List, LottieIcon, Text, Tooltip
 
-### Molecule Cards (22)
+### Molecule Cards (21 — was 22, AssetCard deleted)
 
-| Component | Location | Legacy files? |
-|---|---|---|
-| AssetCard | `molecules/cards/` | No |
-| AuthorCard | `molecules/cards/` | No |
-| BlogCard | `molecules/cards/` | No |
-| ChoiceCard | `molecules/cards/` | No |
-| CompactToolCard | `molecules/cards/` | No |
-| FlipCard | `molecules/cards/` | No |
-| GlowCard | `molecules/cards/` | No |
-| ImageRevealCard | `molecules/cards/` | No |
-| InfoCard | `molecules/cards/` | No |
-| InsightCard | `molecules/cards/` | No |
-| MasonryCard | `molecules/cards/` | No |
-| OfferingCard | `molecules/cards/` | No |
-| ProductCard | `molecules/cards/` | No |
-| ProjectCard | `molecules/cards/` | No |
-| ProjectSpecCard | `molecules/cards/` | No |
-| RainbowBorderCard | `molecules/cards/` | No |
-| SlideCard | `molecules/cards/` | No |
-| SpecCard | `molecules/cards/` | No |
-| StepCard | `molecules/cards/` | No |
-| TeamCard | `molecules/cards/` | No |
-| TestimonialCard | `molecules/cards/` | No |
-| WhyCard | `molecules/cards/` | No |
+| Component | Location | Legacy files? | Status |
+|---|---|---|---|
+| ~~AssetCard~~ | ~~`molecules/cards/`~~ | — | **DELETED** 2026-03-16 — not a molecule, compose in section organism |
+| AuthorCard | `molecules/cards/AuthorCard/` | No | **PASS** 2026-03-16 |
+| BlogCard | `molecules/cards/BlogCard/` | No | **PASS** 2026-03-16 |
+| ChoiceCard | `molecules/cards/` | No | pending |
+| CompactToolCard | `molecules/cards/` | No | pending |
+| FlipCard | `molecules/cards/` | No | pending |
+| GlowCard | `molecules/cards/` | No | pending |
+| ImageRevealCard | `molecules/cards/` | No | pending |
+| InfoCard | `molecules/cards/` | No | pending |
+| InsightCard | `molecules/cards/` | No | pending |
+| MasonryCard | `molecules/cards/` | No | pending |
+| OfferingCard | `molecules/cards/` | No | pending |
+| ProductCard | `molecules/cards/` | No | pending |
+| ProjectCard | `molecules/cards/` | No | pending |
+| ProjectSpecCard | `molecules/cards/` | No | pending |
+| RainbowBorderCard | `molecules/cards/RainbowBorderCard/` | No | **PASS** 2026-03-16 |
+| SlideCard | `molecules/cards/` | No | pending |
+| SpecCard | `molecules/cards/` | No | pending |
+| StepCard | `molecules/cards/` | No | pending |
+| TeamCard | `molecules/cards/` | No | pending |
+| TestimonialCard | `molecules/cards/` | No | pending |
+| WhyCard | `molecules/cards/` | No | pending |
 
 ### Molecule Sections (3)
 
@@ -668,6 +719,7 @@ Badge, Button, Card, FormField, Heading, Icon, Image, Link, List, LottieIcon, Te
 | Files | Location | Action |
 |---|---|---|
 | `GalleryItem.style.css`, `.a11y.css`, `.a11y.recovery.css`, `.responsive.css` | `molecules/gallery/` | Extract any useful rules to `_reference/`, delete directory |
+| ~~`asset-detail.a11y.css`~~ | ~~`molecules/cards/`~~ | **DELETED** 2026-03-16 — orphaned, targeted different component |
 
 ---
 

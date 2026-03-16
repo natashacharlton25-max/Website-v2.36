@@ -6,6 +6,13 @@ import PillarsSection from '../components/organisms/sections/PillarsSection.astr
 import WhoSliderSection from '../components/organisms/sections/WhoSliderSection.astro';
 import CTASection from '../components/organisms/sections/CTASection.astro';
 import Footer from '../components/organisms/Footer/Footer.astro';
+import RainbowBorderCard from '../components/molecules/cards/RainbowBorderCard/RainbowBorderCard.astro';
+import BlogCard from '../components/molecules/cards/BlogCard/BlogCard.astro';
+import Card from '../components/atoms/Card/Card.astro';
+import Badge from '../components/atoms/Badge/Badge.astro';
+import Heading from '../components/atoms/Heading/Heading.astro';
+import Text from '../components/atoms/Text/Text.astro';
+import Button from '../components/atoms/Button/Button.astro';
 
 // Image imports from src/PageImages for Astro optimization
 import bridgeImage from '../PageImages/Home/Bridge/Bridge.png';
@@ -197,6 +204,96 @@ const whoSliderImages = [slider1Image, slider2Image, slider3Image, slider4Image,
     </div>
   </section>
 
+  <!-- RainbowBorderCard test section (DELETE before production) -->
+  <section style="padding: var(--space-2xl) var(--space-sm); max-width: 1200px; margin: 0 auto;">
+    <h2 style="margin-bottom: var(--space-xl); text-align: center;">Rainbow Border Cards (Audit Test)</h2>
+    <div style="margin-bottom: var(--space-lg); display: flex; gap: var(--space-sm); justify-content: center;">
+      <button class="btn btn--sm btn--outline" data-set-hover="none">Hover: None</button>
+      <button class="btn btn--sm btn--outline" data-set-hover="instant">Instant</button>
+      <button class="btn btn--sm btn--outline" data-set-hover="gentle">Gentle</button>
+      <button class="btn btn--sm btn--outline" data-set-hover="full">Full</button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: var(--space-xl);">
+
+      <!-- Full rainbow (default 7 tokens) -->
+      <RainbowBorderCard variant="primary" borderWidth="12px">
+        <Card as="article" padding="lg" shadow="none" radius="none">
+          <Badge label="Workbook" />
+          <Heading level={2} size="h4" weight="medium" color="accent" uppercase flush>Boundaries & Self-Worth</Heading>
+          <Text weight="light" flush>A 12-page guided workbook for exploring personal boundaries in relationships.</Text>
+          <div style="margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap;">
+            <Button variant="primary" size="sm" href="/workbooks/boundaries">View Workbook</Button>
+            <Button shape="circle" variant="glass" size="sm" ariaLabel="Download" icon="download-fill" />
+          </div>
+        </Card>
+      </RainbowBorderCard>
+
+      <!-- Custom 3-colour gradient -->
+      <RainbowBorderCard variant="gradient" colors={['var(--rainbow-1)', 'var(--rainbow-3)', 'var(--rainbow-5)']}>
+        <Card as="article" padding="lg" shadow="none" radius="none">
+          <Badge label="Guide" />
+          <Heading level={2} size="h4" weight="medium" color="accent" uppercase flush>Safety Planning Template</Heading>
+          <Text weight="light" flush>Step-by-step safety planning guide for practitioners and clients.</Text>
+          <div style="margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap;">
+            <Button variant="primary" size="sm" href="/guides/safety-plan">Read Guide</Button>
+            <Button shape="circle" variant="glass" size="sm" ariaLabel="Download" icon="download-fill" />
+          </div>
+        </Card>
+      </RainbowBorderCard>
+
+      <!-- Custom 2-colour duo-tone -->
+      <RainbowBorderCard variant="pulse" borderWidth="3px" colors={['var(--brand-c-primary)', 'var(--brand-c-secondary)']}>
+        <Card as="article" padding="lg" shadow="none" radius="none">
+          <Badge label="Exercise" />
+          <Heading level={2} size="h4" weight="medium" color="accent" uppercase flush>Grounding Techniques</Heading>
+          <Text weight="light" flush>Five grounding exercises for managing anxiety and distress.</Text>
+          <div style="margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap;">
+            <Button variant="primary" size="sm" href="/exercises/grounding">Start Exercise</Button>
+          </div>
+        </Card>
+      </RainbowBorderCard>
+
+    </div>
+  </section>
+
+  <!-- Blog Cards — audit test section (DELETE before production) -->
+  <section style="padding: var(--space-2xl) var(--space-sm); max-width: 1200px; margin: 0 auto;">
+    <h2 style="margin-bottom: var(--space-xl); text-align: center;">Blog Cards (Audit Test)</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-xl);">
+      <BlogCard
+        title="Finding Your Way Back"
+        excerpt="Every recovery journey is different. Here's how to build a path that works for you, at your own pace."
+        image="/_Unused Images/Articles hero Image.png"
+        category="Recovery"
+        author="Natasha Charlton"
+        date="March 2026"
+        readTime="5 min read"
+        tags={["CPTSD", "Self-care", "Recovery"]}
+        href="/insights/finding-your-way-back"
+      />
+      <BlogCard
+        title="Boundaries Without Guilt"
+        excerpt="Setting boundaries isn't selfish — it's essential. Learn practical steps to protect your energy."
+        image="/_Unused Images/Article Hero Card.png"
+        category="Wellbeing"
+        date="February 2026"
+        readTime="4 min read"
+        tags={["Boundaries", "Relationships"]}
+        href="/insights/boundaries"
+        featured
+      />
+      <BlogCard
+        title="Grounding Techniques That Actually Work"
+        excerpt="Five evidence-based grounding exercises for managing anxiety and distress in the moment."
+        category="Techniques"
+        author="Natasha Charlton"
+        date="January 2026"
+        readTime="3 min read"
+        href="/insights/grounding"
+      />
+    </div>
+  </section>
+
   <!-- Final CTA -->
   <CTASection
     title={ctaData.title}
@@ -207,5 +304,31 @@ const whoSliderImages = [slider1Image, slider2Image, slider3Image, slider4Image,
   <!-- Footer with Interactive Mask -->
   <Footer animated />
 </BaseLayout>
+
+<script>
+  // Hover gate test buttons (DELETE before production)
+  function initHoverButtons(): void {
+    document.querySelectorAll<HTMLButtonElement>('[data-set-hover]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.setHover!;
+        if (mode === 'full') {
+          document.body.removeAttribute('data-hover');
+        } else {
+          document.body.dataset.hover = mode;
+        }
+        document.querySelectorAll<HTMLButtonElement>('[data-set-hover]').forEach((b) => {
+          b.classList.toggle('btn--primary', b.dataset.setHover === mode);
+          b.classList.toggle('btn--outline', b.dataset.setHover !== mode);
+        });
+      });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHoverButtons);
+  } else {
+    initHoverButtons();
+  }
+  document.addEventListener('astro:page-load', initHoverButtons);
+</script>
 
 

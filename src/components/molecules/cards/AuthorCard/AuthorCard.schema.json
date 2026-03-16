@@ -1,0 +1,41 @@
+{
+  "component": "AuthorCard",
+  "category": "molecule",
+  "renders": {
+    "full": "AuthorCard.astro",
+    "reduced": "AuthorCard.astro",
+    "assistive": "AuthorCard.astro",
+    "textonly": "AuthorCard.astro"
+  },
+  "notes": "Compact author preview with offset overlapping photo. Photo overlaps left edge of Card atom. Mobile stacks vertically. Textonly hides photo, simplifies badges. All visual properties JSON-overridable via --author-* bridge tokens.",
+
+  "props": {
+    "content": {
+      "_description": "Author information",
+      "name":  { "type": "string", "required": true, "description": "Author name." },
+      "photo": { "type": "string", "required": true, "textonly": false, "description": "Author photo URL or ImageMetadata. Hidden in textonly." },
+      "role":  { "type": "string", "required": false, "description": "Author role shown as pill badge next to name." },
+      "bio":   { "type": "string", "required": true, "description": "Short biography text." },
+      "href":  { "type": "string", "required": false, "description": "Link to full author page." },
+      "label": { "type": "string", "required": false, "default": "About the Author", "description": "Primary badge label." }
+    },
+
+    "visual": {
+      "_description": "Card appearance",
+      "cardVariant": { "type": "string", "required": false, "default": "default", "enum": ["default", "transparent", "outline", "glass", "liquid", "neumorphic", "pressed", "comic", "tech"], "description": "Card atom variant for the content area." },
+      "class": { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "colour": {
+      "_description": "Visual tokens — JSON/pipeline overridable via inline style",
+      "bg":       { "type": "token", "required": false, "default": "var(--page-bg-sunken)", "cssProperty": "--author-bg", "description": "Card and photo background." },
+      "border":   { "type": "token", "required": false, "default": "transparent", "cssProperty": "--author-border", "description": "Card border colour." },
+      "shadow":   { "type": "token", "required": false, "default": "var(--shadow-md)", "cssProperty": "--author-shadow", "description": "Photo and card shadow." },
+      "text":     { "type": "token", "required": false, "default": "var(--brand-c-text)", "cssProperty": "--author-text", "description": "Primary text colour." },
+      "label":    { "type": "token", "required": false, "default": "var(--brand-c-text-light)", "cssProperty": "--author-label", "description": "Secondary/label text colour." },
+      "photoSize": { "type": "token", "required": false, "default": "var(--img-width-xs)", "cssProperty": "--author-photo-size", "description": "Photo dimensions." }
+    },
+
+    "animation": {}
+  }
+}

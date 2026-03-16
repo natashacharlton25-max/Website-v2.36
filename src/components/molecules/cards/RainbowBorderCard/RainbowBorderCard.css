@@ -1,0 +1,170 @@
+/* ══════════════════════════════════════════════════════════════
+   RainbowBorderCard — animated conic-gradient border wrapper
+
+   Slot-based — wraps any content. Hover triggers rotation.
+   Rainbow tokens provide CVD-safe colours automatically.
+
+   Internal tokens (--_rb-*):
+     --_rb-radius, --_rb-width, --_rb-static, --_rb-gradient, --_rb-inner-shadow
+   ══════════════════════════════════════════════════════════════ */
+
+.rainbow-border-card {
+  --_rb-radius: var(--rb-border-radius, var(--radius-lg));
+  --_rb-width: var(--rb-border-width, 3px);
+
+  /* Default gradient uses all 7 rainbow tokens.
+     Custom colors array overrides via --rb-gradient and --rb-static inline props. */
+  --_rb-static: var(--rb-static, var(--rainbow-1));
+  --_rb-gradient: var(--rb-gradient, conic-gradient(
+    from var(--angle),
+    var(--rainbow-1) 0%,
+    var(--rainbow-2) 14%,
+    var(--rainbow-3) 28%,
+    var(--rainbow-4) 42%,
+    var(--rainbow-5) 57%,
+    var(--rainbow-6) 71%,
+    var(--rainbow-7) 85%,
+    var(--rainbow-1) 100%
+  ));
+
+  position: relative;
+  display: flex;
+  border-radius: var(--_rb-radius);
+  padding: var(--_rb-width);
+  transition: background var(--hover-duration) ease-out,
+              filter var(--hover-duration) ease-out;
+  --angle: 0deg;
+  --pulse-brightness: 1;
+}
+
+.rainbow-border-card__inner {
+  background: var(--page-bg-raised);
+  color: var(--brand-c-text);
+  border-radius: calc(var(--_rb-radius) * 0.85);
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  flex: 1;
+  box-shadow: var(--_rb-inner-shadow, none);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Variants
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Rainbow gradient — full ROYGBIV sweep, start=end for seamless spin ── */
+/* All 7 rainbow tokens evenly spaced. CVD variants swap automatically. */
+
+/* ── All variants — solid colour is always the base background ── */
+.rainbow-border-card--primary,
+.rainbow-border-card--gradient,
+.rainbow-border-card--pulse {
+  background: var(--_rb-static);
+}
+
+/* ── Gradient overlay via ::after — fades in/out over the solid base ── */
+.rainbow-border-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--hover-duration) ease-out;
+  pointer-events: none;
+}
+
+/* Gradient variant shows static gradient at rest */
+.rainbow-border-card--gradient::after {
+  background: var(--_rb-gradient);
+  opacity: 1;
+}
+
+/* Animating — gradient overlay visible and rotating */
+.rainbow-border-card.is-animating::after {
+  background: var(--_rb-gradient);
+  opacity: 1;
+}
+
+/* Pulse adds brightness on the overlay */
+.rainbow-border-card--pulse.is-animating::after {
+  filter: brightness(var(--pulse-brightness));
+}
+
+/* Landed — slow fade out, solid base shows through */
+.rainbow-border-card.is-landed::after {
+  opacity: 0;
+  transition: opacity var(--transition-extralong) ease-out;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Hover gate: none — solid border, no gradient, no animation
+   ══════════════════════════════════════════════════════════════ */
+
+[data-hover="none"] .rainbow-border-card {
+  background: var(--_rb-static);
+  transition: none;
+}
+
+[data-hover="none"] .rainbow-border-card::after {
+  display: none;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Render modes
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Reduced — solid border, no gradient overlay, no animation ── */
+[data-render="reduced"] .rainbow-border-card {
+  background: var(--_rb-static);
+  transition: none;
+}
+
+[data-render="reduced"] .rainbow-border-card::after {
+  display: none;
+}
+
+/* ── Assistive — solid border, large targets ── */
+[data-render="assistive"] .rainbow-border-card {
+  background: var(--_rb-static);
+  padding: var(--_rb-width);
+}
+
+[data-render="assistive"] .rainbow-border-card::after {
+  display: none;
+}
+
+/* ── Textonly — no border, no shadow, content only ── */
+[data-render="textonly"] .rainbow-border-card {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-render="textonly"] .rainbow-border-card::after {
+  display: none;
+}
+
+[data-render="textonly"] .rainbow-border-card__inner {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Responsive — small screens
+   ══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 350px) {
+  .rainbow-border-card {
+    --_rb-width: 3px;
+    --_rb-radius: var(--radius-md);
+  }
+
+  .rainbow-border-card__inner {
+    box-shadow: none;
+  }
+}

@@ -187,6 +187,15 @@ These were logged as DEFERRED during individual audits:
 - [ ] Glow token consistency — ReaderNav line 875 rgba() bug
 - [ ] Token coverage grep — every `var(--token)` in component CSS resolves
 
+### RainbowBorderCard enhancements (deferred from molecule audit 2026-03-16)
+- [ ] IntersectionObserver: spin-once variant auto-triggers when card scrolls into view (threshold 0.5). Observe once, unobserve after spin. Touch users get the animation passively.
+- [ ] Touch timeout: match actual spin duration (360° / step × 16ms) instead of fixed 2000ms
+- [ ] Consider `trigger` prop: `'hover'` (default), `'scroll'`, `'tap'` — controls what starts the animation
+
+### Grid organism (deferred from molecule audit 2026-03-16)
+- [ ] Responsive page-edge margins — container padding doesn't reduce on small screens, content clips at edges
+- [ ] `min(100%, var(--grid-min))` fix already applied to auto-fit base (2026-03-16) — verify in all grid contexts
+
 ### Final cross-atom verification
 - [ ] Focus order across multi-atom pages
 - [ ] Icon inheritance: aria-hidden, data-semantic-role propagated in all consumers

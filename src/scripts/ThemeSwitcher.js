@@ -183,16 +183,41 @@ export class ThemeSwitcher {
       button.setAttribute('aria-pressed', isActive.toString());
     });
 
-    // Set data-mode and data-theme on body
+    // Set data-mode, data-theme, and data-cvd on body
     // Theme files output --theme-luminance: light|dark — read after CSS loads
     document.body.setAttribute('data-theme', themeName);
+
+    // Extract CVD mode from theme name (e.g. 'forest-dark-protan' → 'protan')
+    const cvdMatch = themeName.match(/-(protan|deutan|tritan)$/);
+    if (cvdMatch) {
+      document.body.setAttribute('data-cvd', cvdMatch[1]);
+    } else {
+      document.body.removeAttribute('data-cvd');
+    }
+
+    // High contrast detection
+    if (themeName.includes('high-contrast')) {
+      document.body.setAttribute('data-high-contrast', '');
+    } else {
+      document.body.removeAttribute('data-high-contrast');
+    }
+
     setTimeout(() => {
-      const luminance = getComputedStyle(document.documentElement)
-        .getPropertyValue('--theme-luminance').trim();
+      const computed = getComputedStyle(document.documentElement);
+
+      const luminance = computed.getPropertyValue('--theme-luminance').trim();
       if (luminance) {
         document.body.setAttribute('data-mode', luminance);
       } else {
         document.body.removeAttribute('data-mode');
+      }
+
+      // Read chroma from CSS and set data attribute (mono rainbow override)
+      const chroma = computed.getPropertyValue('--theme-chroma').trim();
+      if (chroma) {
+        document.body.setAttribute('data-theme-chroma', chroma);
+      } else {
+        document.body.removeAttribute('data-theme-chroma');
       }
     }, 0);
 

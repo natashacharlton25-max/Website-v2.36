@@ -298,6 +298,8 @@ const authorsCollection = defineCollection({
     bio: z.string(), // Short bio for author cards
     longBio: z.string().optional(), // Extended bio if needed
     photo: image(), // Author photo in same folder
+    signature: image().optional(), // Signature image (PNG) in same folder
+    signatureText: z.string().optional(), // Signature as text (rendered with handwriting font)
 
     // Social/contact links (optional)
     website: z.string().optional(),

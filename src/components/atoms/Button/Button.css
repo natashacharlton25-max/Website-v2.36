@@ -42,12 +42,17 @@
   background-color: var(--_btn-brand);
   color: var(--btn-text, var(--btn-filled-text));
   box-shadow: var(--btn-shadow, var(--shadow-btn));
-  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  transition: background-color var(--hover-duration-fast),
+              color var(--hover-duration-fast),
+              border-color var(--hover-duration-fast),
+              box-shadow var(--hover-duration-fast),
+              transform var(--hover-duration-fast);
 }
 
 .btn:hover {
-  background-color: var(--_btn-brand-dark);
+  background-color: color-mix(in oklch, var(--_btn-brand) 70%, var(--color-Black));
   box-shadow: var(--btn-shadow-hover, var(--shadow-btn-hover));
+  transform: translateY(-1px);
 }
 
 .btn:focus-visible {
@@ -56,8 +61,9 @@
 }
 
 .btn:active {
-  background-color: var(--_btn-brand-dark);
+  background-color: color-mix(in oklch, var(--_btn-brand) 60%, var(--color-Black));
   box-shadow: var(--btn-shadow, var(--shadow-btn));
+  transform: translateY(1px);
 }
 
 .btn:disabled,
@@ -70,6 +76,103 @@
 .btn[aria-disabled="true"]:hover {
   background-color: var(--_btn-brand);
   box-shadow: var(--btn-shadow, var(--shadow-btn));
+}
+
+/* ==========================================================
+   HOVER GATE: NONE — suppress all decorative hover
+   Resets each hover rule to its default-state values.
+   Functional hover (dropdown, tooltip) is NOT touched.
+   ========================================================== */
+
+/* Base + style variants — reset ALL hover-changed properties to default state.
+   Must include box-shadow in transition so duration token can zero it. */
+[data-hover="none"] .btn:hover {
+  background-color: var(--_btn-brand);
+  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  transform: none;
+  filter: none;
+}
+
+/* Instant — colour change only, no movement */
+[data-hover="instant"] .btn:hover {
+  transform: none;
+  box-shadow: var(--btn-shadow, var(--shadow-btn));
+}
+
+[data-hover="none"] .btn--outline:hover {
+  background-color: transparent;
+  color: var(--_btn-brand-dark);
+  border-color: var(--_btn-brand);
+  box-shadow: none;
+}
+
+[data-hover="none"] .btn--ghost:hover {
+  background-color: var(--btn-ghost-bg, transparent);
+  color: var(--btn-ghost-text, var(--brand-c-text));
+  border-color: var(--btn-ghost-border, var(--brand-c-neutral-light));
+  box-shadow: none;
+}
+
+[data-hover="none"] .btn--glass:hover {
+  background: var(--btn-glass-bg, var(--glass-bg));
+  color: var(--btn-glass-text, var(--brand-c-text));
+  border-color: var(--btn-glass-border, var(--glass-border));
+  box-shadow: var(--btn-shadow, var(--shadow-btn));
+}
+
+[data-hover="none"] .btn--glow:hover {
+  box-shadow: var(--btn-shadow, var(--shadow-btn));
+}
+
+[data-hover="none"] .btn--neumorphic:hover {
+  box-shadow: var(--btn-shadow, var(--shadow-btn));
+}
+
+/* Effect hovers — reset transforms/positions to default state */
+[data-hover="none"] .btn--glint:hover::before { left: -100%; }
+
+[data-hover="none"] .btn--colour-flow:hover::before {
+  top: 100%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.25);
+}
+[data-hover="none"] .btn--colour-flow:hover::after {
+  top: 180%;
+  transform: translateX(-50%) scaleY(1) scaleX(1.45);
+}
+
+[data-hover="none"] .btn--jump:hover {
+  transform: none;
+  box-shadow: var(--btn-shadow, var(--shadow-btn));
+}
+
+[data-hover="none"] .btn--comic:hover {
+  transform: none;
+  box-shadow: 4px 6px 0 var(--btn-comic-shadow, var(--color-Black));
+}
+[data-hover="none"] .btn--comic:hover::after { transform: translateX(-100%); }
+
+[data-hover="none"] .btn--tech:hover { transform: none; }
+[data-hover="none"] .btn--tech:hover::before { transform: translate(-5px, -5px); }
+
+[data-hover="none"] .btn--expand:hover::before {
+  width: var(--_expand-circle);
+  border-radius: var(--_expand-r-start);
+  background-color: var(--_btn-brand);
+}
+[data-hover="none"] .btn--expand:hover .btn__label { color: var(--_btn-brand); }
+
+[data-hover="none"] .btn--underline:hover { color: var(--_btn-brand); }
+[data-hover="none"] .btn--underline:hover::after { width: 0; }
+
+[data-hover="none"] .btn--spotlight:hover::before { opacity: 0; }
+
+[data-hover="none"] .btn--split:hover::before { transform: none; }
+[data-hover="none"] .btn--split:hover::after { transform: none; }
+
+[data-hover="none"] .btn--confetti:hover::after {
+  opacity: 0;
+  transform: scale(0);
+  animation: none;
 }
 
 /* ==========================================================
@@ -265,7 +368,10 @@
   background: var(--_btn-brand-dark);
 }
 
-/* Speed variants — default is normal */
+/* Speed variants — default is normal.
+   Timings are designer-authored for the blob rise character.
+   Hover gate suppresses via [data-hover="none"] position reset above,
+   NOT via duration tokenisation. */
 .btn--colour-flow::before,
 .btn--colour-flow::after {
   transition: all var(--transition-extralong);
@@ -308,9 +414,9 @@
 
 .btn--jump {
   transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease,
-    background-color 0.2s ease;
+    transform var(--hover-duration) ease,
+    box-shadow var(--hover-duration) ease,
+    background-color var(--hover-duration-fast) ease;
 }
 
 .btn--jump:hover {
@@ -334,10 +440,10 @@
   border: 3px solid var(--btn-comic-border, var(--color-Black));
   box-shadow: 4px 6px 0 var(--btn-comic-shadow, var(--color-Black));
   transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
+    transform var(--hover-duration) ease,
+    box-shadow var(--hover-duration) ease,
     filter 0.05s ease,
-    background-color 0.2s ease;
+    background-color var(--hover-duration-fast) ease;
 }
 
 .btn--comic:hover {
@@ -360,7 +466,7 @@
   background: var(--_btn-brand-dark);
   z-index: -1;
   transform: translateX(-100%);
-  transition: transform 0.25s ease;
+  transition: transform var(--hover-duration) ease;
   pointer-events: none;
 }
 
@@ -375,7 +481,7 @@
 
 .btn--tech {
   overflow: visible;
-  transition: transform 0.25s ease, background-color 0.25s ease;
+  transition: transform var(--hover-duration) ease, background-color var(--hover-duration) ease;
 }
 
 /* Offset border frame via ::before */
@@ -390,7 +496,7 @@
   border-radius: inherit;
   background: none;
   transform: translate(-5px, -5px);
-  transition: transform 0.25s ease;
+  transition: transform var(--hover-duration) ease;
   pointer-events: none;
 }
 
@@ -448,9 +554,9 @@
   transform: translateY(-50%);
   border-radius: var(--_expand-r-start);
   background-color: var(--_btn-brand);
-  transition: width 0.45s cubic-bezier(0.65, 0, 0.076, 1),
-              border-radius 0.45s cubic-bezier(0.65, 0, 0.076, 1),
-              background-color 0.3s ease;
+  transition: width var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1),
+              border-radius var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1),
+              background-color var(--hover-duration) ease;
   pointer-events: none;
 }
 
@@ -483,7 +589,7 @@
   transform: translate(-50%, -50%);
   z-index: 1;
   color: var(--btn-text, var(--btn-filled-text));
-  transition: transform 0.45s cubic-bezier(0.65, 0, 0.076, 1), opacity 0.2s ease;
+  transition: transform var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1), opacity var(--hover-duration-fast) ease;
 }
 
 /* Text — brand colour by default, white on hover */
@@ -491,7 +597,7 @@
   position: relative;
   z-index: 2;
   color: var(--_btn-brand);
-  transition: color 0.3s ease;
+  transition: color var(--hover-duration) ease;
 }
 
 .btn--expand:hover .btn__label {
@@ -533,7 +639,7 @@
   width: 0;
   height: 2px;
   background: var(--_btn-brand);
-  transition: width 0.35s cubic-bezier(0.65, 0, 0.076, 1);
+  transition: width var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1);
   pointer-events: none;
 }
 
@@ -559,8 +665,8 @@
    ========================================================== */
 
 .btn--magnetic {
-  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              background-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform var(--hover-duration-fast) cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              background-color var(--hover-duration-fast) ease, box-shadow var(--hover-duration-fast) ease;
   will-change: transform;
 }
 
@@ -585,7 +691,7 @@
     transparent
   );
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--hover-duration) ease;
   pointer-events: none;
   z-index: 1;
 }
@@ -612,7 +718,7 @@
   width: 100%;
   height: 50%;
   background: var(--_btn-brand);
-  transition: transform 0.35s cubic-bezier(0.65, 0, 0.076, 1);
+  transition: transform var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1);
   pointer-events: none;
 }
 
@@ -802,7 +908,7 @@
   border-radius: 50%;
   opacity: 0;
   transform: scale(0);
-  transition: all var(--transition-base);
+  transition: all var(--hover-duration);
 }
 
 .btn--confetti:hover::after {
@@ -845,7 +951,8 @@
    RENDER MODE OVERRIDES
    ========================================================== */
 
-/* Reduced — interactive transitions killed, colour-only state changes */
+/* Reduced — all transitions killed */
+[data-render="reduced"] .btn { transition: none; }
 [data-render="reduced"] .dropdown-menu { transition: none; }
 [data-render="reduced"] .btn__chevron { transition: none; }
 

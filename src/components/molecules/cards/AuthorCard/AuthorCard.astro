@@ -1,0 +1,68 @@
+---
+/**
+ * AuthorCard — compact author preview card
+ *
+ * Photo + name + role + short bio. Used at end of articles, in grids.
+ * Links to full author page when href provided.
+ * Composes: Card, Image, Heading, Text, Badge atoms.
+ *
+ * Styles: AuthorCard.css | AuthorCard.responsive.css
+ */
+import type { ImageMetadata } from 'astro';
+import Card from '../../../atoms/Card/Card.astro';
+import Image from '../../../atoms/Image/Image.astro';
+import Heading from '../../../atoms/Heading/Heading.astro';
+import Text from '../../../atoms/Text/Text.astro';
+import Badge from '../../../atoms/Badge/Badge.astro';
+import Link from '../../../atoms/Link/Link.astro';
+
+interface Props {
+  name: string;
+  photo: string | ImageMetadata;
+  role?: string;
+  bio: string;
+  href?: string;
+  label?: string;
+  cardVariant?: 'default' | 'transparent' | 'outline' | 'glass' | 'liquid' | 'neumorphic' | 'pressed' | 'comic' | 'tech';
+  class?: string;
+}
+
+const {
+  name,
+  photo,
+  role,
+  bio,
+  href,
+  label = 'About the Author',
+  cardVariant = 'default',
+  class: className,
+} = Astro.props;
+
+const photoSrc = typeof photo === 'string' ? photo : photo.src;
+---
+
+<div class:list={['author-card', className]}>
+  <div class="author-card__photo">
+    <Image
+      src={photoSrc}
+      alt={name}
+      fit="cover"
+      radius="lg"
+      semanticRole="content-symbol"
+    />
+  </div>
+  <Card variant={cardVariant} padding="lg" radius="lg" shadow="md" class="author-card__content" style={`--card-bg: var(--_author-bg)`}>
+    <Badge label={label} class="author-card__badge" />
+    <div class="author-card__name-row">
+      <Heading level={3} size="h3" weight="bold" flush class="author-card__name">{name}</Heading>
+      {role && <Badge label={role} variant="outline" size="sm" shape="pill" />}
+    </div>
+    <Text flush>{bio}</Text>
+    {href && (
+      <Link href={href} variant="underline" underlineGrow class="author-card__link">
+        <span class="author-card__link-full">Read more about this author</span>
+        <span class="author-card__link-short">READ MORE</span>
+      </Link>
+    )}
+  </Card>
+</div>

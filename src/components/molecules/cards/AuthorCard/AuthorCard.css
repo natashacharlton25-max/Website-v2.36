@@ -1,0 +1,132 @@
+/* ══════════════════════════════════════════════════════════════
+   AuthorCard — compact author preview
+
+   Internal tokens (--_author-*):
+     --_author-photo-size, --_author-bg, --_author-border,
+     --_author-shadow, --_author-text, --_author-label
+
+   Bridge tokens (--author-*) are pipeline/JSON overridable.
+   ══════════════════════════════════════════════════════════════ */
+
+.author-card {
+  /* ── Bridge → internal tokens ── */
+  --_author-photo-size: var(--author-photo-size, var(--img-width-xs));
+  --_author-bg: var(--author-bg, var(--page-bg-sunken));
+  --_author-border: var(--author-border, transparent);
+  --_author-shadow: var(--author-shadow, var(--shadow-md));
+  --_author-text: var(--author-text, var(--brand-c-text));
+  --_author-label: var(--author-label, var(--brand-c-text-light));
+
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* ── Photo — overlapping left edge ── */
+.author-card__photo {
+  flex-shrink: 0;
+  width: var(--_author-photo-size);
+  height: var(--_author-photo-size);
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  margin-right: calc(-1 * var(--space-lg));
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--_author-shadow);
+  background: var(--_author-bg);
+}
+
+/* ── Content — Card atom handles bg, shadow, radius ── */
+.author-card .author-card__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left: calc(var(--space-xl) + var(--space-lg));
+}
+
+/* ── Badges ── */
+.author-card__badge {
+  align-self: flex-start;
+  margin-bottom: var(--space-xs);
+}
+
+/* ── Name — override Card heading squash ── */
+.author-card .author-card__name {
+  font-size: var(--text-h3);
+}
+
+/* ── Name + role row ── */
+.author-card__name-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+/* ── Link ── */
+.author-card__link {
+  display: inline-block;
+  margin-top: var(--space-sm);
+  align-self: flex-end;
+  line-height: var(--leading-tight);
+}
+
+.author-card__link-short {
+  display: none;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Render modes
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Reduced — no decorative shadows ── */
+[data-render="reduced"] .author-card {
+  --_author-shadow: none;
+}
+
+/* ── Assistive — larger photo ── */
+[data-render="assistive"] .author-card {
+  --_author-photo-size: var(--img-width-sm);
+}
+
+/* ── Textonly — no photo, simplified layout ── */
+[data-render="textonly"] .author-card__photo {
+  display: none;
+}
+
+[data-render="textonly"] .author-card .author-card__content {
+  padding-left: var(--space-lg);
+  border: 1px solid var(--_author-border, var(--brand-c-neutral-light));
+  border-radius: var(--radius-lg);
+}
+
+/* "About the Author" badge — outline */
+[data-render="textonly"] .author-card .author-card__badge {
+  align-self: flex-start;
+  background: transparent;
+  color: var(--_author-text);
+  border: 1px solid var(--brand-c-neutral-light);
+  box-shadow: none;
+}
+
+/* "Founder" badge — plain text, no border */
+[data-render="textonly"] .author-card__name-row .badge {
+  background: transparent;
+  color: var(--_author-label);
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+[data-render="textonly"] .author-card__name-row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+}
+
+[data-render="textonly"] .author-card__link {
+  align-self: flex-start;
+}

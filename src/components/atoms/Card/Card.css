@@ -27,7 +27,7 @@
 .card {
   position: relative;
   overflow: hidden;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--hover-duration-fast);
 }
 
 
@@ -123,9 +123,9 @@
 }
 
 .card--neumorphic.card--hover-glow {
-  transition: transform var(--transition-base),
-              box-shadow var(--transition-base),
-              border-color var(--transition-base);
+  transition: transform var(--hover-duration),
+              box-shadow var(--hover-duration),
+              border-color var(--hover-duration);
 }
 
 .card--neumorphic.card--hover-glow:hover {
@@ -144,9 +144,9 @@
 }
 
 .card--pressed.card--hover-glow {
-  transition: transform var(--transition-base),
-              box-shadow var(--transition-base),
-              border-color var(--transition-base);
+  transition: transform var(--hover-duration),
+              box-shadow var(--hover-duration),
+              border-color var(--hover-duration);
 }
 
 .card--pressed.card--hover-glow:hover {
@@ -166,8 +166,8 @@
 }
 
 .card--comic.card--hover-lift {
-  transition: transform 0.25s ease,
-              box-shadow 0.25s ease;
+  transition: transform var(--hover-duration) ease,
+              box-shadow var(--hover-duration) ease;
 }
 
 .card--comic.card--hover-lift:hover {
@@ -204,7 +204,7 @@
 }
 
 .card--tech.card--hover-lift::before {
-  transition: transform 0.25s ease;
+  transition: transform var(--hover-duration) ease;
 }
 
 /* Card stays still — only the accent frame moves on hover */
@@ -219,7 +219,7 @@
 
 .card--hover-lift {
   cursor: pointer;
-  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-fast);
+  transition: transform var(--hover-duration), box-shadow var(--hover-duration), border-color var(--hover-duration-fast);
 }
 
 .card--hover-lift:hover {
@@ -248,7 +248,7 @@
 
 .card--hover-glow {
   cursor: pointer;
-  transition: box-shadow var(--transition-base), border-color var(--transition-fast);
+  transition: box-shadow var(--hover-duration), border-color var(--hover-duration-fast);
 }
 
 .card--hover-glow:hover {
@@ -259,6 +259,43 @@
 .card--hover-glow:focus-visible {
   outline: 2px solid var(--card-accent, var(--brand-c-primary));
   outline-offset: 2px;
+}
+
+/* ── Hover gate: none — kill all hover effects ── */
+[data-hover="none"] .card--hover-lift,
+[data-hover="none"] .card--hover-border,
+[data-hover="none"] .card--hover-glow {
+  transition: none;
+  pointer-events: auto;
+}
+
+[data-hover="none"] .card--hover-lift:hover,
+[data-hover="none"] .card--hover-glow:hover {
+  transform: none;
+  box-shadow: var(--card-shadow, var(--shadow-sm));
+  filter: none;
+}
+
+[data-hover="none"] .card--hover-border:hover {
+  border-color: var(--card-border, var(--brand-c-neutral-light));
+}
+
+[data-mode="dark"][data-hover="none"] .card--hover-border:hover,
+[data-high-contrast][data-hover="none"] .card--hover-border:hover {
+  border-color: var(--brand-c-primary);
+}
+
+[data-hover="none"] .card--comic.card--hover-lift:hover {
+  box-shadow: 5px 7px 0 var(--card-comic-shadow, var(--color-Black));
+}
+[data-hover="none"] .card--tech.card--hover-lift:hover::before { transform: translate(-6px, -6px); }
+[data-hover="none"] .card--neumorphic.card--hover-glow:hover { border-color: transparent; }
+[data-hover="none"] .card--pressed.card--hover-glow:hover { border-color: transparent; box-shadow: var(--card-shadow, var(--shadow-neu-pressed)); }
+
+/* ── Hover gate: instant — no movement, colour only ── */
+[data-hover="instant"] .card--hover-lift:hover,
+[data-hover="instant"] .card--hover-glow:hover {
+  transform: none;
 }
 
 
@@ -451,16 +488,9 @@
    13. RENDER MODE OVERRIDES
    ========================================================== */
 
-/* ── Reduced — kill hover motion, preserve static shadows ── */
+/* ── Reduced — kill transitions, let hover state changes apply instantly ── */
 
 [data-render="reduced"] .card { transition: none; }
-[data-render="reduced"] .card--hover-lift:hover { transform: none; box-shadow: var(--card-shadow, var(--shadow-elevated)); }
-[data-render="reduced"] .card--hover-glow:hover { box-shadow: var(--card-shadow, var(--shadow-elevated)); }
-[data-render="reduced"] .card--comic.card--hover-lift:hover { transform: none; box-shadow: 5px 7px 0 var(--card-comic-shadow, var(--color-Black)); }
-[data-render="reduced"] .card--comic.card--hover-lift:active { transform: none; box-shadow: 5px 7px 0 var(--card-comic-shadow, var(--color-Black)); }
-[data-render="reduced"] .card--tech.card--hover-lift:hover::before { transform: translate(-6px, -6px); }
-[data-render="reduced"] .card--neumorphic.card--hover-glow:hover { box-shadow: var(--card-shadow, var(--shadow-elevated)); border-color: transparent; }
-[data-render="reduced"] .card--pressed.card--hover-glow:hover { box-shadow: var(--card-shadow, var(--shadow-neu-pressed)); border-color: transparent; }
 
 /* Liquid glass — strip distortion in reduced/assistive, keep blur only */
 [data-render="reduced"] .card--liquid::after,

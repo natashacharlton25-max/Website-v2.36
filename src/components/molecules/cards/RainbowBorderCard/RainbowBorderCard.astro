@@ -1,0 +1,161 @@
+---
+/**
+ * RainbowBorderCard — Animated conic-gradient border wrapper
+ *
+ * Slot-based — wraps any content. Hover triggers rotation.
+ * 3 variants: primary (solid→gradient), gradient (static→rotating), pulse (rotation + brightness)
+ * Rainbow tokens provide CVD-safe colours automatically.
+ * Respects hover gate (data-hover) and render mode (data-render).
+ *
+ * Styles: RainbowBorderCard.css
+ */
+
+interface Props {
+  variant?: 'primary' | 'gradient' | 'pulse';
+  borderRadius?: string;
+  borderWidth?: string;
+  rotationSpeed?: number;
+  /** 2-7 gradient colours. Defaults to full rainbow (7 tokens). First colour is also the static/landed colour. */
+  colors?: string[];
+  class?: string;
+}
+
+const {
+  variant = 'gradient',
+  borderRadius,
+  borderWidth,
+  rotationSpeed = 20,
+  colors,
+  class: className,
+} = Astro.props;
+
+// Build conic-gradient from colors array (2-7 stops, evenly spaced, start=end)
+// If no colors passed, CSS defaults to rainbow tokens via --_rb-N fallbacks
+let gradientStyle = '';
+let staticColor = '';
+if (colors && colors.length >= 2) {
+  const stops = [...colors, colors[0]]; // wrap: first = last for seamless spin
+  const step = 100 / (stops.length - 1);
+  const gradientStops = stops.map((c, i) => `${c} ${Math.round(step * i)}%`).join(', ');
+  gradientStyle = `--rb-gradient: conic-gradient(from var(--angle), ${gradientStops})`;
+  staticColor = `--rb-static: ${colors[0]}`;
+}
+
+// Shadow on inner card only when border is thick enough to show it
+const bw = parseInt(borderWidth || '3', 10);
+const innerShadow = bw >= 7 ? '--_rb-inner-shadow: var(--shadow-elevated)' : '';
+
+const styleOverrides = [
+  borderRadius && `--rb-border-radius: ${borderRadius}`,
+  borderWidth && `--rb-border-width: ${borderWidth}`,
+  gradientStyle,
+  staticColor,
+  innerShadow,
+].filter(Boolean).join('; ');
+---
+
+<div
+  class:list={[
+    'rainbow-border-card',
+    `rainbow-border-card--${variant}`,
+    className,
+  ]}
+  data-variant={variant}
+  data-rotation-speed={rotationSpeed}
+  style={styleOverrides || undefined}
+>
+  <div class="rainbow-border-card__inner">
+    <slot />
+  </div>
+</div>
+
+<script>
+  interface RainbowCardElement extends HTMLElement {
+    _animationFrame?: number;
+    _angle?: number;
+    _isAnimating?: boolean;
+    _rotationSpeed?: number;
+    _rainbowBound?: boolean;
+  }
+
+  function initRainbowCard(card: RainbowCardElement): void {
+    if (card._rainbowBound) return;
+    card._rainbowBound = true;
+
+    card._angle = 0;
+    card._isAnimating = false;
+
+    // ── Single-spin animation (original pattern) ──
+    // Spin 360° once → land on solid accent colour → reset on next hover
+
+    function startSpinOnce(): void {
+      if (card._isAnimating) return;
+
+      // Hover gate
+      const hoverMode = document.body.dataset.hover;
+      if (hoverMode === 'none') return;
+
+      // Render gate
+      const renderMode = document.body.dataset.render;
+      if (renderMode && renderMode !== 'full') return;
+
+      // Instant mode — show landed state immediately
+      if (hoverMode === 'instant') {
+        card.classList.add('is-landed');
+        return;
+      }
+
+      card._isAnimating = true;
+      card._angle = 0;
+      card.classList.add('is-animating');
+      card.classList.remove('is-landed');
+
+      const step = hoverMode === 'gentle' ? 2 : 4;
+
+      function frame(): void {
+        card._angle! += step;
+        if (card._angle! < 360) {
+          card.style.setProperty('--angle', card._angle + 'deg');
+          card._animationFrame = requestAnimationFrame(frame);
+        } else {
+          // Spin complete — fade gradient out, solid base shows through
+          card._isAnimating = false;
+          card.classList.remove('is-animating');
+          card.classList.add('is-landed');
+          card.style.setProperty('--angle', '0deg');
+        }
+      }
+      frame();
+    }
+
+    function resetBorder(): void {
+      card._isAnimating = false;
+      if (card._animationFrame) cancelAnimationFrame(card._animationFrame);
+      card.classList.remove('is-animating', 'is-landed');
+      card.style.setProperty('--angle', '0deg');
+    }
+
+    card.addEventListener('mouseenter', startSpinOnce);
+    card.addEventListener('mouseleave', resetBorder);
+    card.addEventListener('focusin', startSpinOnce);
+    card.addEventListener('focusout', resetBorder);
+
+    card.addEventListener('touchstart', () => {
+      startSpinOnce();
+      setTimeout(resetBorder, 2000);
+    }, { passive: true });
+  }
+
+  function initAllRainbowCards(): void {
+    document.querySelectorAll<HTMLElement>('.rainbow-border-card').forEach((card) => {
+      initRainbowCard(card as RainbowCardElement);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAllRainbowCards);
+  } else {
+    initAllRainbowCards();
+  }
+  document.addEventListener('astro:page-load', initAllRainbowCards);
+</script>

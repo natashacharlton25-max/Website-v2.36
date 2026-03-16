@@ -31,7 +31,7 @@
 export interface Props {
   as?: 'div' | 'article' | 'section' | 'aside' | 'li';
   variant?: 'default' | 'transparent' | 'outline' | 'glass' | 'liquid' | 'neumorphic' | 'pressed' | 'comic' | 'tech';
-  hover?: boolean | 'border' | 'glow';
+  hover?: boolean | 'border' | 'glow' | ('lift' | 'border' | 'glow')[];
   shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   dropShadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   radius?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
@@ -69,9 +69,9 @@ const Tag = href ? 'a' : as;
 const classes = [
   'card',
   `card--${variant}`,
-  hover === true && 'card--hover-lift',
-  hover === 'border' && 'card--hover-border',
-  hover === 'glow' && 'card--hover-glow',
+  (hover === true || (Array.isArray(hover) && hover.includes('lift'))) && 'card--hover-lift',
+  (hover === 'border' || (Array.isArray(hover) && hover.includes('border'))) && 'card--hover-border',
+  (hover === 'glow' || (Array.isArray(hover) && hover.includes('glow'))) && 'card--hover-glow',
   shadow && shadow !== 'none' && `card--shadow-${shadow}`,
   dropShadow && dropShadow !== 'none' && `card--drop-${dropShadow}`,
   radius && `card--radius-${radius}`,

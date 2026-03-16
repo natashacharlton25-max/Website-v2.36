@@ -9,6 +9,7 @@ longBio: |
   She founded Walking With A Smile to share evidence-based tools and approaches that have helped countless individuals navigate their recovery journey. Her philosophy centres on empowerment over dependency, choice over prescription, and meeting people exactly where they are.
 
 photo: "./avatar.png"
+signature: "./Sig test.png"
 
 # Professional credentials (optional)
 credentials:

@@ -1,0 +1,47 @@
+{
+  "component": "BlogCard",
+  "category": "molecule",
+  "renders": {
+    "full": "BlogCard.astro",
+    "reduced": "BlogCard.astro",
+    "assistive": "BlogCard.astro",
+    "textonly": "BlogCard.astro"
+  },
+  "notes": "Article preview card. Full-bleed hero image, category badge, meta row, title, excerpt, tags, optional author. Image scales on hover, title changes colour. Textonly hides image. All visual properties JSON-overridable via --blog-* bridge tokens.",
+
+  "props": {
+    "content": {
+      "_description": "Article information",
+      "title":    { "type": "string", "required": true, "description": "Article title." },
+      "excerpt":  { "type": "string", "required": true, "description": "Article excerpt/summary." },
+      "image":    { "type": "string", "required": false, "textonly": false, "description": "Hero image URL. Hidden in textonly." },
+      "imageAlt": { "type": "string", "required": false, "description": "Image alt text. Defaults to title." },
+      "author":   { "type": "string", "required": false, "description": "Author name." },
+      "authorImage": { "type": "string", "required": false, "textonly": false, "description": "Author avatar URL." },
+      "date":     { "type": "string", "required": false, "description": "Publication date." },
+      "category": { "type": "string", "required": false, "description": "Category badge label." },
+      "tags":     { "type": "array", "items": { "type": "string" }, "required": false, "description": "Tag labels. Max 3 shown." },
+      "readTime": { "type": "string", "required": false, "description": "Reading time text." },
+      "href":     { "type": "string", "required": true, "description": "Article URL." },
+      "featured": { "type": "boolean", "required": false, "default": false, "description": "Show featured border." }
+    },
+
+    "visual": {
+      "_description": "Card appearance",
+      "cardVariant": { "type": "string", "required": false, "default": "default", "enum": ["default", "transparent", "outline", "glass", "liquid", "neumorphic", "pressed", "comic", "tech"], "description": "Card atom variant." },
+      "class": { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." }
+    },
+
+    "colour": {
+      "_description": "Visual tokens — JSON/pipeline overridable",
+      "text":           { "type": "token", "cssProperty": "--blog-text", "default": "var(--brand-c-text)" },
+      "meta":           { "type": "token", "cssProperty": "--blog-meta", "default": "var(--brand-c-text-light)" },
+      "border":         { "type": "token", "cssProperty": "--blog-border", "default": "var(--brand-c-neutral-light)" },
+      "hoverTitle":     { "type": "token", "cssProperty": "--blog-hover-title", "default": "var(--brand-c-primary)" },
+      "featuredBorder": { "type": "token", "cssProperty": "--blog-featured-border", "default": "var(--brand-c-primary)" },
+      "tagBg":          { "type": "token", "cssProperty": "--blog-tag-bg", "default": "var(--page-bg-sunken)" }
+    },
+
+    "animation": {}
+  }
+}

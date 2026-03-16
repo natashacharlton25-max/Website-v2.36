@@ -263,9 +263,38 @@ function initPage(): void {
 
 // ── Init ──
 
+function initHoverGateButtons(): void {
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-set-hover]');
+  if (!buttons.length) return;
+
+  // Set initial active state from saved settings
+  const currentMode = getSettings().hoverMode || 'full';
+  buttons.forEach((b) => {
+    b.classList.toggle('btn--primary', b.dataset.setHover === currentMode);
+    b.classList.toggle('btn--outline', b.dataset.setHover !== currentMode);
+  });
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.setHover! as 'none' | 'instant' | 'gentle' | 'full';
+      // Save to settings — persists across pages
+      const settings = getSettings();
+      settings.hoverMode = mode;
+      saveSettings(settings);
+      applySettings(settings);
+
+      buttons.forEach((b) => {
+        b.classList.toggle('btn--primary', b.dataset.setHover === mode);
+        b.classList.toggle('btn--outline', b.dataset.setHover !== mode);
+      });
+    });
+  });
+}
+
 function init(): void {
   initPage();
   initKeyboardDetection();
+  initHoverGateButtons();
 }
 
 if (document.readyState === 'loading') {

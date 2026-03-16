@@ -29,6 +29,8 @@ export interface A11ySettings {
   symbolSet: 'openaac' | 'widgit' | 'pcs' | 'bliss' | 'makaton' | 'custom';
   /** URL to a user-provided custom symbol mapping JSON file */
   customSymbolsUrl: string;
+  /** Hover feedback mode — controls decorative hover effects */
+  hoverMode: 'none' | 'instant' | 'gentle' | 'full';
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -51,7 +53,8 @@ export const defaultSettings: A11ySettings = {
   altDisplayMode: 'hidden',
   cognitiveLevel: 'full',
   symbolSet: 'openaac',
-  customSymbolsUrl: ''
+  customSymbolsUrl: '',
+  hoverMode: 'full'
 };
 
 // ===================================
@@ -185,7 +188,26 @@ export function applySettings(settings: A11ySettings): void {
 
   // Toggle classes on the wrapper (NOT body)
   target.classList.toggle('a11y-text-only', settings.textOnly);
+
+  // Set data-render attribute (new system) alongside legacy classes
+  // Priority: textonly > reduced > assistive > full
+  if (settings.textOnly) {
+    document.body.dataset.render = 'textonly';
+  } else if (settings.reduceMotion) {
+    document.body.dataset.render = 'reduced';
+  } else {
+    document.body.removeAttribute('data-render');
+  }
+
   target.classList.toggle('a11y-highlight-links', settings.highlightLinks);
+  // New data attribute for highlight-links gate (works alongside legacy class)
+  if (settings.highlightLinks) {
+    document.documentElement.setAttribute('data-highlight-links', '');
+    document.documentElement.setAttribute('data-highlight', 'static');
+  } else {
+    document.documentElement.removeAttribute('data-highlight-links');
+    document.documentElement.removeAttribute('data-highlight');
+  }
   target.classList.toggle('a11y-dyslexia-font', settings.dyslexiaFont);
   target.classList.toggle('a11y-reduce-motion', settings.reduceMotion);
   target.classList.toggle('a11y-enhanced-focus', settings.enhancedFocus);
@@ -206,6 +228,14 @@ export function applySettings(settings: A11ySettings): void {
   const cogLevel = settings.cognitiveLevel || 'full';
   (target as HTMLElement).dataset.cognitiveLevel = cogLevel;
   document.documentElement.dataset.cognitiveLevel = cogLevel;
+
+  // Hover Mode — decorative hover feedback
+  const hoverMode = settings.hoverMode || 'full';
+  if (hoverMode === 'full') {
+    document.body.removeAttribute('data-hover');
+  } else {
+    document.body.dataset.hover = hoverMode;
+  }
 
   // Symbol Set — which AAC pictures to display
   const symbolSet = settings.symbolSet || 'openaac';

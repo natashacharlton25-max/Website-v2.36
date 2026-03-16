@@ -236,6 +236,9 @@
  * Themes: tooltip-professional (default), tooltip-glass, tooltip-neon, tooltip-error, tooltip-success
  */
 
+/* DEPRECATED — use <Tooltip> atom instead.
+   Kept for legacy pages. Will be removed after full migration.
+   Hover gate does not apply — functional tooltip. */
 [data-tooltip] {
   position: relative;
   cursor: help;
@@ -660,10 +663,15 @@ select.has-success {
 .prose a {
   color: var(--brand-c-primary);
   text-decoration: underline;
+  transition: color var(--hover-duration);
 }
 
 .prose a:hover {
   color: var(--brand-c-primary-dark);
+}
+
+[data-hover="none"] .prose a:hover {
+  color: var(--brand-c-primary);
 }
 
 .prose code {
@@ -697,8 +705,16 @@ select.has-success {
   color: var(--brand-c-text-light);
 }
 
+.prose tr {
+  transition: background-color var(--hover-duration-fast);
+}
+
 .prose tr:hover td {
   background: var(--brand-c-neutral-light);
+}
+
+[data-hover="none"] .prose tr:hover td {
+  background: transparent;
 }
 
 /* ========== ACCESSIBILITY UTILITIES ========== */

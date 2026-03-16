@@ -3,16 +3,23 @@
  *
  * Rules extracted from component a11y.css files during v2 audit.
  * Each atom adds its own rules here during its audit pass.
- * Scoped to [data-highlight-links] on <html>.
+ *
+ * Supports both legacy [data-highlight-links] and new [data-highlight] attribute.
+ * data-highlight="static"   — visible highlight, no animation
+ * data-highlight="animated" — visible highlight + pulse animation
  */
 
 /* Button — outline ring + label underline */
-[data-highlight-links] .btn {
+[data-highlight-links] .btn,
+[data-highlight="static"] .btn,
+[data-highlight="animated"] .btn {
   outline: 2px solid var(--brand-c-primary);
   outline-offset: 2px;
 }
 
-[data-highlight-links] .btn .btn__label {
+[data-highlight-links] .btn .btn__label,
+[data-highlight="static"] .btn .btn__label,
+[data-highlight="animated"] .btn .btn__label {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -22,7 +29,17 @@
 [data-highlight-links] .link--underline,
 [data-highlight-links] .link--highlight,
 [data-highlight-links] .link--border,
-[data-highlight-links] .link--ghost {
+[data-highlight-links] .link--ghost,
+[data-highlight="static"] .link--default,
+[data-highlight="static"] .link--underline,
+[data-highlight="static"] .link--highlight,
+[data-highlight="static"] .link--border,
+[data-highlight="static"] .link--ghost,
+[data-highlight="animated"] .link--default,
+[data-highlight="animated"] .link--underline,
+[data-highlight="animated"] .link--highlight,
+[data-highlight="animated"] .link--border,
+[data-highlight="animated"] .link--ghost {
   color: var(--brand-c-text);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -31,17 +48,37 @@
 }
 
 /* Kill animated underline — real underline replaces it */
-[data-highlight-links] .link--animate-underline-grow::after {
+[data-highlight-links] .link--animate-underline-grow::after,
+[data-highlight="static"] .link--animate-underline-grow::after,
+[data-highlight="animated"] .link--animate-underline-grow::after {
   display: none;
 }
 
 /* FormField — underline links inside description/error text */
-[data-highlight-links] .form-field a {
+[data-highlight-links] .form-field a,
+[data-highlight="static"] .form-field a,
+[data-highlight="animated"] .form-field a {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 /* Card — link cards get visible primary border */
-[data-highlight-links] .card--link {
+[data-highlight-links] .card--link,
+[data-highlight="static"] .card--link,
+[data-highlight="animated"] .card--link {
   border: 2px solid var(--brand-c-primary);
+}
+
+/* ── Animated mode — pulse on links ── */
+@keyframes highlight-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+[data-highlight="animated"] .link--default,
+[data-highlight="animated"] .link--underline,
+[data-highlight="animated"] .link--highlight,
+[data-highlight="animated"] .link--border,
+[data-highlight="animated"] .link--ghost {
+  animation: highlight-pulse 2s ease-in-out infinite;
 }

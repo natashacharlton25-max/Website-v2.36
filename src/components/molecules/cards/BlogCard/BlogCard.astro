@@ -1,0 +1,109 @@
+---
+/**
+ * BlogCard — article preview card
+ *
+ * Full-bleed hero image, category badge, meta row, heading, excerpt,
+ * tags, optional author. Wraps in Card atom.
+ * Composes: Card, Badge, Heading, Text, Image, Icon, Link atoms.
+ *
+ * Styles: BlogCard.css | BlogCard.responsive.css
+ */
+import Card from '../../../atoms/Card/Card.astro';
+import Badge from '../../../atoms/Badge/Badge.astro';
+import Heading from '../../../atoms/Heading/Heading.astro';
+import Text from '../../../atoms/Text/Text.astro';
+import Image from '../../../atoms/Image/Image.astro';
+import Icon from '../../../atoms/Icon/Icon.astro';
+
+interface Props {
+  title: string;
+  excerpt: string;
+  image?: string;
+  imageAlt?: string;
+  author?: string;
+  authorImage?: string;
+  date?: string;
+  category?: string;
+  tags?: string[];
+  readTime?: string;
+  href: string;
+  featured?: boolean;
+  cardVariant?: 'default' | 'transparent' | 'outline' | 'glass' | 'liquid' | 'neumorphic' | 'pressed' | 'comic' | 'tech';
+  class?: string;
+}
+
+const {
+  title,
+  excerpt,
+  image,
+  imageAlt = title,
+  author,
+  authorImage,
+  date,
+  category,
+  tags = [],
+  readTime,
+  href,
+  featured = false,
+  cardVariant = 'default',
+  class: className,
+} = Astro.props;
+---
+
+<Card
+  as="article"
+  variant={cardVariant}
+  shadow="sm"
+  radius="lg"
+  hover={['lift', 'border']}
+  class:list={['blog-card', featured && 'blog-card--featured', className]}
+>
+  <a href={href} class="blog-card__link">
+    {image && (
+      <div class="blog-card__image">
+        <Image src={image} alt={imageAlt} fit="cover" loading="lazy" class="blog-card__img" />
+        {category && (
+          <Badge label={category} variant="glass" class="blog-card__category blog-card__category--image" />
+        )}
+      </div>
+    )}
+
+    <div class="blog-card__content">
+      {category && (
+        <Badge label={category} class="blog-card__category blog-card__category--content" />
+      )}
+      <div class="blog-card__meta">
+        {date && (
+          <Text as="span" size="sm" color="muted" flush>
+            <Icon name="calendar-fill" size={14} class="blog-card__meta-icon" />
+            {date}
+          </Text>
+        )}
+        {readTime && (
+          <Text as="span" size="sm" color="muted" flush>
+            <Icon name="clock-fill" size={14} class="blog-card__meta-icon" />
+            {readTime}
+          </Text>
+        )}
+      </div>
+
+      <Heading level={3} size="h4" weight="bold" color="accent" flush class="blog-card__title">{title}</Heading>
+      <Text flush class="blog-card__excerpt">{excerpt}</Text>
+
+      {tags.length > 0 && (
+        <div class="blog-card__tags">
+          {tags.slice(0, 3).map(tag => (
+            <Badge label={tag} size="sm" shape="squared" uppercase={false} class="blog-card__tag" />
+          ))}
+        </div>
+      )}
+
+      {author && (
+        <div class="blog-card__author">
+          <Icon name="user-circle-fill" size={24} class="blog-card__author-icon" />
+          <Text as="span" size="sm" weight="bold" flush>{author}</Text>
+        </div>
+      )}
+    </div>
+  </a>
+</Card>
