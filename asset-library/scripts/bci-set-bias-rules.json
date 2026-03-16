@@ -1,0 +1,1101 @@
+{
+  "_meta": {
+    "purpose": "Per-symbol-set bias rules for BCI classification quality scoring",
+    "generated": "2026-03-14",
+    "source": "Derived from bci-symbol-map.csv (6490 concepts × 6 sets) + 80 classification samples",
+    "usage": "aacResolver reads these rules to score/filter symbol matches per set before rendering AacCards"
+  },
+  "sets": {
+    "bliss": {
+      "coverage": "100%",
+      "total": 6490,
+      "source": "bliss-svg-builder via blissary-bci-map.json",
+      "licence": "CC BY-SA 3.0 (BCI) + MPL-2.0 (bliss-svg-builder)",
+      "strengths": [
+        "1:1 mapping to BCI — every concept has exactly one Bliss symbol",
+        "No search bias — symbols are generated from BCI codes, not keyword search",
+        "Grammar indicators built in (tense, plural, comparative etc)",
+        "Consistent visual language across all concepts"
+      ],
+      "weaknesses": [
+        "Abstract visual system — not intuitive without training",
+        "No photorealistic depiction — all geometric/schematic",
+        "Requires Bliss literacy to interpret"
+      ],
+      "bias_rules": [],
+      "search_method": "direct_bci_lookup",
+      "fallback_pattern": null,
+      "notes": "Bliss is the reference set — no bias correction needed. Every BCI concept has a Bliss symbol by definition."
+    },
+    "arasaac": {
+      "coverage": "87%",
+      "total": 5623,
+      "source": "ARASAAC public API keyword search",
+      "licence": "CC BY-NC-SA 4.0",
+      "strengths": [
+        "Large pictogram library (13,000+ images)",
+        "Concrete nouns generally good (apple, bicycle, bell)",
+        "Skin-tone variants available (varianted-skin suffix)",
+        "Active community maintaining pictograms"
+      ],
+      "weaknesses": [
+        "Keyword search returns wrong homonym sense frequently",
+        "Substring matching produces catastrophic mismatches",
+        "Multi-language corpus causes cross-language bleed",
+        "Falls back to deterministic garbage for unknown terms"
+      ],
+      "bias_rules": [
+        {
+          "id": "arasaac-substring-homonym",
+          "type": "reject",
+          "description": "ARASAAC keyword search matches substrings, returning wrong homonym",
+          "examples": [
+            {
+              "word": "airplane-landing",
+              "got": "country",
+              "reason": "'land' substring in 'landing'"
+            },
+            {
+              "word": "airplane-taxiing",
+              "got": "taxi",
+              "reason": "'taxi' substring"
+            },
+            {
+              "word": "airplane-tilt",
+              "got": "tilt and turn doors",
+              "reason": "'tilt' substring"
+            },
+            {
+              "word": "airplane-in-flight",
+              "got": "flight attendants",
+              "reason": "'flight' substring"
+            },
+            {
+              "word": "eyes",
+              "got": "eye shadow",
+              "reason": "'eye' substring matched cosmetics"
+            },
+            {
+              "word": "files",
+              "got": "fillets",
+              "reason": "'fil' substring matched food"
+            },
+            {
+              "word": "coins",
+              "got": "corner",
+              "reason": "unclear substring match"
+            },
+            {
+              "word": "run",
+              "got": "ski run",
+              "reason": "'run' matched the piste not the action"
+            },
+            {
+              "word": "sell",
+              "got": "sell-by date",
+              "reason": "'sell' substring matched food labelling"
+            }
+          ],
+          "detection": "If ARASAAC image filename contains words not in the BCI glosses, flag as suspect",
+          "severity": "high"
+        },
+        {
+          "id": "arasaac-language-bleed",
+          "type": "reject",
+          "description": "ARASAAC multi-language corpus returns results from wrong language",
+          "examples": [
+            {
+              "word": "barn",
+              "got": "kids",
+              "reason": "Swedish 'barn' = children"
+            },
+            {
+              "word": "baby",
+              "got": "infant development",
+              "reason": "matched compound phrase not core concept"
+            },
+            {
+              "word": "put",
+              "got": "tu put",
+              "reason": "French 'tu' prefix leaked into filename"
+            }
+          ],
+          "detection": "If ARASAAC result contains non-English words or prefixes (tu, le, la, de, el, das, het), flag",
+          "severity": "high"
+        },
+        {
+          "id": "arasaac-wrong-sense-verb",
+          "type": "downgrade",
+          "description": "ARASAAC matches the right root word but wrong verbal sense or context",
+          "examples": [
+            {
+              "word": "go",
+              "got": "go around",
+              "reason": "right verb, wrong phrasal usage"
+            },
+            {
+              "word": "get",
+              "got": "get late",
+              "reason": "right verb, wrong phrasal usage"
+            },
+            {
+              "word": "look",
+              "got": "happy look",
+              "reason": "matched 'look' as appearance not perception"
+            },
+            {
+              "word": "walk",
+              "got": "go around",
+              "reason": "matched secondary gloss 'go' not primary 'walk'"
+            },
+            {
+              "word": "stand",
+              "got": "to stand",
+              "reason": "correct — but CSV shows it matched correctly here"
+            },
+            {
+              "word": "make",
+              "got": "to produce",
+              "reason": "matched 3rd gloss 'produce' not primary 'make'"
+            }
+          ],
+          "detection": "If ARASAAC image filename contains a phrase (2+ words) where the BCI gloss is a single word, flag as wrong sense",
+          "severity": "medium"
+        },
+        {
+          "id": "arasaac-deterministic-garbage",
+          "type": "reject",
+          "description": "ARASAAC returns the same garbage image for all unrecognised terms",
+          "examples": [
+            {
+              "word": "amazon-logo",
+              "got": "bald 1",
+              "reason": "fallback for unknown brand terms"
+            },
+            {
+              "word": "android-logo",
+              "got": "bald 1",
+              "reason": "same fallback"
+            },
+            {
+              "word": "angular-logo",
+              "got": "bald 1",
+              "reason": "same fallback"
+            }
+          ],
+          "detection": "If multiple unrelated words resolve to the same ARASAAC image, it's a fallback. Blocklist: 'bald 1', 'simple'",
+          "severity": "critical",
+          "blocklist": [
+            "bald 1",
+            "bald 1.png",
+            "simple",
+            "simple.png"
+          ]
+        },
+        {
+          "id": "arasaac-inappropriate-content",
+          "type": "reject",
+          "description": "Keyword match returns medically/socially inappropriate image for AAC context",
+          "examples": [
+            {
+              "word": "devices",
+              "got": "intrauterine device",
+              "reason": "matched 'device' to medical contraceptive"
+            },
+            {
+              "word": "make",
+              "got": "make love",
+              "reason": "matched make substring to sexual content"
+            }
+          ],
+          "detection": "Manual review required — flag any ARASAAC result containing: intrauterine, contraceptive, sexual, genital, rectal",
+          "severity": "critical",
+          "content_blocklist": [
+            "intrauterine",
+            "contraceptive",
+            "suppository",
+            "enema",
+            "catheter",
+            "genital",
+            "make love",
+            "sex",
+            "intercourse",
+            "erotic"
+          ]
+        },
+        {
+          "id": "arasaac-too-broad",
+          "type": "downgrade",
+          "description": "ARASAAC image depicts multiple concepts merged into one pictogram",
+          "examples": [
+            {
+              "word": "make",
+              "got": "make - do - write 1",
+              "reason": "three verbs in one image"
+            },
+            {
+              "word": "not",
+              "got": "not drinking water_1",
+              "reason": "negation shown only in specific context"
+            },
+            {
+              "word": "do",
+              "got": "to abandon",
+              "reason": "wrong concept entirely — matched secondary gloss?"
+            }
+          ],
+          "detection": "If ARASAAC filename contains ' - ' separators or 3+ words, likely a merged concept",
+          "severity": "medium"
+        },
+        {
+          "id": "arasaac-verb-prefix",
+          "type": "search_strategy",
+          "description": "ARASAAC verbs are named with \"to\" prefix — search \"to [verb]\" for better results",
+          "examples": [
+            {
+              "word": "walk",
+              "better_search": "to walk",
+              "got": "to walk 1, to walk 2"
+            },
+            {
+              "word": "want",
+              "better_search": "to want",
+              "got": "to want"
+            },
+            {
+              "word": "see",
+              "better_search": "to see",
+              "got": "to see"
+            },
+            {
+              "word": "receive",
+              "better_search": "to receive",
+              "got": "to receive 1"
+            },
+            {
+              "word": "do",
+              "better_search": "to make- to do",
+              "got": "to make- to do 1"
+            }
+          ],
+          "detection": "For RED (verb) POS: prepend \"to\" to search term when searching ARASAAC",
+          "severity": "medium"
+        }
+      ],
+      "search_method": "keyword_search_api",
+      "fallback_pattern": "Returns first result from keyword search — often wrong for abstract/compound terms"
+    },
+    "mulberry": {
+      "coverage": "65%",
+      "total": 4219,
+      "source": "OpenSymbols API (Mulberry library)",
+      "licence": "CC BY-SA 4.0",
+      "strengths": [
+        "SVG format — scales cleanly",
+        "Good for concrete everyday objects",
+        "Consistent art style"
+      ],
+      "weaknesses": [
+        "Smallest useful coverage of the pictogram sets",
+        "Catastrophic mismatches on abstract/verb concepts",
+        "Appears to use unrelated keyword expansion",
+        "Country flags leak into results via 'country The...' pattern"
+      ],
+      "bias_rules": [
+        {
+          "id": "mulberry-random-noun",
+          "type": "reject",
+          "description": "Mulberry returns completely unrelated nouns for abstract verbs and function words",
+          "examples": [
+            {
+              "word": "help",
+              "got": "skull",
+              "reason": "skull for help — dangerous inversion of meaning"
+            },
+            {
+              "word": "can",
+              "got": "Mercury",
+              "reason": "planet Mercury for modal verb 'can'"
+            },
+            {
+              "word": "not",
+              "got": "sheep",
+              "reason": "sheep for negation"
+            },
+            {
+              "word": "do",
+              "got": "english class",
+              "reason": "english class for verb 'do'"
+            },
+            {
+              "word": "remember",
+              "got": "squash , to",
+              "reason": "squash for remember"
+            },
+            {
+              "word": "like",
+              "got": "shower 1 , to",
+              "reason": "shower for like"
+            },
+            {
+              "word": "make",
+              "got": "grass",
+              "reason": "grass for make/manufacture"
+            },
+            {
+              "word": "equal",
+              "got": "dinner 3 people",
+              "reason": "dinner for equality"
+            },
+            {
+              "word": "want",
+              "got": "desiring man",
+              "reason": "close but oddly specific gendered image"
+            },
+            {
+              "word": "you",
+              "got": "smoke , to",
+              "reason": "smoking for 'you' pronoun"
+            }
+          ],
+          "detection": "For RED (verb) and WHITE (function) POS: always cross-check Mulberry result against BCI glosses. If zero gloss words appear in Mulberry filename, reject.",
+          "severity": "critical"
+        },
+        {
+          "id": "mulberry-country-leak",
+          "type": "reject",
+          "description": "Mulberry returns country flags/names via 'country The...' pattern",
+          "examples": [
+            {
+              "word": "the",
+              "got": "country The Azores",
+              "reason": "'the' matched 'The' in country name"
+            },
+            {
+              "word": "stand",
+              "got": "country The Czech Republic",
+              "reason": "'stand' somehow matched Czech Republic"
+            }
+          ],
+          "detection": "If Mulberry filename starts with 'country ', reject",
+          "severity": "high",
+          "blocklist_prefix": [
+            "country "
+          ]
+        },
+        {
+          "id": "mulberry-secondary-gloss-match",
+          "type": "downgrade",
+          "description": "Mulberry matched a secondary BCI gloss instead of the primary concept",
+          "examples": [
+            {
+              "word": "photograph",
+              "got": "science",
+              "reason": "no obvious connection"
+            },
+            {
+              "word": "book",
+              "got": "book shelf",
+              "reason": "matched compound containing 'book'"
+            },
+            {
+              "word": "put",
+              "got": "place mat",
+              "reason": "matched 'place' (3rd gloss) as compound"
+            },
+            {
+              "word": "we",
+              "got": "W",
+              "reason": "matched the letter W not the pronoun"
+            }
+          ],
+          "detection": "If Mulberry filename is a compound where only part matches a BCI gloss, downgrade",
+          "severity": "medium"
+        },
+        {
+          "id": "mulberry-action-scene",
+          "type": "downgrade",
+          "description": "Mulberry shows a complex scene instead of the core concept",
+          "examples": [
+            {
+              "word": "walk",
+              "got": "merry go round",
+              "reason": "matched 'go' gloss, showed fairground ride"
+            },
+            {
+              "word": "discussion",
+              "got": "communication aid chat 2",
+              "reason": "showed AAC device not the act of chatting"
+            },
+            {
+              "word": "video_recorder",
+              "got": "tape recorder",
+              "reason": "close but wrong device era"
+            }
+          ],
+          "detection": "If Mulberry filename contains 3+ words describing a scene, it's probably not the core concept",
+          "severity": "medium"
+        }
+      ],
+      "search_method": "opensymbols_keyword_search",
+      "fallback_pattern": "Returns seemingly random concrete noun when keyword has no match"
+    },
+    "sclera": {
+      "coverage": "71%",
+      "total": 4636,
+      "source": "OpenSymbols API (Sclera library)",
+      "licence": "CC BY-NC 2.0 BE",
+      "strengths": [
+        "High coverage (71%)",
+        "Clear simple pictogram style",
+        "Good for concrete nouns and actions with clear visual"
+      ],
+      "weaknesses": [
+        "Shows complex multi-step SCENES instead of single concepts",
+        "Verb results often show entire activity sequences",
+        "Abstract concepts get wildly wrong visual metaphors",
+        "Filename often describes a sentence not a word"
+      ],
+      "bias_rules": [
+        {
+          "id": "sclera-scene-not-concept",
+          "type": "downgrade",
+          "description": "Sclera shows a complex scene or activity sequence instead of a single concept",
+          "examples": [
+            {
+              "word": "walk",
+              "got": "go-cart go-kart crash person",
+              "reason": "entire crash scene for 'walk/go'"
+            },
+            {
+              "word": "close",
+              "got": "pants shut",
+              "reason": "showed shutting pants instead of generic 'close'"
+            },
+            {
+              "word": "barn",
+              "got": "put bicycle in shed",
+              "reason": "entire action sequence: person + bicycle + shed"
+            },
+            {
+              "word": "see",
+              "got": "watch group",
+              "reason": "showed a group watching something"
+            },
+            {
+              "word": "the",
+              "got": "put the dishes in the cupboard",
+              "reason": "entire sentence for a definite article"
+            },
+            {
+              "word": "like",
+              "got": "I do like you",
+              "reason": "full sentence with characters"
+            },
+            {
+              "word": "baby",
+              "got": "infant baptism",
+              "reason": "religious ceremony instead of infant"
+            },
+            {
+              "word": "house",
+              "got": "attention residents",
+              "reason": "showed a notice/sign, not a building"
+            },
+            {
+              "word": "help",
+              "got": "support stockings",
+              "reason": "medical garment for 'help/support'"
+            },
+            {
+              "word": "want",
+              "got": "playground behavior desired",
+              "reason": "behavioral poster for 'want/desire'"
+            }
+          ],
+          "detection": "If Sclera filename contains 4+ words, it's a scene description not a concept. Reject for single-word resolution.",
+          "severity": "high"
+        },
+        {
+          "id": "sclera-wrong-homonym",
+          "type": "reject",
+          "description": "Sclera matched a different meaning of a homonym word",
+          "examples": [
+            {
+              "word": "bank",
+              "got": "bank waiting",
+              "reason": "matched 'bank' as waiting room/queue"
+            },
+            {
+              "word": "wave",
+              "got": "ring wave",
+              "reason": "matched 'wave' as ring shape not ocean/hand"
+            },
+            {
+              "word": "boat",
+              "got": "rocket_1",
+              "reason": "rocket for boat/ship — possibly matched 'ship' as spaceship?"
+            },
+            {
+              "word": "can",
+              "got": "blue wheelchair symbol",
+              "reason": "matched 'able' as disability symbol"
+            },
+            {
+              "word": "not",
+              "got": "match box",
+              "reason": "matched 'not' to... matchbox?"
+            },
+            {
+              "word": "stand",
+              "got": "stand table",
+              "reason": "furniture not the action"
+            }
+          ],
+          "detection": "Cross-check Sclera result against primary BCI gloss. If result is a different semantic domain, reject.",
+          "severity": "high"
+        },
+        {
+          "id": "sclera-compound-activity",
+          "type": "downgrade",
+          "description": "Sclera shows the concept embedded in a specific activity rather than in isolation",
+          "examples": [
+            {
+              "word": "nuclear_fallout",
+              "got": "dust off",
+              "reason": "matched 'dust' gloss, showed dusting furniture"
+            },
+            {
+              "word": "remember",
+              "got": "think then do",
+              "reason": "two-step instruction, not the concept of remembering"
+            },
+            {
+              "word": "do",
+              "got": "act silly",
+              "reason": "matched 'act' gloss but as 'act silly' specifically"
+            },
+            {
+              "word": "siren_of_the_woods",
+              "got": "play in the woods",
+              "reason": "matched 'woods' substring"
+            }
+          ],
+          "detection": "If Sclera filename contains a verb + preposition/object that narrows the BCI concept, downgrade",
+          "severity": "medium"
+        }
+      ],
+      "search_method": "opensymbols_keyword_search",
+      "fallback_pattern": "Returns complex scene descriptions — treats search term as sentence context not isolated concept"
+    },
+    "noun_project": {
+      "coverage": "61%",
+      "total": 3985,
+      "source": "OpenSymbols API (Noun Project library)",
+      "licence": "Various (per icon)",
+      "strengths": [
+        "Clean icon-style SVGs",
+        "Good for concrete nouns and UI concepts",
+        "Consistent minimal art style"
+      ],
+      "weaknesses": [
+        "Icons only — no verb or action depictions",
+        "No pictographic context (just silhouettes)",
+        "Cannot represent abstract concepts visually",
+        "Lowest overlap with AAC vocabulary needs"
+      ],
+      "bias_rules": [
+        {
+          "id": "noun-project-no-verbs",
+          "type": "downgrade",
+          "description": "Noun Project is icon-focused — verb concepts get a generic icon that doesn't convey the action",
+          "examples": [
+            "All RED (verb) POS entries get a noun icon — e.g. 'run' might get a running shoe icon, not the action of running"
+          ],
+          "detection": "For BCI POS = RED, always prefer ARASAAC or Bliss over Noun Project",
+          "severity": "medium"
+        },
+        {
+          "id": "noun-project-no-function-words",
+          "type": "reject",
+          "description": "Noun Project cannot depict function words (the, not, what, who, at, for, but)",
+          "examples": [
+            "WHITE POS entries (function words) have no meaningful icon representation"
+          ],
+          "detection": "For BCI POS = WHITE or BLUE, reject Noun Project entirely",
+          "severity": "high"
+        }
+      ],
+      "search_method": "opensymbols_keyword_search",
+      "fallback_pattern": "Returns closest icon by keyword — reasonable for nouns, useless for verbs/function words"
+    },
+    "tawasol": {
+      "coverage": "37%",
+      "total": 2370,
+      "source": "OpenSymbols API (Tawasol library)",
+      "licence": "CC BY-SA 4.0",
+      "strengths": [
+        "Arabic-world cultural context (useful for Arabic-speaking AAC users)",
+        "Pictograms designed for AAC use specifically"
+      ],
+      "weaknesses": [
+        "Lowest coverage (37%) — huge vocabulary gaps",
+        "Western-biased BCI concepts may not map to Tawasol cultural concepts",
+        "Limited utility as primary set for English-language AAC"
+      ],
+      "bias_rules": [
+        {
+          "id": "tawasol-coverage-gap",
+          "type": "skip",
+          "description": "Tawasol only covers 37% of BCI concepts — always need a fallback set",
+          "detection": "If no Tawasol match exists, fall through to next set in priority. Never block on Tawasol absence.",
+          "severity": "low"
+        }
+      ],
+      "search_method": "opensymbols_keyword_search",
+      "fallback_pattern": "Sparse coverage — most concepts have no Tawasol match"
+    },
+    "twemoji": {
+      "coverage": "5%",
+      "total": 2770,
+      "source": "OpenSymbols API (Twitter Emoji / Twemoji library)",
+      "licence": "CC BY 4.0",
+      "strengths": [
+        "Universally recognisable emoji style",
+        "Excellent for emotions, food, animals, objects",
+        "Consistent art style across all symbols",
+        "Skin tone variants available",
+        "High imageability — designed for instant recognition"
+      ],
+      "weaknesses": [
+        "Limited to emoji vocabulary — no verbs, prepositions, or grammar concepts",
+        "Cultural context may not match AAC needs (e.g. emoji for sarcasm)",
+        "Small set (2,770) relative to ARASAAC or Noun Project",
+        "No action/scene depictions — single object only"
+      ],
+      "bias_rules": [
+        {
+          "id": "twemoji-no-verbs",
+          "type": "reject",
+          "description": "Twemoji has no verb or action representations — only objects and faces",
+          "detection": "For BCI POS = RED (verb), reject Twemoji entirely",
+          "severity": "high"
+        },
+        {
+          "id": "twemoji-no-function-words",
+          "type": "reject",
+          "description": "Twemoji cannot depict function words, pronouns, or grammar concepts",
+          "detection": "For BCI POS = WHITE, BLUE, reject Twemoji entirely",
+          "severity": "high"
+        }
+      ],
+      "search_method": "opensymbols_keyword_search",
+      "fallback_pattern": "Returns emoji-style pictogram if keyword matches — good for concrete nouns and emotions"
+    },
+    "icomoon": {
+      "coverage": "2%",
+      "total": 907,
+      "source": "OpenSymbols API (IcoMoon icon library)",
+      "licence": "mixed (per icon)",
+      "strengths": [
+        "Clean monochrome icon style",
+        "Good for UI concepts and simple objects"
+      ],
+      "weaknesses": [
+        "Very small set (907 symbols)",
+        "Icon-focused — no scene or action depictions",
+        "Monochrome only — limited visual distinction between concepts",
+        "Mixed licensing — some icons may not be freely usable"
+      ],
+      "bias_rules": [
+        {
+          "id": "icomoon-icon-only",
+          "type": "downgrade",
+          "description": "IcoMoon icons are UI-style — may not communicate AAC concepts clearly",
+          "detection": "Prefer ARASAAC or Mulberry pictograms over IcoMoon icons for AAC use",
+          "severity": "low"
+        }
+      ],
+      "search_method": "opensymbols_keyword_search",
+      "fallback_pattern": "Returns monochrome icon — reasonable for nouns, poor for everything else"
+    },
+    "icon_archive": {
+      "coverage": "1%",
+      "total": 600,
+      "source": "OpenSymbols API (IconArchive library)",
+      "licence": "mixed (per icon)",
+      "strengths": [
+        "Colourful detailed icons",
+        "Some high-quality pictographic representations"
+      ],
+      "weaknesses": [
+        "Very small set (600 symbols)",
+        "Inconsistent art styles — aggregated from multiple sources",
+        "Mixed licensing complicates reuse",
+        "Not designed for AAC — general-purpose icon collection"
+      ],
+      "bias_rules": [
+        {
+          "id": "icon-archive-mixed-style",
+          "type": "downgrade",
+          "description": "IconArchive aggregates multiple art styles — inconsistent visual language",
+          "detection": "Prefer sets with consistent style (ARASAAC, Mulberry, Twemoji) over IconArchive",
+          "severity": "low"
+        }
+      ],
+      "search_method": "opensymbols_keyword_search",
+      "fallback_pattern": "Returns detailed colourful icon — good quality but inconsistent style"
+    },
+    "language_craft": {
+      "coverage": "0.4%",
+      "total": 205,
+      "source": "OpenSymbols API (LanguageCraft library)",
+      "licence": "CC BY-NC-SA",
+      "strengths": [
+        "Designed specifically for AAC communication",
+        "Family-oriented pictograms"
+      ],
+      "weaknesses": [
+        "Tiny set (205 symbols) — massive vocabulary gaps",
+        "Non-commercial licence limits some uses",
+        "Very limited coverage — only useful as occasional fallback"
+      ],
+      "bias_rules": [
+        {
+          "id": "language-craft-coverage-gap",
+          "type": "skip",
+          "description": "LanguageCraft only covers 205 concepts — always need a fallback set",
+          "detection": "If no LanguageCraft match exists, fall through. Never block on absence.",
+          "severity": "low"
+        }
+      ],
+      "search_method": "opensymbols_keyword_search",
+      "fallback_pattern": "Sparse coverage — most concepts have no match"
+    },
+    "coughdrop": {
+      "coverage": "0.04%",
+      "total": 21,
+      "source": "OpenSymbols API (CoughDrop Symbols library)",
+      "licence": "CC BY 4.0",
+      "strengths": [
+        "Open licence (CC BY)",
+        "Designed for AAC boards"
+      ],
+      "weaknesses": [
+        "Extremely small set (21 symbols)",
+        "Essentially negligible for general use"
+      ],
+      "bias_rules": [],
+      "search_method": "opensymbols_keyword_search",
+      "fallback_pattern": "Almost never returns a match"
+    }
+  },
+  "global_rules": {
+    "resolution_priority": {
+      "description": "Per-set priority order for resolving a BCI concept to a symbol image",
+      "order": [
+        {
+          "set": "bliss",
+          "when": "data-symbol-set=bliss OR user prefers Bliss",
+          "trust": "absolute"
+        },
+        {
+          "set": "arasaac",
+          "when": "default pictogram set",
+          "trust": "high for YELLOW nouns, low for RED verbs and WHITE function words"
+        },
+        {
+          "set": "mulberry",
+          "when": "fallback if ARASAAC missing",
+          "trust": "high for YELLOW nouns, reject for RED/WHITE/BLUE"
+        },
+        {
+          "set": "sclera",
+          "when": "fallback if ARASAAC + Mulberry missing",
+          "trust": "medium for YELLOW nouns only — scene bias makes verbs unusable"
+        },
+        {
+          "set": "noun_project",
+          "when": "last resort for nouns",
+          "trust": "medium for YELLOW only — icon style, no verbs"
+        },
+        {
+          "set": "tawasol",
+          "when": "user selects Arabic-context set",
+          "trust": "medium where available, coverage gaps expected"
+        },
+        {
+          "set": "twemoji",
+          "when": "emoji-style preferred or concrete noun fallback",
+          "trust": "high for YELLOW nouns and GREEN adjectives, reject for RED/WHITE/BLUE"
+        },
+        {
+          "set": "icomoon",
+          "when": "icon fallback for nouns",
+          "trust": "low — UI icon style not AAC pictogram"
+        },
+        {
+          "set": "icon_archive",
+          "when": "last resort",
+          "trust": "low — mixed styles"
+        },
+        {
+          "set": "language_craft",
+          "when": "AAC-specific fallback",
+          "trust": "medium where available, tiny coverage"
+        },
+        {
+          "set": "coughdrop",
+          "when": "almost never",
+          "trust": "low — 21 symbols total"
+        }
+      ]
+    },
+    "pos_trust_matrix": {
+      "description": "Which sets to trust per POS colour. 'trust' = use as-is, 'check' = verify against glosses, 'reject' = never use",
+      "YELLOW": {
+        "bliss": "trust",
+        "arasaac": "trust",
+        "mulberry": "check",
+        "sclera": "check",
+        "noun_project": "trust",
+        "tawasol": "trust",
+        "twemoji": "trust",
+        "icomoon": "check",
+        "icon_archive": "check",
+        "language_craft": "check",
+        "coughdrop": "check"
+      },
+      "RED": {
+        "bliss": "trust",
+        "arasaac": "check",
+        "mulberry": "reject",
+        "sclera": "reject",
+        "noun_project": "reject",
+        "tawasol": "check",
+        "twemoji": "reject",
+        "icomoon": "reject",
+        "icon_archive": "reject",
+        "language_craft": "check",
+        "coughdrop": "check"
+      },
+      "GREEN": {
+        "bliss": "trust",
+        "arasaac": "trust",
+        "mulberry": "check",
+        "sclera": "check",
+        "noun_project": "reject",
+        "tawasol": "check",
+        "twemoji": "trust",
+        "icomoon": "reject",
+        "icon_archive": "check",
+        "language_craft": "check",
+        "coughdrop": "check"
+      },
+      "BLUE": {
+        "bliss": "trust",
+        "arasaac": "check",
+        "mulberry": "reject",
+        "sclera": "reject",
+        "noun_project": "reject",
+        "tawasol": "check",
+        "twemoji": "check",
+        "icomoon": "reject",
+        "icon_archive": "reject",
+        "language_craft": "check",
+        "coughdrop": "check"
+      },
+      "WHITE": {
+        "bliss": "trust",
+        "arasaac": "reject",
+        "mulberry": "reject",
+        "sclera": "reject",
+        "noun_project": "reject",
+        "tawasol": "check",
+        "twemoji": "reject",
+        "icomoon": "reject",
+        "icon_archive": "reject",
+        "language_craft": "reject",
+        "coughdrop": "reject"
+      }
+    },
+    "gloss_match_scoring": {
+      "description": "How to score a symbol set result against BCI glosses",
+      "rules": [
+        {
+          "match": "exact_primary_gloss",
+          "score": 100,
+          "action": "trust"
+        },
+        {
+          "match": "exact_secondary_gloss",
+          "score": 80,
+          "action": "trust"
+        },
+        {
+          "match": "image_filename_contains_primary_gloss",
+          "score": 60,
+          "action": "check"
+        },
+        {
+          "match": "image_filename_contains_any_gloss",
+          "score": 40,
+          "action": "check"
+        },
+        {
+          "match": "image_filename_shares_no_words_with_glosses",
+          "score": 0,
+          "action": "reject"
+        },
+        {
+          "match": "image_filename_on_blocklist",
+          "score": -100,
+          "action": "reject"
+        }
+      ]
+    },
+    "compound_word_rules": {
+      "description": "How to handle hyphenated Phosphor icon names (e.g. airplane-taxiing, align-center-horizontal)",
+      "rules": [
+        "Split on hyphens, try each segment against BCI glosses",
+        "If only one segment matches, the match is LOW confidence",
+        "If the compound contains 'logo', 'simple', 'fill', 'bold' — it's a UI variant, not an AAC concept",
+        "Compounds with 3+ segments are almost never AAC-resolvable"
+      ],
+      "ui_suffixes_to_strip": [
+        "logo",
+        "simple",
+        "bold",
+        "fill",
+        "duotone",
+        "regular",
+        "thin",
+        "light"
+      ],
+      "reject_if_contains": [
+        "logo"
+      ]
+    },
+    "homonym_resolution": {
+      "description": "BCI has 238 homonyms (same primary gloss, different concepts). Rules for disambiguation.",
+      "examples": [
+        {
+          "word": "bar",
+          "concepts": [
+            {
+              "bci": 12627,
+              "gloss": "bar,pub"
+            },
+            {
+              "bci": 22371,
+              "gloss": "bar,cake"
+            }
+          ]
+        },
+        {
+          "word": "bell",
+          "concepts": [
+            {
+              "bci": 12662,
+              "gloss": "bell"
+            },
+            {
+              "bci": 24802,
+              "gloss": "bell,chime_bar"
+            }
+          ]
+        },
+        {
+          "word": "boot",
+          "concepts": [
+            {
+              "bci": 12876,
+              "gloss": "boot"
+            },
+            {
+              "bci": 24613,
+              "gloss": "boot,trunk,roof_box,luggage_compartment"
+            }
+          ]
+        },
+        {
+          "word": "break",
+          "concepts": [
+            {
+              "bci": 12896,
+              "gloss": "break,crack,fracture-(to)"
+            },
+            {
+              "bci": 24852,
+              "gloss": "break,fracture,injury"
+            }
+          ]
+        },
+        {
+          "word": "block",
+          "concepts": [
+            {
+              "bci": 12860,
+              "gloss": "block,brick"
+            },
+            {
+              "bci": 23815,
+              "gloss": "block,city_block"
+            }
+          ]
+        }
+      ],
+      "rules": [
+        "Prefer the concept whose secondary glosses narrow the sense (e.g. 'bar,pub' vs 'bar,cake')",
+        "If context_overrides table has a rule for this word in this context, use it",
+        "If POS is known from sentence context, prefer the concept with matching POS",
+        "If no disambiguation possible, prefer the lower BCI index (older = more core concept)"
+      ]
+    },
+    "deprecated_concept_rules": {
+      "description": "156 BCI concepts are marked (OLD) — deprecated in the registry",
+      "rules": [
+        "If a concept has (OLD) suffix, check if a non-OLD concept exists with same primary gloss",
+        "Prefer non-OLD over OLD when both exist",
+        "If only OLD exists (e.g. remember-(to)_(OLD)), use it but flag for manual review"
+      ],
+      "count": 156
+    },
+    "numbered_variant_fallback": {
+      "description": "When visual verification fails, try searching with postfix number",
+      "rules": [
+        "ARASAAC uses numbered variants: walk, walk 1, walk 2, to walk 1, to walk 2",
+        "Tawasol uses gendered variants: walk (F), walk (M)",
+        "If first result fails visual check, try \"[term] 1\", \"[term] 2\" etc.",
+        "Numbered variants often show different depictions of same concept (e.g. baby vs adult walking)",
+        "Cannot distinguish variants from text alone — visual verification required"
+      ]
+    },
+    "url_name_mismatch": {
+      "description": "Detect when API result name and image URL filename disagree",
+      "rules": [
+        "Extract filename from image URL (e.g. mitten.png from .../mitten.png)",
+        "If filename shares no words with the result name, flag as url_name_mismatch",
+        "Example: result named \"want\" but URL is mitten.png — ARASAAC served wrong image",
+        "This catches API-level errors that text matching alone cannot detect"
+      ],
+      "severity": "critical"
+    },
+    "content_blocklist": {
+      "description": "Result names containing these phrases are rejected across ALL sets",
+      "phrases": [
+        "make love",
+        "intrauterine",
+        "contraceptive",
+        "suppository",
+        "enema",
+        "catheter",
+        "genital",
+        "erotic",
+        "intercourse",
+        "sex position"
+      ],
+      "severity": "critical"
+    }
+  }
+}

@@ -54,11 +54,64 @@ const STOP_WORDS = new Set([
 
 import wordsEn from '../../data/words-en.json';
 
-// Supplement for Green-tier words missing from OpenAAC dictionary.
-// "move" and "stop" have no entry in words-en.json as of v0.1.
+// Supplement for words missing from OpenAAC words-en.json (v0.1).
+// 42 of 85 BCI concepts have no entry — core verbs, adjectives, and common nouns.
+// UK/US spelling variants also mapped here (aeroplane→airplane, aubergine→eggplant).
 const LEMMA_SUPPLEMENT: Record<string, string> = {
+  // Core verbs (green/orange tier)
   moving: 'move', moved: 'move',
-  stopping: 'stop', stopped: 'stop',
+  stopping: 'stop', stopped: 'stop', stops: 'stop',
+  getting: 'get', got: 'get', gets: 'get', gotten: 'get',
+  helping: 'help', helped: 'help', helps: 'help',
+  making: 'make', made: 'make', makes: 'make',
+  putting: 'put', puts: 'put',
+  // 'close' is a homonym: verb (shut) vs adjective (near).
+  // Only map unambiguous verb forms. 'closed' could be either sense
+  // but in AAC context the verb (shut the door) is more common.
+  // 'closer'/'closest'/'closely' are adjective-only — not mapped here.
+  closing: 'close', closes: 'close',
+  remembering: 'remember', remembered: 'remember', remembers: 'remember',
+  // 'advanced' is ambiguous: verb (moved forward) vs adjective (advanced level).
+  advancing: 'advance', advances: 'advance',
+  // Core adjective
+  sadder: 'sad', saddest: 'sad', sadly: 'sad',
+  // Common nouns — plurals + UK/US variants
+  apples: 'apple',
+  aeroplanes: 'airplane', aeroplane: 'airplane',
+  ambulances: 'ambulance',
+  barns: 'barn',
+  bicycles: 'bicycle', bikes: 'bicycle',
+  birds: 'bird',
+  boots: 'boot',
+  bombs: 'bomb',
+  caterpillars: 'caterpillar',
+  containers: 'container',
+  biscuits: 'cookie', biscuit: 'cookie',
+  discussions: 'discussion',
+  aubergines: 'eggplant', aubergine: 'eggplant',
+  grains: 'grain',
+  houses: 'house',
+  mountains: 'mountain',
+  photographs: 'photograph', photos: 'photograph',
+  jumpers: 'sweater', jumper: 'sweater', pullover: 'sweater',
+  courgettes: 'courgette', zucchinis: 'courgette', zucchini: 'courgette',
+  plasters: 'sticking_plaster', bandaids: 'sticking_plaster', bandaid: 'sticking_plaster',
+  trousers: 'pants', trouser: 'pants',
+  torch: 'flashlight', torches: 'flashlight',
+  nappy: 'diaper', nappies: 'diaper',
+  pram: 'baby_carriage', pushchair: 'baby_carriage', stroller: 'baby_carriage',
+  petrol: 'gasoline',
+  // HOMONYM CAUTION: these UK mappings are ambiguous.
+  // 'flat' also means level/even/tyre. 'jumper' also means someone who jumps.
+  // Only safe in UK English AAC context where these are the dominant sense.
+  // If context disambiguation is added later, move these to context_overrides.
+  lorry: 'truck', lorries: 'truck',
+  lift: 'elevator', lifts: 'elevator',
+  rubbish: 'waste', trash: 'waste', garbage: 'waste',
+  chips: 'french_fries',
+  postbox: 'mailbox', letterbox: 'mailbox',
+  pavement: 'sidewalk',
+  flat: 'apartment',
 };
 
 const LEMMA_MAP: Map<string, string> = (() => {
