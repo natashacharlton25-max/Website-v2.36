@@ -1,20 +1,20 @@
 /* ══════════════════════════════════════════════════════════════
    ChoiceCard — selectable image card
 
-   Card atom handles chrome. ChoiceCard adds:
-   image area, footer (label + checkbox), active state.
+   Card atom handles chrome. FormField (bare) handles input.
+   ChoiceCard adds: image/icon area, footer layout, active state.
 
    Internal tokens (--_choice-*):
      --_choice-active-border
    ══════════════════════════════════════════════════════════════ */
 
 .choice-card {
-  --_choice-active-border: var(--choice-active-border, var(--brand-c-primary));
+  --_choice-active-border: var(--choice-active-border, var(--brand-c-secondary));
 
   cursor: pointer;
   min-width: 0;
   width: 100%;
-  outline: 2px solid transparent;
+  outline: 2px solid var(--brand-c-primary);
   outline-offset: -2px;
   transition: outline-color var(--hover-duration-fast);
 }
@@ -22,7 +22,6 @@
 .choice-card.active {
   outline-color: var(--_choice-active-border);
 }
-
 
 /* ── Image ── */
 .choice-card__image {
@@ -41,7 +40,7 @@
   padding: 0;
 }
 
-/* ── Icon — centred, no image ── */
+/* ── Icon — centred ── */
 .choice-card__icon {
   display: flex;
   align-items: center;
@@ -50,7 +49,7 @@
   color: var(--brand-c-primary);
 }
 
-/* ── Footer — centred ── */
+/* ── Footer — FormField bare ── */
 .choice-card__footer {
   padding-top: var(--space-sm);
   display: flex;
@@ -59,33 +58,13 @@
   text-align: center;
 }
 
-.choice-card__footer .form-field__checkbox-wrap,
-.choice-card__footer .form-field__radio-wrap,
-.choice-card__footer .form-field__toggle-wrap {
-  justify-content: center;
-  gap: var(--space-sm);
-}
-
-/* ── Suppress FormField's own border — Card border is the feedback ── */
-.choice-card .form-field {
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  margin: 0;
-  background: transparent;
+.choice-card__footer .form-field__label-text {
+  font-weight: var(--font-bold);
 }
 
 /* ── Description — centred ── */
 .choice-card__desc {
   text-align: center;
-}
-
-.choice-card__footer .form-field__label-text {
-  font-weight: var(--font-bold);
-}
-
-/* ── Description ── */
-.choice-card__desc {
   padding-top: var(--space-xs);
 }
 
@@ -101,5 +80,9 @@
    ══════════════════════════════════════════════════════════════ */
 
 [data-render="textonly"] .choice-card__image {
+  display: none;
+}
+
+[data-render="textonly"] .choice-card__icon {
   display: none;
 }

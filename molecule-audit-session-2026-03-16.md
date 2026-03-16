@@ -12,7 +12,7 @@ All 12 atoms are pass 2 clean. Hover gate system implemented today.
 | 1 | AssetCard | **DELETED** | Not a molecule — just atoms composed together. Page-level composition with RainbowBorderCard wrapper. | |
 | 2 | AuthorCard | **PASS** | Folder structure, scoped style extracted, raw HTML→atoms (Image, Heading, Text), photo size via `--img-width-*` tokens, collection fields (longBio, credentials, specialties), `ImageMetadata` support | Offset photo pattern → future Card atom `mediaPosition` prop |
 | 3 | BlogCard | **PASS** | Folder structure, atoms used, token chain (7 tokens), hover gate, render modes, glass badge on image, fill tags, author icon+bold. Dark/HC rules in zone files. | Image atom figure needs border-radius:0 inside cards (global pattern) |
-| 4 | ChoiceCard | **PASS** | Folder structure, Card atom wrapper, FormField atom for checkbox/radio/toggle, Image atom, inputType prop, description prop, active border state, tokens, hover gate, render modes | Inner curve mask as global token (deferred) |
+| 4 | ChoiceCard | **PASS** | Folder structure, Card + FormField(bare) + Image/Icon atoms, inputType prop (checkbox/radio/toggle/text), description, active outline state, dark/HC zone rules | Merge into FormField card-select (add icon, description, toggle). Then delete ChoiceCard. |
 | 5 | CompactToolCard | pending | | |
 | 6 | FlipCard | pending | | |
 | 7 | GlowCard | pending | | |
@@ -76,3 +76,5 @@ All 12 atoms are pass 2 clean. Hover gate system implemented today.
 | 6 | Authors collection: consider JSON format instead of markdown (no body content needed) | Content architecture | 2026-03-16 |
 | 7 | AuthorCard: photo should use Card atom media slot once `mediaPosition` exists — currently separate div | Card atom `mediaPosition` | 2026-03-16 |
 | 8 | Author page: full dedicated page with large photo, long bio, credentials, specialties, signature, social links. Uses same content collection. AuthorCard links to it via `href` prop. | New page build | 2026-03-16 |
+| 9 | FormField card-select: merge ChoiceCard features (icon mode, description text, toggle variant, inputType prop). Then delete ChoiceCard molecule. | FormField atom enhancement | 2026-03-16 |
+| 10 | FormField: `fieldStyle="bare"` added — strip wrapper chrome for embedding. | Done (atom change) | 2026-03-16 |

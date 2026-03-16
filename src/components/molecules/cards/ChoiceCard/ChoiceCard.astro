@@ -2,8 +2,8 @@
 /**
  * ChoiceCard — Selectable image card
  *
- * Card + Image + Text + FormField checkbox.
- * Click anywhere to toggle. Simple, clean.
+ * Card + Image/Icon + FormField (bare). Click anywhere to toggle.
+ * Supports checkbox, radio, toggle, text input types.
  *
  * Styles: ChoiceCard.css | ChoiceCard.responsive.css
  */
@@ -19,7 +19,7 @@ interface Props {
   icon?: string;
   label: string;
   description?: string;
-  inputType?: 'checkbox' | 'radio' | 'toggle';
+  inputType?: 'checkbox' | 'radio' | 'toggle' | 'text';
   name?: string;
   value?: string;
   checked?: boolean;
@@ -40,6 +40,8 @@ const {
   cardVariant = 'default',
   class: className = '',
 } = Astro.props;
+
+const fieldId = `${name}-${(value || label).replace(/\s+/g, '-').toLowerCase()}`;
 ---
 
 <Card
@@ -63,7 +65,15 @@ const {
   )}
 
   <div class="choice-card__footer">
-    <FormField type={inputType} id={`${name}-${value || label}`} label={label} name={name} value={value || label} checked={checked} class="choice-card__field" style="--_field-border: transparent; --_field-brand: var(--brand-c-secondary);" />
+    <FormField
+      id={fieldId}
+      type={inputType === 'toggle' ? 'toggle' : inputType}
+      fieldStyle="bare"
+      label={label}
+      name={name}
+      value={value || label}
+      checked={checked}
+    />
   </div>
 
   {description && (
@@ -76,31 +86,34 @@ const {
     document.querySelectorAll<HTMLElement>('[data-choice-card]:not([data-choice-bound])').forEach(card => {
       card.setAttribute('data-choice-bound', '1');
 
-      const input = card.querySelector<HTMLInputElement>('input[type="checkbox"], input[type="radio"]');
+      const input = card.querySelector<HTMLInputElement>('input');
       if (!input) return;
 
-      function syncAll(): void {
+      function syncActive(): void {
         if (input!.type === 'radio') {
           document.querySelectorAll<HTMLElement>('[data-choice-card]').forEach(c => {
             const other = c.querySelector<HTMLInputElement>(`input[name="${input!.name}"]`);
             if (other) c.classList.toggle('active', other.checked);
           });
-        } else {
+        } else if (input!.type === 'checkbox') {
           card.classList.toggle('active', input!.checked);
         }
       }
 
-      // Sync on input change (native label click, keyboard)
-      input.addEventListener('change', syncAll);
+      // Native change — sync active class
+      input.addEventListener('change', syncActive);
 
-      // Card click — toggle input then sync
+      // Card click outside the form field — toggle manually
       card.addEventListener('click', (e) => {
-        const target = e.target as HTMLElement;
-        // Skip if clicking inside FormField (it handles its own toggle)
-        if (target.closest('.form-field')) return;
+        if ((e.target as HTMLElement).closest('.form-field')) return;
+
+        if (input.type === 'text') {
+          input.focus();
+          return;
+        }
 
         input.checked = input.type === 'radio' ? true : !input.checked;
-        syncAll();
+        input.dispatchEvent(new Event('change', { bubbles: true }));
       });
     });
   }
