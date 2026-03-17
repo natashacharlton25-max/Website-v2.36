@@ -25,7 +25,6 @@
   box-shadow: var(--_accordion-shadow);
   overflow: hidden;
   cursor: pointer;
-  transition: flex var(--hover-duration) ease-out;
 }
 
 /* ── Title (summary) ── */
@@ -68,20 +67,44 @@
   color: var(--_accordion-active-color);
 }
 
-/* ── Content — height animates via JS ── */
+/* ── Content ── */
 .accordion__content {
-  padding: 0 var(--space-lg);
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transition: max-height var(--hover-duration-slow) ease-out,
-              opacity var(--hover-duration) ease-out,
-              padding var(--hover-duration-slow) ease-out;
+  padding: 0 var(--space-lg) var(--space-lg);
 }
 
-.accordion__panel[open] .accordion__content {
-  opacity: 1;
-  padding-bottom: var(--space-lg);
+/* ── Desktop — horizontal reveal to the right ── */
+@media (min-width: 481px) {
+  .accordion {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0;
+  }
+
+  /* Panels stack in left column */
+  .accordion__panel {
+    grid-column: 1;
+    border-radius: var(--_accordion-radius) 0 0 var(--_accordion-radius);
+  }
+
+  /* Content reveals in right column */
+  .accordion__content {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    padding: var(--space-xl);
+    background: var(--_accordion-bg);
+    border: 1px solid var(--_accordion-border);
+    border-left: none;
+    border-radius: 0 var(--_accordion-radius) var(--_accordion-radius) 0;
+    box-shadow: var(--_accordion-shadow);
+    display: none;
+  }
+
+  .accordion__panel[open] .accordion__content {
+    display: block;
+  }
 }
 
 /* ── Hover feedback (gated) ── */
@@ -101,11 +124,7 @@
 
 /* ── Render modes ── */
 
-/* Reduced — no animation on content reveal */
-[data-render="reduced"] .accordion__content {
-  animation: none;
-}
-
+/* Reduced — no chevron animation */
 [data-render="reduced"] .accordion__chevron {
   transition: none;
 }
@@ -119,4 +138,8 @@
 
 [data-render="textonly"] .accordion__panel[open] .accordion__title .heading {
   color: var(--text-body);
+}
+
+[data-render="textonly"] .accordion__content {
+  background: transparent;
 }

@@ -214,6 +214,13 @@ These were logged as DEFERRED during individual audits:
   - Learning card variant (figcaption style) for e-learning: front = image + expandable caption, back = full explanation
   - Both FormField card-select (multi-choice) and FlipCard (reveal) can be used in same QuizSection
 
+### Accordion atom (deferred from molecule audit 2026-03-17)
+- **Status**: Built, tested, archived to `_reference/Accordion/`
+- **Issue**: Vertical expand pushes page content — visual accessibility problem for eye gaze/switch users
+- **Needs**: Horizontal reveal (titles left, content right) for desktop. Vertical expand fine for mobile.
+- **Files**: `_reference/Accordion/` has full atom (Accordion.astro, .css, .responsive.css, .schema.json, index.ts)
+- **Use cases**: FAQ sections, FlipCard textonly, settings panels, course modules, Your View panel sections
+
 ### Grid organism (deferred from molecule audit 2026-03-16)
 - [ ] Responsive page-edge margins — container padding doesn't reduce on small screens, content clips at edges
 - [ ] `min(100%, var(--grid-min))` fix already applied to auto-fit base (2026-03-16) — verify in all grid contexts

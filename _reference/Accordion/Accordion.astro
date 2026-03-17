@@ -1,0 +1,80 @@
+---
+/**
+ * Accordion — expandable panel group
+ *
+ * Desktop: horizontal layout — titles left, content right.
+ * Mobile: vertical — standard details/summary expand.
+ * Accordion mode: one open at a time. Independent: multiple open.
+ * Uses native <details>/<summary> for zero-JS fallback + AT support.
+ *
+ * Styles: Accordion.css | Accordion.responsive.css
+ */
+import Heading from '../Heading/Heading.astro';
+import Text from '../Text/Text.astro';
+import Icon from '../Icon/Icon.astro';
+
+interface AccordionItem {
+  title: string;
+  content: string;
+  icon?: string;
+  open?: boolean;
+}
+
+interface Props {
+  items: AccordionItem[];
+  mode?: 'accordion' | 'independent';
+  class?: string;
+}
+
+const {
+  items,
+  mode = 'accordion',
+  class: className,
+} = Astro.props;
+---
+
+<div
+  class:list={['accordion', `accordion--${mode}`, className]}
+  data-accordion-mode={mode}
+>
+  {items.map((item) => (
+    <details
+      class="accordion__panel"
+      open={item.open}
+    >
+      <summary class="accordion__title">
+        {item.icon && (
+          <Icon name={item.icon} size={20} class="accordion__icon" />
+        )}
+        <Heading level={3} size="h5" flush class="accordion__heading">{item.title}</Heading>
+        <Icon name="caret-down" weight="regular" size={16} class="accordion__chevron" aria-hidden="true" />
+      </summary>
+      <div class="accordion__content">
+        <Text size="sm" color="muted">{item.content}</Text>
+      </div>
+    </details>
+  ))}
+</div>
+
+<script>
+  function initAccordions(): void {
+    document.querySelectorAll<HTMLElement>('[data-accordion-mode="accordion"]').forEach((group) => {
+      const panels = group.querySelectorAll<HTMLDetailsElement>('.accordion__panel');
+
+      panels.forEach((panel) => {
+        panel.addEventListener('toggle', () => {
+          if (panel.open) {
+            panels.forEach((other) => {
+              if (other !== panel && other.open) {
+                other.open = false;
+              }
+            });
+          }
+        });
+      });
+    });
+  }
+
+  initAccordions();
+  document.addEventListener('astro:page-load', initAccordions);
+</script>
