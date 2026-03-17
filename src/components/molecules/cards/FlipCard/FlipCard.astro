@@ -1,0 +1,129 @@
+---
+/**
+ * FlipCard — 3D perspective flip card
+ *
+ * Front face: image/colour bg + title + subtitle + arrow indicator.
+ * Back face: title + description + CTA button.
+ * Trigger: hover (desktop, tap fallback on mobile), click (tap/click only).
+ * Reduced render: tooltip shows back content on hover/focus.
+ * Textonly: both faces stacked, no animation.
+ *
+ * Styles: FlipCard.css | FlipCard.responsive.css
+ */
+import type { ImageMetadata } from 'astro';
+import Card from '../../../atoms/Card/Card.astro';
+import Heading from '../../../atoms/Heading/Heading.astro';
+import Text from '../../../atoms/Text/Text.astro';
+import Button from '../../../atoms/Button/Button.astro';
+import Icon from '../../../atoms/Icon/Icon.astro';
+import Image from '../../../atoms/Image/Image.astro';
+import Tooltip from '../../../atoms/Tooltip/Tooltip.astro';
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  description: string;
+  href?: string;
+  linkLabel?: string;
+  frontImage?: string | ImageMetadata;
+  backImage?: string | ImageMetadata;
+  frontIcon?: string;
+  trigger?: 'hover' | 'click';
+  class?: string;
+}
+
+const {
+  title,
+  subtitle,
+  description,
+  href,
+  linkLabel = 'Learn More',
+  frontImage,
+  backImage,
+  frontIcon,
+  trigger = 'hover',
+  class: className,
+} = Astro.props;
+---
+
+<div
+  class:list={[
+    'flip-card',
+    `flip-card--trigger-${trigger}`,
+    className,
+  ]}
+  tabindex="0"
+  data-trigger={trigger}
+>
+  <!-- Full/gentle/instant render: 3D flip -->
+  <div class="flip-card__box">
+    <!-- Front face -->
+    <div class="flip-card__face flip-card__front">
+      {frontImage && (
+        <Image src={frontImage} alt="" role="decorative" class="flip-card__bg-image" />
+      )}
+      <Card variant={frontImage ? 'glass' : 'transparent'} padding="lg" radius="md" class="flip-card__inner">
+        {frontIcon && (
+          <div class="flip-card__front-icon" aria-hidden="true">
+            <Icon name={frontIcon} weight="duotone" size={64} />
+          </div>
+        )}
+        <Heading level={3} size="h4" color="inherit" flush>{title}</Heading>
+        {subtitle && (
+          <Text size="sm" color="inherit" class="flip-card__subtitle">{subtitle}</Text>
+        )}
+      </Card>
+    </div>
+
+    <!-- Back face -->
+    <div class="flip-card__face flip-card__back">
+      {(backImage || frontImage) && (
+        <Image src={backImage || frontImage!} alt="" role="decorative" class="flip-card__bg-image" />
+      )}
+      <Card variant={(backImage || frontImage) ? 'glass' : 'transparent'} padding="lg" radius="md" class="flip-card__inner">
+        <Heading level={3} size="h4" color="inherit" flush>{title}</Heading>
+        <Text size="sm" color="inherit" class="flip-card__desc">{description}</Text>
+        {href && (
+          <Button href={href} variant={(backImage || frontImage) ? 'glass' : 'primary'} size="sm" class="flip-card__cta">{linkLabel}</Button>
+        )}
+      </Card>
+    </div>
+  </div>
+
+  <!-- Reduced render: tooltip with back content -->
+  <div class="flip-card__reduced-tooltip" aria-hidden="true">
+    <Tooltip purpose="info">
+      <Fragment slot="content">
+        <Text size="sm" flush>{description}</Text>
+        {href && (
+          <Button href={href} variant="outline" size="sm" class="flip-card__cta">{linkLabel}</Button>
+        )}
+      </Fragment>
+    </Tooltip>
+  </div>
+</div>
+
+<script>
+  function initFlipCards(): void {
+    document.querySelectorAll<HTMLElement>('.flip-card').forEach((card) => {
+      // All cards get click/tap toggle
+      card.addEventListener('click', (e: Event) => {
+        // Don't flip if clicking the CTA button
+        if ((e.target as HTMLElement).closest('.flip-card__cta')) return;
+        card.classList.toggle('flip-card--flipped');
+      });
+
+      // Keyboard support
+      card.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          if ((e.target as HTMLElement).closest('.flip-card__cta')) return;
+          e.preventDefault();
+          card.classList.toggle('flip-card--flipped');
+        }
+      });
+    });
+  }
+
+  initFlipCards();
+  document.addEventListener('astro:page-load', initFlipCards);
+</script>

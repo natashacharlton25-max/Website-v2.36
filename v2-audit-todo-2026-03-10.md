@@ -192,6 +192,28 @@ These were logged as DEFERRED during individual audits:
 - [ ] Touch timeout: match actual spin duration (360° / step × 16ms) instead of fixed 2000ms
 - [ ] Consider `trigger` prop: `'hover'` (default), `'scroll'`, `'tap'` — controls what starts the animation
 
+### Quiz/Assessment sections (deferred from molecule audit 2026-03-17)
+- **Decision**: CardSelect molecule NOT needed. FormField `type="card-select"` stays as-is.
+- Quiz logic belongs in **section organisms**, not in FormField or a molecule wrapper.
+- FormField stays dumb (renders cards with inputs). Sections add intelligence.
+- Planned organisms:
+  - [ ] `QuizSection` — single quiz question. FormField card-select + reveal button + confetti (gated) + correct/wrong/missed states + explanation text
+  - [ ] `AssessmentSection` — multi-question quiz. Multiple FormFields + scoring + progress bar + results summary
+  - [ ] `MatchingSection` — drag-and-drop matching. FormField pairs
+  - [ ] `SurveySection` — data collection. Mixed FormField types
+- Quiz card states: unanswered (default), correct (green border + tick + confetti), wrong (red border + X + "try again"), missed (correct but not selected)
+- Confetti uses rainbow tokens, gated by hover mode (none = no confetti) and render mode (reduced/assistive/textonly = no confetti)
+- Cognitive level integration: green = big pictograms only, yellow = labels + check indicators, orange = full descriptions + explanations
+- AAC symbols work as card images via existing `symbol` option field → aacResolver pipeline
+- **FlipCard as quiz reveal** (added 2026-03-17):
+  - FlipCard molecule works inside QuizSection for answer reveals
+  - Front = question/choice, back = answer + explanation + confetti on correct
+  - `trigger="click"` for quiz mode — user taps to reveal
+  - Glass Card over image for visual questions, plain for text questions
+  - Confetti JS fires on correct answer flip (gated by hover/render mode)
+  - Learning card variant (figcaption style) for e-learning: front = image + expandable caption, back = full explanation
+  - Both FormField card-select (multi-choice) and FlipCard (reveal) can be used in same QuizSection
+
 ### Grid organism (deferred from molecule audit 2026-03-16)
 - [ ] Responsive page-edge margins — container padding doesn't reduce on small screens, content clips at edges
 - [ ] `min(100%, var(--grid-min))` fix already applied to auto-fit base (2026-03-16) — verify in all grid contexts
