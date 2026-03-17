@@ -214,6 +214,20 @@ These were logged as DEFERRED during individual audits:
   - Learning card variant (figcaption style) for e-learning: front = image + expandable caption, back = full explanation
   - Both FormField card-select (multi-choice) and FlipCard (reveal) can be used in same QuizSection
 
+### GlowCard → GlowSection effect (moved 2026-03-17)
+- **Moved**: `molecules/cards/GlowCard.astro` → `effects/GlowSection/GlowEffect.astro`
+- GSAP cursor-tracking glow — decorative effect, not a card molecule
+- Audit during effects pass (with PhysicsOverlay, ScrollColorBackground, etc)
+
+### Button glow variant (deferred from molecule audit 2026-03-17)
+- **Reference**: `_reference/GlowButton/glow-button-reference.html`
+- Rainbow gradient border + blur glow on hover, all CSS
+- Uses mask-composite for border-only gradient + ::after blur
+- Implement as `effect="glow"` on Button atom using rainbow tokens
+- GlowTokens.css is old version — delete once Button glow rebuilt
+- Animation `glowloop` keyframe needs gating: data-hover="none" kills it, data-render="reduced" kills it
+- CVD-safe via rainbow tokens, dark mode flips tints automatically
+
 ### Accordion atom (deferred from molecule audit 2026-03-17)
 - **Status**: Built, tested, archived to `_reference/Accordion/`
 - **Issue**: Vertical expand pushes page content — visual accessibility problem for eye gaze/switch users

@@ -326,6 +326,99 @@
     inset 2px 2px 6px color-mix(in oklch, var(--btn-shadow-inset, var(--color-Black)) 15%, transparent);
 }
 
+/* ── Rainbow Glow — gradient border + blur on hover ── */
+.btn--rainbow-glow {
+  position: relative;
+  z-index: 1;
+  border: 2px solid var(--brand-c-neutral-light);
+  transition: border-color var(--hover-duration) ease-out;
+}
+
+.btn--rainbow-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(90deg,
+    var(--rainbow-1),
+    var(--rainbow-4),
+    var(--rainbow-7),
+    var(--rainbow-3),
+    var(--rainbow-5),
+    var(--rainbow-2),
+    var(--rainbow-1));
+  background-size: 200% 200%;
+  opacity: 0;
+  transition: opacity var(--hover-duration) ease-out;
+  animation: btn-glowloop 8s linear infinite;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: destination-out;
+  z-index: -1;
+}
+
+.btn--rainbow-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg,
+    var(--rainbow-1),
+    var(--rainbow-4),
+    var(--rainbow-7),
+    var(--rainbow-3),
+    var(--rainbow-5),
+    var(--rainbow-2),
+    var(--rainbow-1));
+  background-size: 200% 200%;
+  filter: blur(12px);
+  opacity: 0;
+  z-index: -2;
+  transition: opacity var(--hover-duration) ease-out;
+  animation: btn-glowloop 8s linear infinite;
+}
+
+.btn--rainbow-glow:hover {
+  border-color: transparent;
+}
+
+.btn--rainbow-glow:hover::before {
+  opacity: 0.85;
+}
+
+.btn--rainbow-glow:hover::after {
+  opacity: 0.45;
+}
+
+@keyframes btn-glowloop {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Rainbow glow hover gate */
+[data-hover="none"] .btn--rainbow-glow:hover {
+  border-color: var(--brand-c-neutral-light);
+}
+
+[data-hover="none"] .btn--rainbow-glow:hover::before,
+[data-hover="none"] .btn--rainbow-glow:hover::after {
+  opacity: 0;
+}
+
+[data-hover="none"] .btn--rainbow-glow::before,
+[data-hover="none"] .btn--rainbow-glow::after {
+  animation: none;
+}
+
+/* Reduced render — no animation */
+[data-render="reduced"] .btn--rainbow-glow::before,
+[data-render="reduced"] .btn--rainbow-glow::after {
+  animation: none;
+}
+
 .btn--neumorphic {
   box-shadow: var(--btn-shadow, var(--shadow-btn));
 }

@@ -1,0 +1,112 @@
+<!-- Reference: Animated glow button with rainbow gradient border + blur
+     TODO: Implement as Button atom glow variant using rainbow tokens
+     Source: original design concept
+
+     Key techniques:
+     - ::before = gradient border via mask-composite (border ring only)
+     - ::after = same gradient with blur(12px) (diffuse glow behind)
+     - Both animate background-position for colour loop
+     - Opacity 0 → hover reveals both layers
+     - mask: content-box exclude trick for border-only gradient
+
+     Token mapping:
+     - Hardcoded hex colours → var(--rainbow-1) through var(--rainbow-7)
+     - background-size: 200% → animation token
+     - blur(12px) → var(--glow-spread) or similar
+     - opacity values → hover gate tokens
+     - 8s animation → var(--transition-extralong) or dedicated token
+     - border-radius: 40px → var(--radius-full) for pill shape
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Animated Glow Button</title>
+  <style>
+    .button-wrapper {
+      position: relative;
+      border-radius: 40px;
+      padding: 2px;
+    }
+
+    .button-wrapper::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 40px;
+      padding: 2px;
+      background: linear-gradient(90deg,
+        #0d3fe4, #ff52e2, #fd4845, #f7d35b, #50f77d, #25e1e4, #0d3fe4);
+      background-size: 200% 200%;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      animation: glowloop 8s linear infinite;
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      -webkit-mask-composite: destination-out;
+      z-index: -1;
+    }
+
+    .button-wrapper:hover::before {
+      opacity: 0.85;
+    }
+
+    .button-wrapper::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 40px;
+      background: linear-gradient(90deg,
+        #0d3fe4, #ff52e2, #fd4845, #f7d35b, #50f77d, #25e1e4, #0d3fe4);
+      background-size: 200% 200%;
+      filter: blur(12px);
+      opacity: 0;
+      z-index: -2;
+      transition: opacity 0.4s ease;
+      animation: glowloop 8s linear infinite;
+    }
+
+    .button-wrapper:hover::after {
+      opacity: 0.45;
+    }
+
+    @keyframes glowloop {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    a.button {
+      all: unset;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 300;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #6b717e;
+      background-color: #fffcf2;
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      border-radius: 40px;
+      padding: 16px 28px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 8px rgba(128, 128, 128, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    a.button:hover {
+      border-color: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div class="button-wrapper">
+    <a href="#" class="button">Find out more about us</a>
+  </div>
+</body>
+</html>
