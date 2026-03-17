@@ -1,71 +1,26 @@
 ---
 /**
- * CardReveal — two-column card pairs with click-to-reveal
+ * CardReveal — two-column reveal layout (chrome only)
  *
- * Chrome + content — Card atom wraps each side.
- * Items prop defines front/back content pairs.
- * Astro doesn't support dynamic named slots, so items are props.
- * Pipeline maps FlipCard content props to items array.
+ * Default slot. Section organisms put Card atoms inside with:
+ *   - class="card-reveal__front" data-reveal-index={i}
+ *   - class="card-reveal__back" data-reveal-panel={i}
+ *
+ * CardReveal provides: grid layout, reveal JS, hover gate, keyboard.
+ * CardReveal does NOT import Card, Heading, Text, or Button.
  *
  * Styles: CardReveal.css | CardReveal.responsive.css
  */
-import Card from '../../../atoms/Card/Card.astro';
-import Heading from '../../../atoms/Heading/Heading.astro';
-import Text from '../../../atoms/Text/Text.astro';
-import Button from '../../../atoms/Button/Button.astro';
-
-interface CardRevealItem {
-  title: string;
-  subtitle?: string;
-  detail: string;
-  href?: string;
-  linkLabel?: string;
-}
 
 interface Props {
-  items: CardRevealItem[];
   class?: string;
 }
 
-const {
-  items,
-  class: className,
-} = Astro.props;
+const { class: className } = Astro.props;
 ---
 
 <div class:list={['card-reveal', className]} data-card-reveal>
-  {items.map((item, i) => (
-    <div class="card-reveal__row">
-      <Card
-        variant="outline"
-        padding="lg"
-        radius="lg"
-        class:list={['card-reveal__front', i === 0 && 'card-reveal__front--active']}
-        data-reveal-index={String(i)}
-      >
-        <Heading level={3} size="h5" flush>{item.title}</Heading>
-        {item.subtitle && (
-          <Text size="sm" color="muted">{item.subtitle}</Text>
-        )}
-        <Button variant="outline" size="sm" class="card-reveal__reveal-btn">Reveal More</Button>
-      </Card>
-      <Card
-        variant="outline"
-        padding="lg"
-        radius="lg"
-        class:list={['card-reveal__back', i === 0 && 'card-reveal__back--active']}
-        data-reveal-panel={String(i)}
-      >
-        <div class="card-reveal__back-inner">
-          <Heading level={3} size="h5" flush>{item.title}</Heading>
-          <Text size="sm" color="muted">{item.detail}</Text>
-          {item.href && (
-            <Button href={item.href} variant="outline" size="sm">{item.linkLabel || 'Learn More'}</Button>
-          )}
-        </div>
-      </Card>
-    </div>
-  ))}
+  <slot />
 </div>
 
 <script>
