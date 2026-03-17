@@ -203,22 +203,60 @@ const iconRight = iconPosition === 'right' && hasIcon;
     </div>
   </div>
 ) : isLink ? (
-  <a
-    href={href}
-    target={target}
-    download={download}
-    class:list={classes}
-    id={id}
-    aria-disabled={disabled}
-    aria-label={ariaLabel}
-    data-semantic-role={semanticRole}
-    {...dataAttrs}
-    {...confettiAttrs}
-  >
-    {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
-    <Text as="span" class="btn__label" flush><slot /></Text>
-    {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
-  </a>
+  variant === 'rainbow-glow' ? (
+    <div class="btn-rainbow-glow-wrap">
+      <a
+        href={href}
+        target={target}
+        download={download}
+        class:list={classes}
+        id={id}
+        aria-disabled={disabled}
+        aria-label={ariaLabel}
+        data-semantic-role={semanticRole}
+        {...dataAttrs}
+        {...confettiAttrs}
+      >
+        {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+        <Text as="span" class="btn__label" flush><slot /></Text>
+        {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      </a>
+    </div>
+  ) : (
+    <a
+      href={href}
+      target={target}
+      download={download}
+      class:list={classes}
+      id={id}
+      aria-disabled={disabled}
+      aria-label={ariaLabel}
+      data-semantic-role={semanticRole}
+      {...dataAttrs}
+      {...confettiAttrs}
+    >
+      {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      <Text as="span" class="btn__label" flush><slot /></Text>
+      {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+    </a>
+  )
+) : variant === 'rainbow-glow' ? (
+  <div class="btn-rainbow-glow-wrap">
+    <button
+      class:list={classes}
+      type={type}
+      disabled={disabled}
+      id={id}
+      aria-label={ariaLabel}
+      data-semantic-role={semanticRole}
+      {...dataAttrs}
+      {...confettiAttrs}
+    >
+      {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      <Text as="span" class="btn__label" flush><slot /></Text>
+      {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+    </button>
+  </div>
 ) : (
   <button
     class:list={classes}

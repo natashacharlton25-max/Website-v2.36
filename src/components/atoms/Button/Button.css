@@ -326,19 +326,30 @@
     inset 2px 2px 6px color-mix(in oklch, var(--btn-shadow-inset, var(--color-Black)) 15%, transparent);
 }
 
-/* ── Rainbow Glow — gradient border + blur on hover ── */
+/* ── Rainbow Glow — wrapper handles glow, button stays clean ── */
+.btn-rainbow-glow-wrap {
+  position: relative;
+  display: inline-block;
+  border-radius: var(--radius-full);
+  padding: 2px;
+}
+
 .btn--rainbow-glow {
+  --_btn-brand: var(--page-bg);
+  --_btn-brand-dark: var(--page-bg);
+  --btn-text: var(--text-body);
   position: relative;
   z-index: 1;
   border: 2px solid var(--brand-c-neutral-light);
+  box-shadow: var(--shadow-sm);
   transition: border-color var(--hover-duration) ease-out;
 }
 
-.btn--rainbow-glow::before {
+.btn-rainbow-glow-wrap::before {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: inherit;
+  border-radius: var(--radius-full);
   padding: 2px;
   background: linear-gradient(90deg,
     var(--rainbow-1),
@@ -359,11 +370,11 @@
   z-index: -1;
 }
 
-.btn--rainbow-glow::after {
+.btn-rainbow-glow-wrap::after {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: inherit;
+  border-radius: var(--radius-full);
   background: linear-gradient(90deg,
     var(--rainbow-1),
     var(--rainbow-4),
@@ -380,15 +391,20 @@
   animation: btn-glowloop 8s linear infinite;
 }
 
+.btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
 .btn--rainbow-glow:hover {
+  background-color: var(--page-bg);
+  color: var(--text-body);
   border-color: transparent;
+  box-shadow: var(--shadow-sm);
+  transform: none;
 }
 
-.btn--rainbow-glow:hover::before {
+.btn-rainbow-glow-wrap:hover::before {
   opacity: 0.85;
 }
 
-.btn--rainbow-glow:hover::after {
+.btn-rainbow-glow-wrap:hover::after {
   opacity: 0.45;
 }
 
@@ -399,23 +415,28 @@
 }
 
 /* Rainbow glow hover gate */
+[data-hover="none"] .btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
 [data-hover="none"] .btn--rainbow-glow:hover {
+  background-color: var(--page-bg);
+  color: var(--text-body);
   border-color: var(--brand-c-neutral-light);
+  box-shadow: var(--shadow-sm);
+  transform: none;
 }
 
-[data-hover="none"] .btn--rainbow-glow:hover::before,
-[data-hover="none"] .btn--rainbow-glow:hover::after {
+[data-hover="none"] .btn-rainbow-glow-wrap:hover::before,
+[data-hover="none"] .btn-rainbow-glow-wrap:hover::after {
   opacity: 0;
 }
 
-[data-hover="none"] .btn--rainbow-glow::before,
-[data-hover="none"] .btn--rainbow-glow::after {
+[data-hover="none"] .btn-rainbow-glow-wrap::before,
+[data-hover="none"] .btn-rainbow-glow-wrap::after {
   animation: none;
 }
 
 /* Reduced render — no animation */
-[data-render="reduced"] .btn--rainbow-glow::before,
-[data-render="reduced"] .btn--rainbow-glow::after {
+[data-render="reduced"] .btn-rainbow-glow-wrap::before,
+[data-render="reduced"] .btn-rainbow-glow-wrap::after {
   animation: none;
 }
 
