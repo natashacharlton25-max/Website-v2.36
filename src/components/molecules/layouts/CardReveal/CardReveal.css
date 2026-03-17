@@ -4,8 +4,8 @@
 
 /* ── Internal tokens ── */
 .card-reveal {
-  --_reveal-active-border: var(--reveal-active-border, var(--brand-c-primary));
-  --_reveal-hover-border: var(--reveal-hover-border, var(--brand-c-secondary));
+  --_reveal-hover-accent: var(--reveal-hover-accent, var(--brand-c-primary));
+  --_reveal-active-accent: var(--reveal-active-accent, var(--brand-c-secondary));
   --_reveal-gap: var(--reveal-gap, var(--space-lg));
 
   display: flex;
@@ -20,36 +20,131 @@
   gap: var(--_reveal-gap);
 }
 
-/* ── Front card — clickable ── */
+/* ── Front card — clickable, flex column for button placement ── */
 .card-reveal__front {
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ── Back card — content hidden until companion clicked ── */
+/* Reveal button — bottom right */
+.card-reveal__reveal-btn {
+  margin-top: auto;
+  align-self: flex-end;
+}
+
+/* Static — title and button match border (default text, not primary) */
+.card-reveal__front .heading {
+  color: var(--text-body);
+}
+
+.card-reveal__front .btn {
+  color: var(--text-body);
+  border-color: var(--text-body);
+}
+
+/* ── Back card — content hidden until revealed ── */
 .card-reveal__back-inner {
   opacity: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  transition: opacity var(--hover-duration) ease-out;
+  transition: opacity 200ms ease-out;
 }
 
 .card-reveal__back--active .card-reveal__back-inner {
   opacity: 1;
 }
 
-/* ── Active front highlight ── */
-.card-reveal__front--active {
-  border-color: var(--_reveal-active-border);
+/* ══════════════════════════════════════════
+   Hover — both cards in row go primary
+   ══════════════════════════════════════════ */
+.card-reveal__row:hover .card-reveal__front.card,
+.card-reveal__row:hover .card-reveal__back.card {
+  border-color: var(--_reveal-hover-accent);
 }
 
-/* ── Hover — base rule, none suppresses ── */
-.card-reveal__front:hover,
-.card-reveal__front:focus-within {
-  border-color: var(--_reveal-hover-border);
+.card-reveal__row:hover .heading {
+  color: var(--_reveal-hover-accent);
 }
 
-[data-hover="none"] .card-reveal__front:hover,
-[data-hover="none"] .card-reveal__front:focus-within {
-  border-color: var(--_reveal-active-border);
+.card-reveal__row:hover .btn {
+  border-color: var(--_reveal-hover-accent);
+  color: var(--_reveal-hover-accent);
+}
+
+/* ══════════════════════════════════════════
+   Active (clicked) — both cards secondary
+   ══════════════════════════════════════════ */
+.card-reveal .card-reveal__front--active.card,
+.card-reveal .card-reveal__back--active.card {
+  border-color: var(--_reveal-active-accent);
+}
+
+.card-reveal .card-reveal__front--active.card .heading,
+.card-reveal .card-reveal__back--active.card .heading {
+  color: var(--_reveal-active-accent);
+}
+
+.card-reveal .card-reveal__front--active.card .btn,
+.card-reveal .card-reveal__back--active.card .btn {
+  border-color: var(--_reveal-active-accent);
+  color: var(--_reveal-active-accent);
+}
+
+/* Hover on active row — primary overrides secondary */
+.card-reveal__row:hover .card-reveal__front--active.card,
+.card-reveal__row:hover .card-reveal__back--active.card {
+  border-color: var(--_reveal-hover-accent);
+}
+
+.card-reveal__row:has(.card-reveal__front--active):hover .heading {
+  color: var(--_reveal-hover-accent);
+}
+
+.card-reveal__row:has(.card-reveal__front--active):hover .btn {
+  border-color: var(--_reveal-hover-accent);
+  color: var(--_reveal-hover-accent);
+}
+
+/* ══════════════════════════════════════════
+   Instant — same changes, no transition
+   ══════════════════════════════════════════ */
+[data-hover="instant"] .card-reveal__front.card,
+[data-hover="instant"] .card-reveal__back.card {
+  transition: none;
+}
+
+/* ══════════════════════════════════════════
+   None — no hover changes, active still works
+   ══════════════════════════════════════════ */
+/* None — no hover changes. Active secondary still shows. */
+[data-hover="none"] .card-reveal__row:hover .card {
+  border-color: var(--brand-c-neutral-light);
+}
+
+[data-hover="none"] .card-reveal__row:hover .heading {
+  color: var(--text-body);
+}
+
+[data-hover="none"] .card-reveal__row:hover .btn {
+  border-color: var(--text-body);
+  color: var(--text-body);
+}
+
+/* None + active — secondary overrides the suppression */
+[data-hover="none"] .card-reveal__row:has(.card-reveal__front--active):hover .card-reveal__front--active.card,
+[data-hover="none"] .card-reveal__row:has(.card-reveal__front--active):hover .card-reveal__back--active.card {
+  border-color: var(--_reveal-active-accent);
+}
+
+[data-hover="none"] .card-reveal__row:has(.card-reveal__front--active):hover .card-reveal__front--active .heading,
+[data-hover="none"] .card-reveal__row:has(.card-reveal__front--active):hover .card-reveal__back--active .heading {
+  color: var(--_reveal-active-accent);
+}
+
+[data-hover="none"] .card-reveal__row:has(.card-reveal__front--active):hover .card-reveal__front--active .btn,
+[data-hover="none"] .card-reveal__row:has(.card-reveal__front--active):hover .card-reveal__back--active .btn {
+  border-color: var(--_reveal-active-accent);
+  color: var(--_reveal-active-accent);
 }
