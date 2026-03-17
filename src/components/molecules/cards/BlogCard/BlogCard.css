@@ -6,13 +6,19 @@
    BlogCard only adds: image area, meta row, tags, author footer.
 
    Internal tokens (--_blog-*):
-     --_blog-border, --_blog-tag-bg
+     --_blog-border, --_blog-tag-bg, --_blog-hover-title,
+     --_blog-featured-border, --_blog-meta-icon, --_blog-author-icon,
+     --_blog-tag-text
    ══════════════════════════════════════════════════════════════ */
 
 .blog-card {
   --_blog-border: var(--blog-border, var(--brand-c-neutral-light));
   --_blog-tag-bg: var(--blog-tag-bg, var(--page-bg-sunken));
-  --card-hover-border: var(--brand-c-secondary);
+  --_blog-tag-text: var(--blog-tag-text, var(--brand-c-text));
+  --_blog-hover-title: var(--blog-hover-title, var(--brand-c-primary));
+  --_blog-featured-border: var(--blog-featured-border, var(--brand-c-primary));
+  --_blog-meta-icon: var(--blog-meta-icon, var(--brand-c-primary));
+  --_blog-author-icon: var(--blog-author-icon, var(--brand-c-primary));
 
   overflow: hidden;
   height: 100%;
@@ -80,7 +86,7 @@
 .blog-card__meta-icon {
   vertical-align: -2px;
   margin-right: var(--space-xs);
-  color: var(--brand-c-primary);
+  color: var(--_blog-meta-icon);
 }
 
 /* ── Image zoom on hover — BlogCard layout concern ── */
@@ -105,6 +111,13 @@
   line-height: var(--leading-tight);
 }
 
+/* Title colour on hover — gated */
+[data-hover="full"] .blog-card:hover .blog-card__title .heading,
+:root:not([data-hover]) .blog-card:hover .blog-card__title .heading,
+[data-hover="gentle"] .blog-card:hover .blog-card__title .heading {
+  color: var(--_blog-hover-title);
+}
+
 /* ── Tags row ── */
 .blog-card__tags {
   display: flex;
@@ -114,7 +127,7 @@
 
 .blog-card__tag {
   --badge-bg: var(--_blog-tag-bg);
-  --badge-text: var(--brand-c-text);
+  --badge-text: var(--_blog-tag-text);
 }
 
 /* ── Author footer — pinned to bottom ── */
@@ -128,12 +141,12 @@
 }
 
 .blog-card__author-icon {
-  color: var(--brand-c-primary);
+  color: var(--_blog-author-icon);
 }
 
 /* ── Featured — accent border ── */
 .blog-card--featured {
-  border: 2px solid var(--brand-c-primary);
+  border: 2px solid var(--_blog-featured-border);
 }
 
 
