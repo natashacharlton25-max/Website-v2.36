@@ -2,48 +2,66 @@
 /**
  * CardReveal — two-column card pairs with click-to-reveal
  *
- * Chrome only — grid layout + reveal interaction.
- * Card atom wraps each slot. Content is section organism's concern.
- * Keyboard: Enter/Space toggles. Focus-within shows visual feedback.
+ * Chrome + content — Card atom wraps each side.
+ * Items prop defines front/back content pairs.
+ * Astro doesn't support dynamic named slots, so items are props.
+ * Pipeline maps FlipCard content props to items array.
  *
  * Styles: CardReveal.css | CardReveal.responsive.css
  */
 import Card from '../../../atoms/Card/Card.astro';
+import Heading from '../../../atoms/Heading/Heading.astro';
+import Text from '../../../atoms/Text/Text.astro';
+import Button from '../../../atoms/Button/Button.astro';
+
+interface CardRevealItem {
+  title: string;
+  subtitle?: string;
+  detail: string;
+  href?: string;
+  linkLabel?: string;
+}
 
 interface Props {
-  count: number;
+  items: CardRevealItem[];
   class?: string;
 }
 
 const {
-  count,
+  items,
   class: className,
 } = Astro.props;
-
-const indices = Array.from({ length: count }, (_, i) => i);
 ---
 
 <div class:list={['card-reveal', className]} data-card-reveal>
-  {indices.map((i) => (
+  {items.map((item, i) => (
     <div class="card-reveal__row">
       <Card
         variant="outline"
         padding="lg"
         radius="lg"
         class:list={['card-reveal__front', i === 0 && 'card-reveal__front--active']}
-        data-reveal-index={i}
+        data-reveal-index={String(i)}
       >
-        <slot name={`front-${i}`} />
+        <Heading level={3} size="h5" flush>{item.title}</Heading>
+        {item.subtitle && (
+          <Text size="sm" color="muted">{item.subtitle}</Text>
+        )}
+        <Button variant="outline" size="sm" class="card-reveal__reveal-btn">Reveal More</Button>
       </Card>
       <Card
         variant="outline"
         padding="lg"
         radius="lg"
         class:list={['card-reveal__back', i === 0 && 'card-reveal__back--active']}
-        data-reveal-panel={i}
+        data-reveal-panel={String(i)}
       >
         <div class="card-reveal__back-inner">
-          <slot name={`back-${i}`} />
+          <Heading level={3} size="h5" flush>{item.title}</Heading>
+          <Text size="sm" color="muted">{item.detail}</Text>
+          {item.href && (
+            <Button href={item.href} variant="outline" size="sm">{item.linkLabel || 'Learn More'}</Button>
+          )}
         </div>
       </Card>
     </div>

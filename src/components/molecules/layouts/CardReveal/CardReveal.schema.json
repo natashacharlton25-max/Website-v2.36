@@ -7,18 +7,32 @@
     "assistive": "CardReveal.astro",
     "textonly": "CardReveal.astro"
   },
-  "notes": "Two-column card pair layout with click-to-reveal. Chrome only — Card atom wraps each slot, content is section organism's concern. Used standalone or as FlipCard textonly render target. Keyboard: Enter/Space toggles. Focus-within shows hover feedback. Slot naming: front-0/back-0, front-1/back-1, etc. Astro matches slot names as strings at compile time. Pipeline maps FlipCard content props to slot content: title→front heading, description→back text, href→back button.",
+  "notes": "Two-column card pair layout with click-to-reveal. Items prop defines front/back content. Card atom wraps each side. Used standalone or as FlipCard textonly render target. Keyboard: Enter/Space toggles. Pipeline maps FlipCard props: title→title, subtitle→subtitle, description→detail, href→href, linkLabel→linkLabel.",
 
   "props": {
     "content": {
-      "_description": "Layout config",
-      "count": { "type": "number", "required": true, "description": "Number of card pairs. Determines slot count (front-0/back-0, front-1/back-1, etc)." }
+      "_description": "Card pair data",
+      "items": {
+        "type": "array",
+        "required": true,
+        "items": {
+          "type": "object",
+          "properties": {
+            "title":     { "type": "string", "required": true },
+            "subtitle":  { "type": "string", "required": false },
+            "detail":    { "type": "string", "required": true },
+            "href":      { "type": "string", "required": false },
+            "linkLabel": { "type": "string", "required": false, "default": "Learn More" }
+          }
+        },
+        "description": "Array of card pairs."
+      }
     },
     "visual": {},
     "animation": {},
     "colour": {
       "_description": "Pipeline-overridable tokens",
-      "activeBorder": { "type": "token", "required": false, "default": "brand-c-primary", "cssProperty": "--reveal-active-border", "description": "Active/selected card border colour." },
+      "activeBorder": { "type": "token", "required": false, "default": "brand-c-primary", "cssProperty": "--reveal-active-border", "description": "Active/selected card border." },
       "hoverBorder":  { "type": "token", "required": false, "default": "brand-c-secondary", "cssProperty": "--reveal-hover-border", "description": "Hover border colour." }
     }
   }
