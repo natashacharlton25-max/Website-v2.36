@@ -11,23 +11,29 @@
 
   "props": {
     "content": {
+      "_description": "What the card says",
       "title":       { "type": "string", "required": true, "description": "Heading on both faces." },
       "subtitle":    { "type": "string", "required": false, "description": "Short text on front face." },
       "description": { "type": "string", "required": true, "description": "Longer text on back face." },
       "href":        { "type": "string", "required": false, "description": "CTA link URL on back face." },
-      "linkLabel":   { "type": "string", "required": false, "default": "Learn More", "description": "CTA button text." },
-      "frontImage":  { "type": "string", "required": false, "description": "Background image URL for front face." },
-      "backImage":   { "type": "string", "required": false, "description": "Background image URL for back face (defaults to frontImage)." }
+      "linkLabel":   { "type": "string", "required": false, "default": "Learn More", "description": "CTA button text." }
     },
     "visual": {
-      "trigger": { "type": "string", "required": false, "default": "hover", "enum": ["hover", "click", "focus"], "description": "Flip trigger. Assistive render forces focus." }
+      "_description": "How the card looks — stripped in textonly",
+      "frontImage": { "type": "string", "required": false, "textonly": false, "description": "Background image URL for front face." },
+      "backImage":  { "type": "string", "required": false, "textonly": false, "description": "Background image URL for back face." },
+      "frontIcon":  { "type": "string", "required": false, "textonly": false, "description": "Icon slug for front face (no image)." }
+    },
+    "animation": {
+      "_description": "Flip motion — stripped in reduced/textonly",
+      "trigger": { "type": "string", "required": false, "default": "hover", "enum": ["hover", "click"], "description": "Flip trigger. hover = desktop hover + mobile tap. click = tap/click only." },
+      "flip":    { "type": "boolean", "required": false, "default": true, "description": "Enable 3D flip. false = instant swap. Stripped in reduced. Stripped in textonly." }
     },
     "colour": {
       "_description": "Pipeline-overridable colour tokens.",
-      "frontBg":  { "type": "token", "required": false, "default": "brand-c-primary", "cssProperty": "--flip-front-bg", "description": "Front face background colour." },
-      "backBg":   { "type": "token", "required": false, "default": "brand-c-primary-dark", "cssProperty": "--flip-back-bg", "description": "Back face background colour." },
-      "text":     { "type": "token", "required": false, "default": "color-White", "cssProperty": "--flip-text", "description": "Text colour on both faces." }
-    },
-    "animation": {}
+      "frontBg": { "type": "token", "required": false, "default": "brand-c-primary", "cssProperty": "--flip-front-bg" },
+      "backBg":  { "type": "token", "required": false, "default": "brand-c-primary-dark", "cssProperty": "--flip-back-bg" },
+      "text":    { "type": "token", "required": false, "default": "color-White", "cssProperty": "--flip-text" }
+    }
   }
 }
