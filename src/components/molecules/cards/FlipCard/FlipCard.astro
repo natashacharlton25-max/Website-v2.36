@@ -29,6 +29,7 @@ interface Props {
   backImage?: string | ImageMetadata;
   frontIcon?: string;
   trigger?: 'hover' | 'click';
+  animated?: boolean;
   class?: string;
 }
 
@@ -42,6 +43,7 @@ const {
   backImage,
   frontIcon,
   trigger = 'hover',
+  animated = false,
   class: className,
 } = Astro.props;
 ---
@@ -50,6 +52,7 @@ const {
   class:list={[
     'flip-card',
     `flip-card--trigger-${trigger}`,
+    animated && 'flip-card--animated',
     className,
   ]}
   tabindex="0"
@@ -73,6 +76,7 @@ const {
           <Text size="sm" color="inherit" class="flip-card__subtitle">{subtitle}</Text>
         )}
       </Card>
+      <Button variant="outline" size="sm" class="flip-card__textonly-reveal">Reveal Info</Button>
     </div>
 
     <!-- Back face -->

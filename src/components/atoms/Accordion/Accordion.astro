@@ -1,0 +1,114 @@
+---
+/**
+ * Accordion — expandable panel group
+ *
+ * Each panel has a title (always visible) and content (expands on click).
+ * Only one panel open at a time (accordion mode) or multiple (independent mode).
+ * Uses native <details>/<summary> for zero-JS fallback + AT support.
+ *
+ * Styles: Accordion.css | Accordion.responsive.css
+ */
+import Heading from '../Heading/Heading.astro';
+import Text from '../Text/Text.astro';
+import Icon from '../Icon/Icon.astro';
+
+interface AccordionItem {
+  title: string;
+  content: string;
+  icon?: string;
+  open?: boolean;
+}
+
+interface Props {
+  items: AccordionItem[];
+  mode?: 'accordion' | 'independent';
+  class?: string;
+}
+
+const {
+  items,
+  mode = 'accordion',
+  class: className,
+} = Astro.props;
+---
+
+<div
+  class:list={['accordion', `accordion--${mode}`, className]}
+  data-accordion-mode={mode}
+>
+  {items.map((item, i) => (
+    <details
+      class="accordion__panel"
+      open={item.open}
+    >
+      <summary class="accordion__title">
+        {item.icon && (
+          <Icon name={item.icon} size={20} class="accordion__icon" />
+        )}
+        <Heading level={3} size="h5" flush class="accordion__heading">{item.title}</Heading>
+        <Icon name="caret-down" weight="regular" size={16} class="accordion__chevron" aria-hidden="true" />
+      </summary>
+      <div class="accordion__content">
+        <Text size="sm" color="muted">{item.content}</Text>
+      </div>
+    </details>
+  ))}
+</div>
+
+<script>
+  function initAccordions(): void {
+    document.querySelectorAll<HTMLElement>('.accordion').forEach((group) => {
+      const isAccordion = group.dataset.accordionMode === 'accordion';
+      const panels = group.querySelectorAll<HTMLDetailsElement>('.accordion__panel');
+
+      panels.forEach((panel) => {
+        const content = panel.querySelector<HTMLElement>('.accordion__content');
+        if (!content) return;
+
+        // Set initial max-height for open panels
+        if (panel.open) {
+          content.style.maxHeight = content.scrollHeight + 'px';
+        }
+
+        const summary = panel.querySelector<HTMLElement>('.accordion__title');
+        if (!summary) return;
+
+        summary.addEventListener('click', (e: Event) => {
+          e.preventDefault();
+
+          if (panel.open) {
+            // Closing
+            content.style.maxHeight = '0';
+            content.addEventListener('transitionend', () => {
+              panel.open = false;
+            }, { once: true });
+          } else {
+            // Close others in accordion mode
+            if (isAccordion) {
+              panels.forEach((other) => {
+                if (other !== panel && other.open) {
+                  const otherContent = other.querySelector<HTMLElement>('.accordion__content');
+                  if (otherContent) {
+                    otherContent.style.maxHeight = '0';
+                    otherContent.addEventListener('transitionend', () => {
+                      other.open = false;
+                    }, { once: true });
+                  }
+                }
+              });
+            }
+
+            // Opening
+            panel.open = true;
+            requestAnimationFrame(() => {
+              content.style.maxHeight = content.scrollHeight + 'px';
+            });
+          }
+        });
+      });
+    });
+  }
+
+  initAccordions();
+  document.addEventListener('astro:page-load', initAccordions);
+</script>
