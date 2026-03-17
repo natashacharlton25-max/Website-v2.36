@@ -7,8 +7,9 @@
  * Rainbow tokens provide CVD-safe colours automatically.
  * Respects hover gate (data-hover) and render mode (data-render).
  *
- * Styles: RainbowBorderCard.css
+ * Styles: RainbowBorderCard.css | RainbowBorderCard.responsive.css
  */
+import Card from '../../../atoms/Card/Card.astro';
 
 interface Props {
   variant?: 'primary' | 'gradient' | 'pulse';
@@ -64,9 +65,9 @@ const styleOverrides = [
   data-rotation-speed={rotationSpeed}
   style={styleOverrides || undefined}
 >
-  <div class="rainbow-border-card__inner">
+  <Card variant="default" class="rainbow-border-card__inner">
     <slot />
-  </div>
+  </Card>
 </div>
 
 <script>
@@ -110,7 +111,8 @@ const styleOverrides = [
       card.classList.add('is-animating');
       card.classList.remove('is-landed');
 
-      const step = hoverMode === 'gentle' ? 2 : 4;
+      const speed = parseInt(card.dataset.rotationSpeed || '20', 10);
+      const step = hoverMode === 'gentle' ? Math.max(1, speed / 10) : speed / 5;
 
       function frame(): void {
         card._angle! += step;

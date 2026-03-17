@@ -1,54 +1,34 @@
 {
   "component": "RainbowBorderCard",
-  "category": "molecule",
+  "category": "effect",
   "renders": {
     "full": "RainbowBorderCard.astro",
     "reduced": "RainbowBorderCard.astro",
     "assistive": "RainbowBorderCard.astro",
     "textonly": "RainbowBorderCard.astro"
   },
-  "notes": "Animated conic-gradient border wrapper. Slot-based. Single-spin on hover: 360° then lands on first colour. Pass 2-7 colours via array — defaults to full rainbow (CVD-safe, dark-mode-aware). First colour is static/landed state. Respects hover gate and render mode.",
+  "notes": "Animated conic-gradient border wrapper. Slot-based — wraps any content. Hover triggers single 360° spin then lands on first colour. Inner Card atom handles chrome, dark mode, HC, render modes. Rainbow tokens provide CVD-safe colours.",
 
   "props": {
     "content": {},
 
     "visual": {
-      "_description": "Border appearance",
-      "variant": {
-        "type": "string",
-        "required": false,
-        "default": "gradient",
-        "enum": ["primary", "gradient", "pulse"],
-        "description": "Animation style. Primary: solid to gradient. Gradient: static gradient to rotating. Pulse: rotation + brightness."
-      },
-      "borderRadius": {
-        "type": "string",
-        "required": false,
-        "default": "var(--radius-lg)",
-        "description": "Border radius. CSS value or token."
-      },
-      "borderWidth": {
-        "type": "string",
-        "required": false,
-        "default": "3px",
-        "description": "Border width. CSS value."
-      },
-      "rotationSpeed": {
-        "type": "number",
-        "required": false,
-        "default": 20,
-        "description": "Rotation speed in ms per frame. Lower = faster. Ignored when data-hover is none/instant."
-      },
-      "class": {
-        "type": "string",
-        "required": false,
-        "default": "",
-        "description": "Additional CSS classes."
-      }
+      "_description": "Static border appearance",
+      "variant":      { "type": "string", "required": false, "default": "gradient", "enum": ["primary", "gradient", "pulse"], "description": "Border style. Primary: solid→gradient. Gradient: static→rotating. Pulse: rotation + brightness." },
+      "borderRadius": { "type": "string", "required": false, "default": "var(--radius-lg)", "description": "Outer border radius." },
+      "borderWidth":  { "type": "string", "required": false, "default": "3px", "description": "Border width (padding around inner card)." },
+      "class":        { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." }
     },
 
-    "colour": {
-      "_description": "Gradient colours — 2-7 stops. First colour is also the static/landed border. Defaults to full ROYGBIV rainbow (CVD-safe via rainbow tokens).",
+    "animation": {
+      "_description": "Rainbow spin — stripped in reduced/assistive/textonly. Solid first-colour border remains.",
+      "spin": {
+        "type": "boolean",
+        "required": false,
+        "default": true,
+        "strip": ["reduced", "assistive", "textonly"],
+        "description": "Conic gradient spin on hover."
+      },
       "colors": {
         "type": "array",
         "items": { "type": "token" },
@@ -56,10 +36,18 @@
         "maxItems": 7,
         "required": false,
         "default": ["var(--rainbow-1)", "var(--rainbow-2)", "var(--rainbow-3)", "var(--rainbow-4)", "var(--rainbow-5)", "var(--rainbow-6)", "var(--rainbow-7)"],
-        "description": "Gradient colour stops. Evenly distributed. First colour wraps to end for seamless spin. Pass 2 for a simple duo-tone, 7 for full rainbow."
+        "strip": ["reduced", "assistive", "textonly"],
+        "description": "Gradient stops. First colour is also the static/landed border."
+      },
+      "rotationSpeed": {
+        "type": "number",
+        "required": false,
+        "default": 20,
+        "strip": ["reduced", "assistive", "textonly"],
+        "description": "Rotation speed. Ignored when data-hover is none/instant."
       }
     },
 
-    "animation": {}
+    "colour": {}
   }
 }
