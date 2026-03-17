@@ -7,17 +7,14 @@
     "assistive": "BlogCard.astro",
     "textonly": "BlogCard.astro"
   },
-  "notes": "Article preview card. Full-bleed hero image, category badge, meta row, title, excerpt, tags, optional author. Image scales on hover, title changes colour. Textonly hides image. All visual properties JSON-overridable via --blog-* bridge tokens.",
+  "notes": "Article preview card. Full-bleed hero image, category badge, meta row, title, excerpt, tags, optional author. Image scales on hover, title changes colour. Textonly hides image. Image atom handles alt text — BlogCard does not pass alt. All visual properties JSON-overridable via --blog-* bridge tokens.",
 
   "props": {
     "content": {
       "_description": "Article information",
       "title":    { "type": "string", "required": true, "description": "Article title." },
       "excerpt":  { "type": "string", "required": true, "description": "Article excerpt/summary." },
-      "image":    { "type": "string", "required": false, "textonly": false, "description": "Hero image URL. Hidden in textonly." },
-      "imageAlt": { "type": "string", "required": false, "description": "Image alt text. Defaults to title." },
       "author":   { "type": "string", "required": false, "description": "Author name." },
-      "authorImage": { "type": "string", "required": false, "textonly": false, "description": "Author avatar URL." },
       "date":     { "type": "string", "required": false, "description": "Publication date." },
       "category": { "type": "string", "required": false, "description": "Category badge label." },
       "tags":     { "type": "array", "items": { "type": "string" }, "required": false, "description": "Tag labels. Max 3 shown." },
@@ -27,9 +24,11 @@
     },
 
     "visual": {
-      "_description": "Card appearance",
+      "_description": "Card appearance — stripped in textonly",
+      "image":       { "type": "string", "required": false, "textonly": false, "description": "Hero image URL." },
+      "authorImage": { "type": "string", "required": false, "textonly": false, "description": "Author avatar URL." },
       "cardVariant": { "type": "string", "required": false, "default": "default", "enum": ["default", "transparent", "outline", "glass", "liquid", "neumorphic", "pressed", "comic", "tech"], "description": "Card atom variant." },
-      "class": { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." }
+      "class":       { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." }
     },
 
     "colour": {
