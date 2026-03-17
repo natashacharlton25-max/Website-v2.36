@@ -10,6 +10,7 @@
   --_compact-media-bg: var(--compact-media-bg, var(--page-bg-sunken));
   --_compact-icon-color: var(--compact-icon-color, var(--brand-c-primary));
   --_compact-action-color: var(--compact-action-color, var(--brand-c-primary));
+  --_compact-hover-accent: var(--compact-hover-accent, var(--brand-c-secondary));
   --_compact-action-rotate: 0deg;
 
   display: flex;
@@ -77,46 +78,43 @@
   display: inline-block;
 }
 
-/* ── Hover — gated by data-hover ── */
+/* ══════════════════════════════════════════
+   Hover — base rule fires, none suppresses
+   ══════════════════════════════════════════ */
 
-/* Full hover (explicit + default when no data-hover set) */
-[data-hover="full"] .compact-tool-card:hover,
-:root:not([data-hover]) .compact-tool-card:hover {
+/* Base hover + focus-within */
+.compact-tool-card:hover,
+.compact-tool-card:focus-within {
   --_compact-action-rotate: 360deg;
-  --_compact-icon-color: var(--brand-c-secondary);
-  --_compact-action-color: var(--brand-c-secondary);
+  --_compact-icon-color: var(--_compact-hover-accent);
+  --_compact-action-color: var(--_compact-hover-accent);
 }
 
-/* Gentle hover */
-[data-hover="gentle"] .compact-tool-card:hover {
-  --_compact-icon-color: var(--brand-c-secondary);
-  --_compact-action-color: var(--brand-c-secondary);
-}
-
-[data-hover="gentle"] .compact-tool-card:hover .compact-tool-card__action-icon {
+/* Gentle — slow rotation */
+[data-hover="gentle"] .compact-tool-card:hover .compact-tool-card__action-icon,
+[data-hover="gentle"] .compact-tool-card:focus-within .compact-tool-card__action-icon {
   transition: transform var(--hover-duration-slow) ease-out;
   transform: rotate(360deg);
 }
 
-/* Instant hover — icon scales up, colour swaps */
-[data-hover="instant"] .compact-tool-card:hover {
-  --_compact-icon-color: var(--brand-c-secondary);
-  --_compact-action-color: var(--brand-c-secondary);
-}
-
-[data-hover="instant"] .compact-tool-card:hover .compact-tool-card__action-icon {
+/* Instant — scale, no transition */
+[data-hover="instant"] .compact-tool-card:hover .compact-tool-card__action-icon,
+[data-hover="instant"] .compact-tool-card:focus-within .compact-tool-card__action-icon {
   transform: scale(1.3);
   transition: none;
 }
 
-/* None — no hover changes */
-[data-hover="none"] .compact-tool-card:hover {
+/* None — no changes */
+[data-hover="none"] .compact-tool-card:hover,
+[data-hover="none"] .compact-tool-card:focus-within {
   --_compact-action-rotate: 0deg;
   --_compact-icon-color: var(--compact-icon-color, var(--brand-c-primary));
   --_compact-action-color: var(--compact-action-color, var(--brand-c-primary));
 }
 
-/* ── Render modes ── */
+/* ══════════════════════════════════════════
+   Render modes
+   ══════════════════════════════════════════ */
 
 /* Reduced — strip rotation animation, keep colour change */
 [data-render="reduced"] .compact-tool-card__action-icon {
