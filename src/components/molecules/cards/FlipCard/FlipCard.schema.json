@@ -7,11 +7,11 @@
     "assistive": "FlipCard.astro",
     "textonly": "CardReveal"
   },
-  "notes": "3D flip card. Front: title + subtitle + arrow. Back: title + description + CTA. Trigger: hover (default), click (JS). Reduced: no animation, instant swap. Textonly: pipeline routes to CardReveal molecule — maps title/subtitle/description/href/linkLabel to CardReveal items. Section collects all FlipCard JSON items into one CardReveal.",
+  "notes": "3D flip card. Front: title + subtitle + icon. Back: title + description + CTA. Trigger: hover (desktop, tap mobile), click (everywhere). Textonly: pipeline routes to CardReveal — maps title/subtitle/description/href/linkLabel. Reduced: instant swap, no 3D.",
 
   "props": {
     "content": {
-      "_description": "What the card says",
+      "_description": "What the card says — survives all render modes",
       "title":       { "type": "string", "required": true, "description": "Heading on both faces." },
       "subtitle":    { "type": "string", "required": false, "description": "Short text on front face." },
       "description": { "type": "string", "required": true, "description": "Longer text on back face." },
@@ -27,13 +27,15 @@
     "animation": {
       "_description": "Flip motion — stripped in reduced/textonly",
       "trigger": { "type": "string", "required": false, "default": "hover", "enum": ["hover", "click"], "description": "Flip trigger. hover = desktop hover + mobile tap. click = tap/click only." },
-      "flip":    { "type": "boolean", "required": false, "default": true, "description": "Enable 3D flip. false = instant swap. Stripped in reduced. Stripped in textonly." }
+      "animated": { "type": "boolean", "required": false, "default": false, "description": "Enable 3D flip animation. false = instant swap." }
     },
     "colour": {
-      "_description": "Pipeline-overridable colour tokens.",
-      "frontBg": { "type": "token", "required": false, "default": "brand-c-primary", "cssProperty": "--flip-front-bg" },
-      "backBg":  { "type": "token", "required": false, "default": "brand-c-primary-dark", "cssProperty": "--flip-back-bg" },
-      "text":    { "type": "token", "required": false, "default": "color-White", "cssProperty": "--flip-text" }
+      "_description": "Pipeline-overridable colour tokens. Defaults match CSS.",
+      "frontBg":     { "type": "token", "required": false, "default": "page-bg-raised", "cssProperty": "--flip-front-bg", "description": "Front face background." },
+      "backBg":      { "type": "token", "required": false, "default": "page-bg-raised", "cssProperty": "--flip-back-bg", "description": "Back face background." },
+      "text":        { "type": "token", "required": false, "default": "text-body", "cssProperty": "--flip-text", "description": "Text colour on both faces." },
+      "border":      { "type": "token", "required": false, "default": "brand-c-primary", "cssProperty": "--flip-border", "description": "Face border colour." },
+      "hoverAccent": { "type": "token", "required": false, "default": "brand-c-secondary", "cssProperty": "--flip-hover-accent", "description": "Border + heading + icon colour on hover." }
     }
   }
 }

@@ -8,6 +8,7 @@
   --_flip-back-bg: var(--flip-back-bg, var(--page-bg-raised));
   --_flip-text: var(--flip-text, var(--text-body));
   --_flip-border: var(--flip-border, var(--brand-c-primary));
+  --_flip-hover-accent: var(--flip-hover-accent, var(--brand-c-secondary));
   --_flip-radius: var(--flip-radius, var(--radius-lg));
   --_flip-min-height: var(--flip-min-height, 22rem);
   --_flip-duration: var(--hover-duration-slow);
@@ -17,7 +18,6 @@
   width: 100%;
   cursor: pointer;
 }
-
 
 /* ── 3D container ── */
 .flip-card__box {
@@ -37,7 +37,6 @@
   border: 1px solid var(--_flip-border);
   text-align: center;
   color: var(--_flip-text);
-  /* Default: no transition (instant swap) */
   transition: none;
 }
 
@@ -63,15 +62,14 @@
 
 /* ── Front face ── */
 .flip-card__front {
-  background-color: var(--_flip-front-bg);
+  background: var(--_flip-front-bg);
   transform: rotateY(0deg);
   transform-style: preserve-3d;
 }
 
-
 /* ── Back face ── */
 .flip-card__back {
-  background-color: var(--_flip-back-bg);
+  background: var(--_flip-back-bg);
   position: absolute;
   top: 0;
   left: 0;
@@ -104,18 +102,7 @@
   transform: translateZ(60px) scale(0.94);
 }
 
-/* ── Front caption — glass badge at bottom ── */
-.flip-card__caption {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 2;
-  padding: var(--space-md) var(--space-lg);
-  text-align: center;
-  color: inherit;
-}
-
+/* ── Icon ── */
 .flip-card__icon {
   margin-bottom: var(--space-md);
 }
@@ -138,17 +125,10 @@
   box-shadow: none;
 }
 
-/* Inner Card default — suppress dark/HC zone border (face handles chrome) */
+/* Inner Card default — suppress dark/HC zone border */
 .flip-card .flip-card__inner.card--default {
   border: none;
   box-shadow: none;
-}
-
-/* ── Arrow indicator ── */
-.flip-card__icon {
-  margin-top: var(--space-lg);
-  opacity: 0.7;
-  transition: opacity var(--hover-duration);
 }
 
 /* ── CTA ── */
@@ -157,91 +137,81 @@
 }
 
 /* ══════════════════════════════════════════
-   Hover colour feedback (gated)
+   Hover colour — base rule, none suppresses
    ══════════════════════════════════════════ */
 
-/* Hover trigger — back face shows secondary on flip */
-[data-hover="full"] .flip-card--trigger-hover:hover .flip-card__back,
-:root:not([data-hover]) .flip-card--trigger-hover:hover .flip-card__back {
-  border-color: var(--brand-c-secondary);
+/* Hover trigger — back face accent on flip */
+.flip-card--trigger-hover:hover .flip-card__back,
+.flip-card--trigger-hover:focus-within .flip-card__back {
+  border-color: var(--_flip-hover-accent);
 }
 
-[data-hover="full"] .flip-card--trigger-hover:hover .flip-card__back .heading,
-:root:not([data-hover]) .flip-card--trigger-hover:hover .flip-card__back .heading {
-  color: var(--brand-c-secondary);
+.flip-card--trigger-hover:hover .flip-card__back .heading,
+.flip-card--trigger-hover:focus-within .flip-card__back .heading {
+  color: var(--_flip-hover-accent);
 }
 
-/* Click trigger — front hover changes to secondary */
-[data-hover="full"] .flip-card--trigger-click:hover .flip-card__front,
-:root:not([data-hover]) .flip-card--trigger-click:hover .flip-card__front {
-  border-color: var(--brand-c-secondary);
+/* Click trigger — front hover accent */
+.flip-card--trigger-click:hover .flip-card__front,
+.flip-card--trigger-click:focus-within .flip-card__front {
+  border-color: var(--_flip-hover-accent);
 }
 
-[data-hover="full"] .flip-card--trigger-click:hover .flip-card__front .heading,
-:root:not([data-hover]) .flip-card--trigger-click:hover .flip-card__front .heading {
-  color: var(--brand-c-secondary);
+.flip-card--trigger-click:hover .flip-card__front .heading,
+.flip-card--trigger-click:focus-within .flip-card__front .heading {
+  color: var(--_flip-hover-accent);
 }
 
-[data-hover="full"] .flip-card--trigger-click:hover .flip-card__icon,
-:root:not([data-hover]) .flip-card--trigger-click:hover .flip-card__icon {
-  color: var(--brand-c-secondary);
+.flip-card--trigger-click:hover .flip-card__icon,
+.flip-card--trigger-click:focus-within .flip-card__icon {
+  color: var(--_flip-hover-accent);
 }
 
-/* Click trigger — back face hover also secondary */
-[data-hover="full"] .flip-card--trigger-click:hover .flip-card__back,
-:root:not([data-hover]) .flip-card--trigger-click:hover .flip-card__back {
-  border-color: var(--brand-c-secondary);
+/* Click trigger — back face hover accent */
+.flip-card--trigger-click:hover .flip-card__back,
+.flip-card--trigger-click:focus-within .flip-card__back {
+  border-color: var(--_flip-hover-accent);
 }
 
-[data-hover="full"] .flip-card--trigger-click:hover .flip-card__back .heading,
-:root:not([data-hover]) .flip-card--trigger-click:hover .flip-card__back .heading {
-  color: var(--brand-c-secondary);
+.flip-card--trigger-click:hover .flip-card__back .heading,
+.flip-card--trigger-click:focus-within .flip-card__back .heading {
+  color: var(--_flip-hover-accent);
 }
 
-/* Gentle — same colours + borders */
-[data-hover="gentle"] .flip-card--trigger-hover:hover .flip-card__back,
-[data-hover="gentle"] .flip-card--trigger-click:hover .flip-card__front,
-[data-hover="gentle"] .flip-card--trigger-click:hover .flip-card__back {
-  border-color: var(--brand-c-secondary);
+/* None — suppress all colour changes */
+[data-hover="none"] .flip-card:hover .flip-card__face,
+[data-hover="none"] .flip-card:focus-within .flip-card__face {
+  border-color: var(--_flip-border);
 }
 
-[data-hover="gentle"] .flip-card--trigger-hover:hover .flip-card__back .heading,
-[data-hover="gentle"] .flip-card--trigger-click:hover .flip-card__front .heading,
-[data-hover="gentle"] .flip-card--trigger-click:hover .flip-card__back .heading {
-  color: var(--brand-c-secondary);
+[data-hover="none"] .flip-card:hover .heading,
+[data-hover="none"] .flip-card:focus-within .heading {
+  color: inherit;
 }
 
-[data-hover="gentle"] .flip-card--trigger-click:hover .flip-card__icon {
-  color: var(--brand-c-secondary);
+[data-hover="none"] .flip-card:hover .flip-card__icon,
+[data-hover="none"] .flip-card:focus-within .flip-card__icon {
+  color: inherit;
 }
-
-/* None — no colour changes */
 
 /* ══════════════════════════════════════════
-   Trigger: hover — each face rotates individually
+   Trigger: hover — flip on desktop
    ══════════════════════════════════════════ */
-/* Hover flip — gated, suppressed in none mode */
 @media (min-width: 501px) {
-  [data-hover="full"] .flip-card--trigger-hover:hover .flip-card__front,
-  :root:not([data-hover]) .flip-card--trigger-hover:hover .flip-card__front,
-  [data-hover="gentle"] .flip-card--trigger-hover:hover .flip-card__front,
-  [data-hover="instant"] .flip-card--trigger-hover:hover .flip-card__front {
+  .flip-card--trigger-hover:hover .flip-card__front,
+  .flip-card--trigger-hover:focus-within .flip-card__front {
     transform: rotateY(-180deg);
     transform-style: preserve-3d;
   }
 
-  [data-hover="full"] .flip-card--trigger-hover:hover .flip-card__back,
-  :root:not([data-hover]) .flip-card--trigger-hover:hover .flip-card__back,
-  [data-hover="gentle"] .flip-card--trigger-hover:hover .flip-card__back,
-  [data-hover="instant"] .flip-card--trigger-hover:hover .flip-card__back {
+  .flip-card--trigger-hover:hover .flip-card__back,
+  .flip-card--trigger-hover:focus-within .flip-card__back {
     transform: rotateY(0deg);
     transform-style: preserve-3d;
   }
 
-  [data-hover="full"] .flip-card--trigger-hover:hover .flip-card__icon,
-  :root:not([data-hover]) .flip-card--trigger-hover:hover .flip-card__icon,
-  [data-hover="gentle"] .flip-card--trigger-hover:hover .flip-card__icon,
-  [data-hover="instant"] .flip-card--trigger-hover:hover .flip-card__icon {
+  .flip-card--trigger-hover:hover .flip-card__icon,
+  .flip-card--trigger-hover:focus-within .flip-card__icon {
     opacity: 0;
   }
 }
@@ -273,24 +243,20 @@
 }
 
 /* ══════════════════════════════════════════
-   Hover gate
+   Hover gate — timing
    ══════════════════════════════════════════ */
 
-/* Gentle — crossfade (animated cards slow down, non-animated crossfade) */
+/* Gentle — slower flip */
 [data-hover="gentle"] .flip-card--animated .flip-card__face {
   transition-duration: var(--hover-duration-extralong);
 }
 
-[data-hover="gentle"] .flip-card:not(.flip-card--animated) .flip-card__face {
-  transition: opacity var(--hover-duration-extralong) ease-out;
-}
-
-/* Instant — no animation regardless of animated prop */
+/* Instant — no animation */
 [data-hover="instant"] .flip-card__face {
   transition: none;
 }
 
-/* None — no animation, no colour changes */
+/* None — no animation */
 [data-hover="none"] .flip-card__face {
   transition: none;
 }
@@ -309,4 +275,4 @@
   --_flip-min-height: 28rem;
 }
 
-/* Textonly — handled by section organism routing to CardReveal */
+/* Textonly — pipeline routes to CardReveal via schema */
