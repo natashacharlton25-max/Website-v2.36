@@ -72,7 +72,7 @@
 
 .compact-tool-card__action-icon {
   color: var(--_compact-action-color);
-  transition: transform var(--hover-duration-base, 0.3s) var(--ease-out, ease-out);
+  transition: transform var(--hover-duration) ease-out;
   transform: rotate(var(--_compact-action-rotate));
   display: inline-block;
 }
@@ -81,7 +81,7 @@
 
 /* Full hover (explicit + default when no data-hover set) */
 [data-hover="full"] .compact-tool-card:hover,
-:not([data-hover]) .compact-tool-card:hover {
+:root:not([data-hover]) .compact-tool-card:hover {
   --_compact-action-rotate: 360deg;
   --_compact-icon-color: var(--brand-c-secondary);
   --_compact-action-color: var(--brand-c-secondary);
@@ -94,7 +94,7 @@
 }
 
 [data-hover="gentle"] .compact-tool-card:hover .compact-tool-card__action-icon {
-  transition: transform var(--hover-duration-slow, 0.8s) var(--ease-out, ease-out);
+  transition: transform var(--hover-duration-slow) ease-out;
   transform: rotate(360deg);
 }
 
@@ -109,7 +109,30 @@
   transition: none;
 }
 
-/* ── Text only — strip media, icon, simplify badge ── */
+/* None — no hover changes */
+[data-hover="none"] .compact-tool-card:hover {
+  --_compact-action-rotate: 0deg;
+  --_compact-icon-color: var(--compact-icon-color, var(--brand-c-primary));
+  --_compact-action-color: var(--compact-action-color, var(--brand-c-primary));
+}
+
+/* ── Render modes ── */
+
+/* Reduced — strip rotation animation, keep colour change */
+[data-render="reduced"] .compact-tool-card__action-icon {
+  transition: none;
+}
+
+[data-render="reduced"] .compact-tool-card {
+  --_compact-action-rotate: 0deg;
+}
+
+/* Assistive — larger media for easier targeting */
+[data-render="assistive"] .compact-tool-card {
+  --_compact-media-size: var(--img-width-lg);
+}
+
+/* Text only — strip media, icon, simplify badge */
 [data-render="textonly"] .compact-tool-card__media,
 [data-render="textonly"] .compact-tool-card__action {
   display: none;
@@ -120,11 +143,4 @@
   color: var(--text-body);
   border: 1px solid var(--text-body);
   box-shadow: none;
-}
-
-/* None — no hover changes */
-[data-hover="none"] .compact-tool-card:hover {
-  --_compact-action-rotate: 0deg;
-  --_compact-icon-color: var(--compact-icon-color, var(--brand-c-primary));
-  --_compact-action-color: var(--compact-action-color, var(--brand-c-primary));
 }

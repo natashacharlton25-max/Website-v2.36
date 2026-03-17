@@ -537,7 +537,7 @@ Badge, Button, Card, FormField, Heading, Icon, Image, Link, List, LottieIcon, Te
 | AuthorCard | `molecules/cards/AuthorCard/` | No | **PASS** 2026-03-16 |
 | BlogCard | `molecules/cards/BlogCard/` | No | **PASS** 2026-03-16 |
 | ~~ChoiceCard~~ | ~~`molecules/cards/ChoiceCard/`~~ | — | **DELETED** 2026-03-16 — merged into FormField card-select |
-| CompactToolCard | `molecules/cards/` | No | pending |
+| CompactToolCard | `molecules/cards/CompactToolCard/` | No | **PASS** 2026-03-17 |
 | FlipCard | `molecules/cards/` | No | pending |
 | GlowCard | `molecules/cards/` | No | pending |
 | ImageRevealCard | `molecules/cards/` | No | pending |

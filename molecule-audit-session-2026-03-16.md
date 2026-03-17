@@ -3,15 +3,25 @@
 ## Context
 Bottom-up audit of Tier 1 molecule cards (22 components, alphabetical order).
 Using `component-audit-post-atom-checklist.md` (15 sections).
-All 12 atoms are pass 2 clean. Hover gate system implemented today.
+All 12 atoms are pass 2 clean. Hover gate system implemented day 1.
 
 ## Session Summary
+
+### Day 1 (2026-03-16)
 - **3 molecules PASS**: RainbowBorderCard, AuthorCard, BlogCard
 - **2 molecules DELETED**: AssetCard (compose at page level), ChoiceCard (merged into FormField card-select)
 - **1 atom enhanced**: FormField — `fieldStyle="bare"`, card-select with image/icon/description/toggle, check indicators
 - **Hover gate system**: full infrastructure built (9 files), 4 atoms retrofitted
 - **5 latent bugs fixed**: data-cvd, data-theme-chroma, data-render, data-high-contrast, data-highlight-links never set by ThemeSwitcher
 - **Global fixes**: Badge dark mode text, Card dark/HC borders, typography scale, Button hover, FormField toggle iOS-style
+
+### Day 2 (2026-03-17)
+- **1 molecule PASS**: CompactToolCard
+- **1 atom enhanced**: Image atom — now accepts `string | ImageMetadata` (Astro build-time optimisation)
+- **Image size tokens rescaled**: 2xs(32px) → 5xl(500px), shape combos (circle/rounded/sharp)
+- **CLAUDE.md updated**: atom import rules (barrel only, never astro:assets)
+- **CardSelect decision**: NOT extracted as molecule. FormField card-select stays. Quiz logic → section organisms (QuizSection, AssessmentSection, MatchingSection, SurveySection)
+- **Global fixes**: Card hover-border → secondary in dark/HC, Badge fill transparent in dark mode, Badge sm letter-spacing
 
 ## Audit Order (Tier 1 — Molecule Cards)
 
@@ -20,8 +30,8 @@ All 12 atoms are pass 2 clean. Hover gate system implemented today.
 | 1 | AssetCard | **DELETED** | Not a molecule — just atoms composed together. Page-level composition with RainbowBorderCard wrapper. | |
 | 2 | AuthorCard | **PASS** | Folder structure, scoped style extracted, raw HTML→atoms (Image, Heading, Text), photo size via `--img-width-*` tokens, collection fields (longBio, credentials, specialties), `ImageMetadata` support | Offset photo pattern → future Card atom `mediaPosition` prop |
 | 3 | BlogCard | **PASS** | Folder structure, atoms used, token chain (7 tokens), hover gate, render modes, glass badge on image, fill tags, author icon+bold. Dark/HC rules in zone files. | Image atom figure needs border-radius:0 inside cards (global pattern) |
-| 4 | ChoiceCard | **PASS** | Folder structure, Card + FormField(bare) + Image/Icon atoms, inputType prop (checkbox/radio/toggle/text), description, active outline state, dark/HC zone rules | Merge into FormField card-select (add icon, description, toggle). Then delete ChoiceCard. |
-| 5 | CompactToolCard | pending | | |
+| 4 | ChoiceCard | **DELETED** | Merged into FormField card-select. Card-select now handles image/icon/description/checkbox/radio/toggle. Dark/HC zone rules, hover gate, textonly (unchanged — functional content). | |
+| 5 | CompactToolCard | **PASS** | Folder structure, Card + Image + Heading + Text + Badge + Icon atoms. Internal tokens (7). Plus icon 360 spin (full), slow spin (gentle), scale (instant), static (none). Icon colour primary→secondary on hover (gated). Media slot: image (string\|ImageMetadata), icon, LottieIcon. Responsive: stack 480px, centre 300px, hide media 200px. Textonly: media + action hidden, badge outline. | |
 | 6 | FlipCard | pending | | |
 | 7 | GlowCard | pending | | |
 | 8 | ImageRevealCard | pending | | |
@@ -78,6 +88,14 @@ All 12 atoms are pass 2 clean. Hover gate system implemented today.
 | 32 | Pages only import organisms + JSON — never atoms/molecules directly | Section organisms compose atoms. Pages pass data. | 2026-03-16 |
 | 33 | All dark/HC rules go in zone files, never in component CSS | Component CSS is mode-agnostic. Zones handle visual adaptation. | 2026-03-16 |
 | 34 | Internal token chain mandatory for all molecules | `--_component-*` tokens with `--component-*` bridge. Render modes override internal tokens. Priority: render > JSON > defaults. | 2026-03-16 |
+| 35 | CardSelect NOT extracted as molecule | FormField card-select stays. Quiz/assessment logic → section organisms (QuizSection, AssessmentSection, MatchingSection, SurveySection). FormField stays dumb. | 2026-03-17 |
+| 36 | Image atom accepts `string \| ImageMetadata` | Molecules pass imported assets or URLs. Atom routes to `AstroImage` (build-time) or `<img>` (runtime). Both paths get full a11y. | 2026-03-17 |
+| 37 | Image size tokens rescaled | New thumbnail sizes: 2xs(32px), xs(48px), sm(64px), md(80px). Old xs(128px)→lg. Shape combos: .img-circle-*, .img-rounded-*, .img-sharp-*. | 2026-03-17 |
+| 38 | CLAUDE.md: atom import rules added | Barrel imports only. Never `astro:assets`. Never direct `.astro` files. Image atom handles ImageMetadata. | 2026-03-17 |
+| 39 | Card hover-border → secondary in dark/HC | Global zone fix. Static border = primary, hover = secondary. Visible change in dark/HC modes. | 2026-03-17 |
+| 40 | Badge fill dark mode: transparent bg | Fill badges in dark mode get no background, just border + glow. Prevents dark-on-dark readability issues. | 2026-03-17 |
+| 41 | Badge sm: letter-spacing 0.08em | Small badges with uppercase text need wider spacing for readability. | 2026-03-17 |
+| 42 | Icon colour via CSS tokens, not inline `color` prop | Inline `color` has highest specificity — CSS hover can't override. Use `currentColor` inheritance from parent container. | 2026-03-17 |
 
 ## Deferred Items (added to v2-audit-todo)
 
@@ -92,3 +110,7 @@ All 12 atoms are pass 2 clean. Hover gate system implemented today.
 | 7 | AuthorCard: photo → Card atom media slot once `mediaPosition` exists | Card atom `mediaPosition` | 2026-03-16 |
 | 8 | Author page: full dedicated page with all collection fields | New page build | 2026-03-16 |
 | 9 | FormField card-select cognitive gating: hide indicators at green level, show at yellow+ | `data-cognitive-level` integration | 2026-03-16 |
+| 10 | QuizSection organism: FormField card-select + reveal button + confetti + correct/wrong states + explanation text | Organism audit phase | 2026-03-17 |
+| 11 | AssessmentSection organism: multi-question quiz + scoring + progress bar | Organism audit phase | 2026-03-17 |
+| 12 | MatchingSection organism: drag-and-drop matching | Organism audit phase | 2026-03-17 |
+| 13 | SurveySection organism: data collection with mixed FormField types | Organism audit phase | 2026-03-17 |
