@@ -1,0 +1,105 @@
+/* ══════════════════════════════════════════
+   CompactToolCard — horizontal card with
+   media (image/icon/lottie) + content
+   ══════════════════════════════════════════ */
+
+/* ── Internal tokens ── */
+.compact-tool-card {
+  --_compact-media-size: var(--compact-media-size, var(--img-width-md));
+  --_compact-media-radius: var(--compact-media-radius, var(--radius-md));
+  --_compact-media-bg: var(--compact-media-bg, var(--page-bg-sunken));
+  --_compact-icon-color: var(--compact-icon-color, var(--brand-c-primary));
+  --_compact-action-color: var(--compact-action-color, var(--brand-c-primary));
+  --_compact-action-rotate: 0deg;
+
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+/* ── Media slot ── */
+.compact-tool-card__media {
+  width: var(--_compact-media-size);
+  height: var(--_compact-media-size);
+  flex-shrink: 0;
+  border-radius: var(--_compact-media-radius);
+  overflow: hidden;
+  background: var(--_compact-media-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--_compact-icon-color);
+}
+
+.compact-tool-card__media img,
+.compact-tool-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.compact-tool-card__icon {
+  color: inherit;
+}
+
+/* ── Content ── */
+.compact-tool-card__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.compact-tool-card__content .badge {
+  width: fit-content;
+}
+
+.compact-tool-card__desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Action icon (plus → rotates on hover) ── */
+.compact-tool-card__action {
+  flex-shrink: 0;
+  align-self: flex-end;
+  color: var(--_compact-action-color);
+}
+
+.compact-tool-card__action-icon {
+  color: var(--_compact-action-color);
+  transition: transform var(--hover-duration-base, 0.3s) var(--ease-out, ease-out);
+  transform: rotate(var(--_compact-action-rotate));
+  display: inline-block;
+}
+
+/* ── Hover — gated by data-hover ── */
+
+/* Full hover (explicit + default when no data-hover set) */
+[data-hover="full"] .compact-tool-card:hover,
+:not([data-hover]) .compact-tool-card:hover {
+  --_compact-action-rotate: 360deg;
+  --_compact-icon-color: var(--brand-c-secondary);
+  --_compact-action-color: var(--brand-c-secondary);
+}
+
+/* Gentle hover */
+[data-hover="gentle"] .compact-tool-card:hover .compact-tool-card__action-icon {
+  transition: transform var(--hover-duration-slow, 0.8s) var(--ease-out, ease-out);
+  transform: rotate(360deg);
+}
+
+/* Instant hover — icon goes bold, no animation */
+[data-hover="instant"] .compact-tool-card:hover .compact-tool-card__action-icon {
+  transform: scale(1.3);
+  transition: none;
+}
+
+/* None — no hover changes */
+[data-hover="none"] .compact-tool-card:hover {
+  --_compact-action-rotate: 0deg;
+}

@@ -92,6 +92,32 @@ For categories:
 
 ---
 
+## Atom Imports — USE THESE EXACTLY
+
+Every molecule and organism MUST import atoms via barrel. NEVER import from `astro:assets`, never import `.astro` files directly. The Image atom handles `ImageMetadata` internally.
+
+```astro
+import { Image } from '../../atoms/Image';        // NOT 'astro:assets'
+import { Card } from '../../atoms/Card';
+import { Heading } from '../../atoms/Heading';
+import { Text } from '../../atoms/Text';
+import { Badge } from '../../atoms/Badge';
+import { Button } from '../../atoms/Button';
+import { Icon } from '../../atoms/Icon';
+import { Link } from '../../atoms/Link';
+import { FormField } from '../../atoms/FormField';
+import { Tooltip } from '../../atoms/Tooltip';
+import { List } from '../../atoms/List';
+import { LottieIcon } from '../../atoms/LottieIcon';
+```
+
+- Adjust `../../` depth based on file location (molecules = `../../../atoms/`, organisms = `../../../../atoms/`)
+- Barrel handles CSS side-effect imports — direct `.astro` import skips CSS
+- Image atom accepts `string` (URL) OR `ImageMetadata` (import) — no need to bypass it
+- NEVER use raw `<h1>`–`<h6>`, `<p>`, `<span>`, `<a>`, `<img>`, `<ul>`, `<button>` — use the atom
+
+---
+
 ## Render Architecture Contract
 
 ### No hardcoded values in component CSS:

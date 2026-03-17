@@ -1,0 +1,68 @@
+---
+/**
+ * CompactToolCard — horizontal card with media + content
+ *
+ * Media slot: image (URL or import), icon, or LottieIcon.
+ * Plus icon rotates on hover (gated). Card atom handles chrome.
+ *
+ * Styles: CompactToolCard.css | CompactToolCard.responsive.css
+ */
+import type { ImageMetadata } from 'astro';
+import Card from '../../../atoms/Card/Card.astro';
+import Badge from '../../../atoms/Badge/Badge.astro';
+import Heading from '../../../atoms/Heading/Heading.astro';
+import Text from '../../../atoms/Text/Text.astro';
+import Image from '../../../atoms/Image/Image.astro';
+import Icon from '../../../atoms/Icon/Icon.astro';
+import LottieIcon from '../../../atoms/LottieIcon/LottieIcon.astro';
+
+interface Props {
+  href: string;
+  name: string;
+  category?: string;
+  description: string;
+  image?: string | ImageMetadata;
+  icon?: string;
+  iconWeight?: 'fill' | 'duotone' | 'regular';
+  lottieSlug?: string;
+  class?: string;
+}
+
+const { href, name, category, description, image, icon, lottieSlug, iconWeight = 'duotone', class: className } = Astro.props;
+const hasMedia = !!(image || icon || lottieSlug);
+---
+
+<Card
+  as="div"
+  variant="default"
+  hover={['lift', 'border']}
+  shadow="sm"
+  radius="lg"
+  padding="lg"
+  href={href}
+  class:list={['compact-tool-card', className]}
+>
+  {hasMedia && (
+    <div class="compact-tool-card__media">
+      {image && (
+        <Image src={image} alt={name} role="decorative" class="compact-tool-card__img" />
+      )}
+      {icon && !image && (
+        <Icon name={icon} weight={iconWeight} size={40} class="compact-tool-card__icon" />
+      )}
+      {lottieSlug && !image && !icon && (
+        <LottieIcon slug={lottieSlug} class="compact-tool-card__lottie" />
+      )}
+    </div>
+  )}
+  <div class="compact-tool-card__content">
+    {category && (
+      <Badge variant="fill" size="sm" label={category} />
+    )}
+    <Heading level={3} size="h4" color="accent" flush>{name}</Heading>
+    <Text size="sm" color="muted">{description}</Text>
+  </div>
+  <div class="compact-tool-card__action">
+    <Icon name="plus" weight="regular" size={20} class="compact-tool-card__action-icon" />
+  </div>
+</Card>
