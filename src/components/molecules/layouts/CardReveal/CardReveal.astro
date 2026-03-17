@@ -2,40 +2,30 @@
 /**
  * CardReveal — two-column card pairs with click-to-reveal
  *
- * Grid: two columns. Left card: always visible. Right card: hidden until clicked.
- * Both use Card atom — textonly render works automatically.
- * Reusable for FlipCard textonly, quizzes, FAQ, any front/back content.
+ * Chrome only — grid layout + reveal interaction.
+ * Card atom wraps each slot. Content is section organism's concern.
+ * Keyboard: Enter/Space toggles. Focus-within shows visual feedback.
  *
  * Styles: CardReveal.css | CardReveal.responsive.css
  */
 import Card from '../../../atoms/Card/Card.astro';
-import Heading from '../../../atoms/Heading/Heading.astro';
-import Text from '../../../atoms/Text/Text.astro';
-import Button from '../../../atoms/Button/Button.astro';
-
-interface CardRevealItem {
-  title: string;
-  subtitle?: string;
-  detail: string;
-  href?: string;
-  linkLabel?: string;
-}
 
 interface Props {
-  items: CardRevealItem[];
+  count: number;
   class?: string;
 }
 
 const {
-  items,
+  count,
   class: className,
 } = Astro.props;
+
+const indices = Array.from({ length: count }, (_, i) => i);
 ---
 
 <div class:list={['card-reveal', className]} data-card-reveal>
-  {items.map((item, i) => (
+  {indices.map((i) => (
     <div class="card-reveal__row">
-      <!-- Left: front card -->
       <Card
         variant="outline"
         padding="lg"
@@ -43,14 +33,8 @@ const {
         class:list={['card-reveal__front', i === 0 && 'card-reveal__front--active']}
         data-reveal-index={i}
       >
-        <Heading level={3} size="h4" flush>{item.title}</Heading>
-        {item.subtitle && (
-          <Text size="sm" color="muted">{item.subtitle}</Text>
-        )}
-        <Button variant="outline" size="sm" class="card-reveal__reveal-btn">Reveal More</Button>
+        <slot name={`front-${i}`} />
       </Card>
-
-      <!-- Right: back card (hidden until clicked) -->
       <Card
         variant="outline"
         padding="lg"
@@ -59,11 +43,7 @@ const {
         data-reveal-panel={i}
       >
         <div class="card-reveal__back-inner">
-          <Heading level={3} size="h4" flush>{item.title}</Heading>
-          <Text size="sm" color="muted">{item.detail}</Text>
-          {item.href && (
-            <Button href={item.href} variant="outline" size="sm">{item.linkLabel || 'Learn More'}</Button>
-          )}
+          <slot name={`back-${i}`} />
         </div>
       </Card>
     </div>
@@ -74,16 +54,24 @@ const {
   function initCardReveal(): void {
     document.querySelectorAll<HTMLElement>('[data-card-reveal]').forEach((group) => {
       const fronts = group.querySelectorAll<HTMLElement>('[data-reveal-index]');
-      const backs = group.querySelectorAll<HTMLElement>('[data-reveal-panel]');
 
       fronts.forEach((front) => {
-        front.addEventListener('click', () => {
-          const index = front.dataset.revealIndex;
-          const target = group.querySelector<HTMLElement>(`[data-reveal-panel="${index}"]`);
+        front.setAttribute('tabindex', '0');
+        front.setAttribute('role', 'button');
 
-          // Toggle this pair only
+        function toggle(): void {
+          const index = front.dataset.revealIndex;
           front.classList.toggle('card-reveal__front--active');
+          const target = group.querySelector<HTMLElement>(`[data-reveal-panel="${index}"]`);
           if (target) target.classList.toggle('card-reveal__back--active');
+        }
+
+        front.addEventListener('click', toggle);
+        front.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggle();
+          }
         });
       });
     });

@@ -2,7 +2,12 @@
    CardReveal — two-column card pairs
    ══════════════════════════════════════════ */
 
+/* ── Internal tokens ── */
 .card-reveal {
+  --_reveal-active-border: var(--reveal-active-border, var(--brand-c-primary));
+  --_reveal-hover-border: var(--reveal-hover-border, var(--brand-c-secondary));
+  --_reveal-gap: var(--reveal-gap, var(--space-lg));
+
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
@@ -12,22 +17,15 @@
 .card-reveal__row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
+  gap: var(--_reveal-gap);
 }
 
 /* ── Front card — clickable ── */
 .card-reveal__front {
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
 }
 
-.card-reveal__reveal-btn {
-  margin-top: auto;
-  align-self: flex-end;
-}
-
-/* ── Back card — hidden until companion clicked ── */
+/* ── Back card — content hidden until companion clicked ── */
 .card-reveal__back-inner {
   opacity: 0;
   display: flex;
@@ -42,12 +40,16 @@
 
 /* ── Active front highlight ── */
 .card-reveal__front--active {
-  border-color: var(--brand-c-primary);
+  border-color: var(--_reveal-active-border);
 }
 
-/* ── Hover (gated) ── */
-[data-hover="full"] .card-reveal__front:hover,
-:root:not([data-hover]) .card-reveal__front:hover,
-[data-hover="gentle"] .card-reveal__front:hover {
-  border-color: var(--brand-c-secondary);
+/* ── Hover — base rule, none suppresses ── */
+.card-reveal__front:hover,
+.card-reveal__front:focus-within {
+  border-color: var(--_reveal-hover-border);
+}
+
+[data-hover="none"] .card-reveal__front:hover,
+[data-hover="none"] .card-reveal__front:focus-within {
+  border-color: var(--_reveal-active-border);
 }
