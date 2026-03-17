@@ -19,7 +19,7 @@
 }
 
 /* ── Reduced tooltip — hidden by default ── */
-.flip-card__reduced-tooltip {
+.flip-card__reveal-render {
   display: none;
 }
 
@@ -303,21 +303,12 @@
    Render modes
    ══════════════════════════════════════════ */
 
-/* Reduced — no 3D flip, show tooltip */
-[data-render="reduced"] .flip-card__face {
-  transition: none;
-}
-
-[data-render="reduced"] .flip-card__back {
+/* Reduced — hide flip, show CardReveal */
+[data-render="reduced"] .flip-card__box {
   display: none;
 }
 
-[data-render="reduced"] .flip-card--flipped .flip-card__front,
-[data-render="reduced"] .flip-card--trigger-hover:hover .flip-card__front {
-  transform: rotateY(0deg);
-}
-
-[data-render="reduced"] .flip-card__reduced-tooltip {
+[data-render="reduced"] .flip-card__reveal-render {
   display: block;
 }
 
@@ -326,100 +317,11 @@
   --_flip-min-height: 28rem;
 }
 
-/* Textonly — single card, back hidden until revealed, no 3D */
-[data-render="textonly"] .flip-card {
-  perspective: none;
-  cursor: default;
-}
-
-[data-render="textonly"] .flip-card--animated .flip-card__face {
-  transition: none;
-}
-
+/* Textonly — hide flip, show CardReveal (Card atom handles textonly) */
 [data-render="textonly"] .flip-card__box {
-  perspective: none;
-  transform-style: flat;
-}
-
-[data-render="textonly"] .flip-card__front {
-  position: static;
-  transform: none;
-  backface-visibility: visible;
-  min-height: auto;
-  background: transparent;
-  color: var(--text-body);
-  border: 1px solid var(--text-body);
-  border-radius: var(--_flip-radius);
-}
-
-[data-render="textonly"] .flip-card__back {
-  position: static;
-  transform: none;
-  backface-visibility: visible;
-  min-height: auto;
-  background: transparent;
-  color: var(--text-body);
-  border: none;
-  border-top: 1px dashed var(--text-body);
-  border-radius: 0;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: max-height var(--hover-duration) ease-out, opacity var(--hover-duration) ease-out;
-}
-
-/* Revealed state — fade in, no rotation */
-[data-render="textonly"] .flip-card--flipped .flip-card__front {
-  transform: none;
-}
-
-[data-render="textonly"] .flip-card--flipped .flip-card__back {
-  transform: none;
-  max-height: 30rem;
-  opacity: 1;
-  padding-top: var(--space-md);
-}
-
-[data-render="textonly"] .flip-card__front::after {
   display: none;
 }
 
-[data-render="textonly"] .flip-card__inner {
-  position: static;
-  transform: none;
-}
-
-[data-render="textonly"] .flip-card__inner.card--glass,
-[data-render="textonly"] .flip-card__inner.card--transparent {
-  background: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: none;
-  box-shadow: none;
-  color: var(--text-body);
-}
-
-[data-render="textonly"] .flip-card__arrow,
-[data-render="textonly"] .flip-card__front-icon {
-  display: none;
-}
-
-[data-render="textonly"] .flip-card__reduced-tooltip {
-  display: none;
-}
-
-[data-render="textonly"] .flip-card__bg-image,
-[data-render="textonly"] .flip-card__face img {
-  display: none;
-}
-
-/* Textonly reveal button */
-[data-render="textonly"] .flip-card__textonly-reveal {
+[data-render="textonly"] .flip-card__reveal-render {
   display: block;
-  margin-top: var(--space-sm);
-}
-
-/* Hide reveal button outside textonly */
-.flip-card__textonly-reveal {
-  display: none;
 }

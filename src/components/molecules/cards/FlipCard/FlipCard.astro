@@ -17,7 +17,7 @@ import Text from '../../../atoms/Text/Text.astro';
 import Button from '../../../atoms/Button/Button.astro';
 import Icon from '../../../atoms/Icon/Icon.astro';
 import Image from '../../../atoms/Image/Image.astro';
-import Tooltip from '../../../atoms/Tooltip/Tooltip.astro';
+import CardReveal from '../../../molecules/layouts/CardReveal/CardReveal.astro';
 
 interface Props {
   title: string;
@@ -76,7 +76,6 @@ const {
           <Text size="sm" color="inherit" class="flip-card__subtitle">{subtitle}</Text>
         )}
       </Card>
-      <Button variant="outline" size="sm" class="flip-card__textonly-reveal">Reveal Info</Button>
     </div>
 
     <!-- Back face -->
@@ -94,16 +93,9 @@ const {
     </div>
   </div>
 
-  <!-- Reduced render: tooltip with back content -->
-  <div class="flip-card__reduced-tooltip" aria-hidden="true">
-    <Tooltip purpose="info">
-      <Fragment slot="content">
-        <Text size="sm" flush>{description}</Text>
-        {href && (
-          <Button href={href} variant="outline" size="sm" class="flip-card__cta">{linkLabel}</Button>
-        )}
-      </Fragment>
-    </Tooltip>
+  <!-- Reduced/Textonly render: CardReveal -->
+  <div class="flip-card__reveal-render">
+    <CardReveal items={[{ title, subtitle, detail: description, href, linkLabel }]} />
   </div>
 </div>
 

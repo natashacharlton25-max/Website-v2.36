@@ -1,0 +1,94 @@
+---
+/**
+ * CardReveal — two-column card pairs with click-to-reveal
+ *
+ * Grid: two columns. Left card: always visible. Right card: hidden until clicked.
+ * Both use Card atom — textonly render works automatically.
+ * Reusable for FlipCard textonly, quizzes, FAQ, any front/back content.
+ *
+ * Styles: CardReveal.css | CardReveal.responsive.css
+ */
+import Card from '../../../atoms/Card/Card.astro';
+import Heading from '../../../atoms/Heading/Heading.astro';
+import Text from '../../../atoms/Text/Text.astro';
+import Button from '../../../atoms/Button/Button.astro';
+
+interface CardRevealItem {
+  title: string;
+  subtitle?: string;
+  detail: string;
+  href?: string;
+  linkLabel?: string;
+}
+
+interface Props {
+  items: CardRevealItem[];
+  class?: string;
+}
+
+const {
+  items,
+  class: className,
+} = Astro.props;
+---
+
+<div class:list={['card-reveal', className]} data-card-reveal>
+  {items.map((item, i) => (
+    <div class="card-reveal__row">
+      <!-- Left: front card -->
+      <Card
+        variant="outline"
+        padding="lg"
+        radius="lg"
+        class:list={['card-reveal__front', i === 0 && 'card-reveal__front--active']}
+        data-reveal-index={i}
+      >
+        <Heading level={3} size="h4" flush>{item.title}</Heading>
+        {item.subtitle && (
+          <Text size="sm" color="muted">{item.subtitle}</Text>
+        )}
+        <Button variant="outline" size="sm" class="card-reveal__reveal-btn">Reveal More</Button>
+      </Card>
+
+      <!-- Right: back card (hidden until clicked) -->
+      <Card
+        variant="outline"
+        padding="lg"
+        radius="lg"
+        class:list={['card-reveal__back', i === 0 && 'card-reveal__back--active']}
+        data-reveal-panel={i}
+      >
+        <div class="card-reveal__back-inner">
+          <Heading level={3} size="h4" flush>{item.title}</Heading>
+          <Text size="sm" color="muted">{item.detail}</Text>
+          {item.href && (
+            <Button href={item.href} variant="outline" size="sm">{item.linkLabel || 'Learn More'}</Button>
+          )}
+        </div>
+      </Card>
+    </div>
+  ))}
+</div>
+
+<script>
+  function initCardReveal(): void {
+    document.querySelectorAll<HTMLElement>('[data-card-reveal]').forEach((group) => {
+      const fronts = group.querySelectorAll<HTMLElement>('[data-reveal-index]');
+      const backs = group.querySelectorAll<HTMLElement>('[data-reveal-panel]');
+
+      fronts.forEach((front) => {
+        front.addEventListener('click', () => {
+          const index = front.dataset.revealIndex;
+          const target = group.querySelector<HTMLElement>(`[data-reveal-panel="${index}"]`);
+
+          // Toggle this pair only
+          front.classList.toggle('card-reveal__front--active');
+          if (target) target.classList.toggle('card-reveal__back--active');
+        });
+      });
+    });
+  }
+
+  initCardReveal();
+  document.addEventListener('astro:page-load', initCardReveal);
+</script>
