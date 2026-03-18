@@ -282,6 +282,23 @@
   --_btn-brand-light: var(--btn-light-bg, var(--neutral-400));
 }
 
+/* Fill variant hovers (primary, secondary, neutral) */
+.btn--primary:hover,
+.btn--secondary:hover,
+.btn--neutral:hover {
+  background-color: var(--_btn-brand-dark);
+  box-shadow: var(--btn-shadow-hover, var(--shadow-btn-hover));
+  transform: translateY(-1px);
+}
+
+.btn--primary:active,
+.btn--secondary:active,
+.btn--neutral:active {
+  background-color: color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
+  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  transform: translateY(1px);
+}
+
 /* ==========================================================
    STYLE VARIANTS — override base appearance, inherit colour
    from --_btn-brand tokens set above
@@ -574,7 +591,7 @@
 }
 
 .btn--glassic:hover {
-  color: var(--primary-200);
+  background: color-mix(in oklch, var(--_btn-brand) 30%, var(--glass-bg));
   transform: translateY(0.125em);
   box-shadow:
     inset 8px 8px 16px color-mix(in oklch, var(--color-Black) 40%, transparent),
@@ -638,7 +655,7 @@
 }
 
 .btn--liquid-glass:hover {
-  color: var(--primary-200);
+  background: color-mix(in oklch, var(--_btn-brand) 20%, var(--liquid-tint));
   border-color: var(--liquid-inner-glow);
   box-shadow:
     var(--liquid-inner-shadow),
@@ -857,6 +874,7 @@
   --_expand-r-start: 999px;
   --_expand-r-end: 999px;
   background: transparent;
+  color: var(--neutral-800);
   box-shadow: none;
   padding: 1.1rem 1.4rem 1.1rem calc(var(--_expand-circle) + 0.5rem);
   overflow: visible;
@@ -867,6 +885,7 @@
 .btn--expand:hover,
 .btn--expand:active {
   background: transparent;
+  color: var(--btn-text, var(--btn-filled-text));
   box-shadow: none;
   transform: none;
 }
@@ -909,22 +928,47 @@
   --_expand-r-end: 0;
 }
 
-/* Icon pinned to circle centre */
+/* Icon pinned to circle centre, rotates on hover */
 .btn--expand .btn__icon {
   position: absolute;
   left: calc(var(--_expand-circle) / 2);
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) rotate(0deg);
   z-index: 1;
   color: var(--btn-text, var(--btn-filled-text));
-  transition: transform var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1), opacity var(--hover-duration-fast) ease;
+  transition: transform var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1);
 }
 
-/* Text — brand colour by default, white on hover */
+.btn--expand:hover .btn__icon {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* Default chevron when no icon — SVG arrow-right via ::after on circle.
+   Hidden when .btn--has-icon is set (Icon atom takes over). */
+.btn--expand:not(.btn--has-icon)::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--_expand-circle) / 2);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 1.25em;
+  height: 1.25em;
+  z-index: 1;
+  background: var(--btn-text, var(--btn-filled-text));
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1);
+}
+
+.btn--expand:not(.btn--has-icon):hover::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* Text — dark brand colour static, white on hover */
 .btn--expand .btn__label {
   position: relative;
   z-index: 2;
-  color: var(--_btn-brand);
+  color: var(--neutral-800);
   transition: color var(--hover-duration) ease;
 }
 
@@ -1038,6 +1082,12 @@
   overflow: visible;
 }
 
+/* Split text — always visible, just the split animation around it */
+.btn--split .btn__label {
+  position: relative;
+  z-index: 2;
+}
+
 .btn--split::before,
 .btn--split::after {
   content: '';
@@ -1047,6 +1097,7 @@
   height: 50%;
   background: var(--_btn-brand);
   transition: transform var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1);
+  transition-delay: calc(var(--hover-duration) * 0.3);
   pointer-events: none;
 }
 

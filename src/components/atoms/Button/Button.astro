@@ -63,8 +63,14 @@ export interface Props {
   confettiTrigger?: 'click' | 'hover';
   confettiCount?: number;
   confettiSpread?: number;
+  /** Text revealed after split effect opens — button sizes to longest */
+  splitText?: string;
+  /** Icon animation — forwarded to Icon atom */
+  iconSpin?: boolean;
+  iconBounce?: boolean;
   dropdownItems?: DropdownItem[];
   class?: string;
+  style?: string;
   [key: `data-${string}`]: string | undefined;
 }
 
@@ -95,6 +101,9 @@ const {
   confettiTrigger = 'click',
   confettiCount = 30,
   confettiSpread = 150,
+  splitText,
+  iconSpin,
+  iconBounce,
   dropdownItems = [],
   class: className = '',
   ...rest
@@ -120,12 +129,14 @@ const iconSize = iconSizes[size] || 18;
 // Build icon name — only prefix with collection if explicitly provided
 const iconName = icon ? (iconCollection ? `${iconCollection}/${icon}` : icon) : '';
 
-// Icon animation props — passed through to Icon component
+// Icon props — all forwarded to Icon atom. Icon owns its own gates.
 const iconAnimProps = {
   ...(iconMorphTo ? { morphTo: iconMorphTo } : {}),
   ...(iconMorphColor ? { morphColor: iconMorphColor } : {}),
   ...(iconDraw ? { draw: iconDraw } : {}),
   ...(iconDrawColor ? { drawColor: iconDrawColor } : {}),
+  ...(iconSpin ? { spin: iconSpin } : {}),
+  ...(iconBounce ? { bounce: iconBounce } : {}),
 };
 
 // Build classes
@@ -136,6 +147,7 @@ const classes = [
   size !== 'md' && `btn--${size}`,
   effect && `btn--${effect}`,
   speed && `btn--speed-${speed}`,
+  hasIcon && 'btn--has-icon',
   hasIcon && `btn--icon-${iconPosition}`,
   isIconOnly && 'btn--icon-only',
   confetti && 'btn--confetti',
