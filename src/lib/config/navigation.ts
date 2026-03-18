@@ -26,12 +26,13 @@ export const MAIN_NAV_LINKS: NavLink[] = [
   { text: 'Assets', href: '/assets' },
   { text: 'Insights', href: '/insights' },
   { text: 'Services', href: '/services' },
+  { text: 'Atom Tests', href: '/test/heading' },
 ];
 
 /**
  * Which nav items have expandable mega menus
  */
-export const NAV_ITEMS_WITH_MENUS = ['Assets', 'Insights', 'Services'];
+export const NAV_ITEMS_WITH_MENUS = ['Assets', 'Insights', 'Services', 'Atom Tests'];
 
 /**
  * Mega menu content for expandable nav items
@@ -53,6 +54,10 @@ export const MEGA_MENUS: Record<string, MegaMenuItem[]> = {
     { title: 'All Services', description: 'Explore our full range of services', href: '/services', image: '/_Unused Images/1.png' },
     { title: 'Workshops', description: 'Join our interactive group sessions', href: '/services#workshops', image: '/_Unused Images/6.png' },
     { title: 'Consultations', description: 'One-on-one personalized support', href: '/services#consultations', image: '/_Unused Images/contact us 1.jpg' },
+  ],
+  'atom tests': [
+    { title: 'Heading', description: 'Levels, sizes, weights, colours, variants, media, AAC', href: '/test/heading' },
+    { title: 'Badge', description: 'Variants, sizes, shapes, icons, colours, semantic roles', href: '/test/badge' },
   ],
   settings: [
     { title: 'Contact', description: '', href: '/contact', icon: 'mail' },

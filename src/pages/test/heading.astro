@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Heading from '../../components/atoms/Heading/Heading.astro';
+import Section from '../../components/atoms/Section/Section.astro';
+import '../../components/atoms/Section/Section.css';
+
+import testData from '../../data/test/heading.json';
+
+// Pipeline: strip props per render mode
+// Full: all props
+// Reduced: content + visual + colour, no animation (lottieIcon → fallbackIcon)
+// Textonly: content only (level, text, subtitle)
+function fullProps(h: any) {
+  return h;
+}
+
+function reducedProps(h: any) {
+  const { lottieIcon, aac, ...rest } = h;
+  // Route lottieIcon → static fallback icon
+  const icon = typeof lottieIcon === 'object' ? (lottieIcon.fallbackIcon || h.icon) :
+               lottieIcon ? h.icon : h.icon;
+  return { ...rest, icon, lottieIcon: undefined };
+}
+
+function textonlyProps(h: any) {
+  return { level: h.level, text: h.text, subtitle: h.subtitle };
+}
+---
+
+<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
+  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
+
+    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+
+    {testData.sections.map((section: any) => (
+      <Section label={section.label} separator gap={testData.layout.itemGap}>
+        {section.items.map((h: any) => (
+          <Fragment>
+            <div class="render-full">
+              <Heading
+                level={h.level}
+                size={h.size}
+                weight={h.weight}
+                family={h.family}
+                align={h.align}
+                uppercase={h.uppercase}
+                tracking={h.tracking}
+                subtitle={h.subtitle}
+                subtitleSize={h.subtitleSize}
+                divider={h.divider}
+                dividerStyle={h.dividerStyle}
+                dividerEnds={h.dividerEnds}
+                variant={h.variant}
+                underlineStyle={h.underlineStyle}
+                image={h.image}
+                icon={h.icon}
+                lottieIcon={h.lottieIcon}
+                mediaPosition={h.mediaPosition}
+                mediaSize={h.mediaSize}
+                iconStyle={h.iconStyle}
+                spacing={h.spacing}
+                aac={h.aac}
+                style={h.style}
+                flush
+              >
+                {h.text}
+              </Heading>
+            </div>
+            <div class="render-reduced">
+              {(() => { const r = reducedProps(h); return (
+                <Heading
+                  level={r.level}
+                  size={r.size}
+                  weight={r.weight}
+                  family={r.family}
+                  align={r.align}
+                  uppercase={r.uppercase}
+                  tracking={r.tracking}
+                  subtitle={r.subtitle}
+                  subtitleSize={r.subtitleSize}
+                  divider={r.divider}
+                  dividerStyle={r.dividerStyle}
+                  dividerEnds={r.dividerEnds}
+                  variant={r.variant}
+                  underlineStyle={r.underlineStyle}
+                  image={r.image}
+                  icon={r.icon}
+                  mediaPosition={r.mediaPosition}
+                  mediaSize={r.mediaSize}
+                  iconStyle={r.iconStyle}
+                  spacing={r.spacing}
+                  style={r.style}
+                  flush
+                >
+                  {r.text}
+                </Heading>
+              ); })()}
+            </div>
+            <div class="render-textonly">
+              <Heading level={h.level} subtitle={h.subtitle} flush>{h.text}</Heading>
+            </div>
+          </Fragment>
+        ))}
+      </Section>
+    ))}
+
+  </Section>
+</BaseLayout>
