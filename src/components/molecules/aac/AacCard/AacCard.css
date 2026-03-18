@@ -21,8 +21,8 @@
   align-items: center;
   gap: var(--space-2xs);
   padding: var(--space-xs) var(--space-sm);
-  background: var(--_aac-card-bg, var(--page-bg));
-  border: 1px solid var(--_aac-card-border, var(--neutral-400));
+  background: var(--_aac-card-bg, var(--neutral-200));
+  border: 3px solid var(--_aac-card-border, var(--neutral-400));
   border-radius: var(--radius-md);
   vertical-align: top;
   text-align: center;
@@ -37,6 +37,21 @@
 .aac-card__pictogram {
   display: block;
   object-fit: contain;
+  filter: var(--_aac-pictogram-filter, none);
+}
+
+/* ==========================================================
+   Pictogram filters — controlled by data-aac-filter on <html>
+   via Your View panel. Temporary while PNGs have baked-in
+   colours — remove when symbols are SVGs recolored by theme.
+   ========================================================== */
+
+[data-aac-filter="grayscale"] .aac-card__pictogram {
+  --_aac-pictogram-filter: var(--img-filter-grayscale);
+}
+
+[data-aac-filter="sepia"] .aac-card__pictogram {
+  --_aac-pictogram-filter: var(--img-sepia);
 }
 
 /* Size variants — pictogram dimensions */
@@ -61,6 +76,9 @@
    ========================================================== */
 
 .aac-card__word {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
   line-height: 1.2;
   color: var(--_aac-card-text, var(--neutral-800));
 }
@@ -116,6 +134,29 @@
 .aac-card--indicator .aac-card__word {
   font-size: var(--text-xs);
   font-style: italic;
+}
+
+
+/* ==========================================================
+   CVD / monochrome — desaturate pictograms for colour-blind
+   users while PNG sources have baked-in colours. Once symbols
+   are SVGs we can recolor with theme tokens instead.
+   ========================================================== */
+
+[data-palette="mono"] .aac-card__pictogram,
+[data-theme-chroma="grey"] .aac-card__pictogram {
+  filter: grayscale(1) contrast(1.2);
+}
+
+[data-palette="no-reds"] .aac-card__pictogram,
+[data-cvd="protan"] .aac-card__pictogram,
+[data-cvd="deutan"] .aac-card__pictogram {
+  filter: contrast(1.15) saturate(0.7);
+}
+
+[data-palette="no-blues"] .aac-card__pictogram,
+[data-cvd="tritan"] .aac-card__pictogram {
+  filter: contrast(1.15) saturate(0.7);
 }
 
 

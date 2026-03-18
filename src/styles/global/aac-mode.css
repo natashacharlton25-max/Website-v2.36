@@ -95,9 +95,16 @@
   line-height: 1.3;
 }
 
-/* Hide the original text content when AAC cards replace it */
-[data-content-aac] .text__content,
-[data-content-aac] .heading-wrap__text-inner,
-[data-content-aac] .heading__text-inner {
+/* Hide the original text content when AAC cards replace it.
+ * Only hides text when this specific element HAS an .heading__aac sibling —
+ * i.e. build-time cards were generated for it. Headings without aac:true
+ * never have .heading__aac in the DOM so their text stays visible. */
+[data-content-aac] .heading-wrap__content:has(.heading__aac) .heading-wrap__text-inner,
+[data-content-aac] .heading:has(.heading__aac) .heading__text-inner {
+  display: none;
+}
+
+/* Text atom: hide text content only when AAC cards are present */
+[data-content-aac] .text:has(.text__aac) .text__content {
   display: none;
 }

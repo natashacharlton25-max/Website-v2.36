@@ -99,6 +99,37 @@ export default {
         });
       }
 
+      // ─── Generic R2 serving (/r2/:path) ─────────────
+      // Serves any R2 object by its exact key. Used by symbol set
+      // switching (Bliss SVGs at symbols/bliss/{bci_index}.svg).
+      const r2Match = path.match(/^\/r2\/(.+)$/);
+      if (r2Match && method === 'GET') {
+        const r2Key = r2Match[1];
+        const object = await env.STORAGE!.get(r2Key);
+
+        if (!object) {
+          return jsonError(404, 'R2 object not found');
+        }
+
+        const ext = r2Key.split('.').pop()?.toLowerCase();
+        const mimeMap: Record<string, string> = {
+          svg: 'image/svg+xml',
+          png: 'image/png',
+          jpg: 'image/jpeg',
+          jpeg: 'image/jpeg',
+          webp: 'image/webp',
+          json: 'application/json',
+        };
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': object.httpMetadata?.contentType || mimeMap[ext || ''] || 'application/octet-stream',
+            'Cache-Control': 'public, max-age=31536000, immutable',
+            'ETag': object.etag,
+          },
+        });
+      }
+
       // ─── Route matching ─────────────────────────────
       // Order matters: more specific routes first
 

@@ -133,6 +133,10 @@ async function lookupWord(
   if (cache.has(key)) return cache.get(key)!;
 
   // ── Tier 1: Our alt_symbols API (curated, fast) ──
+  // Even if no aac_url, capture bci_index and core_tier for fallback
+  let apiBci: number | null = null;
+  let apiTier: CoreTier = null;
+
   try {
     const res = await fetch(
       `${apiBase}/v1/alt-symbols?word_exact=${encodeURIComponent(key)}`,
@@ -146,11 +150,11 @@ async function lookupWord(
 
       if (Array.isArray(rows) && rows.length > 0) {
         const row = rows[0];
-        const tier = (row.core_tier as CoreTier) || null;
-        const bci = row.bci_index || null;
+        apiTier = (row.core_tier as CoreTier) || null;
+        apiBci = row.bci_index || null;
 
         if (row.aac_url && row.aac_url !== 'null') {
-          const result: AacLookup = { type: 'aac', src: row.aac_url, coreTier: tier, bciIndex: bci };
+          const result: AacLookup = { type: 'aac', src: row.aac_url, coreTier: apiTier, bciIndex: apiBci };
           cache.set(key, result);
           return result;
         }
@@ -161,15 +165,16 @@ async function lookupWord(
   }
 
   // ── Tier 2: Open Symbols fallback (broader English coverage, ARASAAC only) ──
+  // Carry forward bci_index from our API so symbol set switching works
   const imageUrl = await lookupOpenSymbols(key);
   if (imageUrl) {
-    const result: AacLookup = { type: 'aac', src: imageUrl, coreTier: null, bciIndex: null };
+    const result: AacLookup = { type: 'aac', src: imageUrl, coreTier: apiTier, bciIndex: apiBci };
     cache.set(key, result);
     return result;
   }
 
   // ── No pictogram found — text only ──
-  const result: AacLookup = { type: 'text', coreTier: null, bciIndex: null };
+  const result: AacLookup = { type: 'text', coreTier: apiTier, bciIndex: apiBci };
   cache.set(key, result);
   return result;
 }

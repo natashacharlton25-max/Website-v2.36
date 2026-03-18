@@ -320,6 +320,78 @@ Content AAC is a render mode replacement — when active, text hides, cards show
 
 ---
 
+## Decision 28: AAC Card Light Background Across All Themes (18 March 2026)
+
+**AAC cards always have a light background regardless of theme.** Pictograms (ARASAAC PNGs) have baked-in white backgrounds — dark card faces create jarring contrast.
+
+- Light mode: `--neutral-200` (light grey)
+- Dark mode: `--neutral-900` (post-flip = light grey)
+- Text-only cards: slightly differentiated (`--neutral-800` dark mode)
+- Scale flip ensures both evaluate to the same visual lightness
+
+Card borders use CVD-aware status tokens (`--color-Success`, `--color-Warning`) — every theme defines protan/tritan-safe variants. No separate CVD logic on cards.
+
+---
+
+## Decision 29: BCI Index as Universal Symbol Key (18 March 2026)
+
+**Every AAC card carries `data-bci` (Blissymbolics Communication International index).** This is the universal key for symbol set switching.
+
+- `aac-inline.ts` carries `bci_index` from our API even when falling through to OpenSymbols for the image
+- `swapSymbolSet()` finds cards by `data-bci`, swaps `<img>` src to `{baseUrl}{bci}.svg`
+- Custom symbol sets: user provides JSON mapping `{ "bci_index": "image_url" }` at any URL
+- Bliss SVGs: 6,411 in R2 at `symbols/bliss/{bci_index}.svg`, served locally in dev via `public/symbols/bliss/`
+
+---
+
+## Decision 30: AAC Pictogram Filter — User Choice (18 March 2026)
+
+**Pictogram colour filtering is a panel toggle, not automatic.** Two options: grayscale and sepia.
+
+- `data-aac-filter` on `<html>` drives CSS
+- Grayscale uses existing `--img-filter-grayscale` token
+- Sepia uses existing `--img-sepia` token
+- Monochrome themes also apply `--img-filter-grayscale` via `[data-theme-chroma="grey"]`
+- Temporary measure — when pictograms are SVGs (via Canva Convert API), recolor with theme tokens instead
+
+---
+
+## Decision 31: Content AAC Scoped Text Hiding (18 March 2026)
+
+**When Content AAC is active, only hide text in elements that HAVE AAC cards.** Previous implementation hid all `.heading-wrap__text-inner` globally — broke headings without `aac: true`.
+
+Fix: CSS `:has()` selector scopes hiding to elements containing `.heading__aac`:
+```css
+[data-content-aac] .heading-wrap__content:has(.heading__aac) .heading-wrap__text-inner { display: none; }
+[data-content-aac] .heading:has(.heading__aac) .heading__text-inner { display: none; }
+```
+
+---
+
+## Decision 32: AAC Card Consistent Typography (18 March 2026)
+
+**AAC card word labels use `--font-body` at `--text-sm` with `font-weight: 500`.** Cards never inherit heading font sizes or families. The panel font swapper still works because it overrides `--font-body` at the wrapper level.
+
+---
+
+## Decision 33: Heading Media Container Tokens (18 March 2026)
+
+**The `.heading-wrap__media` container accepts border, shadow, and radius via CSS custom properties — no bridge tokens.** JSON sets values directly:
+
+- `--heading-media-border` — e.g. `2px solid var(--primary-400)`
+- `--heading-media-shadow` — e.g. `var(--shadow-elevated)` (self-adapts to light/dark)
+- `--heading-media-radius` — e.g. `var(--radius-lg)` or `50%`
+
+Works for both images and icons since both sit in the same container.
+
+---
+
+## Decision 34: R2 Serving Route (18 March 2026)
+
+**Worker has `/r2/:path` route for generic R2 object serving.** Serves any R2 object by exact key with auto-detected MIME type. Used by Bliss symbol switching (`symbols/bliss/{bci_index}.svg`). Separate from `/images/:path` which prepends `images/` to the key.
+
+---
+
 ## Files Referenced
 
 | File | Purpose |

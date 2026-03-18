@@ -33,6 +33,8 @@ export interface A11ySettings {
   hoverMode: 'none' | 'instant' | 'gentle' | 'full';
   /** Content AAC — show pictogram cards for text/heading content */
   contentAac: boolean;
+  /** AAC pictogram filter — grayscale or sepia for colour-blind users */
+  aacFilter: 'none' | 'grayscale' | 'sepia';
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -57,7 +59,8 @@ export const defaultSettings: A11ySettings = {
   symbolSet: 'openaac',
   customSymbolsUrl: '',
   hoverMode: 'full',
-  contentAac: false
+  contentAac: false,
+  aacFilter: 'none'
 };
 
 // ===================================
@@ -239,6 +242,14 @@ export function applySettings(settings: A11ySettings): void {
     document.documentElement.removeAttribute('data-content-aac');
   }
 
+  // AAC Pictogram Filter — grayscale/sepia for colour-blind users
+  const aacFilter = settings.aacFilter || 'none';
+  if (aacFilter === 'none') {
+    document.documentElement.removeAttribute('data-aac-filter');
+  } else {
+    document.documentElement.dataset.aacFilter = aacFilter;
+  }
+
   // Hover Mode — decorative hover feedback
   const hoverMode = settings.hoverMode || 'full';
   if (hoverMode === 'full') {
@@ -253,8 +264,12 @@ export function applySettings(settings: A11ySettings): void {
   document.documentElement.dataset.symbolSet = symbolSet;
 
   // Symbol set switching — swap pictogram sources by BCI index
+  // Local path for dev (/symbols/bliss/ from public/), R2 for production
   if (symbolSet === 'bliss') {
-    swapSymbolSet('https://asset-library.natashacharlton25.workers.dev/r2/symbols/bliss/', '.svg');
+    const blissBase = location.hostname === 'localhost'
+      ? '/symbols/bliss/'
+      : 'https://asset-library.natashacharlton25.workers.dev/r2/symbols/bliss/';
+    swapSymbolSet(blissBase, '.svg');
   } else if (symbolSet === 'openaac') {
     restoreOriginalSymbols();
   } else if (symbolSet === 'custom' && settings.customSymbolsUrl) {

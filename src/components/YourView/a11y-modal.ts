@@ -74,6 +74,11 @@ function initModal(): void {
     panel!.querySelectorAll<HTMLElement>('[data-test-symbolset]').forEach(b => {
       setActive(b, b.dataset.testSymbolset === settings.symbolSet);
     });
+
+    // AAC filter buttons
+    panel!.querySelectorAll<HTMLElement>('[data-test-aacfilter]').forEach(b => {
+      setActive(b, b.dataset.testAacfilter === settings.aacFilter);
+    });
   }
 
   // ── Open / Close ──
@@ -211,6 +216,17 @@ function initModal(): void {
   panel.querySelectorAll<HTMLElement>('[data-test-symbolset]').forEach(btn => {
     btn.addEventListener('click', () => {
       settings.symbolSet = btn.dataset.testSymbolset as A11ySettings['symbolSet'];
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
+  });
+
+  // ── AAC filter buttons ──
+
+  panel.querySelectorAll<HTMLElement>('[data-test-aacfilter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settings.aacFilter = btn.dataset.testAacfilter as A11ySettings['aacFilter'];
       saveSettings(settings);
       applySettings(settings);
       syncUI();

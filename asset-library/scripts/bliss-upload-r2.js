@@ -18,7 +18,7 @@ const { resolve } = require('node:path');
 const WORKER_DIR = resolve(__dirname, '..');
 const SVG_DIR = resolve(__dirname, '../../_bliss-svg');
 const MANIFEST = resolve(__dirname, '_bliss-upload-manifest.json');
-const R2_BUCKET = 'asset-library-r2';
+const R2_BUCKET = 'asset-library';
 
 // ── Load/save manifest for resume ──
 
