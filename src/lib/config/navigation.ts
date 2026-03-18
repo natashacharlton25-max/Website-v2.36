@@ -26,7 +26,7 @@ export const MAIN_NAV_LINKS: NavLink[] = [
   { text: 'Assets', href: '/assets' },
   { text: 'Insights', href: '/insights' },
   { text: 'Services', href: '/services' },
-  { text: 'Atom Tests', href: '/test/heading' },
+  { text: 'Atom Tests', href: '/test/heading-test' },
 ];
 
 /**
@@ -56,8 +56,8 @@ export const MEGA_MENUS: Record<string, MegaMenuItem[]> = {
     { title: 'Consultations', description: 'One-on-one personalized support', href: '/services#consultations', image: '/_Unused Images/contact us 1.jpg' },
   ],
   'atom tests': [
-    { title: 'Heading', description: 'Levels, sizes, weights, colours, variants, media, AAC', href: '/test/heading' },
-    { title: 'Badge', description: 'Variants, sizes, shapes, icons, colours, semantic roles', href: '/test/badge' },
+    { title: 'Heading', description: 'Levels, sizes, weights, colours, variants, media, AAC', href: '/test/heading-test' },
+    { title: 'Badge', description: 'Variants, sizes, shapes, icons, colours, semantic roles', href: '/test/badge-test' },
   ],
   settings: [
     { title: 'Contact', description: '', href: '/contact', icon: 'mail' },

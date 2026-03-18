@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Heading from '../../components/atoms/Heading/Heading.astro';
+import Badge from '../../components/atoms/Badge/Badge.astro';
+import Section from '../../components/atoms/Section/Section.astro';
+import '../../components/atoms/Section/Section.css';
+
+import testData from '../../data/test/badge.json';
+
+// Default colour tokens from JSON — only border, bg/text handled by CSS per mode
+const defaultStyle = `--badge-border: ${testData.colour.badgeBorder}`;
+
+// Merge: item style overrides defaults
+function mergeStyle(itemStyle?: string): string {
+  return itemStyle ? `${defaultStyle}; ${itemStyle}` : defaultStyle;
+}
+
+// Pipeline: strip props per render mode
+// Full: all props
+// Reduced: content + visual, no animation (Badge has none, so same as full)
+// Textonly: label only — no icon, no variant styling
+function reducedProps(b: any) {
+  return b;
+}
+
+function textonlyProps(b: any) {
+  return { label: b.label, level: b.level };
+}
+---
+
+<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
+  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
+
+    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+
+    {testData.sections.map((section: any) => (
+      <Section label={section.label} separator gap={testData.layout.itemGap}>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-md);align-items:center;">
+          {section.items.map((b: any) => (
+            <Fragment>
+              <div class="render-full">
+                <Badge
+                  label={b.label}
+                  variant={b.variant}
+                  size={b.size}
+                  shape={b.shape}
+                  icon={b.icon}
+                  uppercase={b.uppercase}
+                  semanticRole={b.semanticRole}
+                  level={b.level}
+                  style={mergeStyle(b.style)}
+                />
+              </div>
+              <div class="render-reduced">
+                {(() => { const r = reducedProps(b); return (
+                  <Badge
+                    label={r.label}
+                    variant={r.variant}
+                    size={r.size}
+                    shape={r.shape}
+                    icon={r.icon}
+                    uppercase={r.uppercase}
+                    semanticRole={r.semanticRole}
+                    level={r.level}
+                    style={r.style}
+                  />
+                ); })()}
+              </div>
+              <div class="render-textonly">
+                <Badge label={b.label} level={b.level} />
+              </div>
+            </Fragment>
+          ))}
+        </div>
+      </Section>
+    ))}
+
+  </Section>
+</BaseLayout>

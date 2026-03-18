@@ -392,6 +392,44 @@ Works for both images and icons since both sit in the same container.
 
 ---
 
+## Decision 35: Badge Dark Mode — Pre-Flipped Scale Tokens (18 March 2026)
+
+**Dark themes have scales already flipped in the theme file.** `--primary-100` = dark, `--primary-950` = light. The dark zone CSS uses the tokens as-is — no double flip.
+
+Dark mode badge tokens:
+- **Fill bg**: `--primary-300` (dark subtle wash)
+- **Text**: `--primary-900` (light, readable)
+- **Border**: `--primary-700` (bright accent, pops against fill)
+- **Glass border**: `--neutral-200` (subtle, theme-neutral, works all modes)
+
+---
+
+## Decision 36: Badge Border Inherits from Background (18 March 2026)
+
+**`--_badge-border` falls back to `--_badge-bg` unless explicitly overridden.** If JSON sets `--badge-bg: var(--color-Success)`, the border automatically matches. Only set `--badge-border` when a different border colour is needed.
+
+```css
+--_badge-border: var(--badge-border, var(--_badge-bg));
+```
+
+This eliminates duplicate colour declarations in JSON and keeps badge borders consistent with their fill.
+
+---
+
+## Decision 37: Badge and Button Visual Convergence (18 March 2026)
+
+**Badge and Button share identical visual CSS** (fill/outline/glass, sizes, shapes, icons). Future refactor: Badge becomes a semantic wrapper that renders a Button with preset defaults (no hover/focus interaction, uppercase, semantic role). Badge owns the **semantic role**, Button owns the **visual rendering**.
+
+---
+
+## Decision 38: JSON Colour Defaults — Let CSS Handle Mode Switching (18 March 2026)
+
+**JSON `colour` block should NOT set `--badge-bg` or `--badge-text` defaults** — only border. Background and text are handled by CSS per mode (light base CSS, dark zone CSS). Inline styles from JSON override zone CSS and prevent dark mode fallbacks from activating.
+
+Pattern: JSON sets structural tokens (border), CSS handles mode-adaptive tokens (bg, text).
+
+---
+
 ## Files Referenced
 
 | File | Purpose |
