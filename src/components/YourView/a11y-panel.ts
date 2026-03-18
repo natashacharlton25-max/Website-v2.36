@@ -289,10 +289,13 @@ export function applySettings(settings: A11ySettings): void {
     target.classList.add(`a11y-font-${settings.fontFamily}`);
   }
 
-  // Font Size - apply zoom to wrapper so all content scales visually
-  // (zoom affects rem-resolved text without changing html root or the panel)
-  if (wrapper) {
-    wrapper.style.zoom = settings.fontSize !== 100 ? `${settings.fontSize / 100}` : '';
+  // Font Size - scale via html root font-size so rem tokens scale.
+  // Nav is excluded via font-size: 16px in GlassNav-base.css.
+  // Panel is outside #a11y-content-wrapper so immune.
+  if (settings.fontSize !== 100) {
+    document.documentElement.style.fontSize = `${settings.fontSize}%`;
+  } else {
+    document.documentElement.style.fontSize = '';
   }
   document.documentElement.style.setProperty('--a11y-font-scale', `${settings.fontSize}`);
 
