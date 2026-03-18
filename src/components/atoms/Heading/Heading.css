@@ -10,13 +10,15 @@
  * Tokens are defined in tokens/typography.css.
  * This file applies those tokens to actual elements.
  *
- * Internal tokens (--_heading-*):
- *   --_heading-color, --_heading-accent, --_heading-underline,
- *   --_heading-underline-gradient, --_heading-badge-bg, --_heading-badge-bg-alt,
- *   --_heading-badge-bg-neutral, --_heading-badge-text, --_heading-highlight,
- *   --_heading-highlight-alt, --_heading-highlight-neutral, --_heading-icon,
- *   --_heading-icon-alt, --_heading-icon-neutral, --_heading-icon-text,
- *   --_heading-media-bg
+ * Colour tokens (6 total — pipeline provides via inline style, schema has defaults):
+ *   --_heading-color              (neutral-800)   — h1/h3/h4/h5 text
+ *   --_heading-accent             (primary-600)   — h2/h6 text
+ *   --_heading-underline          (primary-600)   — divider + underline
+ *   --_heading-highlight          (primary-200)   — highlight variant bg
+ *   --_heading-media-bg           (page-bg-raised) — icon/image container bg
+ *   --_heading-underline-gradient (gradient-hero)  — gradient underline
+ *
+ * Child atoms (Badge, Icon, Image) own their own colours via their own schemas.
  */
 
 /* ================================================================
@@ -24,25 +26,18 @@
    Every .heading element gets these values.
    ================================================================ */
 
-.heading {
-  /* ── Internal tokens (bridge → internal, single point of truth) ── */
-  --_heading-color:            var(--heading-color, var(--brand-c-text));
-  --_heading-accent:           var(--heading-accent, var(--brand-c-primary));
-  --_heading-underline:        var(--heading-underline, var(--brand-c-primary));
-  --_heading-badge-bg:         var(--heading-badge-bg, var(--brand-c-primary));
-  --_heading-badge-bg-alt:     var(--heading-badge-bg-alt, var(--brand-c-secondary));
-  --_heading-badge-bg-neutral: var(--heading-badge-bg-neutral, var(--brand-c-neutral));
-  --_heading-badge-text:       var(--heading-badge-text, var(--color-White));
-  --_heading-highlight:        var(--heading-highlight, var(--brand-c-primary-light));
-  --_heading-highlight-alt:    var(--heading-highlight-alt, var(--brand-c-secondary-light));
-  --_heading-highlight-neutral: var(--heading-highlight-neutral, var(--brand-c-neutral-light));
-  --_heading-icon:             var(--heading-icon, var(--brand-c-primary));
-  --_heading-icon-alt:         var(--heading-icon-alt, var(--brand-c-secondary));
-  --_heading-icon-neutral:     var(--heading-icon-neutral, var(--brand-c-neutral));
-  --_heading-icon-text:        var(--heading-icon-text, var(--brand-c-text));
-  --_heading-media-bg:         var(--heading-media-bg, var(--brand-c-bg-light));
-  --_heading-underline-gradient: var(--heading-underline-gradient, var(--gradient-hero));
+/* Tokens on both .heading and .heading-wrap so all children can read them */
+.heading,
+.heading-wrap {
+  --_heading-color:     var(--heading-color);
+  --_heading-accent:    var(--heading-accent);
+  --_heading-underline: var(--heading-underline);
+  --_heading-highlight: var(--heading-highlight);
+  --_heading-media-bg:  var(--heading-media-bg);
+  --_heading-underline-gradient: var(--heading-underline-gradient);
+}
 
+.heading {
   font-family: var(--font-heading);
   letter-spacing: var(--letter-spacing-wide);   /* 0.05em — all headings */
   overflow-wrap: break-word;
@@ -119,16 +114,16 @@
 
 /* ── Colour ─────────────────────────────────────────────────── */
 
-.heading--color-accent       { color: var(--_heading-accent); }
-.heading--color-text         { color: var(--_heading-color); }
-.heading--color-muted        { color: var(--text-secondary); }
-.heading--color-inherit      { color: inherit; }
+/* Colour is set by --heading-color and --heading-accent from JSON colour section.
+   h1/h3/h4/h5 use --_heading-color, h2/h6 use --_heading-accent (see size rules above). */
 
 /* ── Font family ────────────────────────────────────────────── */
 
-.heading--family-heading { font-family: var(--font-heading); }
-.heading--family-body    { font-family: var(--font-body); }
-.heading--family-mono    { font-family: var(--font-mono); }
+.heading--family-heading      { font-family: var(--font-heading); }
+.heading--family-body         { font-family: var(--font-body); }
+.heading--family-body-alt     { font-family: var(--font-body-alt); }
+.heading--family-handwriting  { font-family: var(--font-handwriting); }
+.heading--family-mono         { font-family: var(--font-mono); }
 
 /* ── Alignment ──────────────────────────────────────────────── */
 
@@ -154,38 +149,8 @@
 .heading--flush { margin: 0; }
 
 
-/* ================================================================
-   CONTEXT OVERRIDES
-   When .heading sits inside specific containers, it adjusts
-   automatically. Values taken directly from global.css.
-   ================================================================ */
-
-/* Cards — compact headings */
-.card .heading--h2,
-.card .heading--h3,
-.card .heading--h4 {
-  font-size: var(--text-h5);                    /* 18px */
-  line-height: var(--leading-snug);             /* 1.375 */
-}
-
-.card .heading--h5,
-.card .heading--h6 {
-  font-size: var(--text-small);                 /* 14px */
-}
-
-/* Navigation — all headings same small size */
-nav .heading {
-  font-size: var(--text-small);                 /* 14px */
-  font-weight: var(--font-semibold);            /* 600 */
-}
-
-/* Mega menu dropdowns — slightly larger h3 */
-.expandable-item .heading--h3,
-.dropdown-item .heading--h3,
-.submenu .heading--h3 {
-  font-size: var(--text-body);                  /* 16px */
-  font-weight: var(--font-semibold);            /* 600 */
-}
+/* Context overrides DELETED — containers set --heading-size, atom reads it.
+   Card sets --heading-size via its own token. No .card .heading rules here. */
 
 
 /* ================================================================
@@ -205,6 +170,7 @@ nav .heading {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
+  width: fit-content;
   width: fit-content;
 }
 
@@ -232,7 +198,7 @@ nav .heading {
 /* ── Divider ────────────────────────────────────────────────── */
 
 .heading-wrap__divider {
-  width: 0.15em;
+  width: var(--underline-thickness);
   flex-shrink: 0;
   align-self: stretch;
 }
@@ -240,11 +206,8 @@ nav .heading {
 .heading-wrap--divider-ends-rounded .heading-wrap__divider { border-radius: var(--radius-full); }
 .heading-wrap--divider-ends-square .heading-wrap__divider  { border-radius: 0; }
 
-.heading-wrap--divider-color-primary .heading-wrap__divider   { background: var(--_heading-underline); }
-.heading-wrap--divider-color-secondary .heading-wrap__divider { background: var(--_heading-accent); }
-.heading-wrap--divider-color-text .heading-wrap__divider      { background: var(--text-secondary); }
-.heading-wrap--divider-color-neutral .heading-wrap__divider   { background: var(--text-secondary); }
-.heading-wrap--divider-color-gradient .heading-wrap__divider  { background: var(--_heading-underline); }
+/* Divider colour from JSON --heading-underline token */
+.heading-wrap__divider { background: var(--_heading-underline); }
 .heading-wrap--divider-none .heading-wrap__divider            { display: none; }
 
 .heading-wrap--divider-style-dashed .heading-wrap__divider {
@@ -267,9 +230,9 @@ nav .heading {
 /* ── Variant: Underline ─────────────────────────────────────── */
 
 .heading-wrap--variant-underline .heading-wrap__underline {
-  height: var(--border-width-md);
-  width: 90%;
-  margin-top: var(--space-sm);
+  height: var(--underline-thickness);
+  width: 100%;
+  margin-top: var(--underline-offset);
   border-radius: var(--radius-full);
   background: var(--_heading-underline);
 }
@@ -290,46 +253,35 @@ nav .heading {
 
 /* ── Variant: Badge ─────────────────────────────────────────── */
 
-.heading-wrap--variant-badge { display: inline-flex; }
-
-.heading-wrap--variant-badge .heading {
-  font-weight: var(--font-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wider);
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-full);
-  color: var(--_heading-badge-text);
-}
-
-.heading-wrap--badge-primary .heading   { background: var(--_heading-badge-bg); }
-.heading-wrap--badge-secondary .heading { background: var(--_heading-badge-bg-alt); }
-.heading-wrap--badge-neutral .heading   { background: var(--_heading-badge-bg-neutral); }
+/* Badge variant REMOVED — use Badge atom with level prop instead */
 
 
 /* ── Variant: Highlight ─────────────────────────────────────── */
 
-.heading-wrap--variant-highlight .heading { position: relative; }
+.heading-wrap--variant-highlight .heading { position: relative; z-index: 1; }
+.heading-wrap--variant-highlight .heading-wrap__text-inner,
+.heading-wrap--variant-highlight .heading__text-inner { position: relative; z-index: 1; }
 
 .heading-wrap__highlight {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 35%;
+  bottom: 5%;
+  left: -2%;
+  right: -2%;
+  height: 60%;
   z-index: 0;
-  opacity: var(--opacity-low);
+  opacity: 0.5;
+  border-radius: var(--radius-sm);
 }
 
-.heading-wrap--highlight-primary .heading-wrap__highlight   { background: var(--_heading-highlight); }
-.heading-wrap--highlight-secondary .heading-wrap__highlight { background: var(--_heading-highlight-alt); }
-.heading-wrap--highlight-neutral .heading-wrap__highlight   { background: var(--_heading-highlight-neutral); }
+/* Highlight colour from JSON --heading-highlight token */
+.heading-wrap--variant-highlight .heading-wrap__highlight { background: var(--_heading-highlight); }
 
 
 /* ── Variant: Minimal ───────────────────────────────────────── */
 
 .heading-wrap--variant-minimal .heading {
   font-weight: var(--font-medium);
-  color: var(--text-secondary);
+  color: var(--neutral-700);
 }
 
 
@@ -351,12 +303,8 @@ nav .heading {
   object-fit: cover;
 }
 
-.heading-wrap__icon { color: var(--_heading-icon); }
-
-.heading-wrap--icon-primary .heading-wrap__icon   { color: var(--_heading-icon); }
-.heading-wrap--icon-secondary .heading-wrap__icon { color: var(--_heading-icon-alt); }
-.heading-wrap--icon-neutral .heading-wrap__icon   { color: var(--_heading-icon-neutral); }
-.heading-wrap--icon-text .heading-wrap__icon      { color: var(--_heading-icon-text); }
+/* Icon colour — Icon atom owns its own colour. Inherit from parent. */
+.heading-wrap__icon { color: currentColor; }
 
 .heading-wrap--icon-bare .heading-wrap__media {
   background: transparent;

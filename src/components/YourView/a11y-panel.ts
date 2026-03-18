@@ -31,6 +31,8 @@ export interface A11ySettings {
   customSymbolsUrl: string;
   /** Hover feedback mode — controls decorative hover effects */
   hoverMode: 'none' | 'instant' | 'gentle' | 'full';
+  /** Content AAC — show pictogram cards for text/heading content */
+  contentAac: boolean;
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -54,7 +56,8 @@ export const defaultSettings: A11ySettings = {
   cognitiveLevel: 'full',
   symbolSet: 'openaac',
   customSymbolsUrl: '',
-  hoverMode: 'full'
+  hoverMode: 'full',
+  contentAac: false
 };
 
 // ===================================
@@ -229,6 +232,13 @@ export function applySettings(settings: A11ySettings): void {
   (target as HTMLElement).dataset.cognitiveLevel = cogLevel;
   document.documentElement.dataset.cognitiveLevel = cogLevel;
 
+  // Content AAC — pictogram cards for text/heading content
+  if (settings.contentAac) {
+    document.documentElement.setAttribute('data-content-aac', '');
+  } else {
+    document.documentElement.removeAttribute('data-content-aac');
+  }
+
   // Hover Mode — decorative hover feedback
   const hoverMode = settings.hoverMode || 'full';
   if (hoverMode === 'full') {
@@ -242,12 +252,12 @@ export function applySettings(settings: A11ySettings): void {
   (target as HTMLElement).dataset.symbolSet = symbolSet;
   document.documentElement.dataset.symbolSet = symbolSet;
 
-  // Custom Symbols — user-provided JSON mapping file
-  // When symbolSet is 'custom' and a URL is provided, load the mapping
-  // and swap AacCard pictogram sources via data-bci attribute matching.
-  // The JSON file format: { "12321": "https://example.com/symbol.png", ... }
-  // Keys are BCI reference numbers, values are image URLs.
-  if (symbolSet === 'custom' && settings.customSymbolsUrl) {
+  // Symbol set switching — swap pictogram sources by BCI index
+  if (symbolSet === 'bliss') {
+    swapSymbolSet('https://asset-library.natashacharlton25.workers.dev/r2/symbols/bliss/', '.svg');
+  } else if (symbolSet === 'openaac') {
+    restoreOriginalSymbols();
+  } else if (symbolSet === 'custom' && settings.customSymbolsUrl) {
     loadCustomSymbols(settings.customSymbolsUrl);
   }
 
@@ -627,6 +637,42 @@ function applyCustomSymbolMap(map: Record<string, string>): void {
     const img = card.querySelector<HTMLImageElement>('.aac-card__pictogram');
     if (img) {
       img.src = map[bci];
+    }
+  });
+}
+
+// ===================================
+// SYMBOL SET SWITCHING
+// ===================================
+
+/**
+ * Swap all AAC card pictograms to a different symbol set.
+ * Uses data-bci attribute to build URL: baseUrl + bciIndex + extension.
+ * Saves original src in data-original-src for restore.
+ */
+function swapSymbolSet(baseUrl: string, extension: string): void {
+  document.querySelectorAll<HTMLElement>('.aac-card[data-bci]').forEach((card) => {
+    const bci = card.dataset.bci;
+    if (!bci) return;
+
+    const img = card.querySelector<HTMLImageElement>('.aac-card__pictogram');
+    if (img) {
+      if (!img.dataset.originalSrc) {
+        img.dataset.originalSrc = img.src;
+      }
+      img.src = `${baseUrl}${bci}${extension}`;
+    }
+  });
+}
+
+/**
+ * Restore all AAC card pictograms to their original (build-time) sources.
+ */
+function restoreOriginalSymbols(): void {
+  document.querySelectorAll<HTMLElement>('.aac-card[data-bci]').forEach((card) => {
+    const img = card.querySelector<HTMLImageElement>('.aac-card__pictogram');
+    if (img?.dataset.originalSrc) {
+      img.src = img.dataset.originalSrc;
     }
   });
 }

@@ -28,10 +28,15 @@ interface Props {
   src?: string;
   label?: string;
   size?: number;
+  /** Animation trigger mode — replaces autoplay/loop */
+  trigger?: 'autoplay' | 'loop' | 'hover' | 'interval' | 'none';
+  /** Interval in ms (only used with trigger="interval") */
+  interval?: number;
   loop?: boolean;
   autoplay?: boolean;
   class?: string;
   id?: string;
+  [key: string]: any;
 }
 
 const {
@@ -39,11 +44,18 @@ const {
   src,
   label,
   size = 24,
+  trigger = 'none',
+  interval = 20000,
   loop = false,
   autoplay = false,
   class: className = '',
   id,
+  ...rest
 } = Astro.props;
+
+// Resolve trigger to loop/autoplay for backward compat
+const resolvedLoop = trigger === 'loop' || trigger === 'interval' || loop;
+const resolvedAutoplay = trigger === 'autoplay' || trigger === 'loop' || autoplay;
 
 // Fetch Lottie JSON from API at build/render time
 let animationData: string | null = null;
@@ -67,8 +79,10 @@ if (slug) {
 <div
   class:list={['lottie-icon', className]}
   data-lottie-icon
-  data-lottie-loop={loop}
-  data-lottie-autoplay={autoplay}
+  data-lottie-trigger={trigger}
+  data-lottie-interval={trigger === 'interval' ? interval : undefined}
+  data-lottie-loop={resolvedLoop}
+  data-lottie-autoplay={resolvedAutoplay}
   data-semantic-role="decorative"
   {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': 'true' })}
   style={`width: ${size}px; height: ${size}px;`}
@@ -158,6 +172,38 @@ if (slug) {
         }
         anim.play();
       });
+
+      // Trigger modes
+      const trigger = element.dataset.lottieTrigger || 'none';
+
+      if (trigger === 'hover') {
+        anim.autoplay = false;
+        anim.stop();
+
+        function isHoverGated(): boolean {
+          return document.body.dataset.hover === 'none';
+        }
+
+        element.addEventListener('mouseenter', () => {
+          if (isHoverGated()) return;
+          anim.setDirection(1); anim.play();
+        });
+        element.addEventListener('mouseleave', () => {
+          if (isHoverGated()) return;
+          anim.setDirection(-1); anim.play();
+        });
+        // Focus always works — keyboard/AT users need it regardless of hover gate
+        element.addEventListener('focusin', () => { anim.setDirection(1); anim.play(); });
+        element.addEventListener('focusout', () => { anim.setDirection(-1); anim.play(); });
+      }
+
+      if (trigger === 'interval') {
+        const ms = parseInt(element.dataset.lottieInterval || '10000', 10);
+        anim.autoplay = false;
+        anim.stop();
+        anim.addEventListener('complete', () => { anim.stop(); });
+        setInterval(() => { anim.goToAndStop(0, true); anim.play(); }, ms);
+      }
 
     } catch (e) {
       console.error('Failed to load Lottie animation:', e);

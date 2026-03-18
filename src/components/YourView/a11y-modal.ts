@@ -1,8 +1,8 @@
 /**
- * a11y-modal.ts — Modal panel script (every page via BaseLayout)
+ * a11y-modal.ts — Test controls modal (every page via BaseLayout)
  *
- * Quick-access controls: presets, themes, reset, open/close.
- * Full settings live on /accessibility (a11y-page.ts).
+ * Plain toggle buttons for themes, settings, alt text, display modes,
+ * cognitive levels, content AAC.
  */
 
 import {
@@ -10,12 +10,15 @@ import {
   defaultSettings,
   getSettings,
   saveSettings,
-  announce,
   applySettings,
-  updateUI,
-  handlePresetClick,
   initKeyboardDetection
 } from './a11y-panel';
+
+function setActive(btn: HTMLElement, active: boolean): void {
+  btn.style.background = active ? '#4f4' : '#222';
+  btn.style.color = active ? '#000' : '#eee';
+  btn.style.borderColor = active ? '#4f4' : '#999';
+}
 
 function initModal(): void {
   const panel = document.getElementById('a11y-panel');
@@ -24,13 +27,54 @@ function initModal(): void {
   const trigger = document.querySelector('.a11y-panel-trigger');
   const backdrop = document.querySelector('.a11y-panel__backdrop');
   const closeBtn = panel.querySelector('.a11y-panel__close');
-  const themeList = panel.querySelector('.a11y-theme-list');
 
   if (!backdrop) return;
 
   let settings = getSettings();
   applySettings(settings);
-  updateUI(panel, settings);
+
+  // ── Sync button states ──
+
+  function syncUI(): void {
+    // Theme buttons
+    panel!.querySelectorAll<HTMLElement>('[data-test-theme]').forEach(b => {
+      setActive(b, b.dataset.testTheme === settings.theme);
+    });
+
+    // Toggle buttons
+    panel!.querySelectorAll<HTMLElement>('[data-test-toggle]').forEach(b => {
+      const key = b.dataset.testToggle!;
+      const active = key === 'xlText'
+        ? settings.fontSize >= 150
+        : (settings as any)[key] === true;
+      setActive(b, active);
+    });
+
+    // Alt text mode buttons (what to show)
+    panel!.querySelectorAll<HTMLElement>('[data-test-alt]').forEach(b => {
+      setActive(b, b.dataset.testAlt === settings.altTextMode);
+    });
+
+    // Alt display mode buttons (how to show)
+    panel!.querySelectorAll<HTMLElement>('[data-test-display]').forEach(b => {
+      setActive(b, b.dataset.testDisplay === settings.altDisplayMode);
+    });
+
+    // Cognitive level buttons
+    panel!.querySelectorAll<HTMLElement>('[data-test-cognitive]').forEach(b => {
+      setActive(b, b.dataset.testCognitive === settings.cognitiveLevel);
+    });
+
+    // Hover mode buttons
+    panel!.querySelectorAll<HTMLElement>('[data-test-hover]').forEach(b => {
+      setActive(b, b.dataset.testHover === settings.hoverMode);
+    });
+
+    // Symbol set buttons
+    panel!.querySelectorAll<HTMLElement>('[data-test-symbolset]').forEach(b => {
+      setActive(b, b.dataset.testSymbolset === settings.symbolSet);
+    });
+  }
 
   // ── Open / Close ──
 
@@ -42,16 +86,11 @@ function initModal(): void {
     panel.removeAttribute('hidden');
     backdrop!.removeAttribute('hidden');
 
-    // Re-sync UI in case settings changed on /accessibility page
     settings = getSettings();
-    updateUI(panel, settings);
+    syncUI();
 
-    const firstInput = panel.querySelector('input, button:not(.a11y-panel__close)') as HTMLElement;
-    firstInput?.focus();
-
-    if (settings.screenReaderMode) {
-      announce('Accessibility panel opened');
-    }
+    const firstBtn = panel.querySelector('button:not(.a11y-panel__close)') as HTMLElement;
+    firstBtn?.focus();
   }
 
   function closePanel(): void {
@@ -71,10 +110,6 @@ function initModal(): void {
       const externalTrigger = document.querySelector('[data-action="accessibility"]') as HTMLElement;
       externalTrigger?.focus();
     }
-
-    if (settings.screenReaderMode) {
-      announce('Accessibility panel closed');
-    }
   }
 
   if (trigger) {
@@ -93,81 +128,107 @@ function initModal(): void {
     }
   });
 
-  // ── Theme cards ──
+  // ── Theme buttons ──
 
-  themeList?.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest('.a11y-theme-card') as HTMLButtonElement;
-    if (!btn) return;
-
-    const theme = btn.dataset.theme || 'default';
-    settings.theme = theme;
-    saveSettings(settings);
-    applySettings(settings);
-
-    themeList.querySelectorAll('.a11y-theme-card').forEach(b => b.setAttribute('aria-pressed', 'false'));
-    btn.setAttribute('aria-pressed', 'true');
-
-    if (settings.screenReaderMode) {
-      announce(`Color theme changed to ${theme}`);
-    }
+  panel.querySelectorAll<HTMLElement>('[data-test-theme]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settings.theme = btn.dataset.testTheme!;
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
   });
 
-  // ── Reset button ──
+  // ── Toggle buttons ──
+
+  panel.querySelectorAll<HTMLElement>('[data-test-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.testToggle!;
+      if (key === 'xlText') {
+        settings.fontSize = settings.fontSize >= 150 ? 100 : 150;
+      } else {
+        (settings as any)[key] = !(settings as any)[key];
+      }
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
+  });
+
+  // ── Alt text mode buttons (what to show) ──
+
+  panel.querySelectorAll<HTMLElement>('[data-test-alt]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.testAlt as A11ySettings['altTextMode'];
+      settings.altTextMode = mode;
+      // Auto-set display to caption if turning on, hidden if turning off
+      if (mode === 'none') {
+        settings.altDisplayMode = 'hidden';
+      } else if (settings.altDisplayMode === 'hidden') {
+        settings.altDisplayMode = 'caption';
+      }
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
+  });
+
+  // ── Alt display mode buttons (how to show) ──
+
+  panel.querySelectorAll<HTMLElement>('[data-test-display]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settings.altDisplayMode = btn.dataset.testDisplay as A11ySettings['altDisplayMode'];
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
+  });
+
+  // ── Cognitive level buttons ──
+
+  panel.querySelectorAll<HTMLElement>('[data-test-cognitive]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settings.cognitiveLevel = btn.dataset.testCognitive as A11ySettings['cognitiveLevel'];
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
+  });
+
+  // ── Hover mode buttons ──
+
+  panel.querySelectorAll<HTMLElement>('[data-test-hover]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settings.hoverMode = btn.dataset.testHover as A11ySettings['hoverMode'];
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
+  });
+
+  // ── Symbol set buttons ──
+
+  panel.querySelectorAll<HTMLElement>('[data-test-symbolset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settings.symbolSet = btn.dataset.testSymbolset as A11ySettings['symbolSet'];
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
+  });
+
+  // ── Reset ──
 
   const resetBtn = document.getElementById('a11y-reset');
   resetBtn?.addEventListener('click', () => {
     settings = { ...defaultSettings };
     saveSettings(settings);
     applySettings(settings);
-    updateUI(panel, settings);
-
-    document.querySelectorAll('.a11y-preset-btn').forEach(btn => btn.classList.remove('active'));
-
-    if (settings.screenReaderMode) {
-      announce('All accessibility settings reset to defaults');
-    }
+    syncUI();
   });
 
-  // ── Preset buttons ──
-
-  const presetButtons = panel.querySelectorAll('.a11y-preset-btn');
-  presetButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const preset = btn.getAttribute('data-preset') as string;
-      settings = handlePresetClick(panel, settings, preset, btn);
-    });
-  });
-
-  // Restore easyread active state
-  if (settings.textOnly) {
-    const easyReadBtn = panel.querySelector('.a11y-preset-btn[data-preset="easyread"]');
-    easyReadBtn?.classList.add('active');
-  }
-
-  // ── PDF Download ──
-
-  const downloadBtn = document.getElementById('a11y-download-pdf');
-  downloadBtn?.addEventListener('click', () => {
-    const wrapper = document.getElementById('a11y-content-wrapper');
-    const savedClasses = wrapper?.className || '';
-    const savedTheme = (window as any).themeSwitcher?.currentTheme || null;
-
-    wrapper?.classList.add('a11y-text-only', 'a11y-theme-monochrome');
-    (window as any).themeSwitcher?.switchTheme('a11y-monochrome');
-
-    const doPrint = (): void => {
-      window.print();
-      if (wrapper) wrapper.className = savedClasses;
-      if (savedTheme) {
-        (window as any).themeSwitcher?.switchTheme(savedTheme);
-      } else {
-        (window as any).themeSwitcher?.switchTheme('default');
-      }
-    };
-
-    closePanel();
-    setTimeout(doPrint, 350);
-  });
+  // Initial sync
+  syncUI();
 }
 
 // ── Init ──

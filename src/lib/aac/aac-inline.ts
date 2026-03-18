@@ -27,9 +27,11 @@ const OPENSYMBOLS_SECRET = import.meta.env.OPENSYMBOLS_SECRET || '';
 
 // ── Types ──
 
+type CoreTier = 'green' | 'yellow' | 'orange' | null;
+
 type AacLookup =
-  | { type: 'aac'; src: string }
-  | { type: 'text' };
+  | { type: 'aac'; src: string; coreTier: CoreTier; bciIndex: number | null }
+  | { type: 'text'; coreTier: CoreTier; bciIndex: number | null };
 
 // ── Build-wide cache (persists across all aacInline calls in one build) ──
 
@@ -138,15 +140,17 @@ async function lookupWord(
 
     if (res.ok) {
       const data = (await res.json()) as {
-        symbols?: { aac_url?: string | null }[];
+        symbols?: { aac_url?: string | null; core_tier?: string | null; bci_index?: number | null }[];
       };
       const rows = data.symbols || [];
 
       if (Array.isArray(rows) && rows.length > 0) {
         const row = rows[0];
+        const tier = (row.core_tier as CoreTier) || null;
+        const bci = row.bci_index || null;
 
         if (row.aac_url && row.aac_url !== 'null') {
-          const result: AacLookup = { type: 'aac', src: row.aac_url };
+          const result: AacLookup = { type: 'aac', src: row.aac_url, coreTier: tier, bciIndex: bci };
           cache.set(key, result);
           return result;
         }
@@ -159,13 +163,13 @@ async function lookupWord(
   // ── Tier 2: Open Symbols fallback (broader English coverage, ARASAAC only) ──
   const imageUrl = await lookupOpenSymbols(key);
   if (imageUrl) {
-    const result: AacLookup = { type: 'aac', src: imageUrl };
+    const result: AacLookup = { type: 'aac', src: imageUrl, coreTier: null, bciIndex: null };
     cache.set(key, result);
     return result;
   }
 
   // ── No pictogram found — text only ──
-  const result: AacLookup = { type: 'text' };
+  const result: AacLookup = { type: 'text', coreTier: null, bciIndex: null };
   cache.set(key, result);
   return result;
 }
@@ -195,10 +199,10 @@ export async function aacInline(
 
     switch (lookup.type) {
       case 'aac':
-        cards.push(pictogramCard(word, lookup.src));
+        cards.push(pictogramCard(word, lookup.src, lookup.coreTier, lookup.bciIndex));
         break;
       case 'text':
-        cards.push(textOnlyCard(word));
+        cards.push(textOnlyCard(word, lookup.coreTier, lookup.bciIndex));
         break;
     }
   }

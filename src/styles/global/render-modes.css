@@ -1,0 +1,25 @@
+/**
+ * Render Mode Toggle — global CSS
+ *
+ * Pipeline renders full, reduced, and textonly versions at build time.
+ * CSS toggles which one is visible based on data-render on <body>.
+ *
+ * Default: full shown, others hidden.
+ * data-render="reduced": reduced shown, others hidden.
+ * data-render="textonly": textonly shown, others hidden.
+ */
+
+/* Default: show full only */
+.render-full { display: contents; }
+.render-reduced { display: none; }
+.render-textonly { display: none; }
+
+/* Reduced (calm) mode */
+[data-render="reduced"] .render-full { display: none; }
+[data-render="reduced"] .render-reduced { display: contents; }
+[data-render="reduced"] .render-textonly { display: none; }
+
+/* Textonly (reading) mode */
+[data-render="textonly"] .render-full { display: none; }
+[data-render="textonly"] .render-reduced { display: none; }
+[data-render="textonly"] .render-textonly { display: contents; }

@@ -23,14 +23,15 @@
 import { Icon } from '../Icon';
 import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
+import { aacInline } from '../../../lib/aac/aac-inline';
+import '../../../components/molecules/aac/AacCard/AacCard.css';
 
 interface Props {
   // ── Core typography ──────────────────────────────────────
   level: 1 | 2 | 3 | 4 | 5 | 6;
   size?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
-  color?: 'accent' | 'text' | 'muted' | 'inherit';
-  family?: 'heading' | 'body' | 'mono';
+  family?: 'heading' | 'body' | 'body-alt' | 'handwriting' | 'mono';
   align?: 'left' | 'center' | 'right';
   uppercase?: boolean;
   tracking?: 'normal' | 'wide' | 'wider';
@@ -38,30 +39,30 @@ interface Props {
 
   // ── Subtitle ─────────────────────────────────────────────
   subtitle?: string;
+  subtitleSize?: 'xs' | 'sm' | 'base' | 'lg' | 'xl';
 
   // ── Divider ──────────────────────────────────────────────
   divider?: 'left' | 'right' | 'both' | 'none';
-  dividerColor?: 'primary' | 'secondary' | 'text' | 'neutral' | 'gradient';
   dividerStyle?: 'solid' | 'dashed' | 'dotted';
   dividerEnds?: 'rounded' | 'square';
 
   // ── Variant ──────────────────────────────────────────────
-  variant?: 'default' | 'underline' | 'badge' | 'highlight' | 'minimal';
+  variant?: 'default' | 'underline' | 'highlight' | 'minimal';
   underlineStyle?: 'solid' | 'gradient' | 'dashed';
-  badgeColor?: 'primary' | 'secondary' | 'neutral';
-  highlightColor?: 'primary' | 'secondary' | 'neutral';
 
   // ── Media ────────────────────────────────────────────────
-  lottieIcon?: string;
+  lottieIcon?: string | Record<string, any>;
   image?: string;
   icon?: string;
   mediaPosition?: 'left' | 'right';
   mediaSize?: 'sm' | 'md' | 'lg' | 'auto';
-  iconColor?: 'primary' | 'secondary' | 'neutral' | 'text';
   iconStyle?: 'contained' | 'bare';
 
   // ── Layout ───────────────────────────────────────────────
   spacing?: 'tight' | 'normal' | 'loose';
+
+  /** Render AAC pictogram version of content (build-time) */
+  aac?: boolean;
 
   class?: string;
   [key: string]: any;
@@ -71,36 +72,49 @@ const {
   level,
   size,
   weight,
-  color,
   family,
   align,
   uppercase = false,
   tracking,
   flush = false,
   subtitle,
+  subtitleSize = 'base',
   divider,
-  dividerColor = 'primary',
   dividerStyle = 'solid',
   dividerEnds = 'rounded',
   variant = 'default',
   underlineStyle = 'solid',
-  badgeColor = 'primary',
-  highlightColor = 'primary',
   lottieIcon,
   image,
   icon,
   mediaPosition = 'left',
   mediaSize = 'auto',
-  iconColor = 'text',
   iconStyle = 'contained',
   spacing = 'normal',
+  aac = false,
   class: className,
   ...rest
 } = Astro.props;
 
+// Build-time AAC resolution
+let aacHtml = '';
+if (aac) {
+  const slotContent = await Astro.slots.render('default');
+  const plainText = slotContent.replace(/<[^>]*>/g, '').trim();
+  if (plainText) {
+    const apiBase = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
+    aacHtml = await aacInline(plainText, apiBase);
+  }
+}
+
 const Tag = `h${level}` as any;
 const visualSize = size ?? `h${level}`;
-const isDecorated = !!(divider || image || icon || lottieIcon || subtitle || variant !== 'default');
+
+// Resolve lottieIcon — string (slug only) or object (slug + trigger + interval)
+const lottieSlug = typeof lottieIcon === 'string' ? lottieIcon : lottieIcon?.slug;
+const lottieProps = typeof lottieIcon === 'object' ? lottieIcon : {};
+
+const isDecorated = !!(divider || image || icon || lottieSlug || subtitle || variant !== 'default');
 
 const sizeKey = visualSize.replace('h', '');
 const iconSizeMap: Record<string, number> = { '1': 56, '2': 44, '3': 32, '4': 28, '5': 24, '6': 20 };
@@ -112,7 +126,6 @@ const headingClassList = [
   'heading',
   `heading--${visualSize}`,
   weight && `heading--weight-${weight}`,
-  color && `heading--color-${color}`,
   family && `heading--family-${family}`,
   align && `heading--align-${align}`,
   tracking && `heading--tracking-${tracking}`,
@@ -128,25 +141,21 @@ const headingClassList = [
     `heading-wrap--spacing-${spacing}`,
     `heading-wrap--variant-${variant}`,
     divider && `heading-wrap--divider-${divider}`,
-    divider && `heading-wrap--divider-color-${dividerColor}`,
     divider && `heading-wrap--divider-ends-${dividerEnds}`,
     divider && dividerStyle !== 'solid' && `heading-wrap--divider-style-${dividerStyle}`,
     variant === 'underline' && `heading-wrap--underline-${underlineStyle}`,
-    variant === 'badge' && `heading-wrap--badge-${badgeColor}`,
-    variant === 'highlight' && `heading-wrap--highlight-${highlightColor}`,
-    (image || icon || lottieIcon) && 'heading-wrap--has-media',
-    (image || icon || lottieIcon) && `heading-wrap--media-${mediaPosition}`,
-    (image || icon || lottieIcon) && `heading-wrap--media-size-${computedMediaSize}`,
-    (icon || lottieIcon) && `heading-wrap--icon-${iconColor}`,
-    (icon || lottieIcon) && `heading-wrap--icon-${iconStyle}`,
+    (image || icon || lottieSlug) && 'heading-wrap--has-media',
+    (image || icon || lottieSlug) && `heading-wrap--media-${mediaPosition}`,
+    (image || icon || lottieSlug) && `heading-wrap--media-size-${computedMediaSize}`,
+    (icon || lottieSlug) && `heading-wrap--icon-${iconStyle}`,
     className,
-  ]}>
-    {(image || icon || lottieIcon) && mediaPosition === 'left' && (
+  ]} {...rest}>
+    {(image || icon || lottieSlug) && mediaPosition === 'left' && (
       <div class="heading-wrap__media">
         {image ? (
           <img src={image} alt="" class="heading-wrap__img" />
-        ) : lottieIcon ? (
-          <LottieIcon slug={lottieIcon} size={computedIconSize} class="heading-wrap__icon" />
+        ) : lottieSlug ? (
+          <LottieIcon slug={lottieSlug} size={computedIconSize} {...lottieProps} class="heading-wrap__icon" />
         ) : icon ? (
           <Icon name={icon} size={computedIconSize} class="heading-wrap__icon" />
         ) : null}
@@ -158,24 +167,25 @@ const headingClassList = [
     )}
 
     <div class="heading-wrap__content">
-      <Tag class:list={[...headingClassList]} {...rest}>
+      <Tag class:list={[...headingClassList]}>
         {variant === 'highlight' && <span class="heading-wrap__highlight" aria-hidden="true"></span>}
         <span class="heading-wrap__text-inner"><slot /></span>
       </Tag>
-      {subtitle && <Text as="p" size="sm" color="text-light" flush class="heading-wrap__subtitle">{subtitle}</Text>}
+      {subtitle && <Text as="p" size={subtitleSize} flush class="heading-wrap__subtitle" style="--heading-color: var(--neutral-600)">{subtitle}</Text>}
       {variant === 'underline' && <div class="heading-wrap__underline" aria-hidden="true"></div>}
+      {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
     </div>
 
     {divider && (divider === 'right' || divider === 'both') && (
       <div class="heading-wrap__divider" aria-hidden="true"></div>
     )}
 
-    {(image || icon || lottieIcon) && mediaPosition === 'right' && (
+    {(image || icon || lottieSlug) && mediaPosition === 'right' && (
       <div class="heading-wrap__media">
         {image ? (
           <img src={image} alt="" class="heading-wrap__img" />
-        ) : lottieIcon ? (
-          <LottieIcon slug={lottieIcon} size={computedIconSize} class="heading-wrap__icon" />
+        ) : lottieSlug ? (
+          <LottieIcon slug={lottieSlug} size={computedIconSize} {...lottieProps} class="heading-wrap__icon" />
         ) : icon ? (
           <Icon name={icon} size={computedIconSize} class="heading-wrap__icon" />
         ) : null}
@@ -184,6 +194,7 @@ const headingClassList = [
   </div>
 ) : (
   <Tag class:list={[...headingClassList, className]} {...rest}>
-    <slot />
+    <span class="heading__text-inner"><slot /></span>
+    {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
   </Tag>
 )}

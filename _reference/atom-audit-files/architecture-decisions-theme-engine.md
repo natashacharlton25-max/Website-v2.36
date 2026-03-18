@@ -194,6 +194,132 @@ Toast-based break prompt. Mini games from existing atoms. Carer PIN in localStor
 
 ---
 
+## Decision 19: Scale Flip — No Semantic Token Layer (18 March 2026)
+
+**Dark mode flips the scale positions.** `var(--primary-600)` is always a strong mid-tone — dark in light mode, bright in dark mode. The engine swaps pairs: 100↔950, 200↔900, 300↔800, 400↔700, 500↔600.
+
+- **No `--brand-c-*` semantic tokens** — deleted from engine output and all CSS files
+- **No `--text-body` / `--text-secondary`** — deleted, replaced by direct scale references
+- Neutral scale gap filled: `--neutral-300` added (L=0.82) so 300↔800 flip works for all scales
+- JSON references positions directly: `var(--primary-600)` resolves correctly in every mode
+- Same pattern as rainbow dark flip
+
+### Deleted:
+- `computeSemanticTokens()` function in theme engine
+- `BRAND CONVENIENCE TOKENS` block in generated CSS
+- `TEXT TOKENS` block in generated CSS
+- All `--brand-c-*` references across ~150 CSS/Astro files
+- All `--text-body` / `--text-secondary` / `--text-emphasis` / `--text-inverse` references
+
+---
+
+## Decision 20: No CSS Fallbacks — Schema Owns Defaults (18 March 2026)
+
+**Colour defaults live in the schema `colour` section, not in CSS fallbacks.**
+
+Old pattern (deleted): `--_heading-accent: var(--heading-accent, var(--brand-c-primary));`
+New pattern: `--_heading-accent: var(--heading-accent);`
+
+Schema declares: `"headingAccent": { "default": "primary-600", "cssProperty": "--heading-accent" }`
+
+The pipeline reads the schema default and sets the inline style. If the pipeline doesn't provide a value, it breaks visibly — no silent fallbacks hiding missing data.
+
+---
+
+## Decision 21: Each Atom Owns Its Own Colours (18 March 2026)
+
+**No cross-atom colour declarations.** Heading doesn't declare icon colour, badge colour, or image background. Each atom's schema defines its own colour tokens.
+
+- Badge owns `--badge-bg`, `--badge-text`, `--badge-border`
+- Icon owns its colour (via `currentColor` inheritance)
+- Heading owns only: `--heading-color`, `--heading-accent`, `--heading-underline`, `--heading-highlight`, `--heading-media-bg`, `--heading-underline-gradient`
+
+Badge variant removed from Heading. Badge atom accepts `level` prop to render as heading element via Heading atom internally.
+
+---
+
+## Decision 22: Page Template IS the Pipeline (18 March 2026)
+
+**No separate pipeline system.** The Astro page template reads JSON, filters props per render mode, and renders atoms. That IS the pipeline.
+
+All render modes baked in at build time. CSS toggles which shows:
+
+```css
+.render-full { display: contents; }
+.render-reduced { display: none; }
+.render-textonly { display: none; }
+
+[data-render="textonly"] .render-full { display: none; }
+[data-render="textonly"] .render-textonly { display: contents; }
+```
+
+| Mode | Props passed | What changes |
+|---|---|---|
+| Full | content + visual + animation + colour | Everything |
+| Reduced | content + visual + colour (no animation) | LottieIcon → static Icon fallback |
+| Textonly | content only (level, text, subtitle) | Plain heading, no decoration |
+
+---
+
+## Decision 23: LottieIcon Trigger System (18 March 2026)
+
+**Single `trigger` prop replaces `autoplay`/`loop` booleans.**
+
+| Trigger | Behaviour |
+|---|---|
+| `none` | Static — shows first frame |
+| `autoplay` | Plays once on load |
+| `loop` | Plays continuously |
+| `hover` | Forward on hover/focus, reverse on leave |
+| `interval` | Plays once every N ms (default 20s) |
+
+- Hover trigger respects `data-hover` gate — mouse blocked when `none`, focus always works
+- LottieIcon owns all animation config — Heading passes object through, doesn't know about triggers
+- `lottieIcon` prop accepts string (slug) or object (`{ slug, trigger, interval }`)
+
+---
+
+## Decision 24: Symbol Set Runtime Switching (18 March 2026)
+
+**Cards carry `data-bci` attribute. Runtime swaps pictogram src per symbol set.**
+
+- Build time: ARASAAC images baked in + `data-bci` on each card
+- Runtime: panel button → `swapSymbolSet(baseUrl, extension)` → replaces all `<img>` src
+- `restoreOriginalSymbols()` puts back build-time ARASAAC images
+- Bliss: 6,411 SVGs in R2 at `symbols/bliss/{bci_index}.svg`
+- Custom: user-provided JSON mapping (`{ "bci_index": "image_url" }`)
+
+---
+
+## Decision 25: Section Atom (18 March 2026)
+
+**Layout atom for content grouping.** Uses existing container system (`container-7xl` etc.). Handles spacing via `gap` prop, separators, labels.
+
+No hardcoded layout in page templates — Section atom controls all spacing and width.
+
+---
+
+## Decision 26: Warm Dark Background (18 March 2026)
+
+**Dark mode uses `#1f1c1c` (warm dark) instead of `#121212` (M2 flat black).** HC dark keeps pure `#000000`.
+
+Page background hierarchy: sunken (`#141111`) → base (`#1f1c1c`) → raised (`#302b2b`) → overlay (`#3a3434`).
+
+---
+
+## Decision 27: Content AAC — Dual System (18 March 2026)
+
+**Two independent AAC toggles:**
+
+| System | Trigger | Purpose |
+|---|---|---|
+| Image AAC | `data-alt-text-mode="aac"` | Pictogram cards describing images |
+| Content AAC | `data-content-aac` | Pictogram cards replacing text/heading content |
+
+Content AAC is a render mode replacement — when active, text hides, cards show. Built at build time via `aacInline()`, cached by Cloudflare.
+
+---
+
 ## Files Referenced
 
 | File | Purpose |

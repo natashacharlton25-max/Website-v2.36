@@ -11,7 +11,7 @@
  *
  * @param title        - Card heading
  * @param description  - Card body text
- * @param glowColor    - Glow colour CSS value (default: --brand-c-primary-light)
+ * @param glowColor    - Glow colour CSS value (default: --primary-200)
  * @param dark         - Dark colour scheme (default: false)
  * @param decorations  - Array of icon decorations with positions
  * @param drawVariant  - Draw animation variant: draw | drawcenter | pulse
@@ -43,7 +43,7 @@ interface Props {
 const {
   title,
   description = '',
-  glowColor = 'var(--brand-c-primary-light)',
+  glowColor = 'var(--primary-200)',
   dark = false,
   decorations = [],
   drawVariant = 'draw',
@@ -109,7 +109,7 @@ const processedDecorations = decorations.map(d => ({
 <style>
   /* ── Card container ── */
   .glow-card {
-    --_glow: var(--brand-c-primary-light);
+    --_glow: var(--primary-200);
     --_stroke-w: 10;
 
     position: relative;
@@ -121,7 +121,7 @@ const processedDecorations = decorations.map(d => ({
   /* ── Glass body — matches .card--glass variant ── */
   .glow-card__body {
     position: relative;
-    background: color-mix(in oklch, var(--brand-c-bg) 60%, transparent);
+    background: color-mix(in oklch, var(--page-bg) 60%, transparent);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid color-mix(in oklch, var(--_glow) 15%, transparent);
@@ -149,11 +149,11 @@ const processedDecorations = decorations.map(d => ({
 
   /* ── Dark variant — glass so glow bleeds through ── */
   .glow-card--dark .glow-card__body {
-    background: color-mix(in oklch, var(--brand-c-bg-dark) 60%, transparent);
+    background: color-mix(in oklch, var(--neutral-950) 60%, transparent);
     backdrop-filter: blur(20px) saturate(1.3);
     -webkit-backdrop-filter: blur(20px) saturate(1.3);
     border-color: color-mix(in oklch, var(--_glow) 18%, transparent);
-    color: var(--brand-c-bg);
+    color: var(--page-bg);
   }
 
   /* ── Grid texture overlay ── */
@@ -196,11 +196,11 @@ const processedDecorations = decorations.map(d => ({
   }
 
   .glow-card--dark .glow-card__title {
-    color: var(--brand-c-bg);
+    color: var(--page-bg);
   }
 
   .glow-card--dark .glow-card__text {
-    color: var(--brand-c-neutral-light);
+    color: var(--neutral-400);
   }
 
   /* ── Decoration icons ── */

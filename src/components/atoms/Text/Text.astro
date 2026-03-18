@@ -18,9 +18,12 @@
  *   <Text clamp={3}>{card.description}</Text>
  *   <Text as="blockquote" family="body-alt">Pull quote.</Text>
  *   <Text flush>No margin below.</Text>
+ *   <Text aac>This text gets an AAC pictogram version.</Text>
  *
  * For lists, use <List>. For headings, use <Heading>.
  */
+import { aacInline } from '../../../lib/aac/aac-inline';
+import '../../../components/molecules/aac/AacCard/AacCard.css';
 
 interface Props {
   /** HTML element to render */
@@ -56,6 +59,9 @@ interface Props {
   /** Text contrast tone for glass surfaces */
   textTone?: 'light' | 'dark';
 
+  /** Render AAC pictogram version of content (build-time) */
+  aac?: boolean;
+
   /** Additional CSS classes */
   class?: string;
 
@@ -75,9 +81,21 @@ const {
   uppercase = false,
   clamp,
   flush = false,
+  aac = false,
   class: className,
   ...rest
 } = Astro.props;
+
+// Build-time AAC resolution
+let aacHtml = '';
+if (aac) {
+  const slotContent = await Astro.slots.render('default');
+  const plainText = slotContent.replace(/<[^>]*>/g, '').trim();
+  if (plainText) {
+    const apiBase = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
+    aacHtml = await aacInline(plainText, apiBase);
+  }
+}
 
 const classes = [
   'text',
@@ -98,5 +116,6 @@ const inlineStyle = clamp ? `--text-clamp: ${clamp}` : undefined;
 ---
 
 <Tag class:list={classes} style={inlineStyle} {...rest}>
-  <slot />
+  <span class="text__content"><slot /></span>
+  {aacHtml && <span class="text__aac content-aac" set:html={aacHtml} />}
 </Tag>

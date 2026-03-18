@@ -1,77 +1,135 @@
 ---
 /**
- * AccessibilityPanel - Quick-access modal toolbar
+ * AccessibilityPanel - Test controls modal
  *
- * Slim modal with presets, themes, and reset.
- * Full controls live on /accessibility (a11y-page.ts).
- *
- * Rendered on every page via BaseLayout, outside #a11y-content-wrapper
- * so it's immune to its own settings.
+ * Plain text buttons for testing themes, toggles, alt text, AAC, cognitive levels.
+ * Rendered on every page via BaseLayout.
  */
 import { Announcer } from './Announcer';
 
-import { PresetButton } from './PresetButton';
-import Icon from '../atoms/Icon/Icon.astro';
+const btn = "padding:8px 14px;border:1px solid #999;border-radius:4px;cursor:pointer;background:#222;color:#eee;";
+const sep = "margin-top:16px;padding-top:16px;border-top:1px solid #555;";
+const row = "display:flex;flex-wrap:wrap;gap:8px;";
 ---
 
-<!-- Screen Reader Announcer -->
 <Announcer />
 
-<!-- Accessibility Panel (modal) -->
 <div
   class="a11y-panel"
   id="a11y-panel"
   role="dialog"
-  aria-label="Accessibility settings"
+  aria-label="Test controls"
   aria-modal="true"
   hidden
 >
   <div class="a11y-panel__header">
-    <h2 class="a11y-panel__title">
-      Accessibility Panel
-    </h2>
+    <h2 class="a11y-panel__title">Test Controls</h2>
     <div class="a11y-panel__header-actions">
-      <button class="btn btn--sm btn--primary" id="a11y-download-pdf" aria-label="Download page as PDF">
-        <Icon name="a11y-panel/download-fill" size={18} />
-        <span>Download Page as PDF</span>
-      </button>
-      <button class="btn btn--sm btn--ghost" id="a11y-reset" aria-label="Reset all settings">
-        <Icon name="a11y-panel/arrow-counter-clockwise-fill" size={18} />
-        <span>Reset All</span>
-      </button>
-      <button class="a11y-panel__close" type="button" aria-label="Close accessibility panel">
-        <Icon name="x-circle-fill" size={40} />
-      </button>
+      <button id="a11y-reset" type="button" style={btn}>Reset All</button>
+      <button class="a11y-panel__close" type="button" aria-label="Close panel" style="background:transparent;color:#eee;border:none;font-size:24px;cursor:pointer;">&times;</button>
     </div>
   </div>
 
   <div class="a11y-panel__body">
-    <!-- Quick Presets -->
+
+    <!-- Themes -->
     <div class="a11y-panel__section">
-      <h3 class="a11y-panel__section-title">Presets</h3>
-      <div class="a11y-panel__presets-grid">
-        <PresetButton preset="dyslexia" icon="text-aa-fill" title="Dyslexia" />
-        <PresetButton preset="low-vision" icon="eye-fill" title="Low Vision" />
-        <PresetButton preset="color-blind" icon="palette-fill" title="Color Blind" />
-        <PresetButton preset="motor" icon="hand-palm-fill" title="Motor" />
-        <PresetButton preset="cognitive" icon="brain-fill" title="Cognitive" />
-        <PresetButton preset="easyread" icon="book-open-fill" title="Easy Read" />
+      <h3>Theme</h3>
+      <div style={row}>
+        <button data-test-theme="default" type="button" style={btn}>Light</button>
+        <button data-test-theme="default-dark" type="button" style={btn}>Dark</button>
+        <button data-test-theme="high-contrast-light" type="button" style={btn}>High Viz Light</button>
+        <button data-test-theme="high-contrast" type="button" style={btn}>High Viz Dark</button>
+        <button data-test-theme="monochrome-warm" type="button" style={btn}>Mono Light</button>
+        <button data-test-theme="monochrome-warm-dark" type="button" style={btn}>Mono Dark</button>
+        <button data-test-theme="candy" type="button" style={btn}>Candy</button>
+        <button data-test-theme="candy-dark" type="button" style={btn}>Candy Dark</button>
+        <button data-test-theme="neon-light" type="button" style={btn}>Neon Light</button>
+        <button data-test-theme="neon" type="button" style={btn}>Neon Dark</button>
       </div>
     </div>
 
-    <!-- Theme selection available on /accessibility page -->
-  </div>
+    <!-- Toggles -->
+    <div class="a11y-panel__section" style={sep}>
+      <h3>Toggles</h3>
+      <div style={row}>
+        <button data-test-toggle="textOnly" type="button" style={btn}>Text Only</button>
+        <button data-test-toggle="highlightLinks" type="button" style={btn}>Highlight Links</button>
+        <button data-test-toggle="reduceMotion" type="button" style={btn}>Reduced Motion</button>
+        <button data-test-toggle="scrollbarEnhanced" type="button" style={btn}>Large Scrollbar</button>
+        <button data-test-toggle="xlText" type="button" style={btn}>XL Text</button>
+      </div>
+    </div>
 
-  <!-- Link to full settings page -->
-  <div class="a11y-panel__footer">
-    <a href="/accessibility" class="a11y-panel__all-settings-link">
-      All accessibility settings
-      <Icon name="arrow-right-fill" size={18} />
-    </a>
+    <!-- Hover Mode -->
+    <div class="a11y-panel__section" style={sep}>
+      <h3>Hover Mode</h3>
+      <div style={row}>
+        <button data-test-hover="full" type="button" style={btn}>Full</button>
+        <button data-test-hover="gentle" type="button" style={btn}>Gentle</button>
+        <button data-test-hover="instant" type="button" style={btn}>Instant</button>
+        <button data-test-hover="none" type="button" style={btn}>None</button>
+      </div>
+    </div>
+
+    <!-- Image Alt Text — what to show -->
+    <div class="a11y-panel__section" style={sep}>
+      <h3>Image Alt Text (what to show)</h3>
+      <div style={row}>
+        <button data-test-alt="none" type="button" style={btn}>None</button>
+        <button data-test-alt="word" type="button" style={btn}>Word</button>
+        <button data-test-alt="descriptive" type="button" style={btn}>Descriptive</button>
+        <button data-test-alt="aac" type="button" style={btn}>Image AAC</button>
+      </div>
+    </div>
+
+    <!-- Image Alt Text — how to show -->
+    <div class="a11y-panel__section" style={sep}>
+      <h3>Image Alt Text (how to show)</h3>
+      <div style={row}>
+        <button data-test-display="hidden" type="button" style={btn}>Hidden</button>
+        <button data-test-display="caption" type="button" style={btn}>Caption</button>
+        <button data-test-display="overlay" type="button" style={btn}>Overlay</button>
+        <button data-test-display="tooltip" type="button" style={btn}>Tooltip</button>
+        <button data-test-display="subtitle" type="button" style={btn}>Subtitle</button>
+        <button data-test-display="replace" type="button" style={btn}>Replace</button>
+      </div>
+    </div>
+
+    <!-- Symbol Set -->
+    <div class="a11y-panel__section" style={sep}>
+      <h3>Symbol Set</h3>
+      <div style={row}>
+        <button data-test-symbolset="openaac" type="button" style={btn}>OpenAAC</button>
+        <button data-test-symbolset="bliss" type="button" style={btn}>Bliss</button>
+        <button data-test-symbolset="widgit" type="button" style={btn}>Widgit</button>
+        <button data-test-symbolset="pcs" type="button" style={btn}>PCS</button>
+        <button data-test-symbolset="makaton" type="button" style={btn}>Makaton</button>
+      </div>
+    </div>
+
+    <!-- Cognitive Level -->
+    <div class="a11y-panel__section" style={sep}>
+      <h3>AAC Cognitive Level</h3>
+      <div style={row}>
+        <button data-test-cognitive="green" type="button" style={btn}>Green (survival)</button>
+        <button data-test-cognitive="yellow" type="button" style={btn}>Yellow (combiners)</button>
+        <button data-test-cognitive="orange" type="button" style={btn}>Orange (complex)</button>
+        <button data-test-cognitive="full" type="button" style={btn}>Full (all)</button>
+      </div>
+    </div>
+
+    <!-- Content AAC -->
+    <div class="a11y-panel__section" style={sep}>
+      <h3>Content AAC</h3>
+      <div style={row}>
+        <button data-test-toggle="contentAac" type="button" style={btn}>Content AAC</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- Backdrop -->
 <div class="a11y-panel__backdrop" hidden></div>
 
 <script>

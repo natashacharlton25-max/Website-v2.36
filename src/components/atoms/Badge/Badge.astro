@@ -15,6 +15,7 @@
  */
 import { Icon } from '../Icon';
 import { Text } from '../Text';
+import Heading from '../Heading/Heading.astro';
 
 interface Props {
   label: string;
@@ -24,7 +25,10 @@ interface Props {
   icon?: string;
   uppercase?: boolean;
   semanticRole?: 'status' | 'tag' | 'label' | 'none';
+  /** Render as heading element (h1-h6) instead of span */
+  level?: 1 | 2 | 3 | 4 | 5 | 6;
   class?: string;
+  [key: string]: any;
 }
 
 const {
@@ -35,8 +39,11 @@ const {
   icon,
   uppercase = true,
   semanticRole = 'status',
+  level,
   class: className,
+  ...rest
 } = Astro.props;
+
 ---
 
 <span
@@ -46,13 +53,19 @@ const {
     `badge--${variant}`,
     size !== 'md' && `badge--${size}`,
     `badge--${shape}`,
+    level && 'badge--heading',
     icon && 'badge--has-icon',
     !uppercase && 'badge--lowercase',
     className,
   ]}
+  {...rest}
 >
   {icon && (
     <Icon name={icon} class="badge__icon" aria-hidden="true" />
   )}
-  <Text as="span" class="badge__label" flush>{label}</Text>
+  {level ? (
+    <Heading level={level} flush class="badge__label">{label}</Heading>
+  ) : (
+    <Text as="span" class="badge__label" flush>{label}</Text>
+  )}
 </span>

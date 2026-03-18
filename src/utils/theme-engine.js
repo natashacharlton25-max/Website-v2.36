@@ -34,15 +34,16 @@ const NEUTRAL_HUE = 40;
 // Neutral scale: 400–950 only. Positions 100–300 were all near-white and
 // indistinguishable — page backgrounds now use dedicated --page-bg-* tokens.
 const NEUTRAL_STEPS = [
-  { pos: 100, lightness: 0.96, saturation: 0.03 },  // near-white — dark mode emphasis text
-  { pos: 200, lightness: 0.92, saturation: 0.04 },  // off-white — dark mode body text
-  { pos: 400, lightness: 0.82, saturation: 0.06 },  // lightest useful — borders, dividers
-  { pos: 500, lightness: 0.75, saturation: 0.08 },  // decorative, disabled states
-  { pos: 600, lightness: 0.52, saturation: 0.10 },  // decorative, icons
-  { pos: 700, lightness: 0.40, saturation: 0.12 },  // secondary text (light mode)
-  { pos: 800, lightness: 0.30, saturation: 0.12 },  // body text (light mode)
-  { pos: 900, lightness: 0.25, saturation: 0.10 },  // emphasis text (light mode)
-  { pos: 950, lightness: 0.18, saturation: 0.08 },  // black
+  { pos: 100, lightness: 0.97, saturation: 0.03 },  // near-white
+  { pos: 200, lightness: 0.90, saturation: 0.04 },  // off-white
+  { pos: 300, lightness: 0.82, saturation: 0.05 },  // light grey
+  { pos: 400, lightness: 0.72, saturation: 0.06 },  // mid-light — borders, dividers
+  { pos: 500, lightness: 0.60, saturation: 0.08 },  // mid — decorative, disabled
+  { pos: 600, lightness: 0.48, saturation: 0.10 },  // mid-dark — icons
+  { pos: 700, lightness: 0.36, saturation: 0.12 },  // secondary text (light mode)
+  { pos: 800, lightness: 0.26, saturation: 0.12 },  // body text (light mode)
+  { pos: 900, lightness: 0.18, saturation: 0.10 },  // emphasis text (light mode)
+  { pos: 950, lightness: 0.12, saturation: 0.08 },  // black
 ];
 
 
@@ -329,13 +330,13 @@ function computeStatusColors(chromaPreset = 'brand', monoHue = null, statusHueOv
  */
 function computePageBackgrounds(isDark, chromaPreset = 'brand') {
   if (isDark) {
-    // M2 neutral grey — no hue, no warmth. Colour lives in zone backgrounds.
-    // Elevation via white overlay: 5% (#1e1e1e), 11% (#2c2c2c)
+    // Warm dark — slight warmth avoids flat/shiny black feel.
+    // HC dark uses pure black separately (overridden below).
     return {
-      'page-bg':         '#121212',   // base canvas — M2 standard
-      'page-bg-raised':  '#1e1e1e',   // card surface — 5% white overlay
-      'page-bg-sunken':  '#0e0e0e',   // inset/recessed
-      'page-bg-overlay': '#2c2c2c',   // modal surface — 11% white overlay
+      'page-bg':         '#1f1c1c',   // warm dark canvas
+      'page-bg-raised':  '#302b2b',   // card surface — visible lift
+      'page-bg-sunken':  '#141111',   // inset/recessed — noticeably darker
+      'page-bg-overlay': '#3a3434',   // modal surface — clear separation
     };
   }
   if (chromaPreset === 'pastel') {
@@ -363,7 +364,9 @@ function computePageBackgrounds(isDark, chromaPreset = 'brand') {
    8. SEMANTIC TOKEN MAPPING
    ================================================================ */
 
-function computeSemanticTokens(scales, pageBg, isDark, chromaPreset = 'brand') {
+/* DELETED — scale flip replaces semantic token mapping.
+   Kept as reference comment. Original function computed brand-c-*, text-* tokens.
+function _computeSemanticTokens_DELETED(scales, pageBg, isDark, chromaPreset = 'brand') {
   const { primary, secondary, neutral } = scales;
 
   // Helper: build both var() reference (for CSS) and resolved hex (for audit)
@@ -449,6 +452,7 @@ function computeSemanticTokens(scales, pageBg, isDark, chromaPreset = 'brand') {
   }
   return { css, hex };
 }
+END DELETED FUNCTION */
 
 
 /* ================================================================
@@ -600,7 +604,7 @@ export function auditScale(scales, pageBg) {
    11. CSS OUTPUT
    ================================================================ */
 
-function buildCSS(definition, scales, semantic, pageBg, status) {
+function buildCSS(definition, scales, pageBg, status) {
   const {
     name,
     primary: sourcePrimary,
@@ -662,21 +666,6 @@ function buildCSS(definition, scales, semantic, pageBg, status) {
   for (const [k, v] of Object.entries(status)) ln(`  --${k}: ${v};`);
   ln();
 
-  // Semantic brand tokens (var() references to scales — not hardcoded hex)
-  ln(`  /* -- BRAND CONVENIENCE TOKENS -------------------- */`);
-  for (const [k, v] of Object.entries(semantic)) {
-    if (k.startsWith('text-')) continue; // output separately below
-    ln(`  --${k}: ${v};`);
-  }
-  ln();
-
-  // Dedicated text tokens — atoms use these instead of neutral positions
-  ln(`  /* -- TEXT TOKENS ---------------------------------- */`);
-  for (const [k, v] of Object.entries(semantic)) {
-    if (!k.startsWith('text-')) continue;
-    ln(`  --${k}: ${v};`);
-  }
-  ln();
 
   // Pattern opacity presets
   ln(`  /* -- PATTERN OPACITY PRESETS -------------------- */`);
@@ -765,19 +754,25 @@ export function generateThemeData(definition) {
     : neutralType === 'pure' ? generatePureGreyScale() : generateNeutralScale(neutralHue);
   const scales = { primary: priScale, secondary: secScale, neutral: neuScale };
 
-  // 2. Compute page backgrounds
-  let pageBg = computePageBackgrounds(isDark, chromaPreset);
+  // 2. Dark mode: flip scale positions so positions are contextually correct
+  // var(--primary-100) = always subtle, var(--primary-900) = always intense
+  // Skip 500↔600 for primary/secondary — 300 is the dark mode accent (Decision 6)
+  if (isDark) {
+    const FLIP_PAIRS = [[100, 950], [200, 900], [300, 800], [400, 700], [500, 600]];
+    for (const scale of Object.values(scales)) {
+      for (const [a, b] of FLIP_PAIRS) {
+        if (scale[a] !== undefined && scale[b] !== undefined) {
+          [scale[a], scale[b]] = [scale[b], scale[a]];
+        }
+      }
+    }
+  }
 
-  // 3. Compute semantic tokens (returns { css: var() refs, hex: resolved values })
-  let semantic = computeSemanticTokens(scales, pageBg, isDark, chromaPreset);
+  // 3. Compute page backgrounds
+  let pageBg = computePageBackgrounds(isDark, chromaPreset);
 
   // 4. Apply HC overrides if flagged
   if (definition.highContrast) {
-    const hcOverrides = generateHighContrastOverrides(isDark, scales);
-    semantic = {
-      css: { ...semantic.css, ...hcOverrides.css },
-      hex: { ...semantic.hex, ...hcOverrides.hex },
-    };
     pageBg = isDark
       ? { 'page-bg': '#000000', 'page-bg-raised': '#1a1a1a', 'page-bg-sunken': '#000000', 'page-bg-overlay': '#222222' }
       : { 'page-bg': '#ffffff', 'page-bg-raised': '#f5f5f5', 'page-bg-sunken': '#eeeeee', 'page-bg-overlay': '#fafafa' };
@@ -792,17 +787,24 @@ export function generateThemeData(definition) {
     status['color-White'] = '#ffffff';
   }
 
-  // 6. Build CSS (uses var() references)
-  const css = buildCSS(definition, scales, semantic.css, pageBg, status);
+  // 6. Build CSS (scales are the API — no semantic layer)
+  const css = buildCSS(definition, scales, pageBg, status);
 
-  // 7. Run audits (uses resolved hex)
-  const themeAudit = auditTheme(semantic.hex);
+  // 7. Run audits (uses flipped scale hex values directly)
+  const themeAudit = auditTheme({
+    'brand-c-text':           scales.neutral[800],
+    'brand-c-primary':        scales.primary[600],
+    'brand-c-secondary':      scales.secondary[600],
+    'brand-c-bg':             pageBg['page-bg'],
+    'brand-c-neutral':        scales.neutral[700],
+    'brand-c-primary-dark':   scales.primary[800],
+    'brand-c-secondary-dark': scales.secondary[800],
+  });
   const scaleAudit = auditScale(scales, pageBg);
 
   return {
     css,
     scales,
-    semantic: semantic.hex,
     pageBg,
     status,
     audit: {
