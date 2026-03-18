@@ -68,6 +68,8 @@ export interface Props {
   /** Icon animation — forwarded to Icon atom */
   iconSpin?: boolean;
   iconBounce?: boolean;
+  /** Rainbow glow custom colours — 2-7 token stops. Defaults to --rainbow-1 thru 7 */
+  glowColors?: string[];
   dropdownItems?: DropdownItem[];
   class?: string;
   style?: string;
@@ -104,6 +106,7 @@ const {
   splitText,
   iconSpin,
   iconBounce,
+  glowColors,
   dropdownItems = [],
   class: className = '',
   ...rest
@@ -118,6 +121,13 @@ const isLink = !!href;
 const isDropdown = shape === 'dropdown';
 const hasIcon = !!icon || !!lottieIcon;
 const isIconOnly = hasIcon && (shape === 'circle' || shape === 'square');
+
+// Rainbow glow: build custom gradient from colors array
+let glowGradientStyle = '';
+if (glowColors && glowColors.length >= 2) {
+  const stops = [...glowColors, glowColors[0]].join(', ');
+  glowGradientStyle = `--_glow-gradient: linear-gradient(90deg, ${stops})`;
+}
 
 // Icon sizes per button size
 // Semantic role for AT context
@@ -216,7 +226,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
   </div>
 ) : isLink ? (
   variant === 'rainbow-glow' ? (
-    <div class="btn-rainbow-glow-wrap">
+    <div class="btn-rainbow-glow-wrap" style={glowGradientStyle || undefined}>
       <a
         href={href}
         target={target}
@@ -253,7 +263,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     </a>
   )
 ) : variant === 'rainbow-glow' ? (
-  <div class="btn-rainbow-glow-wrap">
+  <div class="btn-rainbow-glow-wrap" style={glowGradientStyle || undefined}>
     <button
       class:list={classes}
       type={type}

@@ -425,14 +425,10 @@
   inset: 0;
   border-radius: var(--radius-full);
   padding: 2px;
-  background: linear-gradient(90deg,
-    var(--rainbow-1),
-    var(--rainbow-4),
-    var(--rainbow-7),
-    var(--rainbow-3),
-    var(--rainbow-5),
-    var(--rainbow-2),
-    var(--rainbow-1));
+  background: var(--_glow-gradient, linear-gradient(90deg,
+    var(--rainbow-1), var(--rainbow-4), var(--rainbow-7),
+    var(--rainbow-3), var(--rainbow-5), var(--rainbow-2),
+    var(--rainbow-1)));
   background-size: 200% 200%;
   opacity: 0;
   transition: opacity var(--hover-duration) ease-out;
@@ -449,14 +445,10 @@
   position: absolute;
   inset: 0;
   border-radius: var(--radius-full);
-  background: linear-gradient(90deg,
-    var(--rainbow-1),
-    var(--rainbow-4),
-    var(--rainbow-7),
-    var(--rainbow-3),
-    var(--rainbow-5),
-    var(--rainbow-2),
-    var(--rainbow-1));
+  background: var(--_glow-gradient, linear-gradient(90deg,
+    var(--rainbow-1), var(--rainbow-4), var(--rainbow-7),
+    var(--rainbow-3), var(--rainbow-5), var(--rainbow-2),
+    var(--rainbow-1)));
   background-size: 200% 200%;
   filter: blur(clamp(16px, 3vw, 40px)) saturate(1.6) contrast(1.5);
   opacity: 0;
@@ -803,13 +795,20 @@
   filter: saturate(0.75);
 }
 
+/* Text + icon above sweep */
+.btn--comic .btn__label,
+.btn--comic .btn__icon {
+  position: relative;
+  z-index: 1;
+}
+
 /* Colour sweep from left */
 .btn--comic::after {
   content: '';
   position: absolute;
   inset: 0;
   background: var(--_btn-brand-dark);
-  z-index: -1;
+  z-index: 0;
   transform: translateX(-100%);
   transition: transform var(--hover-duration) ease;
   pointer-events: none;

@@ -282,8 +282,96 @@
 /* ── Button dark hover — subtle lightness shift, not glow ── */
 /* Glow only on .btn--glow variant (has its own explicit box-shadow) */
 
-[data-mode="dark"] .btn:hover {
-  background-color: color-mix(in oklch, var(--_btn-brand) 70%, var(--color-White));
+/* ── Glassic dark — inner glow replaces neumorphic, 3D layers kept ── */
+
+[data-mode="dark"] .btn--glassic {
+  border: 1px solid var(--primary-600);
+  box-shadow:
+    /* Inner glow instead of neumorphic */
+    inset 0 0 10px color-mix(in oklch, var(--primary-600) 40%, transparent),
+    0 0 9px 3px color-mix(in oklch, var(--primary-600) 10%, transparent),
+    /* 3D layers kept */
+    0 0.0625em 0 0 var(--primary-400),
+    0 0.125em 0 0 var(--primary-500),
+    0 0.25em 0 0 var(--primary-600),
+    0 0.3125em 0 0 var(--primary-600),
+    0 0.375em 0 0 var(--primary-700),
+    0 0.425em 0 0 color-mix(in oklch, var(--color-Black) 10%, transparent),
+    0 0.425em 0.5em 0 var(--primary-600);
+}
+
+[data-mode="dark"] .btn--glassic:hover {
+  box-shadow:
+    inset 0 0 10px color-mix(in oklch, var(--primary-600) 60%, transparent),
+    0 0 9px 3px color-mix(in oklch, var(--primary-600) 20%, transparent),
+    0 0.03em 0 0 var(--primary-600),
+    0 0.0625em 0 0 var(--primary-700),
+    0 0.125em 0 0 var(--primary-700),
+    0 0.225em 0 0 color-mix(in oklch, var(--color-Black) 15%, transparent),
+    0 0.225em 0.375em 0 var(--primary-700);
+}
+
+/* ── Liquid glass dark — border + inner glow, hover intensifies ── */
+
+[data-mode="dark"] .btn--liquid-glass {
+  border: 1px solid var(--primary-600);
+  box-shadow:
+    inset 0 0 10px color-mix(in oklch, var(--primary-600) 40%, transparent),
+    0 0 9px 3px color-mix(in oklch, var(--primary-600) 10%, transparent);
+}
+
+[data-mode="dark"] .btn--liquid-glass:hover {
+  box-shadow:
+    inset 0 0 16px color-mix(in oklch, var(--primary-600) 70%, transparent),
+    0 0 14px 5px color-mix(in oklch, var(--primary-600) 30%, transparent);
+}
+
+/* ── Base button dark — match badge dark fill pattern ── */
+
+/* Static: invisible border reserves space, hover makes it visible */
+[data-mode="dark"] .btn--primary,
+[data-mode="dark"] .btn--secondary,
+[data-mode="dark"] .btn--neutral {
+  border: 2px solid transparent;
+}
+
+/* Underline: no border, no fill — text link style */
+[data-mode="dark"] .btn--underline {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Expand: no border — circle handles it */
+[data-mode="dark"] .btn--expand {
+  border: none;
+}
+
+/* Comic: dark border + shadow for 3D pop on dark bg */
+[data-mode="dark"] .btn--comic {
+  border-color: var(--primary-300);
+  box-shadow: 4px 6px 0 var(--primary-300);
+}
+
+[data-mode="dark"] .btn--comic:hover {
+  color: var(--primary-900);
+}
+
+/* Tech: 900 border for max contrast on dark */
+[data-mode="dark"] .btn--tech {
+  border-color: var(--primary-900);
+}
+
+[data-mode="dark"] .btn--tech::before {
+  border-color: var(--primary-900);
+}
+
+[data-mode="dark"] .btn--primary:not(.btn--comic):not(.btn--expand):not(.btn--underline):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover,
+[data-mode="dark"] .btn--secondary:not(.btn--comic):not(.btn--expand):not(.btn--underline):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover,
+[data-mode="dark"] .btn--neutral:not(.btn--comic):not(.btn--expand):not(.btn--underline):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover {
+  background-color: var(--_btn-brand-light);
+  color: var(--_btn-brand-dark);
+  border-color: var(--_btn-brand-dark);
 }
 
 /* ── Heading dark — text headings use primary-600 instead of body text colour ── */
