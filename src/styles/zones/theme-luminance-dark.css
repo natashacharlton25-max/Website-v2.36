@@ -328,10 +328,23 @@
 
 /* ── Base button dark — match badge dark fill pattern ── */
 
-/* Static: invisible border reserves space, hover makes it visible */
-[data-mode="dark"] .btn--primary,
-[data-mode="dark"] .btn--secondary,
+/* Dark: flip brand-dark to actually dark token */
+[data-mode="dark"] .btn--primary {
+  --_btn-brand-dark: var(--primary-500);
+}
+
+[data-mode="dark"] .btn--secondary {
+  --_btn-brand-dark: var(--secondary-500);
+}
+
 [data-mode="dark"] .btn--neutral {
+  --_btn-brand-dark: var(--neutral-500);
+}
+
+/* Transparent border for fill variants only (not effects that own their border) */
+[data-mode="dark"] .btn--primary:not(.btn--tech):not(.btn--comic):not(.btn--outline):not(.btn--ghost),
+[data-mode="dark"] .btn--secondary:not(.btn--tech):not(.btn--comic):not(.btn--outline):not(.btn--ghost),
+[data-mode="dark"] .btn--neutral:not(.btn--tech):not(.btn--comic):not(.btn--outline):not(.btn--ghost) {
   border: 2px solid transparent;
 }
 
@@ -342,29 +355,54 @@
   box-shadow: none;
 }
 
+/* Tech dark: fill/border swap on hover */
+[data-mode="dark"] .btn--tech.btn--primary { background-color: var(--primary-500); border-color: var(--primary-900); color: var(--primary-300); }
+[data-mode="dark"] .btn--tech.btn--primary::before { border-color: var(--primary-900); }
+[data-mode="dark"] .btn--tech.btn--primary:hover { background-color: var(--primary-900); border-color: var(--primary-500); color: var(--primary-300); }
+[data-mode="dark"] .btn--tech.btn--primary:hover::before { border-color: var(--primary-500); }
+
+[data-mode="dark"] .btn--tech.btn--secondary { background-color: var(--secondary-500); border-color: var(--secondary-900); color: var(--secondary-300); }
+[data-mode="dark"] .btn--tech.btn--secondary::before { border-color: var(--secondary-900); }
+[data-mode="dark"] .btn--tech.btn--secondary:hover { background-color: var(--secondary-900); border-color: var(--secondary-500); color: var(--secondary-300); }
+[data-mode="dark"] .btn--tech.btn--secondary:hover::before { border-color: var(--secondary-500); }
+
+[data-mode="dark"] .btn--tech.btn--neutral { background-color: var(--neutral-500); border-color: var(--neutral-900); color: var(--neutral-300); }
+[data-mode="dark"] .btn--tech.btn--neutral::before { border-color: var(--neutral-900); }
+[data-mode="dark"] .btn--tech.btn--neutral:hover { background-color: var(--neutral-900); border-color: var(--neutral-500); color: var(--neutral-300); }
+[data-mode="dark"] .btn--tech.btn--neutral:hover::before { border-color: var(--neutral-500); }
+
 /* Expand: no border — circle handles it */
 [data-mode="dark"] .btn--expand {
   border: none;
 }
 
-/* Comic: dark border + shadow for 3D pop on dark bg */
-[data-mode="dark"] .btn--comic {
-  border-color: var(--primary-300);
-  box-shadow: 4px 6px 0 var(--primary-300);
+
+/* Dropdown dark: inner glow using brand border colour */
+[data-mode="dark"] .dropdown-menu.dropdown-theme--primary {
+  border-color: var(--primary-600);
+  box-shadow:
+    inset 0 0 10px color-mix(in oklch, var(--primary-600) 30%, transparent),
+    0 0 9px 3px color-mix(in oklch, var(--primary-600) 10%, transparent);
 }
 
-[data-mode="dark"] .btn--comic:hover {
-  color: var(--primary-900);
+[data-mode="dark"] .dropdown-menu.dropdown-theme--secondary {
+  border-color: var(--secondary-600);
+  box-shadow:
+    inset 0 0 10px color-mix(in oklch, var(--secondary-600) 30%, transparent),
+    0 0 9px 3px color-mix(in oklch, var(--secondary-600) 10%, transparent);
 }
 
-/* Tech: 900 border for max contrast on dark */
-[data-mode="dark"] .btn--tech {
-  border-color: var(--primary-900);
+[data-mode="dark"] .dropdown-menu.dropdown-theme--neutral {
+  border-color: var(--neutral-600);
+  box-shadow:
+    inset 0 0 10px color-mix(in oklch, var(--neutral-600) 30%, transparent),
+    0 0 9px 3px color-mix(in oklch, var(--neutral-600) 10%, transparent);
 }
 
-[data-mode="dark"] .btn--tech::before {
-  border-color: var(--primary-900);
-}
+/* Comic dark: darker border + shadow */
+[data-mode="dark"] .btn--comic.btn--primary { border-color: var(--primary-400); box-shadow: 4px 6px 0 var(--primary-400); }
+[data-mode="dark"] .btn--comic.btn--secondary { border-color: var(--secondary-400); box-shadow: 4px 6px 0 var(--secondary-400); }
+[data-mode="dark"] .btn--comic.btn--neutral { border-color: var(--neutral-400); box-shadow: 4px 6px 0 var(--neutral-400); }
 
 [data-mode="dark"] .btn--primary:not(.btn--comic):not(.btn--expand):not(.btn--underline):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover,
 [data-mode="dark"] .btn--secondary:not(.btn--comic):not(.btn--expand):not(.btn--underline):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover,
