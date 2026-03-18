@@ -49,54 +49,31 @@
               transform var(--hover-duration-fast);
 }
 
-.btn:hover {
-  background-color: color-mix(in oklch, var(--_btn-brand) 70%, var(--color-Black));
-  box-shadow: var(--btn-shadow-hover, var(--shadow-btn-hover));
-  transform: translateY(-1px);
-}
-
 .btn:focus-visible {
   outline: 2px solid var(--btn-focus-ring, var(--primary-600));
   outline-offset: 2px;
 }
 
-.btn:active {
-  background-color: color-mix(in oklch, var(--_btn-brand) 60%, var(--color-Black));
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
-  transform: translateY(1px);
-}
-
-.btn:disabled,
-.btn[aria-disabled="true"] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn:disabled:hover,
-.btn[aria-disabled="true"]:hover {
-  background-color: var(--_btn-brand);
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
-}
-
 /* ==========================================================
-   HOVER GATE: NONE — suppress all decorative hover
-   Resets each hover rule to its default-state values.
-   Functional hover (dropdown, tooltip) is NOT touched.
+   HOVER GATE — uses tokens from src/styles/gates/hover-gate.css
+
+   none:    resolve hover to default state (zero visual change)
+   instant: colour only, duration 0s (from tokens)
+   gentle:  authored hover with slow duration (from tokens)
+   full:    authored hover (default, from tokens)
+
+   All transitions use --hover-duration-fast which resolves to
+   0s when none/instant. Per-variant resets below ensure the
+   hover STATE values also return to static when none.
    ========================================================== */
 
-/* Base + style variants — reset ALL hover-changed properties to default state.
-   Must include box-shadow in transition so duration token can zero it. */
+/* None — resolve every decorative hover back to static state */
 [data-hover="none"] .btn:hover {
   background-color: var(--_btn-brand);
+  color: var(--btn-text, var(--btn-filled-text));
   box-shadow: var(--btn-shadow, var(--shadow-btn));
   transform: none;
   filter: none;
-}
-
-/* Instant — colour change only, no movement */
-[data-hover="instant"] .btn:hover {
-  transform: none;
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
 }
 
 [data-hover="none"] .btn--outline:hover {
@@ -117,22 +94,21 @@
   background: var(--btn-glass-bg, var(--glass-bg));
   color: var(--btn-glass-text, var(--neutral-800));
   border-color: var(--btn-glass-border, var(--glass-border));
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
 }
 
-[data-hover="none"] .btn--glow:hover {
-  background: var(--_btn-brand);
-  animation: none;
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
+[data-hover="none"] .btn--liquid-glass:hover {
+  color: var(--btn-glass-text, var(--neutral-800));
+  border-color: var(--neutral-400);
 }
 
-[data-hover="none"] .btn--glow::after {
-  animation: none;
-  opacity: 0;
+[data-hover="none"] .btn--glassic:hover {
+  color: var(--btn-glass-text, var(--neutral-800));
+  transform: none;
 }
 
-[data-hover="none"] .btn--neumorphic:hover {
-  box-shadow: var(--shadow-neu-raised);
+[data-hover="none"] .btn--colour-flow:hover {
+  background: color-mix(in oklch, var(--_btn-brand) 10%, transparent);
+  color: var(--_btn-brand-dark);
 }
 
 [data-hover="none"] .btn--neumorphic-3d:hover {
@@ -140,64 +116,93 @@
   transform: none;
 }
 
-[data-hover="none"] .btn--glassic:hover {
-  transform: none;
-}
-
 [data-hover="none"] .btn--neumorphic-inner:hover {
-  box-shadow: var(--shadow-neu-pressed);
+  background: var(--_btn-brand-light);
 }
 
-[data-hover="none"] .btn--liquid-glass:hover {
-  box-shadow: var(--liquid-inner-shadow), var(--liquid-outer-shadow);
-  border-color: var(--liquid-border);
+[data-hover="none"] .btn--glow:hover {
+  background: var(--_btn-brand);
+  animation: none;
 }
 
-/* Effect hovers — reset transforms/positions to default state */
+[data-hover="none"] .btn--glow::after {
+  animation: none;
+  opacity: 0;
+}
+
+/* None — kill all pseudo-element hover effects */
 [data-hover="none"] .btn--glint:hover::before { left: -100%; }
-
-[data-hover="none"] .btn--colour-flow:hover::before {
-  top: 100%;
-  transform: translateX(-50%) scaleY(1) scaleX(1.25);
-}
-[data-hover="none"] .btn--colour-flow:hover::after {
-  top: 180%;
-  transform: translateX(-50%) scaleY(1) scaleX(1.45);
-}
-
-[data-hover="none"] .btn--jump:hover {
-  transform: none;
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
-}
-
-[data-hover="none"] .btn--comic:hover {
-  transform: none;
-  box-shadow: 4px 6px 0 var(--btn-comic-shadow, var(--color-Black));
-}
-[data-hover="none"] .btn--comic:hover::after { transform: translateX(-100%); }
-
-[data-hover="none"] .btn--tech:hover { transform: none; }
-[data-hover="none"] .btn--tech:hover::before { transform: translate(-5px, -5px); }
-
-[data-hover="none"] .btn--expand:hover::before {
-  width: var(--_expand-circle);
-  border-radius: var(--_expand-r-start);
-  background-color: var(--_btn-brand);
-}
-[data-hover="none"] .btn--expand:hover .btn__label { color: var(--_btn-brand); }
-
-[data-hover="none"] .btn--underline:hover { color: var(--_btn-brand); }
+[data-hover="none"] .btn--colour-flow:hover::before { top: 100%; }
+[data-hover="none"] .btn--colour-flow:hover::after { top: 180%; }
+[data-hover="none"] .btn--expand:hover::before { width: var(--_expand-circle); border-radius: var(--_expand-r-start); }
 [data-hover="none"] .btn--underline:hover::after { width: 0; }
-
 [data-hover="none"] .btn--spotlight:hover::before { opacity: 0; }
-
 [data-hover="none"] .btn--split:hover::before { transform: none; }
 [data-hover="none"] .btn--split:hover::after { transform: none; }
+[data-hover="none"] .btn--jump:hover { transform: none; }
+[data-hover="none"] .btn--comic:hover { transform: none; }
+[data-hover="none"] .btn--tech:hover { transform: none; }
 
-[data-hover="none"] .btn--confetti:hover::after {
-  opacity: 0;
-  transform: scale(0);
+/* None — rainbow glow */
+[data-hover="none"] .btn-rainbow-glow-wrap::before,
+[data-hover="none"] .btn-rainbow-glow-wrap::after {
   animation: none;
+  opacity: 0;
+}
+
+/* Instant — colour changes, no movement/transform */
+[data-hover="instant"] .btn:hover {
+  transform: none;
+}
+
+[data-hover="instant"] .btn::before,
+[data-hover="instant"] .btn::after {
+  transition: none;
+  animation: none;
+}
+
+/* ==========================================================
+   DISABLED — after all hover gates so it wins cascade.
+   Disabled = same as hover none + opacity + cursor.
+   ========================================================== */
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover,
+.btn[aria-disabled="true"]:hover {
+  background-color: var(--_btn-brand);
+  color: var(--btn-text, var(--btn-filled-text));
+  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  transform: none;
+  filter: none;
+  animation: none;
+}
+
+.btn--outline:disabled:hover,
+.btn--outline[aria-disabled="true"]:hover {
+  background-color: transparent;
+  color: var(--_btn-brand-dark);
+  border-color: var(--_btn-brand);
+  box-shadow: none;
+}
+
+.btn--ghost:disabled:hover,
+.btn--ghost[aria-disabled="true"]:hover {
+  background-color: var(--btn-ghost-bg, transparent);
+  color: var(--btn-ghost-text, var(--neutral-800));
+  border-color: var(--btn-ghost-border, var(--neutral-400));
+  box-shadow: none;
+}
+
+.btn:disabled::before,
+.btn:disabled::after,
+.btn[aria-disabled="true"]::before,
+.btn[aria-disabled="true"]::after {
+  display: none;
 }
 
 /* ==========================================================
@@ -464,26 +469,6 @@
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
-}
-
-/* Rainbow glow hover gate */
-[data-hover="none"] .btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
-[data-hover="none"] .btn--rainbow-glow:hover {
-  background-color: var(--page-bg);
-  color: var(--neutral-800);
-  border-color: var(--neutral-400);
-  box-shadow: var(--shadow-sm);
-  transform: none;
-}
-
-[data-hover="none"] .btn-rainbow-glow-wrap:hover::before,
-[data-hover="none"] .btn-rainbow-glow-wrap:hover::after {
-  opacity: 0;
-}
-
-[data-hover="none"] .btn-rainbow-glow-wrap::before,
-[data-hover="none"] .btn-rainbow-glow-wrap::after {
-  animation: none;
 }
 
 /* Reduced render — no animation */
@@ -1330,3 +1315,4 @@
 [data-render="textonly"] .btn--icon-only {
   justify-content: center;
 }
+
