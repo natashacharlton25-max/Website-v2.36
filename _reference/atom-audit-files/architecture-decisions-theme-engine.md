@@ -430,6 +430,20 @@ Pattern: JSON sets structural tokens (border), CSS handles mode-adaptive tokens 
 
 ---
 
+## Decision 39: Text Scaling via HTML Root Font-Size (18 March 2026)
+
+**Text scaling sets `font-size` on `<html>` so all `rem` tokens scale.** Previous approach used CSS `zoom` on `#a11y-content-wrapper` which broke OverlayScrollbars positioning and sticky nav.
+
+Architecture:
+- `<html>` `font-size: ${value}%` — scales all `rem`-based tokens site-wide
+- Nav: `font-size: 16px` on `.nav-container` — pinned, immune to scaling
+- Panel: outside `#a11y-content-wrapper` — immune by DOM position
+- Works on every page, every theme, every render mode
+
+This is permanent infrastructure, not a workaround. The stepper in TypographyAdjustmentsSection (50%–200%) drives it via `applySettings()`.
+
+---
+
 ## Files Referenced
 
 | File | Purpose |
