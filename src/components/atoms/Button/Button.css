@@ -121,11 +121,36 @@
 }
 
 [data-hover="none"] .btn--glow:hover {
+  background: var(--_btn-brand);
+  animation: none;
   box-shadow: var(--btn-shadow, var(--shadow-btn));
 }
 
+[data-hover="none"] .btn--glow::after {
+  animation: none;
+  opacity: 0;
+}
+
 [data-hover="none"] .btn--neumorphic:hover {
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  box-shadow: var(--shadow-neu-raised);
+}
+
+[data-hover="none"] .btn--neumorphic-3d:hover {
+  background: var(--_btn-brand);
+  transform: none;
+}
+
+[data-hover="none"] .btn--glassic:hover {
+  transform: none;
+}
+
+[data-hover="none"] .btn--neumorphic-inner:hover {
+  box-shadow: var(--shadow-neu-pressed);
+}
+
+[data-hover="none"] .btn--liquid-glass:hover {
+  box-shadow: var(--liquid-inner-shadow), var(--liquid-outer-shadow);
+  border-color: var(--liquid-border);
 }
 
 /* Effect hovers — reset transforms/positions to default state */
@@ -315,15 +340,41 @@
   box-shadow: var(--btn-shadow, var(--shadow-btn));
 }
 
+/* Glow pseudo — vibrant blurred halo behind button */
+.btn--glow {
+  position: relative;
+  overflow: visible;
+}
+
+.btn--glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--gradient-hero);
+  background-size: 200% 200%;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+  animation: btn-glowloop 2s linear infinite;
+  pointer-events: none;
+}
+
 .btn--glow:hover {
-  box-shadow:
-    0 6px 20px color-mix(in oklch, var(--_btn-brand) 65%, transparent),
-    0 0 40px color-mix(in oklch, var(--_btn-brand) 30%, transparent);
+  background: var(--gradient-hero);
+  background-size: 200% 200%;
+  animation: btn-glowloop 4s linear infinite;
+  color: var(--btn-text, var(--btn-filled-text));
+}
+
+.btn--glow:hover::after {
+  opacity: 1;
+  filter: blur(clamp(16px, 3vw, 40px)) saturate(1.6) contrast(1.5);
 }
 
 .btn--glow:active {
   box-shadow:
-    inset 2px 2px 6px color-mix(in oklch, var(--btn-shadow-inset, var(--color-Black)) 15%, transparent);
+    inset 2px 2px 6px color-mix(in oklch, var(--color-Black) 15%, transparent);
 }
 
 /* ── Rainbow Glow — wrapper handles glow, button stays clean ── */
@@ -341,6 +392,7 @@
   position: relative;
   z-index: 1;
   border: 2px solid var(--neutral-400);
+  border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
   transition: border-color var(--hover-duration) ease-out;
 }
@@ -384,10 +436,10 @@
     var(--rainbow-2),
     var(--rainbow-1));
   background-size: 200% 200%;
-  filter: blur(12px);
+  filter: blur(clamp(16px, 3vw, 40px)) saturate(1.6) contrast(1.5);
   opacity: 0;
   z-index: -2;
-  transition: opacity var(--hover-duration) ease-out;
+  transition: opacity 0.4s ease;
   animation: btn-glowloop 8s linear infinite;
 }
 
@@ -405,7 +457,7 @@
 }
 
 .btn-rainbow-glow-wrap:hover::after {
-  opacity: 0.45;
+  opacity: 0.8;
 }
 
 @keyframes btn-glowloop {
@@ -435,21 +487,183 @@
 }
 
 /* Reduced render — no animation */
+[data-render="reduced"] .btn--glow::after,
 [data-render="reduced"] .btn-rainbow-glow-wrap::before,
 [data-render="reduced"] .btn-rainbow-glow-wrap::after {
   animation: none;
 }
 
 .btn--neumorphic {
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  box-shadow: var(--btn-shadow, var(--shadow-neu-raised));
 }
 
 .btn--neumorphic:hover {
-  box-shadow: var(--btn-shadow-hover, var(--shadow-btn-hover));
+  box-shadow: var(--btn-shadow-hover, var(--shadow-neu-hover));
 }
 
 .btn--neumorphic:active {
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  box-shadow: var(--shadow-neu-pressed);
+}
+
+/* ── Neumorphic 3D (tray-style raised button with 3D layers) ── */
+
+.btn--neumorphic-3d {
+  background: var(--_btn-brand);
+  color: var(--btn-text, var(--btn-filled-text));
+  text-shadow: 0 0.0625em 0 var(--_btn-brand-dark);
+  border: none;
+  letter-spacing: 0.15em;
+  transition: background var(--transition-slow), color var(--transition-slow), box-shadow var(--transition-base), transform var(--transition-base);
+  box-shadow:
+    /* Inner highlight */
+    inset 0 0.0625em 0 0 color-mix(in oklch, var(--_btn-brand-light) 40%, transparent),
+    /* 3D layers */
+    0 0.0625em 0 0 var(--_btn-brand),
+    0 0.125em 0 0 var(--_btn-brand-dark),
+    0 0.25em 0 0 var(--_btn-brand-dark),
+    0 0.3125em 0 0 var(--_btn-brand-dark),
+    0 0.375em 0 0 var(--_btn-brand-dark),
+    0 0.425em 0 0 color-mix(in oklch, var(--color-Black) 15%, transparent),
+    /* Drop shadow */
+    0 0.425em 0.5em 0 var(--_btn-brand-dark),
+    /* Neumorphic outer */
+    8px 8px 16px color-mix(in oklch, var(--color-Black) 20%, transparent);
+}
+
+.btn--neumorphic-3d:hover {
+  background: var(--_btn-brand-dark);
+  color: var(--btn-text, var(--btn-filled-text));
+  transform: translateY(0.125em);
+  box-shadow:
+    /* Inner pressed shadows */
+    inset 8px 8px 16px color-mix(in oklch, var(--color-Black) 40%, transparent),
+    /* Neumorphic surface */
+    8px 8px 16px color-mix(in oklch, var(--color-Black) 15%, transparent),
+    -8px -8px 16px color-mix(in oklch, var(--color-White) 10%, transparent),
+    /* Compressed 3D layers */
+    inset 0 0.03em 0 0 color-mix(in oklch, var(--_btn-brand-light) 20%, transparent),
+    0 0.03em 0 0 var(--_btn-brand-dark),
+    0 0.0625em 0 0 var(--_btn-brand-dark),
+    0 0.125em 0 0 var(--_btn-brand-dark),
+    0 0.225em 0 0 color-mix(in oklch, var(--color-Black) 25%, transparent),
+    0 0.225em 0.375em 0 var(--_btn-brand-dark);
+}
+
+.btn--neumorphic-3d:active {
+  transform: translateY(0.225em);
+  box-shadow:
+    inset 0 0.03em 0 0 color-mix(in oklch, var(--_btn-brand-light) 20%, transparent),
+    0 0.03em 0 0 var(--_btn-brand-dark),
+    0 0.0625em 0 0 var(--_btn-brand-dark),
+    0 0.125em 0 0 var(--_btn-brand-dark),
+    0 0.225em 0 0 color-mix(in oklch, var(--color-Black) 15%, transparent),
+    0 0.225em 0.375em 0 var(--_btn-brand-dark);
+}
+
+/* ── Glassic (glass + 3D layers + neumorphic shadows) ── */
+
+.btn--glassic {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  color: var(--btn-glass-text, var(--neutral-800));
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    /* Inner neumorphic shadows */
+    inset 8px 8px 16px color-mix(in oklch, var(--color-Black) 40%, transparent),
+    /* Outer neumorphic */
+    8px 8px 16px color-mix(in oklch, var(--color-Black) 15%, transparent),
+    -8px -8px 16px color-mix(in oklch, var(--color-White) 10%, transparent),
+    /* Inner highlight */
+    inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
+    /* 3D layers using primary */
+    0 0.0625em 0 0 var(--primary-400),
+    0 0.125em 0 0 var(--primary-500),
+    0 0.25em 0 0 var(--primary-600),
+    0 0.3125em 0 0 var(--primary-600),
+    0 0.375em 0 0 var(--primary-700),
+    0 0.425em 0 0 color-mix(in oklch, var(--color-Black) 10%, transparent),
+    0 0.425em 0.5em 0 var(--primary-600);
+}
+
+.btn--glassic:hover {
+  color: var(--primary-200);
+  transform: translateY(0.125em);
+  box-shadow:
+    inset 8px 8px 16px color-mix(in oklch, var(--color-Black) 40%, transparent),
+    8px 8px 16px color-mix(in oklch, var(--color-Black) 15%, transparent),
+    -8px -8px 16px color-mix(in oklch, var(--color-White) 10%, transparent),
+    inset 0 0.03em 0 0 color-mix(in oklch, var(--color-White) 10%, transparent),
+    0 0.03em 0 0 var(--primary-600),
+    0 0.0625em 0 0 var(--primary-700),
+    0 0.125em 0 0 var(--primary-700),
+    0 0.225em 0 0 color-mix(in oklch, var(--color-Black) 15%, transparent),
+    0 0.225em 0.375em 0 var(--primary-700);
+}
+
+.btn--glassic:active {
+  color: var(--color-White);
+  transform: translateY(0.225em);
+  box-shadow:
+    inset 8px 8px 16px color-mix(in oklch, var(--color-Black) 40%, transparent),
+    inset 0 0.03em 0 0 color-mix(in oklch, var(--color-White) 10%, transparent),
+    0 0.03em 0 0 var(--primary-700),
+    0 0.0625em 0 0 var(--primary-700),
+    0 0.125em 0 0 var(--primary-800),
+    0 0.225em 0 0 color-mix(in oklch, var(--color-Black) 15%, transparent),
+    0 0.225em 0.375em 0 var(--primary-800);
+}
+
+/* ── Neumorphic Inner (pressed/inset look) ── */
+
+.btn--neumorphic-inner {
+  background: var(--_btn-brand-light);
+  color: var(--_btn-brand-dark);
+  border: none;
+  box-shadow: var(--shadow-neu-pressed);
+  transition: background var(--transition-slow);
+}
+
+.btn--neumorphic-inner:hover {
+  background: var(--neutral-300);
+  box-shadow: var(--shadow-neu-pressed);
+}
+
+.btn--neumorphic-inner:active {
+  background: var(--neutral-400);
+  box-shadow: var(--shadow-neu-pressed);
+}
+
+/* ── Liquid Glass ── */
+
+.btn--liquid-glass {
+  background: var(--liquid-tint);
+  backdrop-filter: blur(var(--liquid-blur));
+  -webkit-backdrop-filter: blur(var(--liquid-blur));
+  border: 1px solid var(--neutral-400);
+  color: var(--btn-glass-text, var(--neutral-800));
+  box-shadow:
+    var(--liquid-inner-shadow),
+    var(--liquid-outer-shadow),
+    var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn--liquid-glass:hover {
+  color: var(--primary-200);
+  border-color: var(--liquid-inner-glow);
+  box-shadow:
+    var(--liquid-inner-shadow),
+    var(--liquid-outer-shadow),
+    0 6px 20px color-mix(in oklch, var(--_btn-brand) 30%, transparent);
+}
+
+.btn--liquid-glass:active {
+  color: var(--color-White);
+  box-shadow: var(--liquid-inner-shadow), var(--shadow-sm);
 }
 
 /* ==========================================================
@@ -473,13 +687,13 @@
 .btn--colour-flow::before {
   top: 100%;
   transform: translateX(-50%) scaleY(1) scaleX(1.25);
-  background: color-mix(in oklch, var(--_btn-brand-light) 55%, transparent);
+  background-color: color-mix(in oklch, var(--color-Black) 10%, transparent);
 }
 
 .btn--colour-flow::after {
   top: 180%;
   transform: translateX(-50%) scaleY(1) scaleX(1.45);
-  background: var(--_btn-brand-dark);
+  background-color: color-mix(in oklch, var(--_btn-brand) 70%, transparent);
 }
 
 /* Speed variants — default is normal.
@@ -501,24 +715,39 @@
   transition: all 0.6s ease;
 }
 
-/* Keep base colour on hover — let blobs do the visual work */
+/* Glass-like translucent base, text goes light on hover as blobs fill */
+.btn--colour-flow {
+  background: color-mix(in oklch, var(--_btn-brand) 10%, transparent);
+  color: var(--_btn-brand-dark);
+  backdrop-filter: blur(var(--glass-blur, 8px));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 8px));
+  box-shadow: var(--shadow-btn);
+}
+
 .btn--colour-flow:hover {
-  background-color: var(--_btn-brand);
+  color: var(--btn-text, var(--btn-filled-text));
+  background: color-mix(in oklch, var(--_btn-brand) 25%, transparent);
+  box-shadow:
+    0 6px 12px color-mix(in oklch, var(--_btn-brand) 30%, transparent),
+    0 3px 6px color-mix(in oklch, var(--color-Black) 10%, transparent);
 }
 
 .btn--colour-flow:hover::before {
-  top: -35%;
+  top: -40%;
+  background-color: color-mix(in oklch, var(--_btn-brand) 70%, transparent);
   transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
 }
 
 .btn--colour-flow:hover::after {
-  top: -45%;
+  top: -50%;
+  background-color: color-mix(in oklch, var(--_btn-brand) 70%, transparent);
   transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
 }
 
 .btn--colour-flow:active {
+  background: color-mix(in oklch, var(--_btn-brand) 35%, transparent);
   box-shadow:
-    inset 2px 2px 6px color-mix(in oklch, var(--btn-shadow-inset, var(--color-Black)) 15%, transparent);
+    inset 2px 2px 6px color-mix(in oklch, var(--color-Black) 15%, transparent);
 }
 
 /* ==========================================================

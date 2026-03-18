@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Heading from '../../components/atoms/Heading/Heading.astro';
+import Button from '../../components/atoms/Button/Button.astro';
+import Section from '../../components/atoms/Section/Section.astro';
+import '../../components/atoms/Section/Section.css';
+
+import testData from '../../data/test/button.json';
+
+// Pipeline: strip props per render mode
+// Reduced: strip animation props (effect, confetti, lottieIcon, speed)
+function reducedProps(b: any) {
+  const { effect, speed, confetti, confettiTrigger, confettiCount, confettiSpread, lottieIcon, lottieLoop, iconMorphTo, iconMorphColor, iconDraw, iconDrawColor, ...rest } = b;
+  return rest;
+}
+
+// Textonly: label + href only
+function textonlyProps(b: any) {
+  return { label: b.label, href: b.href, variant: 'outline', disabled: b.disabled };
+}
+---
+
+<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
+  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
+
+    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+
+    {testData.sections.map((section: any) => (
+      <Section label={section.label} separator gap={testData.layout.itemGap}>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-md);align-items:center;">
+          {section.items.map((b: any) => (
+            <Fragment>
+              <div class="render-full">
+                <Button
+                  variant={b.variant}
+                  shape={b.shape}
+                  size={b.size}
+                  effect={b.effect}
+                  speed={b.speed}
+                  icon={b.icon}
+                  iconPosition={b.iconPosition}
+                  href={b.href}
+                  target={b.target}
+                  disabled={b.disabled}
+                  ariaLabel={b.ariaLabel}
+                  confetti={b.confetti}
+                  confettiTrigger={b.confettiTrigger}
+                  confettiCount={b.confettiCount}
+                  confettiSpread={b.confettiSpread}
+                  dropdownItems={b.dropdownItems}
+                  lottieIcon={b.lottieIcon}
+                  lottieLoop={b.lottieLoop}
+                  style={b.style}
+                >
+                  {b.shape !== 'circle' && b.shape !== 'square' ? b.label : null}
+                </Button>
+              </div>
+              <div class="render-reduced">
+                {(() => { const r = reducedProps(b); return (
+                  <Button
+                    variant={r.variant}
+                    shape={r.shape}
+                    size={r.size}
+                    icon={r.icon}
+                    iconPosition={r.iconPosition}
+                    href={r.href}
+                    target={r.target}
+                    disabled={r.disabled}
+                    ariaLabel={r.ariaLabel}
+                    dropdownItems={r.dropdownItems}
+                    style={r.style}
+                  >
+                    {r.label}
+                  </Button>
+                ); })()}
+              </div>
+              <div class="render-textonly">
+                {(() => { const t = textonlyProps(b); return (
+                  <Button
+                    variant={t.variant}
+                    href={t.href}
+                    disabled={t.disabled}
+                  >
+                    {t.label}
+                  </Button>
+                ); })()}
+              </div>
+            </Fragment>
+          ))}
+        </div>
+      </Section>
+    ))}
+
+  </Section>
+</BaseLayout>

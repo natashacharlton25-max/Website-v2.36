@@ -58,6 +58,7 @@ export const MEGA_MENUS: Record<string, MegaMenuItem[]> = {
   'atom tests': [
     { title: 'Heading', description: 'Levels, sizes, weights, colours, variants, media, AAC', href: '/test/heading-test' },
     { title: 'Badge', description: 'Variants, sizes, shapes, icons, colours, semantic roles', href: '/test/badge-test' },
+    { title: 'Button', description: 'Variants, shapes, effects, confetti, dropdowns', href: '/test/button-test' },
   ],
   settings: [
     { title: 'Contact', description: '', href: '/contact', icon: 'mail' },
