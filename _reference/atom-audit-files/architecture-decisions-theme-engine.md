@@ -444,6 +444,68 @@ This is permanent infrastructure, not a workaround. The stepper in TypographyAdj
 
 ---
 
+## Decision 40: Button Dark Mode — Inner Glow Pattern (18 March 2026)
+
+**Glassic and liquid-glass buttons use inner glow instead of heavy outer neumorphic shadows in dark mode.** Glassic keeps its 3D layers, only the neumorphic parts are swapped.
+
+- Inner glow: `inset 0 0 10px color-mix(in oklch, var(--primary-600) 40%, transparent)`
+- Outer faint: `0 0 9px 3px color-mix(in oklch, var(--primary-600) 10%, transparent)`
+- Hover intensifies both values
+- Both get `primary-600` border in dark mode
+
+---
+
+## Decision 41: Button Fill Hover in Dark Mode — Ghost Style (18 March 2026)
+
+**Primary/secondary/neutral fill buttons use ghost-style hover in dark mode.** Static has transparent border (reserves space), hover fills with `--_btn-brand-light` bg, `--_btn-brand-dark` text + visible border. No layout shift.
+
+Excludes effects that own their hover: comic, expand, colour-flow, split, tech.
+
+---
+
+## Decision 42: Button Brand Token Override in Dark Mode (18 March 2026)
+
+**`--_btn-brand-dark` overridden to scale position `500` in dark mode** (pre-flipped = mid-dark). Base CSS sets it to `primary-800` which in dark themes = very light. Comic border/shadow and tech borders use this token to inherit per-variant colours.
+
+---
+
+## Decision 43: Button Tech Dark — Fill/Border Swap (18 March 2026)
+
+**Tech effect in dark mode: fill `500`, border `900`, text `300`. On hover they swap — fill `900`, border `500`.** The `::before` offset frame matches the button border in both states. Per-variant (primary/secondary/neutral).
+
+---
+
+## Decision 44: Underline Effect Removed from Button (18 March 2026)
+
+**The underline button effect has been completely removed.** Link atom owns underline-style buttons. Removed from: CSS, Props interface, test data, hover gates, dark zone, highlight-links.
+
+---
+
+## Decision 45: Highlight Links — All Buttons to Plain Fill (18 March 2026)
+
+**When highlight links is active, ALL buttons become plain fill.** No effects, no glass, no shadows, no pseudo-elements, no transforms. Just `background: var(--_btn-brand)` with the highlight outline ring.
+
+- Outline ring uses `var(--_btn-brand)` — inherits per variant
+- Hover darkens fill to `--_btn-brand-dark`
+- Expand: inline icon, no animation
+- Rainbow glow: overrides `--_btn-brand` back to `primary-600`
+- Comic: border/shadow stripped in dark+highlight
+- Magnetic/spotlight: JS gated — checks `data-highlight` and `data-hover="none"` before applying transforms
+
+---
+
+## Decision 46: Button glowColors Prop — Custom Rainbow Stops (18 March 2026)
+
+**Rainbow-glow button accepts `glowColors` array (2-7 token strings).** Builds a `linear-gradient` and sets `--_glow-gradient` on the wrapper. CSS falls back to default 7-colour rainbow when not set. Same pattern as RainbowBorderCard's `colors` prop.
+
+---
+
+## Decision 47: Icon Animation Forwarding — Atoms Own Their Gates (18 March 2026)
+
+**Button forwards `iconSpin` and `iconBounce` props to Icon atom.** Icon handles its own CSS classes, hover gates, and render mode behaviour. Button never duplicates icon animation logic — one gate in the atom, not in every consumer.
+
+---
+
 ## Files Referenced
 
 | File | Purpose |

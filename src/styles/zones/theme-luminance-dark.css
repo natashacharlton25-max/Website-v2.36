@@ -348,13 +348,6 @@
   border: 2px solid transparent;
 }
 
-/* Underline: no border, no fill — text link style */
-[data-mode="dark"] .btn--underline {
-  border: none;
-  background: transparent;
-  box-shadow: none;
-}
-
 /* Tech dark: fill/border swap on hover */
 [data-mode="dark"] .btn--tech.btn--primary { background-color: var(--primary-500); border-color: var(--primary-900); color: var(--primary-300); }
 [data-mode="dark"] .btn--tech.btn--primary::before { border-color: var(--primary-900); }
@@ -404,9 +397,17 @@
 [data-mode="dark"] .btn--comic.btn--secondary { border-color: var(--secondary-400); box-shadow: 4px 6px 0 var(--secondary-400); }
 [data-mode="dark"] .btn--comic.btn--neutral { border-color: var(--neutral-400); box-shadow: 4px 6px 0 var(--neutral-400); }
 
-[data-mode="dark"] .btn--primary:not(.btn--comic):not(.btn--expand):not(.btn--underline):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover,
-[data-mode="dark"] .btn--secondary:not(.btn--comic):not(.btn--expand):not(.btn--underline):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover,
-[data-mode="dark"] .btn--neutral:not(.btn--comic):not(.btn--expand):not(.btn--underline):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover {
+/* Comic dark + highlight links: strip comic styling, plain fill */
+[data-mode="dark"][data-highlight-links] .btn--comic,
+[data-mode="dark"][data-highlight="static"] .btn--comic,
+[data-mode="dark"][data-highlight="animated"] .btn--comic {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+[data-mode="dark"] .btn--primary:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover,
+[data-mode="dark"] .btn--secondary:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover,
+[data-mode="dark"] .btn--neutral:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover {
   background-color: var(--_btn-brand-light);
   color: var(--_btn-brand-dark);
   border-color: var(--_btn-brand-dark);

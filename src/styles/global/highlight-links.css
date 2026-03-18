@@ -9,11 +9,11 @@
  * data-highlight="animated" — visible highlight + pulse animation
  */
 
-/* Button — outline ring + label underline */
+/* Button — outline ring inherits brand, label underline */
 [data-highlight-links] .btn,
 [data-highlight="static"] .btn,
 [data-highlight="animated"] .btn {
-  outline: 2px solid var(--primary-600);
+  outline: 2px solid var(--_btn-brand);
   outline-offset: 2px;
 }
 
@@ -22,6 +22,114 @@
 [data-highlight="animated"] .btn .btn__label {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* All buttons → plain fill (like textonly render). No effects, no glass,
+   no shadows. Just primary/secondary/neutral fill with highlight ring. */
+[data-highlight-links] .btn,
+[data-highlight="static"] .btn,
+[data-highlight="animated"] .btn {
+  background: var(--_btn-brand);
+  color: var(--btn-text, var(--btn-filled-text));
+  border: 2px solid transparent;
+  box-shadow: none;
+  transform: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  text-shadow: none;
+  overflow: hidden;
+}
+
+[data-highlight-links] .btn:hover,
+[data-highlight="static"] .btn:hover,
+[data-highlight="animated"] .btn:hover {
+  background: var(--_btn-brand-dark);
+  color: var(--btn-text, var(--btn-filled-text));
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Kill all pseudo-elements */
+[data-highlight-links] .btn::before,
+[data-highlight-links] .btn::after,
+[data-highlight="static"] .btn::before,
+[data-highlight="static"] .btn::after,
+[data-highlight="animated"] .btn::before,
+[data-highlight="animated"] .btn::after {
+  display: none;
+}
+
+/* Magnetic — block JS transform movement */
+[data-highlight-links] .btn--magnetic,
+[data-highlight="static"] .btn--magnetic,
+[data-highlight="animated"] .btn--magnetic {
+  transform: none;
+}
+
+/* Expand — icon inline, no animation, normal padding */
+[data-highlight-links] .btn--expand .btn__icon,
+[data-highlight="static"] .btn--expand .btn__icon,
+[data-highlight="animated"] .btn--expand .btn__icon {
+  position: static;
+  transform: none;
+  animation: none;
+  transition: none;
+}
+
+[data-highlight-links] .btn--expand:hover .btn__icon,
+[data-highlight="static"] .btn--expand:hover .btn__icon,
+[data-highlight="animated"] .btn--expand:hover .btn__icon {
+  transform: none;
+}
+
+[data-highlight-links] .btn--expand,
+[data-highlight="static"] .btn--expand,
+[data-highlight="animated"] .btn--expand {
+  padding: var(--space-md) var(--space-lg);
+}
+
+/* Rainbow glow — override page-bg brand back to primary fill */
+[data-highlight-links] .btn--rainbow-glow,
+[data-highlight="static"] .btn--rainbow-glow,
+[data-highlight="animated"] .btn--rainbow-glow {
+  --_btn-brand: var(--primary-600);
+  --_btn-brand-dark: var(--primary-800);
+  background: var(--primary-600);
+  color: var(--btn-filled-text);
+  border: 2px solid transparent;
+}
+
+[data-highlight-links] .btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
+[data-highlight-links] .btn--rainbow-glow:hover,
+[data-highlight="static"] .btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
+[data-highlight="static"] .btn--rainbow-glow:hover,
+[data-highlight="animated"] .btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
+[data-highlight="animated"] .btn--rainbow-glow:hover {
+  background: var(--primary-800);
+  color: var(--btn-filled-text);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Dropdown items — underline for link visibility, persists on hover */
+[data-highlight-links] .dropdown-item,
+[data-highlight-links] .dropdown-item:hover,
+[data-highlight="static"] .dropdown-item,
+[data-highlight="static"] .dropdown-item:hover,
+[data-highlight="animated"] .dropdown-item,
+[data-highlight="animated"] .dropdown-item:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+[data-highlight-links] .btn-rainbow-glow-wrap::before,
+[data-highlight-links] .btn-rainbow-glow-wrap::after,
+[data-highlight="static"] .btn-rainbow-glow-wrap::before,
+[data-highlight="static"] .btn-rainbow-glow-wrap::after,
+[data-highlight="animated"] .btn-rainbow-glow-wrap::before,
+[data-highlight="animated"] .btn-rainbow-glow-wrap::after {
+  display: none;
 }
 
 /* Link — inline variants get visible underline */

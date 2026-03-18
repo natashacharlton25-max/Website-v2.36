@@ -40,7 +40,7 @@ export interface Props {
   variant?: 'primary' | 'secondary' | 'neutral' | 'outline' | 'ghost' | 'glass' | 'liquid-glass' | 'glassic' | 'glow' | 'rainbow-glow' | 'neumorphic' | 'neumorphic-3d' | 'neumorphic-inner';
   shape?: 'rounded' | 'pill' | 'circle' | 'square' | 'sharp' | 'dropdown';
   size?: 'sm' | 'md' | 'lg';
-  effect?: 'glint' | 'colour-flow' | 'jump' | 'comic' | 'tech' | 'expand' | 'underline' | 'magnetic' | 'spotlight' | 'split';
+  effect?: 'glint' | 'colour-flow' | 'jump' | 'comic' | 'tech' | 'expand' | 'magnetic' | 'spotlight' | 'split';
   speed?: 'slow' | 'normal' | 'fast';
   alignment?: 'left' | 'center';
   type?: 'button' | 'submit' | 'reset';
@@ -405,6 +405,11 @@ const iconRight = iconPosition === 'right' && hasIcon;
       const strength = 8; // max px shift
 
       el.addEventListener('mousemove', (e) => {
+        // Gate: no movement in highlight-links or hover-none mode
+        if (document.documentElement.hasAttribute('data-highlight-links') ||
+            document.documentElement.hasAttribute('data-highlight') ||
+            document.body.dataset.hover === 'none') return;
+
         const rect = el.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
@@ -423,6 +428,11 @@ const iconRight = iconPosition === 'right' && hasIcon;
       el.setAttribute('data-spot-bound', '1');
 
       el.addEventListener('mousemove', (e) => {
+        // Gate: no spotlight in highlight-links or hover-none mode
+        if (document.documentElement.hasAttribute('data-highlight-links') ||
+            document.documentElement.hasAttribute('data-highlight') ||
+            document.body.dataset.hover === 'none') return;
+
         const rect = el.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
