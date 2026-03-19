@@ -76,10 +76,12 @@ function openModal(figure: HTMLElement): void {
   // Store focus for return
   previousFocus = document.activeElement as HTMLElement;
 
-  // Set image
+  // Set image + copy computed filter from original
   const modalImg = m.querySelector('.image-enlarge-modal__image') as HTMLImageElement;
   modalImg.src = img.src;
   modalImg.alt = img.alt;
+  const computedFilter = getComputedStyle(img).filter;
+  modalImg.style.filter = computedFilter !== 'none' ? computedFilter : '';
 
   // Check alt text mode
   const altTextMode = document.documentElement.dataset.altTextMode ||
