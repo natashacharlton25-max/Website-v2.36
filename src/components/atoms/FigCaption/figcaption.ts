@@ -119,7 +119,8 @@ function initFigCaptions(): void {
     function updateCaption(): void {
       const content = getAltContent(figure);
       const isAac = document.documentElement.hasAttribute('data-content-aac') ||
-                     document.documentElement.dataset.altTextMode === 'aac';
+                     document.documentElement.dataset.altTextMode === 'aac' ||
+                     document.documentElement.getAttribute('data-alt-text-mode') === 'aac';
 
       if (isAac) {
         caption.innerHTML = `<span class="figcaption__aac content-aac">${content}</span>`;
@@ -139,6 +140,9 @@ function initFigCaptions(): void {
     function onLeave(): void {
       if (isBarMode()) hideBar();
     }
+
+    // Populate content immediately
+    updateCaption();
 
     figure.addEventListener('mouseenter', onEnter);
     figure.addEventListener('mouseleave', onLeave);
@@ -164,7 +168,7 @@ const observer = new MutationObserver(() => {
 
 observer.observe(document.documentElement, {
   attributes: true,
-  attributeFilter: ['data-alt-display-mode']
+  attributeFilter: ['data-alt-display-mode', 'data-altdisplaymode']
 });
 
 // Scroll hides bar
