@@ -108,6 +108,11 @@ function initFigCaptions(): void {
   const figures = document.querySelectorAll<HTMLElement>('figure[data-role="content"]');
   figures.forEach((figure) => {
     if (figure.dataset.figcaptionInit) return;
+
+    // Only add figcaption if figure has alt text spans
+    const hasAltText = figure.querySelector('.image-alt-word, .image-alt-descriptive, .image-alt-aac');
+    if (!hasAltText) return;
+
     figure.dataset.figcaptionInit = 'true';
 
     // Create figcaption element
@@ -130,6 +135,7 @@ function initFigCaptions(): void {
     }
 
     function onEnter(): void {
+      if (!isTooltipMode()) return;
       updateCaption();
       if (isBarMode()) {
         const content = getAltContent(figure);

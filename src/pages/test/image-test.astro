@@ -78,9 +78,21 @@ for (const section of testData.sections) {
         </div>
         <div class="render-textonly">
           {section.items.filter((item: any) => item.role !== 'decorative').map((item: any) => (
-            <p style="color:var(--neutral-800);">
-              {item.altDescriptive || item.altWord || item.alt || '(decorative image)'}
-            </p>
+            <div>
+              <Image
+                src={item.src}
+                alt={item.alt}
+                role={item.role}
+                altWord={item.altWord}
+                altDescriptive={item.altDescriptive}
+                altAacHtml={item.aacWords ? aacData.get(item.aacWords) : undefined}
+                semanticRole={item.semanticRole}
+                width={item.width}
+                height={item.height}
+                radius={item.radius}
+                shadow={item.shadow}
+              />
+            </div>
           ))}
         </div>
       </Section>
