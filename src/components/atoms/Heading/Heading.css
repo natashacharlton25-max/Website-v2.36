@@ -333,12 +333,17 @@
   color: transparent;
 }
 
-/* Drop shadow on filled text — filter works since text-fill is transparent */
-.heading--fill-image.heading--shadow-drop {
-  filter: drop-shadow(var(--heading-fill-shadow, 2px 4px 6px rgba(0,0,0,0.3)));
+/* ==========================================================
+   TEXT SHADOW — works on all headings via JSON token
+   ========================================================== */
+
+.heading {
+  text-shadow: var(--heading-text-shadow, none);
+  -webkit-text-stroke: var(--heading-text-stroke, unset);
 }
 
-/* Stroke outline on filled text */
-.heading--fill-image.heading--shadow-stroke {
-  -webkit-text-stroke: var(--heading-fill-stroke, 1px rgba(0,0,0,0.15));
+/* Fill-image headings use filter for shadow (text-shadow doesn't show on clipped bg) */
+.heading--fill-image {
+  filter: var(--heading-drop-shadow, none);
+  text-shadow: none;
 }
