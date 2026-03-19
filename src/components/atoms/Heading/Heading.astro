@@ -135,6 +135,7 @@ const headingClassList = [
   tracking && `heading--tracking-${tracking}`,
   uppercase && 'heading--uppercase',
   flush && 'heading--flush',
+  fillImage && 'heading--fill-image',
 ];
 ---
 
@@ -197,8 +198,8 @@ const headingClassList = [
     )}
   </div>
 ) : (
-  <Tag class:list={[...headingClassList, className]} {...rest}>
-    <span class:list={['heading__text-inner', fillImage && 'heading--fill-image']} style={fillImage ? `background-image: url(${fillImage})` : undefined}><slot /></span>
+  <Tag class:list={[...headingClassList, className]} style={fillImage ? `background-image: url('${fillImage}'); ${rest.style || ''}` : rest.style} {...Object.fromEntries(Object.entries(rest).filter(([k]) => k !== 'style'))}>
+    <span class="heading__text-inner"><slot /></span>
     {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
   </Tag>
 )}
