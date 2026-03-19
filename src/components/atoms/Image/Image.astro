@@ -58,8 +58,10 @@ interface Props {
   sepia?: 'light' | 'default' | 'heavy';
   blur?: 'sm' | 'md' | 'lg' | 'xl';
   gradientMask?: 'fade-bottom' | 'fade-top' | 'fade-edges' | 'vignette';
+  maskShape?: 'star' | 'brush' | 'splash' | 'torn' | 'wave';
   clipPath?: 'circle' | 'ellipse' | 'diamond' | 'hexagon' | 'blob' | 'slant-left' | 'slant-right';
   tilt?: 'sm' | 'md' | 'lg';
+  bgFill?: 'glass' | 'solid' | 'none';
   class?: string;
   [key: string]: any;
 }
@@ -87,6 +89,8 @@ const {
   gradientMask,
   clipPath,
   tilt,
+  maskShape,
+  bgFill,
   class: className,
   ...rest
 } = Astro.props;
@@ -122,6 +126,7 @@ const imgClasses = [
   blur && `image--blur-${blur}`,
   gradientMask && `image--mask-${gradientMask}`,
   clipPath && `image--clip-${clipPath}`,
+  maskShape && `image--mask-shape-${maskShape}`,
   tilt && `image--tilt-${tilt}`,
   className,
 ];
@@ -132,6 +137,7 @@ const figureClasses = [
   hasMotion && 'image--animate',
   radius && `image--radius-${radius}`,
   hover && blur && 'image--blur-reveal',
+  bgFill && `image--bg-${bgFill}`,
 ];
 ---
 
