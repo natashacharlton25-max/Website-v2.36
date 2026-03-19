@@ -50,7 +50,6 @@ interface Props {
   fit?: 'cover' | 'contain' | 'fill' | 'none';
   radius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   shadow?: 'none' | 'sm' | 'md' | 'lg';
-  hover?: boolean;
   responsive?: boolean;
   /** @deprecated Use role="decorative" instead */
   decorative?: boolean;
@@ -78,7 +77,6 @@ const {
   fit,
   radius,
   shadow,
-  hover = false,
   responsive = false,
   decorative = false,
   loading = 'lazy',
@@ -108,7 +106,7 @@ const resolvedAlt = isDecorative
   : (altDescriptive || altWord || alt || '');
 
 // Animation gate — true when any motion prop is set
-const hasMotion = hover || tilt;
+const hasMotion = tilt;
 
 // Image element classes (visual treatment)
 const imgClasses = [
@@ -116,7 +114,6 @@ const imgClasses = [
   fit && `image--fit-${fit}`,
   radius && `image--radius-${radius}`,
   shadow && `image--shadow-${shadow}`,
-  hover && 'image--hover',
   responsive && 'image--responsive',
   sepia && `image--sepia-${sepia}`,
   blur && `image--blur-${blur}`,
