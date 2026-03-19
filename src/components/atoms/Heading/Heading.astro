@@ -63,6 +63,12 @@ interface Props {
 
   /** Fill text with an image — CSS background-clip: text */
   fillImage?: string;
+  /** Text shadow */
+  textShadow?: string;
+  /** Drop shadow (for fill-image text) */
+  dropShadow?: string;
+  /** Text stroke outline */
+  textStroke?: string;
 
   /** Render AAC pictogram version of content (build-time) */
   aac?: boolean;
@@ -95,6 +101,9 @@ const {
   iconStyle = 'contained',
   spacing = 'normal',
   fillImage,
+  textShadow,
+  dropShadow,
+  textStroke,
   aac = false,
   class: className,
   ...rest
@@ -125,6 +134,14 @@ const iconSizeMap: Record<string, number> = { '1': 56, '2': 44, '3': 32, '4': 28
 const mediaSizeMapAuto: Record<string, string> = { '1': 'lg', '2': 'lg', '3': 'md', '4': 'md', '5': 'sm', '6': 'sm' };
 const computedMediaSize = mediaSize === 'auto' ? mediaSizeMapAuto[sizeKey] ?? 'md' : mediaSize;
 const computedIconSize = mediaSize === 'auto' ? (iconSizeMap[sizeKey] ?? 32) : (mediaSize === 'sm' ? 24 : mediaSize === 'md' ? 32 : 56);
+
+// Build shadow styles from props
+const shadowStyles = [
+  fillImage && `background-image: url('${fillImage}')`,
+  textShadow && `--heading-text-shadow: ${textShadow}`,
+  dropShadow && `--heading-drop-shadow: drop-shadow(${dropShadow})`,
+  textStroke && `--heading-text-stroke: ${textStroke}`,
+].filter(Boolean).join('; ');
 
 const headingClassList = [
   'heading',
@@ -198,7 +215,7 @@ const headingClassList = [
     )}
   </div>
 ) : (
-  <Tag class:list={[...headingClassList, className]} style={fillImage ? `background-image: url('${fillImage}'); ${rest.style || ''}` : rest.style} {...Object.fromEntries(Object.entries(rest).filter(([k]) => k !== 'style'))}>
+  <Tag class:list={[...headingClassList, className]} style={[shadowStyles, rest.style].filter(Boolean).join('; ') || undefined} {...Object.fromEntries(Object.entries(rest).filter(([k]) => k !== 'style'))}>
     <span class="heading__text-inner"><slot /></span>
     {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
   </Tag>
