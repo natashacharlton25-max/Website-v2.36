@@ -59,6 +59,7 @@ interface Props {
   blur?: 'sm' | 'md' | 'lg' | 'xl';
   gradientMask?: 'fade-bottom' | 'fade-top' | 'fade-edges' | 'vignette';
   maskShape?: 'star' | 'brush' | 'splash' | 'torn' | 'wave';
+  maskIcon?: string;
   clipPath?: 'circle' | 'ellipse' | 'diamond' | 'hexagon' | 'blob' | 'slant-left' | 'slant-right';
   tilt?: 'sm' | 'md' | 'lg';
   bgFill?: 'glass' | 'solid' | 'none';
@@ -90,6 +91,7 @@ const {
   clipPath,
   tilt,
   maskShape,
+  maskIcon,
   bgFill,
   class: className,
   ...rest
@@ -110,6 +112,23 @@ const dataAttrs = Object.fromEntries(
 const resolvedAlt = isDecorative
   ? ''
   : (altDescriptive || altWord || alt || '');
+
+// Fetch icon SVG for mask at build time
+let maskIconStyle = '';
+if (maskIcon) {
+  try {
+    const apiBase = import.meta.env.PUBLIC_ASSET_API_URL || 'https://asset-library.natashacharlton25.workers.dev';
+    const res = await fetch(`${apiBase}/v1/assets/${maskIcon}`);
+    if (res.ok) {
+      const data = await res.json() as any;
+      if (data.asset?.content) {
+        const svg = data.asset.content.replace(/currentColor/g, 'black');
+        const encoded = encodeURIComponent(svg);
+        maskIconStyle = `-webkit-mask-image: url("data:image/svg+xml,${encoded}"); mask-image: url("data:image/svg+xml,${encoded}"); -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;`;
+      }
+    }
+  } catch {}
+}
 
 // Animation gate — true when any motion prop is set
 const hasMotion = hover || tilt;
@@ -177,12 +196,14 @@ const figureClasses = [
         height={height as number}
         loading={loading}
         class:list={imgClasses}
+        style={maskIconStyle || undefined}
         {...dataAttrs}
       />
     ) : (
       <img
         src={src as string}
         alt={resolvedAlt}
+        style={maskIconStyle || undefined}
         width={width}
         height={height}
         loading={loading}
