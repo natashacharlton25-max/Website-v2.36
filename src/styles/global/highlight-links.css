@@ -201,14 +201,21 @@
 /* ── Interactive image indicator — ::after overlay matches image exactly ── */
 [data-highlight-links] figure[data-role="content"],
 [data-image-enlarge] figure[data-role="content"],
-[data-alt-display-mode="tooltip"] figure[data-role="content"] {
+[data-alt-display-mode="tooltip"] figure[data-role="content"],
+[data-hover="none"] .image--hover[class*="image--blur"] {
   position: relative;
   border-radius: var(--_img-radius, 0px);
 }
 
+/* Click-to-reveal cursor for blurred images in hover none */
+[data-hover="none"] .image--hover[class*="image--blur"] {
+  cursor: pointer;
+}
+
 [data-highlight-links] figure[data-role="content"]::after,
 [data-image-enlarge] figure[data-role="content"]::after,
-[data-alt-display-mode="tooltip"] figure[data-role="content"]::after {
+[data-alt-display-mode="tooltip"] figure[data-role="content"]::after,
+[data-hover="none"] .image--hover[class*="image--blur"]::after {
   content: "";
   position: absolute;
   inset: calc(var(--space-xs) * -1);
@@ -221,14 +228,16 @@
 /* ── Hover darken ── */
 [data-highlight-links] figure[data-role="content"]:hover::after,
 [data-image-enlarge] figure[data-role="content"]:hover::after,
-[data-alt-display-mode="tooltip"] figure[data-role="content"]:hover::after {
+[data-alt-display-mode="tooltip"] figure[data-role="content"]:hover::after,
+[data-hover="none"] .image--hover[class*="image--blur"]:hover::after {
   border-color: var(--primary-800);
 }
 
 /* ── Keyboard focus — thicker ── */
 [data-highlight-links] figure[data-role="content"]:focus-visible::after,
 [data-image-enlarge] figure[data-role="content"]:focus-visible::after,
-[data-alt-display-mode="tooltip"] figure[data-role="content"]:focus-visible::after {
+[data-alt-display-mode="tooltip"] figure[data-role="content"]:focus-visible::after,
+[data-hover="none"] .image--hover[class*="image--blur"]:focus-visible::after {
   border-width: 4px;
   border-color: var(--primary-800);
 }
