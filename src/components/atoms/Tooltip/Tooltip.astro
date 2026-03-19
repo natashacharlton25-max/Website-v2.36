@@ -199,6 +199,15 @@ const wrapperClasses = [
       wrapper.addEventListener('focusin', onEnter);
       wrapper.addEventListener('focusout', onLeave);
 
+      // Touch/click for mobile — tap shows bar, tap elsewhere hides
+      triggerEl.addEventListener('click', (e: Event) => {
+        if (isBarMode()) {
+          e.preventDefault();
+          e.stopPropagation();
+          onEnter();
+        }
+      });
+
       // Reposition on resize
       let isVisible = false;
       wrapper.addEventListener('mouseenter', () => { isVisible = true; });
@@ -210,6 +219,16 @@ const wrapperClasses = [
       ro.observe(triggerEl);
     });
   }
+
+  // Tap outside tooltip = dismiss bar on mobile
+  document.addEventListener('click', (e: Event) => {
+    const target = e.target as HTMLElement;
+    if (sharedBar && sharedBar.style.opacity === '1' && !target.closest('.tooltip')) {
+      if (barHideTimeout) clearTimeout(barHideTimeout);
+      sharedBar.style.opacity = '0';
+      sharedBar.style.visibility = 'hidden';
+    }
+  });
 
   // Scroll = user moved on, hide bar immediately
   window.addEventListener('scroll', () => {
