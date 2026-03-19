@@ -198,6 +198,7 @@
    Double box-shadow follows border-radius. Hover darkens.
    ══════════════════════════════════════════════════════════════ */
 
+/* ── Static indicator — always visible ── */
 [data-highlight-links] figure[data-role="content"],
 [data-image-enlarge] figure[data-role="content"],
 [data-alt-display-mode="tooltip"] figure[data-role="content"] {
@@ -206,11 +207,40 @@
   transition: box-shadow 0.2s ease;
 }
 
+/* ── Hover darken (full + gentle) ── */
 [data-highlight-links] figure[data-role="content"]:hover,
-[data-highlight-links] figure[data-role="content"]:focus-within,
 [data-image-enlarge] figure[data-role="content"]:hover,
-[data-image-enlarge] figure[data-role="content"]:focus-within,
-[data-alt-display-mode="tooltip"] figure[data-role="content"]:hover,
-[data-alt-display-mode="tooltip"] figure[data-role="content"]:focus-within {
+[data-alt-display-mode="tooltip"] figure[data-role="content"]:hover {
   box-shadow: 0 0 0 3px var(--page-bg), 0 0 0 6px var(--primary-800);
+}
+
+/* ── Keyboard focus — thicker ring ── */
+[data-highlight-links] figure[data-role="content"]:focus-visible,
+[data-image-enlarge] figure[data-role="content"]:focus-visible,
+[data-alt-display-mode="tooltip"] figure[data-role="content"]:focus-visible {
+  box-shadow: 0 0 0 3px var(--page-bg), 0 0 0 8px var(--primary-800);
+}
+
+/* ── Hover instant — no transition ── */
+[data-hover="instant"] figure[data-role="content"] {
+  transition: none;
+}
+
+/* ── Hover none — static only, no darken ── */
+[data-hover="none"] figure[data-role="content"]:hover {
+  box-shadow: 0 0 0 3px var(--page-bg), 0 0 0 6px var(--primary-600);
+}
+
+/* ── Assistive — thicker ring ── */
+[data-render="assistive"] figure[data-role="content"] {
+  box-shadow: 0 0 0 4px var(--page-bg), 0 0 0 8px var(--primary-600);
+}
+
+/* ── Mobile — always darkened (no hover on touch) ── */
+@media (max-width: 640px) {
+  [data-highlight-links] figure[data-role="content"],
+  [data-image-enlarge] figure[data-role="content"],
+  [data-alt-display-mode="tooltip"] figure[data-role="content"] {
+    box-shadow: 0 0 0 3px var(--page-bg), 0 0 0 6px var(--primary-800);
+  }
 }
