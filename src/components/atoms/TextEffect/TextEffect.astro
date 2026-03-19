@@ -1,0 +1,122 @@
+---
+/**
+ * TextEffect — Visual text treatment atom
+ *
+ * Decorative text with image fill, shadows, strokes, SVG filters.
+ * Separate from Heading/Text atoms which are semantic — this is pure visual.
+ * Use for hero text, feature headers, decorative titles.
+ *
+ * Props:
+ *   text       — The text to display
+ *   fillImage  — Image URL to fill text shape
+ *   fillGradient — CSS gradient to fill text
+ *   textShadow — Outer text shadow
+ *   dropShadow — Filter drop-shadow (for fill-image)
+ *   textStroke — Outline stroke width + colour
+ *   innerShadow — Simulated inner shadow via SVG filter
+ *   size       — Font size (CSS value)
+ *   weight     — Font weight
+ *   family     — Font family token
+ *   tracking   — Letter spacing
+ *   uppercase  — Uppercase transform
+ *   align      — Text alignment
+ *   tag        — HTML element (default: span, aria-hidden for decorative)
+ */
+
+interface Props {
+  text: string;
+  fillImage?: string;
+  fillGradient?: string;
+  textShadow?: string;
+  dropShadow?: string;
+  textStroke?: string;
+  innerShadow?: boolean;
+  size?: string;
+  weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold' | 'black';
+  family?: 'body' | 'heading' | 'mono' | 'handwriting';
+  tracking?: 'tight' | 'normal' | 'wide' | 'wider';
+  uppercase?: boolean;
+  align?: 'left' | 'center' | 'right';
+  tag?: 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3';
+  class?: string;
+  [key: string]: any;
+}
+
+const {
+  text,
+  fillImage,
+  fillGradient,
+  textShadow,
+  dropShadow,
+  textStroke,
+  innerShadow = false,
+  size,
+  weight = 'black',
+  family = 'heading',
+  tracking,
+  uppercase = true,
+  align,
+  tag = 'span',
+  class: className,
+  ...rest
+} = Astro.props;
+
+const Tag = tag as any;
+
+const filterId = innerShadow ? `inner-shadow-${Math.random().toString(36).slice(2, 8)}` : null;
+
+const hasFill = fillImage || fillGradient;
+
+const classes = [
+  'text-effect',
+  hasFill && 'text-effect--fill',
+  innerShadow && 'text-effect--inner-shadow',
+  weight && `text-effect--weight-${weight}`,
+  family && `text-effect--family-${family}`,
+  tracking && `text-effect--tracking-${tracking}`,
+  uppercase && 'text-effect--uppercase',
+  align && `text-effect--align-${align}`,
+  className,
+];
+
+const styles = [
+  size && `font-size: ${size}`,
+  fillImage && `background-image: url('${fillImage}')`,
+  fillGradient && `background-image: ${fillGradient}`,
+  textShadow && `text-shadow: ${textShadow}`,
+  dropShadow && `filter: drop-shadow(${dropShadow})`,
+  textStroke && `-webkit-text-stroke: ${textStroke}`,
+  filterId && `filter: url(#${filterId})`,
+  rest.style,
+].filter(Boolean).join('; ');
+---
+
+{innerShadow && (
+  <svg class="text-effect__svg" width="0" height="0" aria-hidden="true">
+    <defs>
+      <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+        <feComponentTransfer in="SourceAlpha">
+          <feFuncA type="table" tableValues="1 0" />
+        </feComponentTransfer>
+        <feGaussianBlur stdDeviation="3" />
+        <feOffset dx="2" dy="2" result="offsetblur" />
+        <feFlood flood-color="rgba(0,0,0,0.5)" result="color" />
+        <feComposite in2="offsetblur" operator="in" />
+        <feComposite in2="SourceAlpha" operator="in" />
+        <feMerge>
+          <feMergeNode in="SourceGraphic" />
+          <feMergeNode />
+        </feMerge>
+      </filter>
+    </defs>
+  </svg>
+)}
+
+<Tag
+  class:list={classes}
+  style={styles || undefined}
+  aria-hidden={tag === 'span' ? 'true' : undefined}
+  {...Object.fromEntries(Object.entries(rest).filter(([k]) => k !== 'style'))}
+>
+  {text}
+</Tag>
