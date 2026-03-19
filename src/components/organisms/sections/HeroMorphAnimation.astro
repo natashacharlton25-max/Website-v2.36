@@ -6,11 +6,33 @@
  * Script: src/scripts/hero-morph.ts
  * Styles: src/styles/components/hero-morph.css
  *
- * TODO (audit): GSAP MorphSVG can morph image masks between Phosphor icon shapes.
- * Image atom has maskIcon prop (4,533 icons as CSS mask-image).
- * To animate: swap CSS mask-image for inline SVG <clipPath>, GSAP morphs the <path> d attribute.
- * Use cases: hover morph (heart→star), scroll morph (shape changes with scroll position),
- * click morph (reveal animation). Needs live SVG in DOM, not data URI.
+ * TODO (audit): GSAP MorphSVG + clip-path morphing
+ *
+ * 1. IMAGE MASK MORPHING:
+ *    - Image atom has maskIcon prop (4,533 Phosphor icons as CSS mask-image)
+ *    - To animate: swap CSS mask-image for inline SVG <clipPath>
+ *    - GSAP MorphSVGPlugin morphs <path> d attribute between shapes
+ *    - GSAP handles point-count matching automatically (no manual polygon work)
+ *    - Use cases: hover morph (heart→star), scroll morph, click reveal
+ *
+ * 2. NORMALISED 1x1 SVG CLIP PATHS:
+ *    - clipPathUnits="objectBoundingBox" on a 1x1 SVG scales to any element
+ *    - GSAP normalizePath() converts any path to 0-1 range
+ *    - Any Phosphor icon path → normalised → objectBoundingBox clip
+ *    - Works at any element size without recalculation
+ *
+ * 3. CSS TEXT FILL WITH IMAGE:
+ *    - background-image + background-clip: text + -webkit-text-fill-color: transparent
+ *    - Pure CSS, no SVG needed, good browser support
+ *    - Add as `fillImage` prop on Heading/Text atoms
+ *    - Alternative: SVG <pattern> fill (1x1 pattern with image, text uses fill: url(#pattern))
+ *
+ * 4. CSS CLIP-PATH TRANSITION (no GSAP):
+ *    - clip-path: polygon() can be CSS-transitioned natively
+ *    - Both shapes must have same number of points (GSAP fixes this automatically)
+ *    - Simple hover effects without JS
+ *
+ * Reference: https://gsap.com/community/forums/topic/39260-animating-masks-with-gsap-clippath-clip-path-svg-mask/
  * See: Image.astro maskIcon prop, public/masks/*.svg, GSAP MorphSVGPlugin.
  */
 

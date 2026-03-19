@@ -61,6 +61,9 @@ interface Props {
   // ── Layout ───────────────────────────────────────────────
   spacing?: 'tight' | 'normal' | 'loose';
 
+  /** Fill text with an image — CSS background-clip: text */
+  fillImage?: string;
+
   /** Render AAC pictogram version of content (build-time) */
   aac?: boolean;
 
@@ -91,6 +94,7 @@ const {
   mediaSize = 'auto',
   iconStyle = 'contained',
   spacing = 'normal',
+  fillImage,
   aac = false,
   class: className,
   ...rest
@@ -194,7 +198,7 @@ const headingClassList = [
   </div>
 ) : (
   <Tag class:list={[...headingClassList, className]} {...rest}>
-    <span class="heading__text-inner"><slot /></span>
+    <span class:list={['heading__text-inner', fillImage && 'heading--fill-image']} style={fillImage ? `background-image: url(${fillImage})` : undefined}><slot /></span>
     {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
   </Tag>
 )}
