@@ -40,7 +40,6 @@ const tooltipStyle = [
                   text={item.text}
                   purpose={item.purpose || "label"}
                   position={item.position || "top"}
-                  entrance={item.entrance}
                 >
                   <Badge label={item.triggerLabel} variant="fill" />
                 </Tooltip>
@@ -49,10 +48,21 @@ const tooltipStyle = [
           ))}
         </div>
         <div class="render-textonly">
-          {section.items.filter((item: any) => (item.purpose || 'label') === 'info').map((item: any) => (
-            <p style="color:var(--neutral-800);">
-              {item.triggerLabel} [{item.text || '(rich content)'}]
-            </p>
+          {section.items.map((item: any) => (
+            item.richContent ? (
+              <Tooltip purpose="info" position="bottom">
+                <span>{item.triggerLabel}</span>
+                <span slot="content">Rich tooltip with text content</span>
+              </Tooltip>
+            ) : (
+              <Tooltip
+                text={item.text}
+                purpose={item.purpose || "label"}
+                position={item.position || "top"}
+              >
+                <span>{item.triggerLabel}</span>
+              </Tooltip>
+            )
           ))}
         </div>
       </Section>

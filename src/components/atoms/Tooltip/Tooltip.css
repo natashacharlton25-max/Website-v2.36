@@ -1,14 +1,7 @@
 /* ══════════════════════════════════════════════════════════════
    Tooltip — passive contextual display
-   Extracted from utilities.css, rebuilt with real DOM elements.
 
-   Internal tokens (--_tooltip-*):
-     --_tooltip-bg, --_tooltip-text, --_tooltip-border,
-     --_tooltip-arrow, --_tooltip-shadow,
-     --_tooltip-radius, --_tooltip-padding,
-     --_tooltip-offset, --_tooltip-z
-
-   Pipeline tokens (set by JSON inline style):
+   Pipeline tokens (set by JSON or theme):
      --tooltip-bg, --tooltip-text, --tooltip-border,
      --tooltip-shadow, --tooltip-accent
    ══════════════════════════════════════════════════════════════ */
@@ -17,64 +10,50 @@
 .tooltip {
   --_tooltip-bg: var(--tooltip-bg, var(--page-bg-raised));
   --_tooltip-text: var(--tooltip-text, var(--neutral-800));
-  --_tooltip-border: var(--tooltip-border, var(--neutral-400));
-  --_tooltip-accent: var(--tooltip-accent, var(--primary-600));
-  --_tooltip-radius: var(--radius-md);
-  --_tooltip-padding: var(--space-xs) var(--space-sm);
-  --_tooltip-offset: var(--space-xs);
-  --_tooltip-z: var(--z-tooltip);
-  --_tooltip-arrow: var(--_tooltip-bg);
+  --_tooltip-border: var(--tooltip-border, var(--primary-600));
   --_tooltip-shadow: var(--tooltip-shadow, var(--shadow-lg));
 
   position: relative;
   display: inline-flex;
 }
 
-/* ── Trigger — accent underline hint ── */
 .tooltip__trigger {
   display: inline-flex;
   align-items: center;
-  border-bottom: 1px dashed var(--_tooltip-accent);
   cursor: help;
 }
 
-/* ── Content — fixed to viewport, never clipped ── */
+/* ── Tooltip content — hidden by default ── */
 .tooltip__content {
   position: fixed;
-  z-index: var(--_tooltip-z);
+  z-index: var(--z-tooltip);
   left: var(--_tooltip-x, 0);
   top: var(--_tooltip-y, 0);
   max-width: min(90vw, 400px);
-  padding: var(--_tooltip-padding);
+  width: max-content;
+  padding: var(--space-md) var(--space-lg);
   background: var(--_tooltip-bg);
   color: var(--_tooltip-text);
   border: 1px solid var(--_tooltip-border);
-  border-radius: var(--_tooltip-radius);
+  border-radius: var(--radius-md);
   box-shadow: var(--_tooltip-shadow);
   font-weight: var(--font-medium);
   line-height: var(--leading-relaxed);
   text-align: center;
   white-space: normal;
-  width: max-content;
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-/* ── Force text colour inheritance — Text atom sets its own colour ── */
+/* Force text colour inheritance — Text atom sets its own colour */
 .tooltip__content .text,
 .tooltip__content .tooltip__text {
   color: inherit;
 }
 
-/* ── Arrow (CSS triangle) ── */
-.tooltip__content::before {
-  content: '';
-  position: absolute;
-  border: 6px solid transparent;
-}
-
-/* ── Visibility — hover + focus-within ── */
+/* ── Show on hover/focus ── */
 .tooltip:hover .tooltip__content,
 .tooltip:focus-within .tooltip__content {
   opacity: 1;
@@ -84,188 +63,97 @@
 
 
 /* ══════════════════════════════════════════════════════════════
-   Positions
+   Positions — JS sets --_tooltip-x/y to trigger centre
    ══════════════════════════════════════════════════════════════ */
 
-/* Position offsets — JS sets --_tooltip-x/y to trigger centre,
-   CSS translates from there per position variant. */
-
-/* ── Top (default) ── */
 .tooltip--top .tooltip__content {
-  transform: translateX(-50%) translateY(calc(-100% - var(--_tooltip-offset)));
+  transform: translateX(-50%) translateY(calc(-100% - var(--space-xs)));
 }
 
-.tooltip--top .tooltip__content::before {
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-top-color: var(--_tooltip-arrow);
-}
-
-/* ── Bottom ── */
 .tooltip--bottom .tooltip__content {
-  transform: translateX(-50%) translateY(var(--_tooltip-offset));
+  transform: translateX(-50%) translateY(var(--space-xs));
 }
 
-.tooltip--bottom .tooltip__content::before {
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-bottom-color: var(--_tooltip-arrow);
-}
-
-/* ── Left ── */
 .tooltip--left .tooltip__content {
-  transform: translateX(calc(-100% - var(--_tooltip-offset))) translateY(-50%);
+  transform: translateX(calc(-100% - var(--space-xs))) translateY(-50%);
 }
 
-.tooltip--left .tooltip__content::before {
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  border-left-color: var(--_tooltip-arrow);
-}
-
-/* ── Right ── */
 .tooltip--right .tooltip__content {
-  transform: translateX(var(--_tooltip-offset)) translateY(-50%);
+  transform: translateX(var(--space-xs)) translateY(-50%);
 }
 
-.tooltip--right .tooltip__content::before {
-  right: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  border-right-color: var(--_tooltip-arrow);
-}
-
-
-/* Themes removed — tooltip is one consistent style.
-   Predictable, always readable, no variant confusion. */
 
 
 /* ══════════════════════════════════════════════════════════════
-   Animation — gated by prop class
-   No entrance prop = no class = instant appear (opacity flip)
-   ══════════════════════════════════════════════════════════════ */
-
-/* ── Fade ── */
-.tooltip--animate-fade .tooltip__content {
-  transition: opacity var(--transition-fast), visibility var(--transition-fast);
-}
-
-/* ── Scale ── */
-.tooltip--animate-scale .tooltip__content {
-  transform-origin: center;
-  transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
-}
-
-.tooltip--animate-scale.tooltip--top .tooltip__content {
-  transform: translateX(-50%) translateY(calc(-100% - var(--_tooltip-offset))) scale(0.9);
-}
-
-.tooltip--animate-scale.tooltip--top:hover .tooltip__content,
-.tooltip--animate-scale.tooltip--top:focus-within .tooltip__content {
-  transform: translateX(-50%) translateY(calc(-100% - var(--_tooltip-offset))) scale(1);
-}
-
-.tooltip--animate-scale.tooltip--bottom .tooltip__content {
-  transform: translateX(-50%) translateY(var(--_tooltip-offset)) scale(0.9);
-}
-
-.tooltip--animate-scale.tooltip--bottom:hover .tooltip__content,
-.tooltip--animate-scale.tooltip--bottom:focus-within .tooltip__content {
-  transform: translateX(-50%) translateY(var(--_tooltip-offset)) scale(1);
-}
-
-.tooltip--animate-scale.tooltip--left .tooltip__content {
-  transform: translateX(calc(-100% - var(--_tooltip-offset))) translateY(-50%) scale(0.9);
-}
-
-.tooltip--animate-scale.tooltip--left:hover .tooltip__content,
-.tooltip--animate-scale.tooltip--left:focus-within .tooltip__content {
-  transform: translateX(calc(-100% - var(--_tooltip-offset))) translateY(-50%) scale(1);
-}
-
-.tooltip--animate-scale.tooltip--right .tooltip__content {
-  transform: translateX(var(--_tooltip-offset)) translateY(-50%) scale(0.9);
-}
-
-.tooltip--animate-scale.tooltip--right:hover .tooltip__content,
-.tooltip--animate-scale.tooltip--right:focus-within .tooltip__content {
-  transform: translateX(var(--_tooltip-offset)) translateY(-50%) scale(1);
-}
-
-/* ── Slide ── */
-.tooltip--animate-slide .tooltip__content {
-  transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
-}
-
-.tooltip--animate-slide.tooltip--top .tooltip__content {
-  transform: translateX(-50%) translateY(calc(-100% - var(--_tooltip-offset) + var(--space-xs)));
-}
-
-.tooltip--animate-slide.tooltip--top:hover .tooltip__content,
-.tooltip--animate-slide.tooltip--top:focus-within .tooltip__content {
-  transform: translateX(-50%) translateY(calc(-100% - var(--_tooltip-offset)));
-}
-
-.tooltip--animate-slide.tooltip--bottom .tooltip__content {
-  transform: translateX(-50%) translateY(calc(var(--_tooltip-offset) - var(--space-xs)));
-}
-
-.tooltip--animate-slide.tooltip--bottom:hover .tooltip__content,
-.tooltip--animate-slide.tooltip--bottom:focus-within .tooltip__content {
-  transform: translateX(-50%) translateY(var(--_tooltip-offset));
-}
-
-.tooltip--animate-slide.tooltip--left .tooltip__content {
-  transform: translateX(calc(-100% - var(--_tooltip-offset) + var(--space-xs))) translateY(-50%);
-}
-
-.tooltip--animate-slide.tooltip--left:hover .tooltip__content,
-.tooltip--animate-slide.tooltip--left:focus-within .tooltip__content {
-  transform: translateX(calc(-100% - var(--_tooltip-offset))) translateY(-50%);
-}
-
-.tooltip--animate-slide.tooltip--right .tooltip__content {
-  transform: translateX(calc(var(--_tooltip-offset) - var(--space-xs))) translateY(-50%);
-}
-
-.tooltip--animate-slide.tooltip--right:hover .tooltip__content,
-.tooltip--animate-slide.tooltip--right:focus-within .tooltip__content {
-  transform: translateX(var(--_tooltip-offset)) translateY(-50%);
-}
-
-
-/* ══════════════════════════════════════════════════════════════
-   Dialog context — absolute positioning (no JS coords needed)
-   Dialogs in the top layer break position:fixed offsets.
-   Switch to CSS-only relative anchoring via the .tooltip wrapper.
-   Existing transforms handle centering + offset unchanged.
+   Dialog context — absolute positioning
    ══════════════════════════════════════════════════════════════ */
 
 dialog .tooltip__content {
   position: absolute;
 }
 
-dialog .tooltip--top .tooltip__content {
-  left: 50%;
-  top: 0;
+dialog .tooltip--top .tooltip__content { left: 50%; top: 0; }
+dialog .tooltip--bottom .tooltip__content { left: 50%; top: 100%; }
+dialog .tooltip--left .tooltip__content { left: 0; top: 50%; }
+dialog .tooltip--right .tooltip__content { left: 100%; top: 50%; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   Hover gates
+   ══════════════════════════════════════════════════════════════ */
+
+/* Gentle — slow soft fade (floating + bar) */
+[data-hover="gentle"] .tooltip__content {
+  transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
 }
 
-dialog .tooltip--bottom .tooltip__content {
-  left: 50%;
-  top: 100%;
+[data-render="textonly"][data-hover="gentle"] .tooltip__content {
+  transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
 }
 
-dialog .tooltip--left .tooltip__content {
-  left: 0;
-  top: 50%;
+/* Instant — no animation (floating + bar) */
+[data-hover="instant"] .tooltip__content {
+  transition: none;
 }
 
-dialog .tooltip--right .tooltip__content {
-  left: 100%;
-  top: 50%;
+[data-render="textonly"][data-hover="instant"] .tooltip__content {
+  transition: none;
+}
+
+/* None — cursor reset, brackets + inline handled in combined rule below */
+[data-hover="none"] .tooltip .tooltip__trigger {
+  cursor: default;
+}
+
+[data-hover="none"] .tooltip .tooltip__content::before {
+  content: "[";
+}
+
+[data-hover="none"] .tooltip .tooltip__content::after {
+  content: "]";
+}
+
+/* Hover none beats ALL — inline wins over bar, textonly, mobile, everything */
+[data-hover="none"] .tooltip .tooltip__content,
+[data-hover="none"][data-render="assistive"] .tooltip .tooltip__content {
+  position: static;
+  display: inline;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  background: none;
+  border: none;
+  box-shadow: none;
+  transform: none;
+  padding: 0 var(--space-md);
+  margin: 0 var(--space-xs);
+  max-width: none;
+  width: auto;
+  white-space: normal;
+  text-align: inherit;
+  color: var(--neutral-600);
+  font-style: italic;
+  transition: none;
 }
 
 
@@ -273,16 +161,49 @@ dialog .tooltip--right .tooltip__content {
    Render modes
    ══════════════════════════════════════════════════════════════ */
 
-/* ── Reduced — instant appear, no animation ── */
+/* Reduced — no animation */
 [data-render="reduced"] .tooltip__content {
   transition: none;
 }
 
-[data-render="reduced"] .tooltip__content::before {
+/* Textonly — ALL tooltips hidden, JS shared bar shows them on hover */
+[data-render="textonly"] .tooltip .tooltip__content {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Textonly + hover none — info only inline, label hidden */
+[data-hover="none"][data-render="textonly"] .tooltip--info .tooltip__content {
+  position: static;
+  display: inline;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  background: none;
+  border: none;
+  box-shadow: none;
+  transform: none;
+  padding: 0 var(--space-md);
+  margin: 0 var(--space-xs);
+  max-width: none;
+  width: auto;
+  white-space: normal;
+  text-align: inherit;
+  color: var(--neutral-600);
+  font-style: italic;
+  transition: none;
+}
+
+[data-hover="none"][data-render="textonly"] .tooltip--label .tooltip__content {
   display: none;
 }
 
-/* ── Assistive — info = full-width bar, label = hidden ── */
+[data-hover="none"][data-render="textonly"] .tooltip--label .tooltip__trigger {
+  cursor: default;
+}
+
+/* Assistive — info always visible as bar, label hidden */
 [data-render="assistive"] .tooltip--info .tooltip__content {
   position: static;
   max-width: 100%;
@@ -290,13 +211,7 @@ dialog .tooltip--right .tooltip__content {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  background: var(--_tooltip-bg);
-  color: var(--_tooltip-text);
-  border: 1px solid var(--_tooltip-border);
   box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  text-shadow: none;
   transform: none;
   white-space: normal;
   text-align: left;
@@ -307,113 +222,38 @@ dialog .tooltip--right .tooltip__content {
   display: none;
 }
 
-[data-render="assistive"] .tooltip__content::before {
-  display: none;
+[data-render="assistive"] .tooltip__trigger {
+  min-width: 64px;
+  min-height: 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* ── Textonly — info = inlined, label = hidden ── */
-[data-render="textonly"] .tooltip--info .tooltip__content {
-  position: static;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  background: none;
-  border: none;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  text-shadow: none;
-  transform: none;
-  padding: 0;
-  max-width: none;
-  white-space: normal;
-  text-align: inherit;
+/* ── Focus indicator ── */
+.tooltip__trigger:focus-visible {
+  outline: 2px solid var(--_tooltip-border);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
-[data-render="textonly"] .tooltip--info .tooltip__content {
-  color: var(--neutral-600);
-  font-style: italic;
-  padding: 0 var(--space-xs);
+[data-render="assistive"] .tooltip__trigger:focus-visible {
+  outline-width: 3px;
 }
 
-[data-render="textonly"] .tooltip--info .tooltip__content::before {
-  content: "[";
-  display: inline;
-  border: none;
-  position: static;
-}
+/* ── Mobile — ALL tooltips hidden, JS shared bar shows them ── */
+@media (max-width: 640px) {
+  .tooltip .tooltip__content {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 
-[data-render="textonly"] .tooltip--info .tooltip__content::after {
-  content: "]";
-}
-
-[data-render="textonly"] .tooltip--label .tooltip__content {
-  display: none;
-}
-
-[data-render="textonly"] .tooltip__content::before {
-  display: none;
-}
-
-
-/* ══════════════════════════════════════════════════════════════
-   Hover gates
-   full    = normal animated (default — no override needed)
-   gentle  = slower, softer fade
-   instant = no animation, snap appear/disappear
-   none    = inline text on page (same as textonly render)
-   ══════════════════════════════════════════════════════════════ */
-
-/* ── Gentle — slower transitions ── */
-[data-hover="gentle"] .tooltip__content {
-  transition: opacity 0.4s ease, visibility 0.4s ease;
-}
-
-/* ── Instant — no animation ── */
-[data-hover="instant"] .tooltip__content {
-  transition: none;
-}
-
-[data-hover="instant"] .tooltip__content::before {
-  display: none;
-}
-
-/* ── None — renders as inline text, no hover interaction ── */
-[data-hover="none"] .tooltip--info .tooltip__content {
-  position: static;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  background: none;
-  border: none;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  text-shadow: none;
-  transform: none;
-  padding: 0 var(--space-xs);
-  max-width: none;
-  white-space: normal;
-  text-align: inherit;
-  color: var(--neutral-600);
-  font-style: italic;
-}
-
-[data-hover="none"] .tooltip--info .tooltip__content::before {
-  content: "[";
-  display: inline;
-  border: none;
-  position: static;
-}
-
-[data-hover="none"] .tooltip--info .tooltip__content::after {
-  content: "]";
-}
-
-[data-hover="none"] .tooltip--label .tooltip__content {
-  display: none;
-}
-
-[data-hover="none"] .tooltip__content::before {
-  display: none;
+  .tooltip__trigger {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
