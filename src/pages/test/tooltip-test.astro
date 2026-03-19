@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Tooltip from '../../components/atoms/Tooltip/Tooltip.astro';
+import Badge from '../../components/atoms/Badge/Badge.astro';
+import Heading from '../../components/atoms/Heading/Heading.astro';
+import Section from '../../components/atoms/Section/Section.astro';
+import '../../components/atoms/Section/Section.css';
+
+import testData from '../../data/test/tooltip.json';
+---
+
+<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
+  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
+
+    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+
+    {testData.sections.map((section: any) => (
+      <Section label={section.label} separator gap={testData.layout.itemGap}>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-xl);align-items:center;padding:var(--space-2xl) 0;">
+          {section.items.map((item: any) => (
+            <div class="render-full">
+              {item.richContent ? (
+                <Tooltip purpose="info" position="bottom" size="lg">
+                  <Badge label={item.triggerLabel} variant="outline" />
+                  <div slot="content" style="display:flex;flex-direction:column;gap:var(--space-sm);">
+                    <strong>Rich tooltip content</strong>
+                    <p>This tooltip uses the content slot for complex markup including <em>emphasis</em> and structured layout.</p>
+                  </div>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  text={item.text}
+                  purpose={item.purpose || "label"}
+                  position={item.position || "top"}
+                  theme={item.theme || "professional"}
+                  size={item.size || "md"}
+                  entrance={item.entrance}
+                >
+                  <Badge label={item.triggerLabel} variant="fill" />
+                </Tooltip>
+              )}
+            </div>
+          ))}
+        </div>
+        <div class="render-textonly">
+          {section.items.map((item: any) => (
+            <p style="color:var(--neutral-800);">
+              {item.triggerLabel}: {item.text || '(rich content)'}
+            </p>
+          ))}
+        </div>
+      </Section>
+    ))}
+
+  </Section>
+</BaseLayout>

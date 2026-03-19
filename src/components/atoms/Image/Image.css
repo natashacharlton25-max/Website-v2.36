@@ -291,6 +291,8 @@
   padding: var(--space-sm);
   background: var(--_image-overlay);
   color: var(--neutral-400);
+  font-size: var(--text-small);
+  line-height: var(--leading-snug);
 }
 
 /* ── Display mode: TOOLTIP — visible on figure hover ── */
@@ -343,14 +345,48 @@
   white-space: nowrap;
 }
 
-[data-alt-display-mode="replace"][data-alt-text-mode="word"] .image-alt-word,
-[data-alt-display-mode="replace"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
-[data-alt-display-mode="replace"][data-alt-text-mode="aac"] .image-alt-aac {
-  display: block;
-  padding: var(--space-md);
-  background: color-mix(in srgb, var(--_image-caption) 8%, transparent);
+[data-alt-display-mode="replace"] .image {
+  border: 2px solid var(--neutral-400);
   border-radius: var(--radius-md);
-  margin-top: 0;
+  padding: var(--space-lg);
+  min-height: 6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--page-bg);
+}
+
+/* Show the selected alt text mode */
+[data-alt-display-mode="replace"][data-alt-text-mode="word"] .image-alt-word {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--neutral-800);
+}
+
+[data-alt-display-mode="replace"][data-alt-text-mode="descriptive"] .image-alt-descriptive {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--neutral-800);
+}
+
+[data-alt-display-mode="replace"][data-alt-text-mode="aac"] .image-alt-aac {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* Fallback: if no alt text mode selected but replace is on, show descriptive */
+[data-alt-display-mode="replace"][data-alt-text-mode="none"] .image-alt-descriptive {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--neutral-600);
+  font-style: italic;
 }
 
 /* AAC mode + cognitive level rules extracted to src/styles/global/aac-mode.css */

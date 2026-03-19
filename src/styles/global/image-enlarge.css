@@ -1,0 +1,175 @@
+/**
+ * Image Enlarge Mode
+ *
+ * Gate: data-image-enlarge on <html>
+ * When active: content images become clickable, open modal with enlarged view + alt text subtitle
+ * Works across ALL render modes and ALL themes
+ */
+
+/* ── Clickable indicator on images ── */
+[data-image-enlarge] figure[data-role="content"] {
+  cursor: zoom-in;
+  position: relative;
+}
+
+[data-image-enlarge] figure[data-role="content"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-radius: inherit;
+  transition: border-color 0.2s ease;
+  pointer-events: none;
+}
+
+[data-image-enlarge] figure[data-role="content"]:hover::after,
+[data-image-enlarge] figure[data-role="content"]:focus-within::after {
+  border-color: var(--primary-600);
+}
+
+/* Zoom icon badge (injected by JS as Phosphor SVG) */
+.image-enlarge-badge {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  z-index: 2;
+  background: var(--page-bg);
+  border-radius: var(--radius-full);
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  box-shadow: var(--shadow-sm);
+  color: var(--neutral-800);
+}
+
+.image-enlarge-badge svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+[data-image-enlarge] figure[data-role="content"]:hover .image-enlarge-badge,
+[data-image-enlarge] figure[data-role="content"]:focus-within .image-enlarge-badge {
+  opacity: 1;
+}
+
+/* ── Modal overlay ── */
+.image-enlarge-modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal, 9999);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  background: color-mix(in oklch, var(--color-Black) 80%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.image-enlarge-modal[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ── Modal content ── */
+.image-enlarge-modal__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  max-width: 90vw;
+  max-height: 85vh;
+}
+
+.image-enlarge-modal__image {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-elevated);
+}
+
+/* ── Subtitle (alt text) ── */
+.image-enlarge-modal__subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--color-White);
+  text-align: center;
+  max-width: 65ch;
+  padding: var(--space-md) var(--space-lg);
+  background: color-mix(in oklch, var(--color-Black) 60%, transparent);
+  border-radius: var(--radius-md);
+}
+
+.image-enlarge-modal__subtitle:empty {
+  display: none;
+}
+
+/* ── AAC cards row ── */
+.image-enlarge-modal__aac {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+  max-width: 90vw;
+}
+
+.image-enlarge-modal__aac:empty {
+  display: none;
+}
+
+/* ── Close button ── */
+.image-enlarge-modal__close {
+  position: absolute;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  background: color-mix(in oklch, var(--color-Black) 60%, transparent);
+  border: 2px solid var(--color-White);
+  color: var(--color-White);
+  font-size: 1.5rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.image-enlarge-modal__close:hover,
+.image-enlarge-modal__close:focus {
+  background: color-mix(in oklch, var(--color-Black) 80%, transparent);
+}
+
+/* ── XL text mode — bigger subtitle ── */
+[data-text-xl] .image-enlarge-modal__subtitle {
+  font-size: var(--text-xl);
+}
+
+/* ── HC mode — higher contrast ── */
+[data-contrast="high"] .image-enlarge-modal__subtitle {
+  background: var(--color-Black);
+  border: 2px solid var(--color-White);
+}
+
+[data-contrast="high"] .image-enlarge-modal__close {
+  border-width: 3px;
+}
+
+/* ── Assistive — larger close button ── */
+[data-render="assistive"] .image-enlarge-modal__close {
+  width: 4rem;
+  height: 4rem;
+  font-size: 2rem;
+}

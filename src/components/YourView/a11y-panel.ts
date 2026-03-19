@@ -23,7 +23,7 @@ export interface A11ySettings {
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
-  altDisplayMode: 'hidden' | 'caption' | 'overlay' | 'tooltip' | 'subtitle' | 'replace';
+  altDisplayMode: 'hidden' | 'overlay' | 'tooltip' | 'enlarge' | 'replace';
   cognitiveLevel: 'green' | 'yellow' | 'orange' | 'full';
   /** Which symbol pictures to show — OpenAAC is the bundled default */
   symbolSet: 'openaac' | 'widgit' | 'pcs' | 'bliss' | 'makaton' | 'custom';
@@ -35,6 +35,8 @@ export interface A11ySettings {
   contentAac: boolean;
   /** AAC pictogram filter — grayscale or sepia for colour-blind users */
   aacFilter: 'none' | 'grayscale' | 'sepia';
+  /** Image enlarge — click to open modal with enlarged image + alt text subtitle */
+  imageEnlarge: boolean;
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -60,7 +62,8 @@ export const defaultSettings: A11ySettings = {
   customSymbolsUrl: '',
   hoverMode: 'full',
   contentAac: false,
-  aacFilter: 'none'
+  aacFilter: 'none',
+  imageEnlarge: false
 };
 
 // ===================================
@@ -248,6 +251,13 @@ export function applySettings(settings: A11ySettings): void {
     document.documentElement.removeAttribute('data-aac-filter');
   } else {
     document.documentElement.dataset.aacFilter = aacFilter;
+  }
+
+  // Image Enlarge — auto-enabled when display mode is 'enlarge'
+  if (displayMode === 'enlarge') {
+    document.documentElement.setAttribute('data-image-enlarge', '');
+  } else {
+    document.documentElement.removeAttribute('data-image-enlarge');
   }
 
   // Hover Mode — decorative hover feedback
