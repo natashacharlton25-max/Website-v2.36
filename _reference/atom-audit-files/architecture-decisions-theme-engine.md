@@ -601,6 +601,107 @@ Works on every page, every atom, every theme. No per-component scaling rules nee
 
 ---
 
+## Decision 56: Tooltip — Single Style, Theme-Responsive (19 March 2026)
+
+**Tooltip is one consistent style — no theme variants, no sizes, no entrance effects.** Reads theme surface tokens (`page-bg-raised`, `neutral-800`, `primary-600` border) so it auto-adapts to every theme. Dark/HC overrides in zone files, not component CSS.
+
+- Removed: glass, neon, brutalist theme variants
+- Removed: sm/md/lg size prop (always flexes to content)
+- Removed: fade/scale/slide entrance effects
+- Content: text or AAC cards only — no interactive elements
+
+---
+
+## Decision 57: Tooltip Hover Gates — Four Modes (19 March 2026)
+
+| Mode | Behaviour |
+|------|-----------|
+| Full | Floating tooltip, 0.2s fade |
+| Gentle | Floating, 0.8s ease-in-out |
+| Instant | Floating, no transition |
+| None | ALL tooltips inline `[bracketed]`, no hover interaction |
+
+Hover none always wins — overrides textonly, mobile, assistive. Inline mode shows all tooltips, info purpose gets `[brackets]`. When Content AAC active, brackets suppressed (cards have own border grouping).
+
+---
+
+## Decision 58: Tooltip Bottom Bar — Textonly + Mobile (19 March 2026)
+
+**Shared JS bar element for textonly render and mobile.** One bar, all tooltips — text swaps when moving between triggers. Shows ALL tooltips (label + info).
+
+- 2s linger timer between tooltips (no flicker)
+- `showBar()` cancels any pending hide
+- Scroll instantly hides bar
+- Tap outside dismisses on mobile
+- MutationObserver hides bar when hover/render mode changes
+- `data-hover="none"` kills bar entirely (inline mode takes over)
+- Content AAC mode: bar shows card HTML with images, not just text
+- `aria-live="polite"` on bar for screen reader announcements
+
+---
+
+## Decision 59: Tooltip AAC — Build-Time aacInline (19 March 2026)
+
+**Every tooltip with text runs `aacInline()` at build time.** `aac` prop defaults to `true`. Both plain text AND AAC HTML are baked into static output. CSS toggles which shows via `data-content-aac`.
+
+- Same pattern as Heading AAC — component handles generation, not JSON
+- `[data-content-aac] .tooltip__text { display: none }` hides text
+- `.tooltip__aac.content-aac` shown by global `aac-mode.css`
+- Cognitive level filtering via `data-core-tier` + `data-cognitive-level` — already built into cards
+- Inline AAC cards get primary border grouping (2px `--_tooltip-border`)
+
+---
+
+## Decision 60: Image Enlarge Modal — Subtitle Alt Text Display (19 March 2026)
+
+**`data-alt-display-mode="enlarge"` opens a modal with large image + alt text subtitle + AAC cards.** Replaces the old `subtitle` and `caption` display modes. The only display mode that needs JS — all others are pure CSS.
+
+- Phosphor magnifying glass icon fetched from API (SVG badge on hover)
+- Focus trap, escape/click-outside close, returns focus
+- Alt text as subtitle underneath, AAC cards below that
+- Works across all render modes and themes
+- Auto-enabled when display mode = enlarge (no separate toggle)
+
+---
+
+## Decision 61: Image Semantic Roles for Render Stripping (19 March 2026)
+
+**Images classified by purpose — render rules strip based on role, not blanket hide/show.**
+
+| Role | Textonly | Workbook/Study |
+|------|---------|----------------|
+| `decorative` | Hide | Hide |
+| `ui-control` | Hide (text label) | Hide |
+| `content-symbol` | Hide | Show |
+| `informational` | Show | Show |
+| `interactive` | Show with alt | Show |
+
+Per-item `renderOverrides.keep: ["image"]` for exceptions. AAC card pictograms are NEVER stripped — they ARE the content.
+
+---
+
+## Decision 62: AAC Card Borders — 4px All Modes (19 March 2026)
+
+**AAC card borders are 4px in every render mode.** Textonly no longer overrides to 1px. Tier colours (Success/Warning/neutral) need thickness to be visible, especially in dark/HC modes. Consistent across floating tooltip, bottom bar, inline, and page content.
+
+---
+
+## Decision 63: ? Indicator on Tooltip Triggers (19 March 2026)
+
+**Solid primary circle with `?` shown on all tooltip triggers, all modes, all devices.** Universal "more info" hint — users know there's content to discover. Mobile users know to tap. Keyboard users see it alongside focus indicator.
+
+- Removable via future "hide tooltip indicators" setting
+- Mobile: min 44px touch target on trigger
+- Assistive: min 64px touch target, 3px focus outline
+
+---
+
+## Decision 64: Responsive CSS in Separate Files (19 March 2026)
+
+**All `@media` queries live in `Component.responsive.css`, never in base CSS.** Keeps base CSS clean and responsive rules isolated. Consistent with the two-file pattern: `Component.css` (base) + `Component.responsive.css` (breakpoints).
+
+---
+
 ## Files Referenced
 
 | File | Purpose |
@@ -620,3 +721,7 @@ Works on every page, every atom, every theme. No per-component scaling rules nee
 | `src/styles/global/render-textonly.css` | Text-only render CSS overrides |
 | `src/styles/global/textonly-styles.css` | Text-only style variants (easy-read/workbook/study/aac) |
 | `atom-visual-test-matrix.md` | Per-atom visual testing checklist (9 axes) |
+| `src/components/atoms/Tooltip/Tooltip.css` | Tooltip base + hover gates + render modes |
+| `src/components/atoms/Tooltip/Tooltip.responsive.css` | Tooltip mobile breakpoints |
+| `src/scripts/image-enlarge.ts` | Image enlarge modal (Phosphor icon, focus trap) |
+| `src/styles/global/image-enlarge.css` | Image enlarge mode CSS (zoom badge, modal) |
