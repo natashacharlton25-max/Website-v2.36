@@ -209,3 +209,22 @@ const figureClasses = [
     ) : null}
   </figure>
 )}
+
+<script>
+  function initBlurReveal() {
+    document.querySelectorAll<HTMLElement>('.image--hover').forEach((img) => {
+      if (img.dataset.blurRevealInit) return;
+      img.dataset.blurRevealInit = 'true';
+
+      img.addEventListener('click', () => {
+        const hover = document.body.dataset.hover;
+        if (hover === 'none' && img.className.includes('image--blur')) {
+          img.classList.toggle('image--revealed');
+        }
+      });
+    });
+  }
+
+  initBlurReveal();
+  document.addEventListener('astro:page-load', initBlurReveal);
+</script>

@@ -98,6 +98,30 @@
     contrast(var(--media-contrast, 1));
 }
 
+/* Gentle — slow unblur */
+[data-hover="gentle"] .image--animate .image--hover[class*="image--blur"] {
+  transition: filter 0.8s ease-in-out, transform 0.8s ease-in-out;
+}
+
+/* Instant — snap unblur */
+[data-hover="instant"] .image--animate .image--hover[class*="image--blur"]:hover {
+  transition: none;
+}
+
+/* None — no hover, click reveals via JS class, no zoom */
+[data-hover="none"] .image--animate .image--hover[class*="image--blur"]:hover {
+  filter: inherit;
+}
+
+.image--hover.image--revealed {
+  filter:
+    blur(0)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+  transform: none;
+}
+
 .image--animate .image--tilt-sm { transform: var(--img-tilt-sm); }
 .image--animate .image--tilt-md { transform: var(--img-tilt-md); }
 .image--animate .image--tilt-lg { transform: var(--img-tilt-lg); }
