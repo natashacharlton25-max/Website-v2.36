@@ -1,0 +1,174 @@
+---
+/**
+ * LetterDrop — Scatter-land-reveal text animation effect
+ *
+ * Letters start as random characters scattered across the viewport,
+ * animate into position, then reveal correct text with colour.
+ * Each letter gets a random hover effect (balance, shrinkjump, falling, rotate, toplong).
+ *
+ * Props:
+ *   lines       — Array of { text, color } objects
+ *   size        — Font size CSS value (default: 7vw)
+ *   weight      — Font weight (default: 800)
+ *   family      — Font family token
+ *   landDelay   — Base delay before letters land (ms, default: 500)
+ *   revealDelay — Delay after all landed before reveal (ms, default: 1500)
+ *
+ * Hover effects gated by data-hover on body.
+ * Animation gated by data-render (reduced = instant, textonly = plain text).
+ *
+ * Source: texteffect - dropin.md (original prototype)
+ */
+
+interface LineConfig {
+  text: string;
+  color: string;
+}
+
+interface Props {
+  lines: LineConfig[];
+  size?: string;
+  weight?: string | number;
+  family?: 'body' | 'heading' | 'mono' | 'handwriting';
+  landDelay?: number;
+  revealDelay?: number;
+  class?: string;
+}
+
+const {
+  lines,
+  size = '7vw',
+  weight = 800,
+  family = 'heading',
+  landDelay = 500,
+  revealDelay = 1500,
+  class: className,
+} = Astro.props;
+
+const id = `letter-drop-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div
+  class:list={['letter-drop', family && `letter-drop--family-${family}`, className]}
+  id={id}
+  data-land-delay={landDelay}
+  data-reveal-delay={revealDelay}
+  style={`font-size: ${size}; font-weight: ${weight};`}
+>
+  {lines.map((line, i) => (
+    <div class="letter-drop__line" data-word={line.text} data-color={line.color}></div>
+  ))}
+</div>
+
+<!-- Textonly fallback -->
+<div class="letter-drop__textonly render-textonly">
+  {lines.map((line) => (
+    <p style="color:var(--neutral-800);">{line.text}</p>
+  ))}
+</div>
+
+<script>
+  function initLetterDrop() {
+    document.querySelectorAll<HTMLElement>('.letter-drop').forEach((container) => {
+      if (container.dataset.ldInit) return;
+      container.dataset.ldInit = 'true';
+
+      // Skip animation in reduced render
+      const render = document.body.dataset.render;
+      if (render === 'textonly') { container.style.display = 'none'; return; }
+
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const hoverClasses = ['hover-balance', 'hover-shrinkjump', 'hover-falling', 'hover-rotate', 'hover-toplong'];
+      const landDelay = parseInt(container.dataset.landDelay || '500');
+      const revealDelay = parseInt(container.dataset.revealDelay || '1500');
+      const lines = container.querySelectorAll<HTMLElement>('.letter-drop__line');
+      const isReduced = render === 'reduced';
+
+      let totalLetters = 0;
+      let lettersLanded = 0;
+
+      function shuffle<T>(array: T[]): T[] {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      function dropLetters() {
+        lines.forEach((line, li) => {
+          const word = line.dataset.word || '';
+          totalLetters += word.length;
+          let prevHover: string | null = null;
+
+          [...word].forEach((char, idx) => {
+            const span = document.createElement('span');
+            span.className = 'letter-drop__letter';
+            span.dataset.index = String(idx);
+
+            if (isReduced) {
+              // No scatter animation — instant reveal
+              span.textContent = char;
+              span.style.color = line.dataset.color || '';
+              span.style.opacity = '1';
+              line.appendChild(span);
+              return;
+            }
+
+            // Random placeholder character
+            let wrong: string;
+            do { wrong = chars[Math.floor(Math.random() * chars.length)]; }
+            while (wrong === char);
+            span.textContent = wrong;
+            span.style.color = 'var(--neutral-600)';
+            span.style.transform = `translate(${Math.random() * 500 - 250}px, ${Math.random() * 500 - 250}px) rotate(${Math.random() * 360 - 180}deg)`;
+
+            // Random hover effect (avoid repeating previous)
+            const available = hoverClasses.filter(c => c !== prevHover);
+            const hoverClass = available[Math.floor(Math.random() * available.length)];
+            prevHover = hoverClass;
+            span.dataset.hover = hoverClass;
+
+            line.appendChild(span);
+
+            setTimeout(() => {
+              span.style.opacity = '1';
+              span.style.transform = 'translate(0,0) rotate(0deg)';
+              lettersLanded++;
+              if (lettersLanded === totalLetters) {
+                setTimeout(finalReveal, revealDelay);
+              }
+            }, landDelay + li * 800 + idx * 300);
+          });
+        });
+      }
+
+      function finalReveal() {
+        const allLetters = Array.from(container.querySelectorAll('.letter-drop__letter'));
+        const shuffled = shuffle(allLetters);
+        shuffled.forEach((span, i) => {
+          setTimeout(() => {
+            const el = span as HTMLElement;
+            const parent = el.parentElement as HTMLElement;
+            const word = parent.dataset.word || '';
+            const idx = parseInt(el.dataset.index || '0');
+            el.textContent = word[idx];
+            el.style.color = parent.dataset.color || '';
+            el.classList.add('letter-drop__letter--final');
+
+            // Add hover effect class (gated by data-hover)
+            const hover = document.body.dataset.hover;
+            if (hover !== 'none' && el.dataset.hover) {
+              el.classList.add(el.dataset.hover);
+            }
+          }, i * 400);
+        });
+      }
+
+      dropLetters();
+    });
+  }
+
+  initLetterDrop();
+  document.addEventListener('astro:page-load', initLetterDrop);
+</script>

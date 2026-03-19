@@ -1,0 +1,63 @@
+/* ══════════════════════════════════════════════════════════════
+   WordRotate — 3D letter-flip word cycle
+   ══════════════════════════════════════════════════════════════ */
+
+.word-rotate {
+  display: flex;
+  align-items: center;
+  line-height: 1.3;
+}
+
+.word-rotate--family-heading     { font-family: var(--font-heading); }
+.word-rotate--family-body        { font-family: var(--font-body); }
+.word-rotate--family-mono        { font-family: var(--font-mono); }
+.word-rotate--family-handwriting { font-family: var(--font-handwriting); }
+
+.word-rotate__container {
+  position: relative;
+  display: inline-flex;
+  min-height: 1.3em;
+}
+
+.word-rotate__word {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  opacity: 0;
+  white-space: nowrap;
+  width: max-content;
+}
+
+.word-rotate__letter {
+  display: inline-block;
+  transform: translateZ(25px);
+  transform-origin: 50% 50% 25px;
+}
+
+.word-rotate__letter.out {
+  transform: rotateX(90deg);
+  transition: transform 0.32s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+}
+
+.word-rotate__letter.behind {
+  transform: rotateX(-90deg);
+}
+
+.word-rotate__letter.in {
+  transform: rotateX(0deg);
+  transition: transform 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Reduced — no 3D, instant swap */
+[data-render="reduced"] .word-rotate__letter {
+  transform: none;
+  transition: none;
+}
+
+/* Textonly — first word only, plain */
+[data-render="textonly"] .word-rotate__word {
+  position: static;
+  opacity: 1;
+  color: var(--neutral-800);
+}

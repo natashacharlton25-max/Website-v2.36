@@ -1,0 +1,133 @@
+---
+/**
+ * WordRotate — 3D letter-flip word cycle effect
+ *
+ * Cycles through words with 3D rotateX per-letter animation.
+ * Each word can have its own colour/rainbow class.
+ *
+ * Props:
+ *   words       — Array of { text, color } objects
+ *   interval    — Time between word changes (ms, default: 4000)
+ *   size        — Font size CSS value
+ *   weight      — Font weight
+ *   family      — Font family token
+ *
+ * Source: rainbow animated text prototype
+ */
+
+interface WordConfig {
+  text: string;
+  color: string;
+}
+
+interface Props {
+  words: WordConfig[];
+  interval?: number;
+  size?: string;
+  weight?: string | number;
+  family?: 'body' | 'heading' | 'mono' | 'handwriting';
+  class?: string;
+}
+
+const {
+  words,
+  interval = 4000,
+  size = 'clamp(2rem, 8vw, 6rem)',
+  weight = 400,
+  family = 'handwriting',
+  class: className,
+} = Astro.props;
+
+const id = `word-rotate-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div
+  class:list={['word-rotate', family && `word-rotate--family-${family}`, className]}
+  id={id}
+  data-interval={interval}
+  style={`font-size: ${size}; font-weight: ${weight};`}
+>
+  <span class="word-rotate__container">
+    {words.map((word, i) => (
+      <span class="word-rotate__word" style={`color: ${word.color};`} data-index={i}>
+        {word.text}
+      </span>
+    ))}
+  </span>
+</div>
+
+<script>
+  function initWordRotate() {
+    document.querySelectorAll<HTMLElement>('.word-rotate').forEach((el) => {
+      if (el.dataset.wrInit) return;
+      el.dataset.wrInit = 'true';
+
+      const interval = parseInt(el.dataset.interval || '4000');
+      const wordEls = el.querySelectorAll<HTMLElement>('.word-rotate__word');
+      if (!wordEls.length) return;
+
+      const render = document.body.dataset.render;
+      if (render === 'textonly') {
+        wordEls.forEach((w, i) => { if (i > 0) w.style.display = 'none'; });
+        return;
+      }
+
+      // Split each word into letter spans
+      const wordArrays: HTMLElement[][] = [];
+      wordEls.forEach((word) => {
+        const letters: HTMLElement[] = [];
+        const content = word.textContent || '';
+        word.textContent = '';
+        [...content].forEach((char) => {
+          const span = document.createElement('span');
+          span.className = 'word-rotate__letter';
+          span.textContent = char === ' ' ? '\u00A0' : char;
+          word.appendChild(span);
+          letters.push(span);
+        });
+        wordArrays.push(letters);
+      });
+
+      // Show first word
+      let current = 0;
+      wordEls[0].style.opacity = '1';
+
+      const isReduced = render === 'reduced';
+
+      function changeWord() {
+        const currentLetters = wordArrays[current];
+        const nextIndex = (current + 1) % wordEls.length;
+        const nextLetters = wordArrays[nextIndex];
+
+        if (isReduced) {
+          // Instant swap
+          wordEls[current].style.opacity = '0';
+          wordEls[nextIndex].style.opacity = '1';
+        } else {
+          // Animate out
+          currentLetters.forEach((letter, i) => {
+            setTimeout(() => letter.classList.add('out'), i * 80);
+          });
+
+          // Animate in
+          nextLetters.forEach((letter, i) => {
+            letter.classList.add('behind');
+            letter.classList.remove('out', 'in');
+            (letter.parentElement as HTMLElement).style.opacity = '1';
+            setTimeout(() => {
+              letter.classList.remove('behind');
+              letter.classList.add('in');
+            }, 340 + i * 80);
+          });
+        }
+
+        current = nextIndex;
+      }
+
+      setInterval(changeWord, interval);
+    });
+  }
+
+  initWordRotate();
+  document.addEventListener('astro:page-load', initWordRotate);
+</script>

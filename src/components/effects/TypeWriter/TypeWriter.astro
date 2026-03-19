@@ -1,0 +1,105 @@
+---
+/**
+ * TypeWriter — Typing/deleting word cycle effect
+ *
+ * Cycles through words with typing and deleting animation + blinking cursor.
+ * Gradient text fill on the typed word.
+ *
+ * Props:
+ *   words       — Array of strings to cycle through
+ *   speed       — Typing speed in ms (default: 120)
+ *   gradient    — CSS gradient for text fill
+ *   cursorColor — Cursor colour
+ *   size        — Font size CSS value
+ *   weight      — Font weight
+ *   family      — Font family token
+ *
+ * Source: responsive typing effect prototype
+ */
+
+interface Props {
+  words: string[];
+  speed?: number;
+  gradient?: string;
+  cursorColor?: string;
+  size?: string;
+  weight?: string | number;
+  family?: 'body' | 'heading' | 'mono' | 'handwriting';
+  class?: string;
+}
+
+const {
+  words,
+  speed = 120,
+  gradient = 'linear-gradient(90deg, var(--primary-400), var(--secondary-600), var(--primary-800), var(--secondary-400))',
+  cursorColor = 'var(--primary-600)',
+  size = 'clamp(2rem, 6vw, 6rem)',
+  weight = 600,
+  family = 'heading',
+  class: className,
+} = Astro.props;
+
+const id = `typewriter-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div
+  class:list={['typewriter', family && `typewriter--family-${family}`, className]}
+  id={id}
+  data-words={JSON.stringify(words)}
+  data-speed={speed}
+  style={`font-size: ${size}; font-weight: ${weight}; --_tw-gradient: ${gradient}; --_tw-cursor: ${cursorColor};`}
+>
+  <span class="typewriter__text"></span><span class="typewriter__cursor"></span>
+</div>
+
+<script>
+  function initTypewriters() {
+    document.querySelectorAll<HTMLElement>('.typewriter').forEach((el) => {
+      if (el.dataset.twInit) return;
+      el.dataset.twInit = 'true';
+
+      const words: string[] = JSON.parse(el.dataset.words || '[]');
+      const speed = parseInt(el.dataset.speed || '120');
+      const textEl = el.querySelector('.typewriter__text') as HTMLElement;
+      if (!words.length || !textEl) return;
+
+      // Skip in reduced/textonly — show first word static
+      const render = document.body.dataset.render;
+      if (render === 'textonly' || render === 'reduced') {
+        textEl.textContent = words[0];
+        return;
+      }
+
+      let wordIndex = 0;
+      let charIndex = 0;
+      let forwards = true;
+
+      function tick() {
+        const word = words[wordIndex];
+        textEl.textContent = word.substring(0, charIndex);
+
+        if (forwards) {
+          charIndex++;
+          if (charIndex > word.length) {
+            forwards = false;
+            setTimeout(tick, 1500); // pause at full word
+            return;
+          }
+        } else {
+          charIndex--;
+          if (charIndex < 0) {
+            forwards = true;
+            wordIndex = (wordIndex + 1) % words.length;
+            charIndex = 0;
+          }
+        }
+        setTimeout(tick, forwards ? speed : speed / 2);
+      }
+
+      tick();
+    });
+  }
+
+  initTypewriters();
+  document.addEventListener('astro:page-load', initTypewriters);
+</script>

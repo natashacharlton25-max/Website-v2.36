@@ -1,0 +1,79 @@
+/* ══════════════════════════════════════════════════════════════
+   LetterDrop — scatter-land-reveal text animation
+   ══════════════════════════════════════════════════════════════ */
+
+.letter-drop {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.letter-drop--family-heading     { font-family: var(--font-heading); }
+.letter-drop--family-body        { font-family: var(--font-body); }
+.letter-drop--family-mono        { font-family: var(--font-mono); }
+.letter-drop--family-handwriting { font-family: var(--font-handwriting); }
+
+.letter-drop__line {
+  display: flex;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.letter-drop__letter {
+  display: inline-block;
+  margin-right: 0.3vw;
+  opacity: 0;
+  transform: translate(0, 0) rotate(0deg);
+  transition: transform 1s ease, opacity 1s ease, color 0.5s ease;
+  position: relative;
+  backface-visibility: hidden;
+}
+
+/* ── Hover animations (gated by data-hover in hover-gate.css) ── */
+.letter-drop__letter--final.hover-balance:hover     { animation: ld-balance 3s ease-out; }
+.letter-drop__letter--final.hover-shrinkjump:hover  { animation: ld-shrinkjump 3s ease-in-out; }
+.letter-drop__letter--final.hover-falling:hover     { animation: ld-falling 3.5s ease-out; }
+.letter-drop__letter--final.hover-rotate:hover      { animation: ld-rotate 3s ease-out; }
+.letter-drop__letter--final.hover-toplong:hover     { animation: ld-toplong 3.5s linear; }
+
+@keyframes ld-balance {
+  0%, 100% { transform: rotate(0deg); }
+  30%, 60% { transform: rotate(-45deg); }
+}
+
+@keyframes ld-shrinkjump {
+  10%, 35% { transform: scale(2, 0.2); }
+  45%, 50% { transform: scale(1) translateY(-100px); }
+  80% { transform: scale(1) translateY(0); }
+}
+
+@keyframes ld-falling {
+  0% { transform: translateY(-100px) rotateX(0deg); opacity: 0; }
+  20% { opacity: 1; transform: translateY(0) rotateX(200deg); }
+  40% { transform: translateY(0) rotateX(150deg); }
+  60% { transform: translateY(0) rotateX(200deg); }
+  80% { transform: translateY(0) rotateX(175deg); }
+  100% { transform: translateY(0) rotateX(0deg); }
+}
+
+@keyframes ld-rotate {
+  0% { transform: rotateY(0deg); }
+  50% { transform: rotateY(360deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+@keyframes ld-toplong {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-30vh) scaleY(1); }
+  60% { transform: translateY(-30vh) scaleY(4); }
+  100% { transform: translateY(0) scaleY(1); }
+}
+
+/* ── Textonly fallback ── */
+.letter-drop__textonly {
+  display: none;
+}
+
+[data-render="textonly"] .letter-drop {
+  display: none;
+}
