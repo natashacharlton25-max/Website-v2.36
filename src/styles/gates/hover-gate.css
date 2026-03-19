@@ -77,7 +77,31 @@
 
 /* ══════════════════════════════════════════════════════════════
    Image hover zoom + blur reveal
+
+   Base hover rules live here (not in Image.css) so they are
+   gated by mode from the start. No ungated :hover in component.
    ══════════════════════════════════════════════════════════════ */
+
+/* Full — default zoom + filter */
+:not([data-hover="none"]) .image--animate .image--hover:hover {
+  transform: scale(var(--img-hover-scale));
+  box-shadow: var(--img-hover-shadow);
+  filter:
+    var(--img-hover-filter)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
+
+/* Full — blur + hover combo: unblur on hover */
+:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"]:hover {
+  filter:
+    blur(0)
+    var(--img-hover-filter)
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1));
+}
 
 /* Gentle — slow zoom + unblur */
 [data-hover="gentle"] .image--animate .image--hover {
@@ -89,12 +113,7 @@
   transition: none;
 }
 
-/* None — no hover effect at all */
-[data-hover="none"] .image--animate .image--hover:hover {
-  transform: none;
-  box-shadow: none;
-  filter: inherit;
-}
+/* None — zero hover effect. Click reveal via JS for blur. */
 
 
 /* ══════════════════════════════════════════════════════════════
