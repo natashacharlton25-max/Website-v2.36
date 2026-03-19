@@ -24,8 +24,12 @@
  *
  *   <Tooltip purpose="info" id="aac-tip">
  *     <Image slot="default" ... />
- *     <div slot="content">{aacCards}</div>
+ *     <span slot="content">{aacCards}</span>
  *   </Tooltip>
+ *
+ * IMPORTANT: Tooltip content must be text or AAC cards only.
+ * No links, buttons, or interactive elements — tooltips are
+ * not focusable containers and interactive children break a11y.
  */
 import { Text } from '../Text';
 
@@ -34,8 +38,6 @@ interface Props {
   purpose: 'label' | 'info';
   id?: string;
   position?: 'top' | 'bottom' | 'left' | 'right';
-  theme?: 'professional' | 'glass' | 'neon' | 'brutalist';
-  size?: 'sm' | 'md' | 'lg';
   textTone?: 'light' | 'dark';
   entrance?: 'fade' | 'scale' | 'slide';
   class?: string;
@@ -46,8 +48,6 @@ const {
   purpose,
   id = `tooltip-${Math.random().toString(36).slice(2, 8)}`,
   position = 'top',
-  theme = 'professional',
-  size = 'md',
   textTone,
   entrance,
   class: className,
@@ -59,8 +59,6 @@ const wrapperClasses = [
   'tooltip',
   `tooltip--${purpose}`,
   `tooltip--${position}`,
-  `tooltip--${theme}`,
-  `tooltip--${size}`,
   entrance && `tooltip--animate-${entrance}`,
   className,
 ];

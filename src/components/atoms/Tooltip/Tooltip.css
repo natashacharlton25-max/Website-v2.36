@@ -4,19 +4,23 @@
 
    Internal tokens (--_tooltip-*):
      --_tooltip-bg, --_tooltip-text, --_tooltip-border,
-     --_tooltip-arrow, --_tooltip-shadow, --_tooltip-accent,
-     --_tooltip-radius, --_tooltip-padding, --_tooltip-max-width,
+     --_tooltip-arrow, --_tooltip-shadow,
+     --_tooltip-radius, --_tooltip-padding,
      --_tooltip-offset, --_tooltip-z
+
+   Pipeline tokens (set by JSON inline style):
+     --tooltip-bg, --tooltip-text, --tooltip-border,
+     --tooltip-shadow, --tooltip-accent
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Base ── */
 .tooltip {
-  --_tooltip-bg: var(--tooltip-bg, var(--neutral-950));
-  --_tooltip-text: var(--tooltip-text, var(--color-White));
-  --_tooltip-border: transparent;
+  --_tooltip-bg: var(--tooltip-bg, var(--page-bg-raised));
+  --_tooltip-text: var(--tooltip-text, var(--neutral-800));
+  --_tooltip-border: var(--tooltip-border, var(--neutral-400));
+  --_tooltip-accent: var(--tooltip-accent, var(--primary-600));
   --_tooltip-radius: var(--radius-md);
   --_tooltip-padding: var(--space-xs) var(--space-sm);
-  --_tooltip-max-width: 200px;
   --_tooltip-offset: var(--space-xs);
   --_tooltip-z: var(--z-tooltip);
   --_tooltip-arrow: var(--_tooltip-bg);
@@ -26,10 +30,12 @@
   display: inline-flex;
 }
 
-/* ── Trigger ── */
+/* ── Trigger — accent underline hint ── */
 .tooltip__trigger {
   display: inline-flex;
   align-items: center;
+  border-bottom: 1px dashed var(--_tooltip-accent);
+  cursor: help;
 }
 
 /* ── Content — fixed to viewport, never clipped ── */
@@ -38,7 +44,7 @@
   z-index: var(--_tooltip-z);
   left: var(--_tooltip-x, 0);
   top: var(--_tooltip-y, 0);
-  max-width: var(--_tooltip-max-width);
+  max-width: min(90vw, 400px);
   padding: var(--_tooltip-padding);
   background: var(--_tooltip-bg);
   color: var(--_tooltip-text);
@@ -48,10 +54,17 @@
   font-weight: var(--font-medium);
   line-height: var(--leading-relaxed);
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;
+  width: max-content;
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
+}
+
+/* ── Force text colour inheritance — Text atom sets its own colour ── */
+.tooltip__content .text,
+.tooltip__content .tooltip__text {
+  color: inherit;
 }
 
 /* ── Arrow (CSS triangle) ── */
@@ -126,69 +139,8 @@
 }
 
 
-/* ══════════════════════════════════════════════════════════════
-   Sizes
-   ══════════════════════════════════════════════════════════════ */
-
-.tooltip--sm {
-  --_tooltip-max-width: 150px;
-}
-
-.tooltip--lg {
-  --_tooltip-max-width: 320px;
-}
-
-.tooltip--lg .tooltip__content {
-  white-space: normal;
-  text-align: left;
-}
-
-
-/* ══════════════════════════════════════════════════════════════
-   Themes
-   ══════════════════════════════════════════════════════════════ */
-
-/* Professional is the default — tokens set above */
-
-/* ── Glass ── */
-.tooltip--glass {
-  --_tooltip-bg: var(--tooltip-glass-bg, var(--glass-bg));
-  --_tooltip-text: var(--tooltip-text, var(--color-White));
-  --_tooltip-border: var(--tooltip-glass-border, var(--glass-border));
-}
-
-.tooltip--glass .tooltip__content {
-  backdrop-filter: var(--tooltip-glass-blur, var(--glass-blur-heavy)) saturate(160%);
-  -webkit-backdrop-filter: var(--tooltip-glass-blur, var(--glass-blur-heavy)) saturate(160%);
-}
-
-/* ── Neon ── */
-.tooltip--neon {
-  --_tooltip-bg: var(--tooltip-bg, var(--neutral-950));
-  --_tooltip-accent: var(--tooltip-accent, var(--primary-600));
-  --_tooltip-text: var(--_tooltip-accent);
-  --_tooltip-border: var(--_tooltip-accent);
-  --_tooltip-arrow: var(--_tooltip-accent);
-  --_tooltip-shadow: var(--tooltip-glow, var(--glow-neon));
-}
-
-.tooltip--neon .tooltip__content {
-  text-shadow: 0 0 4px var(--_tooltip-accent);
-}
-
-/* ── Brutalist ── */
-.tooltip--brutalist {
-  --_tooltip-bg: var(--tooltip-bg, var(--neutral-950));
-  --_tooltip-text: var(--tooltip-text, var(--color-White));
-  --_tooltip-border: var(--tooltip-border, var(--neutral-700));
-  --_tooltip-arrow: var(--_tooltip-border);
-  --_tooltip-radius: 0;
-}
-
-.tooltip--brutalist .tooltip__content {
-  border-width: 2px;
-  font-family: var(--font-mono);
-}
+/* Themes removed — tooltip is one consistent style.
+   Predictable, always readable, no variant confusion. */
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -378,10 +330,90 @@ dialog .tooltip--right .tooltip__content {
   text-align: inherit;
 }
 
+[data-render="textonly"] .tooltip--info .tooltip__content {
+  color: var(--neutral-600);
+  font-style: italic;
+  padding: 0 var(--space-xs);
+}
+
+[data-render="textonly"] .tooltip--info .tooltip__content::before {
+  content: "[";
+  display: inline;
+  border: none;
+  position: static;
+}
+
+[data-render="textonly"] .tooltip--info .tooltip__content::after {
+  content: "]";
+}
+
 [data-render="textonly"] .tooltip--label .tooltip__content {
   display: none;
 }
 
 [data-render="textonly"] .tooltip__content::before {
+  display: none;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Hover gates
+   full    = normal animated (default — no override needed)
+   gentle  = slower, softer fade
+   instant = no animation, snap appear/disappear
+   none    = inline text on page (same as textonly render)
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Gentle — slower transitions ── */
+[data-hover="gentle"] .tooltip__content {
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+/* ── Instant — no animation ── */
+[data-hover="instant"] .tooltip__content {
+  transition: none;
+}
+
+[data-hover="instant"] .tooltip__content::before {
+  display: none;
+}
+
+/* ── None — renders as inline text, no hover interaction ── */
+[data-hover="none"] .tooltip--info .tooltip__content {
+  position: static;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  background: none;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  text-shadow: none;
+  transform: none;
+  padding: 0 var(--space-xs);
+  max-width: none;
+  white-space: normal;
+  text-align: inherit;
+  color: var(--neutral-600);
+  font-style: italic;
+}
+
+[data-hover="none"] .tooltip--info .tooltip__content::before {
+  content: "[";
+  display: inline;
+  border: none;
+  position: static;
+}
+
+[data-hover="none"] .tooltip--info .tooltip__content::after {
+  content: "]";
+}
+
+[data-hover="none"] .tooltip--label .tooltip__content {
+  display: none;
+}
+
+[data-hover="none"] .tooltip__content::before {
   display: none;
 }
