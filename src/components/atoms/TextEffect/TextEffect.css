@@ -6,9 +6,14 @@
   display: block;
   line-height: 1.1;
   margin: 0;
+  color: var(--neutral-800);
 }
 
-/* ── Fill — image or gradient fills text shape ── */
+
+/* ══════════════════════════════════════════════════════════════
+   Fill — image or gradient fills text shape
+   ══════════════════════════════════════════════════════════════ */
+
 .text-effect--fill {
   background-size: cover;
   background-position: center;
@@ -18,14 +23,81 @@
   color: transparent;
 }
 
-/* ── Inner shadow — SVG filter simulates inset shadow ── */
+
+/* ══════════════════════════════════════════════════════════════
+   Animated gradient — flowing colour through text
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes te-gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.text-effect--gradient-anim {
+  background: var(--_te-gradient);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Always animating */
+.text-effect--gradient-fast {
+  animation: te-gradient-flow 2s ease-in-out infinite;
+}
+
+.text-effect--gradient-slow {
+  animation: te-gradient-flow 8s ease-in-out infinite;
+}
+
+/* Hover trigger — solid until hover */
+.text-effect--gradient-hover {
+  color: var(--_te-solid, var(--neutral-800));
+  -webkit-text-fill-color: var(--_te-solid, var(--neutral-800));
+  background: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.text-effect--gradient-hover.is-animating {
+  background: var(--_te-gradient);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: te-gradient-flow 2s ease-in-out infinite;
+}
+
+.text-effect--gradient-hover.is-fading {
+  background: var(--_te-gradient);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: te-gradient-flow 2s ease-in-out infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Inner shadow — SVG filter
+   ══════════════════════════════════════════════════════════════ */
+
 .text-effect__svg {
   position: absolute;
   width: 0;
   height: 0;
 }
 
-/* ── Weights ── */
+
+/* ══════════════════════════════════════════════════════════════
+   Typography
+   ══════════════════════════════════════════════════════════════ */
+
 .text-effect--weight-normal    { font-weight: var(--font-normal); }
 .text-effect--weight-medium    { font-weight: var(--font-medium); }
 .text-effect--weight-semibold  { font-weight: var(--font-semibold); }
@@ -33,22 +105,42 @@
 .text-effect--weight-extrabold { font-weight: var(--font-extrabold); }
 .text-effect--weight-black     { font-weight: var(--font-black); }
 
-/* ── Families ── */
-.text-effect--family-body      { font-family: var(--font-body); }
-.text-effect--family-heading   { font-family: var(--font-heading); }
-.text-effect--family-mono      { font-family: var(--font-mono); }
+.text-effect--family-body        { font-family: var(--font-body); }
+.text-effect--family-heading     { font-family: var(--font-heading); }
+.text-effect--family-mono        { font-family: var(--font-mono); }
 .text-effect--family-handwriting { font-family: var(--font-handwriting); }
 
-/* ── Tracking ── */
 .text-effect--tracking-tight   { letter-spacing: var(--letter-spacing-tight); }
 .text-effect--tracking-normal  { letter-spacing: 0; }
 .text-effect--tracking-wide    { letter-spacing: var(--letter-spacing-wide); }
 .text-effect--tracking-wider   { letter-spacing: var(--letter-spacing-wider); }
 
-/* ── Transform ── */
 .text-effect--uppercase { text-transform: uppercase; }
 
-/* ── Alignment ── */
 .text-effect--align-left   { text-align: left; }
 .text-effect--align-center { text-align: center; }
 .text-effect--align-right  { text-align: right; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   Render modes
+   ══════════════════════════════════════════════════════════════ */
+
+/* Reduced — no animation */
+[data-render="reduced"] .text-effect--gradient-anim {
+  animation: none;
+  background-position: 50% 50%;
+}
+
+/* Textonly — plain text, no effects */
+[data-render="textonly"] .text-effect {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: var(--neutral-800);
+  color: var(--neutral-800);
+  filter: none;
+  text-shadow: none;
+  -webkit-text-stroke: unset;
+  animation: none;
+}

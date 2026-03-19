@@ -61,6 +61,7 @@ export const MEGA_MENUS: Record<string, MegaMenuItem[]> = {
     { title: 'Button', description: 'Variants, shapes, effects, confetti, dropdowns', href: '/test/button-test' },
     { title: 'Image', description: 'Alt text, AAC, enlarge modal, visual treatments, semantic roles', href: '/test/image-test' },
     { title: 'Tooltip', description: 'Positions, themes, sizes, animations, purpose modes, rich content', href: '/test/tooltip-test' },
+    { title: 'TextEffect', description: 'Image fill, gradient animation, shadows, strokes, inner shadow', href: '/test/text-effect-test' },
   ],
   settings: [
     { title: 'Contact', description: '', href: '/contact', icon: 'mail' },

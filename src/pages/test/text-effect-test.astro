@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TextEffect from '../../components/atoms/TextEffect/TextEffect.astro';
+import Heading from '../../components/atoms/Heading/Heading.astro';
+import Section from '../../components/atoms/Section/Section.astro';
+import '../../components/atoms/Section/Section.css';
+import '../../components/atoms/TextEffect/TextEffect.css';
+
+import testData from '../../data/test/text-effect.json';
+---
+
+<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
+  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
+
+    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+
+    {testData.sections.map((section: any) => (
+      <Section label={section.label} separator gap={testData.layout.itemGap}>
+        <div class="render-full" style="display:flex;flex-direction:column;gap:var(--space-lg);">
+          {section.items.map((item: any) => (
+            <TextEffect
+              text={item.text}
+              fillImage={item.fillImage}
+              fillGradient={item.fillGradient}
+              gradientColors={item.gradientColors}
+              gradientSpeed={item.gradientSpeed}
+              gradientTrigger={item.gradientTrigger}
+              solidColor={item.solidColor}
+              textShadow={item.textShadow}
+              dropShadow={item.dropShadow}
+              textStroke={item.textStroke}
+              innerShadow={item.innerShadow}
+              size={item.size}
+              weight={item.weight}
+              family={item.family}
+              tracking={item.tracking}
+              uppercase={item.uppercase}
+              align={item.align}
+            />
+          ))}
+        </div>
+        <div class="render-textonly" style="display:flex;flex-direction:column;gap:var(--space-md);">
+          {section.items.map((item: any) => (
+            <p style="color:var(--neutral-800);">{item.text}</p>
+          ))}
+        </div>
+      </Section>
+    ))}
+
+  </Section>
+</BaseLayout>
