@@ -198,49 +198,60 @@
    Double box-shadow follows border-radius. Hover darkens.
    ══════════════════════════════════════════════════════════════ */
 
-/* ── Static indicator — always visible ── */
+/* ── Interactive image indicator — ::after overlay matches image exactly ── */
 [data-highlight-links] figure[data-role="content"],
 [data-image-enlarge] figure[data-role="content"],
 [data-alt-display-mode="tooltip"] figure[data-role="content"] {
-  box-shadow: 0 0 0 3px var(--page-bg), 0 0 0 6px var(--primary-600);
-  border-radius: var(--radius-md);
-  transition: box-shadow 0.2s ease;
+  position: relative;
 }
 
-/* ── Hover darken (full + gentle) ── */
-[data-highlight-links] figure[data-role="content"]:hover,
-[data-image-enlarge] figure[data-role="content"]:hover,
-[data-alt-display-mode="tooltip"] figure[data-role="content"]:hover {
-  box-shadow: 0 0 0 3px var(--page-bg), 0 0 0 6px var(--primary-800);
+[data-highlight-links] figure[data-role="content"]::after,
+[data-image-enlarge] figure[data-role="content"]::after,
+[data-alt-display-mode="tooltip"] figure[data-role="content"]::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--space-xs) * -1);
+  border: 3px solid var(--primary-600);
+  border-radius: inherit;
+  pointer-events: none;
+  transition: border-color 0.2s ease;
 }
 
-/* ── Keyboard focus — thicker ring ── */
-[data-highlight-links] figure[data-role="content"]:focus-visible,
-[data-image-enlarge] figure[data-role="content"]:focus-visible,
-[data-alt-display-mode="tooltip"] figure[data-role="content"]:focus-visible {
-  box-shadow: 0 0 0 3px var(--page-bg), 0 0 0 8px var(--primary-800);
+/* ── Hover darken ── */
+[data-highlight-links] figure[data-role="content"]:hover::after,
+[data-image-enlarge] figure[data-role="content"]:hover::after,
+[data-alt-display-mode="tooltip"] figure[data-role="content"]:hover::after {
+  border-color: var(--primary-800);
+}
+
+/* ── Keyboard focus — thicker ── */
+[data-highlight-links] figure[data-role="content"]:focus-visible::after,
+[data-image-enlarge] figure[data-role="content"]:focus-visible::after,
+[data-alt-display-mode="tooltip"] figure[data-role="content"]:focus-visible::after {
+  border-width: 4px;
+  border-color: var(--primary-800);
 }
 
 /* ── Hover instant — no transition ── */
-[data-hover="instant"] figure[data-role="content"] {
+[data-hover="instant"] figure[data-role="content"]::after {
   transition: none;
 }
 
-/* ── Hover none — static only, no darken ── */
-[data-hover="none"] figure[data-role="content"]:hover {
-  box-shadow: 0 0 0 3px var(--page-bg), 0 0 0 6px var(--primary-600);
+/* ── Hover none — no darken ── */
+[data-hover="none"] figure[data-role="content"]:hover::after {
+  border-color: var(--primary-600);
 }
 
-/* ── Assistive — thicker ring ── */
-[data-render="assistive"] figure[data-role="content"] {
-  box-shadow: 0 0 0 4px var(--page-bg), 0 0 0 8px var(--primary-600);
+/* ── Assistive — thicker ── */
+[data-render="assistive"] figure[data-role="content"]::after {
+  border-width: 4px;
 }
 
-/* ── Mobile — always darkened (no hover on touch) ── */
+/* ── Mobile — always darkened ── */
 @media (max-width: 640px) {
-  [data-highlight-links] figure[data-role="content"],
-  [data-image-enlarge] figure[data-role="content"],
-  [data-alt-display-mode="tooltip"] figure[data-role="content"] {
-    box-shadow: 0 0 0 3px var(--page-bg), 0 0 0 6px var(--primary-800);
+  [data-highlight-links] figure[data-role="content"]::after,
+  [data-image-enlarge] figure[data-role="content"]::after,
+  [data-alt-display-mode="tooltip"] figure[data-role="content"]::after {
+    border-color: var(--primary-800);
   }
 }
