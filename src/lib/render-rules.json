@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "description": "Global render mode rules. Pipeline reads this to decide which JSON prop groups to include/strip per render mode. Individual items can override via renderOverrides in content JSON.",
+
+  "renders": {
+    "full": {
+      "label": "Default",
+      "include": ["content", "visual", "animation", "colour"],
+      "strip": [],
+      "css": ["render-modes.css"],
+      "notes": "Everything rendered — all props, all tokens, all effects"
+    },
+
+    "reduced": {
+      "label": "Calm Mode",
+      "include": ["content", "visual", "colour"],
+      "strip": ["animation"],
+      "css": ["render-modes.css", "render-reduced.css"],
+      "notes": "Animation props stripped. No animation classes emitted. Static visuals only."
+    },
+
+    "textonly": {
+      "label": "Reading Mode",
+      "include": ["content"],
+      "strip": ["visual", "animation", "colour"],
+      "css": ["render-modes.css", "render-textonly.css"],
+      "textonlyStyles": ["plain", "easy-read", "workbook", "study", "aac"],
+      "notes": "Content only. Visual gates (dark/HC/HL) still apply via CSS. Textonly style variants add different treatments."
+    },
+
+    "assistive": {
+      "label": "Easy Click",
+      "include": ["content", "visual", "colour"],
+      "strip": ["animation"],
+      "forceProps": {
+        "assistive": true
+      },
+      "css": ["render-modes.css", "render-assistive.css"],
+      "notes": "Large targets (64px), single column, no hover-only content. Same as reduced but with layout changes."
+    }
+  },
+
+  "visualGates": {
+    "description": "These CSS gates apply ACROSS ALL render modes. They never check render mode, render mode never checks them.",
+    "gates": {
+      "dark": {
+        "attribute": "data-mode",
+        "value": "dark",
+        "css": "theme-luminance-dark.css"
+      },
+      "highContrast": {
+        "attribute": "data-contrast",
+        "value": "high",
+        "css": "high-contrast.css"
+      },
+      "highlightLinks": {
+        "attribute": "data-highlight-links",
+        "value": "true",
+        "css": "highlight-links.css"
+      },
+      "hover": {
+        "attribute": "data-hover",
+        "values": ["full", "instant", "gentle", "none"],
+        "css": "hover-gate.css"
+      },
+      "textXl": {
+        "attribute": "data-text-xl",
+        "value": "true",
+        "css": null,
+        "notes": "Handled by html font-size, no separate CSS file"
+      }
+    }
+  },
+
+  "renderOverrides": {
+    "description": "Per-item overrides in content JSON. Optional. Only needed when an item breaks from the default rule.",
+    "schema": {
+      "keep": {
+        "type": "array",
+        "description": "Props that would be stripped but should be kept for this item",
+        "example": ["icon"]
+      },
+      "override": {
+        "type": "object",
+        "description": "Props to replace with different values for this render mode",
+        "example": { "variant": "outline", "style": "--btn-border: var(--primary-600)" }
+      }
+    }
+  }
+}

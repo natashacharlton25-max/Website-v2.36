@@ -1,0 +1,152 @@
+/**
+ * Text-Only Render Styles
+ *
+ * When data-render="textonly", content renders through simplified atoms.
+ * These styles add different visual treatments to the text-only content.
+ *
+ * Axis: data-textonly-style on <html>
+ * Values: plain | easy-read | workbook | study
+ * Default (no attribute): plain
+ */
+
+/* ── Plain (default) — minimal, just content ── */
+.render-textonly {
+  font-family: var(--font-body);
+  line-height: var(--leading-relaxed);
+  color: var(--neutral-800);
+}
+
+.render-textonly .heading {
+  margin-block-end: var(--space-md);
+}
+
+.render-textonly .text {
+  margin-block-end: var(--space-lg);
+}
+
+/* ── Easy Read — larger text, more spacing, high clarity ── */
+[data-textonly-style="easy-read"] .render-textonly {
+  font-size: 1.25rem;
+  line-height: var(--leading-loose);
+  letter-spacing: 0.02em;
+  max-width: 65ch;
+}
+
+[data-textonly-style="easy-read"] .render-textonly .heading {
+  font-size: 1.75rem;
+  font-weight: var(--font-bold);
+  margin-block-end: var(--space-lg);
+  padding-block-end: var(--space-md);
+  border-bottom: 2px solid var(--primary-400);
+}
+
+[data-textonly-style="easy-read"] .render-textonly .text,
+[data-textonly-style="easy-read"] .render-textonly p {
+  margin-block-end: var(--space-xl);
+}
+
+/* ── Workbook — structured boxes, activity layout ── */
+[data-textonly-style="workbook"] .render-textonly {
+  font-size: 1.1rem;
+  line-height: var(--leading-loose);
+}
+
+[data-textonly-style="workbook"] .render-textonly .heading {
+  font-weight: var(--font-bold);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--primary-200);
+  border-radius: var(--radius-md);
+  margin-block-end: var(--space-lg);
+}
+
+[data-textonly-style="workbook"] .render-textonly .text,
+[data-textonly-style="workbook"] .render-textonly p {
+  padding: var(--space-lg);
+  border: 2px solid var(--neutral-400);
+  border-radius: var(--radius-md);
+  margin-block-end: var(--space-lg);
+  min-height: 4rem;
+}
+
+[data-textonly-style="workbook"] .render-textonly .badge {
+  display: inline-block;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--secondary-200);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-medium);
+  margin-block-end: var(--space-md);
+}
+
+/* ── Study — highlighted keywords, definition style ── */
+[data-textonly-style="study"] .render-textonly {
+  font-size: 1.1rem;
+  line-height: var(--leading-relaxed);
+  max-width: 72ch;
+}
+
+[data-textonly-style="study"] .render-textonly .heading {
+  font-weight: var(--font-bold);
+  color: var(--primary-600);
+  margin-block-end: var(--space-md);
+  padding-inline-start: var(--space-md);
+  border-inline-start: 4px solid var(--primary-600);
+}
+
+[data-textonly-style="study"] .render-textonly .text,
+[data-textonly-style="study"] .render-textonly p {
+  margin-block-end: var(--space-lg);
+  padding-inline-start: var(--space-lg);
+}
+
+[data-textonly-style="study"] .render-textonly .badge {
+  display: inline-block;
+  background: var(--primary-200);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-semibold);
+  font-size: 0.9em;
+}
+
+/* ── AAC Cards — symbol-supported text layer ── */
+[data-textonly-style="aac"] .render-textonly {
+  font-size: 1.25rem;
+  line-height: var(--leading-loose);
+}
+
+[data-textonly-style="aac"] .render-textonly .heading,
+[data-textonly-style="aac"] .render-textonly .text,
+[data-textonly-style="aac"] .render-textonly p {
+  margin-block-end: var(--space-xl);
+}
+
+/* Force AAC cards visible in AAC textonly style */
+[data-textonly-style="aac"] .render-textonly .aac-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+[data-textonly-style="aac"] .render-textonly .aac-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 4.5rem;
+  padding: var(--space-sm);
+  border: 2px solid var(--neutral-400);
+  border-radius: var(--radius-md);
+  background: var(--page-bg);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+}
+
+[data-textonly-style="aac"] .render-textonly .aac-card img {
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+}
+
+[data-textonly-style="aac"] .render-textonly .aac-card .aac-word {
+  margin-block-start: var(--space-xs);
+  font-weight: var(--font-medium);
+  text-align: center;
+}

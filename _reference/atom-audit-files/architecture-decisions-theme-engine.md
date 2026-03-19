@@ -506,6 +506,101 @@ Excludes effects that own their hover: comic, expand, colour-flow, split, tech.
 
 ---
 
+## Decision 48: Render Pipeline — rules.json + Generic Strip Function (19 March 2026)
+
+**One `render-rules.json` file defines all render modes globally.** Instead of every schema prop declaring `"strip": ["reduced", "textonly"]` individually, the rules file defines which prop GROUPS (content, visual, animation, colour) to include/strip per render mode.
+
+- `full` → all groups
+- `reduced` → content + visual + colour (animation stripped)
+- `textonly` → content only (visual + animation + colour stripped)
+- `assistive` → content + visual + colour (animation stripped, forceProps: assistive=true)
+
+Generic `renderProps()` function reads rules + schema, strips by group. No per-component stripping logic. One function for all atoms.
+
+---
+
+## Decision 49: Per-Item renderOverrides in Content JSON (19 March 2026)
+
+**Individual JSON items can override the global render rules.** Two mechanisms:
+
+- `keep: ["icon"]` — restore props that would be stripped (e.g. meaningful icon in textonly)
+- `override: { "variant": "outline", "style": "..." }` — swap props for that render mode
+
+99% of items follow the rules file defaults. The 1% that need exceptions declare them inline. The rules file is the law, renderOverrides is the exception.
+
+---
+
+## Decision 50: Visual Gates Cross-Cut All Render Modes (19 March 2026)
+
+**Dark mode, HC, highlight links, hover gates apply ACROSS ALL render modes.** They never check render mode, render mode never checks them. They stack because they don't know about each other.
+
+- `[data-mode="dark"] .heading { ... }` hits ALL headings in ALL renders
+- `[data-render="textonly"] .heading { ... }` hits textonly headings in ALL themes
+- Both fire simultaneously on a textonly heading in dark mode
+
+Two independent layers: content render (WHAT) × visual gates (HOW).
+
+---
+
+## Decision 51: Text-Only Style Variants (19 March 2026)
+
+**Text-only render has sub-styles for different reading purposes.** Controlled by `data-textonly-style` on `<html>`, independent of theme.
+
+| Style | Purpose |
+|-------|---------|
+| `plain` | Minimal, just content |
+| `easy-read` | Larger text, wide spacing, clear headings |
+| `workbook` | Structured boxes, borders, activity layout |
+| `study` | Left border headings, indented body, highlighted keywords |
+| `aac` | Symbol-supported — AAC cards always visible alongside text |
+
+These stack with all visual gates. Workbook in dark mode, study in HC, aac in easy-click — any combo works.
+
+---
+
+## Decision 52: Mobile as Render Mode, Not Just Responsive CSS (19 March 2026)
+
+**Mobile is a render mode entry in rules.json, not 300 breakpoint rules.** One CSS file (`render-mobile.css`) sets root font-size and layout. All tokens use `rem` so everything scales from one value.
+
+Old way: 15 atoms × 5 breakpoints × 4 modes = 300 sets of responsive rules.
+New way: 1 rules entry + 1 CSS file = done.
+
+Every new atom automatically gets mobile render for free. Zero extra work per component. The render mode is a single lever, not per-component work.
+
+---
+
+## Decision 53: Button Dark Mode Inner Glow System (19 March 2026)
+
+**Dark mode buttons use inner glow instead of heavy neumorphic outer shadows.** Matches the dark aesthetic without competing with the dark background.
+
+- Fill buttons: ghost-style hover (brand-light bg, brand-dark text + border)
+- Transparent border on static reserves space — no layout shift on hover
+- Glassic/liquid glass: inner glow replaces neumorphic, primary border
+- Comic: 400 border/shadow per variant colour
+- Tech: fill 500/border 900/text 300, hover swaps fill↔border
+- Dropdown: brand border all modes, inner glow in dark/HC per variant
+
+---
+
+## Decision 54: Highlight Links Strips Effects to Plain Fill (19 March 2026)
+
+**When highlight links is on, ALL buttons become plain fill variants.** No effects, no glass, no shadows, no pseudo-elements. Just brand colour fill + outline ring from `--_btn-brand`.
+
+- Effects (comic, tech, expand, glow, split, colour-flow) all stripped
+- Rainbow glow overrides page-bg back to primary-600 fill
+- Expand becomes normal primary button with inline icon
+- Underline effect removed from Button entirely — Link atom owns that
+
+---
+
+## Decision 55: Text Scaling via html Root Font-Size (19 March 2026)
+
+**Text XL sets `font-size` on `<html>`, all `rem` tokens scale automatically.** Nav pinned at `font-size: 16px` — immune to scaling. Panel outside wrapper — also immune.
+
+Works on every page, every atom, every theme. No per-component scaling rules needed.
+
+---
+
 ## Files Referenced
 
 | File | Purpose |
@@ -518,3 +613,10 @@ Excludes effects that own their hover: comic, expand, colour-flow, split, tech.
 | `src/styles/zones/theme-chroma-mono.css` | Monochrome behaviour + rainbow override |
 | `src/styles/zones/theme-intensity-soft.css` | Soft intensity behaviour |
 | `src/styles/tokens/theme-names.json` | Display names for theme cards |
+| `src/lib/render-rules.json` | Global render mode rules (what to include/strip per mode) |
+| `src/lib/render-pipeline.ts` | Generic prop stripping function (reads rules + schema) |
+| `src/styles/global/render-modes.css` | Show/hide render divs |
+| `src/styles/global/render-reduced.css` | Reduced render CSS overrides |
+| `src/styles/global/render-textonly.css` | Text-only render CSS overrides |
+| `src/styles/global/textonly-styles.css` | Text-only style variants (easy-read/workbook/study/aac) |
+| `atom-visual-test-matrix.md` | Per-atom visual testing checklist (9 axes) |
