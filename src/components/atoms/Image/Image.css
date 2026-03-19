@@ -89,10 +89,11 @@
   filter: brightness(var(--media-brightness, 1)) saturate(var(--media-saturation, 1)) contrast(var(--media-contrast, 1));
 }
 
-/* Hover + blur combo — unblur on hover reveal */
-.image--animate .image--hover[class*="image--blur"]:hover {
+/* Hover + blur combo — unblur on hover reveal (not in hover none) */
+:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"]:hover {
   filter:
     blur(0)
+    var(--img-hover-filter)
     brightness(var(--media-brightness, 1))
     saturate(var(--media-saturation, 1))
     contrast(var(--media-contrast, 1));
@@ -108,11 +109,9 @@
   transition: none;
 }
 
-/* None — no hover, click reveals via JS class, no zoom */
-[data-hover="none"] .image--animate .image--hover[class*="image--blur"]:hover {
-  filter: inherit;
-}
+/* None — no hover effect at all on blurred images. Click reveal via JS. */
 
+/* Click reveal — unblur only, keep theme filters, no zoom */
 .image--hover.image--revealed {
   filter:
     blur(0)
@@ -120,6 +119,7 @@
     saturate(var(--media-saturation, 1))
     contrast(var(--media-contrast, 1));
   transform: none;
+  transition: filter 0.4s ease;
 }
 
 .image--animate .image--tilt-sm { transform: var(--img-tilt-sm); }
