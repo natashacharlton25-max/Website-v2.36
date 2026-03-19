@@ -81,18 +81,28 @@ function openModal(figure: HTMLElement): void {
   modalImg.src = img.src;
   modalImg.alt = img.alt;
 
-  // Set subtitle — use altDescriptive, fall back to altWord, then img alt
-  const altDesc = figure.querySelector('.image-alt-descriptive');
-  const altWord = figure.querySelector('.image-alt-word');
-  const subtitle = m.querySelector('.image-enlarge-modal__subtitle') as HTMLElement;
-  subtitle.textContent = altDesc?.textContent || altWord?.textContent || img.alt || '';
+  // Check alt text mode
+  const altTextMode = document.documentElement.dataset.altTextMode ||
+                       document.documentElement.getAttribute('data-alt-text-mode') || 'none';
+  const isAac = altTextMode === 'aac' || document.documentElement.hasAttribute('data-content-aac');
 
-  // Copy AAC cards if present
-  const aacSource = figure.querySelector('.image-alt-aac');
+  const subtitle = m.querySelector('.image-enlarge-modal__subtitle') as HTMLElement;
   const aacTarget = m.querySelector('.image-enlarge-modal__aac') as HTMLElement;
-  if (aacSource) {
-    aacTarget.innerHTML = aacSource.innerHTML;
+
+  if (isAac) {
+    // AAC mode: show cards, hide text subtitle
+    subtitle.textContent = '';
+    const aacSource = figure.querySelector('.image-alt-aac');
+    aacTarget.innerHTML = aacSource ? aacSource.innerHTML : '';
   } else {
+    // Text mode: show subtitle, hide cards
+    const altDesc = figure.querySelector('.image-alt-descriptive');
+    const altWord = figure.querySelector('.image-alt-word');
+    if (altTextMode === 'word') {
+      subtitle.textContent = altWord?.textContent || '';
+    } else {
+      subtitle.textContent = altDesc?.textContent || altWord?.textContent || img.alt || '';
+    }
     aacTarget.innerHTML = '';
   }
 
