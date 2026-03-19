@@ -1,0 +1,162 @@
+/* ══════════════════════════════════════════════════════════════
+   FigCaption — image alt text display
+
+   Same visual rules as Tooltip atom but lives inside <figure>.
+   Reads alt text from .image-alt-word / .image-alt-descriptive / .image-alt-aac
+   JS creates <figcaption> element with tooltip-like behaviour.
+
+   Gated by data-alt-display-mode="tooltip" on <html>.
+   Uses same hover gates, render modes, and bar system as Tooltip.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Base — hidden until tooltip mode active ── */
+.figcaption {
+  --_fc-bg: var(--tooltip-bg, var(--page-bg-raised));
+  --_fc-text: var(--tooltip-text, var(--neutral-800));
+  --_fc-border: var(--tooltip-border, var(--primary-600));
+  --_fc-shadow: var(--tooltip-shadow, var(--shadow-lg));
+
+  position: absolute;
+  bottom: calc(100% + var(--space-xs));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-tooltip);
+  max-width: min(90vw, 400px);
+  width: max-content;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--_fc-bg);
+  color: var(--_fc-text);
+  border: 2px solid var(--_fc-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--_fc-shadow);
+  font-family: var(--font-body);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-relaxed);
+  text-align: center;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Force text colour */
+.figcaption .text {
+  color: inherit;
+}
+
+/* ── Show on figure hover/focus ── */
+.image:hover > .figcaption,
+.image:focus-within > .figcaption {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* ── ? indicator on image ── */
+[data-alt-display-mode="tooltip"] .image[data-role="content"]::after {
+  content: "?";
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  z-index: 2;
+  font-size: 0.9em;
+  font-weight: var(--font-bold);
+  color: var(--page-bg);
+  background: var(--primary-600);
+  width: 1.8em;
+  height: 1.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  pointer-events: none;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Hover gates
+   ══════════════════════════════════════════════════════════════ */
+
+[data-hover="gentle"] .figcaption {
+  transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+}
+
+[data-hover="instant"] .figcaption {
+  transition: none;
+}
+
+/* None — inline below image */
+[data-hover="none"] .figcaption {
+  position: static;
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  max-width: none;
+  width: auto;
+  padding: var(--space-sm) 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--neutral-600);
+  font-style: italic;
+  transition: none;
+  text-align: left;
+}
+
+/* Hide ? indicator when hover none */
+[data-hover="none"] .image[data-role="content"]::after {
+  display: none;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Render modes
+   ══════════════════════════════════════════════════════════════ */
+
+[data-render="reduced"] .figcaption {
+  transition: none;
+}
+
+/* Textonly — always visible below */
+[data-render="textonly"] .figcaption {
+  position: static;
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  max-width: none;
+  width: auto;
+  padding: var(--space-sm) 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--neutral-600);
+  text-align: left;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   AAC content in figcaption
+   ══════════════════════════════════════════════════════════════ */
+
+.figcaption .aac-card {
+  font-size: var(--text-sm);
+}
+
+.figcaption__aac {
+  display: none;
+}
+
+[data-content-aac] .figcaption__text {
+  display: none;
+}
+
+[data-content-aac] .figcaption__aac {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  justify-content: center;
+}

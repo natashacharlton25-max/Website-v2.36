@@ -5,36 +5,19 @@ import Heading from '../../components/atoms/Heading/Heading.astro';
 import Section from '../../components/atoms/Section/Section.astro';
 import '../../components/atoms/Section/Section.css';
 import '../../styles/global/image-enlarge.css';
+import '../../components/atoms/FigCaption/FigCaption.css';
 
 import testData from '../../data/test/image.json';
 import { aacInline } from '../../lib/aac/aac-inline';
 
-// Build AAC cards for items that have aacWords
-async function buildAacCards(words: string) {
-  const wordList = words.split(' ').filter(Boolean);
-  const cards = [];
-  for (const word of wordList) {
-    const result = await aacInline(word);
-    if (result && result.type === 'aac') {
-      cards.push({
-        word,
-        symbolSrc: result.src,
-        bciIndex: result.bciIndex,
-        coreTier: result.coreTier,
-        isIndicator: false
-      });
-    }
-  }
-  return cards;
-}
-
-// Pre-build AAC data for all items that need it
-const aacData = new Map();
+// Build AAC HTML for items that have aacWords
+const apiBase = import.meta.env.PUBLIC_ASSET_API_URL || 'https://asset-library.natashacharlton25.workers.dev';
+const aacData = new Map<string, string>();
 for (const section of testData.sections) {
   for (const item of section.items) {
     if ((item as any).aacWords) {
-      const cards = await buildAacCards((item as any).aacWords);
-      aacData.set((item as any).aacWords, cards);
+      const html = await aacInline((item as any).aacWords, apiBase) || '';
+      aacData.set((item as any).aacWords, html);
     }
   }
 }
@@ -56,7 +39,7 @@ for (const section of testData.sections) {
                 role={item.role}
                 altWord={item.altWord}
                 altDescriptive={item.altDescriptive}
-                altAacCards={item.aacWords ? aacData.get(item.aacWords) : undefined}
+                altAacHtml={item.aacWords ? aacData.get(item.aacWords) : undefined}
                 semanticRole={item.semanticRole}
                 width={item.width}
                 height={item.height}
@@ -82,7 +65,7 @@ for (const section of testData.sections) {
               role={item.role}
               altWord={item.altWord}
               altDescriptive={item.altDescriptive}
-              altAacCards={item.aacWords ? aacData.get(item.aacWords) : undefined}
+              altAacHtml={item.aacWords ? aacData.get(item.aacWords) : undefined}
               semanticRole={item.semanticRole}
               width={item.width}
               height={item.height}
