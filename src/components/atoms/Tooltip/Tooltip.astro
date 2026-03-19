@@ -32,9 +32,11 @@
  * not focusable containers and interactive children break a11y.
  */
 import { Text } from '../Text';
+import { aacInline } from '../../../lib/aac/aac-inline';
 
 interface Props {
   text?: string;
+  aac?: boolean;
   purpose: 'label' | 'info';
   id?: string;
   position?: 'top' | 'bottom' | 'left' | 'right';
@@ -44,6 +46,7 @@ interface Props {
 
 const {
   text,
+  aac = true,
   purpose,
   id = `tooltip-${Math.random().toString(36).slice(2, 8)}`,
   position = 'top',
@@ -52,6 +55,13 @@ const {
 } = Astro.props;
 
 const isLabel = purpose === 'label';
+
+// Build AAC HTML at build time if aac prop is true and text exists
+let aacHtml = '';
+if (aac && text) {
+  const apiBase = import.meta.env.PUBLIC_ASSET_API_URL || 'https://asset-library.natashacharlton25.workers.dev';
+  aacHtml = await aacInline(text, apiBase) || '';
+}
 
 const wrapperClasses = [
   'tooltip',
@@ -73,9 +83,16 @@ const wrapperClasses = [
     {...(isLabel && { 'aria-hidden': 'true' })}
   >
     {text ? (
-      <Text as="span" class="tooltip__text" textTone={textTone} flush>
-        {text}
-      </Text>
+      <>
+        <Text as="span" class="tooltip__text" textTone={textTone} flush>
+          {text}
+        </Text>
+        {aacHtml && (
+          <span class="tooltip__aac content-aac" aria-hidden="true">
+            <Fragment set:html={aacHtml} />
+          </span>
+        )}
+      </>
     ) : (
       <slot name="content" />
     )}
@@ -118,11 +135,22 @@ const wrapperClasses = [
     return render === 'textonly' || isMobile;
   }
 
-  function showBar(text: string): void {
+  function showBar(html: string, isAac: boolean = false): void {
     const bar = getSharedBar();
     // Cancel any pending hide — new tooltip keeps bar open
     if (barHideTimeout) { clearTimeout(barHideTimeout); barHideTimeout = null; }
-    bar.textContent = text;
+    bar.innerHTML = html;
+
+    // AAC mode: force cards to display flex with images
+    if (isAac) {
+      bar.style.display = 'flex';
+      bar.style.flexWrap = 'wrap';
+      bar.style.justifyContent = 'center';
+      bar.style.gap = '8px';
+    } else {
+      bar.style.display = '';
+    }
+
     bar.style.opacity = '1';
     bar.style.visibility = 'visible';
   }
@@ -181,8 +209,22 @@ const wrapperClasses = [
 
       function onEnter() {
         if (isBarMode()) {
-          const text = contentEl.textContent?.trim() || '';
-          if (text) showBar(text);
+          // Check if Content AAC is active — show AAC cards, else show text
+          const isAac = document.documentElement.hasAttribute('data-content-aac');
+          const aacEl = contentEl.querySelector('.tooltip__aac');
+          const textEl = contentEl.querySelector('.tooltip__text');
+
+          let html = '';
+          let useAac = false;
+          if (isAac && aacEl) {
+            html = aacEl.innerHTML?.trim() || '';
+            useAac = true;
+          } else if (textEl) {
+            html = textEl.textContent?.trim() || '';
+          } else {
+            html = contentEl.textContent?.trim() || '';
+          }
+          if (html) showBar(html, useAac);
         } else {
           updatePosition();
         }

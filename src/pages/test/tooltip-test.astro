@@ -7,15 +7,6 @@ import Section from '../../components/atoms/Section/Section.astro';
 import '../../components/atoms/Section/Section.css';
 
 import testData from '../../data/test/tooltip.json';
-
-// Build tooltip colour style from JSON defaults
-const colourDefaults = (testData as any).colour || {};
-const tooltipStyle = [
-  colourDefaults.tooltipBg && `--tooltip-bg: ${colourDefaults.tooltipBg}`,
-  colourDefaults.tooltipText && `--tooltip-text: ${colourDefaults.tooltipText}`,
-  colourDefaults.tooltipBorder && `--tooltip-border: ${colourDefaults.tooltipBorder}`,
-  colourDefaults.tooltipShadow && `--tooltip-shadow: ${colourDefaults.tooltipShadow}`,
-].filter(Boolean).join('; ');
 ---
 
 <BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
@@ -25,44 +16,30 @@ const tooltipStyle = [
 
     {testData.sections.map((section: any) => (
       <Section label={section.label} separator gap={testData.layout.itemGap}>
-        <div style={`display:flex;flex-wrap:wrap;gap:var(--space-xl);align-items:center;padding:var(--space-2xl) 0;${tooltipStyle}`}>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-xl);align-items:center;padding:var(--space-2xl) 0;">
           {section.items.map((item: any) => (
             <div class="render-full">
-              {item.richContent ? (
-                <Tooltip purpose="info" position="bottom">
-                  <Badge label={item.triggerLabel} variant="outline" />
-                  <span slot="content">
-                    Rich tooltip with text content and emphasis for longer descriptions.
-                  </span>
-                </Tooltip>
-              ) : (
-                <Tooltip
-                  text={item.text}
-                  purpose={item.purpose || "label"}
-                  position={item.position || "top"}
-                >
-                  <Badge label={item.triggerLabel} variant="fill" />
-                </Tooltip>
-              )}
+              <Tooltip
+                text={item.text}
+                aac={item.aac !== false}
+                purpose={item.purpose || "label"}
+                position={item.position || "top"}
+              >
+                <Badge label={item.triggerLabel} variant="fill" />
+              </Tooltip>
             </div>
           ))}
         </div>
         <div class="render-textonly">
           {section.items.map((item: any) => (
-            item.richContent ? (
-              <Tooltip purpose="info" position="bottom">
-                <span>{item.triggerLabel}</span>
-                <span slot="content">Rich tooltip with text content</span>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                text={item.text}
-                purpose={item.purpose || "label"}
-                position={item.position || "top"}
-              >
-                <span>{item.triggerLabel}</span>
-              </Tooltip>
-            )
+            <Tooltip
+              text={item.text}
+              aac={item.aac !== false}
+              purpose={item.purpose || "label"}
+              position={item.position || "top"}
+            >
+              <span>{item.triggerLabel}</span>
+            </Tooltip>
           ))}
         </div>
       </Section>

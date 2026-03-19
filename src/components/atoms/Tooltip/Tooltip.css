@@ -47,6 +47,29 @@
   transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
+/* ── AAC content toggle ── */
+/* .content-aac class handles show/hide via global aac-mode.css */
+/* When Content AAC on: hide tooltip text */
+[data-content-aac] .tooltip__text {
+  display: none;
+}
+
+.tooltip__content .aac-card {
+  font-size: var(--text-sm);
+}
+
+/* Inline AAC cards (hover none) — grouped with primary border */
+[data-hover="none"] .tooltip__aac {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--_tooltip-border);
+  border-radius: var(--radius-md);
+  vertical-align: middle;
+  margin: 0 var(--space-xs);
+}
+
 /* Force text colour inheritance — Text atom sets its own colour */
 .tooltip__content .text,
 .tooltip__content .tooltip__text {
@@ -135,7 +158,8 @@ dialog .tooltip--right .tooltip__content { left: 100%; top: 50%; }
 
 /* Hover none beats ALL — inline wins over bar, textonly, mobile, everything */
 [data-hover="none"] .tooltip .tooltip__content,
-[data-hover="none"][data-render="assistive"] .tooltip .tooltip__content {
+[data-hover="none"][data-render="assistive"] .tooltip .tooltip__content,
+[data-hover="none"][data-render="textonly"] .tooltip .tooltip__content {
   position: static;
   display: inline;
   opacity: 1;
@@ -173,8 +197,9 @@ dialog .tooltip--right .tooltip__content { left: 100%; top: 50%; }
   pointer-events: none;
 }
 
-/* Textonly + hover none — info only inline, label hidden */
-[data-hover="none"][data-render="textonly"] .tooltip--info .tooltip__content {
+
+/* Textonly + hover none — ALL inline, info gets brackets, label hidden */
+[data-hover="none"][data-render="textonly"] .tooltip .tooltip__content {
   position: static;
   display: inline;
   opacity: 1;
@@ -257,20 +282,21 @@ dialog .tooltip--right .tooltip__content { left: 100%; top: 50%; }
     justify-content: center;
   }
 
-  /* Small info dot — hints that trigger is tappable */
-  .tooltip__trigger::after {
-    content: "?";
-    font-size: 0.75em;
-    font-weight: var(--font-bold);
-    color: var(--page-bg);
-    background: var(--primary-600);
-    width: 1.4em;
-    height: 1.4em;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-full);
-    margin-inline-start: var(--space-sm);
-    flex-shrink: 0;
-  }
+}
+
+/* ? indicator — always shown, all modes, all devices */
+.tooltip__trigger::after {
+  content: "?";
+  font-size: 0.75em;
+  font-weight: var(--font-bold);
+  color: var(--page-bg);
+  background: var(--primary-600);
+  width: 1.4em;
+  height: 1.4em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  margin-inline-start: var(--space-sm);
+  flex-shrink: 0;
 }
