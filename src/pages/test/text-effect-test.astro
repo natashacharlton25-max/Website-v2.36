@@ -1,10 +1,16 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TextEffect from '../../components/atoms/TextEffect/TextEffect.astro';
+import LetterDrop from '../../components/effects/LetterDrop/LetterDrop.astro';
+import TypeWriter from '../../components/effects/TypeWriter/TypeWriter.astro';
+import WordRotate from '../../components/effects/WordRotate/WordRotate.astro';
 import Heading from '../../components/atoms/Heading/Heading.astro';
 import Section from '../../components/atoms/Section/Section.astro';
 import '../../components/atoms/Section/Section.css';
 import '../../components/atoms/TextEffect/TextEffect.css';
+import '../../components/effects/LetterDrop/LetterDrop.css';
+import '../../components/effects/TypeWriter/TypeWriter.css';
+import '../../components/effects/WordRotate/WordRotate.css';
 
 import testData from '../../data/test/text-effect.json';
 ---
@@ -46,6 +52,49 @@ import testData from '../../data/test/text-effect.json';
         </div>
       </Section>
     ))}
+
+    <!-- Animation Effects -->
+    <Section label="Letter Drop" separator gap="xl">
+      <div class="render-full">
+        <LetterDrop
+          lines={[
+            { text: "TURNING", color: "var(--primary-600)" },
+            { text: "OBSTACLES", color: "var(--secondary-600)" },
+            { text: "INTO", color: "var(--neutral-800)" },
+            { text: "OPPORTUNITIES", color: "var(--primary-400)" }
+          ]}
+        />
+      </div>
+    </Section>
+
+    <Section label="TypeWriter" separator gap="xl">
+      <div class="render-full">
+        <TypeWriter
+          words={["All About Us.", "Hey There!", "So Glad You Found Us.", "Lovely to meet you here :)", "How are you Today?"]}
+        />
+      </div>
+      <div class="render-textonly">
+        <p style="color:var(--neutral-800);">All About Us.</p>
+      </div>
+    </Section>
+
+    <Section label="Word Rotate" separator gap="xl">
+      <div class="render-full" style="min-height: 6rem;">
+        <WordRotate
+          words={[
+            { text: "Love wins.", color: "var(--primary-600)" },
+            { text: "Joy wins.", color: "var(--secondary-600)" },
+            { text: "Happiness wins.", color: "var(--primary-400)" },
+            { text: "Comfort wins.", color: "var(--secondary-400)" },
+            { text: "Safety wins.", color: "var(--neutral-700)" },
+            { text: "Peace wins.", color: "var(--primary-800)" }
+          ]}
+        />
+      </div>
+      <div class="render-textonly">
+        <p style="color:var(--neutral-800);">Love wins.</p>
+      </div>
+    </Section>
 
   </Section>
 </BaseLayout>
