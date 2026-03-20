@@ -854,30 +854,41 @@ Same content shape → multiple valid components. The mood picks which one:
 
 ---
 
-## Decision 78: One Section Atom Replaces All Organism Sections (20 March 2026)
+## Decision 78: Section + Grid Replace All Organism Sections (20 March 2026) — CORRECTED
 
-**All 20+ organism sections (HeroSection, CTASection, GallerySection, StatsSection, etc.) are replaced by ONE Section atom with full layout enums.**
+**All 20+ organism sections (HeroSection, CTASection, GallerySection, StatsSection, etc.) are replaced by TWO atoms: Section (semantic wrapper) + Grid (multi-column layout).**
 
-A HeroSection is just Section + Heading + Text + Button + Image with specific layout props. The JSON defines the composition, not a hardcoded component.
+**Section atom** — vertical stacking, semantic grouping:
+- `label`, `gap`, `padding`, `separator`, `maxWidth`
+- `collapse`: none, accordion, tabs (uses BaseSwitcher internally)
+- Always stacks children vertically
+- A CTA section is just Section + Heading + Text + Button — no Grid needed
 
-Section schema layout enums:
-- `direction`: vertical, horizontal
-- `overflow`: visible, scroll, slider
-- `columns`: 1, 2, 3, 4, 6
-- `grid`: flex, grid, masonry
-- `alignment`: start, center, end, stretch
-- `justify`: start, center, between, around
-- `wrap`: true, false
-- `gap`: xs, sm, md, lg, xl, 2xl
-- `padding`: none, sm, md, lg, xl, 2xl
-- `maxWidth`: sm, md, lg, xl, full
-- `separator`: true, false
-- `sticky`: true, false
-- `collapse`: none, accordion, tabs
+**Grid atom** — multi-column layout engine (already exists with full schema):
+- `columns`: 1-6
+- `flow`: row, dense, column, masonry
+- `gap`, `align`, `minWidth`, `container`
+- `gallery`: showcase, product (GSAP animated)
+- Grid goes INSIDE Section when columns are needed
+- `spec-grid-layout.ts` handles card measurement + span placement
 
-**Every organism section = Section atom + layout enums + atoms inside + optional effects.**
+**Card atom** — the grid cell:
+- Cards are always the grid children (even transparent ones)
+- Cards handle all accessibility (focus, hover, keyboard)
+- Cards take any atoms inside
+- Cards collapse gracefully in textonly/assistive
 
-Slider = `overflow: "slider"`. Gallery = `grid: "masonry"`. Compare = `columns: 2`. FAQ = `collapse: "accordion"`. No separate components needed.
+**The hierarchy:** Section → Grid (optional) → Card → atoms
+
+```
+CTA:      Section → Heading + Text + Button (no Grid)
+Features: Section → Grid(columns:3) → Card → Icon + Heading + Text
+Gallery:  Section → Grid(flow:masonry) → Card → Image
+FAQ:      Section(collapse:accordion) → Card → Heading + Text
+Slider:   Section → Grid(overflow:slider) → Card → content
+```
+
+**Filter/tabs:** BaseSwitcher pattern already exists. Section uses it when `collapse: "tabs"` or Grid uses it when `filter: true`. Tab labels from JSON.
 
 Existing organism sections become dead code when the pipeline is live.
 
