@@ -702,6 +702,97 @@ Per-item `renderOverrides.keep: ["image"]` for exceptions. AAC card pictograms a
 
 ---
 
+## Decision 65: FigCaption Atom — Image Alt Text Display (20 March 2026)
+
+**Image alt text display uses a dedicated FigCaption atom, NOT the Tooltip atom.** The Tooltip atom wraps its trigger — wrapping a `<figure>` breaks Image's DOM structure. FigCaption sits inside the figure, reads from existing alt text spans (`.image-alt-word`, `.image-alt-descriptive`, `.image-alt-aac`), and uses the same CSS/JS patterns as Tooltip (bar, inline, floating).
+
+- `<figcaption>` element (semantic HTML)
+- Reads alt text based on `data-alt-text-mode` (word/descriptive/aac)
+- Only appears when `data-alt-display-mode="tooltip"` is active
+- Uses shared bar pattern for textonly + mobile
+- Hover gates: full/gentle/instant = floating, none = inline
+- Same `?` indicator as Tooltip
+
+---
+
+## Decision 66: Image Blur-Reveal Effect (20 March 2026)
+
+**Blurred images reveal on hover (zoom + unblur) or click (hover-none).** Gated by hover mode: full = animated reveal, gentle = slow reveal, instant = immediate, none = click-to-reveal. Click reveal uses JS `image--revealed` class toggle. Theme media filters apply to both blurred and revealed states. Border indicator shows in hover-none + highlight-links.
+
+- `blur` prop sets blur level via JSON
+- `hover` + `blur` together enable the effect
+- `body[data-hover="none"]` kills all hover transforms
+- Click adds `image--revealed` class (toggle)
+- `filter: brightness() saturate() contrast()` from theme tokens always applied
+
+---
+
+## Decision 67: Phosphor Icon Masks for Images (20 March 2026)
+
+**Any of 4,533 Phosphor icons can be used as an image mask via `maskIcon` prop.** SVG fetched at build time from the Asset Library API, `currentColor` replaced with black, encoded as data URI, applied as inline `mask-image` style. Zero runtime cost.
+
+- `maskIcon: "heart-fill"` → image clipped to heart shape
+- API returns raw SVG (not JSON) — use `res.text()` not `res.json()`
+- Also supports file-based masks via `maskShape` (star/brush/splash/torn/wave in `public/masks/`)
+- `mask-size: contain`, `mask-repeat: no-repeat`, `mask-position: center`
+
+---
+
+## Decision 68: Image bgFill for Transparent PNGs (20 March 2026)
+
+**Transparent PNGs can have a background fill: `glass` (brand-tint + frosted border) or `solid` (page-bg-raised).** Applied via `bgFill` prop. Glass uses `backdrop-filter: blur()` with `--glass-*` tokens. Card atom already has all effects — for advanced styling, wrap Image in Card.
+
+---
+
+## Decision 69: TextEffect Organism — Visual Text Effects (20 March 2026)
+
+**Visual text treatments (fill-image, shadows, strokes, gradients, glow) are owned by TextEffect, NOT Heading.** TextEffect is an effects organism that renders text with visual treatments. Heading is a semantic atom for document structure.
+
+- fillImage: background-clip text with image URL
+- textShadow: text-shadow CSS (outer shadows only, no inset)
+- dropShadow: filter: drop-shadow()
+- textStroke: -webkit-text-stroke
+- gradientColors: animated gradient fill via background-clip text
+- gradientSpeed: fast/slow/none
+- Uses `--font-display` (Crumbo) by default, overridable
+- Rainbow tokens for gradients, scale tokens for shadows/strokes
+
+---
+
+## Decision 70: Tooltip Bar Hover Mode Behaviour (20 March 2026)
+
+**Bar shows for textonly + mobile. Inline shows for hover-none. They never both show.**
+
+| Render + Hover | Display |
+|---|---|
+| Full + full/gentle/instant | Floating tooltip |
+| Full + none | Inline `[bracketed]` text |
+| Textonly + full/gentle/instant | Bottom bar |
+| Textonly + none | Inline info-only |
+| Textonly + gentle + none combined | Inline (none wins) |
+
+Bar content adapts: text mode shows text, AAC mode shows cards. Bar persists 2s between tooltips (cross-fade, no flicker). Scroll dismisses instantly.
+
+---
+
+## Decision 71: Image Enlarge Modal — Theme Aware (20 March 2026)
+
+**Enlarge modal uses theme tokens for bg/text, applies media filters.** Light mode: `--neutral-400` backdrop. Dark mode: `--neutral-950` backdrop. Image filter uses `--media-brightness`, `--media-saturation`, `--media-contrast` from the active theme. AAC cards displayed below image, not overlaid.
+
+---
+
+## Decision 72: Highlight Links on Clickable Images (20 March 2026)
+
+**Images with alt text tooltip or enlarge modal get a primary border when highlight-links is active.** Uses `border` + `padding` on the figure (not `::after`, which doesn't render reliably). Hover changes border colour. Hover-none: border always visible (click interaction). Border inherits `--_img-radius` from image.
+
+---
+
+## Decision 73: SVG Shapes Library (20 March 2026)
+
+**72 decorative SVG shapes in `svg shapes/` folder, to be uploaded to D1 as assets.** Tagged `shape`, `decorative`, `mask`. Can be used as image masks, decorative elements, or GSAP morph targets. Worker POST handler needs fixing before upload (error 1101 — likely D1 schema issue with `tags` field).
+
+---
+
 ## Files Referenced
 
 | File | Purpose |
@@ -725,3 +816,10 @@ Per-item `renderOverrides.keep: ["image"]` for exceptions. AAC card pictograms a
 | `src/components/atoms/Tooltip/Tooltip.responsive.css` | Tooltip mobile breakpoints |
 | `src/scripts/image-enlarge.ts` | Image enlarge modal (Phosphor icon, focus trap) |
 | `src/styles/global/image-enlarge.css` | Image enlarge mode CSS (zoom badge, modal) |
+| `src/components/atoms/FigCaption/FigCaption.css` | FigCaption base + hover gates + render modes |
+| `src/components/atoms/FigCaption/figcaption.ts` | FigCaption JS (bar, inline, floating, click) |
+| `src/components/effects/TextEffect/TextEffect.astro` | TextEffect organism (fill, shadow, stroke, gradient) |
+| `src/components/effects/TextEffect/TextEffect.css` | TextEffect CSS (gradient animation, fill-image) |
+| `src/styles/gates/hover-gate.css` | Hover gate CSS (image blur-reveal, tooltip, button) |
+| `public/masks/*.svg` | SVG mask shapes (star, brush, splash, torn, wave) |
+| `svg shapes/` | 72 decorative SVG shapes (pending D1 upload) |
