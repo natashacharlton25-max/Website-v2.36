@@ -359,42 +359,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
   document.addEventListener('astro:page-load', initDropdowns);
 </script>
 
-<script>
-  // Confetti — direct binding
-  async function initConfetti() {
-    const els = document.querySelectorAll<HTMLElement>('[data-particle-burst]:not([data-confetti-bound])');
-    if (els.length === 0) return;
-
-    const { createParticleBurst } = await import('../../../lib/animation/particle-burst');
-
-    els.forEach(el => {
-      el.setAttribute('data-confetti-bound', 'true');
-
-      const type = (el.getAttribute('data-particle-type') || 'confetti') as any;
-      const trigger = el.getAttribute('data-particle-trigger') || 'click';
-      const count = parseInt(el.getAttribute('data-particle-count') || '30');
-      const spread = parseInt(el.getAttribute('data-particle-spread') || '150');
-      const opts = { type, particleCount: count, spread };
-
-      if (trigger === 'hover') {
-        let cooldown = false;
-        el.addEventListener('mouseenter', () => {
-          if (cooldown) return;
-          createParticleBurst(el, opts);
-          cooldown = true;
-          setTimeout(() => { cooldown = false; }, 2000);
-        });
-      } else {
-        el.addEventListener('click', () => {
-          createParticleBurst(el, opts);
-        });
-      }
-    });
-  }
-
-  initConfetti();
-  document.addEventListener('astro:page-load', initConfetti);
-</script>
+<!-- Confetti handled globally by particle-burst.ts auto-init -->
 
 <script>
   // Magnetic + Spotlight — cursor-tracking effects
