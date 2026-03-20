@@ -793,6 +793,172 @@ Bar content adapts: text mode shows text, AAC mode shows cards. Bar persists 2s 
 
 ---
 
+## Decision 74: Website Schema Funnel — 5-Layer Pipeline (20 March 2026)
+
+**Website generation is a 5-layer funnel. Each layer narrows choices. Each is a Worker call with schema-validated input/output.**
+
+| Layer | Name | Input | Output |
+|---|---|---|---|
+| 1 | Brand Identity | Client brief / Empire brand-config.json | 2 hex codes, personality, fonts, voice, audience |
+| 2 | Theme + Tokens | Layer 1 hex codes | 112 CSS theme files, all scale tokens, brand CSS |
+| 3 | Mood Resolver | Layer 1 personality traits | Mapped to 25 design moods (preferences, not restrictions) |
+| 4 | Page Plan | Layer 1 brand context | Pages list + intentions + section structure per page |
+| 5 | Content + Assembly | Layers 3+4 | Content written → content shape → component candidates → mood-filtered assembly → page JSON |
+
+**Key principle:** Each layer's output feeds the next layer's input. No layer sees more than it needs.
+
+---
+
+## Decision 75: 25 Design Moods — Preferences Not Restrictions (20 March 2026)
+
+**Moods are a design vocabulary the CLIENT chooses, not industry stereotypes. A meditation app can be Urban + Bright.**
+
+25 moods: Vibrant, Minimal, Modern, Futuristic, Bright, Dark, Elegant, Luxury, Organic, Retro, Playful, Corporate, Editorial, Pastel, Bold, Industrial, Whimsical, Serif, Monochrome, Friendly, Analytical, Atmospheric, Urban, Illustrated, Zen.
+
+- Moods combine freely (union of preferences, not intersection)
+- Moods are PREFERENCES not RESTRICTIONS — the AI prefers certain enums but can still pick any
+- No mood-to-industry mapping — the client picks, not the system
+- Stored in `mood-map.json` with per-component enum preferences
+
+---
+
+## Decision 76: Brand Config IS Layer 1 (20 March 2026)
+
+**Empire v3.1 brand-config.json is the input to the entire pipeline.** No separate onboarding needed for the website builder.
+
+Brand config provides: name, mission, personality traits, colours with roles, fonts with roles, voice/tone rules, audience profile, content guidelines, CTA style, social handles, assets.
+
+- `identity.personality` → mood resolver maps to 25 moods
+- `colors[role=primary/secondary].hex` → theme engine generates 112 themes
+- `voiceAndTone` → content writer uses for words
+- `audience` → page planner uses for structure decisions
+- `contentGuidelines.ctaStyle` → button/CTA copy style
+
+---
+
+## Decision 77: Content Shape Drives Component Selection (20 March 2026)
+
+**The AI writes content FIRST, then the content shape determines which components to use.** Not the other way around.
+
+- "6 items with title + description + icon" → Card grid candidates
+- "quote + author name" → Testimonial card candidates
+- "heading + paragraph + button" → CTA section candidates
+- "10 question + answer pairs" → Accordion OR FlipCards OR expandable cards
+
+Same content shape → multiple valid components. The mood picks which one:
+- FAQ as accordion (minimal/professional)
+- FAQ as flip cards (playful)
+- FAQ as expandable cards with reveal animation (expressive)
+
+**The AI never picks components directly. Content shape + mood = component candidates. The AI picks from candidates.**
+
+---
+
+## Decision 78: One Section Atom Replaces All Organism Sections (20 March 2026)
+
+**All 20+ organism sections (HeroSection, CTASection, GallerySection, StatsSection, etc.) are replaced by ONE Section atom with full layout enums.**
+
+A HeroSection is just Section + Heading + Text + Button + Image with specific layout props. The JSON defines the composition, not a hardcoded component.
+
+Section schema layout enums:
+- `direction`: vertical, horizontal
+- `overflow`: visible, scroll, slider
+- `columns`: 1, 2, 3, 4, 6
+- `grid`: flex, grid, masonry
+- `alignment`: start, center, end, stretch
+- `justify`: start, center, between, around
+- `wrap`: true, false
+- `gap`: xs, sm, md, lg, xl, 2xl
+- `padding`: none, sm, md, lg, xl, 2xl
+- `maxWidth`: sm, md, lg, xl, full
+- `separator`: true, false
+- `sticky`: true, false
+- `collapse`: none, accordion, tabs
+
+**Every organism section = Section atom + layout enums + atoms inside + optional effects.**
+
+Slider = `overflow: "slider"`. Gallery = `grid: "masonry"`. Compare = `columns: 2`. FAQ = `collapse: "accordion"`. No separate components needed.
+
+Existing organism sections become dead code when the pipeline is live.
+
+---
+
+## Decision 79: Pipeline JSON Format — Atoms + Layout + Effects (20 March 2026)
+
+**Every section in every page follows ONE JSON shape:**
+
+```json
+{
+  "id": "section-id",
+  "title": "Section Title",
+  "intention": "What this section achieves",
+  "atoms": [
+    {
+      "atom": "ComponentName",
+      "props": {
+        "enumProps": { "variant": "glass", "size": "lg" },
+        "contentProps": { "text": "Hello world" }
+      },
+      "effects": [
+        { "type": "EffectName", "props": { ... } }
+      ]
+    }
+  ],
+  "layout": {
+    "direction": "vertical",
+    "spacing": "xl",
+    "alignment": "center"
+  },
+  "sectionEffects": [
+    { "type": "PatternOverlay", "props": { ... } },
+    { "type": "GlowSection", "props": { ... } }
+  ]
+}
+```
+
+- `atoms[]` — what content renders (each with enumProps + contentProps + per-atom effects)
+- `layout` — how atoms are arranged (Section schema enums)
+- `sectionEffects[]` — what wraps the section (visual effects layer)
+- `enumProps` validated against schema-vocabulary.json
+- `contentProps` = free text, validated for required fields
+- All colour values must be `var(--token-name)` format
+
+---
+
+## Decision 80: Mood-Map Is Preferences, Not Restrictions (20 March 2026)
+
+**The mood-map weights the AI's choices, it doesn't lock them out.** Every component option remains available — the mood just influences which ones the AI reaches for first.
+
+- `"soft"` prefers `["ghost", "glass", "neumorphic"]` for Button.variant
+- But the AI CAN still pick `"comic"` if the content calls for it
+- Moods combine via union: `soft + bright` = both mood preferences merged
+- No enum is ever removed — only weighted
+
+This prevents typecasting: "soft brand" doesn't mean "no bold buttons ever." It means "usually soft, unless the content needs emphasis."
+
+---
+
+## Decision 81: Schema Vocabulary File for AI Constrained Generation (20 March 2026)
+
+**`schema-vocabulary.json` is auto-generated from all component schemas. It contains every enum, token field, and content field across all 23 components.**
+
+- Generated by script at build time (reads all `*.schema.json` files)
+- The AI reads this to know what it can use
+- Enum validation: AI can only pick values in the enum list
+- Token validation: colour values must match `/^var\(--[a-z0-9-]+\)$/`
+- `$locked` fields (renders, category, component) cannot be modified by AI or content JSON
+
+---
+
+## Decision 82: Confetti — Global Init Only (20 March 2026)
+
+**Particle burst effects are initialised ONCE by `particle-burst.ts` auto-init.** No duplicate init scripts in component files. Uses `data-particle-initialized` guard attribute to prevent double-binding.
+
+Removed: Button.astro inline confetti script (was double-binding with global init).
+Removed: CSS `.btn--confetti::after` indicator dots (the burst itself is the feedback).
+
+---
+
 ## Files Referenced
 
 | File | Purpose |
@@ -823,3 +989,6 @@ Bar content adapts: text mode shows text, AAC mode shows cards. Bar persists 2s 
 | `src/styles/gates/hover-gate.css` | Hover gate CSS (image blur-reveal, tooltip, button) |
 | `public/masks/*.svg` | SVG mask shapes (star, brush, splash, torn, wave) |
 | `svg shapes/` | 72 decorative SVG shapes (pending D1 upload) |
+| `src/data/website-schema-funnel.json` | 5-layer website generation funnel definition |
+| `src/data/mood-map.json` | 25 mood → component enum preference mappings |
+| `src/data/schema-vocabulary.json` | Auto-generated component vocabulary for AI |

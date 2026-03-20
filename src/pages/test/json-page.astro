@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Heading from '../../components/atoms/Heading/Heading.astro';
+import Text from '../../components/atoms/Text/Text.astro';
+import Button from '../../components/atoms/Button/Button.astro';
+import Badge from '../../components/atoms/Badge/Badge.astro';
+import Card from '../../components/atoms/Card/Card.astro';
+import Section from '../../components/atoms/Section/Section.astro';
+import Image from '../../components/atoms/Image/Image.astro';
+import Icon from '../../components/atoms/Icon/Icon.astro';
+import Link from '../../components/atoms/Link/Link.astro';
+import List from '../../components/atoms/List/List.astro';
+
+import '../../components/atoms/Section/Section.css';
+
+import pageData from '../../data/test/json-page.json';
+
+// Component registry — maps JSON component names to Astro components
+const components: Record<string, any> = {
+  Heading, Text, Button, Badge, Card, Section, Image, Icon, Link, List
+};
+
+// Merge content + visual + colour + animation into flat props
+function mergeProps(item: any): Record<string, any> {
+  const props: Record<string, any> = {};
+
+  // Flatten content props
+  if (item.content) Object.assign(props, item.content);
+
+  // Flatten visual props
+  if (item.visual) Object.assign(props, item.visual);
+
+  // Flatten animation props
+  if (item.animation) Object.assign(props, item.animation);
+
+  // Build inline style from colour tokens
+  if (item.colour) {
+    const tokenMap: Record<string, string> = {
+      // Button tokens
+      bg: '--btn-bg', text: '--btn-text', hoverBg: '--btn-hover-bg',
+      lightBg: '--btn-light-bg', focusRing: '--btn-focus-ring',
+      // Badge tokens
+      badgeBg: '--badge-bg', badgeText: '--badge-text', badgeBorder: '--badge-border',
+      // Heading tokens
+      headingColor: '--heading-color', headingAccent: '--heading-accent',
+      headingUnderline: '--heading-underline', headingHighlight: '--heading-highlight',
+      // Card tokens
+      cardBg: '--card-bg', cardText: '--card-text', cardBorder: '--card-border',
+    };
+
+    const styles: string[] = [];
+    for (const [key, value] of Object.entries(item.colour)) {
+      const cssVar = tokenMap[key];
+      if (cssVar && value) {
+        // Value is already var(--token) format
+        styles.push(`${cssVar}: ${value}`);
+      }
+    }
+    if (styles.length > 0) {
+      props.style = (props.style || '') + styles.join('; ');
+    }
+  }
+
+  return props;
+}
+
+// Get slot content (label text)
+function getSlotText(item: any): string {
+  return item.slots?.default || item.content?.label || item.content?.text || '';
+}
+---
+
+<BaseLayout title="JSON Pipeline Page" hideFooter>
+  <main id="main-content" class="container container-7xl" style="padding: var(--space-xl) var(--space-lg);">
+
+    {pageData.sections.map((section: any) => {
+      const sectionProps = mergeProps(section);
+
+      return (
+        <Section label={sectionProps.label} gap={sectionProps.gap || 'lg'} separator>
+          <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
+            {section.children?.map((child: any) => {
+              const Component = components[child.component];
+              if (!Component) return null;
+
+              const props = mergeProps(child);
+              const slotText = getSlotText(child);
+
+              // Card with children — recursive render
+              if (child.component === 'Card' && child.children) {
+                return (
+                  <Card {...props}>
+                    {child.children.map((grandchild: any) => {
+                      const GC = components[grandchild.component];
+                      if (!GC) return null;
+                      const gcProps = mergeProps(grandchild);
+                      const gcSlot = getSlotText(grandchild);
+                      return <GC {...gcProps}>{gcSlot}</GC>;
+                    })}
+                  </Card>
+                );
+              }
+
+              // Section with children
+              if (child.component === 'Section' && child.children) {
+                return (
+                  <Section {...props}>
+                    {child.children.map((grandchild: any) => {
+                      const GC = components[grandchild.component];
+                      if (!GC) return null;
+                      const gcProps = mergeProps(grandchild);
+                      const gcSlot = getSlotText(grandchild);
+                      return <GC {...gcProps}>{gcSlot}</GC>;
+                    })}
+                  </Section>
+                );
+              }
+
+              // Feature cards row
+              if (child.component === 'Card') {
+                return <Card {...props}>{slotText}</Card>;
+              }
+
+              // Simple component
+              return <Component {...props}>{slotText}</Component>;
+            })}
+          </div>
+        </Section>
+      );
+    })}
+
+  </main>
+</BaseLayout>
