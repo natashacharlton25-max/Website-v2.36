@@ -439,28 +439,27 @@ const iconRight = iconPosition === 'right' && hasIcon;
           if (complementColor) {
             document.documentElement.style.setProperty('--highlight-link-color', complementColor);
           }
-          // GSAP tween the dim overlay colour
-          if (document.documentElement.hasAttribute('data-focus-dim') && currentColor) {
-            const gsap = (window as any).gsap;
-            let overlay = document.querySelector('.focus-dim-overlay') as HTMLElement;
-            if (!overlay) {
-              overlay = document.createElement('div');
-              overlay.className = 'focus-dim-overlay';
-              overlay.setAttribute('aria-hidden', 'true');
-              document.body.appendChild(overlay);
+          // Tint page bg token + dim overlay colour
+          if (document.documentElement.hasAttribute('data-focus-dim')) {
+            if (currentColor) {
+              document.documentElement.style.setProperty('--page-bg', currentColor);
             }
-            const probe = document.createElement('div');
-            probe.style.backgroundColor = currentColor;
-            document.body.appendChild(probe);
-            const rgb = getComputedStyle(probe).backgroundColor;
-            probe.remove();
-            const match = rgb.match(/(\d+),\s*(\d+),\s*(\d+)/);
-            if (gsap && match) {
-              gsap.to(overlay, {
-                backgroundColor: `rgba(${match[1]}, ${match[2]}, ${match[3]}, 0.35)`,
-                duration: 0.3,
-                ease: 'power2.out',
-              });
+            const gsap = (window as any).gsap;
+            const overlay = document.querySelector('.focus-dim-overlay');
+            if (gsap && overlay && currentColor) {
+              const probe = document.createElement('div');
+              probe.style.backgroundColor = currentColor;
+              document.body.appendChild(probe);
+              const rgb = getComputedStyle(probe).backgroundColor;
+              probe.remove();
+              const match = rgb.match(/(\d+),\s*(\d+),\s*(\d+)/);
+              if (match) {
+                gsap.to(overlay, {
+                  backgroundColor: `rgba(${match[1]}, ${match[2]}, ${match[3]}, 0.35)`,
+                  duration: 0.3,
+                  ease: 'power2.out',
+                });
+              }
             }
           }
         }
@@ -540,15 +539,17 @@ const iconRight = iconPosition === 'right' && hasIcon;
         el.removeAttribute('data-focus-active');
         requestAnimationFrame(() => { el.style.transition = ''; });
       }
-      // Fade out dim overlay
-      const gsap = (window as any).gsap;
-      const overlay = document.querySelector('.focus-dim-overlay');
-      if (gsap && overlay) {
-        gsap.to(overlay, {
-          backgroundColor: 'rgba(0, 0, 0, 0)',
-          duration: 0.2,
-          ease: 'power2.out',
-        });
+      // Reset page bg + fade overlay
+      if (document.documentElement.hasAttribute('data-focus-dim')) {
+        document.documentElement.style.removeProperty('--page-bg');
+        const gsap = (window as any).gsap;
+        const overlay = document.querySelector('.focus-dim-overlay');
+        if (gsap && overlay) {
+          gsap.to(overlay, {
+            backgroundColor: 'rgba(0, 0, 0, 0)',
+            duration: 0.2,
+          });
+        }
       }
       hideFocusLabel();
     });
