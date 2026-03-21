@@ -31,29 +31,13 @@
   scroll-margin: 40vh;
 }
 
-/* ── Focus Dim — dim non-focused, keep focused at full opacity ── */
-[data-focus-dim]:has([data-focus-active]) section,
-[data-focus-dim]:has([data-focus-active]) .card,
-[data-focus-dim]:has([data-focus-active]) .btn,
-[data-focus-dim]:has([data-focus-active]) figure,
-[data-focus-dim]:has([data-focus-active]) a,
-[data-focus-dim]:has([data-focus-active]) button {
-  opacity: 0.15;
-}
-
-/* Rainbow + dim: wrapper bg tinted by JS GSAP tween — not per-element */
-
-/* Focused element and its ancestors stay full */
-[data-focus-dim] [data-focus-active],
-[data-focus-dim] section:has([data-focus-active]),
-[data-focus-dim] .card:has([data-focus-active]),
-[data-focus-dim] .btn:has([data-focus-active]),
-[data-focus-dim] figure:has([data-focus-active]),
-[data-focus-dim] a:has([data-focus-active]),
-[data-focus-dim] button:has([data-focus-active]),
-[data-focus-dim] *:has(> [data-focus-active]) {
-  opacity: 1 !important;
-  transition: opacity 0s;
+/* ── Focus Dim — single overlay, GSAP controls colour ── */
+.focus-dim-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  z-index: 1030;
+  pointer-events: none;
 }
 
 /* ── Focus Pulse — brief scale on focus arrive ── */
@@ -119,7 +103,7 @@
     0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color);
   opacity: 1;
   pointer-events: none;
-  z-index: 1;
+  z-index: 1036;
 }
 
 /* Fill only on buttons, links, form fields — NOT when rainbow active */
