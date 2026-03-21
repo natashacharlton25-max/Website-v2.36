@@ -427,28 +427,31 @@ const iconRight = iconPosition === 'right' && hasIcon;
           (el as HTMLElement).style.setProperty('--focus-angle', `${angle}deg`);
 
           // Set focus-color to current rainbow, highlight to complementary
-          const rainbowTokens = ['--rainbow-1', '--rainbow-2', '--rainbow-3', '--rainbow-4', '--rainbow-5', '--rainbow-6', '--rainbow-7'];
+          const rainbowBase = ['--rainbow-1', '--rainbow-2', '--rainbow-3', '--rainbow-4', '--rainbow-5', '--rainbow-6', '--rainbow-7'];
+          const rainbowWash = ['--rainbow-1-wash', '--rainbow-2-wash', '--rainbow-3-wash', '--rainbow-4-wash', '--rainbow-5-wash', '--rainbow-6-wash', '--rainbow-7-wash'];
+          const rainbowDark = ['--rainbow-1-dark', '--rainbow-2-dark', '--rainbow-3-dark', '--rainbow-4-dark', '--rainbow-5-dark', '--rainbow-6-dark', '--rainbow-7-dark'];
           const idx = initFocusHoverGate._rainbowIndex;
-          const complementIdx = (idx + 3) % 7; // opposite side of the rainbow
+          const complementIdx = (idx + 3) % 7;
           const styles = getComputedStyle(document.documentElement);
-          const currentColor = styles.getPropertyValue(rainbowTokens[idx]).trim();
-          const complementColor = styles.getPropertyValue(rainbowTokens[complementIdx]).trim();
-          if (currentColor) {
-            document.documentElement.style.setProperty('--focus-color', currentColor);
+          const ringColor = styles.getPropertyValue(rainbowDark[idx]).trim();    // dark for ring
+          const bgColor = styles.getPropertyValue(rainbowWash[idx]).trim();      // wash for page bg
+          const complementColor = styles.getPropertyValue(rainbowBase[complementIdx]).trim();
+          if (ringColor) {
+            document.documentElement.style.setProperty('--focus-color', ringColor);
           }
           if (complementColor) {
             document.documentElement.style.setProperty('--highlight-link-color', complementColor);
           }
-          // Tint page bg token + dim overlay colour
+          // Tint page bg with wash colour (light tint, ring stays visible)
           if (document.documentElement.hasAttribute('data-focus-dim')) {
-            if (currentColor) {
-              document.documentElement.style.setProperty('--page-bg', currentColor);
+            if (bgColor) {
+              document.documentElement.style.setProperty('--page-bg', bgColor);
             }
             const gsap = (window as any).gsap;
             const overlay = document.querySelector('.focus-dim-overlay');
-            if (gsap && overlay && currentColor) {
+            if (gsap && overlay && bgColor) {
               const probe = document.createElement('div');
-              probe.style.backgroundColor = currentColor;
+              probe.style.backgroundColor = bgColor;
               document.body.appendChild(probe);
               const rgb = getComputedStyle(probe).backgroundColor;
               probe.remove();
