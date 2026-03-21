@@ -24,6 +24,7 @@ export interface A11ySettings {
   focusScroll: boolean;
   focusPulse: boolean;
   focusLabel: boolean;
+  focusRainbow: boolean;
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
@@ -61,6 +62,7 @@ export const defaultSettings: A11ySettings = {
   focusScroll: false,
   focusPulse: false,
   focusLabel: false,
+  focusRainbow: false,
   screenReaderMode: false,
   scrollbarEnhanced: false,
   altTextMode: 'none',
@@ -242,6 +244,7 @@ export function applySettings(settings: A11ySettings): void {
   document.documentElement.toggleAttribute('data-focus-scroll', settings.focusScroll);
   document.documentElement.toggleAttribute('data-focus-pulse', settings.focusPulse);
   document.documentElement.toggleAttribute('data-focus-label', settings.focusLabel);
+  document.documentElement.toggleAttribute('data-focus-rainbow', settings.focusRainbow);
   target.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
   target.classList.toggle('a11y-scrollbar-enhanced', settings.scrollbarEnhanced);
 
@@ -446,7 +449,7 @@ export const presets: Record<string, Partial<A11ySettings>> = {
 // ===================================
 export function updateUI(container: HTMLElement, s: A11ySettings): void {
   // Toggle cards
-  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'screenReaderMode', 'scrollbarEnhanced'];
+  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'focusRainbow', 'screenReaderMode', 'scrollbarEnhanced'];
   toggleCardSettings.forEach(key => {
     const card = container.querySelector(`.a11y-toggle-card[data-setting="${key}"]`);
     if (card) {

@@ -419,6 +419,10 @@ const iconRight = iconPosition === 'right' && hasIcon;
       if (el && !el.closest('#a11y-page, #a11y-panel, .a11y-panel')) {
         el.setAttribute('data-focus-active', '');
         el.classList.add('focus-entering');
+        // Rainbow: random start angle for each focus
+        if (document.documentElement.hasAttribute('data-focus-rainbow')) {
+          (el as HTMLElement).style.setProperty('--focus-angle', `${Math.floor(Math.random() * 360)}deg`);
+        }
         el.addEventListener('animationend', () => {
           el.classList.remove('focus-entering');
         }, { once: true });

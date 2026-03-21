@@ -120,15 +120,16 @@
   z-index: 1;
 }
 
-/* Fill only on buttons, links, form fields */
-button[data-focus-active]::after,
-a[data-focus-active]::after,
-.btn[data-focus-active]::after,
-input[data-focus-active]::after,
-textarea[data-focus-active]::after,
-select[data-focus-active]::after {
+/* Fill only on buttons, links, form fields — NOT when rainbow active */
+html:not([data-focus-rainbow]) button[data-focus-active]::after,
+html:not([data-focus-rainbow]) a[data-focus-active]::after,
+html:not([data-focus-rainbow]) .btn[data-focus-active]::after,
+html:not([data-focus-rainbow]) input[data-focus-active]::after,
+html:not([data-focus-rainbow]) textarea[data-focus-active]::after,
+html:not([data-focus-rainbow]) select[data-focus-active]::after {
   background: color-mix(in oklch, var(--focus-color) 25%, transparent);
 }
+
 
 /* Fade in: starts invisible, transitions to visible */
 [data-focus-active].focus-entering::after {
@@ -193,6 +194,83 @@ select[data-focus-active]::after {
     0 0 0 calc(var(--focus-thickness) * 3) var(--focus-bg),
     0 0 0 calc(var(--focus-thickness) * 4) var(--highlight-link-color) !important;
 }
+
+/* ==========================================================
+   RAINBOW FOCUS — spinning gradient border (fun mode)
+   ========================================================== */
+
+@property --focus-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes focus-rainbow-spin {
+  to { --focus-angle: 360deg; }
+}
+
+[data-focus-rainbow] [data-focus-active]::after {
+  box-shadow: none;
+  background: conic-gradient(
+    from var(--focus-angle),
+    var(--rainbow-1) 0%,
+    var(--rainbow-2) 14%,
+    var(--rainbow-3) 28%,
+    var(--rainbow-4) 42%,
+    var(--rainbow-5) 57%,
+    var(--rainbow-6) 71%,
+    var(--rainbow-7) 85%,
+    var(--rainbow-1) 100%
+  );
+  inset: calc(-1 * var(--focus-thickness) * 3);
+  border-radius: var(--radius-lg);
+  /* Mask: cut out the centre to make it a border frame */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: calc(var(--focus-thickness) * 2);
+  opacity: 0.7;
+  animation: focus-rainbow-spin var(--rainbow-spin-speed, 3s) linear infinite;
+}
+
+/* Hover gate speeds for rainbow */
+/* Full: spinning + spread glow on ::before (::after is the rainbow border) */
+[data-focus-rainbow] [data-focus-active]::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--focus-thickness) * 3);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glow-spread);
+  pointer-events: none;
+  display: block !important;
+}
+
+/* Gentle: slow spin, no glow */
+[data-focus-rainbow] [data-hover="gentle"] [data-focus-active]::after {
+  --rainbow-spin-speed: 8s;
+}
+[data-focus-rainbow] [data-hover="gentle"] [data-focus-active]::before {
+  box-shadow: none;
+}
+
+/* Instant: static rainbow, no spin, no glow */
+[data-focus-rainbow] [data-hover="instant"] [data-focus-active]::after {
+  animation: none;
+}
+[data-focus-rainbow] [data-hover="instant"] [data-focus-active]::before {
+  box-shadow: none;
+}
+
+/* None: static rainbow, no spin, no glow */
+[data-focus-rainbow] [data-hover="none"] [data-focus-active]::after {
+  animation: none;
+}
+[data-focus-rainbow] [data-hover="none"] [data-focus-active]::before {
+  box-shadow: none;
+}
+
+
 
 @media (forced-colors: active) {
   [data-focus-active] {
