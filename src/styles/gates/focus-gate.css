@@ -16,6 +16,66 @@
   --focus-thickness: 0.2rem;
 }
 
+/* ==========================================================
+   ENHANCED FOCUS — extra features when data-enhanced-focus on
+   ========================================================== */
+
+/* ── Focus Scroll — centre focused element in viewport ── */
+[data-focus-scroll] a,
+[data-focus-scroll] button,
+[data-focus-scroll] input,
+[data-focus-scroll] textarea,
+[data-focus-scroll] select,
+[data-focus-scroll] [tabindex],
+[data-focus-scroll] [role="button"] {
+  scroll-margin: 40vh;
+}
+
+/* ── Focus Dim — overlay dims non-focused content ── */
+[data-focus-dim]:has([data-focus-active])::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: color-mix(in oklch, var(--page-bg-overlay) 70%, transparent);
+  z-index: 1030;
+  pointer-events: none;
+}
+
+/* ── Focus Pulse — brief scale on focus arrive ── */
+@keyframes focus-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+[data-focus-pulse] [data-focus-active] {
+  animation: focus-pulse var(--duration-base) ease-out;
+}
+
+
+/* Sticky focus label — shows element type near focus ring */
+.focus-label {
+  display: none;
+  position: absolute;
+  z-index: var(--z-modal);
+  padding: 2px var(--space-sm);
+  background: var(--focus-color);
+  color: var(--focus-bg);
+  font-family: var(--font-body);
+  font-size: var(--text-fine);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+
+/* ==========================================================
+   FOCUS RING — applies to all focused elements
+   ========================================================== */
+
 /* Focus state: ring + fill — overrides everything (except panel elements) */
 [data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card) {
   box-shadow:
@@ -27,7 +87,7 @@
   color: var(--neutral-800) !important;
   outline: none !important;
   position: relative;
-  z-index: var(--z-tooltip);
+  z-index: 1035;
   transform: none !important;
   filter: none !important;
   text-shadow: none !important;

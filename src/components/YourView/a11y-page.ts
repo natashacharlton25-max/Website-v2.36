@@ -291,6 +291,36 @@ function initHoverGateButtons(): void {
   });
 }
 
+// ── AAC Pictogram Filter buttons ──
+
+function initAacFilterButtons(): void {
+  const buttons = document.querySelectorAll<HTMLElement>('[data-set-aac-filter]');
+  let settings = getSettings();
+
+  // Set initial active state
+  const currentFilter = settings.aacFilter || 'none';
+  buttons.forEach(b => {
+    b.classList.toggle('btn--primary', b.dataset.setAacFilter === currentFilter);
+    b.classList.toggle('btn--outline', b.dataset.setAacFilter !== currentFilter);
+  });
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.setAacFilter || 'none';
+      settings = getSettings();
+      (settings as any).aacFilter = filter;
+      saveSettings(settings);
+      applySettings(settings);
+
+      // Update button states
+      buttons.forEach(b => {
+        b.classList.toggle('btn--primary', b.dataset.setAacFilter === filter);
+        b.classList.toggle('btn--outline', b.dataset.setAacFilter !== filter);
+      });
+    });
+  });
+}
+
 // ── My Presets — save/load/clear slots ──
 
 function initPresetSlots(): void {
@@ -356,6 +386,7 @@ function init(): void {
   initPage();
   initKeyboardDetection();
   initHoverGateButtons();
+  initAacFilterButtons();
   initPresetSlots();
 }
 

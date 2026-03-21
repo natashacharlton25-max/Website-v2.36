@@ -370,16 +370,66 @@ const iconRight = iconPosition === 'right' && hasIcon;
       lastKeyTime = Date.now();
     });
 
+    // Focus label element (created once, reused)
+    let focusLabel: HTMLElement | null = null;
+
+    function getFocusLabel(): HTMLElement {
+      if (!focusLabel) {
+        focusLabel = document.createElement('div');
+        focusLabel.className = 'focus-label';
+        focusLabel.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(focusLabel);
+      }
+      return focusLabel;
+    }
+
+    function getElementLabel(el: Element): string {
+      const tag = el.tagName.toLowerCase();
+      const role = el.getAttribute('role') || '';
+      const label = el.getAttribute('aria-label') || '';
+      const text = (el.textContent || '').trim().slice(0, 30);
+
+      if (label) return label;
+      if (tag === 'a') return text || 'Link';
+      if (tag === 'button' || role === 'button') return text || 'Button';
+      if (tag === 'input') return (el as HTMLInputElement).type || 'Input';
+      if (tag === 'figure') return 'Image';
+      return text || tag;
+    }
+
+    function showFocusLabel(el: Element) {
+      const label = getFocusLabel();
+      label.textContent = getElementLabel(el);
+      label.style.display = 'block';
+
+      const rect = el.getBoundingClientRect();
+      label.style.top = `${rect.top + window.scrollY - 28}px`;
+      label.style.left = `${rect.left + window.scrollX}px`;
+    }
+
+    function hideFocusLabel() {
+      if (focusLabel) focusLabel.style.display = 'none';
+    }
+
     document.addEventListener('focusin', (e) => {
       // Only activate if focus came from keyboard (within 100ms of a keypress)
       if (Date.now() - lastKeyTime > 100) return;
       const el = (e.target as HTMLElement).closest('[tabindex], button, a, [role="button"]');
-      if (el) el.setAttribute('data-focus-active', '');
+      if (el) {
+        el.setAttribute('data-focus-active', '');
+        if (document.documentElement.hasAttribute('data-focus-scroll')) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        if (document.documentElement.hasAttribute('data-focus-label')) {
+          showFocusLabel(el);
+        }
+      }
     });
 
     document.addEventListener('focusout', (e) => {
       const el = (e.target as HTMLElement).closest('[data-focus-active]');
       if (el) el.removeAttribute('data-focus-active');
+      hideFocusLabel();
     });
   }
   initFocusHoverGate();

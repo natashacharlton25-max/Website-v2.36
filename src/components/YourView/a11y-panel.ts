@@ -20,6 +20,10 @@ export interface A11ySettings {
   theme: string;
   reduceMotion: boolean;
   enhancedFocus: boolean;
+  focusDim: boolean;
+  focusScroll: boolean;
+  focusPulse: boolean;
+  focusLabel: boolean;
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
@@ -53,6 +57,10 @@ export const defaultSettings: A11ySettings = {
   theme: 'default',
   reduceMotion: false,
   enhancedFocus: false,
+  focusDim: false,
+  focusScroll: false,
+  focusPulse: false,
+  focusLabel: false,
   screenReaderMode: false,
   scrollbarEnhanced: false,
   altTextMode: 'none',
@@ -228,6 +236,12 @@ export function applySettings(settings: A11ySettings): void {
     document.documentElement.removeAttribute('data-enhanced-focus');
     document.documentElement.style.removeProperty('--focus-thickness');
   }
+
+  // Individual focus features
+  document.documentElement.toggleAttribute('data-focus-dim', settings.focusDim);
+  document.documentElement.toggleAttribute('data-focus-scroll', settings.focusScroll);
+  document.documentElement.toggleAttribute('data-focus-pulse', settings.focusPulse);
+  document.documentElement.toggleAttribute('data-focus-label', settings.focusLabel);
   target.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
   target.classList.toggle('a11y-scrollbar-enhanced', settings.scrollbarEnhanced);
 
@@ -432,7 +446,7 @@ export const presets: Record<string, Partial<A11ySettings>> = {
 // ===================================
 export function updateUI(container: HTMLElement, s: A11ySettings): void {
   // Toggle cards
-  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'screenReaderMode', 'scrollbarEnhanced'];
+  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'screenReaderMode', 'scrollbarEnhanced'];
   toggleCardSettings.forEach(key => {
     const card = container.querySelector(`.a11y-toggle-card[data-setting="${key}"]`);
     if (card) {
