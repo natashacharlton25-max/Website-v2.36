@@ -31,18 +31,27 @@
   scroll-margin: 40vh;
 }
 
-/* ── Focus Dim — overlay handled by JS (.focus-dim-overlay element) ── */
-.focus-dim-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: color-mix(in oklch, var(--page-bg-overlay) 70%, transparent);
-  z-index: 1030;
-  pointer-events: none;
+/* ── Focus Dim — dim non-focused, keep focused at full opacity ── */
+[data-focus-dim]:has([data-focus-active]) section,
+[data-focus-dim]:has([data-focus-active]) .card,
+[data-focus-dim]:has([data-focus-active]) .btn,
+[data-focus-dim]:has([data-focus-active]) figure,
+[data-focus-dim]:has([data-focus-active]) a,
+[data-focus-dim]:has([data-focus-active]) button {
+  opacity: 0.15;
 }
 
-.focus-dim-overlay.is-active {
-  display: block;
+/* Focused element and its ancestors stay full */
+[data-focus-dim] [data-focus-active],
+[data-focus-dim] section:has([data-focus-active]),
+[data-focus-dim] .card:has([data-focus-active]),
+[data-focus-dim] .btn:has([data-focus-active]),
+[data-focus-dim] figure:has([data-focus-active]),
+[data-focus-dim] a:has([data-focus-active]),
+[data-focus-dim] button:has([data-focus-active]),
+[data-focus-dim] *:has(> [data-focus-active]) {
+  opacity: 1 !important;
+  transition: opacity 0s;
 }
 
 /* ── Focus Pulse — brief scale on focus arrive ── */
@@ -80,49 +89,80 @@
    FOCUS RING — applies to all focused elements
    ========================================================== */
 
-/* Focus state: ring + fill — overrides everything (except panel elements) */
+/* Focus state: strip effects — ring + fill handled by ::after pseudo */
 [data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card) {
-  box-shadow:
-    0 0 0 var(--focus-thickness) var(--focus-bg),
-    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color) !important;
+  box-shadow: none !important;
   border-radius: 0 !important;
   border-color: transparent !important;
-  background: color-mix(in oklch, var(--focus-color) 25%, transparent) !important;
   color: var(--neutral-800) !important;
   outline: none !important;
-  position: relative;
-  z-index: 1035;
+  position: relative !important;
+  z-index: 1035 !important;
   transform: none !important;
   filter: none !important;
   text-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   transition: none !important;
-  animation: none !important;
 }
 
-/* Kill pseudo-element effects on focused elements + wrapper glows */
+/* Focus ring as pseudo-element — animatable independently */
+[data-focus-active]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color);
+  opacity: 1;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Fill only on buttons, links, form fields */
+button[data-focus-active]::after,
+a[data-focus-active]::after,
+.btn[data-focus-active]::after,
+input[data-focus-active]::after,
+textarea[data-focus-active]::after,
+select[data-focus-active]::after {
+  background: color-mix(in oklch, var(--focus-color) 25%, transparent);
+}
+
+/* Fade in: starts invisible, transitions to visible */
+[data-focus-active].focus-entering::after {
+  animation: focus-ring-in var(--focus-animation-speed, 0s) ease-out;
+}
+
+@keyframes focus-ring-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Kill OTHER pseudo-element effects (not our ring) on focused elements */
 [data-focus-active]::before,
-[data-focus-active]::after,
 .btn-rainbow-glow-wrap:has([data-focus-active])::before,
 .btn-rainbow-glow-wrap:has([data-focus-active])::after {
   display: none !important;
 }
 
-/* Focused + hovered: fill shifts to Success */
-[data-focus-active]:hover {
+/* Focused + hovered: ring + fill shift to Success */
+[data-focus-active]:hover::after {
+  background: color-mix(in oklch, var(--color-Success) 25%, transparent);
   box-shadow:
     0 0 0 var(--focus-thickness) var(--focus-bg),
-    0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success) !important;
-  background: color-mix(in oklch, var(--color-Success) 25%, transparent) !important;
-  color: var(--neutral-800) !important;
+    0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success);
 }
 
-/* Hover none: no colour shift on hover */
-[data-hover="none"] [data-focus-active]:hover {
+/* Hover none: no colour shift */
+[data-hover="none"] [data-focus-active]:hover::after {
   box-shadow:
     0 0 0 var(--focus-thickness) var(--focus-bg),
-    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color) !important;
+    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color);
+}
+
+[data-hover="none"] [data-focus-active]:hover {
   background: color-mix(in oklch, var(--focus-color) 25%, transparent) !important;
 }
 

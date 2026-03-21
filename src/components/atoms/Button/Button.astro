@@ -411,38 +411,18 @@ const iconRight = iconPosition === 'right' && hasIcon;
       if (focusLabel) focusLabel.style.display = 'none';
     }
 
-    // Dim overlay element
-    let dimOverlay: HTMLElement | null = null;
-
-    function getDimOverlay(): HTMLElement {
-      if (!dimOverlay) {
-        dimOverlay = document.createElement('div');
-        dimOverlay.className = 'focus-dim-overlay';
-        dimOverlay.setAttribute('aria-hidden', 'true');
-        document.body.appendChild(dimOverlay);
-      }
-      return dimOverlay;
-    }
-
-    function showDimOverlay() {
-      getDimOverlay().classList.add('is-active');
-    }
-
-    function hideDimOverlay() {
-      if (dimOverlay) dimOverlay.classList.remove('is-active');
-    }
-
     document.addEventListener('focusin', (e) => {
       // Only activate if focus came from keyboard (within 100ms of a keypress)
       if (Date.now() - lastKeyTime > 100) return;
       const el = (e.target as HTMLElement).closest('[tabindex], button, a, [role="button"]');
       if (el) {
         el.setAttribute('data-focus-active', '');
+        el.classList.add('focus-entering');
+        el.addEventListener('animationend', () => {
+          el.classList.remove('focus-entering');
+        }, { once: true });
         if (document.documentElement.hasAttribute('data-focus-scroll')) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        if (document.documentElement.hasAttribute('data-focus-dim')) {
-          showDimOverlay();
         }
         if (document.documentElement.hasAttribute('data-focus-label')) {
           showFocusLabel(el);
@@ -451,9 +431,14 @@ const iconRight = iconPosition === 'right' && hasIcon;
     });
 
     document.addEventListener('focusout', (e) => {
-      const el = (e.target as HTMLElement).closest('[data-focus-active]');
-      hideDimOverlay();
-      if (el) el.removeAttribute('data-focus-active');
+      const el = (e.target as HTMLElement).closest('[data-focus-active]') as HTMLElement | null;
+      if (el) {
+        // Always instant out
+        el.style.transition = 'none';
+        el.classList.remove('focus-entering');
+        el.removeAttribute('data-focus-active');
+        requestAnimationFrame(() => { el.style.transition = ''; });
+      }
       hideFocusLabel();
     });
   }
