@@ -447,6 +447,44 @@ const iconRight = iconPosition === 'right' && hasIcon;
         if (document.documentElement.hasAttribute('data-focus-label')) {
           showFocusLabel(el);
         }
+        // Focus colour journey: three synchronised tweens
+        const section = el.closest('[data-scroll-bg]');
+        if (section) {
+          const rawBg = (section as HTMLElement).dataset.scrollBg || '';
+          // Resolve var(--token) to computed hex
+          const probe = document.createElement('div');
+          probe.style.color = rawBg;
+          document.body.appendChild(probe);
+          const resolved = getComputedStyle(probe).color;
+          probe.remove();
+
+          const gsap = (window as any).gsap;
+          if (gsap && resolved) {
+            // 1. Page background morphs to section colour
+            const wrapper = document.getElementById('a11y-content-wrapper');
+            if (wrapper) {
+              gsap.to(wrapper, {
+                backgroundColor: resolved,
+                duration: 0.6,
+                ease: 'power2.out',
+              });
+            }
+
+            // 2. Focus ring adapts to section colour
+            gsap.to(document.documentElement, {
+              '--focus-color': resolved,
+              duration: 0.4,
+              ease: 'power2.out',
+            });
+
+            // 3. Glow adapts
+            gsap.to(document.documentElement, {
+              '--glow-spread': `0 0 30px ${resolved}, 0 0 60px ${resolved}`,
+              duration: 0.5,
+              ease: 'power2.out',
+            });
+          }
+        }
       }
     });
 
