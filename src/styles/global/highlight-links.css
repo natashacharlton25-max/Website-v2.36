@@ -110,7 +110,30 @@
   background: transparent;
 }
 
-/* ── Focus + highlight — focus-gate.css handles via data-focus-active !important ── */
+/* ── Focus overrides highlight — focus wins completely ── */
+[data-highlight-links] [data-focus-active] {
+  outline: none !important;
+  background: color-mix(in oklch, var(--focus-color) 25%, transparent) !important;
+  border-color: transparent !important;
+  overflow: visible !important;
+}
+
+[data-highlight-links] [data-focus-active]::after {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color) !important;
+}
+
+[data-highlight-links] [data-focus-active]:hover {
+  background: color-mix(in oklch, var(--color-Success) 25%, transparent) !important;
+  outline: none !important;
+}
+
+[data-highlight-links] [data-focus-active]:hover::after {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success) !important;
+}
 
 /* Focused + hovered in highlight mode: shift to Success, everything persists */
 [data-highlight-links] button:focus-visible:hover,
