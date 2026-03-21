@@ -83,13 +83,24 @@ function initFocusSystem() {
 
         const rainbowBase = ['--rainbow-1', '--rainbow-2', '--rainbow-3', '--rainbow-4', '--rainbow-5', '--rainbow-6', '--rainbow-7'];
         const rainbowWash = ['--rainbow-1-wash', '--rainbow-2-wash', '--rainbow-3-wash', '--rainbow-4-wash', '--rainbow-5-wash', '--rainbow-6-wash', '--rainbow-7-wash'];
+        const rainbowLight = ['--rainbow-1-light', '--rainbow-2-light', '--rainbow-3-light', '--rainbow-4-light', '--rainbow-5-light', '--rainbow-6-light', '--rainbow-7-light'];
+        const rainbowDark = ['--rainbow-1-dark', '--rainbow-2-dark', '--rainbow-3-dark', '--rainbow-4-dark', '--rainbow-5-dark', '--rainbow-6-dark', '--rainbow-7-dark'];
         const idx = _rainbowIndex;
         const complementIdx = (idx + 3) % 7;
-        // Read from body — dark/CVD tokens are set on body via data-mode/data-cvd
+
+        // Mode-aware token selection
+        const isDark = document.body.dataset.mode === 'dark';
+        const isHC = document.documentElement.hasAttribute('data-high-contrast');
         const styles = getComputedStyle(document.body);
-        const ringColor = styles.getPropertyValue(rainbowBase[idx]).trim();
-        const bgColor = styles.getPropertyValue(rainbowWash[idx]).trim();
-        const complementColor = styles.getPropertyValue(rainbowBase[complementIdx]).trim();
+
+        // Ring: HC uses light (bright on dark bg), dark uses dark, light uses base
+        const ringTokens = isHC ? rainbowLight : (isDark ? rainbowDark : rainbowBase);
+        // Bg: always wash (flips automatically in dark mode CSS)
+        const bgTokens = rainbowWash;
+
+        const ringColor = styles.getPropertyValue(ringTokens[idx]).trim();
+        const bgColor = styles.getPropertyValue(bgTokens[idx]).trim();
+        const complementColor = styles.getPropertyValue(ringTokens[complementIdx]).trim();
 
         if (ringColor) {
           document.documentElement.style.setProperty('--focus-color', ringColor);
