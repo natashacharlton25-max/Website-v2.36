@@ -419,9 +419,19 @@ const iconRight = iconPosition === 'right' && hasIcon;
       if (el && !el.closest('#a11y-page, #a11y-panel, .a11y-panel')) {
         el.setAttribute('data-focus-active', '');
         el.classList.add('focus-entering');
-        // Rainbow: random start angle for each focus
+        // Rainbow: cycle through colours on each tab
         if (document.documentElement.hasAttribute('data-focus-rainbow')) {
-          (el as HTMLElement).style.setProperty('--focus-angle', `${Math.floor(Math.random() * 360)}deg`);
+          if (!initFocusHoverGate._rainbowIndex) initFocusHoverGate._rainbowIndex = 0;
+          initFocusHoverGate._rainbowIndex = (initFocusHoverGate._rainbowIndex + 1) % 7;
+          const angle = initFocusHoverGate._rainbowIndex * (360 / 7);
+          (el as HTMLElement).style.setProperty('--focus-angle', `${angle}deg`);
+
+          // Also set focus-color to the current rainbow colour for ring/fill
+          const rainbowTokens = ['--rainbow-1', '--rainbow-2', '--rainbow-3', '--rainbow-4', '--rainbow-5', '--rainbow-6', '--rainbow-7'];
+          const currentRainbow = getComputedStyle(document.documentElement).getPropertyValue(rainbowTokens[initFocusHoverGate._rainbowIndex]).trim();
+          if (currentRainbow) {
+            document.documentElement.style.setProperty('--focus-color', currentRainbow);
+          }
         }
         el.addEventListener('animationend', () => {
           el.classList.remove('focus-entering');
