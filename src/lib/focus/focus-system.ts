@@ -94,7 +94,7 @@ function initFocusSystem() {
         if (ringColor) {
           document.documentElement.style.setProperty('--focus-color', ringColor);
         }
-        if (complementColor) {
+        if (complementColor && document.documentElement.hasAttribute('data-rainbow-highlight')) {
           document.documentElement.style.setProperty('--highlight-link-color', complementColor);
         }
 
