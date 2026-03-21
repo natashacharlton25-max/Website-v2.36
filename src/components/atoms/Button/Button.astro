@@ -415,14 +415,30 @@ const iconRight = iconPosition === 'right' && hasIcon;
       // Only activate if focus came from keyboard (within 100ms of a keypress)
       if (Date.now() - lastKeyTime > 100) return;
       const el = (e.target as HTMLElement).closest('[tabindex], button, a, [role="button"]');
-      if (el) {
+      // Don't activate focus system on a11y panel/page controls
+      if (el && !el.closest('#a11y-page, #a11y-panel, .a11y-panel')) {
         el.setAttribute('data-focus-active', '');
         el.classList.add('focus-entering');
         el.addEventListener('animationend', () => {
           el.classList.remove('focus-entering');
         }, { once: true });
         if (document.documentElement.hasAttribute('data-focus-scroll')) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const osViewport = document.querySelector('[data-overlayscrollbars-viewport]');
+          const scroller = osViewport || document.documentElement;
+          const rect = el.getBoundingClientRect();
+          const scrollerRect = scroller.getBoundingClientRect();
+          const targetY = scroller.scrollTop + rect.top - scrollerRect.top - (scrollerRect.height / 2) + (rect.height / 2);
+
+          const gsap = (window as any).gsap;
+          if (gsap) {
+            gsap.to(scroller, {
+              scrollTop: targetY,
+              duration: 0.35,
+              ease: 'power3.out',
+            });
+          } else {
+            scroller.scrollTo({ top: targetY, behavior: 'smooth' });
+          }
         }
         if (document.documentElement.hasAttribute('data-focus-label')) {
           showFocusLabel(el);
