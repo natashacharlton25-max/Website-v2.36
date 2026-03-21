@@ -433,7 +433,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
           const idx = initFocusHoverGate._rainbowIndex;
           const complementIdx = (idx + 3) % 7;
           const styles = getComputedStyle(document.documentElement);
-          const ringColor = styles.getPropertyValue(rainbowDark[idx]).trim();    // dark for ring
+          const ringColor = styles.getPropertyValue(rainbowBase[idx]).trim();    // base for ring
           const bgColor = styles.getPropertyValue(rainbowWash[idx]).trim();      // wash for page bg
           const complementColor = styles.getPropertyValue(rainbowBase[complementIdx]).trim();
           if (ringColor) {
@@ -450,19 +450,11 @@ const iconRight = iconPosition === 'right' && hasIcon;
             const gsap = (window as any).gsap;
             const overlay = document.querySelector('.focus-dim-overlay');
             if (gsap && overlay && bgColor) {
-              const probe = document.createElement('div');
-              probe.style.backgroundColor = bgColor;
-              document.body.appendChild(probe);
-              const rgb = getComputedStyle(probe).backgroundColor;
-              probe.remove();
-              const match = rgb.match(/(\d+),\s*(\d+),\s*(\d+)/);
-              if (match) {
-                gsap.to(overlay, {
-                  backgroundColor: `rgba(${match[1]}, ${match[2]}, ${match[3]}, 0.35)`,
-                  duration: 0.3,
-                  ease: 'power2.out',
-                });
-              }
+              gsap.to(overlay, {
+                backgroundColor: bgColor,
+                duration: 0.3,
+                ease: 'power2.out',
+              });
             }
           }
         }
