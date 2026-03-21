@@ -434,7 +434,8 @@ const iconRight = iconPosition === 'right' && hasIcon;
           const rainbowDark = ['--rainbow-1-dark', '--rainbow-2-dark', '--rainbow-3-dark', '--rainbow-4-dark', '--rainbow-5-dark', '--rainbow-6-dark', '--rainbow-7-dark'];
           const idx = initFocusHoverGate._rainbowIndex;
           const complementIdx = (idx + 3) % 7;
-          const styles = getComputedStyle(document.documentElement);
+          // Read from body — dark/CVD tokens are set on body via data-mode/data-cvd
+          const styles = getComputedStyle(document.body);
           const ringColor = styles.getPropertyValue(rainbowBase[idx]).trim();    // base for ring
           const bgColor = styles.getPropertyValue(rainbowWash[idx]).trim();      // wash for page bg
           const complementColor = styles.getPropertyValue(rainbowBase[complementIdx]).trim();
