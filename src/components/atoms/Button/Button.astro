@@ -426,11 +426,18 @@ const iconRight = iconPosition === 'right' && hasIcon;
           const angle = initFocusHoverGate._rainbowIndex * (360 / 7);
           (el as HTMLElement).style.setProperty('--focus-angle', `${angle}deg`);
 
-          // Also set focus-color to the current rainbow colour for ring/fill
+          // Set focus-color to current rainbow, highlight to complementary
           const rainbowTokens = ['--rainbow-1', '--rainbow-2', '--rainbow-3', '--rainbow-4', '--rainbow-5', '--rainbow-6', '--rainbow-7'];
-          const currentRainbow = getComputedStyle(document.documentElement).getPropertyValue(rainbowTokens[initFocusHoverGate._rainbowIndex]).trim();
-          if (currentRainbow) {
-            document.documentElement.style.setProperty('--focus-color', currentRainbow);
+          const idx = initFocusHoverGate._rainbowIndex;
+          const complementIdx = (idx + 3) % 7; // opposite side of the rainbow
+          const styles = getComputedStyle(document.documentElement);
+          const currentColor = styles.getPropertyValue(rainbowTokens[idx]).trim();
+          const complementColor = styles.getPropertyValue(rainbowTokens[complementIdx]).trim();
+          if (currentColor) {
+            document.documentElement.style.setProperty('--focus-color', currentColor);
+          }
+          if (complementColor) {
+            document.documentElement.style.setProperty('--highlight-link-color', complementColor);
           }
         }
         el.addEventListener('animationend', () => {
