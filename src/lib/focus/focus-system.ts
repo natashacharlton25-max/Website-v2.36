@@ -109,17 +109,19 @@ function initFocusSystem() {
           document.documentElement.style.setProperty('--highlight-link-color', complementColor);
         }
 
-        // Tint page bg + overlay with rainbow
+        // Rainbow page bg — always when rainbow is on
+        if (bgColor) {
+          document.documentElement.style.setProperty('--page-bg', bgColor);
+        }
+
+        // Dim overlay — only when focus-dim is also on
         if (document.documentElement.hasAttribute('data-focus-dim')) {
-          if (bgColor) {
-            document.documentElement.style.setProperty('--page-bg', bgColor);
-            const overlay = document.querySelector('.focus-dim-overlay') as HTMLElement;
-            if (overlay) {
-              const baseColor = styles.getPropertyValue(rainbowBase[idx]).trim();
-              overlay.style.transition = 'background-color 0.3s ease-out';
-              overlay.style.backgroundColor = baseColor;
-              overlay.style.opacity = '0.25';
-            }
+          const overlay = document.querySelector('.focus-dim-overlay') as HTMLElement;
+          if (overlay) {
+            const baseColor = styles.getPropertyValue(rainbowBase[idx]).trim();
+            overlay.style.transition = 'background-color 0.3s ease-out';
+            overlay.style.backgroundColor = baseColor;
+            overlay.style.opacity = '0.25';
           }
         }
       }
@@ -188,9 +190,12 @@ function initFocusSystem() {
       el.removeAttribute('data-focus-active');
       requestAnimationFrame(() => { el.style.transition = ''; });
     }
-    // Reset page bg + overlay
-    if (document.documentElement.hasAttribute('data-focus-dim')) {
+    // Reset page bg (rainbow or dim)
+    if (document.documentElement.hasAttribute('data-focus-rainbow') || document.documentElement.hasAttribute('data-focus-dim')) {
       document.documentElement.style.removeProperty('--page-bg');
+    }
+    // Reset overlay
+    if (document.documentElement.hasAttribute('data-focus-dim')) {
       const overlay = document.querySelector('.focus-dim-overlay') as HTMLElement;
       if (overlay) {
         overlay.style.transition = 'background-color 0.2s ease-out, opacity 0.2s ease-out';
