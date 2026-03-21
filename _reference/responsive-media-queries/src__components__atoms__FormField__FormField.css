@@ -1,0 +1,877 @@
+/**
+ * FormField — css
+ *
+ * Covers: text, email, textarea, checkbox, radio, toggle, search, select,
+ *         number, tel, url, password, card-select
+ * Label, description, error render through Text atom.
+ * Card-select renders choices as pictogram/text cards with hidden native inputs.
+ *
+ * Token system (all bridge via --field-* → --_field-*):
+ *   --_field-brand / -dark / -light      colour (variant-swapped)
+ *   --_field-bg / -text / -label         surface + text
+ *   --_field-placeholder / -error        states
+ *   --_field-control-mark                tick/dot colour
+ *   --_field-border                      border colour
+ *   --_field-glass-bg / -blur / -border  glass variant
+ *   --_field-shadow                      neumorphic/glass/toggle
+ *   --_field-control-size                checkbox/radio size
+ *   --_field-toggle-w / -h / -thumb-size toggle dims
+ *
+ * Colour variants swap brand tokens: primary (default), secondary, neutral
+ * Style variants: outlined (default), filled, underlined, glass, neumorphic, glow
+ * High contrast + dark mode: zone files (high-contrast.css, theme-luminance-dark.css)
+ */
+
+/* ==========================================================
+   BASE + TOKENS
+   ========================================================== */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+
+  /* Colour tokens — default = primary */
+  --_field-brand: var(--field-focus, var(--primary-600));
+  --_field-brand-dark: var(--field-focus-dark, var(--primary-800));
+  --_field-brand-light: var(--field-focus-light, var(--primary-200));
+
+  /* Surface / text tokens */
+  --_field-bg: var(--field-bg, var(--page-bg-raised));
+  --_field-text: var(--field-text, var(--neutral-800));
+  --_field-label: var(--field-label, var(--neutral-800));
+  --_field-placeholder: var(--field-placeholder, var(--neutral-400));
+  --_field-error: var(--field-error, var(--color-Error));
+  --_field-control-mark: var(--field-control-mark, var(--color-White));
+
+  /* Border / contrast token */
+  --_field-border: var(--field-border, var(--neutral-400));
+
+  /* Glass tokens — only consumed by .form-field--glass */
+  --_field-glass-bg: var(--field-glass-bg, var(--glass-bg));
+  --_field-glass-blur: var(--field-glass-blur, var(--glass-blur));
+  --_field-glass-border: var(--field-glass-border, var(--glass-border));
+
+  /* Shadow token — consumed by neumorphic, glass, toggle */
+  --_field-shadow: var(--field-shadow, var(--shadow-neu-raised));
+
+  /* Control size tokens */
+  --_field-control-size: 22px;
+  --_field-toggle-w: 44px;
+  --_field-toggle-h: 24px;
+  --_field-thumb-size: 18px;
+}
+
+/* ==========================================================
+   COLOUR VARIANTS
+   ========================================================== */
+.form-field--secondary {
+  --_field-brand: var(--field-focus, var(--secondary-600));
+  --_field-brand-dark: var(--field-focus-dark, var(--secondary-800));
+  --_field-brand-light: var(--field-focus-light, var(--secondary-200));
+}
+
+.form-field--neutral {
+  --_field-brand: var(--field-focus, var(--neutral-700));
+  --_field-brand-dark: var(--field-focus-dark, var(--neutral-900));
+  --_field-brand-light: var(--field-focus-light, var(--neutral-400));
+}
+
+/* High contrast + dark mode rules live in zone files:
+   src/styles/zones/high-contrast.css
+   src/styles/zones/theme-luminance-dark.css */
+
+/* ==========================================================
+   LABEL
+   ========================================================== */
+.form-field__label {
+  font-weight: var(--font-semibold);
+  color: var(--_field-label);
+}
+
+.form-field__required {
+  color: var(--_field-error);
+  margin-left: 2px;
+}
+
+.form-field__desc {
+  color: var(--_field-placeholder);
+}
+
+/* ==========================================================
+   INPUT / TEXTAREA / SELECT — SHARED (outlined = default)
+   ========================================================== */
+.form-field__input {
+  padding: var(--space-sm) var(--space-md);
+  border: var(--border-width-2) solid var(--_field-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  background: var(--_field-bg);
+  color: var(--_field-text);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  width: 100%;
+}
+
+.form-field__input::placeholder {
+  color: var(--_field-placeholder);
+  opacity: 0.6;
+}
+
+.form-field__input:focus {
+  outline: 2px solid transparent; /* visible in Windows High Contrast / forced-colours mode */
+  border-color: var(--_field-brand);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--_field-brand) 15%, transparent);
+}
+
+.form-field__input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: color-mix(in oklch, var(--_field-bg) 90%, var(--_field-border));
+}
+
+/* ---- Textarea ---- */
+.form-field__input--textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ---- Select ---- */
+/* Select arrow — hardcoded fill colour in data URI SVG.
+   CSS custom properties don't work inside url() data URIs.
+   #6b6b6b is mid-grey, works on light and dark backgrounds.
+   Dark theme should override entire background-image if needed. */
+.form-field__input--select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b6b6b' viewBox='0 0 256 256'%3E%3Cpath d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-sm) center;
+  padding-right: var(--space-2xl);
+}
+
+/* ==========================================================
+   STYLE VARIANT: FILLED
+   ========================================================== */
+.form-field--filled .form-field__input {
+  background: color-mix(in oklch, var(--_field-brand) 8%, var(--_field-bg));
+  border-color: transparent;
+}
+
+.form-field--filled .form-field__input:focus {
+  border-color: var(--_field-brand);
+  background: color-mix(in oklch, var(--_field-brand) 4%, var(--_field-bg));
+}
+
+/* ==========================================================
+   STYLE VARIANT: UNDERLINED
+   ========================================================== */
+.form-field--underlined .form-field__input {
+  border: none;
+  border-bottom: 2px solid var(--_field-border);
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+  background: transparent;
+}
+
+.form-field--underlined .form-field__input:focus {
+  border-bottom-color: var(--_field-brand);
+  box-shadow: none;
+}
+
+.form-field--underlined .form-field__input--select {
+  padding-right: var(--space-2xl);
+}
+
+/* ==========================================================
+   STYLE VARIANT: GLASS
+   ========================================================== */
+.form-field--glass .form-field__input {
+  background: var(--_field-glass-bg);
+  backdrop-filter: var(--_field-glass-blur);
+  -webkit-backdrop-filter: var(--_field-glass-blur);
+  border: 1px solid var(--_field-glass-border);
+  color: var(--_field-text);
+  box-shadow: var(--_field-shadow);
+}
+
+.form-field--glass .form-field__input:focus {
+  border-color: var(--_field-brand);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--_field-brand) 15%, transparent);
+}
+
+/* ==========================================================
+   STYLE VARIANT: NEUMORPHIC
+   ========================================================== */
+.form-field--neumorphic .form-field__input {
+  border: none;
+  background: var(--_field-bg);
+  box-shadow: var(--_field-shadow);
+}
+
+.form-field--neumorphic .form-field__input:focus {
+  box-shadow: var(--_field-shadow);
+  border-color: transparent;
+  outline: 2px solid var(--_field-brand);
+  outline-offset: 2px;
+}
+
+/* ==========================================================
+   STYLE VARIANT: GLOW
+   ========================================================== */
+.form-field--glow .form-field__input:focus {
+  box-shadow:
+    0 4px 16px color-mix(in oklch, var(--_field-brand) 50%, transparent),
+    0 0 30px color-mix(in oklch, var(--_field-brand) 20%, transparent);
+}
+
+/* ==========================================================
+   BARE — no wrapper chrome, for embedding inside other components
+   ========================================================== */
+.form-field--bare {
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  min-height: 0;
+}
+
+/* ==========================================================
+   CHECKBOX
+   ========================================================== */
+.form-field--checkbox {
+  flex-direction: row;
+}
+
+.form-field__checkbox-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.form-field__checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.form-field__checkmark {
+  width: var(--_field-control-size);
+  height: var(--_field-control-size);
+  flex-shrink: 0;
+  border: var(--border-width-2) solid var(--_field-border);
+  border-radius: var(--radius-sm);
+  background: var(--_field-bg);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+}
+
+/* Checkmark tick — positioned relative to control size */
+.form-field__checkmark::after {
+  content: '';
+  position: absolute;
+  display: none;
+  left: calc(var(--_field-control-size) * 0.32);
+  top: calc(var(--_field-control-size) * 0.12);
+  width: calc(var(--_field-control-size) * 0.23);
+  height: calc(var(--_field-control-size) * 0.46);
+  border: solid var(--_field-control-mark);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.form-field__checkbox:checked + .form-field__checkmark {
+  background: var(--_field-brand);
+  border-color: var(--_field-brand);
+}
+
+.form-field__checkbox:checked + .form-field__checkmark::after {
+  display: block;
+}
+
+.form-field__checkbox:focus-visible + .form-field__checkmark {
+  outline: 2px solid var(--_field-brand);
+  outline-offset: 2px;
+}
+
+.form-field__checkbox:disabled + .form-field__checkmark {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-field__label-text {
+  color: var(--_field-label);
+}
+
+/* ==========================================================
+   RADIO
+   ========================================================== */
+.form-field--radio {
+  flex-direction: row;
+}
+
+.form-field__radio-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.form-field__radio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.form-field__radio-indicator {
+  width: var(--_field-control-size);
+  height: var(--_field-control-size);
+  flex-shrink: 0;
+  border: var(--border-width-2) solid var(--_field-border);
+  border-radius: 50%;
+  background: var(--_field-bg);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+}
+
+/* Radio dot — sized relative to control */
+.form-field__radio-indicator::after {
+  content: '';
+  position: absolute;
+  display: none;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--_field-control-size) * 0.45);
+  height: calc(var(--_field-control-size) * 0.45);
+  border-radius: 50%;
+  background: var(--_field-control-mark);
+  transform: translate(-50%, -50%);
+}
+
+.form-field__radio:checked + .form-field__radio-indicator {
+  background: var(--_field-brand);
+  border-color: var(--_field-brand);
+}
+
+.form-field__radio:checked + .form-field__radio-indicator::after {
+  display: block;
+}
+
+.form-field__radio:focus-visible + .form-field__radio-indicator {
+  outline: 2px solid var(--_field-brand);
+  outline-offset: 2px;
+}
+
+.form-field__radio:disabled + .form-field__radio-indicator {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==========================================================
+   TOGGLE
+   ========================================================== */
+.form-field--toggle {
+  flex-direction: row;
+}
+
+.form-field__toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.form-field__toggle {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.form-field__toggle-track {
+  width: var(--_field-toggle-w);
+  height: var(--_field-toggle-h);
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--_field-border);
+  cursor: pointer;
+  transition: all var(--hover-duration-fast) ease-out;
+  position: relative;
+  display: block;
+}
+
+.form-field__toggle-thumb {
+  position: absolute;
+  width: var(--_field-thumb-size);
+  height: var(--_field-thumb-size);
+  left: calc(50% - var(--_field-thumb-size) / 2 - (var(--_field-toggle-w) - var(--_field-toggle-h)) / 2);
+  top: calc(50% - var(--_field-thumb-size) / 2);
+  border-radius: 50%;
+  background: var(--_field-control-mark);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all var(--hover-duration-fast) ease-out;
+}
+
+.form-field__toggle:checked + .form-field__toggle-track {
+  background: var(--_field-brand);
+}
+
+.form-field__toggle:checked + .form-field__toggle-track .form-field__toggle-thumb {
+  left: calc(50% - var(--_field-thumb-size) / 2 + (var(--_field-toggle-w) - var(--_field-toggle-h)) / 2);
+}
+
+.form-field__toggle:focus-visible + .form-field__toggle-track {
+  outline: 2px solid var(--_field-brand);
+  outline-offset: 2px;
+}
+
+.form-field__toggle:disabled + .form-field__toggle-track {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ==========================================================
+   ERROR STATE
+   ========================================================== */
+.form-field--error .form-field__input {
+  border-color: var(--_field-error);
+}
+
+.form-field--error .form-field__input:focus {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--_field-error) 15%, transparent);
+}
+
+.form-field--error .form-field__checkmark {
+  border-color: var(--_field-error);
+}
+
+.form-field--error .form-field__radio-indicator {
+  border-color: var(--_field-error);
+}
+
+.form-field--error .form-field__toggle-track {
+  outline: 2px solid var(--_field-error);
+  outline-offset: 2px;
+}
+
+.form-field__error {
+  color: var(--_field-error);
+  font-weight: var(--font-medium);
+}
+
+/* ==========================================================
+   DISABLED STATE
+   ========================================================== */
+.form-field--disabled {
+  pointer-events: none;
+}
+
+/* ==========================================================
+   CARD-SELECT — tappable pictogram/text cards
+   For reflective inputs (emotions, ratings, choices).
+   Hidden radio/checkbox provides native form behaviour.
+   ========================================================== */
+
+.form-field__card-grid {
+  display: grid;
+  gap: var(--space-md);
+}
+
+/* Column variants */
+.form-field--card-cols-2 .form-field__card-grid { grid-template-columns: repeat(2, 1fr); }
+.form-field--card-cols-3 .form-field__card-grid { grid-template-columns: repeat(3, 1fr); }
+.form-field--card-cols-4 .form-field__card-grid { grid-template-columns: repeat(4, 1fr); }
+
+/* Stack on small screens */
+@media (max-width: 480px) {
+  .form-field--card-cols-3 .form-field__card-grid,
+  .form-field--card-cols-4 .form-field__card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 300px) {
+  .form-field--card-cols-2 .form-field__card-grid,
+  .form-field--card-cols-3 .form-field__card-grid,
+  .form-field--card-cols-4 .form-field__card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-field__card {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Hidden native input */
+.form-field__card-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Visual card face */
+.form-field__card-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  border: var(--border-width-2) solid var(--_field-border);
+  border-radius: var(--radius-lg);
+  background: var(--_field-bg);
+  text-align: center;
+  transition: border-color var(--hover-duration-fast), background-color var(--hover-duration-fast);
+  position: relative;
+}
+
+/* Hover */
+.form-field__card-face:hover {
+  border-color: var(--_field-brand);
+  background: var(--_field-brand-light);
+}
+
+/* ── Hover gate: none — card stays static, only check indicator changes ── */
+[data-hover="none"] .form-field__card-face {
+  transition: none;
+}
+
+[data-hover="none"] .form-field__card-face:hover {
+  border-color: var(--_card-select-border, var(--_field-border));
+  background: var(--_card-select-bg, var(--_field-bg));
+}
+
+[data-hover="none"] .form-field__card-input:checked + .form-field__card-face {
+  border-color: var(--_card-select-border, var(--_field-border));
+  background: var(--_card-select-bg, var(--_field-bg));
+  box-shadow: none;
+}
+
+/* ── Hover gate: instant — everything snaps, no transition ── */
+[data-hover="instant"] .form-field__card-face,
+[data-hover="instant"] .form-field__card-check,
+[data-hover="instant"] .form-field__card-check--toggle,
+[data-hover="instant"] .form-field__card-check--toggle::before {
+  transition: none;
+}
+
+/* Instant: no hover bg change, only checked state */
+[data-hover="instant"] .form-field__card-face:hover {
+  border-color: var(--_field-border);
+  background: var(--_field-bg);
+}
+
+/* ── None mode: check indicators still animate ── */
+[data-hover="none"] .form-field__card-check--toggle,
+[data-hover="none"] .form-field__card-check--toggle::before {
+  transition: all var(--hover-duration-fast);
+}
+
+/* Selected state */
+.form-field__card-input:checked + .form-field__card-face {
+  border-color: var(--_field-brand);
+  background: var(--_field-brand-light);
+  box-shadow: 0 0 0 2px var(--_field-brand);
+}
+
+/* ── Reduced render — no transitions ── */
+[data-render="reduced"] .form-field__card-check,
+[data-render="reduced"] .form-field__card-check--toggle,
+[data-render="reduced"] .form-field__card-check--toggle::before {
+  transition: none;
+}
+
+/* ── Card footer — label + check indicator inline ── */
+.form-field__card-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── Check indicator — inline with label ── */
+.form-field__card-check {
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid var(--_field-brand);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: all var(--hover-duration-fast);
+  position: relative;
+}
+
+/* Checked — filled (checkbox + radio only, not toggle) */
+.form-field__card-input:checked + .form-field__card-face .form-field__card-check--checkbox,
+.form-field__card-input:checked + .form-field__card-face .form-field__card-check--radio {
+  background: var(--_field-brand);
+  border-color: var(--_field-brand);
+}
+
+/* Checkbox tick (exclude toggle) */
+.form-field__card-input[type="checkbox"]:checked + .form-field__card-face .form-field__card-check--checkbox::after {
+  content: "";
+  position: absolute;
+  left: 0.3rem;
+  top: 0.1rem;
+  width: 0.25rem;
+  height: 0.5rem;
+  border: solid var(--color-White);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Radio check gets circle */
+.form-field__card-check--radio {
+  border-radius: 50%;
+}
+
+/* Toggle check — iOS-style slider */
+.form-field__card-check--toggle {
+  width: 2.5rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full);
+  background: var(--_field-brand-light);
+  border: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 0 4px color-mix(in oklch, var(--color-Black) 15%, transparent);
+  transition: background var(--hover-duration-fast);
+}
+
+.form-field__card-check--toggle::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--color-White);
+  border-radius: var(--radius-full);
+  transform: translateX(-1.25rem);
+  transition: transform var(--hover-duration-fast);
+  box-shadow: 0 0 4px color-mix(in oklch, var(--color-Black) 20%, transparent);
+}
+
+.form-field__card-input:checked + .form-field__card-face .form-field__card-check--toggle {
+  background: var(--_field-brand);
+}
+
+.form-field__card-input:checked + .form-field__card-face .form-field__card-check--toggle::before {
+  transform: translateX(1.25rem);
+}
+
+/* Radio dot */
+.form-field__card-input[type="radio"]:checked + .form-field__card-face .form-field__card-check::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--color-White);
+}
+
+/* Focus visible on card */
+.form-field__card-input:focus-visible + .form-field__card-face {
+  outline: 2px solid var(--_field-brand);
+  outline-offset: 2px;
+}
+
+/* Card image — full-bleed top */
+.form-field__card-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.form-field__card-image .image,
+.form-field__card-image .image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Card icon — centred */
+.form-field__card-icon {
+  color: var(--_field-brand);
+}
+
+/* Card description */
+.form-field__card-desc {
+  margin-top: var(--space-xs);
+}
+
+/* Disabled */
+.form-field__card-input:disabled + .form-field__card-face {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Symbol image */
+.form-field__card-symbol {
+  width: 3em;
+  height: 3em;
+  object-fit: contain;
+}
+
+/* Card sizes */
+.form-field--card-size-sm .form-field__card-face { padding: var(--space-md); }
+.form-field--card-size-sm .form-field__card-symbol { width: 2em; height: 2em; }
+
+.form-field--card-size-lg .form-field__card-face { padding: var(--space-xl); }
+.form-field--card-size-lg .form-field__card-symbol { width: 4em; height: 4em; }
+
+/* ==========================================================
+   RENDER MODE OVERRIDES
+   ========================================================== */
+
+/* ── Reduced — all transitions instant, strip effects, enlarge controls ── */
+
+[data-render="reduced"] .form-field {
+  --_field-control-size: 28px;
+  --_field-toggle-w: 52px;
+  --_field-toggle-h: 28px;
+  --_field-thumb-size: 20px;
+}
+
+[data-render="reduced"] .form-field__input { transition: none; }
+[data-render="reduced"] .form-field__checkmark { transition: none; }
+[data-render="reduced"] .form-field__radio-indicator { transition: none; }
+[data-render="reduced"] .form-field__toggle-track { transition: none; }
+[data-render="reduced"] .form-field__toggle-thumb { transition: none; }
+
+[data-render="reduced"] .form-field--glass .form-field__input {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--_field-bg);
+  border: var(--border-width-2) solid var(--_field-border);
+  box-shadow: none;
+}
+
+[data-render="reduced"] .form-field--neumorphic .form-field__input {
+  box-shadow: none;
+  border: var(--border-width-2) solid var(--_field-border);
+}
+
+[data-render="reduced"] .form-field--glow .form-field__input:focus {
+  box-shadow: none;
+}
+
+[data-render="reduced"] .form-field__card-face { transition: none; }
+
+/* ── Assistive — enlarged controls, thick focus, generous spacing ── */
+
+[data-render="assistive"] .form-field {
+  --_field-control-size: 32px;
+  --_field-toggle-w: 60px;
+  --_field-toggle-h: 32px;
+  --_field-thumb-size: 24px;
+  gap: var(--space-sm);
+}
+
+[data-render="assistive"] .form-field__input {
+  min-height: 64px;
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--neutral-800);
+}
+
+[data-render="assistive"] .form-field__input:focus {
+  outline: 3px solid var(--_field-brand);
+  outline-offset: 2px;
+}
+
+[data-render="assistive"] .form-field__checkmark,
+[data-render="assistive"] .form-field__radio-indicator {
+  min-width: 32px;
+  min-height: 32px;
+}
+
+[data-render="assistive"] .form-field__checkbox-wrap,
+[data-render="assistive"] .form-field__radio-wrap,
+[data-render="assistive"] .form-field__toggle-wrap {
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+}
+
+[data-render="assistive"] .form-field__card-grid {
+  grid-template-columns: 1fr;
+}
+
+[data-render="assistive"] .form-field__card-face {
+  padding: var(--space-xl);
+  min-height: 64px;
+  flex-direction: row;
+  gap: var(--space-lg);
+}
+
+[data-render="assistive"] .form-field__card-symbol {
+  width: 3em;
+  height: 3em;
+}
+
+[data-render="assistive"] .form-field__card-input:focus-visible + .form-field__card-face {
+  outline-width: 3px;
+}
+
+/* ── Textonly — native controls, no custom widgets ── */
+
+[data-render="textonly"] .form-field__input {
+  background: color-mix(in oklch, var(--_field-text) 6%, transparent);
+  border: none;
+  border-bottom: 2px solid var(--_field-border);
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+[data-render="textonly"] .form-field__input:focus {
+  box-shadow: none;
+  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+  border-bottom-color: var(--_field-brand-dark);
+  outline: 2px solid var(--_field-brand-dark);
+  outline-offset: 2px;
+}
+
+[data-render="textonly"] .form-field__checkmark { display: none; }
+[data-render="textonly"] .form-field__checkbox {
+  position: static;
+  opacity: 1;
+  width: 24px;
+  height: 24px;
+  accent-color: var(--_field-brand);
+}
+
+[data-render="textonly"] .form-field__radio-indicator { display: none; }
+[data-render="textonly"] .form-field__radio {
+  position: static;
+  opacity: 1;
+  width: 24px;
+  height: 24px;
+  accent-color: var(--_field-brand);
+}
+
+[data-render="textonly"] .form-field__toggle-track { display: none; }
+[data-render="textonly"] .form-field__toggle {
+  position: static;
+  opacity: 1;
+  width: 24px;
+  height: 24px;
+  accent-color: var(--_field-brand);
+}
+
+/* Card-select is functional content — NOT stripped in textonly.
+   Images are choices, toggles are form controls. */

@@ -220,6 +220,14 @@ export function applySettings(settings: A11ySettings): void {
   target.classList.toggle('a11y-dyslexia-font', settings.dyslexiaFont);
   target.classList.toggle('a11y-reduce-motion', settings.reduceMotion);
   target.classList.toggle('a11y-enhanced-focus', settings.enhancedFocus);
+  // Enhanced focus — double ring + thicker
+  if (settings.enhancedFocus) {
+    document.documentElement.setAttribute('data-enhanced-focus', '');
+    document.documentElement.style.setProperty('--focus-thickness', '0.3rem');
+  } else {
+    document.documentElement.removeAttribute('data-enhanced-focus');
+    document.documentElement.style.removeProperty('--focus-thickness');
+  }
   target.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
   target.classList.toggle('a11y-scrollbar-enhanced', settings.scrollbarEnhanced);
 
@@ -299,13 +307,13 @@ export function applySettings(settings: A11ySettings): void {
     target.classList.add(`a11y-font-${settings.fontFamily}`);
   }
 
-  // Font Size - scale via html root font-size so rem tokens scale.
-  // Nav is excluded via font-size: 16px in GlassNav-base.css.
-  // Panel is outside #a11y-content-wrapper so immune.
+  // Font Size - set user text multiplier as CSS custom property.
+  // html font-size = base-font-pct × text-multiplier × layout-multiplier
+  // All three multiply. Nothing overrides.
   if (settings.fontSize !== 100) {
-    document.documentElement.style.fontSize = `${settings.fontSize}%`;
+    document.documentElement.style.setProperty('--text-multiplier', `${settings.fontSize / 100}`);
   } else {
-    document.documentElement.style.fontSize = '';
+    document.documentElement.style.removeProperty('--text-multiplier');
   }
   document.documentElement.style.setProperty('--a11y-font-scale', `${settings.fontSize}`);
 

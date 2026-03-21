@@ -20,6 +20,8 @@
  *   icon.dispatchEvent(new CustomEvent('lottie:goToFrame', { detail: { frame: 0 } }));
  */
 
+import { Icon } from '../Icon';
+
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
 const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
 
@@ -27,6 +29,8 @@ interface Props {
   slug?: string;
   src?: string;
   label?: string;
+  /** Phosphor icon name for static fallback (shown in reduced/highlight/focus/textonly) */
+  fallbackIcon?: string;
   size?: number;
   /** Animation trigger mode — replaces autoplay/loop */
   trigger?: 'autoplay' | 'loop' | 'hover' | 'interval' | 'none';
@@ -43,6 +47,7 @@ const {
   slug,
   src,
   label,
+  fallbackIcon,
   size = 24,
   trigger = 'none',
   interval = 20000,
@@ -57,8 +62,9 @@ const {
 const resolvedLoop = trigger === 'loop' || trigger === 'interval' || loop;
 const resolvedAutoplay = trigger === 'autoplay' || trigger === 'loop' || autoplay;
 
-// Fetch Lottie JSON from API at build/render time
+// Fetch Lottie JSON + fallback icon from API at build/render time
 let animationData: string | null = null;
+let resolvedFallbackIcon: string | null = fallbackIcon || null;
 
 if (slug) {
   try {
@@ -66,9 +72,22 @@ if (slug) {
     if (ASSET_API_TOKEN) {
       headers['Authorization'] = `Bearer ${ASSET_API_TOKEN}`;
     }
+
+    // Fetch animation data
     const res = await fetch(`${ASSET_API_URL}/v1/assets/${slug}`, { headers });
     if (res.ok) {
       animationData = await res.text();
+    }
+
+    // Fetch fallback icon slug from lottie_mappings (if not passed as prop)
+    if (!resolvedFallbackIcon) {
+      const metaRes = await fetch(`${ASSET_API_URL}/v1/assets/${slug}/meta`, { headers });
+      if (metaRes.ok) {
+        const meta = await metaRes.json() as Record<string, any>;
+        if (meta.fallbackIcon) {
+          resolvedFallbackIcon = meta.fallbackIcon;
+        }
+      }
     }
   } catch {
     // Fall through to src-based loading
@@ -90,6 +109,9 @@ if (slug) {
   {...(src && !animationData ? { 'data-lottie-src': src } : {})}
 >
   <div class="lottie-icon__container" data-lottie-container></div>
+  {resolvedFallbackIcon && (
+    <Icon name={resolvedFallbackIcon} class="lottie-icon__static" />
+  )}
   {animationData && (
     <script is:inline type="application/json" data-lottie-data set:html={animationData} />
   )}

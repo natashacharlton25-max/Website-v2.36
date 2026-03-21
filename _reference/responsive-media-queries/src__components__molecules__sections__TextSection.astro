@@ -1,0 +1,103 @@
+---
+/**
+ * TextSection - Plain text section with title and body
+ * Used within Reader presentations via layout: "text-only"
+ */
+
+export interface Props {
+  title: string;
+  body?: string;
+  textAlign?: 'left' | 'right' | 'center';
+  position?: 'left' | 'right' | 'center';
+}
+
+const { title, body, textAlign = 'center', position = 'center' } = Astro.props;
+---
+
+<div class={`text-section text-section--align-${textAlign} text-section--pos-${position}`}>
+  <h2 class="text-section__title">{title}</h2>
+  {body && <p class="text-section__body" set:html={body} />}
+</p>
+
+<style>
+  .text-section {
+    max-width: 800px;
+    width: 100%;
+  }
+
+  /* Text alignment */
+  .text-section--align-left {
+    text-align: left;
+  }
+
+  .text-section--align-right {
+    text-align: right;
+  }
+
+  .text-section--align-center {
+    text-align: center;
+  }
+
+  /* Position */
+  .text-section--pos-center {
+    margin: 0 auto;
+  }
+
+  .text-section--pos-left {
+    margin-left: 5%;
+    margin-right: auto;
+  }
+
+  .text-section--pos-right {
+    margin-left: auto;
+    margin-right: 5%;
+  }
+
+  .text-section__title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    color: var(--primary-800);
+    line-height: var(--leading-tight);
+    margin: 0 0 var(--space-xl) 0;
+  }
+
+  .text-section__body {
+    font-family: var(--font-body);
+    font-weight: var(--font-normal);
+    color: var(--neutral-800);
+    line-height: var(--leading-relaxed);
+  }
+
+  .text-section__body :global(p) {
+    margin-bottom: var(--space-md);
+  }
+
+  .text-section__body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 968px) {
+    .text-section__title {
+    }
+
+    .text-section__body {
+    }
+  }
+
+  @media (max-width: 640px) {
+    .text-section__title {
+      margin-bottom: var(--space-lg);
+    }
+
+    .text-section__body {
+    }
+  }
+
+  @media (max-width: 480px) {
+    .text-section__title {
+    }
+
+    .text-section__body {
+    }
+  }
+</style>

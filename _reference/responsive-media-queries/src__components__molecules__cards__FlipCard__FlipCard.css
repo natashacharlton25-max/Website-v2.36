@@ -1,0 +1,282 @@
+/* ══════════════════════════════════════════
+   FlipCard — 3D perspective flip card
+   ══════════════════════════════════════════ */
+
+/* ── Internal tokens ── */
+.flip-card {
+  --_flip-front-bg: var(--flip-front-bg, var(--page-bg-raised));
+  --_flip-back-bg: var(--flip-back-bg, var(--page-bg-raised));
+  --_flip-text: var(--flip-text, var(--neutral-800));
+  --_flip-border: var(--flip-border, var(--primary-600));
+  --_flip-hover-accent: var(--flip-hover-accent, var(--secondary-600));
+  --_flip-radius: var(--flip-radius, var(--radius-lg));
+  --_flip-min-height: var(--flip-min-height, 22rem);
+  --_flip-duration: 700ms;
+  --_flip-easing: cubic-bezier(.4, .2, .2, 1);
+
+  perspective: 1000px;
+  width: 100%;
+  cursor: pointer;
+}
+
+/* ── 3D container ── */
+.flip-card__box {
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+/* ── Shared face styles ── */
+.flip-card__face {
+  display: block;
+  background-size: cover;
+  background-position: center;
+  border-radius: var(--_flip-radius);
+  min-height: var(--_flip-min-height);
+  height: auto;
+  backface-visibility: hidden;
+  border: 2px solid var(--_flip-border);
+  text-align: center;
+  color: var(--_flip-text);
+  transition: opacity 200ms ease-out;
+}
+
+/* Animated: 3D flip transition */
+.flip-card--animated .flip-card__face {
+  transition-timing-function: var(--_flip-easing);
+  transition-duration: var(--_flip-duration);
+  transition-property: transform, opacity;
+}
+
+/* ── Background image — fills face ── */
+.flip-card__bg-image,
+.flip-card__face img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: calc(var(--_flip-radius) - 2px);
+  z-index: 0;
+}
+
+/* ── Front face ── */
+.flip-card__front {
+  background: var(--_flip-front-bg);
+  transform: rotateY(0deg);
+  transform-style: preserve-3d;
+}
+
+/* ── Back face ── */
+.flip-card__back {
+  background: var(--_flip-back-bg);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotateY(180deg);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* ── Inner content — 3D depth push, centred (default) ── */
+.flip-card__inner {
+  transform: translateY(-50%) translateZ(60px) scale(0.94);
+  top: 50%;
+  position: absolute;
+  left: var(--space-lg);
+  right: var(--space-lg);
+  width: auto;
+  outline: 1px solid transparent;
+  perspective: inherit;
+  z-index: 2;
+  text-align: center;
+  color: inherit;
+}
+
+/* Front with image — glass panel at bottom instead of centred */
+.flip-card__front:has(.flip-card__bg-image) .flip-card__inner {
+  top: auto;
+  bottom: var(--space-lg);
+  transform: translateZ(60px) scale(0.94);
+}
+
+/* ── Icon ── */
+.flip-card__icon {
+  margin-bottom: var(--space-md);
+  color: var(--_flip-border);
+  opacity: 0.7;
+  transition: opacity var(--_flip-duration) var(--_flip-easing);
+}
+
+/* Front face — primary colours */
+.flip-card__front .heading {
+  color: var(--_flip-border);
+}
+
+/* Back face — secondary colours always */
+.flip-card__back {
+  border-color: var(--_flip-hover-accent);
+}
+
+.flip-card__back .heading {
+  color: var(--_flip-hover-accent);
+}
+
+.flip-card__back .btn {
+  border-color: var(--_flip-hover-accent);
+  color: var(--_flip-hover-accent);
+  background: transparent;
+}
+
+.flip-card__back .btn:hover {
+  border-color: var(--_flip-border);
+}
+
+/* Glass inner on back face — secondary border */
+.flip-card__back .flip-card__inner.card--glass {
+  border-color: var(--_flip-hover-accent);
+}
+
+.flip-card__subtitle {
+  opacity: 0.85;
+  margin-top: var(--space-xs);
+}
+
+/* Glass Card over images — darker tint for readability */
+.flip-card .flip-card__inner.card--glass {
+  --card-glass-bg: var(--glass-bg-dark);
+  color: var(--glass-text-on-dark);
+}
+
+/* Inner Card transparent — no border from dark/HC zones */
+.flip-card .flip-card__inner.card--transparent {
+  border: none;
+  background: none;
+  box-shadow: none;
+}
+
+/* Inner Card default — suppress dark/HC zone border */
+.flip-card .flip-card__inner.card--default {
+  border: none;
+  box-shadow: none;
+}
+
+/* ── CTA ── */
+.flip-card__cta {
+  margin-top: var(--space-lg);
+}
+
+/* ══════════════════════════════════════════
+   Hover colour — light fill on hover, none suppresses
+   ══════════════════════════════════════════ */
+
+/* Animated cards — fill on hover */
+.flip-card--animated .flip-card__front:hover {
+  background: var(--primary-100);
+}
+
+.flip-card--animated .flip-card__back:hover {
+  background: var(--secondary-100);
+}
+
+/* Non-animated cards — border colour change only */
+.flip-card:not(.flip-card--animated) .flip-card__front:hover {
+  border-color: var(--_flip-hover-accent);
+}
+
+.flip-card:not(.flip-card--animated) .flip-card__back:hover {
+  border-color: var(--_flip-border);
+}
+
+/* None — no hover changes */
+[data-hover="none"] .flip-card__front:hover,
+[data-hover="none"] .flip-card__back:hover {
+  background: var(--_flip-front-bg);
+  border-color: var(--_flip-border);
+}
+
+[data-hover="none"] .flip-card__back:hover {
+  border-color: var(--_flip-hover-accent);
+}
+
+/* ══════════════════════════════════════════
+   Trigger: hover — flip on desktop
+   ══════════════════════════════════════════ */
+@media (min-width: 501px) {
+  .flip-card--trigger-hover:hover .flip-card__front,
+  .flip-card--trigger-hover:focus-within .flip-card__front {
+    transform: rotateY(-180deg);
+    transform-style: preserve-3d;
+  }
+
+  .flip-card--trigger-hover:hover .flip-card__back,
+  .flip-card--trigger-hover:focus-within .flip-card__back {
+    transform: rotateY(0deg);
+    transform-style: preserve-3d;
+  }
+
+  .flip-card--trigger-hover:hover .flip-card__icon,
+  .flip-card--trigger-hover:focus-within .flip-card__icon {
+    opacity: 0;
+  }
+}
+
+/* None — hover trigger blocked, click/tap still works */
+[data-hover="none"] .flip-card--trigger-hover:not(.flip-card--flipped):hover .flip-card__front {
+  transform: rotateY(0deg);
+}
+
+[data-hover="none"] .flip-card--trigger-hover:not(.flip-card--flipped):hover .flip-card__back {
+  transform: rotateY(180deg);
+}
+
+/* ══════════════════════════════════════════
+   Click/tap — JS toggles .flip-card--flipped
+   ══════════════════════════════════════════ */
+.flip-card--flipped .flip-card__front {
+  transform: rotateY(-180deg);
+  transform-style: preserve-3d;
+}
+
+.flip-card--flipped .flip-card__back {
+  transform: rotateY(0deg);
+  transform-style: preserve-3d;
+}
+
+.flip-card--flipped .flip-card__icon {
+  opacity: 0;
+}
+
+/* ══════════════════════════════════════════
+   Hover gate — timing
+   ══════════════════════════════════════════ */
+
+/* Gentle — slower flip */
+[data-hover="gentle"] .flip-card--animated .flip-card__face {
+  transition-duration: var(--hover-duration-extralong);
+}
+
+/* Instant — colour changes instant, flip animation preserved */
+
+/* None — hover blocked, click animation preserved */
+
+/* ══════════════════════════════════════════
+   Render modes
+   ══════════════════════════════════════════ */
+
+/* Reduced — no 3D animation, instant swap */
+[data-render="reduced"] .flip-card__face {
+  transition: none;
+}
+
+/* Assistive — larger target */
+[data-render="assistive"] .flip-card {
+  --_flip-min-height: 28rem;
+}
+
+/* Textonly — hide FlipCard (pipeline routes to CardReveal via schema) */
+[data-render="textonly"] .flip-card {
+  display: none;
+}

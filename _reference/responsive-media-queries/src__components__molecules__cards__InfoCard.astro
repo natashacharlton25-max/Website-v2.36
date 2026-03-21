@@ -1,0 +1,304 @@
+---
+// InfoCard.astro - Reusable info card component with pills/tags
+// Uses: Badge, Heading, Text, Image, Button, ShareMenu atoms
+
+import Badge from '../../atoms/Badge/Badge.astro';
+import Heading from '../../atoms/Heading/Heading.astro';
+import Text from '../../atoms/Text/Text.astro';
+import { Image } from '../../atoms/Image';
+import Button from '../../atoms/Button/Button.astro';
+import ShareMenu from '../Menu/ShareMenu/ShareMenu.astro';
+
+export interface Props {
+  imageUrl: string;
+  imageAlt?: string;
+  tag: string;
+  title: string;
+  description: string;
+  pills?: string[];
+  prevUrl?: string;
+  nextUrl?: string;
+  readMoreUrl?: string;
+  downloadUrl?: string;
+  copyUrl?: string;
+  shareUrl?: string;
+  className?: string;
+}
+
+const {
+  imageUrl,
+  imageAlt = "Info Image",
+  tag,
+  title,
+  description,
+  pills = [],
+  prevUrl,
+  nextUrl,
+  readMoreUrl,
+  downloadUrl,
+  copyUrl,
+  shareUrl,
+  className = ""
+} = Astro.props;
+---
+
+<div class={`info-card ${className}`}>
+  <div class="info-card__image">
+    <Image src={imageUrl} alt={imageAlt} fit="cover" class="info-card__img" />
+  </div>
+  <div class="info-card__content">
+    <div class="info-card__text">
+      <Badge label={tag} color="primary" class="info-card__tag" />
+      <Heading level={2} size="h4" weight="medium" color="secondary" uppercase flush class="info-card__title">{title}</Heading>
+      <Text size="lg" weight="light" leading="relaxed" flush class="info-card__desc">{description}</Text>
+    </div>
+
+    <!-- Pills Section -->
+    {pills.length > 0 && (
+      <div class="info-card__pills">
+        {pills.map(pill => (
+          <Badge label={pill} variant="outline" color="secondary" shape="pill" class="info-card__pill" />
+        ))}
+      </div>
+    )}
+
+    <!-- Desktop Actions -->
+    <div class="info-card__actions-desktop">
+      {prevUrl && (
+        <Button shape="circle" variant="glass" size="sm" ariaLabel="Previous Section" icon="caret-left-fill" class="prev-btn" data-url={prevUrl} />
+      )}
+      {readMoreUrl && (
+        <Button shape="circle" variant="glass" size="sm" href={readMoreUrl} target="_blank" ariaLabel="Read More" icon="plus-fill" />
+      )}
+      {nextUrl && (
+        <Button shape="circle" variant="glass" size="sm" ariaLabel="Next Section" icon="caret-right-fill" class="next-btn" data-url={nextUrl} />
+      )}
+      {downloadUrl && (
+        <Button shape="circle" variant="glass" size="sm" href={downloadUrl} target="_blank" ariaLabel="Download" icon="download-fill" download={true} />
+      )}
+      {copyUrl && (
+        <Button shape="circle" variant="glass" size="sm" ariaLabel="Copy Link" icon="link-fill" class="copy-btn" data-url={copyUrl} />
+      )}
+      {shareUrl && (
+        <ShareMenu url={shareUrl} size="sm" />
+      )}
+    </div>
+
+    <!-- Mobile Actions -->
+    <div class="info-card__actions-mobile">
+      {prevUrl && (
+        <Button shape="circle" variant="glass" size="sm" ariaLabel="Previous Section" icon="caret-left-fill" class="prev-btn-mobile" data-url={prevUrl} />
+      )}
+      {readMoreUrl && (
+        <Button shape="circle" variant="glass" size="sm" href={readMoreUrl} target="_blank" ariaLabel="Read More" icon="plus-fill" />
+      )}
+      {nextUrl && (
+        <Button shape="circle" variant="glass" size="sm" ariaLabel="Next Section" icon="caret-right-fill" class="next-btn-mobile" data-url={nextUrl} />
+      )}
+      {downloadUrl && (
+        <Button shape="circle" variant="glass" size="sm" href={downloadUrl} target="_blank" ariaLabel="Download" icon="download-fill" download={true} />
+      )}
+      {copyUrl && (
+        <Button shape="circle" variant="glass" size="sm" ariaLabel="Copy Link" icon="link-fill" class="copy-btn-mobile" data-url={copyUrl} />
+      )}
+    </div>
+  </div>
+</div>
+
+<style>
+  .info-card {
+    background: color-mix(in oklch, var(--color-White) 18%, transparent);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(6px);
+    border: 1px solid color-mix(in oklch, var(--color-White) 25%, transparent);
+    width: 100%;
+    max-width: 1200px;
+    min-height: 350px;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    overflow: hidden;
+    position: relative;
+    transition: box-shadow var(--transition-base);
+  }
+
+  .info-card:hover {
+    box-shadow: var(--shadow-xl);
+  }
+
+  .info-card__image {
+    width: 380px;
+    min-width: 220px;
+    background: var(--page-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .info-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    display: block;
+  }
+
+  .info-card__content {
+    flex: 1 1 0%;
+    padding: 45px 45px 40px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .info-card__text {
+    flex: 1;
+  }
+
+  .info-card__tag {
+    margin-bottom: 25px;
+  }
+
+  .info-card__title {
+    margin-bottom: var(--space-md);
+  }
+
+  .info-card__desc {
+    margin-bottom: var(--space-xl);
+    white-space: pre-line;
+  }
+
+  .info-card__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-lg);
+  }
+
+  .info-card__actions-desktop,
+  .info-card__actions-mobile {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+    flex-wrap: nowrap;
+  }
+
+  .info-card__actions-mobile {
+    display: none;
+  }
+
+  /* Mobile Styles */
+  @media (max-width: 768px) {
+    .info-card {
+      flex-direction: column;
+      width: 100%;
+      min-width: unset;
+      box-shadow: var(--shadow-md);
+      align-items: center;
+    }
+
+    .info-card__image,
+    .info-card__img {
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      width: 100%;
+      min-width: unset;
+      height: 200px;
+    }
+
+    .info-card__content {
+      padding: var(--space-lg) var(--space-md) var(--space-md);
+      align-items: center;
+      text-align: center;
+    }
+
+    .info-card__tag {
+      margin-bottom: var(--space-md);
+    }
+
+    .info-card__title {
+      margin-bottom: var(--space-sm);
+    }
+
+    .info-card__desc {
+      margin-bottom: var(--space-lg);
+    }
+
+    .info-card__pills {
+      gap: var(--space-xs);
+      margin-bottom: var(--space-md);
+      justify-content: center;
+    }
+
+    .info-card__actions-desktop {
+      display: none !important;
+    }
+
+    .info-card__actions-mobile {
+      display: flex !important;
+      flex-direction: row;
+      justify-content: center !important;
+      align-items: center;
+      gap: var(--space-sm);
+      width: 100%;
+      margin-top: var(--space-md);
+    }
+  }
+
+  /* ── Reduce-motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .info-card {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Handle navigation buttons
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement | null;
+
+    if (target?.closest('.prev-btn, .prev-btn-mobile')) {
+      const btn = target.closest('.prev-btn, .prev-btn-mobile') as HTMLElement;
+      const url = btn?.dataset.url;
+      if (url) window.location.href = url;
+    }
+
+    if (target?.closest('.next-btn, .next-btn-mobile')) {
+      const btn = target.closest('.next-btn, .next-btn-mobile') as HTMLElement;
+      const url = btn?.dataset.url;
+      if (url) window.location.href = url;
+    }
+  });
+
+  // Handle copy link buttons
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('.copy-btn, .copy-btn-mobile')) {
+      const btn = target.closest('.copy-btn, .copy-btn-mobile') as HTMLElement;
+      const url = btn?.dataset.url;
+      if (url) {
+        navigator.clipboard.writeText(url)
+          .then(() => {
+            console.log('Link copied to clipboard');
+          })
+          .catch(() => {
+            const textArea = document.createElement('textarea');
+            textArea.value = url;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.body.removeChild(textArea);
+          });
+      }
+    }
+  });
+
+</script>

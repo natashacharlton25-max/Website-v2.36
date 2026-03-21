@@ -1,0 +1,113 @@
+/**
+ * ContactForm — a11y.css
+ *
+ * Themes:      Brand tokens handle colour changes. ✅ Nothing extra.
+ * Focus:       Button atom handles focus. FormField atom handles input focus. ✅
+ * HL:          Button atom handles link-buttons. ✅
+ *
+ * Reduce-motion: Kill success scroll behaviour.
+ * Text-only:     Flatten success icon gradient, stronger topic borders.
+ */
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    /* Disable smooth scroll to success */
+    & .contact-form__success {
+      scroll-behavior: auto;
+    }
+
+    /* Topic buttons — no colour change on hover */
+    & .contact-form__topic-btn,
+    & .contact-form__topic-btn:hover {
+      transition: none;
+    }
+  }
+
+}
+
+@layer a11y.highlight-links {
+
+  .a11y-highlight-links {
+
+    /* Topic buttons — underline so they read as interactive */
+    & .contact-form__topic-btn {
+      text-decoration: underline;
+      text-decoration-color: var(--primary-600);
+      text-underline-offset: 3px;
+      text-decoration-thickness: 2px;
+    }
+
+    & .contact-form__topic-btn:hover {
+      text-decoration-thickness: 3px;
+    }
+  }
+
+}
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    /* Collapse to single column, cards above form */
+    & .contact-body {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl, 2rem);
+      padding: var(--space-lg, 1.5rem);
+    }
+
+    & .contact-info {
+      order: -1;
+    }
+
+    /* Topic buttons → plain text links */
+    & .contact-form__topic-btn {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      border-radius: 0;
+      padding: var(--space-2xs, 0.25rem) 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* Topic selected — ensure visible without colour reliance */
+    & :is(.contact-form__topic-btn).selected {
+      outline: 3px solid var(--primary-600);
+      outline-offset: -3px;
+      text-decoration-thickness: 3px;
+    }
+
+    /* Submit button → simple underlined text link */
+    & .contact-form__submit {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      border-radius: 0;
+      padding: var(--space-xs, 0.25rem) 0;
+      color: var(--primary-600);
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+    }
+
+    /* ── Under 200px: center submit button ── */
+    @media (max-width: 200px) {
+      & .contact-form__submit {
+        text-align: center;
+        justify-content: center;
+      }
+
+      & .contact-form__actions {
+        text-align: center;
+      }
+    }
+
+    /* Success icon — flat solid instead of gradient */
+    & .contact-form__success-icon {
+      background: var(--color-Success, #38a169);
+    }
+  }
+
+}

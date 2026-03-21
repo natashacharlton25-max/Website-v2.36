@@ -1,0 +1,133 @@
+/**
+ * Pattern Motion — ambient CSS keyframe loops
+ * src/styles/components/pattern-motion.css
+ *
+ * Provides continuous animation on individual pattern icons.
+ * Applied via data-motion attribute on the INNER wrapper element
+ * (outer wrapper carries data-depth for GSAP parallax).
+ *
+ * Architecture:
+ *   <div data-depth="0.6">              ← GSAP: stellar + warp parallax
+ *     <div data-motion="twinkle">       ← CSS: ambient keyframe loop
+ *       <Icon name="star" />            ← pattern-morph.ts: shape + color
+ *     </div>
+ *   </div>
+ *
+ * Tunable via CSS custom properties (set in :root or per-element):
+ *   --pm-drift-speed     Duration of motion cycle (default per mode)
+ *   --pm-drift-range     Amplitude of translate (px)
+ *   --pm-breathe-scale   Max scale for breathe mode
+ *   --pm-rotate-range    Max rotation degrees
+ *   --po-opacity         Read by twinkle to pulse between full and dimmed
+ *
+ * Respects prefers-reduced-motion and .a11y-reduce-motion class.
+ *
+ * @layer components
+ */
+
+@layer components {
+
+  /* ── MODE ACTIVATORS ─────────────────────────── */
+
+  [data-motion="twinkle"] {
+    animation: pm-twinkle var(--pm-drift-speed, 3s) ease-in-out infinite;
+    animation-delay: var(--pm-stagger, 0s);
+  }
+
+  [data-motion="breathe"] {
+    animation: pm-breathe var(--pm-drift-speed, 5s) ease-in-out infinite;
+    animation-delay: var(--pm-stagger, 0s);
+  }
+
+  [data-motion="float"] {
+    animation: pm-float var(--pm-drift-speed, 6s) ease-in-out infinite;
+    animation-delay: var(--pm-stagger, 0s);
+  }
+
+  [data-motion="drift"] {
+    animation: pm-drift var(--pm-drift-speed, 20s) linear infinite;
+    animation-delay: var(--pm-stagger, 0s);
+  }
+
+  [data-motion="pulse"] {
+    animation: pm-pulse var(--pm-drift-speed, 4s) ease-in-out infinite;
+    animation-delay: var(--pm-stagger, 0s);
+  }
+
+  [data-motion="orbit"] {
+    animation: pm-orbit var(--pm-drift-speed, 40s) linear infinite;
+    animation-delay: var(--pm-stagger, 0s);
+  }
+
+  [data-motion="sway"] {
+    animation: pm-sway var(--pm-drift-speed, 8s) ease-in-out infinite;
+    animation-delay: var(--pm-stagger, 0s);
+  }
+
+  [data-motion="static"],
+  [data-motion="none"] {
+    animation: none;
+  }
+
+
+  /* ── KEYFRAMES ───────────────────────────────── */
+
+  /* Twinkle — opacity pulse, classic starfield */
+  @keyframes pm-twinkle {
+    0%, 100% { opacity: var(--po-opacity, 0.25); }
+    50%      { opacity: calc(var(--po-opacity, 0.25) * var(--pm-twinkle-min, 0.3)); }
+  }
+
+  /* Breathe — gentle scale pulse, logos / brand marks */
+  @keyframes pm-breathe {
+    0%, 100% { scale: 1; }
+    50%      { scale: var(--pm-breathe-scale, 1.04); }
+  }
+
+  /* Float — vertical bob, leaves / organic shapes */
+  @keyframes pm-float {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 var(--pm-drift-range, -10px); }
+  }
+
+  /* Drift — horizontal slide, background texture */
+  @keyframes pm-drift {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: var(--pm-drift-range, 8px) 0; }
+  }
+
+  /* Pulse — combined opacity + slight scale, attention items */
+  @keyframes pm-pulse {
+    0%, 100% {
+      opacity: var(--po-opacity, 0.25);
+      scale: 1;
+    }
+    50% {
+      opacity: calc(var(--po-opacity, 0.25) * 1.5);
+      scale: var(--pm-breathe-scale, 1.02);
+    }
+  }
+
+  /* Orbit — continuous rotation, decorative / playful */
+  @keyframes pm-orbit {
+    from { rotate: 0deg; }
+    to   { rotate: 360deg; }
+  }
+
+  /* Sway — pendulum rotation, natural / organic */
+  @keyframes pm-sway {
+    0%, 100% { rotate: calc(var(--pm-rotate-range, 8deg) * -1); }
+    50%      { rotate: var(--pm-rotate-range, 8deg); }
+  }
+
+
+  /* ── A11Y: KILL ALL MOTION ───────────────────── */
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-motion] { animation: none !important; }
+  }
+
+  .a11y-reduce-motion [data-motion] {
+    animation: none !important;
+  }
+}

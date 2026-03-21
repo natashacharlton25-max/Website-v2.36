@@ -1,8 +1,8 @@
 /**
  * LottieIcon — css
  *
- * Base layout for the Lottie animation container.
- * Inherits color from parent for stroke colouring.
+ * Renders both Lottie animation + static Icon fallback.
+ * CSS swaps between them based on render mode, highlight, focus.
  */
 
 .lottie-icon {
@@ -29,4 +29,28 @@
 .lottie-icon__container svg line {
   stroke: currentColor;
   fill: currentColor;
+}
+
+/* Static fallback — hidden by default */
+.lottie-icon__static {
+  display: none;
+}
+
+/* ==========================================================
+   SWAP: show static, hide animation
+   ========================================================== */
+
+/* Swap to static: reduced, textonly, highlight-links, hover-none */
+[data-render="reduced"] .lottie-icon__container,
+[data-render="textonly"] .lottie-icon__container,
+[data-highlight-links] .lottie-icon__container,
+[data-hover="none"] .lottie-icon__container {
+  display: none;
+}
+
+[data-render="reduced"] .lottie-icon__static,
+[data-render="textonly"] .lottie-icon__static,
+[data-highlight-links] .lottie-icon__static,
+[data-hover="none"] .lottie-icon__static {
+  display: inline-flex;
 }

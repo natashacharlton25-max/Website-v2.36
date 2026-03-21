@@ -1,0 +1,388 @@
+/**
+ * Text-Only Structure — global rules
+ *
+ * What to hide, flatten, strip, and swap in textonly render.
+ * Always applies when data-render="textonly". Not themed.
+ * Visual styling (how textonly looks) → textonly-styles.css
+ */
+
+
+/* Layout: single column */
+[data-render="textonly"] { --grid-cols: 1; }
+
+/* Hide decorative images */
+[data-render="textonly"] img[role="presentation"] { display: none; }
+
+/* Hide decorative elements in textonly — explicit list, no blanket aria-hidden rule */
+[data-render="textonly"] .icon:not(.badge__icon),
+[data-render="textonly"] .heading-wrap__divider,
+[data-render="textonly"] .heading-wrap__highlight,
+[data-render="textonly"] .heading-wrap__underline,
+[data-render="textonly"] .list__dot,
+[data-render="textonly"] .text-effect__svg,
+[data-render="textonly"] .card__overlay,
+[data-render="textonly"] .card__arrow,
+[data-render="textonly"] .card__quote-icon,
+[data-render="textonly"] .rainbow-border-card::after {
+  display: none;
+}
+
+/* Keep content images — alt text system handles display */
+[data-render="textonly"] figure[data-role="content"] { display: block; }
+
+/* AAC cards are ALWAYS informational — never hidden in any render mode */
+[data-render="textonly"] .aac-card { display: inline-flex; }
+
+/* Flatten 3D/layered components — content only, nav exempt */
+[data-render="textonly"] #a11y-content-wrapper * {
+  perspective: none;
+  transform-style: flat;
+  transform: none;
+  backface-visibility: visible;
+}
+
+/* Textonly: tooltips hidden — JS shared bar shows them on hover */
+[data-render="textonly"] .tooltip .tooltip__content {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Textonly + hover none: show inline — no bar, no hover available */
+[data-render="textonly"][data-hover="none"] .tooltip .tooltip__content,
+[data-render="textonly"][data-hover="none"] .figcaption,
+[data-render="textonly"][data-hover="none"] [data-hover-content] {
+  position: static;
+  display: inline;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  background: none;
+  border: none;
+  box-shadow: none;
+  transform: none;
+  padding: 0 var(--space-md);
+  margin: 0 var(--space-xs);
+  max-width: none;
+  width: auto;
+  white-space: normal;
+  text-align: inherit;
+  color: var(--neutral-600);
+  font-style: italic;
+  transition: none;
+}
+
+/* Textonly: label tooltips hidden entirely — only info tooltips show */
+[data-render="textonly"] .tooltip--label {
+  display: none;
+}
+
+/* Hover none (any mode): show tooltip text inline */
+[data-hover="none"] .tooltip .tooltip__content,
+[data-hover="none"][data-render="assistive"] .tooltip .tooltip__content {
+  position: static;
+  display: inline;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  background: none;
+  border: none;
+  box-shadow: none;
+  transform: none;
+  padding: 0 var(--space-md);
+  margin: 0 var(--space-xs);
+  max-width: none;
+  width: auto;
+  white-space: normal;
+  text-align: inherit;
+  color: var(--neutral-600);
+  font-style: italic;
+  transition: none;
+}
+
+/* Hover none: hide AAC inside tooltips unless content-aac mode on */
+/* data-hover is on body, data-content-aac is on html — can't compound */
+[data-hover="none"] .tooltip .tooltip__aac,
+[data-hover="none"] .tooltip .content-aac {
+  display: none;
+}
+
+[data-content-aac] [data-hover="none"] .tooltip .tooltip__aac,
+[data-content-aac] [data-hover="none"] .tooltip .content-aac {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* Textonly: figcaption hidden — JS shared bar handles display */
+[data-render="textonly"] .figcaption {
+  display: none;
+}
+
+/* Reduced: figcaption no transition */
+[data-render="reduced"] .figcaption {
+  transition: none;
+}
+
+/* Textonly + tooltip mode: hide alt text spans — bar handles them */
+[data-render="textonly"][data-alt-display-mode="tooltip"] .image-alt-word,
+[data-render="textonly"][data-alt-display-mode="tooltip"] .image-alt-descriptive,
+[data-render="textonly"][data-alt-display-mode="tooltip"] .image-alt-aac {
+  display: none;
+}
+
+/* Textonly + hover none + tooltip + aac: show AAC cards inline (no bar available) */
+[data-alt-display-mode="tooltip"][data-render="textonly"][data-hover="none"][data-alt-text-mode="aac"] .image-alt-aac {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* Strip backgrounds, shadows, borders, filters */
+[data-render="textonly"] .card,
+[data-render="textonly"] [data-card],
+[data-render="textonly"] .badge,
+[data-render="textonly"] .btn,
+[data-render="textonly"] .toast,
+[data-render="textonly"] .form-field__input,
+[data-render="textonly"] .rainbow-border-card {
+  background: transparent;
+  box-shadow: none;
+  border-color: var(--neutral-400);
+  filter: none;
+  backdrop-filter: none;
+}
+
+/* Buttons: primary border — visually interactive */
+[data-render="textonly"] .btn { border-color: var(--primary-600); }
+
+/* Remove hover effects */
+[data-render="textonly"] .card:hover,
+[data-render="textonly"] [data-card]:hover,
+[data-render="textonly"] .btn:hover,
+[data-render="textonly"] .toast:hover {
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+/* Reset text — inherit body font, no transforms */
+[data-render="textonly"] .link,
+[data-render="textonly"] .badge,
+[data-render="textonly"] .list {
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: inherit;
+  color: inherit;
+}
+
+/* Hide decorative overlays, arrows, gradients */
+[data-render="textonly"] .card__overlay,
+[data-render="textonly"] .card__arrow,
+[data-render="textonly"] .rainbow-border-card::after {
+  display: none;
+}
+
+
+/* ==========================================================
+   CARD — textonly structure
+   ========================================================== */
+
+/* Card: flat bordered box, content flows vertically */
+[data-render="textonly"] .card,
+[data-render="textonly"] [data-card] {
+  border: 1px solid var(--card-border, var(--neutral-400));
+  border-radius: 0;
+  padding: var(--space-md);
+  text-align: left;
+  transform: none;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* Link cards: primary border — visually clickable */
+[data-render="textonly"] .card--link {
+  border-color: var(--card-accent, var(--primary-600));
+}
+
+/* Border variants normalised */
+[data-render="textonly"] .card--border-thin,
+[data-render="textonly"] .card--border-medium,
+[data-render="textonly"] .card--border-thick {
+  border: 1px solid var(--card-border, var(--neutral-400));
+}
+
+/* Masonry → block flow */
+[data-render="textonly"] .card--masonry {
+  display: block;
+  margin-bottom: var(--space-sm);
+}
+
+/* Content wrapper: strip visual chrome */
+[data-render="textonly"] .card__content {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  text-align: left;
+  align-items: flex-start;
+  min-height: 0;
+  height: auto;
+}
+
+/* Decorative icons hidden */
+[data-render="textonly"] .card__icon:not([aria-label]),
+[data-render="textonly"] .card__icon-wrapper:not(:has([aria-label])),
+[data-render="textonly"] .card__quote-icon {
+  display: none;
+}
+
+/* Strip text shadows */
+[data-render="textonly"] .card * {
+  text-shadow: none;
+}
+
+/* Separator between stacked cards */
+[data-render="textonly"] .card--separator + .card--separator {
+  border-top: 1px solid currentColor;
+  padding-top: var(--space-sm);
+}
+
+
+/* ==========================================================
+   LINK — textonly structure
+   ========================================================== */
+
+[data-render="textonly"] .link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: normal;
+}
+
+[data-render="textonly"] .link--uppercase { text-transform: none; letter-spacing: normal; }
+
+[data-render="textonly"] .link--weight-normal,
+[data-render="textonly"] .link--weight-medium,
+[data-render="textonly"] .link--weight-semibold,
+[data-render="textonly"] .link--weight-bold,
+[data-render="textonly"] .link--weight-extrabold {
+  font-weight: normal;
+}
+
+[data-render="textonly"] .link--color-primary,
+[data-render="textonly"] .link--color-accent,
+[data-render="textonly"] .link--color-text,
+[data-render="textonly"] .link--color-muted {
+  color: inherit;
+}
+
+
+/* ==========================================================
+   LIST — textonly structure
+   ========================================================== */
+
+/* Native bullets */
+[data-render="textonly"] ul.list--default { list-style-type: disc; padding-left: var(--space-lg); }
+[data-render="textonly"] ol.list--default { list-style-type: decimal; padding-left: var(--space-lg); }
+[data-render="textonly"] .list--default .list__item::marker { color: var(--_list-marker); }
+
+/* Icon lists → native bullets */
+[data-render="textonly"] .list--has-icon { list-style-type: disc; padding-left: var(--space-lg); }
+[data-render="textonly"] .list--has-icon .list__item { display: list-item; }
+[data-render="textonly"] .list--has-icon .list__item::marker { color: var(--_list-marker); }
+[data-render="textonly"] .list--has-icon .list__icon { display: none; }
+
+/* Dot variant normalised */
+[data-render="textonly"] .list--dot .list__dot { width: 0.5em; height: 0.5em; }
+
+/* None variant gets bullets */
+[data-render="textonly"] .list--none { list-style-type: disc; padding-left: var(--space-lg); }
+
+/* Inline → vertical with bullets */
+[data-render="textonly"] .list--inline { display: block; list-style-type: disc; padding-left: var(--space-lg); }
+[data-render="textonly"] .list--inline .list__item { padding: var(--space-xs) 0; }
+
+/* Text normalisation */
+[data-render="textonly"] .list__item { text-align: left; }
+
+
+/* ==========================================================
+   FORM FIELD — textonly structure
+   ========================================================== */
+
+/* Input: underline style */
+[data-render="textonly"] .form-field__input {
+  background: color-mix(in oklch, var(--_field-text) 6%, transparent);
+  border: none;
+  border-bottom: var(--border-width-2) solid var(--_field-border);
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+[data-render="textonly"] .form-field__input:focus {
+  box-shadow: none;
+  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+  border-bottom-color: var(--_field-brand-dark);
+}
+
+/* Show native controls, hide custom widgets */
+[data-render="textonly"] .form-field__checkmark { display: none; }
+[data-render="textonly"] .form-field__checkbox {
+  position: static;
+  opacity: 1;
+  width: 24px;
+  height: 24px;
+  accent-color: var(--_field-brand);
+}
+
+[data-render="textonly"] .form-field__radio-indicator { display: none; }
+[data-render="textonly"] .form-field__radio {
+  position: static;
+  opacity: 1;
+  width: 24px;
+  height: 24px;
+  accent-color: var(--_field-brand);
+}
+
+[data-render="textonly"] .form-field__toggle-track { display: none; }
+[data-render="textonly"] .form-field__toggle {
+  position: static;
+  opacity: 1;
+  width: 24px;
+  height: 24px;
+  accent-color: var(--_field-brand);
+}
+
+
+/* ==========================================================
+   TEXT EFFECT — textonly structure
+   ========================================================== */
+
+[data-render="textonly"] .text-effect {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: inherit;
+  color: inherit;
+  filter: none;
+  text-shadow: none;
+  -webkit-text-stroke: unset;
+  animation: none;
+}
+
+
+/* ==========================================================
+   BADGE — textonly structure
+   ========================================================== */
+
+[data-render="textonly"] .badge {
+  position: static;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

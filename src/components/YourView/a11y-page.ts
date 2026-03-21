@@ -291,10 +291,72 @@ function initHoverGateButtons(): void {
   });
 }
 
+// ── My Presets — save/load/clear slots ──
+
+function initPresetSlots(): void {
+  const slots = document.querySelectorAll<HTMLElement>('[data-save-slot]');
+
+  slots.forEach(slot => {
+    const slotNum = slot.dataset.saveSlot;
+    if (!slotNum) return;
+
+    const key = `a11y-preset-${slotNum}`;
+    const nameInput = slot.querySelector<HTMLInputElement>('.a11y-save-slot__name');
+    const saveBtn = slot.querySelector<HTMLButtonElement>('.a11y-save-slot__save');
+    const clearBtn = slot.querySelector<HTMLButtonElement>('.a11y-save-slot__clear');
+    const statusEl = slot.querySelector<HTMLElement>('.a11y-save-slot__status');
+
+    // Load existing preset
+    function loadSlotUI() {
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          const preset = JSON.parse(saved);
+          if (nameInput) nameInput.value = preset.name || `Preset ${slotNum}`;
+          if (statusEl) statusEl.textContent = 'Saved';
+          if (clearBtn) clearBtn.style.display = '';
+          slot.classList.add('a11y-save-slot--saved');
+          slot.classList.remove('a11y-save-slot--empty');
+        } catch { /* ignore */ }
+      } else {
+        if (nameInput) nameInput.value = '';
+        if (statusEl) statusEl.textContent = 'Empty';
+        if (clearBtn) clearBtn.style.display = 'none';
+        slot.classList.remove('a11y-save-slot--saved');
+        slot.classList.add('a11y-save-slot--empty');
+      }
+    }
+
+    loadSlotUI();
+
+    // Save current settings
+    saveBtn?.addEventListener('click', () => {
+      const settings = getSettings();
+      const name = nameInput?.value.trim() || `Preset ${slotNum}`;
+      const preset = { name, settings };
+      localStorage.setItem(key, JSON.stringify(preset));
+      if (nameInput && !nameInput.value.trim()) nameInput.value = name;
+      loadSlotUI();
+      announce(`Saved as ${name}`);
+    });
+
+    // Clear slot
+    clearBtn?.addEventListener('click', () => {
+      localStorage.removeItem(key);
+      loadSlotUI();
+      announce(`Preset ${slotNum} cleared`);
+    });
+  });
+
+  // Expose for nav preset slots
+  (window as any).__a11yPanel = { applySettings, saveSettings };
+}
+
 function init(): void {
   initPage();
   initKeyboardDetection();
   initHoverGateButtons();
+  initPresetSlots();
 }
 
 if (document.readyState === 'loading') {

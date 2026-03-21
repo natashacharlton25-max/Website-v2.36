@@ -1,0 +1,91 @@
+---
+/**
+ * FontCard - Font Selection Card Component
+ *
+ * A card button for font selection, displaying the font name in that font.
+ *
+ * Usage:
+ * <FontCard
+ *   value="opendyslexic"
+ *   label="OpenDyslexic"
+ *   subtitle="Dyslexia"
+ *   fontFamily="'OpenDyslexic', sans-serif"
+ * />
+ */
+
+interface Props {
+  value: string;
+  label: string;
+  fontFamily?: string;
+}
+
+const { value, label, fontFamily } = Astro.props;
+---
+
+<button
+  class="a11y-font-card"
+  data-font={value}
+  data-font-family={fontFamily}
+  aria-label={`${label} font`}
+  aria-pressed="false"
+>
+  <small class="a11y-font-card__label" style={fontFamily ? `font-family: ${fontFamily}` : ''}>
+    {label}
+  </small>
+</button>
+
+<style>
+  .a11y-font-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--page-bg);
+    border: 2px solid color-mix(in srgb, var(--neutral-900) 20%, transparent);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-align: center;
+    box-shadow: 0 2px 8px color-mix(in oklch, var(--color-Black) 8%, transparent);
+  }
+
+  .a11y-font-card:hover {
+    background: var(--page-bg);
+    border-color: var(--primary-600);
+    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 12%, transparent);
+  }
+
+  .a11y-font-card:focus-visible {
+    outline: 2px solid var(--primary-600);
+    outline-offset: 2px;
+  }
+
+  .a11y-font-card[aria-pressed="true"] {
+    background: var(--page-bg);
+    border-color: var(--primary-600);
+    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-Black) 15%, transparent);
+  }
+
+  .a11y-font-card__label {
+    font-weight: var(--font-bold);
+    color: var(--neutral-900);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  /* Pressed/active state */
+  .a11y-font-card[aria-pressed="true"] .a11y-font-card__label {
+    color: var(--primary-600);
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .a11y-font-card {
+      padding: var(--space-sm) var(--space-md);
+    }
+
+    .a11y-font-card__label {
+    }
+  }
+</style>

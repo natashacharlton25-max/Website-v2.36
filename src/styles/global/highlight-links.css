@@ -1,262 +1,134 @@
 /**
- * Highlight Links — global overrides
+ * Global highlight links — visible indicator on all clickable
  *
- * Rules extracted from component a11y.css files during v2 audit.
- * Each atom adds its own rules here during its audit pass.
- *
- * Supports both legacy [data-highlight-links] and new [data-highlight] attribute.
- * data-highlight="static"   — visible highlight, no animation
- * data-highlight="animated" — visible highlight + pulse animation
+ * Inline text links: underline (not border)
+ * Block elements: outline with offset (gap between element and indicator)
+ * Buttons: ghost + pill + highlight outline
+ * Colour from --highlight-link-color (theme token, contrast-validated)
+ * Uses outline (not border) so element layout is unaffected and gap is automatic.
  */
 
-/* Button — outline ring inherits brand, label underline */
-[data-highlight-links] .btn,
-[data-highlight="static"] .btn,
-[data-highlight="animated"] .btn {
-  outline: 2px solid var(--_btn-brand);
-  outline-offset: 2px;
-}
-
-[data-highlight-links] .btn .btn__label,
-[data-highlight="static"] .btn .btn__label,
-[data-highlight="animated"] .btn .btn__label {
+/* ── Inline text links — underline ── */
+[data-highlight-links] :where(a:not(.btn):not(.card):not([role="button"])) {
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration-color: var(--highlight-link-color);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
 }
 
-/* All buttons → plain fill (like textonly render). No effects, no glass,
-   no shadows. Just primary/secondary/neutral fill with highlight ring. */
-[data-highlight-links] .btn,
-[data-highlight="static"] .btn,
-[data-highlight="animated"] .btn {
-  background: var(--_btn-brand);
-  color: var(--btn-text, var(--btn-filled-text));
-  border: 2px solid transparent;
-  box-shadow: none;
-  transform: none;
+/* ── Block interactive elements — outline with gap ── */
+[data-highlight-links] :where(button:not(.btn), summary, [role="button"]:not(.btn), [tabindex="0"]:not(figure)) {
+  outline: 2px solid var(--highlight-link-color);
+  outline-offset: 1px;
+}
+
+/* Figures: only highlighted when alt text display is active (they're interactive then) */
+[data-highlight-links][data-alt-display-mode="tooltip"] figure[tabindex="0"],
+[data-highlight-links][data-alt-display-mode="caption"] figure[tabindex="0"],
+[data-highlight-links][data-alt-display-mode="overlay"] figure[tabindex="0"],
+[data-highlight-links][data-alt-display-mode="subtitle"] figure[tabindex="0"],
+[data-highlight-links][data-alt-display-mode="replace"] figure[tabindex="0"] {
+  display: inline-block;
+  outline: 2px solid var(--highlight-link-color);
+  outline-offset: 1px;
+}
+
+/* ── Link cards and button-styled links — outline, not underline ── */
+[data-highlight-links] :where(a.card, a[role="button"]:not(.btn)) {
+  text-decoration: none;
+  outline: 2px solid var(--highlight-link-color);
+  outline-offset: 1px;
+}
+
+/* ── Elements with existing borders — outline with gap ── */
+[data-highlight-links] :where(.card) {
+  outline: 2px solid var(--highlight-link-color);
+  outline-offset: 1px;
+}
+
+/* ── Buttons — ghost + pill, all effects stripped ── */
+[data-highlight-links] .btn {
+  background: transparent;
+  color: var(--neutral-800);
+  outline: 2px solid var(--highlight-link-color);
+  outline-offset: 1px;
+  border: none;
+  border-radius: var(--radius-full);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  filter: none;
+  clip-path: none;
+  transform: none;
   text-shadow: none;
+}
+
+/* Kill decorative shadows but NOT focus ring */
+[data-highlight-links] .btn:not(:focus-visible) {
+  box-shadow: none;
+}
+
+/* Reset expand/split/tech — normal ghost padding */
+[data-highlight-links] .btn--expand,
+[data-highlight-links] .btn--split,
+[data-highlight-links] .btn--tech {
+  padding: var(--space-sm) var(--space-lg);
   overflow: hidden;
 }
 
-[data-highlight-links] .btn:hover,
-[data-highlight="static"] .btn:hover,
-[data-highlight="animated"] .btn:hover {
-  background: var(--_btn-brand-dark);
-  color: var(--btn-text, var(--btn-filled-text));
-  border-color: transparent;
-  box-shadow: none;
-  transform: none;
-}
-
-/* Kill all pseudo-elements */
-[data-highlight-links] .btn::before,
-[data-highlight-links] .btn::after,
-[data-highlight="static"] .btn::before,
-[data-highlight="static"] .btn::after,
-[data-highlight="animated"] .btn::before,
-[data-highlight="animated"] .btn::after {
-  display: none;
-}
-
-/* Magnetic — block JS transform movement */
-[data-highlight-links] .btn--magnetic,
-[data-highlight="static"] .btn--magnetic,
-[data-highlight="animated"] .btn--magnetic {
-  transform: none;
-}
-
-/* Expand — icon inline, no animation, normal padding */
+/* Icons — inline, inherit text colour */
 [data-highlight-links] .btn--expand .btn__icon,
-[data-highlight="static"] .btn--expand .btn__icon,
-[data-highlight="animated"] .btn--expand .btn__icon {
+[data-highlight-links] .btn .btn__icon {
   position: static;
   transform: none;
-  animation: none;
-  transition: none;
-}
-
-[data-highlight-links] .btn--expand:hover .btn__icon,
-[data-highlight="static"] .btn--expand:hover .btn__icon,
-[data-highlight="animated"] .btn--expand:hover .btn__icon {
-  transform: none;
-}
-
-[data-highlight-links] .btn--expand,
-[data-highlight="static"] .btn--expand,
-[data-highlight="animated"] .btn--expand {
-  padding: var(--space-md) var(--space-lg);
-}
-
-/* Rainbow glow — override page-bg brand back to primary fill */
-[data-highlight-links] .btn--rainbow-glow,
-[data-highlight="static"] .btn--rainbow-glow,
-[data-highlight="animated"] .btn--rainbow-glow {
-  --_btn-brand: var(--primary-600);
-  --_btn-brand-dark: var(--primary-800);
-  background: var(--primary-600);
-  color: var(--btn-filled-text);
-  border: 2px solid transparent;
-}
-
-[data-highlight-links] .btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
-[data-highlight-links] .btn--rainbow-glow:hover,
-[data-highlight="static"] .btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
-[data-highlight="static"] .btn--rainbow-glow:hover,
-[data-highlight="animated"] .btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
-[data-highlight="animated"] .btn--rainbow-glow:hover {
-  background: var(--primary-800);
-  color: var(--btn-filled-text);
-  border-color: transparent;
-  box-shadow: none;
-}
-
-/* Dropdown items — underline for link visibility, persists on hover */
-[data-highlight-links] .dropdown-item,
-[data-highlight-links] .dropdown-item:hover,
-[data-highlight="static"] .dropdown-item,
-[data-highlight="static"] .dropdown-item:hover,
-[data-highlight="animated"] .dropdown-item,
-[data-highlight="animated"] .dropdown-item:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-[data-highlight-links] .btn-rainbow-glow-wrap::before,
-[data-highlight-links] .btn-rainbow-glow-wrap::after,
-[data-highlight="static"] .btn-rainbow-glow-wrap::before,
-[data-highlight="static"] .btn-rainbow-glow-wrap::after,
-[data-highlight="animated"] .btn-rainbow-glow-wrap::before,
-[data-highlight="animated"] .btn-rainbow-glow-wrap::after {
-  display: none;
-}
-
-/* Link — inline variants get visible underline */
-[data-highlight-links] .link--default,
-[data-highlight-links] .link--underline,
-[data-highlight-links] .link--highlight,
-[data-highlight-links] .link--border,
-[data-highlight-links] .link--ghost,
-[data-highlight="static"] .link--default,
-[data-highlight="static"] .link--underline,
-[data-highlight="static"] .link--highlight,
-[data-highlight="static"] .link--border,
-[data-highlight="static"] .link--ghost,
-[data-highlight="animated"] .link--default,
-[data-highlight="animated"] .link--underline,
-[data-highlight="animated"] .link--highlight,
-[data-highlight="animated"] .link--border,
-[data-highlight="animated"] .link--ghost {
   color: var(--neutral-800);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: var(--primary-600);
-  text-decoration-thickness: 2px;
 }
 
-/* Kill animated underline — real underline replaces it */
-[data-highlight-links] .link--animate-underline-grow::after,
-[data-highlight="static"] .link--animate-underline-grow::after,
-[data-highlight="animated"] .link--animate-underline-grow::after {
+/* Strip all button pseudo-element effects + wrapper glows */
+[data-highlight-links] .btn::before,
+[data-highlight-links] .btn::after,
+[data-highlight-links] .btn-rainbow-glow-wrap::before,
+[data-highlight-links] .btn-rainbow-glow-wrap::after {
   display: none;
 }
 
-/* FormField — underline links inside description/error text */
-[data-highlight-links] .form-field a,
-[data-highlight="static"] .form-field a,
-[data-highlight="animated"] .form-field a {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+/* ── Highlight hover — border + fill shift to Warning (gated) ── */
+[data-highlight-links] :where(button, summary, [role="button"], [tabindex="0"], a.card, a[role="button"], .card):hover {
+  outline-color: var(--color-Warning);
+  background: color-mix(in oklch, var(--color-Warning) 15%, transparent);
 }
 
-/* Card — link cards get visible primary border */
-[data-highlight-links] .card--link,
-[data-highlight="static"] .card--link,
-[data-highlight="animated"] .card--link {
-  border: 2px solid var(--primary-600);
+[data-highlight-links] .btn:hover {
+  outline-color: var(--color-Warning);
+  background: color-mix(in oklch, var(--color-Warning) 15%, transparent);
+  border-color: transparent;
 }
 
-/* ── Animated mode — pulse on links ── */
-@keyframes highlight-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+/* ── Hover none — no colour shift ── */
+[data-highlight-links][data-hover="none"] :where(button, summary, [role="button"], [tabindex="0"], a.card, .card):hover,
+[data-highlight-links][data-hover="none"] .btn:hover {
+  outline-color: var(--highlight-link-color);
+  background: transparent;
 }
 
-[data-highlight="animated"] .link--default,
-[data-highlight="animated"] .link--underline,
-[data-highlight="animated"] .link--highlight,
-[data-highlight="animated"] .link--border,
-[data-highlight="animated"] .link--ghost {
-  animation: highlight-pulse 2s ease-in-out infinite;
-}
+/* ── Focus + highlight — focus-gate.css handles via data-focus-active !important ── */
 
-
-/* ══════════════════════════════════════════════════════════════
-   Interactive images — clickable indicator
-   Applies when highlight-links, enlarge mode, or tooltip mode active.
-   Double box-shadow follows border-radius. Hover darkens.
-   ══════════════════════════════════════════════════════════════ */
-
-/* ── Interactive image indicator — ::after overlay matches image exactly ── */
-[data-highlight-links] figure[data-role="content"],
-[data-image-enlarge] figure[data-role="content"],
-[data-alt-display-mode="tooltip"] figure[data-role="content"],
-body[data-hover="none"] .image--blur-reveal {
+/* Focused + hovered in highlight mode: shift to Success, everything persists */
+[data-highlight-links] button:focus-visible:hover,
+[data-highlight-links] a:focus-visible:hover,
+[data-highlight-links] summary:focus-visible:hover,
+[data-highlight-links] [role="button"]:focus-visible:hover,
+[data-highlight-links] [tabindex="0"]:focus-visible:hover {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success);
+  background: color-mix(in oklch, var(--color-Success) 25%, transparent);
+  color: var(--neutral-800);
+  transform: none;
   position: relative;
-  border-radius: var(--_img-radius, 0px);
+  z-index: var(--z-tooltip);
 }
 
-/* Click-to-reveal — blurred images in hover none */
-body[data-hover="none"] .image--blur-reveal {
-  cursor: pointer;
-  border: 3px solid var(--primary-600);
-  padding: var(--space-xs);
-  border-radius: calc(var(--_img-radius, 0px) + var(--space-xs));
-  transition: border-color 0.2s ease;
-}
-
-[data-highlight-links] figure[data-role="content"]::after,
-[data-image-enlarge] figure[data-role="content"]::after,
-[data-alt-display-mode="tooltip"] figure[data-role="content"]::after,
-
-/* ── Hover darken ── */
-[data-highlight-links] figure[data-role="content"]:hover::after,
-[data-image-enlarge] figure[data-role="content"]:hover::after,
-[data-alt-display-mode="tooltip"] figure[data-role="content"]:hover::after,
-body[data-hover="none"] .image--blur-reveal:hover {
-  border-color: var(--primary-800);
-}
-
-/* ── Keyboard focus — thicker ── */
-[data-highlight-links] figure[data-role="content"]:focus-visible::after,
-[data-image-enlarge] figure[data-role="content"]:focus-visible::after,
-[data-alt-display-mode="tooltip"] figure[data-role="content"]:focus-visible::after,
-body[data-hover="none"] .image--blur-reveal:focus-visible {
-  border-width: 4px;
-  border-color: var(--primary-800);
-}
-
-/* ── Hover instant — no transition ── */
-[data-hover="instant"] figure[data-role="content"]::after {
-  transition: none;
-}
-
-/* ── Hover none — no darken ── */
-[data-hover="none"] figure[data-role="content"]:hover::after {
-  border-color: var(--primary-600);
-}
-
-/* ── Assistive — thicker ── */
-[data-render="assistive"] figure[data-role="content"]::after {
-  border-width: 4px;
-}
-
-/* ── Mobile — always darkened ── */
-@media (max-width: 640px) {
-  [data-highlight-links] figure[data-role="content"]::after,
-  [data-image-enlarge] figure[data-role="content"]::after,
-  [data-alt-display-mode="tooltip"] figure[data-role="content"]::after {
-    border-color: var(--primary-800);
-  }
+/* ── Other elements — outline persists on hover ── */
+[data-highlight-links] :where(summary, [role="button"], [tabindex="0"], a.card, a[role="button"], .card):hover {
+  outline-color: var(--highlight-link-color);
 }

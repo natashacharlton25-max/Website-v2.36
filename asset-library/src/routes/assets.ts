@@ -45,7 +45,7 @@ async function getLicenseInfo(db: D1Database, licenseKey: string) {
     .bind(licenseKey).first();
 }
 
-function buildMetaResponse(asset: AssetRow, version: VersionRow, tags: string[], license: any, usageCount?: number) {
+function buildMetaResponse(asset: AssetRow, version: VersionRow, tags: string[], license: any, usageCount?: number, fallbackIconSlug?: string | null) {
   return {
     id: asset.id,
     name: asset.name,
@@ -70,6 +70,7 @@ function buildMetaResponse(asset: AssetRow, version: VersionRow, tags: string[],
     },
     tags,
     ...(usageCount !== undefined ? { usageCount } : {}),
+    ...(fallbackIconSlug ? { fallbackIcon: fallbackIconSlug } : {}),
     altSymbolId: asset.alt_symbol_id ?? null,
     altDescriptive: asset.alt_descriptive ?? null,
     altAacPhrase: asset.alt_aac_phrase ?? null,
@@ -166,7 +167,16 @@ export async function handleAssetMeta(request: Request, env: Env, slug: string):
     'SELECT COUNT(*) as cnt FROM usage_log WHERE asset_id = ?'
   ).bind(asset.id).first<{ cnt: number }>();
 
-  return json(buildMetaResponse(asset, version, tags, license, countRow?.cnt ?? 0));
+  // Lottie → static fallback icon slug
+  let fallbackIconSlug: string | null = null;
+  if (asset.type === 'lottie') {
+    const mapping = await env.DB.prepare(
+      'SELECT a.slug FROM lottie_mappings lm JOIN assets a ON lm.static_asset_id = a.id WHERE lm.lottie_asset_id = ?'
+    ).bind(asset.id).first<{ slug: string }>();
+    fallbackIconSlug = mapping?.slug ?? null;
+  }
+
+  return json(buildMetaResponse(asset, version, tags, license, countRow?.cnt ?? 0, fallbackIconSlug));
 }
 
 // ─── GET /v1/assets ───────────────────────────────────

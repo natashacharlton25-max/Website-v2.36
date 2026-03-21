@@ -1,0 +1,28 @@
+/**
+ * Global transitions — hover speed on all interactive elements
+ *
+ * Reads --hover-duration-fast from hover-gate.css.
+ * Hover gate sets to 0s for instant/none — transitions become instant.
+ * Components should NOT have their own transition declarations.
+ * Exception: unique animated properties (FlipCard perspective, RainbowBorder rotate).
+ */
+
+:where(a, button, [role="button"], [tabindex="0"],
+       .card, .badge, .btn, .link, .tooltip,
+       .form-field__input, .form-field__card-face) {
+  transition:
+    background-color var(--hover-duration-fast),
+    color var(--hover-duration-fast),
+    border-color var(--hover-duration-fast),
+    box-shadow var(--hover-duration-fast),
+    transform var(--hover-duration-fast),
+    opacity var(--hover-duration-fast);
+}
+
+:where(a, button, .btn, .link)::before,
+:where(a, button, .btn, .link)::after {
+  transition:
+    transform var(--hover-duration-fast),
+    opacity var(--hover-duration-fast),
+    background-color var(--hover-duration-fast);
+}

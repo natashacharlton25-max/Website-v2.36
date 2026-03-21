@@ -12,7 +12,7 @@
    when gate is "none".
    ══════════════════════════════════════════════════════════════ */
 
-/* ── Default (full) — authored timings ── */
+/* ── Default (full) — normal snappy feedback ── */
 :root {
   --hover-duration: 200ms;
   --hover-duration-fast: 120ms;
@@ -36,6 +36,15 @@
   --transition-slow: 0s;
 }
 
+/* Hover none: hide figcaption + ? indicator — inline alt text handles display */
+[data-hover="none"] .figcaption {
+  display: none;
+}
+
+[data-hover="none"] .image[data-role="content"]::after {
+  display: none;
+}
+
 /* ── Instant — state changes happen, no transition ── */
 [data-hover="instant"] {
   --hover-duration: 0s;
@@ -44,12 +53,21 @@
   --hover-duration-extralong: 0s;
 }
 
-/* ── Gentle — slow, deliberate transition ── */
+/* ── Gentle — slow, soft, deliberate ── */
 [data-hover="gentle"] {
-  --hover-duration: 1s;
-  --hover-duration-fast: 600ms;
-  --hover-duration-slow: 800ms;
-  --hover-duration-extralong: 2s;
+  --hover-duration: 1.2s;
+  --hover-duration-fast: 800ms;
+  --hover-duration-slow: 2s;
+  --hover-duration-extralong: 3s;
+}
+
+/* ── Focus active — kill hover on the focused element only ── */
+/* JS sets data-focus-active on focusin, removes on focusout */
+[data-focus-active] {
+  --hover-duration: 0s;
+  --hover-duration-fast: 0s;
+  --hover-duration-slow: 0s;
+  --hover-state: 0;
 }
 
 /* ── Full — default, no overrides needed ── */

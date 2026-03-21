@@ -1,0 +1,319 @@
+---
+/**
+ * Custom Scrollbar Component (OverlayScrollbars)
+ *
+ * Two independent axes, four combinations:
+ *
+ *   SIZE:
+ *     (default)                  → thin 10px, auto-hide
+ *     .a11y-scrollbar-enhanced   → thick 44px, always visible
+ *
+ *   STYLE:
+ *     (default)                  → plain gradient/solid
+ *     .a11y-scrollbar-neumorphic → carved channel, glossy 3D thumb, progress trail
+ *
+ *   Combos:
+ *     (neither)                             → thin plain
+ *     .a11y-scrollbar-neumorphic            → thin neumorphic
+ *     .a11y-scrollbar-enhanced              → thick plain
+ *     .a11y-scrollbar-enhanced.a11y-scrollbar-neumorphic → thick neumorphic
+ *
+ * Desktop only — hidden below 768px.
+ * Right padding on wrapper compensates for scrollbar width.
+ *
+ * Toggle classes on #a11y-content-wrapper.
+ * All colours from --brand-c-* tokens — themes swap automatically.
+ *
+ * Requires: npm install overlayscrollbars
+ * Usage: <CustomScrollbar /> in BaseLayout
+ */
+---
+
+<style is:global>
+
+  /* ==========================================================
+     OVERLAYSCROLLBARS BASE
+     ========================================================== */
+
+  @import 'overlayscrollbars/overlayscrollbars.css';
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  #a11y-content-wrapper {
+    height: calc(100vh - var(--body-top-padding, 70px));
+    overflow: auto;
+    padding-right: 10px;
+    padding-bottom: var(--space-2xl, 3rem);
+  }
+
+  html, body {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  [data-overlayscrollbars]:not(#a11y-content-wrapper),
+  [data-overlayscrollbars-viewport],
+  .os-viewport,
+  .os-padding {
+    background: transparent !important;
+    background-color: transparent !important;
+    pointer-events: auto !important;
+  }
+
+  .os-scrollbar-horizontal {
+    display: none !important;
+  }
+
+  /* Hide on mobile */
+  @media (max-width: 768px) {
+    .os-scrollbar-vertical {
+      display: none !important;
+    }
+
+    #a11y-content-wrapper {
+      padding-right: 0 !important;
+    }
+  }
+
+
+  /* ==========================================================
+     GUTTER COMPENSATION
+     Right padding on wrapper matches scrollbar width
+     ========================================================== */
+
+  #a11y-content-wrapper.a11y-scrollbar-enhanced {
+    padding-right: 44px;
+  }
+
+  #a11y-content-wrapper.a11y-scrollbar-neumorphic:not(.a11y-scrollbar-enhanced) {
+    padding-right: 18px;
+  }
+
+  #a11y-content-wrapper.a11y-scrollbar-neumorphic.a11y-scrollbar-enhanced {
+    padding-right: 44px;
+  }
+
+
+  /* ==========================================================
+     SIZE: DEFAULT — THIN (10px)
+     ========================================================== */
+
+  .os-scrollbar-vertical {
+    --os-size: 10px;
+    --os-padding-perpendicular: 2px;
+    --os-padding-axis: 2px;
+    transform: translateX(-5px);
+    top: 12px !important;
+    bottom: 12px !important;
+    height: calc(100% - var(--body-top-padding, 70px) - 12px - 12px) !important;
+  }
+
+
+  /* ==========================================================
+     SIZE: ENHANCED — THICK (44px)
+     ========================================================== */
+
+  .a11y-scrollbar-enhanced .os-scrollbar-vertical {
+    --os-size: 44px;
+    --os-padding-perpendicular: 4px;
+    --os-padding-axis: 4px;
+    transform: translateX(-10px);
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+
+  /* ==========================================================
+     STYLE: DEFAULT — PLAIN
+     Gradient thumb (thin) / solid thumb (thick), subtle track
+     ========================================================== */
+
+  /* ---- Plain track ---- */
+  .os-scrollbar-vertical .os-scrollbar-track {
+    background: color-mix(in oklch, var(--page-bg) 95%, var(--primary-600));
+    border-radius: var(--radius-md, 6px);
+    overflow: hidden;
+  }
+
+  /* ---- Plain thin thumb ---- */
+  .os-scrollbar-vertical .os-scrollbar-handle {
+    background: linear-gradient(
+      180deg,
+      var(--primary-600) 0%,
+      var(--secondary-600) 100%
+    );
+    border-radius: var(--radius-md, 6px);
+    box-shadow: 0 -100vh 0 100vh color-mix(in oklch, var(--primary-600) 30%, var(--page-bg));
+    transition: background 0.2s ease, opacity 0.2s ease;
+  }
+
+  .os-scrollbar-vertical .os-scrollbar-handle:hover {
+    background: linear-gradient(
+      180deg,
+      var(--primary-600) 0%,
+      var(--secondary-600) 100%
+    );
+    box-shadow: 0 -100vh 0 100vh color-mix(in oklch, var(--primary-600) 40%, var(--page-bg));
+    filter: brightness(1.1);
+  }
+
+  .os-scrollbar-vertical .os-scrollbar-handle:active {
+    background: linear-gradient(
+      180deg,
+      var(--primary-800) 0%,
+      var(--secondary-800) 100%
+    );
+    box-shadow: 0 -100vh 0 100vh color-mix(in oklch, var(--primary-600) 50%, var(--page-bg));
+  }
+
+  /* ---- Plain thick overrides ---- */
+  .a11y-scrollbar-enhanced .os-scrollbar-vertical .os-scrollbar-track {
+    background: var(--neutral-400, #ccc);
+    border-radius: 22px !important;
+    margin-inline: 10px;
+    overflow: hidden !important;
+  }
+
+  .a11y-scrollbar-enhanced .os-scrollbar-vertical .os-scrollbar-handle {
+    background: var(--primary-600);
+    border-radius: 22px;
+    box-shadow: 0 -100vh 20px 100vh color-mix(in oklch, var(--primary-600) 35%, var(--neutral-400, #ccc));
+    transition: filter 0.3s ease;
+  }
+
+  .a11y-scrollbar-enhanced .os-scrollbar-vertical .os-scrollbar-handle:hover {
+    background: var(--primary-600);
+    box-shadow: 0 -100vh 20px 100vh color-mix(in oklch, var(--primary-600) 35%, var(--neutral-400, #ccc));
+    filter: brightness(1.08);
+  }
+
+  .a11y-scrollbar-enhanced .os-scrollbar-vertical .os-scrollbar-handle:active {
+    background: var(--primary-600);
+    box-shadow: 0 -100vh 20px 100vh color-mix(in oklch, var(--primary-600) 35%, var(--neutral-400, #ccc));
+    filter: brightness(0.92);
+  }
+
+
+  /* ==========================================================
+     STYLE: NEUMORPHIC
+     Carved channel track, glossy 3D thumb, progress trail.
+     Applies on top of whichever size is active.
+     ========================================================== */
+
+  /* ---- Neumorphic track (both sizes) ---- */
+  .a11y-scrollbar-neumorphic .os-scrollbar-vertical .os-scrollbar-track {
+    background: var(--page-bg) !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    box-shadow:
+      inset 4px 4px 8px color-mix(in oklch, var(--page-bg) 55%, black),
+      inset -4px -4px 8px color-mix(in oklch, var(--page-bg) 50%, white),
+      inset 0 2px 12px color-mix(in oklch, var(--page-bg) 60%, black) !important;
+  }
+
+  /* ---- Neumorphic thumb (both sizes) ---- */
+  .a11y-scrollbar-neumorphic .os-scrollbar-vertical .os-scrollbar-handle,
+  .a11y-scrollbar-neumorphic .os-scrollbar-vertical .os-scrollbar-handle:hover,
+  .a11y-scrollbar-neumorphic .os-scrollbar-vertical .os-scrollbar-handle:active {
+    background: linear-gradient(
+      160deg,
+      color-mix(in oklch, var(--primary-600) 60%, white) 10%,
+      var(--primary-600) 45%,
+      color-mix(in oklch, var(--primary-600) 85%, black) 70%,
+      var(--primary-600) 85%
+    ) !important;
+    border-radius: 20px !important;
+    box-shadow:
+      2px 2px 4px color-mix(in oklch, var(--primary-600) 50%, black),
+      -1px -1px 3px color-mix(in oklch, var(--primary-600) 30%, white),
+      inset 2px 2px 4px color-mix(in oklch, var(--primary-600) 40%, white),
+      inset -2px -2px 4px color-mix(in oklch, var(--primary-600) 70%, black),
+      inset 0 1px 6px color-mix(in oklch, var(--primary-600) 30%, white),
+      inset 0 -1px 6px color-mix(in oklch, var(--primary-600) 80%, black),
+      0 -100vh 15px 100vh color-mix(in oklch, var(--primary-800) 35%, transparent) !important;
+    filter: none !important;
+  }
+
+  /* ---- Neumorphic thin: wider track for carved effect ---- */
+  .a11y-scrollbar-neumorphic:not(.a11y-scrollbar-enhanced) .os-scrollbar-vertical {
+    --os-size: 18px;
+  }
+
+  .a11y-scrollbar-neumorphic:not(.a11y-scrollbar-enhanced) .os-scrollbar-vertical .os-scrollbar-handle,
+  .a11y-scrollbar-neumorphic:not(.a11y-scrollbar-enhanced) .os-scrollbar-vertical .os-scrollbar-handle:hover,
+  .a11y-scrollbar-neumorphic:not(.a11y-scrollbar-enhanced) .os-scrollbar-vertical .os-scrollbar-handle:active {
+    width: calc(100% - 6px) !important;
+    margin: 0 3px !important;
+  }
+
+  /* ---- Neumorphic thick: thumb narrower than rail ---- */
+  .a11y-scrollbar-neumorphic.a11y-scrollbar-enhanced .os-scrollbar-vertical .os-scrollbar-track {
+    margin-inline: 10px;
+  }
+
+  .a11y-scrollbar-neumorphic.a11y-scrollbar-enhanced .os-scrollbar-vertical .os-scrollbar-handle,
+  .a11y-scrollbar-neumorphic.a11y-scrollbar-enhanced .os-scrollbar-vertical .os-scrollbar-handle:hover,
+  .a11y-scrollbar-neumorphic.a11y-scrollbar-enhanced .os-scrollbar-vertical .os-scrollbar-handle:active {
+    width: calc(100% - 12px) !important;
+    margin: 0 6px !important;
+  }
+
+
+  /* ==========================================================
+     REDUCE MOTION
+     ========================================================== */
+
+  .a11y-reduce-motion .os-scrollbar-vertical,
+  .a11y-reduce-motion .os-scrollbar-vertical .os-scrollbar-handle {
+    transition: none !important;
+  }
+
+  .a11y-reduce-motion {
+    scroll-behavior: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .os-scrollbar-vertical,
+    .os-scrollbar-vertical .os-scrollbar-handle {
+      transition: none !important;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+</style>
+
+<script>
+  import { OverlayScrollbars } from 'overlayscrollbars';
+
+  const wrapper = document.querySelector('#a11y-content-wrapper');
+
+  if (wrapper) {
+    const osOptions = {
+      scrollbars: {
+        autoHide: 'leave' as const,
+        autoHideDelay: 800,
+        clickScroll: true,
+      },
+      overflow: {
+        x: 'hidden' as const,
+        y: 'scroll' as const,
+      },
+    };
+
+    let instance = OverlayScrollbars(wrapper, osOptions);
+
+    document.addEventListener('astro:after-swap', () => {
+      instance?.destroy();
+      const newWrapper = document.querySelector('#a11y-content-wrapper');
+      if (newWrapper) {
+        instance = OverlayScrollbars(newWrapper, osOptions);
+      }
+    });
+  }
+</script>

@@ -44,7 +44,7 @@
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition: visibility var(--duration-fast) var(--ease-default);
 }
 
 /* ── AAC content toggle ── */
@@ -146,77 +146,9 @@ dialog .tooltip--right .tooltip__content { left: 100%; top: 50%; }
   content: none;
 }
 
-/* Hover none beats ALL — inline wins over bar, textonly, mobile, everything */
-[data-hover="none"] .tooltip .tooltip__content,
-[data-hover="none"][data-render="assistive"] .tooltip .tooltip__content,
-[data-hover="none"][data-render="textonly"] .tooltip .tooltip__content {
-  position: static;
-  display: inline;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  background: none;
-  border: none;
-  box-shadow: none;
-  transform: none;
-  padding: 0 var(--space-md);
-  margin: 0 var(--space-xs);
-  max-width: none;
-  width: auto;
-  white-space: normal;
-  text-align: inherit;
-  color: var(--neutral-600);
-  font-style: italic;
-  transition: none;
-}
+/* Textonly + hover-none rules → textonly/structure.css */
 
-
-/* ══════════════════════════════════════════════════════════════
-   Render modes
-   ══════════════════════════════════════════════════════════════ */
-
-/* Reduced — no animation */
-[data-render="reduced"] .tooltip__content {
-  transition: none;
-}
-
-/* Textonly — ALL tooltips hidden, JS shared bar shows them on hover */
-[data-render="textonly"] .tooltip .tooltip__content {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-
-/* Textonly + hover none — ALL inline, info gets brackets, label hidden */
-[data-hover="none"][data-render="textonly"] .tooltip .tooltip__content {
-  position: static;
-  display: inline;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  background: none;
-  border: none;
-  box-shadow: none;
-  transform: none;
-  padding: 0 var(--space-md);
-  margin: 0 var(--space-xs);
-  max-width: none;
-  width: auto;
-  white-space: normal;
-  text-align: inherit;
-  color: var(--neutral-600);
-  font-style: italic;
-  transition: none;
-}
-
-[data-hover="none"][data-render="textonly"] .tooltip--label .tooltip__content {
-  display: none;
-}
-
-[data-hover="none"][data-render="textonly"] .tooltip--label .tooltip__trigger {
-  cursor: default;
-}
+/* Reduced — hover-gate handles transition suppression globally */
 
 /* Assistive — info always visible as bar, label hidden */
 [data-render="assistive"] .tooltip--info .tooltip__content {
@@ -245,16 +177,7 @@ dialog .tooltip--right .tooltip__content { left: 100%; top: 50%; }
   justify-content: center;
 }
 
-/* ── Focus indicator ── */
-.tooltip__trigger:focus-visible {
-  outline: 2px solid var(--_tooltip-border);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-
-[data-render="assistive"] .tooltip__trigger:focus-visible {
-  outline-width: 3px;
-}
+/* Focus → global focus-gate.css */
 
 /* Mobile responsive rules in Tooltip.responsive.css */
 

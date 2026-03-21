@@ -1,0 +1,192 @@
+---
+/**
+ * SlideCard — Two-face slide-reveal card
+ *
+ * Two stacked faces overlap at rest. On hover both slide to
+ * their natural position, revealing the full card content.
+ * Face 1 (top): icon/image + title, tinted background.
+ * Face 2 (bottom): description + optional CTA link.
+ *
+ * Pure CSS hover effect — no JS required.
+ *
+ * @param icon        - Phosphor icon name (rendered via Icon component)
+ * @param title       - Face 1 heading text
+ * @param description - Face 2 body text
+ * @param href        - Optional CTA link URL
+ * @param linkLabel   - CTA link text (default: 'Read More')
+ * @param accentColor - CSS colour for hover accent (default: --primary-600)
+ * @param class       - Extra classes
+ */
+import Icon from '../../atoms/Icon/Icon.astro';
+
+interface Props {
+  icon?: string;
+  title: string;
+  description: string;
+  href?: string;
+  linkLabel?: string;
+  accentColor?: string;
+  class?: string;
+}
+
+const {
+  icon,
+  title,
+  description,
+  href,
+  linkLabel = 'Read More',
+  accentColor = 'var(--primary-600)',
+  class: className = '',
+} = Astro.props;
+---
+
+<div
+  class:list={['card', 'slide-card', className]}
+  style={`--_accent: ${accentColor};`}
+>
+  <div class="slide-card__face slide-card__face--front">
+    <div class="slide-card__front-content">
+      {icon && <Icon name={icon} size={64} class="slide-card__icon" />}
+      <h3 class="slide-card__title text">{title}</h3>
+    </div>
+  </div>
+
+  <div class="slide-card__face slide-card__face--back">
+    <div class="slide-card__back-content">
+      <p class="slide-card__text text">{description}</p>
+      {href && (
+        <a href={href} class="slide-card__link text">
+          {linkLabel}
+        </a>
+      )}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── Card wrapper ── */
+  .slide-card {
+    position: relative;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  /* ── Shared face styles ── */
+  .slide-card__face {
+    width: 100%;
+    height: 12rem;
+    transition: transform 0.5s, background 0.5s, opacity 0.5s;
+  }
+
+  /* ── Face 1 — icon + title (shifted down at rest) ── */
+  .slide-card__face--front {
+    position: relative;
+    background: var(--neutral-900);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    transform: translateY(6rem);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+
+  .slide-card:hover .slide-card__face--front {
+    background: var(--_accent);
+    transform: translateY(0);
+  }
+
+  .slide-card__front-content {
+    opacity: 0.25;
+    transition: opacity 0.5s;
+    text-align: center;
+    color: var(--page-bg);
+  }
+
+  .slide-card:hover .slide-card__front-content {
+    opacity: 1;
+  }
+
+  .slide-card__icon {
+    color: var(--page-bg);
+    margin-bottom: var(--space-sm);
+  }
+
+  .slide-card__title {
+    margin: 0;
+    padding: 0;
+    color: var(--page-bg);
+    text-align: center;
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    font-size: var(--font-size-lg);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+  }
+
+  /* ── Face 2 — description + link (shifted up at rest) ── */
+  .slide-card__face--back {
+    position: relative;
+    background: var(--page-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-lg);
+    box-sizing: border-box;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-6rem);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+  }
+
+  .slide-card:hover .slide-card__face--back {
+    transform: translateY(0);
+  }
+
+  .slide-card__text {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-heading);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--neutral-400);
+  }
+
+  .slide-card__link {
+    display: inline-block;
+    margin-top: var(--space-md);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    font-size: var(--text-sm);
+    color: var(--neutral-800);
+    padding: var(--space-xs) var(--space-sm);
+    border: 1.5px solid var(--neutral-800);
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    transition: background var(--transition-fast), color var(--transition-fast);
+  }
+
+  .slide-card__link:hover {
+    background: var(--_accent);
+    color: var(--page-bg);
+    border-color: var(--_accent);
+  }
+
+  /* ── Reduced motion — show both faces immediately ── */
+  @media (prefers-reduced-motion: reduce) {
+    .slide-card__face--front,
+    .slide-card__face--back {
+      transform: translateY(0);
+      transition: none;
+    }
+
+    .slide-card__front-content {
+      opacity: 1;
+      transition: none;
+    }
+
+    .slide-card__face--front {
+      background: var(--_accent);
+    }
+  }
+</style>

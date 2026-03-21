@@ -1,0 +1,127 @@
+---
+/**
+ * CompareSection - Side-by-side comparison
+ * Used within Reader presentations via layout: "compare"
+ */
+
+export interface CompareSide {
+  label?: string;
+  title: string;
+  content: string;
+}
+
+export interface Props {
+  left: CompareSide;
+  right: CompareSide;
+  divider?: boolean;
+}
+
+const { left, right, divider = true } = Astro.props;
+---
+
+<div class="compare">
+  <div class={`compare__grid ${divider ? 'compare__grid--divider' : ''}`}>
+    <div class="compare__side compare__side--left">
+      {left.label && <small class="compare__label">{left.label}</small>}
+      <h3 class="compare__title">{left.title}</h3>
+      <div class="compare__content" set:html={left.content} />
+    </div>
+    <div class="compare__side compare__side--right">
+      {right.label && <small class="compare__label">{right.label}</small>}
+      <h3 class="compare__title">{right.title}</h3>
+      <div class="compare__content" set:html={right.content} />
+    </div>
+  </div>
+</div>
+
+<style>
+  .compare {
+    width: 100%;
+    max-width: 1000px;
+  }
+
+  .compare__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2xl);
+    position: relative;
+  }
+
+  .compare__grid--divider::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: var(--neutral-400);
+    border-radius: var(--radius-full);
+  }
+
+  .compare__side {
+    padding: var(--space-xl);
+  }
+
+  .compare__label {
+    font-family: var(--font-body);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--neutral-400);
+    margin-bottom: var(--space-sm);
+  }
+
+  .compare__side--left .compare__label {
+    color: var(--secondary-800);
+  }
+
+  .compare__side--right .compare__label {
+    color: var(--primary-800);
+  }
+
+  .compare__title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    color: var(--neutral-900);
+    margin: 0 0 var(--space-md) 0;
+  }
+
+  .compare__content {
+    font-family: var(--font-body);
+    color: var(--neutral-800);
+    line-height: var(--leading-relaxed);
+  }
+
+  .compare__content :global(p) {
+    margin-bottom: var(--space-md);
+  }
+
+  .compare__content :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 968px) {
+    .compare__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+    }
+
+    .compare__grid--divider::after {
+      top: auto;
+      bottom: auto;
+      left: 10%;
+      right: 10%;
+      width: auto;
+      height: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .compare__side {
+      padding: var(--space-lg);
+    }
+  }
+</style>

@@ -1,0 +1,172 @@
+---
+/**
+ * ServiceDetails - Card grid with titled bullet lists
+ *
+ * Used on service detail pages to show "Who This Is For",
+ * "What's Included", "Areas Covered" etc.
+ *
+ * Props:
+ * @param cards - Array of card objects with title and items
+ */
+
+interface Props {
+  cards: Array<{
+    title: string;
+    items: string[];
+  }>;
+}
+
+const { cards } = Astro.props;
+---
+
+{cards.length > 0 && (
+  <section class="service-details section">
+    <div class="container container-6xl">
+      <div class="details-grid">
+        {cards.map(card => (
+          <div class="card details-card">
+            <h3 class="details-card__title">{card.title}</h3>
+            <ul class="details-card__list">
+              {card.items.map(item => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .service-details {
+    background: var(--page-bg);
+  }
+
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-2xl);
+  }
+
+  .details-card {
+    background: linear-gradient(145deg, var(--neutral-400), var(--color-White));
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--border-radius-xl);
+    padding: var(--space-2xl);
+  }
+
+  .details-card__title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    color: var(--neutral-800);
+    margin: 0 0 var(--space-lg) 0;
+    padding-bottom: var(--space-md);
+    border-bottom: 2px solid var(--primary-800);
+  }
+
+  .details-card__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .details-card__list li {
+    position: relative;
+    padding: var(--space-sm) 0 var(--space-sm) var(--space-xl);
+    color: var(--neutral-800);
+    line-height: var(--leading-relaxed);
+  }
+
+  .details-card__list li::before {
+    content: '';
+    position: absolute;
+    left: var(--space-xs);
+    top: calc(var(--space-sm) + 8px);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary-600);
+  }
+
+  /* ========== RESPONSIVE - TABLET (968px) ========== */
+  @media (max-width: 968px) {
+    .details-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ========== RESPONSIVE - SMALL (400px) ========== */
+  @media (max-width: 400px) {
+    .details-card {
+      padding: var(--space-lg);
+    }
+
+    .details-card__title {
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+    }
+
+    .details-card__list li {
+      padding: var(--space-xs) 0 var(--space-xs) var(--space-lg);
+    }
+
+    .details-card__list li::before {
+      width: 6px;
+      height: 6px;
+      top: calc(var(--space-xs) + 7px);
+    }
+  }
+
+  /* ========== RESPONSIVE - VERY SMALL (300px) ========== */
+  @media (max-width: 300px) {
+    .details-grid {
+      gap: var(--space-lg);
+    }
+
+    .details-card {
+      padding: var(--space-md);
+    }
+
+    .details-card__title {
+      text-align: center;
+    }
+
+    .details-card__list li {
+      padding-left: var(--space-md);
+    }
+
+    .details-card__list li::before {
+      width: 5px;
+      height: 5px;
+      left: 2px;
+    }
+  }
+
+  /* ========== RESPONSIVE - TINY (200px) ========== */
+  @media (max-width: 200px) {
+    .details-grid {
+      gap: var(--space-md);
+    }
+
+    .details-card {
+      padding: var(--space-sm);
+    }
+
+    .details-card__title {
+      margin-bottom: var(--space-sm);
+      padding-bottom: var(--space-xs);
+    }
+
+    .details-card__list li {
+      padding: 2px 0 2px var(--space-sm);
+    }
+
+    .details-card__list li::before {
+      width: 4px;
+      height: 4px;
+      top: 8px;
+      left: 0;
+    }
+  }
+</style>

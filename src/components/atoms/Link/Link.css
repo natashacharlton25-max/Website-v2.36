@@ -31,18 +31,13 @@
   text-decoration: none;
   cursor: pointer;
   color: var(--_link-color);
-  transition: color var(--hover-duration);
 }
 
 .link:hover {
   color: var(--_link-hover);
 }
 
-.link:focus-visible {
-  outline: var(--border-width-2) solid var(--_link-focus);
-  outline-offset: var(--border-width-2);
-  border-radius: var(--radius-xs);
-}
+/* focus-visible → global focus-gate.css */
 
 /* ==========================================================
    FLUSH — remove margin
@@ -190,7 +185,6 @@
   border-radius: var(--radius-full);
   transform-origin: 0% 50%;
   transform: scaleX(0);
-  transition: transform var(--hover-duration) cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 .link--animate-underline-grow:hover::after {
@@ -208,7 +202,6 @@
 
 /* Animation: shadowFill — box-shadow inset fills from left */
 .link--animate-shadow-fill {
-  transition: color var(--hover-duration), box-shadow var(--hover-duration);
   padding: 0 0.25rem;
   margin: 0 -0.25rem;
 }
@@ -254,36 +247,6 @@
    RENDER MODE OVERRIDES
    ================================================================ */
 
-/* Reduced — all transitions instant */
-[data-render="reduced"] .link { transition: none; }
+/* Reduced — hover-gate handles transition suppression globally */
 
-/* Textonly — all links become plain underlined text */
-[data-render="textonly"] .link {
-  color: var(--_link-color);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-align: left;
-  text-transform: none;
-  letter-spacing: normal;
-  font-weight: normal;
-}
-
-[data-render="textonly"] .link--uppercase {
-  text-transform: none;
-  letter-spacing: normal;
-}
-
-[data-render="textonly"] .link--weight-normal,
-[data-render="textonly"] .link--weight-medium,
-[data-render="textonly"] .link--weight-semibold,
-[data-render="textonly"] .link--weight-bold,
-[data-render="textonly"] .link--weight-extrabold {
-  font-weight: normal;
-}
-
-[data-render="textonly"] .link--color-primary,
-[data-render="textonly"] .link--color-accent,
-[data-render="textonly"] .link--color-text,
-[data-render="textonly"] .link--color-muted {
-  color: var(--_link-color);
-}
+/* Textonly → global textonly/structure.css */

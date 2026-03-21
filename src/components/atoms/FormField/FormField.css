@@ -108,23 +108,21 @@
   font-size: var(--text-base);
   background: var(--_field-bg);
   color: var(--_field-text);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   width: 100%;
 }
 
 .form-field__input::placeholder {
   color: var(--_field-placeholder);
-  opacity: 0.6;
+  opacity: var(--opacity-subtle);
 }
 
 .form-field__input:focus {
-  outline: 2px solid transparent; /* visible in Windows High Contrast / forced-colours mode */
   border-color: var(--_field-brand);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--_field-brand) 15%, transparent);
+  /* Focus ring handled by global focus-gate.css */
 }
 
 .form-field__input:disabled {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
   background: color-mix(in oklch, var(--_field-bg) 90%, var(--_field-border));
 }
@@ -211,7 +209,7 @@
 .form-field--neumorphic .form-field__input:focus {
   box-shadow: var(--_field-shadow);
   border-color: transparent;
-  outline: 2px solid var(--_field-brand);
+  outline: 2px solid var(--focus-color);
   outline-offset: 2px;
 }
 
@@ -264,7 +262,6 @@
   border: var(--border-width-2) solid var(--_field-border);
   border-radius: var(--radius-sm);
   background: var(--_field-bg);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
   position: relative;
 }
 
@@ -292,12 +289,12 @@
 }
 
 .form-field__checkbox:focus-visible + .form-field__checkmark {
-  outline: 2px solid var(--_field-brand);
+  outline: 2px solid var(--focus-color);
   outline-offset: 2px;
 }
 
 .form-field__checkbox:disabled + .form-field__checkmark {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -334,7 +331,6 @@
   border: var(--border-width-2) solid var(--_field-border);
   border-radius: 50%;
   background: var(--_field-bg);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
   position: relative;
 }
 
@@ -362,12 +358,12 @@
 }
 
 .form-field__radio:focus-visible + .form-field__radio-indicator {
-  outline: 2px solid var(--_field-brand);
+  outline: 2px solid var(--focus-color);
   outline-offset: 2px;
 }
 
 .form-field__radio:disabled + .form-field__radio-indicator {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -400,7 +396,6 @@
   border-radius: var(--radius-full);
   background: var(--_field-border);
   cursor: pointer;
-  transition: all var(--hover-duration-fast) ease-out;
   position: relative;
   display: block;
 }
@@ -427,12 +422,12 @@
 }
 
 .form-field__toggle:focus-visible + .form-field__toggle-track {
-  outline: 2px solid var(--_field-brand);
+  outline: 2px solid var(--focus-color);
   outline-offset: 2px;
 }
 
 .form-field__toggle:disabled + .form-field__toggle-track {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -489,22 +484,7 @@
 .form-field--card-cols-4 .form-field__card-grid { grid-template-columns: repeat(4, 1fr); }
 
 /* Stack on small screens */
-@media (max-width: 480px) {
-  .form-field--card-cols-3 .form-field__card-grid,
-  .form-field--card-cols-4 .form-field__card-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 300px) {
-  .form-field--card-cols-2 .form-field__card-grid,
-  .form-field--card-cols-3 .form-field__card-grid,
-  .form-field--card-cols-4 .form-field__card-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.form-field__card {
+/* @media-stripped-0 *//* @media-stripped-1 */.form-field__card {
   cursor: pointer;
   user-select: none;
 }
@@ -528,7 +508,6 @@
   border-radius: var(--radius-lg);
   background: var(--_field-bg);
   text-align: center;
-  transition: border-color var(--hover-duration-fast), background-color var(--hover-duration-fast);
   position: relative;
 }
 
@@ -581,12 +560,7 @@
   box-shadow: 0 0 0 2px var(--_field-brand);
 }
 
-/* ── Reduced render — no transitions ── */
-[data-render="reduced"] .form-field__card-check,
-[data-render="reduced"] .form-field__card-check--toggle,
-[data-render="reduced"] .form-field__card-check--toggle::before {
-  transition: none;
-}
+/* ── Reduced render — hover-gate handles transition suppression globally ── */
 
 /* ── Card footer — label + check indicator inline ── */
 .form-field__card-footer {
@@ -604,7 +578,6 @@
   border: 2px solid var(--_field-brand);
   border-radius: var(--radius-sm);
   flex-shrink: 0;
-  transition: all var(--hover-duration-fast);
   position: relative;
 }
 
@@ -644,7 +617,6 @@
   display: flex;
   align-items: center;
   box-shadow: inset 0 0 4px color-mix(in oklch, var(--color-Black) 15%, transparent);
-  transition: background var(--hover-duration-fast);
 }
 
 .form-field__card-check--toggle::before {
@@ -655,7 +627,6 @@
   background: var(--color-White);
   border-radius: var(--radius-full);
   transform: translateX(-1.25rem);
-  transition: transform var(--hover-duration-fast);
   box-shadow: 0 0 4px color-mix(in oklch, var(--color-Black) 20%, transparent);
 }
 
@@ -682,7 +653,7 @@
 
 /* Focus visible on card */
 .form-field__card-input:focus-visible + .form-field__card-face {
-  outline: 2px solid var(--_field-brand);
+  outline: 2px solid var(--focus-color);
   outline-offset: 2px;
 }
 
@@ -716,7 +687,7 @@
 
 /* Disabled */
 .form-field__card-input:disabled + .form-field__card-face {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -747,11 +718,6 @@
   --_field-thumb-size: 20px;
 }
 
-[data-render="reduced"] .form-field__input { transition: none; }
-[data-render="reduced"] .form-field__checkmark { transition: none; }
-[data-render="reduced"] .form-field__radio-indicator { transition: none; }
-[data-render="reduced"] .form-field__toggle-track { transition: none; }
-[data-render="reduced"] .form-field__toggle-thumb { transition: none; }
 
 [data-render="reduced"] .form-field--glass .form-field__input {
   backdrop-filter: none;
@@ -770,7 +736,6 @@
   box-shadow: none;
 }
 
-[data-render="reduced"] .form-field__card-face { transition: none; }
 
 /* ── Assistive — enlarged controls, thick focus, generous spacing ── */
 
@@ -785,7 +750,7 @@
 [data-render="assistive"] .form-field__input {
   min-height: 64px;
   padding: var(--space-md) var(--space-lg);
-  font-size: var(--neutral-800);
+  font-size: var(--text-body);
 }
 
 [data-render="assistive"] .form-field__input:focus {
@@ -822,56 +787,9 @@
   height: 3em;
 }
 
-[data-render="assistive"] .form-field__card-input:focus-visible + .form-field__card-face {
-  outline-width: 3px;
-}
+/* Assistive focus → global focus-gate.css */
 
-/* ── Textonly — native controls, no custom widgets ── */
-
-[data-render="textonly"] .form-field__input {
-  background: color-mix(in oklch, var(--_field-text) 6%, transparent);
-  border: none;
-  border-bottom: 2px solid var(--_field-border);
-  border-radius: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-[data-render="textonly"] .form-field__input:focus {
-  box-shadow: none;
-  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
-  border-bottom-color: var(--_field-brand-dark);
-  outline: 2px solid var(--_field-brand-dark);
-  outline-offset: 2px;
-}
-
-[data-render="textonly"] .form-field__checkmark { display: none; }
-[data-render="textonly"] .form-field__checkbox {
-  position: static;
-  opacity: 1;
-  width: 24px;
-  height: 24px;
-  accent-color: var(--_field-brand);
-}
-
-[data-render="textonly"] .form-field__radio-indicator { display: none; }
-[data-render="textonly"] .form-field__radio {
-  position: static;
-  opacity: 1;
-  width: 24px;
-  height: 24px;
-  accent-color: var(--_field-brand);
-}
-
-[data-render="textonly"] .form-field__toggle-track { display: none; }
-[data-render="textonly"] .form-field__toggle {
-  position: static;
-  opacity: 1;
-  width: 24px;
-  height: 24px;
-  accent-color: var(--_field-brand);
-}
+/* Textonly → global textonly/structure.css */
 
 /* Card-select is functional content — NOT stripped in textonly.
    Images are choices, toggles are form controls. */

@@ -1,0 +1,250 @@
+---
+import Button from '../../atoms/Button/Button.astro';
+import Icon from '../../atoms/Icon/Icon.astro';
+
+interface InfoItem {
+  icon: string; // Icon name (e.g., 'file-pdf-fill')
+  label: string;
+}
+
+interface Props {
+  category: string;
+  name: string;
+  sku?: string;
+  description: string;
+  infoItems: InfoItem[];
+  productId: string;
+  productImage: string;
+  hasProfessionalGuide?: boolean;
+  cartNote?: string;
+}
+
+const {
+  category,
+  name,
+  sku,
+  description,
+  infoItems,
+  productId,
+  productImage,
+  hasProfessionalGuide = false,
+  cartNote = "Email required for download link.<br />No purchase necessary. No payment needed.<br />We believe healing should be unconditional."
+} = Astro.props;
+---
+
+<div class="product-details">
+  <!-- Top: Badge Row (fixed at top) -->
+  <div class="info-badges">
+    <small class="info-badge info-badge--type">{category}</small>
+    {infoItems.map((item, index) => (
+      <span class={`info-badge info-badge--${index}`}>
+        <Icon name={`spec-cards/${item.icon}`} size={14} />
+        {item.label}
+      </span>
+    ))}
+  </div>
+
+  <!-- Middle: Content (grows to fill space) -->
+  <div class="product-content">
+    <h1 class="product-title">{name}</h1>
+
+    {sku && (
+      <div class="product-sku">
+        SKU: {sku}
+      </div>
+    )}
+
+    <p class="product-description">{description}</p>
+  </div>
+
+  <!-- Bottom: Footer (fixed at bottom) -->
+  <div class="product-footer">
+    <p class="cart-note-inline" set:html={cartNote} />
+
+    <div class="action-buttons">
+      <!-- Add to Cart Button -->
+      <div
+        class="cart-btn-wrapper add-to-cart-btn-product"
+        data-product-id={productId}
+        data-product-name={name}
+        data-product-price="0"
+        data-product-image={productImage}
+      >
+        <Button variant="primary" size="md">
+          Add to Basket
+        </Button>
+      </div>
+
+      <!-- Professional Guide Button -->
+      {hasProfessionalGuide && (
+        <div
+          class="cart-btn-wrapper add-to-cart-btn-product"
+          data-product-id={`${productId}-guide`}
+          data-product-name={`${name} - Guidance Notes`}
+          data-product-price="0"
+          data-product-image={productImage}
+        >
+          <Button variant="secondary" size="md">
+            Add Guides to Basket
+          </Button>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+<style>
+  .product-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    height: 100%;
+    min-height: 400px;
+  }
+
+  /* Badge Row - stays at top */
+  .info-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  /* Content section - grows to fill space */
+  .product-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    flex-grow: 1;
+  }
+
+  /* Footer - payment note + buttons at bottom */
+  .product-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-top: auto;
+  }
+
+  .info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: var(--border-radius-sm);
+    color: var(--color-White);
+  }
+
+  .info-badge :global(svg) {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Type badge - Primary color */
+  .info-badge--type {
+    background-color: var(--primary-800);
+  }
+
+  /* Info badges - Different accent colors */
+  .info-badge--0 {
+    background-color: var(--secondary-800);
+  }
+
+  .info-badge--1 {
+    background-color: var(--neutral-900);
+  }
+
+  .info-badge--2 {
+    background-color: var(--neutral-900);
+  }
+
+  .product-title {
+    font-size: var(--text-h2);
+    font-weight: var(--font-bold);
+    color: var(--neutral-800);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .product-sku {
+    color: var(--neutral-400);
+  }
+
+  .product-description {
+    color: var(--neutral-800);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .cart-note-inline {
+    color: var(--neutral-800);
+    font-style: italic;
+    padding: var(--space-md);
+    background-color: var(--page-bg);
+    border-left: 3px solid var(--primary-600);
+    border-radius: var(--border-radius-sm);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .cart-btn-wrapper {
+    flex: 0 0 auto;
+    width: auto;
+    cursor: pointer;
+  }
+
+  .cart-btn-wrapper :global(.cart-button-full) {
+    width: 100%;
+  }
+
+  .cart-btn-wrapper :global(.unified-btn),
+  .cart-btn-wrapper :global(.unified-btn button) {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  @media (max-width: 768px) {
+    .action-buttons {
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .cart-btn-wrapper {
+      width: 100%;
+      min-width: auto;
+    }
+
+    .cart-btn-wrapper :global(.unified-btn button) {
+      padding: var(--space-sm) var(--space-md);
+    }
+
+    .cart-btn-wrapper :global(svg) {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .cart-btn-wrapper :global(.unified-btn button) {
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    .cart-btn-wrapper :global(svg) {
+      width: 14px;
+      height: 14px;
+    }
+  }
+</style>

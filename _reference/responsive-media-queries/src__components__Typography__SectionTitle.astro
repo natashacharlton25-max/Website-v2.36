@@ -1,0 +1,460 @@
+---
+/**
+ * SectionTitle - Reusable section title with divider line and optional media
+ *
+ * Usage:
+ * <SectionTitle title="Our Story" />
+ * <SectionTitle title="Services" dividerColor="secondary" size="lg" />
+ * <SectionTitle title="Featured" image="/path/to/img.jpg" mediaPosition="right" />
+ * <SectionTitle title="Contact" icon="envelope-fill" dividerColor="neutral" />
+ * <SectionTitle title="NEW" variant="badge" badgeColor="neutral" />
+ * <SectionTitle title="Welcome" variant="underline" underlineStyle="gradient" />
+ */
+import Icon from '../atoms/Icon/Icon.astro';
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  size?: 'sm' | 'lg';
+
+  // Divider options
+  dividerColor?: 'primary' | 'secondary' | 'text' | 'neutral' | 'gradient';
+  dividerPosition?: 'left' | 'right' | 'both' | 'none';
+  dividerStyle?: 'solid' | 'dashed' | 'dotted';
+  dividerEnds?: 'rounded' | 'square';
+  dividerLength?: 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl'; // 'auto' stretches with text
+
+  // Text styling
+  textColor?: string;
+  uppercase?: boolean;
+  fontWeight?: 'normal' | 'medium' | 'semibold' | 'bold';
+
+  // Variant styles
+  variant?: 'default' | 'underline' | 'badge' | 'highlight' | 'minimal';
+  underlineStyle?: 'solid' | 'gradient' | 'dashed';
+  badgeColor?: 'primary' | 'secondary' | 'neutral';
+  highlightColor?: 'primary' | 'secondary' | 'neutral';
+
+  // Media options
+  image?: string;
+  icon?: string;
+  mediaPosition?: 'left' | 'right';
+  mediaSize?: 'sm' | 'md' | 'lg' | 'auto'; // 'auto' scales with title size
+  iconColor?: 'primary' | 'secondary' | 'neutral' | 'text';
+  iconStyle?: 'contained' | 'bare'; // 'contained' has background, 'bare' is just icon
+
+  // Layout
+  align?: 'left' | 'center' | 'right';
+  spacing?: 'tight' | 'normal' | 'loose';
+
+  class?: string;
+}
+
+const {
+  title,
+  subtitle,
+  size = 'lg',
+  dividerColor = 'primary',
+  dividerPosition = 'left',
+  dividerStyle = 'solid',
+  dividerEnds = 'rounded',
+  dividerLength = 'auto',
+  textColor,
+  uppercase = false,
+  fontWeight = 'bold',
+  variant = 'default',
+  underlineStyle = 'solid',
+  badgeColor = 'primary',
+  highlightColor = 'primary',
+  image,
+  icon,
+  mediaPosition = 'left',
+  mediaSize = 'auto',
+  iconColor = 'text',
+  iconStyle = 'contained',
+  align = 'left',
+  spacing = 'normal',
+  class: className = ''
+} = Astro.props;
+
+// Calculate icon size based on title size when mediaSize is 'auto'
+const iconSizeMap = { sm: 32, lg: 44 };
+const mediaSizeMap = { sm: 'md', lg: 'lg' };
+const computedMediaSize = mediaSize === 'auto' ? mediaSizeMap[size] : mediaSize;
+const computedIconSize = mediaSize === 'auto' ? iconSizeMap[size] : (mediaSize === 'sm' ? 24 : mediaSize === 'md' ? 32 : 56);
+
+// Build class list
+const classes = [
+  'section-title',
+  `section-title--${size}`,
+  `section-title--align-${align}`,
+  `section-title--spacing-${spacing}`,
+  `section-title--weight-${fontWeight}`,
+  `section-title--variant-${variant}`,
+  variant === 'default' ? `section-title--divider-${dividerPosition}` : '',
+  variant === 'default' ? `section-title--divider-${dividerColor}` : '',
+  variant === 'default' ? `section-title--divider-ends-${dividerEnds}` : '',
+  variant === 'default' ? `section-title--divider-length-${dividerLength}` : '',
+  variant === 'default' && dividerStyle !== 'solid' ? `section-title--divider-style-${dividerStyle}` : '',
+  variant === 'underline' ? `section-title--underline-${underlineStyle}` : '',
+  variant === 'badge' ? `section-title--badge-${badgeColor}` : '',
+  variant === 'highlight' ? `section-title--highlight-${highlightColor}` : '',
+  uppercase ? 'section-title--uppercase' : '',
+  (image || icon) ? `section-title--has-media` : '',
+  (image || icon) ? `section-title--media-${mediaPosition}` : '',
+  (image || icon) ? `section-title--media-size-${computedMediaSize}` : '',
+  icon ? `section-title--icon-${iconColor}` : '',
+  icon ? `section-title--icon-${iconStyle}` : '',
+  className
+].filter(Boolean).join(' ');
+
+// Custom text color style
+const customStyle = textColor ? `--section-title-color: ${textColor};` : '';
+---
+
+<div class={classes} style={customStyle}>
+  {/* Media on left */}
+  {(image || icon) && mediaPosition === 'left' && (
+    <div class="section-title__media">
+      {image ? (
+        <img src={image} alt="" class="section-title__img" />
+      ) : icon ? (
+        <Icon name={icon} size={computedIconSize} class="section-title__icon" />
+      ) : null}
+    </div>
+  )}
+
+  {/* Divider left (default variant only) */}
+  {variant === 'default' && (dividerPosition === 'left' || dividerPosition === 'both') && (
+    <div class="section-title__divider"></div>
+  )}
+
+  {/* Title content */}
+  <div class="section-title__content">
+    <h2 class="section-title__text">
+      {variant === 'highlight' && <span class="section-title__highlight"></span>}
+      <span class="section-title__text-inner">{title}</span>
+    </h2>
+    {subtitle && <p class="section-title__subtitle">{subtitle}</p>}
+    {variant === 'underline' && <div class="section-title__underline"></div>}
+  </div>
+
+  {/* Divider right (default variant only) */}
+  {variant === 'default' && (dividerPosition === 'right' || dividerPosition === 'both') && (
+    <div class="section-title__divider"></div>
+  )}
+
+  {/* Media on right */}
+  {(image || icon) && mediaPosition === 'right' && (
+    <div class="section-title__media">
+      {image ? (
+        <img src={image} alt="" class="section-title__img" />
+      ) : icon ? (
+        <Icon name={icon} size={computedIconSize} class="section-title__icon" />
+      ) : null}
+    </div>
+  )}
+</div>
+
+<style>
+  /* ========== BASE ========== */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .section-title__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .section-title__text {
+    font-family: var(--font-heading);
+    color: var(--section-title-color, var(--primary-600));
+    margin: 0;
+    line-height: var(--leading-tight);
+    position: relative;
+  }
+
+  .section-title__text-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-title__subtitle {
+    font-family: var(--font-body);
+    color: var(--neutral-400);
+    margin: 0;
+  }
+
+  /* ========== FONT WEIGHTS ========== */
+  .section-title--weight-normal .section-title__text { font-weight: var(--font-normal); }
+  .section-title--weight-medium .section-title__text { font-weight: var(--font-medium); }
+  .section-title--weight-semibold .section-title__text { font-weight: var(--font-semibold); }
+  .section-title--weight-bold .section-title__text { font-weight: var(--font-bold); }
+
+  /* ========== UPPERCASE ========== */
+  .section-title--uppercase .section-title__text {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ========== SPACING ========== */
+  .section-title--spacing-tight { gap: var(--space-sm); }
+  .section-title--spacing-normal { gap: var(--space-lg); }
+  .section-title--spacing-loose { gap: var(--space-xl); }
+
+  /* ========== DIVIDER ========== */
+  .section-title__divider {
+    width: 4px;
+    flex-shrink: 0;
+    align-self: stretch;
+  }
+
+  /* Divider ends */
+  .section-title--divider-ends-rounded .section-title__divider {
+    border-radius: var(--radius-full);
+  }
+
+  .section-title--divider-ends-square .section-title__divider {
+    border-radius: 0;
+  }
+
+  /* Divider colors */
+  .section-title--divider-primary .section-title__divider { background: var(--primary-600); }
+  .section-title--divider-secondary .section-title__divider { background: var(--secondary-600); }
+  .section-title--divider-text .section-title__divider { background: var(--neutral-400); }
+  .section-title--divider-neutral .section-title__divider { background: var(--neutral-700); }
+  .section-title--divider-gradient .section-title__divider { background: var(--gradient-hero); }
+  .section-title--divider-none .section-title__divider { display: none; }
+
+  /* Divider styles */
+  .section-title--divider-style-dashed .section-title__divider {
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--primary-600) 0,
+      var(--primary-600) 6px,
+      transparent 6px,
+      transparent 10px
+    );
+  }
+
+  .section-title--divider-style-dotted .section-title__divider {
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--primary-600) 0,
+      var(--primary-600) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+    border-radius: 0;
+  }
+
+  /* Divider lengths - 'auto' stretches with text, others are fixed heights */
+  .section-title--divider-length-auto .section-title__divider {
+    align-self: stretch;
+  }
+
+  .section-title--divider-length-xs .section-title__divider {
+    align-self: center;
+    height: 20px;
+  }
+
+  .section-title--divider-length-sm .section-title__divider {
+    align-self: center;
+    height: 32px;
+  }
+
+  .section-title--divider-length-md .section-title__divider {
+    align-self: center;
+    height: 48px;
+  }
+
+  .section-title--divider-length-lg .section-title__divider {
+    align-self: center;
+    height: 64px;
+  }
+
+  .section-title--divider-length-xl .section-title__divider {
+    align-self: center;
+    height: 80px;
+  }
+
+  /* ========== SIZES ========== */
+  /* Default (lg): h2 inherits from global typography */
+  /* Small: steps down to h3 */
+  .section-title--sm .section-title__text { font-size: var(--text-h3); }
+  .section-title--sm .section-title__divider { width: 3px; }
+
+  /* ========== ALIGNMENT ========== */
+  .section-title--align-center {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .section-title--align-center .section-title__content {
+    align-items: center;
+  }
+
+  .section-title--align-right {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .section-title--align-right .section-title__content {
+    align-items: flex-end;
+  }
+
+  /* ========== VARIANT: UNDERLINE ========== */
+  .section-title--variant-underline .section-title__underline {
+    height: 3px;
+    width: 60px;
+    margin-top: var(--space-sm);
+    border-radius: var(--radius-full);
+    background: var(--primary-600);
+  }
+
+  .section-title--underline-gradient .section-title__underline {
+    background: var(--gradient-hero);
+    width: 80px;
+  }
+
+  .section-title--underline-dashed .section-title__underline {
+    background: repeating-linear-gradient(
+      to right,
+      var(--primary-600) 0,
+      var(--primary-600) 8px,
+      transparent 8px,
+      transparent 12px
+    );
+    width: 80px;
+  }
+
+  .section-title--align-center .section-title__underline {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .section-title--align-right .section-title__underline {
+    margin-left: auto;
+  }
+
+  /* ========== VARIANT: BADGE ========== */
+  .section-title--variant-badge {
+    display: inline-flex;
+  }
+
+  .section-title--variant-badge .section-title__text {
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    color: var(--color-White);
+  }
+
+  .section-title--badge-primary .section-title__text { background: var(--primary-600); }
+  .section-title--badge-secondary .section-title__text { background: var(--secondary-600); }
+  .section-title--badge-neutral .section-title__text { background: var(--neutral-700); }
+
+  /* ========== VARIANT: HIGHLIGHT ========== */
+  .section-title--variant-highlight .section-title__highlight {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 35%;
+    z-index: 0;
+    opacity: 0.3;
+  }
+
+  .section-title--highlight-primary .section-title__highlight { background: var(--primary-200); }
+  .section-title--highlight-secondary .section-title__highlight { background: var(--secondary-200); }
+  .section-title--highlight-neutral .section-title__highlight { background: var(--neutral-400); }
+
+  /* ========== VARIANT: MINIMAL ========== */
+  .section-title--variant-minimal .section-title__text {
+    font-weight: var(--font-medium);
+    color: var(--neutral-400);
+  }
+
+  /* ========== MEDIA (Image/Icon) ========== */
+  .section-title__media {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--page-bg-raised);
+  }
+
+  .section-title__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .section-title__icon {
+    color: var(--section-title-color, var(--primary-600));
+  }
+
+  /* Icon colors */
+  .section-title--icon-primary .section-title__icon { color: var(--primary-600); }
+  .section-title--icon-secondary .section-title__icon { color: var(--secondary-600); }
+  .section-title--icon-neutral .section-title__icon { color: var(--neutral-700); }
+  .section-title--icon-text .section-title__icon { color: var(--section-title-color, var(--primary-600)); }
+
+  /* Icon style: bare (no background) */
+  .section-title--icon-bare .section-title__media {
+    background: transparent;
+    border-radius: 0;
+  }
+
+  /* Media sizes - responsive to title size when 'auto' */
+  .section-title--media-size-xs .section-title__media { width: 24px; height: 24px; border-radius: var(--radius-sm); }
+  .section-title--media-size-sm .section-title__media { width: 32px; height: 32px; }
+  .section-title--media-size-md .section-title__media { width: 48px; height: 48px; }
+  .section-title--media-size-lg .section-title__media { width: 64px; height: 64px; }
+
+  /* Media position */
+  .section-title--media-right .section-title__media { order: 10; }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 768px) {
+    .section-title { gap: var(--space-md); }
+  }
+
+  /* ========== VERY SMALL SCREENS (300px) - Stack layout ========== */
+  @media (max-width: 300px) {
+    .section-title {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: var(--space-sm);
+    }
+
+    .section-title__content {
+      align-items: center;
+    }
+
+    .section-title__divider {
+      width: 50% !important;
+      height: 4px !important;
+      align-self: center !important;
+    }
+
+    .section-title--media-right .section-title__media {
+      order: 0;
+    }
+
+
+    .section-title--media-size-lg .section-title__media {
+      width: 48px;
+      height: 48px;
+    }
+  }
+</style>

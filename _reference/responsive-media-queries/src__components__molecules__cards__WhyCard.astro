@@ -1,0 +1,223 @@
+---
+/**
+ * WhyCard - Why work with us card component
+ *
+ * Used on services page to display reasons to work with us
+ *
+ * Props:
+ * @param title - Card title
+ * @param text - Card description text
+ * @param badge - Optional badge label text
+ * @param icon - Optional icon name: 'heart', 'tool', 'star', 'handshake'
+ * @param variant - Optional variant: 'flat' for gradient background with no hover
+ */
+
+interface Props {
+  title: string;
+  text: string;
+  badge?: string;
+  icon?: 'heart' | 'tool' | 'star' | 'handshake';
+  variant?: 'flat';
+}
+
+const { title, text, badge, icon, variant } = Astro.props;
+
+// Icon SVG paths
+const icons: Record<string, string> = {
+  heart: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+  tool: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  star: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  handshake: '<path d="M11 17a1 1 0 0 1-.447-.105L7 15.118l-3.553 1.777a1 1 0 0 1-1.447-.894V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v11a1 1 0 0 1-1 1z"/><path d="M21 17a1 1 0 0 1-.447-.105L17 15.118l-3.553 1.777A1 1 0 0 1 12 16V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v11a1 1 0 0 1-1 1z"/>'
+};
+
+const cardClass = variant ? `why-card why-card--${variant}` : 'why-card';
+---
+
+<div class={cardClass}>
+  {badge && (
+    <div class="why-card__badge">
+      {icon && icons[icon] && (
+        <svg class="why-card__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={icons[icon]} />
+      )}
+      <span class="why-card__badge-text">{badge}</span>
+    </div>
+  )}
+  <h3 class="why-card__title">{title}</h3>
+  <p class="why-card__text">{text}</p>
+</div>
+
+
+<style>
+  /* ========== WHY CARD ========== */
+ .why-card {
+   text-align: left;
+   background-color: var(--neutral-400);
+   border-radius: var(--border-radius-lg);
+   padding: var(--space-lg);
+   box-shadow: none;
+ }
+
+  /* ========== BADGE ========== */
+  .why-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    margin-bottom: var(--space-md);
+    background: var(--primary-200);
+    border-radius: var(--radius-sm);
+  }
+
+  .why-card__icon {
+    color: var(--primary-800);
+    flex-shrink: 0;
+  }
+
+  .why-card__badge-text {
+    font-family: var(--font-body);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--primary-800);
+  }
+
+  /* ========== TITLE ========== */
+  .why-card__title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    font-size: 1.125rem;
+    line-height: 1.375;
+    color: var(--secondary-600);
+    margin: 0 0 var(--space-md) 0;
+  }
+
+  /* ========== TEXT ========== */
+  .why-card__text {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--neutral-800);
+    margin: 0;
+  }
+
+  /* ========== VARIANT: FLAT ========== */
+  /* Gradient background, no hover, colorful gradient badges */
+  .why-card--flat {
+    background: linear-gradient(145deg, var(--neutral-400), var(--color-White));
+    box-shadow: none;
+    border-radius: var(--border-radius-xl);
+    padding: var(--space-2xl);
+    border-left: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .why-card--flat .why-card__badge {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    margin-bottom: var(--space-lg);
+  }
+
+  .why-card--flat .why-card__icon {
+    color: var(--color-White);
+  }
+
+  .why-card--flat .why-card__badge-text {
+    color: var(--color-White);
+    white-space: nowrap;
+  }
+
+  /* nth-child badge color variants (applied via parent grid) */
+  .why-card--flat:nth-child(2) .why-card__badge {
+    background: linear-gradient(135deg, var(--secondary-600), var(--secondary-800));
+  }
+
+  .why-card--flat:nth-child(3) .why-card__badge,
+  .why-card--flat:nth-child(4) .why-card__badge {
+    background: linear-gradient(135deg, var(--neutral-700), var(--neutral-900));
+  }
+
+  /* ========== RESPONSIVE - SMALL (500px) ========== */
+  @media (max-width: 500px) {
+    .why-card__title {
+      margin-bottom: var(--space-sm);
+    }
+
+    .why-card__badge {
+      padding: 3px var(--space-xs);
+      margin-bottom: var(--space-sm);
+    }
+
+    .why-card__icon {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* ========== RESPONSIVE - VERY SMALL (400px) ========== */
+  @media (max-width: 400px) {
+    .why-card--flat {
+      padding: var(--space-lg);
+    }
+
+    .why-card__text {
+      line-height: 1.5;
+    }
+
+    .why-card__badge-text {
+      letter-spacing: 0.03em;
+    }
+
+    .why-card__icon {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  /* ========== RESPONSIVE - TINY (300px) ========== */
+  @media (max-width: 300px) {
+    .why-card {
+      text-align: center;
+    }
+
+    .why-card--flat {
+      padding: var(--space-md);
+    }
+
+    .why-card__badge {
+      display: none;
+    }
+
+    .why-card__title {
+      display: none;
+    }
+
+    .why-card__text {
+      line-height: 1.4;
+    }
+  }
+
+  /* ========== RESPONSIVE - ULTRA SMALL (200px) ========== */
+  @media (max-width: 200px) {
+    .why-card--flat {
+      padding: var(--space-sm);
+    }
+
+    .why-card__badge {
+      padding: 2px 4px;
+      gap: 2px;
+    }
+
+    .why-card__icon {
+      width: 8px;
+      height: 8px;
+    }
+
+    .why-card__text {
+      line-height: 1.3;
+    }
+  }
+
+  /* A11Y theme overrides in: src/styles/a11y/components/why-card.css */
+</style>

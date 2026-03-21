@@ -1,0 +1,143 @@
+/**
+ * Visual Effects Gate
+ *
+ * Controls shadows, glass, glow, liquid effects via data-visual on <html>.
+ * Independent axis — composable with render mode, hover, motion.
+ *
+ * Values:
+ *   full  — everything on (default, no overrides)
+ *   solid — kills glass/blur/liquid, keeps shadows
+ *   flat  — kills everything: shadows, glass, glow, liquid, glint
+ *
+ * Your View panel: "Visual Effects" → Full / Solid / Flat
+ * Textonly sets data-visual="flat" alongside data-render="textonly"
+ * Assistive preset sets data-visual="solid"
+ */
+
+
+/* ==========================================================
+   SOLID — no glass, no blur, no liquid. Shadows + glow remain.
+   ========================================================== */
+
+[data-visual="solid"] {
+  /* Glass backgrounds → transparent */
+  --glass-bg: transparent;
+  --glass-bg-light: transparent;
+  --glass-bg-dark: transparent;
+  --glass-bg-frosted: transparent;
+  --glass-bg-brand: transparent;
+  --glass-bg-brand-tint: transparent;
+  --glass-bg-primary: transparent;
+
+  /* Glass borders → subtle solid */
+  --glass-border: var(--neutral-400);
+  --glass-border-light: var(--neutral-400);
+  --glass-border-dark: var(--neutral-400);
+  --glass-border-frosted: var(--neutral-400);
+  --glass-border-brand: var(--neutral-400);
+  --glass-border-subtle: var(--neutral-400);
+  --glass-border-mid: var(--neutral-400);
+
+  /* Glass blur → none */
+  --glass-blur: none;
+  --glass-blur-heavy: none;
+  --glass-blur-frosted: none;
+  --glass-overlay-blur: 0;
+
+  /* Glass shadow → none */
+  --glass-shadow: none;
+  --glass-shadow-inset: none;
+  --glass-shadow-inset-dark: none;
+
+  /* Liquid → off */
+  --liquid-blur: 0;
+  --liquid-tint: transparent;
+  --liquid-inner-glow: transparent;
+  --liquid-outer-glow: transparent;
+  --liquid-border: var(--neutral-400);
+  --liquid-inner-shadow: none;
+  --liquid-outer-shadow: none;
+
+  /* Glint → off */
+  --glint-gradient: none;
+}
+
+
+/* ==========================================================
+   FLAT — nothing. No shadows, no glass, no glow, no liquid.
+   ========================================================== */
+
+[data-visual="flat"] {
+  /* Everything from solid */
+  --glass-bg: transparent;
+  --glass-bg-light: transparent;
+  --glass-bg-dark: transparent;
+  --glass-bg-frosted: transparent;
+  --glass-bg-brand: transparent;
+  --glass-bg-brand-tint: transparent;
+  --glass-bg-primary: transparent;
+  --glass-border: var(--neutral-400);
+  --glass-border-light: var(--neutral-400);
+  --glass-border-dark: var(--neutral-400);
+  --glass-border-frosted: var(--neutral-400);
+  --glass-border-brand: var(--neutral-400);
+  --glass-border-subtle: var(--neutral-400);
+  --glass-border-mid: var(--neutral-400);
+  --glass-blur: none;
+  --glass-blur-heavy: none;
+  --glass-blur-frosted: none;
+  --glass-overlay-blur: 0;
+  --glass-shadow: none;
+  --glass-shadow-inset: none;
+  --glass-shadow-inset-dark: none;
+  --liquid-blur: 0;
+  --liquid-tint: transparent;
+  --liquid-inner-glow: transparent;
+  --liquid-outer-glow: transparent;
+  --liquid-border: var(--neutral-400);
+  --liquid-inner-shadow: none;
+  --liquid-outer-shadow: none;
+  --glint-gradient: none;
+
+  /* Plus: all shadows → none */
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-elevated: none;
+  --shadow-inner-sm: none;
+  --shadow-inner-lg: none;
+  --shadow-neu-raised: none;
+  --shadow-neu-hover: none;
+  --shadow-neu-pressed: none;
+  --shadow-dropdown-md: none;
+  --shadow-btn: none;
+  --shadow-btn-hover: none;
+
+  /* Plus: all glow → none */
+  --glow-ambient: none;
+  --glow-ambient-secondary: none;
+  --glow-neon: none;
+  --glow-neon-hover: none;
+  --glow-text: none;
+  --glow-text-secondary: none;
+  --glow-text-subtle: none;
+  --glow-text-intense: none;
+  --glow-spread: none;
+  --glow-spread-secondary: none;
+}
+
+
+/* ==========================================================
+   DISABLED STATE — universal opacity
+   ========================================================== */
+
+[disabled],
+[aria-disabled="true"],
+.is-disabled {
+  opacity: var(--opacity-disabled);
+  pointer-events: none;
+  cursor: not-allowed;
+}

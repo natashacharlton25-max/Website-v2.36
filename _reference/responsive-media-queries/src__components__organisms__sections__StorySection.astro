@@ -1,0 +1,81 @@
+---
+import SectionTitle from '../../Typography/SectionTitle.astro';
+
+interface Props {
+  title: string;
+  content: string[];
+  /** Optional image for the section title */
+  image?: string;
+  /** Optional icon for the section title */
+  icon?: string;
+}
+
+const { title, content, image, icon } = Astro.props;
+---
+
+<section class="story section">
+  <div class="container">
+    <div class="story__content">
+      <!-- Section Title with Divider -->
+      <SectionTitle
+        title={title}
+        size="lg"
+        dividerColor="primary"
+        image={image}
+        icon={icon}
+        iconColor="primary"
+        iconStyle="bare"
+      />
+
+      <!-- Story Text -->
+      <div class="story__text">
+        {content.map(paragraph => (
+          <p>{paragraph}</p>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .story__content {
+    max-width: 1400px;
+    text-align: left;
+  }
+
+  .story__text {
+    max-width: 1400px;
+  }
+
+  .story__text p {
+    font-weight: var(--font-medium);
+    color: var(--neutral-800);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-lg);
+  }
+
+  .story__text p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 768px) {
+    .story__text p {
+    }
+  }
+
+  @media (max-width: 480px) {
+    .story__text p {
+    }
+  }
+
+  @media (max-width: 300px) {
+    .story__content {
+      text-align: center;
+    }
+
+    .story__text p {
+      text-align: center;
+    }
+  }
+</style>

@@ -57,18 +57,11 @@ function extractCoreTokens(cssText) {
   const tokenMap = buildTokenMap(cssText);
   const tokens = { bg: null, text: null, primary: null, secondary: null };
 
-  // Find -c-bg, -c-text, -c-primary, -c-secondary declarations
-  for (const [name, value] of Object.entries(tokenMap)) {
-    if (name.endsWith('-c-bg') && !tokens.bg) {
-      tokens.bg = resolveValue(value, tokenMap);
-    } else if (name.endsWith('-c-text') && !tokens.text) {
-      tokens.text = resolveValue(value, tokenMap);
-    } else if (name.endsWith('-c-primary') && !name.endsWith('-c-primary-light') && !name.endsWith('-c-primary-dark') && !tokens.primary) {
-      tokens.primary = resolveValue(value, tokenMap);
-    } else if (name.endsWith('-c-secondary') && !name.endsWith('-c-secondary-light') && !name.endsWith('-c-secondary-dark') && !tokens.secondary) {
-      tokens.secondary = resolveValue(value, tokenMap);
-    }
-  }
+  // Read directly from scale tokens (brand-c-* tokens were removed)
+  tokens.bg = resolveValue(tokenMap['page-bg'], tokenMap) || tokenMap['page-bg'];
+  tokens.text = resolveValue(tokenMap['neutral-800'], tokenMap) || tokenMap['neutral-800'];
+  tokens.primary = resolveValue(tokenMap['primary-600'], tokenMap) || tokenMap['primary-600'];
+  tokens.secondary = resolveValue(tokenMap['secondary-600'], tokenMap) || tokenMap['secondary-600'];
 
   return tokens;
 }

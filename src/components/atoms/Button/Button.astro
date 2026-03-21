@@ -133,8 +133,9 @@ if (glowColors && glowColors.length >= 2) {
 // Semantic role for AT context
 const semanticRole = type === 'submit' ? 'form-submit' : isIconOnly && ariaLabel ? 'control' : 'action';
 
-const iconSizes: Record<string, number> = { sm: 18, md: 22, lg: 26 };
-const iconSize = iconSizes[size] || 18;
+// Icon size omitted — .btn__icon CSS (1.25em) scales with button font-size.
+// Size variants handled by .btn--sm/.btn--lg font-size differences.
+const iconSize = undefined;
 
 // Build icon name — only prefix with collection if explicitly provided
 const iconName = icon ? (iconCollection ? `${iconCollection}/${icon}` : icon) : '';
@@ -357,6 +358,32 @@ const iconRight = iconPosition === 'right' && hasIcon;
   initDropdowns();
   // Also support ClientRouter navigations
   document.addEventListener('astro:page-load', initDropdowns);
+</script>
+
+<script>
+  // Focus gate: set data-focus-active ONLY on keyboard focus (not mouse click).
+  // Track if last interaction was keyboard via keydown before focus.
+  function initFocusHoverGate() {
+    let lastKeyTime = 0;
+
+    document.addEventListener('keydown', () => {
+      lastKeyTime = Date.now();
+    });
+
+    document.addEventListener('focusin', (e) => {
+      // Only activate if focus came from keyboard (within 100ms of a keypress)
+      if (Date.now() - lastKeyTime > 100) return;
+      const el = (e.target as HTMLElement).closest('[tabindex], button, a, [role="button"]');
+      if (el) el.setAttribute('data-focus-active', '');
+    });
+
+    document.addEventListener('focusout', (e) => {
+      const el = (e.target as HTMLElement).closest('[data-focus-active]');
+      if (el) el.removeAttribute('data-focus-active');
+    });
+  }
+  initFocusHoverGate();
+  document.addEventListener('astro:page-load', initFocusHoverGate);
 </script>
 
 <script>

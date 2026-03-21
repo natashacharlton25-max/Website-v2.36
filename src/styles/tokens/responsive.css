@@ -1,0 +1,64 @@
+/* ===================================
+   GLOBAL RESPONSIVE TOKENS
+   --base-font-pct sets the screen-size base.
+   html font-size = base-font-pct × text-multiplier × layout-multiplier
+   All three multiply. Nothing overrides.
+   =================================== */
+
+/* ── Wide screens (automatic, no user toggle) ── */
+
+@media (min-width: 2560px) {
+  :root { --base-font-pct: 125%; }    /* 20px base */
+}
+
+@media (min-width: 1920px) and (max-width: 2559px) {
+  :root { --base-font-pct: 112.5%; }  /* 18px base */
+}
+
+/* ── Desktop default: 100% (16px) — set in typography.css ── */
+
+/* ── Scaling down ── */
+
+@media (max-width: 768px) {
+  :root {
+    --base-font-pct: 87.5%;           /* 14px base */
+  }
+
+  /* Tablet: h6/h5/h4 collapse to h3 size */
+  .heading--h6,
+  .heading--h5,
+  .heading--h4 { font-size: var(--text-h3); }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --base-font-pct: 75%;             /* 12px base */
+    --grid-cols: 1;
+  }
+
+/* Mobile: h6/h5/h4/h3 collapse to h2 size */
+  .heading--h6,
+  .heading--h5,
+  .heading--h4,
+  .heading--h3 { font-size: var(--text-h2); }
+
+  /* Mobile: all badges collapse to large size, allow wrap */
+  .badge.badge { font-size: var(--text-body); padding: var(--space-sm) var(--space-md); white-space: normal; overflow-wrap: break-word; text-align: center; }
+}
+
+@media (max-width: 250px) {
+  :root { --base-font-pct: 62.5%; }   /* 10px base */
+
+  /* All headings collapse to h2 size */
+  .heading--h1 { font-size: var(--text-h2); }
+}
+
+@media (max-width: 200px) {
+  :root { --base-font-pct: 56.25%; }  /* 9px base */
+
+  /* All buttons collapse to small size */
+  .btn {
+    padding: var(--space-sm) var(--space-md);
+    min-height: 2rem;
+  }
+}

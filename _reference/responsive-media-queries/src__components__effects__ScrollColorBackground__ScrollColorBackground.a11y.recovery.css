@@ -1,0 +1,42 @@
+/**
+ * ScrollColorBackground — a11y.css
+ * @layer components
+ *
+ * Disables scroll-based colour transitions when any a11y theme,
+ * reduce-motion, or text-only mode is active.
+ * Forces page background to the static --page-bg or --page-bg.
+ */
+
+@layer components {
+
+  /* ---- Theme overrides ---- */
+  :global(#a11y-content-wrapper.a11y-theme-dark) .scroll-bg-layer,
+  :global(#a11y-content-wrapper.a11y-theme-cream) .scroll-bg-layer,
+  :global(#a11y-content-wrapper.a11y-theme-high-contrast) .scroll-bg-layer,
+  :global(#a11y-content-wrapper.a11y-theme-protanopia) .scroll-bg-layer,
+  :global(#a11y-content-wrapper.a11y-theme-deuteranopia) .scroll-bg-layer,
+  :global(#a11y-content-wrapper.a11y-theme-tritanopia) .scroll-bg-layer,
+  :global(#a11y-content-wrapper.a11y-theme-monochrome) .scroll-bg-layer {
+    background-color: var(--page-bg, var(--page-bg)) !important;
+  }
+
+  /* ---- Text-only mode ---- */
+  :global(#a11y-content-wrapper.a11y-text-only) .scroll-bg-layer {
+    background-color: var(--page-bg, var(--page-bg)) !important;
+  }
+
+  /* ---- Reduce motion ---- */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .scroll-bg-layer {
+    background-color: var(--page-bg, var(--page-bg)) !important;
+    transition: none !important;
+  }
+
+  /* ---- System preference ---- */
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-bg-layer {
+      background-color: var(--page-bg, var(--page-bg)) !important;
+      transition: none !important;
+    }
+  }
+
+}

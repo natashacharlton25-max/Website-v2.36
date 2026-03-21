@@ -1,0 +1,277 @@
+/* =========================================================
+   EDITORIAL LAYOUT - Project Collection Pages
+   Only page-specific styles - components handle their own styling
+   ========================================================= */
+
+/* ========== BREADCRUMBS SPACING ========== */
+.editorial-resources ~ .breadcrumbs-section,
+.editorial-specs ~ .breadcrumbs-section {
+  padding-bottom: 0;
+}
+
+/* Reduce gap between breadcrumbs and hero on project pages */
+.breadcrumbs-section + .hero-section--simple {
+  padding-top: var(--space-md);
+}
+
+/* ========== HERO CUSTOMIZATIONS ========== */
+.editorial-hero__tags {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.editorial-hero__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  margin-top: var(--space-lg);
+}
+
+/* ========== WHO IT'S FOR IMAGE OVERRIDE ========== */
+#who-benefits .image-text-section__image {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+}
+
+#who-benefits .image-text-section__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ========== BENEFITS LIST (slotted into ImageTextSection) ========== */
+.benefits-list__items {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-md) 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.benefits-list__items li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.benefits-list__items li svg {
+  flex-shrink: 0;
+  color: var(--primary-600);
+  margin-top: 4px;
+}
+
+/* ========== PRODUCTS GRID (for resource cards) ========== */
+.editorial-resources {
+  padding-top: 0;
+}
+
+.editorial-resources .products-grid {
+  overflow: hidden; /* Clear floats */
+}
+
+.editorial-resources .products-grid::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+/* ========== SECTION TITLES ========== */
+.editorial__section-title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-semibold);
+  color: var(--neutral-800);
+  margin: 0 0 var(--space-xl) 0;
+}
+
+/* ========== KEY FEATURES / HIGHLIGHTS ========== */
+.editorial-highlights {
+  background: var(--page-bg);
+}
+
+.editorial-highlights__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+}
+
+.editorial-highlight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-White);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  color: var(--neutral-800);
+}
+
+.editorial-highlight svg {
+  color: var(--primary-600);
+  flex-shrink: 0;
+}
+
+/* ========== RELATED SKILLS ========== */
+.editorial-skills {
+  background: var(--page-bg);
+}
+
+.editorial-skills__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.editorial-skill {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  background: var(--primary-200);
+  color: var(--primary-800);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-medium);
+}
+
+/* ========== SPECIFICATIONS ========== */
+.editorial-specs {
+  padding-top: var(--space-xl);
+  padding-bottom: var(--space-4xl);
+  background: var(--page-bg);
+}
+
+/* Override grid to 4 columns for projects */
+.editorial-specs .spec-masonry {
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 0;
+}
+
+@media (max-width: 1024px) {
+  .editorial-specs .spec-masonry {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .editorial-specs .spec-masonry {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .editorial-specs .spec-masonry {
+    grid-template-columns: 1fr;
+  }
+
+  .editorial-specs {
+    padding-top: var(--space-lg);
+    padding-bottom: var(--space-2xl);
+  }
+}
+
+/* ========== RESPONSIVE - VERY SMALL (300px) - CENTER ALIGN ========== */
+@media (max-width: 300px) {
+  .hero-section .editorial-hero__tags,
+  .editorial-hero__tags {
+    justify-content: center !important;
+    width: 100% !important;
+    text-align: center;
+  }
+
+  .hero-section .editorial-hero__meta,
+  .editorial-hero__meta {
+    justify-content: center !important;
+    width: 100% !important;
+    text-align: center;
+    display: flex !important;
+  }
+
+  /* Force badge centering */
+  .editorial-hero__meta > * {
+    margin: 0 auto;
+  }
+
+  .editorial-about__audience {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  .editorial-highlights__grid {
+    justify-content: center;
+  }
+
+  .benefits-list__items li {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+/* ========== ABOUT SECTION (fallback without image) ========== */
+.editorial-about__audience {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--primary-200);
+  border-radius: var(--radius-lg);
+  max-width: 600px;
+}
+
+.editorial-about__audience svg {
+  color: var(--primary-600);
+  flex-shrink: 0;
+}
+
+.editorial-about__audience strong {
+  display: block;
+  font-weight: var(--font-semibold);
+  color: var(--primary-800);
+  margin-bottom: var(--space-xs);
+}
+
+.editorial-about__audience p {
+  margin: 0;
+  color: var(--neutral-800);
+  line-height: var(--leading-relaxed);
+}
+
+/* ========== PROSE CONTENT ========== */
+.editorial-prose {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.editorial-prose :where(h2, h3, h4) {
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+
+.editorial-prose :where(p, ul, ol) {
+  margin-bottom: var(--space-md);
+  line-height: var(--leading-relaxed);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .editorial-highlights__grid {
+    flex-direction: column;
+  }
+
+  .editorial-specs__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .editorial-hero__meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

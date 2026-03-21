@@ -1,0 +1,112 @@
+---
+/**
+ * CalloutSection - Highlighted info/tip/warning box
+ * Used within Reader presentations via layout: "callout"
+ */
+
+export interface Props {
+  title?: string;
+  content: string;
+  type?: 'info' | 'tip' | 'warning';
+}
+
+const { title, content, type = 'info' } = Astro.props;
+
+// Default icons for each type
+const icons = {
+  info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+  tip: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>`,
+  warning: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+};
+
+const defaultTitles = {
+  info: 'Note',
+  tip: 'Tip',
+  warning: 'Important',
+};
+---
+
+<div class={`callout callout--${type}`}>
+  <div class="callout__header">
+    <div class="callout__icon" set:html={icons[type]} />
+    <h3 class="callout__title">{title || defaultTitles[type]}</h3>
+  </div>
+  <div class="callout__content" set:html={content} />
+</div>
+
+<style>
+  .callout {
+    max-width: 800px;
+    width: 100%;
+    padding: var(--space-2xl);
+    border-radius: var(--radius-xl);
+    border-left: 4px solid;
+  }
+
+  .callout--info {
+    background: var(--neutral-400);
+    border-color: var(--neutral-700);
+  }
+
+  .callout--tip {
+    background: var(--primary-200);
+    border-color: var(--primary-600);
+  }
+
+  .callout--warning {
+    background: var(--secondary-200);
+    border-color: var(--secondary-800);
+  }
+
+  .callout__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+
+  .callout__icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .callout--info .callout__icon {
+    color: var(--neutral-900);
+  }
+
+  .callout--tip .callout__icon {
+    color: var(--primary-800);
+  }
+
+  .callout--warning .callout__icon {
+    color: var(--secondary-800);
+  }
+
+  .callout__title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-semibold);
+    color: var(--neutral-900);
+    margin: 0;
+  }
+
+  .callout__content {
+    font-family: var(--font-body);
+    color: var(--neutral-800);
+    line-height: var(--leading-relaxed);
+  }
+
+  .callout__content :global(p) {
+    margin: 0;
+  }
+
+  .callout__content :global(p + p) {
+    margin-top: var(--space-md);
+  }
+
+  @media (max-width: 640px) {
+    .callout {
+      padding: var(--space-xl);
+    }
+  }
+</style>

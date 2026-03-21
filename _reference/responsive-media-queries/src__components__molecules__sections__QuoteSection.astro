@@ -1,0 +1,110 @@
+---
+/**
+ * QuoteSection - Pull quote with attribution
+ * Used within Reader presentations via layout: "quote"
+ */
+
+export interface Props {
+  quote: string;
+  author?: string;
+  role?: string;
+  variant?: 'default' | 'accent' | 'minimal';
+}
+
+const { quote, author, role, variant = 'default' } = Astro.props;
+---
+
+<div class={`quote quote--${variant}`}>
+  <blockquote class="quote__text">
+    {quote}
+  </blockquote>
+  {(author || role) && (
+    <div class="quote__attribution">
+      {author && <span class="quote__author">{author}</span>}
+      {role && <small class="quote__role">{role}</small>}
+    </div>
+  )}
+</div>
+
+<style>
+  .quote {
+    max-width: 900px;
+    width: 100%;
+    text-align: center;
+    padding: var(--space-2xl);
+  }
+
+  .quote__text {
+    font-family: var(--font-heading);
+    font-weight: var(--font-medium);
+    font-style: italic;
+    color: var(--primary-800);
+    line-height: var(--leading-relaxed);
+    margin: 0 0 var(--space-xl) 0;
+    position: relative;
+  }
+
+  .quote__text::before {
+    content: '"';
+    position: absolute;
+    top: -0.5em;
+    left: -0.3em;
+    color: var(--primary-200);
+    font-family: var(--font-heading);
+    line-height: 1;
+    opacity: 0.5;
+  }
+
+  .quote__attribution {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .quote__author {
+    font-family: var(--font-body);
+    font-weight: var(--font-semibold);
+    color: var(--neutral-800);
+  }
+
+  .quote__role {
+    font-family: var(--font-body);
+    color: var(--neutral-400);
+  }
+
+  /* Accent variant */
+  .quote--accent .quote__text {
+    color: var(--secondary-800);
+  }
+
+  .quote--accent .quote__text::before {
+    color: var(--secondary-200);
+  }
+
+  /* Minimal variant */
+  .quote--minimal .quote__text {
+    font-style: normal;
+  }
+
+  .quote--minimal .quote__text::before {
+    display: none;
+  }
+
+  @media (max-width: 968px) {
+    .quote__text {
+    }
+  }
+
+  @media (max-width: 640px) {
+    .quote {
+      padding: var(--space-lg);
+    }
+
+    .quote__text {
+    }
+
+    .quote__text::before {
+    }
+  }
+</style>

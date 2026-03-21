@@ -543,22 +543,29 @@ function generateHighContrastOverrides(isDark, scales) {
  * WCAG audit on semantic token pairs.
  * Text pairs must pass 4.5:1. Decorative pairs must pass 3:1.
  */
-export function auditTheme(semantic) {
-  // Core audit: default text/accent on the theme's own background.
-  // text-light and text-dark are cross-context tokens (for use on explicitly
-  // dark/light surfaces within the page) — their contrast depends on the
-  // surface they're paired with at the component level, not on page-bg.
+export function auditTheme(scales, pageBg, focusHighlight = null) {
+  const bg = pageBg['page-bg'];
+
   const textPairs = [
-    ['text on bg',           semantic['brand-c-text'],       semantic['brand-c-bg']],
-    ['primary on bg',        semantic['brand-c-primary'],    semantic['brand-c-bg']],
-    ['secondary on bg',      semantic['brand-c-secondary'],  semantic['brand-c-bg']],
+    ['text on bg',           scales.neutral[800],    bg],
+    ['primary on bg',        scales.primary[600],    bg],
+    ['secondary on bg',      scales.secondary[600],  bg],
   ];
 
   const decorativePairs = [
-    ['neutral on bg',          semantic['brand-c-neutral'],        semantic['brand-c-bg']],
-    ['primary-dark on bg',     semantic['brand-c-primary-dark'],   semantic['brand-c-bg']],
-    ['secondary-dark on bg',   semantic['brand-c-secondary-dark'], semantic['brand-c-bg']],
+    ['neutral on bg',          scales.neutral[700],    bg],
+    ['primary-dark on bg',     scales.primary[800],    bg],
+    ['secondary-dark on bg',   scales.secondary[800],  bg],
   ];
+
+  if (focusHighlight) {
+    decorativePairs.push(
+      ['focus on page-bg',     focusHighlight['focus-color'], bg],
+      ['focus on card-bg',     focusHighlight['focus-color'], pageBg['page-bg-raised']],
+      ['highlight on page-bg',   focusHighlight['highlight-link-color'], bg],
+      ['highlight on card-bg',   focusHighlight['highlight-link-color'], pageBg['page-bg-raised']],
+    );
+  }
 
   const results = [];
   let allPass = true;
@@ -601,10 +608,90 @@ export function auditScale(scales, pageBg) {
 
 
 /* ================================================================
+   10b. FOCUS RING + HIGHLIGHT LINK TOKENS
+   ================================================================ */
+
+/**
+ * Compute focus and highlight link colours per theme.
+ * Uses status colours (CVD-safe by design) — never primary/secondary.
+ * Focus = single square ring using --color-Info (distinct from all theme palettes).
+ * Highlight = same colour, thicker border for visibility.
+ * HC themes = black/white.
+ */
+function computeFocusHighlightTokens(scales, pageBg, isDark, isHC = false, status = {}, chromaPreset = 'brand') {
+  const pageBgHex = pageBg['page-bg'];
+  const cardBgHex = pageBg['page-bg-raised'];
+
+  const isMono = chromaPreset === 'grey';
+
+  if (isHC) {
+    // HC: use status colours — they have colour even in HC themes
+    return {
+      'focus-color':          status['color-Info'] || (isDark ? '#ffffff' : '#000000'),
+      'focus-bg':             pageBgHex,
+      'highlight-link-color': status['color-Error'] || (isDark ? '#ffffff' : '#000000'),
+    };
+  }
+
+  // Use Info status colour as base — CVD-safe, distinct from theme palette
+  // Monochrome: use slategrey tones — subtle blue tint, visible but not colourful
+  let focusHex;
+  if (isMono) {
+    focusHex = isDark ? '#B2BEB5' : '#91A3B0';  // ash grey (warm) / cadet grey (cool)
+  } else {
+    focusHex = status['color-Info'] || safeOklch(isDark ? 0.70 : 0.45, 0.12, 220);
+  }
+  const focusChroma = isMono ? 0.02 : 0.12;
+
+  // Adjust if contrast fails against page backgrounds
+  let focusL = chroma(focusHex).get('oklch.l');
+  const focusH = isMono ? 0 : (chroma(focusHex).get('oklch.h') || 220);
+  let attempts = 0;
+  while (attempts < 20 && (
+    contrastRatio(focusHex, pageBgHex) < 3 ||
+    contrastRatio(focusHex, cardBgHex) < 3
+  )) {
+    focusL += isDark ? 0.03 : -0.03;
+    focusHex = safeOklch(focusL, focusChroma, focusH);
+    attempts++;
+  }
+
+  // Highlight uses a different status colour — visually distinct from focus
+  // Focus = Info (teal/blue), Highlight = neutral text (dark/light depending on mode)
+  // Highlight: use Error status colour — bold, visible, CVD-safe
+  // Adjust lightness until 3:1 against both backgrounds
+  let highlightHex;
+  if (isMono) {
+    highlightHex = isDark ? '#696969' : '#2F4F4F'; // dim grey / darkslategrey — distinct from focus
+  } else {
+    highlightHex = status['color-Error'] || safeOklch(isDark ? 0.65 : 0.45, 0.18, 25);
+  }
+  let hlL = chroma(highlightHex).get('oklch.l');
+  const hlH = isMono ? 0 : (chroma(highlightHex).get('oklch.h') || 25);
+  const hlC = isMono ? 0.02 : (chroma(highlightHex).get('oklch.c') || 0.18);
+  let hlAttempts = 0;
+  while (hlAttempts < 20 && (
+    contrastRatio(highlightHex, pageBgHex) < 3 ||
+    contrastRatio(highlightHex, cardBgHex) < 3
+  )) {
+    hlL += isDark ? 0.03 : -0.03;
+    highlightHex = safeOklch(hlL, hlC, hlH);
+    hlAttempts++;
+  }
+
+  return {
+    'focus-color':          focusHex,
+    'focus-bg':             pageBgHex,
+    'highlight-link-color': highlightHex,
+  };
+}
+
+
+/* ================================================================
    11. CSS OUTPUT
    ================================================================ */
 
-function buildCSS(definition, scales, pageBg, status) {
+function buildCSS(definition, scales, pageBg, status, focusHighlight) {
   const {
     name,
     primary: sourcePrimary,
@@ -694,6 +781,13 @@ function buildCSS(definition, scales, pageBg, status) {
   ln(`  --media-brightness: ${isDark ? '0.86' : '1'};`);
   ln(`  --media-saturation: ${chromaPreset === 'grey' ? '0' : (isDark ? '0.90' : '1')};`);
   ln(`  --media-contrast: ${chromaPreset === 'grey' ? '1.05' : (isDark ? '0.98' : '1')};`);
+
+  // Focus + highlight tokens
+  ln();
+  ln(`  /* -- FOCUS + HIGHLIGHT TOKENS -------------------- */`);
+  ln(`  --focus-color: ${focusHighlight['focus-color']};`);
+  ln(`  --focus-bg: ${focusHighlight['focus-bg']};`);
+  ln(`  --highlight-link-color: ${focusHighlight['highlight-link-color']};`);
 
   // HC-specific extras
   if (definition.highContrast) {
@@ -787,19 +881,14 @@ export function generateThemeData(definition) {
     status['color-White'] = '#ffffff';
   }
 
+  // 5b. Compute focus + highlight tokens
+  const focusHighlight = computeFocusHighlightTokens(scales, pageBg, isDark, definition.highContrast, status, chromaPreset);
+
   // 6. Build CSS (scales are the API — no semantic layer)
-  const css = buildCSS(definition, scales, pageBg, status);
+  const css = buildCSS(definition, scales, pageBg, status, focusHighlight);
 
   // 7. Run audits (uses flipped scale hex values directly)
-  const themeAudit = auditTheme({
-    'brand-c-text':           scales.neutral[800],
-    'brand-c-primary':        scales.primary[600],
-    'brand-c-secondary':      scales.secondary[600],
-    'brand-c-bg':             pageBg['page-bg'],
-    'brand-c-neutral':        scales.neutral[700],
-    'brand-c-primary-dark':   scales.primary[800],
-    'brand-c-secondary-dark': scales.secondary[800],
-  });
+  const themeAudit = auditTheme(scales, pageBg, focusHighlight);
   const scaleAudit = auditScale(scales, pageBg);
 
   return {

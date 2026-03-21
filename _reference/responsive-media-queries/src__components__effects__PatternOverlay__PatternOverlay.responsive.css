@@ -1,0 +1,66 @@
+/**
+ * PatternOverlay — responsive.css
+ * @layer components
+ *
+ * Strategy:
+ * - Desktop (900+): full density, all modes active
+ * - Tablet (600-900): larger tiles (less dense), grid still visible
+ * - Mobile (< 600): larger tiles, lower opacity, grid hidden
+ * - Tiny (< 300): all patterns hidden
+ */
+
+@layer components {
+
+  /* ==========================================================
+     TABLET — reduce density, increase tile size
+     ========================================================== */
+  @media (max-width: 900px) {
+    .pattern-overlay {
+      --po-scale: calc(var(--po-scale, 60px) * 1.3);
+    }
+  }
+
+
+  /* ==========================================================
+     MOBILE — lower opacity, hide grid (DOM-heavy)
+     Mask and preset modes remain (zero DOM cost).
+     ========================================================== */
+  @media (max-width: 600px) {
+    .pattern-overlay {
+      --po-scale: calc(var(--po-scale, 60px) * 1.5);
+      --po-opacity: calc(var(--po-opacity, 0.05) * 0.6);
+    }
+
+    /* Grid + SMIL grid: too many DOM nodes for mobile */
+    .pattern-overlay--grid {
+      display: none;
+    }
+
+    /* Disable interactive hover on touch devices */
+    .pattern-overlay--interactive {
+      pointer-events: none;
+    }
+  }
+
+
+  /* ==========================================================
+     SMALL MOBILE — further reduce
+     ========================================================== */
+  @media (max-width: 400px) {
+    .pattern-overlay {
+      --po-scale: calc(var(--po-scale, 60px) * 2);
+      --po-opacity: calc(var(--po-opacity, 0.05) * 0.4);
+    }
+  }
+
+
+  /* ==========================================================
+     TINY — hide all patterns
+     ========================================================== */
+  @media (max-width: 300px) {
+    .pattern-overlay {
+      display: none;
+    }
+  }
+
+}

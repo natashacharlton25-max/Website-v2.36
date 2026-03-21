@@ -16,19 +16,7 @@
   display: none;
 }
 
-/* ── Textonly with tooltip: also hide — bar handles it ── */
-[data-render="textonly"][data-alt-display-mode="tooltip"] .image-alt-word,
-[data-render="textonly"][data-alt-display-mode="tooltip"] .image-alt-descriptive,
-[data-render="textonly"][data-alt-display-mode="tooltip"] .image-alt-aac {
-  display: none;
-}
-
-/* ── Textonly + hover none + tooltip mode: show AAC inline (no bar, no figcaption) ── */
-[data-alt-display-mode="tooltip"][data-render="textonly"][data-hover="none"][data-alt-text-mode="aac"] .image-alt-aac {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-}
+/* Textonly + hover rules → textonly/structure.css */
 
 /* ── Base — hidden until tooltip mode active ── */
 .figcaption {
@@ -47,7 +35,7 @@
   padding: var(--space-md) var(--space-lg);
   background: var(--_fc-bg);
   color: var(--_fc-text);
-  border: 2px solid var(--_fc-border);
+  border: var(--border-width-2) solid var(--_fc-border);
   border-radius: var(--radius-md);
   box-shadow: var(--_fc-shadow);
   font-family: var(--font-body);
@@ -58,7 +46,7 @@
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition: visibility var(--duration-fast) var(--ease-default);
 }
 
 /* Force text colour */
@@ -101,28 +89,7 @@
 
 /* Hover gate rules (gentle/instant) in src/styles/gates/hover-gate.css */
 
-/* None — hide figcaption entirely, inline alt text spans handle display */
-[data-hover="none"] .figcaption {
-  display: none;
-}
-
-[data-hover="none"] .image[data-role="content"]::after {
-  display: none;
-}
-
-
-/* ══════════════════════════════════════════════════════════════
-   Render modes
-   ══════════════════════════════════════════════════════════════ */
-
-[data-render="reduced"] .figcaption {
-  transition: none;
-}
-
-/* Textonly — figcaption hidden, JS shared bar handles display on hover */
-[data-render="textonly"] .figcaption {
-  display: none;
-}
+/* Hover-none, reduced, textonly → textonly/structure.css + gates/hover-gate.css */
 
 
 /* ══════════════════════════════════════════════════════════════

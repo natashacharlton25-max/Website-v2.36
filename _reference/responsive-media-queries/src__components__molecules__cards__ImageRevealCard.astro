@@ -1,0 +1,454 @@
+---
+/**
+ * ImageRevealCard — Image card with hover-reveal content
+ *
+ * Image fills the card at rest (2:3 ratio). On hover the image squishes
+ * to 1:1, sliding content into view with staggered transitions.
+ * Backdrop blur scrim fades away on hover.
+ *
+ * @param image       - Image src path (required)
+ * @param imageAlt    - Alt text for image
+ * @param imagePos    - Object-position for image (default: '50% 5%')
+ * @param title       - Card heading text
+ * @param description - Card body text
+ * @param dark        - Dark colour scheme
+ * @param tag         - Optional tag text (e.g. '15M', 'New')
+ * @param tagIcon     - Inline SVG or text before tag label
+ * @param button      - Show CTA button (default true)
+ * @param buttonLabel - CTA button label (default: 'Follow')
+ * @param buttonHref  - If set, button becomes a link
+ * @param borderColor - Border colour (e.g. 'var(--secondary-600)') — outline only, no fill
+ * @param class       - Extra classes
+ *
+ * Styles: scoped. Uses brand tokens + a11y reduce-motion support.
+ */
+
+interface Props {
+  image: string;
+  imageAlt?: string;
+  imagePos?: string;
+  title: string;
+  description?: string;
+  dark?: boolean;
+  tag?: string;
+  button?: boolean;
+  buttonLabel?: string;
+  buttonHref?: string;
+  size?: 'sm' | 'md' | 'lg';
+  borderColor?: string;
+  class?: string;
+}
+
+const {
+  image,
+  imageAlt = '',
+  imagePos = '50% 5%',
+  title,
+  description = '',
+  dark = false,
+  tag,
+  button = true,
+  buttonLabel = 'Follow',
+  buttonHref,
+  size = 'md',
+  borderColor,
+  class: className = '',
+} = Astro.props;
+---
+
+<div
+  class:list={['card', 'reveal-card', `reveal-card--${size}`, dark && 'reveal-card--dark', borderColor && 'reveal-card--bordered', className]}
+  style={`--_img-pos: ${imagePos};${borderColor ? ` --_border-color: ${borderColor};` : ''}`}
+>
+  <img src={image} alt={imageAlt} class="reveal-card__image" />
+
+  <div class="reveal-card__scrim" aria-hidden="true"></div>
+
+  <section class="reveal-card__body">
+    <h3 class="reveal-card__title text">{title}</h3>
+    {description && <p class="reveal-card__text text">{description}</p>}
+
+    <div class="reveal-card__actions">
+      {tag && (
+        <span class="reveal-card__tag text">
+          <svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+            <path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8C55.71,194.74,79.56,176,128,176s72.29,18.74,89.07,44a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/>
+          </svg>
+          {tag}
+        </span>
+      )}
+
+      {button && buttonHref ? (
+        <a href={buttonHref} class="reveal-card__btn text">
+          <span class="reveal-card__btn-plus" aria-hidden="true"></span>
+          {buttonLabel}
+        </a>
+      ) : button ? (
+        <button type="button" class="reveal-card__btn text" data-reveal-follow>
+          <span class="reveal-card__btn-plus" aria-hidden="true"></span>
+          {buttonLabel}
+        </button>
+      ) : null}
+    </div>
+  </section>
+</div>
+
+<style>
+  /* ── Base card ── */
+  .reveal-card {
+    --_bg: var(--page-bg);
+    --_title-rest: var(--page-bg);
+    --_title-hover: var(--neutral-800);
+    --_text: var(--neutral-400);
+    --_btn-bg: var(--neutral-400);
+    --_btn-bg-hover: color-mix(in oklch, var(--neutral-400) 80%, var(--neutral-800));
+    --_btn-text: var(--neutral-800);
+    --_card-w: 20rem;
+    --_card-h: 30rem;
+
+    background: var(--_bg);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xs);
+    width: var(--_card-w);
+    height: var(--_card-h);
+    overflow: clip;
+    position: relative;
+    font-family: var(--font-heading);
+  }
+
+  /* ── Size variants ── */
+  .reveal-card--sm {
+    --_card-w: 16rem;
+    --_card-h: 24rem;
+  }
+
+  .reveal-card--lg {
+    --_card-w: 24rem;
+    --_card-h: 36rem;
+  }
+
+  /* ── Bordered variant ── */
+  .reveal-card--bordered {
+    border: 3px solid var(--_border-color, var(--secondary-600));
+  }
+
+  /* ── Dark variant ── */
+  .reveal-card--dark {
+    --_bg: var(--secondary-600);
+    --_title-rest: var(--page-bg);
+    --_title-hover: var(--page-bg);
+    --_text: var(--neutral-400);
+    --_btn-bg: var(--neutral-900);
+    --_btn-bg-hover: color-mix(in oklch, var(--neutral-900) 80%, var(--page-bg));
+    --_btn-text: var(--page-bg);
+  }
+
+  /* ── Backdrop blur scrim ── */
+  .reveal-card__scrim {
+    content: "";
+    position: absolute;
+    width: calc(100% - var(--space-sm));
+    height: 30%;
+    bottom: var(--space-xs);
+    left: var(--space-xs);
+    mask: linear-gradient(transparent, black 80%);
+    -webkit-mask: linear-gradient(transparent, black 80%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 0 0 calc(var(--radius-xl) - var(--space-xs)) calc(var(--radius-xl) - var(--space-xs));
+    translate: 0 0;
+    transition: translate 0.25s;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ── Image ── */
+  .reveal-card__image {
+    max-width: 100%;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    object-position: var(--_img-pos);
+    border-radius: calc(var(--radius-xl) - var(--space-xs));
+    display: block;
+    transition: aspect-ratio 0.25s, object-position 0.5s;
+    height: auto;
+  }
+
+  /* ── Content section ── */
+  .reveal-card__body {
+    margin: var(--space-md);
+    height: calc(33.3333% - var(--space-md));
+    border-color: var(--_btn-bg-hover);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .reveal-card__title {
+    margin: 0;
+    margin-block-end: var(--space-md);
+    font-family: var(--font-heading);
+    font-weight: var(--font-bold);
+    font-size: var(--font-size-lg);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    opacity: 0;
+    translate: 0 -200%;
+    color: var(--_title-rest);
+    transition: color 0.5s, margin-block-end 0.25s, opacity 1s, translate 0.25s;
+  }
+
+  .reveal-card__text {
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    color: var(--_text);
+    opacity: 0;
+    margin: 0;
+    translate: 0 100%;
+    transition: margin-block-end 0.25s, opacity 1s 0.2s, translate 0.25s 0.2s;
+  }
+
+  /* ── Actions row ── */
+  .reveal-card__actions {
+    flex: 1;
+    align-items: flex-end;
+    display: flex;
+    justify-content: space-between;
+    opacity: 0;
+    transition: translate 0.25s 0.2s, opacity 1s;
+  }
+
+  .reveal-card__tag {
+    align-self: center;
+    color: var(--_title-hover);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+  }
+
+  /* ── CTA button ── */
+  .reveal-card__btn {
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg) var(--radius-lg) var(--radius-xl) var(--radius-lg);
+    font-size: var(--text-sm);
+    font-family: var(--font-heading);
+    font-weight: var(--font-semibold);
+    padding: var(--space-sm) var(--space-lg) var(--space-sm) var(--space-2xl);
+    background: var(--_btn-bg);
+    color: var(--_btn-text);
+    cursor: pointer;
+    transition: background 0.33s;
+    position: relative;
+    text-decoration: none;
+    display: inline-block;
+    text-align: right;
+    translate: var(--space-sm);
+  }
+
+  .reveal-card__btn:hover {
+    background: var(--_btn-bg-hover);
+  }
+
+  .reveal-card__btn:focus-visible {
+    outline: 2px solid var(--_text);
+    outline-offset: 2px;
+  }
+
+  /* Plus icon via pseudo-elements */
+  .reveal-card__btn-plus {
+    position: absolute;
+    top: 50%;
+    left: var(--space-md);
+    translate: 0 -50%;
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  .reveal-card__btn-plus::before,
+  .reveal-card__btn-plus::after {
+    content: "";
+    width: 0.85rem;
+    height: 2px;
+    background: currentcolor;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    border-radius: var(--radius-full);
+    translate: 0 -50%;
+  }
+
+  .reveal-card__btn-plus::after {
+    rotate: 90deg;
+    transition: rotate 0.15s;
+  }
+
+  /* Following state — plus becomes minus */
+  .reveal-card__btn.is-following .reveal-card__btn-plus::after {
+    rotate: 0deg;
+  }
+
+  /* ══════════════════════════════════════
+     HOVER / FOCUS-WITHIN — reveal content
+     ══════════════════════════════════════ */
+  .reveal-card:hover .reveal-card__scrim,
+  .reveal-card:focus-within .reveal-card__scrim {
+    translate: 0 100%;
+  }
+
+  .reveal-card:hover .reveal-card__image,
+  .reveal-card:focus-within .reveal-card__image {
+    aspect-ratio: 1 / 1;
+    object-position: 50% 10%;
+    transition: aspect-ratio 0.25s, object-position 0.25s;
+  }
+
+  .reveal-card:hover .reveal-card__title,
+  .reveal-card:focus-within .reveal-card__title,
+  .reveal-card:hover .reveal-card__text,
+  .reveal-card:focus-within .reveal-card__text {
+    translate: 0 0;
+    margin-block-end: var(--space-xs);
+    opacity: 1;
+  }
+
+  .reveal-card:hover .reveal-card__title,
+  .reveal-card:focus-within .reveal-card__title {
+    color: var(--_title-hover);
+  }
+
+  .reveal-card:hover .reveal-card__actions,
+  .reveal-card:focus-within .reveal-card__actions {
+    translate: 0 0;
+    opacity: 1;
+    transition: translate 0.25s 0.25s, opacity 0.5s 0.25s;
+  }
+
+  /* ── Static mode (applied by JS for a11y-reduce-motion / a11y-text-only) ── */
+  .reveal-card--static .reveal-card__image {
+    aspect-ratio: 1 / 1;
+    transition: none;
+  }
+
+  .reveal-card--static .reveal-card__title,
+  .reveal-card--static .reveal-card__text,
+  .reveal-card--static .reveal-card__actions {
+    opacity: 1;
+    translate: 0 0;
+    transition: none;
+  }
+
+  .reveal-card--static .reveal-card__title {
+    color: var(--_title-hover);
+  }
+
+  .reveal-card--static .reveal-card__scrim {
+    display: none;
+  }
+
+  .reveal-card--static .reveal-card__body {
+    height: auto;
+  }
+
+  /* ── Reduced motion — show content immediately, no animation ── */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-card__image {
+      aspect-ratio: 1 / 1;
+      transition: none;
+    }
+
+    .reveal-card__title,
+    .reveal-card__text,
+    .reveal-card__actions {
+      opacity: 1;
+      translate: 0 0;
+      transition: none;
+    }
+
+    .reveal-card__title {
+      color: var(--_title-hover);
+    }
+
+    .reveal-card__scrim {
+      display: none;
+    }
+  }
+
+  /* ── Responsive — show content on touch/small screens ── */
+  @media (max-width: 768px) {
+    .reveal-card {
+      max-width: 100%;
+    }
+
+    .reveal-card__image {
+      aspect-ratio: 1 / 1;
+    }
+
+    .reveal-card__title,
+    .reveal-card__text,
+    .reveal-card__actions {
+      opacity: 1;
+      translate: 0 0;
+    }
+
+    .reveal-card__title {
+      color: var(--_title-hover);
+    }
+
+    .reveal-card__scrim {
+      display: none;
+    }
+
+    .reveal-card__body {
+      height: auto;
+    }
+
+    .reveal-card__btn {
+      translate: 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .reveal-card,
+    .reveal-card--sm,
+    .reveal-card--lg {
+      --_card-w: 100%;
+    }
+  }
+</style>
+
+<script>
+  // Follow / Unfollow toggle
+  // A11y: respects reduce-motion for transition, button always functional
+
+  function initRevealCards() {
+    document.querySelectorAll<HTMLButtonElement>('[data-reveal-follow]:not([data-reveal-bound])').forEach(btn => {
+      btn.setAttribute('data-reveal-bound', '1');
+
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('is-following');
+        const isFollowing = btn.classList.contains('is-following');
+        btn.textContent = '';
+
+        // Re-add the plus icon span
+        const plus = document.createElement('span');
+        plus.className = 'reveal-card__btn-plus';
+        plus.setAttribute('aria-hidden', 'true');
+        btn.appendChild(plus);
+        btn.appendChild(document.createTextNode(isFollowing ? 'Unfollow' : 'Follow'));
+      });
+    });
+
+    // A11y: if wrapper has reduce-motion, show content permanently
+    const wrapper = document.querySelector('#a11y-content-wrapper');
+    if (wrapper?.classList.contains('a11y-reduce-motion') || wrapper?.classList.contains('a11y-text-only')) {
+      document.querySelectorAll<HTMLElement>('.reveal-card').forEach(card => {
+        card.classList.add('reveal-card--static');
+      });
+    }
+  }
+
+  initRevealCards();
+  document.addEventListener('astro:page-load', initRevealCards);
+</script>

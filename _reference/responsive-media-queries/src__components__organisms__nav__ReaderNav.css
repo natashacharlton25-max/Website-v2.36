@@ -1,0 +1,1466 @@
+/* =========================================================
+   READER NAV COMPONENT STYLES
+   Floating navigation overlay for Reader component
+
+   Three states based on visual notes:
+   - Minimized: Hamburger stacked above progress circle (compact)
+   - Medium: Container expands RIGHT, hamburger + autoplay row, progress + section row
+   - Expanded: Medium + prev/next row + speed row + section list
+   ========================================================= */
+
+/* ========== BASE POSITIONING ========== */
+.reader-nav {
+  position: fixed;
+  z-index: var(--z-sticky);
+  pointer-events: none;
+}
+
+.reader-nav-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  pointer-events: auto;
+  transition: width 0.35s ease-in-out,
+              padding 0.35s ease-in-out,
+              gap 0.35s ease-in-out;
+}
+
+/* ========== NAV ROW BASE ========== */
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: opacity 0.35s ease-in-out,
+              max-height 0.35s ease-in-out,
+              margin 0.35s ease-in-out;
+}
+
+.nav-row--top {
+  position: relative;
+}
+
+/* ========== MENU TOGGLE BUTTON ========== */
+.nav-menu-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity var(--transition-fast);
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.nav-menu-btn:hover {
+  opacity: 1;
+}
+
+.nav-menu-btn:focus-visible {
+  outline: 2px solid var(--primary-600);
+  outline-offset: 2px;
+}
+
+/* Lottie icon positioning - both icons stack on top of each other */
+/* Offset 2px right to align with 50px progress circle below (button is 40px) */
+.menu-icon-hamburger,
+.menu-icon-plus {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + 2px);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.25s ease-in-out, transform 0.35s ease-in-out;
+}
+
+/* Force Lottie SVG elements to use currentColor */
+.nav-menu-btn :is(svg path, svg rect, svg circle, svg line, svg g) {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Default: show Lottie icons, hide static */
+.menu-static-icon {
+  display: none !important;
+}
+
+.menu-lottie-icon {
+  display: inline-flex !important;
+}
+
+/* ========== INFO BUTTON ========== */
+.nav-info-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+  z-index: 10;
+}
+
+.nav-info-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-info-btn:hover {
+  opacity: 1;
+}
+
+.nav-info-btn:focus-visible {
+  outline: 2px solid var(--primary-600);
+  outline-offset: 2px;
+}
+
+/* Info tooltip */
+.info-tooltip {
+  position: absolute;
+  top: 10px;
+  left: calc(100% + 16px);
+  padding: 16px 20px;
+  background: var(--neutral-900);
+  color: var(--color-White);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+  transform: translateX(-8px);
+  z-index: 100;
+}
+
+.nav-info-btn:hover + .info-tooltip,
+.info-tooltip:hover {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.info-tooltip__title {
+  font-weight: var(--font-semibold);
+  font-size: 0.8125rem;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid color-mix(in oklch, var(--color-White) 20%, transparent);
+}
+
+.info-tooltip__item {
+  margin-bottom: 10px;
+  color: var(--neutral-400);
+  line-height: 1.5;
+}
+
+.info-tooltip__item:last-child {
+  margin-bottom: 0;
+}
+
+.info-tooltip__item strong {
+  color: var(--color-White);
+  font-weight: var(--font-semibold);
+}
+
+.info-tooltip kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 2px 8px;
+  background: color-mix(in oklch, var(--color-White) 15%, transparent);
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: var(--font-semibold);
+  color: var(--color-White);
+}
+
+/* Hide info button in minimized state */
+.reader-nav--minimized .nav-info-btn,
+.reader-nav--minimized .info-tooltip {
+  display: none;
+}
+
+/* ========== PROGRESS CIRCLE ========== */
+.progress-circle-wrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+}
+
+.progress-circle {
+  transform: rotate(-90deg);
+  width: 50px;
+  height: 50px;
+}
+
+.progress-bg {
+  opacity: 0.2;
+}
+
+.progress-bar {
+  stroke-dasharray: 138.23;
+  stroke-dashoffset: 138.23;
+  transition: stroke-dashoffset var(--transition-base);
+}
+
+/* Timer ring for autoplay countdown */
+.timer-ring {
+  stroke-dasharray: 138.23;
+  stroke-dashoffset: 138.23;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.timer-ring.is-active {
+  opacity: 0.6;
+}
+
+.progress-section-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: var(--font-bold);
+  color: var(--neutral-400);
+  text-align: center;
+  line-height: 1;
+  cursor: default;
+  user-select: none;
+}
+
+/* ========== AUTOPLAY BUTTON ========== */
+.autoplay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: color-mix(in oklch, currentColor 10%, transparent);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+              opacity var(--transition-fast);
+  opacity: 0.6;
+  font-family: var(--font-body);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: inherit;
+}
+
+.autoplay-btn:hover {
+  opacity: 1;
+}
+
+.autoplay-btn:focus-visible {
+  outline: 2px solid var(--primary-600);
+  outline-offset: 2px;
+}
+
+.autoplay-btn.is-active {
+  opacity: 1;
+  background: color-mix(in oklch, currentColor 22%, transparent);
+}
+
+.autoplay-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ========== SECTION TITLE TOGGLE ========== */
+.nav-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  color: inherit;
+  opacity: 0.85;
+}
+
+.nav-toggle:hover {
+  opacity: 1;
+}
+
+.nav-toggle:focus-visible {
+  outline: 2px solid var(--primary-600);
+  outline-offset: 2px;
+}
+
+.current-section-title {
+  font-family: var(--font-body);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ========== CONTROLS ROW (PREV + AUTOPLAY + NEXT) ========== */
+.nav-row--controls {
+  justify-content: space-between;
+  gap: 8px;
+  /* Use opacity/visibility instead of display for smooth transitions */
+  opacity: 0;
+  visibility: hidden;
+  max-height: 0;
+  overflow: hidden;
+  margin: 0;
+  transition: opacity 0.25s ease-in-out,
+              visibility 0.25s ease-in-out,
+              max-height 0.35s ease-in-out,
+              margin 0.35s ease-in-out;
+}
+
+/* ========== PREV/NEXT ARROWS ========== */
+.nav-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+              opacity var(--transition-fast);
+  opacity: 0.6;
+  color: inherit;
+}
+
+.nav-arrow:hover:not(:disabled) {
+  opacity: 1;
+}
+
+.nav-arrow:focus-visible {
+  outline: 2px solid var(--primary-600);
+  outline-offset: 2px;
+}
+
+.nav-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.nav-arrow svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ========== SPEED ROW ========== */
+.speed-label {
+  font-family: var(--font-body);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: inherit;
+  opacity: 0.7;
+  flex-shrink: 0;
+  min-width: 50px;
+}
+
+.speed-slider {
+  --slider-color: var(--neutral-900);
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 3px;
+  border-radius: var(--radius-full);
+  outline: none;
+  cursor: pointer;
+  background: transparent;
+}
+
+/* Webkit track (Chrome, Safari, Edge) */
+.speed-slider::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklch, var(--slider-color) 25%, transparent);
+}
+
+.speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4.5px;
+  border-radius: 50%;
+  background: var(--slider-color);
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.speed-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Firefox track */
+.speed-slider::-moz-range-track {
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklch, var(--slider-color) 25%, transparent);
+}
+
+.speed-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 50%;
+  background: var(--slider-color);
+  cursor: pointer;
+}
+
+/* Slider color based on foreground */
+.reader-nav--fg-light .speed-slider {
+  --slider-color: var(--color-White);
+}
+
+.reader-nav--fg-dark .speed-slider {
+  --slider-color: var(--neutral-900);
+}
+
+
+/* ========== SECTION DROPDOWN ========== */
+.section-dropdown {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.35s ease-in-out,
+              opacity 0.3s ease-in-out,
+              margin-top 0.3s ease-in-out,
+              padding-top 0.3s ease-in-out;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.section-dropdown.is-open {
+  max-height: 60vh;
+  overflow-y: auto;
+  opacity: 1;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in oklch, currentColor 20%, transparent);
+}
+
+/* Hide scrollbar */
+.section-dropdown {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.section-dropdown::-webkit-scrollbar {
+  display: none;
+}
+
+.section-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.section-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 5px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
+  text-align: left;
+  color: inherit;
+}
+
+.section-number {
+  font-family: var(--font-body);
+  font-weight: var(--font-bold);
+  color: inherit;
+  opacity: 0.5;
+  min-width: 16px;
+  text-align: center;
+}
+
+.section-item.is-active .section-number {
+  opacity: 1;
+}
+
+.section-item:hover {
+  background-color: color-mix(in oklch, currentColor 10%, transparent);
+}
+
+.section-item:focus-visible {
+  outline: 2px solid var(--primary-600);
+  outline-offset: -2px;
+}
+
+.section-item.is-active {
+  background-color: color-mix(in oklch, currentColor 15%, transparent);
+}
+
+.section-name {
+  font-family: var(--font-body);
+  font-weight: var(--font-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: inherit;
+}
+
+/* ==========================================================
+   VIEW STATES
+   ========================================================== */
+
+/* === MINIMIZED STATE (default) === */
+/* Shows: hamburger icon stacked above progress circle */
+
+.reader-nav--minimized .reader-nav-container {
+  width: 74px;
+  padding: 10px 12px;
+  /* Keep stretch to prevent elements shifting when expanding/collapsing */
+  align-items: stretch;
+}
+
+/* In minimized, row--top only shows menu button */
+/* Keep flex-start to prevent shifting when expanding/collapsing */
+.reader-nav--minimized .nav-row--top {
+  justify-content: flex-start;
+}
+
+/* In minimized, row--main shows progress only */
+/* Keep flex-start to prevent shifting when expanding/collapsing */
+.reader-nav--minimized .nav-row--main {
+  justify-content: flex-start;
+}
+
+.reader-nav--minimized .nav-toggle {
+  display: none;
+}
+
+/* Hide these rows in minimized */
+.reader-nav--minimized .nav-row--controls {
+  opacity: 0;
+  visibility: hidden;
+  max-height: 0;
+  margin: 0;
+}
+
+.reader-nav--minimized .nav-row--speed,
+.reader-nav--minimized .section-dropdown {
+  display: none;
+}
+
+/* Lottie icon states - minimized shows hamburger */
+.reader-nav--minimized .menu-icon-hamburger {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.reader-nav--minimized .menu-icon-plus {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* === MEDIUM STATE === */
+/* Shows: hamburger->plus + autoplay row, progress + section title row */
+/* Container expands to the RIGHT */
+
+.reader-nav--medium .reader-nav-container {
+  width: 240px;
+  padding: 10px 12px;
+  align-items: stretch;
+}
+
+.reader-nav--medium .nav-row--top {
+  justify-content: flex-start;
+}
+
+.reader-nav--medium .nav-row--main {
+  justify-content: flex-start;
+}
+
+.reader-nav--medium .nav-toggle {
+  display: flex;
+}
+
+/* Show controls row in medium (prev + autoplay + next) */
+/* Delay appearance until container finishes expanding */
+.reader-nav--medium .nav-row--controls {
+  opacity: 1;
+  visibility: visible;
+  max-height: 50px;
+  margin-top: 0;
+  justify-content: space-between;
+  /* Delay the fade-in to wait for container expansion */
+  transition: opacity 0.25s ease-in-out 0.3s,
+              visibility 0.25s ease-in-out 0.3s,
+              max-height 0.35s ease-in-out,
+              margin 0.35s ease-in-out;
+}
+
+/* Hide speed and section dropdown in medium */
+.reader-nav--medium .nav-row--speed,
+.reader-nav--medium .section-dropdown {
+  display: none;
+}
+
+/* Lottie icon states - medium shows hamburger rotated as plus via CSS */
+.reader-nav--medium .menu-icon-hamburger {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.reader-nav--medium .menu-icon-plus {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* === EXPANDED STATE === */
+/* Shows everything: all rows + section list */
+
+.reader-nav--expanded .reader-nav-container {
+  width: 240px;
+  padding: 10px 12px;
+  align-items: stretch;
+}
+
+.reader-nav--expanded .nav-row--top {
+  justify-content: flex-start;
+}
+
+.reader-nav--expanded .nav-row--main {
+  justify-content: flex-start;
+}
+
+.reader-nav--expanded .nav-toggle {
+  display: flex;
+}
+
+.reader-nav--expanded .nav-row--controls {
+  opacity: 1;
+  visibility: visible;
+  max-height: 50px;
+  justify-content: space-between;
+}
+
+.reader-nav--expanded .nav-row--speed {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-top: 1px solid color-mix(in oklch, currentColor 15%, transparent);
+  border-bottom: 1px solid color-mix(in oklch, currentColor 15%, transparent);
+}
+
+/* Section dropdown is visible in expanded */
+.reader-nav--expanded .section-dropdown {
+  display: block;
+  max-height: 60vh;
+  overflow-y: auto;
+  opacity: 1;
+  margin-top: 4px;
+  padding-top: 0;
+  border-top: none;
+}
+
+/* Lottie icon states - expanded shows plus-to-X icon */
+.reader-nav--expanded .menu-icon-hamburger {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reader-nav--expanded .menu-icon-plus {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ==========================================================
+   BACKGROUND VARIANTS
+   ========================================================== */
+
+/* ==========================================================
+   GLASSMORPHIC VARIANTS (with backdrop blur)
+   ========================================================== */
+
+/* Dark glass - neutral dark tint */
+.reader-nav--bg-dark .reader-nav-container {
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  background-color: color-mix(in oklch, var(--color-Black) 45%, transparent);
+  border: var(--border-width) solid color-mix(in oklch, var(--color-White) 10%, transparent);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Light glass - light/white tint */
+.reader-nav--bg-light .reader-nav-container {
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  background-color: color-mix(in oklch, var(--color-White) 45%, transparent);
+  border: var(--border-width) solid color-mix(in oklch, var(--neutral-400) 30%, transparent);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Glass (neutral) - subtle dark tint, most transparent */
+.reader-nav--bg-glass .reader-nav-container {
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  background-color: color-mix(in oklch, var(--neutral-950) 35%, transparent);
+  border: var(--border-width) solid color-mix(in oklch, var(--color-White) 12%, transparent);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Primary glass - primary color tint */
+.reader-nav--bg-primary-glass .reader-nav-container {
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  background-color: color-mix(in oklch, var(--primary-800) 50%, transparent);
+  border: var(--border-width) solid color-mix(in oklch, var(--color-White) 15%, transparent);
+  box-shadow: var(--shadow-xl);
+  color: var(--color-Black);
+}
+
+.reader-nav--bg-primary-glass .progress-bg {
+  stroke: color-mix(in oklch, var(--color-Black) 20%, transparent);
+}
+
+.reader-nav--bg-primary-glass .progress-bar {
+  stroke: var(--primary-800);
+}
+
+.reader-nav--bg-primary-glass .progress-section-number {
+  color: var(--color-Black);
+}
+
+/* Frosted glass - heavy blur, white tint */
+.reader-nav--bg-frosted .reader-nav-container {
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  background-color: color-mix(in oklch, var(--color-White) 18%, transparent);
+  border: var(--border-width) solid color-mix(in oklch, var(--color-White) 25%, transparent);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Primary colored background */
+.reader-nav--bg-primary .reader-nav-container {
+  background: linear-gradient(135deg, var(--primary-800) 0%, var(--primary-800) 100%);
+  border: var(--border-width) solid var(--primary-600);
+  box-shadow: var(--shadow-xl), 0 0 40px color-mix(in oklch, var(--primary-600) 30%, transparent);
+}
+
+.reader-nav--bg-primary .progress-bg {
+  stroke: color-mix(in oklch, var(--color-White) 25%, transparent);
+}
+
+.reader-nav--bg-primary .progress-bar {
+  stroke: var(--color-White);
+}
+
+.reader-nav--bg-primary .timer-ring {
+  stroke: var(--primary-200);
+}
+
+/* Gradient background (multi-color) */
+.reader-nav--bg-gradient .reader-nav-container {
+  background: linear-gradient(135deg,
+    color-mix(in oklch, var(--primary-800) 90%, transparent) 0%,
+    color-mix(in oklch, var(--secondary-800) 90%, transparent) 50%,
+    color-mix(in oklch, var(--primary-800) 90%, transparent) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: var(--border-width) solid color-mix(in oklch, var(--color-White) 15%, transparent);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Solid dark (no transparency) */
+.reader-nav--bg-solid-dark .reader-nav-container {
+  background: var(--neutral-900);
+  border: var(--border-width) solid var(--neutral-900);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Solid light (no transparency) */
+.reader-nav--bg-solid-light .reader-nav-container {
+  background: var(--color-White);
+  border: var(--border-width) solid var(--neutral-400);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Accent colored (secondary color) */
+.reader-nav--bg-accent .reader-nav-container {
+  background: linear-gradient(135deg, var(--secondary-800) 0%, var(--secondary-800) 100%);
+  border: var(--border-width) solid var(--secondary-600);
+  box-shadow: var(--shadow-xl), 0 0 40px color-mix(in oklch, var(--secondary-600) 30%, transparent);
+}
+
+.reader-nav--bg-accent .progress-bg {
+  stroke: color-mix(in oklch, var(--color-White) 25%, transparent);
+}
+
+.reader-nav--bg-accent .progress-bar {
+  stroke: var(--color-White);
+}
+
+.reader-nav--bg-accent .timer-ring {
+  stroke: var(--secondary-200);
+}
+
+/* ==========================================================
+   SHADOW VARIANTS
+   ========================================================== */
+
+/* No shadow */
+.reader-nav--shadow-none .reader-nav-container {
+  box-shadow: none;
+}
+
+/* Soft shadow (default) - diffuse, subtle */
+.reader-nav--shadow-soft .reader-nav-container {
+  box-shadow:
+    0 4px 20px color-mix(in oklch, var(--color-Black) 15%, transparent),
+    0 2px 8px color-mix(in oklch, var(--color-Black) 10%, transparent);
+}
+
+/* Hard shadow - sharp, defined edge */
+.reader-nav--shadow-hard .reader-nav-container {
+  box-shadow:
+    4px 4px 0 color-mix(in oklch, var(--color-Black) 25%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--color-Black) 10%, transparent);
+}
+
+/* Glow effect - colored ambient light */
+.reader-nav--shadow-glow .reader-nav-container {
+  box-shadow:
+    0 0 30px rgba(var(--primary-600-rgb, 99, 102, 241), 0.4),
+    0 0 60px rgba(var(--primary-600-rgb, 99, 102, 241), 0.2),
+    0 4px 20px color-mix(in oklch, var(--color-Black) 15%, transparent);
+}
+
+/* For glow with primary-glass background, use primary color */
+.reader-nav--bg-primary-glass.reader-nav--shadow-glow .reader-nav-container,
+.reader-nav--bg-primary.reader-nav--shadow-glow .reader-nav-container {
+  box-shadow:
+    0 0 30px color-mix(in oklch, var(--primary-600) 50%, transparent),
+    0 0 60px color-mix(in oklch, var(--primary-600) 25%, transparent),
+    0 4px 20px color-mix(in oklch, var(--color-Black) 15%, transparent);
+}
+
+/* For glow with accent background, use secondary color */
+.reader-nav--bg-accent.reader-nav--shadow-glow .reader-nav-container {
+  box-shadow:
+    0 0 30px color-mix(in oklch, var(--secondary-600) 50%, transparent),
+    0 0 60px color-mix(in oklch, var(--secondary-600) 25%, transparent),
+    0 4px 20px color-mix(in oklch, var(--color-Black) 15%, transparent);
+}
+
+/* Inset shadow - pressed in effect */
+.reader-nav--shadow-inset .reader-nav-container {
+  box-shadow:
+    inset 0 2px 6px color-mix(in oklch, var(--color-Black) 20%, transparent),
+    inset 0 1px 2px color-mix(in oklch, var(--color-Black) 15%, transparent),
+    0 1px 0 color-mix(in oklch, var(--color-White) 10%, transparent);
+}
+
+/* Float effect - elevated, layered shadows */
+.reader-nav--shadow-float .reader-nav-container {
+  box-shadow:
+    0 10px 40px color-mix(in oklch, var(--color-Black) 20%, transparent),
+    0 6px 20px color-mix(in oklch, var(--color-Black) 15%, transparent),
+    0 2px 8px color-mix(in oklch, var(--color-Black) 10%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--color-White) 5%, transparent);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================
+   FOREGROUND VARIANTS
+   ========================================================== */
+
+/* Light foreground (for dark backgrounds) */
+.reader-nav--fg-light .reader-nav-container {
+  color: var(--color-White);
+}
+
+.reader-nav--fg-light .progress-bg {
+  stroke: color-mix(in oklch, var(--color-White) 30%, transparent);
+}
+
+.reader-nav--fg-light .progress-bar {
+  stroke: var(--primary-600);
+}
+
+.reader-nav--fg-light .progress-section-number {
+  color: var(--color-White);
+}
+
+/* Dark foreground (for light backgrounds) */
+.reader-nav--fg-dark .reader-nav-container {
+  color: var(--neutral-900);
+}
+
+.reader-nav--fg-dark .progress-bg {
+  stroke: var(--neutral-400);
+}
+
+.reader-nav--fg-dark .progress-bar {
+  stroke: var(--primary-800);
+}
+
+.reader-nav--fg-dark .progress-section-number {
+  color: var(--neutral-900);
+}
+
+/* ==========================================================
+   POSITION VARIANTS
+   ========================================================== */
+
+.reader-nav--top-left {
+  top: 120px;
+  left: var(--space-xl);
+}
+
+.reader-nav--top-center {
+  top: 25vh;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.reader-nav--top-right {
+  top: 25vh;
+  right: var(--space-xl);
+}
+
+.reader-nav--middle-left {
+  top: 50%;
+  left: var(--space-xl);
+  transform: translateY(-50%);
+}
+
+.reader-nav--middle-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.reader-nav--middle-right {
+  top: 50%;
+  right: var(--space-xl);
+  transform: translateY(-50%);
+}
+
+.reader-nav--bottom-left {
+  bottom: var(--space-xl);
+  left: var(--space-xl);
+}
+
+.reader-nav--bottom-center {
+  bottom: var(--space-xl);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.reader-nav--bottom-right {
+  bottom: var(--space-xl);
+  right: var(--space-xl);
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 768px) {
+  /* Position below mobile nav bar - needs more top space */
+  .reader-nav--top-left,
+  .reader-nav--top-center,
+  .reader-nav--top-right {
+    top: 90px;
+  }
+
+  .reader-nav--bottom-left,
+  .reader-nav--bottom-center,
+  .reader-nav--bottom-right {
+    bottom: var(--space-lg);
+  }
+
+  .reader-nav--top-left,
+  .reader-nav--middle-left,
+  .reader-nav--bottom-left {
+    left: var(--space-md);
+  }
+
+  .reader-nav--top-right,
+  .reader-nav--middle-right,
+  .reader-nav--bottom-right {
+    right: var(--space-md);
+  }
+
+  .reader-nav--medium .reader-nav-container,
+  .reader-nav--expanded .reader-nav-container {
+    width: 220px;
+  }
+
+  .progress-circle-wrapper {
+    width: 44px;
+    height: 44px;
+  }
+
+  .progress-circle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .progress-section-number {
+    font-size: 0.75rem;
+  }
+}
+
+/* ========== RESPONSIVE - SMALL (500px) ========== */
+@media (max-width: 500px) {
+  .reader-nav--top-left,
+  .reader-nav--top-center,
+  .reader-nav--top-right {
+    top: 80px;
+  }
+
+  .reader-nav--top-left,
+  .reader-nav--middle-left,
+  .reader-nav--bottom-left {
+    left: var(--space-sm);
+  }
+
+  .reader-nav--top-right,
+  .reader-nav--middle-right,
+  .reader-nav--bottom-right {
+    right: var(--space-sm);
+  }
+
+  .reader-nav--minimized .reader-nav-container {
+    width: 66px;
+    padding: 8px 10px;
+  }
+
+  .reader-nav--medium .reader-nav-container,
+  .reader-nav--expanded .reader-nav-container {
+    width: 200px;
+    padding: 8px 10px;
+  }
+
+  .nav-menu-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .progress-circle-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+
+  .progress-circle {
+    width: 40px;
+    height: 40px;
+  }
+
+  .progress-section-number {
+    font-size: 0.6875rem;
+  }
+
+  .current-section-title {
+  }
+
+  .nav-arrow {
+    padding: 5px;
+  }
+
+  .autoplay-btn {
+    padding: 2px 8px;
+  }
+
+  .speed-label {
+    min-width: 40px;
+  }
+
+  .section-item {
+    padding: 4px 10px;
+    gap: 8px;
+  }
+
+  .section-name {
+  }
+
+  /* Info tooltip on small screens - position below */
+  .info-tooltip {
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    font-size: 0.6875rem;
+  }
+}
+
+/* ========== RESPONSIVE - VERY SMALL (400px) ========== */
+@media (max-width: 400px) {
+  .reader-nav--top-left,
+  .reader-nav--top-center,
+  .reader-nav--top-right {
+    top: 75px;
+  }
+
+  .reader-nav--top-left,
+  .reader-nav--middle-left,
+  .reader-nav--bottom-left {
+    left: var(--space-xs);
+  }
+
+  .reader-nav--top-right,
+  .reader-nav--middle-right,
+  .reader-nav--bottom-right {
+    right: var(--space-xs);
+  }
+
+  .reader-nav--minimized .reader-nav-container {
+    width: 60px;
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .reader-nav--medium .reader-nav-container,
+  .reader-nav--expanded .reader-nav-container {
+    width: 180px;
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .nav-menu-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .progress-circle-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  .progress-circle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .progress-section-number {
+  }
+
+  .current-section-title {
+  }
+
+  .nav-info-btn {
+    width: 20px;
+    height: 20px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .nav-info-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .nav-arrow {
+    padding: 4px;
+  }
+
+  .autoplay-btn {
+    padding: 2px 6px;
+  }
+
+  .nav-arrow svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .autoplay-btn svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .speed-label {
+  }
+
+  .section-number {
+    min-width: 14px;
+  }
+
+  .section-name {
+  }
+}
+
+/* ========== RESPONSIVE - TINY (300px) ========== */
+@media (max-width: 300px) {
+  .reader-nav--top-left,
+  .reader-nav--top-center,
+  .reader-nav--top-right {
+    top: 70px;
+  }
+
+  .reader-nav--minimized .reader-nav-container {
+    width: 54px;
+    padding: 5px 6px;
+    gap: 6px;
+  }
+
+  .reader-nav--medium .reader-nav-container,
+  .reader-nav--expanded .reader-nav-container {
+    width: 160px;
+    padding: 5px 6px;
+    gap: 6px;
+  }
+
+  .nav-menu-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .progress-circle-wrapper {
+    width: 32px;
+    height: 32px;
+  }
+
+  .progress-circle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .progress-section-number {
+  }
+
+  .current-section-title {
+    letter-spacing: 0.03em;
+  }
+
+  .autoplay-label {
+    display: none;
+  }
+
+  .nav-arrow {
+    padding: 3px;
+  }
+
+  .autoplay-btn {
+    padding: 4px;
+  }
+
+  .nav-arrow svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .autoplay-btn svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* Hide speed row on very small screens */
+  .reader-nav--expanded .nav-row--speed {
+    display: none;
+  }
+
+  .section-item {
+    padding: 3px 6px;
+    gap: 6px;
+  }
+
+  .section-number {
+    min-width: 12px;
+  }
+
+  .section-name {
+  }
+}
+
+/* ========== RESPONSIVE - ULTRA SMALL (200px) ========== */
+@media (max-width: 200px) {
+  .reader-nav--top-left,
+  .reader-nav--top-center,
+  .reader-nav--top-right {
+    top: 60px;
+  }
+
+  .reader-nav--minimized .reader-nav-container {
+    width: 48px;
+    padding: 4px 5px;
+  }
+
+  .reader-nav--medium .reader-nav-container,
+  .reader-nav--expanded .reader-nav-container {
+    width: 140px;
+    padding: 4px 5px;
+  }
+
+  .nav-menu-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .progress-circle-wrapper {
+    width: 28px;
+    height: 28px;
+  }
+
+  .progress-circle {
+    width: 28px;
+    height: 28px;
+  }
+
+  .progress-section-number {
+  }
+
+  .current-section-title {
+  }
+
+  /* Hide info button on ultra small */
+  .nav-info-btn {
+    display: none;
+  }
+}
+
+/* reduced-motion → a11y/motion/reduced-motion.css */
+
+
+/* ==========================================================
+   RESUME PROGRESS TOAST
+   ========================================================== */
+
+.reader-resume-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--neutral-900);
+  color: var(--color-White);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  font-family: var(--font-body);
+  z-index: 9999;
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.reader-resume-toast.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.reader-resume-toast__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reader-resume-toast__text {
+  color: var(--neutral-400);
+}
+
+.reader-resume-toast__section {
+  font-weight: var(--font-semibold);
+  color: var(--color-White);
+}
+
+.reader-resume-toast__actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.reader-resume-toast__btn {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.reader-resume-toast__btn--resume {
+  background: var(--primary-800);
+  color: var(--color-White);
+  border: none;
+}
+
+.reader-resume-toast__btn--resume:hover {
+  background: var(--primary-600);
+}
+
+.reader-resume-toast__btn--dismiss {
+  background: transparent;
+  color: var(--neutral-400);
+  border: 1px solid color-mix(in oklch, var(--color-White) 20%, transparent);
+}
+
+.reader-resume-toast__btn--dismiss:hover {
+  background: color-mix(in oklch, var(--color-White) 10%, transparent);
+  color: var(--color-White);
+}
+
+/* Mobile: Stack vertically */
+@media (max-width: 480px) {
+  .reader-resume-toast {
+    flex-direction: column;
+    left: var(--space-md);
+    right: var(--space-md);
+    transform: translateX(0) translateY(100px);
+    width: auto;
+  }
+
+  .reader-resume-toast.is-visible {
+    transform: translateX(0) translateY(0);
+  }
+
+  .reader-resume-toast__actions {
+    width: 100%;
+  }
+
+  .reader-resume-toast__btn {
+    flex: 1;
+    text-align: center;
+  }
+}

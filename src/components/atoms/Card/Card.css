@@ -27,7 +27,6 @@
 .card {
   position: relative;
   overflow: hidden;
-  transition: border-color var(--hover-duration-fast);
 }
 
 
@@ -123,9 +122,6 @@
 }
 
 .card--neumorphic.card--hover-glow {
-  transition: transform var(--hover-duration),
-              box-shadow var(--hover-duration),
-              border-color var(--hover-duration);
 }
 
 .card--neumorphic.card--hover-glow:hover {
@@ -144,9 +140,6 @@
 }
 
 .card--pressed.card--hover-glow {
-  transition: transform var(--hover-duration),
-              box-shadow var(--hover-duration),
-              border-color var(--hover-duration);
 }
 
 .card--pressed.card--hover-glow:hover {
@@ -166,8 +159,6 @@
 }
 
 .card--comic.card--hover-lift {
-  transition: transform var(--hover-duration) ease,
-              box-shadow var(--hover-duration) ease;
 }
 
 .card--comic.card--hover-lift:hover {
@@ -204,7 +195,6 @@
 }
 
 .card--tech.card--hover-lift::before {
-  transition: transform var(--hover-duration) ease;
 }
 
 /* Card stays still — only the accent frame moves on hover */
@@ -219,7 +209,6 @@
 
 .card--hover-lift {
   cursor: pointer;
-  transition: transform var(--hover-duration), box-shadow var(--hover-duration), border-color var(--hover-duration-fast);
 }
 
 .card--hover-lift:hover {
@@ -228,10 +217,7 @@
   box-shadow: var(--card-shadow-hover, var(--shadow-lg));
 }
 
-.card--hover-lift:focus-visible {
-  outline: 2px solid var(--card-accent, var(--primary-600));
-  outline-offset: 2px;
-}
+/* card focus-visible → global focus-gate.css */
 
 .card--hover-border {
   cursor: pointer;
@@ -241,24 +227,13 @@
   border-color: var(--card-hover-border, var(--primary-600));
 }
 
-.card--hover-border:focus-visible {
-  outline: 2px solid var(--card-accent, var(--primary-600));
-  outline-offset: 2px;
-}
-
 .card--hover-glow {
   cursor: pointer;
-  transition: box-shadow var(--hover-duration), border-color var(--hover-duration-fast);
 }
 
 .card--hover-glow:hover {
   box-shadow: 0 0 0 2px var(--card-accent, var(--primary-600)),
               0 8px 24px color-mix(in oklch, var(--card-accent, var(--primary-600)) 25%, transparent);
-}
-
-.card--hover-glow:focus-visible {
-  outline: 2px solid var(--card-accent, var(--primary-600));
-  outline-offset: 2px;
 }
 
 /* ── Hover gate: none — kill all hover effects ── */
@@ -488,9 +463,7 @@
    13. RENDER MODE OVERRIDES
    ========================================================== */
 
-/* ── Reduced — kill transitions, let hover state changes apply instantly ── */
-
-[data-render="reduced"] .card { transition: none; }
+/* ── Reduced — hover-gate handles transition suppression globally ── */
 
 /* Liquid glass — strip distortion in reduced/assistive, keep blur only */
 [data-render="reduced"] .card--liquid::after,
@@ -502,98 +475,9 @@
 
 /* ── Assistive — simplified chrome, large link targets ── */
 
-[data-render="assistive"] .card { transition: none; }
 [data-render="assistive"] .card:hover { transform: none; }
 
-[data-render="assistive"] .card--link {
-  min-height: 64px;
-}
-
-[data-render="assistive"] .card--link:focus-visible {
-  outline-width: 3px;
-}
+/* Assistive targets + focus → global focus-gate.css */
 
 
-/* ── Textonly — transparent bordered box, content flows vertically ── */
-
-[data-render="textonly"] .card,
-[data-render="textonly"] [data-card] {
-  background: transparent;
-  border: 1px solid var(--card-border, var(--neutral-400));
-  border-radius: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  filter: none;
-  padding: var(--space-md);
-  text-align: left;
-  transform: none;
-  min-height: 0;
-  overflow: visible;
-}
-
-/* Link cards get primary border — visually clickable */
-[data-render="textonly"] .card--link {
-  border-color: var(--card-accent, var(--primary-600));
-}
-
-/* Kill hover effects */
-[data-render="textonly"] .card:hover,
-[data-render="textonly"] [data-card]:hover {
-  transform: none;
-  box-shadow: none;
-  background: transparent;
-}
-
-/* Border variants stripped */
-[data-render="textonly"] .card--border-thin,
-[data-render="textonly"] .card--border-medium,
-[data-render="textonly"] .card--border-thick {
-  border: 1px solid var(--card-border, var(--neutral-400));
-}
-
-/* Masonry resets to block flow */
-[data-render="textonly"] .card--masonry {
-  display: block;
-  margin-bottom: var(--space-sm);
-}
-
-/* Overlay hidden — decorative scrim */
-[data-render="textonly"] .card__overlay {
-  display: none;
-}
-
-/* Content wrapper strips visual chrome */
-[data-render="textonly"] .card__content {
-  padding: 0;
-  background: none;
-  border-radius: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  text-align: left;
-  align-items: flex-start;
-  min-height: 0;
-  height: auto;
-}
-
-/* Decorative icons hidden */
-[data-render="textonly"] .card__icon:not([aria-label]),
-[data-render="textonly"] .card__icon-wrapper:not(:has([aria-label])),
-[data-render="textonly"] .card__quote-icon {
-  display: none;
-}
-
-/* Arrow hidden — decorative */
-[data-render="textonly"] .card__arrow {
-  display: none;
-}
-
-/* Strip text shadows */
-[data-render="textonly"] .card * {
-  text-shadow: none;
-}
-
-/* Separator between stacked cards */
-[data-render="textonly"] .card--separator + .card--separator {
-  border-top: 1px solid currentColor;
-  padding-top: var(--space-sm);
-}
+/* Textonly → global textonly/structure.css */

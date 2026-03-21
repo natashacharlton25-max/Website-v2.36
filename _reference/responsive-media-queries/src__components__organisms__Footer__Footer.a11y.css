@@ -1,0 +1,170 @@
+/**
+ * Footer — a11y.css
+ *
+ * Link highlight rules are handled centrally by Link.a11y.css.
+ * Heading a11y rules are handled by Heading.a11y.css.
+ * Text a11y rules are handled by Text.a11y.css.
+ * Copyright uses <Text> — no glass to strip.
+ *
+ * This file only contains footer-specific overrides:
+ * - Mask collapse + opaque bg restore
+ * - Text-shadow removal
+ * - Reveal-active hover flattening
+ */
+
+@layer a11y.highlight-links {
+  /* Link highlight rules handled by Link.a11y.css */
+}
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    /* Flatten reveal-active hovers to static state */
+    & .footer--reveal-active .footer__link:hover {
+      color: var(--primary-800);
+      text-shadow: none;
+      border-color: transparent;
+    }
+
+    /* Collapse mask, restore opaque footer */
+    & .footer-mask {
+      min-height: auto;
+    }
+
+    & .footer-mask__content .footer {
+      background-color: var(--page-bg);
+    }
+
+    & .footer-mask__content .footer__brand-name,
+    & .footer-mask__content .footer__description,
+    & .footer-mask__content .footer__copyright {
+      text-shadow: none;
+    }
+  }
+
+}
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    & .footer,
+    & .footer__container {
+      text-align: center;
+    }
+
+    /* Override atom text-align:left — footer stays centered */
+    & .footer .heading,
+    & .footer .text,
+    & .footer__copyright {
+      text-align: center;
+    }
+
+    /* Collapse mask, restore opaque footer */
+    & .footer-mask {
+      min-height: auto;
+    }
+
+    & .footer-mask__content .footer {
+      background-color: var(--page-bg);
+    }
+
+    & .footer-mask__content .footer__brand-name,
+    & .footer-mask__content .footer__description,
+    & .footer-mask__content .footer__copyright {
+      text-shadow: none;
+    }
+
+    /* ── 600px: stack nav ── */
+    @media (max-width: 600px) {
+      & .footer__nav {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-sm);
+      }
+
+      & .footer__nav-dot {
+        display: none;
+      }
+    }
+
+    /* ── 480px: tighten spacing ── */
+    @media (max-width: 480px) {
+      & .footer {
+        padding: var(--space-md) 0 var(--space-sm);
+      }
+
+      & .footer__container {
+        gap: var(--space-md);
+      }
+
+      & .footer__logo {
+        width: 60px;
+      }
+
+      & .footer__copyright {
+        font-size: var(--text-small);
+      }
+    }
+
+    /* ── 300px: fine text ── */
+    @media (max-width: 300px) {
+      & .footer__copyright {
+        font-size: var(--text-fine);
+      }
+    }
+
+    /* ── 200px: hide nav, plain footer ── */
+    @media (max-width: 200px) {
+      & .footer {
+        padding: var(--space-xs) 0;
+      }
+
+      & .footer__container {
+        padding-left: var(--space-xs);
+        padding-right: var(--space-xs);
+        gap: var(--space-xs);
+      }
+
+      & .footer__logo {
+        width: 32px;
+      }
+
+      & .footer .footer__brand-name {
+        font-size: var(--neutral-800);
+        letter-spacing: normal;
+      }
+
+      & .footer__nav {
+        display: none;
+      }
+
+      & .footer__copyright {
+        font-size: var(--text-veryfine);
+      }
+    }
+
+    /* ── 100px: tiniest ── */
+    @media (max-width: 100px) {
+      & .footer__logo {
+        width: 20px;
+      }
+
+      & .footer .footer__brand-name {
+        font-size: var(--text-veryfine);
+      }
+
+      & .footer__copyright {
+        font-size: var(--text-veryfine);
+      }
+    }
+  }
+
+}
+
+/* Center alignment — unlayered beats micro.css text-align:left on .container */
+#a11y-content-wrapper.a11y-text-only .footer,
+#a11y-content-wrapper.a11y-text-only .footer__container {
+  text-align: center;
+}

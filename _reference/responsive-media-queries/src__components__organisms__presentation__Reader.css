@@ -1,0 +1,137 @@
+/* =========================================================
+   READER COMPONENT STYLES
+   Scroll-driven content presentation with GSAP animations
+
+   Component-specific styles are in their respective .astro files:
+   - TitleSection.astro
+   - EndSection.astro
+   - TextSection.astro
+   - ImageTextSection.astro
+   - FullWidthSection.astro
+   - QuoteSection.astro
+   - StatsSection.astro
+   - GallerySection.astro
+   - CalloutSection.astro
+   - CompareSection.astro
+   ========================================================= */
+
+/* ========== WRAPPER ========== */
+.reader-wrapper {
+  position: relative;
+  min-height: calc(var(--section-count, 3) * 150vh);
+  background-color: var(--page-bg);
+  /* Pull up to compensate for body padding (fixed nav) */
+  margin-top: calc(-1 * var(--body-top-padding, 70px));
+}
+
+/* ========== CONTAINER ========== */
+.reader-container {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+  overflow: visible; /* Allow full-width sections to break out */
+}
+
+/* ========== SECTIONS ========== */
+.reader-section {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl) var(--space-xl);
+  opacity: 0;
+  pointer-events: none; /* Prevent invisible sections from blocking clicks */
+  will-change: opacity;
+  overflow: hidden;
+}
+
+.reader-section:first-child {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Z-index stacking - supports up to 25 sections */
+.reader-section:nth-child(1) { z-index: 100; }
+.reader-section:nth-child(2) { z-index: 99; }
+.reader-section:nth-child(3) { z-index: 98; }
+.reader-section:nth-child(4) { z-index: 97; }
+.reader-section:nth-child(5) { z-index: 96; }
+.reader-section:nth-child(6) { z-index: 95; }
+.reader-section:nth-child(7) { z-index: 94; }
+.reader-section:nth-child(8) { z-index: 93; }
+.reader-section:nth-child(9) { z-index: 92; }
+.reader-section:nth-child(10) { z-index: 91; }
+.reader-section:nth-child(11) { z-index: 90; }
+.reader-section:nth-child(12) { z-index: 89; }
+.reader-section:nth-child(13) { z-index: 88; }
+.reader-section:nth-child(14) { z-index: 87; }
+.reader-section:nth-child(15) { z-index: 86; }
+.reader-section:nth-child(16) { z-index: 85; }
+.reader-section:nth-child(17) { z-index: 84; }
+.reader-section:nth-child(18) { z-index: 83; }
+.reader-section:nth-child(19) { z-index: 82; }
+.reader-section:nth-child(20) { z-index: 81; }
+.reader-section:nth-child(21) { z-index: 80; }
+.reader-section:nth-child(22) { z-index: 79; }
+.reader-section:nth-child(23) { z-index: 78; }
+.reader-section:nth-child(24) { z-index: 77; }
+.reader-section:nth-child(25) { z-index: 76; }
+
+/* ========== FULL-WIDTH SECTION BREAKOUTS ========== */
+/* Must come AFTER base .reader-section styles to override left: 0 */
+/* Uses margin instead of transform to avoid GSAP conflicts */
+.reader-section--title,
+.reader-section--end,
+.reader-section--full-width-image {
+  left: 0;
+  margin-left: calc(-50vw + 50%);
+  width: 100vw;
+  max-width: none;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+}
+
+/* ========== RESPONSIVE - TABLET ========== */
+@media (max-width: 768px) {
+  /* Remove container padding constraints for full-width sections */
+  .reader-container {
+    padding: 0;
+  }
+
+  /* Add padding back to non-full-width sections */
+  .reader-section:not(.reader-section--title):not(.reader-section--end):not(.reader-section--full-width-image) {
+    padding-left: var(--space-xl);
+    padding-right: var(--space-xl);
+  }
+
+  /* Fix full-width breakouts on mobile - simpler approach */
+  .reader-section--title,
+  .reader-section--end,
+  .reader-section--full-width-image {
+    left: 0;
+    margin-left: 0;
+    width: 100vw;
+    max-width: 100vw;
+  }
+}
+
+/* ========== RESPONSIVE - MOBILE ========== */
+@media (max-width: 640px) {
+  /* Smaller padding for non-full-width sections */
+  .reader-section:not(.reader-section--title):not(.reader-section--end):not(.reader-section--full-width-image) {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+}
+
+/* reduced-motion → a11y/motion/reduced-motion.css */

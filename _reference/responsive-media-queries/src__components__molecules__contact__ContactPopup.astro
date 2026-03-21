@@ -1,0 +1,794 @@
+---
+/**
+ * Contact Popup - Modal contact form
+ * Triggered by side tab email button
+ * Submits to /api/contact endpoint
+ *
+ * CSS Standards Compliant:
+ * - BEM-lite naming (.contact-popup, .contact-popup__header, .contact-popup--variant)
+ * - Standard .form vocabulary for form elements
+ * - Global typography (h2, h3, p) - no font overrides in component
+ * - All design tokens from tokens/ folder
+ * - No hardcoded values
+ */
+import { BRAND_CONFIG } from '../../../lib/config/brand';
+import Icon from '../../atoms/Icon/Icon.astro';
+---
+
+<!-- Popup Overlay (hidden by default) -->
+<div id="contactPopup" class="contact-popup" data-contact-email={BRAND_CONFIG.contact.email}>
+  <div class="contact-popup__container">
+    <!-- Header -->
+    <div class="contact-popup__header">
+      <button id="closePopup" class="contact-popup__close contact-popup__close--mobile" aria-label="Close">
+        <Icon name="contact-popup/x-fill" size={32} class="contact-popup__icon" />
+      </button>
+      <div class="contact-popup__header-content">
+        <h2>Let's have a <span class="contact-popup__highlight">conversation</span></h2>
+        <p class="contact-popup__subtitle">Reach out when you're ready. No pressure.</p>
+      </div>
+      <div class="contact-popup__info">
+        <div class="contact-popup__info-item">
+          <Icon name="contact-popup/envelope-fill" size={18} class="contact-popup__icon" />
+          <span>{BRAND_CONFIG.contact.email}</span>
+        </div>
+        <div class="contact-popup__info-item">
+          <Icon name="contact-popup/timer-fill" size={18} class="contact-popup__icon" />
+          <span>{BRAND_CONFIG.contact.responseTime}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="contact-popup__form-wrapper">
+      <button id="closePopupDesktop" class="contact-popup__close contact-popup__close--desktop" aria-label="Close">
+        <Icon name="contact-popup/x-fill" size={32} class="contact-popup__icon" />
+      </button>
+
+      <!-- Form -->
+      <form class="form" id="contactForm">
+        <div class="contact-popup__topics">
+          <h3>I'd like to chat about...</h3>
+          <div class="contact-popup__topic-list">
+            <button type="button" class="btn btn--outline btn--pill btn--sm contact-popup__topic-btn" data-topic="General enquiry">
+              General enquiry
+            </button>
+            <button type="button" class="btn btn--outline btn--pill btn--sm contact-popup__topic-btn" data-topic="Service enquiry">
+              Service enquiry
+            </button>
+            <button type="button" class="btn btn--outline btn--pill btn--sm contact-popup__topic-btn" data-topic="Resources">
+              Resources
+            </button>
+            <button type="button" class="btn btn--outline btn--pill btn--sm contact-popup__topic-btn" data-topic="This page" data-include-page="true">
+              This page
+            </button>
+            <button type="button" class="btn btn--outline btn--pill btn--sm contact-popup__topic-btn" data-topic="Feedback">
+              Feedback
+            </button>
+            <button type="button" class="btn btn--outline btn--pill btn--sm contact-popup__topic-btn" data-topic="Other">
+              Other
+            </button>
+          </div>
+        </div>
+
+        <div class="form__fields">
+          <div class="form__group">
+            <label for="contactName" class="form__label">Your name</label>
+            <input
+              type="text"
+              id="contactName"
+              name="name"
+              class="form__input"
+              required
+            />
+          </div>
+
+          <div class="form__group">
+            <label for="contactEmail" class="form__label">Your email</label>
+            <input
+              type="email"
+              id="contactEmail"
+              name="email"
+              class="form__input"
+              required
+            />
+          </div>
+
+          <div class="form__group">
+            <label for="contactMessage" class="form__label">Your message</label>
+            <textarea
+              id="contactMessage"
+              name="message"
+              rows="3"
+              class="form__input form__input--textarea"
+              required
+            ></textarea>
+          </div>
+
+          <button type="submit" id="submitContact" class="btn btn--primary" disabled>
+            Send Message
+          </button>
+        </div>
+      </form>
+
+      <!-- Success Message Section (hidden by default) -->
+      <div class="contact-popup__success" id="successMessage" style="display: none;">
+        <div class="contact-popup__success-content">
+          <div class="contact-popup__success-icon">
+            <Icon name="contact-popup/check-circle-fill" size={32} />
+          </div>
+          <h3>Message Sent!</h3>
+          <p>Thanks for reaching out. We'll get back to you soon.</p>
+          <button type="button" class="btn btn--primary contact-popup__success-btn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ========== POPUP OVERLAY ========== */
+  .contact-popup {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in srgb, var(--page-bg) 95%, transparent);
+    backdrop-filter: blur(var(--glass-overlay-blur));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    padding: var(--space-md);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-base);
+  }
+
+  .contact-popup.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* ========== POPUP CONTAINER ========== */
+  .contact-popup__container {
+    background: var(--page-bg);
+    border-radius: var(--radius-xl);
+    max-width: 1000px;
+    width: calc(100% - 40px);
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: var(--shadow-2xl);
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    transform: translateY(var(--space-xl)) scale(0.95);
+    transition: transform var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .contact-popup.show .contact-popup__container {
+    transform: translateY(0) scale(1);
+  }
+
+  /* ========== HEADER SECTION ========== */
+  .contact-popup__header {
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
+    color: var(--color-White);
+    padding: var(--space-xl) var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .contact-popup__header-content {
+    margin-bottom: var(--space-lg);
+  }
+
+  /* Typography inherited from global h2 - only override color for white on gradient */
+  .contact-popup__header h2 {
+    color: var(--color-White);
+  }
+
+  .contact-popup__highlight {
+    color: var(--neutral-400);
+  }
+
+  /* Typography inherited from global p - only layout here */
+  .contact-popup__subtitle {
+    color: color-mix(in srgb, var(--color-White) 85%, transparent);
+    margin: 0;
+  }
+
+  /* ========== CLOSE BUTTON ========== */
+  .contact-popup__close {
+    background: none;
+    border: none;
+    color: currentColor;
+    cursor: pointer;
+    padding: var(--space-sm);
+    transition: all var(--transition-fast);
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .contact-popup__close:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+
+  .contact-popup__close--mobile {
+    display: none;
+    color: var(--color-White);
+  }
+
+  .contact-popup__close--desktop {
+    display: flex;
+    color: var(--neutral-400);
+  }
+
+  /* ========== CONTACT INFO ========== */
+  .contact-popup__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .contact-popup__info-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    opacity: 0.9;
+  }
+
+  .contact-popup__icon {
+    flex-shrink: 0;
+  }
+
+  /* ========== FORM WRAPPER ========== */
+  .contact-popup__form-wrapper {
+    padding: var(--space-xl);
+    background: var(--page-bg);
+    overflow-y: auto;
+    position: relative;
+  }
+
+  /* ========== FORM (using standard vocabulary) ========== */
+  .form {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  /* Typography inherited from global h3 - only spacing here */
+  .contact-popup__topics h3 {
+    margin-bottom: var(--space-sm);
+  }
+
+  /* ========== TOPIC BUTTONS ========== */
+  .contact-popup__topic-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  /* Selected state override - uses global button styles otherwise */
+  .contact-popup__topic-btn.selected {
+    background: var(--primary-600);
+    border-color: var(--primary-600);
+    color: var(--color-White);
+  }
+
+  /* ========== FORM FIELDS (standard vocabulary) ========== */
+  .form__fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .form__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .form__label {
+    font-weight: var(--font-semibold);
+    color: var(--neutral-800);
+  }
+
+  .form__input {
+    padding: var(--space-sm) var(--space-md);
+    border: var(--border-width-2) solid var(--neutral-400);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    background: var(--page-bg);
+    color: var(--neutral-800);
+    transition: all var(--transition-fast);
+  }
+
+  .form__input:focus {
+    outline: none;
+    border-color: var(--primary-600);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-600) 15%, transparent);
+  }
+
+  .form__input--textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  /* ========== SUBMIT BUTTON ========== */
+  .contact-popup__form-wrapper .btn {
+    align-self: flex-start;
+    margin-top: var(--space-xs);
+  }
+
+  /* Override pointer-events to show disabled cursor */
+  .contact-popup__form-wrapper .btn:disabled {
+    pointer-events: auto;
+    cursor: not-allowed;
+  }
+
+  /* ========== SUCCESS MESSAGE ========== */
+  .contact-popup__success {
+    padding: var(--space-2xl);
+    background: var(--page-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+
+  .contact-popup__success-content {
+    text-align: center;
+    max-width: var(--container-sm);
+  }
+
+  .contact-popup__success-icon {
+    width: var(--space-4xl);
+    height: var(--space-4xl);
+    margin: 0 auto var(--space-lg);
+    background: linear-gradient(135deg, var(--color-Success) 0%, color-mix(in oklch, var(--color-Success), black 15%) 100%);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-White);
+  }
+
+
+  /* Typography inherited from global h3, p - only spacing here */
+  .contact-popup__success h3 {
+    margin-bottom: var(--space-sm);
+  }
+
+  .contact-popup__success p {
+    margin-bottom: var(--space-lg);
+  }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 768px) {
+    .contact-popup__container {
+      grid-template-columns: 1fr;
+      max-height: 95vh;
+    }
+
+    .contact-popup__header {
+      padding: var(--space-lg) var(--space-lg);
+    }
+
+    .contact-popup__header-content {
+      margin-bottom: var(--space-md);
+    }
+
+    .contact-popup__form-wrapper {
+      padding: var(--space-lg);
+    }
+
+    .contact-popup__topic-list {
+      gap: var(--space-xs);
+    }
+
+    .contact-popup__info {
+      gap: var(--space-xs);
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .contact-popup__close--desktop {
+      display: none;
+    }
+
+    .contact-popup__close--mobile {
+      display: flex;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .contact-popup__header {
+      padding: var(--space-md) var(--space-md);
+    }
+
+    .contact-popup__header-content {
+      margin-bottom: var(--space-sm);
+    }
+
+    .contact-popup__header h2 {
+    }
+
+    .contact-popup__subtitle {
+    }
+
+    .contact-popup__info {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .contact-popup {
+      padding: var(--space-sm);
+    }
+
+    .contact-popup__container {
+      border-radius: var(--radius-lg);
+    }
+
+    .contact-popup__header {
+      padding: var(--space-xs) var(--space-md);
+    }
+
+    .contact-popup__header-content {
+      margin-bottom: var(--space-xs);
+      text-align: center;
+    }
+
+    .contact-popup__header h2 {
+    }
+
+    .contact-popup__subtitle {
+    }
+
+    .contact-popup__close--mobile {
+      position: relative;
+      top: auto;
+      right: auto;
+      margin: 0 auto;
+      padding: var(--space-2xs);
+    }
+
+    .contact-popup__form-wrapper {
+      padding: var(--space-md);
+    }
+
+    .contact-popup__form-wrapper .btn {
+      align-self: center;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .contact-popup {
+      padding: var(--space-xs);
+    }
+
+    .contact-popup__container {
+      width: calc(100% - 16px);
+      border-radius: var(--radius-md);
+    }
+
+    .contact-popup__header {
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    .contact-popup__header-content {
+      margin-bottom: var(--space-xs);
+    }
+
+    .contact-popup__header h2 {
+    }
+
+    .contact-popup__form-wrapper {
+      padding: var(--space-md);
+    }
+
+    .form__input {
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    .form__input--textarea {
+      min-height: 60px;
+    }
+
+    .contact-popup__success {
+      padding: var(--space-xl);
+    }
+  }
+
+  @media (max-width: 350px) {
+    .contact-popup__container {
+      width: calc(100% - 8px);
+      max-height: 98vh;
+    }
+
+    .contact-popup__header {
+      padding: var(--space-xs) var(--space-xs);
+    }
+
+    .contact-popup__header-content {
+      margin-bottom: var(--space-2xs);
+      text-align: center;
+    }
+
+    .contact-popup__header h2 {
+    }
+
+    .contact-popup__subtitle {
+    }
+
+    .contact-popup__close--mobile {
+      margin: 0 auto;
+      padding: 2px;
+    }
+
+    .contact-popup__form-wrapper {
+      padding: var(--space-sm);
+    }
+
+    .contact-popup__topic-list {
+      gap: 4px;
+    }
+
+    .form {
+      gap: var(--space-sm);
+    }
+
+    .form__fields {
+      gap: var(--space-xs);
+    }
+
+    .contact-popup__form-wrapper .btn {
+      align-self: center;
+    }
+
+    .contact-popup__success {
+      padding: var(--space-lg);
+    }
+
+    .contact-popup__success-icon {
+      width: var(--space-3xl);
+      height: var(--space-3xl);
+      margin-bottom: var(--space-md);
+    }
+  }
+
+  @media (max-width: 300px) {
+    .contact-popup {
+      padding: 2px;
+    }
+
+    .contact-popup__container {
+      width: calc(100% - 4px);
+      border-radius: var(--radius-sm);
+    }
+
+    .contact-popup__header {
+      padding: var(--space-2xs) var(--space-2xs);
+    }
+
+    .contact-popup__header h2 {
+    }
+
+    .contact-popup__subtitle {
+      display: none;
+    }
+
+    .contact-popup__form-wrapper {
+      padding: var(--space-xs);
+    }
+
+    .form__input {
+      padding: var(--space-2xs) var(--space-xs);
+      border-radius: var(--radius-sm);
+    }
+
+    .form__input--textarea {
+      min-height: 50px;
+    }
+
+    .contact-popup__topics h3 {
+      margin-bottom: var(--space-xs);
+    }
+
+    .contact-popup__success {
+      padding: var(--space-md);
+    }
+
+    .contact-popup__success-icon {
+      width: var(--space-2xl);
+      height: var(--space-2xl);
+      margin-bottom: var(--space-sm);
+    }
+  }
+
+  @media (max-width: 200px) {
+    .contact-popup {
+      padding: 1px;
+    }
+
+    .contact-popup__container {
+      width: 100%;
+      border-radius: var(--radius-xs);
+      max-height: 100vh;
+    }
+
+    .contact-popup__header {
+      padding: var(--space-2xs);
+    }
+
+    .contact-popup__header-content {
+      margin-bottom: 2px;
+    }
+
+    .contact-popup__header h2 {
+    }
+
+    .contact-popup__form-wrapper {
+      padding: var(--space-2xs);
+    }
+
+    .form {
+      gap: var(--space-xs);
+    }
+
+    .form__group {
+      gap: 2px;
+    }
+
+    .form__input {
+      padding: 4px 6px;
+    }
+
+    .form__label {
+    }
+
+    .form__input--textarea {
+      min-height: 40px;
+    }
+
+    .contact-popup__topic-list {
+      gap: 2px;
+    }
+
+    .contact-popup__topics h3 {
+    }
+
+    .contact-popup__success {
+      padding: var(--space-sm);
+    }
+
+    .contact-popup__success-icon {
+      width: var(--space-xl);
+      height: var(--space-xl);
+    }
+  }
+
+  @media (max-width: 100px) {
+    .contact-popup {
+      padding: 0;
+    }
+
+    .contact-popup__container {
+      border-radius: 0;
+    }
+
+    .contact-popup__header {
+      padding: 2px;
+    }
+
+    .contact-popup__header h2 {
+    }
+
+    .contact-popup__form-wrapper {
+      padding: 2px;
+    }
+
+    .contact-popup__close--mobile {
+      padding: 0;
+    }
+
+    .form__input {
+      padding: 2px 4px;
+      border-width: 1px;
+    }
+
+    .form__label {
+    }
+
+    .form__input--textarea {
+      min-height: 30px;
+    }
+
+    .contact-popup__topic-list {
+      gap: 1px;
+    }
+
+    .contact-popup__topics h3 {
+    }
+
+    .contact-popup__success {
+      padding: var(--space-xs);
+    }
+
+    .contact-popup__success-icon {
+      width: var(--space-lg);
+      height: var(--space-lg);
+      margin-bottom: var(--space-xs);
+    }
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  /* Class-based reduced motion */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .contact-popup,
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .contact-popup__container {
+    transition: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .contact-popup__container {
+    transform: translateY(0) scale(1) !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .contact-popup__close {
+    transition: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .contact-popup__close:hover {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .form__input {
+    transition: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .contact-popup__topic-btn {
+    transition: none !important;
+  }
+
+  /* System preference reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .contact-popup,
+    .contact-popup__container {
+      transition: none;
+    }
+
+    .contact-popup__container {
+      transform: translateY(0) scale(1);
+    }
+
+    .contact-popup__close {
+      transition: none;
+    }
+
+    .contact-popup__close:hover {
+      opacity: 1;
+      transform: none;
+    }
+
+    .form__input {
+      transition: none;
+    }
+
+    .contact-popup__topic-btn {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Import contact popup functionality
+  import './contact-popup.js';
+</script>

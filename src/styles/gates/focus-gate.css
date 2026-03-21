@@ -1,0 +1,102 @@
+/**
+ * Global focus ring — square border with bg gap + fill
+ *
+ * Uses --focus-color from theme (status-derived, CVD-safe).
+ * Uses --focus-bg for gap between element and ring (page background).
+ * JS sets data-focus-active on focusin, removed on focusout.
+ * IMMUNE to visual-gate — uses --focus-color, not --shadow-* tokens.
+ *
+ * EXCEPTION: Uses !important on focus-visible properties.
+ * Focus visibility is a WCAG non-negotiable. It must override
+ * zone file specificity in dark mode, HC, and any future zone.
+ * This is the ONLY permitted use of !important in the codebase.
+ */
+
+:root {
+  --focus-thickness: 0.2rem;
+}
+
+/* Focus state: ring + fill — overrides everything (except panel elements) */
+[data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card) {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color) !important;
+  border-radius: 0 !important;
+  border-color: transparent !important;
+  background: color-mix(in oklch, var(--focus-color) 25%, transparent) !important;
+  color: var(--neutral-800) !important;
+  outline: none !important;
+  position: relative;
+  z-index: var(--z-tooltip);
+  transform: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Kill pseudo-element effects on focused elements + wrapper glows */
+[data-focus-active]::before,
+[data-focus-active]::after,
+.btn-rainbow-glow-wrap:has([data-focus-active])::before,
+.btn-rainbow-glow-wrap:has([data-focus-active])::after {
+  display: none !important;
+}
+
+/* Focused + hovered: fill shifts to Success */
+[data-focus-active]:hover {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success) !important;
+  background: color-mix(in oklch, var(--color-Success) 25%, transparent) !important;
+  color: var(--neutral-800) !important;
+}
+
+/* Hover none: no colour shift on hover */
+[data-hover="none"] [data-focus-active]:hover {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color) !important;
+  background: color-mix(in oklch, var(--focus-color) 25%, transparent) !important;
+}
+
+/* ==========================================================
+   ENHANCED FOCUS — double ring (user toggle in Your View)
+   ========================================================== */
+
+[data-enhanced-focus] [data-focus-active] {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color),
+    0 0 0 calc(var(--focus-thickness) * 3) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 4) var(--highlight-link-color) !important;
+}
+
+[data-enhanced-focus] [data-focus-active]:hover {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success),
+    0 0 0 calc(var(--focus-thickness) * 3) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 4) var(--highlight-link-color) !important;
+}
+
+[data-hover="none"] [data-enhanced-focus] [data-focus-active]:hover {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color),
+    0 0 0 calc(var(--focus-thickness) * 3) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 4) var(--highlight-link-color) !important;
+}
+
+@media (forced-colors: active) {
+  [data-focus-active] {
+    box-shadow: none !important;
+    outline: 3px solid LinkText !important;
+    outline-offset: 2px;
+    border-radius: revert !important;
+    background: revert !important;
+    color: revert !important;
+  }
+}

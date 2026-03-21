@@ -1,0 +1,140 @@
+/**
+ * HeroSection — a11y.css
+ * @layer a11y
+ *
+ * Accessibility overrides:
+ * - Reduce motion: disable transitions, pattern animation
+ * - Text-only: strip images, gradients, overlays, decorative elements
+ *
+ * Theme overrides (gradient text readability) are handled by brand tokens.
+ * High-contrast / monochrome strip gradient bg in text-only mode.
+ */
+
+@layer a11y.reduce-motion {
+
+  .a11y-reduce-motion {
+
+    & .hero-section,
+    & .hero-section__overlay,
+    & .hero-section__fade,
+    & .hero-section__pres-overlay {
+      transition: none;
+    }
+
+    & .hero-section__circle {
+      animation: none;
+    }
+  }
+
+  /* System preference fallback */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-section,
+    .hero-section__overlay,
+    .hero-section__fade,
+    .hero-section__pres-overlay {
+      transition: none;
+    }
+
+    .hero-section__circle {
+      animation: none;
+    }
+  }
+
+}
+
+
+@layer a11y.text-only {
+
+  .a11y-text-only {
+
+    /* ---- Remove backgrounds and gradients ---- */
+    & .hero-section--gradient,
+    & .hero-section--presentation {
+      background: none;
+    }
+
+    /* ---- Remove pattern overlay ---- */
+    & .hero-section--pattern::before {
+      display: none;
+    }
+
+    /* ---- Remove images, overlays, fades ---- */
+    & .hero-section__image-wrapper,
+    & .hero-section__overlay,
+    & .hero-section__fade,
+    & .hero-section__pres-image-wrapper,
+    & .hero-section__pres-overlay {
+      display: none;
+    }
+
+    /* ---- Remove decorative circles ---- */
+    & .hero-section__decor {
+      display: none;
+    }
+
+    /* ---- Force page text colours ---- */
+    & .hero-section__title,
+    & .hero-section__pres-title {
+      color: var(--neutral-800);
+      text-shadow: none;
+    }
+
+    & .hero-section__subtitle,
+    & .hero-section__description,
+    & .hero-section__extra,
+    & .hero-section__pres-description {
+      color: var(--neutral-400);
+      text-shadow: none;
+    }
+
+    /* ---- Presentation variant: collapse full viewport ---- */
+    & .hero-section--presentation {
+      min-height: auto;
+      height: auto;
+      padding: var(--space-2xl) 0;
+    }
+
+    & .hero-section--has-image .hero-section__pres-title {
+      color: var(--neutral-800);
+      text-shadow: none;
+    }
+
+    & .hero-section--has-image .hero-section__pres-description {
+      color: var(--neutral-400);
+      text-shadow: none;
+    }
+
+    & .hero-section--has-image .hero-section__date,
+    & .hero-section--has-image .hero-section__reading-time {
+      color: var(--neutral-400);
+    }
+
+    & .hero-section--has-image .hero-section__category {
+      background: var(--primary-800);
+      color: var(--color-White);
+    }
+
+    /* ---- Image variant: collapse full viewport ---- */
+    & .hero-section--image {
+      min-height: auto;
+      height: auto;
+      margin-top: 0;
+      padding: var(--space-2xl) 0;
+    }
+
+    & .hero-section--image .hero-section__content {
+      margin-top: var(--space-xl);
+    }
+
+    /* ---- Gradient text: force readable ---- */
+    & .hero-section--gradient .hero-section__title {
+      color: var(--neutral-800);
+    }
+
+    & .hero-section--gradient .hero-section__subtitle,
+    & .hero-section--gradient .hero-section__description {
+      color: var(--neutral-400);
+    }
+  }
+
+}

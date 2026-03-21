@@ -1,0 +1,174 @@
+---
+/**
+ * ProjectSpecCard - Vertical stacked spec card for project pages
+ * Icon on top, then title, then value - centered layout
+ */
+import Icon from '../../atoms/Icon/Icon.astro';
+
+interface Props {
+  iconName: string;
+  label: string;
+  value: string;
+  variant?: 'primary' | 'secondary' | 'accent';
+}
+
+const { iconName, label, value, variant = 'primary' } = Astro.props;
+---
+
+<div class={`card project-spec-card project-spec-card--${variant}`}>
+  <div class="project-spec-card__icon">
+    <Icon name={iconName} size={32} />
+  </div>
+  <small class="project-spec-card__label">{label}</small>
+  <span class="project-spec-card__value">{value}</span>
+</div>
+
+<style>
+  /* Vertical card: icon on top, then title, then value */
+  .project-spec-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-xs);
+    padding: var(--space-lg);
+    border: 1px solid var(--neutral-400);
+    border-radius: var(--radius-lg);
+    background: var(--page-bg);
+    transition: all var(--transition-base);
+  }
+
+  .project-spec-card:hover {
+    box-shadow: 0 2px 8px color-mix(in oklch, var(--color-Black) 6%, transparent);
+  }
+
+  .project-spec-card__icon {
+    flex-shrink: 0;
+    color: var(--primary-800);
+    margin-bottom: var(--space-xs);
+  }
+
+  .project-spec-card__icon :global(.icon),
+  .project-spec-card__icon :global(svg) {
+    width: 32px;
+    height: 32px;
+  }
+
+  .project-spec-card__label {
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--neutral-800);
+  }
+
+  .project-spec-card__value {
+    font-weight: var(--font-medium);
+    line-height: var(--leading-relaxed);
+    color: var(--neutral-800);
+  }
+
+  /* ========== RESPONSIVE - TABLET ========== */
+  @media (max-width: 768px) {
+    .project-spec-card {
+      padding: var(--space-md);
+    }
+
+    .project-spec-card__icon :global(.icon),
+    .project-spec-card__icon :global(svg) {
+      width: 28px;
+      height: 28px;
+    }
+
+    .project-spec-card__label {
+    }
+
+    .project-spec-card__value {
+    }
+  }
+
+  /* ========== RESPONSIVE - SMALL (400px) ========== */
+  @media (max-width: 400px) {
+    .project-spec-card {
+      padding: var(--space-sm);
+      gap: calc(var(--space-xs) * 0.5);
+    }
+
+    .project-spec-card__icon {
+      margin-bottom: calc(var(--space-xs) * 0.5);
+    }
+
+    .project-spec-card__icon :global(.icon),
+    .project-spec-card__icon :global(svg) {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  /* ========== RESPONSIVE - VERY SMALL (300px) ========== */
+  @media (max-width: 300px) {
+    .project-spec-card {
+      border-radius: 0.75rem;
+      padding: var(--space-xs);
+    }
+
+    .project-spec-card__icon :global(.icon),
+    .project-spec-card__icon :global(svg) {
+      width: 20px;
+      height: 20px;
+    }
+
+    .project-spec-card__label {
+      font-size: calc(var(--text-fine) * 0.9);
+    }
+
+    .project-spec-card__value {
+      font-size: calc(var(--text-fine) * 0.85);
+    }
+  }
+
+  /* ========== RESPONSIVE - TINY (200px) ========== */
+  @media (max-width: 200px) {
+    .project-spec-card {
+      padding: var(--space-xs);
+      border-radius: 0.5rem;
+    }
+
+    .project-spec-card__icon :global(.icon),
+    .project-spec-card__icon :global(svg) {
+      width: 18px;
+      height: 18px;
+    }
+
+    .project-spec-card__label {
+      font-size: calc(var(--text-fine) * 0.8);
+    }
+
+    .project-spec-card__value {
+      font-size: calc(var(--text-fine) * 0.75);
+    }
+  }
+
+  /* ========== REDUCED MOTION ========== */
+  /* No visual change on hover - keep base state */
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .project-spec-card {
+    transition: none !important;
+  }
+
+  :global(#a11y-content-wrapper.a11y-reduce-motion) .project-spec-card:hover {
+    box-shadow: none !important;
+    transform: none !important;
+    border-color: var(--neutral-400) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-spec-card {
+      transition: none;
+    }
+
+    .project-spec-card:hover {
+      box-shadow: none;
+      transform: none;
+      border-color: var(--neutral-400);
+    }
+  }
+</style>

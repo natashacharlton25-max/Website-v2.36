@@ -68,7 +68,7 @@ interface Props {
 }
 
 const {
-  name, weight, size = 24, class: className = '', color,
+  name, weight, size, class: className = '', color,
   shadow, glow, gradient, spin, pulse, bounce, stroke,
   draw, drawOnScroll, drawScrub, drawColor,
   morphTo, morphColor, semanticRole,
@@ -200,7 +200,7 @@ if (stroke && !draw && iconContent) {
 
 // ─── Fallback ───────────────────────────────────────────
 
-const fallbackIcon = `<svg viewBox="0 0 256 256" width="${size}" height="${size}" fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.2"/><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-width="16"/></svg>`;
+const fallbackIcon = `<svg viewBox="0 0 256 256"${size != null ? ` width="${size}" height="${size}"` : ''} fill="currentColor"><circle cx="128" cy="128" r="96" opacity="0.2"/><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-width="16"/></svg>`;
 
 // ─── Build classes and data attrs ───────────────────────
 
@@ -236,7 +236,7 @@ if (morphTo && morphTargetContent) {
 
 <span
   class:list={['icon', ...effectClasses, className]}
-  style={`width: ${size}px; height: ${size}px;${color && !gradient ? ` color: ${color};` : ''}`}
+  style={`${size != null ? `width: ${size}px; height: ${size}px;` : ''}${color && !gradient ? ` color: ${color};` : ''}`}
   set:html={iconContent || fallbackIcon}
   aria-hidden="true"
   data-semantic-role={semanticRole}

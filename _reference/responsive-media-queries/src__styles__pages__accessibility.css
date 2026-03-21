@@ -1,0 +1,194 @@
+/**
+ * /accessibility page layout
+ *
+ * Page-level container, header, sections, and grid overrides
+ * for sub-components (theme list, toggle grid, preset row, etc.)
+ * that were originally designed for the modal's grid layout.
+ */
+
+/* ── Page container ── */
+
+.a11y-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
+  padding-top: var(--space-3xl);
+}
+
+/* ── Page header ── */
+
+.a11y-page__header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.a11y-page__title {
+  font-size: var(--font-size-3xl, 30px);
+  font-weight: var(--font-extrabold);
+  color: var(--primary-600);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 var(--space-sm);
+}
+
+.a11y-page__title-aac {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.a11y-page__intro {
+  color: var(--neutral-900);
+  opacity: 0.8;
+  max-width: 600px;
+  margin: 0 auto var(--space-lg);
+}
+
+.a11y-page__header-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+/* ── Sections ── */
+
+.a11y-page__section {
+  margin-bottom: var(--space-2xl);
+  padding-bottom: var(--space-2xl);
+  border-bottom: 1px solid color-mix(in srgb, var(--neutral-900) 12%, transparent);
+}
+
+.a11y-page__section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.a11y-page__section-title {
+  font-size: var(--font-size-xl, 20px);
+  font-weight: var(--font-bold);
+  color: var(--neutral-900);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 var(--space-xs);
+}
+
+.a11y-page__section-desc {
+  color: var(--neutral-900);
+  opacity: 0.7;
+  margin: 0 0 var(--space-lg);
+  line-height: 1.6;
+}
+
+/* ── Presets row — wrap on page ── */
+
+.a11y-page__presets-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+/* ── Theme list — grid layout on page ── */
+
+.a11y-page .a11y-panel__sidebar {
+  padding: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+.a11y-page .a11y-theme-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.a11y-page .a11y-theme-list__heading {
+  font-size: var(--font-size-lg, 18px);
+  margin: 0;
+}
+
+.a11y-page .a11y-theme-list__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-sm);
+}
+
+/* ── Toggle grid — 2-column on page ── */
+
+.a11y-page .a11y-toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+/* ── Font grid — 2-column on page ── */
+
+.a11y-page .a11y-font-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+/* ── Stepper grid — 2-column on page ── */
+
+.a11y-page .a11y-stepper-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+/* ── Alt text grid — horizontal row on page ── */
+
+.a11y-page .a11y-alttext-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+  .a11y-page {
+    padding: var(--space-lg) var(--space-md);
+    padding-top: var(--space-2xl);
+  }
+
+  .a11y-page__presets-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .a11y-page .a11y-theme-list__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .a11y-page .a11y-toggle-grid,
+  .a11y-page .a11y-font-grid,
+  .a11y-page .a11y-stepper-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .a11y-page .a11y-alttext-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .a11y-page {
+    padding: var(--space-md) var(--space-sm);
+    padding-top: var(--space-xl);
+  }
+
+  .a11y-page__title {
+    font-size: var(--font-size-xl, 20px);
+  }
+
+  .a11y-page__presets-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .a11y-page .a11y-alttext-grid {
+    grid-template-columns: 1fr;
+  }
+}

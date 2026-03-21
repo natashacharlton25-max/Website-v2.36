@@ -1,0 +1,171 @@
+---
+/**
+ * TimelineStepper - Horizontal step timeline component
+ *
+ * Used on services pages to display process steps
+ *
+ * Props:
+ * @param steps - Array of step objects with number, title, and text
+ */
+
+interface Props {
+  steps: Array<{ number: string; title: string; text: string }>;
+}
+
+const { steps } = Astro.props;
+---
+
+<div class="timeline-stepper">
+  {steps.map((step) => (
+    <div class="timeline-step">
+      <div class="timeline-step__marker">
+        <span class="timeline-step__number">{step.number}</span>
+      </div>
+      <div class="timeline-step__content">
+        <h3 class="timeline-step__title">{step.title}</h3>
+        <p class="timeline-step__text">{step.text}</p>
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+  .timeline-stepper {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2xl);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .timeline-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+  }
+
+  .timeline-step__marker {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: var(--space-lg);
+  }
+
+  .timeline-step__number {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary-800);
+    color: var(--color-White);
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin: 0 auto;
+  }
+
+  .timeline-step__content {
+    padding: 0 var(--space-sm);
+  }
+
+  .timeline-step__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-md);
+    font-weight: var(--font-semibold);
+    color: var(--neutral-800);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 var(--space-sm) 0;
+  }
+
+  .timeline-step__text {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--neutral-400);
+    line-height: var(--leading-relaxed);
+    margin: 0;
+  }
+
+  /* ========== RESPONSIVE - TABLET (768px) ========== */
+  @media (max-width: 768px) {
+    .timeline-stepper {
+      flex-direction: column;
+      gap: var(--space-xl);
+    }
+
+    .timeline-step {
+      flex-direction: row;
+      text-align: left;
+      align-items: flex-start;
+    }
+
+    .timeline-step__marker {
+      width: auto;
+      flex-direction: column;
+      margin-bottom: 0;
+      margin-right: var(--space-lg);
+    }
+
+    .timeline-step__content {
+      padding: 0;
+      flex: 1;
+    }
+  }
+
+  /* ========== RESPONSIVE - SMALL (400px) ========== */
+  @media (max-width: 400px) {
+    .timeline-step__number {
+      width: 40px;
+      height: 40px;
+    }
+
+    .timeline-step__marker {
+      margin-right: var(--space-md);
+    }
+  }
+
+  /* ========== RESPONSIVE - VERY SMALL (300px) ========== */
+  @media (max-width: 300px) {
+    .timeline-stepper {
+      gap: var(--space-lg);
+    }
+
+    .timeline-step {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .timeline-step__marker {
+      flex-direction: row;
+      margin-right: 0;
+      margin-bottom: var(--space-sm);
+    }
+
+    .timeline-step__number {
+      width: 36px;
+      height: 36px;
+    }
+
+    .timeline-step__content {
+      padding: 0;
+    }
+  }
+
+  /* ========== RESPONSIVE - TINY (200px) ========== */
+  @media (max-width: 200px) {
+    .timeline-stepper {
+      gap: var(--space-md);
+    }
+
+    .timeline-step__number {
+      width: 28px;
+      height: 28px;
+    }
+  }
+</style>

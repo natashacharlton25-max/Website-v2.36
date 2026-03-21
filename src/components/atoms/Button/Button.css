@@ -19,10 +19,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: var(--space-md) var(--space-lg);
-  min-height: 2.75rem;
+  padding: var(--space-sm) var(--space-lg);
   font-weight: var(--font-medium);
-  font-size: inherit;
+  font-size: var(--text-small);
   font-family: var(--font-body);
   line-height: var(--leading-tight);
   text-decoration: none;
@@ -45,10 +44,7 @@
  
 }
 
-.btn:focus-visible {
-  outline: 2px solid var(--btn-focus-ring, var(--primary-600));
-  outline-offset: 2px;
-}
+/* focus-visible → global focus-gate.css */
 
 /* ==========================================================
    HOVER GATE — uses tokens from src/styles/gates/hover-gate.css
@@ -163,7 +159,7 @@
 
 .btn:disabled,
 .btn[aria-disabled="true"] {
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -242,7 +238,6 @@
   flex-shrink: 0;
   color: inherit;
   fill: currentColor;
-  transition: transform var(--transition-base);
 }
 
 /* Hover: 90° anticlockwise (down → right) */
@@ -372,7 +367,6 @@
   background-size: 200% 200%;
   opacity: 0;
   z-index: -1;
-  transition: opacity 0.4s ease, filter 0.4s ease;
   animation: btn-glowloop 2s linear infinite;
   pointer-events: none;
 }
@@ -411,7 +405,6 @@
   border: 2px solid var(--neutral-400);
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
-  transition: border-color var(--hover-duration) ease-out;
 }
 
 .btn-rainbow-glow-wrap::before {
@@ -426,7 +419,6 @@
     var(--rainbow-1)));
   background-size: 200% 200%;
   opacity: 0;
-  transition: opacity var(--hover-duration) ease-out;
   animation: btn-glowloop 8s linear infinite;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -448,7 +440,6 @@
   filter: blur(clamp(16px, 3vw, 40px)) saturate(1.6) contrast(1.5);
   opacity: 0;
   z-index: -2;
-  transition: opacity 0.4s ease;
   animation: btn-glowloop 8s linear infinite;
 }
 
@@ -462,11 +453,11 @@
 }
 
 .btn-rainbow-glow-wrap:hover::before {
-  opacity: 0.85;
+  opacity: var(--opacity-high);
 }
 
 .btn-rainbow-glow-wrap:hover::after {
-  opacity: 0.8;
+  opacity: var(--opacity-high);
 }
 
 @keyframes btn-glowloop {
@@ -502,7 +493,6 @@
   text-shadow: 0 0.0625em 0 var(--_btn-brand-dark);
   border: none;
   letter-spacing: 0.15em;
-  transition: background var(--transition-slow), color var(--transition-slow), box-shadow var(--transition-base), transform var(--transition-base);
   box-shadow:
     /* Inner highlight */
     inset 0 0.0625em 0 0 color-mix(in oklch, var(--_btn-brand-light) 40%, transparent),
@@ -612,7 +602,6 @@
   color: var(--_btn-brand-dark);
   border: none;
   box-shadow: var(--shadow-neu-pressed);
-  transition: background var(--transition-slow);
 }
 
 .btn--neumorphic-inner:hover {
@@ -696,12 +685,12 @@
 
 .btn--speed-slow::before,
 .btn--speed-slow::after {
-  transition: all 3s ease;
+  transition: all var(--duration-extralong) var(--ease-default);
 }
 
 .btn--speed-fast::before,
 .btn--speed-fast::after {
-  transition: all 0.6s ease;
+  transition: all var(--duration-slower) var(--ease-default);
 }
 
 /* Glass-like translucent base, text goes light on hover as blobs fill */
@@ -745,10 +734,6 @@
    ========================================================== */
 
 .btn--jump {
-  transition:
-    transform var(--hover-duration) ease,
-    box-shadow var(--hover-duration) ease,
-    background-color var(--hover-duration-fast) ease;
 }
 
 .btn--jump:hover {
@@ -771,11 +756,6 @@
 .btn--comic {
   border: 3px solid var(--btn-comic-border, var(--color-Black));
   box-shadow: 4px 6px 0 var(--btn-comic-shadow, var(--color-Black));
-  transition:
-    transform var(--hover-duration) ease,
-    box-shadow var(--hover-duration) ease,
-    filter 0.05s ease,
-    background-color var(--hover-duration-fast) ease;
 }
 
 .btn--comic:hover {
@@ -805,7 +785,6 @@
   background: var(--_btn-brand-dark);
   z-index: 0;
   transform: translateX(-100%);
-  transition: transform var(--hover-duration) ease;
   pointer-events: none;
 }
 
@@ -820,7 +799,6 @@
 
 .btn--tech {
   overflow: visible;
-  transition: transform var(--hover-duration) ease, background-color var(--hover-duration) ease;
 }
 
 /* Offset border frame via ::before */
@@ -835,7 +813,6 @@
   border-radius: inherit;
   background: none;
   transform: translate(-5px, -5px);
-  transition: transform var(--hover-duration) ease;
   pointer-events: none;
 }
 
@@ -896,8 +873,7 @@
   border-radius: var(--_expand-r-start);
   background-color: var(--_btn-brand);
   transition: width var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1),
-              border-radius var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1),
-              background-color var(--hover-duration) ease;
+              border-radius var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1);
   pointer-events: none;
 }
 
@@ -930,7 +906,6 @@
   transform: translate(-50%, -50%) rotate(0deg);
   z-index: 1;
   color: var(--btn-text, var(--btn-filled-text));
-  transition: transform var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1);
 }
 
 .btn--expand:hover .btn__icon {
@@ -951,7 +926,6 @@
   background: var(--btn-text, var(--btn-filled-text));
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z'/%3E%3C/svg%3E") center / contain no-repeat;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z'/%3E%3C/svg%3E") center / contain no-repeat;
-  transition: transform var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1);
 }
 
 .btn--expand:not(.btn--has-icon):hover::after {
@@ -963,7 +937,6 @@
   position: relative;
   z-index: 2;
   color: var(--neutral-800);
-  transition: color var(--hover-duration) ease;
 }
 
 .btn--expand:hover .btn__label {
@@ -993,8 +966,6 @@
    ========================================================== */
 
 .btn--magnetic {
-  transition: transform var(--hover-duration-fast) cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              background-color var(--hover-duration-fast) ease, box-shadow var(--hover-duration-fast) ease;
   will-change: transform;
 }
 
@@ -1019,7 +990,6 @@
     transparent
   );
   opacity: 0;
-  transition: opacity var(--hover-duration) ease;
   pointer-events: none;
   z-index: 1;
 }
@@ -1155,7 +1125,7 @@
 
 .btn--dropdown {
   border-radius: var(--radius-md);
-  transition: border-radius 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-radius var(--duration-fast) var(--ease-default);
 }
 
 .dropdown-wrapper:hover .btn--dropdown,
@@ -1180,7 +1150,7 @@
   opacity: 0;
   overflow: hidden;
   visibility: hidden;
-  transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0s 0.35s;
+  transition: max-height var(--duration-base) var(--ease-default), opacity var(--duration-fast) var(--ease-default), visibility 0s var(--duration-base);
 }
 
 .dropdown-wrapper:hover .dropdown-menu,
@@ -1188,7 +1158,7 @@
   max-height: 20rem;
   opacity: 1;
   visibility: visible;
-  transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0s;
+  transition: max-height var(--duration-base) var(--ease-default), opacity var(--duration-fast) var(--ease-default), visibility 0s;
 }
 
 .dropdown-item {
@@ -1203,7 +1173,6 @@
   cursor: pointer;
   border: none;
   background: transparent;
-  transition: background 0.2s ease;
 }
 
 /* Dropdown theme — inherits variant colour via class on .dropdown-menu */
@@ -1221,9 +1190,10 @@
   border-radius: 0 0 var(--radius-md) var(--radius-md);
 }
 
+/* Dropdown item: inset focus ring (structural — items overlap, outset ring clips) */
 .dropdown-item:focus-visible {
-  outline: var(--border-width-2) solid var(--btn-focus-ring, var(--primary-600));
-  outline-offset: calc(-1 * var(--border-width-2));
+  outline: 2px solid var(--focus-color);
+  outline-offset: -2px;
 }
 
 /* Dropdown theme variants — border inherits brand colour */
@@ -1255,40 +1225,9 @@
    RENDER MODE OVERRIDES
    ========================================================== */
 
-/* Reduced — all transitions killed */
-[data-render="reduced"] .btn { transition: none; }
-[data-render="reduced"] .dropdown-menu { transition: none; }
-[data-render="reduced"] .btn__chevron { transition: none; }
+/* Reduced — hover-gate handles transition suppression globally */
 
-/* Assistive — enlarged targets, simplified appearance */
-[data-render="assistive"] .btn {
-  min-width: 64px;
-  min-height: 64px;
-}
-[data-render="assistive"] .btn:focus-visible {
-  outline-width: 3px;
-}
+/* Assistive targets + focus → global focus-gate.css */
 
-/* Textonly — plain outline button, zero decoration */
-[data-render="textonly"] .btn {
-  background: transparent;
-  color: var(--_btn-brand-dark);
-  border: 2px solid var(--_btn-brand);
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  filter: none;
-  clip-path: none;
-  max-width: none;
-}
-[data-render="textonly"] .btn:hover {
-  background: transparent;
-  color: var(--_btn-brand-dark);
-  border-color: var(--_btn-brand-dark);
-  box-shadow: none;
-  filter: none;
-}
-[data-render="textonly"] .btn--icon-only {
-  justify-content: center;
-}
+/* Textonly → global textonly/structure.css */
 
