@@ -31,12 +31,33 @@
   scroll-margin: 40vh;
 }
 
-/* ── Focus Dim — single overlay, GSAP controls colour ── */
+/* ── Focus Dim — per-element opacity (working approach) ── */
+[data-focus-dim]:has([data-focus-active]) section,
+[data-focus-dim]:has([data-focus-active]) .card,
+[data-focus-dim]:has([data-focus-active]) .btn,
+[data-focus-dim]:has([data-focus-active]) figure,
+[data-focus-dim]:has([data-focus-active]) a,
+[data-focus-dim]:has([data-focus-active]) button {
+  opacity: 0.15;
+}
+
+[data-focus-dim] [data-focus-active],
+[data-focus-dim] section:has([data-focus-active]),
+[data-focus-dim] .card:has([data-focus-active]),
+[data-focus-dim] .btn:has([data-focus-active]),
+[data-focus-dim] figure:has([data-focus-active]),
+[data-focus-dim] a:has([data-focus-active]),
+[data-focus-dim] button:has([data-focus-active]),
+[data-focus-dim] *:has(> [data-focus-active]) {
+  opacity: 1 !important;
+}
+
+/* Colour overlay */
 .focus-dim-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0);
-  z-index: 1030;
+  z-index: 9999;
   pointer-events: none;
 }
 

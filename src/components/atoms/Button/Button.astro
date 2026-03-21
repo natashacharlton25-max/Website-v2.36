@@ -418,6 +418,8 @@ const iconRight = iconPosition === 'right' && hasIcon;
       // Don't activate focus system on a11y panel/page controls
       if (el && !el.closest('#a11y-page, #a11y-panel, .a11y-panel')) {
         el.setAttribute('data-focus-active', '');
+        (el as HTMLElement).style.zIndex = '99999';
+        (el as HTMLElement).style.position = 'relative';
         el.classList.add('focus-entering');
         // Rainbow: cycle through colours on each tab
         if (document.documentElement.hasAttribute('data-focus-rainbow')) {
@@ -446,15 +448,14 @@ const iconRight = iconPosition === 'right' && hasIcon;
           if (document.documentElement.hasAttribute('data-focus-dim')) {
             if (bgColor) {
               document.documentElement.style.setProperty('--page-bg', bgColor);
-            }
-            const gsap = (window as any).gsap;
-            const overlay = document.querySelector('.focus-dim-overlay');
-            if (gsap && overlay && bgColor) {
-              gsap.to(overlay, {
-                backgroundColor: bgColor,
-                duration: 0.3,
-                ease: 'power2.out',
-              });
+              // Rainbow overlay — use base colour, more opaque
+              const overlay = document.querySelector('.focus-dim-overlay') as HTMLElement;
+              if (overlay) {
+                const baseColor = styles.getPropertyValue(rainbowBase[idx]).trim();
+                overlay.style.transition = 'background-color 0.3s ease-out';
+                overlay.style.backgroundColor = baseColor;
+                overlay.style.opacity = '0.25';
+              }
             }
           }
         }
@@ -530,6 +531,8 @@ const iconRight = iconPosition === 'right' && hasIcon;
       if (el) {
         // Always instant out
         el.style.transition = 'none';
+        el.style.zIndex = '';
+        el.style.position = '';
         el.classList.remove('focus-entering');
         el.removeAttribute('data-focus-active');
         requestAnimationFrame(() => { el.style.transition = ''; });
@@ -537,13 +540,11 @@ const iconRight = iconPosition === 'right' && hasIcon;
       // Reset page bg + fade overlay
       if (document.documentElement.hasAttribute('data-focus-dim')) {
         document.documentElement.style.removeProperty('--page-bg');
-        const gsap = (window as any).gsap;
-        const overlay = document.querySelector('.focus-dim-overlay');
-        if (gsap && overlay) {
-          gsap.to(overlay, {
-            backgroundColor: 'rgba(0, 0, 0, 0)',
-            duration: 0.2,
-          });
+        const overlay = document.querySelector('.focus-dim-overlay') as HTMLElement;
+        if (overlay) {
+          overlay.style.transition = 'background-color 0.2s ease-out, opacity 0.2s ease-out';
+          overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+          overlay.style.opacity = '0';
         }
       }
       hideFocusLabel();
