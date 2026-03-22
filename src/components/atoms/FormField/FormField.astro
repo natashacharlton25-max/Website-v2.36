@@ -225,23 +225,15 @@ const describedBy = [
             ))}
           </select>
           <Button
-            label={(() => {
-              if (value) {
-                const found = options.find(o => o.value === value);
-                if (found) return found.label;
-              }
-              return placeholder || label || 'Select...';
-            })()}
             variant="outline"
             shape="dropdown"
             disabled={disabled}
             class="form-field__select-btn"
             dropdownItems={options.filter(o => o.value !== '').map(o => ({
               label: o.label,
-              icon: o.icon,
-              action: `select:${id}:${o.value}`
+              value: o.value,
             }))}
-          />
+          >{value ? (options.find(o => o.value === value)?.label || placeholder || label) : (placeholder || label || 'Select...')}</Button>
         </div>
       )}
 
@@ -333,33 +325,36 @@ const describedBy = [
 <!-- Styles: FormField.css | FormField.responsive.css -->
 
 <script>
-  // Sync Button dropdown selection → hidden native select + update button label
+  // Sync Button dropdown selection → hidden native select + update button label + close dropdown
   document.addEventListener('click', (e) => {
-    const item = (e.target as HTMLElement).closest('.dropdown-item[data-action]') as HTMLElement;
+    const item = (e.target as HTMLElement).closest('.dropdown-item[data-value]') as HTMLElement;
     if (!item) return;
 
-    const action = item.dataset.action || '';
-    if (!action.startsWith('select:')) return;
+    const value = item.dataset.value || '';
+    const wrap = item.closest('[data-select-field]') as HTMLElement;
+    if (!wrap) return;
 
-    const parts = action.split(':');
-    const selectId = parts[1];
-    const value = parts.slice(2).join(':');
+    const selectId = wrap.dataset.selectField;
 
     // Update hidden native select
-    const nativeSelect = document.getElementById(selectId) as HTMLSelectElement;
+    const nativeSelect = document.getElementById(selectId!) as HTMLSelectElement;
     if (nativeSelect) {
       nativeSelect.value = value;
       nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    // Update button label to show selected value
-    const wrap = document.querySelector(`[data-select-field="${selectId}"]`);
-    if (wrap) {
-      const btnLabel = wrap.querySelector('.btn__label');
-      const itemLabel = item.querySelector('.dropdown-item__label')?.textContent || item.textContent;
-      if (btnLabel && itemLabel) {
-        btnLabel.textContent = itemLabel.trim();
-      }
+    // Update button label
+    const btnLabel = wrap.querySelector('.btn__label .text');
+    if (btnLabel) {
+      btnLabel.textContent = item.textContent?.trim() || value;
+    }
+
+    // Close dropdown
+    const dropdownBtn = wrap.querySelector('.dropdown-btn') as HTMLElement;
+    if (dropdownBtn) {
+      dropdownBtn.setAttribute('aria-expanded', 'false');
+      const menu = wrap.querySelector('.dropdown-menu') as HTMLElement;
+      if (menu) menu.style.display = '';
     }
   });
 </script>
