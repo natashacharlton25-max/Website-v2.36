@@ -67,8 +67,8 @@ function enterClickToPlace(bookmark: Bookmark): void {
     localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
     console.log('Bookmark saved:', bookmark);
 
-    // Show arrow at placed position
-    showBookmarkArrow(bookmark.scrollY);
+    // Highlight the bookmarked spot
+    showBookmarkMarker(bookmark.scrollY, bookmark.fieldId);
   };
 
   const cleanup = () => {
@@ -89,46 +89,36 @@ function enterClickToPlace(bookmark: Bookmark): void {
   }, 5000);
 }
 
-function showBookmarkArrow(posY: number): void {
-  // Remove any existing arrow
-  document.querySelector('.bookmark-arrow')?.remove();
+function showBookmarkMarker(posY: number, fieldId: string | null): void {
+  // If we have a field ID, use focus system to highlight it
+  if (fieldId) {
+    const field = document.getElementById(fieldId);
+    if (field) {
+      // Simulate keyboard for focus-system detection
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      setTimeout(() => {
+        field.focus();
+        // The focus system handles the ring, fill, arrow tab, rainbow — everything
+      }, 50);
+      return;
+    }
+  }
 
-  const arrow = document.createElement('div');
-  arrow.className = 'bookmark-arrow';
-  arrow.setAttribute('aria-hidden', 'true');
-  arrow.style.cssText = `
-    position: absolute;
-    top: ${posY}px;
-    left: 0;
-    transform: translateY(-50%);
-    z-index: 99999;
-    width: clamp(40px, 8vw, 70px);
-    height: clamp(40px, 8vw, 70px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--focus-color, teal);
-    font-size: 2rem;
-    pointer-events: none;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  `;
-  arrow.innerHTML = '&#9654;';
-  // Append to scrolling container, not body
-  const wrapper = document.getElementById('a11y-content-wrapper')
-    || document.querySelector('[data-overlayscrollbars-viewport]')
-    || document.body;
-  wrapper.appendChild(arrow);
-  console.log('Bookmark arrow created at Y:', posY, 'appended to:', wrapper.id || wrapper.tagName);
-
-  // Pulse animation
-  arrow.animate([
-    { transform: 'translateY(-50%) scale(1)', opacity: 1 },
-    { transform: 'translateY(-50%) scale(1.2)', opacity: 0.8 },
-    { transform: 'translateY(-50%) scale(1)', opacity: 1 }
-  ], { duration: 1000, iterations: 3 });
-
-  // Auto-remove after 10 seconds
-  setTimeout(() => arrow.remove(), 10000);
+  // No field ID — find the nearest element at saved scroll position
+  // Use elementFromPoint at the centre of the viewport after scrolling
+  setTimeout(() => {
+    const el = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+    if (el) {
+      const target = el.closest('section, article, .card, .form-field, p, h1, h2, h3, h4, h5, h6, a, button') as HTMLElement;
+      if (target) {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+        setTimeout(() => {
+          target.setAttribute('tabindex', '-1');
+          target.focus();
+        }, 50);
+      }
+    }
+  }, 100);
 }
 
 export function getBookmark(): Bookmark | null {
@@ -184,17 +174,7 @@ export function restoreBookmark(): void {
 }
 
 function focusBookmarkedField(fieldId: string | null, scrollY: number): void {
-  // Show arrow at saved position
-  showBookmarkArrow(scrollY);
-
-  // If we have a field ID, focus it
-  if (fieldId) {
-    const field = document.getElementById(fieldId);
-    if (field) {
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
-      setTimeout(() => field.focus(), 50);
-    }
-  }
+  showBookmarkMarker(scrollY, fieldId);
 }
 
 // Auto-restore if URL has #bookmark-restore hash
