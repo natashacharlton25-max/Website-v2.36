@@ -327,13 +327,13 @@ const describedBy = [
 <script>
   // Sync Button dropdown selection → hidden native select + update button label + close dropdown
   document.addEventListener('click', (e) => {
-    const item = (e.target as HTMLElement).closest('.dropdown-item[data-value]') as HTMLElement;
+    const item = (e.target as HTMLElement).closest('.dropdown-item') as HTMLElement;
     if (!item) return;
 
-    const value = item.dataset.value || '';
     const wrap = item.closest('[data-select-field]') as HTMLElement;
     if (!wrap) return;
 
+    const value = item.dataset.value || item.textContent?.trim() || '';
     const selectId = wrap.dataset.selectField;
 
     // Update hidden native select
@@ -343,18 +343,22 @@ const describedBy = [
       nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    // Update button label
-    const btnLabel = wrap.querySelector('.btn__label .text');
+    // Update button label — find the text node inside .btn__label
+    const btnLabel = wrap.querySelector('.btn__label');
     if (btnLabel) {
-      btnLabel.textContent = item.textContent?.trim() || value;
+      // The Text atom wraps in <p class="text"> or <span class="text">
+      const textEl = btnLabel.querySelector('.text') || btnLabel;
+      textEl.textContent = item.textContent?.trim() || value;
     }
 
-    // Close dropdown
-    const dropdownBtn = wrap.querySelector('.dropdown-btn') as HTMLElement;
-    if (dropdownBtn) {
-      dropdownBtn.setAttribute('aria-expanded', 'false');
-      const menu = wrap.querySelector('.dropdown-menu') as HTMLElement;
-      if (menu) menu.style.display = '';
+    // Close dropdown — remove .open and .show classes
+    const wrapper = item.closest('.dropdown-wrapper');
+    if (wrapper) {
+      wrapper.classList.remove('open');
+      const menu = wrapper.querySelector('.dropdown-menu');
+      if (menu) menu.classList.remove('show');
+      const btn = wrapper.querySelector('.dropdown-btn');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
     }
   });
 </script>
