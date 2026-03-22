@@ -207,9 +207,9 @@ const describedBy = [
         >{value}</textarea>
       )}
 
-      <!-- Select — CSS-only dropdown using radio inputs -->
+      <!-- Select — CSS-only dropdown using radio inputs + minimal JS for close-on-select -->
       {isSelect && (
-        <div class="form-field__select" role="listbox" aria-labelledby={`${id}-label`}>
+        <div class="form-field__select" role="listbox" aria-labelledby={`${id}-label`} data-select-id={id}>
           <input
             type="checkbox"
             class="form-field__select-toggle"
@@ -232,10 +232,11 @@ const describedBy = [
                 disabled={disabled || opt.value === ''}
                 class="form-field__select-radio"
                 role="option"
+                data-select-toggle={`${id}-toggle`}
               />
               <span class="form-field__select-label">
                 {opt.icon && <Icon name={opt.icon} size={16} class="form-field__select-icon" />}
-                {opt.label}
+                <span class="form-field__select-text">{opt.label}</span>
               </span>
             </label>
           ))}
@@ -328,3 +329,17 @@ const describedBy = [
 </div>
 
 <!-- Styles: FormField.css | FormField.responsive.css -->
+
+<script>
+  // Close select dropdown when option is chosen
+  document.addEventListener('change', (e) => {
+    const radio = e.target as HTMLInputElement;
+    if (radio.classList.contains('form-field__select-radio')) {
+      const toggleId = radio.dataset.selectToggle;
+      if (toggleId) {
+        const toggle = document.getElementById(toggleId) as HTMLInputElement;
+        if (toggle) toggle.checked = false;
+      }
+    }
+  });
+</script>

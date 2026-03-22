@@ -206,7 +206,10 @@
   font-size: var(--text-base);
   border-top: 1px solid color-mix(in oklch, var(--_field-border) 30%, transparent);
   transition: background var(--hover-duration-fast) var(--ease-default),
-              color var(--hover-duration-fast) var(--ease-default);
+              color var(--hover-duration-fast) var(--ease-default),
+              max-height var(--duration-base) var(--ease-default),
+              opacity var(--duration-fast) var(--ease-default),
+              padding var(--duration-base) var(--ease-default);
   z-index: 2;
   display: flex;
   align-items: center;
@@ -218,10 +221,32 @@
   flex-shrink: 0;
 }
 
-/* Hover on option */
+/* Hover on option — brand fill + white text */
 .form-field__select-label:hover {
-  background: color-mix(in oklch, var(--_field-brand) 10%, transparent);
-  color: var(--_field-brand);
+  background: var(--_field-brand);
+  color: var(--color-White);
+}
+
+.form-field__select-label:hover .form-field__select-icon {
+  color: var(--color-White);
+}
+
+/* Rainbow hover colours per option position */
+.form-field__select-option:nth-child(2) .form-field__select-label:hover { background: var(--rainbow-1); }
+.form-field__select-option:nth-child(3) .form-field__select-label:hover { background: var(--rainbow-2); }
+.form-field__select-option:nth-child(4) .form-field__select-label:hover { background: var(--rainbow-3); }
+.form-field__select-option:nth-child(5) .form-field__select-label:hover { background: var(--rainbow-4); }
+.form-field__select-option:nth-child(6) .form-field__select-label:hover { background: var(--rainbow-5); }
+.form-field__select-option:nth-child(7) .form-field__select-label:hover { background: var(--rainbow-6); }
+.form-field__select-option:nth-child(8) .form-field__select-label:hover { background: var(--rainbow-7); }
+
+/* Selected option — subtle brand background */
+.form-field__select-radio:checked ~ .form-field__select-label::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+  z-index: -1;
 }
 
 /* ── CLOSED STATE (toggle not checked) ── */
@@ -230,7 +255,12 @@
 }
 
 .form-field__select-toggle:not(:checked) ~ .form-field__select-option .form-field__select-label {
-  display: none;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-top-width: 0;
+  opacity: 0;
+  overflow: hidden;
 }
 
 .form-field__select-toggle:not(:checked) ~ .form-field__select-arrow {
@@ -248,8 +278,24 @@
   color: var(--_field-text);
 }
 
-/* ── SELECTED STATE (option radio checked) ── */
+.form-field__select-toggle:checked ~ .form-field__select-option .form-field__select-label {
+  max-height: 4rem;
+  opacity: 1;
+}
+
+/* ── SELECTED STATE — stays in list, highlighted ── */
 .form-field__select-radio:checked ~ .form-field__select-label {
+  background: color-mix(in oklch, var(--_field-brand) 10%, transparent);
+  color: var(--_field-brand);
+  font-weight: var(--font-medium);
+}
+
+.form-field__select-radio:checked ~ .form-field__select-label .form-field__select-icon {
+  color: var(--_field-brand);
+}
+
+/* When closed, show selected value in placeholder area */
+.form-field__select-toggle:not(:checked) ~ .form-field__select-option .form-field__select-radio:checked ~ .form-field__select-label {
   position: absolute;
   top: 0;
   left: 0;
@@ -259,6 +305,7 @@
   border-top: none;
   color: var(--_field-text);
   font-weight: var(--font-medium);
+  padding-right: var(--space-2xl);
 }
 
 /* ── DISABLED ── */
