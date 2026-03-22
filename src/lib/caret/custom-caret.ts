@@ -20,6 +20,7 @@
  */
 
 let _caretEl: HTMLElement | null = null;
+let _arrowTab: HTMLElement | null = null;
 let _activeInput: HTMLInputElement | HTMLTextAreaElement | null = null;
 
 const INPUT_SELECTOR = 'input[type="text"], input[type="email"], input[type="search"], input[type="url"], input[type="tel"], input[type="password"], input[type="number"], textarea';
@@ -28,6 +29,14 @@ function createCaret(): HTMLElement {
   const el = document.createElement('span');
   el.className = 'form-field__caret';
   el.setAttribute('aria-hidden', 'true');
+  return el;
+}
+
+function createArrowTab(): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'form-field__arrow-tab';
+  el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = '<span class="form-field__arrow-tab-arrow">&#9654;</span>';
   return el;
 }
 
@@ -109,6 +118,14 @@ function updateCaretPosition() {
   }
 }
 
+function updateArrowPosition() {
+  if (!_arrowTab || !_activeInput) return;
+  const input = _activeInput;
+  const inputRect = input.getBoundingClientRect();
+  const scrollY = window.scrollY || document.documentElement.scrollTop;
+  _arrowTab.style.top = `${inputRect.top + scrollY + inputRect.height / 2}px`;
+}
+
 function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
   if (_activeInput === input && _caretEl) return;
 
@@ -123,6 +140,14 @@ function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
     wrapper.appendChild(_caretEl);
   } else {
     input.parentNode?.appendChild(_caretEl);
+  }
+
+  // Arrow tab — fixed to left edge of viewport, points to active field
+  if (document.documentElement.hasAttribute('data-custom-caret')) {
+    _arrowTab = createArrowTab();
+    document.body.appendChild(_arrowTab);
+    updateArrowPosition();
+    _arrowTab.classList.add('form-field__arrow-tab--visible');
   }
 
   // Initial position
@@ -153,6 +178,10 @@ function hideCaret() {
   if (_caretEl) {
     _caretEl.remove();
     _caretEl = null;
+  }
+  if (_arrowTab) {
+    _arrowTab.remove();
+    _arrowTab = null;
   }
   _activeInput = null;
 }

@@ -843,3 +843,59 @@
 [data-render="textonly"] .form-field__caret {
   --caret-color: var(--neutral-800);
 }
+
+/* ==========================================================
+   ARROW TAB — sticky "sign here" indicator on left edge
+   Points to the active form field
+   ========================================================== */
+
+.form-field__arrow-tab {
+  position: absolute;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm) var(--space-xs) var(--space-xs);
+  background: var(--caret-color, var(--focus-color, var(--primary-600)));
+  color: var(--color-White);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: var(--text-fine);
+  font-weight: var(--font-bold);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--hover-duration-fast, 0.12s) ease-out,
+              top var(--hover-duration-fast, 0.12s) ease-out;
+}
+
+.form-field__arrow-tab--visible {
+  opacity: 1;
+}
+
+.form-field__arrow-tab-arrow {
+  font-size: 0.75em;
+  line-height: 1;
+}
+
+/* ── Gate: hover=gentle → slow position transition ── */
+[data-hover="gentle"] .form-field__arrow-tab {
+  transition: opacity 0.5s ease-out, top 0.8s ease-out;
+}
+
+/* ── Gate: hover=none → no arrow tab ── */
+[data-hover="none"] .form-field__arrow-tab {
+  display: none;
+}
+
+/* ── Gate: enhanced focus → larger tab ── */
+[data-enhanced-focus] .form-field__arrow-tab {
+  padding: var(--space-sm) var(--space-md) var(--space-sm) var(--space-sm);
+  font-size: var(--text-small);
+}
+
+/* ── Gate: assistive → extra large tab ── */
+[data-render="assistive"] .form-field__arrow-tab {
+  padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-md);
+  font-size: var(--text-body);
+}
