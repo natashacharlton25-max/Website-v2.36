@@ -78,15 +78,23 @@ export function saveBookmark(): void {
   }, 5000);
 }
 
-function showArrowFixed(x: number, y: number): void {
+function showArrowFixed(x: number, clientY: number): void {
   document.getElementById('bookmark-arrow')?.remove();
+
+  // Get current scroll to calculate absolute Y
+  const vpEl = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement;
+  const scroll = vpEl ? vpEl.scrollTop : window.scrollY;
+  const absY = scroll + clientY;
 
   const arrow = document.createElement('div');
   arrow.id = 'bookmark-arrow';
   arrow.setAttribute('aria-hidden', 'true');
-  arrow.style.cssText = `position:fixed;top:${y}px;left:${x}px;transform:translate(-50%,-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
+  arrow.style.cssText = `position:absolute;top:${absY}px;left:${x}px;transform:translate(-50%,-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
   arrow.textContent = '\u25B6';
-  document.documentElement.appendChild(arrow);
+
+  // Append to the scroll container so it scrolls with content
+  const container = vpEl || document.getElementById('a11y-content-wrapper') || document.body;
+  container.appendChild(arrow);
 
   arrow.animate([
     { transform: 'translateY(-50%) scale(1)', opacity: 1 },
