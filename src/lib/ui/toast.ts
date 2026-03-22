@@ -46,25 +46,31 @@ export function showToast(options: ToastOptions): void {
   const messageEl = toast.querySelector('.toast__message');
   if (messageEl) messageEl.textContent = message;
 
-  // Set icon from API if slug provided
+  // Set icon from API if slug provided — replaces Lottie icon with static Phosphor
   if (options.icon) {
-    const iconSlot = toast.querySelector('.toast__icon') as HTMLElement;
-    if (iconSlot) {
-      fetch(`https://asset-library.natashacharlton25.workers.dev/v1/assets/${options.icon}`)
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (data?.currentVersion?.content) {
-            iconSlot.innerHTML = data.currentVersion.content;
-            const svg = iconSlot.querySelector('svg');
-            if (svg) {
-              svg.setAttribute('width', '24');
-              svg.setAttribute('height', '24');
-              svg.style.fill = 'currentColor';
-            }
+    const lottieSlot = toast.querySelector('.toast__lottie') as HTMLElement;
+    fetch(`https://asset-library.natashacharlton25.workers.dev/v1/assets/${options.icon}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.currentVersion?.content) {
+          const iconEl = document.createElement('span');
+          iconEl.className = 'toast__icon';
+          iconEl.setAttribute('aria-hidden', 'true');
+          iconEl.innerHTML = data.currentVersion.content;
+          const svg = iconEl.querySelector('svg');
+          if (svg) {
+            svg.setAttribute('width', '24');
+            svg.setAttribute('height', '24');
+            svg.style.fill = 'currentColor';
           }
-        })
-        .catch(() => { /* keep existing template icon */ });
-    }
+          if (lottieSlot) {
+            lottieSlot.replaceWith(iconEl);
+          } else {
+            toast.prepend(iconEl);
+          }
+        }
+      })
+      .catch(() => { /* keep existing template icon */ });
   }
 
   // Set duration attribute
