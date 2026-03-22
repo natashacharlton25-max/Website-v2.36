@@ -52,7 +52,30 @@ Every focus feature is independent. All stack. All keyboard-only (mouse clicks d
 | **Rainbow Scroll** | `data-rainbow-scroll` | GSAP changes highlight border colour based on scroll position | No |
 | **Custom Caret** | `data-custom-caret` | Custom cursor in form fields, syncs colour with `--focus-color` | No (activates on input focus) |
 | **Arrow Tab** | `data-arrow-tab` | Arrow indicator next to active form field, follows field position | No (activates on input focus) |
-| **Rainbow Scroll** | `data-rainbow-scroll` | GSAP changes highlight border colour based on scroll position | No |
+
+### New settings added (Day 2)
+
+| Setting | Attribute | What it does |
+|---|---|---|
+| **Custom Caret** | `data-custom-caret` | Hide OS cursor, render tokenised custom caret in form fields. Tracks position via selectionStart. Gates: hover modes control blink speed, enhanced = thick, assistive = extra thick. Shapes: default line, block, circle. |
+| **Arrow Tab** | `data-arrow-tab` | Arrow indicator follows active form field position. Responsive sizing via clamp(). |
+| **Colour Cycle** | `data-focus-colour-cycle` | Solid focus colour changes through rainbow tokens on each tab. No spinning gradient. |
+| **Rainbow Scroll** | `data-rainbow-scroll` | GSAP ScrollTrigger divides page into 7 rainbow zones, changes highlight border colour based on scroll position. |
+| **Dropdown Mouse Close** | `data-dropdown-mouseclose` | Opt-in: dropdown closes when mouse leaves. Default off — prevents accidental close for motor impairments. |
+| **Caret Shape** | `data-caret-shape` | `block` (wide, semi-transparent) or `circle` (round dot). |
+| **Text XL Mode** | `data-text-xl` | Auto-set when fontSize >= 130%. Form fields scale to XL, checkboxes/radios/toggles become card-style, card-select goes single column. |
+
+### FormField enhancements (Day 2)
+
+| Feature | What it does |
+|---|---|
+| **Size variants** | `size="sm/md/lg/xl"` — all field types scale (input, checkbox, radio, toggle, card-select) |
+| **Inset style** | `fieldStyle="inset"` — inner shadow, darkened background |
+| **CSS-only select → Button dropdown** | Native `<select>` replaced with Button dropdown atom. Hidden native select for form submission. JS syncs selected value + closes on selection. |
+| **Filled state indicator** | `:not(:placeholder-shown):not(:focus)` — border tints toward brand, subtle bg wash when field has content |
+| **Dark/HC inset glow** | Neumorphic/inset/glow inputs get inner + outer glow in dark and HC modes |
+| **Highlight links on form fields** | Input border, checkbox/radio/toggle wrapper, card-select cards, error fields, dropdown menu — all get highlight treatment with hover Warning shift |
+| **Responsive** | 450px: XL + stacked. 150px: revert XL, keep stacked. 100px: small size, placeholder truncates. |
 
 ### Bookmark system
 
