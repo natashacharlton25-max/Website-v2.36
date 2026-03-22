@@ -53,7 +53,7 @@ export function saveBookmark(): void {
 
     localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
 
-    showArrowAtAbsoluteY(absY);
+    showArrowAtAbsolutePosition(e.clientX + (viewport ? viewport.scrollLeft : window.scrollX), absY);
   };
 
   const cleanup = () => {
@@ -73,19 +73,13 @@ export function saveBookmark(): void {
   }, 5000);
 }
 
-function showArrowAtAbsoluteY(absY: number): void {
+function showArrowAtAbsolutePosition(absX: number, absY: number): void {
   document.getElementById('bookmark-arrow')?.remove();
-
-  // Find content container for left edge position
-  const wrapper = document.getElementById('a11y-content-wrapper');
-  const container = wrapper?.querySelector('.container, main, [class*="container"]') as HTMLElement;
-  const containerLeft = container ? container.getBoundingClientRect().left + window.scrollX : 0;
-  const arrowX = Math.max(containerLeft - 40, 4);
 
   const arrow = document.createElement('div');
   arrow.id = 'bookmark-arrow';
   arrow.setAttribute('aria-hidden', 'true');
-  arrow.style.cssText = `position:absolute;top:${absY}px;left:${arrowX}px;transform:translateY(-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
+  arrow.style.cssText = `position:absolute;top:${absY}px;left:${absX}px;transform:translate(-50%,-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
   arrow.textContent = '\u25B6';
 
   // Append inside scroll container so it scrolls with content
@@ -159,7 +153,7 @@ function showBookmarkArrow(): void {
   if (!raw) return;
   try {
     const bookmark: Bookmark = JSON.parse(raw);
-    showArrowAtAbsoluteY(bookmark.clickY || bookmark.scrollY);
+    showArrowAtAbsolutePosition(bookmark.clickX || 40, bookmark.clickY || bookmark.scrollY);
   } catch { /* ignore */ }
 }
 
