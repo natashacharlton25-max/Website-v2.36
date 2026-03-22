@@ -495,13 +495,11 @@ import './GlassNav.css';
       btn.addEventListener('click', async (e) => {
         e.preventDefault();
         const { saveBookmark } = await import('../../../lib/caret/bookmark');
-        const bookmark = saveBookmark();
+        saveBookmark();
         closeAllMenus();
         closeMobileMenu();
-        if (bookmark) {
-          const { showToast } = await import('../../../lib/ui/toast');
-          showToast({ message: 'Place saved! Use "Find My Place" to return here.', icon: 'bookmark-fill' });
-        }
+        const { showToast } = await import('../../../lib/ui/toast');
+        await showToast({ message: 'Place saved! Use "Find My Place" to return here.', icon: 'bookmark-fill' });
       });
     });
 

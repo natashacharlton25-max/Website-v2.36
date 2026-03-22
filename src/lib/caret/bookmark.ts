@@ -59,17 +59,53 @@ function scrollToBookmark(scrollY: number): void {
   const viewport = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement;
   const gsap = (window as any).gsap;
 
-  console.log('Scrolling to:', scrollY, 'viewport:', viewport ? 'OS' : 'window');
+  const onComplete = () => showBookmarkArrow();
 
   if (gsap && viewport) {
-    gsap.to(viewport, { scrollTop: scrollY, duration: 0.8, ease: 'power3.out' });
+    gsap.to(viewport, { scrollTop: scrollY, duration: 0.8, ease: 'power3.out', onComplete });
   } else if (viewport) {
     viewport.scrollTo({ top: scrollY, behavior: 'smooth' });
+    setTimeout(onComplete, 800);
   } else if (gsap) {
-    gsap.to(window, { scrollTo: scrollY, duration: 0.8, ease: 'power3.out' });
+    gsap.to(window, { scrollTo: scrollY, duration: 0.8, ease: 'power3.out', onComplete });
   } else {
     window.scrollTo({ top: scrollY, behavior: 'smooth' });
+    setTimeout(onComplete, 800);
   }
+}
+
+function showBookmarkArrow(): void {
+  // Remove any existing
+  document.getElementById('bookmark-arrow')?.remove();
+
+  // Fixed position arrow at left edge, vertically centred
+  const arrow = document.createElement('div');
+  arrow.id = 'bookmark-arrow';
+  arrow.setAttribute('aria-hidden', 'true');
+  arrow.style.cssText = [
+    'position:fixed',
+    'top:50%',
+    'left:12px',
+    'transform:translateY(-50%)',
+    'z-index:999999',
+    'font-size:3rem',
+    'color:var(--focus-color, teal)',
+    'pointer-events:none',
+    'filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4))',
+  ].join(';');
+  arrow.textContent = '\u25B6'; // Right-pointing triangle
+
+  document.documentElement.appendChild(arrow);
+
+  // Pulse 3 times
+  arrow.animate([
+    { transform: 'translateY(-50%) scale(1)', opacity: 1 },
+    { transform: 'translateY(-50%) scale(1.3)', opacity: 0.7 },
+    { transform: 'translateY(-50%) scale(1)', opacity: 1 },
+  ], { duration: 800, iterations: 3 });
+
+  // Remove after 8 seconds
+  setTimeout(() => arrow.remove(), 8000);
 }
 
 // Auto-restore on page load if URL has #bookmark-restore
