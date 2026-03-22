@@ -353,6 +353,8 @@ export function applySettings(settings: A11ySettings): void {
   } else {
     document.documentElement.style.removeProperty('--text-multiplier');
   }
+  // XL text mode — form fields scale up
+  document.documentElement.toggleAttribute('data-text-xl', settings.fontSize >= 130);
   document.documentElement.style.setProperty('--a11y-font-scale', `${settings.fontSize}`);
 
   // Letter Spacing - apply to wrapper
