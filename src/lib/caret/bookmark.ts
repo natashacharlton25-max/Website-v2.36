@@ -112,7 +112,11 @@ function showBookmarkArrow(posY: number): void {
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
   `;
   arrow.innerHTML = '&#9654;';
-  document.body.appendChild(arrow);
+  // Append to scrolling container, not body
+  const wrapper = document.getElementById('a11y-content-wrapper')
+    || document.querySelector('[data-overlayscrollbars-viewport]')
+    || document.body;
+  wrapper.appendChild(arrow);
 
   // Pulse animation
   arrow.animate([
