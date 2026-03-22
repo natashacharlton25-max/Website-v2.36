@@ -49,6 +49,23 @@ function initPage(): void {
         });
       }
 
+      // Rainbow Links auto-enables Highlight Links + Rainbow Focus
+      if (setting === 'rainbowHighlight' && newValue) {
+        const companions = ['highlightLinks', 'focusRainbow'] as const;
+        companions.forEach(comp => {
+          (settings as any)[comp] = true;
+          const companionCard = page.querySelector(`.a11y-toggle-card[data-setting="${comp}"]`);
+          if (companionCard) companionCard.setAttribute('aria-pressed', 'true');
+        });
+      }
+
+      // Rainbow Focus auto-enables Enhanced Focus
+      if (setting === 'focusRainbow' && newValue) {
+        settings.enhancedFocus = true;
+        const efCard = page.querySelector('.a11y-toggle-card[data-setting="enhancedFocus"]');
+        if (efCard) efCard.setAttribute('aria-pressed', 'true');
+      }
+
       saveSettings(settings);
       applySettings(settings);
 
