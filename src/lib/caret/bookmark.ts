@@ -65,6 +65,7 @@ function enterClickToPlace(bookmark: Bookmark): void {
     bookmark.fieldId = (e.target as HTMLElement).closest('[id]')?.id || null;
 
     localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
+    console.log('Bookmark saved:', bookmark);
 
     // Show arrow at placed position
     showBookmarkArrow(bookmark.scrollY);
@@ -117,6 +118,7 @@ function showBookmarkArrow(posY: number): void {
     || document.querySelector('[data-overlayscrollbars-viewport]')
     || document.body;
   wrapper.appendChild(arrow);
+  console.log('Bookmark arrow created at Y:', posY, 'appended to:', wrapper.id || wrapper.tagName);
 
   // Pulse animation
   arrow.animate([
