@@ -1,59 +1,29 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Heading from '../components/atoms/Heading/Heading.astro';
+import Text from '../components/atoms/Text/Text.astro';
+import Card from '../components/atoms/Card/Card.astro';
 import Section from '../components/atoms/Section/Section.astro';
 import '../components/atoms/Section/Section.css';
+
+import testData from '../data/test/hub.json';
 ---
 
-<BaseLayout title="Atom Test Hub">
-  <Section container="7xl" gap="4xl">
+<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
+  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
 
-    <Heading level={1} align="center" flush>Atom Test Hub</Heading>
-    <Heading level={3} align="center" weight="normal" flush style="--heading-color: var(--neutral-600)">
-      Test each atom individually via JSON pipeline
-    </Heading>
+    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+    <Heading level={testData.subtitle.level as any} align={testData.subtitle.align as any} weight={testData.subtitle.weight as any} flush={testData.subtitle.flush} style={testData.subtitle.style}>{testData.subtitle.text}</Heading>
 
-    <Section gap="lg">
-      <a href="/test/heading-test" style="display:block; padding: var(--space-lg); border: 1px solid var(--neutral-400); border-radius: var(--radius-md); text-decoration: none; color: inherit;">
-        <Heading level={3} flush>Heading</Heading>
-        <p style="margin-top: var(--space-xs); color: var(--neutral-600);">Levels, sizes, weights, colours, families, variants, dividers, subtitles, media, icons, lottie, images, AAC</p>
-      </a>
-      <a href="/test/badge-test" style="display:block; padding: var(--space-lg); border: 1px solid var(--neutral-400); border-radius: var(--radius-md); text-decoration: none; color: inherit;">
-        <Heading level={3} flush>Badge</Heading>
-        <p style="margin-top: var(--space-xs); color: var(--neutral-600);">Variants, sizes, shapes, icons, colours, heading levels, semantic roles, combinations</p>
-      </a>
-      <a href="/test/button-test" style="display:block; padding: var(--space-lg); border: 1px solid var(--neutral-400); border-radius: var(--radius-md); text-decoration: none; color: inherit;">
-        <Heading level={3} flush>Button</Heading>
-        <p style="margin-top: var(--space-xs); color: var(--neutral-600);">Variants, shapes, sizes, icons, links, effects, confetti, dropdowns, speed, combinations</p>
-      </a>
-      <a href="/test/image-test" style="display:block; padding: var(--space-lg); border: 1px solid var(--neutral-400); border-radius: var(--radius-md); text-decoration: none; color: inherit;">
-        <Heading level={3} flush>Image</Heading>
-        <p style="margin-top: var(--space-xs); color: var(--neutral-600);">Alt text modes, AAC cards, enlarge modal, visual treatments, semantic roles, responsive</p>
-      </a>
-      <a href="/test/tooltip-test" style="display:block; padding: var(--space-lg); border: 1px solid var(--neutral-400); border-radius: var(--radius-md); text-decoration: none; color: inherit;">
-        <Heading level={3} flush>Tooltip</Heading>
-        <p style="margin-top: var(--space-xs); color: var(--neutral-600);">Positions, themes, sizes, animations, purpose modes, rich content, hover gates</p>
-      </a>
-      <a href="/test/text-effect-test" style="display:block; padding: var(--space-lg); border: 1px solid var(--neutral-400); border-radius: var(--radius-md); text-decoration: none; color: inherit;">
-        <Heading level={3} flush>TextEffect</Heading>
-        <p style="margin-top: var(--space-xs); color: var(--neutral-600);">Image fill, gradient animation, shadows, glow, strokes, inner shadow, combinations</p>
-      </a>
-      <a href="/test/text-test" style="display:block; padding: var(--space-lg); border: 1px solid var(--neutral-400); border-radius: var(--radius-md); text-decoration: none; color: inherit;">
-        <Heading level={3} flush>Text</Heading>
-        <p style="margin-top: var(--space-xs); color: var(--neutral-600);">Sizes, weights, colours, leading, families, alignment, elements, clamping, tone, AAC, combinations</p>
-      </a>
-      <a href="/test/link-test" style="display:block; padding: var(--space-lg); border: 1px solid var(--neutral-400); border-radius: var(--radius-md); text-decoration: none; color: inherit;">
-        <Heading level={3} flush>Link</Heading>
-        <p style="margin-top: var(--space-xs); color: var(--neutral-600);">Variants, colours, weights, effects, options, combinations, in-context</p>
-      </a>
-      <a href="/test/list-test" style="display:block; padding: var(--space-lg); border: 1px solid var(--neutral-400); border-radius: var(--radius-md); text-decoration: none; color: inherit;">
-        <Heading level={3} flush>List</Heading>
-        <p style="margin-top: var(--space-xs); color: var(--neutral-600);">Variants, ordered, dot sizes, icons, spacing, combinations, flush</p>
-      </a>
-      <a href="/test/formfield-test" style="display:block; padding: var(--space-lg); border: 1px solid var(--neutral-400); border-radius: var(--radius-md); text-decoration: none; color: inherit;">
-        <Heading level={3} flush>FormField</Heading>
-        <p style="margin-top: var(--space-xs); color: var(--neutral-600);">Input types, field styles, variants, checkboxes, radios, toggles, selects, card-select, states, combinations</p>
-      </a>
+    <Section gap={testData.layout.itemGap}>
+      {testData.cards.map((card: any) => (
+        <a href={card.href} style="text-decoration:none;color:inherit;">
+          <Card>
+            <Heading level={3} flush>{card.title}</Heading>
+            <Text size="sm" color="muted" flush>{card.description}</Text>
+          </Card>
+        </a>
+      ))}
     </Section>
 
   </Section>
