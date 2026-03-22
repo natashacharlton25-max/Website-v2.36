@@ -18,14 +18,74 @@ export function saveBookmark(): void {
   const viewport = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement;
   const scrollY = viewport ? viewport.scrollTop : window.scrollY;
 
+  // Save scroll position as fallback
   const bookmark: Bookmark = {
     url: window.location.pathname,
     scrollY,
     timestamp: Date.now(),
   };
 
-  localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
-  console.log('Bookmark saved:', bookmark);
+  // Enter click-to-place mode
+  document.body.style.cursor = 'crosshair';
+
+  const hint = document.createElement('div');
+  hint.id = 'bookmark-hint';
+  hint.textContent = 'Click anywhere to place your marker';
+  hint.style.cssText = 'position:fixed;top:1rem;left:50%;transform:translateX(-50%);z-index:999999;padding:0.5rem 1.5rem;background:var(--focus-color,teal);color:#fff;border-radius:12px;font-family:var(--font-body);font-size:0.875rem;pointer-events:none;';
+  document.documentElement.appendChild(hint);
+
+  let placed = false;
+
+  const onClick = (e: MouseEvent) => {
+    if ((e.target as HTMLElement).closest('nav, .a11y-panel, .nav-container')) return;
+
+    placed = true;
+    cleanup();
+
+    // Save click Y as absolute position (scroll + client)
+    const vpScroll = viewport ? viewport.scrollTop : window.scrollY;
+    bookmark.scrollY = vpScroll + e.clientY - (window.innerHeight / 2);
+
+    localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
+
+    // Show arrow at click position immediately
+    showFixedArrow(e.clientY);
+  };
+
+  const cleanup = () => {
+    document.body.style.cursor = '';
+    hint.remove();
+    document.removeEventListener('click', onClick, true);
+  };
+
+  document.addEventListener('click', onClick, true);
+
+  // Fallback: save scroll position after 5s if no click
+  setTimeout(() => {
+    if (!placed) {
+      cleanup();
+      localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
+    }
+  }, 5000);
+}
+
+function showFixedArrow(clientY: number): void {
+  document.getElementById('bookmark-arrow')?.remove();
+
+  const arrow = document.createElement('div');
+  arrow.id = 'bookmark-arrow';
+  arrow.setAttribute('aria-hidden', 'true');
+  arrow.style.cssText = `position:fixed;top:${clientY}px;left:12px;transform:translateY(-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
+  arrow.textContent = '\u25B6';
+  document.documentElement.appendChild(arrow);
+
+  arrow.animate([
+    { transform: 'translateY(-50%) scale(1)', opacity: 1 },
+    { transform: 'translateY(-50%) scale(1.3)', opacity: 0.7 },
+    { transform: 'translateY(-50%) scale(1)', opacity: 1 },
+  ], { duration: 800, iterations: 3 });
+
+  setTimeout(() => arrow.remove(), 8000);
 }
 
 export function hasBookmark(): boolean {
