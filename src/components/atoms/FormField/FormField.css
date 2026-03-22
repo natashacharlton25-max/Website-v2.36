@@ -143,6 +143,25 @@
   background: var(--_field-bg);
   box-shadow: var(--shadow-sm);
   min-height: 3rem;
+  overflow: hidden;
+}
+
+/* When open, show options with bottom border */
+.form-field__select:has(.form-field__select-toggle:checked) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* When closed, restore full border radius */
+.form-field__select:has(.form-field__select-toggle:not(:checked)) {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+/* Last option gets bottom radius */
+.form-field__select-option:last-child .form-field__select-label {
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
 }
 
 /* When open, options float over content below */
@@ -347,6 +366,11 @@
 .form-field__select-radio:disabled ~ .form-field__select-label:hover {
   background: transparent;
   color: var(--_field-text);
+}
+
+/* Hide empty-value options (placeholder duplicates) */
+.form-field__select-radio[value=""] ~ .form-field__select-label {
+  display: none;
 }
 
 /* ==========================================================
