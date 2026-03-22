@@ -5,6 +5,7 @@
  *         number, tel, url, password, card-select
  * Label, description, error render through Text atom.
  * Card-select renders choices as pictogram/text cards with hidden native inputs.
+ * Custom caret system — see src/lib/interaction/custom-caret.ts
  *
  * Token system (all bridge via --field-* → --_field-*):
  *   --_field-brand / -dark / -light      colour (variant-swapped)
@@ -765,3 +766,70 @@
 
 /* Card-select is functional content — NOT stripped in textonly.
    Images are choices, toggles are form controls. */
+
+/* ==========================================================
+   CUSTOM CARET — hide OS caret, render our own
+   Activated by data-custom-caret on <html>
+   ========================================================== */
+
+/* Hide OS caret when custom caret is active */
+[data-custom-caret] .form-field__input,
+[data-custom-caret] .form-field__input--textarea {
+  caret-color: transparent;
+}
+
+/* Custom caret element (injected by JS) */
+.form-field__caret {
+  position: absolute;
+  width: var(--caret-width, 2px);
+  background: var(--caret-color, var(--focus-color, var(--primary-600)));
+  border-radius: var(--caret-radius, 1px);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 2;
+  animation: caret-blink var(--caret-blink-speed, 1s) step-end infinite;
+}
+
+.form-field__caret--visible {
+  opacity: 1;
+}
+
+@keyframes caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Measurer — hidden, used for position calculation */
+.form-field__caret-measurer {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+}
+
+/* ── Gate: hover=none → solid, no blink ── */
+[data-hover="none"] .form-field__caret {
+  animation: none;
+  opacity: 1;
+}
+
+/* ── Gate: hover=gentle → slow pulse ── */
+[data-hover="gentle"] .form-field__caret {
+  --caret-blink-speed: 2s;
+}
+
+/* ── Gate: enhanced focus → thicker caret ── */
+[data-enhanced-focus] .form-field__caret {
+  --caret-width: 4px;
+}
+
+/* ── Gate: assistive → extra thick ── */
+[data-render="assistive"] .form-field__caret {
+  --caret-width: 6px;
+}
+
+/* ── Gate: textonly → match text colour ── */
+[data-render="textonly"] .form-field__caret {
+  --caret-color: var(--neutral-800);
+}
