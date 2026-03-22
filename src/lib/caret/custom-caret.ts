@@ -32,10 +32,32 @@ function createCaret(): HTMLElement {
   return el;
 }
 
-function createArrowTab(): HTMLElement {
+async function createArrowTab(): Promise<HTMLElement> {
   const el = document.createElement('div');
   el.className = 'form-field__arrow-tab';
   el.setAttribute('aria-hidden', 'true');
+
+  // Fetch Phosphor arrow icon from API
+  try {
+    const res = await fetch('https://asset-library.natashacharlton25.workers.dev/v1/assets/arrow-right-fill');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.currentVersion?.content) {
+        const svg = data.currentVersion.content;
+        el.innerHTML = `<span class="form-field__arrow-tab-arrow">${svg}</span>`;
+        // Size the SVG
+        const svgEl = el.querySelector('svg');
+        if (svgEl) {
+          svgEl.setAttribute('width', '32');
+          svgEl.setAttribute('height', '32');
+          svgEl.style.fill = 'currentColor';
+        }
+        return el;
+      }
+    }
+  } catch { /* fallback below */ }
+
+  // Fallback: CSS triangle
   el.innerHTML = '<span class="form-field__arrow-tab-arrow">&#9654;</span>';
   return el;
 }
@@ -158,12 +180,15 @@ function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
     input.parentNode?.appendChild(_caretEl);
   }
 
-  // Arrow tab — fixed to left edge of viewport, points to active field
+  // Arrow tab — positioned next to active field
   if (document.documentElement.hasAttribute('data-arrow-tab')) {
-    _arrowTab = createArrowTab();
-    document.body.appendChild(_arrowTab);
-    updateArrowPosition();
-    _arrowTab.classList.add('form-field__arrow-tab--visible');
+    createArrowTab().then(tab => {
+      if (!_activeInput) return; // focus moved away before async completed
+      _arrowTab = tab;
+      document.body.appendChild(_arrowTab);
+      updateArrowPosition();
+      _arrowTab.classList.add('form-field__arrow-tab--visible');
+    });
   }
 
   // Initial position

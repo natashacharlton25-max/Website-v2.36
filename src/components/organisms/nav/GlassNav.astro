@@ -135,6 +135,14 @@ import './GlassNav.css';
         <Icon name="gear-fill" size={20} class="a11y-preset-slot__icon" />
         <span class="a11y-preset-slot__name">Open Your View</span>
       </a>
+      <button class="a11y-preset-slot a11y-preset-slot--bookmark" data-action="save-bookmark" aria-label="Save my place">
+        <Icon name="bookmark-fill" size={20} class="a11y-preset-slot__icon" />
+        <span class="a11y-preset-slot__name">Save My Place</span>
+      </button>
+      <button class="a11y-preset-slot a11y-preset-slot--bookmark" data-action="find-bookmark" aria-label="Find my place">
+        <Icon name="map-pin-fill" size={20} class="a11y-preset-slot__icon" />
+        <span class="a11y-preset-slot__name">Find My Place</span>
+      </button>
     </div>
   </div>
 
@@ -478,6 +486,38 @@ import './GlassNav.css';
         closeAllMenus();
         closeMobileMenu();
         window.location.href = '/search';
+      });
+    });
+
+    // Bookmark — save and restore position
+    const saveBookmarkBtns = document.querySelectorAll('[data-action="save-bookmark"]');
+    saveBookmarkBtns.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const { saveBookmark } = await import('../../../lib/caret/bookmark');
+        const bookmark = saveBookmark();
+        closeAllMenus();
+        closeMobileMenu();
+        if (bookmark) {
+          const { showToast } = await import('../../../lib/ui/toast');
+          showToast('Place saved! Use "Find My Place" to return here.', 'success');
+        }
+      });
+    });
+
+    const findBookmarkBtns = document.querySelectorAll('[data-action="find-bookmark"]');
+    findBookmarkBtns.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const { restoreBookmark, hasBookmark } = await import('../../../lib/caret/bookmark');
+        closeAllMenus();
+        closeMobileMenu();
+        if (hasBookmark()) {
+          restoreBookmark();
+        } else {
+          const { showToast } = await import('../../../lib/ui/toast');
+          showToast('No saved place yet. Use "Save My Place" first.', 'info');
+        }
       });
     });
 
