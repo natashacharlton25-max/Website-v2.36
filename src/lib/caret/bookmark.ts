@@ -1,188 +1,89 @@
 /**
- * Form Bookmark — "Where was I?"
+ * Bookmark — Save My Place / Find My Place
  *
- * Saves the user's current position (page, scroll, active field)
- * to localStorage. On return, "Find my place" restores the exact
- * position with GSAP smooth scroll and arrow tab pointing to the field.
- *
- * Activated via nav mega menu button or keyboard shortcut.
+ * Saves page URL + scroll position to localStorage.
+ * On restore, navigates to page and scrolls to saved position.
+ * Focus system handles the visual highlighting.
  */
 
-const BOOKMARK_KEY = 'form-bookmark';
+const BOOKMARK_KEY = 'page-bookmark';
 
 interface Bookmark {
   url: string;
-  fieldId: string | null;
   scrollY: number;
   timestamp: number;
 }
 
-export function saveBookmark(): Bookmark | null {
-  // Immediate fallback: save scroll position
+export function saveBookmark(): void {
   const viewport = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement;
-  const scrollPos = viewport ? viewport.scrollTop : (window.scrollY || document.documentElement.scrollTop);
-  const active = document.activeElement as HTMLElement | null;
-  const fieldId = active?.id || active?.closest('[id]')?.id || null;
+  const scrollY = viewport ? viewport.scrollTop : window.scrollY;
 
   const bookmark: Bookmark = {
     url: window.location.pathname,
-    fieldId,
-    scrollY: scrollPos,
+    scrollY,
     timestamp: Date.now(),
   };
 
-  // Enter click-to-place mode — user can click anywhere to pin the bookmark
-  enterClickToPlace(bookmark);
-
-  return bookmark;
-}
-
-function enterClickToPlace(bookmark: Bookmark): void {
-  // Show cursor change on body
-  document.body.style.cursor = 'crosshair';
-
-  // Visual hint
-  const hint = document.createElement('div');
-  hint.className = 'bookmark-hint';
-  hint.textContent = 'Click anywhere to place your marker — or wait to save scroll position';
-  hint.style.cssText = 'position:fixed;top:var(--space-xl,2rem);left:50%;transform:translateX(-50%);z-index:99999;padding:var(--space-sm,0.5rem) var(--space-lg,1.5rem);background:var(--focus-color,teal);color:var(--color-White,#fff);border-radius:var(--radius-lg,12px);font-family:var(--font-body);font-size:var(--text-small,0.875rem);pointer-events:none;opacity:0.95;';
-  document.body.appendChild(hint);
-
-  let placed = false;
-
-  const handleClick = (e: MouseEvent) => {
-    // Don't capture clicks on nav/panel
-    if ((e.target as HTMLElement).closest('nav, .a11y-panel, #a11y-page')) return;
-
-    placed = true;
-    cleanup();
-
-    // Get click position relative to document
-    const viewport = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement;
-    const scrollY = viewport ? viewport.scrollTop : (window.scrollY || document.documentElement.scrollTop);
-
-    bookmark.scrollY = scrollY + e.clientY;
-    bookmark.fieldId = (e.target as HTMLElement).closest('[id]')?.id || null;
-
-    localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
-    console.log('Bookmark saved:', bookmark);
-
-    // Highlight the bookmarked spot
-    showBookmarkMarker(bookmark.scrollY, bookmark.fieldId);
-  };
-
-  const cleanup = () => {
-    document.body.style.cursor = '';
-    hint.remove();
-    document.removeEventListener('click', handleClick, true);
-  };
-
-  // Listen for click (capture phase so it fires first)
-  document.addEventListener('click', handleClick, true);
-
-  // Timeout fallback — save scroll position if no click after 5 seconds
-  setTimeout(() => {
-    if (!placed) {
-      cleanup();
-      localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
-    }
-  }, 5000);
-}
-
-function showBookmarkMarker(posY: number, fieldId: string | null): void {
-  // If we have a field ID, use focus system to highlight it
-  if (fieldId) {
-    const field = document.getElementById(fieldId);
-    if (field) {
-      // Simulate keyboard for focus-system detection
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
-      setTimeout(() => {
-        field.focus();
-        // The focus system handles the ring, fill, arrow tab, rainbow — everything
-      }, 50);
-      return;
-    }
-  }
-
-  // No field ID — find the nearest element at saved scroll position
-  // Use elementFromPoint at the centre of the viewport after scrolling
-  setTimeout(() => {
-    const el = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
-    if (el) {
-      const target = el.closest('section, article, .card, .form-field, p, h1, h2, h3, h4, h5, h6, a, button') as HTMLElement;
-      if (target) {
-        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
-        setTimeout(() => {
-          target.setAttribute('tabindex', '-1');
-          target.focus();
-        }, 50);
-      }
-    }
-  }, 100);
-}
-
-export function getBookmark(): Bookmark | null {
-  const raw = localStorage.getItem(BOOKMARK_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-export function clearBookmark(): void {
-  localStorage.removeItem(BOOKMARK_KEY);
+  localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
+  console.log('Bookmark saved:', bookmark);
 }
 
 export function hasBookmark(): boolean {
   return !!localStorage.getItem(BOOKMARK_KEY);
 }
 
-export function restoreBookmark(): void {
-  const bookmark = getBookmark();
-  if (!bookmark) return;
+export function clearBookmark(): void {
+  localStorage.removeItem(BOOKMARK_KEY);
+}
 
-  // If different page, navigate there
+export function restoreBookmark(): void {
+  const raw = localStorage.getItem(BOOKMARK_KEY);
+  if (!raw) return;
+
+  let bookmark: Bookmark;
+  try { bookmark = JSON.parse(raw); } catch { return; }
+
+  console.log('Restoring bookmark:', bookmark);
+
+  // Different page — navigate there with hash
   if (bookmark.url !== window.location.pathname) {
     window.location.href = bookmark.url + '#bookmark-restore';
     return;
   }
 
-  // Same page — scroll to position and focus field
+  // Same page — scroll to position
+  scrollToBookmark(bookmark.scrollY);
+}
+
+function scrollToBookmark(scrollY: number): void {
+  const viewport = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement;
   const gsap = (window as any).gsap;
-  const scroller = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement
-    || window;
 
-  const scrollTarget = bookmark.scrollY;
+  console.log('Scrolling to:', scrollY, 'viewport:', viewport ? 'OS' : 'window');
 
-  if (gsap) {
-    gsap.to(scroller === window ? document.documentElement : scroller, {
-      scrollTop: scrollTarget,
-      duration: 0.8,
-      ease: 'power3.out',
-      onComplete: () => focusBookmarkedField(bookmark.fieldId, bookmark.scrollY),
-    });
+  if (gsap && viewport) {
+    gsap.to(viewport, { scrollTop: scrollY, duration: 0.8, ease: 'power3.out' });
+  } else if (viewport) {
+    viewport.scrollTo({ top: scrollY, behavior: 'smooth' });
+  } else if (gsap) {
+    gsap.to(window, { scrollTo: scrollY, duration: 0.8, ease: 'power3.out' });
   } else {
-    if (scroller === window) {
-      window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
-    } else {
-      scroller.scrollTo({ top: scrollTarget, behavior: 'smooth' });
-    }
-    setTimeout(() => focusBookmarkedField(bookmark.fieldId, bookmark.scrollY), 500);
+    window.scrollTo({ top: scrollY, behavior: 'smooth' });
   }
 }
 
-function focusBookmarkedField(fieldId: string | null, scrollY: number): void {
-  showBookmarkMarker(scrollY, fieldId);
-}
-
-// Auto-restore if URL has #bookmark-restore hash
+// Auto-restore on page load if URL has #bookmark-restore
 export function initBookmarkRestore(): void {
   if (window.location.hash === '#bookmark-restore') {
-    // Remove hash without triggering navigation
     history.replaceState(null, '', window.location.pathname);
-    // Delay to let page render
-    setTimeout(restoreBookmark, 600);
+    // Wait for page + OverlayScrollbars to render
+    setTimeout(() => {
+      const raw = localStorage.getItem(BOOKMARK_KEY);
+      if (!raw) return;
+      try {
+        const bookmark: Bookmark = JSON.parse(raw);
+        scrollToBookmark(bookmark.scrollY);
+      } catch { /* ignore */ }
+    }, 800);
   }
 }
