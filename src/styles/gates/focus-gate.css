@@ -188,32 +188,24 @@ html:not([data-focus-rainbow]) select[data-focus-active]::after {
   display: none !important;
 }
 
-/* Focused + hovered: fill shifts to Success */
-html:not([data-focus-rainbow]) [data-focus-active]:not(.form-field):hover {
+/* Focused + hovered: ALL elements shift fill to Success */
+html:not([data-focus-rainbow]) [data-focus-active]:hover {
   background: color-mix(in oklch, var(--color-Success) 25%, transparent) !important;
 }
 
-/* Form fields: wrapper fill + token override to Success */
+/* Form fields: also override tokens so children inherit */
 html:not([data-focus-rainbow]) .form-field[data-focus-active]:hover {
-  background: color-mix(in oklch, var(--color-Success) 15%, transparent) !important;
   --_field-brand: var(--color-Success);
   --_field-border: var(--color-Success);
 }
 
 html:not([data-focus-rainbow]) .form-field[data-focus-active]:hover .form-field__input {
   border-color: var(--color-Success) !important;
-  background: color-mix(in oklch, var(--color-Success) 5%, var(--_field-bg)) !important;
+  background: var(--_field-bg) !important;
 }
 
-html:not([data-focus-rainbow]) [data-focus-active]:not(.form-field):hover::after {
+html:not([data-focus-rainbow]) [data-focus-active]:hover::after {
   background: transparent !important;
-  box-shadow:
-    0 0 0 var(--focus-thickness) var(--focus-bg),
-    0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success);
-}
-
-html:not([data-focus-rainbow]) .form-field[data-focus-active]:hover::after {
-  background: color-mix(in oklch, var(--color-Success) 15%, transparent) !important;
   box-shadow:
     0 0 0 var(--focus-thickness) var(--focus-bg),
     0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success);
