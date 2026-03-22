@@ -51,6 +51,24 @@
 
   /* All headings collapse to h2 size */
   .heading--h1 { font-size: var(--text-h2); }
+
+  /* All form fields scale up to XL for touch targets */
+  .form-field {
+    --_field-control-size: 2.5rem;
+    --_field-toggle-w: 6rem;
+    --_field-toggle-h: 3rem;
+    --_field-thumb-size: 2.25rem;
+  }
+
+  .form-field__input {
+    padding: var(--space-lg) var(--space-xl);
+    font-size: var(--text-lg, 1.125rem);
+    min-height: 4.5rem;
+  }
+
+  .form-field__label {
+    font-size: var(--text-lg, 1.125rem);
+  }
 }
 
 @media (max-width: 200px) {
@@ -60,5 +78,51 @@
   .btn {
     padding: var(--space-sm) var(--space-md);
     min-height: 2rem;
+  }
+}
+
+@media (max-width: 150px) {
+  /* Checkboxes, radios, toggles: stack with border card */
+  .form-field__checkbox-wrap,
+  .form-field__radio-wrap,
+  .form-field__toggle-wrap {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-sm);
+    border: 1px solid var(--_field-border, var(--neutral-300));
+    border-radius: var(--radius-md);
+    gap: var(--space-xs);
+  }
+}
+
+@media (max-width: 100px) {
+  /* All form fields collapse to small size */
+  .form-field {
+    --_field-control-size: 1rem;
+    --_field-toggle-w: 2rem;
+    --_field-toggle-h: 1.125rem;
+    --_field-thumb-size: 0.875rem;
+  }
+
+  .form-field__input {
+    padding: var(--space-2xs) var(--space-sm);
+    font-size: var(--text-small);
+  }
+
+  .form-field__label {
+    font-size: var(--text-small);
+  }
+
+  /* Placeholder truncates — input is too narrow for text */
+  .form-field__input {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .form-field__input::placeholder {
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 }
