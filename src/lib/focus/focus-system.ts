@@ -69,7 +69,8 @@ function initFocusSystem() {
     if (Date.now() - lastKeyTime > 100) return;
     let el = (e.target as HTMLElement).closest('[tabindex], button, a, input, textarea, select, [role="button"]');
     // Form controls can't use ::after — move focus to .form-field wrapper
-    if (el && (el.matches('input, textarea, select') && el.closest('.form-field'))) {
+    // EXCEPT dropdown buttons — they handle their own focus
+    if (el && (el.matches('input, textarea, select') && el.closest('.form-field') && !el.closest('.form-field__select-wrap'))) {
       el = el.closest('.form-field');
     }
     // Don't activate focus system on a11y panel/page controls
