@@ -73,8 +73,8 @@ function initFocusSystem() {
     if (el && (el.matches('input, textarea, select') && el.closest('.form-field') && !el.closest('.form-field__select-wrap'))) {
       el = el.closest('.form-field');
     }
-    // Don't activate focus system on a11y panel/page controls
-    if (el && !el.closest('#a11y-page, #a11y-panel, .a11y-panel')) {
+    // Don't activate focus system on a11y panel/page controls or dropdown menu items
+    if (el && !el.closest('#a11y-page, #a11y-panel, .a11y-panel, .dropdown-menu')) {
       el.setAttribute('data-focus-active', '');
       (el as HTMLElement).style.zIndex = '99999';
       (el as HTMLElement).style.position = 'relative';
