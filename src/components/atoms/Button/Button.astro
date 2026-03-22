@@ -328,15 +328,57 @@ const iconRight = iconPosition === 'right' && hasIcon;
         }
       });
 
-      // Keyboard: Escape closes
-      btn.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && wrapper.classList.contains('open')) {
+      // Keyboard: Escape closes, arrows navigate, tab wraps
+      wrapper.addEventListener('keydown', (e) => {
+        const isOpen = wrapper.classList.contains('open');
+        if (!isOpen) return;
+
+        const items = [...menu.querySelectorAll('.dropdown-item:not([disabled])')] as HTMLElement[];
+        const currentIndex = items.indexOf(document.activeElement as HTMLElement);
+
+        if (e.key === 'Escape') {
+          e.preventDefault();
           wrapper.classList.remove('open');
           menu.classList.remove('show');
           btn.setAttribute('aria-expanded', 'false');
           btn.focus();
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const next = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+          items[next]?.focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const prev = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+          items[prev]?.focus();
+        } else if (e.key === 'Tab') {
+          // Tab past last item → close and let focus move naturally
+          if (!e.shiftKey && currentIndex === items.length - 1) {
+            wrapper.classList.remove('open');
+            menu.classList.remove('show');
+            btn.setAttribute('aria-expanded', 'false');
+          }
+          // Shift+Tab past first item → close and return to button
+          if (e.shiftKey && (currentIndex === 0 || document.activeElement === btn)) {
+            wrapper.classList.remove('open');
+            menu.classList.remove('show');
+            btn.setAttribute('aria-expanded', 'false');
+          }
+        } else if (e.key === 'Enter' || e.key === ' ') {
+          if (document.activeElement !== btn && currentIndex >= 0) {
+            e.preventDefault();
+            items[currentIndex]?.click();
+          }
         }
       });
+
+      // When dropdown opens, focus first item
+      const observer = new MutationObserver(() => {
+        if (wrapper.classList.contains('open')) {
+          const firstItem = menu.querySelector('.dropdown-item:not([disabled])') as HTMLElement;
+          if (firstItem) setTimeout(() => firstItem.focus(), 50);
+        }
+      });
+      observer.observe(wrapper, { attributes: true, attributeFilter: ['class'] });
     });
 
     // Close on outside click (only attach once)
