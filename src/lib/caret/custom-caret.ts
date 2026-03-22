@@ -4,6 +4,9 @@
  * Hides OS caret (caret-color: transparent via CSS) and renders a
  * custom caret element positioned via selectionStart.
  *
+ * TRACKS cursor position on every keypress, click, arrow key, and selection change.
+ * Uses a hidden measurer span with inherited font styles to calculate pixel position.
+ *
  * Fully tokenised:
  *   --caret-width, --caret-color, --caret-blink-speed, --caret-radius
  *
@@ -18,8 +21,8 @@
 
 let _caretEl: HTMLElement | null = null;
 let _activeInput: HTMLInputElement | HTMLTextAreaElement | null = null;
-let _measurer: HTMLSpanElement | null = null;
-let _raf: number | null = null;
+
+const INPUT_SELECTOR = 'input[type="text"], input[type="email"], input[type="search"], input[type="url"], input[type="tel"], input[type="password"], input[type="number"], textarea';
 
 function createCaret(): HTMLElement {
   const el = document.createElement('span');
@@ -28,69 +31,82 @@ function createCaret(): HTMLElement {
   return el;
 }
 
-function createMeasurer(): HTMLSpanElement {
-  const el = document.createElement('span');
-  el.className = 'form-field__caret-measurer';
-  el.setAttribute('aria-hidden', 'true');
-  return el;
-}
+function updateCaretPosition() {
+  if (!_activeInput || !_caretEl) return;
 
-function positionCaret(input: HTMLInputElement | HTMLTextAreaElement, caret: HTMLElement, measurer: HTMLSpanElement) {
+  const input = _activeInput;
   const pos = input.selectionStart ?? 0;
   const text = input.value.slice(0, pos);
 
-  // Copy font styles to measurer
+  // Create measurer with inherited font styles
+  const measurer = document.createElement('span');
   const styles = getComputedStyle(input);
+  measurer.style.cssText = 'font:inherit;visibility:hidden;position:absolute;white-space:pre;top:0;left:0;';
   measurer.style.font = styles.font;
   measurer.style.letterSpacing = styles.letterSpacing;
   measurer.style.wordSpacing = styles.wordSpacing;
   measurer.style.textTransform = styles.textTransform;
-  measurer.style.whiteSpace = 'pre';
 
-  // For textarea, handle line wrapping
-  if (input.tagName === 'TEXTAREA') {
-    measurer.style.whiteSpace = 'pre-wrap';
-    measurer.style.wordBreak = 'break-word';
-    measurer.style.width = `${input.clientWidth}px`;
-  }
-
-  measurer.textContent = text || '\u200B'; // Zero-width space for empty input
-
-  // Get position
-  const inputRect = input.getBoundingClientRect();
   const paddingLeft = parseFloat(styles.paddingLeft) || 0;
   const paddingTop = parseFloat(styles.paddingTop) || 0;
-
-  // Append measurer temporarily to get dimensions
-  input.parentNode?.appendChild(measurer);
+  const lineHeight = parseFloat(styles.lineHeight) || parseFloat(styles.fontSize) * 1.2;
 
   if (input.tagName === 'TEXTAREA') {
-    // For textarea: use measurer height for vertical position
-    const lines = measurer.offsetHeight;
-    const lastLine = measurer.textContent.split('\n').pop() || '';
+    // Textarea: handle line wrapping
+    measurer.style.whiteSpace = 'pre-wrap';
+    measurer.style.wordBreak = 'break-word';
+    measurer.style.width = `${input.clientWidth - paddingLeft - (parseFloat(styles.paddingRight) || 0)}px`;
+    measurer.textContent = text || '\u200B';
+    input.parentNode?.appendChild(measurer);
+
+    // Get height of all text up to cursor
+    const fullHeight = measurer.offsetHeight;
+
+    // Get width of last line only
+    const lastLine = text.split('\n').pop() || '';
     const lastLineMeasurer = document.createElement('span');
-    lastLineMeasurer.style.font = styles.font;
-    lastLineMeasurer.style.letterSpacing = styles.letterSpacing;
-    lastLineMeasurer.style.visibility = 'hidden';
-    lastLineMeasurer.style.position = 'absolute';
-    lastLineMeasurer.style.whiteSpace = 'pre';
+    lastLineMeasurer.style.cssText = `font:${styles.font};visibility:hidden;position:absolute;white-space:pre;letter-spacing:${styles.letterSpacing};`;
     lastLineMeasurer.textContent = lastLine || '\u200B';
     document.body.appendChild(lastLineMeasurer);
 
-    caret.style.left = `${paddingLeft + lastLineMeasurer.offsetWidth}px`;
-    caret.style.top = `${paddingTop + lines - parseFloat(styles.lineHeight || styles.fontSize)}px`;
+    // Position caret relative to input's position within form-field
+    const inputRect = input.getBoundingClientRect();
+    const wrapperRect = (input.closest('.form-field') || input.parentNode as Element).getBoundingClientRect();
+    const offsetLeft = inputRect.left - wrapperRect.left;
+    const offsetTop = inputRect.top - wrapperRect.top;
+
+    _caretEl.style.left = `${offsetLeft + paddingLeft + lastLineMeasurer.offsetWidth}px`;
+    _caretEl.style.top = `${offsetTop + paddingTop + fullHeight - lineHeight - input.scrollTop}px`;
+
     lastLineMeasurer.remove();
+    measurer.remove();
   } else {
-    // For input: simple horizontal position
-    caret.style.left = `${paddingLeft + measurer.offsetWidth}px`;
-    caret.style.top = `${paddingTop}px`;
+    // Single-line input
+    measurer.textContent = text || '\u200B';
+    input.parentNode?.appendChild(measurer);
+
+    // Position relative to form-field wrapper
+    const inputRect = input.getBoundingClientRect();
+    const wrapperRect = (input.closest('.form-field') || input.parentNode as Element).getBoundingClientRect();
+    const offsetLeft = inputRect.left - wrapperRect.left;
+    const offsetTop = inputRect.top - wrapperRect.top;
+
+    _caretEl.style.left = `${offsetLeft + paddingLeft + measurer.offsetWidth}px`;
+    _caretEl.style.top = `${offsetTop + paddingTop}px`;
+
+    measurer.remove();
   }
 
-  // Set caret height to match line-height
-  const lineHeight = parseFloat(styles.lineHeight) || parseFloat(styles.fontSize) * 1.2;
-  caret.style.height = `${lineHeight}px`;
+  // Set caret height
+  _caretEl.style.height = `${lineHeight}px`;
 
-  measurer.remove();
+  // Rainbow colour sync
+  if (document.documentElement.hasAttribute('data-focus-rainbow')) {
+    const focusColor = getComputedStyle(document.documentElement).getPropertyValue('--focus-color').trim();
+    if (focusColor) {
+      _caretEl.style.setProperty('--caret-color', focusColor);
+    }
+  }
 }
 
 function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
@@ -100,38 +116,39 @@ function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
 
   _activeInput = input;
   _caretEl = createCaret();
-  _measurer = createMeasurer();
 
-  // Insert caret into the form-field wrapper (relative positioned)
+  // Insert into form-field wrapper (has position: relative)
   const wrapper = input.closest('.form-field');
   if (wrapper) {
     wrapper.appendChild(_caretEl);
   } else {
-    // Fallback: insert next to input
     input.parentNode?.appendChild(_caretEl);
   }
 
-  // Rainbow: set initial colour
-  updateCaretColour();
-
-  positionCaret(input, _caretEl, _measurer);
+  // Initial position
+  updateCaretPosition();
   _caretEl.classList.add('form-field__caret--visible');
 
-  // Track position changes
-  const update = () => {
-    if (_activeInput && _caretEl && _measurer) {
-      positionCaret(_activeInput, _caretEl, _measurer);
-      updateCaretColour();
-    }
-    _raf = requestAnimationFrame(update);
-  };
-  _raf = requestAnimationFrame(update);
+  // Attach tracking listeners directly to the input
+  input.addEventListener('input', updateCaretPosition);
+  input.addEventListener('click', handleDelayedUpdate);
+  input.addEventListener('keyup', updateCaretPosition);
+  input.addEventListener('select', updateCaretPosition);
+  input.addEventListener('mouseup', handleDelayedUpdate);
+}
+
+function handleDelayedUpdate() {
+  // Click/mouseup: selectionStart updates after the event
+  setTimeout(updateCaretPosition, 0);
 }
 
 function hideCaret() {
-  if (_raf) {
-    cancelAnimationFrame(_raf);
-    _raf = null;
+  if (_activeInput) {
+    _activeInput.removeEventListener('input', updateCaretPosition);
+    _activeInput.removeEventListener('click', handleDelayedUpdate);
+    _activeInput.removeEventListener('keyup', updateCaretPosition);
+    _activeInput.removeEventListener('select', updateCaretPosition);
+    _activeInput.removeEventListener('mouseup', handleDelayedUpdate);
   }
   if (_caretEl) {
     _caretEl.remove();
@@ -140,27 +157,13 @@ function hideCaret() {
   _activeInput = null;
 }
 
-function updateCaretColour() {
-  if (!_caretEl) return;
-
-  const html = document.documentElement;
-  if (html.hasAttribute('data-focus-rainbow')) {
-    // Use current rainbow focus colour
-    const focusColor = getComputedStyle(html).getPropertyValue('--focus-color').trim();
-    if (focusColor) {
-      _caretEl.style.setProperty('--caret-color', focusColor);
-    }
-  }
-}
-
 export function initCustomCaret() {
   // Only activate when data-custom-caret is on <html>
-  const html = document.documentElement;
-  if (!html.hasAttribute('data-custom-caret')) return;
+  if (!document.documentElement.hasAttribute('data-custom-caret')) return;
 
   document.addEventListener('focusin', (e) => {
     const target = e.target as HTMLElement;
-    if (target.matches('input[type="text"], input[type="email"], input[type="search"], input[type="url"], input[type="tel"], input[type="password"], input[type="number"], textarea')) {
+    if (target.matches(INPUT_SELECTOR)) {
       showCaret(target as HTMLInputElement | HTMLTextAreaElement);
     }
   });
@@ -169,22 +172,10 @@ export function initCustomCaret() {
     hideCaret();
   });
 
-  // Also update on click (mouse repositions cursor)
-  document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    if (_activeInput && target === _activeInput) {
-      setTimeout(() => {
-        if (_activeInput && _caretEl && _measurer) {
-          positionCaret(_activeInput, _caretEl, _measurer);
-        }
-      }, 0);
-    }
-  });
-
-  // Update on input (typing moves cursor)
-  document.addEventListener('input', () => {
-    if (_activeInput && _caretEl && _measurer) {
-      positionCaret(_activeInput, _caretEl, _measurer);
+  // Also listen for selectionchange (covers arrow keys, home/end, shift+arrows)
+  document.addEventListener('selectionchange', () => {
+    if (_activeInput && document.activeElement === _activeInput) {
+      updateCaretPosition();
     }
   });
 }
