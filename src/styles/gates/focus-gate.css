@@ -97,7 +97,7 @@
    ========================================================== */
 
 /* Focus state: strip effects — ring + fill handled by ::after pseudo */
-[data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card):not(.a11y-save-slot__name) {
+[data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card):not(.a11y-save-slot__name):not(.form-field) {
   box-shadow: none !important;
   border-radius: 0 !important;
   border-color: transparent !important;
@@ -115,7 +115,7 @@
   transition: none !important;
 }
 
-/* Focus ring as pseudo-element — animatable independently */
+/* Focus ring as pseudo-element — on top for border, no fill */
 [data-focus-active]::after {
   content: '';
   position: absolute;
@@ -124,6 +124,7 @@
   box-shadow:
     0 0 0 var(--focus-thickness) var(--focus-bg),
     0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color);
+  background: transparent;
   opacity: 1;
   pointer-events: none;
   z-index: 1036;
@@ -193,8 +194,9 @@ html:not([data-focus-rainbow]) [data-focus-active]:hover {
   background: color-mix(in oklch, var(--color-Success) 25%, transparent) !important;
 }
 
-/* Form fields: also override tokens so children inherit */
+/* Form fields: fill + token override to Success on hover */
 html:not([data-focus-rainbow]) .form-field[data-focus-active]:hover {
+  background: color-mix(in oklch, var(--color-Success) 15%, transparent) !important;
   --_field-brand: var(--color-Success);
   --_field-border: var(--color-Success);
 }
