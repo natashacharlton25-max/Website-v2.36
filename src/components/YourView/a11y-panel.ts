@@ -31,6 +31,7 @@ export interface A11ySettings {
   rainbowScroll: boolean;
   focusColourCycle: boolean;
   arrowTab: boolean;
+  dropdownMouseClose: boolean;
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
@@ -75,6 +76,7 @@ export const defaultSettings: A11ySettings = {
   rainbowScroll: false,
   focusColourCycle: false,
   arrowTab: false,
+  dropdownMouseClose: false,
   screenReaderMode: false,
   scrollbarEnhanced: false,
   altTextMode: 'none',
@@ -263,6 +265,7 @@ export function applySettings(settings: A11ySettings): void {
   document.documentElement.toggleAttribute('data-rainbow-scroll', settings.rainbowScroll);
   document.documentElement.toggleAttribute('data-focus-colour-cycle', settings.focusColourCycle);
   document.documentElement.toggleAttribute('data-arrow-tab', settings.arrowTab);
+  document.documentElement.toggleAttribute('data-dropdown-mouseclose', settings.dropdownMouseClose);
   target.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
   target.classList.toggle('a11y-scrollbar-enhanced', settings.scrollbarEnhanced);
 
@@ -467,7 +470,7 @@ export const presets: Record<string, Partial<A11ySettings>> = {
 // ===================================
 export function updateUI(container: HTMLElement, s: A11ySettings): void {
   // Toggle cards
-  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'focusRainbow', 'focusColorJourney', 'rainbowHighlight', 'customCaret', 'rainbowScroll', 'focusColourCycle', 'arrowTab', 'screenReaderMode', 'scrollbarEnhanced'];
+  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'focusRainbow', 'focusColorJourney', 'rainbowHighlight', 'customCaret', 'rainbowScroll', 'focusColourCycle', 'arrowTab', 'dropdownMouseClose', 'screenReaderMode', 'scrollbarEnhanced'];
   toggleCardSettings.forEach(key => {
     const card = container.querySelector(`.a11y-toggle-card[data-setting="${key}"]`);
     if (card) {

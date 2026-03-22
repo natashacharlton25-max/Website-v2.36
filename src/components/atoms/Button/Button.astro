@@ -381,9 +381,11 @@ const iconRight = iconPosition === 'right' && hasIcon;
       });
       observer.observe(wrapper, { attributes: true, attributeFilter: ['class'] });
 
-      // Close when mouse leaves — but NOT if keyboard focus is inside
+      // Close when mouse leaves — only if setting enabled and keyboard focus not inside
       wrapper.addEventListener('mouseleave', () => {
-        if (wrapper.classList.contains('open') && !wrapper.contains(document.activeElement)) {
+        if (document.documentElement.hasAttribute('data-dropdown-mouseclose') &&
+            wrapper.classList.contains('open') &&
+            !wrapper.contains(document.activeElement)) {
           wrapper.classList.remove('open');
           menu.classList.remove('show');
           btn.setAttribute('aria-expanded', 'false');
