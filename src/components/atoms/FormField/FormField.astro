@@ -17,6 +17,7 @@
 import { Text } from '../Text';
 import { Image } from '../Image';
 import Icon from '../Icon/Icon.astro';
+import Button from '../Button/Button.astro';
 
 interface SelectOption {
   value: string;
@@ -207,39 +208,33 @@ const describedBy = [
         >{value}</textarea>
       )}
 
-      <!-- Select — CSS-only dropdown using radio inputs + minimal JS for close-on-select -->
+      <!-- Select — uses Button dropdown + hidden native select for form submission -->
       {isSelect && (
-        <div class="form-field__select" role="listbox" aria-labelledby={`${id}-label`} data-select-id={id}>
-          <input
-            type="checkbox"
-            class="form-field__select-toggle"
-            id={`${id}-toggle`}
+        <div class="form-field__select-wrap">
+          <select
+            id={id}
+            name={fieldName}
+            required={required}
             disabled={disabled}
-            aria-hidden="true"
+            class="form-field__select-native"
+            aria-describedby={describedBy}
+            aria-invalid={error ? 'true' : undefined}
+          >
+            {options.map((opt) => (
+              <option value={opt.value} selected={value === opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <Button
+            label={value ? options.find(o => o.value === value)?.label || placeholder || 'Select...' : placeholder || 'Select...'}
+            variant="outline"
+            shape="dropdown"
+            disabled={disabled}
+            dropdownItems={options.filter(o => o.value !== '').map(o => ({
+              label: o.label,
+              icon: o.icon,
+              action: `select:${id}:${o.value}`
+            }))}
           />
-          <span class="form-field__select-arrow" aria-hidden="true">
-            <Icon name="plus-regular" size={20} />
-          </span>
-          <span class="form-field__select-placeholder">{placeholder || 'Select...'}</span>
-          {options.filter(opt => opt.value !== '').map((opt, i) => (
-            <label class="form-field__select-option" for={`${id}-opt-${i}`}>
-              <input
-                type="radio"
-                name={fieldName}
-                value={opt.value}
-                id={`${id}-opt-${i}`}
-                checked={value === opt.value}
-                disabled={disabled}
-                class="form-field__select-radio"
-                role="option"
-                data-select-toggle={`${id}-toggle`}
-              />
-              <span class="form-field__select-label">
-                {opt.icon && <Icon name={opt.icon} size={16} class="form-field__select-icon" />}
-                <span class="form-field__select-text">{opt.label}</span>
-              </span>
-            </label>
-          ))}
         </div>
       )}
 
@@ -329,17 +324,3 @@ const describedBy = [
 </div>
 
 <!-- Styles: FormField.css | FormField.responsive.css -->
-
-<script>
-  // Close select dropdown when option is chosen
-  document.addEventListener('change', (e) => {
-    const radio = e.target as HTMLInputElement;
-    if (radio.classList.contains('form-field__select-radio')) {
-      const toggleId = radio.dataset.selectToggle;
-      if (toggleId) {
-        const toggle = document.getElementById(toggleId) as HTMLInputElement;
-        if (toggle) toggle.checked = false;
-      }
-    }
-  });
-</script>
