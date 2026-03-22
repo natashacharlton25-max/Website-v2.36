@@ -221,7 +221,7 @@ const describedBy = [
             <Icon name="plus-regular" size={20} />
           </span>
           <span class="form-field__select-placeholder">{placeholder || 'Select...'}</span>
-          {options.map((opt, i) => (
+          {options.filter(opt => opt.value !== '').map((opt, i) => (
             <label class="form-field__select-option" for={`${id}-opt-${i}`}>
               <input
                 type="radio"
@@ -229,7 +229,7 @@ const describedBy = [
                 value={opt.value}
                 id={`${id}-opt-${i}`}
                 checked={value === opt.value}
-                disabled={disabled || opt.value === ''}
+                disabled={disabled}
                 class="form-field__select-radio"
                 role="option"
                 data-select-toggle={`${id}-toggle`}
