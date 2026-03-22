@@ -46,16 +46,39 @@ export function showToast(options: ToastOptions): void {
   const messageEl = toast.querySelector('.toast__message');
   if (messageEl) messageEl.textContent = message;
 
-  // Set icon from API if slug provided — replaces Lottie icon with static Phosphor
+  // Set icon — fetch Phosphor SVG from API, replace Lottie slot
   if (options.icon) {
-    const lottieSlot = toast.querySelector('.toast__lottie') as HTMLElement;
+    const lottieSlot = toast.querySelector('.lottie-icon, .toast__lottie') as HTMLElement;
+
+    // Create icon container immediately (shows while SVG loads)
+    const iconEl = document.createElement('span');
+    iconEl.className = 'toast__icon';
+    iconEl.setAttribute('aria-hidden', 'true');
+    iconEl.style.display = 'flex';
+    iconEl.style.alignItems = 'center';
+    iconEl.style.justifyContent = 'center';
+    iconEl.style.width = '24px';
+    iconEl.style.height = '24px';
+    iconEl.style.flexShrink = '0';
+
+    // Replace Lottie immediately, then fill with SVG
+    if (lottieSlot) {
+      lottieSlot.replaceWith(iconEl);
+    } else {
+      // Prepend before message
+      const msg = toast.querySelector('.toast__message');
+      if (msg) {
+        msg.before(iconEl);
+      } else {
+        toast.prepend(iconEl);
+      }
+    }
+
+    // Fetch SVG from API
     fetch(`https://asset-library.natashacharlton25.workers.dev/v1/assets/${options.icon}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data?.currentVersion?.content) {
-          const iconEl = document.createElement('span');
-          iconEl.className = 'toast__icon';
-          iconEl.setAttribute('aria-hidden', 'true');
           iconEl.innerHTML = data.currentVersion.content;
           const svg = iconEl.querySelector('svg');
           if (svg) {
@@ -63,14 +86,9 @@ export function showToast(options: ToastOptions): void {
             svg.setAttribute('height', '24');
             svg.style.fill = 'currentColor';
           }
-          if (lottieSlot) {
-            lottieSlot.replaceWith(iconEl);
-          } else {
-            toast.prepend(iconEl);
-          }
         }
       })
-      .catch(() => { /* keep existing template icon */ });
+      .catch(() => { /* icon slot stays empty */ });
   }
 
   // Set duration attribute
