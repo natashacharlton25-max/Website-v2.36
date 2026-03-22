@@ -50,14 +50,14 @@ export function saveBookmark(): void {
     const scroll = vpEl ? vpEl.scrollTop : window.scrollY;
     const absY = scroll + e.clientY;
 
-    bookmark.scrollY = Math.max(0, absY - (window.innerHeight / 2));
+    bookmark.scrollY = Math.max(0, scroll + e.clientY - (window.innerHeight / 2));
     bookmark.clickX = e.clientX;
-    bookmark.clickY = absY;
+    bookmark.clickY = e.clientY; // Store clientY (viewport-relative)
 
     localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
-    console.log('Saved:', { clientY: e.clientY, scroll, absY, savedScrollY: bookmark.scrollY });
 
-    showArrowAtAbsolutePosition(e.clientX, absY);
+    // Show arrow right where they clicked — fixed position, exact spot
+    showArrowFixed(e.clientX, e.clientY);
   };
 
   const cleanup = () => {
@@ -77,20 +77,15 @@ export function saveBookmark(): void {
   }, 5000);
 }
 
-function showArrowAtAbsolutePosition(absX: number, absY: number): void {
+function showArrowFixed(x: number, y: number): void {
   document.getElementById('bookmark-arrow')?.remove();
 
   const arrow = document.createElement('div');
   arrow.id = 'bookmark-arrow';
   arrow.setAttribute('aria-hidden', 'true');
-  arrow.style.cssText = `position:absolute;top:${absY}px;left:${absX}px;transform:translate(-50%,-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
+  arrow.style.cssText = `position:fixed;top:${y}px;left:${x}px;transform:translate(-50%,-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
   arrow.textContent = '\u25B6';
-
-  // Append inside scroll container so it scrolls with content
-  const scrollContainer = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement
-    || wrapper
-    || document.body;
-  scrollContainer.appendChild(arrow);
+  document.documentElement.appendChild(arrow);
 
   arrow.animate([
     { transform: 'translateY(-50%) scale(1)', opacity: 1 },
@@ -157,7 +152,8 @@ function showBookmarkArrow(): void {
   if (!raw) return;
   try {
     const bookmark: Bookmark = JSON.parse(raw);
-    showArrowAtAbsolutePosition(bookmark.clickX || 40, bookmark.clickY || bookmark.scrollY);
+    // After scroll restore, the saved clientY is where it should appear on screen
+    showArrowFixed(bookmark.clickX || 40, bookmark.clickY || (window.innerHeight / 2));
   } catch { /* ignore */ }
 }
 
