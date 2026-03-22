@@ -210,7 +210,7 @@ const describedBy = [
 
       <!-- Select — uses Button dropdown + hidden native select for form submission -->
       {isSelect && (
-        <div class="form-field__select-wrap">
+        <div class="form-field__select-wrap" data-select-field={id}>
           <select
             id={id}
             name={fieldName}
@@ -229,6 +229,7 @@ const describedBy = [
             variant="outline"
             shape="dropdown"
             disabled={disabled}
+            class="form-field__select-btn"
             dropdownItems={options.filter(o => o.value !== '').map(o => ({
               label: o.label,
               icon: o.icon,
@@ -324,3 +325,35 @@ const describedBy = [
 </div>
 
 <!-- Styles: FormField.css | FormField.responsive.css -->
+
+<script>
+  // Sync Button dropdown selection → hidden native select + update button label
+  document.addEventListener('click', (e) => {
+    const item = (e.target as HTMLElement).closest('.dropdown-item[data-action]') as HTMLElement;
+    if (!item) return;
+
+    const action = item.dataset.action || '';
+    if (!action.startsWith('select:')) return;
+
+    const parts = action.split(':');
+    const selectId = parts[1];
+    const value = parts.slice(2).join(':');
+
+    // Update hidden native select
+    const nativeSelect = document.getElementById(selectId) as HTMLSelectElement;
+    if (nativeSelect) {
+      nativeSelect.value = value;
+      nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Update button label to show selected value
+    const wrap = document.querySelector(`[data-select-field="${selectId}"]`);
+    if (wrap) {
+      const btnLabel = wrap.querySelector('.btn__label');
+      const itemLabel = item.querySelector('.dropdown-item__label')?.textContent || item.textContent;
+      if (btnLabel && itemLabel) {
+        btnLabel.textContent = itemLabel.trim();
+      }
+    }
+  });
+</script>
