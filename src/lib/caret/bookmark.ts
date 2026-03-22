@@ -45,15 +45,13 @@ export function saveBookmark(): void {
     placed = true;
     cleanup();
 
-    const vpScroll = viewport ? viewport.scrollTop : window.scrollY;
-    const absY = vpScroll + e.clientY;
-    bookmark.scrollY = absY - (window.innerHeight / 2);
-    bookmark.clickX = e.clientX;
-    bookmark.clickY = absY;
+    bookmark.scrollY = e.pageY - (window.innerHeight / 2);
+    bookmark.clickX = e.pageX;
+    bookmark.clickY = e.pageY;
 
     localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
 
-    showArrowAtAbsolutePosition(e.clientX + (viewport ? viewport.scrollLeft : window.scrollX), absY);
+    showArrowAtAbsolutePosition(e.pageX, e.pageY);
   };
 
   const cleanup = () => {
