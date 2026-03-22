@@ -225,7 +225,13 @@ const describedBy = [
             ))}
           </select>
           <Button
-            label={value ? options.find(o => o.value === value)?.label || placeholder || 'Select...' : placeholder || 'Select...'}
+            label={(() => {
+              if (value) {
+                const found = options.find(o => o.value === value);
+                if (found) return found.label;
+              }
+              return placeholder || label || 'Select...';
+            })()}
             variant="outline"
             shape="dropdown"
             disabled={disabled}
