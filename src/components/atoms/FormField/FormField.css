@@ -134,17 +134,150 @@
   min-height: 5rem;
 }
 
-/* ---- Select ---- */
-/* Select arrow — hardcoded fill colour in data URI SVG.
-   CSS custom properties don't work inside url() data URIs.
-   #6b6b6b is mid-grey, works on light and dark backgrounds.
-   Dark theme should override entire background-image if needed. */
-.form-field__input--select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b6b6b' viewBox='0 0 256 256'%3E%3Cpath d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right var(--space-sm) center;
+/* ---- CSS-Only Select ---- */
+.form-field__select {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: var(--border-width-2) solid var(--_field-border);
+  background: var(--_field-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Toggle radio — invisible, covers the placeholder area */
+.form-field__select-toggle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 3rem;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 4;
+}
+
+/* Arrow icon */
+.form-field__select-arrow {
+  position: absolute;
+  z-index: 3;
+  right: var(--space-md);
+  top: 0.9rem;
+  color: var(--_field-border);
+  pointer-events: none;
+  transition: transform var(--hover-duration-fast) var(--ease-default);
+}
+
+/* Placeholder — shows current selection or default text */
+.form-field__select-placeholder {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
   padding-right: var(--space-2xl);
+  color: var(--_field-placeholder);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  cursor: pointer;
+  z-index: 0;
+  border-bottom: 1px solid transparent;
+}
+
+/* Option labels — hidden when closed */
+.form-field__select-option {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+}
+
+.form-field__select-radio {
+  display: none;
+}
+
+.form-field__select-label {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  color: var(--_field-text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  border-top: 1px solid color-mix(in oklch, var(--_field-border) 30%, transparent);
+  transition: background var(--hover-duration-fast) var(--ease-default),
+              color var(--hover-duration-fast) var(--ease-default);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.form-field__select-icon {
+  color: var(--_field-brand);
+  flex-shrink: 0;
+}
+
+/* Hover on option */
+.form-field__select-label:hover {
+  background: color-mix(in oklch, var(--_field-brand) 10%, transparent);
+  color: var(--_field-brand);
+}
+
+/* ── CLOSED STATE (toggle not checked) ── */
+.form-field__select-toggle:not(:checked) {
+  z-index: 4;
+}
+
+.form-field__select-toggle:not(:checked) ~ .form-field__select-option .form-field__select-label {
+  display: none;
+}
+
+.form-field__select-toggle:not(:checked) ~ .form-field__select-arrow {
+  transform: rotate(0deg);
+}
+
+/* ── OPEN STATE (toggle checked) ── */
+.form-field__select-toggle:checked ~ .form-field__select-arrow {
+  transform: rotate(180deg);
+  color: var(--_field-brand);
+}
+
+.form-field__select-toggle:checked ~ .form-field__select-placeholder {
+  border-bottom: 1px solid color-mix(in oklch, var(--_field-border) 30%, transparent);
+  color: var(--_field-text);
+}
+
+/* ── SELECTED STATE (option radio checked) ── */
+.form-field__select-radio:checked ~ .form-field__select-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 3;
+  background: var(--_field-bg);
+  border-top: none;
+  color: var(--_field-text);
+  font-weight: var(--font-medium);
+}
+
+/* ── DISABLED ── */
+.form-field__select-toggle:disabled {
+  cursor: not-allowed;
+}
+
+.form-field__select-toggle:disabled ~ .form-field__select-placeholder {
+  opacity: var(--opacity-disabled);
+}
+
+.form-field__select-radio:disabled ~ .form-field__select-label {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+.form-field__select-radio:disabled ~ .form-field__select-label:hover {
+  background: transparent;
+  color: var(--_field-text);
 }
 
 /* ==========================================================

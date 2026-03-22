@@ -207,22 +207,40 @@ const describedBy = [
         >{value}</textarea>
       )}
 
-      <!-- Select — use Button component with shape="dropdown" instead -->
+      <!-- Select — CSS-only dropdown using radio inputs -->
       {isSelect && (
-        <select
-          id={id}
-          name={fieldName}
-          required={required}
-          disabled={disabled}
-          class="form-field__input form-field__input--select"
-          aria-describedby={describedBy}
-          aria-invalid={error ? 'true' : undefined}
-        >
-          {placeholder && <option value="" disabled selected>{placeholder}</option>}
-          {options.map((opt) => (
-            <option value={opt.value} selected={value === opt.value}>{opt.label}</option>
+        <div class="form-field__select" role="listbox" aria-labelledby={`${id}-label`}>
+          <input
+            type="radio"
+            name={`${fieldName}-toggle`}
+            class="form-field__select-toggle"
+            id={`${id}-toggle`}
+            disabled={disabled}
+            aria-hidden="true"
+          />
+          <span class="form-field__select-arrow" aria-hidden="true">
+            <Icon name="caret-down-fill" size={16} />
+          </span>
+          <span class="form-field__select-placeholder">{placeholder || 'Select...'}</span>
+          {options.map((opt, i) => (
+            <label class="form-field__select-option" for={`${id}-opt-${i}`}>
+              <input
+                type="radio"
+                name={fieldName}
+                value={opt.value}
+                id={`${id}-opt-${i}`}
+                checked={value === opt.value}
+                disabled={disabled || opt.value === ''}
+                class="form-field__select-radio"
+                role="option"
+              />
+              <span class="form-field__select-label">
+                {opt.icon && <Icon name={opt.icon} size={16} class="form-field__select-icon" />}
+                {opt.label}
+              </span>
+            </label>
           ))}
-        </select>
+        </div>
       )}
 
       {/* Card-select — pictogram/text cards for reflective inputs */}
