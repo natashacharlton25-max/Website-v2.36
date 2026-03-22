@@ -158,10 +158,9 @@ function hideCaret() {
 }
 
 export function initCustomCaret() {
-  // Only activate when data-custom-caret is on <html>
-  if (!document.documentElement.hasAttribute('data-custom-caret')) return;
-
+  // Check attribute at focus time, not init time — setting may load after init
   document.addEventListener('focusin', (e) => {
+    if (!document.documentElement.hasAttribute('data-custom-caret')) return;
     const target = e.target as HTMLElement;
     if (target.matches(INPUT_SELECTOR)) {
       showCaret(target as HTMLInputElement | HTMLTextAreaElement);
@@ -172,8 +171,9 @@ export function initCustomCaret() {
     hideCaret();
   });
 
-  // Also listen for selectionchange (covers arrow keys, home/end, shift+arrows)
+  // selectionchange covers arrow keys, home/end, shift+arrows
   document.addEventListener('selectionchange', () => {
+    if (!document.documentElement.hasAttribute('data-custom-caret')) return;
     if (_activeInput && document.activeElement === _activeInput) {
       updateCaretPosition();
     }
