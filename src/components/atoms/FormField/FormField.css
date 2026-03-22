@@ -254,13 +254,19 @@
   z-index: 4;
 }
 
-.form-field__select-toggle:not(:checked) ~ .form-field__select-option .form-field__select-label {
+/* Hide all unselected options when closed */
+.form-field__select-toggle:not(:checked) ~ .form-field__select-option .form-field__select-radio:not(:checked) ~ .form-field__select-label {
   max-height: 0;
   padding-top: 0;
   padding-bottom: 0;
   border-top-width: 0;
   opacity: 0;
   overflow: hidden;
+}
+
+/* Hide placeholder when something is selected and closed */
+.form-field__select:has(.form-field__select-radio:checked) .form-field__select-toggle:not(:checked) ~ .form-field__select-placeholder {
+  display: none;
 }
 
 .form-field__select-toggle:not(:checked) ~ .form-field__select-arrow {
@@ -283,7 +289,7 @@
   opacity: 1;
 }
 
-/* ── SELECTED STATE — stays in list, highlighted ── */
+/* ── SELECTED STATE — highlighted when open ── */
 .form-field__select-radio:checked ~ .form-field__select-label {
   background: color-mix(in oklch, var(--_field-brand) 10%, transparent);
   color: var(--_field-brand);
@@ -294,18 +300,17 @@
   color: var(--_field-brand);
 }
 
-/* When closed, show selected value in placeholder area */
+/* When closed, selected value shows as the display text */
 .form-field__select-toggle:not(:checked) ~ .form-field__select-option .form-field__select-radio:checked ~ .form-field__select-label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 3;
+  max-height: 4rem !important;
+  opacity: 1 !important;
+  padding: var(--space-sm) var(--space-md) !important;
+  padding-right: var(--space-2xl) !important;
+  overflow: visible !important;
   background: var(--_field-bg);
   border-top: none;
   color: var(--_field-text);
   font-weight: var(--font-medium);
-  padding-right: var(--space-2xl);
 }
 
 /* ── DISABLED ── */
