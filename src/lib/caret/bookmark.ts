@@ -18,15 +18,18 @@ interface Bookmark {
 }
 
 export function saveBookmark(): Bookmark | null {
-  const activeField = document.querySelector('[data-focus-active]') as HTMLElement | null;
-  const fieldId = activeField?.closest('.form-field')?.querySelector('input, textarea, select')?.id
-    || activeField?.id
-    || null;
+  // Save whatever element has focus, or just scroll position
+  const active = document.activeElement as HTMLElement | null;
+  const fieldId = active?.id || active?.closest('[id]')?.id || null;
+
+  // Use OverlayScrollbars viewport scroll if available
+  const viewport = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement;
+  const scrollPos = viewport ? viewport.scrollTop : (window.scrollY || document.documentElement.scrollTop);
 
   const bookmark: Bookmark = {
     url: window.location.pathname,
     fieldId,
-    scrollY: window.scrollY || document.documentElement.scrollTop,
+    scrollY: scrollPos,
     timestamp: Date.now(),
   };
 
@@ -74,7 +77,7 @@ export function restoreBookmark(): void {
       scrollTop: scrollTarget,
       duration: 0.8,
       ease: 'power3.out',
-      onComplete: () => focusBookmarkedField(bookmark.fieldId),
+      onComplete: () => focusBookmarkedField(bookmark.fieldId, bookmark.scrollY),
     });
   } else {
     if (scroller === window) {
@@ -82,18 +85,32 @@ export function restoreBookmark(): void {
     } else {
       scroller.scrollTo({ top: scrollTarget, behavior: 'smooth' });
     }
-    setTimeout(() => focusBookmarkedField(bookmark.fieldId), 500);
+    setTimeout(() => focusBookmarkedField(bookmark.fieldId, bookmark.scrollY), 500);
   }
 }
 
-function focusBookmarkedField(fieldId: string | null): void {
-  if (!fieldId) return;
+function focusBookmarkedField(fieldId: string | null, scrollY: number): void {
+  // Show arrow tab at the saved scroll position
+  const arrow = document.createElement('div');
+  arrow.className = 'form-field__arrow-tab form-field__arrow-tab--visible';
+  arrow.setAttribute('aria-hidden', 'true');
+  arrow.innerHTML = '<span class="form-field__arrow-tab-arrow">&#9654;</span>';
+  arrow.style.top = `${scrollY}px`;
+  arrow.style.left = '0';
+  document.body.appendChild(arrow);
 
-  const field = document.getElementById(fieldId);
-  if (field) {
-    field.focus();
-    // Arrow tab will appear automatically via custom-caret system
+  // If we have a field ID, focus it
+  if (fieldId) {
+    const field = document.getElementById(fieldId);
+    if (field) {
+      // Simulate keyboard so focus-system activates
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      setTimeout(() => field.focus(), 50);
+    }
   }
+
+  // Remove arrow after 10 seconds
+  setTimeout(() => arrow.remove(), 10000);
 }
 
 // Auto-restore if URL has #bookmark-restore hash
