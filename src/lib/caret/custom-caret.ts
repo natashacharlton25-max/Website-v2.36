@@ -121,9 +121,25 @@ function updateCaretPosition() {
 function updateArrowPosition() {
   if (!_arrowTab || !_activeInput) return;
   const input = _activeInput;
-  const inputRect = input.getBoundingClientRect();
+  const wrapper = input.closest('.form-field') || input;
+  const rect = wrapper.getBoundingClientRect();
   const scrollY = window.scrollY || document.documentElement.scrollTop;
-  _arrowTab.style.top = `${inputRect.top + scrollY + inputRect.height / 2}px`;
+  const scrollX = window.scrollX || document.documentElement.scrollLeft;
+
+  // Position arrow to the left of the field, wherever it is on the page
+  const arrowWidth = _arrowTab.offsetWidth || 70;
+  _arrowTab.style.top = `${rect.top + scrollY + rect.height / 2}px`;
+  _arrowTab.style.left = `${rect.left + scrollX - arrowWidth - 8}px`;
+
+  // Flip to right side if too close to left edge
+  if (rect.left < arrowWidth + 16) {
+    _arrowTab.style.left = `${rect.right + scrollX + 8}px`;
+    _arrowTab.style.borderRadius = 'var(--radius-lg) 0 0 var(--radius-lg)';
+    _arrowTab.style.transform = 'translateY(-50%) scaleX(-1)';
+  } else {
+    _arrowTab.style.borderRadius = '0 var(--radius-lg) var(--radius-lg) 0';
+    _arrowTab.style.transform = 'translateY(-50%)';
+  }
 }
 
 function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
