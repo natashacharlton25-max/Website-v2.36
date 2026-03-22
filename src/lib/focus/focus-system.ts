@@ -67,7 +67,11 @@ function initFocusSystem() {
   document.addEventListener('focusin', (e) => {
     // Only activate if focus came from keyboard (within 100ms of a keypress)
     if (Date.now() - lastKeyTime > 100) return;
-    const el = (e.target as HTMLElement).closest('[tabindex], button, a, [role="button"]');
+    let el = (e.target as HTMLElement).closest('[tabindex], button, a, input, textarea, select, [role="button"]');
+    // Form controls can't use ::after — move focus to .form-field wrapper
+    if (el && (el.matches('input, textarea, select') && el.closest('.form-field'))) {
+      el = el.closest('.form-field');
+    }
     // Don't activate focus system on a11y panel/page controls
     if (el && !el.closest('#a11y-page, #a11y-panel, .a11y-panel')) {
       el.setAttribute('data-focus-active', '');
