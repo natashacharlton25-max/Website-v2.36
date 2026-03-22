@@ -50,9 +50,10 @@ export function saveBookmark(): void {
     const scroll = vpEl ? vpEl.scrollTop : window.scrollY;
     const absY = scroll + e.clientY;
 
-    bookmark.scrollY = Math.max(0, scroll + e.clientY - (window.innerHeight / 2));
+    // Scroll target: position content so the click point lands at the same clientY
+    bookmark.scrollY = scroll;  // Just save current scroll — restore puts it back exactly
     bookmark.clickX = e.clientX;
-    bookmark.clickY = e.clientY; // Store clientY (viewport-relative)
+    bookmark.clickY = e.clientY;
 
     localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
 
