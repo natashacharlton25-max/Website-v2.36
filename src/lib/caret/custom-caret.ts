@@ -143,7 +143,7 @@ function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
   }
 
   // Arrow tab — fixed to left edge of viewport, points to active field
-  if (document.documentElement.hasAttribute('data-custom-caret')) {
+  if (document.documentElement.hasAttribute('data-arrow-tab')) {
     _arrowTab = createArrowTab();
     document.body.appendChild(_arrowTab);
     updateArrowPosition();

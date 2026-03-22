@@ -30,6 +30,7 @@ export interface A11ySettings {
   customCaret: boolean;
   rainbowScroll: boolean;
   focusColourCycle: boolean;
+  arrowTab: boolean;
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
@@ -73,6 +74,7 @@ export const defaultSettings: A11ySettings = {
   customCaret: false,
   rainbowScroll: false,
   focusColourCycle: false,
+  arrowTab: false,
   screenReaderMode: false,
   scrollbarEnhanced: false,
   altTextMode: 'none',
@@ -260,6 +262,7 @@ export function applySettings(settings: A11ySettings): void {
   document.documentElement.toggleAttribute('data-custom-caret', settings.customCaret);
   document.documentElement.toggleAttribute('data-rainbow-scroll', settings.rainbowScroll);
   document.documentElement.toggleAttribute('data-focus-colour-cycle', settings.focusColourCycle);
+  document.documentElement.toggleAttribute('data-arrow-tab', settings.arrowTab);
   target.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
   target.classList.toggle('a11y-scrollbar-enhanced', settings.scrollbarEnhanced);
 
@@ -464,7 +467,7 @@ export const presets: Record<string, Partial<A11ySettings>> = {
 // ===================================
 export function updateUI(container: HTMLElement, s: A11ySettings): void {
   // Toggle cards
-  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'focusRainbow', 'focusColorJourney', 'rainbowHighlight', 'customCaret', 'rainbowScroll', 'focusColourCycle', 'screenReaderMode', 'scrollbarEnhanced'];
+  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'focusRainbow', 'focusColorJourney', 'rainbowHighlight', 'customCaret', 'rainbowScroll', 'focusColourCycle', 'arrowTab', 'screenReaderMode', 'scrollbarEnhanced'];
   toggleCardSettings.forEach(key => {
     const card = container.querySelector(`.a11y-toggle-card[data-setting="${key}"]`);
     if (card) {
