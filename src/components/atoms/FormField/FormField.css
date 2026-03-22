@@ -55,11 +55,11 @@
   /* Shadow token — consumed by neumorphic, glass, toggle */
   --_field-shadow: var(--field-shadow, var(--shadow-neu-raised));
 
-  /* Control size tokens */
-  --_field-control-size: 22px;
-  --_field-toggle-w: 44px;
-  --_field-toggle-h: 24px;
-  --_field-thumb-size: 18px;
+  /* Control size tokens — rem so they scale with --base-font-pct */
+  --_field-control-size: 1.375rem;   /* 22px at 16px base */
+  --_field-toggle-w: 2.75rem;       /* 44px at 16px base */
+  --_field-toggle-h: 1.5rem;        /* 24px at 16px base */
+  --_field-thumb-size: 1.125rem;    /* 18px at 16px base */
 }
 
 /* ==========================================================
@@ -91,7 +91,7 @@
 
 .form-field__required {
   color: var(--_field-error);
-  margin-left: 2px;
+  margin-left: var(--space-hair, 2px);
 }
 
 .form-field__desc {
@@ -131,7 +131,7 @@
 /* ---- Textarea ---- */
 .form-field__input--textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 5rem;
 }
 
 /* ---- Select ---- */
@@ -195,7 +195,7 @@
 
 .form-field--glass .form-field__input:focus {
   border-color: var(--_field-brand);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--_field-brand) 15%, transparent);
+  box-shadow: 0 0 0 var(--focus-thickness) color-mix(in oklch, var(--_field-brand) 15%, transparent);
 }
 
 /* ==========================================================
@@ -217,8 +217,7 @@
    ========================================================== */
 .form-field--glow .form-field__input:focus {
   box-shadow:
-    0 4px 16px color-mix(in oklch, var(--_field-brand) 50%, transparent),
-    0 0 30px color-mix(in oklch, var(--_field-brand) 20%, transparent);
+    var(--glow-spread);
 }
 
 /* ==========================================================
@@ -399,7 +398,7 @@
   background: var(--_field-control-mark);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: all var(--hover-duration-fast) ease-out;
+  transition: all var(--hover-duration-fast) var(--ease-default);
 }
 
 .form-field__toggle:checked + .form-field__toggle-track {
@@ -423,7 +422,7 @@
 }
 
 .form-field--error .form-field__input:focus {
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--_field-error) 15%, transparent);
+  box-shadow: 0 0 0 var(--focus-thickness) color-mix(in oklch, var(--_field-error) 15%, transparent);
 }
 
 .form-field--error .form-field__checkmark {
@@ -541,7 +540,7 @@
 .form-field__card-input:checked + .form-field__card-face {
   border-color: var(--_field-brand);
   background: var(--_field-brand-light);
-  box-shadow: 0 0 0 2px var(--_field-brand);
+  box-shadow: 0 0 0 var(--border-width-md, 2px) var(--_field-brand);
 }
 
 /* ── Reduced render — hover-gate handles transition suppression globally ── */
@@ -600,7 +599,7 @@
   overflow: hidden;
   display: flex;
   align-items: center;
-  box-shadow: inset 0 0 4px color-mix(in oklch, var(--color-Black) 15%, transparent);
+  box-shadow: var(--shadow-sm);
 }
 
 .form-field__card-check--toggle::before {
@@ -611,7 +610,7 @@
   background: var(--color-White);
   border-radius: var(--radius-full);
   transform: translateX(-1.25rem);
-  box-shadow: 0 0 4px color-mix(in oklch, var(--color-Black) 20%, transparent);
+  box-shadow: var(--shadow-sm);
 }
 
 .form-field__card-input:checked + .form-field__card-face .form-field__card-check--toggle {
@@ -690,10 +689,10 @@
 /* ── Reduced — all transitions instant, strip effects, enlarge controls ── */
 
 [data-render="reduced"] .form-field {
-  --_field-control-size: 28px;
-  --_field-toggle-w: 52px;
-  --_field-toggle-h: 28px;
-  --_field-thumb-size: 20px;
+  --_field-control-size: 1.75rem;    /* 28px at 16px base */
+  --_field-toggle-w: 3.25rem;       /* 52px at 16px base */
+  --_field-toggle-h: 1.75rem;       /* 28px at 16px base */
+  --_field-thumb-size: 1.25rem;     /* 20px at 16px base */
 }
 
 
@@ -718,23 +717,23 @@
 /* ── Assistive — enlarged controls, thick focus, generous spacing ── */
 
 [data-render="assistive"] .form-field {
-  --_field-control-size: 32px;
-  --_field-toggle-w: 60px;
-  --_field-toggle-h: 32px;
-  --_field-thumb-size: 24px;
+  --_field-control-size: 2rem;       /* 32px at 16px base */
+  --_field-toggle-w: 3.75rem;       /* 60px at 16px base */
+  --_field-toggle-h: 2rem;          /* 32px at 16px base */
+  --_field-thumb-size: 1.5rem;      /* 24px at 16px base */
   gap: var(--space-sm);
 }
 
 [data-render="assistive"] .form-field__input {
-  min-height: 64px;
+  min-height: 4rem;                  /* 64px at 16px base */
   padding: var(--space-md) var(--space-lg);
   font-size: var(--text-body);
 }
 
 [data-render="assistive"] .form-field__checkmark,
 [data-render="assistive"] .form-field__radio-indicator {
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 2rem;
+  min-height: 2rem;
 }
 
 [data-render="assistive"] .form-field__checkbox-wrap,
@@ -750,7 +749,7 @@
 
 [data-render="assistive"] .form-field__card-face {
   padding: var(--space-xl);
-  min-height: 64px;
+  min-height: 4rem;
   flex-direction: row;
   gap: var(--space-lg);
 }
@@ -875,7 +874,7 @@
 .form-field__arrow-tab-arrow {
   font-size: 2rem;
   line-height: 1;
-  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(1px 1px 2px color-mix(in oklch, var(--color-Black) 30%, transparent));
 }
 
 /* ── Gate: hover=gentle → slow position transition ── */
