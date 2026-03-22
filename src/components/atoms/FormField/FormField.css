@@ -137,12 +137,25 @@
 /* ---- CSS-Only Select ---- */
 .form-field__select {
   position: relative;
-  overflow: hidden;
   width: 100%;
   border-radius: var(--radius-md);
   border: var(--border-width-2) solid var(--_field-border);
   background: var(--_field-bg);
   box-shadow: var(--shadow-sm);
+  min-height: 3rem;
+}
+
+/* When open, options float over content below */
+.form-field__select-toggle:checked ~ .form-field__select-placeholder {
+  position: relative;
+  z-index: 11;
+}
+
+.form-field__select-toggle:checked ~ .form-field__select-option {
+  position: relative;
+  z-index: 10;
+  background: var(--_field-bg);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Toggle radio — invisible, covers the placeholder area */
@@ -275,7 +288,7 @@
 
 /* ── OPEN STATE (toggle checked) ── */
 .form-field__select-toggle:checked ~ .form-field__select-arrow {
-  transform: rotate(180deg);
+  transform: rotate(225deg);
   color: var(--_field-brand);
 }
 
