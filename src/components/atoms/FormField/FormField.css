@@ -531,13 +531,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--space-sm);
   padding: var(--space-lg);
+  padding-bottom: var(--space-xl);
   border: var(--border-width-2) solid var(--_field-border);
   border-radius: var(--radius-lg);
   background: var(--_field-bg);
   text-align: center;
   position: relative;
+  min-height: 6rem;
+  cursor: pointer;
 }
 
 /* Hover */
@@ -582,11 +586,16 @@
   transition: all var(--hover-duration-fast);
 }
 
-/* Selected state */
+/* Selected state — card fills with brand colour */
 .form-field__card-input:checked + .form-field__card-face {
   border-color: var(--_field-brand);
-  background: var(--_field-brand-light);
-  box-shadow: 0 0 0 var(--border-width-md, 2px) var(--_field-brand);
+  background: var(--_field-brand);
+  color: var(--color-White);
+  box-shadow: var(--shadow-md);
+}
+
+.form-field__card-input:checked + .form-field__card-face .icon {
+  color: var(--color-White);
 }
 
 /* ── Reduced render — hover-gate handles transition suppression globally ── */
@@ -600,21 +609,17 @@
   justify-content: center;
 }
 
-/* ── Check indicator — inline with label ── */
+/* ── Check indicator — hidden, card border/fill IS the indicator ── */
 .form-field__card-check {
-  width: 1.125rem;
-  height: 1.125rem;
-  border: 2px solid var(--_field-brand);
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-  position: relative;
+  display: none;
 }
 
-/* Checked — filled (checkbox + radio only, not toggle) */
+/* Checked — filled + visible (checkbox + radio only, not toggle) */
 .form-field__card-input:checked + .form-field__card-face .form-field__card-check--checkbox,
 .form-field__card-input:checked + .form-field__card-face .form-field__card-check--radio {
   background: var(--_field-brand);
   border-color: var(--_field-brand);
+  opacity: 1;
 }
 
 /* Checkbox tick (exclude toggle) */
