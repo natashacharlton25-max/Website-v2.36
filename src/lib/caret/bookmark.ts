@@ -93,12 +93,33 @@ function showBookmarkArrow(posY: number): void {
   document.querySelector('.bookmark-arrow')?.remove();
 
   const arrow = document.createElement('div');
-  arrow.className = 'form-field__arrow-tab form-field__arrow-tab--visible bookmark-arrow';
+  arrow.className = 'bookmark-arrow';
   arrow.setAttribute('aria-hidden', 'true');
-  arrow.innerHTML = '<span class="form-field__arrow-tab-arrow">&#9654;</span>';
-  arrow.style.top = `${posY}px`;
-  arrow.style.left = '0';
+  arrow.style.cssText = `
+    position: absolute;
+    top: ${posY}px;
+    left: 0;
+    transform: translateY(-50%);
+    z-index: 99999;
+    width: clamp(40px, 8vw, 70px);
+    height: clamp(40px, 8vw, 70px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--focus-color, teal);
+    font-size: 2rem;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  `;
+  arrow.innerHTML = '&#9654;';
   document.body.appendChild(arrow);
+
+  // Pulse animation
+  arrow.animate([
+    { transform: 'translateY(-50%) scale(1)', opacity: 1 },
+    { transform: 'translateY(-50%) scale(1.2)', opacity: 0.8 },
+    { transform: 'translateY(-50%) scale(1)', opacity: 1 }
+  ], { duration: 1000, iterations: 3 });
 
   // Auto-remove after 10 seconds
   setTimeout(() => arrow.remove(), 10000);
