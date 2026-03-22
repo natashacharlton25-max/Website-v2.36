@@ -40,6 +40,18 @@ Every focus feature is independent. All stack. All keyboard-only (mouse clicks d
 | Focus-color token | Set to `--rainbow-N` on each tab | Drives ring colour |
 | Highlight-link-color | Set to complement on each tab | Drives all highlight borders |
 
+### All rainbow/colour features
+
+| Feature | Attribute | What it does | Needs focus? |
+|---|---|---|---|
+| **Rainbow Focus** | `data-focus-rainbow` | Spinning gradient border on focused element | Yes (keyboard) |
+| **Colour Cycle** | `data-focus-colour-cycle` | Solid focus ring/fill changes colour on each tab (no gradient) | Yes (keyboard) |
+| **Colour Journey** | `data-focus-color-journey` | GSAP tweens page bg to section's scroll-bg on each tab | Yes (keyboard) |
+| **Rainbow Highlight** | `data-rainbow-highlight` | CSS animation cycles all highlight borders through 7 colours | No |
+| **Rainbow Links** | `data-rainbow-highlight` + `data-focus-rainbow` | Highlight borders change complement colour on each tab | Yes (keyboard) |
+| **Rainbow Scroll** | `data-rainbow-scroll` | GSAP changes highlight border colour based on scroll position | No |
+| **Custom Caret** | `data-custom-caret` | Custom cursor in form fields, syncs colour with `--focus-color` | No (activates on input focus) |
+
 All rainbow tokens auto-flip for dark mode and CVD variants via CSS files:
 - `rainbow-default.css` (always loaded)
 - `rainbow-protan.css` (gated `[data-cvd="protan"]`)

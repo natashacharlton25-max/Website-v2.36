@@ -154,6 +154,25 @@ function initFocusSystem() {
         }
       }
 
+      // Focus Colour Cycle: solid colour changes on each tab (no spinning gradient, no page bg)
+      if (document.documentElement.hasAttribute('data-focus-colour-cycle') && !document.documentElement.hasAttribute('data-focus-rainbow')) {
+        _rainbowIndex = (_rainbowIndex + 1) % 7;
+        const isDark = document.body.dataset.mode === 'dark';
+        const isHC = document.documentElement.hasAttribute('data-high-contrast');
+        const styles = getComputedStyle(document.body);
+
+        const rainbowBase = ['--rainbow-1', '--rainbow-2', '--rainbow-3', '--rainbow-4', '--rainbow-5', '--rainbow-6', '--rainbow-7'];
+        const rainbowLight = ['--rainbow-1-light', '--rainbow-2-light', '--rainbow-3-light', '--rainbow-4-light', '--rainbow-5-light', '--rainbow-6-light', '--rainbow-7-light'];
+        const rainbowDark = ['--rainbow-1-dark', '--rainbow-2-dark', '--rainbow-3-dark', '--rainbow-4-dark', '--rainbow-5-dark', '--rainbow-6-dark', '--rainbow-7-dark'];
+
+        const ringTokens = isHC ? rainbowLight : (isDark ? rainbowDark : rainbowBase);
+        const ringColor = styles.getPropertyValue(ringTokens[_rainbowIndex]).trim();
+
+        if (ringColor) {
+          document.documentElement.style.setProperty('--focus-color', ringColor);
+        }
+      }
+
       // Focus label
       if (document.documentElement.hasAttribute('data-focus-label')) {
         showFocusLabel(el);
