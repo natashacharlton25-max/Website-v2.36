@@ -51,6 +51,18 @@ Every focus feature is independent. All stack. All keyboard-only (mouse clicks d
 | **Rainbow Links** | `data-rainbow-highlight` + `data-focus-rainbow` | Highlight borders change complement colour on each tab | Yes (keyboard) |
 | **Rainbow Scroll** | `data-rainbow-scroll` | GSAP changes highlight border colour based on scroll position | No |
 | **Custom Caret** | `data-custom-caret` | Custom cursor in form fields, syncs colour with `--focus-color` | No (activates on input focus) |
+| **Arrow Tab** | `data-arrow-tab` | Arrow indicator next to active form field, follows field position | No (activates on input focus) |
+| **Rainbow Scroll** | `data-rainbow-scroll` | GSAP changes highlight border colour based on scroll position | No |
+
+### Bookmark system
+
+| Feature | How it works |
+|---|---|
+| **Save My Place** | Click-to-place: crosshair cursor → click anywhere → saves exact X/Y + scroll position to localStorage. Falls back to scroll position after 5 seconds if no click. |
+| **Find My Place** | Scrolls to saved position via GSAP smooth scroll. Arrow appears at saved X/Y coordinates. Works across pages — navigates to saved URL first. |
+| **Arrow marker** | `position: absolute` inside scroll container. Scrolls with content. Pulses 3x to draw attention. Click to dismiss, auto-removes 30s. |
+| **Mobile** | Bookmark/map-pin buttons in mobile menu icons. Touch coordinates used same as click. |
+| **Cross-session** | localStorage persists across browser sessions. User returns next day, clicks Find My Place. |
 
 All rainbow tokens auto-flip for dark mode and CVD variants via CSS files:
 - `rainbow-default.css` (always loaded)
