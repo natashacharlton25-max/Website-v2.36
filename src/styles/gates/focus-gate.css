@@ -130,7 +130,7 @@
   z-index: 1036;
 }
 
-/* Dropdown menu items: inset focus ring, no fill */
+/* Dropdown menu items: inset focus ring + fill, shrunk to text */
 .dropdown-item[data-focus-active] {
   background: transparent !important;
   z-index: auto !important;
@@ -138,7 +138,15 @@
 
 .dropdown-item[data-focus-active]::after {
   inset: var(--space-sm) var(--space-md) !important;
-  background: transparent !important;
+  background: color-mix(in oklch, var(--focus-color) 20%, transparent) !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+.dropdown-item[data-focus-active]:hover::after {
+  background: color-mix(in oklch, var(--color-Success) 20%, transparent) !important;
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success) !important;
 }
 
 /* Form fields: ring needs breathing room, children go square */
