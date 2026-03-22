@@ -46,13 +46,14 @@ export function saveBookmark(): void {
     cleanup();
 
     const vpScroll = viewport ? viewport.scrollTop : window.scrollY;
-    bookmark.scrollY = vpScroll + e.clientY - (window.innerHeight / 2);
+    const absY = vpScroll + e.clientY;
+    bookmark.scrollY = absY - (window.innerHeight / 2);
     bookmark.clickX = e.clientX;
-    bookmark.clickY = e.clientY;
+    bookmark.clickY = absY;
 
     localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
 
-    showArrowAtPosition(e.clientX, e.clientY);
+    showArrowAtAbsoluteY(absY);
   };
 
   const cleanup = () => {
@@ -72,23 +73,26 @@ export function saveBookmark(): void {
   }, 5000);
 }
 
-function showArrowAtPosition(clientX: number, clientY: number): void {
+function showArrowAtAbsoluteY(absY: number): void {
   document.getElementById('bookmark-arrow')?.remove();
 
-  // Find content container edge
-  const container = document.querySelector('.container, main, #main-content, #a11y-content-wrapper') as HTMLElement;
-  const containerRect = container?.getBoundingClientRect();
-  const containerLeft = containerRect ? containerRect.left : 0;
-
-  // Arrow sits on the left edge of the container, at the click Y
+  // Find content container for left edge position
+  const wrapper = document.getElementById('a11y-content-wrapper');
+  const container = wrapper?.querySelector('.container, main, [class*="container"]') as HTMLElement;
+  const containerLeft = container ? container.getBoundingClientRect().left + window.scrollX : 0;
   const arrowX = Math.max(containerLeft - 40, 4);
 
   const arrow = document.createElement('div');
   arrow.id = 'bookmark-arrow';
   arrow.setAttribute('aria-hidden', 'true');
-  arrow.style.cssText = `position:fixed;top:${clientY}px;left:${arrowX}px;transform:translateY(-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
+  arrow.style.cssText = `position:absolute;top:${absY}px;left:${arrowX}px;transform:translateY(-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
   arrow.textContent = '\u25B6';
-  document.documentElement.appendChild(arrow);
+
+  // Append inside scroll container so it scrolls with content
+  const scrollContainer = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement
+    || wrapper
+    || document.body;
+  scrollContainer.appendChild(arrow);
 
   arrow.animate([
     { transform: 'translateY(-50%) scale(1)', opacity: 1 },
@@ -96,7 +100,12 @@ function showArrowAtPosition(clientX: number, clientY: number): void {
     { transform: 'translateY(-50%) scale(1)', opacity: 1 },
   ], { duration: 800, iterations: 3 });
 
-  setTimeout(() => arrow.remove(), 8000);
+  // Remove after 30 seconds or on click
+  const removeArrow = () => arrow.remove();
+  setTimeout(removeArrow, 30000);
+  arrow.style.pointerEvents = 'auto';
+  arrow.style.cursor = 'pointer';
+  arrow.addEventListener('click', removeArrow);
 }
 
 export function hasBookmark(): boolean {
@@ -150,10 +159,7 @@ function showBookmarkArrow(): void {
   if (!raw) return;
   try {
     const bookmark: Bookmark = JSON.parse(raw);
-    // If we have a click position, show at that Y. Otherwise centre of viewport.
-    const y = bookmark.clickY || (window.innerHeight / 2);
-    const x = bookmark.clickX || 0;
-    showArrowAtPosition(x, y);
+    showArrowAtAbsoluteY(bookmark.clickY || bookmark.scrollY);
   } catch { /* ignore */ }
 }
 
