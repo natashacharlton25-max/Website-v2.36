@@ -45,13 +45,19 @@ export function saveBookmark(): void {
     placed = true;
     cleanup();
 
-    bookmark.scrollY = e.pageY - (window.innerHeight / 2);
-    bookmark.clickX = e.pageX;
-    bookmark.clickY = e.pageY;
+    // Get scroll from OverlayScrollbars viewport
+    const vpEl = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement;
+    const scroll = vpEl ? vpEl.scrollTop : window.scrollY;
+    const absY = scroll + e.clientY;
+
+    bookmark.scrollY = Math.max(0, absY - (window.innerHeight / 2));
+    bookmark.clickX = e.clientX;
+    bookmark.clickY = absY;
 
     localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
+    console.log('Saved:', { clientY: e.clientY, scroll, absY, savedScrollY: bookmark.scrollY });
 
-    showArrowAtAbsolutePosition(e.pageX, e.pageY);
+    showArrowAtAbsolutePosition(e.clientX, absY);
   };
 
   const cleanup = () => {
