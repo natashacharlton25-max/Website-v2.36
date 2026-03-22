@@ -11,6 +11,8 @@ const BOOKMARK_KEY = 'page-bookmark';
 interface Bookmark {
   url: string;
   scrollY: number;
+  clickX: number;
+  clickY: number;
   timestamp: number;
 }
 
@@ -18,10 +20,11 @@ export function saveBookmark(): void {
   const viewport = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement;
   const scrollY = viewport ? viewport.scrollTop : window.scrollY;
 
-  // Save scroll position as fallback
   const bookmark: Bookmark = {
     url: window.location.pathname,
     scrollY,
+    clickX: 0,
+    clickY: 0,
     timestamp: Date.now(),
   };
 
@@ -42,14 +45,14 @@ export function saveBookmark(): void {
     placed = true;
     cleanup();
 
-    // Save click Y as absolute position (scroll + client)
     const vpScroll = viewport ? viewport.scrollTop : window.scrollY;
     bookmark.scrollY = vpScroll + e.clientY - (window.innerHeight / 2);
+    bookmark.clickX = e.clientX;
+    bookmark.clickY = e.clientY;
 
     localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
 
-    // Show arrow at click position immediately
-    showFixedArrow(e.clientY);
+    showArrowAtPosition(e.clientX, e.clientY);
   };
 
   const cleanup = () => {
@@ -69,13 +72,21 @@ export function saveBookmark(): void {
   }, 5000);
 }
 
-function showFixedArrow(clientY: number): void {
+function showArrowAtPosition(clientX: number, clientY: number): void {
   document.getElementById('bookmark-arrow')?.remove();
+
+  // Find content container edge
+  const container = document.querySelector('.container, main, #main-content, #a11y-content-wrapper') as HTMLElement;
+  const containerRect = container?.getBoundingClientRect();
+  const containerLeft = containerRect ? containerRect.left : 0;
+
+  // Arrow sits on the left edge of the container, at the click Y
+  const arrowX = Math.max(containerLeft - 40, 4);
 
   const arrow = document.createElement('div');
   arrow.id = 'bookmark-arrow';
   arrow.setAttribute('aria-hidden', 'true');
-  arrow.style.cssText = `position:fixed;top:${clientY}px;left:12px;transform:translateY(-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
+  arrow.style.cssText = `position:fixed;top:${clientY}px;left:${arrowX}px;transform:translateY(-50%);z-index:999999;font-size:3rem;color:var(--focus-color,teal);pointer-events:none;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4));`;
   arrow.textContent = '\u25B6';
   document.documentElement.appendChild(arrow);
 
@@ -135,37 +146,15 @@ function scrollToBookmark(scrollY: number): void {
 }
 
 function showBookmarkArrow(): void {
-  // Remove any existing
-  document.getElementById('bookmark-arrow')?.remove();
-
-  // Fixed position arrow at left edge, vertically centred
-  const arrow = document.createElement('div');
-  arrow.id = 'bookmark-arrow';
-  arrow.setAttribute('aria-hidden', 'true');
-  arrow.style.cssText = [
-    'position:fixed',
-    'top:50%',
-    'left:12px',
-    'transform:translateY(-50%)',
-    'z-index:999999',
-    'font-size:3rem',
-    'color:var(--focus-color, teal)',
-    'pointer-events:none',
-    'filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4))',
-  ].join(';');
-  arrow.textContent = '\u25B6'; // Right-pointing triangle
-
-  document.documentElement.appendChild(arrow);
-
-  // Pulse 3 times
-  arrow.animate([
-    { transform: 'translateY(-50%) scale(1)', opacity: 1 },
-    { transform: 'translateY(-50%) scale(1.3)', opacity: 0.7 },
-    { transform: 'translateY(-50%) scale(1)', opacity: 1 },
-  ], { duration: 800, iterations: 3 });
-
-  // Remove after 8 seconds
-  setTimeout(() => arrow.remove(), 8000);
+  const raw = localStorage.getItem(BOOKMARK_KEY);
+  if (!raw) return;
+  try {
+    const bookmark: Bookmark = JSON.parse(raw);
+    // If we have a click position, show at that Y. Otherwise centre of viewport.
+    const y = bookmark.clickY || (window.innerHeight / 2);
+    const x = bookmark.clickX || 0;
+    showArrowAtPosition(x, y);
+  } catch { /* ignore */ }
 }
 
 // Auto-restore on page load if URL has #bookmark-restore
