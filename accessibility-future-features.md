@@ -29,6 +29,8 @@ Prioritise by impact and feasibility.
 | **Your View page redesign** | Accordion sections, live preview of each option, tiered sub-options (e.g. Rainbow → spinning/cycling/glow/dim toggles). Collapsible — only one section open. Current value badge visible when collapsed. | Same atoms: Card, Heading, FormField, Badge. JSON-driven. |
 | **Bottom bar AAC companion** | Bottom bar shows AAC pictograms for visible/focused text simultaneously. Not either/or — both text on screen AND symbols in bar. Modes: scroll sync, focus sync, tooltip, focus label. All stack. | Extends existing Tooltip bottom bar. |
 | **Practice sandbox page** | Safe playground with target practice. "Navigate to the blue button" → confetti on success → next target. Free roam mode for exploring. Difficulty scales. | Uses existing confetti system. JSON target list. Great for learning controller/switch/eye gaze. |
+| **Custom caret system** | Hide OS caret (`caret-color: transparent`), render custom caret via pseudo-element. Fully tokenised: `--caret-width`, `--caret-color`, `--caret-blink-speed`, `--caret-radius`. All gates work: motion=none solid, gentle=slow pulse, rainbow=colour cycling, HC=max contrast, assistive=4px thick. | `src/lib/interaction/custom-caret.ts`. Your View: Default/Block/Still/Block Still/Rainbow. |
+| **Caret position tracking** | Read OS caret position (selectionStart) for visual feedback on long forms. Progress bar at top, section colour matching, field counter ("3 of 12"), completion glow (green on valid), error pulse (red). Caret position drives scroll-to-visible in textareas. | Two layers: OS owns position logic, we own visual. `--form-progress` token drives progress bar width. |
 
 ---
 
