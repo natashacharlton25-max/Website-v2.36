@@ -329,7 +329,8 @@ const iconRight = iconPosition === 'right' && hasIcon;
       });
 
       // Keyboard: Escape closes, arrows navigate, tab wraps
-      wrapper.addEventListener('keydown', (e) => {
+      wrapper.addEventListener('keydown', (ev) => {
+        const e = ev as KeyboardEvent;
         const isOpen = wrapper.classList.contains('open');
         if (!isOpen) return;
 
@@ -379,6 +380,15 @@ const iconRight = iconPosition === 'right' && hasIcon;
         }
       });
       observer.observe(wrapper, { attributes: true, attributeFilter: ['class'] });
+
+      // Close when mouse leaves — but NOT if keyboard focus is inside
+      wrapper.addEventListener('mouseleave', () => {
+        if (wrapper.classList.contains('open') && !wrapper.contains(document.activeElement)) {
+          wrapper.classList.remove('open');
+          menu.classList.remove('show');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
     });
 
     // Close on outside click (only attach once)
