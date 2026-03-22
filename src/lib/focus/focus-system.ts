@@ -214,3 +214,40 @@ function initFocusSystem() {
 // Init
 initFocusSystem();
 document.addEventListener('astro:page-load', initFocusSystem);
+
+// ── Rainbow Scroll — highlight borders change colour based on scroll position ──
+function initRainbowScroll() {
+  if (!document.documentElement.hasAttribute('data-rainbow-scroll')) return;
+  if (!document.documentElement.hasAttribute('data-highlight-links')) return;
+
+  const gsap = (window as any).gsap;
+  const ScrollTrigger = (window as any).ScrollTrigger;
+  if (!gsap || !ScrollTrigger) return;
+
+  const rainbowTokens = [
+    '--rainbow-1', '--rainbow-2', '--rainbow-3', '--rainbow-4',
+    '--rainbow-5', '--rainbow-6', '--rainbow-7'
+  ];
+
+  // Divide page into 7 colour zones based on scroll progress
+  ScrollTrigger.create({
+    trigger: document.body,
+    start: 'top top',
+    end: 'bottom bottom',
+    onUpdate: (self: any) => {
+      const progress = self.progress; // 0 to 1
+      const idx = Math.min(Math.floor(progress * 7), 6);
+      const styles = getComputedStyle(document.body);
+      const colour = styles.getPropertyValue(rainbowTokens[idx]).trim();
+      if (colour) {
+        document.documentElement.style.setProperty('--highlight-link-color', colour);
+      }
+    }
+  });
+}
+
+// Delay rainbow scroll init — wait for GSAP + ScrollTrigger to load
+setTimeout(() => {
+  initRainbowScroll();
+}, 500);
+document.addEventListener('astro:page-load', () => setTimeout(initRainbowScroll, 500));

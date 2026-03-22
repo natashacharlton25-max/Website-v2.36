@@ -155,3 +155,43 @@
 [data-highlight-links] :where(summary, [role="button"], [tabindex="0"], a.card, a[role="button"], .card):hover {
   outline-color: var(--highlight-link-color);
 }
+
+/* ==========================================================
+   RAINBOW HIGHLIGHT — cycling border colours without focus
+   Activated by data-rainbow-highlight on <html>
+   ========================================================== */
+
+@keyframes rainbow-highlight-cycle {
+  0%      { --highlight-link-color: var(--rainbow-1); }
+  14.28%  { --highlight-link-color: var(--rainbow-2); }
+  28.57%  { --highlight-link-color: var(--rainbow-3); }
+  42.85%  { --highlight-link-color: var(--rainbow-4); }
+  57.14%  { --highlight-link-color: var(--rainbow-5); }
+  71.42%  { --highlight-link-color: var(--rainbow-6); }
+  85.71%  { --highlight-link-color: var(--rainbow-7); }
+  100%    { --highlight-link-color: var(--rainbow-1); }
+}
+
+[data-rainbow-highlight][data-highlight-links] {
+  animation: rainbow-highlight-cycle 7s linear infinite;
+}
+
+/* Hover gate: gentle = slow cycle */
+[data-hover="gentle"] [data-rainbow-highlight][data-highlight-links],
+[data-rainbow-highlight][data-highlight-links][data-hover="gentle"] {
+  animation-duration: 14s;
+}
+
+/* Hover gate: none/instant = no animation, static rainbow */
+[data-hover="none"] [data-rainbow-highlight][data-highlight-links],
+[data-rainbow-highlight][data-highlight-links][data-hover="none"],
+[data-hover="instant"] [data-rainbow-highlight][data-highlight-links],
+[data-rainbow-highlight][data-highlight-links][data-hover="instant"] {
+  animation: none;
+}
+
+/* Scroll-driven rainbow — GSAP sets --highlight-link-color based on scroll position.
+   When data-rainbow-scroll is on, CSS animation is disabled so GSAP controls the colour. */
+[data-rainbow-scroll][data-highlight-links] {
+  animation: none;
+}

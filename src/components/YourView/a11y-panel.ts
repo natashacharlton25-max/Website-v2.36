@@ -28,6 +28,7 @@ export interface A11ySettings {
   focusColorJourney: boolean;
   rainbowHighlight: boolean;
   customCaret: boolean;
+  rainbowScroll: boolean;
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
@@ -69,6 +70,7 @@ export const defaultSettings: A11ySettings = {
   focusColorJourney: false,
   rainbowHighlight: false,
   customCaret: false,
+  rainbowScroll: false,
   screenReaderMode: false,
   scrollbarEnhanced: false,
   altTextMode: 'none',
@@ -254,6 +256,7 @@ export function applySettings(settings: A11ySettings): void {
   document.documentElement.toggleAttribute('data-focus-color-journey', settings.focusColorJourney);
   document.documentElement.toggleAttribute('data-rainbow-highlight', settings.rainbowHighlight);
   document.documentElement.toggleAttribute('data-custom-caret', settings.customCaret);
+  document.documentElement.toggleAttribute('data-rainbow-scroll', settings.rainbowScroll);
   target.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
   target.classList.toggle('a11y-scrollbar-enhanced', settings.scrollbarEnhanced);
 
@@ -458,7 +461,7 @@ export const presets: Record<string, Partial<A11ySettings>> = {
 // ===================================
 export function updateUI(container: HTMLElement, s: A11ySettings): void {
   // Toggle cards
-  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'focusRainbow', 'focusColorJourney', 'rainbowHighlight', 'customCaret', 'screenReaderMode', 'scrollbarEnhanced'];
+  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'focusRainbow', 'focusColorJourney', 'rainbowHighlight', 'customCaret', 'rainbowScroll', 'screenReaderMode', 'scrollbarEnhanced'];
   toggleCardSettings.forEach(key => {
     const card = container.querySelector(`.a11y-toggle-card[data-setting="${key}"]`);
     if (card) {
