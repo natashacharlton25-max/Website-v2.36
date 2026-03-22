@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Heading from '../../components/atoms/Heading/Heading.astro';
+import Link from '../../components/atoms/Link/Link.astro';
+import Text from '../../components/atoms/Text/Text.astro';
+import Section from '../../components/atoms/Section/Section.astro';
+import '../../components/atoms/Section/Section.css';
+
+import testData from '../../data/test/link.json';
+
+// Pipeline: strip props per render mode
+function textonlyProps(item: any) {
+  return { href: item.href, label: item.label };
+}
+---
+
+<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
+  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
+
+    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+
+    {testData.sections.map((section: any) => (
+      <Section label={section.label} separator gap={testData.layout.itemGap}>
+        {section.layout === 'block' ? (
+          <div style="display:flex;flex-direction:column;gap:var(--space-lg);">
+            {section.items.map((item: any) => (
+              <Fragment>
+                <div class="render-full">
+                  <Text>{item.label} <Link
+                    href={item.href}
+                    variant={item.variant}
+                    color={item.color}
+                    weight={item.weight}
+                    uppercase={item.uppercase}
+                    flush={item.flush}
+                    external={item.external}
+                    download={item.download}
+                    ariaLabel={item.ariaLabel}
+                    underlineGrow={item.underlineGrow}
+                    highlightGrow={item.highlightGrow}
+                    shadowFill={item.shadowFill}
+                    textSlide={item.textSlide}
+                  >{item.variant || 'default'}</Link> {item.afterText}</Text>
+                </div>
+                <div class="render-reduced">
+                  <Text>{item.label} <Link href={item.href} variant={item.variant} color={item.color}>{item.variant || 'default'}</Link> {item.afterText}</Text>
+                </div>
+                <div class="render-textonly">
+                  <Text>{item.label} <Link href={item.href}>{item.variant || 'default'}</Link> {item.afterText}</Text>
+                </div>
+              </Fragment>
+            ))}
+          </div>
+        ) : (
+          <div style="display:flex;flex-wrap:wrap;gap:var(--space-lg);align-items:center;">
+            {section.items.map((item: any) => (
+              <Fragment>
+                <div class="render-full">
+                  <Link
+                    href={item.href}
+                    variant={item.variant}
+                    color={item.color}
+                    weight={item.weight}
+                    uppercase={item.uppercase}
+                    flush={item.flush}
+                    external={item.external}
+                    download={item.download}
+                    ariaLabel={item.ariaLabel}
+                    underlineGrow={item.underlineGrow}
+                    highlightGrow={item.highlightGrow}
+                    shadowFill={item.shadowFill}
+                    textSlide={item.textSlide}
+                  >{item.label}</Link>
+                </div>
+                <div class="render-reduced">
+                  <Link href={item.href} variant={item.variant} color={item.color} weight={item.weight}>{item.label}</Link>
+                </div>
+                <div class="render-textonly">
+                  <Link href={item.href}>{item.label}</Link>
+                </div>
+              </Fragment>
+            ))}
+          </div>
+        )}
+      </Section>
+    ))}
+
+  </Section>
+</BaseLayout>

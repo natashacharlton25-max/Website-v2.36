@@ -1,0 +1,106 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Heading from '../../components/atoms/Heading/Heading.astro';
+import FormField from '../../components/atoms/FormField/FormField.astro';
+import Section from '../../components/atoms/Section/Section.astro';
+import '../../components/atoms/Section/Section.css';
+
+import testData from '../../data/test/formfield.json';
+
+// Pipeline: strip props per render mode
+function textonlyProps(item: any) {
+  return {
+    id: item.id,
+    label: item.label,
+    type: item.type,
+    value: item.value,
+    disabled: item.disabled,
+    checked: item.checked
+  };
+}
+---
+
+<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
+  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
+
+    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+
+    {testData.sections.map((section: any) => (
+      <Section label={section.label} separator gap={testData.layout.itemGap}>
+        <div style="display:flex;flex-direction:column;gap:var(--space-lg);max-width:600px;">
+          {section.items.map((item: any) => (
+            <Fragment>
+              <div class="render-full">
+                <FormField
+                  id={item.id}
+                  name={item.name}
+                  label={item.label}
+                  type={item.type}
+                  variant={item.variant}
+                  fieldStyle={item.fieldStyle}
+                  placeholder={item.placeholder}
+                  required={item.required}
+                  disabled={item.disabled}
+                  error={item.error}
+                  description={item.description}
+                  value={item.value}
+                  checked={item.checked}
+                  rows={item.rows}
+                  min={item.min}
+                  max={item.max}
+                  step={item.step}
+                  options={item.options}
+                  hideLabel={item.hideLabel}
+                  radioValue={item.radioValue}
+                  maxSelections={item.maxSelections}
+                  cardSize={item.cardSize}
+                  cardColumns={item.cardColumns}
+                />
+              </div>
+              <div class="render-reduced">
+                <FormField
+                  id={`${item.id}-reduced`}
+                  name={item.name ? `${item.name}-reduced` : undefined}
+                  label={item.label}
+                  type={item.type}
+                  variant={item.variant}
+                  fieldStyle={item.fieldStyle}
+                  placeholder={item.placeholder}
+                  required={item.required}
+                  disabled={item.disabled}
+                  error={item.error}
+                  description={item.description}
+                  value={item.value}
+                  checked={item.checked}
+                  rows={item.rows}
+                  min={item.min}
+                  max={item.max}
+                  step={item.step}
+                  options={item.options}
+                  hideLabel={item.hideLabel}
+                  radioValue={item.radioValue}
+                  maxSelections={item.maxSelections}
+                  cardSize={item.cardSize}
+                  cardColumns={item.cardColumns}
+                />
+              </div>
+              <div class="render-textonly">
+                <FormField
+                  id={`${item.id}-textonly`}
+                  label={item.label}
+                  type={item.type}
+                  value={item.value}
+                  disabled={item.disabled}
+                  checked={item.checked}
+                  options={item.options}
+                  radioValue={item.radioValue}
+                />
+              </div>
+            </Fragment>
+          ))}
+        </div>
+      </Section>
+    ))}
+
+  </Section>
+</BaseLayout>

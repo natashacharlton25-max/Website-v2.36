@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Heading from '../../components/atoms/Heading/Heading.astro';
+import Text from '../../components/atoms/Text/Text.astro';
+import Section from '../../components/atoms/Section/Section.astro';
+import '../../components/atoms/Section/Section.css';
+
+import testData from '../../data/test/text.json';
+
+// Pipeline: strip props per render mode
+function textonlyProps(item: any) {
+  return { text: item.text, as: item.as };
+}
+---
+
+<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
+  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
+
+    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+
+    {testData.sections.map((section: any) => (
+      <Section label={section.label} separator gap={testData.layout.itemGap}>
+        <div style={`display:flex;flex-direction:column;gap:var(--space-${section.layout === 'block' ? 'xl' : 'md'});`}>
+          {section.items.map((item: any) => (
+            <Fragment>
+              <div class="render-full">
+                <Text
+                  as={item.as}
+                  size={item.size}
+                  weight={item.weight}
+                  leading={item.leading}
+                  color={item.color}
+                  family={item.family}
+                  align={item.align}
+                  uppercase={item.uppercase}
+                  clamp={item.clamp}
+                  flush={item.flush}
+                  textTone={item.textTone}
+                  aac={item.aac}
+                >{item.text}</Text>
+              </div>
+              <div class="render-reduced">
+                <Text
+                  as={item.as}
+                  size={item.size}
+                  weight={item.weight}
+                  leading={item.leading}
+                  color={item.color}
+                  family={item.family}
+                  align={item.align}
+                  flush={item.flush}
+                >{item.text}</Text>
+              </div>
+              <div class="render-textonly">
+                <Text as={item.as}>{item.text}</Text>
+              </div>
+            </Fragment>
+          ))}
+        </div>
+      </Section>
+    ))}
+
+  </Section>
+</BaseLayout>
