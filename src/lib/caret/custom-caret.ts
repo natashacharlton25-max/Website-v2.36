@@ -20,7 +20,6 @@
  */
 
 let _caretEl: HTMLElement | null = null;
-let _arrowTab: HTMLElement | null = null;
 let _activeInput: HTMLInputElement | HTMLTextAreaElement | null = null;
 
 const INPUT_SELECTOR = 'input[type="text"], input[type="email"], input[type="search"], input[type="url"], input[type="tel"], input[type="password"], input[type="number"], textarea';
@@ -29,36 +28,6 @@ function createCaret(): HTMLElement {
   const el = document.createElement('span');
   el.className = 'form-field__caret';
   el.setAttribute('aria-hidden', 'true');
-  return el;
-}
-
-async function createArrowTab(): Promise<HTMLElement> {
-  const el = document.createElement('div');
-  el.className = 'form-field__arrow-tab';
-  el.setAttribute('aria-hidden', 'true');
-
-  // Fetch Phosphor arrow icon from API
-  try {
-    const res = await fetch('https://asset-library.natashacharlton25.workers.dev/v1/assets/arrow-right-fill');
-    if (res.ok) {
-      const data = await res.json();
-      if (data.currentVersion?.content) {
-        const svg = data.currentVersion.content;
-        el.innerHTML = `<span class="form-field__arrow-tab-arrow">${svg}</span>`;
-        // Size the SVG
-        const svgEl = el.querySelector('svg');
-        if (svgEl) {
-          svgEl.setAttribute('width', '32');
-          svgEl.setAttribute('height', '32');
-          svgEl.style.fill = 'currentColor';
-        }
-        return el;
-      }
-    }
-  } catch { /* fallback below */ }
-
-  // Fallback: CSS triangle
-  el.innerHTML = '<span class="form-field__arrow-tab-arrow">&#9654;</span>';
   return el;
 }
 
@@ -83,24 +52,19 @@ function updateCaretPosition() {
   const lineHeight = parseFloat(styles.lineHeight) || parseFloat(styles.fontSize) * 1.2;
 
   if (input.tagName === 'TEXTAREA') {
-    // Textarea: handle line wrapping
     measurer.style.whiteSpace = 'pre-wrap';
     measurer.style.wordBreak = 'break-word';
     measurer.style.width = `${input.clientWidth - paddingLeft - (parseFloat(styles.paddingRight) || 0)}px`;
     measurer.textContent = text || '\u200B';
     input.parentNode?.appendChild(measurer);
 
-    // Get height of all text up to cursor
     const fullHeight = measurer.offsetHeight;
-
-    // Get width of last line only
     const lastLine = text.split('\n').pop() || '';
     const lastLineMeasurer = document.createElement('span');
     lastLineMeasurer.style.cssText = `font:${styles.font};visibility:hidden;position:absolute;white-space:pre;letter-spacing:${styles.letterSpacing};`;
     lastLineMeasurer.textContent = lastLine || '\u200B';
     document.body.appendChild(lastLineMeasurer);
 
-    // Position caret relative to input's position within form-field
     const inputRect = input.getBoundingClientRect();
     const wrapperRect = (input.closest('.form-field') || input.parentNode as Element).getBoundingClientRect();
     const offsetLeft = inputRect.left - wrapperRect.left;
@@ -112,11 +76,9 @@ function updateCaretPosition() {
     lastLineMeasurer.remove();
     measurer.remove();
   } else {
-    // Single-line input
     measurer.textContent = text || '\u200B';
     input.parentNode?.appendChild(measurer);
 
-    // Position relative to form-field wrapper
     const inputRect = input.getBoundingClientRect();
     const wrapperRect = (input.closest('.form-field') || input.parentNode as Element).getBoundingClientRect();
     const offsetLeft = inputRect.left - wrapperRect.left;
@@ -128,7 +90,6 @@ function updateCaretPosition() {
     measurer.remove();
   }
 
-  // Set caret height
   _caretEl.style.height = `${lineHeight}px`;
 
   // Rainbow colour sync
@@ -140,30 +101,6 @@ function updateCaretPosition() {
   }
 }
 
-function updateArrowPosition() {
-  if (!_arrowTab || !_activeInput) return;
-  const input = _activeInput;
-  const wrapper = input.closest('.form-field') || input;
-  const rect = wrapper.getBoundingClientRect();
-  const scrollY = window.scrollY || document.documentElement.scrollTop;
-  const scrollX = window.scrollX || document.documentElement.scrollLeft;
-
-  // Position arrow to the left of the field, wherever it is on the page
-  const arrowWidth = _arrowTab.offsetWidth || 70;
-  _arrowTab.style.top = `${rect.top + scrollY + rect.height / 2}px`;
-  _arrowTab.style.left = `${rect.left + scrollX - arrowWidth - 8}px`;
-
-  // Flip to right side if too close to left edge
-  if (rect.left < arrowWidth + 16) {
-    _arrowTab.style.left = `${rect.right + scrollX + 8}px`;
-    _arrowTab.style.borderRadius = 'var(--radius-lg) 0 0 var(--radius-lg)';
-    _arrowTab.style.transform = 'translateY(-50%) scaleX(-1)';
-  } else {
-    _arrowTab.style.borderRadius = '0 var(--radius-lg) var(--radius-lg) 0';
-    _arrowTab.style.transform = 'translateY(-50%)';
-  }
-}
-
 function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
   if (_activeInput === input && _caretEl) return;
 
@@ -172,7 +109,6 @@ function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
   _activeInput = input;
   _caretEl = createCaret();
 
-  // Insert into form-field wrapper (has position: relative)
   const wrapper = input.closest('.form-field');
   if (wrapper) {
     wrapper.appendChild(_caretEl);
@@ -180,22 +116,9 @@ function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
     input.parentNode?.appendChild(_caretEl);
   }
 
-  // Arrow tab — positioned next to active field
-  if (document.documentElement.hasAttribute('data-arrow-tab')) {
-    createArrowTab().then(tab => {
-      if (!_activeInput) return; // focus moved away before async completed
-      _arrowTab = tab;
-      document.body.appendChild(_arrowTab);
-      updateArrowPosition();
-      _arrowTab.classList.add('form-field__arrow-tab--visible');
-    });
-  }
-
-  // Initial position
   updateCaretPosition();
   _caretEl.classList.add('form-field__caret--visible');
 
-  // Attach tracking listeners directly to the input
   input.addEventListener('input', updateCaretPosition);
   input.addEventListener('click', handleDelayedUpdate);
   input.addEventListener('keyup', updateCaretPosition);
@@ -204,7 +127,6 @@ function showCaret(input: HTMLInputElement | HTMLTextAreaElement) {
 }
 
 function handleDelayedUpdate() {
-  // Click/mouseup: selectionStart updates after the event
   setTimeout(updateCaretPosition, 0);
 }
 
@@ -220,15 +142,10 @@ function hideCaret() {
     _caretEl.remove();
     _caretEl = null;
   }
-  if (_arrowTab) {
-    _arrowTab.remove();
-    _arrowTab = null;
-  }
   _activeInput = null;
 }
 
 export function initCustomCaret() {
-  // Check attribute at focus time, not init time — setting may load after init
   document.addEventListener('focusin', (e) => {
     if (!document.documentElement.hasAttribute('data-custom-caret')) return;
     const target = e.target as HTMLElement;
@@ -241,7 +158,6 @@ export function initCustomCaret() {
     hideCaret();
   });
 
-  // selectionchange covers arrow keys, home/end, shift+arrows
   document.addEventListener('selectionchange', () => {
     if (!document.documentElement.hasAttribute('data-custom-caret')) return;
     if (_activeInput && document.activeElement === _activeInput) {
