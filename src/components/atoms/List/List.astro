@@ -25,7 +25,10 @@
  *   </List>
  */
 import { Icon } from '../Icon';
+import { Link } from '../Link';
 import { Text } from '../Text';
+
+type ListItem = string | { text: string; href?: string; };
 
 interface Props {
   as?: 'ul' | 'ol';
@@ -37,7 +40,7 @@ interface Props {
   spacing?: 'tight' | 'normal' | 'loose';
   flush?: boolean;
   class?: string;
-  items?: string[];
+  items?: ListItem[];
   [key: string]: any;
 }
 
@@ -80,17 +83,25 @@ const classes = [
 
 <Tag class:list={classes} {...dataAttrs}>
   {items ? (
-    items.map((item: string) => (
-      <li class="list__item">
-        {hasIcon && (
-          <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="list__icon" />
-        )}
-        {variant === 'dot' && (
-          <span class="list__dot" aria-hidden="true"></span>
-        )}
-        <Text as="span" class="list__content" flush>{item}</Text>
-      </li>
-    ))
+    items.map((item: ListItem) => {
+      const text = typeof item === 'string' ? item : item.text;
+      const href = typeof item === 'string' ? undefined : item.href;
+      return (
+        <li class="list__item">
+          {hasIcon && (
+            <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="list__icon" />
+          )}
+          {variant === 'dot' && (
+            <span class="list__dot" aria-hidden="true"></span>
+          )}
+          {href ? (
+            <Link href={href} class="list__content" variant="underline">{text}</Link>
+          ) : (
+            <Text as="span" class="list__content" flush>{text}</Text>
+          )}
+        </li>
+      );
+    })
   ) : (
     <slot />
   )}
