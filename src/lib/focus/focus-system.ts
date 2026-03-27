@@ -70,8 +70,12 @@ function initFocusSystem() {
     let el = (e.target as HTMLElement).closest('[tabindex], button, a, input, textarea, select, [role="button"]');
     // Form controls can't use ::after — move focus to .form-field wrapper
     // EXCEPT dropdown buttons — they handle their own focus
-    if (el && (el.matches('input, textarea, select') && el.closest('.form-field') && !el.closest('.form-field__select-wrap'))) {
+    if (el && (el.matches('input, textarea, select') && el.closest('.form-field') && !el.closest('.form-field__select-wrap') && !el.closest('.form-field__card'))) {
       el = el.closest('.form-field');
+    }
+    // Card-select: focus on the card label, not the hidden input
+    if (el && el.matches('input[type="radio"], input[type="checkbox"]') && el.closest('.form-field__card')) {
+      el = el.closest('.form-field__card');
     }
     // Don't activate focus system on a11y panel/page controls
     if (el && !el.closest('#a11y-page, #a11y-panel, .a11y-panel')) {
@@ -228,6 +232,43 @@ function initFocusSystem() {
       }
     }
     hideFocusLabel();
+  });
+
+  // Card-select: arrow key navigation for checkbox groups
+  document.addEventListener('keydown', (e) => {
+    const active = document.activeElement as HTMLElement;
+    if (!active) return;
+    const cardFace = active.closest('.form-field__card');
+    if (!cardFace) return;
+
+    const grid = cardFace.closest('.form-field__card-grid');
+    if (!grid) return;
+
+    const cards = [...grid.querySelectorAll('.form-field__card')] as HTMLElement[];
+    const currentIdx = cards.indexOf(cardFace as HTMLElement);
+    if (currentIdx === -1) return;
+
+    let nextIdx = -1;
+    const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+
+    if (e.key === 'ArrowRight') nextIdx = Math.min(currentIdx + 1, cards.length - 1);
+    else if (e.key === 'ArrowLeft') nextIdx = Math.max(currentIdx - 1, 0);
+    else if (e.key === 'ArrowDown') nextIdx = Math.min(currentIdx + cols, cards.length - 1);
+    else if (e.key === 'ArrowUp') nextIdx = Math.max(currentIdx - cols, 0);
+    else if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      const input = cardFace.querySelector('input') as HTMLInputElement;
+      if (input && !input.disabled) {
+        input.checked = !input.checked;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      return;
+    }
+    else return;
+
+    e.preventDefault();
+    const nextInput = cards[nextIdx]?.querySelector('input') as HTMLElement;
+    if (nextInput) nextInput.focus();
   });
 }
 
