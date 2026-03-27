@@ -15,6 +15,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { generateThemeData } from '../src/utils/theme-engine.js';
+import chroma from 'chroma-js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -174,8 +175,33 @@ function processDefinition(def, outputFolder) {
     scaleFails.forEach(f => console.log(`     ${f.label}: ${f.ratio}:1 (need ${f.target})`));
   }
 
+  // Apply brand config overrides — BrandDefault.css ONLY (light brand theme)
+  // All variants (dark, protan, tritan, HC) use engine-calculated scale
+  let css = result.css;
+  if (def.name === 'default') {
+    const brandConfigPath = path.join(brandDir, 'brandconfig.json');
+    if (fs.existsSync(brandConfigPath)) {
+      const brand = JSON.parse(fs.readFileSync(brandConfigPath, 'utf8'));
+      const ROLE_MAP = { fill: 600, hover: 800, tint: 200, border: 400 };
+
+      for (const family of ['primary', 'secondary']) {
+        if (!brand[family]) continue;
+        for (const [role, hex] of Object.entries(brand[family])) {
+          const pos = ROLE_MAP[role];
+          if (!pos) continue;
+          const token = `--${family}-${pos}:`;
+          const regex = new RegExp(`(${token})\\s*#[0-9a-fA-F]{3,8}`);
+          if (regex.test(css)) {
+            css = css.replace(regex, `$1 ${hex}`);
+            console.log(`  🎨 brand: ${family}-${pos} → ${hex} (${role})`);
+          }
+        }
+      }
+    }
+  }
+
   // Write file regardless (for inspection if failing)
-  fs.writeFileSync(filePath, result.css);
+  fs.writeFileSync(filePath, css);
   totalGenerated++;
 
   if (themeAudit.allPass && scaleFails.length === 0) {
