@@ -316,21 +316,36 @@
    FORM FIELD — textonly structure
    ========================================================== */
 
-/* Input: underline style */
-[data-render="textonly"] .form-field__input {
-  background: color-mix(in oklch, var(--_field-text) 6%, transparent);
-  border: none;
-  border-bottom: var(--border-width-2) solid var(--_field-border);
+/* Input: clean border, no fill */
+[data-render="textonly"] .form-field .form-field__input {
+  --_field-bg: transparent;
+  border: 2px solid var(--primary-600);
   border-radius: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
-[data-render="textonly"] .form-field__input:focus {
+/* Highlight links + textonly: all form elements square, highlight colour */
+[data-highlight-links] [data-render="textonly"] .form-field .form-field__input,
+[data-highlight-links] [data-render="textonly"] .form-field__card-face,
+[data-highlight-links] [data-render="textonly"] .form-field__checkbox-wrap,
+[data-highlight-links] [data-render="textonly"] .form-field__radio-wrap,
+[data-highlight-links] [data-render="textonly"] .form-field__toggle-wrap,
+[data-highlight-links] [data-render="textonly"] .form-field__card,
+[data-highlight-links] [data-render="textonly"] .form-field {
+  border-color: var(--highlight-link-color);
+  border-radius: 0;
+}
+
+[data-highlight-links] [data-render="textonly"] .form-field .form-field__input:hover,
+[data-highlight-links] [data-render="textonly"] .form-field__card-face:hover,
+[data-highlight-links] [data-render="textonly"] .form-field__card:hover,
+[data-highlight-links] [data-render="textonly"] .form-field:hover {
+  border-color: var(--color-Warning);
+}
+
+[data-render="textonly"] .form-field .form-field__input:focus {
   box-shadow: none;
-  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
-  border-bottom-color: var(--_field-brand-dark);
+  background: transparent;
+  border: 3px solid var(--secondary-600);
 }
 
 /* Show native controls, hide custom widgets */
