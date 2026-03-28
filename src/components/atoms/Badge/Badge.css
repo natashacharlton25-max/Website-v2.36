@@ -28,8 +28,7 @@
   /* Colour tokens — JSON pipeline overrides, theme fallbacks.
      Border inherits from bg unless explicitly set. */
   --_badge-bg: var(--badge-bg, var(--primary-200));
-  --_badge-text: var(--badge-text, var(--neutral-900));
-  --_badge-border: var(--badge-border, var(--primary-400));
+  --_badge-border: var(--badge-border, var(--primary-600));
 }
 
 .badge__icon {
@@ -84,7 +83,7 @@
 
 .badge--fill {
   background-color: var(--_badge-bg);
-  color: var(--_badge-text);
+  color: oklch(from var(--_badge-bg) round(1.21 - l) 0 0);
   border-color: var(--_badge-bg);
 }
 
@@ -102,8 +101,66 @@
   background: var(--badge-glass-bg, var(--glass-bg));
   backdrop-filter: var(--badge-glass-blur, var(--glass-blur));
   -webkit-backdrop-filter: var(--badge-glass-blur, var(--glass-blur));
-  border: 1px solid var(--badge-glass-border, var(--neutral-200));
-  color: var(--_badge-text);
+  border: 1px solid var(--badge-glass-border, color-mix(in oklch, var(--_badge-bg) 30%, var(--color-White)));
+  color: oklch(from var(--page-bg) round(1.21 - l) 0 0);
+}
+
+/* ========== SHADOW ========== */
+
+.badge--shadow-none { box-shadow: none; }
+.badge--shadow-out  { box-shadow: 0 1px 3px color-mix(in oklch, var(--neutral-950) 18%, transparent), 0 1px 2px color-mix(in oklch, var(--neutral-950) 12%, transparent); }
+.badge--shadow-in   { box-shadow: inset 0 2px 4px color-mix(in oklch, var(--color-Black) 22%, transparent); }
+
+/* ========== COLOUR VARIANTS ========== */
+
+.badge--primary {
+  --_badge-bg: var(--primary-200);
+  --_badge-border: var(--primary-600);
+}
+
+.badge--secondary {
+  --_badge-bg: var(--secondary-200);
+  --_badge-border: var(--secondary-600);
+}
+
+.badge--neutral {
+  --_badge-bg: var(--neutral-200);
+  --_badge-border: var(--neutral-600);
+}
+
+.badge--red {
+  --_badge-bg: var(--rainbow-1-wash);
+  --_badge-border: var(--rainbow-1);
+}
+
+.badge--orange {
+  --_badge-bg: var(--rainbow-2-wash);
+  --_badge-border: var(--rainbow-2);
+}
+
+.badge--yellow {
+  --_badge-bg: var(--rainbow-3-wash);
+  --_badge-border: var(--rainbow-3);
+}
+
+.badge--teal {
+  --_badge-bg: var(--rainbow-4-wash);
+  --_badge-border: var(--rainbow-4);
+}
+
+.badge--blue {
+  --_badge-bg: var(--rainbow-5-wash);
+  --_badge-border: var(--rainbow-5);
+}
+
+.badge--purple {
+  --_badge-bg: var(--rainbow-6-wash);
+  --_badge-border: var(--rainbow-6);
+}
+
+.badge--pink {
+  --_badge-bg: var(--rainbow-7-wash);
+  --_badge-border: var(--rainbow-7);
 }
 
 /* ========== ICON-ONLY ========== */
@@ -123,7 +180,7 @@
   font-size: var(--text-base);
   padding: var(--space-md);
   background: var(--_badge-bg);
-  color: var(--_badge-text);
+  color: oklch(from var(--_badge-bg) round(1.21 - l) 0 0);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: none;
