@@ -73,6 +73,16 @@ function openModal(figure: HTMLElement): void {
   const img = figure.querySelector('img') as HTMLImageElement;
   if (!img) return;
 
+  // Mark as viewed — neutral borders on re-open
+  const wasViewed = figure.classList.contains('alt-viewed');
+  figure.classList.add('alt-viewed');
+  figure.classList.add('highlight-visited');
+  if (wasViewed) {
+    m.classList.add('modal-viewed');
+  } else {
+    m.classList.remove('modal-viewed');
+  }
+
   // Store focus for return
   previousFocus = document.activeElement as HTMLElement;
 
@@ -188,6 +198,9 @@ async function attachHandlers(): Promise<void> {
 // Watch for attribute changes on <html> to enable/disable
 function observeEnlargeMode(): void {
   const observer = new MutationObserver(() => {
+    // Close modal on any display mode change
+    closeModal();
+
     const isActive = document.documentElement.hasAttribute('data-image-enlarge');
     if (isActive) {
       attachHandlers();
@@ -206,7 +219,7 @@ function observeEnlargeMode(): void {
 
   observer.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-image-enlarge']
+    attributeFilter: ['data-image-enlarge', 'data-alt-display-mode']
   });
 }
 

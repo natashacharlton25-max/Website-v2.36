@@ -168,31 +168,29 @@ const figureClasses = [
 ---
 
 {isDecorative ? (
-  isOptimised ? (
-    <AstroImage
-      src={src as ImageMetadata}
-      alt=""
-      width={width as number}
-      height={height as number}
-      loading={loading}
-      class:list={imgClasses}
-      aria-hidden="true"
-      role="presentation"
-      {...dataAttrs}
-    />
-  ) : (
-    <img
-      src={src as string}
-      alt=""
-      width={width}
-      height={height}
-      loading={loading}
-      class:list={imgClasses}
-      aria-hidden="true"
-      role="presentation"
-      {...dataAttrs}
-    />
-  )
+  <figure class:list={figureClasses} data-role="decorative" aria-hidden="true">
+    {isOptimised ? (
+      <AstroImage
+        src={src as ImageMetadata}
+        alt=""
+        width={width as number}
+        height={height as number}
+        loading={loading}
+        class:list={imgClasses}
+        role="presentation"
+      />
+    ) : (
+      <img
+        src={src as string}
+        alt=""
+        width={width}
+        height={height}
+        loading={loading}
+        class:list={imgClasses}
+        role="presentation"
+      />
+    )}
+  </figure>
 ) : (
   <figure class:list={figureClasses} data-role="content" data-semantic-role={semanticRole} tabindex="0">
     {isOptimised ? (

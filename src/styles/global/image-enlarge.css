@@ -23,28 +23,50 @@
   top: var(--space-sm);
   right: var(--space-sm);
   z-index: 2;
-  background: var(--page-bg);
+  background: var(--primary-600);
+  color: oklch(from var(--primary-600) round(1.21 - l) 0 0);
   border-radius: var(--radius-full);
-  width: 2rem;
-  height: 2rem;
+  width: 1.8em;
+  height: 1.8em;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  opacity: 1;
   pointer-events: none;
-  box-shadow: var(--shadow-sm);
-  color: var(--neutral-800);
 }
 
 .image-enlarge-badge svg {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.1rem;
+  height: 1.1rem;
 }
 
-[data-image-enlarge] figure[data-role="content"]:hover .image-enlarge-badge,
-[data-image-enlarge] figure[data-role="content"]:focus-within .image-enlarge-badge {
-  opacity: 1;
+/* Viewed state — neutral after modal opened */
+.image.alt-viewed .image-enlarge-badge {
+  background: var(--neutral-400);
+  color: oklch(from var(--neutral-400) round(1.21 - l) 0 0);
+}
+
+/* Highlight-links — hide icon, use outline ring instead */
+[data-highlight-links] .image-enlarge-badge {
+  display: none;
+}
+
+/* Highlight-links — brand outline on enlarge figures */
+[data-highlight-links][data-image-enlarge] figure[data-role="content"] {
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
+}
+
+/* Viewed — neutral outline (not green) */
+[data-highlight-links] figure.highlight-visited[data-role="content"] {
+  outline-color: var(--neutral-400);
+}
+
+/* Modal — neutral borders when re-opened (already viewed) */
+.image-enlarge-modal.modal-viewed .image-enlarge-modal__subtitle,
+.image-enlarge-modal.modal-viewed .image-enlarge-modal__aac,
+.image-enlarge-modal.modal-viewed .image-enlarge-modal__close {
+  border-color: var(--neutral-400);
 }
 
 /* ── Modal overlay ── */
@@ -100,7 +122,7 @@
   max-width: 65ch;
   padding: var(--space-md) var(--space-lg);
   background: var(--page-bg-raised);
-  border: 2px solid var(--primary-600);
+  border: 2px solid var(--bar-border-color, var(--primary-600));
   border-radius: var(--radius-md);
 }
 
@@ -117,7 +139,7 @@
   max-width: 90vw;
   padding: var(--space-md);
   background: var(--page-bg-raised);
-  border: 2px solid var(--primary-600);
+  border: 2px solid var(--bar-border-color, var(--primary-600));
   border-radius: var(--radius-md);
 }
 
@@ -131,7 +153,7 @@
   top: var(--space-lg);
   right: var(--space-lg);
   background: var(--page-bg-raised);
-  border: 2px solid var(--primary-600);
+  border: 2px solid var(--bar-border-color, var(--primary-600));
   color: var(--neutral-800);
   font-size: 1.5rem;
   width: 3rem;
