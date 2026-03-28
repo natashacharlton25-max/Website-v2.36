@@ -195,10 +195,32 @@
    SHADOW
    ========================================================== */
 
+/* ==========================================================
+   BORDER
+   ========================================================== */
+
+.image--border-thin   { border: 1px solid var(--_image-border); }
+.image--border-medium { border: 2px solid var(--_image-border); }
+.image--border-thick  { border: 4px solid var(--_image-border); }
+
 .image--shadow-none { box-shadow: none; }
 .image--shadow-sm   { box-shadow: var(--img-shadow-sm); }
 .image--shadow-md   { box-shadow: var(--img-shadow-md); }
 .image--shadow-lg   { box-shadow: var(--img-shadow-lg); }
+.image--shadow-inset { box-shadow: inset 0 2px 8px color-mix(in oklch, var(--color-Black) 20%, transparent); }
+
+/* ==========================================================
+   CLIP PATH + SHADOW — drop-shadow filter since box-shadow
+   doesn't work with clip-path
+   ========================================================== */
+
+[class*="image--clip-"] {
+  filter:
+    brightness(var(--media-brightness, 1))
+    saturate(var(--media-saturation, 1))
+    contrast(var(--media-contrast, 1))
+    drop-shadow(0 4px 8px color-mix(in oklch, var(--neutral-950) 20%, transparent));
+}
 
 /* ==========================================================
    HOVER — cursor only (transform gated above under .image--animate)

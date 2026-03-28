@@ -50,7 +50,8 @@ interface Props {
   fit?: 'cover' | 'contain' | 'fill' | 'none';
   color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
   radius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
-  shadow?: 'none' | 'sm' | 'md' | 'lg';
+  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'inset';
+  border?: 'none' | 'thin' | 'medium' | 'thick';
   hover?: boolean;
   responsive?: boolean;
   /** @deprecated Use role="decorative" instead */
@@ -83,6 +84,7 @@ const {
   color = 'primary',
   radius,
   shadow,
+  border: borderProp,
   hover = false,
   responsive = false,
   decorative = false,
@@ -158,6 +160,8 @@ const figureClasses = [
   `image--${color}`,
   hasMotion && 'image--animate',
   radius && `image--radius-${radius}`,
+  borderProp && borderProp !== 'none' && `image--border-${borderProp}`,
+  shadow && shadow !== 'none' && `image--shadow-${shadow}`,
   hover && blur && 'image--blur-reveal',
   bgFill && `image--bg-${bgFill}`,
 ];
