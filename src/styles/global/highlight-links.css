@@ -56,88 +56,43 @@
 /* ── Dropdown items — underline label only, no border ── */
 [data-highlight-links] .dropdown-item {
   text-decoration: underline;
-  text-decoration-color: var(--highlight-link-color);
+  text-decoration-color: var(--primary-600);
   text-decoration-thickness: 2px;
   text-underline-offset: 0.2em;
   outline: none;
 }
 
 [data-highlight-links] .dropdown-item:hover {
-  text-decoration-color: var(--color-Warning);
+  text-decoration-color: var(--primary-800);
 }
 
-/* ── Form fields — border on the input itself ── */
-/* Form fields: brand highlight style — matches button treatment */
-[data-highlight-links] .form-field__input {
-  background: var(--btn-highlight-bg, transparent);
-  border: var(--btn-highlight-border, 2px solid var(--primary-600));
-  border-radius: var(--btn-highlight-radius, var(--radius-md));
-  outline: var(--btn-highlight-outline, none);
-  outline-offset: var(--btn-highlight-outline-offset, 0);
-}
-
-[data-highlight-links] .form-field__input:hover {
-  background: var(--btn-highlight-hover-bg, var(--primary-600));
-  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
-  color: oklch(from var(--btn-highlight-hover-bg, var(--primary-600)) round(1.21 - l) 0 0);
-}
-
-/* Neumorphic has border:none — force it back for highlight */
-[data-highlight-links] .form-field--neumorphic .form-field__input {
-  border: var(--btn-highlight-border, 2px solid var(--primary-600));
-}
-
-/* Checkboxes, radios, toggles — same brand highlight style */
+/* ── Form fields — highlight adds outline ring only, no design change ── */
+[data-highlight-links] .form-field__input,
 [data-highlight-links] .form-field__checkbox-wrap,
 [data-highlight-links] .form-field__radio-wrap,
 [data-highlight-links] .form-field__toggle-wrap {
-  border: var(--btn-highlight-border, 2px solid var(--primary-600));
-  border-radius: var(--btn-highlight-radius, var(--radius-md));
-  padding: var(--space-sm);
-  outline: var(--btn-highlight-outline, none);
-  outline-offset: var(--btn-highlight-outline-offset, 0);
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
+  border-radius: var(--radius-md);
 }
 
-[data-highlight-links] .form-field__checkbox-wrap:hover,
-[data-highlight-links] .form-field__radio-wrap:hover,
-[data-highlight-links] .form-field__toggle-wrap:hover {
-  background: var(--btn-highlight-hover-bg, var(--primary-600));
-  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
+/* Neumorphic has border:none — add border for highlight visibility */
+[data-highlight-links] .form-field--neumorphic .form-field__input {
+  border: 2px solid var(--primary-600);
 }
 
-/* Error fields — highlight style wins over error border */
+/* Controls: no hover override — normal hover stays, highlight just adds ring */
+
+/* Error fields — highlight border */
 [data-highlight-links] .form-field--error .form-field__input,
 [data-highlight-links] .form-field--error .form-field__input:focus {
   border-color: var(--primary-600);
 }
 
-[data-highlight-links] .form-field--error .form-field__input:hover {
-  background: var(--btn-highlight-hover-bg, var(--primary-600));
-  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
-}
-
-/* Card-select cards — brand highlight style */
+/* Card-select cards — add outline ring only */
 [data-highlight-links] .form-field__card-face {
-  border: var(--btn-highlight-border, 2px solid var(--primary-600));
-  outline: var(--btn-highlight-outline, none);
-  outline-offset: var(--btn-highlight-outline-offset, 0);
-}
-
-[data-highlight-links] .form-field__card-face:hover {
-  background: var(--btn-highlight-hover-bg, var(--primary-600));
-  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
-}
-
-/* Selected card — brand fill */
-[data-highlight-links] .form-field__card-input:checked + .form-field__card-face {
-  border-color: var(--primary-600);
-  background: var(--_field-brand);
-  color: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
-}
-
-[data-highlight-links] .form-field__card-input:checked + .form-field__card-face:hover {
-  background: var(--btn-highlight-hover-bg, var(--primary-600));
-  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
 
 /* ── Focus + Highlight links: focus wins ── */
@@ -169,88 +124,31 @@
   outline-offset: 1px;
 }
 
-/* ── Link cards and block links — outline, not underline ── */
+/* ── Link cards and block links — outline ring ── */
 [data-highlight-links] :where(a.card, a[role="button"]:not(.btn), a[style*="display:block"], a[style*="display: block"]) {
   text-decoration: none;
-  outline: 2px solid var(--highlight-link-color);
-  outline-offset: 1px;
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
 
-/* ── Elements with existing borders — outline with gap ── */
+/* ── Elements with existing borders — outline ring ── */
 [data-highlight-links] :where(.card) {
-  outline: 2px solid var(--highlight-link-color);
-  outline-offset: 1px;
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
 
-/* ── Buttons — ghost + pill, all effects stripped (not dropdown) ── */
+/* ── Buttons — brand highlight style from brandconfig.json ── */
 [data-highlight-links] .btn:not(.dropdown-btn) {
   background: var(--btn-highlight-bg, transparent);
   color: var(--btn-highlight-text, var(--neutral-800));
   border: var(--btn-highlight-border, none);
   border-radius: var(--btn-highlight-radius, var(--radius-md));
-  outline: var(--btn-highlight-outline, 2px solid var(--highlight-link-color));
-  outline-offset: var(--btn-highlight-outline-offset, 2px);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  filter: none !important;
-  clip-path: none;
-  transform: none !important;
-  text-shadow: none !important;
-}
-
-/* Kill decorative shadows but NOT focus ring */
-[data-highlight-links] .btn:not([data-focus-active]) {
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow: none;
-}
-
-/* Reset expand/split/tech — normal ghost padding */
-[data-highlight-links] .btn--expand,
-[data-highlight-links] .btn--split,
-[data-highlight-links] .btn--tech {
-  padding: var(--space-sm) var(--space-lg);
-  overflow: hidden;
-}
-
-/* Icons — inline, inherit text colour */
-[data-highlight-links] .btn--expand .btn__icon,
-[data-highlight-links] .btn .btn__icon {
-  position: static;
-  transform: none;
-  color: var(--neutral-800);
-}
-
-/* Strip all button pseudo-element effects + wrapper glows (except focus ring) */
-[data-highlight-links] .btn:not([data-focus-active])::before,
-[data-highlight-links] .btn:not([data-focus-active])::after,
-[data-highlight-links] .btn-rainbow-glow-wrap::before,
-[data-highlight-links] .btn-rainbow-glow-wrap::after {
-  display: none;
-}
-
-/* ── Highlight hover — border + fill shift to Warning (gated) ── */
-[data-highlight-links] :where(button, summary, [role="button"], [tabindex="0"], a.card, a[role="button"], a[style*="display:block"], a[style*="display: block"], .card):hover {
-  outline-color: var(--color-Warning);
-  background: color-mix(in oklch, var(--color-Warning) 15%, transparent);
-}
-
-[data-highlight-links] .btn:hover {
-  background: var(--btn-highlight-hover-bg, color-mix(in oklch, var(--highlight-link-color) 15%, transparent));
-  border-color: var(--btn-highlight-hover-bg, var(--highlight-link-color));
-  transform: none;
-  box-shadow: none;
-  color: var(--btn-highlight-hover-text, var(--neutral-800));
-}
-
-[data-highlight-links] .btn:hover .btn__icon,
-[data-highlight-links] .btn:hover .icon {
-  color: inherit !important;
-}
-
-/* ── Hover none — no colour shift ── */
-[data-highlight-links][data-hover="none"] :where(button, summary, [role="button"], [tabindex="0"], a.card, .card):hover,
-[data-highlight-links][data-hover="none"] .btn:hover {
-  outline-color: var(--highlight-link-color);
-  background: transparent;
+  text-shadow: none;
 }
 
 /* ── Focus overrides highlight — focus wins completely ── */
@@ -343,7 +241,7 @@
    HIGHLIGHT LINKS + TEXTONLY — square borders, highlight colour
    ========================================================== */
 
-/* Text-only + highlight: keep text-only transparent bg, add outline ring only */
+/* Text-only + highlight: just add outline ring, no other changes */
 [data-highlight-links] [data-render="textonly"] .form-field .form-field__input,
 [data-highlight-links] [data-render="textonly"] .form-field__card-face,
 [data-highlight-links] [data-render="textonly"] .form-field__checkbox-wrap,
@@ -352,14 +250,20 @@
   background: transparent;
   outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
   outline-offset: var(--btn-highlight-outline-offset, 3px);
-  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
-  outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
 
+/* No hover change — text-only design stays as-is, highlight just adds ring */
 [data-highlight-links] [data-render="textonly"] .form-field .form-field__input:hover,
-[data-highlight-links] [data-render="textonly"] .form-field__card-face:hover {
+[data-highlight-links] [data-render="textonly"] .form-field__card-face:hover,
+[data-highlight-links] [data-render="textonly"] .form-field__checkbox-wrap:hover,
+[data-highlight-links] [data-render="textonly"] .form-field__radio-wrap:hover,
+[data-highlight-links] [data-render="textonly"] .form-field__toggle-wrap:hover,
+[data-highlight-links] [data-render="textonly"] .btn:hover,
+[data-highlight-links] [data-render="textonly"] .badge:hover,
+[data-highlight-links] [data-render="textonly"] .card:hover,
+[data-highlight-links] [data-render="textonly"] :where(button, summary, [role="button"], [tabindex="0"]):hover {
   background: transparent;
-  border-color: var(--secondary-600);
-  color: var(--_field-text);
+  color: inherit;
+  transform: none;
 }
 
