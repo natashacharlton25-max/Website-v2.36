@@ -9,8 +9,8 @@ const themeModules = import.meta.glob('../styles/themes/**/*.css', {
 function buildThemeMap(modules) {
   const themes = {};
   for (const [path, url] of Object.entries(modules)) {
-    // Skip Preview folder
-    if (path.includes('/Preview/')) continue;
+    // Skip Preview folder and brand-overrides (loaded statically)
+    if (path.includes('/Preview/') || path.includes('brand-overrides')) continue;
     // Extract filename as theme name from subfolder structure:
     //   '../styles/themes/brand/mind-the-box/BrandDefault.css' -> 'default'
     //   '../styles/themes/a11y/calm/calm-dark.css' -> 'calm-dark'

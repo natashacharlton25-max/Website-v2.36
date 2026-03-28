@@ -199,19 +199,62 @@ function processDefinition(def, outputFolder) {
           }
         }
       }
-      // Set btn-filled-text from primary fill, btn-filled-text-dark from hover
-      if (brand.primary?.fill) {
-        const fillL = chroma(brand.primary.fill).get('oklch.l');
-        const textOnFill = fillL > 0.7 ? 'var(--neutral-900)' : 'var(--neutral-100)';
-        css = css.replace(/(--btn-filled-text:)\s*[^;]+/, `$1 ${textOnFill}`);
-        console.log(`  🎨 brand: btn-filled-text → ${textOnFill} (fill L=${fillL.toFixed(2)})`);
+      // Generate brand-overrides.css — identity tokens that persist across themes
+      const SHAPE_RADIUS = { sharp: '0', subtle: 'var(--radius-sm)', soft: 'var(--radius-md)', rounded: 'var(--radius-lg)', pill: 'var(--radius-full)' };
+
+      function buildButtonTokens(prefix, config) {
+        if (!config) return '';
+        const radius = SHAPE_RADIUS[config.shape] || 'var(--radius-md)';
+        const colorFamily = config.color || 'primary';
+        const isFill = config.style === 'fill';
+        const bw = config.borderWidth || '2px';
+        // Structure — brand decides shape/style, colours follow active theme
+        const tokens = [
+          `  --${prefix}-radius: ${radius};`,
+          `  --${prefix}-style: ${config.style || 'outline'};`,
+          `  --${prefix}-bg: ${isFill ? `var(--${colorFamily}-600)` : 'transparent'};`,
+          `  --${prefix}-text: ${isFill ? `oklch(from var(--${colorFamily}-600) round(1.21 - l) 0 0)` : `var(--${colorFamily}-600)`};`,
+          `  --${prefix}-border: ${isFill ? 'none' : `${bw} solid var(--${colorFamily}-600)`};`,
+          `  --${prefix}-hover-bg: var(--${colorFamily}-800);`,
+          `  --${prefix}-hover-text: oklch(from var(--${colorFamily}-800) round(1.21 - l) 0 0);`,
+        ];
+        // Outline ring for highlight-links
+        if (config.outlineColor) {
+          const outlineCol = `var(--${config.outlineColor}-600)`;
+          tokens.push(`  --${prefix}-outline: ${config.outlineWidth || '3px'} solid ${outlineCol};`);
+          tokens.push(`  --${prefix}-outline-offset: ${config.outlineOffset || '3px'};`);
+        }
+        return tokens.join('\n');
       }
-      if (brand.primary?.hover) {
-        const hoverL = chroma(brand.primary.hover).get('oklch.l');
-        const textOnHover = hoverL > 0.7 ? 'var(--neutral-900)' : 'var(--neutral-100)';
-        css = css.replace(/(--btn-filled-text:)\s*([^;]+;)/, `$1 $2\n  --btn-filled-text-dark: ${textOnHover};`);
-        console.log(`  🎨 brand: btn-filled-text-dark → ${textOnHover} (hover L=${hoverL.toFixed(2)})`);
+
+      const overrideLines = [];
+      overrideLines.push('/**');
+      overrideLines.push(` * Brand Overrides — ${brand.brand || 'default'}`);
+      overrideLines.push(' * Generated from brandconfig.json. Loads after any theme.');
+      overrideLines.push(' * Identity tokens that persist across theme switches.');
+      overrideLines.push(' */');
+      overrideLines.push('');
+      overrideLines.push(':root {');
+
+      // Text-only button tokens
+      const toTokens = buildButtonTokens('btn-textonly', brand.textOnlyButton);
+      if (toTokens) {
+        overrideLines.push(toTokens);
+        console.log(`  🎨 brand: textonly button → ${brand.textOnlyButton.style}/${brand.textOnlyButton.shape}/${brand.textOnlyButton.color}`);
       }
+
+      // Highlight-links button tokens
+      const hlTokens = buildButtonTokens('btn-highlight', brand.highlightLinksButton);
+      if (hlTokens) {
+        overrideLines.push(hlTokens);
+        console.log(`  🎨 brand: highlight button → ${brand.highlightLinksButton.style}/${brand.highlightLinksButton.shape}/${brand.highlightLinksButton.color}`);
+      }
+
+      overrideLines.push('}');
+
+      const overridesPath = path.join(brandDir, 'brand-overrides.css');
+      fs.writeFileSync(overridesPath, overrideLines.join('\n'));
+      console.log(`  🎨 brand: wrote ${path.relative(rootDir, overridesPath)}`);
     }
   }
 

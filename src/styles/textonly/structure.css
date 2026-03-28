@@ -37,8 +37,12 @@
 [data-render="textonly"] #a11y-content-wrapper * {
   perspective: none;
   transform-style: flat;
-  transform: none;
   backface-visibility: visible;
+}
+
+/* Transform kill is hover gate's job, not textonly's */
+[data-render="textonly"][data-hover="none"] #a11y-content-wrapper * {
+  transform: none;
 }
 
 /* Textonly: tooltips hidden — JS shared bar shows them on hover */
@@ -142,7 +146,6 @@
 [data-render="textonly"] .card,
 [data-render="textonly"] [data-card],
 [data-render="textonly"] .badge,
-[data-render="textonly"] .btn,
 [data-render="textonly"] .toast,
 [data-render="textonly"] .form-field__input,
 [data-render="textonly"] .rainbow-border-card {
@@ -153,19 +156,33 @@
   backdrop-filter: none;
 }
 
-/* Buttons: primary border, square — visually interactive */
-[data-render="textonly"] .btn { border-color: var(--primary-600); border-radius: 0; }
+/* Buttons: brand text-only style from brandconfig.json */
+[data-render="textonly"] .btn {
+  background: var(--btn-textonly-bg, transparent);
+  color: var(--btn-textonly-text, var(--primary-600));
+  border: var(--btn-textonly-border, 2px solid var(--primary-600));
+  border-radius: var(--btn-textonly-radius, 0);
+  box-shadow: none;
+  backdrop-filter: none;
+  filter: none;
+  text-shadow: none;
+}
 
-/* Remove hover effects */
+[data-render="textonly"] .btn:hover {
+  background: var(--btn-textonly-hover-bg, var(--primary-800));
+  color: var(--btn-textonly-hover-text, var(--btn-filled-text-dark));
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+/* Remove hover effects — cards + toast only */
 [data-render="textonly"] .card:hover,
 [data-render="textonly"] [data-card]:hover,
-[data-render="textonly"] .btn:hover,
 [data-render="textonly"] .toast:hover {
   transform: none !important;
   box-shadow: none !important;
   filter: none !important;
-  background: var(--primary-600) !important;
-  color: var(--color-White) !important;
 }
 
 /* Reset text — inherit body font, no transforms */
