@@ -136,14 +136,25 @@
 }
 
 .form-field__input:hover {
-  background: color-mix(in oklch, var(--_field-brand) 5%, transparent);
+  background: color-mix(in oklch, var(--_field-brand) var(--_field-hover-tint, 5%), var(--_field-hover-base, transparent));
 }
 
-/* Hover-none — no tint on hover or focus */
+/* Hover-none: no visual change on any state */
 [data-hover="none"] .form-field__input:hover,
-[data-hover="none"] .form-field__input:focus {
+[data-hover="none"] .form-field__input:focus,
+[data-hover="none"] .form-field__input:focus:hover {
   background: transparent;
+  border-color: color-mix(in oklch, var(--_field-brand) 30%, var(--_field-border));
 }
+
+[data-hover="none"] .form-field.has-value .form-field__input:hover,
+[data-hover="none"] .form-field.has-value .form-field__input:focus,
+[data-hover="none"] .form-field.has-value .form-field__input:focus:hover {
+  border-color: var(--neutral-400);
+  background: color-mix(in oklch, var(--neutral-400) 8%, var(--_field-hover-base, transparent));
+}
+
+
 
 .form-field__input:focus {
   border-color: var(--_field-brand);
@@ -151,10 +162,10 @@
   outline: none;
 }
 
-/* Filled state — input has content, not focused (JS toggles .has-value on .form-field) */
+/* Filled state — neutral border + tint when not focused */
 .form-field.has-value .form-field__input:not(:focus) {
-  border-color: color-mix(in oklch, var(--_field-brand) 40%, var(--_field-border));
-  background: color-mix(in oklch, var(--_field-brand) 3%, var(--_field-bg));
+  border-color: var(--neutral-400);
+  background: color-mix(in oklch, var(--neutral-400) 8%, var(--_field-hover-base, transparent));
 }
 
 .form-field__input:disabled {

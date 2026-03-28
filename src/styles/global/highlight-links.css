@@ -98,7 +98,7 @@
 [data-highlight-links] .form-field__radio-wrap:hover,
 [data-highlight-links] .form-field__toggle-wrap:hover,
 [data-highlight-links] .form-field__card-face:hover {
-  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+  background: color-mix(in oklch, var(--_field-brand) var(--_field-hover-tint, 8%), var(--_field-hover-base, transparent));
   border-color: var(--primary-600);
 }
 
@@ -349,13 +349,13 @@
 }
 
 
-/* Text-only + highlight hover — brand tint */
+/* Text-only + highlight hover — brand tint (dark mode uses token base) */
 [data-highlight-links] [data-render="textonly"] .form-field .form-field__input:hover,
 [data-highlight-links] [data-render="textonly"] .form-field__checkbox-wrap:hover,
 [data-highlight-links] [data-render="textonly"] .form-field__radio-wrap:hover,
 [data-highlight-links] [data-render="textonly"] .form-field__toggle-wrap:hover,
 [data-highlight-links] [data-render="textonly"] .form-field__card-face:hover {
-  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+  background: color-mix(in oklch, var(--_field-brand) var(--_field-hover-tint, 8%), var(--_field-hover-base, transparent));
 }
 
 /* Form field dropdown — follows form field style, not button style */
@@ -366,7 +366,7 @@
 }
 
 [data-highlight-links] [data-render="textonly"] .form-field .btn--dropdown:hover {
-  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+  background: color-mix(in oklch, var(--_field-brand) var(--_field-hover-tint, 8%), var(--_field-hover-base, transparent));
   color: var(--neutral-800);
   border-color: var(--primary-600);
 }
@@ -418,6 +418,12 @@
   border-color: inherit;
   transform: none;
   box-shadow: none;
+}
+
+/* Filled inputs — keep neutral state on hover */
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field.has-value .form-field__input:hover {
+  border-color: var(--neutral-400);
+  background: color-mix(in oklch, var(--neutral-400) 8%, var(--_field-hover-base, transparent));
 }
 
 /* Dropdown selected — keep neutral on hover */
