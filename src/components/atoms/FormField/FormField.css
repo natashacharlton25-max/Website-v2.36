@@ -79,6 +79,22 @@
   --_field-border: var(--neutral-500);
 }
 
+/* Shape variants */
+.form-field--sharp   .form-field__input { border-radius: 0; }
+.form-field--subtle  .form-field__input { border-radius: var(--radius-sm); }
+.form-field--soft    .form-field__input { border-radius: var(--radius-md); }
+.form-field--rounded .form-field__input { border-radius: var(--radius-lg); }
+.form-field--pill    .form-field__input { border-radius: var(--radius-full); }
+
+/* Rainbow colour variants */
+.form-field--red     { --_field-brand: var(--rainbow-1);  --_field-brand-dark: var(--rainbow-1-dark);  --_field-brand-light: var(--rainbow-1-wash); }
+.form-field--orange  { --_field-brand: var(--rainbow-2);  --_field-brand-dark: var(--rainbow-2-dark);  --_field-brand-light: var(--rainbow-2-wash); }
+.form-field--yellow  { --_field-brand: var(--rainbow-3);  --_field-brand-dark: var(--rainbow-3-dark);  --_field-brand-light: var(--rainbow-3-wash); }
+.form-field--teal    { --_field-brand: var(--rainbow-4);  --_field-brand-dark: var(--rainbow-4-dark);  --_field-brand-light: var(--rainbow-4-wash); }
+.form-field--blue    { --_field-brand: var(--rainbow-5);  --_field-brand-dark: var(--rainbow-5-dark);  --_field-brand-light: var(--rainbow-5-wash); }
+.form-field--purple  { --_field-brand: var(--rainbow-6);  --_field-brand-dark: var(--rainbow-6-dark);  --_field-brand-light: var(--rainbow-6-wash); }
+.form-field--pink    { --_field-brand: var(--rainbow-7);  --_field-brand-dark: var(--rainbow-7-dark);  --_field-brand-light: var(--rainbow-7-wash); }
+
 /* High contrast + dark mode rules live in zone files:
    src/styles/zones/high-contrast.css
    src/styles/zones/theme-luminance-dark.css */
@@ -124,8 +140,8 @@
   outline: none;
 }
 
-/* Filled state — input has content, not focused */
-.form-field__input:not(:placeholder-shown):not(:focus) {
+/* Filled state — input has content, not focused (JS toggles .has-value on .form-field) */
+.form-field.has-value .form-field__input:not(:focus) {
   border-color: color-mix(in oklch, var(--_field-brand) 40%, var(--_field-border));
   background: color-mix(in oklch, var(--_field-brand) 3%, var(--_field-bg));
 }

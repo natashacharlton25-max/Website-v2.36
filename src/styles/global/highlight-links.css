@@ -85,67 +85,77 @@
 }
 
 /* ── Form fields — border on the input itself ── */
+/* Form fields: brand highlight style — matches button treatment */
 [data-highlight-links] .form-field__input {
-  border-color: var(--highlight-link-color);
+  background: var(--btn-highlight-bg, transparent);
+  border: var(--btn-highlight-border, 2px solid var(--primary-600));
+  border-radius: var(--btn-highlight-radius, var(--radius-md));
+  outline: var(--btn-highlight-outline, none);
+  outline-offset: var(--btn-highlight-outline-offset, 0);
 }
 
 [data-highlight-links] .form-field__input:hover {
-  border-color: var(--color-Warning) !important;
-  background: color-mix(in oklch, var(--color-Warning) 5%, transparent);
+  background: var(--btn-highlight-hover-bg, var(--primary-600));
+  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
+  color: oklch(from var(--btn-highlight-hover-bg, var(--primary-600)) round(1.21 - l) 0 0);
 }
 
 /* Neumorphic has border:none — force it back for highlight */
 [data-highlight-links] .form-field--neumorphic .form-field__input {
-  border: var(--border-width-2) solid var(--highlight-link-color);
+  border: var(--btn-highlight-border, 2px solid var(--primary-600));
 }
 
-/* Checkboxes, radios, toggles — border around label + control wrapper */
+/* Checkboxes, radios, toggles — same brand highlight style */
 [data-highlight-links] .form-field__checkbox-wrap,
 [data-highlight-links] .form-field__radio-wrap,
 [data-highlight-links] .form-field__toggle-wrap {
-  border: var(--border-width-2) solid var(--highlight-link-color);
-  border-radius: var(--radius-md);
+  border: var(--btn-highlight-border, 2px solid var(--primary-600));
+  border-radius: var(--btn-highlight-radius, var(--radius-md));
   padding: var(--space-sm);
+  outline: var(--btn-highlight-outline, none);
+  outline-offset: var(--btn-highlight-outline-offset, 0);
 }
 
 [data-highlight-links] .form-field__checkbox-wrap:hover,
 [data-highlight-links] .form-field__radio-wrap:hover,
 [data-highlight-links] .form-field__toggle-wrap:hover {
-  border-color: var(--color-Warning);
-  background: color-mix(in oklch, var(--color-Warning) 5%, transparent);
+  background: var(--btn-highlight-hover-bg, var(--primary-600));
+  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
 }
 
-/* Error fields — highlight colour wins over error border */
+/* Error fields — highlight style wins over error border */
 [data-highlight-links] .form-field--error .form-field__input,
 [data-highlight-links] .form-field--error .form-field__input:focus {
-  border-color: var(--highlight-link-color) !important;
+  border-color: var(--primary-600);
 }
 
 [data-highlight-links] .form-field--error .form-field__input:hover {
-  border-color: var(--color-Warning) !important;
-  background: color-mix(in oklch, var(--color-Warning) 5%, transparent);
+  background: var(--btn-highlight-hover-bg, var(--primary-600));
+  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
 }
 
-/* Card-select cards — highlight border + hover */
+/* Card-select cards — brand highlight style */
 [data-highlight-links] .form-field__card-face {
-  border-color: var(--highlight-link-color);
+  border: var(--btn-highlight-border, 2px solid var(--primary-600));
+  outline: var(--btn-highlight-outline, none);
+  outline-offset: var(--btn-highlight-outline-offset, 0);
 }
 
 [data-highlight-links] .form-field__card-face:hover {
-  border-color: var(--color-Warning) !important;
-  background: color-mix(in oklch, var(--color-Warning) 5%, transparent) !important;
+  background: var(--btn-highlight-hover-bg, var(--primary-600));
+  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
 }
 
-/* Selected card — brand fill wins immediately, even while hovering */
+/* Selected card — brand fill */
 [data-highlight-links] .form-field__card-input:checked + .form-field__card-face {
-  border-color: var(--highlight-link-color) !important;
-  background: var(--_field-brand) !important;
-  color: var(--color-White) !important;
+  border-color: var(--primary-600);
+  background: var(--_field-brand);
+  color: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
 }
 
 [data-highlight-links] .form-field__card-input:checked + .form-field__card-face:hover {
-  border-color: var(--color-Warning) !important;
-  background: var(--_field-brand) !important;
+  background: var(--btn-highlight-hover-bg, var(--primary-600));
+  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
 }
 
 /* ── Focus + Highlight links: focus wins ── */
@@ -351,21 +361,21 @@
    HIGHLIGHT LINKS + TEXTONLY — square borders, highlight colour
    ========================================================== */
 
+/* Text-only + highlight: keep text-only transparent bg, add outline ring only */
 [data-highlight-links] [data-render="textonly"] .form-field .form-field__input,
 [data-highlight-links] [data-render="textonly"] .form-field__card-face,
 [data-highlight-links] [data-render="textonly"] .form-field__checkbox-wrap,
 [data-highlight-links] [data-render="textonly"] .form-field__radio-wrap,
-[data-highlight-links] [data-render="textonly"] .form-field__toggle-wrap,
-[data-highlight-links] [data-render="textonly"] .form-field__card,
-[data-highlight-links] [data-render="textonly"] .form-field {
-  border-color: var(--highlight-link-color);
-  border-radius: 0;
+[data-highlight-links] [data-render="textonly"] .form-field__toggle-wrap {
+  background: transparent;
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
 
 [data-highlight-links] [data-render="textonly"] .form-field .form-field__input:hover,
-[data-highlight-links] [data-render="textonly"] .form-field__card-face:hover,
-[data-highlight-links] [data-render="textonly"] .form-field__card:hover,
-[data-highlight-links] [data-render="textonly"] .form-field:hover {
-  border-color: var(--color-Warning);
+[data-highlight-links] [data-render="textonly"] .form-field__card-face:hover {
+  background: transparent;
+  border-color: var(--secondary-600);
+  color: var(--_field-text);
 }
 

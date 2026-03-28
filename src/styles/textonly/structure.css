@@ -344,20 +344,29 @@
    FORM FIELD — textonly structure
    ========================================================== */
 
-/* Input: brand text-only style from brandconfig.json */
+/* Input: always bordered in text-only, shape from brand config */
 [data-render="textonly"] .form-field .form-field__input {
   --_field-bg: transparent;
-  border: var(--btn-textonly-border, 2px solid var(--primary-600));
+  border: 2px solid var(--primary-600);
   border-radius: var(--btn-textonly-radius, 0);
   box-shadow: none;
   backdrop-filter: none;
+  color: var(--neutral-800);
+  caret-color: var(--primary-600);
 }
 
+/* Active — secondary border */
 [data-render="textonly"] .form-field .form-field__input:focus {
   box-shadow: none;
   background: transparent;
   border-color: var(--secondary-600);
   border-width: 3px;
+}
+
+/* Filled — neutral border + subtle tint to show complete */
+[data-render="textonly"] .form-field.has-value .form-field__input:not(:focus) {
+  border-color: var(--neutral-400);
+  background: color-mix(in oklch, var(--neutral-400) 8%, transparent);
 }
 
 /* Show native controls, hide custom widgets */

@@ -361,4 +361,15 @@ const describedBy = [
       if (btn) btn.setAttribute('aria-expanded', 'false');
     }
   });
+
+  // Toggle has-value class on inputs for CSS state targeting
+  document.querySelectorAll('.form-field__input').forEach(input => {
+    const check = () => {
+      const hasVal = input.value && input.value.trim().length > 0;
+      input.closest('.form-field')?.classList.toggle('has-value', hasVal);
+    };
+    input.addEventListener('input', check);
+    input.addEventListener('change', check);
+    check(); // initial state
+  });
 </script>
