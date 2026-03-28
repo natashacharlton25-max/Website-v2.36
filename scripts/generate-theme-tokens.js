@@ -15,7 +15,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { generateThemeData } from '../src/utils/theme-engine.js';
-import chroma from 'chroma-js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const chroma = require('chroma-js');
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -197,6 +199,19 @@ function processDefinition(def, outputFolder) {
           }
         }
       }
+      // Set btn-filled-text from primary fill, btn-filled-text-dark from hover
+      if (brand.primary?.fill) {
+        const fillL = chroma(brand.primary.fill).get('oklch.l');
+        const textOnFill = fillL > 0.7 ? 'var(--neutral-900)' : 'var(--neutral-100)';
+        css = css.replace(/(--btn-filled-text:)\s*[^;]+/, `$1 ${textOnFill}`);
+        console.log(`  🎨 brand: btn-filled-text → ${textOnFill} (fill L=${fillL.toFixed(2)})`);
+      }
+      if (brand.primary?.hover) {
+        const hoverL = chroma(brand.primary.hover).get('oklch.l');
+        const textOnHover = hoverL > 0.7 ? 'var(--neutral-900)' : 'var(--neutral-100)';
+        css = css.replace(/(--btn-filled-text:)\s*([^;]+;)/, `$1 $2\n  --btn-filled-text-dark: ${textOnHover};`);
+        console.log(`  🎨 brand: btn-filled-text-dark → ${textOnHover} (hover L=${hoverL.toFixed(2)})`);
+      }
     }
   }
 
@@ -254,7 +269,7 @@ else console.log('✅ 0 themes failed WCAG text audit');
 // ── Auto-run generate-core-tokens (coretokens.css + theme-cards.css) ──
 console.log('\n── Generating core tokens + theme cards CSS ──');
 const coreTokensScript = path.join(rootDir, 'src/scripts/generate-core-tokens.js');
-const { execSync } = await import('child_process');
+const { execSync } = require('child_process');
 try {
   execSync(`node "${coreTokensScript}"`, { stdio: 'inherit', cwd: rootDir });
 } catch (e) {

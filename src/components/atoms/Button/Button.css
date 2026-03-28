@@ -20,6 +20,7 @@
   justify-content: center;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-lg);
+  min-height: 2.5rem;
   font-weight: var(--font-medium);
   font-size: var(--text-small);
   font-family: var(--font-body);
@@ -62,7 +63,7 @@
 /* None — resolve every decorative hover back to static state */
 [data-hover="none"] .btn:hover {
   background-color: var(--_btn-brand);
-  color: var(--btn-text, var(--btn-filled-text));
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   box-shadow: var(--btn-shadow, var(--shadow-btn));
   transform: none;
   filter: none;
@@ -70,7 +71,7 @@
 
 [data-hover="none"] .btn--outline:hover {
   background-color: transparent;
-  color: var(--_btn-brand-dark);
+  color: var(--_btn-brand);
   border-color: var(--_btn-brand);
   box-shadow: none;
 }
@@ -90,7 +91,7 @@
 
 [data-hover="none"] .btn--liquid-glass:hover {
   color: var(--btn-glass-text, var(--neutral-800));
-  border-color: var(--neutral-400);
+  border-color: color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
 }
 
 [data-hover="none"] .btn--glassic:hover {
@@ -100,7 +101,7 @@
 
 [data-hover="none"] .btn--colour-flow:hover {
   background: color-mix(in oklch, var(--_btn-brand) 10%, transparent);
-  color: var(--_btn-brand-dark);
+  color: var(--_btn-brand);
 }
 
 [data-hover="none"] .btn--neumorphic-3d:hover {
@@ -166,7 +167,7 @@
 .btn:disabled:hover,
 .btn[aria-disabled="true"]:hover {
   background-color: var(--_btn-brand);
-  color: var(--btn-text, var(--btn-filled-text));
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   box-shadow: var(--btn-shadow, var(--shadow-btn));
   transform: none;
   filter: none;
@@ -176,7 +177,7 @@
 .btn--outline:disabled:hover,
 .btn--outline[aria-disabled="true"]:hover {
   background-color: transparent;
-  color: var(--_btn-brand-dark);
+  color: var(--_btn-brand);
   border-color: var(--_btn-brand);
   box-shadow: none;
 }
@@ -267,8 +268,8 @@
 }
 
 .btn--neutral {
-  --_btn-brand: var(--btn-bg, var(--neutral-700));
-  --_btn-brand-dark: var(--btn-hover-bg, var(--neutral-900));
+  --_btn-brand: var(--btn-bg, var(--neutral-600));
+  --_btn-brand-dark: var(--btn-hover-bg, var(--neutral-700));
   --_btn-brand-light: var(--btn-light-bg, var(--neutral-400));
 }
 
@@ -298,14 +299,14 @@
 
 .btn--outline {
   background-color: transparent;
-  color: var(--_btn-brand-dark);
+  color: var(--_btn-brand);
   border: 2px solid var(--_btn-brand);
   box-shadow: none;
 }
 
 .btn--outline:hover {
   background-color: var(--_btn-brand);
-  color: var(--btn-text, var(--btn-filled-text));
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   border-color: var(--_btn-brand);
 }
 
@@ -323,7 +324,7 @@
 
 .btn--ghost:hover {
   background-color: var(--_btn-brand-light);
-  color: var(--_btn-brand-dark);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   border-color: var(--_btn-brand-light);
 }
 
@@ -342,15 +343,15 @@
 }
 
 .btn--glass:hover {
-  background: var(--_btn-brand-dark);
-  color: var(--btn-text, var(--btn-filled-text));
+  background: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   border-color: var(--_btn-brand);
   box-shadow: var(--btn-shadow-hover, var(--shadow-btn-hover));
 }
 
 .btn--glass:active {
-  background: var(--_btn-brand-dark);
-  color: var(--btn-text, var(--btn-filled-text));
+  background: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   box-shadow: var(--btn-shadow, var(--shadow-btn));
 }
 
@@ -377,7 +378,7 @@
   background: var(--gradient-hero);
   background-size: 200% 200%;
   animation: btn-glowloop 4s linear infinite;
-  color: var(--btn-text, var(--btn-filled-text));
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
 }
 
 .btn--glow:hover::after {
@@ -404,9 +405,9 @@
   --btn-text: var(--neutral-800);
   position: relative;
   z-index: 1;
-  border: 2px solid var(--neutral-400);
+  border: none;
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px color-mix(in oklch, var(--neutral-950) 25%, transparent), 0 2px 4px color-mix(in oklch, var(--neutral-950) 15%, transparent);
 }
 
 .btn-rainbow-glow-wrap::before {
@@ -491,29 +492,29 @@
 
 .btn--neumorphic-3d {
   background: var(--_btn-brand);
-  color: var(--btn-text, var(--btn-filled-text));
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   text-shadow: 0 0.0625em 0 var(--_btn-brand-dark);
   border: none;
   letter-spacing: 0.15em;
   box-shadow:
-    /* Inner highlight */
-    inset 0 0.0625em 0 0 color-mix(in oklch, var(--_btn-brand-light) 40%, transparent),
-    /* 3D layers */
-    0 0.0625em 0 0 var(--_btn-brand),
-    0 0.125em 0 0 var(--_btn-brand-dark),
-    0 0.25em 0 0 var(--_btn-brand-dark),
-    0 0.3125em 0 0 var(--_btn-brand-dark),
-    0 0.375em 0 0 var(--_btn-brand-dark),
-    0 0.425em 0 0 color-mix(in oklch, var(--color-Black) 15%, transparent),
+    /* Inner highlight — lighter from fill */
+    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    /* 3D layers — progressively darker from fill */
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
     /* Drop shadow */
-    0 0.425em 0.5em 0 var(--_btn-brand-dark),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
     /* Neumorphic outer */
     8px 8px 16px color-mix(in oklch, var(--color-Black) 20%, transparent);
 }
 
 .btn--neumorphic-3d:hover {
   background: var(--_btn-brand-dark);
-  color: var(--btn-text, var(--btn-filled-text));
+  color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
   transform: translateY(0.125em);
   box-shadow:
     /* Inner pressed shadows */
@@ -559,14 +560,14 @@
     -8px -8px 16px color-mix(in oklch, var(--color-White) 10%, transparent),
     /* Inner highlight */
     inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
-    /* 3D layers using primary */
-    0 0.0625em 0 0 var(--primary-400),
-    0 0.125em 0 0 var(--primary-500),
-    0 0.25em 0 0 var(--primary-600),
-    0 0.3125em 0 0 var(--primary-600),
-    0 0.375em 0 0 var(--primary-700),
-    0 0.425em 0 0 color-mix(in oklch, var(--color-Black) 10%, transparent),
-    0 0.425em 0.5em 0 var(--primary-600);
+    /* 3D layers — progressively darker from fill */
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
 }
 
 .btn--glassic:hover {
@@ -577,37 +578,38 @@
     8px 8px 16px color-mix(in oklch, var(--color-Black) 15%, transparent),
     -8px -8px 16px color-mix(in oklch, var(--color-White) 10%, transparent),
     inset 0 0.03em 0 0 color-mix(in oklch, var(--color-White) 10%, transparent),
-    0 0.03em 0 0 var(--primary-600),
-    0 0.0625em 0 0 var(--primary-700),
-    0 0.125em 0 0 var(--primary-700),
-    0 0.225em 0 0 color-mix(in oklch, var(--color-Black) 15%, transparent),
-    0 0.225em 0.375em 0 var(--primary-700);
+    0 0.03em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.225em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h / 0.85),
+    0 0.225em 0.375em 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h / 0.6);
 }
 
 .btn--glassic:active {
-  color: var(--color-White);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   transform: translateY(0.225em);
   box-shadow:
     inset 8px 8px 16px color-mix(in oklch, var(--color-Black) 40%, transparent),
     inset 0 0.03em 0 0 color-mix(in oklch, var(--color-White) 10%, transparent),
-    0 0.03em 0 0 var(--primary-700),
-    0 0.0625em 0 0 var(--primary-700),
-    0 0.125em 0 0 var(--primary-800),
-    0 0.225em 0 0 color-mix(in oklch, var(--color-Black) 15%, transparent),
-    0 0.225em 0.375em 0 var(--primary-800);
+    0 0.03em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.225em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.225em 0.375em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
 }
 
 /* ── Neumorphic Inner (pressed/inset look) ── */
 
 .btn--neumorphic-inner {
   background: var(--_btn-brand-light);
-  color: var(--_btn-brand-dark);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   border: none;
   box-shadow: var(--shadow-neu-pressed);
 }
 
 .btn--neumorphic-inner:hover {
-  background: var(--neutral-300);
+  background: var(--secondary-300);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   box-shadow: var(--shadow-neu-pressed);
 }
 
@@ -622,7 +624,7 @@
   background: var(--liquid-tint);
   backdrop-filter: blur(var(--liquid-blur));
   -webkit-backdrop-filter: blur(var(--liquid-blur));
-  border: 1px solid var(--neutral-400);
+  border: 1px solid color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
   color: var(--btn-glass-text, var(--neutral-800));
   box-shadow:
     var(--liquid-inner-shadow),
@@ -698,14 +700,14 @@
 /* Glass-like translucent base, text goes light on hover as blobs fill */
 .btn--colour-flow {
   background: color-mix(in oklch, var(--_btn-brand) 10%, transparent);
-  color: var(--_btn-brand-dark);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   backdrop-filter: blur(var(--glass-blur, 8px));
   -webkit-backdrop-filter: blur(var(--glass-blur, 8px));
   box-shadow: var(--shadow-btn);
 }
 
 .btn--colour-flow:hover {
-  color: var(--btn-text, var(--btn-filled-text));
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   background: color-mix(in oklch, var(--_btn-brand) 25%, transparent);
   box-shadow:
     0 6px 12px color-mix(in oklch, var(--_btn-brand) 30%, transparent),
@@ -847,7 +849,7 @@
   --_expand-r-start: 999px;
   --_expand-r-end: 999px;
   background: transparent;
-  color: var(--neutral-800);
+  color: oklch(from var(--page-bg) round(1.21 - l) 0 0);
   box-shadow: none;
   padding: 1.1rem 1.4rem 1.1rem calc(var(--_expand-circle) + 0.5rem);
   overflow: visible;
@@ -858,7 +860,7 @@
 .btn--expand:hover,
 .btn--expand:active {
   background: transparent;
-  color: var(--btn-text, var(--btn-filled-text));
+  color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
   box-shadow: none;
   transform: none;
 }
@@ -907,11 +909,11 @@
   top: 50%;
   transform: translate(-50%, -50%) rotate(0deg);
   z-index: 1;
-  color: var(--btn-text, var(--btn-filled-text));
+  color: inherit;
 }
 
 .btn--expand:hover .btn__icon {
-  transform: translate(-50%, -50%) rotate(90deg);
+  transform: translate(-50%, -50%);
 }
 
 /* Default chevron when no icon — SVG arrow-right via ::after on circle.
@@ -925,24 +927,24 @@
   width: 1.25em;
   height: 1.25em;
   z-index: 1;
-  background: var(--btn-text, var(--btn-filled-text));
+  background: currentColor;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z'/%3E%3C/svg%3E") center / contain no-repeat;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 .btn--expand:not(.btn--has-icon):hover::after {
-  transform: translate(-50%, -50%) rotate(90deg);
+  transform: translate(-50%, -50%);
 }
 
-/* Text — dark brand colour static, white on hover */
+/* Text — contrast against page static, contrast against fill on hover */
 .btn--expand .btn__label {
   position: relative;
   z-index: 2;
-  color: var(--neutral-800);
+  color: oklch(from var(--page-bg) round(1.21 - l) 0 0);
 }
 
 .btn--expand:hover .btn__label {
-  color: var(--btn-text, var(--btn-filled-text));
+  color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
 }
 
 /* Size variants */
@@ -1073,42 +1075,62 @@
    ========================================================== */
 
 .btn--sm {
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-fine);
   min-height: 2rem;
 }
 
+/* Base .btn is md: padding space-sm/space-lg, font-size text-small, min-height 2.5rem */
+
 .btn--lg {
-  padding: var(--space-lg) var(--space-2xl);
-  min-height: 3.5rem;
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--text-base);
+  min-height: 3.25rem;
 }
 
 /* ==========================================================
    SHAPE
    ========================================================== */
 
-.btn--rounded { border-radius: var(--radius-xl); }
-.btn--pill    { border-radius: var(--radius-full); }
-.btn--sharp   { border-radius: 0; }
+.btn--sharp    { border-radius: 0; }
+.btn--subtle   { border-radius: var(--radius-sm); }
+.btn--soft     { border-radius: var(--radius-md); }
+.btn--rounded  { border-radius: var(--radius-lg); }
+.btn--pill     { border-radius: var(--radius-full); }
 
-.btn--circle,
-.btn--square {
+/* Icon-only shapes */
+.btn--i-sharp,
+.btn--i-subtle,
+.btn--i-soft,
+.btn--i-rounded,
+.btn--circle {
   width: 2.75rem;
   height: 2.75rem;
   padding: 0;
 }
 
-.btn--circle { border-radius: 50%; }
+.btn--i-sharp   { border-radius: 0; }
+.btn--i-subtle  { border-radius: var(--radius-sm); }
+.btn--i-soft    { border-radius: var(--radius-md); }
+.btn--i-rounded { border-radius: var(--radius-lg); }
+.btn--circle    { border-radius: 50%; }
 
-.btn--sm.btn--circle,
-.btn--sm.btn--square {
+.btn--sm.btn--i-sharp,
+.btn--sm.btn--i-subtle,
+.btn--sm.btn--i-soft,
+.btn--sm.btn--i-rounded,
+.btn--sm.btn--circle {
   width: 2rem;
   height: 2rem;
 }
 
-.btn--lg.btn--circle,
-.btn--lg.btn--square {
-  width: 3.5rem;
-  height: 3.5rem;
+.btn--lg.btn--i-sharp,
+.btn--lg.btn--i-subtle,
+.btn--lg.btn--i-soft,
+.btn--lg.btn--i-rounded,
+.btn--lg.btn--circle {
+  width: 3.25rem;
+  height: 3.25rem;
 }
 
 /* Icon-only — hide text overflow */
