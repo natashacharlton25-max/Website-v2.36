@@ -192,14 +192,26 @@
 }
 
 /* Figures: only highlighted when alt text display is active (they're interactive then) */
+/* ── Visited state — clicked elements go neutral ── */
+[data-highlight-links] .highlight-visited {
+  outline-color: var(--neutral-400);
+}
+
+[data-highlight-links] a.highlight-visited {
+  text-decoration-color: var(--neutral-400);
+}
+
+[data-highlight-links] .btn.highlight-visited {
+  border-color: var(--neutral-400);
+  outline-color: var(--neutral-400);
+}
+
+/* Images — brand outline ring for interactive figures */
 [data-highlight-links][data-alt-display-mode="tooltip"] figure[tabindex="0"],
-[data-highlight-links][data-alt-display-mode="caption"] figure[tabindex="0"],
-[data-highlight-links][data-alt-display-mode="overlay"] figure[tabindex="0"],
-[data-highlight-links][data-alt-display-mode="subtitle"] figure[tabindex="0"],
-[data-highlight-links][data-alt-display-mode="replace"] figure[tabindex="0"] {
+[data-highlight-links][data-alt-display-mode="overlay"] figure[tabindex="0"] {
   display: inline-block;
-  outline: 2px solid var(--highlight-link-color);
-  outline-offset: 1px;
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
 
 /* ── Link cards and block links — outline ring ── */

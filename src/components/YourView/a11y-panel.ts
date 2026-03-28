@@ -35,7 +35,7 @@ export interface A11ySettings {
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
-  altDisplayMode: 'hidden' | 'overlay' | 'tooltip' | 'enlarge' | 'replace';
+  altDisplayMode: 'hidden' | 'overlay' | 'tooltip' | 'enlarge' | 'inline';
   cognitiveLevel: 'green' | 'yellow' | 'orange' | 'full';
   /** Which symbol pictures to show — OpenAAC is the bundled default */
   symbolSet: 'openaac' | 'widgit' | 'pcs' | 'bliss' | 'makaton' | 'custom';
@@ -237,6 +237,15 @@ export function applySettings(settings: A11ySettings): void {
   if (settings.highlightLinks) {
     document.documentElement.setAttribute('data-highlight-links', '');
     document.documentElement.setAttribute('data-highlight', 'static');
+    // Track clicked links — mark as visited
+    if (!(window as any).__highlightClickInit) {
+      (window as any).__highlightClickInit = true;
+      document.addEventListener('click', (e) => {
+        if (!document.documentElement.hasAttribute('data-highlight-links')) return;
+        const link = (e.target as Element).closest('a, button, [role="button"], [tabindex="0"]');
+        if (link) link.classList.add('highlight-visited');
+      });
+    }
   } else {
     document.documentElement.removeAttribute('data-highlight-links');
     document.documentElement.removeAttribute('data-highlight');

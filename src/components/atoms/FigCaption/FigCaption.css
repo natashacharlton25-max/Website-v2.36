@@ -62,8 +62,14 @@
   visibility: visible;
 }
 
-/* ── ? indicator on image ── */
-[data-alt-display-mode="tooltip"] .image[data-role="content"]::after {
+/* ── Overlay mode — bar only, no per-image popup ── */
+[data-alt-display-mode="overlay"] .figcaption {
+  display: none;
+}
+
+/* ── ? indicator on image — hidden by default, shows on hover or always on none ── */
+[data-alt-display-mode="tooltip"] .image[data-role="content"]::after,
+[data-alt-display-mode="overlay"] .image[data-role="content"]::after {
   content: "?";
   position: absolute;
   top: var(--space-sm);
@@ -71,7 +77,7 @@
   z-index: 2;
   font-size: 0.9em;
   font-weight: var(--font-bold);
-  color: var(--page-bg);
+  color: oklch(from var(--primary-600) round(1.21 - l) 0 0);
   background: var(--primary-600);
   width: 1.8em;
   height: 1.8em;
@@ -80,6 +86,53 @@
   justify-content: center;
   border-radius: var(--radius-full);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--hover-duration, var(--duration-fast)) var(--ease-default);
+}
+
+/* Show on hover */
+[data-alt-display-mode="tooltip"] .image[data-role="content"]:hover::after,
+[data-alt-display-mode="overlay"] .image[data-role="content"]:hover::after {
+  opacity: 1;
+}
+
+/* Hover-none — always visible (tells user it's clickable) */
+[data-hover="none"] [data-alt-display-mode="tooltip"] .image[data-role="content"]::after,
+[data-hover="none"] [data-alt-display-mode="overlay"] .image[data-role="content"]::after {
+  opacity: 1;
+}
+
+/* Highlight-links — bar border matches highlight ring colour */
+[data-highlight-links] {
+  --bar-border-color: var(--secondary-600);
+}
+
+/* ── Viewed state — neutral after alt text has been seen ── */
+[data-alt-display-mode="tooltip"] .image.alt-viewed[data-role="content"]::after,
+[data-alt-display-mode="overlay"] .image.alt-viewed[data-role="content"]::after {
+  background: var(--neutral-400);
+  color: oklch(from var(--neutral-400) round(1.21 - l) 0 0);
+}
+
+/* Figcaption popup — neutral border after viewed */
+.image.alt-viewed > .figcaption {
+  --_fc-border: var(--neutral-400);
+}
+
+/* Inline mode: viewed card border goes neutral */
+[data-alt-display-mode="inline"] .image.alt-viewed {
+  border-color: var(--neutral-400);
+}
+
+/* Highlight-links: viewed figure outline goes neutral */
+[data-highlight-links] .image.alt-viewed {
+  outline-color: var(--neutral-400);
+}
+
+/* Highlight-links — hide ? icon, border on figure instead */
+[data-highlight-links] [data-alt-display-mode="tooltip"] .image[data-role="content"]::after,
+[data-highlight-links] [data-alt-display-mode="overlay"] .image[data-role="content"]::after {
+  display: none;
 }
 
 

@@ -357,7 +357,7 @@
    ALT TEXT SPANS — two-axis gating
 
    Axis 1: data-alt-text-mode  = what to show  (none/word/descriptive/aac)
-   Axis 2: data-alt-display-mode = how to show  (hidden/caption/overlay/tooltip/replace)
+   Axis 2: data-alt-display-mode = how to show  (hidden/caption/overlay/tooltip/inline)
 
    Both attributes are set as data-* attributes on the document root element (<html>).
    Only the matching span for the active text-mode is ever visible.
@@ -389,20 +389,11 @@
 }
 
 /* ── Display mode: OVERLAY — positioned over the image ── */
-[data-alt-display-mode="overlay"][data-alt-text-mode="word"] .image-alt-word,
-[data-alt-display-mode="overlay"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
-[data-alt-display-mode="overlay"][data-alt-text-mode="aac"] .image-alt-aac {
-  display: block;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin-top: 0;
-  padding: var(--space-sm);
-  background: var(--_image-overlay);
-  color: var(--neutral-400);
-  font-size: var(--text-small);
-  line-height: var(--leading-snug);
+/* Overlay — uses shared bottom bar via FigCaption JS, hide inline spans */
+[data-alt-display-mode="overlay"] .image-alt-word,
+[data-alt-display-mode="overlay"] .image-alt-descriptive,
+[data-alt-display-mode="overlay"] .image-alt-aac {
+  display: none;
 }
 
 /* ── Display mode: TOOLTIP — FigCaption atom handles via JS ── */
@@ -447,57 +438,109 @@
 /* ── Display mode: REPLACE — image visually-hidden, text shown ──
    Uses visually-hidden (not display:none) so img stays in the
    accessibility tree. Screen reader still reads img alt. */
-[data-alt-display-mode="replace"] .image .image__img {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+/* Hide decorative + images with no alt text in inline mode */
+[data-alt-display-mode="inline"] .image[data-semantic-role="decorative"],
+[data-alt-display-mode="inline"] .image:not(:has(.image-alt-word)):not(:has(.image-alt-descriptive)):not(:has(.image-alt-aac)),
+[data-alt-display-mode="inline"] img[aria-hidden="true"]:not(figure img) {
+  display: none;
+}
+
+/* Two-column: thumbnail left, alt text right */
+[data-alt-display-mode="inline"] .image {
+  border: 2px solid var(--primary-600);
+  border-radius: var(--btn-textonly-radius, var(--radius-md));
+  display: grid;
+  grid-template-columns: 6rem 1fr;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-
-[data-alt-display-mode="replace"] .image {
-  border: 2px solid var(--neutral-400);
-  border-radius: var(--radius-md);
-  padding: var(--space-lg);
-  min-height: 6rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   background: var(--page-bg);
+  max-width: 100%;
+  box-shadow: var(--shadow);
 }
 
-/* Show the selected alt text mode */
-[data-alt-display-mode="replace"][data-alt-text-mode="word"] .image-alt-word {
-  display: block;
+/* Strip all image effects in inline mode */
+[data-alt-display-mode="inline"] .image .image__img {
+  outline: none;
+  filter: none;
+}
+
+[data-alt-display-mode="inline"] .image--shadow-sm,
+[data-alt-display-mode="inline"] .image--shadow-md,
+[data-alt-display-mode="inline"] .image--shadow-lg,
+[data-alt-display-mode="inline"] .image--shadow-inset,
+[data-alt-display-mode="inline"] .image--border-thin .image__img,
+[data-alt-display-mode="inline"] .image--border-medium .image__img,
+[data-alt-display-mode="inline"] .image--border-thick .image__img {
+  box-shadow: none;
+  outline: none;
+}
+
+/* Kill inner shadow pseudo-element */
+[data-alt-display-mode="inline"] .image--shadow-inset::after {
+  display: none;
+}
+
+/* Thumbnail — fills left column, cropped */
+[data-alt-display-mode="inline"] .image .image__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  grid-row: 1 / -1;
+}
+
+
+/* Alt text — right column with padding */
+[data-alt-display-mode="inline"][data-alt-text-mode="word"] .image-alt-word {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
   font-family: var(--font-body);
   font-size: var(--text-lg);
   font-weight: var(--font-semibold);
   color: var(--neutral-800);
 }
 
-[data-alt-display-mode="replace"][data-alt-text-mode="descriptive"] .image-alt-descriptive {
-  display: block;
+[data-alt-display-mode="inline"][data-alt-text-mode="descriptive"] .image-alt-descriptive {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: var(--leading-relaxed);
   color: var(--neutral-800);
 }
 
-[data-alt-display-mode="replace"][data-alt-text-mode="aac"] .image-alt-aac {
+[data-alt-display-mode="inline"][data-alt-text-mode="aac"] .image-alt-aac {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
   gap: var(--space-sm);
 }
 
 /* Fallback: if no alt text mode selected but replace is on, show descriptive */
-[data-alt-display-mode="replace"][data-alt-text-mode="none"] .image-alt-descriptive {
+[data-alt-display-mode="inline"][data-alt-text-mode="none"] .image-alt-descriptive {
   display: block;
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: var(--leading-relaxed);
   color: var(--neutral-600);
   font-style: italic;
+}
+
+/* AAC mode fallback: if no AAC cards, show altWord */
+[data-alt-display-mode="inline"][data-alt-text-mode="aac"] .image:not(:has(.image-alt-aac)) .image-alt-word {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--neutral-800);
 }
 
 /* AAC mode + cognitive level rules extracted to src/styles/global/aac-mode.css */

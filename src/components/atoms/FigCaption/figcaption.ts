@@ -26,13 +26,13 @@ function getSharedBar(): HTMLElement {
     position: fixed; bottom: 0; left: 0; right: 0;
     z-index: var(--z-tooltip, 9000);
     text-align: center; white-space: normal;
-    padding: var(--space-md, 12px) var(--space-lg, 24px);
+    padding: var(--space-lg, 16px) var(--space-2xl, 32px);
     background: var(--page-bg-raised, #f5f5f5);
     color: var(--neutral-800, #333);
-    border-top: 4px solid var(--primary-600, #666);
+    border-top: 4px solid var(--bar-border-color, var(--primary-600, #666));
     font-weight: 500;
     opacity: 0; visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
+    transition: opacity var(--hover-duration, 0.2s) ease, visibility var(--hover-duration, 0.2s) ease;
   `;
   document.body.appendChild(bar);
   sharedBar = bar;
@@ -40,6 +40,7 @@ function getSharedBar(): HTMLElement {
 }
 
 function isBarMode(): boolean {
+  if (isOverlayMode()) return true; // overlay always uses bar
   const hover = document.body.dataset.hover;
   if (hover === 'none') return false;
   const render = document.body.dataset.render;
@@ -48,19 +49,53 @@ function isBarMode(): boolean {
 }
 
 function isTooltipMode(): boolean {
-  return document.documentElement.dataset.altDisplayMode === 'tooltip';
+  const mode = document.documentElement.dataset.altDisplayMode;
+  return mode === 'tooltip' || mode === 'overlay' || mode === 'inline';
 }
 
-function showBar(html: string): void {
+function isOverlayMode(): boolean {
+  return document.documentElement.dataset.altDisplayMode === 'overlay';
+}
+
+function isInlineMode(): boolean {
+  return document.documentElement.dataset.altDisplayMode === 'inline';
+}
+
+function showBar(html: string, permanent = false): void {
   const bar = getSharedBar();
   if (barHideTimeout) { clearTimeout(barHideTimeout); barHideTimeout = null; }
-  bar.innerHTML = html;
-  bar.style.opacity = '1';
+
+  if (permanent) {
+    bar.innerHTML = `<span>${html}</span><button class="tooltip-bar__close" aria-label="Close" style="
+      position: absolute; right: var(--space-lg, 16px); top: 50%; transform: translateY(-50%);
+      background: var(--page-bg, #fff); border: 2px solid var(--bar-border-color, var(--primary-600, #666));
+      cursor: pointer; font-size: 1em; font-weight: bold;
+      color: var(--neutral-800, #333); padding: var(--space-xs, 4px) var(--space-sm, 8px);
+      border-radius: var(--radius-sm, 4px); line-height: 1;
+    ">&times;</button>`;
+    bar.style.position = 'fixed';
+    const closeBtn = bar.querySelector('.tooltip-bar__close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => hideBar(true));
+    }
+  } else {
+    bar.innerHTML = html;
+  }
+
   bar.style.visibility = 'visible';
+  requestAnimationFrame(() => {
+    bar.style.opacity = '1';
+  });
 }
 
-function hideBar(): void {
+function hideBar(immediate = false): void {
   if (barHideTimeout) clearTimeout(barHideTimeout);
+  if (immediate) {
+    const bar = getSharedBar();
+    bar.style.opacity = '0';
+    bar.style.visibility = 'hidden';
+    return;
+  }
   barHideTimeout = setTimeout(() => {
     const bar = getSharedBar();
     bar.style.opacity = '0';
@@ -76,11 +111,16 @@ function getAltContent(figure: HTMLElement): string {
   if (isAac) {
     const aac = figure.querySelector('.image-alt-aac');
     if (aac) return aac.innerHTML;
+    const word = figure.querySelector('.image-alt-word');
+    if (word) return word.textContent || '';
   }
 
   if (altMode === 'aac') {
     const aac = figure.querySelector('.image-alt-aac');
     if (aac) return aac.innerHTML;
+    // Fallback: no AAC cards, show word
+    const word = figure.querySelector('.image-alt-word');
+    if (word) return word.textContent || '';
   }
 
   if (altMode === 'descriptive') {
@@ -115,13 +155,17 @@ function initFigCaptions(): void {
 
     figure.dataset.figcaptionInit = 'true';
 
-    // Create figcaption element
-    const caption = document.createElement('figcaption');
-    caption.className = 'figcaption';
-    caption.setAttribute('aria-hidden', 'true');
-    figure.appendChild(caption);
+    // Create figcaption element (not for inline mode — alt text already visible)
+    let caption: HTMLElement | null = null;
+    if (!isInlineMode()) {
+      caption = document.createElement('figcaption');
+      caption.className = 'figcaption';
+      caption.setAttribute('aria-hidden', 'true');
+      figure.appendChild(caption);
+    }
 
     function updateCaption(): void {
+      if (!caption) return;
       const content = getAltContent(figure);
       const isAac = document.documentElement.hasAttribute('data-content-aac') ||
                      document.documentElement.dataset.altTextMode === 'aac' ||
@@ -134,17 +178,34 @@ function initFigCaptions(): void {
       }
     }
 
+    const isPermanentMode = () => isOverlayMode() && document.body.dataset.hover === 'none';
+
     function onEnter(): void {
       if (!isTooltipMode()) return;
-      updateCaption();
-      if (isBarMode()) {
+      if (isPermanentMode()) return; // click only in permanent mode
+      if (document.body.dataset.hover === 'none') return; // click only in hover-none
+      if (!isInlineMode()) updateCaption();
+      if (isBarMode() && !isInlineMode()) {
         const content = getAltContent(figure);
         if (content) showBar(content);
       }
     }
 
     function onLeave(): void {
+      if (isPermanentMode()) return; // stays until X clicked
+      figure.classList.add('alt-viewed'); // mark as seen on leave
+      figure.classList.add('highlight-visited'); // highlight-links visited state
       if (isBarMode()) hideBar();
+    }
+
+    function onClick(): void {
+      if (!isTooltipMode()) return;
+      if (!isPermanentMode()) return; // only for permanent mode
+      updateCaption();
+      const content = getAltContent(figure);
+      if (content) showBar(content, true);
+      // Mark as viewed — user has seen the alt text
+      figure.classList.add('alt-viewed');
     }
 
     // Populate content immediately
@@ -155,9 +216,35 @@ function initFigCaptions(): void {
     figure.addEventListener('focusin', onEnter);
     figure.addEventListener('focusout', onLeave);
 
-    // Touch support
+    // Click — touch support + permanent mode + hover-none viewed state
     figure.addEventListener('click', (e: Event) => {
-      if (isBarMode()) {
+      if (isPermanentMode()) {
+        e.stopPropagation();
+        onClick();
+      } else if (document.body.dataset.hover === 'none') {
+        // Hover-none: click toggles figcaption + marks viewed
+        e.stopPropagation();
+        updateCaption();
+        if (caption) {
+          const isShowing = caption.style.opacity === '1';
+          caption.style.opacity = isShowing ? '0' : '1';
+          caption.style.visibility = isShowing ? 'hidden' : 'visible';
+          caption.style.pointerEvents = isShowing ? 'none' : 'auto';
+          if (!isShowing) {
+            figure.classList.add('alt-viewed');
+            figure.classList.add('highlight-visited');
+          }
+        }
+        if (isBarMode()) {
+          const content = getAltContent(figure);
+          if (content) showBar(content, true);
+          figure.classList.add('alt-viewed');
+          figure.classList.add('highlight-visited');
+        }
+      } else if (isInlineMode()) {
+        figure.classList.add('alt-viewed');
+        figure.classList.add('highlight-visited');
+      } else if (isBarMode()) {
         e.stopPropagation();
         onEnter();
       }
