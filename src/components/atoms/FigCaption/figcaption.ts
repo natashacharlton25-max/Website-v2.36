@@ -41,11 +41,8 @@ function getSharedBar(): HTMLElement {
 
 function isBarMode(): boolean {
   if (isOverlayMode()) return true; // overlay always uses bar
-  const hover = document.body.dataset.hover;
-  if (hover === 'none') return false;
-  const render = document.body.dataset.render;
   const isMobile = window.innerWidth <= 640;
-  return render === 'textonly' || isMobile;
+  return isMobile; // only mobile uses bar, text-only uses popup
 }
 
 function isTooltipMode(): boolean {
