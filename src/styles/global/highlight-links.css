@@ -9,52 +9,34 @@
  */
 
 /* ── Dropdown button — ghost, outline, keeps own shape ── */
+/* ── Dropdown — brand highlight style ── */
 [data-highlight-links] .dropdown-btn {
-  background: transparent !important;
-  color: var(--neutral-700) !important;
-  border-color: transparent !important;
-  outline: 2px solid var(--highlight-link-color);
-  outline-offset: 1px;
+  background: var(--btn-highlight-bg, transparent);
+  color: var(--btn-highlight-text, var(--neutral-800));
+  border: var(--btn-highlight-border, 2px solid var(--primary-600));
+  border-radius: var(--btn-highlight-radius, var(--radius-md));
+  outline: var(--btn-highlight-outline, none);
+  outline-offset: var(--btn-highlight-outline-offset, 0);
 }
 
 [data-highlight-links] .dropdown-btn .icon {
-  color: var(--neutral-700);
+  color: inherit;
 }
 
 [data-highlight-links] .dropdown-btn:hover {
-  outline-color: var(--color-Warning);
+  background: var(--btn-highlight-hover-bg, var(--primary-600));
+  color: oklch(from var(--btn-highlight-hover-bg, var(--primary-600)) round(1.21 - l) 0 0);
+  border-color: var(--btn-highlight-hover-bg, var(--primary-600));
 }
 
-/* Dropdown menu — match highlight border when expanded */
-[data-highlight-links] .dropdown-wrapper {
-  --btn-dropdown-border: var(--highlight-link-color);
-}
-
-[data-highlight-links] .dropdown-wrapper:hover {
-  --btn-dropdown-border: var(--color-Warning);
-}
-
-/* Dropdown menu — transparent original border, wider to align with button outline */
-[data-highlight-links] .dropdown-wrapper .dropdown-menu {
-  border-color: transparent;
-  margin-left: -3px;
-  margin-right: -3px;
-  width: calc(100% + 6px);
-  border-width: 2px;
-  border-color: var(--highlight-link-color);
+/* Dropdown menu — brand border */
+[data-highlight-links] .dropdown-wrapper .dropdown-menu,
+[data-highlight-links] .dropdown-menu.show {
+  border: 2px solid var(--primary-600);
 }
 
 [data-highlight-links] .dropdown-wrapper:hover .dropdown-menu {
-  border-color: var(--color-Warning);
-}
-
-/* Dropdown menu — border when expanded */
-[data-highlight-links] .dropdown-menu.show {
-  border: 2px solid var(--highlight-link-color);
-}
-
-[data-highlight-links] .dropdown-menu.show:hover {
-  border-color: var(--color-Warning);
+  border-color: var(--primary-800);
 }
 
 /* ── Inline text links — underline ── */
@@ -368,6 +350,8 @@
 [data-highlight-links] [data-render="textonly"] .form-field__radio-wrap,
 [data-highlight-links] [data-render="textonly"] .form-field__toggle-wrap {
   background: transparent;
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
   outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
   outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
