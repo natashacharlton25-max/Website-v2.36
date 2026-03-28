@@ -193,6 +193,7 @@ function initFigCaptions(): void {
 
     function onLeave(): void {
       if (isPermanentMode()) return; // stays until X clicked
+      if (document.body.dataset.hover === 'none') return; // click handles viewed state
       figure.classList.add('alt-viewed'); // mark as seen on leave
       figure.classList.add('highlight-visited'); // highlight-links visited state
       if (isBarMode()) hideBar();
@@ -222,20 +223,17 @@ function initFigCaptions(): void {
         e.stopPropagation();
         onClick();
       } else if (document.body.dataset.hover === 'none') {
-        // Hover-none: click toggles figcaption + marks viewed
+        // Hover-none: click toggles figcaption
         e.stopPropagation();
         updateCaption();
         if (caption) {
-          const isShowing = caption.style.opacity === '1';
-          caption.style.opacity = isShowing ? '0' : '1';
-          caption.style.visibility = isShowing ? 'hidden' : 'visible';
-          caption.style.pointerEvents = isShowing ? 'none' : 'auto';
-          if (!isShowing) {
+          caption.classList.toggle('figcaption--show');
+          if (caption.classList.contains('figcaption--show')) {
             figure.classList.add('alt-viewed');
             figure.classList.add('highlight-visited');
           }
         }
-        if (isBarMode()) {
+        if (isBarMode() && !isInlineMode()) {
           const content = getAltContent(figure);
           if (content) showBar(content, true);
           figure.classList.add('alt-viewed');

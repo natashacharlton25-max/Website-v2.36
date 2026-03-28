@@ -49,15 +49,18 @@
   background: color-mix(in oklch, var(--neutral-400) 8%, var(--_field-hover-base, transparent));
 }
 
-/* Hover none: hide figcaption + ? indicator — inline alt text handles display */
-[data-hover="none"] .figcaption {
+/* Hover none: hide figcaption — suppress CSS hover show */
+[data-hover="none"] .figcaption,
+[data-hover="none"] .image:hover > .figcaption,
+[data-hover="none"] .image:focus-within > .figcaption {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
 
-/* Click-toggled figcaption in hover-none */
-[data-hover="none"] .figcaption.figcaption--show {
+/* Click-toggled figcaption in hover-none — beats hover suppression */
+[data-hover="none"] .image > .figcaption.figcaption--show,
+[data-hover="none"] .image:hover > .figcaption.figcaption--show {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
