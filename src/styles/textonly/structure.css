@@ -28,7 +28,7 @@
 }
 
 /* Keep content images — alt text system handles display */
-[data-render="textonly"] figure[data-role="content"] { display: block; }
+[data-render="textonly"] figure[data-role="content"] { display: inline-block; }
 
 /* Text-only + inline: hide image, single column alt text card */
 /* data-alt-display-mode on <html>, data-render on <body> */
@@ -130,8 +130,24 @@
 }
 
 /* Textonly: figcaption hidden — JS shared bar handles display */
+/* Text-only: figcaption visible in tooltip mode, hidden otherwise */
 [data-render="textonly"] .figcaption {
   display: none;
+}
+
+/* Text-only + tooltip: figcaption exists but hidden until hover/click */
+[data-alt-display-mode="tooltip"] [data-render="textonly"] .figcaption {
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Text-only + tooltip: images stay natural size, no grid */
+[data-alt-display-mode="tooltip"] [data-render="textonly"] .image {
+  display: inline-block;
+  width: auto;
+  max-width: 100%;
 }
 
 /* Reduced: figcaption no transition */
@@ -139,15 +155,22 @@
   transition: none;
 }
 
-/* Textonly + tooltip mode: hide alt text spans — bar handles them */
-[data-render="textonly"][data-alt-display-mode="tooltip"] .image-alt-word,
-[data-render="textonly"][data-alt-display-mode="tooltip"] .image-alt-descriptive,
-[data-render="textonly"][data-alt-display-mode="tooltip"] .image-alt-aac {
+/* Textonly + tooltip mode: hide alt text spans — figcaption handles them */
+[data-alt-display-mode="tooltip"] [data-render="textonly"] .image .image-alt-word,
+[data-alt-display-mode="tooltip"] [data-render="textonly"] .image .image-alt-descriptive,
+[data-alt-display-mode="tooltip"] [data-render="textonly"] .image .image-alt-aac {
+  display: none;
+}
+
+/* Also hide in overlay mode — bar handles them */
+[data-alt-display-mode="overlay"] [data-render="textonly"] .image .image-alt-word,
+[data-alt-display-mode="overlay"] [data-render="textonly"] .image .image-alt-descriptive,
+[data-alt-display-mode="overlay"] [data-render="textonly"] .image .image-alt-aac {
   display: none;
 }
 
 /* Textonly + hover none + tooltip + aac: show AAC cards inline (no bar available) */
-[data-alt-display-mode="tooltip"][data-render="textonly"][data-hover="none"][data-alt-text-mode="aac"] .image-alt-aac {
+[data-alt-display-mode="tooltip"] [data-render="textonly"][data-hover="none"] [data-alt-text-mode="aac"] .image-alt-aac {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs);
