@@ -236,6 +236,20 @@ function processDefinition(def, outputFolder) {
       overrideLines.push('');
       overrideLines.push(':root {');
 
+      // Text-only heading tokens
+      if (brand.textOnlyHeading) {
+        const th = brand.textOnlyHeading;
+        const colorFamily = th.color || 'neutral';
+        const SIZE_MAP = { h1: 'var(--text-h1)', h2: 'var(--text-h2)', h3: 'var(--text-h3)', h4: 'var(--text-h4)', h5: 'var(--text-h5)', h6: 'var(--text-h6)' };
+        const FONT_MAP = { heading: 'var(--font-heading)', body: 'var(--font-body)', mono: 'var(--font-mono)' };
+        const WEIGHT_MAP = { normal: 'var(--font-normal)', medium: 'var(--font-medium)', semibold: 'var(--font-semibold)', bold: 'var(--font-bold)', extrabold: 'var(--font-extrabold)' };
+        overrideLines.push(`  --heading-textonly-color: var(--${colorFamily}-600);`);
+        overrideLines.push(`  --heading-textonly-size: ${SIZE_MAP[th.size] || 'var(--text-h3)'};`);
+        overrideLines.push(`  --heading-textonly-font: ${FONT_MAP[th.font] || 'var(--font-heading)'};`);
+        overrideLines.push(`  --heading-textonly-weight: ${WEIGHT_MAP[th.weight] || 'var(--font-bold)'};`);
+        console.log(`  🎨 brand: textonly heading → ${th.color}/${th.size}/${th.font || 'heading'}/${th.weight || 'bold'}`);
+      }
+
       // Text-only button tokens
       const toTokens = buildButtonTokens('btn-textonly', brand.textOnlyButton);
       if (toTokens) {

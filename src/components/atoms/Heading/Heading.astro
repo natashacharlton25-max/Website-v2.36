@@ -37,6 +37,9 @@ interface Props {
   tracking?: 'normal' | 'wide' | 'wider';
   flush?: boolean;
 
+  // ── Colour ──────────────────────────────────────────────
+  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+
   // ── Subtitle ─────────────────────────────────────────────
   subtitle?: string;
   subtitleSize?: 'xs' | 'sm' | 'base' | 'lg' | 'xl';
@@ -70,6 +73,7 @@ interface Props {
 
 const {
   level,
+  color = 'primary',
   size,
   weight,
   family,
@@ -124,6 +128,7 @@ const computedIconSize = mediaSize === 'auto' ? (iconSizeMap[sizeKey] ?? 32) : (
 
 const headingClassList = [
   'heading',
+  `heading--${color}`,
   `heading--${visualSize}`,
   weight && `heading--weight-${weight}`,
   family && `heading--family-${family}`,
@@ -137,6 +142,7 @@ const headingClassList = [
 {isDecorated ? (
   <div class:list={[
     'heading-wrap',
+    `heading--${color}`,
     `heading-wrap--align-${align ?? 'left'}`,
     `heading-wrap--spacing-${spacing}`,
     `heading-wrap--variant-${variant}`,
