@@ -1161,6 +1161,12 @@
   border-bottom-right-radius: 0;
 }
 
+/* Hover none — only flatten on click-open, not hover */
+[data-hover="none"] .dropdown-wrapper:not(.open):hover .btn--dropdown {
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+}
+
 .dropdown-menu {
   position: absolute;
   top: 100%;
@@ -1177,7 +1183,7 @@
   opacity: 0;
   overflow: hidden;
   visibility: hidden;
-  transition: max-height var(--duration-base) var(--ease-default), opacity var(--duration-fast) var(--ease-default), visibility 0s var(--duration-base);
+  transition: max-height var(--hover-duration, var(--duration-base)) var(--ease-default), opacity var(--hover-duration-fast, var(--duration-fast)) var(--ease-default), visibility 0s var(--hover-duration, var(--duration-base));
 }
 
 .dropdown-wrapper:hover .dropdown-menu,
@@ -1185,8 +1191,16 @@
   max-height: 20rem;
   opacity: 1;
   visibility: visible;
-  transition: max-height var(--duration-base) var(--ease-default), opacity var(--duration-fast) var(--ease-default), visibility 0s;
+  transition: max-height var(--hover-duration, var(--duration-base)) var(--ease-default), opacity var(--hover-duration-fast, var(--duration-fast)) var(--ease-default), visibility 0s;
 }
+
+/* Hover none — only click (.show) opens, not hover */
+[data-hover="none"] .dropdown-wrapper:hover .dropdown-menu:not(.show) {
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
 
 .dropdown-item {
   display: block;

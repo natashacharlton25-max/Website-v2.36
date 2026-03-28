@@ -66,22 +66,100 @@
   text-decoration-color: var(--primary-800);
 }
 
-/* ── Form fields — highlight adds outline ring only, no design change ── */
-[data-highlight-links] .form-field__input,
+/* ── Form fields — same as text-only + outline ring ── */
+[data-highlight-links] .form-field__input {
+  background: transparent;
+  border: 2px solid var(--primary-600);
+  box-shadow: none;
+  backdrop-filter: none;
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
+}
+
 [data-highlight-links] .form-field__checkbox-wrap,
 [data-highlight-links] .form-field__radio-wrap,
 [data-highlight-links] .form-field__toggle-wrap {
+  border: 2px solid var(--primary-600);
+  background: transparent;
   outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
   outline-offset: var(--btn-highlight-outline-offset, 3px);
-  border-radius: var(--radius-md);
 }
 
-/* Neumorphic has border:none — add border for highlight visibility */
-[data-highlight-links] .form-field--neumorphic .form-field__input {
+[data-highlight-links] .form-field__card-face {
+  background: transparent;
   border: 2px solid var(--primary-600);
+  outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
+  outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
 
-/* Controls: no hover override — normal hover stays, highlight just adds ring */
+/* Hover — brand tint like text-only */
+[data-highlight-links] .form-field__input:hover,
+[data-highlight-links] .form-field__checkbox-wrap:hover,
+[data-highlight-links] .form-field__radio-wrap:hover,
+[data-highlight-links] .form-field__toggle-wrap:hover,
+[data-highlight-links] .form-field__card-face:hover {
+  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+  border-color: var(--primary-600);
+}
+
+/* Strip custom controls to match text-only */
+[data-highlight-links] .form-field__checkmark,
+[data-highlight-links] .form-field__radio-indicator {
+  border-color: var(--primary-600);
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-highlight-links] .form-field__toggle-track {
+  border: 2px solid var(--primary-600);
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Focus — secondary border */
+[data-highlight-links] .form-field__input:focus {
+  border-color: var(--secondary-600);
+  background: transparent;
+}
+
+[data-highlight-links] .form-field__checkbox-wrap:has(:focus-visible),
+[data-highlight-links] .form-field__radio-wrap:has(:focus-visible),
+[data-highlight-links] .form-field__toggle-wrap:has(:focus-visible) {
+  border-color: var(--secondary-600);
+}
+
+/* Checked — neutral border + tint when not focused */
+[data-highlight-links] .form-field__checkbox-wrap:has(:checked):not(:has(:focus-visible)),
+[data-highlight-links] .form-field__radio-wrap:has(:checked):not(:has(:focus-visible)),
+[data-highlight-links] .form-field__toggle-wrap:has(:checked):not(:has(:focus-visible)) {
+  border-color: var(--neutral-400);
+  background: color-mix(in oklch, var(--neutral-400) 8%, transparent);
+}
+
+/* Card checked — brand fill */
+[data-highlight-links] .form-field__card-input:checked + .form-field__card-face {
+  background: var(--_field-brand);
+  border-color: var(--_field-brand);
+  color: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
+}
+
+/* Hover-none gate — no hover feedback */
+[data-highlight-links] [data-hover="none"] .form-field__input:hover,
+[data-highlight-links] [data-hover="none"] .form-field__checkbox-wrap:hover,
+[data-highlight-links] [data-hover="none"] .form-field__radio-wrap:hover,
+[data-highlight-links] [data-hover="none"] .form-field__toggle-wrap:hover,
+[data-highlight-links] [data-hover="none"] .form-field__card-input:not(:checked) + .form-field__card-face:hover {
+  background: transparent;
+  border-color: var(--primary-600);
+}
+
+/* Hover-none checked card stays filled */
+[data-highlight-links] [data-hover="none"] .form-field__card-input:checked + .form-field__card-face,
+[data-highlight-links] [data-hover="none"] .form-field__card-input:checked + .form-field__card-face:hover {
+  background: var(--_field-brand);
+  border-color: var(--_field-brand);
+  color: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
+}
 
 /* Error fields — highlight border */
 [data-highlight-links] .form-field--error .form-field__input,
@@ -150,6 +228,23 @@
   box-shadow: none;
   text-shadow: none;
 }
+
+/* Strip glow + pseudo-element effects */
+[data-highlight-links] .btn:not(.dropdown-btn)::before,
+[data-highlight-links] .btn:not(.dropdown-btn)::after,
+[data-highlight-links] .btn-rainbow-glow-wrap::before,
+[data-highlight-links] .btn-rainbow-glow-wrap::after {
+  display: none;
+}
+
+/* Hover — colour change only, no movement */
+[data-highlight-links] .btn:not(.dropdown-btn):hover {
+  background: var(--btn-highlight-hover-bg, var(--primary-800));
+  color: var(--btn-highlight-hover-text, oklch(from var(--primary-800) round(1.21 - l) 0 0));
+  transform: none;
+  box-shadow: none;
+}
+
 
 /* ── Focus overrides highlight — focus wins completely ── */
 [data-highlight-links] [data-focus-active] {
@@ -241,29 +336,144 @@
    HIGHLIGHT LINKS + TEXTONLY — square borders, highlight colour
    ========================================================== */
 
-/* Text-only + highlight: just add outline ring, no other changes */
+/* Text-only + highlight: just add outline ring, lock inner border to primary */
 [data-highlight-links] [data-render="textonly"] .form-field .form-field__input,
 [data-highlight-links] [data-render="textonly"] .form-field__card-face,
 [data-highlight-links] [data-render="textonly"] .form-field__checkbox-wrap,
 [data-highlight-links] [data-render="textonly"] .form-field__radio-wrap,
 [data-highlight-links] [data-render="textonly"] .form-field__toggle-wrap {
   background: transparent;
+  border-color: var(--primary-600);
   outline: var(--btn-highlight-outline, 3px solid var(--secondary-600));
   outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
 
-/* No hover change — text-only design stays as-is, highlight just adds ring */
+
+/* Text-only + highlight hover — brand tint */
 [data-highlight-links] [data-render="textonly"] .form-field .form-field__input:hover,
-[data-highlight-links] [data-render="textonly"] .form-field__card-face:hover,
 [data-highlight-links] [data-render="textonly"] .form-field__checkbox-wrap:hover,
 [data-highlight-links] [data-render="textonly"] .form-field__radio-wrap:hover,
 [data-highlight-links] [data-render="textonly"] .form-field__toggle-wrap:hover,
-[data-highlight-links] [data-render="textonly"] .btn:hover,
-[data-highlight-links] [data-render="textonly"] .badge:hover,
-[data-highlight-links] [data-render="textonly"] .card:hover,
-[data-highlight-links] [data-render="textonly"] :where(button, summary, [role="button"], [tabindex="0"]):hover {
+[data-highlight-links] [data-render="textonly"] .form-field__card-face:hover {
+  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+}
+
+/* Form field dropdown — follows form field style, not button style */
+[data-highlight-links] [data-render="textonly"] .form-field .btn--dropdown {
+  background: transparent;
+  color: var(--neutral-800);
+  border: 2px solid var(--primary-600);
+}
+
+[data-highlight-links] [data-render="textonly"] .form-field .btn--dropdown:hover {
+  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+  color: var(--neutral-800);
+  border-color: var(--primary-600);
+}
+
+/* Selected dropdown — neutral */
+[data-highlight-links] [data-render="textonly"] .form-field.has-value .btn--dropdown {
+  border-color: var(--neutral-500);
+  background: color-mix(in oklch, var(--neutral-400) 8%, transparent);
+  color: var(--neutral-800);
+}
+
+[data-highlight-links] [data-render="textonly"] .form-field.has-value .btn--dropdown:hover {
+  border-color: var(--primary-600);
+  background: color-mix(in oklch, var(--neutral-400) 12%, transparent);
+  color: var(--neutral-800);
+}
+
+/* Checked controls hover — neutral tint to match neutral border */
+[data-highlight-links] [data-render="textonly"] .form-field__checkbox-wrap:has(:checked):hover,
+[data-highlight-links] [data-render="textonly"] .form-field__radio-wrap:has(:checked):hover,
+[data-highlight-links] [data-render="textonly"] .form-field__toggle-wrap:has(:checked):hover {
+  background: color-mix(in oklch, var(--neutral-400) 12%, transparent);
+  border-color: var(--neutral-400);
+}
+
+/* Text-only + highlight checked card — instant fill, all hover modes */
+[data-highlight-links] [data-render="textonly"] .form-field__card-input:checked + .form-field__card-face,
+[data-highlight-links] [data-render="textonly"] .form-field__card-input:checked + .form-field__card-face:hover {
+  background: var(--_field-brand);
+  border-color: var(--_field-brand);
+  color: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
+}
+
+/* Text-only + highlight + hover-none — completely static (except checked cards) */
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field .form-field__input:hover,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field .form-field__input:focus,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field__checkbox-wrap:hover,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field__radio-wrap:hover,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field__toggle-wrap:hover {
+  background: transparent;
+  border-color: var(--primary-600);
+  color: inherit;
+}
+
+/* Buttons — keep text-only static fill on hover-none */
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .btn:hover {
+  background: var(--btn-textonly-bg, transparent);
+  color: var(--btn-textonly-text, var(--primary-600));
+  border-color: inherit;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Dropdown selected — keep neutral on hover */
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field.has-value .btn--dropdown:hover {
+  border-color: var(--neutral-500);
+  background: color-mix(in oklch, var(--neutral-400) 8%, transparent);
+}
+
+/* Checked controls — keep neutral state on hover */
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field__checkbox-wrap:has(:checked):hover,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field__radio-wrap:has(:checked):hover,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field__toggle-wrap:has(:checked):hover {
+  border-color: var(--neutral-400);
+  background: color-mix(in oklch, var(--neutral-400) 8%, transparent);
+}
+
+/* Unchecked card hover — static */
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field__card-input:not(:checked) + .form-field__card-face:hover {
+  background: transparent;
+  border-color: var(--primary-600);
+}
+
+/* Checked card — stays filled even on hover */
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field__card-input:checked + .form-field__card-face,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .form-field__card-input:checked + .form-field__card-face:hover {
+  background: var(--_field-brand);
+  border-color: var(--_field-brand);
+  color: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
+}
+
+/* Text-only + highlight + hover-none: buttons/badges/cards static */
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .btn:hover,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .badge:hover,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .card:hover,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] :where(button, summary, [role="button"], [tabindex="0"]):hover {
   background: transparent;
   color: inherit;
   transform: none;
 }
 
+/* ── Hover gate: none — resolve to static state ── */
+/* data-highlight-links is on <html>, data-hover is on <body> */
+[data-highlight-links] [data-hover="none"] .btn:not(.dropdown-btn):hover,
+[data-highlight-links] [data-hover="none"] .dropdown-btn:hover {
+  background: var(--btn-highlight-bg, transparent);
+  color: var(--btn-highlight-text, var(--neutral-800));
+  transform: none;
+  box-shadow: none;
+}
+
+/* Hover gate: none — form controls stay static */
+[data-highlight-links] [data-hover="none"] .form-field__input:hover,
+[data-highlight-links] [data-hover="none"] .form-field__checkbox-wrap:hover,
+[data-highlight-links] [data-hover="none"] .form-field__radio-wrap:hover,
+[data-highlight-links] [data-hover="none"] .form-field__toggle-wrap:hover,
+[data-highlight-links] [data-hover="none"] .form-field__card-face:hover {
+  background: transparent;
+  border-color: inherit;
+}

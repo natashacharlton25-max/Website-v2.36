@@ -176,6 +176,55 @@
   filter: none;
 }
 
+/* Hover gate: none — resolve to static */
+[data-render="textonly"][data-hover="none"] .btn:hover {
+  background: var(--btn-textonly-bg, transparent);
+  color: var(--btn-textonly-text, var(--primary-600));
+}
+
+/* Form field hover — subtle brand tint on bg */
+[data-render="textonly"] .form-field .form-field__input:hover {
+  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+}
+
+/* Card hover — light brand tint */
+[data-render="textonly"] .form-field__card-face:hover {
+  background: color-mix(in oklch, var(--_field-brand) 10%, transparent);
+}
+
+/* Checkbox/radio/toggle wrap hover */
+[data-render="textonly"] .form-field__checkbox-wrap:hover,
+[data-render="textonly"] .form-field__radio-wrap:hover,
+[data-render="textonly"] .form-field__toggle-wrap:hover {
+  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
+}
+
+/* Card checked — brand fill */
+[data-render="textonly"] .form-field__card-input:checked + .form-field__card-face {
+  background: var(--_field-brand);
+  border-color: var(--_field-brand);
+  color: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
+}
+
+/* Hover-none — all form controls stay static */
+[data-render="textonly"][data-hover="none"] .form-field .form-field__input:hover,
+[data-render="textonly"][data-hover="none"] .form-field__checkbox-wrap:hover,
+[data-render="textonly"][data-hover="none"] .form-field__radio-wrap:hover,
+[data-render="textonly"][data-hover="none"] .form-field__toggle-wrap:hover {
+  background: transparent;
+}
+
+[data-render="textonly"][data-hover="none"] .form-field__card-face:hover {
+  background: transparent;
+  border-color: color-mix(in oklch, var(--_field-brand) 30%, var(--_field-border));
+}
+
+[data-render="textonly"][data-hover="none"] .form-field__card-input:checked + .form-field__card-face {
+  border-color: var(--_field-brand);
+  background: var(--_field-brand);
+  color: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
+}
+
 /* Remove hover effects — cards + toast only */
 [data-render="textonly"] .card:hover,
 [data-render="textonly"] [data-card]:hover,
@@ -369,32 +418,49 @@
   background: color-mix(in oklch, var(--neutral-400) 8%, transparent);
 }
 
-/* Show native controls, hide custom widgets */
-[data-render="textonly"] .form-field__checkmark { display: none; }
-[data-render="textonly"] .form-field__checkbox {
-  position: static;
-  opacity: 1;
-  width: 24px;
-  height: 24px;
-  accent-color: var(--_field-brand);
+/* Control wraps — bordered like inputs */
+[data-render="textonly"] .form-field__checkbox-wrap,
+[data-render="textonly"] .form-field__radio-wrap,
+[data-render="textonly"] .form-field__toggle-wrap {
+  border: 2px solid var(--primary-600);
+  border-radius: var(--btn-textonly-radius, 0);
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
 }
 
-[data-render="textonly"] .form-field__radio-indicator { display: none; }
-[data-render="textonly"] .form-field__radio {
-  position: static;
-  opacity: 1;
-  width: 24px;
-  height: 24px;
-  accent-color: var(--_field-brand);
+/* Active — secondary border on focus */
+[data-render="textonly"] .form-field__checkbox-wrap:has(:focus-visible),
+[data-render="textonly"] .form-field__radio-wrap:has(:focus-visible),
+[data-render="textonly"] .form-field__toggle-wrap:has(:focus-visible) {
+  border-color: var(--secondary-600);
 }
 
-[data-render="textonly"] .form-field__toggle-track { display: none; }
-[data-render="textonly"] .form-field__toggle {
-  position: static;
-  opacity: 1;
-  width: 24px;
-  height: 24px;
-  accent-color: var(--_field-brand);
+/* Checked — neutral border + tint when not focused */
+[data-render="textonly"] .form-field__checkbox-wrap:has(:checked):not(:has(:focus-visible)),
+[data-render="textonly"] .form-field__radio-wrap:has(:checked):not(:has(:focus-visible)),
+[data-render="textonly"] .form-field__toggle-wrap:has(:checked):not(:has(:focus-visible)) {
+  border-color: var(--neutral-400);
+  background: color-mix(in oklch, var(--neutral-400) 8%, transparent);
+}
+
+/* Dropdown — selected (has-value) goes neutral */
+[data-render="textonly"] .form-field.has-value .btn--dropdown {
+  border: 2px solid var(--neutral-500);
+  background: color-mix(in oklch, var(--neutral-400) 8%, transparent);
+}
+
+/* Keep custom controls, strip effects, use brand border */
+[data-render="textonly"] .form-field__checkmark,
+[data-render="textonly"] .form-field__radio-indicator {
+  border-color: var(--primary-600);
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-render="textonly"] .form-field__toggle-track {
+  border: 2px solid var(--primary-600);
+  background: transparent;
+  box-shadow: none;
 }
 
 
