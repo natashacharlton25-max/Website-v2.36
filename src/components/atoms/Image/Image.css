@@ -88,6 +88,18 @@
   background: var(--page-bg-raised);
 }
 
+.image--bg-tint {
+  background: color-mix(in oklch, var(--_image-border) 10%, var(--page-bg));
+}
+
+.image--bg-wash {
+  background: color-mix(in oklch, var(--_image-border) 25%, var(--page-bg));
+}
+
+.image--bg-fill {
+  background: var(--_image-border);
+}
+
 /* ==========================================================
    MASK SHAPES — CSS mask-image effects
    ========================================================== */
@@ -196,18 +208,28 @@
    ========================================================== */
 
 /* ==========================================================
-   BORDER
+   BORDER — inset outline (inside image, no layout shift)
    ========================================================== */
 
-.image--border-thin   { border: 1px solid var(--_image-border); }
-.image--border-medium { border: 2px solid var(--_image-border); }
-.image--border-thick  { border: 4px solid var(--_image-border); }
+.image--border-thin   .image__img { outline: 2px solid var(--_image-border); outline-offset: -2px; }
+.image--border-medium .image__img { outline: 4px solid var(--_image-border); outline-offset: -4px; }
+.image--border-thick  .image__img { outline: 8px solid var(--_image-border); outline-offset: -8px; }
 
 .image--shadow-none { box-shadow: none; }
 .image--shadow-sm   { box-shadow: var(--img-shadow-sm); }
 .image--shadow-md   { box-shadow: var(--img-shadow-md); }
 .image--shadow-lg   { box-shadow: var(--img-shadow-lg); }
-.image--shadow-inset { box-shadow: inset 0 2px 8px color-mix(in oklch, var(--color-Black) 20%, transparent); }
+.image--shadow-inset { position: relative; overflow: hidden; }
+.image--shadow-inset::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 4px 16px color-mix(in oklch, var(--color-Black) 30%, transparent),
+              inset 0 -4px 16px color-mix(in oklch, var(--color-Black) 15%, transparent);
+  pointer-events: none;
+  z-index: 1;
+}
 
 /* ==========================================================
    CLIP PATH + SHADOW — drop-shadow filter since box-shadow
