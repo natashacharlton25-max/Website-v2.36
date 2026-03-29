@@ -109,11 +109,28 @@ Controls all decorative hover feedback speed. Does NOT control hover content (to
 | `gentle` | 400ms fast, 800ms base, 2s slow | Slow, soft hover transitions |
 | `none` | 0s all, `--hover-state: 0` | No hover decoration at all |
 
-### Focus interaction
-When an element has `data-focus-active`, its hover is killed regardless of gate:
-- Fill stays, shifts to `--color-Success` on hover
+### Focus interaction (UPDATED 2026-03-29)
+
+Focus ring and hover are now **independently gated**:
+
+| System | Controls | Tokens | File |
+|---|---|---|---|
+| **Focus gate** | Ring move speed + appear animation | `--focus-move-duration`, `--focus-appear-duration` | `focus-gate.css` |
+| **Hover gate** | Focus ring hover colour change speed (info→success) | `--hover-duration` per mode | `hover-gate.css` |
+
+Focus hover colour change per hover mode:
+| Hover mode | Focus ring hover behaviour |
+|---|---|
+| `full` | Colour shifts info→success at `--hover-duration` (200ms) |
+| `gentle` | Colour shifts slowly (0.8s) |
+| `instant` | Colour shifts instantly |
+| `none` | No colour change — ring stays at `--focus-color` |
+
+When an element has `data-focus-active`:
+- Fill stays, shifts to `--color-Success` on hover (unless hover=none)
 - No transform, no filter, no text-shadow, no backdrop-filter
 - Pseudo-elements (`::before`, `::after`) on focused buttons are hidden
+- Link effects stripped: underline grow `::before` hidden, text slide gradient removed, highlight bar hidden
 
 ---
 
@@ -128,6 +145,7 @@ Makes all interactive elements visually identifiable with coloured borders.
 | Element type | Highlight treatment |
 |---|---|
 | Links (`a`) | Underline + outline |
+| Link atom (`.link`) | Border variant from brand config: `--secondary-600` outline, body text colour, hover fills with light secondary. All variant decorations stripped. |
 | Buttons (`.btn`) | Ghost pill (transparent bg, border) |
 | Images (`figure[data-role="content"]`) | Outline (only when alt text display active) |
 | Form fields | Outline |
@@ -139,7 +157,9 @@ Makes all interactive elements visually identifiable with coloured borders.
 - Monochrome themes: ash grey / cadet grey
 - HC themes: actual status colours
 - Rainbow mode: cycles complement colour on each tab
-- Hover shifts to `--color-Warning`
+- Hover: text stays static, light secondary fill for feedback
+- Brand config (`highlightLinksButton`) controls: shape, outline colour, outline width
+- Lists get loose spacing for border link items
 
 ### Focus override
 When `:focus-visible`, highlight outline hidden, focus ring takes over completely.
@@ -181,7 +201,7 @@ Controls which HTML template is visible.
 |---|---|---|
 | `full` | Default | All CSS, animations, hover effects |
 | `reduced` | Calm Mode | Animation props stripped (no animation classes emitted) |
-| `textonly` | Reading Mode | Content only, structural rules from `textonly/structure.css` |
+| `textonly` | Reading Mode | Content only, structural rules from `textonly/structure.css`. Links: bold, primary colour, hover changes colour + underline. All variant decorations stripped. Dark mode swaps static/hover tokens. |
 
 ### Textonly visual styles
 
