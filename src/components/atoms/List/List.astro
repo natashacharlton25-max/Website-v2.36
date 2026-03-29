@@ -12,7 +12,7 @@
  *   <List items={['One', 'Two', 'Three']} />
  *   <List as="ol" items={['First', 'Second']} />
  *   <List icon="check-circle-fill" items={['Done', 'Done']} />
- *   <List icon="arrow-right-fill" iconColor="secondary" items={['Go', 'Go']} />
+ *   <List icon="arrow-right-fill" color="secondary" items={['Go', 'Go']} />
  *   <List variant="dot" items={['Custom dots']} />
  *   <List variant="dot" dotSize="lg" items={['Big dots']} />
  *   <List variant="none" items={['Clean', 'No bullets']} />
@@ -36,7 +36,7 @@ interface Props {
   dotSize?: 'sm' | 'md' | 'lg';
   icon?: string;
   iconCollection?: string;
-  iconColor?: 'primary' | 'accent' | 'text' | 'inherit';
+  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
   spacing?: 'tight' | 'normal' | 'loose';
   flush?: boolean;
   class?: string;
@@ -50,7 +50,7 @@ const {
   dotSize = 'md',
   icon,
   iconCollection = 'interface',
-  iconColor = 'primary',
+  color = 'primary',
   spacing = 'normal',
   flush = false,
   class: className,
@@ -74,7 +74,7 @@ const classes = [
   `list--${variant}`,
   hasIcon && 'list--has-icon',
   variant === 'dot' && `list--dot-${dotSize}`,
-  iconColor !== 'primary' && `list--icon-color-${iconColor}`,
+  `list--${color}`,
   spacing !== 'normal' && `list--spacing-${spacing}`,
   flush && 'list--flush',
   className,

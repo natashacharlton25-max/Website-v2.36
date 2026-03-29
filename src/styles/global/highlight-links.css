@@ -92,14 +92,31 @@
 }
 
 [data-highlight-links] .link:hover {
-  color: var(--secondary-600);
+  color: var(--_link-text);
   background: color-mix(in oklch, var(--secondary-600) 10%, transparent);
   border-color: var(--secondary-600);
 }
 
+/* ── List — loose spacing for border link items ── */
+[data-highlight-links] .list__item {
+  margin-bottom: var(--space-sm);
+}
+
+/* Textonly + highlight-links — hover changes text + underline together */
+[data-highlight-links] [data-render="textonly"] .link:hover,
+[data-highlight-links] [data-render="textonly"] .link[class*="link--"]:hover {
+  color: var(--_link-hover);
+}
+
+[data-highlight-links] [data-render="textonly"] .link:hover .text {
+  text-decoration-color: var(--_link-hover);
+}
+
 /* Hover gate: none — no hover change on highlighted links */
 [data-highlight-links] [data-hover="none"] .link,
-[data-highlight-links] [data-hover="none"] .link:hover {
+[data-highlight-links] [data-hover="none"] .link:hover,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .link:hover,
+[data-highlight-links] [data-render="textonly"][data-hover="none"] .link[class*="link--"]:hover {
   color: var(--_link-text);
   background: transparent;
 }
