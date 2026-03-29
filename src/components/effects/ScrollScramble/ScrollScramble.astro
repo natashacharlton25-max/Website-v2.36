@@ -25,9 +25,13 @@ interface WordConfig {
 
 interface Props {
   words: WordConfig[];
+  /** Layout mode: linear (inline text) or circular (radial arrangement) */
+  mode?: 'linear' | 'circular';
   size?: string;
   weight?: string;
   family?: 'body' | 'body-alt' | 'heading' | 'mono' | 'handwriting';
+  /** Circle diameter CSS value (circular mode only) */
+  circleSize?: string;
   scrub?: number | boolean;
   start?: string;
   end?: string;
@@ -36,14 +40,18 @@ interface Props {
 
 const {
   words,
+  mode = 'linear',
   size,
   weight,
   family = 'heading',
+  circleSize = '30vw',
   scrub = 1,
   start = 'top top',
   end = 'bottom bottom',
   class: className,
 } = Astro.props;
+
+const wordCount = words.length;
 
 const id = `scroll-scramble-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -54,19 +62,34 @@ const style = [
 ].filter(Boolean).join('; ');
 ---
 
-<div class="scroll-scramble-wrap" id={id} data-scrub={scrub} data-start={start} data-end={end}>
-  <div
-    class:list={['scroll-scramble', className]}
-    style={style || undefined}
-  >
-    {words.map((word) => (
-      <p class="scroll-scramble__word" aria-label={word.text} data-color={word.color || 'primary'}>
-        {[...word.text].map((char, i) => (
-          <span class="scroll-scramble__letter" aria-hidden="true" data-i={i}>{char}</span>
-        ))}
-      </p>
-    ))}
-  </div>
+<div class="scroll-scramble-wrap" id={id} data-scrub={scrub} data-start={start} data-end={end} data-mode={mode}>
+  {mode === 'circular' ? (
+    <ul
+      class:list={['scroll-scramble scroll-scramble--circular', className]}
+      style={`${style || ''}; --circle-size: ${circleSize}; --word-count: ${wordCount};`}
+    >
+      {words.map((word, wi) => (
+        <li class="scroll-scramble__word-radial" data-color={word.color || 'primary'} style={`--wi: ${wi};`} aria-label={word.text}>
+          {[...word.text].map((char, i) => (
+            <span class="scroll-scramble__letter" aria-hidden="true" data-i={i} style={`--i: ${i};`}>{char}</span>
+          ))}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <div
+      class:list={['scroll-scramble', className]}
+      style={style || undefined}
+    >
+      {words.map((word) => (
+        <p class="scroll-scramble__word" aria-label={word.text} data-color={word.color || 'primary'}>
+          {[...word.text].map((char, i) => (
+            <span class="scroll-scramble__letter" aria-hidden="true" data-i={i}>{char}</span>
+          ))}
+        </p>
+      ))}
+    </div>
+  )}
 </div>
 
 <!-- Textonly fallback -->
@@ -95,30 +118,17 @@ const style = [
       wrap.dataset.scrambleInit = 'true';
 
       const scrub = parseFloat(wrap.dataset.scrub || '1') || 1;
+      const effectMode = wrap.dataset.mode || 'linear';
       const inner = wrap.querySelector('.scroll-scramble') as HTMLElement;
       if (!inner) return;
 
-      const letters = inner.querySelectorAll<HTMLElement>('.scroll-scramble__letter');
+      if (effectMode === 'circular') {
+        // Circular: tween --rotate from 0 to 1
+        // CSS calc() handles circle rotation + letter angle convergence
+        gsap.set(inner, { '--rotate': 0 });
 
-      // Set initial scattered positions
-      letters.forEach((letter) => {
-        const i = parseInt(letter.dataset.i || '0');
-        const dir = 1 - 2 * (i % 2);
-        const rand = ((i * 7 + 20) % 4) - 4;
-        const wave = Math.sin(i * 17 * Math.PI / 180);
-
-        const startY = (rand + wave) * dir * 75;
-        const z = Math.abs(rand * 2 + wave);
-        const startZ = z * 1.5 * 13;
-
-        gsap.set(letter, { y: startY, z: startZ });
-      });
-
-      // Scrub letters from scattered to final as wrapper scrolls through
-      letters.forEach((letter) => {
-        gsap.to(letter, {
-          y: 0,
-          z: 0,
+        gsap.to(inner, {
+          '--rotate': 1,
           ease: 'none',
           scrollTrigger: {
             trigger: wrap,
@@ -128,7 +138,38 @@ const style = [
             scrub,
           },
         });
-      });
+      } else {
+        // Linear: scatter Y/Z per letter, converge on scroll
+        const letters = inner.querySelectorAll<HTMLElement>('.scroll-scramble__letter');
+
+        letters.forEach((letter) => {
+          const i = parseInt(letter.dataset.i || '0');
+          const dir = 1 - 2 * (i % 2);
+          const rand = ((i * 7 + 20) % 4) - 4;
+          const wave = Math.sin(i * 17 * Math.PI / 180);
+
+          const startY = (rand + wave) * dir * 75;
+          const z = Math.abs(rand * 2 + wave);
+          const startZ = z * 1.5 * 13;
+
+          gsap.set(letter, { y: startY, z: startZ });
+        });
+
+        letters.forEach((letter) => {
+          gsap.to(letter, {
+            y: 0,
+            z: 0,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: wrap,
+              scroller: osViewport || undefined,
+              start: 'top bottom',
+              end: 'center center',
+              scrub,
+            },
+          });
+        });
+      }
     });
   }
 

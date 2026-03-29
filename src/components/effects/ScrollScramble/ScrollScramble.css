@@ -51,6 +51,62 @@
 .scroll-scramble__word[data-color="purple"] { color: var(--rainbow-6); }
 .scroll-scramble__word[data-color="pink"] { color: var(--rainbow-7); }
 
+/* ══════════════════════════════════════════════════════════════
+   CIRCULAR MODE — words arranged radially, rotate + unscramble
+   ══════════════════════════════════════════════════════════════ */
+
+.scroll-scramble--circular {
+  --rotate: 0;
+  --radius: calc(var(--circle-size, 30vw) / 2);
+  --letter-spacing: 1ch;
+  --letter-angle-delta: 48deg;
+
+  display: block;
+  width: var(--circle-size, 30vw);
+  height: var(--circle-size, 30vw);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  border-radius: 50%;
+  transform: translateY(-50%) rotate(calc(var(--rotate) * 360deg));
+}
+
+.scroll-scramble__word-radial {
+  position: absolute;
+  inset: 50%;
+  transform: rotate(calc(360deg / var(--word-count) * var(--wi)));
+  margin: 0;
+  padding: 0;
+}
+
+.scroll-scramble__word-radial .scroll-scramble__letter {
+  --letter-rotate: var(--rotate);
+  --letter-scramble-angle: calc((var(--i) + 1) * var(--letter-angle-delta));
+  --letter-angle: calc(var(--letter-scramble-angle) * (1 - var(--letter-rotate)));
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: 0 0;
+  font-size: var(--scramble-size, clamp(1rem, 3.5vw + 0.045rem, 3rem));
+  transform:
+    rotate(var(--letter-angle))
+    translateX(var(--radius))
+    translateX(calc(var(--i) * var(--letter-spacing)));
+}
+
+/* Radial word colours */
+.scroll-scramble__word-radial[data-color="primary"] { color: var(--primary-600); }
+.scroll-scramble__word-radial[data-color="secondary"] { color: var(--secondary-600); }
+.scroll-scramble__word-radial[data-color="neutral"] { color: var(--neutral-800); }
+.scroll-scramble__word-radial[data-color="red"] { color: var(--rainbow-1); }
+.scroll-scramble__word-radial[data-color="orange"] { color: var(--rainbow-2); }
+.scroll-scramble__word-radial[data-color="yellow"] { color: var(--rainbow-3); }
+.scroll-scramble__word-radial[data-color="teal"] { color: var(--rainbow-4); }
+.scroll-scramble__word-radial[data-color="blue"] { color: var(--rainbow-5); }
+.scroll-scramble__word-radial[data-color="purple"] { color: var(--rainbow-6); }
+.scroll-scramble__word-radial[data-color="pink"] { color: var(--rainbow-7); }
+
 /* ── Textonly fallback ── */
 .scroll-scramble__textonly {
   display: none;
