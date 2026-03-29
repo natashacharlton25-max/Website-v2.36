@@ -180,7 +180,16 @@ const id = `letter-drop-${Math.random().toString(36).slice(2, 8)}`;
         });
       }
 
-      dropLetters();
+      // Trigger when scrolled into view, not on page load
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            dropLetters();
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.2 });
+      observer.observe(container);
 
       // JS-driven hover: play once, cooldown before replay
       container.addEventListener('mouseenter', (e) => {

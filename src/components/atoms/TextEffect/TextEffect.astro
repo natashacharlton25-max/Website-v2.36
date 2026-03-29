@@ -73,7 +73,6 @@ const classes = [
   hasFill && 'text-effect--fill',
   hasGradientAnim && 'text-effect--gradient-anim',
   hasGradientAnim && `text-effect--gradient-${gradientSpeed}`,
-  hasGradientAnim && gradientTrigger === 'hover' && 'text-effect--gradient-hover',
   innerShadow && 'text-effect--inner-shadow',
   weight && `text-effect--weight-${weight}`,
   family && `text-effect--family-${family}`,
@@ -128,31 +127,3 @@ const styles = [
   {text}
 </Tag>
 
-<script>
-  function initTextEffects() {
-    document.querySelectorAll<HTMLElement>('.text-effect--gradient-hover').forEach((el) => {
-      if (el.dataset.teInit) return;
-      el.dataset.teInit = 'true';
-
-      el.addEventListener('mouseenter', () => el.classList.add('is-animating'));
-      el.addEventListener('mouseleave', () => {
-        el.classList.remove('is-animating');
-        el.classList.add('is-fading');
-        setTimeout(() => el.classList.remove('is-fading'), 300);
-      });
-
-      // Touch
-      el.addEventListener('touchstart', () => {
-        el.classList.add('is-animating');
-        setTimeout(() => {
-          el.classList.remove('is-animating');
-          el.classList.add('is-fading');
-          setTimeout(() => el.classList.remove('is-fading'), 300);
-        }, 2000);
-      }, { passive: true });
-    });
-  }
-
-  initTextEffects();
-  document.addEventListener('astro:page-load', initTextEffects);
-</script>

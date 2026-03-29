@@ -1,0 +1,67 @@
+/**
+ * ScrollScramble — scroll-driven letter convergence
+ *
+ * Letters start scattered (random Y offset + depth) and converge
+ * to final position as user scrolls. GSAP ScrollTrigger drives it.
+ */
+
+.scroll-scramble {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1ch;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.scroll-scramble__word {
+  perspective: 300px;
+  transform-style: preserve-3d;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.scroll-scramble__letter {
+  display: inline-block;
+  position: relative;
+  font-size: var(--scramble-size, clamp(1rem, 2.5vw + 0.045rem, 1.5rem));
+  font-weight: var(--scramble-weight, var(--font-extrabold));
+  font-family: var(--scramble-family, var(--font-heading));
+  will-change: transform;
+}
+
+/* ── Colour per word — set via data-color on word element ── */
+.scroll-scramble__word[data-color="primary"] { color: var(--primary-600); }
+.scroll-scramble__word[data-color="secondary"] { color: var(--secondary-600); }
+.scroll-scramble__word[data-color="neutral"] { color: var(--neutral-800); }
+.scroll-scramble__word[data-color="red"] { color: var(--rainbow-1); }
+.scroll-scramble__word[data-color="orange"] { color: var(--rainbow-2); }
+.scroll-scramble__word[data-color="yellow"] { color: var(--rainbow-3); }
+.scroll-scramble__word[data-color="teal"] { color: var(--rainbow-4); }
+.scroll-scramble__word[data-color="blue"] { color: var(--rainbow-5); }
+.scroll-scramble__word[data-color="purple"] { color: var(--rainbow-6); }
+.scroll-scramble__word[data-color="pink"] { color: var(--rainbow-7); }
+
+/* ── Textonly fallback ── */
+.scroll-scramble__textonly {
+  display: none;
+}
+
+[data-render="textonly"] .scroll-scramble {
+  display: none;
+}
+
+[data-render="textonly"] .scroll-scramble__textonly {
+  display: block;
+}
+
+/* ── Reduced — no 3D, instant position ── */
+[data-render="reduced"] .scroll-scramble__letter {
+  transform: none !important;
+}

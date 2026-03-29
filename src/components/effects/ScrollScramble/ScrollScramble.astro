@@ -1,0 +1,143 @@
+---
+/**
+ * ScrollScramble — Scroll-driven letter convergence
+ *
+ * Letters start scattered with random Y offset + Z depth.
+ * As user scrolls, letters converge to final readable position.
+ * GSAP ScrollTrigger drives the animation.
+ *
+ * Props:
+ *   words      — Array of { text, color } objects (one per word)
+ *   size       — CSS font size (default: clamp responsive)
+ *   weight     — Font weight token
+ *   family     — Font family token
+ *   scrub      — GSAP scrub value (default: 1)
+ *   start      — ScrollTrigger start (default: "top top")
+ *   end        — ScrollTrigger end (default: "bottom bottom")
+ *
+ * Source: codepen.io/cbolson scroll scramble demo
+ */
+
+interface WordConfig {
+  text: string;
+  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+}
+
+interface Props {
+  words: WordConfig[];
+  size?: string;
+  weight?: string;
+  family?: 'body' | 'body-alt' | 'heading' | 'mono' | 'handwriting';
+  scrub?: number | boolean;
+  start?: string;
+  end?: string;
+  class?: string;
+}
+
+const {
+  words,
+  size,
+  weight,
+  family = 'heading',
+  scrub = 1,
+  start = 'top top',
+  end = 'bottom bottom',
+  class: className,
+} = Astro.props;
+
+const id = `scroll-scramble-${Math.random().toString(36).slice(2, 8)}`;
+
+const style = [
+  size && `--scramble-size: ${size}`,
+  weight && `--scramble-weight: ${weight}`,
+  family && `--scramble-family: var(--font-${family})`,
+].filter(Boolean).join('; ');
+---
+
+<div
+  class:list={['scroll-scramble', className]}
+  id={id}
+  data-scrub={scrub}
+  data-start={start}
+  data-end={end}
+  style={style || undefined}
+>
+  {words.map((word) => (
+    <p class="scroll-scramble__word" aria-label={word.text} data-color={word.color || 'primary'}>
+      {[...word.text].map((char, i) => (
+        <span class="scroll-scramble__letter" aria-hidden="true" data-i={i}>{char}</span>
+      ))}
+    </p>
+  ))}
+</div>
+
+<!-- Textonly fallback -->
+<div class="scroll-scramble__textonly">
+  {words.map((word) => (
+    <span style="margin-right: 0.5ch;">{word.text}</span>
+  ))}
+</div>
+
+<script>
+  async function initScrollScramble() {
+    const containers = document.querySelectorAll<HTMLElement>('.scroll-scramble');
+    if (!containers.length) return;
+
+    const render = document.body.dataset.render;
+    if (render === 'textonly' || render === 'reduced') return;
+
+    const { gsap } = await import('gsap');
+    const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Use OverlayScrollbars viewport if available
+    const osViewport = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement | null;
+
+    containers.forEach((container) => {
+      if (container.dataset.scrambleInit) return;
+      container.dataset.scrambleInit = 'true';
+
+      const scrub = parseFloat(container.dataset.scrub || '1') || 1;
+      const start = container.dataset.start || 'top top';
+      const end = container.dataset.end || 'bottom bottom';
+
+      const letters = container.querySelectorAll<HTMLElement>('.scroll-scramble__letter');
+
+      // Calculate scatter offsets per letter
+      letters.forEach((letter) => {
+        const i = parseInt(letter.dataset.i || '0');
+        const dir = 1 - 2 * (i % 2);
+        const rand = ((i * 7 + 20) % 4) - 4;
+        const wave = Math.sin(i * 17 * Math.PI / 180);
+
+        const startY = (rand + wave) * dir * 75;
+        const z = Math.abs(rand * 2 + wave);
+        const startZ = z * 1.5 * 13;
+
+        // Set initial scattered position
+        gsap.set(letter, {
+          y: startY,
+          z: startZ,
+        });
+
+        // Animate to 0 on scroll
+        gsap.to(letter, {
+          y: 0,
+          z: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: document.body,
+            scroller: osViewport || undefined,
+            start,
+            end,
+            scrub,
+          },
+        });
+      });
+    });
+  }
+
+  // Delay to let OverlayScrollbars init
+  setTimeout(initScrollScramble, 400);
+  document.addEventListener('astro:page-load', () => setTimeout(initScrollScramble, 400));
+</script>
