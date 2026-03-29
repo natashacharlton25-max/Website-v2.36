@@ -374,11 +374,22 @@
 
 [data-render="textonly"] .link--uppercase { text-transform: none; letter-spacing: normal; }
 
-[data-render="textonly"] .link--color-primary,
-[data-render="textonly"] .link--color-accent,
-[data-render="textonly"] .link--color-text,
-[data-render="textonly"] .link--color-muted {
+/* All colour variants use primary in textonly */
+[data-render="textonly"] .link[class*="link--"] {
   color: var(--_link-color);
+}
+
+[data-render="textonly"] .link[class*="link--"]:hover {
+  color: var(--_link-hover);
+}
+
+[data-render="textonly"][data-hover="none"] .link[class*="link--"]:hover {
+  color: var(--_link-color);
+}
+
+[data-render="textonly"][data-hover="none"] .link:hover .text,
+[data-render="textonly"][data-hover="none"] .link--underline:hover .text {
+  text-decoration-color: var(--_link-color);
 }
 
 
