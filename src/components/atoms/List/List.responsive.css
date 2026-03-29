@@ -2,17 +2,47 @@
  * List — responsive.css
  *
  * Item text size inherits from Text.responsive.css.
- * This file handles: indent, spacing, inline wrapping.
+ * This file handles: indent, spacing, inline wrapping, mobile stacking.
  */
 
-/* ── Tablet (768px) ─────────────────────────────────────── */
+/* ── Small screens (450px) — inline stacks, everything scales up ── */
 
-/* @media-stripped-0 *//* ── Mobile (480px) ─────────────────────────────────────── */
+@media (max-width: 450px) {
+  /* Inline lists stack vertically */
+  .list--inline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-/* @media-stripped-1 *//* ── Small mobile (280px) ───────────────────────────────── */
+  /* All items get loose spacing */
+  .list .list__item {
+    padding: var(--space-sm) 0;
+  }
 
-/* @media-stripped-2 *//* ── Micro (200px) ──────────────────────────────────────── */
+  /* Dots scale to large */
+  .list--dot-sm .list__dot,
+  .list--dot-md .list__dot,
+  .list--dot-lg .list__dot {
+    width: 0.75em;
+    height: 0.75em;
+  }
 
-/* @media-stripped-3 *//* ── Ultra-micro (150px) ────────────────────────────────── */
+  /* Icons scale up */
+  .list--has-icon .list__icon svg,
+  .list--has-icon .list__icon {
+    width: 1.5em;
+    height: 1.5em;
+  }
 
-/* @media-stripped-4 */
+  /* Ordered numbers scale up, tighter min-width */
+  ol.list--default .list__item::before {
+    font-size: 1.25em;
+    min-width: 1.25em;
+  }
+
+  /* Unordered bullets scale up */
+  ul.list--default .list__item::before {
+    width: 0.6em;
+    height: 0.6em;
+  }
+}
