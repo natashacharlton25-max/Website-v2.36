@@ -23,31 +23,11 @@ function textonlyProps(item: any) {
         {section.layout === 'block' ? (
           <div style="display:flex;flex-direction:column;gap:var(--space-lg);">
             {section.items.map((item: any) => (
-              <Fragment>
-                <div class="render-full">
-                  <Text>{item.label} <Link
-                    href={item.href}
-                    variant={item.variant}
-                    color={item.color}
-                    weight={item.weight}
-                    uppercase={item.uppercase}
-                    flush={item.flush}
-                    external={item.external}
-                    download={item.download}
-                    ariaLabel={item.ariaLabel}
-                    underlineGrow={item.underlineGrow}
-                    highlightGrow={item.highlightGrow}
-                    shadowFill={item.shadowFill}
-                    textSlide={item.textSlide}
-                  >{item.variant || 'default'}</Link> {item.afterText}</Text>
-                </div>
-                <div class="render-reduced">
-                  <Text>{item.label} <Link href={item.href} variant={item.variant} color={item.color}>{item.variant || 'default'}</Link> {item.afterText}</Text>
-                </div>
-                <div class="render-textonly">
-                  <Text>{item.label} <Link href={item.href}>{item.variant || 'default'}</Link> {item.afterText}</Text>
-                </div>
-              </Fragment>
+              <Text flush>{item.before}<Link
+                href={item.href}
+                variant={item.variant}
+                color={item.color}
+              >{item.linkText}</Link>{item.after}</Text>
             ))}
           </div>
         ) : (
