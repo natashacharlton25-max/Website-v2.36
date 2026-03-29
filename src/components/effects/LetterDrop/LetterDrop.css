@@ -10,6 +10,7 @@
 
 .letter-drop--family-heading     { font-family: var(--font-heading); }
 .letter-drop--family-body        { font-family: var(--font-body); }
+.letter-drop--family-body-alt    { font-family: var(--font-body-alt); }
 .letter-drop--family-mono        { font-family: var(--font-mono); }
 .letter-drop--family-handwriting { font-family: var(--font-handwriting); }
 
@@ -29,12 +30,18 @@
   backface-visibility: hidden;
 }
 
-/* ── Hover animations (gated by data-hover in hover-gate.css) ── */
-.letter-drop__letter--final.hover-balance:hover     { animation: ld-balance 3s ease-out; }
-.letter-drop__letter--final.hover-shrinkjump:hover  { animation: ld-shrinkjump 3s ease-in-out; }
-.letter-drop__letter--final.hover-falling:hover     { animation: ld-falling 3.5s ease-out; }
-.letter-drop__letter--final.hover-rotate:hover      { animation: ld-rotate 3s ease-out; }
-.letter-drop__letter--final.hover-toplong:hover     { animation: ld-toplong 3.5s linear; }
+/* Once landed, kill transform/opacity transition so hover animations run clean */
+.letter-drop__letter--final {
+  opacity: 1;
+  transition: none;
+}
+
+/* ── Hover animations — triggered by JS, not CSS :hover ── */
+.letter-drop__letter--animating.hover-balance     { animation: ld-balance 3s ease-out forwards; }
+.letter-drop__letter--animating.hover-shrinkjump  { animation: ld-shrinkjump 3s ease-in-out forwards; }
+.letter-drop__letter--animating.hover-falling     { animation: ld-falling 3.5s ease-out forwards; }
+.letter-drop__letter--animating.hover-rotate      { animation: ld-rotate 3s ease-out forwards; }
+.letter-drop__letter--animating.hover-toplong     { animation: ld-toplong 3.5s linear forwards; }
 
 @keyframes ld-balance {
   0%, 100% { transform: rotate(0deg); }

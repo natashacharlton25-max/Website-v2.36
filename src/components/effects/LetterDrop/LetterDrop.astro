@@ -27,9 +27,11 @@ interface LineConfig {
 
 interface Props {
   lines: LineConfig[];
+  /** Effect mode: drop-in (fly + reveal only), hover (hover animations only), both (full effect) */
+  mode?: 'drop-in' | 'hover' | 'both';
   size?: string;
   weight?: string | number;
-  family?: 'body' | 'heading' | 'mono' | 'handwriting';
+  family?: 'body' | 'body-alt' | 'heading' | 'mono' | 'handwriting';
   landDelay?: number;
   revealDelay?: number;
   class?: string;
@@ -37,6 +39,7 @@ interface Props {
 
 const {
   lines,
+  mode = 'both',
   size = '7vw',
   weight = 800,
   family = 'heading',
@@ -51,6 +54,7 @@ const id = `letter-drop-${Math.random().toString(36).slice(2, 8)}`;
 <div
   class:list={['letter-drop', family && `letter-drop--family-${family}`, className]}
   id={id}
+  data-mode={mode}
   data-land-delay={landDelay}
   data-reveal-delay={revealDelay}
   style={`font-size: ${size}; font-weight: ${weight};`}
@@ -79,10 +83,13 @@ const id = `letter-drop-${Math.random().toString(36).slice(2, 8)}`;
 
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       const hoverClasses = ['hover-balance', 'hover-shrinkjump', 'hover-falling', 'hover-rotate', 'hover-toplong'];
+      const effectMode = container.dataset.mode || 'both';
       const landDelay = parseInt(container.dataset.landDelay || '500');
       const revealDelay = parseInt(container.dataset.revealDelay || '1500');
       const lines = container.querySelectorAll<HTMLElement>('.letter-drop__line');
       const isReduced = render === 'reduced';
+      const hasDrop = effectMode === 'drop-in' || effectMode === 'both';
+      const hasHover = effectMode === 'hover' || effectMode === 'both';
 
       let totalLetters = 0;
       let lettersLanded = 0;
@@ -106,11 +113,23 @@ const id = `letter-drop-${Math.random().toString(36).slice(2, 8)}`;
             span.className = 'letter-drop__letter';
             span.dataset.index = String(idx);
 
-            if (isReduced) {
-              // No scatter animation — instant reveal
+            // Random hover effect (avoid repeating previous)
+            const available = hoverClasses.filter(c => c !== prevHover);
+            const hoverClass = available[Math.floor(Math.random() * available.length)];
+            prevHover = hoverClass;
+            span.dataset.hover = hoverClass;
+
+            if (isReduced || !hasDrop) {
+              // No scatter — show final letter immediately
               span.textContent = char;
               span.style.color = line.dataset.color || '';
               span.style.opacity = '1';
+              span.classList.add('letter-drop__letter--final');
+              // Add hover class if hover mode enabled
+              if (hasHover && !isReduced) {
+                const hover = document.body.dataset.hover;
+                if (hover !== 'none') span.classList.add(hoverClass);
+              }
               line.appendChild(span);
               return;
             }
@@ -122,12 +141,6 @@ const id = `letter-drop-${Math.random().toString(36).slice(2, 8)}`;
             span.textContent = wrong;
             span.style.color = 'var(--neutral-600)';
             span.style.transform = `translate(${Math.random() * 500 - 250}px, ${Math.random() * 500 - 250}px) rotate(${Math.random() * 360 - 180}deg)`;
-
-            // Random hover effect (avoid repeating previous)
-            const available = hoverClasses.filter(c => c !== prevHover);
-            const hoverClass = available[Math.floor(Math.random() * available.length)];
-            prevHover = hoverClass;
-            span.dataset.hover = hoverClass;
 
             line.appendChild(span);
 
@@ -156,16 +169,41 @@ const id = `letter-drop-${Math.random().toString(36).slice(2, 8)}`;
             el.style.color = parent.dataset.color || '';
             el.classList.add('letter-drop__letter--final');
 
-            // Add hover effect class (gated by data-hover)
-            const hover = document.body.dataset.hover;
-            if (hover !== 'none' && el.dataset.hover) {
-              el.classList.add(el.dataset.hover);
+            // Add hover effect class (gated by data-hover and mode)
+            if (hasHover) {
+              const hover = document.body.dataset.hover;
+              if (hover !== 'none' && el.dataset.hover) {
+                el.classList.add(el.dataset.hover);
+              }
             }
           }, i * 400);
         });
       }
 
       dropLetters();
+
+      // JS-driven hover: play once, cooldown before replay
+      container.addEventListener('mouseenter', (e) => {
+        const target = (e.target as HTMLElement).closest('.letter-drop__letter--final');
+        if (!target || !(target as HTMLElement).dataset.hover) return;
+        if ((target as HTMLElement).dataset.ldCooldown) return;
+
+        const hover = document.body.dataset.hover;
+        if (hover === 'none') return;
+
+        (target as HTMLElement).classList.add('letter-drop__letter--animating');
+
+        const onEnd = () => {
+          (target as HTMLElement).classList.remove('letter-drop__letter--animating');
+          (target as HTMLElement).dataset.ldCooldown = '1';
+          target.removeEventListener('animationend', onEnd);
+          setTimeout(() => {
+            delete (target as HTMLElement).dataset.ldCooldown;
+          }, 500);
+        };
+
+        target.addEventListener('animationend', onEnd, { once: true });
+      }, true);
     });
   }
 
