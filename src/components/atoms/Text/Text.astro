@@ -39,13 +39,19 @@ interface Props {
   leading?: 'tight' | 'snug' | 'normal' | 'relaxed';
 
   /** Colour token */
-  color?: 'text' | 'muted' | 'accent' | 'link' | 'inherit';
+  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
 
   /** Font family variant */
   family?: 'body' | 'body-alt' | 'handwriting' | 'mono';
 
   /** Text alignment */
-  align?: 'left' | 'center' | 'right';
+  align?: 'left' | 'center' | 'right' | 'justify';
+
+  /** Highlight background bar behind text */
+  highlight?: boolean;
+
+  /** Highlight bar colour (independent from text colour) */
+  highlightColor?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
 
   /** Uppercase with letter-spacing */
   uppercase?: boolean;
@@ -78,6 +84,8 @@ const {
   family,
   align,
   textTone,
+  highlight = false,
+  highlightColor = 'primary',
   uppercase = false,
   clamp,
   flush = false,
@@ -102,10 +110,12 @@ const classes = [
   size && `text--${size}`,
   weight && `text--weight-${weight}`,
   leading && `text--leading-${leading}`,
-  color && `text--color-${color}`,
+  color && `text--${color}`,
   family && `text--family-${family}`,
   align && `text--align-${align}`,
   textTone && `text--tone-${textTone}`,
+  highlight && 'text--highlight',
+  highlight && `text--hl-${highlightColor}`,
   uppercase && 'text--uppercase',
   clamp && 'text--clamp',
   flush && 'text--flush',
