@@ -270,26 +270,29 @@
 .btn--neutral {
   --_btn-brand: var(--btn-bg, var(--neutral-600));
   --_btn-brand-dark: var(--btn-hover-bg, var(--neutral-700));
-  --_btn-brand-light: var(--btn-light-bg, var(--neutral-400));
+  --_btn-brand-light: var(--btn-light-bg, var(--neutral-200));
 }
 
-/* Fill variant hovers (primary, secondary, neutral) */
-.btn--primary:hover,
-.btn--secondary:hover,
-.btn--neutral:hover {
+/* Fill variant hovers */
+.btn--fill:not(.btn--dropdown):hover {
   background-color: var(--_btn-brand-dark);
   color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
   box-shadow: var(--btn-shadow-hover, var(--shadow-btn-hover));
   transform: translateY(-1px);
 }
 
-.btn--primary:active,
-.btn--secondary:active,
-.btn--neutral:active {
+.btn--fill:not(.btn--dropdown):active {
   background-color: color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
   color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
   box-shadow: var(--btn-shadow, var(--shadow-btn));
   transform: translateY(1px);
+}
+
+/* Dropdown hover — fill with brand colour */
+.btn--dropdown:hover {
+  background-color: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  border-color: var(--_btn-brand);
 }
 
 /* ==========================================================
@@ -1150,7 +1153,7 @@
 .btn--dropdown {
   background: transparent;
   color: var(--_field-text, var(--neutral-800));
-  border: var(--border-width-2) solid color-mix(in oklch, var(--_field-brand, var(--primary-600)) 30%, var(--_field-border, var(--neutral-300)));
+  border: var(--border-width-2) solid var(--_btn-brand);
   border-radius: var(--radius-md);
   transition: border-radius var(--duration-fast) var(--ease-default),
               background-color var(--hover-duration, var(--duration-base)) var(--ease-default),
@@ -1174,7 +1177,7 @@
 [data-hover="none"] .btn--dropdown:hover {
   background: transparent;
   color: var(--_field-text, var(--neutral-800));
-  border-color: color-mix(in oklch, var(--_field-brand, var(--primary-600)) 30%, var(--_field-border, var(--neutral-300)));
+  border-color: var(--_btn-brand);
 }
 
 /* Dropdown selected — neutral border + tint */

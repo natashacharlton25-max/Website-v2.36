@@ -5,7 +5,8 @@
  * Handles: links, buttons, dropdowns, confetti effects.
  * Uses brand tokens for all colours. Icon component for icons.
  *
- * @param variant   - 'primary' (default), 'secondary', 'neutral', 'outline', 'ghost', 'glass', 'glow', 'neumorphic'
+ * @param variant   - 'fill' (default), 'outline', 'ghost', 'glass', 'glow', 'neumorphic', etc.
+ * @param color     - 'primary' (default), 'secondary', 'neutral'
  * @param shape     - 'rounded' (default), 'pill', 'circle', 'square', 'sharp', 'dropdown'
  * @param size      - 'sm', 'md' (default), 'lg'
  * @param alignment - 'left', 'center' — wraps button in alignment container
@@ -37,7 +38,8 @@ export interface DropdownItem {
 }
 
 export interface Props {
-  variant?: 'primary' | 'secondary' | 'neutral' | 'outline' | 'ghost' | 'glass' | 'liquid-glass' | 'glassic' | 'glow' | 'rainbow-glow' | 'neumorphic' | 'neumorphic-3d' | 'neumorphic-inner';
+  variant?: 'fill' | 'outline' | 'ghost' | 'glass' | 'liquid-glass' | 'glassic' | 'glow' | 'rainbow-glow' | 'neumorphic' | 'neumorphic-3d' | 'neumorphic-inner';
+  color?: 'primary' | 'secondary' | 'neutral';
   shape?: 'rounded' | 'pill' | 'circle' | 'square' | 'sharp' | 'dropdown';
   size?: 'sm' | 'md' | 'lg';
   effect?: 'glint' | 'colour-flow' | 'jump' | 'comic' | 'tech' | 'expand' | 'magnetic' | 'spotlight' | 'split';
@@ -77,7 +79,8 @@ export interface Props {
 }
 
 const {
-  variant = 'primary',
+  variant: rawVariant = 'fill',
+  color: rawColor = 'primary',
   shape = 'rounded',
   size = 'md',
   effect,
@@ -111,6 +114,12 @@ const {
   class: className = '',
   ...rest
 } = Astro.props;
+
+// Migrate legacy variant="primary|secondary|neutral" → variant="fill" + color
+const colorVariants = ['primary', 'secondary', 'neutral'] as const;
+const isLegacyVariant = colorVariants.includes(rawVariant as any);
+const variant = isLegacyVariant ? 'fill' : rawVariant;
+const color = isLegacyVariant ? rawVariant : rawColor;
 
 // Extract data-* attributes
 const dataAttrs = Object.fromEntries(
@@ -154,6 +163,7 @@ const iconAnimProps = {
 const classes = [
   'btn',
   `btn--${variant}`,
+  `btn--${color}`,
   `btn--${shape}`,
   size !== 'md' && `btn--${size}`,
   effect && `btn--${effect}`,
@@ -207,7 +217,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     </button>
 
     <div
-      class={`dropdown-menu dropdown-theme--${variant}`}
+      class={`dropdown-menu dropdown-theme--${color}`}
       role="menu"
     >
       {dropdownItems.map((item) => (

@@ -157,14 +157,29 @@
   border: none;
 }
 
-/* Rainbow Glow Button — dark mode */
-[data-mode="dark"] .btn--rainbow-glow,
+/* Rainbow Glow Button — dark mode: coloured shadow replaces white */
+[data-mode="dark"] .btn--rainbow-glow {
+  --btn-text: var(--primary-600);
+  color: var(--primary-600);
+  border-color: var(--primary-600);
+  box-shadow:
+    0 4px 12px color-mix(in oklch, var(--rainbow-5) 25%, transparent),
+    0 2px 4px color-mix(in oklch, var(--rainbow-3) 15%, transparent);
+}
+
 [data-mode="dark"] .btn--rainbow-glow:hover,
 [data-mode="dark"][data-hover="none"] .btn--rainbow-glow:hover,
 [data-mode="dark"][data-hover="none"] .btn-rainbow-glow-wrap:hover .btn--rainbow-glow {
   --btn-text: var(--primary-600);
   color: var(--primary-600);
   border-color: var(--primary-600);
+}
+
+/* Brand Glow — dark mode: coloured shadow */
+[data-mode="dark"] .btn--glow {
+  box-shadow:
+    0 4px 12px color-mix(in oklch, var(--_btn-brand) 25%, transparent),
+    0 2px 4px color-mix(in oklch, var(--_btn-brand) 15%, transparent);
 }
 
 /* FlipCard hover fills — dark mode (animated only) */
@@ -393,6 +408,11 @@
     0 0.225em 0.375em 0 var(--primary-700);
 }
 
+/* ── Neumorphic-inner dark — lighter static bg per colour ── */
+[data-mode="dark"] .btn--neumorphic-inner.btn--primary   { --_btn-brand-light: var(--primary-400); }
+[data-mode="dark"] .btn--neumorphic-inner.btn--secondary { --_btn-brand-light: var(--secondary-400); }
+[data-mode="dark"] .btn--neumorphic-inner.btn--neutral   { --_btn-brand-light: var(--neutral-400); }
+
 /* ── Liquid glass dark — border + inner glow, hover intensifies ── */
 
 [data-mode="dark"] .btn--liquid-glass {
@@ -407,6 +427,7 @@
     inset 0 0 16px color-mix(in oklch, var(--primary-600) 70%, transparent),
     0 0 14px 5px color-mix(in oklch, var(--primary-600) 30%, transparent);
 }
+
 
 /* ── Base button dark — match badge dark fill pattern ── */
 
@@ -461,9 +482,7 @@
 }
 
 /* Transparent border for fill variants only (not effects that own their border) */
-[data-mode="dark"] .btn--primary:not(.btn--tech):not(.btn--comic):not(.btn--outline):not(.btn--ghost),
-[data-mode="dark"] .btn--secondary:not(.btn--tech):not(.btn--comic):not(.btn--outline):not(.btn--ghost),
-[data-mode="dark"] .btn--neutral:not(.btn--tech):not(.btn--comic):not(.btn--outline):not(.btn--ghost) {
+[data-mode="dark"] .btn--fill:not(.btn--tech):not(.btn--comic):not(.btn--dropdown) {
   border: 2px solid transparent;
 }
 
@@ -488,6 +507,14 @@
   border: none;
 }
 
+
+/* Dropdown button dark — visible text + solid brand border */
+[data-mode="dark"] .btn.btn--dropdown {
+  --_field-text: var(--_btn-brand);
+  background: transparent;
+  color: var(--_btn-brand);
+  border: var(--border-width-2) solid var(--_btn-brand);
+}
 
 /* Dropdown dark: inner glow using brand border colour */
 [data-mode="dark"] .dropdown-menu.dropdown-theme--primary {
@@ -524,9 +551,12 @@
   box-shadow: none;
 }
 
-[data-mode="dark"] .btn--primary:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover,
-[data-mode="dark"] .btn--secondary:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover,
-[data-mode="dark"] .btn--neutral:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover {
+/* Colour-flow dark — more visible static bg */
+[data-mode="dark"] .btn--colour-flow {
+  background: color-mix(in oklch, var(--_btn-brand) 25%, transparent);
+}
+
+[data-mode="dark"] .btn--fill:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover {
   background-color: var(--_btn-brand-light);
   color: var(--_btn-brand-dark);
   border-color: var(--_btn-brand-dark);
@@ -542,9 +572,9 @@
 }
 
 /* Highlight + media bg — lighter in dark mode */
-[data-mode="dark"] .heading--primary   { --_heading-highlight: var(--primary-800);   --_heading-media-bg: var(--primary-800); }
-[data-mode="dark"] .heading--secondary { --_heading-highlight: var(--secondary-800); --_heading-media-bg: var(--secondary-800); }
-[data-mode="dark"] .heading--neutral   { --_heading-highlight: var(--neutral-800);   --_heading-media-bg: var(--neutral-800); }
+[data-mode="dark"] .heading--primary   { --_heading-highlight: var(--primary-400);   --_heading-media-bg: var(--primary-800); }
+[data-mode="dark"] .heading--secondary { --_heading-highlight: var(--secondary-400); --_heading-media-bg: var(--secondary-800); }
+[data-mode="dark"] .heading--neutral   { --_heading-highlight: var(--neutral-400);   --_heading-media-bg: var(--neutral-800); }
 /* Rainbow highlights auto-flip via tokens — no overrides needed */
 
 /* ── Image — dark mode bg fills ── */
