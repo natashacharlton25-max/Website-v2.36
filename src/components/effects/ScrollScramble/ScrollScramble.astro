@@ -54,21 +54,19 @@ const style = [
 ].filter(Boolean).join('; ');
 ---
 
-<div
-  class:list={['scroll-scramble', className]}
-  id={id}
-  data-scrub={scrub}
-  data-start={start}
-  data-end={end}
-  style={style || undefined}
->
-  {words.map((word) => (
-    <p class="scroll-scramble__word" aria-label={word.text} data-color={word.color || 'primary'}>
-      {[...word.text].map((char, i) => (
-        <span class="scroll-scramble__letter" aria-hidden="true" data-i={i}>{char}</span>
-      ))}
-    </p>
-  ))}
+<div class="scroll-scramble-wrap" id={id} data-scrub={scrub} data-start={start} data-end={end}>
+  <div
+    class:list={['scroll-scramble', className]}
+    style={style || undefined}
+  >
+    {words.map((word) => (
+      <p class="scroll-scramble__word" aria-label={word.text} data-color={word.color || 'primary'}>
+        {[...word.text].map((char, i) => (
+          <span class="scroll-scramble__letter" aria-hidden="true" data-i={i}>{char}</span>
+        ))}
+      </p>
+    ))}
+  </div>
 </div>
 
 <!-- Textonly fallback -->
@@ -80,8 +78,8 @@ const style = [
 
 <script>
   async function initScrollScramble() {
-    const containers = document.querySelectorAll<HTMLElement>('.scroll-scramble');
-    if (!containers.length) return;
+    const wraps = document.querySelectorAll<HTMLElement>('.scroll-scramble-wrap');
+    if (!wraps.length) return;
 
     const render = document.body.dataset.render;
     if (render === 'textonly' || render === 'reduced') return;
@@ -90,20 +88,19 @@ const style = [
     const { ScrollTrigger } = await import('gsap/ScrollTrigger');
     gsap.registerPlugin(ScrollTrigger);
 
-    // Use OverlayScrollbars viewport if available
     const osViewport = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement | null;
 
-    containers.forEach((container) => {
-      if (container.dataset.scrambleInit) return;
-      container.dataset.scrambleInit = 'true';
+    wraps.forEach((wrap) => {
+      if (wrap.dataset.scrambleInit) return;
+      wrap.dataset.scrambleInit = 'true';
 
-      const scrub = parseFloat(container.dataset.scrub || '1') || 1;
-      const start = container.dataset.start || 'top top';
-      const end = container.dataset.end || 'bottom bottom';
+      const scrub = parseFloat(wrap.dataset.scrub || '1') || 1;
+      const inner = wrap.querySelector('.scroll-scramble') as HTMLElement;
+      if (!inner) return;
 
-      const letters = container.querySelectorAll<HTMLElement>('.scroll-scramble__letter');
+      const letters = inner.querySelectorAll<HTMLElement>('.scroll-scramble__letter');
 
-      // Calculate scatter offsets per letter
+      // Set initial scattered positions
       letters.forEach((letter) => {
         const i = parseInt(letter.dataset.i || '0');
         const dir = 1 - 2 * (i % 2);
@@ -114,22 +111,20 @@ const style = [
         const z = Math.abs(rand * 2 + wave);
         const startZ = z * 1.5 * 13;
 
-        // Set initial scattered position
-        gsap.set(letter, {
-          y: startY,
-          z: startZ,
-        });
+        gsap.set(letter, { y: startY, z: startZ });
+      });
 
-        // Animate to 0 on scroll
+      // Scrub letters from scattered to final as wrapper scrolls through
+      letters.forEach((letter) => {
         gsap.to(letter, {
           y: 0,
           z: 0,
           ease: 'none',
           scrollTrigger: {
-            trigger: document.body,
+            trigger: wrap,
             scroller: osViewport || undefined,
-            start,
-            end,
+            start: 'top bottom',
+            end: 'center center',
             scrub,
           },
         });
@@ -137,7 +132,6 @@ const style = [
     });
   }
 
-  // Delay to let OverlayScrollbars init
   setTimeout(initScrollScramble, 400);
   document.addEventListener('astro:page-load', () => setTimeout(initScrollScramble, 400));
 </script>
