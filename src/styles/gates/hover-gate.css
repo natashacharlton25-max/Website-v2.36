@@ -101,6 +101,53 @@
 
 
 /* ══════════════════════════════════════════════════════════════
+   Focus ring — two independent animations:
+   1. Move: ring transitioning between elements on tab (--focus-move-duration)
+   2. Hover: ring colour change info→success on mouse hover (--focus-hover-duration)
+   Both independent of hover gate.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Focus hover colour change — gated by hover mode */
+/* Full — slightly animated */
+[data-focus-active]:hover {
+  transition: background var(--hover-duration) ease-out !important;
+}
+
+[data-focus-active]:hover::after {
+  transition: box-shadow var(--hover-duration) ease-out;
+}
+
+/* Gentle — slow colour change */
+[data-hover="gentle"] [data-focus-active]:hover {
+  transition: background 0.8s ease-in-out !important;
+}
+
+[data-hover="gentle"] [data-focus-active]:hover::after {
+  transition: box-shadow 0.8s ease-in-out;
+}
+
+/* Instant — snap colour change */
+[data-hover="instant"] [data-focus-active]:hover {
+  transition: background 0s !important;
+}
+
+[data-hover="instant"] [data-focus-active]:hover::after {
+  transition: box-shadow 0s;
+}
+
+/* None — no focus hover colour change */
+[data-hover="none"] [data-focus-active]:hover {
+  background: color-mix(in oklch, var(--focus-color) 25%, transparent) !important;
+}
+
+[data-hover="none"] [data-focus-active]:hover::after {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
    Functional hover — tooltip, dropdown
 
    Content ALWAYS appears. Only transition is affected.

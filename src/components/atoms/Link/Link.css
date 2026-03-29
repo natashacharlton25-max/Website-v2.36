@@ -182,7 +182,7 @@
 }
 
 /* ── Hover gate: none — suppress animation effects ── */
-[data-hover="none"] .link--animate-underline-grow::after { transform: scaleX(0); }
+[data-hover="none"] .link--animate-underline-grow::before { transform: scaleX(0); }
 [data-hover="none"] .link--animate-highlight-grow .text::before { display: none; }
 [data-hover="none"] .link--animate-shadow-fill:hover { color: var(--_link-text); box-shadow: none; }
 [data-hover="none"] .link--animate-text-slide:hover { background-position: -100%; }
@@ -207,6 +207,35 @@
   letter-spacing: var(--letter-spacing-wide);
 }
 
+/* ==========================================================
+   FOCUS — strip effects when focus-gate is active
+   Focus ring drawn by focus-gate.css via [data-focus-active]::after
+   ========================================================== */
+
+.link[data-focus-active] .text {
+  text-decoration: none;
+}
+
+.link--highlight[data-focus-active] .text::before {
+  display: none;
+}
+
+.link--animate-underline-grow[data-focus-active]::before {
+  background: transparent;
+  transform: scaleX(0);
+}
+
+.link--animate-text-slide[data-focus-active] {
+  background-image: none;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+}
+
+.link--animate-text-slide[data-focus-active]::before {
+  background: transparent;
+  width: 0;
+}
+
 /* ================================================================
    ANIMATION EFFECTS — gated by animation props
    Only rendered when JSON passes the animation prop.
@@ -215,10 +244,14 @@
 
 /* Animation: underlineGrow — underline scales from left on hover */
 .link--animate-underline-grow {
+  text-decoration: none;
+}
+
+.link--animate-underline-grow .text {
   text-decoration: none; /* override static underline — animation replaces it */
 }
 
-.link--animate-underline-grow::after {
+.link--animate-underline-grow::before {
   content: '';
   position: absolute;
   bottom: 0;
@@ -232,7 +265,7 @@
   transition: transform var(--hover-duration) ease-out;
 }
 
-.link--animate-underline-grow:hover::after {
+.link--animate-underline-grow:hover::before {
   transform: scaleX(1);
 }
 

@@ -14,6 +14,8 @@
 
 :root {
   --focus-thickness: 0.2rem;
+  --focus-move-duration: 200ms;
+  --focus-appear-duration: 150ms;
 }
 
 /* ==========================================================
@@ -112,7 +114,7 @@
   text-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  transition: none !important;
+  transition: background var(--focus-appear-duration) ease-out !important;
 }
 
 /* Focus ring as pseudo-element — on top for border, no fill */
@@ -128,6 +130,7 @@
   opacity: 1;
   pointer-events: none;
   z-index: 1036;
+  transition: box-shadow var(--focus-move-duration) ease-out;
 }
 
 /* Dropdown menu items: inset focus ring + fill, shrunk to text */
@@ -243,16 +246,7 @@ html:not([data-focus-rainbow]) [data-focus-active]:hover::after {
     0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success);
 }
 
-/* Hover none: no colour shift */
-[data-hover="none"] [data-focus-active]:hover::after {
-  box-shadow:
-    0 0 0 var(--focus-thickness) var(--focus-bg),
-    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color);
-}
-
-[data-hover="none"] [data-focus-active]:hover {
-  background: color-mix(in oklch, var(--focus-color) 25%, transparent) !important;
-}
+/* Focus hover transitions gated by hover-gate.css */
 
 /* ==========================================================
    ENHANCED FOCUS — double ring (user toggle in Your View)
