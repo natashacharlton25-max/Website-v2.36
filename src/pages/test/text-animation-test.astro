@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Heading } from '../../components/atoms/Heading';
+import { Section } from '../../components/atoms/Section';
+import LetterDrop from '../../components/effects/LetterDrop/LetterDrop.astro';
+import TypeWriter from '../../components/effects/TypeWriter/TypeWriter.astro';
+import WordRotate from '../../components/effects/WordRotate/WordRotate.astro';
+import ScrollScramble from '../../components/effects/ScrollScramble/ScrollScramble.astro';
+import ScrollCircleText from '../../components/effects/ScrollCircleText/ScrollCircleText.astro';
+import '../../components/effects/LetterDrop/LetterDrop.css';
+import '../../components/effects/TypeWriter/TypeWriter.css';
+import '../../components/effects/WordRotate/WordRotate.css';
+import '../../components/effects/ScrollScramble/ScrollScramble.css';
+import '../../components/effects/ScrollCircleText/ScrollCircleText.css';
+
+import testData from '../../data/test/text-animation.json';
+---
+
+<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
+  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
+
+    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+
+    {testData.sections.map((section: any) => (
+      <Section label={section.label} separator gap={testData.layout.itemGap}>
+        {section.type === 'letter-drop' ? (
+          <LetterDrop
+            mode={section.config.mode}
+            lines={section.config.lines}
+            family={section.config.family}
+            size={section.config.size}
+          />
+        ) : section.type === 'typewriter' ? (
+          <TypeWriter
+            words={section.config.words}
+            family={section.config.family}
+          />
+        ) : section.type === 'word-rotate' ? (
+          <WordRotate
+            words={section.config.words}
+            family={section.config.family}
+          />
+        ) : section.type === 'scroll-scramble' ? (
+          <ScrollScramble
+            words={section.config.words}
+          />
+        ) : section.type === 'scroll-circle-text' ? (
+          <ScrollCircleText
+            words={section.config.words}
+            circleSize={section.config.circleSize}
+            fontSize={section.config.fontSize}
+          />
+        ) : null}
+      </Section>
+    ))}
+
+  </Section>
+</BaseLayout>
