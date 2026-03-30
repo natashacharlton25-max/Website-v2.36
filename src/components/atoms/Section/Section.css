@@ -1,14 +1,22 @@
 /**
  * Section — Layout atom
  *
- * Colour tokens (1 — pipeline provides, schema has default):
- *   --_section-separator   (neutral-400)  — separator line colour
+ * Internal tokens:
+ *   --_section-bg          (transparent)    — section background
+ *   --_section-separator   (neutral-400)    — separator line colour
+ *   --_section-sep-width   (border-width)   — separator thickness
+ *   --_section-label       (neutral-700)    — label text colour
  */
 
 .section-atom {
+  --_section-bg: var(--section-bg, transparent);
   --_section-separator: var(--section-separator, var(--neutral-400));
+  --_section-sep-width: var(--section-sep-width, var(--border-width));
+  --_section-label: var(--section-label, var(--neutral-700));
+
   padding-top: var(--_section-gap);
   padding-bottom: var(--_section-gap);
+  background: var(--_section-bg);
 }
 
 .section-atom--flush {
@@ -22,7 +30,59 @@
   gap: var(--_section-gap);
 }
 
-/* Label */
+
+/* ==========================================================
+   GAP — spacing between children + padding
+   ========================================================== */
+
+.section-atom--gap-none { --_section-gap: 0; }
+.section-atom--gap-xs   { --_section-gap: var(--space-xs); }
+.section-atom--gap-sm   { --_section-gap: var(--space-sm); }
+.section-atom--gap-md   { --_section-gap: var(--space-md); }
+.section-atom--gap-lg   { --_section-gap: var(--space-lg); }
+.section-atom--gap-xl   { --_section-gap: var(--space-xl); }
+.section-atom--gap-2xl  { --_section-gap: var(--space-2xl); }
+.section-atom--gap-3xl  { --_section-gap: var(--space-3xl); }
+.section-atom--gap-4xl  { --_section-gap: var(--space-4xl); }
+.section-atom--gap-5xl  { --_section-gap: var(--space-5xl); }
+.section-atom--gap-6xl  { --_section-gap: var(--space-6xl); }
+.section-atom--gap-7xl  { --_section-gap: var(--space-7xl); }
+
+
+/* ==========================================================
+   COLOUR ENUM — 10 variants
+   ========================================================== */
+
+.section-atom--primary   { --_section-bg: var(--primary-200);     --_section-separator: var(--primary-400);   --_section-label: var(--primary-600); }
+.section-atom--secondary { --_section-bg: var(--secondary-200);   --_section-separator: var(--secondary-400); --_section-label: var(--secondary-600); }
+.section-atom--neutral   { --_section-bg: transparent;            --_section-separator: var(--neutral-400);   --_section-label: var(--neutral-700); }
+.section-atom--red       { --_section-bg: var(--rainbow-1-wash);  --_section-separator: var(--rainbow-1);     --_section-label: var(--rainbow-1-dark); }
+.section-atom--orange    { --_section-bg: var(--rainbow-2-wash);  --_section-separator: var(--rainbow-2);     --_section-label: var(--rainbow-2-dark); }
+.section-atom--yellow    { --_section-bg: var(--rainbow-3-wash);  --_section-separator: var(--rainbow-3);     --_section-label: var(--rainbow-3-dark); }
+.section-atom--teal      { --_section-bg: var(--rainbow-4-wash);  --_section-separator: var(--rainbow-4);     --_section-label: var(--rainbow-4-dark); }
+.section-atom--blue      { --_section-bg: var(--rainbow-5-wash);  --_section-separator: var(--rainbow-5);     --_section-label: var(--rainbow-5-dark); }
+.section-atom--purple    { --_section-bg: var(--rainbow-6-wash);  --_section-separator: var(--rainbow-6);     --_section-label: var(--rainbow-6-dark); }
+.section-atom--pink      { --_section-bg: var(--rainbow-7-wash);  --_section-separator: var(--rainbow-7);     --_section-label: var(--rainbow-7-dark); }
+
+
+/* ==========================================================
+   SEPARATOR
+   ========================================================== */
+
+.section-atom--separated .section-atom__label {
+  padding-bottom: var(--_section-gap);
+  border-bottom: var(--_section-sep-width) solid var(--_section-separator);
+}
+
+.section-atom--sep-thin   { --_section-sep-width: var(--border-width); }
+.section-atom--sep-medium { --_section-sep-width: var(--border-width-2); }
+.section-atom--sep-thick  { --_section-sep-width: 3px; }
+
+
+/* ==========================================================
+   LABEL
+   ========================================================== */
+
 .section-atom__label {
   margin-bottom: var(--_section-gap);
 }
@@ -31,15 +91,9 @@
   font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
-  color: var(--neutral-700);
+  color: var(--_section-label);
   font-weight: var(--font-bold);
 }
 
 .section-atom__label--h5 { font-size: var(--text-h5); }
 .section-atom__label--h6 { font-size: var(--text-small); }
-
-/* Separator between label and content */
-.section-atom--separated .section-atom__label {
-  padding-bottom: var(--_section-gap);
-  border-bottom: var(--_section-sep-width) solid var(--_section-separator);
-}

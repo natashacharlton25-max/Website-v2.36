@@ -2,72 +2,53 @@
 /**
  * Section — Layout atom for content grouping
  *
- * Uses existing container system for width constraints.
- * Handles spacing, separators, and colour zones.
- * JSON provides all layout values.
+ * Pure class mapping. CSS defines all visual behaviour.
+ * JSON provides enum values → Astro maps to classes → CSS handles the rest.
  *
  * Usage:
  *   <Section>Content here</Section>
  *   <Section container="md" gap="lg" separator>Constrained with dividers</Section>
- *   <Section label="Group Title">Labelled section</Section>
+ *   <Section color="teal" separator separatorWeight="medium">Coloured zone</Section>
  */
 
 interface Props {
   as?: 'section' | 'div' | 'article' | 'aside' | 'main';
   container?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | 'full' | 'prose';
-  gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+  gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
+  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
   separator?: boolean;
   separatorWeight?: 'thin' | 'medium' | 'thick';
   label?: string;
   labelSize?: 'h5' | 'h6';
   flush?: boolean;
   class?: string;
-  [key: string]: any;
 }
 
 const {
   as: Tag = 'section',
   container,
   gap = 'lg',
+  color,
   separator = false,
   separatorWeight = 'thin',
   label,
   labelSize = 'h6',
   flush = false,
   class: className,
-  ...rest
 } = Astro.props;
-
-const gapMap: Record<string, string> = {
-  none: '0', xs: 'var(--space-xs)', sm: 'var(--space-sm)', md: 'var(--space-md)',
-  lg: 'var(--space-lg)', xl: 'var(--space-xl)', '2xl': 'var(--space-2xl)', '3xl': 'var(--space-3xl)',
-  '4xl': 'var(--space-4xl)', '5xl': 'var(--space-5xl)', '6xl': 'var(--space-6xl)', '7xl': 'var(--space-7xl)',
-};
-
-const separatorWidthMap: Record<string, string> = {
-  thin: '1px', medium: '2px', thick: '3px',
-};
-
-const gapVal = gapMap[gap] || gapMap.lg;
-const sepWidth = separatorWidthMap[separatorWeight];
-
-// Merge any passed style with section's own internal tokens
-const internalStyle = `--_section-gap:${gapVal};--_section-sep-width:${sepWidth}`;
-const passedStyle = rest.style || '';
-delete rest.style;
-const mergedStyle = passedStyle ? `${internalStyle};${passedStyle}` : internalStyle;
 ---
 
 <Tag
   class:list={[
     'section-atom',
+    `section-atom--gap-${gap}`,
+    color && `section-atom--${color}`,
     container && `container container-${container}`,
     separator && 'section-atom--separated',
+    separator && `section-atom--sep-${separatorWeight}`,
     flush && 'section-atom--flush',
     className,
   ]}
-  style={mergedStyle}
-  {...rest}
 >
   {label && (
     <div class="section-atom__label">
