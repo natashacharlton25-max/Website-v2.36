@@ -128,12 +128,15 @@ const style = [
       });
 
       // Delayed version — lerps toward --rotate each frame
+      let rafId: number;
       const updateDelayed = () => {
         proxy.delayed += (proxy.rotate - proxy.delayed) * 0.08;
         circle.style.setProperty('--delayed-rotate', String(proxy.delayed));
-        requestAnimationFrame(updateDelayed);
+        if (circle.isConnected) {
+          rafId = requestAnimationFrame(updateDelayed);
+        }
       };
-      requestAnimationFrame(updateDelayed);
+      rafId = requestAnimationFrame(updateDelayed);
     });
   }
 
