@@ -22,8 +22,8 @@ interface Props {
   gradientTrigger?: 'always' | 'hover';
   /** Solid colour shown before hover gradient triggers */
   solidColor?: string;
-  textShadow?: string;
-  dropShadow?: string;
+  /** Shadow effect */
+  shadow?: 'drop' | 'text' | 'glow';
   textStroke?: string;
   innerShadow?: boolean;
   size?: string;
@@ -45,8 +45,7 @@ const {
   gradientSpeed = 'slow',
   gradientTrigger = 'always',
   solidColor,
-  textShadow,
-  dropShadow,
+  shadow,
   textStroke,
   innerShadow = false,
   size,
@@ -88,8 +87,9 @@ const styles = [
   fillGradient && !gradientCss && `background-image: ${fillGradient}`,
   gradientCss && `--_te-gradient: ${gradientCss}`,
   solidColor && `--_te-solid: ${solidColor}`,
-  textShadow && `text-shadow: ${textShadow}`,
-  dropShadow && `filter: drop-shadow(${dropShadow})`,
+  shadow === 'text' && `text-shadow: 2px 2px 4px var(--neutral-600)`,
+  shadow === 'drop' && `filter: drop-shadow(4px 4px 8px var(--neutral-600))`,
+  shadow === 'glow' && `text-shadow: 0 0 20px var(--primary-600), 0 0 40px var(--primary-400)`,
   textStroke && `-webkit-text-stroke: ${textStroke}`,
   filterId && `filter: url(#${filterId})`,
   rest.style,
