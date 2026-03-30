@@ -2,24 +2,19 @@
 /**
  * Section — Layout atom for content grouping
  *
- * Pure class mapping. CSS defines all visual behaviour.
- * JSON provides enum values → Astro maps to classes → CSS handles the rest.
- *
- * Usage:
- *   <Section>Content here</Section>
- *   <Section container="md" gap="lg" separator>Constrained with dividers</Section>
- *   <Section color="teal" separator separatorWeight="medium">Coloured zone</Section>
+ * Pure class mapping. Props → classes → CSS.
+ * No inline styles. No token computation. No content rendering.
+ * Children come from JSON pipeline via slot.
  */
 
 interface Props {
   as?: 'section' | 'div' | 'article' | 'aside' | 'main';
   container?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | 'full' | 'prose';
-  gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
+  gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  bg?: 'none' | 'tint' | 'light' | 'solid';
   separator?: boolean;
   separatorWeight?: 'thin' | 'medium' | 'thick';
-  label?: string;
-  labelSize?: 'h5' | 'h6';
   flush?: boolean;
   class?: string;
 }
@@ -29,10 +24,9 @@ const {
   container,
   gap = 'lg',
   color,
+  bg,
   separator = false,
   separatorWeight = 'thin',
-  label,
-  labelSize = 'h6',
   flush = false,
   class: className,
 } = Astro.props;
@@ -43,6 +37,7 @@ const {
     'section-atom',
     `section-atom--gap-${gap}`,
     color && `section-atom--${color}`,
+    bg && `section-atom--bg-${bg}`,
     container && `container container-${container}`,
     separator && 'section-atom--separated',
     separator && `section-atom--sep-${separatorWeight}`,
@@ -50,12 +45,5 @@ const {
     className,
   ]}
 >
-  {label && (
-    <div class="section-atom__label">
-      <span class:list={['section-atom__label-text', `section-atom__label--${labelSize}`]}>{label}</span>
-    </div>
-  )}
-  <div class="section-atom__content">
-    <slot />
-  </div>
+  <slot />
 </Tag>
