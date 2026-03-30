@@ -108,8 +108,9 @@ const style = [
       const circle = wrap.querySelector('.scroll-circle-text') as HTMLElement;
       if (!circle) return;
 
-      // Use a proxy object — GSAP tweens it, onUpdate pushes to CSS
-      const proxy = { rotate: 0 };
+      // --rotate updates immediately via GSAP
+      // --delayed-rotate lags behind via separate GSAP tween with delay
+      const proxy = { rotate: 0, delayed: 0 };
 
       gsap.to(proxy, {
         rotate: 1,
@@ -117,15 +118,22 @@ const style = [
         scrollTrigger: {
           trigger: wrap,
           scroller: osViewport || undefined,
-          start: 'top 90%',
-          end: 'top center',
+          start: 'top bottom',
+          end: 'bottom top',
           scrub,
         },
         onUpdate: () => {
           circle.style.setProperty('--rotate', String(proxy.rotate));
-          circle.style.setProperty('--delayed-rotate', String(proxy.rotate));
         },
       });
+
+      // Delayed version — lerps toward --rotate each frame
+      const updateDelayed = () => {
+        proxy.delayed += (proxy.rotate - proxy.delayed) * 0.08;
+        circle.style.setProperty('--delayed-rotate', String(proxy.delayed));
+        requestAnimationFrame(updateDelayed);
+      };
+      requestAnimationFrame(updateDelayed);
     });
   }
 
