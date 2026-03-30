@@ -22,15 +22,35 @@ import testData from '../../data/test/text-effect.json';
 
     {testData.sections.map((section: any) => (
       <Section label={section.label} separator gap={testData.layout.itemGap}>
-        <div style="display:flex;flex-direction:column;gap:var(--space-lg);">
-          {section.items.map((item: any) => (
+        {section.type === 'letter-drop' ? (
+          <LetterDrop
+            mode={section.config.mode}
+            lines={section.config.lines}
+            family={section.config.family}
+            size={section.config.size}
+          />
+        ) : section.type === 'typewriter' ? (
+          <TypeWriter
+            words={section.config.words}
+            family={section.config.family}
+          />
+        ) : section.type === 'word-rotate' ? (
+          <WordRotate
+            words={section.config.words}
+            family={section.config.family}
+          />
+        ) : section.type === 'scroll-scramble' ? (
+          <ScrollScramble
+            words={section.config.words}
+          />
+        ) : (
+          section.items.map((item: any) => (
             <TextEffect
               text={item.text}
               fillImage={item.fillImage}
               fillGradient={item.fillGradient}
               gradientColors={item.gradientColors}
               gradientSpeed={item.gradientSpeed}
-              gradientTrigger={item.gradientTrigger}
               solidColor={item.solidColor}
               textShadow={item.textShadow}
               dropShadow={item.dropShadow}
@@ -43,99 +63,10 @@ import testData from '../../data/test/text-effect.json';
               uppercase={item.uppercase}
               align={item.align}
             />
-          ))}
-        </div>
+          ))
+        )}
       </Section>
     ))}
-
-    <!-- Animation Effects -->
-    <Section label="Letter Drop — Both (drop + hover)" separator gap="xl">
-      <LetterDrop
-        mode="both"
-        lines={[
-          { text: "TURNING", color: "var(--primary-600)" },
-          { text: "OBSTACLES", color: "var(--secondary-600)" },
-          { text: "INTO", color: "var(--neutral-800)" },
-          { text: "OPPORTUNITIES", color: "var(--primary-400)" }
-        ]}
-        family="heading"
-      />
-    </Section>
-
-    <Section label="Letter Drop — Drop-In Only (no hover)" separator gap="xl">
-      <LetterDrop
-        mode="drop-in"
-        lines={[
-          { text: "HELLO", color: "var(--rainbow-4)" },
-          { text: "WORLD", color: "var(--rainbow-6)" }
-        ]}
-        family="heading"
-        size="6vw"
-      />
-    </Section>
-
-    <Section label="Letter Drop — Hover Only (no fly-in)" separator gap="xl">
-      <LetterDrop
-        mode="hover"
-        lines={[
-          { text: "HOVER", color: "var(--secondary-600)" },
-          { text: "EACH", color: "var(--primary-600)" },
-          { text: "LETTER", color: "var(--rainbow-1)" }
-        ]}
-        family="heading"
-        size="5vw"
-      />
-    </Section>
-
-    <Section label="TypeWriter" separator gap="xl">
-      <TypeWriter
-        words={["All About Us.", "Hey There!", "So Glad You Found Us.", "Lovely to meet you here :)", "How are you Today?"]}
-        family="heading"
-      />
-    </Section>
-
-    <Section label="Word Rotate" separator gap="xl">
-      <div style="min-height: 6rem;">
-        <WordRotate
-          words={[
-            { text: "Love wins.", color: "var(--primary-600)" },
-            { text: "Joy wins.", color: "var(--secondary-600)" },
-            { text: "Happiness wins.", color: "var(--primary-400)" },
-            { text: "Comfort wins.", color: "var(--secondary-400)" },
-            { text: "Safety wins.", color: "var(--neutral-700)" },
-            { text: "Peace wins.", color: "var(--primary-800)" }
-          ]}
-          family="heading"
-        />
-      </div>
-    </Section>
-
-    <Section label="Scroll Scramble (Linear)" separator gap="xl">
-      <ScrollScramble
-        words={[
-          { text: "Meaning", color: "primary" },
-          { text: "emerges,", color: "secondary" },
-          { text: "one", color: "neutral" },
-          { text: "letter", color: "teal" },
-          { text: "at", color: "neutral" },
-          { text: "a", color: "neutral" },
-          { text: "time.", color: "purple" }
-        ]}
-      />
-    </Section>
-
-    <Section label="Scroll Scramble (Circular)" separator gap="xl">
-      <ScrollScramble
-        mode="circular"
-        words={[
-          { text: "TURNING", color: "primary" },
-          { text: "OBSTACLES", color: "secondary" },
-          { text: "INTO", color: "neutral" },
-          { text: "OPPORTUNITIES", color: "teal" }
-        ]}
-        circleSize="40vw"
-      />
-    </Section>
 
   </Section>
 </BaseLayout>
