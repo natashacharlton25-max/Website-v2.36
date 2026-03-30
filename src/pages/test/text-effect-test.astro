@@ -4,6 +4,8 @@ import { TextEffect } from '../../components/atoms/TextEffect';
 import LetterDrop from '../../components/effects/LetterDrop/LetterDrop.astro';
 import ScrollScramble from '../../components/effects/ScrollScramble/ScrollScramble.astro';
 import '../../components/effects/ScrollScramble/ScrollScramble.css';
+import ScrollCircleText from '../../components/effects/ScrollCircleText/ScrollCircleText.astro';
+import '../../components/effects/ScrollCircleText/ScrollCircleText.css';
 import TypeWriter from '../../components/effects/TypeWriter/TypeWriter.astro';
 import WordRotate from '../../components/effects/WordRotate/WordRotate.astro';
 import { Heading } from '../../components/atoms/Heading';
@@ -43,7 +45,13 @@ import testData from '../../data/test/text-effect.json';
           <ScrollScramble
             words={section.config.words}
           />
-        ) : (
+        ) : section.type === 'scroll-circle-text' ? (
+          <ScrollCircleText
+            words={section.config.words}
+            circleSize={section.config.circleSize}
+            fontSize={section.config.fontSize}
+          />
+        ) : section.items ? (
           section.items.map((item: any) => (
             <TextEffect
               text={item.text}
@@ -64,7 +72,7 @@ import testData from '../../data/test/text-effect.json';
               align={item.align}
             />
           ))
-        )}
+        ) : null}
       </Section>
     ))}
 

@@ -1,0 +1,131 @@
+---
+/**
+ * ScrollCircleText — Scroll-driven circular text rotation
+ *
+ * Words arranged radially around a circle. On scroll the circle rotates
+ * and letters fan out based on scroll velocity then settle back.
+ * GSAP drives --rotate, CSS transition on --delayed-rotate creates lag.
+ *
+ * Props:
+ *   words       — Array of { text, color } objects
+ *   circleSize  — Circle diameter CSS value (default: 30vmin)
+ *   fontSize    — Letter font size (default: 5vmin)
+ *   weight      — Font weight
+ *   family      — Font family token
+ *   scrub       — GSAP scrub value (default: 1)
+ *
+ * Source: codepen.io/cbolson text-circle-animation-css-only
+ */
+
+interface WordConfig {
+  text: string;
+  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+}
+
+interface Props {
+  words: WordConfig[];
+  circleSize?: string;
+  fontSize?: string;
+  weight?: string;
+  family?: 'body' | 'body-alt' | 'heading' | 'mono' | 'handwriting';
+  scrub?: number | boolean;
+  class?: string;
+}
+
+const {
+  words,
+  circleSize = '30vmin',
+  fontSize = '5vmin',
+  weight,
+  family = 'heading',
+  scrub = 1,
+  class: className,
+} = Astro.props;
+
+const id = `scroll-circle-${Math.random().toString(36).slice(2, 8)}`;
+const wordCount = words.length;
+const angleStep = 360 / wordCount;
+const easeSpeed = 50; // ms per letter index
+
+const style = [
+  `--circle-size: ${circleSize}`,
+  `--circle-font-size: ${fontSize}`,
+  weight && `--circle-font-weight: ${weight}`,
+  family && `--circle-font-family: var(--font-${family})`,
+].filter(Boolean).join('; ');
+---
+
+<div class="scroll-circle-text-wrap" id={id} data-scrub={scrub}>
+  <ul
+    class:list={['scroll-circle-text', className]}
+    style={style}
+  >
+    {words.map((word, wi) => (
+      <li
+        class="scroll-circle-text__word"
+        data-color={word.color || 'primary'}
+        style={`rotate: ${angleStep * (wi + 1)}deg;`}
+        aria-label={word.text}
+      >
+        {[...word.text].map((char, i) => (
+          <span
+            class="scroll-circle-text__letter"
+            aria-hidden="true"
+            style={`--i: ${i}; transition: --delayed-rotate ${easeSpeed * i}ms ease-out;`}
+          >{char}</span>
+        ))}
+      </li>
+    ))}
+  </ul>
+</div>
+
+<!-- Textonly fallback -->
+<div class="scroll-circle-text__textonly">
+  {words.map((word) => (
+    <span style="margin-right: 0.5ch;">{word.text}</span>
+  ))}
+</div>
+
+<script>
+  async function initScrollCircleText() {
+    const wraps = document.querySelectorAll<HTMLElement>('.scroll-circle-text-wrap');
+    if (!wraps.length) return;
+
+    const render = document.body.dataset.render;
+    if (render === 'textonly' || render === 'reduced') return;
+
+    const { gsap } = await import('gsap');
+    const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+    gsap.registerPlugin(ScrollTrigger);
+
+    const osViewport = document.querySelector('[data-overlayscrollbars-viewport]') as HTMLElement | null;
+
+    wraps.forEach((wrap) => {
+      if (wrap.dataset.circleInit) return;
+      wrap.dataset.circleInit = 'true';
+
+      const scrub = parseFloat(wrap.dataset.scrub || '1') || 1;
+      const circle = wrap.querySelector('.scroll-circle-text') as HTMLElement;
+      if (!circle) return;
+
+      gsap.fromTo(circle,
+        { '--rotate': 0, '--delayed-rotate': 0 },
+        {
+          '--rotate': 1,
+          '--delayed-rotate': 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: wrap,
+            scroller: osViewport || undefined,
+            start: 'top bottom',
+            end: 'top 20%',
+            scrub,
+          },
+        }
+      );
+    });
+  }
+
+  setTimeout(initScrollCircleText, 400);
+  document.addEventListener('astro:page-load', () => setTimeout(initScrollCircleText, 400));
+</script>

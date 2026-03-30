@@ -1,0 +1,88 @@
+/**
+ * ScrollCircleText — scroll-driven circular text rotation
+ *
+ * Words arranged radially around a circle. On scroll the circle rotates
+ * and letters fan out based on scroll velocity then settle back.
+ * GSAP drives --rotate, CSS transition on --delayed-rotate creates lag.
+ *
+ * Source: codepen.io/cbolson text-circle-animation-css-only
+ */
+
+.scroll-circle-text-wrap {
+  position: relative;
+  height: 200vh;
+}
+
+.scroll-circle-text {
+  --rotate: 0;
+  --delayed-rotate: 0;
+  --spacing: 3vmin;
+
+  position: sticky;
+  top: 50%;
+  transform: translateY(-50%);
+  display: block;
+  width: var(--circle-size, 30vmin);
+  height: var(--circle-size, 30vmin);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  border-radius: 50%;
+  transform: translateY(-50%) rotate(calc(var(--rotate) * 360deg));
+}
+
+.scroll-circle-text__word {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  line-height: 0;
+  transform-origin: 0 0;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+}
+
+.scroll-circle-text__letter {
+  --rotate-velocity: calc(var(--rotate) - var(--delayed-rotate));
+  --rotate-spacing: calc(var(--spacing) * -4 * var(--rotate-velocity));
+  --x: calc(var(--circle-size, 30vmin) / 2 + var(--rotate-spacing));
+  --y: calc((var(--i) + 1) * -20px * var(--rotate-velocity));
+  --r: calc(90deg * var(--rotate-velocity));
+
+  display: inline-block;
+  position: relative;
+  font-size: var(--circle-font-size, 5vmin);
+  font-weight: var(--circle-font-weight, var(--font-extrabold));
+  font-family: var(--circle-font-family, var(--font-heading));
+  transform: translate(var(--x), var(--y)) rotate(var(--r));
+  transform-origin: var(--x) 0;
+}
+
+/* ── Word colours ── */
+.scroll-circle-text__word[data-color="primary"] { color: var(--primary-600); }
+.scroll-circle-text__word[data-color="secondary"] { color: var(--secondary-600); }
+.scroll-circle-text__word[data-color="neutral"] { color: var(--neutral-800); }
+.scroll-circle-text__word[data-color="red"] { color: var(--rainbow-1); }
+.scroll-circle-text__word[data-color="orange"] { color: var(--rainbow-2); }
+.scroll-circle-text__word[data-color="yellow"] { color: var(--rainbow-3); }
+.scroll-circle-text__word[data-color="teal"] { color: var(--rainbow-4); }
+.scroll-circle-text__word[data-color="blue"] { color: var(--rainbow-5); }
+.scroll-circle-text__word[data-color="purple"] { color: var(--rainbow-6); }
+.scroll-circle-text__word[data-color="pink"] { color: var(--rainbow-7); }
+
+/* First word gets accent colour by default */
+.scroll-circle-text__word:first-child { color: var(--primary-600); }
+
+/* ── Textonly fallback ── */
+.scroll-circle-text__textonly { display: none; }
+
+[data-render="textonly"] .scroll-circle-text-wrap { display: none; }
+[data-render="textonly"] .scroll-circle-text__textonly { display: block; }
+
+/* ── Reduced — no animation ── */
+[data-render="reduced"] .scroll-circle-text {
+  transform: translateY(-50%) rotate(0deg);
+}
+[data-render="reduced"] .scroll-circle-text__letter {
+  transform: translateX(var(--x));
+}
