@@ -108,21 +108,24 @@ const style = [
       const circle = wrap.querySelector('.scroll-circle-text') as HTMLElement;
       if (!circle) return;
 
-      gsap.fromTo(circle,
-        { '--rotate': 0, '--delayed-rotate': 0 },
-        {
-          '--rotate': 1,
-          '--delayed-rotate': 1,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: wrap,
-            scroller: osViewport || undefined,
-            start: 'top bottom',
-            end: 'top 20%',
-            scrub,
-          },
-        }
-      );
+      // Use a proxy object — GSAP tweens it, onUpdate pushes to CSS
+      const proxy = { rotate: 0 };
+
+      gsap.to(proxy, {
+        rotate: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: wrap,
+          scroller: osViewport || undefined,
+          start: 'top 90%',
+          end: 'top center',
+          scrub,
+        },
+        onUpdate: () => {
+          circle.style.setProperty('--rotate', String(proxy.rotate));
+          circle.style.setProperty('--delayed-rotate', String(proxy.rotate));
+        },
+      });
     });
   }
 

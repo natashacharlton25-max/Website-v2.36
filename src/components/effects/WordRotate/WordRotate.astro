@@ -95,34 +95,31 @@ const id = `word-rotate-${Math.random().toString(36).slice(2, 8)}`;
       const isReduced = render === 'reduced';
 
       function changeWord() {
-        const currentLetters = wordArrays[current];
-        const nextIndex = (current + 1) % wordEls.length;
-        const nextLetters = wordArrays[nextIndex];
+        const prev = current;
+        const next = (current + 1) % wordEls.length;
+        const prevLetters = wordArrays[prev];
+        const nextLetters = wordArrays[next];
 
         if (isReduced) {
-          // Instant swap
-          wordEls[current].style.opacity = '0';
-          wordEls[nextIndex].style.opacity = '1';
+          wordEls[prev].style.opacity = '0';
+          wordEls[next].style.opacity = '1';
         } else {
-          // Animate out current word
-          currentLetters.forEach((letter, i) => {
+          // Animate out
+          prevLetters.forEach((letter, i) => {
             setTimeout(() => letter.classList.add('out'), i * 80);
           });
-          // Hide current word after all letters animate out
-          const outDuration = currentLetters.length * 80 + 320;
-          setTimeout(() => {
-            wordEls[current].style.opacity = '0';
-            currentLetters.forEach((l) => l.classList.remove('out', 'in'));
-          }, outDuration);
 
-          // Animate in next word
-          nextLetters.forEach((letter, i) => {
-            letter.classList.add('behind');
-            letter.classList.remove('out', 'in');
-          });
+          const outDuration = prevLetters.length * 80 + 320;
+
+          // Hide old, show new after out animation
           setTimeout(() => {
-            wordEls[nextIndex].style.opacity = '1';
+            wordEls[prev].style.opacity = '0';
+            prevLetters.forEach((l) => l.classList.remove('out', 'in'));
+
+            wordEls[next].style.opacity = '1';
             nextLetters.forEach((letter, i) => {
+              letter.classList.remove('out', 'in');
+              letter.classList.add('behind');
               setTimeout(() => {
                 letter.classList.remove('behind');
                 letter.classList.add('in');
@@ -131,7 +128,7 @@ const id = `word-rotate-${Math.random().toString(36).slice(2, 8)}`;
           }, outDuration);
         }
 
-        current = nextIndex;
+        current = next;
       }
 
       setInterval(changeWord, interval);
