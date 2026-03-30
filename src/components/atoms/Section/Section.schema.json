@@ -1,33 +1,25 @@
 {
   "component": "Section",
   "category": "atom",
-  "renders": { "full": "Section.astro", "reduced": "Section.astro", "assistive": "Section.astro", "textonly": "Section.astro" },
-  "notes": "Pure container atom. Owns background, spacing, separator, colour zone. No content rendering — children come from JSON pipeline via slot. Heading labels are child components, not Section props.",
+  "renders": { "full": "Section.astro", "reduced": "Section.astro", "textonly": "Section.astro" },
+  "notes": "Pure container. Owns background, spacing, separator, colour zone. Children slotted.",
 
   "props": {
-    "content": {
-      "_description": "Section has no content props — children are slotted"
-    },
+    "content": {},
 
     "visual": {
-      "_description": "How the section looks",
-      "as":              { "type": "string",  "required": false, "default": "section", "enum": ["section","div","article","aside","main"], "description": "HTML element." },
-      "container":       { "type": "string",  "required": false, "default": null, "enum": ["xs","sm","md","lg","xl","2xl","3xl","4xl","5xl","6xl","7xl","full","prose"], "description": "Max width constraint." },
-      "gap":             { "type": "string",  "required": false, "default": "lg", "enum": ["none","xs","sm","md","lg","xl","2xl","3xl"], "description": "Spacing between children." },
-      "color":           { "type": "string",  "required": false, "default": null, "enum": ["primary","secondary","neutral","red","orange","yellow","teal","blue","purple","pink"], "description": "Colour variant — sets background and separator colour." },
-      "bg":              { "type": "string",  "required": false, "default": null, "enum": ["none","tint"], "description": "Background intensity override." },
-      "separator":       { "type": "boolean", "required": false, "default": false, "description": "Show bottom separator line." },
-      "separatorWeight": { "type": "string",  "required": false, "default": "thin", "enum": ["thin","medium","thick"], "description": "Separator line weight." },
-      "flush":           { "type": "boolean", "required": false, "default": false, "description": "Remove top and bottom padding." }
+      "as":              { "type": "string",  "default": "section", "enum": ["section","div","article","aside","main"] },
+      "container":       { "type": "string",  "default": null,      "enum": ["xs","sm","md","lg","xl","2xl","3xl","4xl","5xl","6xl","7xl","full","prose"] },
+      "gap":             { "type": "string",  "default": "lg",      "enum": ["none","xs","sm","md","lg","xl","2xl","3xl"] },
+      "color":           { "type": "string",  "default": null,      "enum": ["primary","secondary","neutral","red","orange","yellow","teal","blue","purple","pink"] },
+      "bg":              { "type": "string",  "default": null,      "enum": ["none","tint"] },
+      "separator":       { "type": "boolean", "default": false },
+      "separatorWeight": { "type": "string",  "default": "thin",    "enum": ["thin","medium","thick"] },
+      "flush":           { "type": "boolean", "default": false }
     },
 
     "animation": {},
-
-    "colour": {
-      "_description": "Pipeline colour tokens — passed as inline style",
-      "sectionBg":        { "type": "token", "required": false, "default": "transparent", "cssProperty": "--section-bg", "description": "Section background." },
-      "sectionSeparator": { "type": "token", "required": false, "default": "neutral-400", "cssProperty": "--section-separator", "description": "Separator line colour." }
-    }
+    "colour": {}
   },
 
   "slots": {

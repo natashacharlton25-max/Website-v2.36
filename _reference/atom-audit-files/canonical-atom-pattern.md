@@ -64,38 +64,36 @@ const {
 ## CSS
 
 ```css
-/* 1. Internal tokens with bridge fallbacks */
+/* 1. Internal tokens — defaults, no bridge */
 .component {
-  --_comp-bg: var(--comp-bg, var(--primary-200));
-  --_comp-border: var(--comp-border, var(--primary-600));
-  --_comp-text: var(--comp-text, var(--neutral-800));
-}
+  --_comp-bg: transparent;
+  --_comp-border: var(--neutral-400);
+  --_comp-text: var(--neutral-800);
 
-/* 2. Base uses internal tokens */
-.component {
   background: var(--_comp-bg);
   border-color: var(--_comp-border);
   color: var(--_comp-text);
 }
 
-/* 3. Colour enum — 10 variants remap internal tokens */
+/* 2. Colour enum — 10 variants remap internal tokens */
 .component--primary   { --_comp-bg: var(--primary-200);   --_comp-border: var(--primary-600); }
 .component--secondary { --_comp-bg: var(--secondary-200); --_comp-border: var(--secondary-600); }
 .component--neutral   { --_comp-bg: var(--neutral-200);   --_comp-border: var(--neutral-600); }
 .component--red       { --_comp-bg: var(--rainbow-1-wash); --_comp-border: var(--rainbow-1); }
 /* ... orange, yellow, teal, blue, purple, pink */
 
-/* 4. Visual variants — enums, not raw values */
+/* 3. Visual variants — enums, not raw values */
 .component--sm { padding: var(--space-sm); }
 .component--lg { padding: var(--space-lg); }
 ```
 
 ### Token chain:
 ```
-JSON pipeline → --comp-bg (inline style) → --_comp-bg (internal) → background
-                                              ↑
-                              Colour class sets default if no pipeline value
+JSON enum → CSS class → internal token → CSS property
+colour: "teal" → .component--teal → --_comp-bg: var(--rainbow-4-wash) → background
 ```
+
+No bridge tokens. No pipeline inline styles. Colour enum class is the single source.
 
 ### What CSS does NOT contain:
 - `@layer` wrappers
@@ -113,23 +111,22 @@ JSON pipeline → --comp-bg (inline style) → --_comp-bg (internal) → backgro
 {
   "component": "Component",
   "category": "atom",
-  "renders": { "full": "Component.astro", "reduced": "Component.astro", "assistive": "Component.astro", "textonly": null },
+  "renders": { "full": "Component.astro", "reduced": "Component.astro", "textonly": null },
 
   "props": {
-    "content": { "_description": "What" },
+    "content": {},
     "visual": {
-      "color": { "enum": ["primary","secondary","neutral","red","orange","yellow","teal","blue","purple","pink"] },
-      "variant": { "enum": [...] },
-      "size": { "enum": [...] }
+      "color": { "type": "string", "default": null, "enum": ["primary","secondary","neutral","red","orange","yellow","teal","blue","purple","pink"] },
+      "variant": { "type": "string", "default": "fill", "enum": [...] },
+      "size": { "type": "string", "default": "md", "enum": [...] }
     },
     "animation": {},
-    "colour": {
-      "compBg": { "cssProperty": "--comp-bg" },
-      "compBorder": { "cssProperty": "--comp-border" }
-    }
+    "colour": {}
   }
 }
 ```
+
+No pipeline tokens in colour group. Colour enum handles everything via CSS classes. `colour: {}` is empty — kept for schema structure consistency.
 
 ---
 
