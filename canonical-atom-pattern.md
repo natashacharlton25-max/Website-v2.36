@@ -233,6 +233,20 @@ Used by Text and Heading atoms. Four enums:
 
 Classes: `.text-highlight`, `.text-highlight--{colour}`, `.text-highlight--{height}`, `.text-highlight--{opacity}`, `.text-highlight--{shape}`
 
+### Micro-animations (global/micro-animations.css)
+30+ reusable animation presets. Any atom can use via `.anim--{name}` class or `animation` enum prop.
+
+**Categories:**
+- **Movement**: spin, bounce, shake, float, drift, slide-up/down/left/right, flip
+- **Scale**: pulse, ping, pop, squish, heartbeat, rubber-band
+- **Opacity**: fade, blink, flash, glint, shimmer, twinkle
+- **Rotation**: wiggle, swing, rock, nod
+- **Compound**: attention, celebrate, enter, exit
+
+All hover-triggered. Duration tokens from `motion.css`. Easing via `--ease-expo-out` for smooth organic feel.
+
+Icon atom uses `animation` enum prop → emits `.anim--{name}` class. Legacy `spin`/`pulse`/`bounce` boolean props still work.
+
 ### Alt text display modes (gates/alt-text-gate.css)
 Five display modes controlled by `data-alt-display-mode` on `<html>`/`<body>`:
 

@@ -1,0 +1,302 @@
+/**
+ * Micro-animations — global animation presets
+ *
+ * Reusable across all atoms: Icon, Badge, Button, Card, etc.
+ * Each animation is a class: .anim--{name}:hover triggers on hover.
+ * Atoms reference these via their animation enum prop.
+ *
+ * Categories: movement, scale, opacity, rotation, compound
+ */
+
+
+/* ==========================================================
+   BASE — smooth transition for all animated elements
+   ========================================================== */
+
+[class*="anim--"] {
+  transition: transform var(--duration-base) var(--ease-expo-out),
+              filter var(--duration-base) var(--ease-expo-out),
+              opacity var(--duration-base) var(--ease-expo-out);
+  will-change: transform, filter, opacity;
+}
+
+
+/* ==========================================================
+   MOVEMENT
+   ========================================================== */
+
+@keyframes anim-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes anim-bounce {
+  0%   { transform: translateY(0); }
+  25%  { transform: translateY(-6px); }
+  45%  { transform: translateY(0); }
+  60%  { transform: translateY(-3px); }
+  75%  { transform: translateY(0); }
+  88%  { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes anim-shake {
+  0%   { transform: translateX(0) rotate(0deg); }
+  12%  { transform: translateX(-2px) rotate(-3deg); }
+  24%  { transform: translateX(2px) rotate(3deg); }
+  36%  { transform: translateX(-2px) rotate(-2deg); }
+  48%  { transform: translateX(2px) rotate(2deg); }
+  60%  { transform: translateX(-1px) rotate(-1deg); }
+  72%  { transform: translateX(1px) rotate(1deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+}
+
+@keyframes anim-float {
+  0%   { transform: translateY(0) scale(1); }
+  25%  { transform: translateY(-4px) scale(1.01); }
+  50%  { transform: translateY(-7px) scale(1.02); }
+  75%  { transform: translateY(-4px) scale(1.01); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes anim-drift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(3px, -4px); }
+  50%  { transform: translate(-2px, -6px); }
+  75%  { transform: translate(1px, -3px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes anim-slide-up {
+  0%   { transform: translateY(8px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes anim-slide-down {
+  0%   { transform: translateY(-8px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes anim-slide-left {
+  0%   { transform: translateX(8px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes anim-slide-right {
+  0%   { transform: translateX(-8px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes anim-flip {
+  0%   { transform: perspective(400px) rotateY(0deg); }
+  50%  { transform: perspective(400px) rotateY(180deg); }
+  100% { transform: perspective(400px) rotateY(360deg); }
+}
+
+
+/* ==========================================================
+   SCALE
+   ========================================================== */
+
+@keyframes anim-pulse {
+  0%   { transform: scale(1); }
+  20%  { transform: scale(1.12); }
+  40%  { transform: scale(0.97); }
+  60%  { transform: scale(1.05); }
+  80%  { transform: scale(0.99); }
+  100% { transform: scale(1); }
+}
+
+@keyframes anim-ping {
+  0%   { transform: scale(1); opacity: 1; }
+  35%  { transform: scale(1.25); opacity: 0.7; }
+  65%  { transform: scale(0.95); opacity: 1; }
+  85%  { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes anim-pop {
+  0%   { transform: scale(0.8); opacity: 0; }
+  50%  { transform: scale(1.08); opacity: 1; }
+  75%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+@keyframes anim-squish {
+  0%   { transform: scale(1, 1); }
+  30%  { transform: scale(1.1, 0.9); }
+  50%  { transform: scale(0.93, 1.07); }
+  70%  { transform: scale(1.03, 0.97); }
+  100% { transform: scale(1, 1); }
+}
+
+@keyframes anim-heartbeat {
+  0%   { transform: scale(1); }
+  14%  { transform: scale(1.14); }
+  28%  { transform: scale(1); }
+  42%  { transform: scale(1.1); }
+  70%  { transform: scale(1); }
+}
+
+@keyframes anim-rubber-band {
+  0%   { transform: scaleX(1) scaleY(1); }
+  30%  { transform: scaleX(1.15) scaleY(0.85); }
+  40%  { transform: scaleX(0.85) scaleY(1.15); }
+  50%  { transform: scaleX(1.08) scaleY(0.92); }
+  65%  { transform: scaleX(0.97) scaleY(1.03); }
+  75%  { transform: scaleX(1.02) scaleY(0.98); }
+  100% { transform: scaleX(1) scaleY(1); }
+}
+
+
+/* ==========================================================
+   OPACITY / VISIBILITY
+   ========================================================== */
+
+@keyframes anim-fade {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes anim-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+@keyframes anim-flash {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75%      { opacity: 0; }
+}
+
+@keyframes anim-glint {
+  0%   { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+  30%  { filter: brightness(1.5) drop-shadow(0 0 4px currentColor); }
+  60%  { filter: brightness(1.2) drop-shadow(0 0 8px currentColor); }
+  100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+}
+
+@keyframes anim-shimmer {
+  0%   { filter: brightness(1); }
+  25%  { filter: brightness(1.3); }
+  50%  { filter: brightness(1); }
+  75%  { filter: brightness(1.2); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes anim-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.8); }
+}
+
+
+/* ==========================================================
+   ROTATION
+   ========================================================== */
+
+@keyframes anim-wiggle {
+  0%   { transform: rotate(0deg); }
+  15%  { transform: rotate(-10deg); }
+  30%  { transform: rotate(8deg); }
+  45%  { transform: rotate(-6deg); }
+  60%  { transform: rotate(4deg); }
+  75%  { transform: rotate(-2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes anim-swing {
+  0%, 100% { transform: rotate(0deg); transform-origin: top center; }
+  20%      { transform: rotate(10deg); }
+  40%      { transform: rotate(-8deg); }
+  60%      { transform: rotate(4deg); }
+  80%      { transform: rotate(-2deg); }
+}
+
+@keyframes anim-rock {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(5deg); }
+  75%      { transform: rotate(-5deg); }
+}
+
+@keyframes anim-nod {
+  0%, 100% { transform: rotateX(0deg); }
+  30%      { transform: rotateX(-15deg); }
+  60%      { transform: rotateX(10deg); }
+}
+
+
+/* ==========================================================
+   COMPOUND
+   ========================================================== */
+
+@keyframes anim-attention {
+  0%   { transform: scale(1) translateX(0); }
+  15%  { transform: scale(1.06) translateX(-2px); }
+  30%  { transform: scale(1.06) translateX(2px); }
+  45%  { transform: scale(1.03) translateX(-1px); }
+  60%  { transform: scale(1) translateX(0); }
+  100% { transform: scale(1) translateX(0); }
+}
+
+@keyframes anim-celebrate {
+  0%   { transform: scale(1) rotate(0deg); }
+  20%  { transform: scale(1.18) rotate(-8deg); }
+  40%  { transform: scale(1.18) rotate(8deg); }
+  60%  { transform: scale(1.1) rotate(-4deg); }
+  80%  { transform: scale(1.04) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes anim-enter {
+  0%   { transform: translateY(12px) scale(0.9); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes anim-exit {
+  0%   { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-12px) scale(0.9); opacity: 0; }
+}
+
+
+/* ==========================================================
+   HOVER TRIGGERS — .anim--{name}:hover
+   ========================================================== */
+
+/* Movement */
+.anim--spin:hover        { animation: anim-spin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim--bounce:hover      { animation: anim-bounce var(--duration-long) var(--ease-expo-out); }
+.anim--shake:hover       { animation: anim-shake var(--duration-long) var(--ease-expo-out); }
+.anim--float:hover       { animation: anim-float 3s var(--ease-expo-out) infinite; }
+.anim--drift:hover       { animation: anim-drift 4s var(--ease-expo-out) infinite; }
+.anim--slide-up:hover    { animation: anim-slide-up var(--duration-slower) var(--ease-expo-out); }
+.anim--slide-down:hover  { animation: anim-slide-down var(--duration-slower) var(--ease-expo-out); }
+.anim--slide-left:hover  { animation: anim-slide-left var(--duration-slower) var(--ease-expo-out); }
+.anim--slide-right:hover { animation: anim-slide-right var(--duration-slower) var(--ease-expo-out); }
+.anim--flip:hover        { animation: anim-flip var(--duration-long) var(--ease-expo-out); }
+
+/* Scale */
+.anim--pulse:hover       { animation: anim-pulse var(--duration-long) var(--ease-expo-out); }
+.anim--ping:hover        { animation: anim-ping var(--duration-long) var(--ease-expo-out); }
+.anim--pop:hover         { animation: anim-pop var(--duration-slower) var(--ease-bounce); }
+.anim--squish:hover      { animation: anim-squish var(--duration-long) var(--ease-expo-out); }
+.anim--heartbeat:hover   { animation: anim-heartbeat var(--duration-long) var(--ease-expo-out) infinite; }
+.anim--rubber-band:hover { animation: anim-rubber-band var(--duration-long) var(--ease-expo-out); }
+
+/* Opacity */
+.anim--fade:hover        { animation: anim-fade var(--duration-slower) var(--ease-default); }
+.anim--blink:hover       { animation: anim-blink 1.5s var(--ease-default) 2; }
+.anim--flash:hover       { animation: anim-flash var(--duration-long) var(--ease-default); }
+.anim--glint:hover       { animation: anim-glint var(--duration-slower) var(--ease-expo-out); }
+.anim--shimmer:hover     { animation: anim-shimmer 2s var(--ease-default) infinite; }
+.anim--twinkle:hover     { animation: anim-twinkle 2s var(--ease-default) infinite; }
+
+/* Rotation */
+.anim--wiggle:hover      { animation: anim-wiggle var(--duration-slower) var(--ease-expo-out); }
+.anim--swing:hover       { animation: anim-swing var(--duration-long) var(--ease-expo-out); }
+.anim--rock:hover        { animation: anim-rock 2s var(--ease-default) infinite; }
+.anim--nod:hover         { animation: anim-nod var(--duration-slower) var(--ease-expo-out); }
+
+/* Compound */
+.anim--attention:hover   { animation: anim-attention var(--duration-long) var(--ease-expo-out); }
+.anim--celebrate:hover   { animation: anim-celebrate var(--duration-long) var(--ease-bounce); }
+.anim--enter:hover       { animation: anim-enter var(--duration-slower) var(--ease-expo-out); }
+.anim--exit:hover        { animation: anim-exit var(--duration-slower) var(--ease-expo-out); }

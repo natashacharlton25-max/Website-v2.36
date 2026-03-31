@@ -55,30 +55,10 @@
    No prop = no class = these rules never match.
    ========================================================== */
 
-@keyframes icon-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
+/* Animations → global/micro-animations.css
+   Icon uses .anim--{name} classes from the shared animation system.
+   Legacy .icon--spin/pulse/bounce still work via aliases below. */
 
-@keyframes icon-pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50%      { transform: scale(1.15); opacity: 0.7; }
-}
-
-@keyframes icon-bounce {
-  0%, 100% { transform: translateY(0); }
-  40%      { transform: translateY(-4px); }
-  60%      { transform: translateY(-2px); }
-}
-
-.icon--spin:hover {
-  animation: icon-spin var(--icon-spin-speed, 1s) linear infinite;
-}
-
-.icon--pulse:hover {
-  animation: icon-pulse var(--icon-pulse-speed, 1.5s) ease-in-out infinite;
-}
-
-.icon--bounce:hover {
-  animation: icon-bounce var(--icon-bounce-speed, 0.6s) ease-in-out infinite;
-}
+.icon--spin:hover    { animation: anim-spin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.icon--pulse:hover   { animation: anim-pulse var(--duration-long) var(--ease-expo-out); }
+.icon--bounce:hover  { animation: anim-bounce var(--duration-long) var(--ease-expo-out); }
