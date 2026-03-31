@@ -19,7 +19,7 @@ export default defineConfig({
 
   // Integrations
   integrations: [
-    icon()
+    icon(),
   ],
 
   // Build configuration
