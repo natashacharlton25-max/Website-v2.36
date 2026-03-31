@@ -16,6 +16,7 @@
 
   position: relative;
   width: fit-content;
+  isolation: isolate;
 }
 
 .text-highlight::before {
@@ -27,7 +28,7 @@
   height: var(--_highlight-height);
   z-index: -1;
   opacity: var(--_highlight-opacity);
-  border-radius: 0;
+  border-radius: var(--_highlight-radius, 0);
 }
 
 
@@ -44,10 +45,21 @@
    OPACITY
    ========================================================== */
 
+/* ==========================================================
+   SHAPE
+   ========================================================== */
+
+.text-highlight--sharp   { --_highlight-radius: 0; }
+.text-highlight--rounded { --_highlight-radius: var(--radius-sm); }
+
+
+/* ==========================================================
+   OPACITY
+   ========================================================== */
+
 .text-highlight--faint  { --_highlight-opacity: var(--opacity-low); }
 .text-highlight--soft   { --_highlight-opacity: var(--opacity-medium); }
 .text-highlight--bold   { --_highlight-opacity: var(--opacity-high); }
-.text-highlight--solid  { --_highlight-opacity: 1; }
 
 
 /* ==========================================================

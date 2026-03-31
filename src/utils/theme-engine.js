@@ -777,7 +777,7 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
 
   // Text + theme-specific
   ln(`  /* -- TEXT + THEME-SPECIFIC ---------------------- */`);
-  ln(`  --color-Text: var(--neutral-950);`);
+  ln(`  --color-Text: var(--neutral-700);`);
   ln(`  --color-Text-contrast: var(--page-bg);`);
   ln(`  --media-brightness: ${isDark ? '0.86' : '1'};`);
   ln(`  --media-saturation: ${chromaPreset === 'grey' ? '0' : (isDark ? '0.90' : '1')};`);
@@ -792,8 +792,9 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
 
   // HC-specific extras
   if (definition.highContrast) {
+    ln(`  --color-Text: ${isDark ? 'var(--color-White)' : 'var(--color-Black)'};`);
+    ln(`  --color-Text-contrast: ${isDark ? 'var(--color-Black)' : 'var(--color-White)'};`);
     ln(`  --a11y-hc-icon-filter: brightness(0) invert(${isDark ? '1' : '0'});`);
-    ln(`  --btn-filled-text: ${isDark ? 'var(--color-Black)' : 'var(--color-White)'};`);
   }
 
   ln(`}`);

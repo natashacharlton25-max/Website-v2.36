@@ -52,6 +52,9 @@ interface Props {
 
   /** Highlight bar colour (independent from text colour) */
   highlightColor?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  highlightHeight?: 'sm' | 'md' | 'lg';
+  highlightOpacity?: 'faint' | 'soft' | 'bold';
+  highlightShape?: 'sharp' | 'rounded';
 
   /** Uppercase with letter-spacing */
   uppercase?: boolean;
@@ -83,6 +86,9 @@ const {
   textTone,
   highlight = false,
   highlightColor = 'primary',
+  highlightHeight,
+  highlightOpacity,
+  highlightShape,
   uppercase = false,
   clamp,
   flush = false,
@@ -112,6 +118,9 @@ const classes = [
   textTone && `text--tone-${textTone}`,
   highlight && 'text-highlight',
   highlight && `text-highlight--${highlightColor}`,
+  highlight && highlightHeight && `text-highlight--${highlightHeight}`,
+  highlight && highlightOpacity && `text-highlight--${highlightOpacity}`,
+  highlight && highlightShape && `text-highlight--${highlightShape}`,
   uppercase && 'text--uppercase',
   clamp && 'text--clamp',
   flush && 'text--flush',
