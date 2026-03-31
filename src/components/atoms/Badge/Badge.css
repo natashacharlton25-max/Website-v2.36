@@ -1,10 +1,12 @@
 /**
  * Badge — base styles
  *
- * One size. Colour set by JSON pipeline via --badge-bg / --badge-text / --badge-border.
+ * Internal tokens:
+ *   --_badge-bg      (primary-200) — badge background
+ *   --_badge-border  (primary-600) — badge border / outline colour
  *
  * Style variants: fill (default), outline, glass
- * Shapes: rounded, pill, squared
+ * Shapes: sharp, subtle, soft, rounded, pill
  * Sizes: sm, md (default), lg
  */
 
@@ -16,19 +18,18 @@
   gap: var(--space-xs);
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-xs);
-  font-size: 0.85em;
-  font-weight: var(--font-semibold);
-  line-height: 1;
+  font-size: var(--text-fine);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-none);
   white-space: nowrap;
-  letter-spacing: 0.03em;
+  letter-spacing: var(--letter-spacing-wider);
   text-transform: uppercase;
   margin: 0;
   overflow-wrap: normal;
+  border: var(--border-width-2) solid transparent;
 
-  /* Colour tokens — JSON pipeline overrides, theme fallbacks.
-     Border inherits from bg unless explicitly set. */
-  --_badge-bg: var(--badge-bg, var(--primary-200));
-  --_badge-border: var(--badge-border, var(--primary-600));
+  --_badge-bg: var(--primary-200);
+  --_badge-border: var(--primary-600);
 }
 
 .badge__icon {
@@ -48,11 +49,11 @@
 /* ========== SIZE ========== */
 
 .badge--sm {
-  font-size: var(--text-fine);
+  font-size: var(--text-veryfine);
   padding: var(--space-2xs) var(--space-xs);
   gap: var(--space-xs);
   border-radius: var(--radius-xs);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 .badge--lg {
@@ -86,25 +87,30 @@
 
 .badge--outline {
   background: transparent;
-  border: 1.5px solid var(--_badge-border);
+  border-color: var(--_badge-border);
   color: var(--_badge-border);
 }
+
+/* ========== BORDER WEIGHT ========== */
+
+.badge--border-thin  { border-width: var(--border-width); }
+.badge--border-thick { border-width: var(--border-width-md); }
 
 /* ========== VARIANT: Glass ========== */
 
 .badge--glass {
-  background: var(--badge-glass-bg, var(--glass-bg));
-  backdrop-filter: var(--badge-glass-blur, var(--glass-blur));
-  -webkit-backdrop-filter: var(--badge-glass-blur, var(--glass-blur));
-  border: 1px solid var(--badge-glass-border, color-mix(in oklch, var(--_badge-bg) 30%, var(--color-White)));
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-color: color-mix(in oklch, var(--_badge-bg) 30%, var(--color-White));
   color: oklch(from var(--page-bg) round(1.21 - l) 0 0);
 }
 
 /* ========== SHADOW ========== */
 
 .badge--shadow-none { box-shadow: none; }
-.badge--shadow-out  { box-shadow: 0 1px 3px color-mix(in oklch, var(--neutral-950) 18%, transparent), 0 1px 2px color-mix(in oklch, var(--neutral-950) 12%, transparent); }
-.badge--shadow-in   { box-shadow: inset 0 2px 4px color-mix(in oklch, var(--color-Black) 22%, transparent); }
+.badge--shadow-out  { box-shadow: var(--shadow); }
+.badge--shadow-in   { box-shadow: var(--shadow-neu-hover); }
 
 /* ========== COLOUR VARIANTS ========== */
 
@@ -166,20 +172,5 @@
   justify-content: center;
 }
 
-/* ================================================================
-   RENDER MODE OVERRIDES
-   ================================================================ */
-
-/* Assistive — larger text, solid background, normal flow */
-[data-render="assistive"] .badge {
-  font-size: var(--text-base);
-  padding: var(--space-md);
-  background: var(--_badge-bg);
-  color: oklch(from var(--_badge-bg) round(1.21 - l) 0 0);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: none;
-  position: static;
-}
-
-/* Textonly → global textonly/structure.css */
+/* Assistive → assistive-gate.css
+   Textonly  → textonly-gate.css */

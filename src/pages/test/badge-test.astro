@@ -1,80 +1,47 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Page } from '../../components/atoms/Page';
+import { Section } from '../../components/atoms/Section';
 import { Heading } from '../../components/atoms/Heading';
 import { Badge } from '../../components/atoms/Badge';
-import { Section } from '../../components/atoms/Section';
+import { Grid } from '../../components/atoms/Grid';
 
-import testData from '../../data/test/badge.json';
+import data from '../../data/test/badge.json';
 
-// Default colour tokens from JSON — only border, bg/text handled by CSS per mode
-const defaultStyle = `--badge-border: ${testData.colour.badgeBorder}`;
-
-// Merge: item style overrides defaults
-function mergeStyle(itemStyle?: string): string {
-  return itemStyle ? `${defaultStyle}; ${itemStyle}` : defaultStyle;
-}
-
-// Pipeline: strip props per render mode
-// Full: all props
-// Reduced: content + visual, no animation (Badge has none, so same as full)
-// Textonly: label only — no icon, no variant styling
-function reducedProps(b: any) {
-  return b;
-}
-
-function textonlyProps(b: any) {
-  return { label: b.label, level: b.level };
-}
+const sections = data.children || [];
 ---
 
-<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
-  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
-
-    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
-
-    {testData.sections.map((section: any) => (
-      <Section label={section.label} separator gap={testData.layout.itemGap}>
-        <div style="display:flex;flex-wrap:wrap;gap:var(--space-md);align-items:center;">
-          {section.items.map((b: any) => (
-            <Fragment>
-              <div class="render-full">
-                <Badge
-                  label={b.label}
-                  color={b.color}
-                  variant={b.variant}
-                  shadow={b.shadow}
-                  size={b.size}
-                  shape={b.shape}
-                  icon={b.icon}
-                  uppercase={b.uppercase}
-                  semanticRole={b.semanticRole}
-                  level={b.level}
-                  style={mergeStyle(b.style)}
-                />
-              </div>
-              <div class="render-reduced">
-                {(() => { const r = reducedProps(b); return (
+<BaseLayout title="Badge Atom Test">
+  <Page margin={data.margin as any}>
+    {sections.map((section: any) => (
+      <Section gap={section.gap as any} container={section.container as any}>
+        {(section.children || []).map((child: any) => {
+          if (child.component === 'Heading') {
+            return <Heading level={child.level as any} align={child.align as any} flush={child.flush}>{child.text}</Heading>;
+          }
+          if (child.component === 'Grid') {
+            return (
+              <Grid variant={child.variant as any} gap={child.gap as any} align={child.align as any}>
+                {(child.children || []).map((badge: any) => (
                   <Badge
-                    label={r.label}
-                    variant={r.variant}
-                    size={r.size}
-                    shape={r.shape}
-                    icon={r.icon}
-                    uppercase={r.uppercase}
-                    semanticRole={r.semanticRole}
-                    level={r.level}
-                    style={r.style}
+                    label={badge.label}
+                    color={badge.color}
+                    variant={badge.variant}
+                    shadow={badge.shadow}
+                    size={badge.size}
+                    shape={badge.shape}
+                    icon={badge.icon}
+                    lottieIcon={badge.lottieIcon}
+                    lottieTrigger={badge.lottieTrigger}
+                    uppercase={badge.uppercase}
+                    semanticRole={badge.semanticRole}
                   />
-                ); })()}
-              </div>
-              <div class="render-textonly">
-                <Badge label={b.label} level={b.level} />
-              </div>
-            </Fragment>
-          ))}
-        </div>
+                ))}
+              </Grid>
+            );
+          }
+        })}
       </Section>
     ))}
-
-  </Section>
+  </Page>
 </BaseLayout>

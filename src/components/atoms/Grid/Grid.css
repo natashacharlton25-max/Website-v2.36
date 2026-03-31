@@ -1,0 +1,176 @@
+/**
+ * Grid — Layout atom
+ *
+ * Internal tokens:
+ *   --_grid-gap       (space-md)   — gap between items
+ *   --_grid-columns   (1)          — column count for fixed variant
+ *   --_grid-min-width (16rem)      — min column width for auto-fit/auto-fill
+ *   --_grid-row-min   (auto)       — min row height for dense flow
+ */
+
+.base-grid {
+  --_grid-gap: var(--space-md);
+  --_grid-columns: 1;
+
+  display: grid;
+  grid-template-columns: repeat(var(--_grid-columns), 1fr);
+  gap: var(--_grid-gap);
+  width: 100%;
+}
+
+
+/* ==========================================================
+   VARIANT
+   ========================================================== */
+
+.base-grid--inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--_grid-gap);
+}
+
+.base-grid--auto-fit {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--_grid-min-width, 16rem)), 1fr));
+}
+
+.base-grid--auto-fill {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_grid-min-width, 16rem)), 1fr));
+}
+
+
+/* ==========================================================
+   FLOW MODES
+   ========================================================== */
+
+.base-grid--dense {
+  grid-auto-flow: dense;
+  grid-auto-rows: minmax(var(--_grid-row-min, auto), auto);
+}
+
+.base-grid--column {
+  grid-auto-flow: column;
+}
+
+.base-grid--masonry {
+  display: block;
+  column-count: var(--_grid-columns);
+  column-gap: var(--_grid-gap);
+  padding: var(--space-sm);
+}
+
+.base-grid--masonry > * {
+  break-inside: avoid;
+  margin-bottom: var(--_grid-gap);
+}
+
+
+/* ==========================================================
+   COLUMNS
+   ========================================================== */
+
+.base-grid--cols-1 { --_grid-columns: 1; }
+.base-grid--cols-2 { --_grid-columns: 2; }
+.base-grid--cols-3 { --_grid-columns: 3; }
+.base-grid--cols-4 { --_grid-columns: 4; }
+.base-grid--cols-5 { --_grid-columns: 5; }
+.base-grid--cols-6 { --_grid-columns: 6; }
+
+
+/* ==========================================================
+   GAP
+   ========================================================== */
+
+.base-grid--gap-none { --_grid-gap: 0; }
+.base-grid--gap-xs   { --_grid-gap: var(--space-xs); }
+.base-grid--gap-sm   { --_grid-gap: var(--space-sm); }
+.base-grid--gap-md   { --_grid-gap: var(--space-md); }
+.base-grid--gap-lg   { --_grid-gap: var(--space-lg); }
+.base-grid--gap-xl   { --_grid-gap: var(--space-xl); }
+.base-grid--gap-2xl  { --_grid-gap: var(--space-2xl); }
+
+
+/* ==========================================================
+   ALIGN
+   ========================================================== */
+
+.base-grid--align-start   { align-items: start; }
+.base-grid--align-center  { align-items: center; }
+.base-grid--align-end     { align-items: end; }
+.base-grid--align-stretch { align-items: stretch; }
+
+
+/* ==========================================================
+   GALLERY MODES
+   Layout-only rules. JS targets [data-gallery] attribute.
+   ========================================================== */
+
+.base-grid--gallery {
+  position: relative;
+}
+
+/* Showcase: 1 large + N thumbnails, carousel rotation */
+.base-grid--gallery-showcase {
+  grid-template-columns: minmax(auto, var(--container-sm)) var(--space-5xl);
+  grid-template-rows: repeat(3, 1fr);
+  grid-auto-flow: dense;
+  height: var(--container-xs);
+  min-height: var(--container-xs);
+}
+
+.base-grid--gallery-showcase > :first-child,
+.base-grid--gallery-showcase > .is-expanded {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+}
+
+.base-grid--gallery-showcase > :not(:first-child):not(.is-expanded) {
+  grid-column: 2;
+}
+
+/* Product: 6-col expand/collapse thumbnails */
+.base-grid--gallery-product {
+  grid-template-columns: repeat(6, 1fr);
+  grid-auto-flow: dense;
+}
+
+.base-grid--gallery-product > * {
+  grid-column: span 2;
+}
+
+.base-grid--gallery-product > .is-active {
+  grid-row: 1;
+  grid-column: 1 / span 6;
+  order: 0;
+}
+
+.base-grid--gallery-product > .is-inactive {
+  grid-column: span 2;
+}
+
+
+/* ==========================================================
+   COLUMN SPANNING
+   ========================================================== */
+
+.base-grid > [style*="--span"] {
+  grid-column: span var(--span, 1);
+}
+
+.grid-span-2    { grid-column: span 2; }
+.grid-span-3    { grid-column: span 3; }
+.grid-span-4    { grid-column: span 4; }
+.grid-span-5    { grid-column: span 5; }
+.grid-span-6    { grid-column: span 6; }
+.grid-span-full { grid-column: 1 / -1; }
+
+
+/* ==========================================================
+   ROW SPANNING
+   ========================================================== */
+
+.base-grid > [style*="--row-span"] {
+  grid-row: span var(--row-span, 1);
+}
+
+.grid-row-span-2 { grid-row: span 2; }
+.grid-row-span-3 { grid-row: span 3; }

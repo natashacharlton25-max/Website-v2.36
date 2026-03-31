@@ -1,0 +1,20 @@
+---
+interface Props {
+  margin?: 'compact' | 'comfortable' | 'spacious';
+  gap?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+  class?: string;
+}
+
+const { margin = 'comfortable', gap = '2xl', class: className } = Astro.props;
+---
+
+<main
+  class:list={[
+    'page',
+    `page--margin-${margin}`,
+    `page--gap-${gap}`,
+    className,
+  ]}
+>
+  <slot />
+</main>

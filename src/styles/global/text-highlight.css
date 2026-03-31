@@ -1,0 +1,66 @@
+/**
+ * Text highlight — shared colour bar behind text
+ *
+ * Used by Text and Heading atoms via their highlight props.
+ * Colour map: 10 variants matching the global colour enum.
+ * Height enum: sm (30%), md (45%), lg (100%).
+ *
+ * Internal token:
+ *   --_highlight-height   (45%)          — bar height relative to text
+ *   --_highlight-opacity  (opacity-low)  — bar transparency
+ */
+
+.text-highlight {
+  --_highlight-height: 45%;
+  --_highlight-opacity: var(--opacity-low);
+
+  position: relative;
+  width: fit-content;
+}
+
+.text-highlight::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--_highlight-height);
+  z-index: -1;
+  opacity: var(--_highlight-opacity);
+  border-radius: 0;
+}
+
+
+/* ==========================================================
+   HEIGHT
+   ========================================================== */
+
+.text-highlight--sm { --_highlight-height: 30%; }
+.text-highlight--md { --_highlight-height: 45%; }
+.text-highlight--lg { --_highlight-height: 100%; }
+
+
+/* ==========================================================
+   OPACITY
+   ========================================================== */
+
+.text-highlight--faint  { --_highlight-opacity: var(--opacity-low); }
+.text-highlight--soft   { --_highlight-opacity: var(--opacity-medium); }
+.text-highlight--bold   { --_highlight-opacity: var(--opacity-high); }
+.text-highlight--solid  { --_highlight-opacity: 1; }
+
+
+/* ==========================================================
+   COLOUR — 10 variants
+   ========================================================== */
+
+.text-highlight--primary::before   { background: var(--primary-400); }
+.text-highlight--secondary::before { background: var(--secondary-400); }
+.text-highlight--neutral::before   { background: var(--neutral-400); }
+.text-highlight--red::before       { background: var(--rainbow-1-light); }
+.text-highlight--orange::before    { background: var(--rainbow-2-light); }
+.text-highlight--yellow::before    { background: var(--rainbow-3-light); }
+.text-highlight--teal::before      { background: var(--rainbow-4-light); }
+.text-highlight--blue::before      { background: var(--rainbow-5-light); }
+.text-highlight--purple::before    { background: var(--rainbow-6-light); }
+.text-highlight--pink::before      { background: var(--rainbow-7-light); }

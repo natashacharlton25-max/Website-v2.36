@@ -1,0 +1,79 @@
+/**
+ * Assistive render gate — single column, larger touch targets
+ *
+ * Rules extracted from component CSS during atom audit.
+ * Scoped to [data-render="assistive"].
+ */
+
+/* ── Grid ── */
+
+[data-render="assistive"] .base-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+[data-render="assistive"] .base-grid--masonry {
+  display: flex;
+  flex-direction: column;
+  column-count: unset;
+  column-gap: unset;
+  padding: 0;
+}
+
+[data-render="assistive"] .base-grid--masonry > * {
+  margin-bottom: var(--space-md);
+  break-inside: unset;
+}
+
+/* Kill gallery animation */
+[data-render="assistive"] [data-gallery] {
+  --gallery-animate: 0;
+}
+
+/* Showcase: hide carousel */
+[data-render="assistive"] .base-grid--gallery-showcase {
+  display: none;
+}
+
+/* Product: vertical stack */
+[data-render="assistive"] .base-grid--gallery-product {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-render="assistive"] .base-grid--gallery-product > .is-active,
+[data-render="assistive"] .base-grid--gallery-product > .is-inactive {
+  opacity: 1;
+  filter: none;
+  height: auto;
+}
+
+/* Kill spanning */
+[data-render="assistive"] .base-grid > [class*="grid-span"],
+[data-render="assistive"] .base-grid > [class*="grid-row-span"],
+[data-render="assistive"] .base-grid > [style*="--span"],
+[data-render="assistive"] .base-grid > [style*="--row-span"] {
+  flex: none;
+  width: 100%;
+}
+
+/* Separator */
+[data-render="assistive"] .base-grid--separator > * + * {
+  border-top: 1px solid var(--neutral-400);
+  padding-top: var(--space-sm);
+}
+
+
+/* ── Badge ── */
+
+[data-render="assistive"] .badge {
+  font-size: var(--text-base);
+  padding: var(--space-md);
+  background: var(--_badge-bg);
+  color: oklch(from var(--_badge-bg) round(1.21 - l) 0 0);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  position: static;
+}

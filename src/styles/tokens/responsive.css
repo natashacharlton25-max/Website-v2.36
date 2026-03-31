@@ -47,6 +47,16 @@
 }
 
 @media (max-width: 450px) {
+  :root {
+    --base-font-pct: 100%;
+  }
+
+  /* Blockquote: left aligned, keep border */
+  blockquote.text.text {
+    margin: var(--space-md) 0;
+    padding-left: var(--space-sm);
+  }
+
   /* All form fields scale to XL for touch targets */
   .form-field {
     --_field-control-size: 2.5rem;
@@ -80,7 +90,12 @@
 }
 
 @media (max-width: 250px) {
-  :root { --base-font-pct: 62.5%; }   /* 10px base */
+  :root { --base-font-pct: 100%; }
+
+  /* All text forced to XL for readability */
+  .text.text {
+    font-size: var(--text-h4);
+  }
 
   /* All headings collapse to h2 size */
   .heading--h1 { font-size: var(--text-h2); }
@@ -93,6 +108,26 @@
   .btn {
     padding: var(--space-sm) var(--space-md);
     min-height: 2rem;
+  }
+
+  /* Badges: strip icons, force fill — text only */
+  .badge .badge__icon,
+  .badge .lottie-icon {
+    display: none;
+  }
+
+  .badge.badge--outline,
+  .badge.badge--glass {
+    background-color: var(--_badge-bg);
+    color: oklch(from var(--_badge-bg) round(1.21 - l) 0 0);
+    border-color: var(--_badge-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .badge.badge {
+    box-shadow: none;
+    border-color: transparent;
   }
 }
 

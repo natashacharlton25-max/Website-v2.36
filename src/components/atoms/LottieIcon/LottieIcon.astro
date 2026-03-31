@@ -33,7 +33,7 @@ interface Props {
   fallbackIcon?: string;
   size?: number;
   /** Animation trigger mode — replaces autoplay/loop */
-  trigger?: 'autoplay' | 'loop' | 'hover' | 'interval' | 'none';
+  trigger?: 'autoplay' | 'loop' | 'hover' | 'viewport' | 'interval' | 'none';
   /** Interval in ms (only used with trigger="interval") */
   interval?: number;
   loop?: boolean;
@@ -50,7 +50,7 @@ const {
   fallbackIcon,
   size = 24,
   trigger = 'none',
-  interval = 20000,
+  interval = 3000,
   loop = false,
   autoplay = false,
   class: className = '',
@@ -59,7 +59,7 @@ const {
 } = Astro.props;
 
 // Resolve trigger to loop/autoplay for backward compat
-const resolvedLoop = trigger === 'loop' || trigger === 'interval' || loop;
+const resolvedLoop = trigger === 'loop' || loop;
 const resolvedAutoplay = trigger === 'autoplay' || trigger === 'loop' || autoplay;
 
 // Fetch Lottie JSON + fallback icon from API at build/render time
@@ -219,12 +219,39 @@ if (slug) {
         element.addEventListener('focusout', () => { anim.setDirection(-1); anim.play(); });
       }
 
-      if (trigger === 'interval') {
-        const ms = parseInt(element.dataset.lottieInterval || '10000', 10);
+      if (trigger === 'viewport') {
         anim.autoplay = false;
         anim.stop();
-        anim.addEventListener('complete', () => { anim.stop(); });
-        setInterval(() => { anim.goToAndStop(0, true); anim.play(); }, ms);
+        const observer = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              anim.goToAndStop(0, true);
+              anim.play();
+              observer.unobserve(element);
+            }
+          }
+        }, { threshold: 0.5 });
+        observer.observe(element);
+      }
+
+      if (trigger === 'interval') {
+        const ms = parseInt(element.dataset.lottieInterval || '3000', 10);
+        const repeats = parseInt(element.dataset.lottieRepeats || '3', 10);
+        anim.autoplay = false;
+        anim.stop();
+        let playCount = 0;
+        anim.addEventListener('complete', () => {
+          playCount++;
+          if (playCount < repeats) {
+            anim.goToAndStop(0, true);
+            anim.play();
+          } else {
+            anim.stop();
+            playCount = 0;
+            setTimeout(() => { anim.goToAndStop(0, true); anim.play(); }, ms);
+          }
+        });
+        anim.play();
       }
 
     } catch (e) {

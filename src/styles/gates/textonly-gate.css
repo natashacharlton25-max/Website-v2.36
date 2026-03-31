@@ -1,0 +1,144 @@
+/**
+ * Textonly render gate — single column, minimal layout
+ *
+ * Rules extracted from component CSS during atom audit.
+ * Scoped to [data-render="textonly"].
+ */
+
+/* ── Grid ── */
+
+[data-render="textonly"] .base-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Inline grids keep wrapping — badges, tags, etc. */
+[data-render="textonly"] .base-grid--inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+[data-render="textonly"] .base-grid--masonry {
+  display: flex;
+  flex-direction: column;
+  column-count: unset;
+  column-gap: unset;
+  padding: 0;
+}
+
+[data-render="textonly"] .base-grid--masonry > * {
+  margin-bottom: var(--space-sm);
+  break-inside: unset;
+}
+
+/* Showcase gallery: purely visual carousel — hide entirely */
+[data-render="textonly"] .base-grid--gallery-showcase {
+  display: none;
+}
+
+/* Product gallery: vertical stack */
+[data-render="textonly"] .base-grid--gallery-product {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-render="textonly"] .base-grid--gallery-product > .is-active,
+[data-render="textonly"] .base-grid--gallery-product > .is-inactive {
+  opacity: 1;
+  filter: none;
+  height: auto;
+}
+
+/* Kill column/row spanning — single column */
+[data-render="textonly"] .base-grid > [class*="grid-span"],
+[data-render="textonly"] .base-grid > [class*="grid-row-span"],
+[data-render="textonly"] .base-grid > [style*="--span"],
+[data-render="textonly"] .base-grid > [style*="--row-span"] {
+  flex: none;
+  width: 100%;
+}
+
+/* Separator between stacked items */
+[data-render="textonly"] .base-grid--separator > * + * {
+  border-top: 1px solid currentColor;
+  padding-top: var(--space-sm);
+}
+
+
+/* ── Badge ── */
+
+[data-render="textonly"] .badge {
+  display: inline-flex;
+  background-color: var(--_badge-bg);
+  color: oklch(from var(--_badge-bg) round(1.21 - l) 0 0);
+  border: var(--border-width) solid var(--neutral-400);
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  width: auto;
+  flex: none;
+  font-size: var(--text-fine);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+/* Reset size and shape overrides */
+[data-render="textonly"] .badge--sm,
+[data-render="textonly"] .badge--lg {
+  font-size: var(--text-fine);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 0;
+}
+
+[data-render="textonly"] .badge--sharp,
+[data-render="textonly"] .badge--subtle,
+[data-render="textonly"] .badge--soft,
+[data-render="textonly"] .badge--rounded,
+[data-render="textonly"] .badge--pill {
+  border-radius: 0;
+  padding: var(--space-xs) var(--space-sm);
+}
+
+/* Beat compound selectors like .badge--lg.badge--rounded */
+[data-render="textonly"] .badge[class*="badge--"] {
+  border-radius: 0;
+  font-size: var(--text-fine);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+[data-render="textonly"] .badge__icon,
+[data-render="textonly"] .badge .lottie-icon {
+  display: none;
+}
+
+
+/* ── Text ── */
+
+[data-render="textonly"] .text {
+  color: var(--color-Text);
+  font-family: var(--font-body);
+  text-transform: none;
+}
+
+/* Strip highlight */
+[data-render="textonly"] .text-highlight::before {
+  display: none;
+}
+
+/* Blockquote: keep border, simplify */
+[data-render="textonly"] blockquote.text {
+  font-family: var(--font-body);
+  font-size: inherit;
+  margin: var(--space-md) 0;
+  padding-left: var(--space-sm);
+}
+
+
+/* ── Heading ── */
+
+[data-render="textonly"] .heading,
+[data-render="textonly"] .heading-wrap {
+  --_heading-color: var(--color-Text);
+  --_heading-accent: var(--color-Text);
+}

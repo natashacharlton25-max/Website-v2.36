@@ -39,7 +39,7 @@ interface Props {
   leading?: 'tight' | 'snug' | 'normal' | 'relaxed';
 
   /** Colour token */
-  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  color?: 'default' | 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
 
   /** Font family variant */
   family?: 'body' | 'body-alt' | 'handwriting' | 'mono';
@@ -70,9 +70,6 @@ interface Props {
 
   /** Additional CSS classes */
   class?: string;
-
-  /** Any additional HTML attributes */
-  [key: string]: any;
 }
 
 const {
@@ -91,7 +88,6 @@ const {
   flush = false,
   aac = false,
   class: className,
-  ...rest
 } = Astro.props;
 
 // Build-time AAC resolution
@@ -110,12 +106,12 @@ const classes = [
   size && `text--${size}`,
   weight && `text--weight-${weight}`,
   leading && `text--leading-${leading}`,
-  color && `text--${color}`,
+  color && color !== 'default' && `text--${color}`,
   family && `text--family-${family}`,
   align && `text--align-${align}`,
   textTone && `text--tone-${textTone}`,
-  highlight && 'text--highlight',
-  highlight && `text--hl-${highlightColor}`,
+  highlight && 'text-highlight',
+  highlight && `text-highlight--${highlightColor}`,
   uppercase && 'text--uppercase',
   clamp && 'text--clamp',
   flush && 'text--flush',
@@ -125,7 +121,7 @@ const classes = [
 const inlineStyle = clamp ? `--text-clamp: ${clamp}` : undefined;
 ---
 
-<Tag class:list={classes} style={inlineStyle} {...rest}>
+<Tag class:list={classes} style={inlineStyle}>
   <span class="text__content"><slot /></span>
   {aacHtml && <span class="text__aac content-aac" set:html={aacHtml} />}
 </Tag>

@@ -14,6 +14,7 @@
  * @param semanticRole - 'status' (default), 'tag', 'label', 'none'
  */
 import { Icon } from '../Icon';
+import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
 import Heading from '../Heading/Heading.astro';
 
@@ -25,13 +26,15 @@ interface Props {
   shadow?: 'none' | 'out' | 'in';
   size?: 'sm' | 'md' | 'lg';
   shape?: 'sharp' | 'subtle' | 'soft' | 'rounded' | 'pill';
+  borderWeight?: 'thin' | 'thick';
   icon?: string;
+  lottieIcon?: string;
+  lottieTrigger?: 'autoplay' | 'loop' | 'hover' | 'viewport' | 'interval' | 'none';
   uppercase?: boolean;
   semanticRole?: 'status' | 'tag' | 'label' | 'none';
   /** Render as heading element (h1-h6) instead of span */
   level?: 1 | 2 | 3 | 4 | 5 | 6;
   class?: string;
-  [key: string]: any;
 }
 
 const {
@@ -41,12 +44,14 @@ const {
   shadow = 'out',
   size = 'md',
   shape = 'soft',
+  borderWeight,
   icon,
+  lottieIcon,
+  lottieTrigger = 'none',
   uppercase = true,
   semanticRole = 'status',
   level,
   class: className,
-  ...rest
 } = Astro.props;
 
 ---
@@ -60,16 +65,18 @@ const {
     `badge--shadow-${shadow}`,
     size !== 'md' && `badge--${size}`,
     `badge--${shape}`,
+    borderWeight && `badge--border-${borderWeight}`,
     level && 'badge--heading',
-    icon && 'badge--has-icon',
+    (icon || lottieIcon) && 'badge--has-icon',
     !uppercase && 'badge--lowercase',
     className,
   ]}
-  {...rest}
 >
-  {icon && (
+  {lottieIcon ? (
+    <LottieIcon slug={lottieIcon} trigger={lottieTrigger} fallbackIcon={icon} class="badge__icon" aria-hidden="true" />
+  ) : icon ? (
     <Icon name={icon} class="badge__icon" aria-hidden="true" />
-  )}
+  ) : null}
   {level ? (
     <Heading level={level} flush class="badge__label">{label}</Heading>
   ) : (

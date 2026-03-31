@@ -775,9 +775,10 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
   ln(`  --parallax-intensity: 1;`);
   ln();
 
-  // Theme-specific
-  ln(`  /* -- THEME-SPECIFIC ----------------------------- */`);
-  ln(`  --btn-filled-text: ${isDark ? pageBg['page-bg'] : scales.neutral[100]};`);
+  // Text + theme-specific
+  ln(`  /* -- TEXT + THEME-SPECIFIC ---------------------- */`);
+  ln(`  --color-Text: var(--neutral-950);`);
+  ln(`  --color-Text-contrast: var(--page-bg);`);
   ln(`  --media-brightness: ${isDark ? '0.86' : '1'};`);
   ln(`  --media-saturation: ${chromaPreset === 'grey' ? '0' : (isDark ? '0.90' : '1')};`);
   ln(`  --media-contrast: ${chromaPreset === 'grey' ? '1.05' : (isDark ? '0.98' : '1')};`);

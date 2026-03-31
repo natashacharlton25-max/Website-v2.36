@@ -38,7 +38,7 @@ interface Props {
   flush?: boolean;
 
   // ── Colour ──────────────────────────────────────────────
-  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  color?: 'default' | 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
 
   // ── Subtitle ─────────────────────────────────────────────
   subtitle?: string;
@@ -51,6 +51,8 @@ interface Props {
 
   // ── Variant ──────────────────────────────────────────────
   variant?: 'default' | 'underline' | 'highlight' | 'minimal';
+  highlightHeight?: 'sm' | 'md' | 'lg';
+  highlightOpacity?: 'faint' | 'soft' | 'bold' | 'solid';
   underlineStyle?: 'solid' | 'gradient' | 'dashed';
   underlineGradient?: 'hero' | 'primary' | 'primary-soft' | 'primary-light' | 'secondary' | 'secondary-soft' | 'sunset' | 'brand-emerge' | 'brand-fade';
 
@@ -74,7 +76,7 @@ interface Props {
 
 const {
   level,
-  color = 'primary',
+  color = 'default',
   size,
   weight,
   family,
@@ -88,6 +90,8 @@ const {
   dividerStyle = 'solid',
   dividerEnds = 'rounded',
   variant = 'default',
+  highlightHeight,
+  highlightOpacity,
   underlineStyle = 'solid',
   underlineGradient = 'hero',
   lottieIcon,
@@ -154,6 +158,8 @@ const headingClassList = [
     `heading-wrap--align-${align ?? 'left'}`,
     `heading-wrap--spacing-${spacing}`,
     `heading-wrap--variant-${variant}`,
+    variant === 'highlight' && highlightHeight && `text-highlight--${highlightHeight}`,
+    variant === 'highlight' && highlightOpacity && `text-highlight--${highlightOpacity}`,
     divider && `heading-wrap--divider-${divider}`,
     divider && `heading-wrap--divider-ends-${dividerEnds}`,
     divider && dividerStyle !== 'solid' && `heading-wrap--divider-style-${dividerStyle}`,
@@ -186,7 +192,7 @@ const headingClassList = [
         <span class="heading-wrap__text-inner"><slot /></span>
       </Tag>
       {variant === 'underline' && <div class="heading-wrap__underline" aria-hidden="true"></div>}
-      {subtitle && <Text as="p" size={subtitleSize} flush class="heading-wrap__subtitle" style="--heading-color: var(--neutral-600)">{subtitle}</Text>}
+      {subtitle && <Text as="p" size={subtitleSize} flush class="heading-wrap__subtitle" color="neutral">{subtitle}</Text>}
       {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
     </div>
 

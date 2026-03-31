@@ -27,7 +27,7 @@ Object.entries(themeModules).forEach(([path, url]) => {
 });
 
 // Theme metadata — loaded from generated theme-names.json
-import themeNames from '../../tokens/theme-names.json';
+import themeNames from '../theme-names.json';
 
 /**
  * Compose a full theme variant name from base + luminance + CVD

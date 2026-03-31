@@ -1,0 +1,46 @@
+---
+interface Props {
+  variant?: 'fixed' | 'inline' | 'auto-fit' | 'auto-fill';
+  columns?: 1 | 2 | 3 | 4 | 5 | 6;
+  gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  align?: 'start' | 'center' | 'end' | 'stretch';
+  flow?: 'row' | 'dense' | 'column' | 'masonry';
+  gallery?: 'showcase' | 'product';
+  separator?: boolean;
+  id?: string;
+  class?: string;
+}
+
+const {
+  variant = 'fixed',
+  columns = 3,
+  gap = 'md',
+  align,
+  flow = 'row',
+  gallery,
+  separator = false,
+  id,
+  class: className,
+} = Astro.props;
+
+const isMasonry = flow === 'masonry';
+const gridVariant = isMasonry ? 'masonry' : variant;
+---
+
+<div
+  class:list={[
+    'base-grid',
+    gridVariant === 'fixed' && `base-grid--cols-${columns}`,
+    gridVariant !== 'fixed' && `base-grid--${gridVariant}`,
+    `base-grid--gap-${gap}`,
+    align && `base-grid--align-${align}`,
+    !isMasonry && flow !== 'row' && `base-grid--${flow}`,
+    gallery && `base-grid--gallery base-grid--gallery-${gallery}`,
+    separator && 'base-grid--separator',
+    className,
+  ]}
+  id={id}
+  data-gallery={gallery || undefined}
+>
+  <slot />
+</div>

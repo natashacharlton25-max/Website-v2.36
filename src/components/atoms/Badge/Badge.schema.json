@@ -1,8 +1,8 @@
 {
   "component": "Badge",
   "category": "atom",
-  "renders": { "full": "Badge.astro", "reduced": "Badge.astro", "assistive": "Badge.astro", "textonly": "Badge.astro" },
-  "notes": "Simple inline label. Colour set by JSON pipeline via --badge-bg/text/border tokens. Non-interactive — no animation, no hover.",
+  "renders": { "full": "Badge.astro", "reduced": "Badge.astro", "textonly": "Badge.astro" },
+  "notes": "Simple inline label. Colour via class enum. Non-interactive — no animation, no hover. Assistive rules in assistive-gate.css.",
 
   "props": {
     "content": {
@@ -18,12 +18,15 @@
       "shadow":       { "type": "string",  "required": false, "default": "out", "enum": ["none", "out", "in"], "description": "Shadow style." },
       "size":         { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Size scale. md is the default." },
       "shape":        { "type": "string",  "required": false, "default": "soft", "enum": ["sharp", "subtle", "soft", "rounded", "pill"], "description": "Border radius shape." },
+      "borderWeight": { "type": "string",  "required": false, "default": null, "enum": ["thin", "thick"], "description": "Border weight. Default (2px) set on base. Thin = 1px, thick = 3px. Most visible with outline variant." },
       "uppercase":    { "type": "boolean", "required": false, "default": true, "description": "Uppercase text transform." },
       "semanticRole": { "type": "string",  "required": false, "default": "status", "enum": ["status", "tag", "label", "none"], "description": "Semantic role for the badge. Controls data-semantic-role attribute." },
       "class":        { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
     },
 
-    "animation": {}
+    "animation": {
+      "lottieIcon": { "type": "string", "required": false, "default": null, "description": "Lottie slug for animated icon. Falls back to content.icon in reduced/assistive. Stripped in textonly." }
+    }
   },
 
   "pipelineRules": {

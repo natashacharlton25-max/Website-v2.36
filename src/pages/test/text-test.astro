@@ -1,65 +1,70 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Page } from '../../components/atoms/Page';
+import { Section } from '../../components/atoms/Section';
 import { Heading } from '../../components/atoms/Heading';
 import { Text } from '../../components/atoms/Text';
-import { Section } from '../../components/atoms/Section';
+import { Grid } from '../../components/atoms/Grid';
 
-import testData from '../../data/test/text.json';
+import data from '../../data/test/text.json';
 
-// Pipeline: strip props per render mode
-function textonlyProps(item: any) {
-  return { text: item.text, as: item.as };
-}
+const sections = data.children || [];
 ---
 
-<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
-  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
-
-    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
-
-    {testData.sections.map((section: any) => (
-      <Section label={section.label} separator gap={testData.layout.itemGap}>
-        <div style={`display:flex;flex-direction:column;gap:var(--space-${section.layout === 'block' ? 'xl' : 'md'});`}>
-          {section.items.map((item: any) => (
-            <Fragment>
-              <div class="render-full">
-                <Text
-                  as={item.as}
-                  size={item.size}
-                  weight={item.weight}
-                  leading={item.leading}
-                  color={item.color}
-                  family={item.family}
-                  align={item.align}
-                  highlight={item.highlight}
-                  highlightColor={item.highlightColor}
-                  uppercase={item.uppercase}
-                  clamp={item.clamp}
-                  flush={item.flush}
-                  textTone={item.textTone}
-                  aac={item.aac}
-                >{item.text}</Text>
-              </div>
-              <div class="render-reduced">
-                <Text
-                  as={item.as}
-                  size={item.size}
-                  weight={item.weight}
-                  leading={item.leading}
-                  color={item.color}
-                  family={item.family}
-                  align={item.align}
-                  flush={item.flush}
-                >{item.text}</Text>
-              </div>
-              <div class="render-textonly">
-                <Text as={item.as}>{item.text}</Text>
-              </div>
-            </Fragment>
-          ))}
-        </div>
+<BaseLayout title="Text Atom Test">
+  <Page margin={data.margin as any}>
+    {sections.map((section: any) => (
+      <Section gap={section.gap as any} container={section.container as any}>
+        {(section.children || []).map((child: any) => {
+          if (child.component === 'Heading') {
+            return <Heading level={child.level as any} align={child.align as any} flush={child.flush}>{child.text}</Heading>;
+          }
+          if (child.component === 'Text') {
+            return (
+              <Text
+                as={child.as}
+                size={child.size}
+                weight={child.weight}
+                leading={child.leading}
+                color={child.color}
+                family={child.family}
+                align={child.align}
+                highlight={child.highlight}
+                highlightColor={child.highlightColor}
+                uppercase={child.uppercase}
+                clamp={child.clamp}
+                flush={child.flush}
+                textTone={child.textTone}
+                aac={child.aac}
+              >{child.text}</Text>
+            );
+          }
+          if (child.component === 'Grid') {
+            return (
+              <Grid variant={child.variant as any} columns={child.columns as any} gap={child.gap as any}>
+                {(child.children || []).map((item: any) => (
+                  <Text
+                    as={item.as}
+                    size={item.size}
+                    weight={item.weight}
+                    leading={item.leading}
+                    color={item.color}
+                    family={item.family}
+                    align={item.align}
+                    highlight={item.highlight}
+                    highlightColor={item.highlightColor}
+                    uppercase={item.uppercase}
+                    clamp={item.clamp}
+                    flush={item.flush}
+                    textTone={item.textTone}
+                    aac={item.aac}
+                  >{item.text}</Text>
+                ))}
+              </Grid>
+            );
+          }
+        })}
       </Section>
     ))}
-
-  </Section>
+  </Page>
 </BaseLayout>
