@@ -777,8 +777,13 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
 
   // Text + theme-specific
   ln(`  /* -- TEXT + THEME-SPECIFIC ---------------------- */`);
-  ln(`  --color-Text: var(--neutral-700);`);
-  ln(`  --color-Text-contrast: var(--page-bg);`);
+  if (definition.highContrast) {
+    ln(`  --color-Text: ${isDark ? 'var(--color-White)' : 'var(--color-Black)'};`);
+    ln(`  --color-Text-contrast: ${isDark ? 'var(--color-Black)' : 'var(--color-White)'};`);
+  } else {
+    ln(`  --color-Text: var(--neutral-700);`);
+    ln(`  --color-Text-contrast: var(--page-bg);`);
+  }
   ln(`  --media-brightness: ${isDark ? '0.86' : '1'};`);
   ln(`  --media-saturation: ${chromaPreset === 'grey' ? '0' : (isDark ? '0.90' : '1')};`);
   ln(`  --media-contrast: ${chromaPreset === 'grey' ? '1.05' : (isDark ? '0.98' : '1')};`);
@@ -792,8 +797,6 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
 
   // HC-specific extras
   if (definition.highContrast) {
-    ln(`  --color-Text: ${isDark ? 'var(--color-White)' : 'var(--color-Black)'};`);
-    ln(`  --color-Text-contrast: ${isDark ? 'var(--color-Black)' : 'var(--color-White)'};`);
     ln(`  --a11y-hc-icon-filter: brightness(0) invert(${isDark ? '1' : '0'});`);
   }
 
@@ -872,6 +875,19 @@ export function generateThemeData(definition) {
     pageBg = isDark
       ? { 'page-bg': '#000000', 'page-bg-raised': '#1a1a1a', 'page-bg-sunken': '#000000', 'page-bg-overlay': '#222222' }
       : { 'page-bg': '#ffffff', 'page-bg-raised': '#f5f5f5', 'page-bg-sunken': '#eeeeee', 'page-bg-overlay': '#fafafa' };
+  }
+
+  // HC scale overrides: push 600/800 to maximum gamut chroma
+  if (definition.highContrast) {
+    const priHue = chroma(primary).get('oklch.h') || 0;
+    // Use maxChromaForHue — absolute brightest the gamut allows at this hue
+    scales.primary[600] = safeOklch(0.70, maxChromaForHue(priHue, 0.70), priHue);
+    scales.primary[800] = safeOklch(0.80, maxChromaForHue(priHue, 0.80), priHue);
+    if (!isMonoPalette) {
+      const secHue = chroma(secondary).get('oklch.h') || 0;
+      scales.secondary[600] = safeOklch(0.68, maxChromaForHue(secHue, 0.68), secHue);
+      scales.secondary[800] = safeOklch(0.78, maxChromaForHue(secHue, 0.78), secHue);
+    }
   }
 
   // 5. Compute status colours (definition can override hues via statusHues field)
