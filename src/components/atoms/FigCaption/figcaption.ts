@@ -40,22 +40,27 @@ function getSharedBar(): HTMLElement {
 }
 
 function isBarMode(): boolean {
-  if (isOverlayMode()) return true; // overlay always uses bar
+  if (isSubtitleMode()) return true; // subtitle always uses bar
   const isMobile = window.innerWidth <= 640;
   return isMobile; // only mobile uses bar, text-only uses popup
 }
 
 function isTooltipMode(): boolean {
-  const mode = document.documentElement.dataset.altDisplayMode;
-  return mode === 'tooltip' || mode === 'overlay' || mode === 'inline';
+  const mode = document.documentElement.dataset.altDisplayMode
+    || document.body.dataset.altDisplayMode;
+  return mode === 'tooltip' || mode === 'subtitle' || mode === 'inline';
 }
 
-function isOverlayMode(): boolean {
-  return document.documentElement.dataset.altDisplayMode === 'overlay';
+function isSubtitleMode(): boolean {
+  const mode = document.documentElement.dataset.altDisplayMode
+    || document.body.dataset.altDisplayMode;
+  return mode === 'subtitle';
 }
 
 function isInlineMode(): boolean {
-  return document.documentElement.dataset.altDisplayMode === 'inline';
+  const mode = document.documentElement.dataset.altDisplayMode
+    || document.body.dataset.altDisplayMode;
+  return mode === 'inline';
 }
 
 function showBar(html: string, permanent = false): void {
@@ -175,7 +180,7 @@ function initFigCaptions(): void {
       }
     }
 
-    const isPermanentMode = () => isOverlayMode() && document.body.dataset.hover === 'none';
+    const isPermanentMode = () => isSubtitleMode() && document.body.dataset.hover === 'none';
 
     function onEnter(): void {
       if (!isTooltipMode()) return;
@@ -257,6 +262,10 @@ const observer = new MutationObserver(() => {
 observer.observe(document.documentElement, {
   attributes: true,
   attributeFilter: ['data-alt-display-mode', 'data-altdisplaymode']
+});
+observer.observe(document.body, {
+  attributes: true,
+  attributeFilter: ['data-alt-display-mode']
 });
 
 // Scroll hides bar

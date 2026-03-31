@@ -1,0 +1,269 @@
+/**
+ * Alt text display gate — two-axis gating for image alt text
+ *
+ * Axis 1: data-alt-text-mode    = what to show  (none/word/descriptive/aac)
+ * Axis 2: data-alt-display-mode = how to show   (hidden/subtitle/tooltip/inline/enlarge)
+ *
+ * Both attributes set on <html> by Your View panel.
+ * Rules extracted from Image.css during atom audit.
+ */
+
+
+/* ==========================================================
+   BASE — all alt spans hidden by default
+   ========================================================== */
+
+.image-alt-word,
+.image-alt-descriptive,
+.image-alt-aac {
+  display: none;
+  font-size: var(--text-small);
+  color: var(--_image-caption);
+  margin-top: var(--space-xs);
+}
+
+
+/* ==========================================================
+   DISPLAY MODE: SUBTITLE — FigCaption bottom bar
+   FigCaption JS handles rendering, inline spans hidden
+   ========================================================== */
+
+[data-alt-display-mode="subtitle"] .image-alt-word,
+[data-alt-display-mode="subtitle"] .image-alt-descriptive,
+[data-alt-display-mode="subtitle"] .image-alt-aac {
+  display: none;
+}
+
+
+/* ==========================================================
+   DISPLAY MODE: TOOLTIP — FigCaption atom handles via JS
+   ========================================================== */
+
+
+/* ==========================================================
+   DISPLAY MODE: ENLARGE — click to enlarge modal
+   Handled by image-enlarge.css + JS
+   ========================================================== */
+
+
+/* ==========================================================
+   TEXTONLY IMAGE ALT — toggle text vs AAC cards
+   ========================================================== */
+
+.image-textonly__aac {
+  display: none;
+}
+
+[data-content-aac] .image-textonly__text,
+[data-alt-text-mode="aac"] .image-textonly__text {
+  display: none;
+}
+
+[data-content-aac] .image-textonly__aac,
+[data-alt-text-mode="aac"] .image-textonly__aac {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+
+/* ==========================================================
+   DISPLAY MODE: INLINE — thumbnail + alt text side by side
+   ========================================================== */
+
+/* Force single column layout for inline image cards */
+[data-alt-display-mode="inline"] .base-grid--inline {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Hide decorative + images with no alt text */
+[data-alt-display-mode="inline"] .image[data-role="decorative"],
+[data-alt-display-mode="inline"] .image:not(:has(.image-alt-word)):not(:has(.image-alt-descriptive)):not(:has(.image-alt-aac)),
+[data-alt-display-mode="inline"] img[aria-hidden="true"]:not(figure img) {
+  display: none;
+}
+
+/* Two-column: fixed thumbnail left, alt text right */
+[data-alt-display-mode="inline"] .image {
+  border: var(--border-width-2) solid var(--primary-600);
+  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-columns: var(--space-5xl) 1fr;
+  overflow: hidden;
+  background: var(--page-bg);
+  max-width: 100%;
+  box-shadow: var(--shadow);
+  width: 100%;
+  min-height: var(--space-5xl);
+}
+
+/* Strip all image effects in inline mode */
+[data-alt-display-mode="inline"] .image .image__img {
+  outline: none;
+  filter: none;
+}
+
+[data-alt-display-mode="inline"] .image--shadow-sm,
+[data-alt-display-mode="inline"] .image--shadow-md,
+[data-alt-display-mode="inline"] .image--shadow-lg,
+[data-alt-display-mode="inline"] .image--shadow-inset,
+[data-alt-display-mode="inline"] .image--border-thin .image__img,
+[data-alt-display-mode="inline"] .image--border-medium .image__img,
+[data-alt-display-mode="inline"] .image--border-thick .image__img {
+  box-shadow: none;
+  outline: none;
+}
+
+/* Kill inner shadow pseudo-element */
+[data-alt-display-mode="inline"] .image--shadow-inset::after {
+  display: none;
+}
+
+/* Thumbnail — fills left column, cropped */
+[data-alt-display-mode="inline"] .image .image__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  grid-row: 1 / -1;
+}
+
+/* Alt text in inline — reset base margin, fill cell */
+[data-alt-display-mode="inline"] .image-alt-word,
+[data-alt-display-mode="inline"] .image-alt-descriptive,
+[data-alt-display-mode="inline"] .image-alt-aac {
+  margin-top: 0;
+  grid-row: 1 / -1;
+}
+
+/* Alt text — right column with padding */
+[data-alt-display-mode="inline"][data-alt-text-mode="word"] .image-alt-word {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-Text);
+}
+
+[data-alt-display-mode="inline"][data-alt-text-mode="descriptive"] .image-alt-descriptive {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--color-Text);
+}
+
+[data-alt-display-mode="inline"][data-alt-text-mode="aac"] .image-alt-aac {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
+  gap: var(--space-sm);
+}
+
+/* Fallback: if no alt text mode selected but inline is on, show descriptive */
+[data-alt-display-mode="inline"][data-alt-text-mode="none"] .image-alt-descriptive {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--neutral-600);
+  font-style: italic;
+}
+
+/* AAC mode fallback: if no AAC cards, show altWord */
+[data-alt-display-mode="inline"][data-alt-text-mode="aac"] .image:not(:has(.image-alt-aac)) .image-alt-word {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-Text);
+}
+
+
+/* ==========================================================
+   INLINE — mobile (≤450px): stack image on top, text below
+   ========================================================== */
+
+@media (max-width: 450px) {
+  [data-alt-display-mode="inline"] .image {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+    min-height: auto;
+  }
+
+  [data-alt-display-mode="inline"] .image .image__img {
+    grid-row: auto;
+    height: var(--space-5xl);
+    width: 100%;
+    object-fit: cover;
+  }
+
+  [data-alt-display-mode="inline"] .image-alt-word,
+  [data-alt-display-mode="inline"] .image-alt-descriptive,
+  [data-alt-display-mode="inline"] .image-alt-aac {
+    grid-row: auto;
+  }
+}
+
+
+/* ==========================================================
+   INLINE — small (≤300px): centre align text
+   ========================================================== */
+
+@media (max-width: 300px) {
+  [data-alt-display-mode="inline"] .image-alt-word,
+  [data-alt-display-mode="inline"] .image-alt-descriptive,
+  [data-alt-display-mode="inline"] .image-alt-aac {
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+
+/* ==========================================================
+   INLINE — micro (≤150px): minimal margins
+   ========================================================== */
+
+@media (max-width: 150px) {
+  [data-alt-display-mode="inline"] .image {
+    border-radius: var(--radius-xs);
+    border-width: var(--border-width);
+  }
+
+  [data-alt-display-mode="inline"][data-alt-text-mode="word"] .image-alt-word,
+  [data-alt-display-mode="inline"][data-alt-text-mode="descriptive"] .image-alt-descriptive,
+  [data-alt-display-mode="inline"][data-alt-text-mode="aac"] .image-alt-aac {
+    padding: var(--space-xs) var(--space-sm);
+  }
+}
+
+
+/* ==========================================================
+   XL TEXT REFLOW
+   ========================================================== */
+
+[data-text-xl] .image {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-text-xl] [data-alt-display-mode="subtitle"][data-alt-text-mode] .image-alt-word,
+[data-text-xl] [data-alt-display-mode="subtitle"][data-alt-text-mode] .image-alt-descriptive,
+[data-text-xl] [data-alt-display-mode="subtitle"][data-alt-text-mode] .image-alt-aac {
+  position: static;
+  background: transparent;
+  color: var(--_image-caption);
+}

@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
-const shapesDir = path.join(rootDir, 'svg shapes');
+const shapesDir = path.join(rootDir, '4sPcycMSQHlrtNTStxvoTt4Xd7g');
 
 const API_URL = process.env.ASSET_API_URL || 'https://asset-library.natashacharlton25.workers.dev';
 const API_TOKEN = process.env.ASSET_API_TOKEN;

@@ -35,7 +35,7 @@ export interface A11ySettings {
   screenReaderMode: boolean;
   scrollbarEnhanced: boolean;
   altTextMode: 'none' | 'word' | 'descriptive' | 'aac';
-  altDisplayMode: 'hidden' | 'overlay' | 'tooltip' | 'enlarge' | 'inline';
+  altDisplayMode: 'hidden' | 'subtitle' | 'tooltip' | 'enlarge' | 'inline';
   cognitiveLevel: 'green' | 'yellow' | 'orange' | 'full';
   /** Which symbol pictures to show — OpenAAC is the bundled default */
   symbolSet: 'openaac' | 'widgit' | 'pcs' | 'bliss' | 'makaton' | 'custom';

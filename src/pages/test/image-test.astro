@@ -1,66 +1,60 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Image } from '../../components/atoms/Image';
-import { Heading } from '../../components/atoms/Heading';
+import { Page } from '../../components/atoms/Page';
 import { Section } from '../../components/atoms/Section';
+import { Heading } from '../../components/atoms/Heading';
+import { Image } from '../../components/atoms/Image';
+import { Grid } from '../../components/atoms/Grid';
 import '../../styles/global/image-enlarge.css';
 import '../../components/atoms/FigCaption/FigCaption.css';
 
-import testData from '../../data/test/image.json';
-import { aacInline } from '../../lib/aac/aac-inline';
+import data from '../../data/test/image.json';
 
-// Build AAC HTML for items that have aacWords
-const apiBase = import.meta.env.PUBLIC_ASSET_API_URL || 'https://asset-library.natashacharlton25.workers.dev';
-const aacData = new Map<string, string>();
-for (const section of testData.sections) {
-  for (const item of section.items) {
-    if ((item as any).aacWords) {
-      const html = await aacInline((item as any).aacWords, apiBase) || '';
-      aacData.set((item as any).aacWords, html);
-    }
-  }
-}
+const sections = data.children || [];
 ---
 
-<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
-  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
-
-    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
-
-    {testData.sections.map((section: any) => (
-      <Section label={section.label} separator gap={testData.layout.itemGap}>
-        <div style="display:flex;flex-wrap:wrap;gap:var(--space-xl);align-items:start;">
-          {section.items.map((item: any) => (
-            <Image
-              src={item.src}
-              alt={item.alt}
-              role={item.role}
-              altWord={item.altWord}
-              altDescriptive={item.altDescriptive}
-              altAacHtml={item.aacWords ? aacData.get(item.aacWords) : undefined}
-              semanticRole={item.semanticRole}
-              color={item.color}
-              border={item.border}
-              width={item.width}
-              height={item.height}
-              fit={item.fit}
-              radius={item.radius}
-              shadow={item.shadow}
-              hover={item.hover}
-              responsive={item.responsive}
-              sepia={item.sepia}
-              blur={item.blur}
-              gradientMask={item.gradientMask}
-              clipPath={item.clipPath}
-              maskShape={item.maskShape}
-              maskIcon={item.maskIcon}
-              tilt={item.tilt}
-              bgFill={item.bgFill}
-            />
-          ))}
-        </div>
+<BaseLayout title="Image Atom Test">
+  <Page margin={data.margin as any}>
+    {sections.map((section: any) => (
+      <Section gap={section.gap as any} container={section.container as any}>
+        {(section.children || []).map((child: any) => {
+          if (child.component === 'Heading') {
+            return <Heading level={child.level as any} align={child.align as any} flush={child.flush}>{child.text}</Heading>;
+          }
+          if (child.component === 'Grid') {
+            return (
+              <Grid variant={child.variant as any} gap={child.gap as any} align={child.align as any}>
+                {(child.children || []).map((img: any) => (
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    role={img.role}
+                    altWord={img.altWord}
+                    altDescriptive={img.altDescriptive}
+                    semanticRole={img.semanticRole}
+                    width={img.width}
+                    height={img.height}
+                    radius={img.radius}
+                    shadow={img.shadow}
+                    color={img.color}
+                    border={img.border}
+                    fit={img.fit}
+                    sepia={img.sepia}
+                    blur={img.blur}
+                    gradientMask={img.gradientMask}
+                    clipPath={img.clipPath}
+                    tilt={img.tilt}
+                    hover={img.hover}
+                    maskIcon={img.maskIcon}
+                    maskShape={img.maskShape}
+                    bgFill={img.bgFill}
+                  />
+                ))}
+              </Grid>
+            );
+          }
+        })}
       </Section>
     ))}
-
-  </Section>
+  </Page>
 </BaseLayout>

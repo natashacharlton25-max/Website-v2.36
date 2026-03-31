@@ -166,11 +166,11 @@ function initModal(): void {
     btn.addEventListener('click', () => {
       const mode = btn.dataset.testAlt as A11ySettings['altTextMode'];
       settings.altTextMode = mode;
-      // Auto-set display to caption if turning on, hidden if turning off
+      // Auto-set display to subtitle if turning on, hidden if turning off
       if (mode === 'none') {
         settings.altDisplayMode = 'hidden';
       } else if (settings.altDisplayMode === 'hidden') {
-        settings.altDisplayMode = 'caption';
+        settings.altDisplayMode = 'subtitle';
       }
       saveSettings(settings);
       applySettings(settings);

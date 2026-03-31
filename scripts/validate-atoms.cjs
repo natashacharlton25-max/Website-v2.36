@@ -103,7 +103,7 @@ for (const atom of atoms) {
 
   // ─── ASTRO RULES (8, 9, 10) ───
   const astroFiles = fs.readdirSync(dir).filter(f => f.endsWith('.astro'));
-  const styleExceptions = { Text: /inlineStyle|--text-clamp/, Icon: /size/, LottieIcon: /size/ };
+  const styleExceptions = { Text: /inlineStyle|--text-clamp/, Icon: /size/, LottieIcon: /size/, Image: /maskIconStyle/ };
   for (const file of astroFiles) {
     const lines = fs.readFileSync(path.join(dir, file), 'utf8').split('\n');
     lines.forEach((line, i) => {

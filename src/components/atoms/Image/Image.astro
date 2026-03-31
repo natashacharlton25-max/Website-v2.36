@@ -60,13 +60,12 @@ interface Props {
   sepia?: 'light' | 'default' | 'heavy';
   blur?: 'sm' | 'md' | 'lg' | 'xl';
   gradientMask?: 'fade-bottom' | 'fade-top' | 'fade-edges' | 'vignette';
-  maskShape?: 'star' | 'brush' | 'splash' | 'torn' | 'wave';
   maskIcon?: string;
+  maskShape?: string;
   clipPath?: 'circle' | 'ellipse' | 'diamond' | 'hexagon' | 'blob' | 'slant-left' | 'slant-right';
   tilt?: 'sm' | 'md' | 'lg';
   bgFill?: 'glass' | 'solid' | 'tint' | 'wash' | 'fill' | 'none';
   class?: string;
-  [key: string]: any;
 }
 
 const {
@@ -94,8 +93,8 @@ const {
   gradientMask,
   clipPath,
   tilt,
-  maskShape,
   maskIcon,
+  maskShape,
   bgFill,
   class: className,
   ...rest
@@ -117,12 +116,13 @@ const resolvedAlt = isDecorative
   ? ''
   : (altDescriptive || altWord || alt || '');
 
-// Fetch icon SVG for mask at build time
+// Fetch SVG for mask at build time — icons or shapes from Asset Library API
 let maskIconStyle = '';
-if (maskIcon) {
+const maskSlug = maskIcon || maskShape;
+if (maskSlug) {
   try {
     const apiBase = import.meta.env.PUBLIC_ASSET_API_URL || 'https://asset-library.natashacharlton25.workers.dev';
-    const res = await fetch(`${apiBase}/v1/assets/${maskIcon}`);
+    const res = await fetch(`${apiBase}/v1/assets/${maskSlug}`);
     if (res.ok) {
       const text = await res.text();
       if (text.includes('<svg')) {
@@ -148,7 +148,6 @@ const imgClasses = [
   sepia && `image--sepia-${sepia}`,
   blur && `image--blur-${blur}`,
   gradientMask && `image--mask-${gradientMask}`,
-  maskShape && `image--mask-shape-${maskShape}`,
   clipPath && `image--clip-${clipPath}`,
   tilt && `image--tilt-${tilt}`,
   className,
@@ -177,6 +176,7 @@ const figureClasses = [
         height={height as number}
         loading={loading}
         class:list={imgClasses}
+        style={maskIconStyle || undefined}
         role="presentation"
       />
     ) : (
@@ -187,6 +187,7 @@ const figureClasses = [
         height={height}
         loading={loading}
         class:list={imgClasses}
+        style={maskIconStyle || undefined}
         role="presentation"
       />
     )}

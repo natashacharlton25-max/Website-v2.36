@@ -9,13 +9,13 @@
    Uses same hover gates, render modes, and bar system as Tooltip.
    ══════════════════════════════════════════════════════════════ */
 
-/* ── When tooltip/overlay mode active, hide inline alt text — figcaption/bar handles display ── */
+/* ── When tooltip/subtitle mode active, hide inline alt text — figcaption/bar handles display ── */
 [data-alt-display-mode="tooltip"] .image .image-alt-word,
 [data-alt-display-mode="tooltip"] .image .image-alt-descriptive,
 [data-alt-display-mode="tooltip"] .image .image-alt-aac,
-[data-alt-display-mode="overlay"] .image .image-alt-word,
-[data-alt-display-mode="overlay"] .image .image-alt-descriptive,
-[data-alt-display-mode="overlay"] .image .image-alt-aac {
+[data-alt-display-mode="subtitle"] .image .image-alt-word,
+[data-alt-display-mode="subtitle"] .image .image-alt-descriptive,
+[data-alt-display-mode="subtitle"] .image .image-alt-aac {
   display: none;
 }
 
@@ -69,38 +69,46 @@
 /* Hover-none: gates in hover-gate.css handle hide/show via .figcaption--show */
 
 /* ── Overlay mode — bar only, no per-image popup ── */
-[data-alt-display-mode="overlay"] .figcaption {
+[data-alt-display-mode="subtitle"] .figcaption {
   display: none;
 }
 
 /* ── Enlarge modal + other non-tooltip modes — no figcaption popup ── */
 [data-alt-display-mode="enlarge"] .figcaption,
 [data-alt-display-mode="hidden"] .figcaption,
-[data-alt-display-mode="caption"] .figcaption,
 [data-alt-display-mode="inline"] .figcaption {
   display: none;
 }
 
-/* ── ? indicator on image — hidden by default, shows on hover or always on none ── */
-[data-alt-display-mode="tooltip"] .image[data-role="content"]::after,
-[data-alt-display-mode="overlay"] .image[data-role="content"]::after {
+/* ── Alt text indicator — consistent across all active display modes ──
+   Black circle with white ring, white ? — contrasts on any background.
+   Position: bottom-right, outside image styling (z-index above filters/clips). */
+
+[data-alt-display-mode="subtitle"] .image[data-role="content"]:has(.image-alt-word, .image-alt-descriptive, .image-alt-aac)::after,
+[data-alt-display-mode="tooltip"] .image[data-role="content"]:has(.image-alt-word, .image-alt-descriptive, .image-alt-aac)::after,
+[data-alt-display-mode="enlarge"] .image[data-role="content"]:has(.image-alt-word, .image-alt-descriptive, .image-alt-aac)::after {
   content: "?";
   position: absolute;
-  top: var(--space-sm);
-  right: var(--space-sm);
-  z-index: 2;
-  font-size: 0.9em;
+  bottom: var(--space-md);
+  right: var(--space-md);
+  z-index: 10;
+  font-size: var(--text-fine);
   font-weight: var(--font-bold);
-  color: oklch(from var(--primary-600) round(1.21 - l) 0 0);
-  background: var(--primary-600);
-  width: 1.8em;
-  height: 1.8em;
+  color: var(--color-White);
+  background: var(--color-Black);
+  outline: var(--border-width-2) solid var(--color-White);
+  width: 1.6em;
+  height: 1.6em;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-full);
   pointer-events: none;
-  opacity: 1;
+  isolation: isolate;
+  filter: none;
+  clip-path: none;
+  -webkit-mask: none;
+  mask: none;
 }
 
 /* Highlight-links — bar border matches highlight ring colour */
@@ -109,9 +117,9 @@
 }
 
 /* ── Viewed state — neutral after alt text has been seen ── */
-[data-alt-display-mode="tooltip"] .image.alt-viewed[data-role="content"]::after,
-[data-alt-display-mode="overlay"] .image.alt-viewed[data-role="content"]::after {
+.image.alt-viewed[data-role="content"]::after {
   background: var(--neutral-400);
+  outline-color: var(--neutral-400);
   color: oklch(from var(--neutral-400) round(1.21 - l) 0 0);
 }
 
@@ -130,9 +138,8 @@
   outline-color: var(--neutral-400);
 }
 
-/* Highlight-links — hide ? icon, border on figure instead */
-[data-highlight-links] [data-alt-display-mode="tooltip"] .image[data-role="content"]::after,
-[data-highlight-links] [data-alt-display-mode="overlay"] .image[data-role="content"]::after {
+/* Highlight-links — hide indicator, border on figure instead */
+[data-highlight-links] .image[data-role="content"]::after {
   display: none;
 }
 

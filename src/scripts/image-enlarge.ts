@@ -164,11 +164,11 @@ function trapFocus(e: KeyboardEvent): void {
 }
 
 async function attachHandlers(): Promise<void> {
-  // Only activate when data-image-enlarge is set
-  const isActive = document.documentElement.hasAttribute('data-image-enlarge');
+  // Activate when enlarge display mode is set (on html or body)
+  const isActive = document.documentElement.dataset.altDisplayMode === 'enlarge'
+    || document.body.dataset.altDisplayMode === 'enlarge'
+    || document.documentElement.hasAttribute('data-image-enlarge');
   if (!isActive) return;
-
-  const iconSvg = await fetchZoomIcon();
 
   const figures = document.querySelectorAll('figure[data-role="content"]') as NodeListOf<HTMLElement>;
   figures.forEach((figure) => {
@@ -176,15 +176,17 @@ async function attachHandlers(): Promise<void> {
     if (figure.dataset.enlargeBound) return;
     figure.dataset.enlargeBound = 'true';
 
-    // Inject zoom icon badge
-    const badge = document.createElement('span');
-    badge.className = 'image-enlarge-badge';
-    badge.setAttribute('aria-hidden', 'true');
-    badge.innerHTML = iconSvg;
-    figure.appendChild(badge);
+    // Badge handled by CSS ::after indicator (FigCaption.css)
 
-    figure.addEventListener('click', () => openModal(figure));
+    figure.addEventListener('click', () => {
+      const mode = document.documentElement.dataset.altDisplayMode
+        || document.body.dataset.altDisplayMode;
+      if (mode === 'enlarge') openModal(figure);
+    });
     figure.addEventListener('keydown', (e: KeyboardEvent) => {
+      const mode = document.documentElement.dataset.altDisplayMode
+        || document.body.dataset.altDisplayMode;
+      if (mode !== 'enlarge') return;
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         openModal(figure);
@@ -201,7 +203,9 @@ function observeEnlargeMode(): void {
     // Close modal on any display mode change
     closeModal();
 
-    const isActive = document.documentElement.hasAttribute('data-image-enlarge');
+    const isActive = document.documentElement.dataset.altDisplayMode === 'enlarge'
+      || document.body.dataset.altDisplayMode === 'enlarge'
+      || document.documentElement.hasAttribute('data-image-enlarge');
     if (isActive) {
       attachHandlers();
     } else {
@@ -210,8 +214,7 @@ function observeEnlargeMode(): void {
       figures.forEach((figure) => {
         figure.removeAttribute('aria-haspopup');
         delete figure.dataset.enlargeBound;
-        const badge = figure.querySelector('.image-enlarge-badge');
-        if (badge) badge.remove();
+        // Badge handled by CSS ::after — no JS cleanup needed
       });
       closeModal();
     }
@@ -220,6 +223,10 @@ function observeEnlargeMode(): void {
   observer.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['data-image-enlarge', 'data-alt-display-mode']
+  });
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['data-alt-display-mode']
   });
 }
 
