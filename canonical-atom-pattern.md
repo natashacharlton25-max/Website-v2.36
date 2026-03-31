@@ -213,7 +213,7 @@ Once all rules are in the correct files, duplicates and moot rules become visibl
 Generated per theme by `theme-engine.js`. Every atom that renders text on the page background uses `--color-Text` as its default colour.
 
 ```css
---color-Text: var(--neutral-950);           /* dark text on light bg */
+--color-Text: var(--neutral-700);           /* dark text on light bg */
 --color-Text-contrast: var(--page-bg);      /* light text on dark bg — buttons use oklch instead */
 ```
 
@@ -225,12 +225,31 @@ Heading and Text schemas have `"default"` as the first colour enum option. When 
 Set by GlassNav-base.css on `:root`. Page atom reads it for `padding-top` to clear the fixed navbar.
 
 ### Shared text-highlight (global/text-highlight.css)
-Used by Text and Heading atoms. Three enums:
-- **Height**: sm (30%), md (45%), lg (100%)
-- **Opacity**: faint, soft, bold, solid
+Used by Text and Heading atoms. Four enums:
+- **Height**: sm (30%), md (45%), lg (75%), full (100%)
+- **Opacity**: faint, soft, bold
+- **Shape**: sharp, rounded
 - **Colour**: 10 variants (primary through pink)
 
-Classes: `.text-highlight`, `.text-highlight--{colour}`, `.text-highlight--{height}`, `.text-highlight--{opacity}`
+Classes: `.text-highlight`, `.text-highlight--{colour}`, `.text-highlight--{height}`, `.text-highlight--{opacity}`, `.text-highlight--{shape}`
+
+### Alt text display modes (gates/alt-text-gate.css)
+Five display modes controlled by `data-alt-display-mode` on `<html>`/`<body>`:
+
+| Mode | What it does |
+|---|---|
+| `hidden` | Nothing shown (default) — screen readers still read img alt |
+| `subtitle` | FigCaption bottom bar (was "overlay") |
+| `tooltip` | Hover/focus shows FigCaption popup |
+| `inline` | Thumbnail + alt text side by side (stacks on mobile) |
+| `enlarge` | Click to enlarge modal |
+
+Deleted modes: `caption`, `overlay` (renamed to subtitle), `replace`, old `subtitle` (image shrink).
+
+Alt text indicator (`?` badge) shows on subtitle, tooltip, enlarge — only on images with alt text spans (`:has()` gated). Black circle, white ring, consistent position bottom-right.
+
+### Image maskShape (Asset Library API)
+`maskShape` prop fetches SVG shapes from Cloudflare Asset Library (same API as icons). Slugs: `shape-001` to `shape-072`. Old hardcoded `/masks/*.svg` paths removed.
 
 ---
 
