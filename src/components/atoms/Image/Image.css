@@ -51,6 +51,8 @@
    ========================================================== */
 
 .image__img {
+  --_img-effect: ;
+
   display: block;
   max-width: 100%;
   height: auto;
@@ -59,9 +61,10 @@
   border-color: var(--img-border-color);
   border-radius: var(--img-radius);
   filter:
-    brightness(var(--media-brightness, 1))
-    saturate(var(--media-saturation, 1))
-    contrast(var(--media-contrast, 1));
+    var(--_img-effect)
+    brightness(var(--media-brightness))
+    saturate(var(--media-saturation))
+    contrast(var(--media-contrast));
 }
 
 /* ==========================================================
@@ -200,13 +203,7 @@
    doesn't work with clip-path
    ========================================================== */
 
-[class*="image--clip-"] {
-  filter:
-    brightness(var(--media-brightness, 1))
-    saturate(var(--media-saturation, 1))
-    contrast(var(--media-contrast, 1))
-    drop-shadow(0 4px 8px color-mix(in oklch, var(--neutral-950) 20%, transparent));
-}
+[class*="image--clip-"] .image__img { --_img-effect: var(--svg-drop-shadow-lg); }
 
 /* ==========================================================
    HOVER — cursor only (transform gated above under .image--animate)
@@ -221,65 +218,18 @@
    Composes with theme filters.
    ========================================================== */
 
-.image--sepia-light {
-  filter:
-    var(--img-sepia-light)
-    brightness(var(--media-brightness, 1))
-    saturate(var(--media-saturation, 1))
-    contrast(var(--media-contrast, 1));
-}
-
-.image--sepia-default {
-  filter:
-    var(--img-sepia)
-    brightness(var(--media-brightness, 1))
-    saturate(var(--media-saturation, 1))
-    contrast(var(--media-contrast, 1));
-}
-
-.image--sepia-heavy {
-  filter:
-    var(--img-sepia-heavy)
-    brightness(var(--media-brightness, 1))
-    saturate(var(--media-saturation, 1))
-    contrast(var(--media-contrast, 1));
-}
+.image--sepia-light   .image__img { --_img-effect: var(--img-sepia-light); }
+.image--sepia-default .image__img { --_img-effect: var(--img-sepia); }
+.image--sepia-heavy   .image__img { --_img-effect: var(--img-sepia-heavy); }
 
 /* ==========================================================
    BLUR — loading placeholders, backgrounds
    ========================================================== */
 
-.image--blur-sm {
-  filter:
-    var(--img-blur-sm)
-    brightness(var(--media-brightness, 1))
-    saturate(var(--media-saturation, 1))
-    contrast(var(--media-contrast, 1));
-}
-
-.image--blur-md {
-  filter:
-    var(--img-blur-md)
-    brightness(var(--media-brightness, 1))
-    saturate(var(--media-saturation, 1))
-    contrast(var(--media-contrast, 1));
-}
-
-.image--blur-lg {
-  filter:
-    var(--img-blur-lg)
-    brightness(var(--media-brightness, 1))
-    saturate(var(--media-saturation, 1))
-    contrast(var(--media-contrast, 1));
-}
-
-.image--blur-xl {
-  filter:
-    var(--img-blur-xl)
-    brightness(var(--media-brightness, 1))
-    saturate(var(--media-saturation, 1))
-    contrast(var(--media-contrast, 1));
-}
+.image--blur-sm .image__img { --_img-effect: var(--img-blur-sm); }
+.image--blur-md .image__img { --_img-effect: var(--img-blur-md); }
+.image--blur-lg .image__img { --_img-effect: var(--img-blur-lg); }
+.image--blur-xl .image__img { --_img-effect: var(--img-blur-xl); }
 
 /* ==========================================================
    GRADIENT MASK — soft fade edges
