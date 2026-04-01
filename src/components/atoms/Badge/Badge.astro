@@ -27,7 +27,7 @@ interface Props {
   size?: 'sm' | 'md' | 'lg';
   shape?: 'sharp' | 'subtle' | 'soft' | 'rounded' | 'pill';
   borderWeight?: 'thin' | 'thick';
-  borderGradient?: boolean;
+  borderGradient?: 'primary' | 'secondary' | 'hero' | 'sunset';
   icon?: string;
   iconWeight?: 'brand' | 'fill' | 'duotone' | 'regular' | 'bold' | 'thin' | 'light';
   iconColor?: 'default' | 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
@@ -48,7 +48,7 @@ const {
   size = 'md',
   shape = 'soft',
   borderWeight,
-  borderGradient = false,
+  borderGradient,
   icon,
   iconWeight,
   iconColor,
@@ -72,14 +72,14 @@ const {
     size !== 'md' && `badge--${size}`,
     `badge--${shape}`,
     borderWeight && `badge--border-${borderWeight}`,
-    borderGradient && 'badge--border-gradient',
+    borderGradient && `badge--border-gradient badge--border-gradient-${borderGradient}`,
     level && 'badge--heading',
     icon && 'badge--has-icon',
     !uppercase && 'badge--lowercase',
   ]}
 >
   {icon ? (
-    <Icon name={icon} weight={iconWeight !== 'brand' ? iconWeight : undefined} color={iconColor !== 'default' ? iconColor : undefined} gradient={gradient} animation={animation} animationTrigger={animationTrigger} class="badge__icon" aria-hidden="true" />
+    <Icon name={icon} weight={iconWeight !== 'brand' ? iconWeight : undefined} color={iconColor !== 'default' ? iconColor : undefined} gradient={variant !== 'fill' ? gradient : undefined} animation={animation} animationTrigger={animationTrigger} class="badge__icon" aria-hidden="true" />
   ) : null}
   {level ? (
     <Heading level={level} flush class="badge__label">{label}</Heading>

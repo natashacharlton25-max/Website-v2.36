@@ -158,14 +158,14 @@
 .badge--gradient-secondary,
 .badge--gradient-hero,
 .badge--gradient-sunset {
-  border: none;
+  border: var(--border-width-2) solid transparent;
   color: var(--color-Text-contrast);
 }
 
-.badge--gradient-primary   { background: var(--gradient-primary); }
-.badge--gradient-secondary { background: var(--gradient-secondary); }
-.badge--gradient-hero      { background: var(--gradient-hero); }
-.badge--gradient-sunset    { background: var(--gradient-sunset); }
+.badge--gradient-primary   { background: var(--gradient-primary) padding-box, var(--gradient-primary) border-box; }
+.badge--gradient-secondary { background: var(--gradient-secondary) padding-box, var(--gradient-secondary) border-box; }
+.badge--gradient-hero      { background: var(--gradient-hero) padding-box, var(--gradient-hero) border-box; }
+.badge--gradient-sunset    { background: var(--gradient-sunset) padding-box, var(--gradient-sunset) border-box; }
 
 /* Gradient on outline — gradient border + gradient text */
 .badge--outline.badge--gradient-primary,
@@ -203,11 +203,17 @@
 
 /* ── Animated gradient border ─────────────────────────── */
 
+.badge--border-gradient { --_border-grad: var(--gradient-hero); }
+.badge--border-gradient-primary   { --_border-grad: var(--gradient-primary); }
+.badge--border-gradient-secondary { --_border-grad: var(--gradient-secondary); }
+.badge--border-gradient-hero      { --_border-grad: var(--gradient-hero); }
+.badge--border-gradient-sunset    { --_border-grad: var(--gradient-sunset); }
+
 .badge.badge--border-gradient {
-  background:
-    linear-gradient(var(--page-bg-overlay), var(--page-bg-overlay)) padding-box,
-    var(--gradient-hero) border-box;
   border: var(--border-width-2) solid transparent;
+  background:
+    linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
+    var(--_border-grad) border-box;
   background-size: 100% 100%, 200% 200%;
   animation-name: anim-border-flow;
   animation-duration: var(--duration-continuous-slower);
@@ -215,20 +221,25 @@
   animation-iteration-count: infinite;
 }
 
-.badge.badge--fill.badge--border-gradient {
+.badge--fill.badge--border-gradient {
   background:
-    linear-gradient(var(--page-bg-overlay), var(--page-bg-overlay)) padding-box,
-    var(--gradient-hero) border-box;
+    linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
+    var(--_border-grad) border-box;
   border: var(--border-width-2) solid transparent;
   background-size: 100% 100%, 200% 200%;
 }
 
-/* Gradient border text — gradient text to match the border */
+/* Gradient border text — matches the border gradient */
 .badge.badge--border-gradient .badge__label {
-  background: var(--gradient-hero);
+  background: var(--_border-grad);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Gradient border icon — explicit colour so it doesn't inherit transparent */
+.badge.badge--border-gradient .badge__icon {
+  color: var(--_badge-border);
 }
 
 /* @keyframes anim-border-flow lives in micro-animations.css */

@@ -168,13 +168,14 @@ if (needsStrokeConversion && iconContent) {
 if (gradient && iconContent && !draw) {
   const gradientId = `icon-grad-${Math.random().toString(36).slice(2, 8)}`;
 
+  // SVG gradient stops — must match CSS gradient tokens in gradients.css
   const gradientStops: Record<string, string> = {
-    primary: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="100%" stop-color="var(--primary-800)"/>`,
+    primary: `<stop offset="0%" stop-color="var(--primary-800)"/><stop offset="45%" stop-color="var(--primary-600)"/><stop offset="100%" stop-color="var(--primary-200)"/>`,
     secondary: `<stop offset="0%" stop-color="var(--secondary-600)"/><stop offset="100%" stop-color="var(--secondary-800)"/>`,
-    warm: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="100%" stop-color="var(--secondary-600)"/>`,
-    cool: `<stop offset="0%" stop-color="var(--primary-200)"/><stop offset="100%" stop-color="var(--primary-800)"/>`,
     hero: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="100%" stop-color="var(--secondary-600)"/>`,
     sunset: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="30%" stop-color="var(--primary-800)"/><stop offset="100%" stop-color="var(--secondary-800)"/>`,
+    warm: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="100%" stop-color="var(--secondary-600)"/>`,
+    cool: `<stop offset="0%" stop-color="var(--primary-200)"/><stop offset="100%" stop-color="var(--primary-800)"/>`,
   };
 
   const gradientDef = `<defs><linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">${gradientStops[gradient]}</linearGradient></defs>`;

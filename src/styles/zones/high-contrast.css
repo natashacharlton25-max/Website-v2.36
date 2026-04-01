@@ -170,31 +170,20 @@
   color: var(--color-Text-contrast);
 }
 
-/* Badge HC — gradient fills → white bg + gradient text + coloured border */
-[data-high-contrast] .badge--fill[class*="badge--gradient"] {
-  background: var(--page-bg-raised);
-  border: var(--border-width-2) solid var(--_badge-border);
+/* Badge HC — gradient fills use overlay bg so gradient border/text is visible.
+   Sets the internal token — Badge.css variant rules read it. */
+[data-high-contrast] .badge--gradient-primary,
+[data-high-contrast] .badge--gradient-secondary,
+[data-high-contrast] .badge--gradient-hero,
+[data-high-contrast] .badge--gradient-sunset {
+  --_badge-bg: var(--page-bg-overlay);
+  --_badge-border: var(--_badge-border);
 }
 
-[data-high-contrast] .badge--fill[class*="badge--gradient"] .badge__label {
-  background: var(--gradient-hero);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-[data-high-contrast] .badge--fill.badge--gradient-primary .badge__label { background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; }
-[data-high-contrast] .badge--fill.badge--gradient-secondary .badge__label { background: var(--gradient-secondary); -webkit-background-clip: text; background-clip: text; }
-[data-high-contrast] .badge--fill.badge--gradient-sunset .badge__label { background: var(--gradient-sunset); -webkit-background-clip: text; background-clip: text; }
-
-/* Badge HC — fill + gradient border → overlay bg, coloured border, no animation */
-[data-high-contrast] .badge--fill.badge--border-gradient {
-  background: var(--page-bg-raised);
-  border: var(--border-width-2) solid var(--_badge-border);
+/* Badge HC — animated gradient border — no animation */
+[data-high-contrast] .badge--border-gradient {
   animation: none;
 }
-
-/* Outline + glass gradients are fine in HC — no override needed */
 
 /* Text highlight — primary/secondary/neutral need brighter positions in HC */
 [data-high-contrast] .text-highlight--primary::before   { background: var(--primary-600); }
