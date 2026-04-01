@@ -21,19 +21,15 @@
   --hover-state: 1;
 }
 
-/* ── None — zero decorative change ── */
-/* Also zeroes base transition tokens so ungated components
-   (molecules, organisms) at least stop ANIMATING even if
-   their hover state changes still fire visually. */
+/* ── None — zero decorative hover change ── */
+/* Only zeroes hover transition tokens. Animation/transition
+   speed is owned by motion-gate.css. */
 [data-hover="none"] {
   --hover-duration: 0s;
   --hover-duration-fast: 0s;
   --hover-duration-slow: 0s;
   --hover-duration-extralong: 0s;
   --hover-state: 0;
-  --transition-fast: 0s;
-  --transition-base: 0s;
-  --transition-slow: 0s;
 }
 
 
@@ -79,20 +75,14 @@
 }
 
 /* ── Gentle — slow, soft, deliberate ── */
+/* Only controls hover transition speed (--hover-duration-*).
+   Animation speed (--duration-*) is owned by motion-gate.css. */
 [data-hover="gentle"] {
   --hover-duration: 1.2s;
   --hover-duration-fast: 800ms;
   --hover-duration-slow: 2s;
   --hover-duration-extralong: 3s;
   --focus-animation-speed: 2.5s;
-
-  /* Slow down all micro-animations globally */
-  --duration-fast: 300ms;
-  --duration-base: 600ms;
-  --duration-slow: 1s;
-  --duration-slower: 1.5s;
-  --duration-long: 2s;
-  --duration-extralong: 3s;
 }
 
 /* ── Focus active — kill hover on the focused element only ── */

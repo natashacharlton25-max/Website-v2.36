@@ -2,44 +2,46 @@
   "component": "Heading",
   "category": "atom",
   "renders": { "full": "Heading.astro", "reduced": "Heading.astro", "textonly": "Heading.astro" },
-  "notes": "Every heading on the site should go through this component. Heading.css is the single source of truth for all heading typography. All 4 renders use the same Heading.astro — pipeline strips visual/animation props in textonly (plain semantic heading). Subtitle passes through in textonly (semantic content) and renders via Text atom — triggers the decorated wrapper path but produces clean flex-column markup with no visual decoration.",
+  "notes": "Every heading on the site should go through this component. Heading.css is the single source of truth for all heading typography. All 3 renders use the same Heading.astro — pipeline strips visual/animation props in textonly (plain semantic heading). Subtitle passes through in textonly (semantic content) and renders via Text atom.",
 
   "props": {
     "content": {
-      "_description": "What the heading communicates",
-      "level":    { "type": "number",  "required": true, "enum": [1,2,3,4,5,6], "description": "Semantic heading level (h1-h6)." },
-      "subtitle": { "type": "string",  "required": false, "default": null, "description": "Supporting text below the heading." },
-      "icon":     { "type": "string",  "required": false, "default": null, "textonly": false, "description": "Phosphor icon slug. Decorative (aria-hidden)." },
-      "image":    { "type": "string",  "required": false, "default": null, "textonly": false, "description": "Image URL for media slot. Decorative." }
+      "level":    { "type": "number", "required": true, "enum": [1,2,3,4,5,6] },
+      "subtitle": { "type": "string" },
+      "icon":     { "type": "string", "textonly": false },
+      "image":    { "type": "string", "textonly": false },
+      "aac":      { "type": "boolean", "default": false }
     },
 
     "visual": {
-      "_description": "How the heading looks",
-      "size":           { "type": "string",  "required": false, "default": "matches level", "enum": ["h1","h2","h3","h4","h5","h6"], "description": "Visual size override." },
-      "weight":         { "type": "string",  "required": false, "default": null, "enum": ["normal","medium","semibold","bold","extrabold"], "description": "Font weight override." },
-      "family":         { "type": "string",  "required": false, "default": null, "enum": ["heading","body","mono"], "description": "Font family override." },
-      "align":          { "type": "string",  "required": false, "default": null, "enum": ["left","center","right"], "description": "Text alignment." },
-      "tracking":       { "type": "string",  "required": false, "default": null, "enum": ["normal","wide","wider"], "description": "Letter spacing." },
-      "uppercase":      { "type": "boolean", "required": false, "default": false, "description": "Uppercase text transform." },
-      "flush":          { "type": "boolean", "required": false, "default": false, "description": "Remove bottom margin." },
-      "variant":        { "type": "string",  "required": false, "default": "default", "enum": ["default","underline","highlight","minimal"], "description": "Decorated treatment style." },
-      "underlineStyle":    { "type": "string",  "required": false, "default": "solid", "enum": ["solid","gradient","dashed"], "description": "Underline variant style." },
-      "underlineGradient": { "type": "string",  "required": false, "default": "hero", "enum": ["hero","primary","primary-soft","primary-light","secondary","secondary-soft","sunset","brand-emerge","brand-fade"], "description": "Which gradient token to use when underlineStyle is gradient." },
-      "divider":        { "type": "string",  "required": false, "default": null, "enum": ["left","right","both","none"], "description": "Divider bar position." },
-      "dividerStyle":   { "type": "string",  "required": false, "default": "solid", "enum": ["solid","dashed","dotted"], "description": "Divider pattern." },
-      "dividerEnds":    { "type": "string",  "required": false, "default": "rounded", "enum": ["rounded","square"], "description": "Divider end caps." },
-      "mediaPosition":  { "type": "string",  "required": false, "default": "left", "enum": ["left","right"], "description": "Icon/image position." },
-      "mediaSize":      { "type": "string",  "required": false, "default": "auto", "enum": ["sm","md","lg","auto"], "description": "Media container size." },
-      "iconStyle":      { "type": "string",  "required": false, "default": "contained", "enum": ["contained","bare"], "description": "Icon media container background. contained = bg circle, bare = no background." },
-      "spacing":        { "type": "string",  "required": false, "default": "normal", "enum": ["tight","normal","loose"], "description": "Wrapper gap size." },
-      "color":          { "type": "string",  "required": false, "default": "default", "enum": ["default", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"], "description": "Colour variant for accent, underline, highlight, media. Default uses --color-Text." },
-      "class":          { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+      "size":              { "type": "string", "default": "matches level", "enum": ["h1","h2","h3","h4","h5","h6"] },
+      "weight":            { "type": "string", "enum": ["normal","medium","semibold","bold","extrabold"] },
+      "family":            { "type": "string", "enum": ["heading","body","body-alt","handwriting","mono"] },
+      "align":             { "type": "string", "enum": ["left","center","right"] },
+      "tracking":          { "type": "string", "enum": ["normal","wide","wider"] },
+      "uppercase":         { "type": "boolean", "default": false },
+      "flush":             { "type": "boolean", "default": false },
+      "color":             { "type": "string", "default": "default", "enum": ["default","primary","secondary","neutral","red","orange","yellow","teal","blue","purple","pink"] },
+      "variant":           { "type": "string", "default": "default", "enum": ["default","underline","highlight","minimal"] },
+      "highlightHeight":   { "type": "string", "default": "md", "enum": ["sm","md","lg","full"] },
+      "highlightOpacity":  { "type": "string", "default": "soft", "enum": ["faint","soft","bold","solid"] },
+      "underlineStyle":    { "type": "string", "default": "solid", "enum": ["solid","gradient","dashed"] },
+      "underlineGradient": { "type": "string", "default": "hero", "enum": ["hero","primary","primary-soft","primary-light","secondary","secondary-soft","sunset","brand-emerge","brand-fade"] },
+      "divider":           { "type": "string", "enum": ["left","right","both","none"] },
+      "dividerStyle":      { "type": "string", "default": "solid", "enum": ["solid","dashed","dotted"] },
+      "dividerEnds":       { "type": "string", "default": "rounded", "enum": ["rounded","square"] },
+      "mediaPosition":     { "type": "string", "default": "left", "enum": ["left","right"] },
+      "mediaSize":         { "type": "string", "default": "md", "enum": ["sm","md","lg"] },
+      "iconStyle":         { "type": "string", "default": "contained", "enum": ["contained","bare"] },
+      "spacing":           { "type": "string", "default": "normal", "enum": ["tight","normal","loose"] },
+      "subtitleSize":      { "type": "string", "default": "base", "enum": ["xs","sm","base","lg","xl"] }
     },
 
     "animation": {
-      "_description": "Motion behaviour — stripped in reduced/assistive/textonly renders",
-      "lottieIcon": { "type": "string", "required": false, "default": null, "description": "Lottie animation slug for media slot. When present, renders LottieIcon instead of static Icon. Stripped in reduced/assistive (falls back to content.icon) and textonly (no media). Only rendered when full animation props are available." }
-    }
+      "lottieIcon": { "type": "string" }
+    },
+
+    "colour": {}
   },
 
   "slots": {

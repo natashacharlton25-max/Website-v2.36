@@ -43,6 +43,8 @@ export interface A11ySettings {
   customSymbolsUrl: string;
   /** Hover feedback mode — controls decorative hover effects */
   hoverMode: 'none' | 'instant' | 'gentle' | 'full';
+  /** Motion speed — controls all animation duration globally */
+  motionMode: 'none' | 'gentle' | 'full';
   /** Content AAC — show pictogram cards for text/heading content */
   contentAac: boolean;
   /** AAC pictogram filter — grayscale or sepia for colour-blind users */
@@ -85,6 +87,7 @@ export const defaultSettings: A11ySettings = {
   symbolSet: 'openaac',
   customSymbolsUrl: '',
   hoverMode: 'full',
+  motionMode: 'full',
   contentAac: false,
   aacFilter: 'none',
   imageEnlarge: false
@@ -321,6 +324,14 @@ export function applySettings(settings: A11ySettings): void {
     document.body.removeAttribute('data-hover');
   } else {
     document.body.dataset.hover = hoverMode;
+  }
+
+  // Motion Mode — all animation speed
+  const motionMode = settings.motionMode || 'full';
+  if (motionMode === 'full') {
+    document.body.removeAttribute('data-motion');
+  } else {
+    document.body.dataset.motion = motionMode;
   }
 
   // Symbol Set — which AAC pictures to display

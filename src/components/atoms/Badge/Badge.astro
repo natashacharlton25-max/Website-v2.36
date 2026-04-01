@@ -14,7 +14,6 @@
  * @param semanticRole - 'status' (default), 'tag', 'label', 'none'
  */
 import { Icon } from '../Icon';
-import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
 import Heading from '../Heading/Heading.astro';
 
@@ -23,35 +22,41 @@ interface Props {
   /** Colour variant — sets brand tokens for dark mode */
   color?: 'primary' | 'secondary' | 'neutral' | 'success' | 'warning' | 'error' | 'info';
   variant?: 'fill' | 'outline' | 'glass';
-  shadow?: 'none' | 'out' | 'in';
+  shadow?: 'none' | 'out' | 'drop' | 'in' | 'elevated' | 'glow' | 'glow-intense';
+  gradient?: 'primary' | 'secondary' | 'hero' | 'sunset';
   size?: 'sm' | 'md' | 'lg';
   shape?: 'sharp' | 'subtle' | 'soft' | 'rounded' | 'pill';
   borderWeight?: 'thin' | 'thick';
+  borderGradient?: boolean;
   icon?: string;
-  lottieIcon?: string;
-  lottieTrigger?: 'autoplay' | 'loop' | 'hover' | 'viewport' | 'interval' | 'none';
+  iconWeight?: 'brand' | 'fill' | 'duotone' | 'regular' | 'bold' | 'thin' | 'light';
+  iconColor?: 'default' | 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  animation?: 'spin' | 'bounce' | 'shake' | 'float' | 'drift' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'flip' | 'pulse' | 'ping' | 'pop' | 'squish' | 'heartbeat' | 'rubber-band' | 'fade' | 'blink' | 'flash' | 'glint' | 'shimmer' | 'twinkle' | 'wiggle' | 'swing' | 'rock' | 'nod' | 'attention' | 'celebrate' | 'enter' | 'exit';
+  animationTrigger?: 'viewport' | 'autoplay' | 'loop' | 'interval' | 'none';
   uppercase?: boolean;
   semanticRole?: 'status' | 'tag' | 'label' | 'none';
   /** Render as heading element (h1-h6) instead of span */
   level?: 1 | 2 | 3 | 4 | 5 | 6;
-  class?: string;
 }
 
 const {
   label,
   color = 'primary',
   variant = 'fill',
-  shadow = 'out',
+  shadow = 'none',
+  gradient,
   size = 'md',
   shape = 'soft',
   borderWeight,
+  borderGradient = false,
   icon,
-  lottieIcon,
-  lottieTrigger = 'none',
+  iconWeight,
+  iconColor,
+  animation,
+  animationTrigger = 'viewport',
   uppercase = true,
   semanticRole = 'status',
   level,
-  class: className,
 } = Astro.props;
 
 ---
@@ -62,20 +67,19 @@ const {
     'badge',
     `badge--${color}`,
     `badge--${variant}`,
-    `badge--shadow-${shadow}`,
+    shadow !== 'none' && `badge--shadow-${shadow}`,
+    gradient && `badge--gradient-${gradient}`,
     size !== 'md' && `badge--${size}`,
     `badge--${shape}`,
     borderWeight && `badge--border-${borderWeight}`,
+    borderGradient && 'badge--border-gradient',
     level && 'badge--heading',
-    (icon || lottieIcon) && 'badge--has-icon',
+    icon && 'badge--has-icon',
     !uppercase && 'badge--lowercase',
-    className,
   ]}
 >
-  {lottieIcon ? (
-    <LottieIcon slug={lottieIcon} trigger={lottieTrigger} fallbackIcon={icon} class="badge__icon" aria-hidden="true" />
-  ) : icon ? (
-    <Icon name={icon} class="badge__icon" aria-hidden="true" />
+  {icon ? (
+    <Icon name={icon} weight={iconWeight !== 'brand' ? iconWeight : undefined} color={iconColor !== 'default' ? iconColor : undefined} gradient={variant !== 'fill' ? gradient : undefined} animation={animation} animationTrigger={animationTrigger} class="badge__icon" aria-hidden="true" />
   ) : null}
   {level ? (
     <Heading level={level} flush class="badge__label">{label}</Heading>

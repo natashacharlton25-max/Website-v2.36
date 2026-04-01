@@ -141,10 +141,10 @@
 
 /* Rainbow → rainbow-hc.css (loaded via tokens/index.css) */
 
-/* Badge — primary/secondary/neutral use 600 for both fill and border in HC */
-[data-high-contrast] .badge--primary   { --_badge-bg: var(--primary-600);   --_badge-border: var(--primary-600); }
-[data-high-contrast] .badge--secondary { --_badge-bg: var(--secondary-600); --_badge-border: var(--secondary-600); }
-[data-high-contrast] .badge--neutral   { --_badge-bg: var(--neutral-600);   --_badge-border: var(--neutral-600); }
+/* Badge — HC uses 800 scale position (brightest) for both bg and border */
+[data-high-contrast] .badge--primary   { --_badge-bg: var(--primary-800);   --_badge-border: var(--primary-800); }
+[data-high-contrast] .badge--secondary { --_badge-bg: var(--secondary-800); --_badge-border: var(--secondary-800); }
+[data-high-contrast] .badge--neutral   { --_badge-bg: var(--neutral-800);   --_badge-border: var(--neutral-800); }
 
 /* Badge — rainbow use base vivid token in HC */
 [data-high-contrast] .badge--red    { --_badge-bg: var(--rainbow-1); --_badge-border: var(--rainbow-1); }
@@ -155,26 +155,24 @@
 [data-high-contrast] .badge--purple { --_badge-bg: var(--rainbow-6); --_badge-border: var(--rainbow-6); }
 [data-high-contrast] .badge--pink   { --_badge-bg: var(--rainbow-7); --_badge-border: var(--rainbow-7); }
 
-/* Badge fill text — max contrast on rainbow fills in HC */
-[data-high-contrast][data-mode="dark"] .badge--fill.badge--red,
-[data-high-contrast][data-mode="dark"] .badge--fill.badge--orange,
-[data-high-contrast][data-mode="dark"] .badge--fill.badge--yellow,
-[data-high-contrast][data-mode="dark"] .badge--fill.badge--teal,
-[data-high-contrast][data-mode="dark"] .badge--fill.badge--blue,
-[data-high-contrast][data-mode="dark"] .badge--fill.badge--purple,
-[data-high-contrast][data-mode="dark"] .badge--fill.badge--pink {
-  color: var(--color-Black);
+/* Badge fill text — max contrast on rainbow fills in HC.
+   Uses --color-Text-contrast (theme provides correct value per luminance). */
+[data-high-contrast] .badge--fill.badge--primary,
+[data-high-contrast] .badge--fill.badge--secondary,
+[data-high-contrast] .badge--fill.badge--neutral,
+[data-high-contrast] .badge--fill.badge--red,
+[data-high-contrast] .badge--fill.badge--orange,
+[data-high-contrast] .badge--fill.badge--yellow,
+[data-high-contrast] .badge--fill.badge--teal,
+[data-high-contrast] .badge--fill.badge--blue,
+[data-high-contrast] .badge--fill.badge--purple,
+[data-high-contrast] .badge--fill.badge--pink {
+  color: var(--color-Text-contrast);
 }
 
-[data-high-contrast][data-mode="light"] .badge--fill.badge--red,
-[data-high-contrast][data-mode="light"] .badge--fill.badge--orange,
-[data-high-contrast][data-mode="light"] .badge--fill.badge--yellow,
-[data-high-contrast][data-mode="light"] .badge--fill.badge--teal,
-[data-high-contrast][data-mode="light"] .badge--fill.badge--blue,
-[data-high-contrast][data-mode="light"] .badge--fill.badge--purple,
-[data-high-contrast][data-mode="light"] .badge--fill.badge--pink {
-  color: var(--color-White);
-}
+/* Badge HC — only colour token overrides.
+   All visual features (glass, gradient, glow, shadow) render the same as dark mode.
+   HC gradient tokens in gradients.css provide neon-bright stops globally. */
 
 /* Text highlight — primary/secondary/neutral need brighter positions in HC */
 [data-high-contrast] .text-highlight--primary::before   { background: var(--primary-600); }

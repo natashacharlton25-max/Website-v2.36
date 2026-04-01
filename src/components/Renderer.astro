@@ -1,0 +1,37 @@
+---
+/**
+ * Renderer — Generic JSON → Astro component renderer
+ *
+ * Reads the "component" key, looks up the atom, spreads props, recurses children.
+ * Every page uses this. No manual prop mapping. JSON is the single source of truth.
+ *
+ * Usage:
+ *   import Renderer from '../../components/Renderer.astro';
+ *   import data from '../../data/test/badge.json';
+ *
+ *   <Renderer node={data} />
+ */
+import { componentRegistry, resolveNode, type RenderNode } from '../lib/render';
+
+interface Props {
+  node: RenderNode;
+}
+
+const { node } = Astro.props;
+const resolved = resolveNode(node, componentRegistry);
+---
+
+{resolved && (
+  resolved.children.length > 0 ? (
+    <resolved.Component {...resolved.props}>
+      {resolved.slotText}
+      {resolved.children.map((child: RenderNode) => (
+        <Astro.self node={child} />
+      ))}
+    </resolved.Component>
+  ) : (
+    <resolved.Component {...resolved.props}>
+      {resolved.slotText}
+    </resolved.Component>
+  )
+)}

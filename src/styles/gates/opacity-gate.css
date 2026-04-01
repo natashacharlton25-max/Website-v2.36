@@ -131,6 +131,43 @@
 
 
 /* ==========================================================
+   FLAT — text highlight → solid underline
+   Decorative colour bar replaced with thin solid line
+   ========================================================== */
+
+[data-visual="flat"] .text-highlight,
+[data-visual="flat"] .heading-wrap__highlight {
+  --_highlight-height: 30%;
+  --_highlight-opacity: 1;
+}
+
+
+/* ==========================================================
+   FLAT — gradient badges → solid fill fallback
+   ========================================================== */
+
+[data-visual="flat"] [class*="badge--gradient-"] {
+  background: var(--_badge-bg);
+  color: oklch(from var(--_badge-bg) round(1.21 - l) 0 0);
+  border: var(--border-width-2) solid var(--_badge-border);
+}
+
+[data-visual="flat"] [class*="badge--gradient-"] .badge__label {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: unset;
+}
+
+/* FLAT — animated gradient border → solid border */
+[data-visual="flat"] .badge--border-gradient {
+  background: var(--_badge-bg);
+  border: var(--border-width-2) solid var(--_badge-border);
+  animation: none;
+}
+
+
+/* ==========================================================
    DISABLED STATE — universal opacity
    ========================================================== */
 

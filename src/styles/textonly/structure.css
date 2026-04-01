@@ -518,15 +518,33 @@
    BADGE — textonly structure
    ========================================================== */
 
-/* Badge: inherits text-only button style from brand config */
-[data-render="textonly"] .badge {
-  position: static;
-  background: var(--btn-textonly-bg, transparent);
-  color: var(--btn-textonly-text, var(--primary-600));
-  border: var(--btn-textonly-border, 2px solid var(--primary-600));
-  border-radius: var(--btn-textonly-radius, 0);
+/* Badge: strip all decoration — neutral bordered text label */
+[data-render="textonly"] .badge,
+[data-render="textonly"] .badge[class*="badge--gradient"],
+[data-render="textonly"] .badge[class*="badge--shadow"],
+[data-render="textonly"] .badge.badge--border-gradient,
+[data-render="textonly"] .badge.badge--fill,
+[data-render="textonly"] .badge.badge--outline,
+[data-render="textonly"] .badge.badge--glass {
+  background: transparent;
+  color: var(--color-Text);
+  border: var(--border-width) solid var(--neutral-400);
+  border-radius: var(--radius-xs);
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  animation: none;
+}
+
+/* Badge textonly: kill gradient text + force text colour on all variants */
+[data-render="textonly"] .badge .badge__label,
+[data-render="textonly"] .badge[class*="badge--gradient"] .badge__label,
+[data-render="textonly"] [class*="badge--outline"][class*="badge--gradient"] .badge__label,
+[data-render="textonly"] [class*="badge--glass"][class*="badge--gradient"] .badge__label {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: var(--color-Text);
+  color: var(--color-Text);
 }
 

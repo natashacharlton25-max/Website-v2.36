@@ -2,38 +2,42 @@
   "component": "Badge",
   "category": "atom",
   "renders": { "full": "Badge.astro", "reduced": "Badge.astro", "textonly": "Badge.astro" },
-  "notes": "Simple inline label. Colour via class enum. Non-interactive — no animation, no hover. Assistive rules in assistive-gate.css.",
+  "notes": "Simple inline label. Colour via class enum. Assistive rules in assistive-gate.css. Icon is base name only — weight resolved from brand config or explicit iconWeight enum.",
 
   "props": {
     "content": {
-      "_description": "What the badge communicates",
-      "label":     { "type": "string",  "required": true, "description": "Display text." },
-      "icon":      { "type": "string",  "required": false, "textonly": false, "description": "Phosphor icon slug. Decorative (aria-hidden). Stripped in textonly render." }
+      "label":     { "type": "string", "required": true },
+      "icon":      { "type": "string", "textonly": false }
     },
 
     "visual": {
-      "_description": "How the badge looks",
-      "variant":      { "type": "string",  "required": false, "default": "fill", "enum": ["fill", "outline", "glass"], "description": "Fill style." },
-      "color":        { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"], "description": "Colour variant. Rainbow colours auto-switch for dark mode + CVD." },
-      "shadow":       { "type": "string",  "required": false, "default": "out", "enum": ["none", "out", "in"], "description": "Shadow style." },
-      "size":         { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Size scale. md is the default." },
-      "shape":        { "type": "string",  "required": false, "default": "soft", "enum": ["sharp", "subtle", "soft", "rounded", "pill"], "description": "Border radius shape." },
-      "borderWeight": { "type": "string",  "required": false, "default": null, "enum": ["thin", "thick"], "description": "Border weight. Default (2px) set on base. Thin = 1px, thick = 3px. Most visible with outline variant." },
-      "uppercase":    { "type": "boolean", "required": false, "default": true, "description": "Uppercase text transform." },
-      "semanticRole": { "type": "string",  "required": false, "default": "status", "enum": ["status", "tag", "label", "none"], "description": "Semantic role for the badge. Controls data-semantic-role attribute." },
-      "class":        { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+      "variant":      { "type": "string", "default": "fill", "enum": ["fill", "outline", "glass"] },
+      "color":        { "type": "string", "default": "default", "enum": ["default", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"] },
+      "shadow":       { "type": "string", "default": "none", "enum": ["none", "out", "drop", "in", "elevated", "glow", "glow-intense"] },
+      "gradient":     { "type": "string", "enum": ["primary", "secondary", "hero", "sunset"] },
+      "size":         { "type": "string", "default": "md", "enum": ["sm", "md", "lg"] },
+      "shape":        { "type": "string", "default": "soft", "enum": ["sharp", "subtle", "soft", "rounded", "pill"] },
+      "borderWeight":   { "type": "string", "default": "thin", "enum": ["thin", "thick"] },
+      "borderGradient": { "type": "boolean", "default": false },
+      "uppercase":    { "type": "boolean", "default": true },
+      "iconWeight":   { "type": "string", "default": "brand", "enum": ["brand", "fill", "duotone", "regular", "bold", "thin", "light"] },
+      "iconColor":    { "type": "string", "default": "default", "enum": ["default", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"] },
+      "semanticRole": { "type": "string", "default": "status", "enum": ["status", "tag", "label", "none"] }
     },
 
     "animation": {
-      "lottieIcon": { "type": "string", "required": false, "default": null, "description": "Lottie slug for animated icon. Falls back to content.icon in reduced/assistive. Stripped in textonly." }
-    }
+      "animation":        { "type": "string", "enum": ["spin","bounce","shake","float","drift","slide-up","slide-down","slide-left","slide-right","flip","pulse","ping","pop","squish","heartbeat","rubber-band","fade","blink","flash","glint","shimmer","twinkle","wiggle","swing","rock","nod","attention","celebrate","enter","exit"] },
+      "animationTrigger": { "type": "string", "default": "viewport", "enum": ["viewport","autoplay","loop","interval","none"] }
+    },
+
+    "colour": {}
   },
 
   "pipelineRules": {
     "altTextRule": {
       "action": "append-to-adjacent-image",
       "field": "label",
-      "description": "When Badge is a sibling of Image inside any container, Badge.label is appended to Image.altWord by the pipeline. Badge owns the rule; pipeline enforces it universally."
+      "description": "When Badge is a sibling of Image inside any container, Badge.label is appended to Image.altWord by the pipeline."
     }
   }
 }

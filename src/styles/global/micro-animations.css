@@ -256,47 +256,100 @@
   100% { transform: translateY(-12px) scale(0.9); opacity: 0; }
 }
 
+/* Border gradient flow — animated gradient border for any component */
+@keyframes anim-border-flow {
+  0%   { background-position: 0 0, 0% 0%; }
+  50%  { background-position: 0 0, 100% 100%; }
+  100% { background-position: 0 0, 0% 0%; }
+}
+
 
 /* ==========================================================
-   HOVER TRIGGERS — .anim--{name}:hover
+   DEFINITIONS — each .anim--{name} sets internal tokens
+   Separate from triggers so any trigger mode can play any animation.
    ========================================================== */
 
 /* Movement */
-.anim--spin:hover        { animation: anim-spin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-.anim--bounce:hover      { animation: anim-bounce var(--duration-long) var(--ease-expo-out); }
-.anim--shake:hover       { animation: anim-shake var(--duration-long) var(--ease-expo-out); }
-.anim--float:hover       { animation: anim-float 3s var(--ease-expo-out) infinite; }
-.anim--drift:hover       { animation: anim-drift 4s var(--ease-expo-out) infinite; }
-.anim--slide-up:hover    { animation: anim-slide-up var(--duration-slower) var(--ease-expo-out); }
-.anim--slide-down:hover  { animation: anim-slide-down var(--duration-slower) var(--ease-expo-out); }
-.anim--slide-left:hover  { animation: anim-slide-left var(--duration-slower) var(--ease-expo-out); }
-.anim--slide-right:hover { animation: anim-slide-right var(--duration-slower) var(--ease-expo-out); }
-.anim--flip:hover        { animation: anim-flip var(--duration-long) var(--ease-expo-out); }
+.anim--spin        { --_anim: anim-spin;        --_anim-dur: var(--duration-continuous);       --_anim-ease: var(--ease-expo-out);  --_anim-count: infinite; }
+.anim--bounce      { --_anim: anim-bounce;      --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--shake       { --_anim: anim-shake;        --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--float       { --_anim: anim-float;        --_anim-dur: var(--duration-continuous-slower); --_anim-ease: var(--ease-expo-out);  --_anim-count: infinite; }
+.anim--drift       { --_anim: anim-drift;        --_anim-dur: var(--duration-continuous-drift);  --_anim-ease: var(--ease-expo-out);  --_anim-count: infinite; }
+.anim--slide-up    { --_anim: anim-slide-up;     --_anim-dur: var(--duration-slower);            --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--slide-down  { --_anim: anim-slide-down;   --_anim-dur: var(--duration-slower);            --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--slide-left  { --_anim: anim-slide-left;   --_anim-dur: var(--duration-slower);            --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--slide-right { --_anim: anim-slide-right;  --_anim-dur: var(--duration-slower);            --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--flip        { --_anim: anim-flip;          --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
 
 /* Scale */
-.anim--pulse:hover       { animation: anim-pulse var(--duration-long) var(--ease-expo-out); }
-.anim--ping:hover        { animation: anim-ping var(--duration-long) var(--ease-expo-out); }
-.anim--pop:hover         { animation: anim-pop var(--duration-slower) var(--ease-bounce); }
-.anim--squish:hover      { animation: anim-squish var(--duration-long) var(--ease-expo-out); }
-.anim--heartbeat:hover   { animation: anim-heartbeat var(--duration-long) var(--ease-expo-out) infinite; }
-.anim--rubber-band:hover { animation: anim-rubber-band var(--duration-long) var(--ease-expo-out); }
+.anim--pulse       { --_anim: anim-pulse;        --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--ping        { --_anim: anim-ping;          --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--pop         { --_anim: anim-pop;            --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-bounce);    --_anim-count: 1; }
+.anim--squish      { --_anim: anim-squish;        --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--heartbeat   { --_anim: anim-heartbeat;    --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: infinite; }
+.anim--rubber-band { --_anim: anim-rubber-band;  --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
 
 /* Opacity */
-.anim--fade:hover        { animation: anim-fade var(--duration-slower) var(--ease-default); }
-.anim--blink:hover       { animation: anim-blink 1.5s var(--ease-default) 2; }
-.anim--flash:hover       { animation: anim-flash var(--duration-long) var(--ease-default); }
-.anim--glint:hover       { animation: anim-glint var(--duration-slower) var(--ease-expo-out); }
-.anim--shimmer:hover     { animation: anim-shimmer 2s var(--ease-default) infinite; }
-.anim--twinkle:hover     { animation: anim-twinkle 2s var(--ease-default) infinite; }
+.anim--fade        { --_anim: anim-fade;          --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-default);   --_anim-count: 1; }
+.anim--blink       { --_anim: anim-blink;          --_anim-dur: var(--duration-continuous);       --_anim-ease: var(--ease-default);   --_anim-count: 2; }
+.anim--flash       { --_anim: anim-flash;          --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-default);   --_anim-count: 1; }
+.anim--glint       { --_anim: anim-glint;          --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--shimmer     { --_anim: anim-shimmer;        --_anim-dur: var(--duration-continuous-slow);  --_anim-ease: var(--ease-default);   --_anim-count: infinite; }
+.anim--twinkle     { --_anim: anim-twinkle;        --_anim-dur: var(--duration-continuous-slow);  --_anim-ease: var(--ease-default);   --_anim-count: infinite; }
 
 /* Rotation */
-.anim--wiggle:hover      { animation: anim-wiggle var(--duration-slower) var(--ease-expo-out); }
-.anim--swing:hover       { animation: anim-swing var(--duration-long) var(--ease-expo-out); }
-.anim--rock:hover        { animation: anim-rock 2s var(--ease-default) infinite; }
-.anim--nod:hover         { animation: anim-nod var(--duration-slower) var(--ease-expo-out); }
+.anim--wiggle      { --_anim: anim-wiggle;        --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--swing       { --_anim: anim-swing;          --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--rock        { --_anim: anim-rock;            --_anim-dur: var(--duration-continuous-slow);  --_anim-ease: var(--ease-default);   --_anim-count: infinite; }
+.anim--nod         { --_anim: anim-nod;              --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
 
 /* Compound */
-.anim--attention:hover   { animation: anim-attention var(--duration-long) var(--ease-expo-out); }
-.anim--celebrate:hover   { animation: anim-celebrate var(--duration-long) var(--ease-bounce); }
-.anim--enter:hover       { animation: anim-enter var(--duration-slower) var(--ease-expo-out); }
-.anim--exit:hover        { animation: anim-exit var(--duration-slower) var(--ease-expo-out); }
+.anim--attention   { --_anim: anim-attention;      --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--celebrate   { --_anim: anim-celebrate;      --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-bounce);    --_anim-count: 1; }
+.anim--enter       { --_anim: anim-enter;          --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--exit        { --_anim: anim-exit;            --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+
+
+/* ==========================================================
+   TRIGGERS — when animation plays
+   Uses individual animation properties (not shorthand) because
+   shorthand with multiple var() tokens fails silently in some browsers.
+   Icon owns the trigger via data-anim-trigger attribute.
+   ========================================================== */
+
+/* Hover — default for interactive elements (no data-anim-trigger = hover) */
+[class*="anim--"]:not([data-anim-trigger]):hover,
+[class*="anim--"]:not([data-anim-trigger]):focus-within {
+  animation-name: var(--_anim);
+  animation-duration: var(--_anim-dur);
+  animation-timing-function: var(--_anim-ease);
+  animation-iteration-count: var(--_anim-count);
+}
+
+/* Autoplay — plays continuously from page load */
+[data-anim-trigger="autoplay"][class*="anim--"],
+/* Loop — plays continuously (alias for autoplay) */
+[data-anim-trigger="loop"][class*="anim--"] {
+  animation-name: var(--_anim);
+  animation-duration: var(--_anim-dur);
+  animation-timing-function: var(--_anim-ease);
+  animation-iteration-count: infinite;
+}
+
+/* Viewport — plays continuously while visible, static when not
+   JS toggles .anim--playing on enter/exit */
+[data-anim-trigger="viewport"][class*="anim--"].anim--playing {
+  animation-name: var(--_anim);
+  animation-duration: var(--_anim-dur);
+  animation-timing-function: var(--_anim-ease);
+  animation-iteration-count: infinite;
+}
+
+/* Interval — plays once on timed interval while visible
+   JS toggles .anim--playing on each tick */
+[data-anim-trigger="interval"][class*="anim--"].anim--playing {
+  animation-name: var(--_anim);
+  animation-duration: var(--_anim-dur);
+  animation-timing-function: var(--_anim-ease);
+  animation-iteration-count: 1;
+}

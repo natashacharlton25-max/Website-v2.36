@@ -2,13 +2,23 @@
 
 This is the ONE pattern. Every atom follows it. No exceptions unless documented here.
 
-Reference atoms: **Section**, **Page**, **Grid**, **Badge**, **Text** (all validator-clean)
+Reference atoms: **Grid**, **Page**, **Heading** (all validator-clean). Section, Badge, Text need minor schema updates (colour group, default enum).
 
 ---
 
 ## The Rule
 
 JSON sends enums. CSS classes read global tokens. Themes provide values. That's it.
+
+### Schema enforcement — three layers, nothing gets through
+
+| Layer | When | What it catches | File |
+|---|---|---|---|
+| **Build-time validator** | `node validate-atoms.cjs` | Schema structure, CSS violations, missing enums | `scripts/validate-atoms.cjs` |
+| **Test JSON validator** | `node validate-test-json.cjs` | Props not in schema, enum violations, CSS values in JSON | `scripts/validate-test-json.cjs` |
+| **Runtime validator** | Cloudflare Worker before render | Unknown props stripped, enum violations rejected, CSS values blocked | `src/lib/schema-validator.ts` |
+
+The schema is the contract. The worker calls `validateComponent()` before rendering — any prop not in the schema is stripped, any value not in the enum is rejected. No freeform CSS can reach the renderer. Content that fails validation gets the component's default state, not a broken page.
 
 ```
 JSON:          { "color": "teal", "variant": "fill", "shape": "pill" }
@@ -119,7 +129,7 @@ const { color, variant, shape, size, separator, separatorWeight } = Astro.props;
     },
     "visual": {
       "variant": { "type": "string", "default": "fill", "enum": ["fill", "outline", "glass"] },
-      "color":   { "type": "string", "default": "primary", "enum": ["primary","secondary","neutral","red","orange","yellow","teal","blue","purple","pink"] },
+      "color":   { "type": "string", "default": "default", "enum": ["default","primary","secondary","neutral","red","orange","yellow","teal","blue","purple","pink"] },
       "shape":   { "type": "string", "default": "soft", "enum": ["sharp","subtle","soft","rounded","pill"] },
       "size":    { "type": "string", "default": "md", "enum": ["sm","md","lg"] },
       "shadow":  { "type": "string", "default": "none", "enum": ["none","out","in"] }
@@ -178,12 +188,28 @@ These rules belong in global/gate/zone files, not component CSS. Move them first
 - NO hardcoded px for visual values — use tokens (exceptions: 0, 1px borders)
 - NO hardcoded hex colours
 - NO hardcoded opacity — use --opacity-* tokens
-- NO hardcoded durations — use --duration-* tokens  
+- NO hardcoded durations — use --duration-* tokens
 - NO hardcoded easing — use --ease-* tokens
+- NO @layer wrappers
+- NO !important declarations
+- NO @media (prefers-reduced-motion) — pipeline handles this via data attributes
+- NO .a11y-* class selectors — legacy, replaced by data attributes
+- NO #a11y-content-wrapper references — dead
 - NO per-component transition rules — moved to transitions.css
-- NO per-component focus rules — moved to focus-gate.css
+- NO per-component :focus-visible rules — moved to focus-gate.css
+- NO per-component :hover rules — moved to hover-gate.css (exceptions: Button, Link, Icon)
 - NO per-component highlight-links rules — moved to highlight-links.css
 - NO zone/gate rules — moved to their correct gate/zone file
+- NO @keyframes in component CSS — moved to micro-animations.css for global gating
+- NO `animation:` shorthand with hardcoded values — use var(--duration-*) / var(--ease-*) tokens
+- `animation: none` IS allowed — it's the gating (explicitly disabling motion)
+
+### In component Astro:
+- NO :global() selectors — use external CSS file
+- NO scoped `<style>` blocks — use external CSS file
+- NO static imports of animation libraries (gsap, lottie-web, matter-js)
+- Animation libraries must be dynamic-imported AFTER checking getMotion() gate
+- NO prefersReducedMotion() — legacy, use getMotion() from gate.ts
 
 ---
 
@@ -195,8 +221,12 @@ Zone/gate rules found in component CSS get MOVED to the correct file, never dele
 |---|---|---|
 | [data-mode="dark"] rules | theme-luminance-dark.css | All dark overrides in one place |
 | [data-high-contrast] rules | high-contrast.css | All HC overrides in one place |
-| [data-hover="none/instant/gentle"] rules | hover-gate.css OR stays if variant-specific | Hover gating in one place |
-| [data-render="reduced"] rules | motion-gate.css | Motion gating in one place |
+| [data-hover] rules | hover-gate.css OR stays if variant-specific | Hover gating in one place |
+| [data-render="reduced"] rules | reduced-gate.css | Motion gating in one place |
+| :hover rules | hover-gate.css OR stays if variant-specific | Hover gating in one place |
+| :focus-visible rules | focus-gate.css OR stays if variant-specific | Focus gating in one place |
+| @keyframes | micro-animations.css | Global animation gating in one place |
+| animation: (hardcoded values) | Use var(--duration-*) / var(--ease-*) tokens | Token gating enables global kill |
 | [data-render="textonly"] rules | textonly/structure.css or textonly/styles.css | Textonly in one place |
 | [data-render="assistive"] rules | assistive-gate.css | Assistive gating in one place |
 | [data-highlight-links] rules | highlight-links.css | Highlight in one place |
@@ -340,13 +370,14 @@ Every gate file and what it contains:
 
 ```
 src/styles/gates/
-  hover-gate.css         ← hover speed tokens + variant-specific hover suppression
-  motion-gate.css        ← CSS animation freeze + reduced static states per component
-  visual-gate.css        ← full/solid/flat shadow/glass/glow control
+  hover-gate.css         ← hover transitions: full, gentle, instant, none. Owns --hover-duration-* only
+  motion-gate.css        ← animation speed: full, gentle, none. Owns --duration-* tokens. THE kill switch
+  reduced-gate.css       ← render mode static states per component (data-render="reduced")
+  opacity-gate.css       ← visual effects: full, solid, flat. Owns shadow/glass/glow tokens
   focus-gate.css         ← double box-shadow ring, forced-colors fallback
   assistive-gate.css     ← enlarged targets, thick borders, simplified layouts
-  layout-modes.css       ← single/reading/presentation column modes
-  workbook-gate.css      ← workbook print chrome: numbering, write spaces, page breaks
+  alt-text-gate.css      ← alt text display mode switching (hidden, subtitle, tooltip, inline, enlarge)
+  textonly-gate.css       ← textonly layout and visibility rules
 
 src/styles/global/
   transitions.css        ← global hover transitions on all interactive elements
@@ -362,7 +393,7 @@ src/styles/textonly/
   styles.css             ← visual treatment for textonly content (borders, spacing)
 ```
 
-### motion-gate.css — Reduced shows COMPLETED state
+### reduced-gate.css — Reduced shows COMPLETED state
 
 Reduced does NOT just pause animation. It shows the finished result. Every animated component needs a static state rule:
 
@@ -422,9 +453,53 @@ Screen always has everything — interaction gates reveal content. Print is a se
 
 Each component's static state goes here. Not in component CSS. All in one file so you can see the full reduced experience.
 
+### Animation Gating — Three Independent Layers
+
+Animation is gated at three levels. All work independently. No animation atom needed.
+
+```
+JSON animation prop exists?
+  ├─ NO  → no animation class in HTML → CSS never matches → zero motion (build-time gate)
+  └─ YES → class in HTML
+            ├─ JS gate: getMotion() → 'none'/'still' → don't import library (zero bytes)
+            ├─ CSS gate: --duration-base: 0s → animation runs in zero time (frozen)
+            └─ Hover gate: data-hover="none" → click replaces hover trigger
+```
+
+**Layer 1: JSON prop gating (build time)**
+- If content author doesn't set an animation prop, no `.anim--*` class exists in HTML
+- CSS animation rules never match — zero motion, zero cost
+- This is the primary gate — structural, not runtime
+
+**Layer 2: JS library gating (runtime — script loading)**
+- Animation scripts MUST call `getMotion()` BEFORE importing libraries
+- If gated, don't even `import('gsap')` — zero bytes downloaded
+- NEVER static-import animation libraries at top of script
+- The old `prefersReducedMotion()` function is LEGACY — use `getMotion()` from gate.ts
+
+Correct pattern (dynamic import after gate check):
+```js
+const motion = getMotion();
+if (motion === 'none' || motion === 'still') return;
+const { gsap } = await import('gsap');
+// now init animation
+```
+
+Wrong pattern (static import, always loads):
+```js
+import gsap from 'gsap';  // ← WRONG: loads library even when gated
+```
+
+**Layer 3: CSS token gating (runtime — animation values)**
+- ALL animation durations must use `var(--duration-*)` tokens
+- ALL animation easings must use `var(--ease-*)` tokens
+- Setting tokens to `0s` / `none` in one gate file kills all motion globally
+- `animation: none` IS allowed — it's the explicit disable
+- @keyframes should be in micro-animations.css for centralised gating
+
 ### JS animation gate (src/lib/animation/gate.ts)
 
-JS animations (GSAP, Lottie, ScrollDraw) check the gate before running:
+Single source of truth. Every animation script calls this BEFORE importing any library:
 
 ```js
 export function getMotion(): 'full' | 'gentle' | 'still' | 'none' {
@@ -442,11 +517,44 @@ export function getMotion(): 'full' | 'gentle' | 'still' | 'none' {
 | full | Play animation normally |
 | gentle | Play at half speed |
 | still | Show final frame / completed state |
-| none | Show plain fallback or nothing |
+| none | Don't import library. Show plain fallback or nothing |
+
+### Hover gating — 4 modes
+
+`data-hover` attribute on body. Controlled by Your View panel.
+
+| Mode | Behaviour |
+|---|---|
+| full | Normal hover effects |
+| soft | Gentle/reduced hover |
+| instant | Instant state change, no transition |
+| none | Click replaces hover trigger entirely |
+
+Hover rules belong in `hover-gate.css`, not component CSS. Exceptions: Button (22 variant-specific suppressions), Link (focus-active), Icon (hover-triggered animation).
+
+### Visual effects gating — 3 modes (opacity-gate.css)
+
+`data-visual` attribute on body. Controls shadows, glass, glow, liquid effects.
+
+| Mode | What it does |
+|---|---|
+| full | Everything on (default) |
+| solid | Kills glass/blur/liquid. Keeps shadows + glow |
+| flat | Kills everything: shadows, glass, glow, liquid, glint |
+
+Works by zeroing global tokens: `--glass-bg: transparent`, `--shadow-sm: none`, `--glow-ambient: none`, etc. Components that use these tokens get the effect for free — no per-component rules needed.
+
+Textonly sets `data-visual="flat"` alongside `data-render="textonly"`. Assistive preset sets `data-visual="solid"`.
+
+**Opacity tokens** (in `tokens/layout.css`):
+- `--opacity-hidden` (0), `--opacity-low` (0.3), `--opacity-subtle` (0.45), `--opacity-disabled` (0.5)
+- `--opacity-medium` (0.6), `--opacity-medium-high` (0.75), `--opacity-high` (0.85), `--opacity-full` (1)
+
+All component opacity values MUST use these tokens — hardcoded opacity is caught by validator rule 5.
 
 ### assistive-gate.css
 
-Assistive is a preset that toggles multiple attributes. But some rules are unique to assistive and don't come from other gates:
+Assistive is a preset that toggles multiple data attributes. Most needs are covered by existing gates (hover=none, motion=still, text size up). The few component-specific overrides live here — cherry-picked, not a full render mode:
 
 ```css
 [data-assistive] {
@@ -455,12 +563,15 @@ Assistive is a preset that toggles multiple attributes. But some rules are uniqu
   --focus-thickness: 0.3rem;
 }
 
-/* Component-specific assistive rules — moved from component CSS */
+/* Cherry-picked per-component rules — only what existing gates don't cover */
+[data-assistive] .list { /* simplified like textonly */ }
 [data-assistive] .badge { font-size: var(--text-body); padding: var(--space-md); }
-[data-assistive] .tooltip { /* inline instead of floating */ }
-[data-assistive] .form-field { /* larger controls */ }
-/* etc — every [data-render="assistive"] rule from components moves here */
+[data-assistive] .form-field { --_field-control-size: 2rem; --_field-thumb-size: 1.5rem; }
+/* Tooltip — bottom bar (hover=none already triggers this, may not need a rule) */
+/* Card stays visual. Heading stays styled. Not everything changes. */
 ```
+
+Move existing `[data-render="assistive"]` rules from component CSS into this file. Then check what's actually needed versus what existing gates already handle. Most will be redundant.
 
 ### textonly files
 
@@ -1038,16 +1149,25 @@ Radius doesn't scale with text. A pill button stays pill at every size. `border-
 ### In schema:
 - NO "type": "token"
 - NO "cssProperty" field
-- NO "assistive" in renders
+- NO "assistive" in renders — only full, reduced, textonly
 - NO defaults that are token names ("default": "neutral-400")
 - Defaults are enum values ("default": "primary")
+- MUST have all 4 prop groups: content, visual, animation, colour
+- colour group MUST be empty {} — colour is a visual enum, not a separate axis
+- color enum MUST be the canonical 11: default, primary, secondary, neutral, red, orange, yellow, teal, blue, purple, pink
+- Animation props MUST be in the animation{} group — if it moves, it goes there
+- Pipeline strips animation{} for reduced/textonly — props in content/visual survive all renders
+- Every string prop in visual{} and animation{} MUST have an enum — JSON sends enums, not freeform strings
+- Exempt: slug-type props (lottieIcon, morphTo, maskShape — asset references are freeform by nature)
+- class/style are Astro composition props — should NOT be in schema (JSON authors don't set them)
 
 ---
 
-## The 10 colour enums (every coloured atom uses all 10)
+## The 11 colour enums (every coloured atom uses all 11)
 
 | Enum | Background token | Border/accent token |
 |---|---|---|
+| default | (no class emitted) | (no class emitted) — base CSS uses --color-Text |
 | primary | var(--primary-200) | var(--primary-600) |
 | secondary | var(--secondary-200) | var(--secondary-600) |
 | neutral | var(--neutral-200) | var(--neutral-600) |
@@ -1059,7 +1179,71 @@ Radius doesn't scale with text. A pill button stays pill at every size. `border-
 | purple | var(--rainbow-6-wash) | var(--rainbow-6) |
 | pink | var(--rainbow-7-wash) | var(--rainbow-7) |
 
-Not every atom uses background + border. Some only need accent colour. But the enum is always the same 10 values.
+`default` = no colour class emitted, base CSS applies `--color-Text` (the theme text token). 10 colour classes in CSS, 11 enum values in schema. Not every atom uses background + border. Some only need accent colour. But the enum is always the same 11 values.
+
+---
+
+## The 30 animation enums (global micro-animations)
+
+Shared across every animatable atom. JSON `"animation": "bounce"` → Astro emits `.anim--bounce` → global CSS handles the rest. No animation atom needed — the class is global.
+
+**Tokens** (`src/styles/tokens/motion.css`): easing + durations. THE GATE POINT — zero these to kill all motion.
+**Keyframes + triggers** (`src/styles/global/micro-animations.css`): @keyframes + `.anim--{name}:hover` rules. Consumes tokens.
+
+All 30 animations use `var(--duration-*)` and `var(--ease-*)` tokens. No hardcoded values.
+
+| Category | Enums |
+|----------|-------|
+| Movement | spin, bounce, shake, float, drift, slide-up, slide-down, slide-left, slide-right, flip |
+| Scale | pulse, ping, pop, squish, heartbeat, rubber-band |
+| Opacity | fade, blink, flash, glint, shimmer, twinkle |
+| Rotation | wiggle, swing, rock, nod |
+| Compound | attention, celebrate, enter, exit |
+
+**Gating — three layers, all independent:**
+
+| Layer | How | When |
+|-------|-----|------|
+| JSON prop | Pipeline strips `animation{}` group → no `.anim--*` class in HTML | Build time (reduced/textonly) |
+| CSS tokens | `--duration-long: 0s` in reduced-gate.css → animation runs in zero time | Runtime |
+| Hover gate | `data-hover="none"` → `:hover` never triggers | Runtime |
+
+**Schema pattern** — every animatable atom:
+```json
+"animation": {
+  "animation": { "type": "string", "enum": ["spin","bounce","shake","float","drift","slide-up","slide-down","slide-left","slide-right","flip","pulse","ping","pop","squish","heartbeat","rubber-band","fade","blink","flash","glint","shimmer","twinkle","wiggle","swing","rock","nod","attention","celebrate","enter","exit"] }
+}
+```
+
+Component-specific animation (Icon draw/morph, LottieIcon, GSAP scroll) lives alongside the shared enum in that atom's `animation{}` group. The 30 micro-animations are the global shared set.
+
+---
+
+## Icon weight enum (every atom with an icon prop)
+
+Icons come from D1 (Asset Library API). JSON author passes the **base name only** (e.g. `"heart"`, not `"heart-fill"`). Weight is resolved from brand config (`ICON_WEIGHT` env var) or explicit `iconWeight` enum.
+
+| iconWeight | Resolves to | When to use |
+|---|---|---|
+| brand | Brand default (ICON_WEIGHT env var, usually fill) | Default — don't set, brand decides |
+| fill | heart-fill | Solid filled icons |
+| duotone | heart-duotone | Two-tone icons |
+| regular | heart-regular | Outline/regular weight |
+| bold | heart-bold | Thicker strokes |
+| thin | heart-thin | Thinner strokes |
+| light | heart-light | Lightest weight |
+
+**Schema pattern** — every atom with an `icon` prop:
+```json
+"content": {
+  "icon": { "type": "string", "textonly": false }
+},
+"visual": {
+  "iconWeight": { "type": "string", "default": "brand", "enum": ["brand","fill","duotone","regular","bold","thin","light"] }
+}
+```
+
+`icon` is content (what icon), `iconWeight` is visual (how it looks). `"brand"` = no override, use the brand config default. JSON authors never need to know the full slug — just the base name and optionally a weight.
 
 ---
 
@@ -1074,7 +1258,7 @@ Not every atom uses background + border. Some only need accent colour. But the e
 | Link | [data-focus-active] rules in component | Strip effects on focus — unique to link animations |
 | FormField | Sibling focus selectors | Hidden input → visible element pattern |
 | Image | Textonly AAC rules in component | AAC display switching unique to Image |
-| Icon | Hover-triggered animation | Spin/pulse/bounce only on hover — unique |
+| Icon | Draw/morph animation in component | DrawSVG + MorphSVG are Icon-specific GSAP transforms, not micro-animations |
 
 Everything else follows the canonical pattern. No exceptions.
 

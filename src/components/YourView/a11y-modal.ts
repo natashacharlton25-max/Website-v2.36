@@ -70,6 +70,11 @@ function initModal(): void {
       setActive(b, b.dataset.testHover === settings.hoverMode);
     });
 
+    // Motion mode buttons
+    panel!.querySelectorAll<HTMLElement>('[data-test-motion]').forEach(b => {
+      setActive(b, b.dataset.testMotion === settings.motionMode);
+    });
+
     // Symbol set buttons
     panel!.querySelectorAll<HTMLElement>('[data-test-symbolset]').forEach(b => {
       setActive(b, b.dataset.testSymbolset === settings.symbolSet);
@@ -205,6 +210,17 @@ function initModal(): void {
   panel.querySelectorAll<HTMLElement>('[data-test-hover]').forEach(btn => {
     btn.addEventListener('click', () => {
       settings.hoverMode = btn.dataset.testHover as A11ySettings['hoverMode'];
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
+  });
+
+  // ── Motion mode buttons ──
+
+  panel.querySelectorAll<HTMLElement>('[data-test-motion]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settings.motionMode = btn.dataset.testMotion as A11ySettings['motionMode'];
       saveSettings(settings);
       applySettings(settings);
       syncUI();

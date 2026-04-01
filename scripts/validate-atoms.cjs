@@ -1,10 +1,87 @@
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * ATOM VALIDATOR — checks every atom against canonical-atom-pattern.md
+ *
+ * RULE LEGEND:
+ *   CSS rules (scanned in component .css files)
+ *     1   Nested var() fallback — var(--x, var(--y))
+ *     2   Hardcoded px >= 10 (not border-width, not 9999)
+ *     3   Hardcoded hex colour (not in mask/gradient context)
+ *     4   Hardcoded rgb/rgba/hsl (not in color-mix)
+ *     5   Hardcoded opacity (not 0, not 1, not var())
+ *     6   Hardcoded duration (not 0s, not inside var())
+ *     7   Hardcoded easing (not in @keyframes, not var())
+ *    11   [data-render="assistive"] in component CSS (→ assistive-gate.css)
+ *    12   Zone/gate rules in component CSS (dark, HC, textonly, reduced, highlight-links)
+ *    16   @layer wrapper in component CSS
+ *    17   !important in component CSS
+ *    18   @media (prefers-reduced-motion) in component CSS
+ *    19   .a11y-* class selector in component CSS
+ *    20   #a11y-content-wrapper reference
+ *    21   transition: rule in component CSS (→ transitions.css) [WARN]
+ *    22   :focus-visible rule in component CSS (→ focus-gate.css) [MOVE]
+ *    29   :hover in component CSS (→ hover-gate.css) [WARN]
+ *         hover has 4 modes: full, soft, instant, none (none = click replaces hover)
+ *    31   @keyframes in component CSS (→ micro-animations.css for global gating) [WARN]
+ *    32   animation: shorthand without var() tokens [FAIL]
+ *         all animation must use --duration-* / --ease-* tokens so one gate file
+ *         can kill all motion by zeroing the tokens
+ *
+ *   Astro rules (scanned in component .astro files)
+ *     8   Inline style= (with per-atom exceptions)
+ *     9   CSS computation maps / Record<> (with exceptions)
+ *    10   Rest spread [key: string]
+ *    23   :global() selector in .astro
+ *    24   Scoped <style> block in .astro (should be external CSS)
+ *
+ *   Schema rules (scanned in .schema.json)
+ *    13   "type": "token" or "cssProperty" field
+ *    14   "assistive" render pointing to .astro file
+ *    25   Missing required prop groups (content, visual, animation, colour)
+ *    26   Non-empty colour group (colour is a visual enum, group must be {})
+ *    27   Default value looks like a token name (e.g. "neutral-400")
+ *    28   Unexpected render keys (must be full/reduced/textonly only)
+ *    30   Schema color enum must be canonical 11 values
+ *         (default [--color-Text], primary, secondary, neutral, + 7 rainbow)
+ *    33   Animation prop in wrong schema group — anything that moves belongs
+ *         in animation{}, not content{} or visual{}, so pipeline can strip it
+ *    34   Animation library import without render gate in component script
+ *         (must check getMotion() / data-render BEFORE importing gsap/lottie/matter)
+ *    35   String prop in visual/animation group without enum
+ *         content group strings are exempt (text, slugs, URLs are freeform)
+ *    36   class/style prop in schema — Astro composition only, not JSON content
+ *
+ *   Coverage rules
+ *    15   Colour enum count in CSS (10 classes expected: primary..pink)
+ */
+
 const atomsDir = path.join(__dirname, '..', 'src', 'components', 'atoms');
 const atoms = fs.readdirSync(atomsDir).filter(d =>
   fs.statSync(path.join(atomsDir, d)).isDirectory()
 );
+
+// Per-atom exceptions for transition rules (documented in canonical)
+const transitionExceptions = {
+  Button: true,   // 22 variant-specific hover suppressions
+  Link: true,     // focus-active strip effects
+  FormField: true  // sibling focus pattern
+};
+
+// Per-atom exceptions for :hover rules (documented in canonical)
+// These atoms have variant-specific hover behaviour that stays in component CSS
+const hoverExceptions = {
+  Button: true,   // 22 variant-specific hover suppressions
+  Link: true,     // focus-active strip effects on hover
+  Icon: true      // hover-triggered animation (spin/pulse/bounce)
+};
+
+// Per-atom exceptions for focus-visible rules
+const focusExceptions = {
+  FormField: true,  // sibling focus selectors
+  Link: true        // focus-active rules
+};
 
 const summary = [];
 console.log('=== ATOM VALIDATOR ===\n');
@@ -82,6 +159,7 @@ for (const atom of atoms) {
           issues.push({ rule: 7, ln, file, msg: 'hardcoded easing: linear' });
         }
       }
+
       // Rule 11: Assistive render in component CSS
       if (/data-render=["']assistive["']/.test(line)) {
         issues.push({ type: 'MOVE', rule: 11, ln, file, msg: 'assistive rule (→ assistive-gate.css)' });
@@ -98,10 +176,66 @@ for (const atom of atoms) {
         issues.push({ type: 'MOVE', rule: 12, ln, file, msg: 'reduced rule (→ reduced-gate.css)' });
       if (/data-highlight-links/.test(line))
         issues.push({ type: 'MOVE', rule: 12, ln, file, msg: 'highlight-links rule (→ highlight-links.css)' });
+
+      // Rule 16: @layer in component CSS
+      if (/@layer\s/.test(line)) {
+        issues.push({ rule: 16, ln, file, msg: `@layer wrapper` });
+      }
+
+      // Rule 17: !important in component CSS
+      if (/!important/.test(line)) {
+        issues.push({ rule: 17, ln, file, msg: `!important: ${t.substring(0, 60)}` });
+      }
+
+      // Rule 18: @media (prefers-reduced-motion) in component CSS
+      if (/prefers-reduced-motion/.test(line)) {
+        issues.push({ rule: 18, ln, file, msg: 'prefers-reduced-motion (pipeline handles this)' });
+      }
+
+      // Rule 19: .a11y-* class selector in component CSS
+      if (/\.a11y-/.test(line)) {
+        issues.push({ rule: 19, ln, file, msg: `a11y class selector: ${t.substring(0, 60)}` });
+      }
+
+      // Rule 20: #a11y-content-wrapper in component CSS
+      if (/#a11y-content-wrapper/.test(line)) {
+        issues.push({ rule: 20, ln, file, msg: '#a11y-content-wrapper reference' });
+      }
+
+      // Rule 21: transition: in component CSS (→ transitions.css) — WARN with exceptions
+      if (!transitionExceptions[atom] && /\btransition\s*:/.test(line) && !/var\(/.test(line)) {
+        issues.push({ type: 'WARN', rule: 21, ln, file, msg: `transition rule (→ transitions.css?): ${t.substring(0, 60)}` });
+      }
+
+      // Rule 22: :focus-visible in component CSS (→ focus-gate.css) — MOVE with exceptions
+      if (!focusExceptions[atom] && /:focus-visible/.test(line)) {
+        issues.push({ type: 'MOVE', rule: 22, ln, file, msg: `focus-visible rule (→ focus-gate.css): ${t.substring(0, 60)}` });
+      }
+
+      // Rule 29: :hover in component CSS (→ hover-gate.css) — WARN with exceptions
+      // Hover has 4 modes: full, soft, instant, none (none = click replaces hover)
+      // Component CSS should not contain bare :hover — gate via [data-hover] in hover-gate.css
+      if (!hoverExceptions[atom] && /:hover/.test(line) && !/data-hover/.test(line)) {
+        issues.push({ type: 'WARN', rule: 29, ln, file, msg: `hover rule (→ hover-gate.css?): ${t.substring(0, 60)}` });
+      }
+
+      // Rule 31: @keyframes in component CSS (→ micro-animations.css)
+      // Keyframes should be global so one gate file can disable all motion
+      if (/@keyframes\s/.test(line)) {
+        issues.push({ type: 'WARN', rule: 31, ln, file, msg: `@keyframes in component (→ micro-animations.css?): ${t.substring(0, 50)}` });
+      }
+
+      // Rule 32: animation: shorthand without var() tokens
+      // All animation MUST use --duration-* / --ease-* tokens for global gating
+      // Setting tokens to 0s/none kills all motion in one place
+      // "animation: none" is exempt — it IS the gating (explicitly disabling motion)
+      if (/\banimation\s*:/.test(line) && !/var\(/.test(line) && !isKeyframe && !/animation\s*:\s*none/.test(line)) {
+        issues.push({ rule: 32, ln, file, msg: `animation without tokens (use var(--duration-*) / var(--ease-*)): ${t.substring(0, 60)}` });
+      }
     });
   }
 
-  // ─── ASTRO RULES (8, 9, 10) ───
+  // ─── ASTRO RULES (8, 9, 10, 23, 24) ───
   const astroFiles = fs.readdirSync(dir).filter(f => f.endsWith('.astro'));
   const styleExceptions = { Text: /inlineStyle|--text-clamp/, Icon: /size/, LottieIcon: /size/, Image: /maskIconStyle/, Heading: /mergedStyle/ };
   for (const file of astroFiles) {
@@ -128,23 +262,155 @@ for (const atom of atoms) {
       if (/\[key:\s*string\]/.test(line)) {
         issues.push({ rule: 10, ln, file, msg: 'rest spread: [key: string]' });
       }
+
+      // Rule 23: :global() selector in .astro
+      if (/:global\(/.test(line)) {
+        issues.push({ rule: 23, ln, file, msg: `:global() selector: ${line.trim().substring(0, 60)}` });
+      }
+
+      // Rule 24: Scoped <style> block in .astro (should use external CSS)
+      if (/^\s*<style[\s>]/.test(line) && !/is:global/.test(line)) {
+        issues.push({ rule: 24, ln, file, msg: 'scoped <style> block (use external .css file)' });
+      }
+    });
+
+    // Rule 34: Animation library import without render gate
+    // Must check getMotion() / data-render BEFORE importing gsap/lottie/matter
+    // Pattern: ungated static import of animation library at top of <script>
+    const fullContent = lines.join('\n');
+    const animLibPattern = /import\s.*['"](?:gsap|lottie-web|matter-js|@lottiefiles)/;
+    const hasAnimImport = lines.findIndex(l => animLibPattern.test(l));
+    if (hasAnimImport !== -1) {
+      // Check if file has a render gate BEFORE the animation code runs
+      const hasGate = /getMotion|data[\.\[]render|data-render|prefersReducedMotion/.test(fullContent);
+      if (!hasGate) {
+        issues.push({ rule: 34, ln: hasAnimImport + 1, file, msg: `ungated animation import (check getMotion() before importing): ${lines[hasAnimImport].trim().substring(0, 60)}` });
+      }
+    }
+
+    // Also flag the old gate pattern — should use getMotion() from gate.ts
+    lines.forEach((line, i) => {
+      if (/prefersReducedMotion/.test(line)) {
+        issues.push({ type: 'WARN', rule: 34, ln: i + 1, file, msg: 'legacy gate: prefersReducedMotion() → use getMotion() from gate.ts' });
+      }
     });
   }
 
-  // ─── SCHEMA RULES (13, 14) ───
+  // ─── SCHEMA RULES (13, 14, 25, 26, 27, 28) ───
   const schemaFile = `${atom}.schema.json`;
   const schemaPath = path.join(dir, schemaFile);
   if (fs.existsSync(schemaPath)) {
-    const lines = fs.readFileSync(schemaPath, 'utf8').split('\n');
+    const raw = fs.readFileSync(schemaPath, 'utf8');
+    const lines = raw.split('\n');
+
+    // Line-by-line checks (rules 13, 14)
     lines.forEach((line, i) => {
       const ln = i + 1;
       if (/"type":\s*"token"/.test(line))
         issues.push({ rule: 13, ln, file: schemaFile, msg: `schema token type: ${line.trim().substring(0, 60)}` });
       if (/"cssProperty"/.test(line))
-        issues.push({ rule: 13, ln, file: schemaFile, msg: `cssProperty in schema` });
+        issues.push({ rule: 13, ln, file: schemaFile, msg: 'cssProperty in schema' });
       if (/"assistive"/.test(line) && /\.astro/.test(line))
         issues.push({ rule: 14, ln, file: schemaFile, msg: `assistive render: ${line.trim().substring(0, 50)}` });
     });
+
+    // Structural checks (rules 25, 26, 27, 28)
+    try {
+      const schema = JSON.parse(raw);
+      const props = schema.props || {};
+      const renders = schema.renders || {};
+
+      // Rule 25: Missing required prop groups
+      const requiredGroups = ['content', 'visual', 'animation', 'colour'];
+      const missing = requiredGroups.filter(g => !(g in props));
+      if (missing.length > 0) {
+        issues.push({ rule: 25, ln: '--', file: schemaFile, msg: `missing prop groups: ${missing.join(', ')}` });
+      }
+
+      // Rule 26: Non-empty colour group (colour is a visual enum)
+      if (props.colour && Object.keys(props.colour).length > 0) {
+        issues.push({ rule: 26, ln: '--', file: schemaFile, msg: 'colour group must be empty {} (colour is a visual enum)' });
+      }
+
+      // Rule 27: Defaults that look like token names (e.g. "neutral-400", "primary-200")
+      for (const [, groupProps] of Object.entries(props)) {
+        if (typeof groupProps !== 'object' || groupProps === null) continue;
+        for (const [prop, def] of Object.entries(groupProps)) {
+          if (prop.startsWith('_')) continue;
+          if (typeof def !== 'object' || def === null) continue;
+          if (def.default && typeof def.default === 'string' && /^[a-z]+-\d{2,3}$/.test(def.default)) {
+            issues.push({ rule: 27, ln: '--', file: schemaFile, msg: `token-name default: ${prop} = "${def.default}" (use enum value)` });
+          }
+        }
+      }
+
+      // Rule 28: Unexpected render keys
+      const allowedRenders = ['full', 'reduced', 'textonly'];
+      const unexpected = Object.keys(renders).filter(k => !allowedRenders.includes(k));
+      if (unexpected.length > 0) {
+        issues.push({ rule: 28, ln: '--', file: schemaFile, msg: `unexpected render keys: ${unexpected.join(', ')} (allowed: full, reduced, textonly)` });
+      }
+
+      // Rule 30: Schema color enum must be canonical 11 values
+      // default (--color-Text), primary, secondary, neutral, + 7 rainbow
+      const canonicalColorEnum = ['default','primary','secondary','neutral','red','orange','yellow','teal','blue','purple','pink'];
+      const colorProp = (props.visual && props.visual.color) || null;
+      if (colorProp && colorProp.enum) {
+        const missingColors = canonicalColorEnum.filter(c => !colorProp.enum.includes(c));
+        const extraColors = colorProp.enum.filter(c => !canonicalColorEnum.includes(c));
+        if (missingColors.length > 0) {
+          issues.push({ rule: 30, ln: '--', file: schemaFile, msg: `schema color enum missing: ${missingColors.join(', ')}` });
+        }
+        if (extraColors.length > 0) {
+          issues.push({ type: 'WARN', rule: 30, ln: '--', file: schemaFile, msg: `schema color enum extra: ${extraColors.join(', ')}` });
+        }
+      }
+
+      // Rule 33: Animation props must be in the animation{} group
+      // If it moves, it belongs in animation — pipeline strips animation group
+      // for reduced/textonly renders. Props in content/visual survive all renders.
+      const animKeywords = /^(anim|lottie|motion|autoplay|loop|playOn|spin|pulse|bounce|shake|float|drift|parallax|scroll.*reveal|typewriter|entrance|exit)/i;
+      for (const group of ['content', 'visual']) {
+        if (!props[group] || typeof props[group] !== 'object') continue;
+        for (const prop of Object.keys(props[group])) {
+          if (prop.startsWith('_')) continue;
+          if (animKeywords.test(prop)) {
+            issues.push({ rule: 33, ln: '--', file: schemaFile, msg: `"${prop}" in ${group}{} — moves, so belongs in animation{}` });
+          }
+        }
+      }
+
+      // Rule 35: String props in visual/animation MUST have enum
+      // Content group is exempt — text, slugs, URLs are genuinely freeform
+      // JSON sends enums. No freeform strings in visual/animation.
+      // Exempt: slug-type props (asset references like lottieIcon, maskShape)
+      const slugProps = /^(class|style|lottieIcon|icon|image|maskIcon|maskShape|morphTo|iconMorphTo)$/;
+      for (const group of ['visual', 'animation']) {
+        if (!props[group] || typeof props[group] !== 'object') continue;
+        for (const [prop, def] of Object.entries(props[group])) {
+          if (prop.startsWith('_')) continue;
+          if (typeof def !== 'object' || def === null) continue;
+          if (def.type === 'string' && !def.enum && !slugProps.test(prop)) {
+            issues.push({ rule: 35, ln: '--', file: schemaFile, msg: `"${prop}" in ${group}{} is string without enum — add enum or change type` });
+          }
+        }
+      }
+
+      // Rule 36: class/style props in schema — Astro composition only, not JSON content
+      // JSON authors use enums. class/style are developer escape hatches.
+      const astroOnlyProps = ['class', 'style'];
+      for (const [group, groupProps] of Object.entries(props)) {
+        if (typeof groupProps !== 'object' || groupProps === null) continue;
+        for (const prop of Object.keys(groupProps)) {
+          if (astroOnlyProps.includes(prop)) {
+            issues.push({ rule: 36, ln: '--', file: schemaFile, msg: `"${prop}" in ${group}{} — Astro composition prop, remove from schema` });
+          }
+        }
+      }
+
+    } catch (e) {
+      issues.push({ rule: 25, ln: '--', file: schemaFile, msg: `JSON parse error: ${e.message}` });
+    }
   } else if (atom !== 'FigCaption') {
     issues.push({ rule: 13, ln: '--', file: '--', msg: 'missing schema.json' });
   }
@@ -154,8 +420,8 @@ for (const atom of atoms) {
   const allCss = cssFiles.map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n');
   const found = colourEnums.filter(c => new RegExp(`\\.\\w[\\w-]*--${c}\\b`).test(allCss));
   if (found.length > 0 && found.length < 10) {
-    const missing = colourEnums.filter(c => !found.includes(c));
-    issues.push({ type: 'WARN', rule: 15, ln: '--', file: cssFiles[0], msg: `${found.length}/10 colour enums (missing: ${missing.join(', ')})` });
+    const missingColours = colourEnums.filter(c => !found.includes(c));
+    issues.push({ type: 'WARN', rule: 15, ln: '--', file: cssFiles[0], msg: `${found.length}/10 colour enums (missing: ${missingColours.join(', ')})` });
   }
 
   if (issues.length === 0) {

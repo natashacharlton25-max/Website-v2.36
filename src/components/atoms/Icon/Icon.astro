@@ -53,8 +53,9 @@ interface Props {
   color?: string;
   shadow?: 'sm' | 'md' | 'lg';
   glow?: 'sm' | 'md' | 'lg' | 'secondary' | 'white';
-  gradient?: 'primary' | 'secondary' | 'warm' | 'cool';
-  animation?: 'spin' | 'pulse' | 'bounce' | 'shake' | 'wiggle' | 'float' | 'ping' | 'glint';
+  gradient?: 'primary' | 'secondary' | 'warm' | 'cool' | 'hero' | 'sunset';
+  animation?: 'spin' | 'bounce' | 'shake' | 'float' | 'drift' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'flip' | 'pulse' | 'ping' | 'pop' | 'squish' | 'heartbeat' | 'rubber-band' | 'fade' | 'blink' | 'flash' | 'glint' | 'shimmer' | 'twinkle' | 'wiggle' | 'swing' | 'rock' | 'nod' | 'attention' | 'celebrate' | 'enter' | 'exit';
+  animationTrigger?: 'hover' | 'viewport' | 'autoplay' | 'loop' | 'interval' | 'click' | 'focus' | 'none';
   spin?: boolean;
   pulse?: boolean;
   bounce?: boolean;
@@ -70,7 +71,7 @@ interface Props {
 
 const {
   name, weight, size, class: className = '', color,
-  shadow, glow, gradient, animation, spin, pulse, bounce, stroke,
+  shadow, glow, gradient, animation, animationTrigger = 'hover', spin, pulse, bounce, stroke,
   draw, drawOnScroll, drawScrub, drawColor,
   morphTo, morphColor, semanticRole,
 } = Astro.props;
@@ -172,6 +173,8 @@ if (gradient && iconContent && !draw) {
     secondary: `<stop offset="0%" stop-color="var(--secondary-600)"/><stop offset="100%" stop-color="var(--secondary-800)"/>`,
     warm: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="100%" stop-color="var(--secondary-600)"/>`,
     cool: `<stop offset="0%" stop-color="var(--primary-200)"/><stop offset="100%" stop-color="var(--primary-800)"/>`,
+    hero: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="100%" stop-color="var(--secondary-600)"/>`,
+    sunset: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="30%" stop-color="var(--primary-800)"/><stop offset="100%" stop-color="var(--secondary-800)"/>`,
   };
 
   const gradientDef = `<defs><linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">${gradientStops[gradient]}</linearGradient></defs>`;
@@ -207,10 +210,15 @@ const fallbackIcon = `<svg viewBox="0 0 256 256"${size != null ? ` width="${size
 
 const drawVariant = typeof draw === 'string' ? draw : 'draw';
 
+// Colour enums use CSS class, non-enum values use inline style
+const colorEnums = ['default','primary','secondary','neutral','red','orange','yellow','teal','blue','purple','pink'];
+const isColorEnum = color && colorEnums.includes(color);
+
 const effectClasses = [
   shadow && `icon--shadow-${shadow}`,
   glow && `icon--glow-${glow}`,
   gradient && 'icon--has-gradient',
+  isColorEnum && color !== 'default' && `icon--${color}`,
   animation && `anim--${animation}`,
   spin && 'icon--spin',
   pulse && 'icon--pulse',
@@ -238,9 +246,10 @@ if (morphTo && morphTargetContent) {
 
 <span
   class:list={['icon', ...effectClasses, className]}
-  style={`${size != null ? `width: ${size}px; height: ${size}px;` : ''}${color && !gradient ? ` color: ${color};` : ''}`}
+  style={size != null ? `width: ${size}px; height: ${size}px;` : undefined}
   set:html={iconContent || fallbackIcon}
   aria-hidden="true"
   data-semantic-role={semanticRole}
+  data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
   {...dataAttrs}
 />

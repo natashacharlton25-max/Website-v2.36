@@ -1,0 +1,100 @@
+/**
+ * Motion Gate — controls ALL animation speed globally
+ *
+ * Independent axis from hover-gate (hover interactions) and
+ * data-render (what HTML exists). This controls how fast
+ * animations play, including non-hover animations (autoplay,
+ * loop, viewport, interval).
+ *
+ * Values (set on <body> via Your View panel):
+ *   full   — normal speed (default, no overrides)
+ *   gentle — slower, calmer animation (roughly 2x duration)
+ *   none   — all animation frozen, no autoplay, no triggers
+ *
+ * Works by overriding duration tokens. Every animation uses
+ * var(--duration-*) so one gate file controls everything.
+ * JS triggers (anim-trigger.ts) also check data-motion.
+ */
+
+
+/* ==========================================================
+   GENTLE — slower, calmer animation
+   Everything plays but at reduced speed. Continuous animations
+   slow down. One-shot animations take longer to complete.
+   ========================================================== */
+
+[data-motion="gentle"] {
+  /* One-shot durations — roughly 2x slower */
+  --duration-fast: 300ms;
+  --duration-base: 600ms;
+  --duration-slow: 1s;
+  --duration-slower: 1.5s;
+  --duration-long: 2s;
+  --duration-extralong: 3s;
+
+  /* Continuous/looping — noticeably slower */
+  --duration-continuous: 3s;
+  --duration-continuous-slow: 4s;
+  --duration-continuous-slower: 6s;
+  --duration-continuous-drift: 8s;
+
+  /* Transitions — gentler */
+  --transition-fast: var(--duration-fast) var(--ease-default);
+  --transition-base: var(--duration-base) var(--ease-default);
+  --transition-slow: var(--duration-slow) var(--ease-default);
+}
+
+
+/* ==========================================================
+   NONE — all animation dead
+   Zero every duration token. CSS animations run in zero time
+   = frozen at end state. JS triggers don't fire (checked in
+   anim-trigger.ts). Autoplay/loop CSS rules still exist but
+   duration is 0s so nothing visually moves.
+   ========================================================== */
+
+[data-motion="none"] {
+  --duration-instant: 0s;
+  --duration-fast: 0s;
+  --duration-base: 0s;
+  --duration-slow: 0s;
+  --duration-slower: 0s;
+  --duration-long: 0s;
+  --duration-extralong: 0s;
+
+  --duration-continuous: 0s;
+  --duration-continuous-slow: 0s;
+  --duration-continuous-slower: 0s;
+  --duration-continuous-drift: 0s;
+
+  --transition-fast: 0s;
+  --transition-base: 0s;
+  --transition-slow: 0s;
+  --transition-extralong: 0s;
+}
+
+/* None — kill all CSS animation explicitly (belt + suspenders with 0s tokens) */
+[data-motion="none"] [class*="anim--"],
+[data-motion="none"] .badge--border-gradient {
+  animation: none;
+}
+
+/* None — glow stays visible but static (no pulse/shimmer if added later) */
+
+
+/* ==========================================================
+   REDUCED RENDER — strip animation entirely
+   data-render="reduced" strips animation{} group from JSON
+   so .anim--* classes never exist in HTML. These rules are
+   fallback for any animation CSS that wasn't prop-gated.
+   ========================================================== */
+
+[data-render="reduced"] [class*="anim--"],
+[data-render="reduced"] .badge--border-gradient {
+  animation: none;
+}
+
+[data-render="textonly"] [class*="anim--"],
+[data-render="textonly"] .badge--border-gradient {
+  animation: none;
+}

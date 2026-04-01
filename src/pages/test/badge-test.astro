@@ -1,47 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Page } from '../../components/atoms/Page';
-import { Section } from '../../components/atoms/Section';
-import { Heading } from '../../components/atoms/Heading';
-import { Badge } from '../../components/atoms/Badge';
-import { Grid } from '../../components/atoms/Grid';
-
+import Renderer from '../../components/Renderer.astro';
 import data from '../../data/test/badge.json';
-
-const sections = data.children || [];
 ---
 
 <BaseLayout title="Badge Atom Test">
-  <Page margin={data.margin as any}>
-    {sections.map((section: any) => (
-      <Section gap={section.gap as any} container={section.container as any}>
-        {(section.children || []).map((child: any) => {
-          if (child.component === 'Heading') {
-            return <Heading level={child.level as any} align={child.align as any} flush={child.flush}>{child.text}</Heading>;
-          }
-          if (child.component === 'Grid') {
-            return (
-              <Grid variant={child.variant as any} gap={child.gap as any} align={child.align as any}>
-                {(child.children || []).map((badge: any) => (
-                  <Badge
-                    label={badge.label}
-                    color={badge.color}
-                    variant={badge.variant}
-                    shadow={badge.shadow}
-                    size={badge.size}
-                    shape={badge.shape}
-                    icon={badge.icon}
-                    lottieIcon={badge.lottieIcon}
-                    lottieTrigger={badge.lottieTrigger}
-                    uppercase={badge.uppercase}
-                    semanticRole={badge.semanticRole}
-                  />
-                ))}
-              </Grid>
-            );
-          }
-        })}
-      </Section>
-    ))}
-  </Page>
+  <Renderer node={data} />
 </BaseLayout>
