@@ -32,6 +32,8 @@ interface Props {
   /** Phosphor icon name for static fallback (shown in reduced/highlight/focus/textonly) */
   fallbackIcon?: string;
   size?: number;
+  /** Override Lottie native colours with CSS color. Enum or 'native' to keep baked-in colours. */
+  color?: 'native' | 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink' | 'inherit';
   /** Animation trigger mode — replaces autoplay/loop */
   trigger?: 'autoplay' | 'loop' | 'hover' | 'viewport' | 'interval' | 'none';
   /** Interval in ms (only used with trigger="interval") */
@@ -48,6 +50,7 @@ const {
   label,
   fallbackIcon,
   size = 24,
+  color = 'native',
   trigger = 'none',
   interval = 3000,
   loop = false,
@@ -94,7 +97,7 @@ if (slug) {
 ---
 
 <div
-  class:list={['lottie-icon', className]}
+  class:list={['lottie-icon', color !== 'native' && `lottie-icon--${color}`, className]}
   data-lottie-icon
   data-lottie-trigger={trigger}
   data-lottie-interval={trigger === 'interval' ? interval : undefined}
@@ -220,21 +223,45 @@ if (slug) {
         // Focus always works — keyboard/AT users need it regardless of hover gate
         element.addEventListener('focusin', () => { anim.setDirection(1); anim.play(); });
         element.addEventListener('focusout', () => { anim.setDirection(-1); anim.play(); });
+
+        // Click — hover-none fallback: toggle play/reverse on click
+        element.addEventListener('click', () => {
+          if (!isHoverGated()) return;
+          if (element._lottieDirection === 1) {
+            anim.setDirection(1); anim.play();
+            element._lottieDirection = -1;
+          } else {
+            anim.setDirection(-1); anim.play();
+            element._lottieDirection = 1;
+          }
+        });
       }
 
       if (trigger === 'viewport') {
         anim.autoplay = false;
         anim.stop();
-        const observer = new IntersectionObserver((entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              anim.goToAndStop(0, true);
-              anim.play();
-              observer.unobserve(element);
+        // Wait a frame so initial layout settles, then observe
+        // Elements already in viewport on load get skipped until they scroll out and back
+        let hasBeenOutside = false;
+        requestAnimationFrame(() => {
+          const rect = element.getBoundingClientRect();
+          const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+          if (!isInView) hasBeenOutside = true;
+
+          const observer = new IntersectionObserver((entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) {
+                hasBeenOutside = true;
+              }
+              if (entry.isIntersecting && hasBeenOutside) {
+                anim.goToAndStop(0, true);
+                anim.play();
+                observer.unobserve(element);
+              }
             }
-          }
-        }, { threshold: 0.1 });
-        observer.observe(element);
+          }, { root: null, rootMargin: '0px', threshold: 0 });
+          observer.observe(element);
+        });
       }
 
       if (trigger === 'interval') {

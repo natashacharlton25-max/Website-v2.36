@@ -22,16 +22,48 @@
   height: 100%;
 }
 
-/* Theme adaptation — force currentColor on all SVG shapes.
-   Lottie-web sets inline styles so we need high specificity.
-   Monochrome/dark/HC themes change currentColor via inheritance. */
-.lottie-icon__container svg path,
-.lottie-icon__container svg rect,
-.lottie-icon__container svg circle,
-.lottie-icon__container svg line,
-.lottie-icon__container svg ellipse,
-.lottie-icon__container svg polygon,
-.lottie-icon__container svg polyline {
+/* Theme adaptation — only override Lottie colours in monochrome/HC
+   Default: Lottie keeps its own baked-in colours (brand social icons etc.)
+   Mono/HC: force currentColor so icons adapt to theme */
+[data-theme-chroma="grey"] .lottie-icon__container svg path,
+[data-theme-chroma="grey"] .lottie-icon__container svg rect,
+[data-theme-chroma="grey"] .lottie-icon__container svg circle,
+[data-theme-chroma="grey"] .lottie-icon__container svg line,
+[data-theme-chroma="grey"] .lottie-icon__container svg ellipse,
+[data-theme-chroma="grey"] .lottie-icon__container svg polygon,
+[data-theme-chroma="grey"] .lottie-icon__container svg polyline,
+[data-high-contrast] .lottie-icon__container svg path,
+[data-high-contrast] .lottie-icon__container svg rect,
+[data-high-contrast] .lottie-icon__container svg circle,
+[data-high-contrast] .lottie-icon__container svg line,
+[data-high-contrast] .lottie-icon__container svg ellipse,
+[data-high-contrast] .lottie-icon__container svg polygon,
+[data-high-contrast] .lottie-icon__container svg polyline {
+  stroke: currentColor !important;
+  fill: currentColor !important;
+}
+
+/* ── Colour override — forces currentColor on Lottie SVG ── */
+.lottie-icon--inherit   { color: inherit; }
+.lottie-icon--primary   { color: var(--primary-600); }
+.lottie-icon--secondary { color: var(--secondary-600); }
+.lottie-icon--neutral   { color: var(--neutral-600); }
+.lottie-icon--red       { color: var(--rainbow-1); }
+.lottie-icon--orange    { color: var(--rainbow-2); }
+.lottie-icon--yellow    { color: var(--rainbow-3); }
+.lottie-icon--teal      { color: var(--rainbow-4); }
+.lottie-icon--blue      { color: var(--rainbow-5); }
+.lottie-icon--purple    { color: var(--rainbow-6); }
+.lottie-icon--pink      { color: var(--rainbow-7); }
+
+/* When colour is set, override Lottie native colours */
+.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg path,
+.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg rect,
+.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg circle,
+.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg line,
+.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg ellipse,
+.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg polygon,
+.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg polyline {
   stroke: currentColor !important;
   fill: currentColor !important;
 }
@@ -41,16 +73,8 @@
   display: none;
 }
 
-/* Swap rules → reduced-gate.css, textonly-gate.css, highlight-links.css
-   Hover-none swap stays here — it's component-level hover behaviour */
-
-[data-hover="none"] .lottie-icon__container {
-  display: none;
-}
-
-[data-hover="none"] .lottie-icon__static {
-  display: inline-flex;
-}
+/* Swap rules → reduced-gate.css, textonly-gate.css
+   Hover-none: keep Lottie visible, JS handles click/focus only trigger */
 
 /* Fallback only — no animation data, show icon directly */
 .lottie-icon__fallback-only {
