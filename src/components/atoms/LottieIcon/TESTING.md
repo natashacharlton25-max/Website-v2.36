@@ -1,20 +1,34 @@
 # LottieIcon Atom — Testing Notes
 
-## Trigger Modes (added 2026-03-18)
+## Trigger Modes
 - `none` — static, first frame only
 - `autoplay` — plays once on load
 - `loop` — plays continuously
 - `hover` — forward on hover/focus, reverse on leave
-- `interval` — plays once every N ms (default 20s)
+- `viewport` — plays once when scrolled into view (IntersectionObserver)
+- `interval` — plays 3x, pauses 3s, repeats (default 3s gap, 3 repeats)
+
+## Test page
+`/test/lottie-icon-test` — all 33 Lotties across all trigger types
+
+## Render mode gating (✅ implemented)
+- `reduced` → swap to static Icon fallback (reduced-gate.css)
+- `textonly` → swap to static Icon fallback (textonly-gate.css)
+- `highlight-links` → swap to static Icon fallback (highlight-links.css)
+- `hover-none` → swap to static Icon fallback (LottieIcon.css)
+
+## Tested
+- ✅ Trigger modes: none, autoplay, loop, hover, viewport, interval
+- ✅ Interval timing: play 3x then pause 3s then repeat
+- ✅ Focus: hover trigger works via keyboard focus (focusin/focusout)
+- ✅ Hover-none gate: static fallback shown
+- ✅ Reduced/textonly/highlight gates: static fallback shown
+- ✅ Fallback icon: explicit via `fallbackIcon` prop or auto from API meta
+- ✅ A11y: aria-label when label prop set, aria-hidden when decorative
+- ✅ Sizes: 16-96px tested on test page
 
 ## Still needs testing
-- **Render mode gating**: reduced/assistive should swap to static Icon fallback (via lottie_mappings in D1)
-- **Text-only render**: should not render at all (decorative)
-- **Reduced motion**: `data-render="reduced"` or `prefers-reduced-motion` should stop all animation
-- **Hover mode interaction**: `data-hover="none"` should disable hover trigger
-- **Timing**: interval mode timing across page lifecycle (astro:page-load, view transitions)
-- **Size scaling**: XL Text mode — does the lottie container scale proportionally?
-- **Theme adaptation**: lottie SVG colours don't adapt to themes (they're baked in JSON) — need colour override strategy
-- **Fallback chain**: slug not found → static icon fallback → text label → hidden
-- **A11y**: aria-label when label prop set, aria-hidden when decorative
-- **Focus-within**: hover trigger should also work via keyboard focus (focusin/focusout)
+- **Theme adaptation**: Lottie SVG colours baked in JSON — need colour override strategy
+- **XL Text mode**: does container scale proportionally?
+- **View transitions**: interval/loop timing across astro:page-load
+- **Fallback chain**: slug not found → static icon → text label → hidden

@@ -117,9 +117,11 @@ for (const atom of atoms) {
         }
       }
 
-      // Rule 9: CSS computation maps
+      // Rule 9: CSS computation maps (exclude API headers and data attributes)
       if (/const\s+\w*(Map|map)\b/.test(line) || /const\s+\w*:\s*Record</.test(line)) {
-        issues.push({ rule: 9, ln, file, msg: `CSS computation: ${line.trim().substring(0, 60)}` });
+        if (!/headers|dataAttrs|data-/.test(line)) {
+          issues.push({ rule: 9, ln, file, msg: `CSS computation: ${line.trim().substring(0, 60)}` });
+        }
       }
 
       // Rule 10: Rest spread

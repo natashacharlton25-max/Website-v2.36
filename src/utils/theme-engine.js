@@ -558,7 +558,7 @@ export function auditTheme(scales, pageBg, focusHighlight = null) {
     ['secondary-dark on bg',   scales.secondary[800],  bg],
   ];
 
-  if (focusHighlight) {
+  if (focusHighlight && !String(focusHighlight['focus-color']).startsWith('var(')) {
     decorativePairs.push(
       ['focus on page-bg',     focusHighlight['focus-color'], bg],
       ['focus on card-bg',     focusHighlight['focus-color'], pageBg['page-bg-raised']],
@@ -618,65 +618,110 @@ export function auditScale(scales, pageBg) {
  * Highlight = same colour, thicker border for visibility.
  * HC themes = black/white.
  */
+/**
+ * Pick two rainbow hues most distant from primary and secondary.
+ * Rainbow hues (ROYGBIV): ~25, 45, 85, 160, 220, 275, 340
+ */
+const RAINBOW_HUES = [25, 45, 85, 160, 220, 275, 340];
+
+function hueDist(a, b) {
+  const d = Math.abs(a - b);
+  return Math.min(d, 360 - d);
+}
+
+function nearestRainbow(targetHue) {
+  let best = 1;
+  let bestDist = 999;
+  for (let i = 0; i < RAINBOW_HUES.length; i++) {
+    const d = hueDist(targetHue, RAINBOW_HUES[i]);
+    if (d < bestDist) {
+      bestDist = d;
+      best = i + 1; // rainbow-1 to rainbow-7
+    }
+  }
+  return best;
+}
+
+function pickDistantRainbowHues(priHue, secHue) {
+  // Score each rainbow hue by minimum distance from primary AND secondary
+  const scored = RAINBOW_HUES.map(h => ({
+    hue: h,
+    minDist: Math.min(hueDist(h, priHue), hueDist(h, secHue)),
+  })).sort((a, b) => b.minDist - a.minDist);
+
+  // Best two — most distant from both brand colours, and distinct from each other
+  const focusHue = scored[0].hue;
+  let highlightHue = scored[1].hue;
+  // Ensure focus and highlight are at least 60° apart
+  if (hueDist(focusHue, highlightHue) < 60 && scored.length > 2) {
+    highlightHue = scored[2].hue;
+  }
+  return { focusHue, highlightHue };
+}
+
 function computeFocusHighlightTokens(scales, pageBg, isDark, isHC = false, status = {}, chromaPreset = 'brand') {
   const pageBgHex = pageBg['page-bg'];
   const cardBgHex = pageBg['page-bg-raised'];
 
   const isMono = chromaPreset === 'grey';
 
-  if (isHC) {
-    // HC: use status colours — they have colour even in HC themes
-    return {
-      'focus-color':          status['color-Info'] || (isDark ? '#ffffff' : '#000000'),
-      'focus-bg':             pageBgHex,
-      'highlight-link-color': status['color-Error'] || (isDark ? '#ffffff' : '#000000'),
-    };
-  }
+  // Gap-split: place focus + highlight in the largest hue gap between primary and secondary
+  // Guarantees maximum distance from both brand colours
+  const pri = scales.primary || {};
+  const sec = scales.secondary || {};
+  const priHue = chroma(pri[600] || '#0088ff').get('oklch.h') || 220;
+  const secHue = chroma(sec[600] || '#cc79a7').get('oklch.h') || 330;
 
-  // Use Info status colour as base — CVD-safe, distinct from theme palette
-  // Monochrome: use slategrey tones — subtle blue tint, visible but not colourful
-  let focusHex;
-  if (isMono) {
-    focusHex = isDark ? '#B2BEB5' : '#91A3B0';  // ash grey (warm) / cadet grey (cool)
+  // Find the two gaps between primary and secondary on the colour wheel
+  const gapCW = ((secHue - priHue) + 360) % 360;   // clockwise from pri to sec
+  const gapCCW = 360 - gapCW;                        // counter-clockwise
+  let gapStart, gapSize;
+  if (gapCW >= gapCCW) {
+    gapStart = priHue;
+    gapSize = gapCW;
   } else {
-    focusHex = status['color-Info'] || safeOklch(isDark ? 0.70 : 0.45, 0.12, 220);
+    gapStart = secHue;
+    gapSize = gapCCW;
   }
-  const focusChroma = isMono ? 0.02 : 0.12;
+  // Place focus at 1/3 into gap, highlight at 2/3
+  const focusTargetHue = (gapStart + gapSize / 3) % 360;
+  const highlightTargetHue = (gapStart + (gapSize * 2) / 3) % 360;
 
-  // Adjust if contrast fails against page backgrounds
-  let focusL = chroma(focusHex).get('oklch.l');
-  const focusH = isMono ? 0 : (chroma(focusHex).get('oklch.h') || 220);
-  let attempts = 0;
-  while (attempts < 20 && (
-    contrastRatio(focusHex, pageBgHex) < 3 ||
-    contrastRatio(focusHex, cardBgHex) < 3
+  // Text colour hex for distinction check
+  const textHex = isHC
+    ? (isDark ? '#ffffff' : '#000000')
+    : (scales.neutral?.[700] || '#a4a4a4');
+
+  // Compute hex at the gap-split hues — max chroma, contrast-checked
+  // Neon: absolute max chroma at the lightness that gives 4.5:1 on light, or bright on dark
+  // Light mode: find the brightest L that still passes contrast, then max chroma at that L
+  // Dark mode: high L, max chroma
+  const targetL = isDark ? 0.82 : 0.62;
+  let focusHex = safeOklch(targetL, maxChromaForHue(focusTargetHue, targetL), focusTargetHue);
+  let highlightHex = safeOklch(targetL, maxChromaForHue(highlightTargetHue, targetL), highlightTargetHue);
+
+  // Contrast-check: 4.5:1 AA against bg (AAA may conflict with text distinction)
+  // Chroma kept high so colour distinguishes from neutral text
+  let fAttempts = 0;
+  let fL = focusL;
+  while (fAttempts < 20 && (
+    contrastRatio(focusHex, pageBgHex) < 4.5 ||
+    contrastRatio(focusHex, cardBgHex) < 4.5
   )) {
-    focusL += isDark ? 0.03 : -0.03;
-    focusHex = safeOklch(focusL, focusChroma, focusH);
-    attempts++;
+    fL += isDark ? 0.03 : -0.03;
+    focusHex = safeOklch(fL, maxChromaForHue(focusTargetHue, fL), focusTargetHue);
+    fAttempts++;
   }
 
-  // Highlight uses a different status colour — visually distinct from focus
-  // Focus = Info (teal/blue), Highlight = neutral text (dark/light depending on mode)
-  // Highlight: use Error status colour — bold, visible, CVD-safe
-  // Adjust lightness until 3:1 against both backgrounds
-  let highlightHex;
-  if (isMono) {
-    highlightHex = isDark ? '#696969' : '#2F4F4F'; // dim grey / darkslategrey — distinct from focus
-  } else {
-    highlightHex = status['color-Error'] || safeOklch(isDark ? 0.65 : 0.45, 0.18, 25);
-  }
-  let hlL = chroma(highlightHex).get('oklch.l');
-  const hlH = isMono ? 0 : (chroma(highlightHex).get('oklch.h') || 25);
-  const hlC = isMono ? 0.02 : (chroma(highlightHex).get('oklch.c') || 0.18);
-  let hlAttempts = 0;
-  while (hlAttempts < 20 && (
-    contrastRatio(highlightHex, pageBgHex) < 3 ||
-    contrastRatio(highlightHex, cardBgHex) < 3
+  let hAttempts = 0;
+  let hL = hlL;
+  while (hAttempts < 20 && (
+    contrastRatio(highlightHex, pageBgHex) < 4.5 ||
+    contrastRatio(highlightHex, cardBgHex) < 4.5
   )) {
-    hlL += isDark ? 0.03 : -0.03;
-    highlightHex = safeOklch(hlL, hlC, hlH);
-    hlAttempts++;
+    hL += isDark ? 0.03 : -0.03;
+    highlightHex = safeOklch(hL, maxChromaForHue(highlightTargetHue, hL), highlightTargetHue);
+    hAttempts++;
   }
 
   return {

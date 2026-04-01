@@ -22,13 +22,18 @@
   height: 100%;
 }
 
-/* Apply current color to strokes and fills */
+/* Theme adaptation — force currentColor on all SVG shapes.
+   Lottie-web sets inline styles so we need high specificity.
+   Monochrome/dark/HC themes change currentColor via inheritance. */
 .lottie-icon__container svg path,
 .lottie-icon__container svg rect,
 .lottie-icon__container svg circle,
-.lottie-icon__container svg line {
-  stroke: currentColor;
-  fill: currentColor;
+.lottie-icon__container svg line,
+.lottie-icon__container svg ellipse,
+.lottie-icon__container svg polygon,
+.lottie-icon__container svg polyline {
+  stroke: currentColor !important;
+  fill: currentColor !important;
 }
 
 /* Static fallback — hidden by default */
@@ -36,21 +41,29 @@
   display: none;
 }
 
-/* ==========================================================
-   SWAP: show static, hide animation
-   ========================================================== */
+/* Swap rules → reduced-gate.css, textonly-gate.css, highlight-links.css
+   Hover-none swap stays here — it's component-level hover behaviour */
 
-/* Swap to static: reduced, textonly, highlight-links, hover-none */
-[data-render="reduced"] .lottie-icon__container,
-[data-render="textonly"] .lottie-icon__container,
-[data-highlight-links] .lottie-icon__container,
 [data-hover="none"] .lottie-icon__container {
   display: none;
 }
 
-[data-render="reduced"] .lottie-icon__static,
-[data-render="textonly"] .lottie-icon__static,
-[data-highlight-links] .lottie-icon__static,
 [data-hover="none"] .lottie-icon__static {
   display: inline-flex;
+}
+
+/* Fallback only — no animation data, show icon directly */
+.lottie-icon__fallback-only {
+  display: inline-flex;
+}
+
+/* Empty — no animation, no fallback, no label — hide completely */
+.lottie-icon:has(.lottie-icon__empty) {
+  display: none;
+}
+
+/* XL Text — scale proportionally */
+[data-text-xl] .lottie-icon {
+  transform: scale(1.25);
+  transform-origin: center;
 }

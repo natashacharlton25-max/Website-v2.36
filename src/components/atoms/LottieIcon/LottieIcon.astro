@@ -40,7 +40,6 @@ interface Props {
   autoplay?: boolean;
   class?: string;
   id?: string;
-  [key: string]: any;
 }
 
 const {
@@ -55,7 +54,6 @@ const {
   autoplay = false,
   class: className = '',
   id,
-  ...rest
 } = Astro.props;
 
 // Resolve trigger to loop/autoplay for backward compat
@@ -103,15 +101,20 @@ if (slug) {
   data-lottie-loop={resolvedLoop}
   data-lottie-autoplay={resolvedAutoplay}
   data-semantic-role="decorative"
-  {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': 'true' })}
+  {...(label ? { role: 'img', 'aria-label': label, tabindex: '0' } : { 'aria-hidden': 'true' })}
+  tabindex={trigger === 'hover' ? '0' : undefined}
   style={`width: ${size}px; height: ${size}px;`}
   id={id}
   {...(src && !animationData ? { 'data-lottie-src': src } : {})}
 >
-  <div class="lottie-icon__container" data-lottie-container></div>
-  {resolvedFallbackIcon && (
-    <Icon name={resolvedFallbackIcon} class="lottie-icon__static" />
-  )}
+  {animationData ? (
+    <div class="lottie-icon__container" data-lottie-container></div>
+  ) : null}
+  {resolvedFallbackIcon ? (
+    <Icon name={resolvedFallbackIcon} class={animationData ? "lottie-icon__static" : "lottie-icon__fallback-only"} />
+  ) : !animationData ? (
+    <span class="lottie-icon__empty" aria-hidden="true"></span>
+  ) : null}
   {animationData && (
     <script is:inline type="application/json" data-lottie-data set:html={animationData} />
   )}
@@ -230,7 +233,7 @@ if (slug) {
               observer.unobserve(element);
             }
           }
-        }, { threshold: 0.5 });
+        }, { threshold: 0.1 });
         observer.observe(element);
       }
 
@@ -273,4 +276,15 @@ if (slug) {
 
   // Support Astro page transitions
   document.addEventListener('astro:page-load', initAllLottieIcons);
+
+  // Cleanup before page swap — destroy animations to prevent orphaned timers
+  document.addEventListener('astro:before-swap', () => {
+    const icons = document.querySelectorAll('[data-lottie-icon]') as NodeListOf<LottieIconElement>;
+    icons.forEach(el => {
+      if (el._lottieAnim) {
+        el._lottieAnim.destroy();
+        el._lottieAnim = undefined;
+      }
+    });
+  });
 </script>
