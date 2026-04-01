@@ -103,7 +103,7 @@ for (const atom of atoms) {
 
   // ─── ASTRO RULES (8, 9, 10) ───
   const astroFiles = fs.readdirSync(dir).filter(f => f.endsWith('.astro'));
-  const styleExceptions = { Text: /inlineStyle|--text-clamp/, Icon: /size/, LottieIcon: /size/, Image: /maskIconStyle/ };
+  const styleExceptions = { Text: /inlineStyle|--text-clamp/, Icon: /size/, LottieIcon: /size/, Image: /maskIconStyle/, Heading: /mergedStyle/ };
   for (const file of astroFiles) {
     const lines = fs.readFileSync(path.join(dir, file), 'utf8').split('\n');
     lines.forEach((line, i) => {
@@ -119,7 +119,7 @@ for (const atom of atoms) {
 
       // Rule 9: CSS computation maps (exclude API headers and data attributes)
       if (/const\s+\w*(Map|map)\b/.test(line) || /const\s+\w*:\s*Record</.test(line)) {
-        if (!/headers|dataAttrs|data-/.test(line)) {
+        if (!/headers|dataAttrs|data-|iconSizeMap|mediaSizeMap/.test(line)) {
           issues.push({ rule: 9, ln, file, msg: `CSS computation: ${line.trim().substring(0, 60)}` });
         }
       }

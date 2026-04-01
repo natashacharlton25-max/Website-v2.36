@@ -71,7 +71,7 @@ interface Props {
   aac?: boolean;
 
   class?: string;
-  [key: string]: any;
+  style?: string;
 }
 
 const {
@@ -104,7 +104,6 @@ const {
   aac = false,
   class: className,
   style: incomingStyle,
-  ...rest
 } = Astro.props;
 
 // Build-time AAC resolution
@@ -169,7 +168,7 @@ const headingClassList = [
     (image || icon || lottieSlug) && `heading-wrap--media-size-${computedMediaSize}`,
     (icon || lottieSlug) && `heading-wrap--icon-${iconStyle}`,
     className,
-  ]} style={mergedStyle || undefined} {...rest}>
+  ]} style={mergedStyle || undefined}>
     {(image || icon || lottieSlug) && mediaPosition === 'left' && (
       <div class="heading-wrap__media">
         {image ? (
@@ -213,7 +212,7 @@ const headingClassList = [
     )}
   </div>
 ) : (
-  <Tag class:list={[...headingClassList, className]} style={mergedStyle || undefined} {...rest}>
+  <Tag class:list={[...headingClassList, className]} style={mergedStyle || undefined}>
     <span class="heading__text-inner"><slot /></span>
     {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
   </Tag>
