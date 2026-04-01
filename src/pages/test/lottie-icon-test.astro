@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { Page } from '../../components/atoms/Page';
 import { Section } from '../../components/atoms/Section';
 import { Heading } from '../../components/atoms/Heading';
+import { Text } from '../../components/atoms/Text';
 import { LottieIcon } from '../../components/atoms/LottieIcon';
 import { Grid } from '../../components/atoms/Grid';
 
@@ -23,13 +24,19 @@ const sections = data.children || [];
             return (
               <Grid variant={child.variant as any} gap={child.gap as any} align={child.align as any}>
                 {(child.children || []).map((lottie: any) => (
-                  <LottieIcon
-                    slug={lottie.slug}
-                    size={lottie.size}
-                    trigger={lottie.trigger}
-                    fallbackIcon={lottie.fallbackIcon}
-                    interval={lottie.interval}
-                  />
+                  <div style="text-align:center; display:inline-flex; flex-direction:column; align-items:center; gap:var(--space-xs);">
+                    <LottieIcon
+                      slug={lottie.slug}
+                      size={lottie.size}
+                      color={lottie.color}
+                      role={lottie.role}
+                      trigger={lottie.trigger}
+                      label={lottie.label}
+                      fallbackIcon={lottie.fallbackIcon}
+                      interval={lottie.interval}
+                    />
+                    {lottie.label && <Text as="span" size="xs" flush>{lottie.label}</Text>}
+                  </div>
                 ))}
               </Grid>
             );

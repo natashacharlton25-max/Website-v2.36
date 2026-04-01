@@ -4,31 +4,30 @@
   "renders": {
     "full": "LottieIcon.astro",
     "reduced": "Icon",
-    "assistive": "Icon",
     "textonly": "Icon"
   },
-  "notes": "API-backed animated icon using Lottie. Fetches JSON at build time and inlines as animationData. JSON content can declare up to three dimensions: the Lottie animation (full render), a Phosphor fallback icon name (reduced/assistive — pipeline routes to Icon atom), and a text label (textonly — pipeline routes to Text or Link atom, and used as aria-label on LottieIcon). All optional — decorative instances may only have the animation. The render pipeline handles mode switching, LottieIcon only renders the animation.",
+  "notes": "API-backed animated icon using Lottie. Fetches JSON at build time, inlines as animationData. Pipeline routes to Icon atom in reduced/textonly. Decorative instances (no label) hidden in textonly.",
 
   "props": {
     "content": {
       "_description": "What this icon is and what it represents",
-      "slug": { "type": "string", "required": false, "default": null, "description": "Asset Library slug for the Lottie JSON." },
-      "src": { "type": "string", "required": false, "default": null, "description": "Legacy filesystem path fallback. Migrate to slug." },
-      "fallbackIcon": { "type": "string", "required": false, "default": null, "description": "Phosphor icon name for reduced/assistive render. Pipeline routes this to Icon atom — LottieIcon.astro never sees this prop." },
-      "label": { "type": "string", "required": false, "default": null, "description": "Human-readable label. Used as aria-label on LottieIcon in full render. Pipeline routes to Text or Link atom in textonly mode. Absent = decorative (aria-hidden)." }
+      "slug":         { "type": "string", "required": false, "default": null, "description": "Asset Library slug for the Lottie JSON." },
+      "fallbackIcon": { "type": "string", "required": false, "default": null, "description": "Phosphor icon name for static fallback in reduced/textonly." },
+      "label":        { "type": "string", "required": false, "default": null, "description": "Human-readable label. Required for navigation role. Optional for informational." },
+      "role":         { "type": "string", "required": false, "default": "decorative", "enum": ["decorative", "navigation", "informational"], "description": "Decorative = aria-hidden, hidden in textonly. Informational = shows static fallback icon in textonly. Navigation = shows static fallback + text label in textonly (requires label + fallbackIcon)." }
     },
 
     "visual": {
       "_description": "How the icon looks",
-      "size": { "type": "number", "required": false, "default": 24, "description": "Width and height in px." },
-      "class": { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." },
-      "id": { "type": "string", "required": false, "default": null, "description": "HTML id attribute." }
+      "size":  { "type": "number", "required": false, "default": 24, "description": "Width and height in px." },
+      "color": { "type": "string", "required": false, "default": "native", "enum": ["native", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "inherit"], "description": "Colour override. native = keeps Lottie baked colours. Any other forces currentColor." },
+      "class": { "type": "string", "required": false, "default": "", "description": "Additional CSS classes." }
     },
 
     "animation": {
       "_description": "Motion behaviour — stripped in reduced render",
-      "trigger": { "type": "string", "required": false, "default": "none", "enum": ["none", "autoplay", "loop", "hover", "interval"], "description": "Animation trigger mode. none=static, autoplay=once on load, loop=continuous, hover=play on hover/focus, interval=repeat every N ms." },
-      "interval": { "type": "number", "required": false, "default": 20000, "description": "Interval in ms for trigger=interval mode." }
+      "trigger":  { "type": "string", "required": false, "default": "none", "enum": ["none", "autoplay", "loop", "hover", "viewport", "interval"], "description": "Animation trigger. none=static, autoplay=once, loop=continuous, hover=play on hover/focus/click, viewport=play on scroll into view, interval=play 3x then pause." },
+      "interval": { "type": "number", "required": false, "default": 3000, "description": "Gap in ms between interval bursts (default 3s)." }
     }
   }
 }
