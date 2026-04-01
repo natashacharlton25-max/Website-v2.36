@@ -1,26 +1,19 @@
 /* ===================================
    GRADIENT TOKENS
-   Only tokens actively used in components
+   Three tiers: base (dark), light mode override, HC override.
+   Rainbow gradients use rainbow tokens (CVD-safe, theme-aware).
    =================================== */
 
 :root {
   /* ============================================
-     PRIMARY GRADIENTS
+     PRIMARY / SECONDARY / NEUTRAL
      ============================================ */
-  --gradient-primary: linear-gradient(160deg, var(--primary-800) 0%, var(--primary-600) 45%, var(--primary-200) 100%);
+  --gradient-primary: linear-gradient(160deg, var(--primary-800) 0%, var(--primary-600) 45%, var(--primary-400) 100%);
   --gradient-primary-soft: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
   --gradient-primary-light: linear-gradient(135deg, var(--primary-200) 0%, var(--primary-600) 100%);
-
-  /* ============================================
-     SECONDARY GRADIENTS
-     ============================================ */
   --gradient-secondary: linear-gradient(135deg, var(--secondary-600) 0%, var(--secondary-800) 100%);
-  --gradient-secondary-soft: linear-gradient(135deg, var(--secondary-600) 0%, var(--secondary-800) 100%);
-
-  /* ============================================
-     NEUTRAL GRADIENT (was neutral/neutral)
-     ============================================ */
-  --gradient-neutral: linear-gradient(135deg, var(--neutral-900) 0%, var(--neutral-900) 100%);
+  --gradient-secondary-soft: linear-gradient(135deg, var(--secondary-400) 0%, var(--secondary-600) 100%);
+  --gradient-neutral: linear-gradient(135deg, var(--neutral-600) 0%, var(--neutral-800) 100%);
 
   /* ============================================
      MIXED — Primary + Secondary
@@ -29,6 +22,33 @@
   --gradient-sunset: linear-gradient(45deg, var(--primary-600) 0%, var(--primary-800) 30%, var(--secondary-800) 100%);
   --gradient-brand-emerge: linear-gradient(135deg, var(--page-bg) 0%, var(--primary-600) 50%, var(--secondary-800) 100%);
   --gradient-brand-fade: linear-gradient(135deg, var(--primary-800) 0%, var(--secondary-600) 50%, var(--page-bg-raised) 100%);
+
+  /* ============================================
+     RAINBOW — one per colour enum (7 colours)
+     Uses light→base→dark for rich depth
+     ============================================ */
+  --gradient-red: linear-gradient(135deg, var(--rainbow-1-light) 0%, var(--rainbow-1) 50%, var(--rainbow-1-dark) 100%);
+  --gradient-orange: linear-gradient(135deg, var(--rainbow-2-light) 0%, var(--rainbow-2) 50%, var(--rainbow-2-dark) 100%);
+  --gradient-yellow: linear-gradient(135deg, var(--rainbow-3-light) 0%, var(--rainbow-3) 50%, var(--rainbow-3-dark) 100%);
+  --gradient-teal: linear-gradient(135deg, var(--rainbow-4-light) 0%, var(--rainbow-4) 50%, var(--rainbow-4-dark) 100%);
+  --gradient-blue: linear-gradient(135deg, var(--rainbow-5-light) 0%, var(--rainbow-5) 50%, var(--rainbow-5-dark) 100%);
+  --gradient-purple: linear-gradient(135deg, var(--rainbow-6-light) 0%, var(--rainbow-6) 50%, var(--rainbow-6-dark) 100%);
+  --gradient-pink: linear-gradient(135deg, var(--rainbow-7-light) 0%, var(--rainbow-7) 50%, var(--rainbow-7-dark) 100%);
+
+  /* ============================================
+     WASH GRADIENTS — soft pastel gradients for fill variants
+     Uses wash→light→base range (200→400 scale)
+     ============================================ */
+  --gradient-primary-wash: linear-gradient(135deg, var(--primary-200) 0%, var(--primary-400) 100%);
+  --gradient-secondary-wash: linear-gradient(135deg, var(--secondary-200) 0%, var(--secondary-400) 100%);
+  --gradient-neutral-wash: linear-gradient(135deg, var(--neutral-200) 0%, var(--neutral-400) 100%);
+  --gradient-red-wash: linear-gradient(135deg, var(--rainbow-1-wash) 0%, var(--rainbow-1-light) 100%);
+  --gradient-orange-wash: linear-gradient(135deg, var(--rainbow-2-wash) 0%, var(--rainbow-2-light) 100%);
+  --gradient-yellow-wash: linear-gradient(135deg, var(--rainbow-3-wash) 0%, var(--rainbow-3-light) 100%);
+  --gradient-teal-wash: linear-gradient(135deg, var(--rainbow-4-wash) 0%, var(--rainbow-4-light) 100%);
+  --gradient-blue-wash: linear-gradient(135deg, var(--rainbow-5-wash) 0%, var(--rainbow-5-light) 100%);
+  --gradient-purple-wash: linear-gradient(135deg, var(--rainbow-6-wash) 0%, var(--rainbow-6-light) 100%);
+  --gradient-pink-wash: linear-gradient(135deg, var(--rainbow-7-wash) 0%, var(--rainbow-7-light) 100%);
 
   /* ============================================
      NEUTRAL / BACKGROUND
@@ -55,20 +75,88 @@
 }
 
 /* ============================================
-   HIGH CONTRAST — uses 600/800 which are the
-   neon-bright stops in HC theme. Rainbow tokens
-   are already CVD-safe with pre-computed stops.
+   GLOBAL GRADIENT CLASS MAP
+   Any component with .badge--gradient-{name} or similar
+   reads --_grad (vivid) and --_grad-wash (soft) tokens.
    ============================================ */
 
-/* HC — same gradients for light and dark.
-   Theme scale positions swap per luminance so the same
-   token references produce visible gradients on both. */
+.gradient-primary,   [class*="--gradient-primary"]   { --_grad: var(--gradient-primary);   --_grad-wash: var(--gradient-primary-wash); }
+.gradient-secondary, [class*="--gradient-secondary"] { --_grad: var(--gradient-secondary); --_grad-wash: var(--gradient-secondary-wash); }
+.gradient-neutral,   [class*="--gradient-neutral"]   { --_grad: var(--gradient-neutral);   --_grad-wash: var(--gradient-neutral-wash); }
+.gradient-hero,      [class*="--gradient-hero"]      { --_grad: var(--gradient-hero);      --_grad-wash: var(--gradient-hero); }
+.gradient-sunset,    [class*="--gradient-sunset"]    { --_grad: var(--gradient-sunset);    --_grad-wash: var(--gradient-sunset); }
+.gradient-red,       [class*="--gradient-red"]       { --_grad: var(--gradient-red);       --_grad-wash: var(--gradient-red-wash); }
+.gradient-orange,    [class*="--gradient-orange"]    { --_grad: var(--gradient-orange);    --_grad-wash: var(--gradient-orange-wash); }
+.gradient-yellow,    [class*="--gradient-yellow"]    { --_grad: var(--gradient-yellow);    --_grad-wash: var(--gradient-yellow-wash); }
+.gradient-teal,      [class*="--gradient-teal"]      { --_grad: var(--gradient-teal);      --_grad-wash: var(--gradient-teal-wash); }
+.gradient-blue,      [class*="--gradient-blue"]      { --_grad: var(--gradient-blue);      --_grad-wash: var(--gradient-blue-wash); }
+.gradient-purple,    [class*="--gradient-purple"]    { --_grad: var(--gradient-purple);    --_grad-wash: var(--gradient-purple-wash); }
+.gradient-pink,      [class*="--gradient-pink"]      { --_grad: var(--gradient-pink);      --_grad-wash: var(--gradient-pink-wash); }
+
+/* ============================================
+   DARK MODE — wash gradients swap to vivid (wash invisible on dark bg)
+   ============================================ */
+
+[data-mode="dark"] {
+  --gradient-primary-wash: var(--gradient-primary);
+  --gradient-secondary-wash: var(--gradient-secondary);
+  --gradient-neutral-wash: var(--gradient-neutral);
+  --gradient-red-wash: var(--gradient-red);
+  --gradient-orange-wash: var(--gradient-orange);
+  --gradient-yellow-wash: var(--gradient-yellow);
+  --gradient-teal-wash: var(--gradient-teal);
+  --gradient-blue-wash: var(--gradient-blue);
+  --gradient-purple-wash: var(--gradient-purple);
+  --gradient-pink-wash: var(--gradient-pink);
+}
+
+/* ============================================
+   LIGHT MODE — brighter stops for light backgrounds
+   ============================================ */
+
+[data-mode="light"] {
+  --gradient-primary: linear-gradient(160deg, var(--primary-400) 0%, var(--primary-600) 45%, var(--primary-200) 100%);
+  --gradient-primary-soft: linear-gradient(135deg, var(--primary-200) 0%, var(--primary-400) 100%);
+  --gradient-primary-light: linear-gradient(135deg, var(--primary-200) 0%, var(--primary-600) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--secondary-400) 0%, var(--secondary-600) 100%);
+  --gradient-secondary-soft: linear-gradient(135deg, var(--secondary-200) 0%, var(--secondary-400) 100%);
+  --gradient-neutral: linear-gradient(135deg, var(--neutral-400) 0%, var(--neutral-600) 100%);
+  --gradient-hero: linear-gradient(135deg, var(--primary-400) 0%, var(--secondary-400) 100%);
+  --gradient-sunset: linear-gradient(45deg, var(--primary-400) 0%, var(--primary-600) 30%, var(--secondary-600) 100%);
+}
+
+/* ============================================
+   HIGH CONTRAST — max separation, uses text tokens
+   ============================================ */
+
 [data-high-contrast] {
   --gradient-primary: linear-gradient(160deg, var(--primary-600) 0%, var(--color-Text) 100%);
   --gradient-primary-soft: linear-gradient(135deg, var(--primary-600) 0%, var(--color-Text-contrast) 100%);
   --gradient-primary-light: linear-gradient(135deg, var(--color-Text-contrast) 0%, var(--primary-600) 100%);
+  --gradient-primary-wash: linear-gradient(135deg, var(--primary-600) 0%, var(--color-Text) 100%);
   --gradient-secondary: linear-gradient(135deg, var(--secondary-600) 0%, var(--color-Text) 100%);
   --gradient-secondary-soft: linear-gradient(135deg, var(--secondary-600) 0%, var(--color-Text-contrast) 100%);
+  --gradient-secondary-wash: linear-gradient(135deg, var(--secondary-600) 0%, var(--color-Text) 100%);
+  --gradient-neutral: linear-gradient(135deg, var(--neutral-600) 0%, var(--color-Text) 100%);
+  --gradient-neutral-wash: linear-gradient(135deg, var(--neutral-600) 0%, var(--color-Text) 100%);
   --gradient-hero: linear-gradient(135deg, var(--primary-600) 0%, var(--secondary-600) 100%);
   --gradient-sunset: linear-gradient(45deg, var(--primary-600) 0%, var(--secondary-600) 50%, var(--color-Text) 100%);
+
+  /* Rainbow — vivid rainbow token → text colour */
+  --gradient-red: linear-gradient(135deg, var(--rainbow-1) 0%, var(--color-Text) 100%);
+  --gradient-orange: linear-gradient(135deg, var(--rainbow-2) 0%, var(--color-Text) 100%);
+  --gradient-yellow: linear-gradient(135deg, var(--rainbow-3) 0%, var(--color-Text) 100%);
+  --gradient-teal: linear-gradient(135deg, var(--rainbow-4) 0%, var(--color-Text) 100%);
+  --gradient-blue: linear-gradient(135deg, var(--rainbow-5) 0%, var(--color-Text) 100%);
+  --gradient-purple: linear-gradient(135deg, var(--rainbow-6) 0%, var(--color-Text) 100%);
+  --gradient-pink: linear-gradient(135deg, var(--rainbow-7) 0%, var(--color-Text) 100%);
+
+  /* Rainbow wash — same as vivid in HC */
+  --gradient-red-wash: linear-gradient(135deg, var(--rainbow-1) 0%, var(--color-Text) 100%);
+  --gradient-orange-wash: linear-gradient(135deg, var(--rainbow-2) 0%, var(--color-Text) 100%);
+  --gradient-yellow-wash: linear-gradient(135deg, var(--rainbow-3) 0%, var(--color-Text) 100%);
+  --gradient-teal-wash: linear-gradient(135deg, var(--rainbow-4) 0%, var(--color-Text) 100%);
+  --gradient-blue-wash: linear-gradient(135deg, var(--rainbow-5) 0%, var(--color-Text) 100%);
+  --gradient-purple-wash: linear-gradient(135deg, var(--rainbow-6) 0%, var(--color-Text) 100%);
+  --gradient-pink-wash: linear-gradient(135deg, var(--rainbow-7) 0%, var(--color-Text) 100%);
 }

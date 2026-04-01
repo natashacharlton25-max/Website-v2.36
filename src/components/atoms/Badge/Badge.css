@@ -154,60 +154,69 @@
 
 /* ── Gradient fill — solid gradient background ────────── */
 
-.badge--gradient-primary,
-.badge--gradient-secondary,
-.badge--gradient-hero,
-.badge--gradient-sunset {
-  border: var(--border-width-2) solid transparent;
+/* Gradient shared base — vivid gradient, contrast text */
+[class*="badge--gradient-"] {
+  background: var(--_grad);
+  border: none;
   color: var(--color-Text-contrast);
 }
 
-.badge--gradient-primary   { background: var(--gradient-primary) padding-box, var(--gradient-primary) border-box; }
-.badge--gradient-secondary { background: var(--gradient-secondary) padding-box, var(--gradient-secondary) border-box; }
-.badge--gradient-hero      { background: var(--gradient-hero) padding-box, var(--gradient-hero) border-box; }
-.badge--gradient-sunset    { background: var(--gradient-sunset) padding-box, var(--gradient-sunset) border-box; }
-
-/* Gradient on outline — gradient border + gradient text */
-.badge--outline.badge--gradient-primary,
-.badge--outline.badge--gradient-secondary,
-.badge--outline.badge--gradient-hero,
-.badge--outline.badge--gradient-sunset {
-  border: var(--border-width-2) solid transparent;
+/* Fill variant — wash (soft) gradient in light, vivid in dark.
+   Text: dark in light mode (reads on wash), contrast in dark (reads on vivid).
+   Dark mode swaps --_grad-wash to vivid in gradients.css. */
+.badge--fill[class*="badge--gradient-"] {
+  background: var(--_grad-wash);
+  color: var(--color-Text);
+  border: none;
 }
 
-.badge--outline.badge--gradient-primary { background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--gradient-primary) border-box; }
-.badge--outline.badge--gradient-secondary { background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--gradient-secondary) border-box; }
-.badge--outline.badge--gradient-hero { background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--gradient-hero) border-box; }
-.badge--outline.badge--gradient-sunset { background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--gradient-sunset) border-box; }
+/* Dark fill gradient text colour in theme-luminance-dark.css */
 
-.badge--outline.badge--gradient-primary .badge__label { background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.badge--outline.badge--gradient-secondary .badge__label { background: var(--gradient-secondary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.badge--outline.badge--gradient-hero .badge__label { background: var(--gradient-hero); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.badge--outline.badge--gradient-sunset .badge__label { background: var(--gradient-sunset); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+/* Gradient tokens (--_grad, --_grad-wash) set globally in gradients.css */
 
-/* Gradient on glass — glass bg + coloured border + gradient text */
-.badge--glass.badge--gradient-primary,
-.badge--glass.badge--gradient-secondary,
-.badge--glass.badge--gradient-hero,
-.badge--glass.badge--gradient-sunset {
+/* Gradient on outline — gradient border + gradient text */
+.badge--outline[class*="badge--gradient-"] {
+  border: var(--border-width-2) solid transparent;
+  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_grad) border-box;
+}
+
+.badge--outline[class*="badge--gradient-"] .badge__label {
+  background: var(--_grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Gradient on glass — glass bg + subtle border + gradient text */
+.badge--glass[class*="badge--gradient-"] {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: var(--border-width) solid color-mix(in oklch, var(--neutral-400) 20%, transparent);
 }
 
-.badge--glass.badge--gradient-primary .badge__label { background: var(--gradient-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.badge--glass.badge--gradient-secondary .badge__label { background: var(--gradient-secondary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.badge--glass.badge--gradient-hero .badge__label { background: var(--gradient-hero); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-.badge--glass.badge--gradient-sunset .badge__label { background: var(--gradient-sunset); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.badge--glass[class*="badge--gradient-"] .badge__label {
+  background: var(--_grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
 /* ── Animated gradient border ─────────────────────────── */
 
 .badge--border-gradient { --_border-grad: var(--gradient-hero); }
 .badge--border-gradient-primary   { --_border-grad: var(--gradient-primary); }
 .badge--border-gradient-secondary { --_border-grad: var(--gradient-secondary); }
+.badge--border-gradient-neutral   { --_border-grad: var(--gradient-neutral); }
 .badge--border-gradient-hero      { --_border-grad: var(--gradient-hero); }
 .badge--border-gradient-sunset    { --_border-grad: var(--gradient-sunset); }
+.badge--border-gradient-red       { --_border-grad: var(--gradient-red); }
+.badge--border-gradient-orange    { --_border-grad: var(--gradient-orange); }
+.badge--border-gradient-yellow    { --_border-grad: var(--gradient-yellow); }
+.badge--border-gradient-teal      { --_border-grad: var(--gradient-teal); }
+.badge--border-gradient-blue      { --_border-grad: var(--gradient-blue); }
+.badge--border-gradient-purple    { --_border-grad: var(--gradient-purple); }
+.badge--border-gradient-pink      { --_border-grad: var(--gradient-pink); }
 
 .badge.badge--border-gradient {
   border: var(--border-width-2) solid transparent;

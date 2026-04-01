@@ -172,17 +172,20 @@
 
 /* Badge HC — gradient fills use overlay bg so gradient border/text is visible.
    Sets the internal token — Badge.css variant rules read it. */
-[data-high-contrast] .badge--gradient-primary,
-[data-high-contrast] .badge--gradient-secondary,
-[data-high-contrast] .badge--gradient-hero,
-[data-high-contrast] .badge--gradient-sunset {
+/* All gradient fills in HC — overlay bg */
+[data-high-contrast] [class*="badge--gradient-"] {
   --_badge-bg: var(--page-bg-overlay);
-  --_badge-border: var(--_badge-border);
 }
 
-/* Badge HC — animated gradient border — no animation */
-[data-high-contrast] .badge--border-gradient {
-  animation: none;
+/* Animated gradient border — keep animation + gradient border, page bg fill */
+[data-high-contrast] .badge.badge--border-gradient,
+[data-high-contrast] .badge--fill.badge--border-gradient {
+  background:
+    linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
+    var(--_border-grad) border-box;
+  background-size: 100% 100%, 200% 200%;
+  border: var(--border-width-2) solid transparent;
+  color: var(--color-Text);
 }
 
 /* Text highlight — primary/secondary/neutral need brighter positions in HC */
