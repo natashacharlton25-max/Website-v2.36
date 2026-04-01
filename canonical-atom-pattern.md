@@ -1247,6 +1247,54 @@ Icons come from D1 (Asset Library API). JSON author passes the **base name only*
 
 ---
 
+## The 12 gradient enums (global utility)
+
+Defined in `src/styles/tokens/gradients.css`. Every component reads `--_grad` (vivid) and `--_grad-wash` (soft) tokens — set globally by `[class*="--gradient-{name}"]`.
+
+| Enum | Vivid gradient | Wash gradient | Use |
+|---|---|---|---|
+| primary | primary-800 → primary-400 | primary-200 → primary-400 | Brand primary |
+| secondary | secondary-600 → secondary-800 | secondary-200 → secondary-400 | Brand secondary |
+| neutral | neutral-600 → neutral-800 | neutral-200 → neutral-400 | Subtle/mono |
+| hero | primary-600 → secondary-600 | (same as vivid) | Primary + secondary mix |
+| sunset | primary-600 → secondary-800 | (same as vivid) | Warm multi-stop |
+| red | rainbow-1 light → base → dark | rainbow-1 wash → light | Rainbow |
+| orange | rainbow-2 light → base → dark | rainbow-2 wash → light | Rainbow |
+| yellow | rainbow-3 light → base → dark | rainbow-3 wash → light | Rainbow |
+| teal | rainbow-4 light → base → dark | rainbow-4 wash → light | Rainbow |
+| blue | rainbow-5 light → base → dark | rainbow-5 wash → light | Rainbow |
+| purple | rainbow-6 light → base → dark | rainbow-6 wash → light | Rainbow |
+| pink | rainbow-7 light → base → dark | rainbow-7 wash → light | Rainbow |
+
+**Three tiers — theme-adaptive:**
+
+| Tier | Overrides | Gradient feel |
+|------|-----------|---------------|
+| Base (dark) | `:root` | Deep, rich (600→800) |
+| Light mode | `[data-mode="light"]` | Bright, vibrant (400→600) |
+| Dark wash | `[data-mode="dark"]` | Wash = vivid (wash invisible on dark) |
+| High contrast | `[data-high-contrast]` | Colour → `--color-Text` (max separation) |
+
+**Component usage — fill vs outline vs glass:**
+
+| Variant | Uses | Text | Why |
+|---------|------|------|-----|
+| Fill | `--_grad-wash` (soft) | `--color-Text` | Readable on pastel bg |
+| Fill (dark) | `--_grad-wash` → vivid | `--color-Text-contrast` | Wash swaps to vivid in dark |
+| Outline | `--_grad` (vivid) as border + text-clip | Gradient | Transparent bg, gradient visible |
+| Glass | `--_grad` as text-clip | Gradient | Glass bg, gradient text pops |
+
+**Schema pattern** — every atom with gradient support:
+```json
+"visual": {
+  "gradient": { "type": "string", "enum": ["primary","secondary","neutral","hero","sunset","red","orange","yellow","teal","blue","purple","pink"] }
+}
+```
+
+No per-component gradient definitions. One global utility, every component reads the same tokens.
+
+---
+
 ## Exceptions (documented, intentional)
 
 | Atom | Exception | Why |
