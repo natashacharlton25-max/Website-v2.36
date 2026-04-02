@@ -141,46 +141,10 @@
 
 /* Rainbow → rainbow-hc.css (loaded via tokens/index.css) */
 
-/* Badge — HC uses 800 scale position (brightest) for both bg and border */
-[data-high-contrast] .badge--primary   { --_badge-bg: var(--primary-800);   --_badge-border: var(--primary-800); }
-[data-high-contrast] .badge--secondary { --_badge-bg: var(--secondary-800); --_badge-border: var(--secondary-800); }
-[data-high-contrast] .badge--neutral   { --_badge-bg: var(--neutral-800);   --_badge-border: var(--neutral-800); }
-
-/* Badge — rainbow use base vivid token in HC */
-[data-high-contrast] .badge--red    { --_badge-bg: var(--rainbow-1); --_badge-border: var(--rainbow-1); }
-[data-high-contrast] .badge--orange { --_badge-bg: var(--rainbow-2); --_badge-border: var(--rainbow-2); }
-[data-high-contrast] .badge--yellow { --_badge-bg: var(--rainbow-3); --_badge-border: var(--rainbow-3); }
-[data-high-contrast] .badge--teal   { --_badge-bg: var(--rainbow-4); --_badge-border: var(--rainbow-4); }
-[data-high-contrast] .badge--blue   { --_badge-bg: var(--rainbow-5); --_badge-border: var(--rainbow-5); }
-[data-high-contrast] .badge--purple { --_badge-bg: var(--rainbow-6); --_badge-border: var(--rainbow-6); }
-[data-high-contrast] .badge--pink   { --_badge-bg: var(--rainbow-7); --_badge-border: var(--rainbow-7); }
-
-/* Badge fill text — max contrast on rainbow fills in HC.
-   Uses --color-Text-contrast (theme provides correct value per luminance). */
-[data-high-contrast] .badge--fill.badge--primary,
-[data-high-contrast] .badge--fill.badge--secondary,
-[data-high-contrast] .badge--fill.badge--neutral,
-[data-high-contrast] .badge--fill.badge--red,
-[data-high-contrast] .badge--fill.badge--orange,
-[data-high-contrast] .badge--fill.badge--yellow,
-[data-high-contrast] .badge--fill.badge--teal,
-[data-high-contrast] .badge--fill.badge--blue,
-[data-high-contrast] .badge--fill.badge--purple,
-[data-high-contrast] .badge--fill.badge--pink {
-  color: var(--color-Text-contrast);
-}
-
-/* Badge HC — gradient fills use overlay bg so gradient border/text is visible.
-   Sets the internal token — Badge.css variant rules read it. */
-/* All gradient fills in HC — overlay bg */
-[data-high-contrast] [class*="badge--gradient-"] {
-  --_badge-bg: var(--page-bg-overlay);
-}
-
-/* Animated gradient border — transparent fill, Badge.css handles the rest */
-[data-high-contrast] .badge.badge--border-gradient {
-  color: var(--color-Text);
-}
+/* Badge HC — no overrides needed.
+   --_badge-color reads semantic tokens which HC theme provides.
+   Fill uses oklch auto-contrast for text.
+   HC theme generates contrast-targeted values (9:1/7:1 AAA). */
 
 /* Text highlight — primary/secondary/neutral need brighter positions in HC */
 [data-high-contrast] .text-highlight--primary::before   { background: var(--primary-600); }
