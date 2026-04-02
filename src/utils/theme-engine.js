@@ -1081,15 +1081,22 @@ export function generateThemeData(definition) {
     secScale = isMonoPalette ? generateGreyFullScale() : generateScale(secondary);
   }
 
-  // If secondary is near-black (L < 0.25), tint its 800 with primary hue
-  // Gives visible difference between 600 (exact black) and 800 (brand-tinted dark)
-  if (!isMonoPalette && !definition.highContrast) {
-    const secL = chroma(secondary).get('oklch.l');
-    if (secL < 0.25) {
-      const priHue = chroma(primary).get('oklch.h') || 0;
-      const priC = chroma(primary).get('oklch.c') || 0;
-      // Take primary's 900 directly — near-black but brand-tinted
-      secScale[800] = priScale[900];
+  // If 600 and 800 are too close (visually indistinct), replace 800.
+  // First try own 900, then try other scale's 900.
+  if (!definition.highContrast) {
+    for (const [scale, otherScale] of [[priScale, secScale], [secScale, priScale]]) {
+      const l600 = chroma(scale[600]).get('oklch.l');
+      const l800 = chroma(scale[800]).get('oklch.l');
+      const diff = Math.abs(l600 - l800);
+      if (diff < 0.12) {
+        // Try own 900 first — same hue, deeper
+        const own900diff = Math.abs(l600 - chroma(scale[900]).get('oklch.l'));
+        if (own900diff >= 0.15) {
+          scale[800] = scale[900];
+        } else if (otherScale[900]) {
+          scale[800] = otherScale[900];
+        }
+      }
     }
   }
 
