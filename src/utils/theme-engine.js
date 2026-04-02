@@ -173,8 +173,9 @@ export function generateBrandScale(baseHex) {
     l400 = bL + (l200 - bL) * 0.50;
     l800 = bL * emphasisMult;
   } else if (isDark) {
-    l200 = Math.min(0.85, bL * 1.8);
-    l400 = bL + (l200 - bL) * 0.45;
+    // Dark brand — 200 needs visible range, at least 0.55 lightness
+    l200 = Math.max(0.55, bL + (0.95 - bL) * 0.50);
+    l400 = bL + (l200 - bL) * 0.50;
     l800 = bL * emphasisMult;
   } else {
     // 200 lightness scales with brand — darker brands get closer 200
