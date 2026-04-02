@@ -1079,9 +1079,17 @@ export function generateThemeData(definition) {
     : neutralType === 'pure' ? generatePureGreyScale() : generateNeutralScale(neutralHue);
   const scales = { primary: priScale, secondary: secScale, neutral: neuScale };
 
-  // 3. No more dark flip — each generator produces mode-appropriate values directly.
-  //    generateDarkScale = muted for dark bg, generateHCScale = contrast-targeted,
-  //    generateBrandScale = sacred anchors for light. No post-hoc swapping.
+  // 3. Neutral still needs the dark flip — primary/secondary have their own
+  //    dark generators but neutral uses the same scale for both modes.
+  if (isDark && !definition.highContrast) {
+    const FLIP_PAIRS = [[100, 950], [200, 900], [300, 800], [400, 700], [500, 600]];
+    const neuFlip = scales.neutral;
+    for (const [a, b] of FLIP_PAIRS) {
+      if (neuFlip[a] !== undefined && neuFlip[b] !== undefined) {
+        [neuFlip[a], neuFlip[b]] = [neuFlip[b], neuFlip[a]];
+      }
+    }
+  }
 
   // HC pageBg + scale overrides handled by generateHCScale above — no manual overrides needed
 
