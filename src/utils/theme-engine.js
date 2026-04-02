@@ -1081,6 +1081,19 @@ export function generateThemeData(definition) {
     secScale = isMonoPalette ? generateGreyFullScale() : generateScale(secondary);
   }
 
+  // If secondary is near-black (L < 0.25), tint its 800 with primary hue
+  // Gives visible difference between 600 (exact black) and 800 (brand-tinted dark)
+  if (!isMonoPalette && !definition.highContrast) {
+    const secL = chroma(secondary).get('oklch.l');
+    if (secL < 0.25) {
+      const priHue = chroma(primary).get('oklch.h') || 0;
+      const priC = chroma(primary).get('oklch.c') || 0;
+      secScale[800] = safeOklch(secL * 0.70, priC * 0.25, priHue);
+      // Recalculate 900 from new 800
+      secScale[900] = safeOklch(chroma(secScale[800]).get('oklch.l') * 0.65, priC * 0.15, priHue);
+    }
+  }
+
   // Neutral: mono themes get hue-tinted, otherwise warm or pure grey
   const neutralHue = neutralType === 'pure' ? 0 : NEUTRAL_HUE;
   const neuScale = isMonoPalette
