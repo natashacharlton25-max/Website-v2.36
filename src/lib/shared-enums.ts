@@ -17,12 +17,69 @@ export const COLOURS = [
 ] as const;
 export type Colour = typeof COLOURS[number];
 
-// ── Gradient (12 values) ────────────────────────────────
-export const GRADIENTS = [
-  'primary', 'secondary', 'neutral', 'hero', 'sunset',
+// ── Gradient — tiered by use case ────────────────────────
+
+/** Colour gradients — match colour enum, one per colour */
+export const GRADIENTS_COLOUR = [
+  'primary', 'secondary', 'neutral',
   'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'
 ] as const;
+
+/** Soft gradients — subtle, lighter variants */
+export const GRADIENTS_SOFT = [
+  'primary-soft', 'primary-light', 'secondary-soft'
+] as const;
+
+/** Mixed gradients — multi-colour blends */
+export const GRADIENTS_MIXED = [
+  'hero', 'sunset', 'brand-emerge', 'brand-fade'
+] as const;
+
+/** Wash gradients — softest, pastel */
+export const GRADIENTS_WASH = [
+  'primary-wash', 'secondary-wash', 'neutral-wash',
+  'red-wash', 'orange-wash', 'yellow-wash', 'teal-wash',
+  'blue-wash', 'purple-wash', 'pink-wash'
+] as const;
+
+/** Light gradients — light → base */
+export const GRADIENTS_LIGHT = [
+  'red-light', 'orange-light', 'yellow-light', 'teal-light',
+  'blue-light', 'purple-light', 'pink-light'
+] as const;
+
+/** Dark gradients — base → dark */
+export const GRADIENTS_DARK = [
+  'red-dark', 'orange-dark', 'yellow-dark', 'teal-dark',
+  'blue-dark', 'purple-dark', 'pink-dark'
+] as const;
+
+/** Deep gradients — darkest, richest */
+export const GRADIENTS_DEEP = [
+  'red-deep', 'orange-deep', 'yellow-deep', 'teal-deep',
+  'blue-deep', 'purple-deep', 'pink-deep'
+] as const;
+
+/** Background gradients — section/page fills */
+export const GRADIENTS_BACKGROUND = [
+  'light', 'dark', 'background-light', 'background-warm', 'background-cool'
+] as const;
+
+/** All gradients — full enum for components that accept any gradient */
+export const GRADIENTS = [
+  ...GRADIENTS_COLOUR, ...GRADIENTS_SOFT, ...GRADIENTS_MIXED,
+  ...GRADIENTS_WASH, ...GRADIENTS_LIGHT, ...GRADIENTS_DARK,
+  ...GRADIENTS_DEEP, ...GRADIENTS_BACKGROUND
+] as const;
 export type Gradient = typeof GRADIENTS[number];
+export type GradientColour = typeof GRADIENTS_COLOUR[number];
+export type GradientMixed = typeof GRADIENTS_MIXED[number];
+
+// ── Colour Tier (5 values) — fill intensity ─────────────
+export const COLOUR_TIERS = [
+  'wash', 'light', 'base', 'dark', 'deep'
+] as const;
+export type ColourTier = typeof COLOUR_TIERS[number];
 
 // ── Animation (30 values) ───────────────────────────────
 export const ANIMATIONS = [
