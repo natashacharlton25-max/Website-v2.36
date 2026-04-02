@@ -109,6 +109,127 @@ export function safeOklch(l, c, h) {
    ================================================================ */
 
 /**
+ * Find the OKLCH lightness that achieves a target WCAG contrast ratio
+ * against a background hex, at a given hue and chroma.
+ */
+function findLightnessForContrast(bgHex, hue, chromaVal, targetRatio, tolerance = 0.2) {
+  const bgLum = chroma(bgHex).luminance();
+  const bgIsLight = bgLum > 0.5;
+
+  // Search range: if bg is dark, we need lighter fg (higher L); if light, darker fg (lower L)
+  let lo = bgIsLight ? 0.10 : 0.40;
+  let hi = bgIsLight ? 0.60 : 0.95;
+
+  for (let i = 0; i < 30; i++) {
+    const mid = (lo + hi) / 2;
+    const safeChr = Math.min(chromaVal, maxChromaForHue(hue, mid) * 0.90);
+    const hex = safeOklch(mid, safeChr, hue);
+    const fgLum = chroma(hex).luminance();
+    const lighter = Math.max(bgLum, fgLum);
+    const darker = Math.min(bgLum, fgLum);
+    const ratio = (lighter + 0.05) / (darker + 0.05);
+
+    if (Math.abs(ratio - targetRatio) < tolerance) return mid;
+    if (bgIsLight) {
+      // Darker fg = higher contrast on light bg
+      if (ratio < targetRatio) hi = mid; else lo = mid;
+    } else {
+      // Lighter fg = higher contrast on dark bg
+      if (ratio < targetRatio) lo = mid; else hi = mid;
+    }
+  }
+  return (lo + hi) / 2;
+}
+
+/**
+ * Generate a brand scale from two anchor hex values (600 = base, 800 = accent).
+ * Positions 200-500 interpolate from wash toward 600.
+ * Position 700 is a mix of 600 and 800.
+ * Positions 900-950 darken from 800.
+ * If only one hex provided, falls back to generateScale.
+ */
+export function generateBrandScale(baseHex, accentHex) {
+  if (!accentHex) return generateScale(baseHex);
+
+  const base = chroma(baseHex);
+  const accent = chroma(accentHex);
+  const [bL, bC, bH] = base.oklch();
+  const [aL, aC, aH] = accent.oklch();
+
+  const scale = {};
+
+  // Anchors — exact brand values
+  scale[600] = baseHex;
+  scale[800] = accentHex;
+
+  // 700 = mix of base and accent
+  scale[700] = chroma.mix(baseHex, accentHex, 0.5, 'oklch').hex();
+
+  // 200-500: lighten from base toward wash
+  // 200 = very light wash, 500 = slightly lighter than base
+  scale[200] = safeOklch(0.92, bC * 0.20, bH);
+  scale[300] = safeOklch(0.82, bC * 0.45, bH);
+  scale[400] = safeOklch(0.72, bC * 0.70, bH);
+  scale[500] = safeOklch(0.60, bC * 0.85, bH);
+
+  // 900-950: darken from accent
+  scale[900] = safeOklch(0.18, aC * 0.50, aH);
+  scale[950] = safeOklch(0.12, aC * 0.30, aH);
+
+  // 100 if needed
+  scale[100] = safeOklch(0.96, bC * 0.08, bH);
+
+  return scale;
+}
+
+/**
+ * Generate an HC scale — contrast-targeted lightness, not max chroma.
+ * 600 = ~8:1 against pageBg (AAA for text)
+ * 800 = ~5:1 against pageBg (AA for UI, visually distinct from 600)
+ * Other positions spread evenly.
+ */
+export function generateHCScale(baseHex, pageBgHex = '#000000') {
+  const [, , hue] = chroma(baseHex).oklch();
+  const chromaVal = 0.15; // moderate chroma — not neon, readable
+
+  // Find lightness values that hit target contrast ratios
+  const l600 = findLightnessForContrast(pageBgHex, hue, chromaVal, 8.0);
+  const l800 = findLightnessForContrast(pageBgHex, hue, chromaVal, 5.0);
+
+  const scale = {};
+  const c600 = Math.min(chromaVal, maxChromaForHue(hue, l600) * 0.90);
+  const c800 = Math.min(chromaVal, maxChromaForHue(hue, l800) * 0.90);
+
+  scale[600] = safeOklch(l600, c600, hue);
+  scale[800] = safeOklch(l800, c800, hue);
+  scale[700] = safeOklch((l600 + l800) / 2, (c600 + c800) / 2, hue);
+
+  // Spread remaining positions
+  const bgIsLight = chroma(pageBgHex).luminance() > 0.5;
+  if (bgIsLight) {
+    // Light bg: 200 = lightest (near bg), 900 = darkest
+    scale[200] = safeOklch(0.90, chromaVal * 0.15, hue);
+    scale[300] = safeOklch(0.80, chromaVal * 0.30, hue);
+    scale[400] = safeOklch(0.65, chromaVal * 0.60, hue);
+    scale[500] = safeOklch(0.55, chromaVal * 0.80, hue);
+    scale[900] = safeOklch(0.15, chromaVal * 0.40, hue);
+    scale[950] = safeOklch(0.10, chromaVal * 0.20, hue);
+  } else {
+    // Dark bg: 200 = darkest (near bg), 900 = lightest
+    scale[200] = safeOklch(0.12, chromaVal * 0.15, hue);
+    scale[300] = safeOklch(0.22, chromaVal * 0.30, hue);
+    scale[400] = safeOklch(0.35, chromaVal * 0.50, hue);
+    scale[500] = safeOklch(0.50, chromaVal * 0.70, hue);
+    scale[900] = safeOklch(0.92, chromaVal * 0.30, hue);
+    scale[950] = safeOklch(0.96, chromaVal * 0.10, hue);
+  }
+
+  scale[100] = bgIsLight ? safeOklch(0.96, chromaVal * 0.05, hue) : safeOklch(0.08, chromaVal * 0.05, hue);
+
+  return scale;
+}
+
+/**
  * Generate an 11-step OKLCH scale from any base hex colour.
  * Chroma tapers toward white/black extremes, gamut-clamped per hue.
  */
@@ -873,23 +994,35 @@ export function generateThemeData(definition) {
   let primary = rawPrimary;
   let secondary = rawSecondary;
 
-  // HC brighten: force primary/secondary to max chroma at luminance-appropriate lightness.
-  if (definition.highContrast) {
-    const priHue = chroma(primary).get('oklch.h') || 0;
-    const hcPriL = isDark ? 0.80 : 0.55;
-    const hcSecL = isDark ? 0.75 : 0.50;
-    primary = safeOklch(hcPriL, 0.20, priHue);
-    if (!isMonoPalette) {
-      const secHue = chroma(secondary).get('oklch.h') || 0;
-      secondary = safeOklch(hcSecL, 0.18, secHue);
-    }
-  }
-
   const monoHue = isMonoPalette ? (chroma(primary).get('oklch.h') || 0) : null;
 
-  // 1. Generate raw scales
-  const priScale = generateScale(primary);
-  const secScale = isMonoPalette ? generateGreyFullScale() : generateScale(secondary);
+  // 1. Compute page backgrounds first — HC generators need pageBg for contrast
+  let pageBg = computePageBackgrounds(isDark, chromaPreset);
+  if (definition.highContrast) {
+    pageBg = isDark
+      ? { 'page-bg': '#000000', 'page-bg-raised': '#1a1a1a', 'page-bg-sunken': '#000000', 'page-bg-overlay': '#222222' }
+      : { 'page-bg': '#ffffff', 'page-bg-raised': '#f5f5f5', 'page-bg-sunken': '#eeeeee', 'page-bg-overlay': '#fafafa' };
+  }
+
+  // 2. Generate scales — two paths:
+  //    Brand: 600 + 800 anchored (never overridden), everything else interpolated
+  //    Calculated: single-hex lightness curve, HC gets contrast-targeted values
+  let priScale, secScale;
+
+  if (definition.brand) {
+    // Brand path — 600 and 800 are sacred hex values from brand config
+    priScale = generateBrandScale(primary, definition.primaryAccent || null);
+    secScale = isMonoPalette ? generateGreyFullScale() : generateBrandScale(secondary, definition.secondaryAccent || null);
+  } else {
+    // Calculated path — HC + global themes, all positions computed
+    if (definition.highContrast) {
+      priScale = generateHCScale(primary, pageBg['page-bg']);
+      secScale = isMonoPalette ? generateGreyFullScale() : generateHCScale(secondary, pageBg['page-bg']);
+    } else {
+      priScale = generateScale(primary);
+      secScale = isMonoPalette ? generateGreyFullScale() : generateScale(secondary);
+    }
+  }
 
   // Neutral: mono themes get hue-tinted, otherwise warm or pure grey
   const neutralHue = neutralType === 'pure' ? 0 : NEUTRAL_HUE;
@@ -898,10 +1031,9 @@ export function generateThemeData(definition) {
     : neutralType === 'pure' ? generatePureGreyScale() : generateNeutralScale(neutralHue);
   const scales = { primary: priScale, secondary: secScale, neutral: neuScale };
 
-  // 2. Dark mode: flip scale positions so positions are contextually correct
-  // var(--primary-100) = always subtle, var(--primary-900) = always intense
-  // Skip 500↔600 for primary/secondary — 300 is the dark mode accent (Decision 6)
-  if (isDark) {
+  // 3. Dark mode: flip scale positions so positions are contextually correct
+  // HC scales already have dark-appropriate values — skip flip for HC
+  if (isDark && !definition.highContrast) {
     const FLIP_PAIRS = [[100, 950], [200, 900], [300, 800], [400, 700], [500, 600]];
     for (const scale of Object.values(scales)) {
       for (const [a, b] of FLIP_PAIRS) {
@@ -912,28 +1044,7 @@ export function generateThemeData(definition) {
     }
   }
 
-  // 3. Compute page backgrounds
-  let pageBg = computePageBackgrounds(isDark, chromaPreset);
-
-  // 4. Apply HC overrides if flagged
-  if (definition.highContrast) {
-    pageBg = isDark
-      ? { 'page-bg': '#000000', 'page-bg-raised': '#1a1a1a', 'page-bg-sunken': '#000000', 'page-bg-overlay': '#222222' }
-      : { 'page-bg': '#ffffff', 'page-bg-raised': '#f5f5f5', 'page-bg-sunken': '#eeeeee', 'page-bg-overlay': '#fafafa' };
-  }
-
-  // HC scale overrides: push 600/800 to maximum gamut chroma
-  if (definition.highContrast) {
-    const priHue = chroma(primary).get('oklch.h') || 0;
-    // Use maxChromaForHue — absolute brightest the gamut allows at this hue
-    scales.primary[600] = safeOklch(0.70, maxChromaForHue(priHue, 0.70), priHue);
-    scales.primary[800] = safeOklch(0.80, maxChromaForHue(priHue, 0.80), priHue);
-    if (!isMonoPalette) {
-      const secHue = chroma(secondary).get('oklch.h') || 0;
-      scales.secondary[600] = safeOklch(0.68, maxChromaForHue(secHue, 0.68), secHue);
-      scales.secondary[800] = safeOklch(0.78, maxChromaForHue(secHue, 0.78), secHue);
-    }
-  }
+  // HC pageBg + scale overrides handled by generateHCScale above — no manual overrides needed
 
   // 5. Compute status colours (definition can override hues via statusHues field)
   const status = computeStatusColors(chromaPreset, isMonoPalette ? monoHue : null, definition.statusHues || null);
