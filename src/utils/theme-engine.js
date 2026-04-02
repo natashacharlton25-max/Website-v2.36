@@ -218,7 +218,7 @@ export function generateHCScale(baseHex, pageBgHex = '#000000') {
 
   // Find lightness values that hit target contrast ratios
   const l600 = findLightnessForContrast(pageBgHex, hue, chromaVal, 9.0);
-  const l800 = findLightnessForContrast(pageBgHex, hue, chromaVal, 7.0);
+  const l800 = findLightnessForContrast(pageBgHex, hue, chromaVal, 14.0);
 
   const scale = {};
   const c600 = Math.min(chromaVal, maxChromaForHue(hue, l600) * 0.90);
