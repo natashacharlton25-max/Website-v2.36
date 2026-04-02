@@ -1089,20 +1089,6 @@ export function generateThemeData(definition) {
     secScale = isMonoPalette ? generateGreyFullScale() : generateScale(secondary);
   }
 
-  // Pastel: compress scale into light range.
-  // Remap 200→200, 300→400, 400→600, 500→800 so semantic tokens land on soft values.
-  if (chromaPreset === 'pastel' && !isDark) {
-    for (const scale of [priScale, secScale]) {
-      scale[800] = scale[500];
-      scale[700] = scale[450] || scale[500]; // fallback
-      scale[600] = scale[400];
-      scale[500] = scale[350] || scale[400]; // fallback
-      scale[400] = scale[300];
-      scale[300] = scale[250] || scale[300]; // fallback
-      // 200, 100, 900, 950 stay as-is
-    }
-  }
-
   // If 600 is near-black (L < 0.25) and 800 is indistinct, replace 800
   // with the other scale's 900 (brand-tinted near-black).
   // Only fires for near-black — normal dark/vivid colours keep their calculated 800.
