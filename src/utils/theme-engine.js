@@ -239,9 +239,9 @@ export function generateHCScale(baseHex, pageBgHex = '#000000') {
     scale[900] = safeOklch(0.15, chromaVal * 0.40, hue);
     scale[950] = safeOklch(0.10, chromaVal * 0.20, hue);
   } else {
-    // Dark bg: 200 = darkest (near bg), 900 = lightest
-    scale[200] = safeOklch(0.12, chromaVal * 0.15, hue);
-    scale[300] = safeOklch(0.22, chromaVal * 0.30, hue);
+    // Dark bg: 200 = visible tint (not near-black), 900 = lightest
+    scale[200] = safeOklch(0.25, chromaVal * 0.30, hue);
+    scale[300] = safeOklch(0.25, chromaVal * 0.30, hue);
     scale[400] = safeOklch(0.35, chromaVal * 0.50, hue);
     scale[500] = safeOklch(0.50, chromaVal * 0.70, hue);
     scale[900] = safeOklch(0.92, chromaVal * 0.30, hue);
