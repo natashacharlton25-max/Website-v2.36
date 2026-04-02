@@ -91,9 +91,9 @@ function initFocusSystem() {
         (el as HTMLElement).style.setProperty('--focus-angle', `${angle}deg`);
 
         const rainbowBase = ['--rainbow-1', '--rainbow-2', '--rainbow-3', '--rainbow-4', '--rainbow-5', '--rainbow-6', '--rainbow-7'];
-        const rainbowWash = ['--rainbow-1-tint', '--rainbow-2-tint', '--rainbow-3-tint', '--rainbow-4-tint', '--rainbow-5-tint', '--rainbow-6-tint', '--rainbow-7-tint'];
-        const rainbowLight = ['--rainbow-1-mid', '--rainbow-2-mid', '--rainbow-3-mid', '--rainbow-4-mid', '--rainbow-5-mid', '--rainbow-6-mid', '--rainbow-7-mid'];
-        const rainbowDark = ['--rainbow-1-emphasis', '--rainbow-2-emphasis', '--rainbow-3-emphasis', '--rainbow-4-emphasis', '--rainbow-5-emphasis', '--rainbow-6-emphasis', '--rainbow-7-emphasis'];
+        const rainbowTint = ['--rainbow-1-tint', '--rainbow-2-tint', '--rainbow-3-tint', '--rainbow-4-tint', '--rainbow-5-tint', '--rainbow-6-tint', '--rainbow-7-tint'];
+        const rainbowMid = ['--rainbow-1-mid', '--rainbow-2-mid', '--rainbow-3-mid', '--rainbow-4-mid', '--rainbow-5-mid', '--rainbow-6-mid', '--rainbow-7-mid'];
+        const rainbowEmphasis = ['--rainbow-1-emphasis', '--rainbow-2-emphasis', '--rainbow-3-emphasis', '--rainbow-4-emphasis', '--rainbow-5-emphasis', '--rainbow-6-emphasis', '--rainbow-7-emphasis'];
         const idx = _rainbowIndex;
         const complementIdx = (idx + 3) % 7;
 
@@ -102,10 +102,10 @@ function initFocusSystem() {
         const isHC = document.documentElement.hasAttribute('data-high-contrast');
         const styles = getComputedStyle(document.body);
 
-        // Ring: HC uses light (bright on dark bg), dark uses dark, light uses base
-        const ringTokens = isHC ? rainbowLight : (isDark ? rainbowDark : rainbowBase);
-        // Bg: always wash (flips automatically in dark mode CSS)
-        const bgTokens = rainbowWash;
+        // Ring: HC uses mid (bright on dark bg), dark uses emphasis, light uses base
+        const ringTokens = isHC ? rainbowMid : (isDark ? rainbowEmphasis : rainbowBase);
+        // Bg: always tint (flips automatically in dark mode CSS)
+        const bgTokens = rainbowTint;
 
         const ringColor = styles.getPropertyValue(ringTokens[idx]).trim();
         const bgColor = styles.getPropertyValue(bgTokens[idx]).trim();
