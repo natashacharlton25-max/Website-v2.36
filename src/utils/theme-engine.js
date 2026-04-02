@@ -164,22 +164,22 @@ export function generateBrandScale(baseHex) {
 
   let l200, l400, l800;
 
+  // 800 multiplier scales with lightness — lighter brands get gentler emphasis
+  // L=0.30 → 0.65× (deep), L=0.60 → 0.78×, L=0.85 → 0.88× (gentle)
+  const emphasisMult = 0.55 + (bL * 0.40);
+
   if (isPastel) {
-    // Pastel brand — compressed light range, gentle emphasis
-    // 800 sits at what would normally be 700 — not too dark for pastels
     l200 = Math.min(0.95, bL + (1 - bL) * 0.60);
     l400 = bL + (l200 - bL) * 0.50;
-    l800 = bL * 0.88;
+    l800 = bL * emphasisMult;
   } else if (isDark) {
-    // Dark brand — muted light (not white), compressed dark range
     l200 = Math.min(0.85, bL * 1.8);
     l400 = bL + (l200 - bL) * 0.45;
-    l800 = bL * 0.65;
+    l800 = bL * emphasisMult;
   } else {
-    // Vivid brand — normal full spread
     l200 = 0.92;
     l400 = bL + (l200 - bL) * 0.50;
-    l800 = bL * 0.55;
+    l800 = bL * emphasisMult;
   }
 
   // Chroma scales with lightness — lighter = less chroma, darker = slightly less
