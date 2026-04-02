@@ -168,19 +168,21 @@ export function generateBrandScale(baseHex, accentHex) {
 
   // Generate from the midpoint (700) so the scale is centred between both brand colours
   const [mL, mC, mH] = mix700.oklch();
+  // 200-500: ramp from near-white DOWN to just above the 600 anchor lightness
+  // Lightness must always decrease: 200 > 300 > 400 > 500 > 600
+  const l600 = bL; // lightness of the 600 anchor (from destructure above)
+  scale[200] = safeOklch(0.96, mC * 0.12, mH);
+  scale[300] = safeOklch(l600 + (0.96 - l600) * 0.65, mC * 0.30, mH);
+  scale[400] = safeOklch(l600 + (0.96 - l600) * 0.35, mC * 0.55, mH);
+  scale[500] = safeOklch(l600 + (0.96 - l600) * 0.10, mC * 0.75, mH);
 
-  // 200-500: lighten from midpoint hue — smooth ramp, not just one anchor colour
-  scale[200] = safeOklch(0.92, mC * 0.20, mH);
-  scale[300] = safeOklch(0.82, mC * 0.45, mH);
-  scale[400] = safeOklch(0.72, mC * 0.70, mH);
-  scale[500] = safeOklch(0.60, mC * 0.85, mH);
-
-  // 900-950: darken from midpoint hue
-  scale[900] = safeOklch(0.18, mC * 0.50, mH);
-  scale[950] = safeOklch(0.12, mC * 0.30, mH);
+  // 900-950: ramp below the 800 anchor lightness toward near-black
+  const l800 = aL; // from destructure above
+  scale[900] = safeOklch(l800 * 0.30, mC * 0.40, mH);
+  scale[950] = safeOklch(l800 * 0.15, mC * 0.20, mH);
 
   // 100 if needed
-  scale[100] = safeOklch(0.96, mC * 0.08, mH);
+  scale[100] = safeOklch(0.98, mC * 0.05, mH);
 
   return scale;
 }
