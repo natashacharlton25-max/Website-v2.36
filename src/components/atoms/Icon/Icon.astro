@@ -235,7 +235,10 @@ if (morphTo && morphTargetContent) {
 
 <span
   class:list={['icon', ...effectClasses, className]}
-  style={size != null ? `width: ${size}px; height: ${size}px;` : undefined}
+  style={[
+    size != null && `width: ${size}px; height: ${size}px;`,
+    color && !isColorEnum && `color: ${color};`,
+  ].filter(Boolean).join(' ') || undefined}
   set:html={iconContent || fallbackIcon}
   aria-hidden="true"
   data-semantic-role={semanticRole}
