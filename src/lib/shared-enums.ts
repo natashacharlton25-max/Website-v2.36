@@ -70,6 +70,12 @@ export const FONT_WEIGHTS = [
 ] as const;
 export type FontWeight = typeof FONT_WEIGHTS[number];
 
+// ── Variant (4 values) ──────────────────────────────────
+export const VARIANTS = [
+  'fill', 'outline', 'glass', 'liquid-glass'
+] as const;
+export type Variant = typeof VARIANTS[number];
+
 // ── Shape (5 values) ────────────────────────────────────
 export const SHAPES = [
   'sharp', 'subtle', 'soft', 'rounded', 'pill'
@@ -87,6 +93,19 @@ export const SIZES = [
   'sm', 'md', 'lg'
 ] as const;
 export type Size = typeof SIZES[number];
+
+// ── Border Weight (2 values) ────────────────────────────
+export const BORDER_WEIGHTS = [
+  'thin', 'thick'
+] as const;
+export type BorderWeight = typeof BORDER_WEIGHTS[number];
+
+// ── Border Gradient (12 values — same as gradient) ──────
+export const BORDER_GRADIENTS = [
+  'primary', 'secondary', 'neutral', 'hero', 'sunset',
+  'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'
+] as const;
+export type BorderGradient = typeof BORDER_GRADIENTS[number];
 
 // ── Semantic Role (4 values) ────────────────────────────
 export const SEMANTIC_ROLES = [
