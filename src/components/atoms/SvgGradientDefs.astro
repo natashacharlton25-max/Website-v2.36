@@ -1,0 +1,87 @@
+---
+/**
+ * SvgGradientDefs — hidden SVG block with all gradient <linearGradient> defs.
+ * Include once in the layout. Any SVG on the page can reference via fill="url(#grad-red)".
+ * Stops use CSS custom properties so they adapt to all themes/modes automatically.
+ *
+ * IDs match the gradient enum: grad-{name} for base, grad-{name}-{tier} for tiers.
+ */
+
+const rainbows = [
+  { name: 'red', idx: 1 },
+  { name: 'orange', idx: 2 },
+  { name: 'yellow', idx: 3 },
+  { name: 'teal', idx: 4 },
+  { name: 'blue', idx: 5 },
+  { name: 'purple', idx: 6 },
+  { name: 'pink', idx: 7 },
+];
+---
+
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    {/* Primary / Secondary / Neutral */}
+    <linearGradient id="grad-primary" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--primary-emphasis)" />
+      <stop offset="45%" stop-color="var(--primary-base)" />
+      <stop offset="100%" stop-color="var(--primary-mid)" />
+    </linearGradient>
+    <linearGradient id="grad-secondary" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--secondary-base)" />
+      <stop offset="100%" stop-color="var(--secondary-emphasis)" />
+    </linearGradient>
+    <linearGradient id="grad-neutral" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--neutral-base)" />
+      <stop offset="100%" stop-color="var(--neutral-emphasis)" />
+    </linearGradient>
+
+    {/* Mixed */}
+    <linearGradient id="grad-hero" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="var(--primary-base)" />
+      <stop offset="100%" stop-color="var(--secondary-base)" />
+    </linearGradient>
+    <linearGradient id="grad-sunset" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="var(--primary-base)" />
+      <stop offset="30%" stop-color="var(--primary-emphasis)" />
+      <stop offset="100%" stop-color="var(--secondary-emphasis)" />
+    </linearGradient>
+
+    {/* Rainbow — base tier (tint → mid → base → emphasis) */}
+    {rainbows.map(({ name, idx }) => (
+      <linearGradient id={`grad-${name}`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color={`var(--rainbow-${idx}-tint)`} />
+        <stop offset="30%" stop-color={`var(--rainbow-${idx}-mid)`} />
+        <stop offset="60%" stop-color={`var(--rainbow-${idx})`} />
+        <stop offset="100%" stop-color={`var(--rainbow-${idx}-emphasis)`} />
+      </linearGradient>
+    ))}
+
+    {/* Rainbow — tint tier (mid → tint → white) */}
+    {rainbows.map(({ name, idx }) => (
+      <linearGradient id={`grad-${name}-tint`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color={`var(--rainbow-${idx}-mid)`} />
+        <stop offset="60%" stop-color={`var(--rainbow-${idx}-tint)`} />
+        <stop offset="100%" stop-color="var(--color-White)" />
+      </linearGradient>
+    ))}
+
+    {/* Rainbow — mid tier (emphasis → base → mid → tint) */}
+    {rainbows.map(({ name, idx }) => (
+      <linearGradient id={`grad-${name}-mid`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color={`var(--rainbow-${idx}-emphasis)`} />
+        <stop offset="35%" stop-color={`var(--rainbow-${idx})`} />
+        <stop offset="65%" stop-color={`var(--rainbow-${idx}-mid)`} />
+        <stop offset="100%" stop-color={`var(--rainbow-${idx}-tint)`} />
+      </linearGradient>
+    ))}
+
+    {/* Rainbow — emphasis tier (base → emphasis → black) */}
+    {rainbows.map(({ name, idx }) => (
+      <linearGradient id={`grad-${name}-emphasis`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color={`var(--rainbow-${idx})`} />
+        <stop offset="60%" stop-color={`var(--rainbow-${idx}-emphasis)`} />
+        <stop offset="100%" stop-color="var(--color-Black)" />
+      </linearGradient>
+    ))}
+  </defs>
+</svg>

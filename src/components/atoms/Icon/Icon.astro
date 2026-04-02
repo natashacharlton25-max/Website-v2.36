@@ -164,31 +164,11 @@ if (needsStrokeConversion && iconContent) {
   });
 }
 
-// Gradient: inject SVG <linearGradient> and swap fill to url(#id)
+// Gradient: reference shared SvgGradientDefs via url(#grad-{name})
+// SvgGradientDefs.astro must be included once in the layout.
 if (gradient && iconContent && !draw) {
-  const gradientId = `icon-grad-${Math.random().toString(36).slice(2, 8)}`;
+  const gradientId = `grad-${gradient}`;
 
-  // SVG gradient stops — must match CSS gradient tokens in gradients.css
-  const gradientStops: Record<string, string> = {
-    primary: `<stop offset="0%" stop-color="var(--primary-800)"/><stop offset="45%" stop-color="var(--primary-600)"/><stop offset="100%" stop-color="var(--primary-200)"/>`,
-    secondary: `<stop offset="0%" stop-color="var(--secondary-600)"/><stop offset="100%" stop-color="var(--secondary-800)"/>`,
-    neutral: `<stop offset="0%" stop-color="var(--neutral-600)"/><stop offset="100%" stop-color="var(--neutral-800)"/>`,
-    hero: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="100%" stop-color="var(--secondary-600)"/>`,
-    sunset: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="30%" stop-color="var(--primary-800)"/><stop offset="100%" stop-color="var(--secondary-800)"/>`,
-    red: `<stop offset="0%" stop-color="var(--rainbow-1-mid)"/><stop offset="50%" stop-color="var(--rainbow-1)"/><stop offset="100%" stop-color="var(--rainbow-1-emphasis)"/>`,
-    orange: `<stop offset="0%" stop-color="var(--rainbow-2-mid)"/><stop offset="50%" stop-color="var(--rainbow-2)"/><stop offset="100%" stop-color="var(--rainbow-2-emphasis)"/>`,
-    yellow: `<stop offset="0%" stop-color="var(--rainbow-3-mid)"/><stop offset="50%" stop-color="var(--rainbow-3)"/><stop offset="100%" stop-color="var(--rainbow-3-emphasis)"/>`,
-    teal: `<stop offset="0%" stop-color="var(--rainbow-4-mid)"/><stop offset="50%" stop-color="var(--rainbow-4)"/><stop offset="100%" stop-color="var(--rainbow-4-emphasis)"/>`,
-    blue: `<stop offset="0%" stop-color="var(--rainbow-5-mid)"/><stop offset="50%" stop-color="var(--rainbow-5)"/><stop offset="100%" stop-color="var(--rainbow-5-emphasis)"/>`,
-    purple: `<stop offset="0%" stop-color="var(--rainbow-6-mid)"/><stop offset="50%" stop-color="var(--rainbow-6)"/><stop offset="100%" stop-color="var(--rainbow-6-emphasis)"/>`,
-    pink: `<stop offset="0%" stop-color="var(--rainbow-7-mid)"/><stop offset="50%" stop-color="var(--rainbow-7)"/><stop offset="100%" stop-color="var(--rainbow-7-emphasis)"/>`,
-    warm: `<stop offset="0%" stop-color="var(--primary-600)"/><stop offset="100%" stop-color="var(--secondary-600)"/>`,
-    cool: `<stop offset="0%" stop-color="var(--primary-200)"/><stop offset="100%" stop-color="var(--primary-800)"/>`,
-  };
-
-  const gradientDef = `<defs><linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">${gradientStops[gradient]}</linearGradient></defs>`;
-
-  iconContent = iconContent.replace(/<svg([^>]*)>/, `<svg$1>${gradientDef}`);
   iconContent = iconContent
     .replace(/fill="currentColor"/g, `fill="url(#${gradientId})"`)
     .replace(/fill="CurrentColor"/g, `fill="url(#${gradientId})"`);
