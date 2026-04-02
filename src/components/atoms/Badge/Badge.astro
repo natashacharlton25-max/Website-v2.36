@@ -33,6 +33,8 @@ interface Props {
   iconColor?: 'default' | 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
   animation?: 'spin' | 'bounce' | 'shake' | 'float' | 'drift' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'flip' | 'pulse' | 'ping' | 'pop' | 'squish' | 'heartbeat' | 'rubber-band' | 'fade' | 'blink' | 'flash' | 'glint' | 'shimmer' | 'twinkle' | 'wiggle' | 'swing' | 'rock' | 'nod' | 'attention' | 'celebrate' | 'enter' | 'exit';
   animationTrigger?: 'viewport' | 'autoplay' | 'loop' | 'interval' | 'none';
+  fontFamily?: 'heading' | 'body' | 'body-alt' | 'handwriting' | 'mono';
+  fontWeight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
   uppercase?: boolean;
   semanticRole?: 'status' | 'tag' | 'label' | 'none';
   /** Render as heading element (h1-h6) instead of span */
@@ -54,6 +56,8 @@ const {
   iconColor,
   animation,
   animationTrigger = 'viewport',
+  fontFamily,
+  fontWeight,
   uppercase = true,
   semanticRole = 'status',
   level,
@@ -82,8 +86,8 @@ const {
     <Icon name={icon} weight={iconWeight !== 'brand' ? iconWeight : undefined} color={iconColor !== 'default' ? iconColor : undefined} gradient={variant !== 'fill' ? gradient : undefined} animation={animation} animationTrigger={animationTrigger} class="badge__icon" aria-hidden="true" />
   ) : null}
   {level ? (
-    <Heading level={level} flush class="badge__label">{label}</Heading>
+    <Heading level={level} flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} class="badge__label">{label}</Heading>
   ) : (
-    <Text as="span" class="badge__label" flush>{label}</Text>
+    <Text as="span" class="badge__label" flush family={fontFamily !== 'heading' ? fontFamily : undefined} weight={fontWeight !== 'bold' ? fontWeight : undefined}>{label}</Text>
   )}
 </span>
