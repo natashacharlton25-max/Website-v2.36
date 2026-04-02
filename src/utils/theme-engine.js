@@ -193,7 +193,7 @@ export function generateHCScale(baseHex, pageBgHex = '#000000') {
   const chromaVal = 0.15; // moderate chroma — not neon, readable
 
   // Find lightness values that hit target contrast ratios
-  const l600 = findLightnessForContrast(pageBgHex, hue, chromaVal, 8.0);
+  const l600 = findLightnessForContrast(pageBgHex, hue, chromaVal, 9.0);
   const l800 = findLightnessForContrast(pageBgHex, hue, chromaVal, 7.0);
 
   const scale = {};
