@@ -1082,14 +1082,15 @@ export function generateThemeData(definition) {
   }
 
   // If 600 and 800 are too close (visually indistinct), replace 800.
+  // Skip pastel scales (L > 0.75) — their gentle emphasis is intentional.
   // First try own 900, then try other scale's 900.
   if (!definition.highContrast) {
     for (const [scale, otherScale] of [[priScale, secScale], [secScale, priScale]]) {
       const l600 = chroma(scale[600]).get('oklch.l');
+      if (l600 > 0.75) continue; // pastel — keep gentle 800
       const l800 = chroma(scale[800]).get('oklch.l');
       const diff = Math.abs(l600 - l800);
       if (diff < 0.12) {
-        // Try own 900 first — same hue, deeper
         const own900diff = Math.abs(l600 - chroma(scale[900]).get('oklch.l'));
         if (own900diff >= 0.15) {
           scale[800] = scale[900];
