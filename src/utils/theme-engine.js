@@ -158,27 +158,46 @@ export function generateBrandScale(baseHex) {
   // 600 = sacred, exact brand hex, never touched
   scale[600] = baseHex;
 
-  // Monochromatic scale from the same hue
-  // 200-500: lighten toward wash
-  scale[100] = safeOklch(0.97, bC * 0.05, hue);
-  scale[200] = safeOklch(0.92, bC * 0.15, hue);
-  scale[300] = safeOklch(0.82, bC * 0.35, hue);
-  scale[400] = safeOklch(0.72, bC * 0.55, hue);
-  scale[500] = safeOklch(0.62, bC * 0.75, hue);
+  // Detect brand intent from lightness
+  const isPastel = bL > 0.75;
+  const isDark = bL < 0.45;
 
-  // If 500 ends up darker than 600 (brand colour is very light), recalculate
-  const l500 = chroma(scale[500]).get('oklch.l');
-  if (l500 < bL) {
-    scale[300] = safeOklch(bL + (0.92 - bL) * 0.70, bC * 0.35, hue);
-    scale[400] = safeOklch(bL + (0.92 - bL) * 0.45, bC * 0.55, hue);
-    scale[500] = safeOklch(bL + (0.92 - bL) * 0.15, bC * 0.75, hue);
+  let l200, l400, l800;
+
+  if (isPastel) {
+    // Pastel brand — compressed light range, muted dark
+    l200 = Math.min(0.95, bL + (1 - bL) * 0.60);
+    l400 = bL + (l200 - bL) * 0.50;
+    l800 = bL * 0.65;
+  } else if (isDark) {
+    // Dark brand — muted light (not white), compressed dark range
+    l200 = Math.min(0.85, bL * 1.8);
+    l400 = bL + (l200 - bL) * 0.45;
+    l800 = bL * 0.65;
+  } else {
+    // Vivid brand — normal full spread
+    l200 = 0.92;
+    l400 = bL + (l200 - bL) * 0.50;
+    l800 = bL * 0.55;
   }
 
-  // 700-800: darken from 600
-  scale[700] = safeOklch(bL * 0.75, bC * 0.85, hue);
-  scale[800] = safeOklch(bL * 0.55, bC * 0.70, hue);
-  scale[900] = safeOklch(bL * 0.30, bC * 0.45, hue);
-  scale[950] = safeOklch(bL * 0.15, bC * 0.25, hue);
+  // Chroma scales with lightness — lighter = less chroma, darker = slightly less
+  const c200 = bC * 0.15;
+  const c400 = bC * 0.55;
+  const c800 = bC * 0.70;
+
+  // Four core positions
+  scale[200] = safeOklch(l200, c200, hue);
+  scale[400] = safeOklch(l400, c400, hue);
+  scale[800] = safeOklch(l800, c800, hue);
+
+  // Duplicates for in-between positions (gradients etc)
+  scale[100] = scale[200];
+  scale[300] = scale[200];
+  scale[500] = scale[400];
+  scale[700] = scale[800];
+  scale[900] = scale[800];
+  scale[950] = scale[800];
 
   return scale;
 }
