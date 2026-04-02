@@ -21,6 +21,7 @@ interface Props {
   label: string;
   /** Colour variant — sets brand tokens for dark mode */
   color?: 'primary' | 'secondary' | 'neutral' | 'success' | 'warning' | 'error' | 'info';
+  colorTier?: 'tint' | 'mid' | 'base' | 'emphasis';
   variant?: 'fill' | 'outline' | 'glass' | 'liquid-glass';
   shadow?: 'none' | 'out' | 'drop' | 'in' | 'elevated' | 'glow' | 'glow-intense';
   gradient?: 'primary' | 'secondary' | 'neutral' | 'hero' | 'sunset' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
@@ -44,6 +45,7 @@ interface Props {
 const {
   label,
   color = 'primary',
+  colorTier,
   variant = 'fill',
   shadow = 'none',
   gradient,
@@ -70,6 +72,7 @@ const {
   class:list={[
     'badge',
     color !== 'default' && `badge--${color}`,
+    colorTier && colorTier !== 'base' && `badge--tier-${colorTier}`,
     `badge--${variant}`,
     shadow !== 'none' && `badge--shadow-${shadow}`,
     gradient && `badge--gradient-${gradient}`,
