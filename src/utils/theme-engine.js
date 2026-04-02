@@ -945,7 +945,10 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
   ln(`:root {`);
 
   // Semantic tokens (new API — migrate to these)
-  const SEMANTIC_MAP = { 200: 'tint', 400: 'mid', 600: 'base', 800: 'emphasis' };
+  // Pastel compresses semantic tokens into the light range (200→500)
+  const SEMANTIC_MAP = chromaPreset === 'pastel' && !isDark
+    ? { 200: 'tint', 300: 'mid', 400: 'base', 500: 'emphasis' }
+    : { 200: 'tint', 400: 'mid', 600: 'base', 800: 'emphasis' };
   for (const [family, scale] of Object.entries(scales)) {
     ln(`  /* -- ${family.toUpperCase()} SCALE ---- */`);
     for (const [pos, semName] of Object.entries(SEMANTIC_MAP)) {
