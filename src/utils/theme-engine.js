@@ -194,7 +194,8 @@ export function generateBrandScale(baseHex) {
   scale[400] = safeOklch(l400, c400, hue);
   scale[800] = safeOklch(l800, c800, hue);
 
-  // In-between positions — interpolated from the four core values
+  // In-between positions — interpolated for internal use (HC, dark, audits)
+  // CSS output only writes the four semantic tokens
   scale[100] = safeOklch(l200 + (0.97 - l200) * 0.50, c200 * 0.30, hue);
   scale[300] = safeOklch(l200 + (l400 - l200) * 0.50, (c200 + c400) * 0.50, hue);
   scale[500] = safeOklch(l400 + (bL - l400) * 0.50, (c400 + bC) * 0.50, hue);
@@ -943,11 +944,15 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
   ln();
   ln(`:root {`);
 
-  // Raw scales (primary API — components use these directly)
+  // Semantic tokens (new API — migrate to these)
+  const SEMANTIC_MAP = { 200: 'tint', 400: 'mid', 600: 'base', 800: 'emphasis' };
   for (const [family, scale] of Object.entries(scales)) {
+    ln(`  /* -- ${family.toUpperCase()} SCALE ---- */`);
+    for (const [pos, semName] of Object.entries(SEMANTIC_MAP)) {
+      if (scale[pos]) ln(`  --${family}-${semName}: ${scale[pos]};`);
+    }
+    // Numbered positions (backwards compat — same values)
     const positions = Object.keys(scale).map(Number).sort((a, b) => a - b);
-    const range = `${positions[0]}-${positions[positions.length - 1]}`;
-    ln(`  /* -- ${family.toUpperCase()} SCALE (${range}) ---- */`);
     for (const pos of positions) ln(`  --${family}-${pos}: ${scale[pos]};`);
     ln();
   }
@@ -1068,9 +1073,11 @@ export function generateThemeData(definition) {
     priScale = generateHCScale(primary, pageBg['page-bg']);
     secScale = isMonoPalette ? generateGreyFullScale() : generateHCScale(secondary, pageBg['page-bg']);
   } else if (definition.brand && !isDark) {
-    // Brand light — 600 and 800 are sacred hex values
+    // Brand light — 600 is sacred, 800 = accent if provided, else calculated
     priScale = generateBrandScale(primary);
+    if (definition.primaryAccent) priScale[800] = definition.primaryAccent;
     secScale = isMonoPalette ? generateGreyFullScale() : generateBrandScale(secondary);
+    if (!isMonoPalette && definition.secondaryAccent) secScale[800] = definition.secondaryAccent;
   } else if (isDark) {
     // Dark mode (brand or global) — muted, purpose-built for dark bg
     priScale = generateDarkScale(primary);
