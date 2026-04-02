@@ -24,11 +24,11 @@ interface Props {
   colorTier?: 'tint' | 'mid' | 'base' | 'emphasis';
   variant?: 'fill' | 'outline' | 'glass' | 'liquid-glass';
   shadow?: 'none' | 'out' | 'drop' | 'in' | 'elevated' | 'glow' | 'glow-intense';
-  gradient?: 'primary' | 'secondary' | 'neutral' | 'hero' | 'sunset' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  gradient?: 'primary' | 'secondary' | 'neutral' | 'hero' | 'sunset' | 'brand-emerge' | 'brand-fade' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  animatedGradient?: boolean;
   size?: 'sm' | 'md' | 'lg';
   shape?: 'sharp' | 'subtle' | 'soft' | 'rounded' | 'pill';
   borderWeight?: 'thin' | 'thick';
-  borderGradient?: 'primary' | 'secondary' | 'neutral' | 'hero' | 'sunset' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
   icon?: string;
   iconWeight?: 'brand' | 'fill' | 'duotone' | 'regular' | 'bold' | 'thin' | 'light';
   iconColor?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
@@ -49,10 +49,10 @@ const {
   variant = 'fill',
   shadow = 'none',
   gradient,
+  animatedGradient = false,
   size = 'md',
   shape = 'soft',
   borderWeight,
-  borderGradient,
   icon,
   iconWeight,
   iconColor,
@@ -76,10 +76,10 @@ const {
     `badge--${variant}`,
     shadow !== 'none' && `badge--shadow-${shadow}`,
     gradient && `badge--gradient-${gradient}`,
+    animatedGradient && 'badge--animated-gradient',
     size !== 'md' && `badge--${size}`,
     `badge--${shape}`,
     borderWeight && `badge--border-${borderWeight}`,
-    borderGradient && `badge--border-gradient badge--border-gradient-${borderGradient}`,
     level && 'badge--heading',
     icon && 'badge--has-icon',
     !uppercase && 'badge--lowercase',

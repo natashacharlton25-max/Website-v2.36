@@ -1,13 +1,13 @@
 /**
  * Badge — base styles
  *
- * Single colour token: --_badge-color (set by colour enum, shifted by tier)
- * Variant (fill/outline/glass) decides HOW the colour is applied.
- * Tier (tint/mid/base/emphasis) decides WHICH intensity.
+ * One colour token: --_badge-color (colour enum + tier)
+ * One gradient token: --_grad (gradient enum, set globally in gradients.css)
  *
- * Colour enum sets four tier tokens + --_badge-color to base (brand/600).
- * Tier enum shifts --_badge-color to a different position.
- * oklch auto-contrast calculates text colour from bg.
+ * Variant decides HOW colour/gradient is applied.
+ * Tier decides WHICH intensity.
+ * Gradient + variant = specific treatment per variant.
+ * animatedGradient adds flow animation to whatever the variant does.
  */
 
 
@@ -91,7 +91,7 @@
 .badge--lowercase { text-transform: none; }
 
 
-/* ========== VARIANT: Fill (default) ========== */
+/* ========== VARIANT: Fill ========== */
 
 .badge--fill {
   background-color: var(--_badge-color);
@@ -157,40 +157,38 @@
 }
 
 
-/* ========== GRADIENT FILL ========== */
+/* ========== GRADIENT — per variant ========== */
+/* --_grad and --_grad-wash set globally by [class*="--gradient-{name}"] in gradients.css */
 
-[class*="badge--gradient-"]:not([class*="border-gradient"]) {
+/* Fill + gradient: solid gradient bg, solid text (oklch contrast) */
+.badge--fill[class*="badge--gradient-"] {
   background: var(--_grad);
-  border: none;
-  color: var(--color-Text-contrast);
-}
-
-.badge--fill[class*="badge--gradient-"]:not([class*="border-gradient"]) {
-  background: var(--_grad-wash);
-  color: var(--color-Text);
+  color: oklch(from var(--_grad) round(1.21 - l) 0 0);
   border: none;
 }
 
-.badge--outline[class*="badge--gradient-"]:not([class*="border-gradient"]) {
+/* Outline + gradient: gradient border, gradient text, transparent bg */
+.badge--outline[class*="badge--gradient-"] {
   border: var(--border-width-2) solid transparent;
   background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_grad) border-box;
 }
 
-.badge--outline[class*="badge--gradient-"]:not([class*="border-gradient"]) .badge__label {
+.badge--outline[class*="badge--gradient-"] .badge__label {
   background: var(--_grad);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.badge--glass[class*="badge--gradient-"]:not([class*="border-gradient"]) {
+/* Glass + gradient: glass bg, gradient text */
+.badge--glass[class*="badge--gradient-"] {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: var(--border-width) solid color-mix(in oklch, var(--neutral-400) 20%, transparent);
 }
 
-.badge--glass[class*="badge--gradient-"]:not([class*="border-gradient"]) .badge__label {
+.badge--glass[class*="badge--gradient-"] .badge__label {
   background: var(--_grad);
   -webkit-background-clip: text;
   background-clip: text;
@@ -198,41 +196,15 @@
 }
 
 
-/* ========== ANIMATED GRADIENT BORDER ========== */
+/* ========== ANIMATED GRADIENT ========== */
+/* Adds flow animation to whatever the variant already does with gradient */
 
-.badge--border-gradient { --_border-grad: var(--gradient-hero); }
-.badge--border-gradient-primary   { --_border-grad: var(--gradient-primary); }
-.badge--border-gradient-secondary { --_border-grad: var(--gradient-secondary); }
-.badge--border-gradient-neutral   { --_border-grad: var(--gradient-neutral); }
-.badge--border-gradient-hero      { --_border-grad: var(--gradient-hero); }
-.badge--border-gradient-sunset    { --_border-grad: var(--gradient-sunset); }
-.badge--border-gradient-red       { --_border-grad: var(--gradient-red); }
-.badge--border-gradient-orange    { --_border-grad: var(--gradient-orange); }
-.badge--border-gradient-yellow    { --_border-grad: var(--gradient-yellow); }
-.badge--border-gradient-teal      { --_border-grad: var(--gradient-teal); }
-.badge--border-gradient-blue      { --_border-grad: var(--gradient-blue); }
-.badge--border-gradient-purple    { --_border-grad: var(--gradient-purple); }
-.badge--border-gradient-pink      { --_border-grad: var(--gradient-pink); }
-
-.badge.badge--border-gradient {
-  border: var(--border-width-2) solid transparent;
-  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_border-grad) border-box;
-  background-size: 100% 100%, 200% 200%;
+.badge--animated-gradient {
+  background-size: 200% 200%;
   animation-name: anim-border-flow;
   animation-duration: var(--duration-continuous-slower);
   animation-timing-function: var(--ease-default);
   animation-iteration-count: infinite;
-}
-
-.badge.badge--border-gradient .badge__label {
-  background: var(--_border-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.badge.badge--border-gradient .badge__icon {
-  color: var(--_badge-color);
 }
 
 
