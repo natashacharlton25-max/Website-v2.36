@@ -158,26 +158,29 @@ export function generateBrandScale(baseHex, accentHex) {
 
   const scale = {};
 
-  // Anchors — exact brand values
+  // Anchors — exact brand values, never overridden
   scale[600] = baseHex;
   scale[800] = accentHex;
 
-  // 700 = mix of base and accent
-  scale[700] = chroma.mix(baseHex, accentHex, 0.5, 'oklch').hex();
+  // 700 = mix of base and accent — the bridge
+  const mix700 = chroma.mix(baseHex, accentHex, 0.5, 'oklch');
+  scale[700] = mix700.hex();
 
-  // 200-500: lighten from base toward wash
-  // 200 = very light wash, 500 = slightly lighter than base
-  scale[200] = safeOklch(0.92, bC * 0.20, bH);
-  scale[300] = safeOklch(0.82, bC * 0.45, bH);
-  scale[400] = safeOklch(0.72, bC * 0.70, bH);
-  scale[500] = safeOklch(0.60, bC * 0.85, bH);
+  // Generate from the midpoint (700) so the scale is centred between both brand colours
+  const [mL, mC, mH] = mix700.oklch();
 
-  // 900-950: darken from accent
-  scale[900] = safeOklch(0.18, aC * 0.50, aH);
-  scale[950] = safeOklch(0.12, aC * 0.30, aH);
+  // 200-500: lighten from midpoint hue — smooth ramp, not just one anchor colour
+  scale[200] = safeOklch(0.92, mC * 0.20, mH);
+  scale[300] = safeOklch(0.82, mC * 0.45, mH);
+  scale[400] = safeOklch(0.72, mC * 0.70, mH);
+  scale[500] = safeOklch(0.60, mC * 0.85, mH);
+
+  // 900-950: darken from midpoint hue
+  scale[900] = safeOklch(0.18, mC * 0.50, mH);
+  scale[950] = safeOklch(0.12, mC * 0.30, mH);
 
   // 100 if needed
-  scale[100] = safeOklch(0.96, bC * 0.08, bH);
+  scale[100] = safeOklch(0.96, mC * 0.08, mH);
 
   return scale;
 }
