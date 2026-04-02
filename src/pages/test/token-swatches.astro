@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const rainbowColours = ['red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'];
+const tiers = ['wash', 'light', 'base', 'dark', 'deep'];
+const brandColours = ['primary', 'secondary', 'neutral'];
+const brandScale = ['200', '300', '400', '500', '600', '700', '800', '900'];
+const gradientTiers = ['wash', 'light', '', 'dark', 'deep'];
+const mixedGradients = ['hero', 'sunset', 'brand-emerge', 'brand-fade', 'primary-soft', 'primary-light', 'secondary-soft'];
+---
+
+<BaseLayout title="Token Swatches">
+  <main style="max-width: var(--container-7xl); margin: 0 auto; padding: var(--space-xl);">
+
+    <h1 style="color: var(--color-Text); margin-bottom: var(--space-xl);">Token Swatches</h1>
+
+    <h2 style="color: var(--color-Text); margin-bottom: var(--space-md);">Rainbow Colours — 5 tiers</h2>
+    <div style="display: grid; grid-template-columns: auto repeat(5, 1fr); gap: 2px; margin-bottom: var(--space-xl);">
+      <div></div>
+      {tiers.map(t => <div style="text-align: center; font-size: var(--text-fine); color: var(--color-Text); padding: var(--space-xs);">{t}</div>)}
+      {rainbowColours.map(c => <>
+        <div style={`font-size: var(--text-fine); color: var(--color-Text); padding: var(--space-xs); display: flex; align-items: center;`}>{c}</div>
+        <div style={`background: var(--rainbow-${rainbowColours.indexOf(c)+1}-wash); height: 48px; border-radius: var(--radius-xs);`}></div>
+        <div style={`background: var(--rainbow-${rainbowColours.indexOf(c)+1}-light); height: 48px; border-radius: var(--radius-xs);`}></div>
+        <div style={`background: var(--rainbow-${rainbowColours.indexOf(c)+1}); height: 48px; border-radius: var(--radius-xs);`}></div>
+        <div style={`background: var(--rainbow-${rainbowColours.indexOf(c)+1}-dark); height: 48px; border-radius: var(--radius-xs);`}></div>
+        <div style={`background: var(--rainbow-${rainbowColours.indexOf(c)+1}-deep); height: 48px; border-radius: var(--radius-xs);`}></div>
+      </>)}
+    </div>
+
+    <h2 style="color: var(--color-Text); margin-bottom: var(--space-md);">Brand Colours — scale positions</h2>
+    <div style="display: grid; grid-template-columns: auto repeat(8, 1fr); gap: 2px; margin-bottom: var(--space-xl);">
+      <div></div>
+      {brandScale.map(s => <div style="text-align: center; font-size: var(--text-fine); color: var(--color-Text); padding: var(--space-xs);">{s}</div>)}
+      {brandColours.map(c => <>
+        <div style={`font-size: var(--text-fine); color: var(--color-Text); padding: var(--space-xs); display: flex; align-items: center;`}>{c}</div>
+        {brandScale.map(s => <div style={`background: var(--${c}-${s}); height: 48px; border-radius: var(--radius-xs);`}></div>)}
+      </>)}
+    </div>
+
+    <h2 style="color: var(--color-Text); margin-bottom: var(--space-md);">Rainbow Gradients — 5 tiers</h2>
+    <div style="display: grid; grid-template-columns: auto repeat(5, 1fr); gap: 2px; margin-bottom: var(--space-xl);">
+      <div></div>
+      {gradientTiers.map(t => <div style="text-align: center; font-size: var(--text-fine); color: var(--color-Text); padding: var(--space-xs);">{t || 'base'}</div>)}
+      {rainbowColours.map(c => <>
+        <div style={`font-size: var(--text-fine); color: var(--color-Text); padding: var(--space-xs); display: flex; align-items: center;`}>{c}</div>
+        {gradientTiers.map(t => {
+          const name = t ? `${c}-${t}` : c;
+          return <div style={`background: var(--gradient-${name}); height: 48px; border-radius: var(--radius-xs);`}></div>;
+        })}
+      </>)}
+    </div>
+
+    <h2 style="color: var(--color-Text); margin-bottom: var(--space-md);">Brand + Mixed Gradients</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-sm); margin-bottom: var(--space-xl);">
+      {['primary', 'secondary', 'neutral', 'primary-soft', 'primary-light', 'secondary-soft', 'primary-wash', 'secondary-wash', 'neutral-wash', 'hero', 'sunset', 'brand-emerge', 'brand-fade', 'light', 'dark', 'background-light', 'background-warm', 'background-cool'].map(g =>
+        <div style={`background: var(--gradient-${g}); height: 48px; border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center;`}>
+          <span style="font-size: var(--text-fine); color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5); mix-blend-mode: difference;">{g}</span>
+        </div>
+      )}
+    </div>
+
+    <h2 style="color: var(--color-Text); margin-bottom: var(--space-md);">Text Tokens</h2>
+    <div style="display: flex; gap: var(--space-md); margin-bottom: var(--space-xl);">
+      <div style="padding: var(--space-md); background: var(--page-bg); border: 1px solid var(--neutral-400); border-radius: var(--radius-sm);">
+        <span style="color: var(--color-Text);">--color-Text</span>
+      </div>
+      <div style="padding: var(--space-md); background: var(--color-Text); border-radius: var(--radius-sm);">
+        <span style="color: var(--color-Text-contrast);">--color-Text-contrast</span>
+      </div>
+    </div>
+
+  </main>
+</BaseLayout>
