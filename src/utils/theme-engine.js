@@ -158,40 +158,45 @@ export function generateBrandScale(baseHex, accentHex) {
 
   const scale = {};
 
-  // Anchors — exact brand values, never overridden
+  // 600 = sacred, exact hex, never touch
   scale[600] = baseHex;
-  scale[800] = accentHex;
 
-  // 700 = mix of base and accent — the bridge
-  const mix700 = chroma.mix(baseHex, accentHex, 0.5, 'oklch');
+  // 800 = prefer exact hex, but adjust if lighter than 600 (inverted)
+  // Darken 800 so it sits below 600 lightness for monotonic scale
+  let finalAccent = accentHex;
+  if (aL > bL) {
+    // 800 is lighter than 600 — darken it to just below 600
+    const targetL800 = bL * 0.75;
+    finalAccent = safeOklch(targetL800, aC * 0.80, aH);
+  }
+  scale[800] = finalAccent;
+
+  // 700 = mix of 600 and adjusted 800
+  const mix700 = chroma.mix(baseHex, finalAccent, 0.5, 'oklch');
   scale[700] = mix700.hex();
 
-  // Generate from the midpoint (700) hue
-  const [mL, mC, mH] = mix700.oklch();
+  // Find the lightest and darkest anchors for direction
+  const lightest = Math.max(bL, aL, chroma(scale[700]).get('oklch.l'));
+  const darkest = Math.min(bL, aL, chroma(scale[700]).get('oklch.l'));
 
-  // First pass — standard positions from midpoint
-  scale[200] = safeOklch(0.92, mC * 0.20, mH);
-  scale[300] = safeOklch(0.82, mC * 0.45, mH);
-  scale[400] = safeOklch(0.72, mC * 0.70, mH);
-  scale[500] = safeOklch(0.60, mC * 0.85, mH);
+  // Use the lighter anchor's hue for 200-500 (wash ramp)
+  // Use the darker anchor's hue for 900-950 (deep ramp)
+  const lightHue = bL >= aL ? (bH || 0) : (aH || 0);
+  const darkHue = bL < aL ? (bH || 0) : (aH || 0);
+  const lightC = bL >= aL ? bC : aC;
+  const darkC = bL < aL ? bC : aC;
 
-  // Check: if 500 is darker than 700, the anchors are very light
-  // Recalculate 200-500 relative to 700 lightness so they ramp above it
-  const l500 = chroma(scale[500]).get('oklch.l');
-  const l700 = chroma(scale[700]).get('oklch.l');
-  if (l500 < l700) {
-    scale[200] = safeOklch(0.92, mC * 0.20, mH);
-    scale[300] = safeOklch(l700 + (0.92 - l700) * 0.70, mC * 0.40, mH);
-    scale[400] = safeOklch(l700 + (0.92 - l700) * 0.45, mC * 0.60, mH);
-    scale[500] = safeOklch(l700 + (0.92 - l700) * 0.15, mC * 0.80, mH);
-  }
+  // 200-500: ramp from near-white down toward the lightest anchor
+  // Always lighter than ALL anchors (600, 700, 800)
+  scale[100] = safeOklch(0.97, lightC * 0.05, lightHue);
+  scale[200] = safeOklch(0.92, lightC * 0.15, lightHue);
+  scale[300] = safeOklch(lightest + (0.92 - lightest) * 0.55, lightC * 0.35, lightHue);
+  scale[400] = safeOklch(lightest + (0.92 - lightest) * 0.30, lightC * 0.55, lightHue);
+  scale[500] = safeOklch(lightest + (0.92 - lightest) * 0.05, lightC * 0.75, lightHue);
 
-  // 900-950: darken from midpoint
-  scale[900] = safeOklch(0.18, mC * 0.50, mH);
-  scale[950] = safeOklch(0.12, mC * 0.30, mH);
-
-  // 100 if needed
-  scale[100] = safeOklch(0.96, mC * 0.08, mH);
+  // 900-950: ramp from darkest anchor toward near-black
+  scale[900] = safeOklch(darkest * 0.35, darkC * 0.40, darkHue);
+  scale[950] = safeOklch(darkest * 0.18, darkC * 0.20, darkHue);
 
   return scale;
 }
