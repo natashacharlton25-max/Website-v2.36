@@ -148,55 +148,37 @@ function findLightnessForContrast(bgHex, hue, chromaVal, targetRatio, tolerance 
  * Positions 900-950 darken from 800.
  * If only one hex provided, falls back to generateScale.
  */
-export function generateBrandScale(baseHex, accentHex) {
-  if (!accentHex) return generateScale(baseHex);
-
+export function generateBrandScale(baseHex) {
   const base = chroma(baseHex);
-  const accent = chroma(accentHex);
   const [bL, bC, bH] = base.oklch();
-  const [aL, aC, aH] = accent.oklch();
+  const hue = bH || 0;
 
   const scale = {};
 
-  // 600 = sacred, exact hex, never touch
+  // 600 = sacred, exact brand hex, never touched
   scale[600] = baseHex;
 
-  // 800 = prefer exact hex, but adjust if lighter than 600 (inverted)
-  // Darken 800 so it sits below 600 lightness for monotonic scale
-  let finalAccent = accentHex;
-  if (aL > bL) {
-    // 800 is lighter than 600 — darken it to just below 600
-    const targetL800 = bL * 0.75;
-    finalAccent = safeOklch(targetL800, aC * 0.80, aH);
+  // Monochromatic scale from the same hue
+  // 200-500: lighten toward wash
+  scale[100] = safeOklch(0.97, bC * 0.05, hue);
+  scale[200] = safeOklch(0.92, bC * 0.15, hue);
+  scale[300] = safeOklch(0.82, bC * 0.35, hue);
+  scale[400] = safeOklch(0.72, bC * 0.55, hue);
+  scale[500] = safeOklch(0.62, bC * 0.75, hue);
+
+  // If 500 ends up darker than 600 (brand colour is very light), recalculate
+  const l500 = chroma(scale[500]).get('oklch.l');
+  if (l500 < bL) {
+    scale[300] = safeOklch(bL + (0.92 - bL) * 0.70, bC * 0.35, hue);
+    scale[400] = safeOklch(bL + (0.92 - bL) * 0.45, bC * 0.55, hue);
+    scale[500] = safeOklch(bL + (0.92 - bL) * 0.15, bC * 0.75, hue);
   }
-  scale[800] = finalAccent;
 
-  // 700 = mix of 600 and adjusted 800
-  const mix700 = chroma.mix(baseHex, finalAccent, 0.5, 'oklch');
-  scale[700] = mix700.hex();
-
-  // Find the lightest and darkest anchors for direction
-  const lightest = Math.max(bL, aL, chroma(scale[700]).get('oklch.l'));
-  const darkest = Math.min(bL, aL, chroma(scale[700]).get('oklch.l'));
-
-  // Use the lighter anchor's hue for 200-500 (wash ramp)
-  // Use the darker anchor's hue for 900-950 (deep ramp)
-  const lightHue = bL >= aL ? (bH || 0) : (aH || 0);
-  const darkHue = bL < aL ? (bH || 0) : (aH || 0);
-  const lightC = bL >= aL ? bC : aC;
-  const darkC = bL < aL ? bC : aC;
-
-  // 200-500: ramp from near-white down toward the lightest anchor
-  // Always lighter than ALL anchors (600, 700, 800)
-  scale[100] = safeOklch(0.97, lightC * 0.05, lightHue);
-  scale[200] = safeOklch(0.92, lightC * 0.15, lightHue);
-  scale[300] = safeOklch(lightest + (0.92 - lightest) * 0.55, lightC * 0.35, lightHue);
-  scale[400] = safeOklch(lightest + (0.92 - lightest) * 0.30, lightC * 0.55, lightHue);
-  scale[500] = safeOklch(lightest + (0.92 - lightest) * 0.05, lightC * 0.75, lightHue);
-
-  // 900-950: ramp from darkest anchor toward near-black
-  scale[900] = safeOklch(darkest * 0.35, darkC * 0.40, darkHue);
-  scale[950] = safeOklch(darkest * 0.18, darkC * 0.20, darkHue);
+  // 700-800: darken from 600
+  scale[700] = safeOklch(bL * 0.75, bC * 0.85, hue);
+  scale[800] = safeOklch(bL * 0.55, bC * 0.70, hue);
+  scale[900] = safeOklch(bL * 0.30, bC * 0.45, hue);
+  scale[950] = safeOklch(bL * 0.15, bC * 0.25, hue);
 
   return scale;
 }
@@ -1065,8 +1047,8 @@ export function generateThemeData(definition) {
     secScale = isMonoPalette ? generateGreyFullScale() : generateHCScale(secondary, pageBg['page-bg']);
   } else if (definition.brand && !isDark) {
     // Brand light — 600 and 800 are sacred hex values
-    priScale = generateBrandScale(primary, definition.primaryAccent || null);
-    secScale = isMonoPalette ? generateGreyFullScale() : generateBrandScale(secondary, definition.secondaryAccent || null);
+    priScale = generateBrandScale(primary);
+    secScale = isMonoPalette ? generateGreyFullScale() : generateBrandScale(secondary);
   } else if (isDark) {
     // Dark mode (brand or global) — muted, purpose-built for dark bg
     priScale = generateDarkScale(primary);
