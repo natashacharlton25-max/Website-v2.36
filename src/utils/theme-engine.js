@@ -230,6 +230,34 @@ export function generateHCScale(baseHex, pageBgHex = '#000000') {
 }
 
 /**
+ * Generate a dark-mode scale from a base hex.
+ * Same hue, muted chroma, lightness inverted for dark backgrounds.
+ * 600 = muted base (readable on dark bg), 800 = slightly lighter muted accent.
+ * Not a flip — purpose-built for dark.
+ */
+export function generateDarkScale(baseHex) {
+  const [, c, h] = chroma(baseHex).oklch();
+  const hue = h || 0;
+  // Mute chroma to ~60% of original — vivid colours are harsh on dark
+  const mutedC = c * 0.60;
+
+  const scale = {};
+  // Dark bg positions: 200 = near-black, 900 = near-white
+  scale[100] = safeOklch(0.08, mutedC * 0.05, hue);
+  scale[200] = safeOklch(0.14, mutedC * 0.15, hue);
+  scale[300] = safeOklch(0.25, mutedC * 0.35, hue);
+  scale[400] = safeOklch(0.38, mutedC * 0.55, hue);
+  scale[500] = safeOklch(0.50, mutedC * 0.75, hue);
+  scale[600] = safeOklch(0.62, mutedC * 0.85, hue);  // muted base — readable on dark
+  scale[700] = safeOklch(0.72, mutedC * 0.70, hue);
+  scale[800] = safeOklch(0.80, mutedC * 0.55, hue);  // lighter, softer accent
+  scale[900] = safeOklch(0.90, mutedC * 0.25, hue);
+  scale[950] = safeOklch(0.95, mutedC * 0.10, hue);
+
+  return scale;
+}
+
+/**
  * Generate an 11-step OKLCH scale from any base hex colour.
  * Chroma tapers toward white/black extremes, gamut-clamped per hue.
  */
@@ -1004,24 +1032,30 @@ export function generateThemeData(definition) {
       : { 'page-bg': '#ffffff', 'page-bg-raised': '#f5f5f5', 'page-bg-sunken': '#eeeeee', 'page-bg-overlay': '#fafafa' };
   }
 
-  // 2. Generate scales — two paths:
-  //    Brand: 600 + 800 anchored (never overridden), everything else interpolated
-  //    Calculated: single-hex lightness curve, HC gets contrast-targeted values
+  // 2. Generate scales — pick the right generator per mode:
+  //    Brand light:  sacred 600/800 hex, rest interpolated
+  //    Brand dark:   muted from brand hue, purpose-built for dark bg
+  //    HC:           contrast-targeted from hue, AAA ratios
+  //    Global light: single-hex lightness curve
+  //    Global dark:  muted from hue
   let priScale, secScale;
 
-  if (definition.brand) {
-    // Brand path — 600 and 800 are sacred hex values from brand config
+  if (definition.highContrast) {
+    // HC always calculates — brand hex is hue source only
+    priScale = generateHCScale(primary, pageBg['page-bg']);
+    secScale = isMonoPalette ? generateGreyFullScale() : generateHCScale(secondary, pageBg['page-bg']);
+  } else if (definition.brand && !isDark) {
+    // Brand light — 600 and 800 are sacred hex values
     priScale = generateBrandScale(primary, definition.primaryAccent || null);
     secScale = isMonoPalette ? generateGreyFullScale() : generateBrandScale(secondary, definition.secondaryAccent || null);
+  } else if (isDark) {
+    // Dark mode (brand or global) — muted, purpose-built for dark bg
+    priScale = generateDarkScale(primary);
+    secScale = isMonoPalette ? generateGreyFullScale() : generateDarkScale(secondary);
   } else {
-    // Calculated path — HC + global themes, all positions computed
-    if (definition.highContrast) {
-      priScale = generateHCScale(primary, pageBg['page-bg']);
-      secScale = isMonoPalette ? generateGreyFullScale() : generateHCScale(secondary, pageBg['page-bg']);
-    } else {
-      priScale = generateScale(primary);
-      secScale = isMonoPalette ? generateGreyFullScale() : generateScale(secondary);
-    }
+    // Global light — single-hex lightness curve
+    priScale = generateScale(primary);
+    secScale = isMonoPalette ? generateGreyFullScale() : generateScale(secondary);
   }
 
   // Neutral: mono themes get hue-tinted, otherwise warm or pure grey
@@ -1031,18 +1065,9 @@ export function generateThemeData(definition) {
     : neutralType === 'pure' ? generatePureGreyScale() : generateNeutralScale(neutralHue);
   const scales = { primary: priScale, secondary: secScale, neutral: neuScale };
 
-  // 3. Dark mode: flip scale positions so positions are contextually correct
-  // HC scales already have dark-appropriate values — skip flip for HC
-  if (isDark && !definition.highContrast) {
-    const FLIP_PAIRS = [[100, 950], [200, 900], [300, 800], [400, 700], [500, 600]];
-    for (const scale of Object.values(scales)) {
-      for (const [a, b] of FLIP_PAIRS) {
-        if (scale[a] !== undefined && scale[b] !== undefined) {
-          [scale[a], scale[b]] = [scale[b], scale[a]];
-        }
-      }
-    }
-  }
+  // 3. No more dark flip — each generator produces mode-appropriate values directly.
+  //    generateDarkScale = muted for dark bg, generateHCScale = contrast-targeted,
+  //    generateBrandScale = sacred anchors for light. No post-hoc swapping.
 
   // HC pageBg + scale overrides handled by generateHCScale above — no manual overrides needed
 
