@@ -1088,9 +1088,8 @@ export function generateThemeData(definition) {
     if (secL < 0.25) {
       const priHue = chroma(primary).get('oklch.h') || 0;
       const priC = chroma(primary).get('oklch.c') || 0;
-      secScale[800] = safeOklch(secL * 0.70, priC * 0.25, priHue);
-      // Recalculate 900 from new 800
-      secScale[900] = safeOklch(chroma(secScale[800]).get('oklch.l') * 0.65, priC * 0.15, priHue);
+      // Take primary's 900 directly — near-black but brand-tinted
+      secScale[800] = priScale[900];
     }
   }
 
