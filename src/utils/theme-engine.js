@@ -166,23 +166,32 @@ export function generateBrandScale(baseHex, accentHex) {
   const mix700 = chroma.mix(baseHex, accentHex, 0.5, 'oklch');
   scale[700] = mix700.hex();
 
-  // Generate from the midpoint (700) so the scale is centred between both brand colours
+  // Generate from the midpoint (700) hue
   const [mL, mC, mH] = mix700.oklch();
-  // 200-500: ramp from near-white DOWN to just above the 600 anchor lightness
-  // Lightness must always decrease: 200 > 300 > 400 > 500 > 600
-  const l600 = bL; // lightness of the 600 anchor (from destructure above)
-  scale[200] = safeOklch(0.96, mC * 0.12, mH);
-  scale[300] = safeOklch(l600 + (0.96 - l600) * 0.65, mC * 0.30, mH);
-  scale[400] = safeOklch(l600 + (0.96 - l600) * 0.35, mC * 0.55, mH);
-  scale[500] = safeOklch(l600 + (0.96 - l600) * 0.10, mC * 0.75, mH);
 
-  // 900-950: ramp below the 800 anchor lightness toward near-black
-  const l800 = aL; // from destructure above
-  scale[900] = safeOklch(l800 * 0.30, mC * 0.40, mH);
-  scale[950] = safeOklch(l800 * 0.15, mC * 0.20, mH);
+  // First pass — standard positions from midpoint
+  scale[200] = safeOklch(0.92, mC * 0.20, mH);
+  scale[300] = safeOklch(0.82, mC * 0.45, mH);
+  scale[400] = safeOklch(0.72, mC * 0.70, mH);
+  scale[500] = safeOklch(0.60, mC * 0.85, mH);
+
+  // Check: if 500 is darker than 700, the anchors are very light
+  // Recalculate 200-500 relative to 700 lightness so they ramp above it
+  const l500 = chroma(scale[500]).get('oklch.l');
+  const l700 = chroma(scale[700]).get('oklch.l');
+  if (l500 < l700) {
+    scale[200] = safeOklch(0.92, mC * 0.20, mH);
+    scale[300] = safeOklch(l700 + (0.92 - l700) * 0.70, mC * 0.40, mH);
+    scale[400] = safeOklch(l700 + (0.92 - l700) * 0.45, mC * 0.60, mH);
+    scale[500] = safeOklch(l700 + (0.92 - l700) * 0.15, mC * 0.80, mH);
+  }
+
+  // 900-950: darken from midpoint
+  scale[900] = safeOklch(0.18, mC * 0.50, mH);
+  scale[950] = safeOklch(0.12, mC * 0.30, mH);
 
   // 100 if needed
-  scale[100] = safeOklch(0.98, mC * 0.05, mH);
+  scale[100] = safeOklch(0.96, mC * 0.08, mH);
 
   return scale;
 }
