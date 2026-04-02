@@ -1081,22 +1081,17 @@ export function generateThemeData(definition) {
     secScale = isMonoPalette ? generateGreyFullScale() : generateScale(secondary);
   }
 
-  // If 600 and 800 are too close (visually indistinct), replace 800.
-  // Skip pastel scales (L > 0.75) — their gentle emphasis is intentional.
-  // First try own 900, then try other scale's 900.
-  if (!definition.highContrast) {
+  // If 600 is near-black (L < 0.25) and 800 is indistinct, replace 800
+  // with the other scale's 900 (brand-tinted near-black).
+  // Only fires for near-black — normal dark/vivid colours keep their calculated 800.
+  if (!isMonoPalette && !definition.highContrast) {
     for (const [scale, otherScale] of [[priScale, secScale], [secScale, priScale]]) {
       const l600 = chroma(scale[600]).get('oklch.l');
-      if (l600 > 0.75) continue; // pastel — keep gentle 800
+      if (l600 >= 0.25) continue; // not near-black — keep calculated 800
       const l800 = chroma(scale[800]).get('oklch.l');
       const diff = Math.abs(l600 - l800);
-      if (diff < 0.12) {
-        const own900diff = Math.abs(l600 - chroma(scale[900]).get('oklch.l'));
-        if (own900diff >= 0.15) {
-          scale[800] = scale[900];
-        } else if (otherScale[900]) {
-          scale[800] = otherScale[900];
-        }
+      if (diff < 0.12 && otherScale[900]) {
+        scale[800] = otherScale[900];
       }
     }
   }
