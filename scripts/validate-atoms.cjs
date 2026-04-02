@@ -351,9 +351,9 @@ for (const atom of atoms) {
         issues.push({ rule: 28, ln: '--', file: schemaFile, msg: `unexpected render keys: ${unexpected.join(', ')} (allowed: full, reduced, textonly)` });
       }
 
-      // Rule 30: Schema color enum must be canonical 11 values
-      // default (--color-Text), primary, secondary, neutral, + 7 rainbow
-      const canonicalColorEnum = ['default','primary','secondary','neutral','red','orange','yellow','teal','blue','purple','pink'];
+      // Rule 30: Schema color enum must be canonical values from shared-enums.json
+      const sharedEnums = require(path.join(__dirname, '..', 'src', 'lib', 'shared-enums.json'));
+      const canonicalColorEnum = sharedEnums.colour;
       const colorProp = (props.visual && props.visual.color) || null;
       if (colorProp && colorProp.enum) {
         const missingColors = canonicalColorEnum.filter(c => !colorProp.enum.includes(c));

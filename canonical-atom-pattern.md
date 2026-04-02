@@ -1160,6 +1160,8 @@ Radius doesn't scale with text. A pill button stays pill at every size. `border-
 - Every string prop in visual{} and animation{} MUST have an enum — JSON sends enums, not freeform strings
 - Exempt: slug-type props (lottieIcon, morphTo, maskShape — asset references are freeform by nature)
 - class/style are Astro composition props — should NOT be in schema (JSON authors don't set them)
+- Shared enums defined ONCE in `src/lib/shared-enums.ts` (.ts for Astro) and `src/lib/shared-enums.json` (for validators/schemas)
+- Add a new enum value in shared-enums = available in every component automatically
 
 ---
 
