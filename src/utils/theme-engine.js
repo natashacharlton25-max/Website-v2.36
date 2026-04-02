@@ -852,7 +852,7 @@ function computeFocusHighlightTokens(scales, pageBg, isDark, isHC = false, statu
   // Contrast-check: 4.5:1 AA against bg (AAA may conflict with text distinction)
   // Chroma kept high so colour distinguishes from neutral text
   let fAttempts = 0;
-  let fL = focusL;
+  let fL = targetL;
   while (fAttempts < 20 && (
     contrastRatio(focusHex, pageBgHex) < 4.5 ||
     contrastRatio(focusHex, cardBgHex) < 4.5
@@ -863,7 +863,7 @@ function computeFocusHighlightTokens(scales, pageBg, isDark, isHC = false, statu
   }
 
   let hAttempts = 0;
-  let hL = hlL;
+  let hL = targetL;
   while (hAttempts < 20 && (
     contrastRatio(highlightHex, pageBgHex) < 4.5 ||
     contrastRatio(highlightHex, cardBgHex) < 4.5
