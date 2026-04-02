@@ -191,13 +191,13 @@ export function generateBrandScale(baseHex) {
   scale[400] = safeOklch(l400, c400, hue);
   scale[800] = safeOklch(l800, c800, hue);
 
-  // Duplicates for in-between positions (gradients etc)
-  scale[100] = scale[200];
-  scale[300] = scale[200];
-  scale[500] = scale[400];
-  scale[700] = scale[800];
-  scale[900] = scale[800];
-  scale[950] = scale[800];
+  // In-between positions — interpolated from the four core values
+  scale[100] = safeOklch(l200 + (0.97 - l200) * 0.50, c200 * 0.30, hue);
+  scale[300] = safeOklch(l200 + (l400 - l200) * 0.50, (c200 + c400) * 0.50, hue);
+  scale[500] = safeOklch(l400 + (bL - l400) * 0.50, (c400 + bC) * 0.50, hue);
+  scale[700] = safeOklch(bL + (l800 - bL) * 0.35, (bC + c800) * 0.50, hue);
+  scale[900] = safeOklch(l800 * 0.65, c800 * 0.55, hue);
+  scale[950] = safeOklch(l800 * 0.40, c800 * 0.35, hue);
 
   return scale;
 }
