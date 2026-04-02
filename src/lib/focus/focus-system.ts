@@ -91,9 +91,9 @@ function initFocusSystem() {
         (el as HTMLElement).style.setProperty('--focus-angle', `${angle}deg`);
 
         const rainbowBase = ['--rainbow-1', '--rainbow-2', '--rainbow-3', '--rainbow-4', '--rainbow-5', '--rainbow-6', '--rainbow-7'];
-        const rainbowWash = ['--rainbow-1-wash', '--rainbow-2-wash', '--rainbow-3-wash', '--rainbow-4-wash', '--rainbow-5-wash', '--rainbow-6-wash', '--rainbow-7-wash'];
-        const rainbowLight = ['--rainbow-1-light', '--rainbow-2-light', '--rainbow-3-light', '--rainbow-4-light', '--rainbow-5-light', '--rainbow-6-light', '--rainbow-7-light'];
-        const rainbowDark = ['--rainbow-1-dark', '--rainbow-2-dark', '--rainbow-3-dark', '--rainbow-4-dark', '--rainbow-5-dark', '--rainbow-6-dark', '--rainbow-7-dark'];
+        const rainbowWash = ['--rainbow-1-tint', '--rainbow-2-tint', '--rainbow-3-tint', '--rainbow-4-tint', '--rainbow-5-tint', '--rainbow-6-tint', '--rainbow-7-tint'];
+        const rainbowLight = ['--rainbow-1-mid', '--rainbow-2-mid', '--rainbow-3-mid', '--rainbow-4-mid', '--rainbow-5-mid', '--rainbow-6-mid', '--rainbow-7-mid'];
+        const rainbowDark = ['--rainbow-1-emphasis', '--rainbow-2-emphasis', '--rainbow-3-emphasis', '--rainbow-4-emphasis', '--rainbow-5-emphasis', '--rainbow-6-emphasis', '--rainbow-7-emphasis'];
         const idx = _rainbowIndex;
         const complementIdx = (idx + 3) % 7;
 
@@ -167,8 +167,8 @@ function initFocusSystem() {
         const styles = getComputedStyle(document.body);
 
         const rainbowBase = ['--rainbow-1', '--rainbow-2', '--rainbow-3', '--rainbow-4', '--rainbow-5', '--rainbow-6', '--rainbow-7'];
-        const rainbowLight = ['--rainbow-1-light', '--rainbow-2-light', '--rainbow-3-light', '--rainbow-4-light', '--rainbow-5-light', '--rainbow-6-light', '--rainbow-7-light'];
-        const rainbowDark = ['--rainbow-1-dark', '--rainbow-2-dark', '--rainbow-3-dark', '--rainbow-4-dark', '--rainbow-5-dark', '--rainbow-6-dark', '--rainbow-7-dark'];
+        const rainbowLight = ['--rainbow-1-mid', '--rainbow-2-mid', '--rainbow-3-mid', '--rainbow-4-mid', '--rainbow-5-mid', '--rainbow-6-mid', '--rainbow-7-mid'];
+        const rainbowDark = ['--rainbow-1-emphasis', '--rainbow-2-emphasis', '--rainbow-3-emphasis', '--rainbow-4-emphasis', '--rainbow-5-emphasis', '--rainbow-6-emphasis', '--rainbow-7-emphasis'];
 
         const ringTokens = isHC ? rainbowLight : (isDark ? rainbowDark : rainbowBase);
         const ringColor = styles.getPropertyValue(ringTokens[_rainbowIndex]).trim();

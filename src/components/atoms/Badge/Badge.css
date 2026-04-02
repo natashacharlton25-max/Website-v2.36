@@ -160,13 +160,20 @@
 
 
 /* ========== GRADIENT — per variant ========== */
-/* --_grad and --_grad-wash set globally by [class*="--gradient-{name}"] in gradients.css */
+/* --_grad and --_grad-tint set globally by [class*="--gradient-{name}"] in gradients.css */
 
-/* Fill + gradient: solid gradient bg, contrast text */
+/* Fill + gradient: White/Black swap per mode so one rule fits all.
+   Darker gradients (base/emphasis) → White token text.
+   Lighter gradients (tint/mid) → Black token text. */
 .badge--fill[class*="badge--gradient-"] {
   background: var(--_grad);
-  color: var(--color-Text-contrast);
+  color: var(--color-White);
   border: none;
+}
+
+.badge--fill[class*="badge--gradient-"][class*="-tint"],
+.badge--fill[class*="badge--gradient-"][class*="-mid"] {
+  color: var(--color-Black);
 }
 
 /* Outline + gradient: gradient border, gradient text, transparent bg */
@@ -177,6 +184,7 @@
 
 .badge--outline[class*="badge--gradient-"] .badge__label {
   background: var(--_grad);
+  background-size: 200px 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -244,13 +252,13 @@
 .badge--primary   { --_tier-tint: var(--primary-tint); --_tier-mid: var(--primary-mid); --_badge-color: var(--primary-base); --_tier-emphasis: var(--primary-emphasis); }
 .badge--secondary { --_tier-tint: var(--secondary-tint); --_tier-mid: var(--secondary-mid); --_badge-color: var(--secondary-base); --_tier-emphasis: var(--secondary-emphasis); }
 .badge--neutral   { --_tier-tint: var(--neutral-tint); --_tier-mid: var(--neutral-mid); --_badge-color: var(--neutral-base); --_tier-emphasis: var(--neutral-emphasis); }
-.badge--red       { --_tier-tint: var(--rainbow-1-wash); --_tier-mid: var(--rainbow-1-light); --_badge-color: var(--rainbow-1); --_tier-emphasis: var(--rainbow-1-dark); }
-.badge--orange    { --_tier-tint: var(--rainbow-2-wash); --_tier-mid: var(--rainbow-2-light); --_badge-color: var(--rainbow-2); --_tier-emphasis: var(--rainbow-2-dark); }
-.badge--yellow    { --_tier-tint: var(--rainbow-3-wash); --_tier-mid: var(--rainbow-3-light); --_badge-color: var(--rainbow-3); --_tier-emphasis: var(--rainbow-3-dark); }
-.badge--teal      { --_tier-tint: var(--rainbow-4-wash); --_tier-mid: var(--rainbow-4-light); --_badge-color: var(--rainbow-4); --_tier-emphasis: var(--rainbow-4-dark); }
-.badge--blue      { --_tier-tint: var(--rainbow-5-wash); --_tier-mid: var(--rainbow-5-light); --_badge-color: var(--rainbow-5); --_tier-emphasis: var(--rainbow-5-dark); }
-.badge--purple    { --_tier-tint: var(--rainbow-6-wash); --_tier-mid: var(--rainbow-6-light); --_badge-color: var(--rainbow-6); --_tier-emphasis: var(--rainbow-6-dark); }
-.badge--pink      { --_tier-tint: var(--rainbow-7-wash); --_tier-mid: var(--rainbow-7-light); --_badge-color: var(--rainbow-7); --_tier-emphasis: var(--rainbow-7-dark); }
+.badge--red       { --_tier-tint: var(--rainbow-1-tint); --_tier-mid: var(--rainbow-1-mid); --_badge-color: var(--rainbow-1); --_tier-emphasis: var(--rainbow-1-emphasis); }
+.badge--orange    { --_tier-tint: var(--rainbow-2-tint); --_tier-mid: var(--rainbow-2-mid); --_badge-color: var(--rainbow-2); --_tier-emphasis: var(--rainbow-2-emphasis); }
+.badge--yellow    { --_tier-tint: var(--rainbow-3-tint); --_tier-mid: var(--rainbow-3-mid); --_badge-color: var(--rainbow-3); --_tier-emphasis: var(--rainbow-3-emphasis); }
+.badge--teal      { --_tier-tint: var(--rainbow-4-tint); --_tier-mid: var(--rainbow-4-mid); --_badge-color: var(--rainbow-4); --_tier-emphasis: var(--rainbow-4-emphasis); }
+.badge--blue      { --_tier-tint: var(--rainbow-5-tint); --_tier-mid: var(--rainbow-5-mid); --_badge-color: var(--rainbow-5); --_tier-emphasis: var(--rainbow-5-emphasis); }
+.badge--purple    { --_tier-tint: var(--rainbow-6-tint); --_tier-mid: var(--rainbow-6-mid); --_badge-color: var(--rainbow-6); --_tier-emphasis: var(--rainbow-6-emphasis); }
+.badge--pink      { --_tier-tint: var(--rainbow-7-tint); --_tier-mid: var(--rainbow-7-mid); --_badge-color: var(--rainbow-7); --_tier-emphasis: var(--rainbow-7-emphasis); }
 
 
 /* ========== COLOUR TIER ========== */

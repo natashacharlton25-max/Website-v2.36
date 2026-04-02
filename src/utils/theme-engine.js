@@ -185,7 +185,7 @@ export function generateBrandScale(baseHex) {
   }
 
   // Chroma scales with lightness — lighter = less chroma, darker = slightly less
-  const c200 = bC * 0.15;
+  const c200 = bC * 0.45;
   const c400 = bC * 0.55;
   const c800 = bC * 0.70;
 
@@ -240,7 +240,7 @@ export function generateHCScale(baseHex, pageBgHex = '#000000') {
     scale[950] = safeOklch(0.10, chromaVal * 0.20, hue);
   } else {
     // Dark bg: 200 = visible tint (above page bg), 900 = lightest
-    scale[200] = safeOklch(0.35, chromaVal * 0.30, hue);
+    scale[200] = safeOklch(0.30, chromaVal * 0.30, hue);
     scale[300] = safeOklch(0.35, chromaVal * 0.30, hue);
     scale[400] = safeOklch(0.42, chromaVal * 0.50, hue);
     scale[500] = safeOklch(0.50, chromaVal * 0.70, hue);
@@ -268,7 +268,7 @@ export function generateDarkScale(baseHex) {
   const scale = {};
   // Dark bg positions: 200 = near-black, 900 = near-white
   scale[100] = safeOklch(0.18, mutedC * 0.10, hue);
-  scale[200] = safeOklch(0.35, mutedC * 0.35, hue);
+  scale[200] = safeOklch(0.30, mutedC * 0.35, hue);
   scale[300] = safeOklch(0.35, mutedC * 0.35, hue);
   scale[400] = safeOklch(0.42, mutedC * 0.55, hue);
   scale[500] = safeOklch(0.50, mutedC * 0.75, hue);
@@ -299,7 +299,7 @@ export function generateScale(baseHex) {
     // Prevents warm hues (pink/red) from browning at low lightness.
     let adjustedChroma;
     if (targetL > 0.85) {
-      adjustedChroma = c * 0.3;           // near-white: very low chroma
+      adjustedChroma = c * 0.55;          // light tint: enough chroma to read as colour
     } else if (l > 0.01) {
       adjustedChroma = c * (targetL / l);  // proportional to lightness ratio
       adjustedChroma = Math.max(adjustedChroma, 0.02); // floor: keep some colour
@@ -675,7 +675,7 @@ function generateHighContrastOverrides(isDark, scales) {
   // HC primary/secondary — var() refs for CSS, resolved hex for audit.
   // Dark HC: 300 (vivid, full chroma on black bg)
   // Light HC: 600 (deep, high contrast on white bg — 500 only hits ~4:1)
-  // Position 200 is above chroma taper threshold (L≥0.85 → chroma×0.3) = washed out.
+  // Position 200 is above chroma taper threshold (L≥0.85 → chroma×0.45).
   const priSec = isDark ? {
     'brand-c-primary':         { css: 'var(--primary-300)',     hex: primary[300] },
     'brand-c-secondary':       { css: 'var(--secondary-300)',   hex: secondary[300] },
@@ -1000,8 +1000,9 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
   // Text + theme-specific
   ln(`  /* -- TEXT + THEME-SPECIFIC ---------------------- */`);
   if (definition.highContrast) {
-    ln(`  --color-Text: ${isDark ? 'var(--color-White)' : 'var(--color-Black)'};`);
-    ln(`  --color-Text-contrast: ${isDark ? 'var(--color-Black)' : 'var(--color-White)'};`);
+    // White/Black swap in dark mode, so these refs work in both modes
+    ln(`  --color-Text: var(--color-Black);`);
+    ln(`  --color-Text-contrast: var(--color-White);`);
   } else {
     ln(`  --color-Text: var(--neutral-700);`);
     ln(`  --color-Text-contrast: var(--page-bg);`);
@@ -1103,6 +1104,22 @@ export function generateThemeData(definition) {
     }
   }
 
+  // If primary and secondary have near-identical hue (<15°), shift secondary
+  // lightness in dark mode so they don't converge to the same colour.
+  if (isDark && !isMonoPalette) {
+    const [, , priH] = chroma(primary).oklch();
+    const [, , secH] = chroma(secondary).oklch();
+    const hueDiff = Math.abs((priH || 0) - (secH || 0));
+    const hueClose = hueDiff < 15 || hueDiff > 345; // wraparound
+    if (hueClose) {
+      // Shift secondary: bump all positions +0.10 lightness for separation
+      for (const pos of Object.keys(secScale).map(Number)) {
+        const [sl, sc, sh] = chroma(secScale[pos]).oklch();
+        secScale[pos] = safeOklch(Math.min(sl + 0.10, 0.95), sc * 1.15, sh || 0);
+      }
+    }
+  }
+
   // Neutral: mono themes get hue-tinted, otherwise warm or pure grey
   const neutralHue = neutralType === 'pure' ? 0 : NEUTRAL_HUE;
   const neuScale = isMonoPalette
@@ -1120,6 +1137,10 @@ export function generateThemeData(definition) {
         [neuFlip[a], neuFlip[b]] = [neuFlip[b], neuFlip[a]];
       }
     }
+    // Bump tint and mid up — after flip they're too dark/close together
+    // Primary dark: tint=L0.30, mid=L0.42. Match that spread for neutral.
+    neuFlip[200] = neuFlip[400];  // tint → old 700 (L≈0.36)
+    neuFlip[400] = neuFlip[500];  // mid → old 600 (L≈0.48)
   }
 
   // HC pageBg + scale overrides handled by generateHCScale above — no manual overrides needed
@@ -1131,6 +1152,11 @@ export function generateThemeData(definition) {
   if (definition.highContrast) {
     status['color-Black'] = '#000000';
     status['color-White'] = '#ffffff';
+  }
+
+  // Dark mode: swap White/Black so gradient endpoints flip automatically
+  if (isDark) {
+    [status['color-White'], status['color-Black']] = [status['color-Black'], status['color-White']];
   }
 
   // 5b. Compute focus + highlight tokens
