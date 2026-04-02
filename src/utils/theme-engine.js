@@ -239,10 +239,10 @@ export function generateHCScale(baseHex, pageBgHex = '#000000') {
     scale[900] = safeOklch(0.15, chromaVal * 0.40, hue);
     scale[950] = safeOklch(0.10, chromaVal * 0.20, hue);
   } else {
-    // Dark bg: 200 = visible tint (not near-black), 900 = lightest
-    scale[200] = safeOklch(0.25, chromaVal * 0.30, hue);
-    scale[300] = safeOklch(0.25, chromaVal * 0.30, hue);
-    scale[400] = safeOklch(0.35, chromaVal * 0.50, hue);
+    // Dark bg: 200 = visible tint (above page bg), 900 = lightest
+    scale[200] = safeOklch(0.35, chromaVal * 0.30, hue);
+    scale[300] = safeOklch(0.35, chromaVal * 0.30, hue);
+    scale[400] = safeOklch(0.42, chromaVal * 0.50, hue);
     scale[500] = safeOklch(0.50, chromaVal * 0.70, hue);
     scale[900] = safeOklch(0.92, chromaVal * 0.30, hue);
     scale[950] = safeOklch(0.96, chromaVal * 0.10, hue);
@@ -267,10 +267,10 @@ export function generateDarkScale(baseHex) {
 
   const scale = {};
   // Dark bg positions: 200 = near-black, 900 = near-white
-  scale[100] = safeOklch(0.12, mutedC * 0.05, hue);
-  scale[200] = safeOklch(0.25, mutedC * 0.35, hue);
-  scale[300] = safeOklch(0.25, mutedC * 0.35, hue);
-  scale[400] = safeOklch(0.38, mutedC * 0.55, hue);
+  scale[100] = safeOklch(0.18, mutedC * 0.10, hue);
+  scale[200] = safeOklch(0.35, mutedC * 0.35, hue);
+  scale[300] = safeOklch(0.35, mutedC * 0.35, hue);
+  scale[400] = safeOklch(0.42, mutedC * 0.55, hue);
   scale[500] = safeOklch(0.50, mutedC * 0.75, hue);
   scale[600] = safeOklch(0.62, mutedC * 0.85, hue);  // muted base — readable on dark
   scale[700] = safeOklch(0.72, mutedC * 0.70, hue);
@@ -1112,7 +1112,7 @@ export function generateThemeData(definition) {
 
   // 3. Neutral still needs the dark flip — primary/secondary have their own
   //    dark generators but neutral uses the same scale for both modes.
-  if (isDark && !definition.highContrast) {
+  if (isDark) {
     const FLIP_PAIRS = [[100, 950], [200, 900], [300, 800], [400, 700], [500, 600]];
     const neuFlip = scales.neutral;
     for (const [a, b] of FLIP_PAIRS) {
