@@ -29,8 +29,9 @@
   border: var(--border-width-2) solid transparent;
   position: relative;
 
-  --_badge-bg: var(--primary-200);
-  --_badge-border: var(--primary-600);
+  --_badge-color: var(--primary-base);
+  --_badge-bg: var(--_badge-color);
+  --_badge-border: var(--_badge-color);
 }
 
 /* Vertical centering — force label to match icon height.
@@ -268,92 +269,28 @@
 
 /* ========== COLOUR VARIANTS ========== */
 
-.badge--primary {
-  --_badge-bg: var(--primary-200);
-  --_badge-border: var(--primary-600);
-}
-
-.badge--secondary {
-  --_badge-bg: var(--secondary-200);
-  --_badge-border: var(--secondary-600);
-}
-
-.badge--neutral {
-  --_badge-bg: var(--neutral-200);
-  --_badge-border: var(--neutral-600);
-}
-
-.badge--red {
-  --_badge-bg: var(--rainbow-1-wash);
-  --_badge-border: var(--rainbow-1);
-}
-
-.badge--orange {
-  --_badge-bg: var(--rainbow-2-wash);
-  --_badge-border: var(--rainbow-2);
-}
-
-.badge--yellow {
-  --_badge-bg: var(--rainbow-3-wash);
-  --_badge-border: var(--rainbow-3);
-}
-
-.badge--teal {
-  --_badge-bg: var(--rainbow-4-wash);
-  --_badge-border: var(--rainbow-4);
-}
-
-.badge--blue {
-  --_badge-bg: var(--rainbow-5-wash);
-  --_badge-border: var(--rainbow-5);
-}
-
-.badge--purple {
-  --_badge-bg: var(--rainbow-6-wash);
-  --_badge-border: var(--rainbow-6);
-}
-
-.badge--pink {
-  --_badge-bg: var(--rainbow-7-wash);
-  --_badge-border: var(--rainbow-7);
-}
+/* Colour enum — sets all four tier tokens. Default tier (base) reads --_badge-color */
+.badge--primary   { --_tier-tint: var(--primary-tint); --_tier-mid: var(--primary-mid); --_badge-color: var(--primary-base); --_tier-emphasis: var(--primary-emphasis); }
+.badge--secondary { --_tier-tint: var(--secondary-tint); --_tier-mid: var(--secondary-mid); --_badge-color: var(--secondary-base); --_tier-emphasis: var(--secondary-emphasis); }
+.badge--neutral   { --_tier-tint: var(--neutral-tint); --_tier-mid: var(--neutral-mid); --_badge-color: var(--neutral-base); --_tier-emphasis: var(--neutral-emphasis); }
+.badge--red       { --_tier-tint: var(--rainbow-1-wash); --_tier-mid: var(--rainbow-1-light); --_badge-color: var(--rainbow-1); --_tier-emphasis: var(--rainbow-1-dark); }
+.badge--orange    { --_tier-tint: var(--rainbow-2-wash); --_tier-mid: var(--rainbow-2-light); --_badge-color: var(--rainbow-2); --_tier-emphasis: var(--rainbow-2-dark); }
+.badge--yellow    { --_tier-tint: var(--rainbow-3-wash); --_tier-mid: var(--rainbow-3-light); --_badge-color: var(--rainbow-3); --_tier-emphasis: var(--rainbow-3-dark); }
+.badge--teal      { --_tier-tint: var(--rainbow-4-wash); --_tier-mid: var(--rainbow-4-light); --_badge-color: var(--rainbow-4); --_tier-emphasis: var(--rainbow-4-dark); }
+.badge--blue      { --_tier-tint: var(--rainbow-5-wash); --_tier-mid: var(--rainbow-5-light); --_badge-color: var(--rainbow-5); --_tier-emphasis: var(--rainbow-5-dark); }
+.badge--purple    { --_tier-tint: var(--rainbow-6-wash); --_tier-mid: var(--rainbow-6-light); --_badge-color: var(--rainbow-6); --_tier-emphasis: var(--rainbow-6-dark); }
+.badge--pink      { --_tier-tint: var(--rainbow-7-wash); --_tier-mid: var(--rainbow-7-light); --_badge-color: var(--rainbow-7); --_tier-emphasis: var(--rainbow-7-dark); }
 
 /* ========== COLOUR TIER — shifts which token position bg/border use ========== */
 /* Base (default) = bg uses tint (200), border uses base (600) — set above */
 
-/* Base tier (default) = tint bg + base border — set by colour enum classes above */
+/* Colour tier — shifts --_badge-color to a different token position.
+   Base (default) = brand colour (600). No tier class needed. */
+.badge--tier-tint     { --_badge-color: var(--_tier-tint); }
+.badge--tier-mid      { --_badge-color: var(--_tier-mid); }
+.badge--tier-emphasis { --_badge-color: var(--_tier-emphasis); }
 
-/* Tint tier — subtle, light bg + light border */
-.badge--tier-tint {
-  --_badge-bg: var(--_tier-tint);
-  --_badge-border: var(--_tier-mid);
-}
-
-/* Mid tier — medium, mid bg + base border */
-.badge--tier-mid {
-  --_badge-bg: var(--_tier-mid);
-  --_badge-border: var(--_tier-base);
-}
-
-/* Emphasis tier — boldest, base bg + emphasis border */
-.badge--tier-emphasis {
-  --_badge-bg: var(--_tier-base);
-  --_badge-border: var(--_tier-emphasis);
-}
-
-/* Map colour enum to tier tokens — primary */
-.badge--primary { --_tier-tint: var(--primary-tint); --_tier-mid: var(--primary-mid); --_tier-base: var(--primary-base); --_tier-emphasis: var(--primary-emphasis); }
-.badge--secondary { --_tier-tint: var(--secondary-tint); --_tier-mid: var(--secondary-mid); --_tier-base: var(--secondary-base); --_tier-emphasis: var(--secondary-emphasis); }
-.badge--neutral { --_tier-tint: var(--neutral-tint); --_tier-mid: var(--neutral-mid); --_tier-base: var(--neutral-base); --_tier-emphasis: var(--neutral-emphasis); }
-
-/* Rainbow tiers use rainbow tokens */
-.badge--red { --_tier-tint: var(--rainbow-1-wash); --_tier-mid: var(--rainbow-1-light); --_tier-base: var(--rainbow-1); --_tier-emphasis: var(--rainbow-1-dark); }
-.badge--orange { --_tier-tint: var(--rainbow-2-wash); --_tier-mid: var(--rainbow-2-light); --_tier-base: var(--rainbow-2); --_tier-emphasis: var(--rainbow-2-dark); }
-.badge--yellow { --_tier-tint: var(--rainbow-3-wash); --_tier-mid: var(--rainbow-3-light); --_tier-base: var(--rainbow-3); --_tier-emphasis: var(--rainbow-3-dark); }
-.badge--teal { --_tier-tint: var(--rainbow-4-wash); --_tier-mid: var(--rainbow-4-light); --_tier-base: var(--rainbow-4); --_tier-emphasis: var(--rainbow-4-dark); }
-.badge--blue { --_tier-tint: var(--rainbow-5-wash); --_tier-mid: var(--rainbow-5-light); --_tier-base: var(--rainbow-5); --_tier-emphasis: var(--rainbow-5-dark); }
-.badge--purple { --_tier-tint: var(--rainbow-6-wash); --_tier-mid: var(--rainbow-6-light); --_tier-base: var(--rainbow-6); --_tier-emphasis: var(--rainbow-6-dark); }
-.badge--pink { --_tier-tint: var(--rainbow-7-wash); --_tier-mid: var(--rainbow-7-light); --_tier-base: var(--rainbow-7); --_tier-emphasis: var(--rainbow-7-dark); }
+/* Tier tokens already set by colour enum classes above */
 
 /* ========== ICON-ONLY ========== */
 

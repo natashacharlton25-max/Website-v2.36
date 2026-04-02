@@ -12,7 +12,7 @@
 
 // ── Colour (11 values) ──────────────────────────────────
 export const COLOURS = [
-  'default', 'primary', 'secondary', 'neutral',
+  'primary', 'secondary', 'neutral',
   'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'
 ] as const;
 export type Colour = typeof COLOURS[number];
