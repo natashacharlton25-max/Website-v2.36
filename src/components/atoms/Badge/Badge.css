@@ -1,16 +1,17 @@
 /**
  * Badge — base styles
  *
- * Internal tokens:
- *   --_badge-bg      (primary-200) — badge background
- *   --_badge-border  (primary-600) — badge border / outline colour
+ * Single colour token: --_badge-color (set by colour enum, shifted by tier)
+ * Variant (fill/outline/glass) decides HOW the colour is applied.
+ * Tier (tint/mid/base/emphasis) decides WHICH intensity.
  *
- * Style variants: fill (default), outline, glass
- * Shapes: sharp, subtle, soft, rounded, pill
- * Sizes: sm, md (default), lg
+ * Colour enum sets four tier tokens + --_badge-color to base (brand/600).
+ * Tier enum shifts --_badge-color to a different position.
+ * oklch auto-contrast calculates text colour from bg.
  */
 
-/* ========== BASE + TOKENS ========== */
+
+/* ========== BASE ========== */
 
 .badge {
   display: inline-flex;
@@ -30,12 +31,8 @@
   position: relative;
 
   --_badge-color: var(--primary-base);
-  --_badge-bg: var(--_badge-color);
-  --_badge-border: var(--_badge-color);
 }
 
-/* Vertical centering — force label to match icon height.
-   .text class on the label has its own line-height — override it. */
 .badge .badge__label,
 .badge .badge__label.text {
   display: inline-flex;
@@ -56,6 +53,7 @@
   margin-right: var(--space-xs);
 }
 
+
 /* ========== SHAPE ========== */
 
 .badge--sharp    { border-radius: 0; }
@@ -63,6 +61,7 @@
 .badge--soft     { border-radius: var(--radius-sm); }
 .badge--rounded  { border-radius: var(--radius-md); }
 .badge--pill     { border-radius: var(--radius-full); padding: var(--space-sm) var(--space-lg); }
+
 
 /* ========== SIZE ========== */
 
@@ -81,19 +80,16 @@
   border-radius: var(--radius-sm);
 }
 
-/* Font family + weight passed through to Text atom — no badge CSS needed */
-
-/* Size-aware shape overrides */
 .badge--sm.badge--soft    { border-radius: var(--radius-xs); }
 .badge--sm.badge--rounded { border-radius: var(--radius-sm); }
 .badge--lg.badge--soft    { border-radius: var(--radius-lg); }
 .badge--lg.badge--rounded { border-radius: var(--radius-xl); }
 
-/* ========== TEXT TRANSFORM ========== */
 
-.badge--lowercase {
-  text-transform: none;
-}
+/* ========== TEXT ========== */
+
+.badge--lowercase { text-transform: none; }
+
 
 /* ========== VARIANT: Fill (default) ========== */
 
@@ -103,22 +99,15 @@
   border-color: var(--_badge-color);
 }
 
-/* Fill: icon inherits auto-contrast by default.
-   When iconColor is set, Icon's .icon--{color} class uses dark tokens
-   which have good contrast against wash backgrounds. */
 
 /* ========== VARIANT: Outline ========== */
 
 .badge--outline {
   background: transparent;
-  border-color: var(--_badge-border);
-  color: var(--_badge-border);
+  border-color: var(--_badge-color);
+  color: var(--_badge-color);
 }
 
-/* ========== BORDER WEIGHT ========== */
-
-.badge--border-thin  { border-width: var(--border-width); }
-.badge--border-thick { border-width: var(--border-width-md); }
 
 /* ========== VARIANT: Glass ========== */
 
@@ -126,9 +115,10 @@
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border-color: color-mix(in oklch, var(--_badge-bg) 30%, var(--color-Text-contrast));
+  border-color: color-mix(in oklch, var(--_badge-color) 30%, var(--color-Text-contrast));
   color: var(--color-Text);
 }
+
 
 /* ========== VARIANT: Liquid Glass ========== */
 
@@ -141,54 +131,46 @@
   color: var(--color-Text);
 }
 
-/* ========== SHADOW ========== */
+
+/* ========== BORDER WEIGHT ========== */
+
+.badge--border-thin  { border-width: var(--border-width); }
+.badge--border-thick { border-width: var(--border-width-md); }
+
+
+/* ========== SHADOW + GLOW ========== */
 
 .badge--shadow-none     { box-shadow: none; }
 .badge--shadow-out      { box-shadow: var(--shadow-sm); }
 .badge--shadow-drop     { box-shadow: var(--shadow-lg); }
 .badge--shadow-in       { box-shadow: var(--shadow-neu-hover); }
 .badge--shadow-elevated { box-shadow: var(--shadow-elevated); }
-/* Glow — inherits badge colour. Fill uses bg, outline/glass uses border */
+
 .badge--shadow-glow {
-  box-shadow: 0 0 var(--space-md) color-mix(in oklch, var(--_badge-border) 40%, transparent),
-              0 0 var(--space-xs) color-mix(in oklch, var(--_badge-border) 20%, transparent);
+  box-shadow: 0 0 var(--space-md) color-mix(in oklch, var(--_badge-color) 40%, transparent),
+              0 0 var(--space-xs) color-mix(in oklch, var(--_badge-color) 20%, transparent);
 }
+
 .badge--shadow-glow-intense {
-  box-shadow: 0 0 var(--space-lg) color-mix(in oklch, var(--_badge-border) 60%, transparent),
-              0 0 var(--space-sm) color-mix(in oklch, var(--_badge-border) 30%, transparent);
-}
-.badge--fill.badge--shadow-glow {
-  box-shadow: 0 0 var(--space-md) color-mix(in oklch, var(--_badge-border) 40%, transparent),
-              0 0 var(--space-xs) color-mix(in oklch, var(--_badge-border) 20%, transparent);
-}
-.badge--fill.badge--shadow-glow-intense {
-  box-shadow: 0 0 var(--space-lg) color-mix(in oklch, var(--_badge-border) 60%, transparent),
-              0 0 var(--space-sm) color-mix(in oklch, var(--_badge-border) 30%, transparent);
+  box-shadow: 0 0 var(--space-lg) color-mix(in oklch, var(--_badge-color) 60%, transparent),
+              0 0 var(--space-sm) color-mix(in oklch, var(--_badge-color) 30%, transparent);
 }
 
-/* ── Gradient fill — solid gradient background ────────── */
 
-/* Gradient shared base — vivid gradient, contrast text */
+/* ========== GRADIENT FILL ========== */
+
 [class*="badge--gradient-"] {
   background: var(--_grad);
   border: none;
   color: var(--color-Text-contrast);
 }
 
-/* Fill variant — wash (soft) gradient in light, vivid in dark.
-   Text: dark in light mode (reads on wash), contrast in dark (reads on vivid).
-   Dark mode swaps --_grad-wash to vivid in gradients.css. */
 .badge--fill[class*="badge--gradient-"] {
   background: var(--_grad-wash);
   color: var(--color-Text);
   border: none;
 }
 
-/* Dark fill gradient text colour in theme-luminance-dark.css */
-
-/* Gradient tokens (--_grad, --_grad-wash) set globally in gradients.css */
-
-/* Gradient on outline — gradient border + gradient text */
 .badge--outline[class*="badge--gradient-"] {
   border: var(--border-width-2) solid transparent;
   background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_grad) border-box;
@@ -201,7 +183,6 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* Gradient on glass — glass bg + subtle border + gradient text */
 .badge--glass[class*="badge--gradient-"] {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
@@ -216,7 +197,8 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* ── Animated gradient border ─────────────────────────── */
+
+/* ========== ANIMATED GRADIENT BORDER ========== */
 
 .badge--border-gradient { --_border-grad: var(--gradient-hero); }
 .badge--border-gradient-primary   { --_border-grad: var(--gradient-primary); }
@@ -234,9 +216,7 @@
 
 .badge.badge--border-gradient {
   border: var(--border-width-2) solid transparent;
-  background:
-    linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
-    var(--_border-grad) border-box;
+  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_border-grad) border-box;
   background-size: 100% 100%, 200% 200%;
   animation-name: anim-border-flow;
   animation-duration: var(--duration-continuous-slower);
@@ -244,15 +224,6 @@
   animation-iteration-count: infinite;
 }
 
-.badge--fill.badge--border-gradient {
-  background:
-    linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
-    var(--_border-grad) border-box;
-  border: var(--border-width-2) solid transparent;
-  background-size: 100% 100%, 200% 200%;
-}
-
-/* Gradient border text — matches the border gradient */
 .badge.badge--border-gradient .badge__label {
   background: var(--_border-grad);
   -webkit-background-clip: text;
@@ -260,16 +231,13 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* Gradient border icon — explicit colour so it doesn't inherit transparent */
 .badge.badge--border-gradient .badge__icon {
-  color: var(--_badge-border);
+  color: var(--_badge-color);
 }
 
-/* @keyframes anim-border-flow lives in micro-animations.css */
 
-/* ========== COLOUR VARIANTS ========== */
+/* ========== COLOUR ENUM ========== */
 
-/* Colour enum — sets all four tier tokens. Default tier (base) reads --_badge-color */
 .badge--primary   { --_tier-tint: var(--primary-tint); --_tier-mid: var(--primary-mid); --_badge-color: var(--primary-base); --_tier-emphasis: var(--primary-emphasis); }
 .badge--secondary { --_tier-tint: var(--secondary-tint); --_tier-mid: var(--secondary-mid); --_badge-color: var(--secondary-base); --_tier-emphasis: var(--secondary-emphasis); }
 .badge--neutral   { --_tier-tint: var(--neutral-tint); --_tier-mid: var(--neutral-mid); --_badge-color: var(--neutral-base); --_tier-emphasis: var(--neutral-emphasis); }
@@ -281,16 +249,13 @@
 .badge--purple    { --_tier-tint: var(--rainbow-6-wash); --_tier-mid: var(--rainbow-6-light); --_badge-color: var(--rainbow-6); --_tier-emphasis: var(--rainbow-6-dark); }
 .badge--pink      { --_tier-tint: var(--rainbow-7-wash); --_tier-mid: var(--rainbow-7-light); --_badge-color: var(--rainbow-7); --_tier-emphasis: var(--rainbow-7-dark); }
 
-/* ========== COLOUR TIER — shifts which token position bg/border use ========== */
-/* Base (default) = bg uses tint (200), border uses base (600) — set above */
 
-/* Colour tier — shifts --_badge-color to a different token position.
-   Base (default) = brand colour (600). No tier class needed. */
+/* ========== COLOUR TIER ========== */
+
 .badge--tier-tint     { --_badge-color: var(--_tier-tint); }
 .badge--tier-mid      { --_badge-color: var(--_tier-mid); }
 .badge--tier-emphasis { --_badge-color: var(--_tier-emphasis); }
 
-/* Tier tokens already set by colour enum classes above */
 
 /* ========== ICON-ONLY ========== */
 
@@ -299,6 +264,3 @@
   aspect-ratio: 1;
   justify-content: center;
 }
-
-/* Assistive → assistive-gate.css
-   Textonly  → textonly-gate.css */
