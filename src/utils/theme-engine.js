@@ -177,7 +177,8 @@ export function generateBrandScale(baseHex) {
     l400 = bL + (l200 - bL) * 0.45;
     l800 = bL * emphasisMult;
   } else {
-    l200 = 0.92;
+    // 200 lightness scales with brand — darker brands get closer 200
+    l200 = bL + (0.95 - bL) * 0.70;
     l400 = bL + (l200 - bL) * 0.50;
     l800 = bL * emphasisMult;
   }
