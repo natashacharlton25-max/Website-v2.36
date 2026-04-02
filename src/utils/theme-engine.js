@@ -267,8 +267,8 @@ export function generateDarkScale(baseHex) {
 
   const scale = {};
   // Dark bg positions: 200 = near-black, 900 = near-white
-  scale[100] = safeOklch(0.08, mutedC * 0.05, hue);
-  scale[200] = safeOklch(0.14, mutedC * 0.15, hue);
+  scale[100] = safeOklch(0.12, mutedC * 0.05, hue);
+  scale[200] = safeOklch(0.20, mutedC * 0.25, hue);
   scale[300] = safeOklch(0.25, mutedC * 0.35, hue);
   scale[400] = safeOklch(0.38, mutedC * 0.55, hue);
   scale[500] = safeOklch(0.50, mutedC * 0.75, hue);
