@@ -1,27 +1,58 @@
 /**
  * TEXT SHADOW MIXIN — global pattern for any text element
  *
- * Any element with .text-shadow--{type} gets the effect.
- * Uses --_color (or currentColor) for coloured glows.
- *
- * Values match TEXT_SHADOWS enum: none, drop, text, glow
+ * Same enum as box-shadow (Shadow): none, out, drop, in, elevated, glow, glow-intense, glow-inner
+ * Uses --shadow-Black for dark shadows, currentColor for coloured glows.
  */
 
+/* ── Out — subtle outer shadow ── */
+.text-shadow--out {
+  text-shadow:
+    0 1px 2px color-mix(in oklch, var(--shadow-Black) 30%, transparent);
+}
+
+/* ── Drop — deeper drop shadow ── */
 .text-shadow--drop {
   text-shadow:
-    0 1px 2px color-mix(in oklch, var(--shadow-Black) 30%, transparent),
-    0 2px 4px color-mix(in oklch, var(--shadow-Black) 15%, transparent);
+    0 2px 4px color-mix(in oklch, var(--shadow-Black) 50%, transparent),
+    0 4px 8px color-mix(in oklch, var(--shadow-Black) 25%, transparent);
 }
 
-.text-shadow--text {
+/* ── In — inset letterpress ── */
+.text-shadow--in {
   text-shadow:
-    0 1px 0 color-mix(in oklch, var(--shadow-Black) 20%, transparent);
+    0 -1px 0 color-mix(in oklch, var(--shadow-Black) 30%, transparent),
+    0 1px 0 color-mix(in oklch, var(--shadow-White) 15%, transparent);
 }
 
+/* ── Elevated — multi-layer depth ── */
+.text-shadow--elevated {
+  text-shadow:
+    0 1px 1px color-mix(in oklch, var(--shadow-Black) 20%, transparent),
+    0 2px 4px color-mix(in oklch, var(--shadow-Black) 15%, transparent),
+    0 4px 8px color-mix(in oklch, var(--shadow-Black) 10%, transparent);
+}
+
+/* ── Glow — coloured, uses currentColor ── */
 .text-shadow--glow {
   text-shadow:
-    0 0 8px color-mix(in oklch, currentColor 40%, transparent),
-    0 0 16px color-mix(in oklch, currentColor 20%, transparent);
+    0 0 10px color-mix(in oklch, currentColor 50%, transparent),
+    0 0 20px color-mix(in oklch, currentColor 25%, transparent);
+}
+
+/* ── Glow Intense — larger coloured spread ── */
+.text-shadow--glow-intense {
+  text-shadow:
+    0 0 8px color-mix(in oklch, currentColor 70%, transparent),
+    0 0 20px color-mix(in oklch, currentColor 50%, transparent),
+    0 0 40px color-mix(in oklch, currentColor 25%, transparent);
+}
+
+/* ── Glow Inner — tight coloured halo ── */
+.text-shadow--glow-inner {
+  text-shadow:
+    0 0 4px color-mix(in oklch, currentColor 60%, transparent),
+    0 0 8px color-mix(in oklch, currentColor 30%, transparent);
 }
 
 /* Calm override in src/styles/zones/theme-chroma-calm.css */

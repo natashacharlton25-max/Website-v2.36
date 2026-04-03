@@ -70,9 +70,9 @@ export const SHADOWS = [
 ] as const;
 export type Shadow = typeof SHADOWS[number];
 
-// ── Text Shadow (4 values) — shadow/glow on text itself ─
+// ── Text Shadow (8 values) — matches Shadow enum for consistency ─
 export const TEXT_SHADOWS = [
-  'none', 'drop', 'text', 'glow'
+  'none', 'out', 'drop', 'in', 'elevated', 'glow', 'glow-intense', 'glow-inner'
 ] as const;
 export type TextShadow = typeof TEXT_SHADOWS[number];
 
