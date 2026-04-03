@@ -206,8 +206,6 @@ const headingClassList = [
     `heading-wrap--align-${align ?? 'left'}`,
     `heading-wrap--spacing-${spacing}`,
     `heading-wrap--variant-${variant}`,
-    variant === 'highlight' && highlightHeight && `text-highlight--${highlightHeight}`,
-    variant === 'highlight' && highlightOpacity && `text-highlight--${highlightOpacity}`,
     divider && `heading-wrap--divider-${divider}`,
     divider && `heading-wrap--divider-ends-${dividerEnds}`,
     divider && dividerStyle !== 'solid' && `heading-wrap--divider-style-${dividerStyle}`,
@@ -241,9 +239,15 @@ const headingClassList = [
     )}
 
     <div class="heading-wrap__content">
-      <Tag class:list={[...headingClassList]}>
-        {variant === 'highlight' && <span class:list={['heading-wrap__highlight', resolvedHighlightColor && `color--${resolvedHighlightColor}`, highlightTier && highlightTier !== 'base' && `color--tier-${highlightTier}`]} aria-hidden="true"></span>}
-        <span class="heading-wrap__text-inner"><slot /></span>
+      <Tag class:list={[
+        ...headingClassList,
+        variant === 'highlight' && 'text-highlight',
+        variant === 'highlight' && resolvedHighlightColor && `color--${resolvedHighlightColor}`,
+        variant === 'highlight' && highlightTier && highlightTier !== 'base' && `color--tier-${highlightTier}`,
+        variant === 'highlight' && highlightHeight && `text-highlight--${highlightHeight}`,
+        variant === 'highlight' && highlightOpacity && `text-highlight--${highlightOpacity}`,
+      ]}>
+        <span class="heading__text-inner"><slot /></span>
       </Tag>
       {variant === 'underline' && <div class:list={['underline', underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`, resolvedUnderlineColor && `color--${resolvedUnderlineColor}`, underlineTier && underlineTier !== 'base' && `color--tier-${underlineTier}`]} aria-hidden="true"></div>}
       {subtitle && <Text as="p" size={subtitleSize} flush class="heading-wrap__subtitle" color="neutral">{subtitle}</Text>}
