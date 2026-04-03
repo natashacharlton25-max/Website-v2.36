@@ -43,6 +43,16 @@ export type Gradient = typeof GRADIENTS[number];
 export type GradientColour = typeof GRADIENTS_COLOUR[number];
 export type GradientMixed = typeof GRADIENTS_MIXED[number];
 
+// ── Gradient Rules (canonical) ───────────────────────────
+// These are not enums but documented constants for how gradients behave:
+//   - `animatedGradient: boolean` — every gradient component gets this prop
+//   - Fill variant: gradient animates background only, text is solid (--color-White/--color-Black)
+//   - Outline variant: gradient animates border (anim-border-flow), label gets background-clip:text
+//   - Glass variant: gradient animates background, label gets background-clip:text
+//   - Icon inside gradient component: always solid colour, never gradient
+//   - Gradient text colour: tint/mid → --color-Black, base/emphasis → --color-White (auto-swaps dark mode)
+//   - animatedGradient is INDEPENDENT of animation prop (icon/component motion)
+
 // ── Colour Tier (4 values) — maps to semantic tokens ────
 export const COLOUR_TIERS = [
   'tint', 'mid', 'base', 'emphasis'
