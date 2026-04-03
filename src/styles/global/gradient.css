@@ -2,7 +2,7 @@
  * GRADIENT MIXIN — global pattern for any component
  *
  * Any element with .gradient gets a computed gradient from its own tier tokens.
- * Requires --_tier-tint, --_tier-mid, --_badge-color, --_tier-emphasis on the element
+ * Requires --_tier-tint, --_tier-mid, --_color, --_tier-emphasis on the element
  * (set by colour enum classes like .badge--red, .button--primary etc.)
  *
  * Props via data attributes:
@@ -26,7 +26,7 @@
     var(--color-White) 0%,
     var(--_tier-tint) 15%,
     var(--_tier-mid) 35%,
-    var(--_badge-color) 60%,
+    var(--_color) 60%,
     var(--_tier-emphasis) 85%,
     var(--color-Black) 100%
   );
@@ -46,7 +46,7 @@
 .gradient[data-grad-spread="tight"] {
   --_grad-computed: linear-gradient(
     var(--_grad-angle, 135deg),
-    var(--_badge-color) 0%,
+    var(--_color) 0%,
     var(--_tier-emphasis) 60%,
     var(--color-Black) 100%
   );
@@ -57,7 +57,7 @@
   --_grad-computed: linear-gradient(
     var(--_grad-angle, 135deg),
     var(--page-bg) 0%,
-    var(--_badge-color) 100%
+    var(--_color) 100%
   );
   background-size: var(--_grad-size) 100%;
 }
@@ -66,7 +66,7 @@
 .gradient--blend-fade {
   --_grad-computed: linear-gradient(
     var(--_grad-angle, 135deg),
-    var(--_badge-color) 0%,
+    var(--_color) 0%,
     var(--page-bg) 100%
   );
   background-size: var(--_grad-size) 100%;
@@ -78,7 +78,7 @@
     circle at var(--_grad-focus, center),
     var(--color-White) 0%,
     var(--_tier-tint) 15%,
-    var(--_badge-color) 50%,
+    var(--_color) 50%,
     var(--_tier-emphasis) 85%,
     var(--color-Black) 100%
   );
@@ -98,7 +98,7 @@
 .gradient[data-grad-type="radial"][data-grad-spread="tight"] {
   --_grad-computed: radial-gradient(
     circle at var(--_grad-focus, center),
-    var(--_badge-color) 0%,
+    var(--_color) 0%,
     var(--_tier-emphasis) 60%,
     var(--color-Black) 100%
   );
@@ -125,7 +125,7 @@
 .gradient.gradient--outline {
   border: var(--border-width-2) solid transparent;
   background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
-    linear-gradient(var(--_grad-angle, 135deg), var(--_tier-tint) 0%, var(--_tier-mid) 25%, var(--_badge-color) 50%, var(--_tier-emphasis) 100%) border-box;
+    linear-gradient(var(--_grad-angle, 135deg), var(--_tier-tint) 0%, var(--_tier-mid) 25%, var(--_color) 50%, var(--_tier-emphasis) 100%) border-box;
 }
 
 .gradient.gradient--outline[data-grad-spread="soft"] {
@@ -135,19 +135,19 @@
 
 .gradient.gradient--outline[data-grad-spread="tight"] {
   background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
-    linear-gradient(var(--_grad-angle, 135deg), var(--_badge-color) 0%, var(--_tier-emphasis) 100%) border-box;
+    linear-gradient(var(--_grad-angle, 135deg), var(--_color) 0%, var(--_tier-emphasis) 100%) border-box;
 }
 
 /* Outline emerge: border fades FROM page-bg into colour */
 .gradient.gradient--outline.gradient--blend-emerge {
   background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
-    linear-gradient(var(--_grad-angle, 135deg), var(--page-bg) 0%, var(--_badge-color) 100%) border-box;
+    linear-gradient(var(--_grad-angle, 135deg), var(--page-bg) 0%, var(--_color) 100%) border-box;
 }
 
 /* Outline fade: border fades FROM colour into page-bg */
 .gradient.gradient--outline.gradient--blend-fade {
   background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
-    linear-gradient(var(--_grad-angle, 135deg), var(--_badge-color) 0%, var(--page-bg) 100%) border-box;
+    linear-gradient(var(--_grad-angle, 135deg), var(--_color) 0%, var(--page-bg) 100%) border-box;
 }
 
 
@@ -155,7 +155,7 @@
   background: linear-gradient(
     var(--_grad-angle, 135deg),
     var(--_tier-emphasis) 0%,
-    var(--_badge-color) 40%,
+    var(--_color) 40%,
     var(--_tier-mid) 100%
   );
   background-size: var(--_grad-size) 100%;
@@ -173,7 +173,7 @@
 }
 
 .gradient--outline[data-grad-spread="tight"] .gradient__text {
-  background: linear-gradient(var(--_grad-angle, 135deg), var(--_tier-emphasis) 0%, var(--_badge-color) 100%);
+  background: linear-gradient(var(--_grad-angle, 135deg), var(--_tier-emphasis) 0%, var(--_color) 100%);
   background-size: var(--_grad-size) 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -266,18 +266,18 @@
 
 /* Mid preset: emphasis → base → mid → tint (flipped) */
 .gradient--preset-mid {
-  --_grad-computed: linear-gradient(135deg, var(--_tier-emphasis) 0%, var(--_badge-color) 35%, var(--_tier-mid) 65%, var(--_tier-tint) 100%);
+  --_grad-computed: linear-gradient(135deg, var(--_tier-emphasis) 0%, var(--_color) 35%, var(--_tier-mid) 65%, var(--_tier-tint) 100%);
   background-size: var(--_grad-size) 100%;
 }
 
 /* Base preset: tint → mid → base → emphasis (full range) */
 .gradient--preset-base {
-  --_grad-computed: linear-gradient(135deg, var(--_tier-tint) 0%, var(--_tier-mid) 30%, var(--_badge-color) 60%, var(--_tier-emphasis) 100%);
+  --_grad-computed: linear-gradient(135deg, var(--_tier-tint) 0%, var(--_tier-mid) 30%, var(--_color) 60%, var(--_tier-emphasis) 100%);
   background-size: var(--_grad-size) 100%;
 }
 
 /* Emphasis preset: base → emphasis → black */
 .gradient--preset-emphasis {
-  --_grad-computed: linear-gradient(135deg, var(--_badge-color) 0%, var(--_tier-emphasis) 60%, var(--color-Black) 100%);
+  --_grad-computed: linear-gradient(135deg, var(--_color) 0%, var(--_tier-emphasis) 60%, var(--color-Black) 100%);
   background-size: var(--_grad-size) 100%;
 }
