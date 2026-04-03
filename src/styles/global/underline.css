@@ -28,30 +28,29 @@
 }
 
 
-/* ── Dashed — rounded pill shapes via radial gradient ── */
+/* ── Dashed — rounded pill ends ── */
 
 .underline--dashed {
-  background: radial-gradient(
-    ellipse var(--underline-dash) calc(var(--underline-thickness) / 2),
-    currentColor 70%,
-    transparent 71%
-  );
-  background-size: calc(var(--underline-dash) * 2 + var(--underline-gap)) var(--underline-thickness);
-  background-repeat: repeat-x;
+  --_s: var(--underline-thickness);
+  --_c: currentColor;
+  --_g: var(--_s) top 50%, var(--_c) calc(100% - 1px), #0000;
+  background: 0 / calc(4 * var(--_s)) space no-repeat;
+  background-image:
+    radial-gradient(circle closest-side at left  var(--_g)),
+    radial-gradient(circle closest-side at right var(--_g)),
+    linear-gradient(90deg, #0000 25%, var(--_c) 0 75%, #0000 0);
   border-radius: 0;
 }
 
 
-/* ── Dotted — perfect circles via radial gradient ── */
+/* ── Dotted — circles ── */
 
 .underline--dotted {
-  background: radial-gradient(
-    circle closest-side,
-    currentColor 85%,
-    transparent 86%
-  );
-  background-size: calc(var(--underline-dot-gap) + var(--underline-thickness)) var(--underline-thickness);
-  background-repeat: repeat-x;
+  --_s: var(--underline-thickness);
+  --_c: currentColor;
+  background: 0 / calc(2.5 * var(--_s)) space no-repeat;
+  background-image:
+    radial-gradient(circle closest-side, var(--_c) calc(100% - 1px), #0000);
   border-radius: 0;
 }
 
