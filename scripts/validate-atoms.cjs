@@ -54,6 +54,8 @@ const path = require('path');
  *    36   class/style prop in schema — Astro composition only, not JSON content
  *    37   Hardcoded enum union in .astro — should import from shared-enums.ts
  *         Checks for inline 'spin' | 'bounce' etc. patterns that match shared enums
+ *    38   gradientType/gradientFocus in atom schema — radial only for large elements
+ *         (Card, Section). Atoms use linear direction + spread only.
  *
  *   Coverage rules
  *    15   Colour enum count in CSS (10 classes expected: primary..pink)
@@ -431,6 +433,17 @@ for (const atom of atoms) {
         for (const prop of Object.keys(groupProps)) {
           if (astroOnlyProps.includes(prop)) {
             issues.push({ rule: 36, ln: '--', file: schemaFile, msg: `"${prop}" in ${group}{} — Astro composition prop, remove from schema` });
+          }
+        }
+      }
+
+      // Rule 38: gradientType/gradientFocus only for large elements (Card, Section)
+      // Atoms use linear direction + spread only — radial needs surface area.
+      const largeComponents = ['Card', 'Section', 'Page', 'Image'];
+      if (!largeComponents.includes(atom) && props.gradient) {
+        for (const prop of ['gradientType', 'gradientFocus']) {
+          if (props.gradient[prop]) {
+            issues.push({ rule: 38, ln: '--', file: schemaFile, msg: `"${prop}" in gradient{} — radial only for large elements (Card, Section), not atoms` });
           }
         }
       }

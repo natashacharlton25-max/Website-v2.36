@@ -114,13 +114,14 @@ export const GRADIENT_DIRECTIONS = [
 ] as const;
 export type GradientDirection = typeof GRADIENT_DIRECTIONS[number];
 
-// ── Gradient Type (2 values) ───────────────────────────
+// ── Gradient Type (2 values) — radial only for large elements (Card, Section)
 export const GRADIENT_TYPES = [
   'linear', 'radial'
 ] as const;
 export type GradientType = typeof GRADIENT_TYPES[number];
 
-// ── Gradient Focus (9 values) — radial origin ──────────
+// ── Gradient Focus (9 values) — radial origin, large elements only
+// Not available on atoms (Badge, Button, Icon) — radial needs surface area.
 export const GRADIENT_FOCUSES = [
   'center', 'top', 'bottom', 'left', 'right',
   'top-left', 'top-right', 'bottom-left', 'bottom-right'
