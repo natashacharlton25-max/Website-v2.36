@@ -453,7 +453,9 @@ function computeStatusColors(chromaPreset = 'brand', monoHue = null, statusHueOv
       'color-Info':    safeOklch(0.45, 0.08, monoHue),   // between warning and error
       'color-Black':   '#1a1a1a',
       'color-White':   '#fafafa',
-    };
+    'shadow-Black':  '#000000',
+    'shadow-White':  '#ffffff',
+  };
   }
 
   // Monochrome: achromatic status at four distinct lightness levels
@@ -465,7 +467,9 @@ function computeStatusColors(chromaPreset = 'brand', monoHue = null, statusHueOv
       'color-Info':    chroma.oklch(MONO_STATUS_LIGHTNESS.Info,    0, 0).hex(),
       'color-Black':   '#1a1a1a',
       'color-White':   '#fafafa',
-    };
+    'shadow-Black':  '#000000',
+    'shadow-White':  '#ffffff',
+  };
   }
 
   // Use overrides from definition if provided, otherwise defaults
@@ -489,6 +493,8 @@ function computeStatusColors(chromaPreset = 'brand', monoHue = null, statusHueOv
     'color-Info':    safeOklch(0.55, infoChroma, hues.Info),
     'color-Black':   '#1a1a1a',
     'color-White':   '#fafafa',
+    'shadow-Black':  '#000000',
+    'shadow-White':  '#ffffff',
   };
 }
 
