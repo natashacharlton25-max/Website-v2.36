@@ -18,33 +18,49 @@
 
 
 /* ========== COMPUTED GRADIENT ========== */
-/* Default: balanced spread, all 4 tier stops */
+/* Default: balanced — white → all 4 tiers → black (full depth) */
 
 .gradient {
   --_grad-computed: linear-gradient(
     var(--_grad-angle, 135deg),
-    var(--_tier-tint) var(--_grad-start, 0%),
-    var(--_tier-mid) 30%,
+    var(--color-White) 0%,
+    var(--_tier-tint) 15%,
+    var(--_tier-mid) 35%,
     var(--_badge-color) 60%,
-    var(--_tier-emphasis) var(--_grad-end, 100%)
+    var(--_tier-emphasis) 85%,
+    var(--color-Black) 100%
   );
 }
 
-/* Spread: soft — tint → mid only */
+/* Spread: soft — white → tint → mid (light wash) */
 .gradient[data-grad-spread="soft"] {
   --_grad-computed: linear-gradient(
     var(--_grad-angle, 135deg),
-    var(--_tier-tint) 0%,
+    var(--color-White) 0%,
+    var(--_tier-tint) 40%,
     var(--_tier-mid) 100%
   );
 }
 
-/* Spread: tight — base → emphasis only */
+/* Spread: tight — base → emphasis → black (dark end) */
 .gradient[data-grad-spread="tight"] {
   --_grad-computed: linear-gradient(
     var(--_grad-angle, 135deg),
     var(--_badge-color) 0%,
-    var(--_tier-emphasis) 100%
+    var(--_tier-emphasis) 60%,
+    var(--color-Black) 100%
+  );
+}
+
+/* Spread: fade — page-bg → tint → base → page-bg (blends into background) */
+.gradient[data-grad-spread="fade"] {
+  --_grad-computed: linear-gradient(
+    var(--_grad-angle, 135deg),
+    var(--page-bg) 0%,
+    var(--_tier-tint) 20%,
+    var(--_badge-color) 50%,
+    var(--_tier-tint) 80%,
+    var(--page-bg) 100%
   );
 }
 
@@ -52,9 +68,11 @@
 .gradient[data-grad-type="radial"] {
   --_grad-computed: radial-gradient(
     circle at var(--_grad-focus, center),
-    var(--_tier-tint) var(--_grad-start, 0%),
+    var(--color-White) 0%,
+    var(--_tier-tint) 15%,
     var(--_badge-color) 50%,
-    var(--_tier-emphasis) var(--_grad-end, 100%)
+    var(--_tier-emphasis) 85%,
+    var(--color-Black) 100%
   );
 }
 
@@ -62,7 +80,8 @@
 .gradient[data-grad-type="radial"][data-grad-spread="soft"] {
   --_grad-computed: radial-gradient(
     circle at var(--_grad-focus, center),
-    var(--_tier-tint) 0%,
+    var(--color-White) 0%,
+    var(--_tier-tint) 40%,
     var(--_tier-mid) 100%
   );
 }
@@ -72,7 +91,18 @@
   --_grad-computed: radial-gradient(
     circle at var(--_grad-focus, center),
     var(--_badge-color) 0%,
-    var(--_tier-emphasis) 100%
+    var(--_tier-emphasis) 60%,
+    var(--color-Black) 100%
+  );
+}
+
+/* Radial + fade */
+.gradient[data-grad-type="radial"][data-grad-spread="fade"] {
+  --_grad-computed: radial-gradient(
+    circle at var(--_grad-focus, center),
+    var(--_badge-color) 0%,
+    var(--_tier-tint) 60%,
+    var(--page-bg) 100%
   );
 }
 

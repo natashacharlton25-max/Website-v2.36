@@ -130,7 +130,7 @@ export type GradientFocus = typeof GRADIENT_FOCUSES[number];
 
 // ── Gradient Spread (3 values) — stop intensity ────────
 export const GRADIENT_SPREADS = [
-  'soft', 'balanced', 'tight'
+  'soft', 'balanced', 'tight', 'fade'
 ] as const;
 export type GradientSpread = typeof GRADIENT_SPREADS[number];
 
