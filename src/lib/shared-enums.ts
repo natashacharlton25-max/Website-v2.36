@@ -17,10 +17,21 @@
    COLOUR — everything about colour selection and intensity
    ================================================================ */
 
-// ── Colour (10 values) ─────────────────────────────────
-export const COLOURS = [
-  'primary', 'secondary', 'neutral',
+// ── Brand Colour (3 values) — changes per theme ────────
+export const BRAND_COLOURS = [
+  'primary', 'secondary', 'neutral'
+] as const;
+export type BrandColour = typeof BRAND_COLOURS[number];
+
+// ── Rainbow Colour (7 values) — universal accents, adapted per mode
+export const RAINBOW_COLOURS = [
   'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'
+] as const;
+export type RainbowColour = typeof RAINBOW_COLOURS[number];
+
+// ── All Colours (10 values) — brand + rainbow combined ──
+export const COLOURS = [
+  ...BRAND_COLOURS, ...RAINBOW_COLOURS
 ] as const;
 export type Colour = typeof COLOURS[number];
 

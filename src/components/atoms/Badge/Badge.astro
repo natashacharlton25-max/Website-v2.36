@@ -17,14 +17,18 @@ import { Icon } from '../Icon';
 import { Text } from '../Text';
 import Heading from '../Heading/Heading.astro';
 import type {
-  Colour, ColourTier, Variant, Shadow, Gradient, Size, Shape,
-  BorderWeight, IconWeight, Animation, AnimationTrigger,
+  BrandColour, RainbowColour, ColourTier,
+  Variant, Shadow, Gradient, Size, Shape, BorderWeight,
+  IconWeight, Animation, AnimationTrigger,
   FontFamily, FontWeight, SemanticRole,
 } from '../../lib/shared-enums';
 
 interface Props {
   label: string;
-  color?: Colour | 'success' | 'warning' | 'error' | 'info';
+  /** Brand colour — primary/secondary/neutral, changes per theme */
+  brandColor?: BrandColour;
+  /** Rainbow colour — red through pink, universal accents */
+  rainbowColor?: RainbowColour;
   colorTier?: ColourTier;
   variant?: Variant;
   shadow?: Shadow;
@@ -35,7 +39,7 @@ interface Props {
   borderWeight?: BorderWeight;
   icon?: string;
   iconWeight?: IconWeight;
-  iconColor?: Colour;
+  iconColor?: BrandColour | RainbowColour;
   animation?: Animation;
   animationTrigger?: AnimationTrigger;
   fontFamily?: FontFamily;
@@ -47,7 +51,8 @@ interface Props {
 
 const {
   label,
-  color = 'primary',
+  brandColor = 'primary',
+  rainbowColor,
   colorTier,
   variant = 'fill',
   shadow = 'none',
@@ -67,6 +72,9 @@ const {
   semanticRole = 'status',
   level,
 } = Astro.props;
+
+// Resolve colour: rainbow takes precedence if set, else brand
+const color = rainbowColor || brandColor;
 
 ---
 

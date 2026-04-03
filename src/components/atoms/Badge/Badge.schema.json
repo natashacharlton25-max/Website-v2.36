@@ -2,38 +2,53 @@
   "component": "Badge",
   "category": "atom",
   "renders": { "full": "Badge.astro", "reduced": "Badge.astro", "textonly": "Badge.astro" },
-  "notes": "Simple inline label. Colour via class enum. Assistive rules in assistive-gate.css. Icon is base name only — weight resolved from brand config or explicit iconWeight enum.",
+  "notes": "Simple inline label. Colour via class enum. Icon is base name only — weight resolved from brand config or explicit iconWeight.",
 
   "props": {
     "content": {
-      "label":     { "type": "string", "required": true },
-      "icon":      { "type": "string", "textonly": false }
+      "label": { "type": "string", "required": true }
+    },
+
+    "colour": {
+      "brandColor": { "type": "string", "default": "primary", "enum": ["primary", "secondary", "neutral"] }
+    },
+
+    "rainbow": {
+      "rainbowColor": { "type": "string", "enum": ["red", "orange", "yellow", "teal", "blue", "purple", "pink"] },
+      "colorTier":    { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"] }
+    },
+
+    "gradient": {
+      "gradient": { "type": "string", "enum": ["primary", "secondary", "neutral", "hero", "sunset", "brand-emerge", "brand-fade", "red", "orange", "yellow", "teal", "blue", "purple", "pink"] }
+    },
+
+    "typography": {
+      "fontFamily": { "type": "string", "default": "heading", "enum": ["heading", "body", "body-alt", "handwriting", "mono"] },
+      "fontWeight": { "type": "string", "default": "bold", "enum": ["normal", "medium", "semibold", "bold", "extrabold"] },
+      "uppercase":  { "type": "boolean", "default": true }
+    },
+
+    "icon": {
+      "icon":       { "type": "string", "textonly": false },
+      "iconWeight": { "type": "string", "default": "brand", "enum": ["brand", "fill", "duotone", "regular", "bold", "thin", "light"] },
+      "iconColor":  { "type": "string", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"] }
     },
 
     "visual": {
       "variant":      { "type": "string", "default": "fill", "enum": ["fill", "outline", "glass", "liquid-glass"] },
-      "color":        { "type": "string", "default": "primary", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"] },
-      "colorTier":    { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"] },
-      "shadow":       { "type": "string", "default": "none", "enum": ["none", "out", "drop", "in", "elevated", "glow", "glow-intense"] },
-      "gradient":         { "type": "string", "enum": ["primary", "secondary", "neutral", "hero", "sunset", "brand-emerge", "brand-fade", "red", "orange", "yellow", "teal", "blue", "purple", "pink"] },
-      "size":         { "type": "string", "default": "md", "enum": ["sm", "md", "lg"] },
       "shape":        { "type": "string", "default": "soft", "enum": ["sharp", "subtle", "soft", "rounded", "pill"] },
+      "size":         { "type": "string", "default": "md", "enum": ["sm", "md", "lg"] },
+      "shadow":       { "type": "string", "default": "none", "enum": ["none", "out", "drop", "in", "elevated", "glow", "glow-intense"] },
       "borderWeight": { "type": "string", "default": "thin", "enum": ["thin", "thick"] },
-      "fontFamily":   { "type": "string", "default": "heading", "enum": ["heading", "body", "body-alt", "handwriting", "mono"] },
-      "fontWeight":   { "type": "string", "default": "bold", "enum": ["normal", "medium", "semibold", "bold", "extrabold"] },
-      "uppercase":    { "type": "boolean", "default": true },
-      "iconWeight":   { "type": "string", "default": "brand", "enum": ["brand", "fill", "duotone", "regular", "bold", "thin", "light"] },
-      "iconColor":    { "type": "string", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"] },
-      "semanticRole": { "type": "string", "default": "status", "enum": ["status", "tag", "label", "none"] }
+      "semanticRole": { "type": "string", "default": "status", "enum": ["status", "tag", "label", "none"] },
+      "level":        { "type": "number", "enum": [1, 2, 3, 4, 5, 6] }
     },
 
     "animation": {
-      "animation":        { "type": "string", "enum": ["spin","bounce","shake","float","drift","slide-up","slide-down","slide-left","slide-right","flip","pulse","ping","pop","squish","heartbeat","rubber-band","fade","blink","flash","glint","shimmer","twinkle","wiggle","swing","rock","nod","attention","celebrate","enter","exit"] },
-      "animationTrigger": { "type": "string", "default": "viewport", "enum": ["viewport","autoplay","loop","interval","none"] },
+      "animation":        { "type": "string", "enum": ["spin", "bounce", "shake", "float", "drift", "slide-up", "slide-down", "slide-left", "slide-right", "flip", "pulse", "ping", "pop", "squish", "heartbeat", "rubber-band", "fade", "blink", "flash", "glint", "shimmer", "twinkle", "wiggle", "swing", "rock", "nod", "attention", "celebrate", "enter", "exit"] },
+      "animationTrigger": { "type": "string", "default": "viewport", "enum": ["viewport", "autoplay", "loop", "interval", "none"] },
       "animatedGradient": { "type": "boolean", "default": false }
-    },
-
-    "colour": {}
+    }
   },
 
   "pipelineRules": {

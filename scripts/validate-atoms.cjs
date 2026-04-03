@@ -350,9 +350,13 @@ for (const atom of atoms) {
         issues.push({ rule: 25, ln: '--', file: schemaFile, msg: `missing prop groups: ${missing.join(', ')}` });
       }
 
-      // Rule 26: Non-empty colour group (colour is a visual enum)
-      if (props.colour && Object.keys(props.colour).length > 0) {
-        issues.push({ rule: 26, ln: '--', file: schemaFile, msg: 'colour group must be empty {} (colour is a visual enum)' });
+      // Rule 26: Colour group should only contain brandColor (not rainbow or generic color)
+      if (props.colour) {
+        for (const key of Object.keys(props.colour)) {
+          if (key !== 'brandColor') {
+            issues.push({ rule: 26, ln: '--', file: schemaFile, msg: `colour group has unexpected prop "${key}" — only brandColor belongs here` });
+          }
+        }
       }
 
       // Rule 27: Defaults that look like token names (e.g. "neutral-400", "primary-200")
@@ -376,7 +380,7 @@ for (const atom of atoms) {
 
       // Rule 30: Schema color enum must be canonical values from shared-enums.json
       const sharedEnums = require(path.join(__dirname, '..', 'src', 'lib', 'shared-enums.json'));
-      const canonicalColorEnum = sharedEnums.colour.colour;
+      const canonicalColorEnum = sharedEnums.colour.all;
       const colorProp = (props.visual && props.visual.color) || null;
       if (colorProp && colorProp.enum) {
         const missingColors = canonicalColorEnum.filter(c => !colorProp.enum.includes(c));
