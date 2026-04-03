@@ -1,55 +1,80 @@
 /**
- * UNDERLINE MIXIN — global decorative underline for any text element
+ * UNDERLINE MIXIN — global decorative underline
  *
- * Any element with .underline gets a decorative bar below.
- * Colour inherits from currentColor.
+ * Pattern-based rendering via background-image (not text-decoration).
+ * Full control over dash/dot length, gap, thickness, offset.
+ * Uses currentColor — inherits from .color--{name} mixin.
  *
- * Styles: solid (default), gradient, dashed, dotted
+ * Styles: solid, dashed, dotted, gradient
  * Gap: close, default, loose
- * Values match UnderlineStyle + UnderlineGap enums in shared-enums.ts
+ * Thickness: sm, md, lg
  */
 
 :root {
-  --underline-offset: -0.55em;
-  --underline-thickness: 4px;
+  --underline-thickness: 2px;
+  --underline-offset: 3px;
+  --underline-dash: 6px;
+  --underline-gap: 4px;
+  --underline-dot: 1.5px;
+  --underline-dot-gap: 4px;
 }
 
 .underline {
   display: block;
   height: var(--underline-thickness);
-  width: 100%;
   margin-top: var(--underline-offset);
   border-radius: var(--radius-full);
   background: currentColor;
 }
 
-/* Gradient underline — uses the gradient mixin --_grad-computed if set */
+
+/* ── Dashed — repeating linear gradient ── */
+
+.underline--dashed {
+  background: repeating-linear-gradient(
+    to right,
+    currentColor 0 var(--underline-dash),
+    transparent var(--underline-dash) calc(var(--underline-dash) + var(--underline-gap))
+  );
+  border-radius: 0;
+}
+
+
+/* ── Dotted — radial gradient dots ── */
+
+.underline--dotted {
+  background: radial-gradient(
+    circle,
+    currentColor var(--underline-dot),
+    transparent calc(var(--underline-dot) + 0.5px)
+  );
+  background-size: calc(var(--underline-dot-gap) + var(--underline-dot) * 2) var(--underline-thickness);
+  background-repeat: repeat-x;
+  border-radius: 0;
+}
+
+
+/* ── Gradient — reads --_grad-computed from gradient mixin ── */
+
 .underline--gradient {
   background: var(--_grad-computed, currentColor);
 }
 
-/* Dashed underline */
-.underline--dashed {
-  background: repeating-linear-gradient(
-    to right, currentColor 0, currentColor 0.35em,
-    transparent 0.35em, transparent 0.55em
-  );
-}
 
-/* Dotted underline */
-.underline--dotted {
-  background: repeating-linear-gradient(
-    to right, currentColor 0, currentColor 0.15em,
-    transparent 0.15em, transparent 0.35em
-  );
-}
+/* ── Thickness ── */
 
-/* Gap — distance between text and underline */
-.underline--gap-close { margin-top: calc(var(--underline-offset) * 0.5); }
-.underline--gap-loose { margin-top: calc(var(--underline-offset) * 2); }
+.underline--thickness-sm { --underline-thickness: 1px; }
+.underline--thickness-md { --underline-thickness: 2px; }
+.underline--thickness-lg { --underline-thickness: 3px; }
 
-/* Alignment */
+
+/* ── Gap (offset from text) ── */
+
+.underline--gap-close   { --underline-offset: 1px; }
+.underline--gap-loose   { --underline-offset: 6px; }
+
+
+/* ── Alignment ── */
+
 .underline--center { margin-left: auto; margin-right: auto; }
-.underline--right { margin-left: auto; }
-
-/* Calm override in src/styles/tokens/rainbow-calm.css */
+.underline--right  { margin-left: auto; }
