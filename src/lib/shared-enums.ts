@@ -64,11 +64,17 @@ export const SIZES = [
 ] as const;
 export type Size = typeof SIZES[number];
 
-// ── Shadow (7 values) ──────────────────────────────────
+// ── Shadow (8 values) — box-shadow on element ──────────
 export const SHADOWS = [
   'none', 'out', 'drop', 'in', 'elevated', 'glow', 'glow-intense', 'glow-inner'
 ] as const;
 export type Shadow = typeof SHADOWS[number];
+
+// ── Text Shadow (4 values) — shadow/glow on text itself ─
+export const TEXT_SHADOWS = [
+  'none', 'drop', 'text', 'glow'
+] as const;
+export type TextShadow = typeof TEXT_SHADOWS[number];
 
 // ── Border Weight (2 values) ───────────────────────────
 export const BORDER_WEIGHTS = [
