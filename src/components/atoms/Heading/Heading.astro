@@ -28,6 +28,7 @@ import '../../../components/molecules/aac/AacCard/AacCard.css';
 import type {
   BrandColour, RainbowColour, ColourTier,
   FontWeight, FontFamily, TextShadow,
+  UnderlineStyle, UnderlineGap,
   IconWeight, Animation, AnimationTrigger,
   GradientBlend, GradientDirection, GradientSpread,
 } from '../../../lib/shared-enums';
@@ -58,7 +59,8 @@ interface Props {
   variant?: 'default' | 'underline' | 'highlight' | 'minimal';
   highlightHeight?: 'sm' | 'md' | 'lg' | 'full';
   highlightOpacity?: 'faint' | 'soft' | 'bold' | 'solid';
-  underlineStyle?: 'solid' | 'gradient' | 'dashed';
+  underlineStyle?: UnderlineStyle;
+  underlineGap?: UnderlineGap;
   divider?: 'left' | 'right' | 'both' | 'none';
   dividerStyle?: 'solid' | 'dashed' | 'dotted';
   dividerEnds?: 'rounded' | 'square';
@@ -110,6 +112,7 @@ const {
   highlightHeight,
   highlightOpacity,
   underlineStyle = 'solid',
+  underlineGap,
   gradient = false,
   gradientBlend,
   gradientDirection,
@@ -215,7 +218,7 @@ const headingClassList = [
         {variant === 'highlight' && <span class="heading-wrap__highlight" aria-hidden="true"></span>}
         <span class="heading-wrap__text-inner"><slot /></span>
       </Tag>
-      {variant === 'underline' && <div class="heading-wrap__underline" aria-hidden="true"></div>}
+      {variant === 'underline' && <div class:list={['underline', underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`]} aria-hidden="true"></div>}
       {subtitle && <Text as="p" size={subtitleSize} flush class="heading-wrap__subtitle" color="neutral">{subtitle}</Text>}
       {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
     </div>
