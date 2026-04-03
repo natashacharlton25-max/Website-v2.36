@@ -82,6 +82,12 @@ export const UNDERLINE_STYLES = [
 ] as const;
 export type UnderlineStyle = typeof UNDERLINE_STYLES[number];
 
+// ── Underline Gap (3 values) ──────────────────────────
+export const UNDERLINE_GAPS = [
+  'close', 'default', 'loose'
+] as const;
+export type UnderlineGap = typeof UNDERLINE_GAPS[number];
+
 // ── Border Weight (2 values) ───────────────────────────
 export const BORDER_WEIGHTS = [
   'thin', 'thick'
