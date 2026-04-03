@@ -66,7 +66,7 @@ export type Size = typeof SIZES[number];
 
 // ── Shadow (7 values) ──────────────────────────────────
 export const SHADOWS = [
-  'none', 'out', 'drop', 'in', 'elevated', 'glow', 'glow-intense'
+  'none', 'out', 'drop', 'in', 'elevated', 'glow', 'glow-intense', 'glow-inner'
 ] as const;
 export type Shadow = typeof SHADOWS[number];
 
