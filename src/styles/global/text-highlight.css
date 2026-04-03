@@ -1,72 +1,71 @@
 /**
  * Text highlight — shared colour bar behind text
  *
- * Used by Text and Heading atoms via their highlight props.
- * Colour map: 10 variants matching the global colour enum.
- * Height enum: sm (30%), md (45%), lg (100%).
+ * Used by Text and Heading atoms.
+ * Colour from global .color--{name} mixin.
+ * Intensity uses colour TIERS not opacity — works in all modes.
  *
- * Internal token:
- *   --_highlight-height   (45%)          — bar height relative to text
- *   --_highlight-opacity  (opacity-low)  — bar transparency
+ * Height: sm, md, lg, full
+ * Intensity: faint (tint), soft (mid), bold (base), solid (emphasis)
+ * Shape: sharp, rounded
  */
 
 .text-highlight {
   --_highlight-height: 45%;
-  --_highlight-opacity: var(--opacity-low);
 
   position: relative;
   width: fit-content;
   isolation: isolate;
 }
 
+/* Bar via ::before (legacy — for Text atom which has no inner span) */
 .text-highlight::before {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
+  left: -2%;
+  right: -2%;
   bottom: 5%;
   height: var(--_highlight-height);
   z-index: -1;
-  opacity: var(--_highlight-opacity);
-  border-radius: var(--_highlight-radius, 0);
+  border-radius: var(--_highlight-radius, var(--radius-sm));
+  background: var(--_tier-tint, var(--neutral-tint));
+  opacity: 0.5;
 }
 
+/* Bar via child span (for Heading — allows independent colour) */
+.text-highlight__bar {
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  bottom: 5%;
+  height: var(--_highlight-height);
+  z-index: -1;
+  border-radius: var(--_highlight-radius, var(--radius-sm));
+  background: var(--_tier-tint, var(--neutral-tint));
+  opacity: 0.5;
+}
 
-/* ==========================================================
-   HEIGHT
-   ========================================================== */
+/* When __bar is present, hide ::before */
+.text-highlight:has(.text-highlight__bar)::before { display: none; }
 
-.text-highlight--sm { --_highlight-height: 30%; }
-.text-highlight--md { --_highlight-height: 45%; }
-.text-highlight--lg { --_highlight-height: 75%; }
+
+/* ── Height ── */
+
+.text-highlight--sm   { --_highlight-height: 30%; }
+.text-highlight--md   { --_highlight-height: 45%; }
+.text-highlight--lg   { --_highlight-height: 75%; }
 .text-highlight--full { --_highlight-height: 100%; }
 
 
-/* ==========================================================
-   OPACITY
-   ========================================================== */
+/* ── Intensity — tier colour × opacity for text readability ── */
 
-/* ==========================================================
-   SHAPE
-   ========================================================== */
+.text-highlight--faint::before, .text-highlight--faint .text-highlight__bar { background: var(--_tier-tint, var(--neutral-tint)); opacity: 0.5; }
+.text-highlight--soft::before, .text-highlight--soft .text-highlight__bar   { background: var(--_tier-tint, var(--neutral-tint)); opacity: 0.8; }
+.text-highlight--bold::before, .text-highlight--bold .text-highlight__bar   { background: var(--_tier-mid, var(--neutral-mid)); opacity: 0.7; }
+.text-highlight--solid::before, .text-highlight--solid .text-highlight__bar { background: var(--_tier-mid, var(--neutral-mid)); opacity: 1; }
+
+
+/* ── Shape ── */
 
 .text-highlight--sharp   { --_highlight-radius: 0; }
 .text-highlight--rounded { --_highlight-radius: var(--radius-sm); }
-
-
-/* ==========================================================
-   OPACITY
-   ========================================================== */
-
-.text-highlight--faint  { --_highlight-opacity: var(--opacity-low); }
-.text-highlight--soft   { --_highlight-opacity: var(--opacity-medium); }
-.text-highlight--bold   { --_highlight-opacity: var(--opacity-high); }
-
-
-/* ==========================================================
-   COLOUR — uses global .color--{name} mixin
-   The highlight reads --_tier-tint from the colour mixin for the bar.
-   Apply .color--{name} on the .text-highlight element.
-   ========================================================== */
-
-.text-highlight::before { background: var(--_tier-mid, var(--neutral-mid)); }
