@@ -44,47 +44,33 @@
   --liquid-outer-shadow: none;
 }
 
-/* ========== CALM: NO GRADIENTS ========== */
-/* Kill ALL gradient effects — composable, blends, presets, animated.
-   Everything flattens to solid colour. */
+/* ========== CALM: BADGES → GLASS + BRAND ONLY ========== */
+/* All badges revert to glass. Rainbow colours collapse to primary (already
+   handled by rainbow token overrides above). Only brand tones show. */
 
-/* Fill: solid colour, no gradient background */
-[data-theme-chroma="calm"] .gradient.gradient--fill {
-  background: var(--_badge-color);
-}
-
-/* Outline: solid border, no gradient border */
-[data-theme-chroma="calm"] .gradient.gradient--outline {
-  background: transparent;
-  border-color: var(--_badge-color);
-}
-
-/* Outline text: solid colour, no gradient text-clip */
-[data-theme-chroma="calm"] .gradient--outline .gradient__text {
-  background: none;
-  -webkit-text-fill-color: var(--_badge-color);
-}
-
-/* Glass: glass bg only, no gradient */
-[data-theme-chroma="calm"] .gradient.gradient--glass {
+[data-theme-chroma="calm"] .badge {
   background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-color: color-mix(in oklch, var(--_badge-color) 20%, transparent);
+  color: var(--_badge-color);
 }
 
-[data-theme-chroma="calm"] .gradient--glass .gradient__text {
-  background: none;
-  -webkit-text-fill-color: var(--_badge-color);
-}
-
-/* Kill all blends — emerge, fade, hero, sunset, presets */
-[data-theme-chroma="calm"] [class*="gradient--blend-"] {
-  --_grad-computed: none;
-}
-
+/* Kill all gradients, blends, presets, animated */
+[data-theme-chroma="calm"] .gradient,
+[data-theme-chroma="calm"] [class*="gradient--blend-"],
 [data-theme-chroma="calm"] [class*="gradient--preset-"] {
   --_grad-computed: none;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
-/* Kill animated gradients */
+[data-theme-chroma="calm"] .gradient__text {
+  background: none;
+  -webkit-text-fill-color: var(--_badge-color);
+}
+
 [data-theme-chroma="calm"] .gradient--animated,
 [data-theme-chroma="calm"] .gradient--animated .gradient__text {
   animation: none;
