@@ -4,20 +4,89 @@
  * Every component schema, validator, and Astro prop type
  * references these arrays. Add a value here = available everywhere.
  *
- * These match 1:1 with CSS classes and token definitions:
+ * Organised by canonical schema groups: COLOUR → VISUAL → ANIMATION → CONTENT
+ *
+ * CSS class mapping:
  *   colour  → .badge--red, .icon--red (CSS) + var(--rainbow-1) (token)
  *   gradient → .badge--gradient-red (CSS) + var(--gradient-red) (token)
  *   animation → .anim--spin (CSS) + @keyframes anim-spin (micro-animations.css)
  */
 
-// ── Colour (11 values) ──────────────────────────────────
+
+/* ================================================================
+   COLOUR — everything about colour selection and intensity
+   ================================================================ */
+
+// ── Colour (10 values) ─────────────────────────────────
 export const COLOURS = [
   'primary', 'secondary', 'neutral',
   'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'
 ] as const;
 export type Colour = typeof COLOURS[number];
 
-// ── Gradient — tiered by use case ────────────────────────
+// ── Colour Tier (4 values) — maps to semantic tokens ────
+export const COLOUR_TIERS = [
+  'tint', 'mid', 'base', 'emphasis'
+] as const;
+export type ColourTier = typeof COLOUR_TIERS[number];
+
+
+/* ================================================================
+   VISUAL — appearance, shape, variant, shadow, typography
+   ================================================================ */
+
+// ── Variant (4 values) ─────────────────────────────────
+export const VARIANTS = [
+  'fill', 'outline', 'glass', 'liquid-glass'
+] as const;
+export type Variant = typeof VARIANTS[number];
+
+// ── Shape (5 values) ───────────────────────────────────
+export const SHAPES = [
+  'sharp', 'subtle', 'soft', 'rounded', 'pill'
+] as const;
+export type Shape = typeof SHAPES[number];
+
+// ── Size (3 values) ────────────────────────────────────
+export const SIZES = [
+  'sm', 'md', 'lg'
+] as const;
+export type Size = typeof SIZES[number];
+
+// ── Shadow (7 values) ──────────────────────────────────
+export const SHADOWS = [
+  'none', 'out', 'drop', 'in', 'elevated', 'glow', 'glow-intense'
+] as const;
+export type Shadow = typeof SHADOWS[number];
+
+// ── Border Weight (2 values) ───────────────────────────
+export const BORDER_WEIGHTS = [
+  'thin', 'thick'
+] as const;
+export type BorderWeight = typeof BORDER_WEIGHTS[number];
+
+// ── Font Family (5 values) ─────────────────────────────
+export const FONT_FAMILIES = [
+  'heading', 'body', 'body-alt', 'handwriting', 'mono'
+] as const;
+export type FontFamily = typeof FONT_FAMILIES[number];
+
+// ── Font Weight (5 values) ─────────────────────────────
+export const FONT_WEIGHTS = [
+  'normal', 'medium', 'semibold', 'bold', 'extrabold'
+] as const;
+export type FontWeight = typeof FONT_WEIGHTS[number];
+
+// ── Icon Weight (7 values) ─────────────────────────────
+export const ICON_WEIGHTS = [
+  'brand', 'fill', 'duotone', 'regular', 'bold', 'thin', 'light'
+] as const;
+export type IconWeight = typeof ICON_WEIGHTS[number];
+
+
+/* ================================================================
+   GRADIENT — colour, direction, type, focus, spread
+   ================================================================ */
 
 /** Colour gradients — match colour enum, one per colour */
 export const GRADIENTS_COLOUR = [
@@ -43,17 +112,7 @@ export type Gradient = typeof GRADIENTS[number];
 export type GradientColour = typeof GRADIENTS_COLOUR[number];
 export type GradientMixed = typeof GRADIENTS_MIXED[number];
 
-// ── Gradient Rules (canonical) ───────────────────────────
-// These are not enums but documented constants for how gradients behave:
-//   - `animatedGradient: boolean` — every gradient component gets this prop
-//   - Fill variant: gradient animates background only, text is solid (--color-White/--color-Black)
-//   - Outline variant: gradient animates border (anim-border-flow), label gets background-clip:text
-//   - Glass variant: gradient animates background, label gets background-clip:text
-//   - Icon inside gradient component: always solid colour, never gradient
-//   - Gradient text colour: tint/mid → --color-Black, base/emphasis → --color-White (auto-swaps dark mode)
-//   - animatedGradient is INDEPENDENT of animation prop (icon/component motion)
-
-// ── Gradient Direction (8 values) — intent-based, not raw angles ──
+// ── Gradient Direction (8 values) — intent-based, not raw angles
 export const GRADIENT_DIRECTIONS = [
   'vertical', 'vertical-reverse',
   'horizontal', 'horizontal-reverse',
@@ -62,32 +121,49 @@ export const GRADIENT_DIRECTIONS = [
 ] as const;
 export type GradientDirection = typeof GRADIENT_DIRECTIONS[number];
 
-// ── Gradient Type (2 values) ────────────────────────────
+// ── Gradient Type (2 values) ───────────────────────────
 export const GRADIENT_TYPES = [
   'linear', 'radial'
 ] as const;
 export type GradientType = typeof GRADIENT_TYPES[number];
 
-// ── Gradient Focus (9 values) — radial/conic origin ─────
+// ── Gradient Focus (9 values) — radial origin ──────────
 export const GRADIENT_FOCUSES = [
   'center', 'top', 'bottom', 'left', 'right',
   'top-left', 'top-right', 'bottom-left', 'bottom-right'
 ] as const;
 export type GradientFocus = typeof GRADIENT_FOCUSES[number];
 
-// ── Gradient Spread (3 values) — stop intensity ─────────
+// ── Gradient Spread (3 values) — stop intensity ────────
 export const GRADIENT_SPREADS = [
   'soft', 'balanced', 'tight'
 ] as const;
 export type GradientSpread = typeof GRADIENT_SPREADS[number];
 
-// ── Colour Tier (4 values) — maps to semantic tokens ────
-export const COLOUR_TIERS = [
-  'tint', 'mid', 'base', 'emphasis'
+// ── Border Gradient (12 values — colour + mixed) ───────
+export const BORDER_GRADIENTS = [
+  'primary', 'secondary', 'neutral', 'hero', 'sunset',
+  'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'
 ] as const;
-export type ColourTier = typeof COLOUR_TIERS[number];
+export type BorderGradient = typeof BORDER_GRADIENTS[number];
 
-// ── Animation (30 values) ───────────────────────────────
+/*
+ * Gradient Rules (canonical — ALL components):
+ *   - `animatedGradient: boolean` — every gradient component gets this prop
+ *   - Fill: gradient animates background only, text is solid (--color-White/--color-Black)
+ *   - Outline: gradient animates border (anim-border-flow), label gets background-clip:text
+ *   - Glass: gradient animates background, label gets background-clip:text
+ *   - Icon inside gradient component: always solid colour, never gradient
+ *   - Gradient text colour: tint/mid → --color-Black, base/emphasis → --color-White
+ *   - animatedGradient is INDEPENDENT of animation prop (icon/component motion)
+ */
+
+
+/* ================================================================
+   ANIMATION — motion, triggers
+   ================================================================ */
+
+// ── Animation (30 values) ──────────────────────────────
 export const ANIMATIONS = [
   // Movement
   'spin', 'bounce', 'shake', 'float', 'drift',
@@ -103,74 +179,24 @@ export const ANIMATIONS = [
 ] as const;
 export type Animation = typeof ANIMATIONS[number];
 
-// ── Animation Trigger (5 values) ────────────────────────
+// ── Animation Trigger (5 values) — non-interactive ─────
 export const ANIMATION_TRIGGERS = [
   'viewport', 'autoplay', 'loop', 'interval', 'none'
 ] as const;
 export type AnimationTrigger = typeof ANIMATION_TRIGGERS[number];
 
-// ── Interactive Animation Trigger (8 values — includes hover/click/focus) ──
+// ── Interactive Animation Trigger (8 values) ───────────
 export const ANIMATION_TRIGGERS_INTERACTIVE = [
   'hover', 'viewport', 'autoplay', 'loop', 'interval', 'click', 'focus', 'none'
 ] as const;
 export type AnimationTriggerInteractive = typeof ANIMATION_TRIGGERS_INTERACTIVE[number];
 
-// ── Icon Weight (7 values) ──────────────────────────────
-export const ICON_WEIGHTS = [
-  'brand', 'fill', 'duotone', 'regular', 'bold', 'thin', 'light'
-] as const;
-export type IconWeight = typeof ICON_WEIGHTS[number];
 
-// ── Font Family (5 values) ──────────────────────────────
-export const FONT_FAMILIES = [
-  'heading', 'body', 'body-alt', 'handwriting', 'mono'
-] as const;
-export type FontFamily = typeof FONT_FAMILIES[number];
+/* ================================================================
+   CONTENT — semantic role, accessibility
+   ================================================================ */
 
-// ── Font Weight (5 values) ──────────────────────────────
-export const FONT_WEIGHTS = [
-  'normal', 'medium', 'semibold', 'bold', 'extrabold'
-] as const;
-export type FontWeight = typeof FONT_WEIGHTS[number];
-
-// ── Variant (4 values) ──────────────────────────────────
-export const VARIANTS = [
-  'fill', 'outline', 'glass', 'liquid-glass'
-] as const;
-export type Variant = typeof VARIANTS[number];
-
-// ── Shape (5 values) ────────────────────────────────────
-export const SHAPES = [
-  'sharp', 'subtle', 'soft', 'rounded', 'pill'
-] as const;
-export type Shape = typeof SHAPES[number];
-
-// ── Shadow (7 values) ───────────────────────────────────
-export const SHADOWS = [
-  'none', 'out', 'drop', 'in', 'elevated', 'glow', 'glow-intense'
-] as const;
-export type Shadow = typeof SHADOWS[number];
-
-// ── Size (3 values) ─────────────────────────────────────
-export const SIZES = [
-  'sm', 'md', 'lg'
-] as const;
-export type Size = typeof SIZES[number];
-
-// ── Border Weight (2 values) ────────────────────────────
-export const BORDER_WEIGHTS = [
-  'thin', 'thick'
-] as const;
-export type BorderWeight = typeof BORDER_WEIGHTS[number];
-
-// ── Border Gradient (12 values — same as gradient) ──────
-export const BORDER_GRADIENTS = [
-  'primary', 'secondary', 'neutral', 'hero', 'sunset',
-  'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'
-] as const;
-export type BorderGradient = typeof BORDER_GRADIENTS[number];
-
-// ── Semantic Role (4 values) ────────────────────────────
+// ── Semantic Role (4 values) ───────────────────────────
 export const SEMANTIC_ROLES = [
   'status', 'tag', 'label', 'none'
 ] as const;
