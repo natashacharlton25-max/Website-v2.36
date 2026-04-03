@@ -1251,76 +1251,93 @@ Icons come from D1 (Asset Library API). JSON author passes the **base name only*
 
 ## Gradient system (canonical)
 
-### Enums
-Defined in `shared-enums.ts`. Gradient tokens in `gradients.css`. Every component reads `--_grad` via inlined class map rules.
+### How it works
+Gradients are built from **tier tokens** (`--_tier-tint/mid`, `--_badge-color`, `--_tier-emphasis`) set by the colour enum classes. No separate gradient colour enum needed — the colour IS the gradient.
 
-| Group | Values |
-|-------|--------|
-| Colour | primary, secondary, neutral, red, orange, yellow, teal, blue, purple, pink |
-| Mixed | hero, sunset, brand-emerge, brand-fade |
-| Background | background-light, background-warm, background-cool |
+CSS mixin: `src/styles/global/gradient.css`. Components add `.gradient` + `.gradient--{variant}` classes.
 
-### 4-tier gradient stops (per colour)
+### Three layers
 
-| Tier | Stops | Direction |
-|------|-------|-----------|
-| Tint | mid → tint → white | Flipped — dark starts first for text readability |
-| Mid | emphasis → base → mid → tint | Flipped |
-| Base | tint → mid → base → emphasis | Full 4-stop range |
-| Emphasis | base → emphasis → black | Dark end |
+**1. Composable gradients** (`gradient: true` + direction + spread)
 
-Tiers selected via `colorTier` prop (separate from `gradient` prop). Badge.astro combines: `badge--gradient-${gradient}-${colorTier}`.
+| Prop | Values | What it does |
+|------|--------|-------------|
+| `gradient` | boolean | Enable gradient from tier tokens |
+| `gradientDirection` | vertical, horizontal, diagonal (×4 with reverse) | Sets `--_grad-angle` |
+| `gradientSpread` | soft, balanced, tight | Controls stop range |
 
-### Gradient text colour (canonical rule — ALL components)
+| Spread | Stops |
+|--------|-------|
+| Soft | color-White → tint → mid |
+| Balanced | color-White → tint → mid → base → emphasis → color-Black |
+| Tight | base → emphasis → color-Black |
 
-| Tier | Text colour | Why |
-|------|-------------|-----|
-| Tint/mid | `var(--color-Black)` | Light gradient bg |
-| Base/emphasis | `var(--color-White)` | Dark gradient bg |
+**2. Named blends** (`gradientBlend`)
 
-`--color-White` and `--color-Black` swap in dark mode (theme engine), so these rules auto-correct in all modes.
+| Blend | Stops | Direction |
+|-------|-------|-----------|
+| `hero` | primary-base → secondary-base | Respects direction |
+| `sunset` | primary-base → primary-emphasis → secondary-emphasis | Respects direction |
+| `brand-emerge` | primary-tint → primary-base → secondary-emphasis | Respects direction |
+| `brand-fade` | primary-emphasis → secondary-base → secondary-tint | Respects direction |
+| `emerge` | page-bg → colour (appears from background) | Respects direction |
+| `fade` | colour → page-bg (dissolves into background) | Respects direction |
+
+**3. Tier presets** (`gradientBlend: "preset-*"`)
+
+| Preset | Stops | Direction |
+|--------|-------|-----------|
+| `preset-tint` | mid → tint → white | Fixed 135deg |
+| `preset-mid` | emphasis → base → mid → tint | Fixed 135deg |
+| `preset-base` | tint → mid → base → emphasis | Fixed 135deg |
+| `preset-emphasis` | base → emphasis → black | Fixed 135deg |
 
 ### Variant behaviour (canonical — ALL components)
 
 | Variant | Background | Border | Text | Icon |
 |---------|-----------|--------|------|------|
-| Fill | `var(--_grad)` | none | Solid (`--color-White`/`--color-Black`) | Solid (inherits text) |
-| Outline | `page-bg` padding-box | `var(--_grad)` border-box | `background-clip: text` with `--_grad` | Solid colour |
-| Glass | Glass bg | Glass border | `background-clip: text` with `--_grad` | Solid colour |
+| Fill | `--_grad-computed` | none (unless borderWeight set) | Solid (`--color-White`/`--color-Black`) | Solid (inherits text) |
+| Outline | page-bg padding-box | Gradient border-box (tier-only, no white/black) | `background-clip: text` | Solid colour |
+| Glass | Glass bg | Glass border | `background-clip: text` | Solid colour |
 
-### `animatedGradient` prop (canonical — ALL gradient components)
+### Fill text colour
 
-- Boolean prop, independent of `animation` (icon/component motion)
+| Spread | Text | Why |
+|--------|------|-----|
+| Soft | `var(--color-Black)` | Light gradient bg |
+| Balanced/tight | `var(--color-White)` | Dark gradient bg |
+
+### `animatedGradient` prop
+
+- Boolean, independent of `animation` (icon/component motion)
 - Fill: `anim-gradient-flow` on background, text stays solid
-- Outline: `anim-border-flow` on border, label gets `anim-gradient-flow` via text-clip
-- Glass: `anim-gradient-flow` on background, label gets text-clip animation
-- Icon NEVER gets gradient animation — always solid colour
-- Outline text uses `background-size: var(--container-sm)` for consistent sizing
+- Outline: `anim-border-flow` on border
+- Glass: `anim-gradient-flow` on background
+- Icon NEVER gets gradient animation
+- Background sizing: `var(--_grad-size)` (25rem) for consistent rendering
 
 ### Mode overrides
 
 | Mode | Behaviour |
 |------|-----------|
-| Dark | `--color-White`/`--color-Black` swap in theme — gradients self-correct |
-| HC | Rainbow-hc.css provides HC-contrast tokens — no gradient overrides needed |
-| Mono | `rainbow-mono.css` tinted grey tokens cascade into gradient class map |
-| Calm | `rainbow-calm.css` flattens all gradients to solid fills |
-| CVD | Protan/tritan rainbow files provide safe colours — gradients cascade |
+| Dark | `--color-White`/`--color-Black` swap → gradient endpoints self-correct |
+| HC | HC rainbow tokens cascade — no overrides needed |
+| Mono | Mono rainbow tokens cascade |
+| Calm | All gradients flatten to solid `--_badge-color` |
+| CVD | CVD rainbow tokens cascade |
 
-### SVG gradients
-`SvgGradientDefs.astro` in layout provides `<linearGradient>` defs. Icons use `fill="url(#grad-{name})"`. Same tokens, same modes.
-
-### Schema pattern — every atom with gradient support:
+### Schema pattern
 ```json
-"visual": {
-  "gradient": { "type": "string", "enum": ["primary","secondary","neutral","hero","sunset","brand-emerge","brand-fade","red","orange","yellow","teal","blue","purple","pink"] }
+"gradient": {
+  "gradient": { "type": "boolean" },
+  "gradientBlend": { "type": "string", "enum": ["hero","sunset","brand-emerge","brand-fade","emerge","fade","preset-tint","preset-mid","preset-base","preset-emphasis"] },
+  "gradientDirection": { "type": "string", "enum": ["vertical","vertical-reverse","horizontal","horizontal-reverse","diagonal","diagonal-reverse","diagonal-alt","diagonal-alt-reverse"] },
+  "gradientSpread": { "type": "string", "enum": ["soft","balanced","tight"] }
 },
 "animation": {
   "animatedGradient": { "type": "boolean" }
 }
 ```
-
-No per-component gradient definitions. One global utility, every component reads the same tokens.
 
 ---
 
