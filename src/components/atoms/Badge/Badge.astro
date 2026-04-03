@@ -14,13 +14,13 @@
  * @param semanticRole - 'status' (default), 'tag', 'label', 'none'
  */
 import { Icon } from '../Icon';
+import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
 import Heading from '../Heading/Heading.astro';
 import type {
   BrandColour, RainbowColour, ColourTier,
   Variant, Shadow, GradientBlend, GradientDirection, GradientSpread,
   Size, Shape, BorderWeight,
-  IconWeight, Animation, AnimationTrigger,
   FontFamily, FontWeight, SemanticRole,
 } from '../../../lib/shared-enums';
 
@@ -43,11 +43,8 @@ interface Props {
   size?: Size;
   shape?: Shape;
   borderWeight?: BorderWeight;
-  icon?: string;
-  iconWeight?: IconWeight;
-  iconColor?: BrandColour | RainbowColour;
-  animation?: Animation;
-  animationTrigger?: AnimationTrigger;
+  /** Media — component node { component: "Icon"|"LottieIcon", ...atomProps } */
+  media?: Record<string, any>;
   fontFamily?: FontFamily;
   fontWeight?: FontWeight;
   uppercase?: boolean;
@@ -70,11 +67,7 @@ const {
   size = 'md',
   shape = 'soft',
   borderWeight,
-  icon,
-  iconWeight,
-  iconColor,
-  animation,
-  animationTrigger = 'viewport',
+  media,
   fontFamily,
   fontWeight,
   uppercase = true,
@@ -105,13 +98,12 @@ const color = rainbowColor || brandColor;
     `badge--${shape}`,
     borderWeight && `badge--border-${borderWeight}`,
     level && 'badge--heading',
-    icon && 'badge--has-icon',
+    media && 'badge--has-icon',
     !uppercase && 'badge--lowercase',
   ]}
 >
-  {icon ? (
-    <Icon name={icon} weight={iconWeight !== 'brand' ? iconWeight : undefined} color={iconColor} animation={animation} animationTrigger={animationTrigger} class="badge__icon" aria-hidden="true" />
-  ) : null}
+  {media?.component === 'Icon' && <Icon {...media} class="badge__icon" aria-hidden="true" />}
+  {media?.component === 'LottieIcon' && <LottieIcon {...media} class="badge__icon" aria-hidden="true" />}
   {level ? (
     <Heading level={level} flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} class:list={['badge__label', (gradient || gradientBlend) && variant !== 'fill' && 'gradient__text']}>{label}</Heading>
   ) : (
