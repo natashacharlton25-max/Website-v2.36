@@ -1,0 +1,181 @@
+/**
+ * GRADIENT MIXIN — global pattern for any component
+ *
+ * Any element with .gradient gets a computed gradient from its own tier tokens.
+ * Requires --_tier-tint, --_tier-mid, --_badge-color, --_tier-emphasis on the element
+ * (set by colour enum classes like .badge--red, .button--primary etc.)
+ *
+ * Props via data attributes:
+ *   data-grad-dir     → --_grad-angle (vertical, horizontal, diagonal etc.)
+ *   data-grad-spread  → stop range (soft, balanced, tight)
+ *   data-grad-type    → linear or radial
+ *   data-grad-focus   → radial origin (center, top-left etc.)
+ *
+ * Components opt in by adding .gradient class. Variant behaviour
+ * (.gradient--fill, .gradient--outline, .gradient--glass) controls
+ * how the gradient is applied.
+ */
+
+
+/* ========== COMPUTED GRADIENT ========== */
+/* Default: balanced spread, all 4 tier stops */
+
+.gradient {
+  --_grad-computed: linear-gradient(
+    var(--_grad-angle, 135deg),
+    var(--_tier-tint) var(--_grad-start, 0%),
+    var(--_tier-mid) 30%,
+    var(--_badge-color) 60%,
+    var(--_tier-emphasis) var(--_grad-end, 100%)
+  );
+}
+
+/* Spread: soft — tint → mid only */
+.gradient[data-grad-spread="soft"] {
+  --_grad-computed: linear-gradient(
+    var(--_grad-angle, 135deg),
+    var(--_tier-tint) 0%,
+    var(--_tier-mid) 100%
+  );
+}
+
+/* Spread: tight — base → emphasis only */
+.gradient[data-grad-spread="tight"] {
+  --_grad-computed: linear-gradient(
+    var(--_grad-angle, 135deg),
+    var(--_badge-color) 0%,
+    var(--_tier-emphasis) 100%
+  );
+}
+
+/* Type: radial */
+.gradient[data-grad-type="radial"] {
+  --_grad-computed: radial-gradient(
+    circle at var(--_grad-focus, center),
+    var(--_tier-tint) var(--_grad-start, 0%),
+    var(--_badge-color) 50%,
+    var(--_tier-emphasis) var(--_grad-end, 100%)
+  );
+}
+
+/* Radial + soft */
+.gradient[data-grad-type="radial"][data-grad-spread="soft"] {
+  --_grad-computed: radial-gradient(
+    circle at var(--_grad-focus, center),
+    var(--_tier-tint) 0%,
+    var(--_tier-mid) 100%
+  );
+}
+
+/* Radial + tight */
+.gradient[data-grad-type="radial"][data-grad-spread="tight"] {
+  --_grad-computed: radial-gradient(
+    circle at var(--_grad-focus, center),
+    var(--_badge-color) 0%,
+    var(--_tier-emphasis) 100%
+  );
+}
+
+
+/* ========== FILL VARIANT ========== */
+
+.gradient--fill {
+  background: var(--_grad-computed);
+  color: var(--color-White);
+  border: none;
+}
+
+/* Soft spread = light gradient → dark text */
+.gradient--fill[data-grad-spread="soft"] {
+  color: var(--color-Black);
+}
+
+
+/* ========== OUTLINE VARIANT ========== */
+
+.gradient--outline {
+  border: var(--border-width-2) solid transparent;
+  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_grad-computed) border-box;
+}
+
+.gradient--outline .gradient__text {
+  background: var(--_grad-computed);
+  background-size: var(--container-sm) 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+/* ========== GLASS VARIANT ========== */
+
+.gradient--glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-width) solid color-mix(in oklch, var(--neutral-400) 20%, transparent);
+}
+
+.gradient--glass .gradient__text {
+  background: var(--_grad-computed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+/* ========== ANIMATED ========== */
+
+.gradient--animated.gradient--fill {
+  background: var(--_grad-computed);
+  background-size: 300% 300%;
+  animation-name: anim-gradient-flow;
+  animation-duration: var(--duration-continuous-slower);
+  animation-timing-function: var(--ease-default);
+  animation-iteration-count: infinite;
+}
+
+.gradient--animated.gradient--outline {
+  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_grad-computed) border-box;
+  background-size: 100% 100%, 300% 300%;
+  animation-name: anim-border-flow;
+  animation-duration: var(--duration-continuous-slower);
+  animation-timing-function: var(--ease-default);
+  animation-iteration-count: infinite;
+}
+
+.gradient--animated.gradient--glass {
+  background-size: 300% 300%;
+  animation-name: anim-gradient-flow;
+  animation-duration: var(--duration-continuous-slower);
+  animation-timing-function: var(--ease-default);
+  animation-iteration-count: infinite;
+}
+
+.gradient--animated .gradient__text {
+  background-size: 300% 300%;
+  animation-name: anim-gradient-flow;
+  animation-duration: var(--duration-continuous-slower);
+  animation-timing-function: var(--ease-default);
+  animation-iteration-count: infinite;
+}
+
+
+/* ========== MIXED BLENDS (hero, sunset etc.) ========== */
+/* These use two colour sources — can't be built from single tier tokens */
+
+.gradient--blend-hero {
+  --_grad-computed: linear-gradient(var(--_grad-angle, 135deg), var(--primary-base) 0%, var(--secondary-base) 100%);
+}
+
+.gradient--blend-sunset {
+  --_grad-computed: linear-gradient(var(--_grad-angle, 45deg), var(--primary-base) 0%, var(--primary-emphasis) 30%, var(--secondary-emphasis) 100%);
+}
+
+.gradient--blend-brand-emerge {
+  --_grad-computed: linear-gradient(var(--_grad-angle, 135deg), var(--primary-tint) 0%, var(--primary-base) 50%, var(--secondary-emphasis) 100%);
+}
+
+.gradient--blend-brand-fade {
+  --_grad-computed: linear-gradient(var(--_grad-angle, 135deg), var(--primary-emphasis) 0%, var(--secondary-base) 50%, var(--secondary-tint) 100%);
+}

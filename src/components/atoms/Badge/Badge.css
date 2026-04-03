@@ -159,92 +159,12 @@
 }
 
 
-/* ========== GRADIENT — per variant ========== */
-/* --_grad and --_grad-tint set globally by [class*="--gradient-{name}"] in gradients.css */
-
-/* Fill + gradient: White/Black swap per mode so one rule fits all.
-   Darker gradients (base/emphasis) → White token text.
-   Lighter gradients (tint/mid) → Black token text. */
-.badge--fill[class*="badge--gradient-"] {
-  background: var(--_grad);
-  color: var(--color-White);
-  border: none;
-}
-
-.badge--fill[class*="badge--gradient-"][class*="-tint"],
-.badge--fill[class*="badge--gradient-"][class*="-mid"] {
-  color: var(--color-Black);
-}
-
-/* Outline + gradient: gradient border, gradient text, transparent bg */
-.badge--outline[class*="badge--gradient-"] {
-  border: var(--border-width-2) solid transparent;
-  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_grad) border-box;
-}
-
-.badge--outline[class*="badge--gradient-"] .badge__label {
-  background: var(--_grad);
-  background-size: var(--container-sm) 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Glass + gradient: glass bg, gradient text */
-.badge--glass[class*="badge--gradient-"] {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--border-width) solid color-mix(in oklch, var(--neutral-400) 20%, transparent);
-}
-
-.badge--glass[class*="badge--gradient-"] .badge__label {
-  background: var(--_grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-
-/* ========== ANIMATED GRADIENT ========== */
-
-/* Fill + animated gradient */
-.badge--fill.badge--animated-gradient[class*="badge--gradient-"] {
-  background: var(--_grad);
-  background-size: 300% 300%;
-  animation-name: anim-gradient-flow;
-  animation-duration: var(--duration-continuous-slower);
-  animation-timing-function: var(--ease-default);
-  animation-iteration-count: infinite;
-}
-
-/* Outline + animated gradient */
-.badge--outline.badge--animated-gradient[class*="badge--gradient-"] {
-  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_grad) border-box;
-  background-size: 100% 100%, 300% 300%;
-  animation-name: anim-border-flow;
-  animation-duration: var(--duration-continuous-slower);
-  animation-timing-function: var(--ease-default);
-  animation-iteration-count: infinite;
-}
-
-/* Glass + animated gradient */
-.badge--glass.badge--animated-gradient[class*="badge--gradient-"] {
-  background-size: 300% 300%;
-  animation-name: anim-gradient-flow;
-  animation-duration: var(--duration-continuous-slower);
-  animation-timing-function: var(--ease-default);
-  animation-iteration-count: infinite;
-}
-
-/* Animated gradient text — outline/glass labels get flowing gradient text */
-.badge--animated-gradient[class*="badge--gradient-"] .badge__label {
-  background-size: 300% 300%;
-  animation-name: anim-gradient-flow;
-  animation-duration: var(--duration-continuous-slower);
-  animation-timing-function: var(--ease-default);
-  animation-iteration-count: infinite;
-}
+/* ========== GRADIENT ========== */
+/* Uses global gradient mixin from src/styles/global/gradient.css.
+   Badge adds .gradient + .gradient--{variant} classes.
+   The gradient reads tier tokens (--_tier-tint/mid, --_badge-color, --_tier-emphasis)
+   already set by the colour enum classes below.
+   Badge label uses .gradient__text for background-clip:text treatment. */
 
 
 /* ========== COLOUR ENUM ========== */

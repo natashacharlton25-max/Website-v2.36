@@ -18,7 +18,7 @@ import { Text } from '../Text';
 import Heading from '../Heading/Heading.astro';
 import type {
   BrandColour, RainbowColour, ColourTier,
-  Variant, Shadow, Gradient, GradientDirection, GradientType, GradientFocus, GradientSpread,
+  Variant, Shadow, GradientDirection, GradientType, GradientFocus, GradientSpread,
   Size, Shape, BorderWeight,
   IconWeight, Animation, AnimationTrigger,
   FontFamily, FontWeight, SemanticRole,
@@ -33,7 +33,10 @@ interface Props {
   colorTier?: ColourTier;
   variant?: Variant;
   shadow?: Shadow;
-  gradient?: Gradient;
+  /** Show colour as gradient instead of flat */
+  gradient?: boolean;
+  /** Mixed blend — overrides single-colour gradient with two-colour blend */
+  gradientBlend?: 'hero' | 'sunset' | 'brand-emerge' | 'brand-fade';
   gradientDirection?: GradientDirection;
   gradientType?: GradientType;
   gradientFocus?: GradientFocus;
@@ -61,7 +64,8 @@ const {
   colorTier,
   variant = 'fill',
   shadow = 'none',
-  gradient,
+  gradient = false,
+  gradientBlend,
   gradientDirection,
   gradientType,
   gradientFocus,
@@ -99,8 +103,10 @@ const color = rainbowColor || brandColor;
     colorTier && colorTier !== 'base' && `badge--tier-${colorTier}`,
     `badge--${variant}`,
     shadow !== 'none' && `badge--shadow-${shadow}`,
-    gradient && colorTier && colorTier !== 'base' ? `badge--gradient-${gradient}-${colorTier}` : gradient && `badge--gradient-${gradient}`,
-    animatedGradient && 'badge--animated-gradient',
+    (gradient || gradientBlend) && 'gradient',
+    (gradient || gradientBlend) && `gradient--${variant}`,
+    gradientBlend && `gradient--blend-${gradientBlend}`,
+    animatedGradient && 'gradient--animated',
     size !== 'md' && `badge--${size}`,
     `badge--${shape}`,
     borderWeight && `badge--border-${borderWeight}`,
@@ -110,11 +116,11 @@ const color = rainbowColor || brandColor;
   ]}
 >
   {icon ? (
-    <Icon name={icon} weight={iconWeight !== 'brand' ? iconWeight : undefined} color={iconColor} gradient={variant !== 'fill' ? gradient : undefined} animation={animation} animationTrigger={animationTrigger} class="badge__icon" aria-hidden="true" />
+    <Icon name={icon} weight={iconWeight !== 'brand' ? iconWeight : undefined} color={iconColor} animation={animation} animationTrigger={animationTrigger} class="badge__icon" aria-hidden="true" />
   ) : null}
   {level ? (
-    <Heading level={level} flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} class="badge__label">{label}</Heading>
+    <Heading level={level} flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} class:list={['badge__label', (gradient || gradientBlend) && variant !== 'fill' && 'gradient__text']}>{label}</Heading>
   ) : (
-    <Text as="span" class="badge__label" flush family={fontFamily !== 'heading' ? fontFamily : undefined} weight={fontWeight !== 'bold' ? fontWeight : undefined}>{label}</Text>
+    <Text as="span" class:list={['badge__label', (gradient || gradientBlend) && variant !== 'fill' && 'gradient__text']} flush family={fontFamily !== 'heading' ? fontFamily : undefined} weight={fontWeight !== 'bold' ? fontWeight : undefined}>{label}</Text>
   )}
 </span>

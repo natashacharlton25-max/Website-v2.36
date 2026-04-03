@@ -99,29 +99,11 @@ export type IconWeight = typeof ICON_WEIGHTS[number];
    GRADIENT — colour, direction, type, focus, spread
    ================================================================ */
 
-/** Colour gradients — match colour enum, one per colour */
-export const GRADIENTS_COLOUR = [
-  'primary', 'secondary', 'neutral',
-  'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'
-] as const;
-
-/** Mixed gradients — multi-colour blends */
-export const GRADIENTS_MIXED = [
+// ── Gradient Blend (4 values) — mixed two-colour gradients ──
+export const GRADIENT_BLENDS = [
   'hero', 'sunset', 'brand-emerge', 'brand-fade'
 ] as const;
-
-/** Background gradients — section/page fills */
-export const GRADIENTS_BACKGROUND = [
-  'background-light', 'background-warm', 'background-cool'
-] as const;
-
-/** All gradients — colour + mixed + background */
-export const GRADIENTS = [
-  ...GRADIENTS_COLOUR, ...GRADIENTS_MIXED, ...GRADIENTS_BACKGROUND
-] as const;
-export type Gradient = typeof GRADIENTS[number];
-export type GradientColour = typeof GRADIENTS_COLOUR[number];
-export type GradientMixed = typeof GRADIENTS_MIXED[number];
+export type GradientBlend = typeof GRADIENT_BLENDS[number];
 
 // ── Gradient Direction (8 values) — intent-based, not raw angles
 export const GRADIENT_DIRECTIONS = [
@@ -151,12 +133,7 @@ export const GRADIENT_SPREADS = [
 ] as const;
 export type GradientSpread = typeof GRADIENT_SPREADS[number];
 
-// ── Border Gradient (12 values — colour + mixed) ───────
-export const BORDER_GRADIENTS = [
-  'primary', 'secondary', 'neutral', 'hero', 'sunset',
-  'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'
-] as const;
-export type BorderGradient = typeof BORDER_GRADIENTS[number];
+// Border gradient removed — gradient is now boolean + tier tokens
 
 /*
  * Gradient Rules (canonical — ALL components):
