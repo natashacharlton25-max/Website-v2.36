@@ -189,6 +189,7 @@ const headingClassList = [
   flush && 'heading--flush',
   textShadow && textShadow !== 'none' && `text-shadow--${textShadow}`,
   (gradient || gradientBlend) && 'gradient__text',
+  (gradient || gradientBlend) && animatedGradient && 'gradient__text--animated',
   gradientBlend && `gradient--blend-${gradientBlend}`,
 ];
 ---
@@ -236,7 +237,7 @@ const headingClassList = [
         {variant === 'highlight' && <span class:list={['text-highlight__bar', resolvedHighlightColor && `color--${resolvedHighlightColor}`, highlightTier && highlightTier !== 'base' && `color--tier-${highlightTier}`]} aria-hidden="true"></span>}
         <span class="heading__text-inner"><slot /></span>
       </Tag>
-      {variant === 'underline' && <div class:list={['underline', underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`, underlineThickness && `underline--thickness-${underlineThickness}`, resolvedUnderlineColor && `color--${resolvedUnderlineColor}`, underlineTier && underlineTier !== 'base' && `color--tier-${underlineTier}`, underlineStyle === 'gradient' && gradientBlend && `gradient--blend-${gradientBlend}`, underlineStyle === 'gradient' && gradient && 'gradient']} aria-hidden="true"></div>}
+      {variant === 'underline' && <div class:list={['underline', underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`, underlineThickness && `underline--thickness-${underlineThickness}`, resolvedUnderlineColor && `color--${resolvedUnderlineColor}`, underlineTier && underlineTier !== 'base' && `color--tier-${underlineTier}`, underlineStyle === 'gradient' && gradientBlend && `gradient--blend-${gradientBlend}`, underlineStyle === 'gradient' && gradient && 'gradient', animatedGradient && 'underline--animated']} aria-hidden="true"></div>}
       {subtitle && <Text as="p" size={subtitleSize} flush class="heading-wrap__subtitle" color="neutral">{subtitle}</Text>}
       {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
     </div>
