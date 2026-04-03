@@ -52,14 +52,20 @@
   );
 }
 
-/* Spread: fade — page-bg → tint → base → page-bg (blends into background) */
-.gradient[data-grad-spread="fade"] {
+/* Blend: emerge — page-bg → colour (appears from background) */
+.gradient--blend-emerge {
   --_grad-computed: linear-gradient(
     var(--_grad-angle, 135deg),
     var(--page-bg) 0%,
-    var(--_tier-tint) 20%,
-    var(--_badge-color) 50%,
-    var(--_tier-tint) 80%,
+    var(--_badge-color) 100%
+  );
+}
+
+/* Blend: fade — colour → page-bg (dissolves into background) */
+.gradient--blend-fade {
+  --_grad-computed: linear-gradient(
+    var(--_grad-angle, 135deg),
+    var(--_badge-color) 0%,
     var(--page-bg) 100%
   );
 }
@@ -96,15 +102,6 @@
   );
 }
 
-/* Radial + fade */
-.gradient[data-grad-type="radial"][data-grad-spread="fade"] {
-  --_grad-computed: radial-gradient(
-    circle at var(--_grad-focus, center),
-    var(--_badge-color) 0%,
-    var(--_tier-tint) 60%,
-    var(--page-bg) 100%
-  );
-}
 
 
 /* ========== FILL VARIANT ========== */
@@ -143,9 +140,6 @@
   --_grad-border: linear-gradient(var(--_grad-angle, 135deg), var(--_badge-color) 0%, var(--_tier-emphasis) 100%);
 }
 
-.gradient--outline[data-grad-spread="fade"] {
-  --_grad-border: linear-gradient(var(--_grad-angle, 135deg), var(--_tier-tint) 0%, var(--_badge-color) 50%, var(--_tier-tint) 100%);
-}
 
 .gradient--outline .gradient__text {
   background: linear-gradient(
@@ -248,4 +242,28 @@
 
 .gradient--blend-brand-fade {
   --_grad-computed: linear-gradient(var(--_grad-angle, 135deg), var(--primary-emphasis) 0%, var(--secondary-base) 50%, var(--secondary-tint) 100%);
+}
+
+
+/* ========== TIER PRESETS — fixed stop patterns from the original system ========== */
+/* These are the hand-tuned gradients that looked great. Fixed direction (135deg). */
+
+/* Tint preset: mid → tint → white (flipped — dark starts first for text) */
+.gradient--preset-tint {
+  --_grad-computed: linear-gradient(135deg, var(--_tier-mid) 0%, var(--_tier-tint) 60%, var(--color-White) 100%);
+}
+
+/* Mid preset: emphasis → base → mid → tint (flipped) */
+.gradient--preset-mid {
+  --_grad-computed: linear-gradient(135deg, var(--_tier-emphasis) 0%, var(--_badge-color) 35%, var(--_tier-mid) 65%, var(--_tier-tint) 100%);
+}
+
+/* Base preset: tint → mid → base → emphasis (full range) */
+.gradient--preset-base {
+  --_grad-computed: linear-gradient(135deg, var(--_tier-tint) 0%, var(--_tier-mid) 30%, var(--_badge-color) 60%, var(--_tier-emphasis) 100%);
+}
+
+/* Emphasis preset: base → emphasis → black */
+.gradient--preset-emphasis {
+  --_grad-computed: linear-gradient(135deg, var(--_badge-color) 0%, var(--_tier-emphasis) 60%, var(--color-Black) 100%);
 }

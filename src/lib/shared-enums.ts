@@ -101,7 +101,9 @@ export type IconWeight = typeof ICON_WEIGHTS[number];
 
 // ── Gradient Blend (4 values) — mixed two-colour gradients ──
 export const GRADIENT_BLENDS = [
-  'hero', 'sunset', 'brand-emerge', 'brand-fade'
+  'hero', 'sunset', 'brand-emerge', 'brand-fade',
+  'emerge', 'fade',
+  'preset-tint', 'preset-mid', 'preset-base', 'preset-emphasis'
 ] as const;
 export type GradientBlend = typeof GRADIENT_BLENDS[number];
 
@@ -130,7 +132,7 @@ export type GradientFocus = typeof GRADIENT_FOCUSES[number];
 
 // ── Gradient Spread (3 values) — stop intensity ────────
 export const GRADIENT_SPREADS = [
-  'soft', 'balanced', 'tight', 'fade'
+  'soft', 'balanced', 'tight'
 ] as const;
 export type GradientSpread = typeof GRADIENT_SPREADS[number];
 
