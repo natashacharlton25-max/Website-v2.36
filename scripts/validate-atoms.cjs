@@ -52,6 +52,8 @@ const path = require('path');
  *    35   String prop in visual/animation group without enum
  *         content group strings are exempt (text, slugs, URLs are freeform)
  *    36   class/style prop in schema — Astro composition only, not JSON content
+ *    37   Hardcoded enum union in .astro — should import from shared-enums.ts
+ *         Checks for inline 'spin' | 'bounce' etc. patterns that match shared enums
  *
  *   Coverage rules
  *    15   Colour enum count in CSS (10 classes expected: primary..pink)
@@ -294,6 +296,27 @@ for (const atom of atoms) {
         issues.push({ type: 'WARN', rule: 34, ln: i + 1, file, msg: 'legacy gate: prefersReducedMotion() → use getMotion() from gate.ts' });
       }
     });
+
+    // Rule 37: Hardcoded enum unions — should import from shared-enums.ts
+    const hasSharedImport = /from\s+['"].*shared-enums/.test(fullContent);
+    if (!hasSharedImport) {
+      // Check for known enum patterns that indicate hardcoded values
+      const enumPatterns = [
+        { pattern: /'spin'\s*\|\s*'bounce'/, name: 'Animation' },
+        { pattern: /'fill'\s*\|\s*'outline'\s*\|\s*'glass'/, name: 'Variant' },
+        { pattern: /'sharp'\s*\|\s*'subtle'\s*\|\s*'soft'/, name: 'Shape' },
+        { pattern: /'tint'\s*\|\s*'mid'\s*\|\s*'base'\s*\|\s*'emphasis'/, name: 'ColourTier' },
+        { pattern: /'heading'\s*\|\s*'body'\s*\|\s*'body-alt'/, name: 'FontFamily' },
+        { pattern: /'normal'\s*\|\s*'medium'\s*\|\s*'semibold'/, name: 'FontWeight' },
+        { pattern: /'brand'\s*\|\s*'fill'\s*\|\s*'duotone'/, name: 'IconWeight' },
+        { pattern: /'viewport'\s*\|\s*'autoplay'\s*\|\s*'loop'/, name: 'AnimationTrigger' },
+      ];
+      for (const { pattern, name } of enumPatterns) {
+        if (pattern.test(fullContent)) {
+          issues.push({ rule: 37, ln: '--', file, msg: `hardcoded ${name} enum — import from shared-enums.ts` });
+        }
+      }
+    }
   }
 
   // ─── SCHEMA RULES (13, 14, 25, 26, 27, 28) ───
@@ -353,7 +376,7 @@ for (const atom of atoms) {
 
       // Rule 30: Schema color enum must be canonical values from shared-enums.json
       const sharedEnums = require(path.join(__dirname, '..', 'src', 'lib', 'shared-enums.json'));
-      const canonicalColorEnum = sharedEnums.colour;
+      const canonicalColorEnum = sharedEnums.colour.colour;
       const colorProp = (props.visual && props.visual.color) || null;
       if (colorProp && colorProp.enum) {
         const missingColors = canonicalColorEnum.filter(c => !colorProp.enum.includes(c));
