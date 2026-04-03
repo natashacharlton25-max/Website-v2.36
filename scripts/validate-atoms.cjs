@@ -55,6 +55,7 @@ const path = require('path');
  *    37   Hardcoded enum union in .astro — should import from shared-enums.ts
  *         Checks for inline 'spin' | 'bounce' etc. patterns that match shared enums
  *    38   gradientType/gradientFocus in atom schema — radial only for large elements
+ *    39   slots/class/style in schema — Renderer handles slots, class/style are Astro-only
  *         (Card, Section). Atoms use linear direction + spread only.
  *
  *   Coverage rules
@@ -445,6 +446,14 @@ for (const atom of atoms) {
           if (props.gradient[prop]) {
             issues.push({ rule: 38, ln: '--', file: schemaFile, msg: `"${prop}" in gradient{} — radial only for large elements (Card, Section), not atoms` });
           }
+        }
+      }
+
+      // Rule 39: slots/class/style at schema root — these don't belong in schemas
+      const bannedRootKeys = ['slots', 'class', 'style'];
+      for (const key of bannedRootKeys) {
+        if (schema[key]) {
+          issues.push({ rule: 39, ln: '--', file: schemaFile, msg: `"${key}" in schema root — Renderer handles slots, class/style are Astro-only` });
         }
       }
 
