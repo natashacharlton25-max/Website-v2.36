@@ -166,7 +166,7 @@ function trapFocus(e: KeyboardEvent): void {
 async function attachHandlers(): Promise<void> {
   // Activate when enlarge display mode is set (on html or body)
   const isActive = document.documentElement.dataset.altDisplayMode === 'enlarge'
-    || document.body.dataset.altDisplayMode === 'enlarge'
+    || document.documentElement.dataset.altDisplayMode === 'enlarge'
     || document.documentElement.hasAttribute('data-image-enlarge');
   if (!isActive) return;
 
@@ -180,12 +180,12 @@ async function attachHandlers(): Promise<void> {
 
     figure.addEventListener('click', () => {
       const mode = document.documentElement.dataset.altDisplayMode
-        || document.body.dataset.altDisplayMode;
+        || document.documentElement.dataset.altDisplayMode;
       if (mode === 'enlarge') openModal(figure);
     });
     figure.addEventListener('keydown', (e: KeyboardEvent) => {
       const mode = document.documentElement.dataset.altDisplayMode
-        || document.body.dataset.altDisplayMode;
+        || document.documentElement.dataset.altDisplayMode;
       if (mode !== 'enlarge') return;
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -204,7 +204,7 @@ function observeEnlargeMode(): void {
     closeModal();
 
     const isActive = document.documentElement.dataset.altDisplayMode === 'enlarge'
-      || document.body.dataset.altDisplayMode === 'enlarge'
+      || document.documentElement.dataset.altDisplayMode === 'enlarge'
       || document.documentElement.hasAttribute('data-image-enlarge');
     if (isActive) {
       attachHandlers();

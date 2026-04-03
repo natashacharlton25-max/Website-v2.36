@@ -47,19 +47,19 @@ function isBarMode(): boolean {
 
 function isTooltipMode(): boolean {
   const mode = document.documentElement.dataset.altDisplayMode
-    || document.body.dataset.altDisplayMode;
+    || document.documentElement.dataset.altDisplayMode;
   return mode === 'tooltip' || mode === 'subtitle' || mode === 'inline';
 }
 
 function isSubtitleMode(): boolean {
   const mode = document.documentElement.dataset.altDisplayMode
-    || document.body.dataset.altDisplayMode;
+    || document.documentElement.dataset.altDisplayMode;
   return mode === 'subtitle';
 }
 
 function isInlineMode(): boolean {
   const mode = document.documentElement.dataset.altDisplayMode
-    || document.body.dataset.altDisplayMode;
+    || document.documentElement.dataset.altDisplayMode;
   return mode === 'inline';
 }
 
@@ -180,12 +180,12 @@ function initFigCaptions(): void {
       }
     }
 
-    const isPermanentMode = () => isSubtitleMode() && document.body.dataset.hover === 'none';
+    const isPermanentMode = () => isSubtitleMode() && document.documentElement.dataset.hover === 'none';
 
     function onEnter(): void {
       if (!isTooltipMode()) return;
       if (isPermanentMode()) return; // click only in permanent mode
-      if (document.body.dataset.hover === 'none') return; // click only in hover-none
+      if (document.documentElement.dataset.hover === 'none') return; // click only in hover-none
       if (!isInlineMode()) updateCaption();
       if (isBarMode() && !isInlineMode()) {
         const content = getAltContent(figure);
@@ -195,7 +195,7 @@ function initFigCaptions(): void {
 
     function onLeave(): void {
       if (isPermanentMode()) return; // stays until X clicked
-      if (document.body.dataset.hover === 'none') return; // click handles viewed state
+      if (document.documentElement.dataset.hover === 'none') return; // click handles viewed state
       figure.classList.add('alt-viewed'); // mark as seen on leave
       figure.classList.add('highlight-visited'); // highlight-links visited state
       if (isBarMode()) hideBar();
@@ -224,7 +224,7 @@ function initFigCaptions(): void {
       if (isPermanentMode()) {
         e.stopPropagation();
         onClick();
-      } else if (document.body.dataset.hover === 'none') {
+      } else if (document.documentElement.dataset.hover === 'none') {
         // Hover-none: click toggles figcaption
         e.stopPropagation();
         updateCaption();

@@ -18,8 +18,8 @@
  */
 
 function initAnimTriggers() {
-  const render = document.body.dataset.render;
-  const motion = document.body.dataset.motion;
+  const render = document.documentElement.dataset.render;
+  const motion = document.documentElement.dataset.motion;
   if (render === 'textonly' || render === 'reduced') return;
   if (motion === 'none') return;
 

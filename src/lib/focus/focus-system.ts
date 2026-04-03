@@ -98,7 +98,7 @@ function initFocusSystem() {
         const complementIdx = (idx + 3) % 7;
 
         // Mode-aware token selection
-        const isDark = document.body.dataset.mode === 'dark';
+        const isDark = document.documentElement.dataset.mode === 'dark';
         const isHC = document.documentElement.hasAttribute('data-high-contrast');
         const styles = getComputedStyle(document.body);
 
@@ -162,7 +162,7 @@ function initFocusSystem() {
       // Focus Colour Cycle: solid colour changes on each tab (no spinning gradient, no page bg)
       if (document.documentElement.hasAttribute('data-focus-colour-cycle') && !document.documentElement.hasAttribute('data-focus-rainbow')) {
         _rainbowIndex = (_rainbowIndex + 1) % 7;
-        const isDark = document.body.dataset.mode === 'dark';
+        const isDark = document.documentElement.dataset.mode === 'dark';
         const isHC = document.documentElement.hasAttribute('data-high-contrast');
         const styles = getComputedStyle(document.body);
 

@@ -228,11 +228,11 @@ export function applySettings(settings: A11ySettings): void {
   // Set data-render attribute (new system) alongside legacy classes
   // Priority: textonly > reduced > assistive > full
   if (settings.textOnly) {
-    document.body.dataset.render = 'textonly';
+    document.documentElement.dataset.render = 'textonly';
   } else if (settings.reduceMotion) {
-    document.body.dataset.render = 'reduced';
+    document.documentElement.dataset.render = 'reduced';
   } else {
-    document.body.removeAttribute('data-render');
+    document.documentElement.removeAttribute('data-render');
   }
 
   target.classList.toggle('a11y-highlight-links', settings.highlightLinks);
@@ -321,17 +321,17 @@ export function applySettings(settings: A11ySettings): void {
   // Hover Mode — decorative hover feedback
   const hoverMode = settings.hoverMode || 'full';
   if (hoverMode === 'full') {
-    document.body.removeAttribute('data-hover');
+    document.documentElement.removeAttribute('data-hover');
   } else {
-    document.body.dataset.hover = hoverMode;
+    document.documentElement.dataset.hover = hoverMode;
   }
 
   // Motion Mode — all animation speed
   const motionMode = settings.motionMode || 'full';
   if (motionMode === 'full') {
-    document.body.removeAttribute('data-motion');
+    document.documentElement.removeAttribute('data-motion');
   } else {
-    document.body.dataset.motion = motionMode;
+    document.documentElement.dataset.motion = motionMode;
   }
 
   // Symbol Set — which AAC pictures to display

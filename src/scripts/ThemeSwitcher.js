@@ -124,7 +124,7 @@ export class ThemeSwitcher {
     this.currentTheme = themeName;
 
     // Show loading state
-    document.body.classList.add('theme-switching');
+    document.documentElement.classList.add('theme-switching');
 
     return new Promise((resolve, reject) => {
       // Set up load handler before changing href
@@ -136,7 +136,7 @@ export class ThemeSwitcher {
         localStorage.setItem('color-theme', themeName);
 
         // Remove loading state
-        document.body.classList.remove('theme-switching');
+        document.documentElement.classList.remove('theme-switching');
 
         // Update UI indicators
         this.updateThemeIndicators(themeName);
@@ -161,7 +161,7 @@ export class ThemeSwitcher {
         this.themeLink.removeEventListener('error', onError);
 
         console.error(`Failed to load theme: ${themeName}`);
-        document.body.classList.remove('theme-switching');
+        document.documentElement.classList.remove('theme-switching');
         // Revert to previous theme on error
         this.currentTheme = previousTheme;
         reject(new Error(`Failed to load theme: ${themeName}`));
@@ -183,23 +183,23 @@ export class ThemeSwitcher {
       button.setAttribute('aria-pressed', isActive.toString());
     });
 
-    // Set data-mode, data-theme, and data-cvd on body
+    // Set data-mode, data-theme, and data-cvd on <html>
     // Theme files output --theme-luminance: light|dark — read after CSS loads
-    document.body.setAttribute('data-theme', themeName);
+    document.documentElement.setAttribute('data-theme', themeName);
 
     // Extract CVD mode from theme name (e.g. 'forest-dark-protan' → 'protan')
     const cvdMatch = themeName.match(/-(protan|deutan|tritan)$/);
     if (cvdMatch) {
-      document.body.setAttribute('data-cvd', cvdMatch[1]);
+      document.documentElement.setAttribute('data-cvd', cvdMatch[1]);
     } else {
-      document.body.removeAttribute('data-cvd');
+      document.documentElement.removeAttribute('data-cvd');
     }
 
     // High contrast detection
     if (themeName.includes('high-contrast')) {
-      document.body.setAttribute('data-high-contrast', '');
+      document.documentElement.setAttribute('data-high-contrast', '');
     } else {
-      document.body.removeAttribute('data-high-contrast');
+      document.documentElement.removeAttribute('data-high-contrast');
     }
 
     setTimeout(() => {
@@ -207,30 +207,30 @@ export class ThemeSwitcher {
 
       const luminance = computed.getPropertyValue('--theme-luminance').trim();
       if (luminance) {
-        document.body.setAttribute('data-mode', luminance);
+        document.documentElement.setAttribute('data-mode', luminance);
       } else {
-        document.body.removeAttribute('data-mode');
+        document.documentElement.removeAttribute('data-mode');
       }
 
       // Read chroma from CSS and set data attribute (mono rainbow override)
       const chroma = computed.getPropertyValue('--theme-chroma').trim();
       if (chroma) {
-        document.body.setAttribute('data-theme-chroma', chroma);
+        document.documentElement.setAttribute('data-theme-chroma', chroma);
       } else {
-        document.body.removeAttribute('data-theme-chroma');
+        document.documentElement.removeAttribute('data-theme-chroma');
       }
     }, 0);
 
     // Legacy: body classes for components still using .a11y-theme-* selectors
     // TODO: Remove once all selectors migrated to [data-mode] etc.
-    document.body.classList.forEach(cls => {
+    document.documentElement.classList.forEach(cls => {
       if (cls.startsWith('a11y-theme-')) {
-        document.body.classList.remove(cls);
+        document.documentElement.classList.remove(cls);
       }
     });
     if (themeName !== 'default') {
       const bodyClass = themeName.replace('a11y-', 'a11y-theme-');
-      document.body.classList.add(bodyClass);
+      document.documentElement.classList.add(bodyClass);
     }
 
     // Update meta theme-color for mobile browsers
