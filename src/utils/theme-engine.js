@@ -512,7 +512,7 @@ function computePageBackgrounds(isDark, chromaPreset = 'brand') {
       'page-bg-overlay': '#3a3434',   // modal surface — clear separation
     };
   }
-  if (chromaPreset === 'pastel') {
+  if (chromaPreset === 'calm') {
     // Compressed lightness: page-bg L=0.95 (warmer than standard white).
     // neutral-700 text-light gives 4.6:1, neutral-800 body text gives 6.9:1 — both AA.
     // Reduces visual noise — gentle, low-glare, ADHD/migraine-friendly.
@@ -561,7 +561,7 @@ function _computeSemanticTokens_DELETED(scales, pageBg, isDark, chromaPreset = '
       'brand-c-primary-dark':    dual('var(--primary-400)',       primary[400]),
       'brand-c-secondary-dark':  dual('var(--secondary-400)',     secondary[400]),
     };
-  } else if (chromaPreset === 'pastel') {
+  } else if (chromaPreset === 'calm') {
     tokens = {
       'brand-c-text':            dual('var(--neutral-800)',       neutral[800]),
       'brand-c-primary':         dual('var(--primary-600)',       primary[600]),
@@ -596,7 +596,7 @@ function _computeSemanticTokens_DELETED(scales, pageBg, isDark, chromaPreset = '
   };
 
   // Pastel override: compressed neutral-dark range
-  if (chromaPreset === 'pastel' && !isDark) {
+  if (chromaPreset === 'calm' && !isDark) {
     shared['brand-c-neutral-dark'] = dual('var(--neutral-800)', neutral[800]);
   }
 
@@ -946,7 +946,7 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
 
   // Semantic tokens (new API — migrate to these)
   // Pastel compresses semantic tokens into the light range (200→500)
-  const SEMANTIC_MAP = chromaPreset === 'pastel' && !isDark
+  const SEMANTIC_MAP = chromaPreset === 'calm' && !isDark
     ? { 200: 'tint', 300: 'mid', 400: 'base', 500: 'emphasis' }
     : { 200: 'tint', 400: 'mid', 600: 'base', 800: 'emphasis' };
   for (const [family, scale] of Object.entries(scales)) {
