@@ -190,13 +190,19 @@ const headingClassList = [
     divider && `heading-wrap--divider-${divider}`,
     divider && `heading-wrap--divider-ends-${dividerEnds}`,
     divider && dividerStyle !== 'solid' && `heading-wrap--divider-style-${dividerStyle}`,
-    variant === 'underline' && `heading-wrap--underline-${underlineStyle}`,
+    (gradient || gradientBlend) && 'gradient',
+    (gradient || gradientBlend) && `gradient--${variant === 'default' ? 'fill' : variant}`,
+    gradientBlend && `gradient--blend-${gradientBlend}`,
+    animatedGradient && 'gradient--animated',
     (image || icon || lottieSlug) && 'heading-wrap--has-media',
     (image || icon || lottieSlug) && `heading-wrap--media-${mediaPosition}`,
     (image || icon || lottieSlug) && `heading-wrap--media-size-${computedMediaSize}`,
     (icon || lottieSlug) && `heading-wrap--icon-${iconStyle}`,
     className,
-  ]} style={mergedStyle || undefined}>
+  ]}
+    data-grad-dir={gradientDirection || undefined}
+    data-grad-spread={gradientSpread || undefined}
+    style={mergedStyle || undefined}>
     {(image || icon || lottieSlug) && mediaPosition === 'left' && (
       <div class="heading-wrap__media">
         {image ? (
