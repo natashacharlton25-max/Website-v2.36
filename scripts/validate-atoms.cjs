@@ -56,6 +56,8 @@ const path = require('path');
  *         Checks for inline 'spin' | 'bounce' etc. patterns that match shared enums
  *    38   gradientType/gradientFocus in atom schema — radial only for large elements
  *    39   slots/class/style in schema — Renderer handles slots, class/style are Astro-only
+ *    40   Per-atom colour classes in CSS — should use global .color--{name} mixin
+ *    41   Zone/mode overrides in global/*.css — should be in zones/*.css
  *         (Card, Section). Atoms use linear direction + spread only.
  *
  *   Coverage rules
@@ -238,6 +240,18 @@ for (const atom of atoms) {
         issues.push({ rule: 32, ln, file, msg: `animation without tokens (use var(--duration-*) / var(--ease-*)): ${t.substring(0, 60)}` });
       }
     });
+
+    // Rule 40: Per-atom colour classes — should use global .color--{name}
+    const atomLower = atom.toLowerCase();
+    const perAtomColorRe = new RegExp(`\\.${atomLower}--(?:primary|secondary|neutral|red|orange|yellow|teal|blue|purple|pink)\\b`);
+    for (const f of cssFiles) {
+      const cssContent = fs.readFileSync(path.join(dir, f), 'utf8').split('\n');
+      cssContent.forEach((line, i) => {
+        if (perAtomColorRe.test(line) && !/color--/.test(line)) {
+          issues.push({ rule: 40, ln: i + 1, file: f, msg: `per-atom colour class — use global .color--{name} mixin` });
+        }
+      });
+    }
   }
 
   // ─── ASTRO RULES (8, 9, 10, 23, 24) ───
