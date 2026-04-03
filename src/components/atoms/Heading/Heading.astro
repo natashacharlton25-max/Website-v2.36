@@ -25,11 +25,26 @@ import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
 import { aacInline } from '../../../lib/aac/aac-inline';
 import '../../../components/molecules/aac/AacCard/AacCard.css';
-import type { FontWeight, FontFamily, Colour } from '../../../lib/shared-enums';
+import type {
+  BrandColour, RainbowColour, ColourTier,
+  FontWeight, FontFamily,
+  IconWeight, Animation, AnimationTrigger,
+  GradientBlend, GradientDirection, GradientSpread,
+} from '../../../lib/shared-enums';
 
 interface Props {
-  // ── Core typography ──────────────────────────────────────
+  // ── Content ─────────────────────────────────────────────
   level: 1 | 2 | 3 | 4 | 5 | 6;
+  subtitle?: string;
+  subtitleSize?: 'xs' | 'sm' | 'base' | 'lg' | 'xl';
+  aac?: boolean;
+
+  // ── Colour ──────────────────────────────────────────────
+  brandColor?: BrandColour;
+  rainbowColor?: RainbowColour;
+  colorTier?: ColourTier;
+
+  // ── Typography ──────────────────────────────────────────
   size?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   weight?: FontWeight;
   family?: FontFamily;
@@ -38,38 +53,35 @@ interface Props {
   tracking?: 'normal' | 'wide' | 'wider';
   flush?: boolean;
 
-  // ── Colour ──────────────────────────────────────────────
-  color?: 'default' | Colour;
-
-  // ── Subtitle ─────────────────────────────────────────────
-  subtitle?: string;
-  subtitleSize?: 'xs' | 'sm' | 'base' | 'lg' | 'xl';
-
-  // ── Divider ──────────────────────────────────────────────
-  divider?: 'left' | 'right' | 'both' | 'none';
-  dividerStyle?: 'solid' | 'dashed' | 'dotted';
-  dividerEnds?: 'rounded' | 'square';
-
-  // ── Variant ──────────────────────────────────────────────
+  // ── Visual ──────────────────────────────────────────────
   variant?: 'default' | 'underline' | 'highlight' | 'minimal';
   highlightHeight?: 'sm' | 'md' | 'lg' | 'full';
   highlightOpacity?: 'faint' | 'soft' | 'bold' | 'solid';
   underlineStyle?: 'solid' | 'gradient' | 'dashed';
-  underlineGradient?: 'hero' | 'primary' | 'primary-soft' | 'primary-light' | 'secondary' | 'secondary-soft' | 'sunset' | 'brand-emerge' | 'brand-fade';
-
-  // ── Media ────────────────────────────────────────────────
-  lottieIcon?: string | Record<string, any>;
-  image?: string;
-  icon?: string;
-  mediaPosition?: 'left' | 'right';
-  mediaSize?: 'sm' | 'md' | 'lg' | 'auto';
-  iconStyle?: 'contained' | 'bare';
-
-  // ── Layout ───────────────────────────────────────────────
+  divider?: 'left' | 'right' | 'both' | 'none';
+  dividerStyle?: 'solid' | 'dashed' | 'dotted';
+  dividerEnds?: 'rounded' | 'square';
   spacing?: 'tight' | 'normal' | 'loose';
 
-  /** Render AAC pictogram version of content (build-time) */
-  aac?: boolean;
+  // ── Gradient ────────────────────────────────────────────
+  gradient?: boolean;
+  gradientBlend?: GradientBlend;
+  gradientDirection?: GradientDirection;
+  gradientSpread?: GradientSpread;
+
+  // ── Icon ────────────────────────────────────────────────
+  icon?: string;
+  iconWeight?: IconWeight;
+  iconStyle?: 'contained' | 'bare';
+  lottieIcon?: string | Record<string, any>;
+  image?: string;
+  mediaPosition?: 'left' | 'right';
+  mediaSize?: 'sm' | 'md' | 'lg' | 'auto';
+
+  // ── Animation ───────────────────────────────────────────
+  animation?: Animation;
+  animationTrigger?: AnimationTrigger;
+  animatedGradient?: boolean;
 
   class?: string;
   style?: string;
@@ -77,7 +89,9 @@ interface Props {
 
 const {
   level,
-  color = 'default',
+  brandColor,
+  rainbowColor,
+  colorTier,
   size,
   weight,
   family,
@@ -94,18 +108,28 @@ const {
   highlightHeight,
   highlightOpacity,
   underlineStyle = 'solid',
-  underlineGradient = 'hero',
+  gradient = false,
+  gradientBlend,
+  gradientDirection,
+  gradientSpread,
   lottieIcon,
   image,
   icon,
+  iconWeight,
+  iconStyle = 'contained',
   mediaPosition = 'left',
   mediaSize = 'auto',
-  iconStyle = 'contained',
+  animation,
+  animationTrigger,
+  animatedGradient = false,
   spacing = 'normal',
   aac = false,
   class: className,
   style: incomingStyle,
 } = Astro.props;
+
+// Resolve colour: rainbow takes precedence if set, else brand, else default
+const color = rainbowColor || brandColor || 'default';
 
 // Build-time AAC resolution
 let aacHtml = '';
@@ -133,10 +157,7 @@ const mediaSizeMapAuto: Record<string, string> = { '1': 'lg', '2': 'lg', '3': 'm
 const computedMediaSize = mediaSize === 'auto' ? mediaSizeMapAuto[sizeKey] ?? 'md' : mediaSize;
 const computedIconSize = mediaSize === 'auto' ? (iconSizeMap[sizeKey] ?? 32) : (mediaSize === 'sm' ? 24 : mediaSize === 'md' ? 32 : 56);
 
-const gradientStyle = (variant === 'underline' && underlineStyle === 'gradient')
-  ? `--heading-underline-gradient: var(--gradient-${underlineGradient})`
-  : '';
-const mergedStyle = [gradientStyle, incomingStyle].filter(Boolean).join('; ');
+const mergedStyle = incomingStyle || '';
 
 const headingClassList = [
   'heading',
