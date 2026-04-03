@@ -274,6 +274,14 @@ for (const { path: filePath, label } of pageFiles) {
     }
   }
 
+  // Test pages must use Renderer — manual prop mapping breaks when schemas change
+  const normPath = filePath.replace(/\\/g, '/');
+  const isTestPage = normPath.includes('/test/') && normPath.endsWith('-test.astro');
+  const usesRenderer = /import\s+.*Renderer/.test(content);
+  if (isTestPage && hasJsonImport && !usesRenderer) {
+    issues.push({ ln: '--', msg: `test page imports JSON but doesn't use Renderer — manual prop mapping will drift from schema` });
+  }
+
   // Pages that import atoms + JSON = correct pattern (JSON-driven renderer)
   // This is the target architecture — atoms render from JSON data.
   // No warning needed — this IS how the site is built.
