@@ -62,9 +62,9 @@ export const GRADIENT_DIRECTIONS = [
 ] as const;
 export type GradientDirection = typeof GRADIENT_DIRECTIONS[number];
 
-// ── Gradient Type (3 values) ────────────────────────────
+// ── Gradient Type (2 values) ────────────────────────────
 export const GRADIENT_TYPES = [
-  'linear', 'radial', 'conic'
+  'linear', 'radial'
 ] as const;
 export type GradientType = typeof GRADIENT_TYPES[number];
 

@@ -2,8 +2,126 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Renderer from '../../components/Renderer.astro';
 import data from '../../data/test/rainbow-gradients.json';
+
+const directions = [
+  { name: 'vertical', label: 'Vertical' },
+  { name: 'vertical-reverse', label: 'Vertical Reverse' },
+  { name: 'horizontal', label: 'Horizontal' },
+  { name: 'horizontal-reverse', label: 'Horizontal Reverse' },
+  { name: 'diagonal', label: 'Diagonal' },
+  { name: 'diagonal-reverse', label: 'Diagonal Reverse' },
+  { name: 'diagonal-alt', label: 'Diagonal Alt' },
+  { name: 'diagonal-alt-reverse', label: 'Diagonal Alt Reverse' },
+];
+
+const spreads = [
+  { name: 'soft', label: 'Soft (0%–100%)' },
+  { name: 'balanced', label: 'Balanced (10%–90%)' },
+  { name: 'tight', label: 'Tight (25%–75%)' },
+];
+
+const colours = ['red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'];
 ---
 
 <BaseLayout title="Rainbow & Gradient Visual Test">
+  <main style="max-width: var(--container-7xl); margin: 0 auto; padding: var(--space-xl);">
+
+    <h1 style="color: var(--color-Text); margin-bottom: var(--space-xl); text-align: center;">Gradient Geometry Test</h1>
+
+    <h2 style="color: var(--color-Text); margin-bottom: var(--space-md);">Direction — 8 enums</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-md); margin-bottom: var(--space-xl);">
+      {directions.map(d => (
+        <div
+          data-grad-dir={d.name}
+          style={`
+            height: 120px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(var(--_grad-angle), var(--rainbow-1-tint) 0%, var(--rainbow-1-mid) 30%, var(--rainbow-1) 60%, var(--rainbow-1-emphasis) 100%);
+            display: flex; align-items: flex-end; padding: var(--space-sm);
+          `}
+        >
+          <span style="color: var(--color-White); font-size: var(--text-fine); font-weight: var(--font-bold); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">{d.label}</span>
+        </div>
+      ))}
+    </div>
+
+    <h2 style="color: var(--color-Text); margin-bottom: var(--space-md);">Direction × Colour</h2>
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--space-sm); margin-bottom: var(--space-xl);">
+      {colours.map((c, i) => (
+        <div
+          data-grad-dir="horizontal"
+          style={`
+            height: 80px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(var(--_grad-angle), var(--rainbow-${i+1}-tint) 0%, var(--rainbow-${i+1}-mid) 30%, var(--rainbow-${i+1}) 60%, var(--rainbow-${i+1}-emphasis) 100%);
+            display: flex; align-items: center; justify-content: center;
+          `}
+        >
+          <span style="color: var(--color-White); font-size: var(--text-fine); font-weight: var(--font-bold); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">{c}</span>
+        </div>
+      ))}
+      {colours.map((c, i) => (
+        <div
+          data-grad-dir="vertical"
+          style={`
+            height: 80px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(var(--_grad-angle), var(--rainbow-${i+1}-tint) 0%, var(--rainbow-${i+1}-mid) 30%, var(--rainbow-${i+1}) 60%, var(--rainbow-${i+1}-emphasis) 100%);
+            display: flex; align-items: center; justify-content: center;
+          `}
+        >
+          <span style="color: var(--color-White); font-size: var(--text-fine); font-weight: var(--font-bold); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">{c}</span>
+        </div>
+      ))}
+      {colours.map((c, i) => (
+        <div
+          data-grad-dir="diagonal-alt"
+          style={`
+            height: 80px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(var(--_grad-angle), var(--rainbow-${i+1}-tint) 0%, var(--rainbow-${i+1}-mid) 30%, var(--rainbow-${i+1}) 60%, var(--rainbow-${i+1}-emphasis) 100%);
+            display: flex; align-items: center; justify-content: center;
+          `}
+        >
+          <span style="color: var(--color-White); font-size: var(--text-fine); font-weight: var(--font-bold); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">{c}</span>
+        </div>
+      ))}
+    </div>
+
+    <h2 style="color: var(--color-Text); margin-bottom: var(--space-md);">Spread — 3 enums</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin-bottom: var(--space-xl);">
+      {spreads.map(s => (
+        <div
+          data-grad-spread={s.name}
+          style={`
+            height: 120px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary-tint) var(--_grad-start), var(--primary-emphasis) var(--_grad-end));
+            display: flex; align-items: flex-end; padding: var(--space-sm);
+          `}
+        >
+          <span style="color: var(--color-White); font-size: var(--text-fine); font-weight: var(--font-bold); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">{s.label}</span>
+        </div>
+      ))}
+    </div>
+
+    <h2 style="color: var(--color-Text); margin-bottom: var(--space-md);">Radial Focus — 9 positions</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin-bottom: var(--space-xl);">
+      {['top-left', 'top', 'top-right', 'left', 'center', 'right', 'bottom-left', 'bottom', 'bottom-right'].map(pos => (
+        <div style={`
+          height: 120px;
+          border-radius: var(--radius-md);
+          background: radial-gradient(circle at ${pos.replace('-', ' ')}, var(--primary-tint) 0%, var(--primary-base) 50%, var(--primary-emphasis) 100%);
+          display: flex; align-items: flex-end; padding: var(--space-sm);
+        `}>
+          <span style="color: var(--color-White); font-size: var(--text-fine); font-weight: var(--font-bold); text-shadow: 0 1px 3px rgba(0,0,0,0.5);">{pos}</span>
+        </div>
+      ))}
+    </div>
+
+  </main>
+
+  <hr style="margin: var(--space-xl) auto; max-width: var(--container-7xl); border-color: var(--neutral-400);" />
+
   <Renderer node={data} />
 </BaseLayout>
