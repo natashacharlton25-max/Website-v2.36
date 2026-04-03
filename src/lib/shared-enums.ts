@@ -53,6 +53,34 @@ export type GradientMixed = typeof GRADIENTS_MIXED[number];
 //   - Gradient text colour: tint/mid → --color-Black, base/emphasis → --color-White (auto-swaps dark mode)
 //   - animatedGradient is INDEPENDENT of animation prop (icon/component motion)
 
+// ── Gradient Direction (8 values) — intent-based, not raw angles ──
+export const GRADIENT_DIRECTIONS = [
+  'vertical', 'vertical-reverse',
+  'horizontal', 'horizontal-reverse',
+  'diagonal', 'diagonal-reverse',
+  'diagonal-alt', 'diagonal-alt-reverse'
+] as const;
+export type GradientDirection = typeof GRADIENT_DIRECTIONS[number];
+
+// ── Gradient Type (3 values) ────────────────────────────
+export const GRADIENT_TYPES = [
+  'linear', 'radial', 'conic'
+] as const;
+export type GradientType = typeof GRADIENT_TYPES[number];
+
+// ── Gradient Focus (9 values) — radial/conic origin ─────
+export const GRADIENT_FOCUSES = [
+  'center', 'top', 'bottom', 'left', 'right',
+  'top-left', 'top-right', 'bottom-left', 'bottom-right'
+] as const;
+export type GradientFocus = typeof GRADIENT_FOCUSES[number];
+
+// ── Gradient Spread (3 values) — stop intensity ─────────
+export const GRADIENT_SPREADS = [
+  'soft', 'balanced', 'tight'
+] as const;
+export type GradientSpread = typeof GRADIENT_SPREADS[number];
+
 // ── Colour Tier (4 values) — maps to semantic tokens ────
 export const COLOUR_TIERS = [
   'tint', 'mid', 'base', 'emphasis'

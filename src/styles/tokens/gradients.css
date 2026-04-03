@@ -6,6 +6,17 @@
 
 :root {
   /* ============================================
+     GRADIENT GEOMETRY — direction, type, focus, spread
+     Components set these via data attributes or classes.
+     Default: diagonal linear, balanced spread.
+     ============================================ */
+  --_grad-angle: 135deg;
+  --_grad-type: linear-gradient;
+  --_grad-focus: at center;
+  --_grad-start: 0%;
+  --_grad-end: 100%;
+
+  /* ============================================
      PRIMARY / SECONDARY / NEUTRAL — semantic tokens
      ============================================ */
   --gradient-primary: linear-gradient(160deg, var(--primary-emphasis) 0%, var(--primary-base) 45%, var(--primary-mid) 100%);
@@ -135,3 +146,23 @@
 /* HC gradient overrides REMOVED — rainbow-hc.css provides proper HC
    tint/mid/base/emphasis tokens. The :root gradient definitions reference
    semantic rainbow tokens which resolve correctly in all modes. */
+
+/* ============================================
+   GRADIENT DIRECTION — intent-based angle mapping
+   Sets --_grad-angle which gradient definitions read.
+   ============================================ */
+[data-grad-dir="vertical"]             { --_grad-angle: 180deg; }
+[data-grad-dir="vertical-reverse"]     { --_grad-angle: 0deg; }
+[data-grad-dir="horizontal"]           { --_grad-angle: 90deg; }
+[data-grad-dir="horizontal-reverse"]   { --_grad-angle: 270deg; }
+[data-grad-dir="diagonal"]             { --_grad-angle: 135deg; }
+[data-grad-dir="diagonal-reverse"]     { --_grad-angle: 315deg; }
+[data-grad-dir="diagonal-alt"]         { --_grad-angle: 45deg; }
+[data-grad-dir="diagonal-alt-reverse"] { --_grad-angle: 225deg; }
+
+/* ============================================
+   GRADIENT SPREAD — stop compression
+   ============================================ */
+[data-grad-spread="soft"]     { --_grad-start: 0%;  --_grad-end: 100%; }
+[data-grad-spread="balanced"] { --_grad-start: 10%; --_grad-end: 90%; }
+[data-grad-spread="tight"]    { --_grad-start: 25%; --_grad-end: 75%; }
