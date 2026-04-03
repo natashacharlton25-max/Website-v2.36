@@ -29,7 +29,6 @@ import type {
   BrandColour, RainbowColour, ColourTier,
   FontWeight, FontFamily, TextShadow,
   UnderlineStyle, UnderlineGap, UnderlineThickness,
-  IconWeight, Animation, AnimationTrigger,
   GradientBlend, GradientDirection, GradientSpread,
 } from '../../../lib/shared-enums';
 
@@ -85,19 +84,12 @@ interface Props {
   gradientDirection?: GradientDirection;
   gradientSpread?: GradientSpread;
 
-  // ── Icon ────────────────────────────────────────────────
-  icon?: string;
-  iconWeight?: IconWeight;
-  iconColor?: BrandColour | RainbowColour;
-  iconStyle?: 'contained' | 'bare';
-  lottieIcon?: string | Record<string, any>;
-  image?: string;
+  // ── Media — component node { component: "Icon"|"LottieIcon"|"Image", ...props }
+  media?: Record<string, any>;
   mediaPosition?: 'left' | 'right';
   mediaSize?: 'sm' | 'md' | 'lg' | 'auto';
 
   // ── Animation ───────────────────────────────────────────
-  animation?: Animation;
-  animationTrigger?: AnimationTrigger;
   animatedGradient?: boolean;
 
   class?: string;
@@ -138,16 +130,9 @@ const {
   gradientBlend,
   gradientDirection,
   gradientSpread,
-  lottieIcon,
-  image,
-  icon,
-  iconWeight,
-  iconColor,
-  iconStyle = 'contained',
+  media,
   mediaPosition = 'left',
   mediaSize = 'auto',
-  animation,
-  animationTrigger,
   animatedGradient = false,
   spacing = 'normal',
   aac = false,
@@ -175,11 +160,13 @@ if (aac) {
 const Tag = `h${level}` as any;
 const visualSize = size ?? `h${level}`;
 
-// Resolve lottieIcon — string (slug only) or object (slug + trigger + interval)
-const lottieSlug = typeof lottieIcon === 'string' ? lottieIcon : lottieIcon?.slug;
-const lottieProps = typeof lottieIcon === 'object' ? lottieIcon : {};
+const hasMedia = !!media;
+const isDecorated = !!(divider || hasMedia || subtitle || variant !== 'default');
 
-const isDecorated = !!(divider || image || icon || lottieSlug || subtitle || variant !== 'default');
+// Media component type and props — spread onto the atom, Heading only adds size
+const mediaComponent = media?.component;
+const { component: _mc, ...mediaProps } = media || {};
+
 
 const sizeKey = visualSize.replace('h', '');
 const iconSizeMap: Record<string, number> = { '1': 56, '2': 44, '3': 32, '4': 28, '5': 24, '6': 20 };
@@ -217,24 +204,19 @@ const headingClassList = [
     (gradient || gradientBlend) && `gradient--${variant === 'default' ? 'fill' : variant}`,
     gradientBlend && `gradient--blend-${gradientBlend}`,
     animatedGradient && 'gradient--animated',
-    (image || icon || lottieSlug) && 'heading-wrap--has-media',
-    (image || icon || lottieSlug) && `heading-wrap--media-${mediaPosition}`,
-    (image || icon || lottieSlug) && `heading-wrap--media-size-${computedMediaSize}`,
-    (icon || lottieSlug) && `heading-wrap--icon-${iconStyle}`,
+    hasMedia && 'heading-wrap--has-media',
+    hasMedia && `heading-wrap--media-${mediaPosition}`,
+    hasMedia && `heading-wrap--media-size-${computedMediaSize}`,
     className,
   ]}
     data-grad-dir={gradientDirection || undefined}
     data-grad-spread={gradientSpread || undefined}
     style={mergedStyle || undefined}>
-    {(image || icon || lottieSlug) && mediaPosition === 'left' && (
-      <div class:list={['heading-wrap__media', textColor && `color--${textColor}`, colorTier && colorTier !== 'base' && `color--tier-${colorTier}`]}>
-        {image ? (
-          <img src={image} alt="" class="heading-wrap__img" />
-        ) : lottieSlug ? (
-          <LottieIcon slug={lottieSlug} size={computedIconSize} {...lottieProps} class="heading-wrap__icon" />
-        ) : icon ? (
-          <Icon name={icon} size={computedIconSize} weight={iconWeight !== 'brand' ? iconWeight : undefined} color={iconColor || textColor || undefined} animation={animation} animationTrigger={animationTrigger} class="heading-wrap__icon" />
-        ) : null}
+    {hasMedia && mediaPosition === 'left' && (
+      <div class="heading-wrap__media">
+        {mediaComponent === 'Icon' && <Icon {...mediaProps} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
+        {mediaComponent === 'LottieIcon' && <LottieIcon {...mediaProps} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
+        {mediaComponent === 'Image' && <img src={mediaProps.src} alt={mediaProps.alt || ''} class="heading-wrap__img" />}
       </div>
     )}
 
@@ -261,15 +243,11 @@ const headingClassList = [
       <div class:list={['heading-wrap__divider', resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`]} aria-hidden="true"></div>
     )}
 
-    {(image || icon || lottieSlug) && mediaPosition === 'right' && (
-      <div class:list={['heading-wrap__media', textColor && `color--${textColor}`, colorTier && colorTier !== 'base' && `color--tier-${colorTier}`]}>
-        {image ? (
-          <img src={image} alt="" class="heading-wrap__img" />
-        ) : lottieSlug ? (
-          <LottieIcon slug={lottieSlug} size={computedIconSize} {...lottieProps} class="heading-wrap__icon" />
-        ) : icon ? (
-          <Icon name={icon} size={computedIconSize} weight={iconWeight !== 'brand' ? iconWeight : undefined} color={iconColor || textColor || undefined} animation={animation} animationTrigger={animationTrigger} class="heading-wrap__icon" />
-        ) : null}
+    {hasMedia && mediaPosition === 'right' && (
+      <div class="heading-wrap__media">
+        {mediaComponent === 'Icon' && <Icon {...mediaProps} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
+        {mediaComponent === 'LottieIcon' && <LottieIcon {...mediaProps} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
+        {mediaComponent === 'Image' && <img src={mediaProps.src} alt={mediaProps.alt || ''} class="heading-wrap__img" />}
       </div>
     )}
   </div>
