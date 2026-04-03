@@ -1,0 +1,51 @@
+/**
+ * UNDERLINE MIXIN — global decorative underline for any text element
+ *
+ * Any element with .underline gets a decorative bar below.
+ * Colour inherits from currentColor or --_badge-color / --_heading-accent.
+ * Thickness and offset from global tokens (borders.css).
+ *
+ * Styles: solid (default), gradient, dashed, dotted
+ * Values match underlineStyle enum.
+ */
+
+.underline {
+  display: block;
+  height: var(--underline-thickness);
+  width: 100%;
+  margin-top: var(--underline-offset);
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+
+/* Gradient underline — uses the gradient mixin --_grad-computed if set */
+.underline--gradient {
+  background: var(--_grad-computed, currentColor);
+}
+
+/* Dashed underline */
+.underline--dashed {
+  background: repeating-linear-gradient(
+    to right, currentColor 0, currentColor 0.35em,
+    transparent 0.35em, transparent 0.55em
+  );
+}
+
+/* Dotted underline */
+.underline--dotted {
+  background: repeating-linear-gradient(
+    to right, currentColor 0, currentColor 0.15em,
+    transparent 0.15em, transparent 0.35em
+  );
+}
+
+/* Alignment */
+.underline--center { margin-left: auto; margin-right: auto; }
+.underline--right { margin-left: auto; }
+
+/* Calm mode: flatten to solid */
+[data-theme-chroma="calm"] .underline--gradient,
+[data-theme-chroma="calm"] .underline--dashed,
+[data-theme-chroma="calm"] .underline--dotted {
+  background: currentColor;
+}

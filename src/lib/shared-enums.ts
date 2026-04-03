@@ -76,6 +76,12 @@ export const TEXT_SHADOWS = [
 ] as const;
 export type TextShadow = typeof TEXT_SHADOWS[number];
 
+// ── Underline Style (4 values) ─────────────────────────
+export const UNDERLINE_STYLES = [
+  'solid', 'gradient', 'dashed', 'dotted'
+] as const;
+export type UnderlineStyle = typeof UNDERLINE_STYLES[number];
+
 // ── Border Weight (2 values) ───────────────────────────
 export const BORDER_WEIGHTS = [
   'thin', 'thick'
