@@ -1,36 +1,41 @@
 /**
- * UNDERLINE MIXIN — global decorative underline
+ * LINE MIXIN — global decorative line (underlines + dividers)
  *
- * Pattern-based rendering via background-image (not text-decoration).
- * Full control over dash/dot length, gap, thickness, offset.
- * Uses currentColor — inherits from .color--{name} mixin.
+ * .underline = horizontal (below text)
+ * .divider = vertical (beside text)
+ * Same tokens, same styles, just rotated.
  *
  * Styles: solid, dashed, dotted, gradient
- * Gap: close, default, loose
  * Thickness: sm, md, lg
+ * Gap: close, default, loose
+ * Animated gradient: .underline--animated / .divider--animated
+ *
+ * Uses currentColor — inherits from .color--{name} mixin.
  */
 
 :root {
-  --underline-thickness: 0.125rem;
-  --underline-offset: 0.15rem;
-  --underline-dash: 6px;
-  --underline-gap: 4px;
-  --underline-dot: 1.5px;
-  --underline-dot-gap: 4px;
+  --line-thickness: 0.125rem;
+  --line-dash: 6px;
+  --line-gap: 4px;
+  --line-dot: 1.5px;
+  --line-dot-gap: 4px;
 }
+
+
+/* ================================================================
+   HORIZONTAL — .underline
+   ================================================================ */
 
 .underline {
   display: block;
-  height: var(--underline-thickness);
+  height: var(--line-thickness);
   border-radius: var(--radius-full);
   background: currentColor;
 }
 
-
-/* ── Dashed — rounded pill ends ── */
-
+/* Dashed — rounded pill ends (horizontal) */
 .underline--dashed {
-  --_s: var(--underline-thickness);
+  --_s: var(--line-thickness);
   --_c: currentColor;
   --_g: var(--_s) top 50%, var(--_c) calc(100% - 1px), #0000;
   background: 0 / calc(4 * var(--_s)) space no-repeat;
@@ -41,11 +46,9 @@
   border-radius: 0;
 }
 
-
-/* ── Dotted — circles ── */
-
+/* Dotted — circles (horizontal) */
 .underline--dotted {
-  --_s: var(--underline-thickness);
+  --_s: var(--line-thickness);
   --_c: currentColor;
   background: 0 / calc(2.5 * var(--_s)) space no-repeat;
   background-image:
@@ -53,28 +56,81 @@
   border-radius: 0;
 }
 
-
-/* ── Gradient — reads --_grad-computed from gradient mixin ── */
-
+/* Gradient */
 .underline--gradient {
   background: var(--_grad-computed, currentColor);
 }
 
+/* Animated gradient */
+.underline--animated {
+  background-size: 300% 100%;
+  animation: anim-gradient-flow var(--duration-continuous-slower) var(--ease-default) infinite;
+}
 
-/* ── Thickness ── */
+/* Gap (offset from text) */
+.underline--gap-close { margin-top: calc(var(--space-xs) * -2); }
+.underline--gap-loose { margin-top: var(--space-md); }
 
-.underline--thickness-sm { --underline-thickness: 0.125rem; }
-.underline--thickness-md { --underline-thickness: 0.25rem; }
-.underline--thickness-lg { --underline-thickness: 0.375rem; }
-
-
-/* ── Gap (offset from text) ── */
-
-.underline--gap-close   { margin-top: calc(var(--space-xs) * -2); }
-.underline--gap-loose   { margin-top: var(--space-md); }
-
-
-/* ── Alignment ── */
-
+/* Alignment */
 .underline--center { margin-left: auto; margin-right: auto; }
 .underline--right  { margin-left: auto; }
+
+
+/* ================================================================
+   VERTICAL — .divider (same tokens, rotated)
+   ================================================================ */
+
+.divider {
+  display: block;
+  width: var(--line-thickness);
+  align-self: stretch;
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+
+/* Dashed — rounded pill ends (vertical) */
+.divider--dashed {
+  --_s: var(--line-thickness);
+  --_c: currentColor;
+  --_g: var(--_s) left 50%, var(--_c) calc(100% - 1px), #0000;
+  background: 0 / 100% calc(4 * var(--_s)) no-repeat space;
+  background-image:
+    radial-gradient(circle closest-side at top    var(--_g)),
+    radial-gradient(circle closest-side at bottom var(--_g)),
+    linear-gradient(#0000 25%, var(--_c) 0 75%, #0000 0);
+  border-radius: 0;
+}
+
+/* Dotted — circles (vertical) */
+.divider--dotted {
+  --_s: var(--line-thickness);
+  --_c: currentColor;
+  background: 0 / 100% calc(2.5 * var(--_s)) no-repeat space;
+  background-image:
+    radial-gradient(circle closest-side, var(--_c) calc(100% - 1px), #0000);
+  border-radius: 0;
+}
+
+/* Gradient (vertical) */
+.divider--gradient {
+  background: var(--_grad-computed, currentColor);
+}
+
+/* Animated gradient (vertical) */
+.divider--animated {
+  background-size: 100% 300%;
+  animation: anim-gradient-flow var(--duration-continuous-slower) var(--ease-default) infinite;
+}
+
+/* Gap (offset from text) */
+.divider--gap-close { margin-inline: 0; }
+.divider--gap-loose { margin-inline: var(--space-md); }
+
+
+/* ================================================================
+   SHARED — thickness (both directions)
+   ================================================================ */
+
+.underline--thickness-sm, .divider--thickness-sm { --line-thickness: 0.125rem; }
+.underline--thickness-md, .divider--thickness-md { --line-thickness: 0.25rem; }
+.underline--thickness-lg, .divider--thickness-lg { --line-thickness: 0.375rem; }
