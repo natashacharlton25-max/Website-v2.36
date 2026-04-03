@@ -52,6 +52,7 @@ interface Props {
   uppercase?: boolean;
   tracking?: 'normal' | 'wide' | 'wider';
   flush?: boolean;
+  textShadow?: TextShadow;
 
   // ── Visual ──────────────────────────────────────────────
   variant?: 'default' | 'underline' | 'highlight' | 'minimal';
@@ -99,6 +100,7 @@ const {
   uppercase = false,
   tracking,
   flush = false,
+  textShadow,
   subtitle,
   subtitleSize = 'base',
   divider,
@@ -159,8 +161,6 @@ const computedIconSize = mediaSize === 'auto' ? (iconSizeMap[sizeKey] ?? 32) : (
 
 const mergedStyle = incomingStyle || '';
 
-const textShadow = Astro.props.textShadow;
-
 const headingClassList = [
   'heading',
   `heading--${color}`,
@@ -201,7 +201,7 @@ const headingClassList = [
         ) : lottieSlug ? (
           <LottieIcon slug={lottieSlug} size={computedIconSize} {...lottieProps} class="heading-wrap__icon" />
         ) : icon ? (
-          <Icon name={icon} size={computedIconSize} weight={iconWeight} animation={animation} animationTrigger={animationTrigger} class="heading-wrap__icon" />
+          <Icon name={icon} size={computedIconSize} weight={iconWeight !== 'brand' ? iconWeight : undefined} animation={animation} animationTrigger={animationTrigger} class="heading-wrap__icon" />
         ) : null}
       </div>
     )}
@@ -231,7 +231,7 @@ const headingClassList = [
         ) : lottieSlug ? (
           <LottieIcon slug={lottieSlug} size={computedIconSize} {...lottieProps} class="heading-wrap__icon" />
         ) : icon ? (
-          <Icon name={icon} size={computedIconSize} weight={iconWeight} animation={animation} animationTrigger={animationTrigger} class="heading-wrap__icon" />
+          <Icon name={icon} size={computedIconSize} weight={iconWeight !== 'brand' ? iconWeight : undefined} animation={animation} animationTrigger={animationTrigger} class="heading-wrap__icon" />
         ) : null}
       </div>
     )}
