@@ -1,51 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Page } from '../../components/atoms/Page';
-import { Section } from '../../components/atoms/Section';
-import { Heading } from '../../components/atoms/Heading';
-
+import Renderer from '../../components/Renderer.astro';
 import data from '../../data/test/heading.json';
-
-const sections = data.children || [];
 ---
 
 <BaseLayout title="Heading Atom Test">
-  <Page margin={data.margin as any}>
-    {sections.map((section: any) => (
-      <Section gap={section.gap as any} container={section.container as any}>
-        {(section.children || []).map((child: any) => {
-          if (child.component === 'Heading') {
-            return (
-              <Heading
-                level={child.level as any}
-                size={child.size}
-                weight={child.weight}
-                family={child.family}
-                align={child.align}
-                tracking={child.tracking}
-                uppercase={child.uppercase}
-                flush={child.flush}
-                color={child.color}
-                variant={child.variant}
-                underlineStyle={child.underlineStyle}
-                underlineGradient={child.underlineGradient}
-                divider={child.divider}
-                dividerStyle={child.dividerStyle}
-                dividerEnds={child.dividerEnds}
-                subtitle={child.subtitle}
-                icon={child.icon}
-                image={child.image}
-                mediaPosition={child.mediaPosition}
-                mediaSize={child.mediaSize}
-                iconStyle={child.iconStyle}
-                spacing={child.spacing}
-                highlightHeight={child.highlightHeight}
-                highlightOpacity={child.highlightOpacity}
-              >{child.text}</Heading>
-            );
-          }
-        })}
-      </Section>
-    ))}
-  </Page>
+  <Renderer node={data} />
 </BaseLayout>
