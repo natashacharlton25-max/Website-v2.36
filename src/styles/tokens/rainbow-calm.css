@@ -45,23 +45,28 @@
 }
 
 /* ========== CALM: NO GRADIENTS ========== */
-/* Gradient mixin classes flatten to solid fill — uses tier tokens */
+/* Kill ALL gradient effects — composable, blends, presets, animated.
+   Everything flattens to solid colour. */
 
-[data-theme-chroma="calm"] .gradient--fill {
+/* Fill: solid colour, no gradient background */
+[data-theme-chroma="calm"] .gradient.gradient--fill {
   background: var(--_badge-color);
 }
 
-[data-theme-chroma="calm"] .gradient--outline {
+/* Outline: solid border, no gradient border */
+[data-theme-chroma="calm"] .gradient.gradient--outline {
   background: transparent;
   border-color: var(--_badge-color);
 }
 
+/* Outline text: solid colour, no gradient text-clip */
 [data-theme-chroma="calm"] .gradient--outline .gradient__text {
   background: none;
   -webkit-text-fill-color: var(--_badge-color);
 }
 
-[data-theme-chroma="calm"] .gradient--glass {
+/* Glass: glass bg only, no gradient */
+[data-theme-chroma="calm"] .gradient.gradient--glass {
   background: var(--glass-bg);
 }
 
@@ -70,11 +75,17 @@
   -webkit-text-fill-color: var(--_badge-color);
 }
 
-/* Kill animated gradients in calm */
-[data-theme-chroma="calm"] .gradient--animated {
-  animation: none;
+/* Kill all blends — emerge, fade, hero, sunset, presets */
+[data-theme-chroma="calm"] [class*="gradient--blend-"] {
+  --_grad-computed: none;
 }
 
+[data-theme-chroma="calm"] [class*="gradient--preset-"] {
+  --_grad-computed: none;
+}
+
+/* Kill animated gradients */
+[data-theme-chroma="calm"] .gradient--animated,
 [data-theme-chroma="calm"] .gradient--animated .gradient__text {
   animation: none;
 }
