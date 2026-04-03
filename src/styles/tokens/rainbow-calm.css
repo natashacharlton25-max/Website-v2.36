@@ -1,8 +1,9 @@
 /**
  * Calm rainbow — monochromatic, tint + mid only.
  * All 7 positions collapse to primary hue. No vivid or emphasis.
- * base = mid, emphasis = mid. Everything stays soft and uniform.
  * Gated: [data-theme-chroma="calm"]
+ *
+ * Engine uses 200/300/400/500 semantic map for calm chroma.
  */
 
 [data-theme-chroma="calm"] {
@@ -26,43 +27,58 @@
 
   --rainbow-7-tint: var(--primary-tint); --rainbow-7-mid: var(--primary-mid);
   --rainbow-7: var(--primary-base);     --rainbow-7-emphasis: var(--primary-emphasis);
+
+  /* Calm: kill all visual noise at token level */
+  --svg-glow-sm: none;
+  --svg-glow-md: none;
+  --svg-glow-lg: none;
+  --svg-glow-secondary: none;
+  --svg-glow-white: none;
+  --svg-drop-shadow: none;
+  --svg-drop-shadow-md: none;
+  --svg-drop-shadow-lg: none;
 }
 
-/* Calm: no gradients — all flatten to solid fill at the tier's colour */
-[data-theme-chroma="calm"] .badge--fill[class*="--gradient-"] {
-  background: var(--primary-base);
+/* ========== CALM: NO GRADIENTS ========== */
+/* Gradient mixin classes flatten to solid fill — uses tier tokens */
+
+[data-theme-chroma="calm"] .gradient--fill {
+  background: var(--_badge-color);
 }
-[data-theme-chroma="calm"] .badge--fill[class*="--gradient-"][class*="-tint"] {
-  background: var(--primary-tint);
+
+[data-theme-chroma="calm"] .gradient--outline {
+  background: transparent;
+  border-color: var(--_badge-color);
 }
-[data-theme-chroma="calm"] .badge--fill[class*="--gradient-"][class*="-mid"] {
-  background: var(--primary-mid);
-}
-[data-theme-chroma="calm"] .badge--fill[class*="--gradient-"][class*="-emphasis"] {
-  background: var(--primary-emphasis);
-}
-[data-theme-chroma="calm"] .badge--outline[class*="--gradient-"] {
-  border-color: var(--primary-base);
-}
-[data-theme-chroma="calm"] .badge--outline[class*="--gradient-"] .badge__label {
+
+[data-theme-chroma="calm"] .gradient--outline .gradient__text {
   background: none;
-  -webkit-text-fill-color: var(--primary-base);
+  -webkit-text-fill-color: var(--_badge-color);
 }
-[data-theme-chroma="calm"] .badge--outline[class*="--gradient-"][class*="-tint"] {
-  border-color: var(--primary-tint);
+
+[data-theme-chroma="calm"] .gradient--glass {
+  background: var(--glass-bg);
 }
-[data-theme-chroma="calm"] .badge--outline[class*="--gradient-"][class*="-tint"] .badge__label {
-  -webkit-text-fill-color: var(--primary-tint);
+
+[data-theme-chroma="calm"] .gradient--glass .gradient__text {
+  background: none;
+  -webkit-text-fill-color: var(--_badge-color);
 }
-[data-theme-chroma="calm"] .badge--outline[class*="--gradient-"][class*="-mid"] {
-  border-color: var(--primary-mid);
+
+/* Kill animated gradients in calm */
+[data-theme-chroma="calm"] .gradient--animated {
+  animation: none;
 }
-[data-theme-chroma="calm"] .badge--outline[class*="--gradient-"][class*="-mid"] .badge__label {
-  -webkit-text-fill-color: var(--primary-mid);
+
+[data-theme-chroma="calm"] .gradient--animated .gradient__text {
+  animation: none;
 }
-[data-theme-chroma="calm"] .badge--outline[class*="--gradient-"][class*="-emphasis"] {
-  border-color: var(--primary-emphasis);
-}
-[data-theme-chroma="calm"] .badge--outline[class*="--gradient-"][class*="-emphasis"] .badge__label {
-  -webkit-text-fill-color: var(--primary-emphasis);
+
+/* ========== CALM: NO GLOWS / SHADOWS ========== */
+
+[data-theme-chroma="calm"] [class*="--shadow-glow"],
+[data-theme-chroma="calm"] [class*="--shadow-elevated"],
+[data-theme-chroma="calm"] [class*="--glow"] {
+  box-shadow: none;
+  filter: none;
 }
