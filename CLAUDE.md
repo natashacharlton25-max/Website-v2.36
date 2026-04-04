@@ -143,6 +143,15 @@ Every colour, spacing, radius, shadow, font size, transition, and breakpoint mus
 - `Component.responsive.css` — breakpoint styles (if needed)
 - NO `Component.animation.css` — animation rules live in base CSS, gated by prop-driven classes
 - NO `Component.a11y.css` — the extraction process distributes these rules elsewhere
+- NO `data-render` or `data-motion` selectors in component CSS — all in gate files
+
+### Gate Files (single authority per concern):
+- `src/styles/gates/motion-gate.css` — kills ALL animation (anim--, gradient--, icon--, underline--, divider--)
+- `src/styles/gates/textonly-gate.css` — per-atom visual stripping (hide decorative, simplify layout)
+- `src/styles/gates/reduced-gate.css` — motion suppression for reduced render
+- `src/styles/gates/assistive-gate.css` — large targets, single column, simplified layout
+- `src/styles/zones/theme-chroma-calm.css` — visibility only (no animation rules, motion gate handles that)
+- Component CSS must NOT contain `[data-render]`, `[data-motion]`, or `[data-theme-chroma]` selectors
 
 ### Animation Architecture:
 - Animation = JSON prop → class on element → CSS rule in `Component.css`
@@ -153,13 +162,21 @@ Every colour, spacing, radius, shadow, font size, transition, and breakpoint mus
 
 ### Icon System:
 - Icons are served from the Asset Library API (D1/R2 on Cloudflare)
+- **13,456 Phosphor assets**: 5 weights (light, regular, bold, fill, duotone) × standard + flat variants
+- **Slug convention**: `heart-fill` (standard multi-path), `heart-fill-flat` (single-path for draw/morph)
+- **Flat fallback**: API returns standard version if `-flat` slug doesn't exist (hash-identical icons)
 - Icon.astro fetches via `ASSET_API_URL` — no `fs.readFileSync`, no local file access
-- Icon weight is resolved from brand config (`ICON_WEIGHT` env var), not hardcoded
+- Icon weight resolved from brand config (`ICON_WEIGHT` env var), not hardcoded
+- **5 weights only**: light, regular, bold, fill, duotone — `thin` and `brand` removed
+- **Colour**: uses global `.color--{name}` mixin — no per-atom colour classes
+- **Draw animation**: GSAP DrawSVGPlugin — 4 variants, ghost/fill modes, gradient lines, scroll scrub
+- **Morph animation**: GSAP MorphSVGPlugin — prefers flat SVGs, hover toggle
+- **All Phosphor icons tagged** with rich semantic tags + 18 categories from `@phosphor-icons/core`
 - LottieIcon.astro fetches JSON server-side and inlines via `animationData`
 - Never reference `public/Icons/` — all icons come from the API
 
 ### Schema Structure:
-- Every component schema uses three prop groups: `content`, `visual`, `animation`
+- Every component schema uses canonical prop groups: `content`, `colour`, `gradient`, `visual`, `animation` (plus `rainbow`, `typography`, `media` where applicable)
 - The `"category"` field must be `"atom"` for all atoms — not subcategory paths like `"atoms/ui"` or `"atoms/icons"`
 - Plus a `renders` block: `{ full, reduced, assistive, textonly }` pointing to the .astro file or an atom name
 - Empty `animation: {}` is correct for components with no motion

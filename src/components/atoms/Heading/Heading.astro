@@ -28,7 +28,10 @@ import '../../../components/molecules/aac/AacCard/AacCard.css';
 import type {
   BrandColour, RainbowColour, ColourTier,
   FontWeight, FontFamily, TextShadow,
+  HeadingSize, HeadingVariant, TextSize, Alignment, Tracking, Spacing,
+  HighlightHeight, HighlightOpacity,
   UnderlineStyle, UnderlineGap, UnderlineThickness,
+  DividerPosition, DividerEnds, MediaPosition, MediaSize,
   GradientBlend, GradientDirection, GradientSpread,
 } from '../../../lib/shared-enums';
 
@@ -36,7 +39,7 @@ interface Props {
   // ── Content ─────────────────────────────────────────────
   level: 1 | 2 | 3 | 4 | 5 | 6;
   subtitle?: string;
-  subtitleSize?: 'xs' | 'sm' | 'base' | 'lg' | 'xl';
+  subtitleSize?: TextSize;
   aac?: boolean;
 
   // ── Colour ──────────────────────────────────────────────
@@ -45,21 +48,21 @@ interface Props {
   colorTier?: ColourTier;
 
   // ── Typography ──────────────────────────────────────────
-  size?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  size?: HeadingSize;
   weight?: FontWeight;
   family?: FontFamily;
-  align?: 'left' | 'center' | 'right';
+  align?: Alignment;
   uppercase?: boolean;
-  tracking?: 'normal' | 'wide' | 'wider';
+  tracking?: Tracking;
   flush?: boolean;
   textShadow?: TextShadow;
 
   // ── Highlight ────────────────────────────────────────────
-  variant?: 'default' | 'underline' | 'highlight' | 'minimal';
+  variant?: HeadingVariant;
   highlightColor?: BrandColour | RainbowColour;
   highlightTier?: ColourTier;
-  highlightHeight?: 'sm' | 'md' | 'lg' | 'full';
-  highlightOpacity?: 'faint' | 'soft' | 'bold' | 'solid';
+  highlightHeight?: HighlightHeight;
+  highlightOpacity?: HighlightOpacity;
 
   // ── Underline ───────────────────────────────────────────
   underlineColor?: BrandColour | RainbowColour;
@@ -69,14 +72,14 @@ interface Props {
   underlineThickness?: UnderlineThickness;
 
   // ── Divider ─────────────────────────────────────────────
-  divider?: 'left' | 'right' | 'both' | 'none';
+  divider?: DividerPosition;
   dividerColor?: BrandColour | RainbowColour;
   dividerTier?: ColourTier;
-  dividerStyle?: 'solid' | 'dashed' | 'dotted';
-  dividerEnds?: 'rounded' | 'square';
+  dividerStyle?: UnderlineStyle;
+  dividerEnds?: DividerEnds;
 
   // ── Visual ──────────────────────────────────────────────
-  spacing?: 'tight' | 'normal' | 'loose';
+  spacing?: Spacing;
 
   // ── Gradient ────────────────────────────────────────────
   gradient?: boolean;
@@ -86,8 +89,8 @@ interface Props {
 
   // ── Media — component node { component: "Icon"|"LottieIcon"|"Image", ...props }
   media?: Record<string, any>;
-  mediaPosition?: 'left' | 'right';
-  mediaSize?: 'sm' | 'md' | 'lg' | 'auto';
+  mediaPosition?: MediaPosition;
+  mediaSize?: MediaSize;
 
   // ── Animation ───────────────────────────────────────────
   animatedGradient?: boolean;
@@ -204,7 +207,7 @@ const headingClassList = [
     divider && `heading-wrap--divider-ends-${dividerEnds}`,
     divider && dividerStyle !== 'solid' && `heading-wrap--divider-style-${dividerStyle}`,
     (gradient || gradientBlend) && 'gradient',
-    (gradient || gradientBlend) && `gradient--${variant === 'default' ? 'fill' : variant}`,
+    (gradient || gradientBlend) && variant !== 'default' && `gradient--${variant}`,
     gradientBlend && `gradient--blend-${gradientBlend}`,
     animatedGradient && 'gradient--animated',
     hasMedia && 'heading-wrap--has-media',
@@ -224,7 +227,7 @@ const headingClassList = [
     )}
 
     {divider && (divider === 'left' || divider === 'both') && (
-      <div class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && gradientBlend && `gradient--blend-${gradientBlend}`, animatedGradient && 'divider--animated']} aria-hidden="true"></div>
+      <div class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && gradientBlend && `gradient--blend-${gradientBlend}`, dividerStyle === 'gradient' && 'gradient', animatedGradient && 'divider--animated']} aria-hidden="true"></div>
     )}
 
     <div class="heading-wrap__content">
@@ -243,7 +246,7 @@ const headingClassList = [
     </div>
 
     {divider && (divider === 'right' || divider === 'both') && (
-      <div class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && gradientBlend && `gradient--blend-${gradientBlend}`, animatedGradient && 'divider--animated']} aria-hidden="true"></div>
+      <div class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && gradientBlend && `gradient--blend-${gradientBlend}`, dividerStyle === 'gradient' && 'gradient', animatedGradient && 'divider--animated']} aria-hidden="true"></div>
     )}
 
     {hasMedia && mediaPosition === 'right' && (

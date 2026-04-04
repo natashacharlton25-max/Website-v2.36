@@ -86,7 +86,14 @@ export async function handleAssetGet(request: Request, env: Env, slug: string): 
   const format = url.searchParams.get('format');
   const vParam = url.searchParams.get('v');
 
-  const asset = await getAssetBySlug(env.DB, slug);
+  let asset = await getAssetBySlug(env.DB, slug);
+
+  // Flat fallback: if heart-fill-flat not found, try heart-fill
+  // (some flat SVGs are byte-identical to standard and were deduped during seed)
+  if (!asset && slug.endsWith('-flat')) {
+    asset = await getAssetBySlug(env.DB, slug.slice(0, -5));
+  }
+
   if (!asset) return notFound(`Asset not found: ${slug}`);
 
   // Resolve version

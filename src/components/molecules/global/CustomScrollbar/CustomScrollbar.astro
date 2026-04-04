@@ -66,8 +66,31 @@
     display: none !important;
   }
 
-  /* Hide on mobile */
-  /* @media-stripped-0 */  /* ==========================================================
+  /* Hide on mobile — reset wrapper to native scroll, override OS inline styles */
+  @media (max-width: 768px) {
+    #a11y-content-wrapper {
+      height: auto !important;
+      overflow: visible !important;
+      padding-right: 0 !important;
+    }
+
+    html, body {
+      overflow: auto !important;
+      height: auto !important;
+    }
+
+    [data-overlayscrollbars-viewport] {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .os-scrollbar {
+      display: none !important;
+    }
+  }
+
+  /* ==========================================================
      GUTTER COMPENSATION
      Right padding on wrapper matches scrollbar width
      ========================================================== */
@@ -277,7 +300,7 @@
 
   const wrapper = document.querySelector('#a11y-content-wrapper');
 
-  if (wrapper) {
+  if (wrapper && window.innerWidth > 768) {
     const osOptions = {
       scrollbars: {
         autoHide: 'leave' as const,
@@ -295,7 +318,7 @@
     document.addEventListener('astro:after-swap', () => {
       instance?.destroy();
       const newWrapper = document.querySelector('#a11y-content-wrapper');
-      if (newWrapper) {
+      if (newWrapper && window.innerWidth > 768) {
         instance = OverlayScrollbars(newWrapper, osOptions);
       }
     });

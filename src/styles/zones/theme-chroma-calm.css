@@ -5,10 +5,10 @@
  * Gated: [data-theme-chroma="calm"]
  *
  * Badges → glass primary
- * Gradients → killed
+ * Headings → plain text (no gradients, media, highlights, dividers, underlines)
  * Shadows/glows → killed
  * Underlines → solid
- * Animations → killed
+ * Animations → motion gate (data-motion="none"), not this file
  */
 
 
@@ -33,14 +33,53 @@
   color: var(--primary-base);
   box-shadow: none;
   filter: none;
-  animation: none;
 }
 
 [data-theme-chroma="calm"] .badge .badge__label,
 [data-theme-chroma="calm"] .badge .gradient__text {
   background: none;
   -webkit-text-fill-color: var(--primary-base);
-  animation: none;
+}
+
+
+/* ========== HEADINGS → PLAIN TEXT ========== */
+/* No animations, no gradients, no media, no highlights */
+
+[data-theme-chroma="calm"] .heading.gradient__text {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-theme-chroma="calm"] .heading-wrap.gradient,
+[data-theme-chroma="calm"] .heading-wrap.gradient--fill {
+  background: none;
+  color: inherit;
+}
+
+[data-theme-chroma="calm"] .heading-wrap__divider,
+[data-theme-chroma="calm"] .heading-wrap__media,
+[data-theme-chroma="calm"] .heading-wrap .underline,
+[data-theme-chroma="calm"] .text-highlight__bar {
+  display: none;
+}
+
+
+
+/* ========== ICONS → PLAIN ========== */
+/* Decorative icons hidden. Informational icons stay but no shadows/glows/gradients. */
+
+[data-theme-chroma="calm"] .icon[data-semantic-role="decorative"],
+[data-theme-chroma="calm"] .icon:not([data-semantic-role]) {
+  display: none;
+}
+
+[data-theme-chroma="calm"] .icon[data-semantic-role="ui-control"],
+[data-theme-chroma="calm"] .icon[data-semantic-role="content-symbol"] {
+  filter: none;
+}
+
+[data-theme-chroma="calm"] .icon--has-gradient svg {
+  fill: currentColor;
 }
 
 
