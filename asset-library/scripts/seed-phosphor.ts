@@ -24,8 +24,17 @@ const ICONS_ROOT = process.env.ICONS_ROOT || path.join(process.cwd(), '..', 'pub
 const FLAT_DIR = path.join(ICONS_ROOT, 'SVGs Flat');
 const CURATED_DIR = path.join(ICONS_ROOT, 'phosphor');
 
-const WEIGHTS = ['fill', 'duotone', 'regular'] as const;
+const WEIGHTS = ['fill', 'duotone', 'regular', 'light', 'bold'] as const;
 type Weight = typeof WEIGHTS[number];
+
+// Standard (multi-path) SVG directories — for draw/gradient/stroke modes
+const STANDARD_DIRS: Partial<Record<Weight, string>> = {
+  light: path.join('C:', 'Users', 'natas', 'Downloads', 'phosphor-icons (1)', 'SVGs', 'light'),
+  bold: path.join(process.cwd(), '..', 'bold'),
+};
+
+// Phosphor metadata (rich tags + categories from @phosphor-icons/core)
+const PHOSPHOR_META_PATH = path.join(process.cwd(), '..', 'phosphor-meta.json');
 
 // ─── Curated folder → tag mapping ──────────────────────
 
@@ -303,6 +312,97 @@ async function enrichTags(entries: CuratedEntry[]): Promise<{ enriched: number; 
   return { enriched, created, failed };
 }
 
+// ─── Phase 1b: Standard (multi-path) SVGs ──────────────
+
+function scanStandard(): FlatEntry[] {
+  const entries: FlatEntry[] = [];
+
+  for (const [weight, dir] of Object.entries(STANDARD_DIRS) as [Weight, string][]) {
+    if (!dir || !fs.existsSync(dir)) {
+      console.log(`   SKIP standard ${weight}: ${dir || 'no path'}`);
+      continue;
+    }
+
+    const files = fs.readdirSync(dir).filter(f => f.endsWith('.svg'));
+    console.log(`   ${weight} (standard): ${files.length} SVGs`);
+
+    for (const file of files) {
+      const slug = slugFromFile(file, weight);
+      const content = fs.readFileSync(path.join(dir, file), 'utf-8');
+
+      entries.push({
+        name: titleCase(slug),
+        slug,
+        weight,
+        content,
+        tags: ['icon', 'svg', weight],
+      });
+    }
+  }
+
+  return entries;
+}
+
+// ─── Phase 3: Phosphor metadata tags ────────────────────
+
+interface PhosphorMeta {
+  name: string;
+  categories: string[];
+  tags: string[];
+}
+
+async function enrichPhosphorMeta(): Promise<{ enriched: number; failed: number }> {
+  if (!fs.existsSync(PHOSPHOR_META_PATH)) {
+    console.log('   phosphor-meta.json not found — run: node -e "const {icons}=require(\'@phosphor-icons/core\');require(\'fs\').writeFileSync(\'phosphor-meta.json\',JSON.stringify(icons,null,2))"');
+    return { enriched: 0, failed: 0 };
+  }
+
+  const meta: PhosphorMeta[] = JSON.parse(fs.readFileSync(PHOSPHOR_META_PATH, 'utf-8'));
+  console.log(`   Loaded ${meta.length} icon metadata entries`);
+
+  let enriched = 0, failed = 0;
+
+  for (const entry of meta) {
+    const allTags = [
+      ...entry.tags.filter((t: string) => t !== '*new*'),
+      ...entry.categories,
+      'phosphor',
+    ];
+
+    // Apply tags to all weight variants
+    for (const w of WEIGHTS) {
+      const slug = `${entry.name}-${w}`;
+
+      const metaRes = await apiFetch(`/v1/assets/${slug}/meta`);
+      if (!metaRes.ok) continue;
+
+      const existing = await metaRes.json() as { tags: string[] };
+      const existingSet = new Set(existing.tags || []);
+      const newTags = allTags.filter(t => !existingSet.has(t));
+
+      if (newTags.length === 0) continue;
+
+      const merged = [...existingSet, ...newTags];
+      const patchRes = await apiFetch(`/v1/assets/${slug}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ tags: merged }),
+      });
+
+      if (patchRes.ok) {
+        enriched++;
+      } else {
+        failed++;
+      }
+    }
+
+    if ((enriched + failed) % 100 === 0) {
+      process.stdout.write(`   Enriched ${enriched}, failed ${failed}\r`);
+    }
+  }
+
+  return { enriched, failed };
+}
+
 // ─── Verify ────────────────────────────────────────────
 
 async function verifySample(entries: FlatEntry[], sampleSize = 50): Promise<void> {
@@ -392,6 +492,38 @@ async function main() {
   console.log(`   Skipped: ${totalSkipped}`);
   console.log(`   Errors:  ${totalErrors}`);
 
+  // ── Phase 1b: Standard (multi-path) SVGs ────────────────
+  console.log('\nPhase 1b: Scanning standard SVGs (light + bold)...\n');
+
+  const standardEntries = scanStandard();
+  console.log(`\n   Total standard: ${standardEntries.length} SVGs\n`);
+
+  if (standardEntries.length > 0) {
+    let stdCreated = 0, stdSkipped = 0, stdErrors = 0;
+
+    console.log(`  Importing ${standardEntries.length} standard assets...\n`);
+
+    for (let i = 0; i < standardEntries.length; i += BATCH_SIZE) {
+      const batch = standardEntries.slice(i, i + BATCH_SIZE);
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+      const totalBatches = Math.ceil(standardEntries.length / BATCH_SIZE);
+
+      process.stdout.write(`   ${batchNum}/${totalBatches} (${batch.length})... `);
+
+      const { created, skipped, errors } = await importBatch(batch);
+      stdCreated += created;
+      stdSkipped += skipped;
+      stdErrors += errors;
+
+      console.log(`${created} created, ${skipped} skipped, ${errors} errors`);
+    }
+
+    console.log(`\n  Phase 1b summary:`);
+    console.log(`   Created: ${stdCreated}`);
+    console.log(`   Skipped: ${stdSkipped}`);
+    console.log(`   Errors:  ${stdErrors}`);
+  }
+
   // ── Phase 2: Enrich from curated folder ────────────────
   console.log(`\nPhase 2: Enriching from curated phosphor/...`);
   console.log(`   Source: ${CURATED_DIR}\n`);
@@ -416,6 +548,14 @@ async function main() {
     console.log(`   Created:  ${created} (curated-only, not in flat set)`);
     console.log(`   Failed:   ${failed}`);
   }
+
+  // ── Phase 3: Phosphor metadata tags ─────────────────────
+  console.log('\nPhase 3: Enriching with Phosphor metadata (tags + categories)...\n');
+
+  const { enriched: metaEnriched, failed: metaFailed } = await enrichPhosphorMeta();
+  console.log(`\n  Phase 3 summary:`);
+  console.log(`   Enriched: ${metaEnriched} (semantic tags added)`);
+  console.log(`   Failed:   ${metaFailed}`);
 
   // ── Verify sample ──────────────────────────────────────
   console.log(`\n  Verifying integrity (random sample)...`);

@@ -52,6 +52,12 @@ export const VARIANTS = [
 ] as const;
 export type Variant = typeof VARIANTS[number];
 
+// ── Heading Variant (4 values) ─────────────────────────
+export const HEADING_VARIANTS = [
+  'default', 'underline', 'highlight', 'minimal'
+] as const;
+export type HeadingVariant = typeof HEADING_VARIANTS[number];
+
 // ── Shape (5 values) ───────────────────────────────────
 export const SHAPES = [
   'sharp', 'subtle', 'soft', 'rounded', 'pill'
@@ -63,6 +69,72 @@ export const SIZES = [
   'sm', 'md', 'lg'
 ] as const;
 export type Size = typeof SIZES[number];
+
+// ── Heading Size (6 values) ───────────────────────────
+export const HEADING_SIZES = [
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+] as const;
+export type HeadingSize = typeof HEADING_SIZES[number];
+
+// ── Text Size (5 values) ──────────────────────────────
+export const TEXT_SIZES = [
+  'xs', 'sm', 'base', 'lg', 'xl'
+] as const;
+export type TextSize = typeof TEXT_SIZES[number];
+
+// ── Alignment (3 values) ──────────────────────────────
+export const ALIGNMENTS = [
+  'left', 'center', 'right'
+] as const;
+export type Alignment = typeof ALIGNMENTS[number];
+
+// ── Tracking (3 values) ──────────────────────────────
+export const TRACKINGS = [
+  'normal', 'wide', 'wider'
+] as const;
+export type Tracking = typeof TRACKINGS[number];
+
+// ── Spacing (3 values) ───────────────────────────────
+export const SPACINGS = [
+  'tight', 'normal', 'loose'
+] as const;
+export type Spacing = typeof SPACINGS[number];
+
+// ── Highlight Height (4 values) ──────────────────────
+export const HIGHLIGHT_HEIGHTS = [
+  'sm', 'md', 'lg', 'full'
+] as const;
+export type HighlightHeight = typeof HIGHLIGHT_HEIGHTS[number];
+
+// ── Highlight Opacity (4 values) ─────────────────────
+export const HIGHLIGHT_OPACITIES = [
+  'faint', 'soft', 'bold', 'solid'
+] as const;
+export type HighlightOpacity = typeof HIGHLIGHT_OPACITIES[number];
+
+// ── Divider Position (4 values) ──────────────────────
+export const DIVIDER_POSITIONS = [
+  'left', 'right', 'both', 'none'
+] as const;
+export type DividerPosition = typeof DIVIDER_POSITIONS[number];
+
+// ── Divider Ends (2 values) ──────────────────────────
+export const DIVIDER_ENDS = [
+  'rounded', 'square'
+] as const;
+export type DividerEnds = typeof DIVIDER_ENDS[number];
+
+// ── Media Position (2 values) ────────────────────────
+export const MEDIA_POSITIONS = [
+  'left', 'right'
+] as const;
+export type MediaPosition = typeof MEDIA_POSITIONS[number];
+
+// ── Media Size (4 values) ────────────────────────────
+export const MEDIA_SIZES = [
+  'sm', 'md', 'lg', 'auto'
+] as const;
+export type MediaSize = typeof MEDIA_SIZES[number];
 
 // ── Shadow (8 values) — box-shadow on element ──────────
 export const SHADOWS = [
@@ -112,9 +184,9 @@ export const FONT_WEIGHTS = [
 ] as const;
 export type FontWeight = typeof FONT_WEIGHTS[number];
 
-// ── Icon Weight (7 values) ─────────────────────────────
+// ── Icon Weight (5 values) ─────────────────────────────
 export const ICON_WEIGHTS = [
-  'brand', 'fill', 'duotone', 'regular', 'bold', 'thin', 'light'
+  'light', 'regular', 'bold', 'fill', 'duotone'
 ] as const;
 export type IconWeight = typeof ICON_WEIGHTS[number];
 

@@ -35,50 +35,80 @@
  *   class     — Additional CSS classes
  */
 
+import type {
+  BrandColour, RainbowColour, ColourTier,
+  IconWeight,
+  Animation, AnimationTriggerInteractive,
+  GradientBlend,
+} from '../../../lib/shared-enums';
+
 // ─── Brand config ───────────────────────────────────────
-// TODO: Import from your brand config system.
-// For now, reads from an environment variable or defaults to 'fill'.
-// Replace this with your actual brand config import when ready.
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
 const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
 const DEFAULT_WEIGHT = import.meta.env.ICON_WEIGHT || 'fill';
 
-// ─── Types ──────────────────────────────────────────────
+type IconSemanticRole = 'decorative' | 'ui-control' | 'content-symbol';
+type IconShadow = 'sm' | 'md' | 'lg' | 'elevated';
+type IconGlow = 'sm' | 'md' | 'lg' | 'secondary' | 'white';
+type DrawVariant = 'draw' | 'drawcenter' | 'chachaslide' | 'pulse';
+type DrawMode = 'once' | 'static' | 'yoyo' | 'reverse-yoyo';
 
 interface Props {
+  // ── Content ─────────────────────────────────────────────
   name: string;
-  weight?: 'fill' | 'duotone' | 'regular' | 'bold' | 'thin' | 'light';
+  weight?: IconWeight;
+  semanticRole?: IconSemanticRole;
+
+  // ── Colour ──────────────────────────────────────────────
+  brandColor?: BrandColour;
+  rainbowColor?: RainbowColour;
+  colorTier?: ColourTier;
+
+  // ── Visual ──────────────────────────────────────────────
   size?: number;
-  class?: string;
-  color?: string;
-  shadow?: 'sm' | 'md' | 'lg';
-  glow?: 'sm' | 'md' | 'lg' | 'secondary' | 'white';
-  gradient?: 'primary' | 'secondary' | 'neutral' | 'hero' | 'sunset' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink' | 'warm' | 'cool';
-  animation?: 'spin' | 'bounce' | 'shake' | 'float' | 'drift' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'flip' | 'pulse' | 'ping' | 'pop' | 'squish' | 'heartbeat' | 'rubber-band' | 'fade' | 'blink' | 'flash' | 'glint' | 'shimmer' | 'twinkle' | 'wiggle' | 'swing' | 'rock' | 'nod' | 'attention' | 'celebrate' | 'enter' | 'exit';
-  animationTrigger?: 'hover' | 'viewport' | 'autoplay' | 'loop' | 'interval' | 'click' | 'focus' | 'none';
-  spin?: boolean;
-  pulse?: boolean;
-  bounce?: boolean;
-  stroke?: boolean;
-  draw?: boolean | 'draw' | 'drawcenter' | 'chachaslide' | 'flashgordon' | 'rainbowchase' | 'pulse';
+  shadow?: IconShadow;
+  glow?: IconGlow;
+  gradient?: GradientBlend;
+  gradientAnimate?: boolean;
+  // ── Animation ───────────────────────────────────────────
+  animation?: Animation;
+  animationTrigger?: AnimationTriggerInteractive;
+  draw?: boolean | DrawVariant;
+  drawMode?: DrawMode;
+  drawLaser?: boolean;
+  drawFill?: boolean;
+  drawGhost?: boolean;
+  drawGhostColor?: string;
   drawOnScroll?: boolean;
   drawScrub?: boolean;
   drawColor?: string;
   morphTo?: string;
   morphColor?: string;
-  semanticRole?: 'decorative' | 'ui-control' | 'content-symbol';
+  morphViaCircle?: boolean;
+
+  // ── Legacy (deprecated — use animation prop) ────────────
+  spin?: boolean;
+  pulse?: boolean;
+  bounce?: boolean;
+
+  class?: string;
+  color?: string;
 }
 
 const {
   name, weight, size, class: className = '', color,
-  shadow, glow, gradient, animation, animationTrigger = 'hover', spin, pulse, bounce, stroke,
-  draw, drawOnScroll, drawScrub, drawColor,
-  morphTo, morphColor, semanticRole,
+  brandColor, rainbowColor, colorTier,
+  shadow, glow, gradient, gradientAnimate, animation, animationTrigger = 'hover', spin, pulse, bounce,
+  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawGhostColor, drawOnScroll, drawScrub, drawColor,
+  morphTo, morphColor, morphViaCircle, semanticRole,
 } = Astro.props;
+
+// Resolve colour: rainbow takes precedence, else brand
+const resolvedColor = rainbowColor || brandColor || null;
 
 // ─── Weight suffixes (for slug detection) ───────────────
 
-const WEIGHTS = ['fill', 'duotone', 'regular', 'bold', 'thin', 'light'];
+const WEIGHTS = ['light', 'regular', 'bold', 'fill', 'duotone'];
 
 function hasWeightSuffix(slug: string): boolean {
   return WEIGHTS.some(w => slug.endsWith(`-${w}`));
@@ -120,75 +150,57 @@ async function fetchIcon(slug: string): Promise<string | null> {
 // ─── Resolve primary icon ───────────────────────────────
 
 const slug = resolveSlug(name, weight);
-let iconContent = await fetchIcon(slug);
+const fetchSlug = morphTo ? `${slug}-flat` : slug;
+let iconContent = await fetchIcon(fetchSlug);
 
-// Fallback: if weight variant doesn't exist, try fill
+// Fallback: non-flat, then fill weight
+if (!iconContent && morphTo) {
+  iconContent = await fetchIcon(slug);
+}
 if (!iconContent && !name.endsWith('-fill') && weight !== 'fill') {
-  const fillSlug = resolveSlug(name, 'fill');
-  iconContent = await fetchIcon(fillSlug);
+  iconContent = await fetchIcon(resolveSlug(name, 'fill'));
 }
 
 // ─── Resolve morph target ───────────────────────────────
 
 let morphTargetContent: string | null = null;
 if (morphTo && !draw) {
-  const morphSlug = resolveSlug(morphTo, weight);
+  // Flat suffix for single-path morph — API handles fallback internally
+  const morphSlug = `${resolveSlug(morphTo, weight)}-flat`;
   morphTargetContent = await fetchIcon(morphSlug);
-
-  // Fallback to fill weight for morph target too
-  if (!morphTargetContent && weight !== 'fill') {
-    const morphFillSlug = resolveSlug(morphTo, 'fill');
-    morphTargetContent = await fetchIcon(morphFillSlug);
-  }
 }
 
 // ─── SVG Transforms ─────────────────────────────────────
-// These operate on raw SVG strings — identical logic to the old component.
 
-// Draw mode: render as stroke outline
-const needsStrokeConversion = !!draw && !stroke;
-
-if (needsStrokeConversion && iconContent) {
-  iconContent = iconContent.replace(/<svg([^>]*)>/, (_match: string, attrs: string) => {
-    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
-    return `<svg${cleaned} fill="none">`;
-  });
-
-  iconContent = iconContent.replace(/<rect([^/]*)\/>/g, '<rect$1 fill="none" stroke="none"/>');
-
-  const drawStrokeWidth = 10;
-  const shapeRe = /<(path|circle|polygon|polyline)([^/]*)\/>/g;
-  iconContent = iconContent.replace(shapeRe, (_match: string, tag: string, attrs: string) => {
-    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
-    return `<${tag}${cleaned} fill="none" stroke="currentColor" stroke-width="${drawStrokeWidth}"/>`;
-  });
-}
+// Draw animation: GSAP DrawSVGPlugin handles everything client-side.
+// Icon.astro just outputs the normal icon + data attributes.
+// No server-side SVG surgery needed.
 
 // Gradient: reference shared SvgGradientDefs via url(#grad-{name})
 // SvgGradientDefs.astro must be included once in the layout.
 if (gradient && iconContent && !draw) {
-  const gradientId = `grad-${gradient}`;
+  if (gradientAnimate) {
+    // Animated gradient: inject per-instance <linearGradient> with <animateTransform>
+    const uid = `agrad-${Math.random().toString(36).substring(2, 9)}`;
+    const gradientId = `grad-${gradient}`;
 
-  iconContent = iconContent
-    .replace(/fill="currentColor"/g, `fill="url(#${gradientId})"`)
-    .replace(/fill="CurrentColor"/g, `fill="url(#${gradientId})"`);
-  iconContent = iconContent.replace(/<path(?![^>]*fill=)/g, `<path fill="url(#${gradientId})"`);
-}
+    // Build animated gradient def that references the same stops as the shared def
+    // but with rotation animation and a unique ID
+    const animGradDef = `<defs><linearGradient id="${uid}" href="#${gradientId}" gradientUnits="objectBoundingBox"><animateTransform attributeName="gradientTransform" type="rotate" values="0 0.5 0.5; 90 0.5 0.5; 0 0.5 0.5; -90 0.5 0.5; 0 0.5 0.5" dur="8s" repeatCount="indefinite" /></linearGradient></defs>`;
 
-// Stroke: line-art mode
-if (stroke && !draw && iconContent) {
-  iconContent = iconContent.replace(/<svg([^>]*)>/, (_match: string, attrs: string) => {
-    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
-    return `<svg${cleaned} fill="none">`;
-  });
-  iconContent = iconContent.replace(/<rect([^/]*)\/>/g, '<rect$1 fill="none" stroke="none"/>');
-
-  const strokeWidth = 16;
-  const shapeRe = /<(path|circle|polygon|polyline)([^/]*)\/>/g;
-  iconContent = iconContent.replace(shapeRe, (_match: string, tag: string, attrs: string) => {
-    const cleaned = attrs.replace(/\s*fill="[^"]*"/g, '');
-    return `<${tag}${cleaned} fill="none" stroke="currentColor" stroke-width="${strokeWidth}"/>`;
-  });
+    // Inject defs into SVG and replace fills
+    iconContent = iconContent.replace(/<svg([^>]*)>/, `<svg$1>${animGradDef}`);
+    iconContent = iconContent
+      .replace(/fill="currentColor"/g, `fill="url(#${uid})"`)
+      .replace(/fill="CurrentColor"/g, `fill="url(#${uid})"`);
+    iconContent = iconContent.replace(/<path(?![^>]*fill=)/g, `<path fill="url(#${uid})"`);
+  } else {
+    const gradientId = `grad-${gradient}`;
+    iconContent = iconContent
+      .replace(/fill="currentColor"/g, `fill="url(#${gradientId})"`)
+      .replace(/fill="CurrentColor"/g, `fill="url(#${gradientId})"`);
+    iconContent = iconContent.replace(/<path(?![^>]*fill=)/g, `<path fill="url(#${gradientId})"`);
+  }
 }
 
 // ─── Fallback ───────────────────────────────────────────
@@ -199,21 +211,19 @@ const fallbackIcon = `<svg viewBox="0 0 256 256"${size != null ? ` width="${size
 
 const drawVariant = typeof draw === 'string' ? draw : 'draw';
 
-// Colour enums use CSS class, non-enum values use inline style
-const colorEnums = ['default','primary','secondary','neutral','red','orange','yellow','teal','blue','purple','pink'];
-const isColorEnum = color && colorEnums.includes(color);
-
 const effectClasses = [
+  resolvedColor && `color--${resolvedColor}`,
+  colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,
   shadow && `icon--shadow-${shadow}`,
   glow && `icon--glow-${glow}`,
   gradient && 'icon--has-gradient',
-  isColorEnum && color !== 'default' && `icon--${color}`,
   animation && `anim--${animation}`,
   spin && 'icon--spin',
   pulse && 'icon--pulse',
   bounce && 'icon--bounce',
-  (stroke || draw) && 'icon--stroke',
+  draw && 'icon--stroke',
   draw && 'icon--draw',
+  draw && drawFill && 'icon--draw-fill',
   morphTo && 'icon--morph',
 ];
 
@@ -221,15 +231,22 @@ const dataAttrs: Record<string, string | undefined> = {};
 
 if (draw) {
   dataAttrs['data-icon-draw'] = drawVariant;
+  dataAttrs['data-icon-draw-mode'] = drawMode;
+  if (drawLaser) dataAttrs['data-icon-draw-laser'] = 'true';
+  if (drawFill) dataAttrs['data-icon-draw-fill'] = 'true';
+  if (drawGhost) dataAttrs['data-icon-draw-ghost'] = 'true';
+  if (drawGhostColor) dataAttrs['data-icon-draw-ghost-color'] = drawGhostColor;
   if (drawOnScroll) dataAttrs['data-icon-draw-scroll'] = 'true';
   if (drawScrub) dataAttrs['data-icon-draw-scrub'] = 'true';
   if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
+  if (animationTrigger && animationTrigger !== 'hover') dataAttrs['data-icon-draw-trigger'] = animationTrigger;
 }
 
 if (morphTo && morphTargetContent) {
   dataAttrs['data-icon-morph'] = 'true';
   dataAttrs['data-icon-morph-target'] = morphTargetContent;
   if (morphColor) dataAttrs['data-icon-morph-color'] = morphColor;
+  if (morphViaCircle) dataAttrs['data-icon-morph-circle'] = 'true';
 }
 ---
 
@@ -237,10 +254,12 @@ if (morphTo && morphTargetContent) {
   class:list={['icon', ...effectClasses, className]}
   style={[
     size != null && `width: ${size}px; height: ${size}px;`,
-    color && !isColorEnum && `color: ${color};`,
+    color && `color: ${color};`,
   ].filter(Boolean).join(' ') || undefined}
   set:html={iconContent || fallbackIcon}
-  aria-hidden="true"
+  aria-hidden={!(draw || morphTo) ? "true" : undefined}
+  tabindex={(draw || morphTo) ? "0" : undefined}
+  role={(draw || morphTo) ? "img" : undefined}
   data-semantic-role={semanticRole}
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
   {...dataAttrs}

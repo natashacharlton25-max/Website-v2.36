@@ -2,45 +2,40 @@
   "component": "Icon",
   "category": "atom",
   "renders": { "full": "Icon.astro", "reduced": "Icon.astro", "assistive": "Icon.astro", "textonly": null },
-  "notes": "API-backed icon atom. Fetches SVG from Asset Library Worker at build/render time. Weight resolved via brand config or explicit override. All SVG transforms (stroke, gradient, draw, morph) happen server-side before inlining. textonly: null — decorative, skipped entirely.",
+  "notes": "API-backed icon atom. Fetches SVG from Asset Library at build time. Weight resolved via brand config or explicit override. textonly: null for decorative icons. ui-control and content-symbol icons stay visible in textonly/calm.",
 
   "props": {
     "content": {
-      "_description": "What icon to render",
-      "name":         { "type": "string",  "required": true, "description": "Icon base name or full slug (e.g. 'heart' or 'heart-fill'). Folder prefixes and ph: prefix stripped automatically." },
-      "weight":       { "type": "string",  "required": false, "enum": ["fill", "duotone", "regular", "bold", "thin", "light"], "description": "Override weight. Defaults to brand config (ICON_WEIGHT env var, usually 'fill')." },
-      "semanticRole": { "type": "string",  "required": false, "enum": ["decorative", "ui-control", "content-symbol"], "description": "Semantic role for assistive tech. Decorative icons get aria-hidden. Content-symbol icons participate in AAC display." }
-    },
-
-    "visual": {
-      "_description": "How the icon looks",
-      "size":     { "type": "number",  "required": false, "default": 24, "description": "Icon size in pixels. Sets width and height on wrapper span." },
-      "color":    { "type": "string",  "required": false, "description": "CSS color value or variable. Skipped when gradient is set." },
-      "shadow":   { "type": "string",  "required": false, "enum": ["sm", "md", "lg"], "description": "Drop shadow via CSS filter." },
-      "glow":     { "type": "string",  "required": false, "enum": ["sm", "md", "lg", "secondary", "white"], "description": "Coloured glow via CSS filter." },
-      "gradient": { "type": "string",  "required": false, "enum": ["primary", "secondary", "warm", "cool"], "description": "Gradient fill injected as SVG linearGradient. Mutually exclusive with color." },
-      "stroke":   { "type": "boolean", "required": false, "description": "Line-art mode. Strips fills and adds stroke to all shapes." },
-      "class":    { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes on wrapper span." }
-    },
-
-    "animation": {
-      "_description": "Motion behaviour — gated by prop-driven classes (no prop = no class = no motion)",
-      "spin":         { "type": "boolean", "required": false, "description": "Continuous rotation on hover." },
-      "pulse":        { "type": "boolean", "required": false, "description": "Scale pulse on hover for attention." },
-      "bounce":       { "type": "boolean", "required": false, "description": "Subtle bounce on hover." },
-      "draw":         { "type": ["boolean", "string"], "required": false, "enum": [true, "draw", "drawcenter", "chachaslide", "flashgordon", "rainbowchase", "pulse"], "description": "DrawSVG animation. Converts fills to strokes for path drawing effect." },
-      "drawOnScroll": { "type": "boolean", "required": false, "description": "Trigger draw animation on scroll into view." },
-      "drawScrub":    { "type": "boolean", "required": false, "description": "Scrub draw animation with scroll position." },
-      "drawColor":    { "type": "string",  "required": false, "description": "Stroke colour for draw animation." },
-      "morphTo":      { "type": "string",  "required": false, "description": "Target icon name for MorphSVG on hover. Fetches target SVG from API." },
-      "morphColor":   { "type": "string",  "required": false, "description": "Fill colour for morph target state." }
+      "name":         { "type": "string", "required": true },
+      "weight":       { "type": "string", "enum": ["light", "regular", "bold", "fill", "duotone"] },
+      "semanticRole": { "type": "string", "enum": ["decorative", "ui-control", "content-symbol"] }
     },
 
     "colour": {
-      "_description": "Pipeline colour tokens — set as inline styles. 'auto' = pipeline resolves from context.",
-      "iconColor":  { "type": "token", "required": false, "default": "auto", "cssProperty": "--icon-color",  "description": "Icon fill/stroke colour." },
-      "iconShadow": { "type": "token", "required": false, "default": "auto", "cssProperty": "--icon-shadow", "description": "Drop shadow filter override." },
-      "iconGlow":   { "type": "token", "required": false, "default": "auto", "cssProperty": "--icon-glow",   "description": "Glow filter override." }
+      "brandColor":  { "type": "string", "enum": ["primary", "secondary", "neutral"] },
+      "rainbowColor": { "type": "string", "enum": ["red", "orange", "yellow", "teal", "blue", "purple", "pink"] },
+      "colorTier":   { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"] }
+    },
+
+    "gradient": {
+      "gradient": { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade", "emerge", "fade", "preset-tint", "preset-mid", "preset-base", "preset-emphasis", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"] }
+    },
+
+    "visual": {
+      "size":    { "type": "number", "default": 24 },
+      "shadow":  { "type": "string", "enum": ["sm", "md", "lg"] },
+      "glow":    { "type": "string", "enum": ["sm", "md", "lg", "secondary", "white"] }
+    },
+
+    "animation": {
+      "animation":        { "type": "string", "enum": ["spin", "bounce", "shake", "float", "drift", "slide-up", "slide-down", "slide-left", "slide-right", "flip", "pulse", "ping", "pop", "squish", "heartbeat", "rubber-band", "fade", "blink", "flash", "glint", "shimmer", "twinkle", "wiggle", "swing", "rock", "nod", "attention", "celebrate", "enter", "exit"] },
+      "animationTrigger": { "type": "string", "default": "hover", "enum": ["hover", "viewport", "autoplay", "loop", "interval", "click", "focus", "none"] },
+      "draw":             { "type": ["boolean", "string"], "enum": [true, "draw", "drawcenter", "chachaslide", "flashgordon", "rainbowchase", "pulse"] },
+      "drawOnScroll":     { "type": "boolean" },
+      "drawScrub":        { "type": "boolean" },
+      "drawColor":        { "type": "string" },
+      "morphTo":          { "type": "string" },
+      "morphColor":       { "type": "string" }
     }
   }
 }

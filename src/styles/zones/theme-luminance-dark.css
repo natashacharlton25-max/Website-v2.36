@@ -23,6 +23,9 @@
    borders get fainter, inset highlight becomes a subtle White edge. */
 
 [data-mode="dark"] {
+  /* Icon ghost — darker in dark mode */
+  --icon-ghost-stroke: var(--page-bg-sunken);
+
   /* Glass bg — almost transparent, let blur do the work */
   --glass-bg: color-mix(in oklch, var(--shadow-White) 4%, transparent);
   --glass-bg-light: color-mix(in oklch, var(--shadow-White) 3%, transparent);
@@ -278,6 +281,7 @@
   --shadow-glow-primary: 0 0 14px color-mix(in oklch, var(--primary-600) 50%, transparent);
   --shadow-glow-secondary: 0 0 14px color-mix(in oklch, var(--secondary-600) 50%, transparent);
 
+
   /* Elevated — dark-only shadows, no white highlight */
   --shadow-elevated:
     0 0 0 1px color-mix(in oklch, var(--shadow-Black) 50%, transparent),
@@ -529,14 +533,9 @@
   border-color: var(--_btn-brand-dark);
 }
 
-/* ── Heading dark — text headings use primary-600 instead of body text colour ── */
-/* Prevents white-on-dark headings blending into body text.                       */
-/* Accent headings (h2, h6) already use --_heading-accent which resolves          */
-/* to brand primary — no override needed for those.                               */
-
-[data-mode="dark"] .heading {
-  --_heading-color: var(--heading-color, var(--primary-600));
-}
+/* ── Heading dark — colour from global .color-- mixin, no override needed ── */
+/* Rainbow tokens auto-swap for dark mode. Headings without a colour prop     */
+/* fall back to --color-Text which also adapts.                                */
 
 /* ── Link dark — lighter tokens for readability ── */
 [data-mode="dark"] .link {
@@ -566,10 +565,7 @@
 
 /* Text highlight — no dark override needed, tiers auto-adapt */
 
-/* Heading media bg — darker bg in dark mode */
-[data-mode="dark"] .heading--primary   { --_heading-media-bg: var(--primary-800); }
-[data-mode="dark"] .heading--secondary { --_heading-media-bg: var(--secondary-800); }
-[data-mode="dark"] .heading--neutral   { --_heading-media-bg: var(--neutral-800); }
+/* Heading media bg — uses --_tier-tint from .color-- mixin, auto-adapts for dark */
 
 /* ── LottieIcon — force currentColor in dark mode (native baked colours are dark) ── */
 [data-mode="dark"] .lottie-icon__container svg path,

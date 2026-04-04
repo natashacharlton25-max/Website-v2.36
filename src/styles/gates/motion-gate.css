@@ -75,8 +75,23 @@
 
 /* None — kill all CSS animation explicitly (belt + suspenders with 0s tokens) */
 [data-motion="none"] [class*="anim--"],
-[data-motion="none"] .badge--animated-gradient {
+[data-motion="none"] .gradient--animated,
+[data-motion="none"] .gradient__text--animated,
+[data-motion="none"] .underline--animated,
+[data-motion="none"] .divider--animated,
+[data-motion="none"] .icon--spin,
+[data-motion="none"] .icon--pulse,
+[data-motion="none"] .icon--bounce,
+[data-motion="none"] .icon--draw svg path {
   animation: none;
+  stroke-dashoffset: 0;
+  fill-opacity: 1;
+}
+
+/* Animated gradient — freeze SVG animateTransform */
+[data-motion="none"] .icon svg animateTransform,
+[data-motion="none"] .icon svg animate {
+  display: none;
 }
 
 /* None — glow stays visible but static (no pulse/shimmer if added later) */
@@ -90,11 +105,23 @@
    ========================================================== */
 
 [data-render="reduced"] [class*="anim--"],
-[data-render="reduced"] .badge--animated-gradient {
+[data-render="reduced"] .gradient--animated,
+[data-render="reduced"] .gradient__text--animated,
+[data-render="reduced"] .underline--animated,
+[data-render="reduced"] .divider--animated,
+[data-render="reduced"] .icon--spin,
+[data-render="reduced"] .icon--pulse,
+[data-render="reduced"] .icon--bounce {
   animation: none;
 }
 
 [data-render="textonly"] [class*="anim--"],
-[data-render="textonly"] .badge--animated-gradient {
+[data-render="textonly"] .gradient--animated,
+[data-render="textonly"] .gradient__text--animated,
+[data-render="textonly"] .underline--animated,
+[data-render="textonly"] .divider--animated,
+[data-render="textonly"] .icon--spin,
+[data-render="textonly"] .icon--pulse,
+[data-render="textonly"] .icon--bounce {
   animation: none;
 }

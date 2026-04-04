@@ -7,8 +7,8 @@
  */
 
 .icon {
-  /* ── Internal tokens (bridge → internal, single point of truth) ── */
-  --_icon-color: var(--icon-color, inherit);
+  /* ── Internal tokens — reads from global .color-- mixin (--_color) or pipeline token ── */
+  --_icon-color: var(--_color, var(--icon-color, inherit));
 
   display: inline-flex;
   align-items: center;
@@ -17,6 +17,7 @@
   height: 1.25em;
   color: var(--_icon-color);
 }
+
 
 .icon svg {
   width: 100%;
@@ -36,24 +37,43 @@
   fill: currentColor;
 }
 
-/* ── Colour enum — uses base semantic tokens ──── */
+/* Ghost stroke — origPaths only (overlays keep draw color for animation) */
+.icon--draw[data-icon-draw-ghost="true"] svg path:not(.icon-draw-overlay):not(.icon-draw-trail):not(.icon-draw-worm):not(.icon-draw-chase),
+.icon--draw[data-icon-draw-ghost="true"] svg circle:not(.icon-draw-overlay):not(.icon-draw-trail),
+.icon--draw[data-icon-draw-ghost="true"] svg polygon:not(.icon-draw-overlay):not(.icon-draw-trail) {
+  stroke: var(--icon-ghost-stroke, var(--neutral-tint));
+  fill: none;
+}
 
-.icon--primary   { color: var(--primary-base); }
-.icon--secondary { color: var(--secondary-base); }
-.icon--neutral   { color: var(--neutral-base); }
-.icon--red       { color: var(--rainbow-1); }
-.icon--orange    { color: var(--rainbow-2); }
-.icon--yellow    { color: var(--rainbow-3); }
-.icon--teal      { color: var(--rainbow-4); }
-.icon--blue      { color: var(--rainbow-5); }
-.icon--purple    { color: var(--rainbow-6); }
-.icon--pink      { color: var(--rainbow-7); }
+/* Ghost resting overlay — ghost color when no inline stroke from GSAP */
+.icon--draw[data-icon-draw-ghost="true"]:not(.icon--draw-fill) svg .icon-draw-overlay {
+  stroke: var(--icon-ghost-stroke, var(--neutral-tint));
+}
+
+/* Ghost fill — origPaths get tint fill */
+.icon--draw[data-icon-draw-ghost="true"].icon--draw-fill svg path:not(.icon-draw-overlay):not(.icon-draw-trail):not(.icon-draw-worm):not(.icon-draw-chase),
+.icon--draw[data-icon-draw-ghost="true"].icon--draw-fill svg circle:not(.icon-draw-overlay),
+.icon--draw[data-icon-draw-ghost="true"].icon--draw-fill svg polygon:not(.icon-draw-overlay) {
+  fill: var(--icon-ghost-stroke, var(--neutral-tint));
+  stroke: none;
+}
+
+/* Draw fill: origPaths need fill — .icon--stroke normally excludes fill: currentColor */
+.icon--draw-fill svg path:not(.icon-draw-overlay):not(.icon-draw-trail):not(.icon-draw-worm):not(.icon-draw-chase),
+.icon--draw-fill svg circle:not(.icon-draw-overlay),
+.icon--draw-fill svg polygon:not(.icon-draw-overlay) {
+  fill: currentColor;
+}
+
+/* Colour — uses global .color--{name} mixin from colour.css */
+/* No per-atom colour classes needed */
 
 /* ── Shadow ──────────────────────────────────────────── */
 
-.icon--shadow-sm { filter: var(--icon-shadow, var(--svg-drop-shadow)); }
-.icon--shadow-md { filter: var(--icon-shadow, var(--svg-drop-shadow-md)); }
-.icon--shadow-lg { filter: var(--icon-shadow, var(--svg-drop-shadow-lg)); }
+.icon--shadow-sm       { filter: var(--icon-shadow, var(--svg-drop-shadow)); }
+.icon--shadow-md       { filter: var(--icon-shadow, var(--svg-drop-shadow-md)); }
+.icon--shadow-lg       { filter: var(--icon-shadow, var(--svg-drop-shadow-lg)); }
+.icon--shadow-elevated { filter: var(--icon-shadow, var(--svg-drop-shadow-elevated)); }
 
 /* ── Glow ────────────────────────────────────────────── */
 
@@ -68,10 +88,14 @@
    No prop = no class = these rules never match.
    ========================================================== */
 
-/* Animations → global/micro-animations.css
-   Icon uses .anim--{name} classes from the shared animation system.
-   Legacy .icon--spin/pulse/bounce still work via aliases below. */
+/* Draw animation handled by GSAP DrawSVGPlugin (src/lib/animation/icon-animation.ts) */
+/* Icon.astro outputs data-icon-draw attributes, GSAP picks them up client-side */
+/* No CSS overrides — GSAP controls all fill/stroke state on originals and overlays */
 
-.icon--spin:hover    { animation: anim-spin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-.icon--pulse:hover   { animation: anim-pulse var(--duration-long) var(--ease-expo-out); }
-.icon--bounce:hover  { animation: anim-bounce var(--duration-long) var(--ease-expo-out); }
+
+/* ── Micro-animations — prop-gated ────────────────────── */
+/* Motion gate (motion-gate.css) kills all .anim--* and .icon--spin/pulse/bounce. */
+
+.icon--spin   { animation: anim-spin var(--duration-continuous) linear infinite; }
+.icon--pulse  { animation: anim-pulse var(--duration-continuous-slow) var(--ease-expo-out) infinite; }
+.icon--bounce { animation: anim-bounce var(--duration-continuous-slow) var(--ease-expo-out) infinite; }

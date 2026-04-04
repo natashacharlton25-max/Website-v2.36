@@ -56,7 +56,7 @@ gsap.registerPlugin(DrawSVGPlugin, ScrollTrigger);
    TYPES
    ================================================================ */
 
-type DrawVariant = 'draw' | 'drawcenter' | 'chachaslide' | 'flashgordon' | 'rainbowchase' | 'pulse';
+type DrawVariant = 'draw' | 'drawcenter' | 'chachaslide' | 'pulse';
 
 interface ScrollDrawConfig {
   variant: DrawVariant;
@@ -257,68 +257,6 @@ export function playDrawVariant(
         break;
       }
 
-      case 'flashgordon': {
-        const q = duration / 4;
-        tl.fromTo(path,
-          { drawSVG: '0%', stroke: accentColors[0], strokeWidth: 2 },
-          { drawSVG: '100%', duration: q, ease: 'none' },
-          offset
-        )
-        .set(path, { stroke: accentColors[1] }, offset + q)
-        .fromTo(path,
-          { drawSVG: '100% 100%' },
-          { drawSVG: '0% 0%', duration: q, ease: 'none' },
-          offset + q
-        )
-        .set(path, { stroke: accentColors[2] }, offset + q * 2)
-        .fromTo(path,
-          { drawSVG: '0% 0%' },
-          { drawSVG: '0% 100%', duration: q, ease: 'none' },
-          offset + q * 2
-        )
-        .to(path,
-          { stroke: color, strokeWidth: 1.5, duration: 0.3 },
-          offset + q * 3
-        );
-        break;
-      }
-
-      case 'rainbowchase': {
-        // Create rainbow segments as clones
-        const parent = path.parentNode;
-        if (!parent) break;
-
-        const segments = rainbowColors.map((c) => {
-          const seg = path.cloneNode(true) as SVGPathElement;
-          gsap.set(seg, {
-            stroke: c,
-            strokeWidth: 3,
-            fill: 'none',
-            drawSVG: '0% 15%',
-            opacity: 1,
-          });
-          parent.insertBefore(seg, path.nextSibling);
-          return seg;
-        });
-
-        // Base path draws underneath
-        tl.fromTo(path,
-          { drawSVG: '0%', stroke: color, strokeWidth: 1.5 },
-          { drawSVG: '100%', duration: duration * 1.5, ease: 'power1.in' },
-          offset
-        );
-
-        // Rainbow segments chase along
-        segments.forEach((seg, i) => {
-          tl.fromTo(seg,
-            { drawSVG: '0% 15%' },
-            { drawSVG: '85% 100%', duration: duration * 1.5, ease: 'linear' },
-            offset + i * 0.08
-          )
-          .to(seg, { opacity: 0, duration: 0.3 }, offset + duration * 1.5);
-        });
-        break;
-      }
     }
   });
 

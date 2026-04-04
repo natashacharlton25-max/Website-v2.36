@@ -1,53 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Page } from '../../components/atoms/Page';
-import { Section } from '../../components/atoms/Section';
-import { Heading } from '../../components/atoms/Heading';
-import { Icon } from '../../components/atoms/Icon';
-import { Grid } from '../../components/atoms/Grid';
-
+import Renderer from '../../components/Renderer.astro';
 import data from '../../data/test/icon.json';
-
-const sections = data.children || [];
 ---
 
 <BaseLayout title="Icon Atom Test">
-  <Page margin={data.margin as any}>
-    {sections.map((section: any) => (
-      <Section gap={section.gap as any} container={section.container as any}>
-        {(section.children || []).map((child: any) => {
-          if (child.component === 'Heading') {
-            return <Heading level={child.level as any} align={child.align as any} flush={child.flush}>{child.text}</Heading>;
-          }
-          if (child.component === 'Grid') {
-            return (
-              <Grid variant={child.variant as any} gap={child.gap as any} align={child.align as any}>
-                {(child.children || []).map((icon: any) => (
-                  <Icon
-                    name={icon.name}
-                    size={icon.size}
-                    weight={icon.weight}
-                    color={icon.color}
-                    shadow={icon.shadow}
-                    glow={icon.glow}
-                    gradient={icon.gradient}
-                    stroke={icon.stroke}
-                    animation={icon.animation}
-                    spin={icon.spin}
-                    pulse={icon.pulse}
-                    bounce={icon.bounce}
-                    draw={icon.draw}
-                    drawColor={icon.drawColor}
-                    drawOnScroll={icon.drawOnScroll}
-                    morphTo={icon.morphTo}
-                    morphColor={icon.morphColor}
-                  />
-                ))}
-              </Grid>
-            );
-          }
-        })}
-      </Section>
-    ))}
-  </Page>
+  <Renderer node={data} />
 </BaseLayout>
