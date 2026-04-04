@@ -165,9 +165,13 @@ if (!iconContent && !name.endsWith('-fill') && weight !== 'fill') {
 
 let morphTargetContent: string | null = null;
 if (morphTo && !draw) {
-  // Flat suffix for single-path morph — API handles fallback internally
+  // Fill morph (MorphSVG): flat suffix for single-path
   const morphSlug = `${resolveSlug(morphTo, weight)}-flat`;
   morphTargetContent = await fetchIcon(morphSlug);
+} else if (morphTo && draw) {
+  // Draw morph (DrawSVG): fetch target icon for path swap
+  const morphSlug = resolveSlug(morphTo, weight);
+  morphTargetContent = await fetchIcon(`${morphSlug}-flat`) || await fetchIcon(morphSlug);
 }
 
 // ─── SVG Transforms ─────────────────────────────────────

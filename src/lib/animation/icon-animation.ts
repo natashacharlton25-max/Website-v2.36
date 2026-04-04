@@ -154,7 +154,10 @@ function initDrawIcon(el: HTMLElement) {
   });
 
   const drawTrigger = el.dataset.iconDrawTrigger || (onScroll ? (scrub ? 'scrub' : 'viewport') : 'hover');
-  const play = () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor);
+  const hasMorphTarget = !!el.dataset.iconMorphTarget;
+  const play = hasMorphTarget
+    ? () => playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor)
+    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor);
 
   switch (drawTrigger) {
     case 'scrub': {
@@ -779,11 +782,128 @@ function playDraw(
 }
 
 /* ================================================================
+   DRAW MORPH — erase → intermediary worm → draw new shape
+   Uses DrawSVG path swaps, no MorphSVG needed.
+   ================================================================ */
+
+function playDrawMorph(
+  el: HTMLElement,
+  overlays: SVGPathElement[],
+  _origPaths: SVGPathElement[],
+  color: string,
+  _ghostOpacity: number,
+  _isGhostMode: boolean,
+  _ghostColor: string
+): gsap.core.Timeline {
+  const motion = getMotionMode();
+  if (motion === 'none') return gsap.timeline();
+  const d = motion === 'gentle' ? 4 : 2;
+  const sw = 10;
+  const master = gsap.timeline();
+
+  // Clean up old temp clones
+  const svg = overlays[0]?.closest('svg');
+  if (svg) {
+    svg.querySelectorAll('.icon-draw-chase, .icon-draw-worm, .icon-draw-trail, .icon-draw-static').forEach(el => el.remove());
+  }
+  overlays.forEach(o => gsap.killTweensOf(o));
+
+  // Parse morph target SVG — extract path d attributes
+  const morphHTML = el.dataset.iconMorphTarget || '';
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = morphHTML;
+  const targetPaths = Array.from(tempDiv.querySelectorAll('path')) as SVGPathElement[];
+
+  // Store original path data if not already
+  overlays.forEach(o => {
+    if (!(o as any)._originalD) (o as any)._originalD = o.getAttribute('d');
+  });
+
+
+
+  // Helper: find percentage along path closest to a point
+  function findClosestPct(path: SVGPathElement, targetX: number, targetY: number): number {
+    const total = path.getTotalLength();
+    let best = 0;
+    let bestDist = Infinity;
+    for (let s = 0; s <= 200; s++) {
+      const pt = path.getPointAtLength((s / 200) * total);
+      const dist = Math.hypot(pt.x - targetX, pt.y - targetY);
+      if (dist < bestDist) { bestDist = dist; best = (s / 200) * 100; }
+    }
+    return best;
+  }
+
+  // Track state — alternates between original and target
+  const isAtTarget = (overlays[0] as any)._atTarget === true;
+
+  // Reference point: top-center of 256x256 viewBox
+  const refX = 128, refY = 24;
+
+  // Find erase-to point on current shape
+  overlays.forEach(o => {
+    gsap.set(o, { opacity: 1, drawSVG: '100%', stroke: color, strokeWidth: sw });
+    (o as any)._eraseEnd = findClosestPct(o, refX, refY);
+  });
+
+  // ── Phase 1: Erase current shape — shrinks to the reference point ──
+  overlays.forEach(o => {
+    const ep = (o as any)._eraseEnd;
+    master.fromTo(o,
+      { drawSVG: `${ep}% ${ep + 100}%` },
+      { drawSVG: `${ep}% ${ep}%`, duration: d * 0.4, ease: 'power2.in' }, 0);
+  });
+
+  // ── Phase 2: Worm bridges from erase end to draw start ──
+  const eraseEnd = d * 0.4;
+  const newD = isAtTarget
+    ? overlays.map(o => (o as any)._originalD)
+    : targetPaths.map(p => p.getAttribute('d'));
+
+  // Swap path data and find draw-from point
+  master.call(() => {
+    overlays.forEach((o, i) => {
+      const pathD = newD[i] || newD[0];
+      if (pathD) o.setAttribute('d', pathD);
+      (o as any)._drawStart = findClosestPct(o, refX, refY);
+      gsap.set(o, { drawSVG: `${(o as any)._drawStart}% ${(o as any)._drawStart}%`, opacity: 1 });
+    });
+  }, [], eraseEnd);
+
+  // Worm: small segment appears at ref point, then shape draws out from it
+  const wormStart = eraseEnd + 0.05;
+  const growD = d * 0.1;
+
+  // ── Phase 3: Draw new shape from reference point ──
+  const drawStart = wormStart + growD;
+  overlays.forEach(o => {
+    const ds = (o as any)._drawStart || 0;
+    // Grow worm from point
+    master.fromTo(o,
+      { drawSVG: `${ds}% ${ds}%` },
+      { drawSVG: `${ds}% ${ds + 5}%`, duration: growD, ease: 'power2.out' }, wormStart);
+    // Draw full shape
+    master.fromTo(o,
+      { drawSVG: `${ds}% ${ds + 5}%` },
+      { drawSVG: `${ds}% ${ds + 100}%`, duration: d * 0.5, ease: 'power2.out' }, drawStart);
+  });
+
+  // Update state
+  master.call(() => {
+    (overlays[0] as any)._atTarget = !isAtTarget;
+  });
+
+  return master;
+}
+
+/* ================================================================
    MORPH ICONS
    ================================================================ */
 
 function initMorphIcon(el: HTMLElement) {
   if (getMotionMode() === 'none') return;
+  // Draw-morph handles this icon instead
+  if (el.dataset.iconDraw) return;
 
   const svg = el.querySelector('svg');
   if (!svg) return;
