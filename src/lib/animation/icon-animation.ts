@@ -15,9 +15,10 @@
 import { gsap } from 'gsap';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
+import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(DrawSVGPlugin, MorphSVGPlugin, ScrollTrigger);
+gsap.registerPlugin(DrawSVGPlugin, MorphSVGPlugin, MotionPathPlugin, ScrollTrigger);
 
 type DrawVariant = 'draw' | 'drawcenter' | 'chachaslide' | 'pulse';
 type DrawMode = 'once' | 'static' | 'yoyo' | 'reverse-yoyo';
@@ -60,22 +61,23 @@ function initDrawIcon(el: HTMLElement) {
     MorphSVGPlugin.convertToPath(e as any);
   });
 
-  // Split compound paths (single <path> with multiple M commands) into separate <path> elements
+  // Split compound paths using MotionPathPlugin.getRawPath (handles curves properly)
   svg.querySelectorAll('path:not(.icon-draw-overlay)').forEach(p => {
-    const d = p.getAttribute('d');
-    if (!d) return;
-    // Split on M/m commands (except the very first one)
-    const subPaths = d.split(/(?=M\s)/i).filter(s => s.trim().length > 0);
-    if (subPaths.length <= 1) return;
-    // Replace single path with multiple paths
+    const rawPath = MotionPathPlugin.getRawPath(p as any);
+    if (rawPath.length <= 1) return;
     const parent = p.parentNode;
     if (!parent) return;
-    subPaths.forEach(subD => {
-      const newPath = p.cloneNode(false) as SVGPathElement;
-      newPath.setAttribute('d', subD.trim());
+    const attributes = Array.from(p.attributes);
+    rawPath.forEach((segment: any) => {
+      const newPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      attributes.forEach(attr => {
+        if (attr.nodeName !== 'd') newPath.setAttributeNS(null, attr.nodeName, attr.nodeValue || '');
+      });
+      newPath.setAttributeNS(null, 'd',
+        'M' + segment[0] + ',' + segment[1] + 'C' + segment.slice(2).join(',') + (segment.closed ? 'z' : ''));
       parent.insertBefore(newPath, p);
     });
-    p.remove();
+    parent.removeChild(p);
   });
 
   // Base paths — now split and converted
@@ -340,29 +342,17 @@ function addVariant(
   const pathStagger = overlays.length > 1 ? staggerTime : 0;
 
   if (laser) {
-    overlays.forEach((path, idx) => {
-      const offset = idx * pathStagger;
-
-      // Main path draws normally
-      gsap.set(path, { stroke: color, strokeWidth: sw });
-      tl.fromTo(path, { drawSVG: '0%' }, {
-        drawSVG: '100%', duration: d, ease: 'power2.inOut'
-      }, offset);
-
-      // Laser head: brighter/thicker clone travels slightly ahead
-      const head = path.cloneNode(true) as SVGPathElement;
-      head.classList.add('icon-draw-worm');
-      gsap.set(head, { fill: 'none', stroke: color, strokeWidth: sw * 1.5, opacity: 1, drawSVG: '0% 0%' });
-      path.parentNode!.appendChild(head);
-
-      // Head grows, travels, shrinks — always 8% segment
-      const growD = d * 0.08;
-      const shrinkD = d * 0.08;
-      const travelD = d - growD - shrinkD;
-      tl.fromTo(head, { drawSVG: '0% 0%' }, { drawSVG: '0% 8%', duration: growD, ease: 'power2.out' }, offset);
-      tl.fromTo(head, { drawSVG: '0% 8%' }, { drawSVG: '92% 100%', duration: travelD, ease: 'power2.inOut' }, offset + growD);
-      tl.fromTo(head, { drawSVG: '92% 100%' }, { drawSVG: '100% 100%', duration: shrinkD, ease: 'power2.in' }, offset + growD + travelD);
-    });
+    // Laser: draw with thicker stroke that thins as it completes
+    gsap.set(overlays, { stroke: color, strokeWidth: sw * 2 });
+    tl.fromTo(overlays, { drawSVG: '0%' }, {
+      drawSVG: '100%', duration: d, ease: 'power2.inOut',
+      stagger: { each: pathStagger, from: staggerFrom, ease: 'slow(0.7, 0.7, false)' }
+    }, 0);
+    // Thin out as draw completes
+    tl.to(overlays, {
+      strokeWidth: sw, duration: d * 0.6, ease: 'power2.in',
+      stagger: { each: pathStagger, from: staggerFrom, ease: 'slow(0.7, 0.7, false)' }
+    }, d * 0.4);
     return;
   }
 
