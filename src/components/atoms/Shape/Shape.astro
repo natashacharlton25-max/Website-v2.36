@@ -28,10 +28,12 @@ const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
 
 type ShapeType = 'circle' | 'square' | 'rounded' | 'pill' | 'hexagon' | 'diamond' | 'triangle' | 'star' | 'blob' | 'custom';
 type ShapeSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+type ShapeMode = 'shape' | 'mask';
 
 interface Props {
   // ── Content ─────────────────────────────────────────────
   shape?: ShapeType;
+  mode?: ShapeMode;
   slug?: string;
   semanticRole?: 'decorative' | 'container';
   label?: string;
@@ -72,6 +74,7 @@ interface Props {
 
 const {
   shape = 'circle',
+  mode = 'shape',
   slug,
   semanticRole = 'decorative',
   label,
@@ -126,6 +129,8 @@ const CLIP_PATHS: Record<string, string> = {
 };
 
 const clipPath = CLIP_PATHS[shape] || undefined;
+const isMask = mode === 'mask';
+const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)}` : undefined;
 const isRounded = shape === 'circle' || shape === 'rounded' || shape === 'pill';
 
 // Draw data attributes
@@ -164,7 +169,13 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
     isContainer && 'shape--container',
     className,
   ]}
-  style={clipPath ? `clip-path: ${clipPath};` : undefined}
+  style={isMask && maskId && svgContent
+    ? `clip-path: url(#${maskId});`
+    : isMask && clipPath
+      ? `clip-path: ${clipPath};`
+      : !isMask && clipPath
+        ? `clip-path: ${clipPath};`
+        : undefined}
   aria-hidden={semanticRole === 'decorative' ? "true" : undefined}
   aria-label={semanticRole !== 'decorative' ? label : undefined}
   data-semantic-role={semanticRole}
@@ -173,7 +184,16 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
   {...dataAttrs}
 >
-  {svgContent && <Fragment set:html={svgContent} />}
+  {svgContent && !isMask && <Fragment set:html={svgContent} />}
+  {svgContent && isMask && maskId && (
+    <svg class="shape__mask-def" aria-hidden="true" style="position:absolute;width:0;height:0;">
+      <defs>
+        <clipPath id={maskId} clipPathUnits="objectBoundingBox">
+          <Fragment set:html={svgContent.replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^/]*\/>/, '')} />
+        </clipPath>
+      </defs>
+    </svg>
+  )}
   {isContainer && (
     <div class="shape__content">
       {mediaComponent === 'Icon' && <Icon {...mediaProps} />}
