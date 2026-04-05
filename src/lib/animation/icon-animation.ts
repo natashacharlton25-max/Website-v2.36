@@ -349,22 +349,30 @@ function addVariant(
   const pathStagger = overlays.length > 1 ? staggerTime : 0;
 
   if (laser) {
-    // Laser: each worm starts hidden, appears only when its animation begins
-    gsap.set(overlays, { strokeWidth: sw * 1.3, opacity: 0 });
-    // Stagger opacity on — each worm appears at its own start time
+    // Laser: worm (10% bright segment) travels, trail draws behind at lower opacity
     overlays.forEach((path, idx) => {
       const offset = idx * pathStagger;
-      tl.set(path, { opacity: 1 }, offset);
+
+      // Trail: full line draws behind worm at lower opacity
+      gsap.set(path, { strokeWidth: sw, opacity: 0 });
+      tl.set(path, { opacity: 0.3 }, offset);
+      tl.fromTo(path, { drawSVG: '0%' }, {
+        drawSVG: '100%', duration: d, ease: 'power2.inOut'
+      }, offset);
+      // Fade trail to full opacity after worm passes
+      tl.to(path, { opacity: 1, duration: d * 0.4, ease: 'power2.out' }, offset + d * 0.6);
+
+      // Worm: bright thick 10% segment travels ahead
+      const worm = path.cloneNode(true) as SVGPathElement;
+      worm.classList.add('icon-draw-worm');
+      gsap.set(worm, { fill: 'none', strokeWidth: sw * 1.5, drawSVG: '0% 0%', opacity: 0 });
+      path.parentNode!.appendChild(worm);
+
+      tl.set(worm, { opacity: 1 }, offset);
+      tl.fromTo(worm, { drawSVG: '0% 0%' }, { drawSVG: '0% 10%', duration: d * 0.08, ease: 'power2.out' }, offset);
+      tl.fromTo(worm, { drawSVG: '0% 10%' }, { drawSVG: '90% 100%', duration: d * 0.84, ease: 'power2.inOut' }, offset + d * 0.08);
+      tl.fromTo(worm, { drawSVG: '90% 100%' }, { drawSVG: '100% 100%', duration: d * 0.08, ease: 'power2.in' }, offset + d * 0.92);
     });
-    tl.fromTo(overlays, { drawSVG: '0%' }, {
-      drawSVG: '100%', duration: d, ease: 'power2.inOut',
-      stagger: { each: pathStagger, from: staggerFrom, ease: 'slow(0.7, 0.7, false)' }
-    }, 0);
-    // Thin out as draw completes
-    tl.to(overlays, {
-      strokeWidth: sw, duration: d * 0.6, ease: 'power2.in',
-      stagger: { each: pathStagger, from: staggerFrom, ease: 'slow(0.7, 0.7, false)' }
-    }, d * 0.4);
     return;
   }
 
