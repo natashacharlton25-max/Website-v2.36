@@ -85,10 +85,8 @@ function initDrawIcon(el: HTMLElement) {
   const color = isGradient
     ? `url(#grad-${rawColor})`
     : rawColor || iconColor;
-  // Read stroke width from existing SVG — shapes use 100-unit viewBox (sw~4), icons use 256-unit (sw~10)
-  const firstPath = origPaths[0];
-  const existingSw = firstPath ? parseFloat(getComputedStyle(firstPath).strokeWidth) || 0 : 0;
-  const sw = existingSw > 0 ? existingSw : 10;
+  // Stroke width: read from data attribute (Shape sets it), fallback 10 for icons (256-unit viewBox)
+  const sw = el.dataset.iconDrawSw ? parseFloat(el.dataset.iconDrawSw) : 10;
 
   // Detect scroll container — OverlayScrollbars viewport
   const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
