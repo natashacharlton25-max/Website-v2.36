@@ -1199,6 +1199,13 @@ export function initIconAnimations() {
   document.querySelectorAll<HTMLElement>('[data-icon-morph]').forEach(initMorphIcon);
 }
 
+// Clear inline stroke colours on theme change so currentColor takes over
+function onThemeChange() {
+  document.querySelectorAll('.icon-draw-overlay, .icon-draw-worm, .icon-draw-trail, .icon-draw-chase').forEach(el => {
+    (el as HTMLElement).style.removeProperty('stroke');
+  });
+}
+
 if (typeof document !== 'undefined') {
   document.addEventListener('astro:page-load', initIconAnimations);
 
@@ -1207,4 +1214,8 @@ if (typeof document !== 'undefined') {
   } else {
     initIconAnimations();
   }
+
+  // Watch for theme changes (ThemeSwitcher sets data-mode, data-theme-chroma on <html>)
+  const observer = new MutationObserver(onThemeChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-mode', 'data-theme-chroma', 'class'] });
 }
