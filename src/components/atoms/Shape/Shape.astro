@@ -1,15 +1,8 @@
 ---
 /**
- * Shape — decorative SVG shape or container background.
- *
- * Two modes:
- *   1. Standalone: renders a shape SVG (from API or built-in geometric)
- *   2. Container: wraps child content (Icon, text) in a shaped background
- *
- * Built-in shapes use CSS clip-path / border-radius.
- * API shapes fetch SVG from Asset Library (Bliss, Phosphor shape icons).
- * Shares visual props with Badge/Icon: variant, shadow, glow, gradient.
- * Shares draw/morph animation with Icon (GSAP DrawSVG/MorphSVG).
+ * Shape — all shapes rendered as SVG.
+ * Fill/stroke/glass controlled by variant.
+ * Same system as Icon — works with draw, morph, gradient, GSAP.
  */
 
 import { Icon } from '../Icon';
@@ -29,38 +22,28 @@ const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
 type ShapeType = 'circle' | 'square' | 'rounded' | 'pill' | 'hexagon' | 'diamond' | 'triangle' | 'star' | 'blob' | 'custom';
 type ShapeSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 type ShapeMode = 'shape' | 'mask';
+type BorderWeight = 'sm' | 'md' | 'lg';
 
 interface Props {
-  // ── Content ─────────────────────────────────────────────
   shape?: ShapeType;
   mode?: ShapeMode;
   slug?: string;
   semanticRole?: 'decorative' | 'container';
   label?: string;
-
-  // ── Colour ──────────────────────────────────────────────
   brandColor?: BrandColour;
   rainbowColor?: RainbowColour;
   colorTier?: ColourTier;
-
-  // ── Visual ──────────────────────────────────────────────
   size?: ShapeSize;
   variant?: Variant;
-  borderWeight?: 'sm' | 'md' | 'lg';
+  borderWeight?: BorderWeight;
   shadow?: Shadow;
   glow?: 'sm' | 'md' | 'lg';
-
-  // ── Gradient ────────────────────────────────────────────
   gradient?: boolean;
   gradientBlend?: GradientBlend;
   gradientDirection?: GradientDirection;
   gradientSpread?: GradientSpread;
   gradientAnimate?: boolean;
-
-  // ── Media — component node { component: "Icon"|"Image"|"LottieIcon", ...props }
   media?: Record<string, any>;
-
-  // ── Animation ───────────────────────────────────────────
   animation?: Animation;
   animationTrigger?: AnimationTriggerInteractive;
   draw?: boolean | 'draw' | 'drawcenter' | 'chachaslide' | 'pulse';
@@ -69,38 +52,16 @@ interface Props {
   drawGhost?: boolean;
   drawColor?: string;
   morphTo?: string;
-
   class?: string;
 }
 
 const {
-  shape = 'circle',
-  mode = 'shape',
-  slug,
-  semanticRole = 'decorative',
-  label,
-  brandColor,
-  rainbowColor,
-  colorTier,
-  size = 'md',
-  variant = 'fill',
-  shadow,
-  glow,
-  gradient,
-  gradientBlend,
-  gradientDirection,
-  gradientSpread,
-  gradientAnimate,
-  media,
-  borderWeight,
-  animation,
-  animationTrigger = 'hover',
-  draw,
-  drawMode = 'static',
-  drawLaser,
-  drawGhost,
-  drawColor,
-  morphTo,
+  shape = 'circle', mode = 'shape', slug, semanticRole = 'decorative', label,
+  brandColor, rainbowColor, colorTier,
+  size = 'md', variant = 'fill', borderWeight, shadow, glow,
+  gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
+  media, animation, animationTrigger = 'hover',
+  draw, drawMode = 'static', drawLaser, drawGhost, drawColor, morphTo,
   class: className,
 } = Astro.props;
 
@@ -122,28 +83,29 @@ if (slug) {
   } catch { /* fallback to built-in */ }
 }
 
-// Built-in shape clip paths
-const CLIP_PATHS: Record<string, string> = {
-  hexagon: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-  diamond: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-  triangle: 'polygon(50% 0%, 100% 100%, 0% 100%)',
-  star: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+// Stroke width from borderWeight
+const sw = borderWeight === 'lg' ? 4 : borderWeight === 'md' ? 3 : 2;
+const pad = sw;
+const vb = `-${pad} -${pad} ${100 + pad * 2} ${100 + pad * 2}`;
+
+// Built-in SVG shapes — viewBox 0 0 100 100, padded by stroke width
+const SVG_SHAPES: Record<string, string> = {
+  circle:  '<circle cx="50" cy="50" r="48" />',
+  square:  '<rect x="2" y="2" width="96" height="96" />',
+  rounded: '<rect x="2" y="2" width="96" height="96" rx="15" ry="15" />',
+  pill:    '<rect x="2" y="2" width="96" height="48" rx="24" ry="24" />',
+  hexagon: '<polygon points="50,2 97,27 97,73 50,98 3,73 3,27" />',
+  diamond: '<polygon points="50,2 98,50 50,98 2,50" />',
+  triangle:'<polygon points="50,2 98,98 2,98" />',
+  star:    '<polygon points="50,2 61,35 97,35 68,57 79,91 50,70 21,91 32,57 3,35 39,35" />',
+  blob:    '<path d="M70,8 C90,15 98,35 96,55 C94,75 80,92 60,96 C40,100 18,90 8,72 C-2,54 2,30 15,15 C28,0 50,1 70,8 Z" />',
 };
 
-const clipPath = CLIP_PATHS[shape] || undefined;
-const isMask = mode === 'mask';
-const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)}` : undefined;
-const isClipShape = !!clipPath;
-const needsSvgOutline = isClipShape && variant === 'outline';
-
-// SVG polygon points for outline rendering (no clip-path clipping)
-const SVG_POLYGONS: Record<string, string> = {
-  hexagon: '50,0 100,25 100,75 50,100 0,75 0,25',
-  diamond: '50,0 100,50 50,100 0,50',
-  triangle: '50,0 100,100 0,100',
-  star: '50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35',
-};
-const svgPolygon = SVG_POLYGONS[shape] || undefined;
+const isFill = variant === 'fill';
+const isGlass = variant === 'glass' || variant === 'liquid-glass';
+const isCssShape = ['circle', 'square', 'rounded', 'pill'].includes(shape);
+const isSvgShape = !isCssShape;
+const builtinSvg = isSvgShape ? SVG_SHAPES[shape] : undefined;
 
 // Draw data attributes
 const drawVariant = typeof draw === 'string' ? draw : 'draw';
@@ -155,11 +117,11 @@ if (draw) {
   if (drawGhost) dataAttrs['data-icon-draw-ghost'] = 'true';
   if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
 }
-if (morphTo) {
-  dataAttrs['data-icon-morph'] = 'true';
-}
+if (morphTo) dataAttrs['data-icon-morph'] = 'true';
 
 const gradientName = gradientBlend || (gradient ? 'primary' : null);
+const isMask = mode === 'mask';
+const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)}` : undefined;
 ---
 
 <div
@@ -170,7 +132,6 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
     `shape--${variant}`,
     resolvedColor && `color--${resolvedColor}`,
     colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,
-    borderWeight && `shape--border-${borderWeight}`,
     shadow && `shape--shadow-${shadow}`,
     glow && `shape--glow-${glow}`,
     gradientName && 'gradient',
@@ -182,13 +143,6 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
     isContainer && 'shape--container',
     className,
   ]}
-  style={isMask && maskId && svgContent
-    ? `clip-path: url(#${maskId});`
-    : isMask && clipPath
-      ? `clip-path: ${clipPath};`
-      : !isMask && clipPath
-        ? `clip-path: ${clipPath};`
-        : undefined}
   aria-hidden={semanticRole === 'decorative' ? "true" : undefined}
   aria-label={semanticRole !== 'decorative' ? label : undefined}
   data-semantic-role={semanticRole}
@@ -197,12 +151,26 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
   {...dataAttrs}
 >
-  {needsSvgOutline && svgPolygon && (
-    <svg class="shape__outline-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-      <polygon points={svgPolygon} fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+  {builtinSvg && !svgContent && (
+    <svg class="shape__svg" viewBox={vb} overflow="visible" aria-hidden="true">
+      <g
+        fill={isFill ? 'currentColor' : (isGlass ? 'currentColor' : 'none')}
+        fill-opacity={isGlass ? '0.08' : undefined}
+        stroke={isFill ? 'none' : 'currentColor'}
+        stroke-width={isFill ? '0' : String(sw)}
+        stroke-linejoin="round"
+        stroke-linecap="round"
+      >
+        <Fragment set:html={builtinSvg} />
+      </g>
     </svg>
   )}
-  {svgContent && !isMask && <Fragment set:html={svgContent} />}
+
+  {svgContent && !isMask && <Fragment set:html={svgContent
+    .replace(/fill="rgb\([^"]*\)"/g, 'fill="currentColor"')
+    .replace(/fill="#[0-9a-fA-F]+"/g, 'fill="currentColor"')
+  } />}
+
   {svgContent && isMask && maskId && (
     <svg class="shape__mask-def" aria-hidden="true" style="position:absolute;width:0;height:0;">
       <defs>
@@ -212,6 +180,7 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
       </defs>
     </svg>
   )}
+
   {isContainer && (
     <div class="shape__content">
       {mediaComponent === 'Icon' && <Icon {...mediaProps as any} />}
