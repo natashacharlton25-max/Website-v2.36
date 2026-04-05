@@ -883,11 +883,11 @@ function playDraw(
         const eraseEnd = fadeIn + totalEraseD + stagger * 2;
         const reverseFrom = staggerFrom === 'start' ? 'end' : staggerFrom === 'end' ? 'start' : staggerFrom;
         if (!isGhostMode) {
-          master.set(overlays, { drawSVG: '100% 100%', opacity: 1 }, eraseEnd + 0.1);
+          master.set(overlays, { drawSVG: '100% 100%', opacity: 1 }, eraseEnd - 0.3);
           master.fromTo(overlays, { drawSVG: '100% 100%' }, {
             drawSVG: '0% 100%', duration: d, ease: 'power2.out',
             stagger: { each: staggerTime > 0 ? staggerTime / Math.max(1, overlays.length - 1) : 0, from: reverseFrom, ease: 'slow(0.7, 0.7, false)' }
-          }, eraseEnd + 0.2);
+          }, eraseEnd - 0.2);
         }
       }
       break;
