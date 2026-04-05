@@ -5,9 +5,10 @@
   "notes": "API-backed icon atom. Fetches SVG from Asset Library at build time. Weight resolved via brand config or explicit override. textonly: null for decorative. morph forces fill weight, draw forces non-fill (auto-corrected).",
 
   "_rules": [
-    { "rule": "morph-requires-fill", "condition": "morphTo && !draw", "requires": "weight === 'fill' || weight === undefined" },
+    { "rule": "morph-requires-fill", "condition": "morphTo", "requires": "weight === 'fill' || weight === undefined" },
     { "rule": "draw-excludes-fill", "condition": "draw", "excludes": "weight === 'fill'" },
-    { "rule": "gradient-draw-passthrough", "condition": "gradient && draw", "note": "gradient value used as drawColor for gradient stroke lines" }
+    { "rule": "gradient-draw-passthrough", "condition": "gradient && draw", "note": "gradient value used as drawColor for gradient stroke lines" },
+    { "rule": "draw-colour-base-only", "condition": "draw", "note": "drawColor only accepts base colour variants or rainbow — no tiers (tint/mid/emphasis)" }
   ],
 
   "props": {
