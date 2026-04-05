@@ -90,8 +90,11 @@ function initDrawIcon(el: HTMLElement) {
   const onScroll = el.dataset.iconDrawScroll === 'true';
   const scrub = el.dataset.iconDrawScrub === 'true';
   // Stagger: none=0, tight=0.1, normal=0.3, loose=0.6
-  const staggerMap: Record<string, number> = { none: 0, tight: 0.1, normal: 0.3, loose: 0.6 };
-  const drawStagger = staggerMap[el.dataset.iconDrawStagger || 'normal'] ?? 0.3;
+  // Stagger scales with path count — total stagger time is fixed, per-path = total / count
+  const staggerTotalMap: Record<string, number> = { none: 0, tight: 0.5, normal: 1, loose: 2 };
+  const staggerTotal = staggerTotalMap[el.dataset.iconDrawStagger || 'normal'] ?? 1;
+  const pathCount = origPaths.length;
+  const drawStagger = pathCount > 1 ? staggerTotal / (pathCount - 1) : 0;
   const drawStaggerFrom = (el.dataset.iconDrawStaggerFrom || 'start') as 'start' | 'center' | 'end' | 'edges' | 'random';
   // Overlay color: drawColor can be a CSS colour OR a gradient name (e.g. "hero", "rainbow", "red")
   const cs = getComputedStyle(document.documentElement);
