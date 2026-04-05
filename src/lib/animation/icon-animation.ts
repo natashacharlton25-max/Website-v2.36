@@ -372,6 +372,7 @@ function addVariant(
       tl.fromTo(worm, { drawSVG: '0% 0%' }, { drawSVG: '0% 10%', duration: d * 0.08, ease: 'power2.out' }, offset);
       tl.fromTo(worm, { drawSVG: '0% 10%' }, { drawSVG: '90% 100%', duration: d * 0.84, ease: 'power2.inOut' }, offset + d * 0.08);
       tl.fromTo(worm, { drawSVG: '90% 100%' }, { drawSVG: '100% 100%', duration: d * 0.08, ease: 'power2.in' }, offset + d * 0.92);
+      tl.set(worm, { opacity: 0 }, offset + d);
     });
     return;
   }
