@@ -821,7 +821,8 @@ function playDraw(
 
         // Ghost overlay underneath — always visible (ghost uses neutral-mid, full uses draw color)
         const overlayColor = isGhostMode ? ghostColor : color;
-        overlays.forEach(o => gsap.set(o, { drawSVG: '100%', opacity: 1, stroke: overlayColor, strokeWidth: sw }));
+        const startOpacity = isGhostMode ? ghostOpacity : 1;
+        overlays.forEach(o => gsap.set(o, { drawSVG: '100%', opacity: startOpacity, stroke: overlayColor, strokeWidth: sw }));
 
         // 3 stacked erase clones
         const fadeIn = isGhostMode ? 1.2 : 0;
