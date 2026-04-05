@@ -186,7 +186,6 @@ function initDrawIcon(el: HTMLElement) {
     } else {
       gsap.set(clone, {
         fill: 'none',
-        stroke: color,
         strokeWidth: overlayStrokeWidth,
         drawSVG: startDrawn ? '100%' : '0%',
         opacity: initOpacity,
@@ -351,7 +350,7 @@ function addVariant(
 
   if (laser) {
     // Laser: each worm starts hidden, appears only when its animation begins
-    gsap.set(overlays, { stroke: color, strokeWidth: sw * 1.3, opacity: 0 });
+    gsap.set(overlays, { strokeWidth: sw * 1.3, opacity: 0 });
     // Stagger opacity on — each worm appears at its own start time
     overlays.forEach((path, idx) => {
       const offset = idx * pathStagger;
@@ -371,21 +370,21 @@ function addVariant(
 
   switch (variant) {
     case 'draw':
-      gsap.set(overlays, { stroke: color, strokeWidth: sw });
+      gsap.set(overlays, { strokeWidth: sw });
       tl.fromTo(overlays, { drawSVG: '0%' }, {
         drawSVG: '100%', duration: d, ease: 'power2.inOut',
         stagger: { each: pathStagger, from: staggerFrom, ease: 'slow(0.7, 0.7, false)' }
       }, 0);
       break;
     case 'drawcenter':
-      gsap.set(overlays, { stroke: color, strokeWidth: sw });
+      gsap.set(overlays, { strokeWidth: sw });
       tl.fromTo(overlays, { drawSVG: '50% 50%' }, {
         drawSVG: '0% 100%', duration: d, ease: 'power2.inOut',
         stagger: { each: pathStagger, from: staggerFrom, ease: 'slow(0.7, 0.7, false)' }
       }, 0);
       break;
     case 'pulse':
-      gsap.set(overlays, { stroke: color, strokeWidth: sw * 1.5, opacity: 0.8 });
+      gsap.set(overlays, { strokeWidth: sw * 1.5, opacity: 0.8 });
       tl.fromTo(overlays, { drawSVG: '0%' }, {
         drawSVG: '100%', duration: d * 0.5, ease: 'power2.out',
         stagger: { each: pathStagger, from: staggerFrom, ease: 'slow(0.7, 0.7, false)' }
