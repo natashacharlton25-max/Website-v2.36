@@ -888,28 +888,16 @@ function playDraw(
           const drawOpacities = [0.25, 0.5, 0.75];
 
           master.call(() => {
-            // Build and animate all inside callback so clones exist when tweened
-            overlays.forEach(o => gsap.set(o, { drawSVG: '100% 100%', opacity: 0 }));
+            // Redraw: per-path stagger, reversed direction — mirrors the erase
+            overlays.forEach(o => gsap.set(o, { drawSVG: '100% 100%', opacity: 1 }));
 
-            for (let i = 0; i < 3; i++) {
-              const layer: SVGPathElement[] = [];
-              overlays.forEach(o => {
-                const clone = o.cloneNode(true) as SVGPathElement;
-                clone.classList.add('icon-draw-trail');
-                gsap.set(clone, { fill: 'none', stroke: color, strokeWidth: sw, drawSVG: '100% 100%', opacity: drawOpacities[i] });
-                o.parentNode!.appendChild(clone);
-                layer.push(clone);
-              });
+            gsap.fromTo(overlays, { drawSVG: '100% 100%' }, {
+              drawSVG: '0% 100%', duration: d, ease: 'power2.out',
+              stagger: { each: redrawStagger, from: reverseFrom, ease: 'slow(0.7, 0.7, false)' }
+            });
 
-              gsap.fromTo(layer, { drawSVG: '100% 100%' }, {
-                drawSVG: '0% 100%', duration: d, ease: 'power2.out',
-                delay: i * 0.3,
-                stagger: { each: redrawStagger, from: reverseFrom, ease: 'slow(0.7, 0.7, false)' }
-              });
-            }
-
-            // After redraw: show overlay at full, clean up clones
-            const totalRedrawD = d + staggerTime + stagger;
+            // After all paths finish: clean up trails, ensure overlay at full
+            const totalRedrawD = d + staggerTime;
             gsap.delayedCall(totalRedrawD, () => {
               overlays.forEach(o => gsap.set(o, { drawSVG: '100%', opacity: 1 }));
               if (svg) svg.querySelectorAll('.icon-draw-trail').forEach(el => {
