@@ -127,7 +127,8 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
 <div
   class:list={[
     'shape',
-    `shape--${shape}`,
+    !svgContent && `shape--${shape}`,
+    svgContent && 'shape--api',
     `shape--${size}`,
     `shape--${variant}`,
     resolvedColor && `color--${resolvedColor}`,
@@ -166,10 +167,20 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     </svg>
   )}
 
-  {svgContent && !isMask && <Fragment set:html={svgContent
-    .replace(/fill="rgb\([^"]*\)"/g, 'fill="currentColor"')
-    .replace(/fill="#[0-9a-fA-F]+"/g, 'fill="currentColor"')
-  } />}
+  {svgContent && !isMask && <Fragment set:html={(() => {
+    let s = svgContent;
+    // Add viewBox if missing (shapes are 256x256)
+    if (!s.includes('viewBox')) {
+      s = s.replace(/<svg/, '<svg viewBox="0 0 256 256"');
+    }
+    // Remove fixed dimensions so SVG scales to container
+    s = s.replace(/\s*width="\d+"/g, '');
+    s = s.replace(/\s*height="\d+"/g, '');
+    // Replace hardcoded fills with currentColor
+    s = s.replace(/fill="rgb\([^"]*\)"/g, 'fill="currentColor"');
+    s = s.replace(/fill="#[a-fA-F0-9]+"/g, 'fill="currentColor"');
+    return s;
+  })()} />}
 
   {svgContent && isMask && maskId && (
     <svg class="shape__mask-def" aria-hidden="true" style="position:absolute;width:0;height:0;">
