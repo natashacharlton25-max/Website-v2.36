@@ -118,7 +118,33 @@ if (draw) {
   if (drawGhost) dataAttrs['data-icon-draw-ghost'] = 'true';
   if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
 }
-if (morphTo) dataAttrs['data-icon-morph'] = 'true';
+// Morph target: built-in shape name or D1 slug
+let morphTargetSvg: string | null = null;
+if (morphTo) {
+  // Check if it's a built-in shape name
+  const builtinTarget = SVG_SHAPES[morphTo as keyof typeof SVG_SHAPES];
+  if (builtinTarget) {
+    morphTargetSvg = `<svg viewBox="${vb}"><g>${builtinTarget}</g></svg>`;
+  } else {
+    // Fetch from D1
+    try {
+      const headers: Record<string, string> = {};
+      if (ASSET_API_TOKEN) headers['Authorization'] = `Bearer ${ASSET_API_TOKEN}`;
+      const res = await fetch(`${ASSET_API_URL}/v1/assets/${morphTo}`, { headers });
+      if (res.ok) {
+        let s = await res.text();
+        if (!s.includes('viewBox')) s = s.replace(/<svg/, '<svg viewBox="0 0 256 256"');
+        s = s.replace(/\s*width="\d+"/g, '');
+        s = s.replace(/\s*height="\d+"/g, '');
+        s = s.replace(/fill="rgb\([^"]*\)"/g, 'fill="currentColor"');
+        s = s.replace(/fill="#[a-fA-F0-9]+"/g, 'fill="currentColor"');
+        morphTargetSvg = s;
+      }
+    } catch { /* ignore */ }
+  }
+  dataAttrs['data-icon-morph'] = 'true';
+  if (morphTargetSvg) dataAttrs['data-icon-morph-target'] = morphTargetSvg;
+}
 
 const gradientName = gradientBlend || (gradient ? 'primary' : null);
 const isMask = mode === 'mask';

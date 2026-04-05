@@ -55,10 +55,15 @@ function initDrawIcon(el: HTMLElement) {
   const svg = el.querySelector('svg');
   if (!svg) return;
 
+  // Convert non-path elements (circle, rect, polygon, polyline, ellipse, line) to <path>
+  // This makes DrawSVG and MorphSVG work consistently on all shape types
+  svg.querySelectorAll('circle, rect, polygon, polyline, ellipse, line').forEach(el => {
+    MorphSVGPlugin.convertToPath(el as any);
+  });
 
   // Base paths (stroke outlines) — leave visible, clone for overlays
   const origPaths = Array.from(
-    svg.querySelectorAll('path:not(.icon-draw-overlay), circle:not(.icon-draw-overlay), polygon:not(.icon-draw-overlay), polyline:not(.icon-draw-overlay)')
+    svg.querySelectorAll('path:not(.icon-draw-overlay)')
   ).filter(p => p.tagName.toLowerCase() !== 'rect') as SVGPathElement[];
   if (!origPaths.length) return;
 
