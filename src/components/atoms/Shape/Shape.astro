@@ -1,0 +1,167 @@
+---
+/**
+ * Shape — decorative SVG shape or container background.
+ *
+ * Two modes:
+ *   1. Standalone: renders a shape SVG (from API or built-in geometric)
+ *   2. Container: wraps child content (Icon, text) in a shaped background
+ *
+ * Built-in shapes use CSS clip-path / border-radius.
+ * API shapes fetch SVG from Asset Library (Bliss, Phosphor shape icons).
+ * Shares visual props with Badge/Icon: variant, shadow, glow, gradient.
+ * Shares draw/morph animation with Icon (GSAP DrawSVG/MorphSVG).
+ */
+
+import type {
+  BrandColour, RainbowColour, ColourTier,
+  Shape as ShapeEnum, Variant, Shadow,
+  GradientBlend, GradientDirection, GradientSpread,
+  Animation, AnimationTriggerInteractive,
+} from '../../../lib/shared-enums';
+
+const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
+const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
+
+type ShapeType = 'circle' | 'square' | 'rounded' | 'pill' | 'hexagon' | 'diamond' | 'triangle' | 'star' | 'blob' | 'custom';
+type ShapeSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+
+interface Props {
+  // ── Content ─────────────────────────────────────────────
+  shape?: ShapeType;
+  slug?: string;
+  semanticRole?: 'decorative' | 'container';
+  label?: string;
+
+  // ── Colour ──────────────────────────────────────────────
+  brandColor?: BrandColour;
+  rainbowColor?: RainbowColour;
+  colorTier?: ColourTier;
+
+  // ── Visual ──────────────────────────────────────────────
+  size?: ShapeSize;
+  variant?: Variant;
+  shadow?: Shadow;
+  glow?: 'sm' | 'md' | 'lg';
+
+  // ── Gradient ────────────────────────────────────────────
+  gradient?: boolean;
+  gradientBlend?: GradientBlend;
+  gradientDirection?: GradientDirection;
+  gradientSpread?: GradientSpread;
+  gradientAnimate?: boolean;
+
+  // ── Animation ───────────────────────────────────────────
+  animation?: Animation;
+  animationTrigger?: AnimationTriggerInteractive;
+  draw?: boolean | 'draw' | 'drawcenter' | 'chachaslide' | 'pulse';
+  drawMode?: 'once' | 'static' | 'yoyo' | 'reverse-yoyo';
+  drawLaser?: boolean;
+  drawGhost?: boolean;
+  drawColor?: string;
+  morphTo?: string;
+
+  class?: string;
+}
+
+const {
+  shape = 'circle',
+  slug,
+  semanticRole = 'decorative',
+  label,
+  brandColor,
+  rainbowColor,
+  colorTier,
+  size = 'md',
+  variant = 'fill',
+  shadow,
+  glow,
+  gradient,
+  gradientBlend,
+  gradientDirection,
+  gradientSpread,
+  gradientAnimate,
+  animation,
+  animationTrigger = 'hover',
+  draw,
+  drawMode = 'static',
+  drawLaser,
+  drawGhost,
+  drawColor,
+  morphTo,
+  class: className,
+} = Astro.props;
+
+const resolvedColor = rainbowColor || brandColor || null;
+const hasSlot = Astro.slots.has('default');
+const isContainer = hasSlot || semanticRole === 'container';
+
+// Fetch API shape if slug provided
+let svgContent: string | null = null;
+if (slug) {
+  try {
+    const headers: Record<string, string> = {};
+    if (ASSET_API_TOKEN) headers['Authorization'] = `Bearer ${ASSET_API_TOKEN}`;
+    const res = await fetch(`${ASSET_API_URL}/v1/assets/${slug}`, { headers });
+    if (res.ok) svgContent = await res.text();
+  } catch { /* fallback to built-in */ }
+}
+
+// Built-in shape clip paths
+const CLIP_PATHS: Record<string, string> = {
+  hexagon: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+  diamond: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+  triangle: 'polygon(50% 0%, 100% 100%, 0% 100%)',
+  star: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+};
+
+const clipPath = CLIP_PATHS[shape] || undefined;
+const isRounded = shape === 'circle' || shape === 'rounded' || shape === 'pill';
+
+// Draw data attributes
+const drawVariant = typeof draw === 'string' ? draw : 'draw';
+const dataAttrs: Record<string, string | undefined> = {};
+if (draw) {
+  dataAttrs['data-icon-draw'] = drawVariant;
+  dataAttrs['data-icon-draw-mode'] = drawMode;
+  if (drawLaser) dataAttrs['data-icon-draw-laser'] = 'true';
+  if (drawGhost) dataAttrs['data-icon-draw-ghost'] = 'true';
+  if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
+}
+if (morphTo) {
+  dataAttrs['data-icon-morph'] = 'true';
+}
+
+const gradientName = gradientBlend || (gradient ? 'primary' : null);
+---
+
+<div
+  class:list={[
+    'shape',
+    `shape--${shape}`,
+    `shape--${size}`,
+    `shape--${variant}`,
+    resolvedColor && `color--${resolvedColor}`,
+    colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,
+    shadow && `shape--shadow-${shadow}`,
+    glow && `shape--glow-${glow}`,
+    gradientName && 'gradient',
+    gradientName && `gradient--${variant}`,
+    gradientBlend && `gradient--blend-${gradientBlend}`,
+    gradientAnimate && 'gradient--animated',
+    animation && `anim--${animation}`,
+    draw && 'shape--draw',
+    isContainer && 'shape--container',
+    className,
+  ]}
+  style={clipPath ? `clip-path: ${clipPath};` : undefined}
+  aria-hidden={semanticRole === 'decorative' ? "true" : undefined}
+  aria-label={semanticRole !== 'decorative' ? label : undefined}
+  data-semantic-role={semanticRole}
+  data-grad-dir={gradientDirection || undefined}
+  data-grad-spread={gradientSpread || undefined}
+  data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
+  {...dataAttrs}
+>
+  {svgContent && <Fragment set:html={svgContent} />}
+  {isContainer && <div class="shape__content"><slot /></div>}
+</div>
