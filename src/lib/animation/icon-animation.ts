@@ -488,7 +488,6 @@ function playDraw(
           master.fromTo(o, { drawSVG: '0%' }, { drawSVG: '10%', duration: growD, ease: 'power2.out' }, t);
           master.fromTo(o, { drawSVG: '10%' }, { drawSVG: '100%', duration: travelD, ease: 'power2.inOut' }, t + growD);
         });
-        worms.forEach(w => master.set(w, { opacity: 1 }, t));
         const onceTl = gsap.timeline();
         addVariant(onceTl, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
         master.add(onceTl, t);
@@ -515,13 +514,11 @@ function playDraw(
             gsap.set(o, { drawSVG: '100%' });
             master.to(o, { opacity: ghostOpacity, duration: 1, ease: 'power2.out' }, 0);
           });
-          worms.forEach(w => gsap.set(w, { opacity: 1 }));
           addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
           master.to(overlays, { opacity: restOpacity, duration: 1, ease: 'power2.out' }, d);
         } else {
           // Ghost: stays at ghost, worm passes over
           overlays.forEach(o => gsap.set(o, { drawSVG: '100%', opacity: ghostOpacity }));
-          worms.forEach(w => gsap.set(w, { opacity: 1 }));
           addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
         }
       } else {
