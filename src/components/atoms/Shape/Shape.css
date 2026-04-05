@@ -84,6 +84,31 @@
   overflow: visible;
 }
 
+/* SVG variant styles — fill/stroke via CSS so var() works */
+.shape__svg--fill g {
+  fill: var(--_color, var(--svg-ghost-color));
+  stroke: none;
+}
+
+.shape__svg--outline g {
+  fill: none;
+  stroke: var(--_color, var(--svg-ghost-color));
+}
+
+.shape__svg--glass g {
+  fill: var(--_color, var(--svg-ghost-color));
+  fill-opacity: 0.08;
+  stroke: var(--_color, var(--svg-ghost-color));
+  stroke-opacity: 0.3;
+}
+
+.shape__svg--liquid-glass g {
+  fill: var(--_color, var(--svg-ghost-color));
+  fill-opacity: 0.06;
+  stroke: var(--_color, var(--svg-ghost-color));
+  stroke-opacity: 0.2;
+}
+
 /* API shape SVGs */
 .shape svg:not(.shape__svg):not(.shape__mask-def) {
   width: 100%;
@@ -104,12 +129,25 @@
 
 /* ── Shadow ─────────────────────────────────────────── */
 
+.shape--shadow-sm,
+.shape--shadow-md,
+.shape--shadow-lg,
+.shape--shadow-elevated {
+  overflow: visible;
+}
+
 .shape--shadow-sm       { filter: var(--svg-drop-shadow); }
 .shape--shadow-md       { filter: var(--svg-drop-shadow-md); }
 .shape--shadow-lg       { filter: var(--svg-drop-shadow-lg); }
 .shape--shadow-elevated { filter: var(--svg-drop-shadow-elevated); }
 
 /* ── Glow ───────────────────────────────────────────── */
+
+.shape--glow-sm,
+.shape--glow-md,
+.shape--glow-lg {
+  overflow: visible;
+}
 
 .shape--glow-sm { filter: var(--svg-glow-sm); }
 .shape--glow-md { filter: var(--svg-glow-md); }
@@ -127,6 +165,12 @@
   justify-content: center;
   width: 100%;
   height: 100%;
+  color: var(--color-Text);
+}
+
+/* Icons inside shapes get their own colour — not inherited from shape */
+.shape__content .icon {
+  color: var(--_icon-color);
 }
 
 /* ── Mask def ───────────────────────────────────────── */
