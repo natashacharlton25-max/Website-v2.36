@@ -467,10 +467,20 @@ function playDraw(
   const dimFill = fillPaths.length > 0 && !isGhostMode;
   if (dimFill) fillPaths.forEach(p => gsap.killTweensOf(p));
 
-  // Laser: no separate worm clones. addVariant handles thick→thin stroke.
-  // Modes that used worms now use overlays directly.
-  const animTargets = overlays;
+  // Create worm clones for laser modes
+  let animTargets = overlays;
   const worms: SVGPathElement[] = [];
+  if (laser) {
+    overlays.forEach(o => {
+      if (!isGhostMode) gsap.set(o, { stroke: color, strokeWidth: sw });
+      const worm = o.cloneNode(true) as SVGPathElement;
+      worm.classList.add('icon-draw-worm');
+      gsap.set(worm, { fill: 'none', stroke: color, strokeWidth: sw, drawSVG: '0% 0%', opacity: 0 });
+      o.parentNode!.appendChild(worm);
+      worms.push(worm);
+    });
+    animTargets = worms;
+  }
 
   // Animation starts immediately (fades run in parallel via gsap.to)
   const t = 0;
@@ -487,11 +497,13 @@ function playDraw(
           master.fromTo(o, { drawSVG: '0%' }, { drawSVG: '10%', duration: growD, ease: 'power2.out' }, t);
           master.fromTo(o, { drawSVG: '10%' }, { drawSVG: '100%', duration: travelD, ease: 'power2.inOut' }, t + growD);
         });
+        worms.forEach(w => master.set(w, { opacity: 1 }, t));
         const onceTl = gsap.timeline();
-        addVariant(onceTl, overlays, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
+        addVariant(onceTl, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
         master.add(onceTl, t);
         const onceTotalD = d + staggerTime * Math.max(0, worms.length - 1);
         master.to(overlays, { opacity: 0, duration: 0.5 }, t + onceTotalD);
+        master.to(worms, { opacity: 0, duration: 0.5 }, t + onceTotalD);
       } else {
         overlays.forEach(o => master.set(o, { opacity: 1 }, t));
         const onceTl = gsap.timeline();
@@ -512,12 +524,14 @@ function playDraw(
             gsap.set(o, { drawSVG: '100%' });
             master.to(o, { opacity: ghostOpacity, duration: 1, ease: 'power2.out' }, 0);
           });
-          addVariant(master, overlays, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
+          worms.forEach(w => gsap.set(w, { opacity: 1 }));
+          addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
           master.to(overlays, { opacity: restOpacity, duration: 1, ease: 'power2.out' }, d);
         } else {
           // Ghost: stays at ghost, worm passes over
           overlays.forEach(o => gsap.set(o, { drawSVG: '100%', opacity: ghostOpacity }));
-          addVariant(master, overlays, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
+          worms.forEach(w => gsap.set(w, { opacity: 1 }));
+          addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
         }
       } else {
         // Full variant: dim to ghost → draw → brighten back
