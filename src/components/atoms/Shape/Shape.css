@@ -30,7 +30,29 @@
 /* Pill stretches horizontally */
 .shape--pill { aspect-ratio: auto; padding-inline: var(--space-lg); }
 
-/* Clip-path shapes (hexagon, diamond, triangle, star) set via inline style */
+/* Clip-path shapes: border gets clipped, so remove it — fill uses clip-path directly */
+.shape--hexagon,
+.shape--diamond,
+.shape--triangle,
+.shape--star {
+  border: none;
+}
+
+/* Clip-path + outline: SVG polygon handles the stroke (rendered in template) */
+.shape--hexagon.shape--outline,
+.shape--diamond.shape--outline,
+.shape--triangle.shape--outline,
+.shape--star.shape--outline {
+  background: transparent;
+  clip-path: none;
+}
+
+.shape__outline-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
 
 /* ── Variants ───────────────────────────────────────── */
 
@@ -44,6 +66,12 @@
   border: var(--border-width) solid var(--_color, var(--primary-base));
   color: var(--_color, var(--primary-base));
 }
+
+/* ── Border weight ──────────────────────────────────── */
+
+.shape--border-sm { border-width: var(--border-width); }
+.shape--border-md { border-width: var(--border-width-md); }
+.shape--border-lg { border-width: var(--border-width-lg); }
 
 .shape--glass {
   background: var(--glass-bg);

@@ -18,7 +18,7 @@ import { LottieIcon } from '../LottieIcon';
 
 import type {
   BrandColour, RainbowColour, ColourTier,
-  Shape as ShapeEnum, Variant, Shadow,
+  Variant, Shadow,
   GradientBlend, GradientDirection, GradientSpread,
   Animation, AnimationTriggerInteractive,
 } from '../../../lib/shared-enums';
@@ -46,6 +46,7 @@ interface Props {
   // ── Visual ──────────────────────────────────────────────
   size?: ShapeSize;
   variant?: Variant;
+  borderWeight?: 'sm' | 'md' | 'lg';
   shadow?: Shadow;
   glow?: 'sm' | 'md' | 'lg';
 
@@ -91,6 +92,7 @@ const {
   gradientSpread,
   gradientAnimate,
   media,
+  borderWeight,
   animation,
   animationTrigger = 'hover',
   draw,
@@ -131,7 +133,17 @@ const CLIP_PATHS: Record<string, string> = {
 const clipPath = CLIP_PATHS[shape] || undefined;
 const isMask = mode === 'mask';
 const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)}` : undefined;
-const isRounded = shape === 'circle' || shape === 'rounded' || shape === 'pill';
+const isClipShape = !!clipPath;
+const needsSvgOutline = isClipShape && variant === 'outline';
+
+// SVG polygon points for outline rendering (no clip-path clipping)
+const SVG_POLYGONS: Record<string, string> = {
+  hexagon: '50,0 100,25 100,75 50,100 0,75 0,25',
+  diamond: '50,0 100,50 50,100 0,50',
+  triangle: '50,0 100,100 0,100',
+  star: '50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35',
+};
+const svgPolygon = SVG_POLYGONS[shape] || undefined;
 
 // Draw data attributes
 const drawVariant = typeof draw === 'string' ? draw : 'draw';
@@ -158,6 +170,7 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
     `shape--${variant}`,
     resolvedColor && `color--${resolvedColor}`,
     colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,
+    borderWeight && `shape--border-${borderWeight}`,
     shadow && `shape--shadow-${shadow}`,
     glow && `shape--glow-${glow}`,
     gradientName && 'gradient',
@@ -184,6 +197,11 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
   {...dataAttrs}
 >
+  {needsSvgOutline && svgPolygon && (
+    <svg class="shape__outline-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <polygon points={svgPolygon} fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+    </svg>
+  )}
   {svgContent && !isMask && <Fragment set:html={svgContent} />}
   {svgContent && isMask && maskId && (
     <svg class="shape__mask-def" aria-hidden="true" style="position:absolute;width:0;height:0;">
@@ -196,9 +214,9 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
   )}
   {isContainer && (
     <div class="shape__content">
-      {mediaComponent === 'Icon' && <Icon {...mediaProps} />}
-      {mediaComponent === 'Image' && <Image {...mediaProps} />}
-      {mediaComponent === 'LottieIcon' && <LottieIcon {...mediaProps} />}
+      {mediaComponent === 'Icon' && <Icon {...mediaProps as any} />}
+      {mediaComponent === 'Image' && <Image {...mediaProps as any} />}
+      {mediaComponent === 'LottieIcon' && <LottieIcon {...mediaProps as any} />}
       <slot />
     </div>
   )}
