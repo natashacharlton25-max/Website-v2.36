@@ -575,7 +575,7 @@ function playDraw(
         overlays.forEach(o => {
           if (!isGhostMode) gsap.set(o, { stroke: color, strokeWidth: sw });
           if (isGhostMode) {
-            gsap.set(o, { drawSVG: '0%', opacity: ghostOpacity });
+            gsap.set(o, { drawSVG: '100%', opacity: ghostOpacity });
           } else {
             // Full: dim to ghost, overlay stays as static ghost background
             gsap.set(o, { drawSVG: '100%' });
@@ -674,7 +674,7 @@ function playDraw(
           for (let i = 0; i < 3; i++) {
             const clone = o.cloneNode(true) as SVGPathElement;
             clone.classList.add('icon-draw-trail');
-            gsap.set(clone, { fill: 'none', drawSVG: '0%', opacity: 0 });
+            gsap.set(clone, { fill: 'none', stroke: 'currentColor', drawSVG: '0%', opacity: 0 });
             o.parentNode!.appendChild(clone);
             trails[i].push(clone);
           }
