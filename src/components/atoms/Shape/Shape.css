@@ -28,8 +28,13 @@
 /* ── CSS variants (circle/square/rounded/pill only) ─── */
 
 .shape--fill {
-  background: var(--_color, var(--primary-base));
-  color: oklch(from var(--_color, var(--primary-base)) round(1.21 - l) 0 0);
+  background: var(--_color, var(--svg-ghost-color));
+  color: oklch(from var(--_color, var(--svg-ghost-color)) round(1.21 - l) 0 0);
+}
+
+/* Gradient overrides fill background */
+.shape--fill.gradient {
+  background: var(--_grad-computed);
 }
 
 .shape--outline {
@@ -102,6 +107,11 @@
 .shape__svg--outline g {
   fill: none;
   stroke: var(--_color, var(--svg-ghost-color));
+}
+
+/* Draw overlays inside shape SVG — GSAP controls these */
+.shape__svg .icon-draw-overlay {
+  fill: none;
 }
 
 .shape__svg--glass g {
