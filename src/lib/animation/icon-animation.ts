@@ -360,24 +360,24 @@ function addVariant(
       gsap.set(overlays, { stroke: color, strokeWidth: sw });
       tl.fromTo(overlays, { drawSVG: '0%' }, {
         drawSVG: '100%', duration: d, ease: 'power2.inOut',
-        stagger: { each: pathStagger, from: staggerFrom }
+        stagger: { each: pathStagger, from: staggerFrom, ease: 'power2.in' }
       }, 0);
       break;
     case 'drawcenter':
       gsap.set(overlays, { stroke: color, strokeWidth: sw });
       tl.fromTo(overlays, { drawSVG: '50% 50%' }, {
         drawSVG: '0% 100%', duration: d, ease: 'power2.inOut',
-        stagger: { each: pathStagger, from: staggerFrom }
+        stagger: { each: pathStagger, from: staggerFrom, ease: 'power2.in' }
       }, 0);
       break;
     case 'pulse':
       gsap.set(overlays, { stroke: color, strokeWidth: sw * 1.5, opacity: 0.8 });
       tl.fromTo(overlays, { drawSVG: '0%' }, {
         drawSVG: '100%', duration: d * 0.5, ease: 'power2.out',
-        stagger: { each: pathStagger, from: staggerFrom }
+        stagger: { each: pathStagger, from: staggerFrom, ease: 'power2.in' }
       }, 0);
       tl.to(overlays, { strokeWidth: sw, opacity: 1, duration: d * 0.5,
-        stagger: { each: pathStagger, from: staggerFrom }
+        stagger: { each: pathStagger, from: staggerFrom, ease: 'power2.in' }
       }, d * 0.5);
       break;
     case 'chachaslide': {
