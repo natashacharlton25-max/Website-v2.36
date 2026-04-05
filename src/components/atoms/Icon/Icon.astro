@@ -33,6 +33,7 @@ interface Props {
   name: string;
   weight?: IconWeight;
   semanticRole?: IconSemanticRole;
+  label?: string;
 
   // ── Colour ──────────────────────────────────────────────
   brandColor?: BrandColour;
@@ -75,7 +76,7 @@ const {
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
   animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawOnScroll, drawScrub, drawColor,
-  morphTo, morphViaCircle, semanticRole,
+  morphTo, morphViaCircle, semanticRole, label,
 } = Astro.props;
 
 // Resolve colour: rainbow takes precedence, else brand
@@ -245,14 +246,18 @@ if (morphTo && morphTargetContent) {
 
 ---
 
+{/* Semantic roles: decorative=hidden, ui-control=labelled+focusable, content-symbol=labelled */}
 <span
   class:list={['icon', ...effectClasses, className]}
   style={size != null ? `width: ${size}px; height: ${size}px;` : undefined}
-  set:html={iconContent || fallbackIcon}
-  aria-hidden={!(draw || morphTo) ? "true" : undefined}
-  tabindex={(draw || morphTo) ? "0" : undefined}
-  role={(draw || morphTo) ? "img" : undefined}
+  aria-hidden={semanticRole === 'decorative' || !semanticRole ? "true" : undefined}
+  aria-label={semanticRole && semanticRole !== 'decorative' ? label : undefined}
+  tabindex={semanticRole === 'ui-control' ? "0" : undefined}
+  role={semanticRole && semanticRole !== 'decorative' ? "img" : undefined}
   data-semantic-role={semanticRole}
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
   {...dataAttrs}
-/>
+>
+  <Fragment set:html={iconContent || fallbackIcon} />
+  {label && semanticRole === 'ui-control' && <span class="icon__label">{label}</span>}
+</span>

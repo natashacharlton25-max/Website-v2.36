@@ -8,14 +8,16 @@
     { "rule": "morph-requires-fill", "condition": "morphTo", "requires": "weight === 'fill' || weight === undefined" },
     { "rule": "draw-excludes-fill", "condition": "draw", "excludes": "weight === 'fill'" },
     { "rule": "gradient-draw-passthrough", "condition": "gradient && draw", "note": "gradient value used as drawColor for gradient stroke lines" },
-    { "rule": "draw-colour-base-only", "condition": "draw", "note": "drawColor only accepts base colour variants or rainbow — no tiers (tint/mid/emphasis)" }
+    { "rule": "draw-colour-base-only", "condition": "draw", "note": "drawColor only accepts base colour variants or rainbow — no tiers (tint/mid/emphasis)" },
+    { "rule": "label-required-for-informational", "condition": "semanticRole !== 'decorative'", "requires": "label", "note": "ui-control and content-symbol icons must have label for screen readers and textonly swap" }
   ],
 
   "props": {
     "content": {
       "name":         { "type": "string", "required": true },
       "weight":       { "type": "string", "enum": ["light", "regular", "bold", "fill", "duotone"] },
-      "semanticRole": { "type": "string", "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] }
+      "semanticRole": { "type": "string", "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] },
+      "label":        { "type": "string", "_note": "Required for ui-control and content-symbol. Screen reader text + textonly label swap for ui-control." }
     },
 
     "colour": {
