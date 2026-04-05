@@ -47,14 +47,23 @@
 }
 
 .shape--liquid-glass {
-  background: color-mix(in oklch, var(--_color, var(--primary-base)) 8%, transparent);
+  background: color-mix(in oklch, var(--_color, var(--svg-ghost-color)) 8%, transparent);
   backdrop-filter: var(--glass-blur-heavy);
   -webkit-backdrop-filter: var(--glass-blur-heavy);
-  border: var(--border-width) solid color-mix(in oklch, var(--_color, var(--primary-base)) 20%, transparent);
-  box-shadow:
-    inset 0 1px 0 0 color-mix(in oklch, var(--_color, var(--primary-base)) 15%, transparent),
-    0 0 var(--space-sm) color-mix(in oklch, var(--_color, var(--primary-base)) 10%, transparent);
+  border: var(--border-width) solid color-mix(in oklch, var(--_color, var(--svg-ghost-color)) 20%, transparent);
   color: var(--color-Text);
+}
+
+/* SVG shapes: no CSS box-shadow (shows as rectangle) — use filter instead */
+.shape--hexagon.shape--liquid-glass,
+.shape--diamond.shape--liquid-glass,
+.shape--triangle.shape--liquid-glass,
+.shape--star.shape--liquid-glass,
+.shape--blob.shape--liquid-glass {
+  background: none;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* ── Border weight ──────────────────────────────────── */
@@ -129,13 +138,6 @@
 
 /* ── Shadow ─────────────────────────────────────────── */
 
-.shape--shadow-sm,
-.shape--shadow-md,
-.shape--shadow-lg,
-.shape--shadow-elevated {
-  overflow: visible;
-}
-
 .shape--shadow-sm       { filter: var(--svg-drop-shadow); }
 .shape--shadow-md       { filter: var(--svg-drop-shadow-md); }
 .shape--shadow-lg       { filter: var(--svg-drop-shadow-lg); }
@@ -145,7 +147,11 @@
 
 .shape--glow-sm,
 .shape--glow-md,
-.shape--glow-lg {
+.shape--glow-lg,
+.shape--shadow-sm,
+.shape--shadow-md,
+.shape--shadow-lg,
+.shape--shadow-elevated {
   overflow: visible;
 }
 
@@ -168,9 +174,11 @@
   color: var(--color-Text);
 }
 
-/* Icons inside shapes get their own colour — not inherited from shape */
+/* Icons inside shapes: own colour, proportional sizing */
 .shape__content .icon {
   color: var(--_icon-color);
+  width: 50%;
+  height: 50%;
 }
 
 /* ── Mask def ───────────────────────────────────────── */
