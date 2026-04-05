@@ -1,45 +1,20 @@
 ---
 /**
- * Icon component — API-backed, multi-brand aware.
+ * Icon — API-backed, multi-brand aware.
  *
- * Fetches SVG icons from the Asset Library API at build time.
- * Brand config determines the default icon weight (fill/duotone/regular).
- * All SVG transforms (stroke, gradient, draw, morph) happen server-side
- * on the raw markup before inlining.
- *
- * Usage:
- *   <Icon name="heart" />                          → resolves to heart-{brandWeight}
- *   <Icon name="heart-fill" />                     → explicit weight override
- *   <Icon name="heart" weight="duotone" />         → explicit weight override
- *   <Icon name="heart" size={20} color="var(--primary-600)" />
- *   <Icon name="heart" gradient="warm" />
- *   <Icon name="heart" draw drawOnScroll />
- *   <Icon name="heart" morphTo="star" />
- *
- * Props:
- *   name      — Icon base name or full slug (e.g. "heart" or "heart-fill")
- *   weight    — Override weight: 'fill' | 'duotone' | 'regular' | 'bold' | 'thin' | 'light'
- *   size      — Icon size in pixels (default: 24)
- *   color     — CSS color value or variable
- *   shadow    — Drop shadow: 'sm' | 'md' | 'lg'
- *   glow      — Coloured glow: 'sm' | 'md' | 'lg' | 'secondary' | 'white'
- *   gradient  — Gradient fill: 'primary' | 'secondary' | 'warm' | 'cool'
- *   spin      — Continuous rotation
- *   pulse     — Scale pulse for attention
- *   bounce    — Subtle bounce indicator
- *   stroke    — Line-art mode
- *   draw      — DrawSVG animation: true or variant name
- *   drawOnScroll / drawScrub / drawColor — Draw animation options
- *   morphTo   — Target icon name for MorphSVG on hover
- *   morphColor — Fill color for morph target state
- *   class     — Additional CSS classes
+ * Fetches SVG from Asset Library API at build time.
+ * Weight: light, regular, bold, fill, duotone (brand default via ICON_WEIGHT env).
+ * Colour: global .color--{name} mixin (brandColor/rainbowColor/colorTier).
+ * Gradient: SVG linearGradient fill via SvgGradientDefs.
+ * Draw: GSAP DrawSVGPlugin (client-side, data attributes).
+ * Morph: GSAP MorphSVGPlugin (hover toggle).
  */
 
 import type {
   BrandColour, RainbowColour, ColourTier,
   IconWeight,
   Animation, AnimationTriggerInteractive,
-  GradientBlend,
+  GradientBlend, GradientDirection, GradientSpread,
 } from '../../../lib/shared-enums';
 
 // ─── Brand config ───────────────────────────────────────
@@ -49,7 +24,7 @@ const DEFAULT_WEIGHT = import.meta.env.ICON_WEIGHT || 'fill';
 
 type IconSemanticRole = 'decorative' | 'ui-control' | 'content-symbol';
 type IconShadow = 'sm' | 'md' | 'lg' | 'elevated';
-type IconGlow = 'sm' | 'md' | 'lg' | 'secondary' | 'white';
+type IconGlow = 'sm' | 'md' | 'lg';
 type DrawVariant = 'draw' | 'drawcenter' | 'chachaslide' | 'pulse';
 type DrawMode = 'once' | 'static' | 'yoyo' | 'reverse-yoyo';
 
@@ -68,8 +43,14 @@ interface Props {
   size?: number;
   shadow?: IconShadow;
   glow?: IconGlow;
-  gradient?: GradientBlend;
+
+  // ── Gradient ────────────────────────────────────────────
+  gradient?: boolean;
+  gradientBlend?: GradientBlend;
+  gradientDirection?: GradientDirection;
+  gradientSpread?: GradientSpread;
   gradientAnimate?: boolean;
+
   // ── Animation ───────────────────────────────────────────
   animation?: Animation;
   animationTrigger?: AnimationTriggerInteractive;
@@ -78,33 +59,34 @@ interface Props {
   drawLaser?: boolean;
   drawFill?: boolean;
   drawGhost?: boolean;
-  drawGhostColor?: string;
   drawOnScroll?: boolean;
   drawScrub?: boolean;
   drawColor?: string;
   morphTo?: string;
-  morphColor?: string;
   morphViaCircle?: boolean;
 
-  // ── Legacy (deprecated — use animation prop) ────────────
-  spin?: boolean;
-  pulse?: boolean;
-  bounce?: boolean;
-
   class?: string;
-  color?: string;
 }
 
 const {
-  name, weight, size, class: className = '', color,
+  name, weight, size, class: className = '',
   brandColor, rainbowColor, colorTier,
-  shadow, glow, gradient, gradientAnimate, animation, animationTrigger = 'hover', spin, pulse, bounce,
-  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawGhostColor, drawOnScroll, drawScrub, drawColor,
-  morphTo, morphColor, morphViaCircle, semanticRole,
+  shadow, glow,
+  gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
+  animation, animationTrigger = 'hover',
+  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawOnScroll, drawScrub, drawColor,
+  morphTo, morphViaCircle, semanticRole,
 } = Astro.props;
 
 // Resolve colour: rainbow takes precedence, else brand
 const resolvedColor = rainbowColor || brandColor || null;
+
+// Weight rules: morph (with or without draw) → fill only, draw (no morph) → never fill
+const resolvedWeight = morphTo
+  ? (weight || 'fill')
+  : draw && (weight === 'fill' || (!weight && DEFAULT_WEIGHT === 'fill'))
+    ? 'light'
+    : weight;
 
 // ─── Weight suffixes (for slug detection) ───────────────
 
@@ -114,7 +96,7 @@ function hasWeightSuffix(slug: string): boolean {
   return WEIGHTS.some(w => slug.endsWith(`-${w}`));
 }
 
-function resolveSlug(iconName: string, weightOverride?: string): string {
+function resolveSlug(iconName: string, weightOverride?: string, stripWeight?: boolean): string {
   // Strip legacy 'ph:' prefix
   let resolved = iconName.startsWith('ph:') ? iconName.slice(3) : iconName;
 
@@ -123,8 +105,19 @@ function resolveSlug(iconName: string, weightOverride?: string): string {
     resolved = resolved.split('/').pop()!;
   }
 
-  // If the name already has a weight suffix, use it as-is
-  if (hasWeightSuffix(resolved)) return resolved;
+  // If name has a weight suffix: strip it when forced (draw/morph weight rules), else use as-is
+  if (hasWeightSuffix(resolved)) {
+    if (stripWeight) {
+      for (const w of WEIGHTS) {
+        if (resolved.endsWith(`-${w}`)) {
+          resolved = resolved.slice(0, -(w.length + 1));
+          break;
+        }
+      }
+    } else {
+      return resolved;
+    }
+  }
 
   // Append weight: explicit override → brand default
   const w = weightOverride || DEFAULT_WEIGHT;
@@ -149,7 +142,8 @@ async function fetchIcon(slug: string): Promise<string | null> {
 
 // ─── Resolve primary icon ───────────────────────────────
 
-const slug = resolveSlug(name, weight);
+const needsWeightStrip = !!(draw || morphTo);
+const slug = resolveSlug(name, resolvedWeight, needsWeightStrip);
 const fetchSlug = morphTo ? `${slug}-flat` : slug;
 let iconContent = await fetchIcon(fetchSlug);
 
@@ -165,12 +159,15 @@ if (!iconContent && !name.endsWith('-fill') && weight !== 'fill') {
 
 let morphTargetContent: string | null = null;
 if (morphTo && !draw) {
-  // Fill morph (MorphSVG): flat suffix for single-path
-  const morphSlug = `${resolveSlug(morphTo, weight)}-flat`;
+  // Fill morph (MorphSVG): force fill weight, flat suffix for single-path
+  const morphSlug = `${resolveSlug(morphTo, 'fill')}-flat`;
   morphTargetContent = await fetchIcon(morphSlug);
+  if (!morphTargetContent) {
+    morphTargetContent = await fetchIcon(resolveSlug(morphTo, 'fill'));
+  }
 } else if (morphTo && draw) {
-  // Draw morph (DrawSVG): fetch target icon for path swap
-  const morphSlug = resolveSlug(morphTo, weight);
+  // Draw morph (DrawSVG): use resolved weight (never fill), prefer flat
+  const morphSlug = resolveSlug(morphTo, resolvedWeight);
   morphTargetContent = await fetchIcon(`${morphSlug}-flat`) || await fetchIcon(morphSlug);
 }
 
@@ -182,24 +179,22 @@ if (morphTo && !draw) {
 
 // Gradient: reference shared SvgGradientDefs via url(#grad-{name})
 // SvgGradientDefs.astro must be included once in the layout.
-if (gradient && iconContent && !draw) {
-  if (gradientAnimate) {
-    // Animated gradient: inject per-instance <linearGradient> with <animateTransform>
-    const uid = `agrad-${Math.random().toString(36).substring(2, 9)}`;
-    const gradientId = `grad-${gradient}`;
+// gradient (boolean) + gradientBlend (named blend) — same as Badge/Heading
+const gradientName = gradientBlend || (gradient ? 'primary' : null);
 
-    // Build animated gradient def that references the same stops as the shared def
-    // but with rotation animation and a unique ID
+if (gradientName && iconContent && !draw) {
+  if (gradientAnimate) {
+    const uid = `agrad-${Math.random().toString(36).substring(2, 9)}`;
+    const gradientId = `grad-${gradientName}`;
     const animGradDef = `<defs><linearGradient id="${uid}" href="#${gradientId}" gradientUnits="objectBoundingBox"><animateTransform attributeName="gradientTransform" type="rotate" values="0 0.5 0.5; 90 0.5 0.5; 0 0.5 0.5; -90 0.5 0.5; 0 0.5 0.5" dur="8s" repeatCount="indefinite" /></linearGradient></defs>`;
 
-    // Inject defs into SVG and replace fills
     iconContent = iconContent.replace(/<svg([^>]*)>/, `<svg$1>${animGradDef}`);
     iconContent = iconContent
       .replace(/fill="currentColor"/g, `fill="url(#${uid})"`)
       .replace(/fill="CurrentColor"/g, `fill="url(#${uid})"`);
     iconContent = iconContent.replace(/<path(?![^>]*fill=)/g, `<path fill="url(#${uid})"`);
   } else {
-    const gradientId = `grad-${gradient}`;
+    const gradientId = `grad-${gradientName}`;
     iconContent = iconContent
       .replace(/fill="currentColor"/g, `fill="url(#${gradientId})"`)
       .replace(/fill="CurrentColor"/g, `fill="url(#${gradientId})"`);
@@ -220,11 +215,8 @@ const effectClasses = [
   colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,
   shadow && `icon--shadow-${shadow}`,
   glow && `icon--glow-${glow}`,
-  gradient && 'icon--has-gradient',
+  gradientName && 'icon--has-gradient',
   animation && `anim--${animation}`,
-  spin && 'icon--spin',
-  pulse && 'icon--pulse',
-  bounce && 'icon--bounce',
   draw && 'icon--stroke',
   draw && 'icon--draw',
   draw && drawFill && 'icon--draw-fill',
@@ -239,7 +231,6 @@ if (draw) {
   if (drawLaser) dataAttrs['data-icon-draw-laser'] = 'true';
   if (drawFill) dataAttrs['data-icon-draw-fill'] = 'true';
   if (drawGhost) dataAttrs['data-icon-draw-ghost'] = 'true';
-  if (drawGhostColor) dataAttrs['data-icon-draw-ghost-color'] = drawGhostColor;
   if (drawOnScroll) dataAttrs['data-icon-draw-scroll'] = 'true';
   if (drawScrub) dataAttrs['data-icon-draw-scrub'] = 'true';
   if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
@@ -249,17 +240,14 @@ if (draw) {
 if (morphTo && morphTargetContent) {
   dataAttrs['data-icon-morph'] = 'true';
   dataAttrs['data-icon-morph-target'] = morphTargetContent;
-  if (morphColor) dataAttrs['data-icon-morph-color'] = morphColor;
   if (morphViaCircle) dataAttrs['data-icon-morph-circle'] = 'true';
 }
+
 ---
 
 <span
   class:list={['icon', ...effectClasses, className]}
-  style={[
-    size != null && `width: ${size}px; height: ${size}px;`,
-    color && `color: ${color};`,
-  ].filter(Boolean).join(' ') || undefined}
+  style={size != null ? `width: ${size}px; height: ${size}px;` : undefined}
   set:html={iconContent || fallbackIcon}
   aria-hidden={!(draw || morphTo) ? "true" : undefined}
   tabindex={(draw || morphTo) ? "0" : undefined}

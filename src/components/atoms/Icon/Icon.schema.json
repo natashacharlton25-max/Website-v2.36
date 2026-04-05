@@ -1,41 +1,58 @@
 {
   "component": "Icon",
   "category": "atom",
-  "renders": { "full": "Icon.astro", "reduced": "Icon.astro", "assistive": "Icon.astro", "textonly": null },
-  "notes": "API-backed icon atom. Fetches SVG from Asset Library at build time. Weight resolved via brand config or explicit override. textonly: null for decorative icons. ui-control and content-symbol icons stay visible in textonly/calm.",
+  "renders": { "full": "Icon.astro", "reduced": "Icon.astro", "textonly": null },
+  "notes": "API-backed icon atom. Fetches SVG from Asset Library at build time. Weight resolved via brand config or explicit override. textonly: null for decorative. morph forces fill weight, draw forces non-fill (auto-corrected).",
+
+  "_rules": [
+    { "rule": "morph-requires-fill", "condition": "morphTo && !draw", "requires": "weight === 'fill' || weight === undefined" },
+    { "rule": "draw-excludes-fill", "condition": "draw", "excludes": "weight === 'fill'" },
+    { "rule": "gradient-draw-passthrough", "condition": "gradient && draw", "note": "gradient value used as drawColor for gradient stroke lines" }
+  ],
 
   "props": {
     "content": {
       "name":         { "type": "string", "required": true },
       "weight":       { "type": "string", "enum": ["light", "regular", "bold", "fill", "duotone"] },
-      "semanticRole": { "type": "string", "enum": ["decorative", "ui-control", "content-symbol"] }
+      "semanticRole": { "type": "string", "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] }
     },
 
     "colour": {
-      "brandColor":  { "type": "string", "enum": ["primary", "secondary", "neutral"] },
+      "brandColor": { "type": "string", "enum": ["primary", "secondary", "neutral"] }
+    },
+
+    "rainbow": {
       "rainbowColor": { "type": "string", "enum": ["red", "orange", "yellow", "teal", "blue", "purple", "pink"] },
-      "colorTier":   { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"] }
+      "colorTier":    { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"] }
     },
 
     "gradient": {
-      "gradient": { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade", "emerge", "fade", "preset-tint", "preset-mid", "preset-base", "preset-emphasis", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"] }
+      "gradient":          { "type": "boolean", "default": false },
+      "gradientBlend":     { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade", "emerge", "fade", "preset-tint", "preset-mid", "preset-base", "preset-emphasis", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "rainbow"] },
+      "gradientDirection": { "type": "string", "default": "diagonal", "enum": ["vertical", "vertical-reverse", "horizontal", "horizontal-reverse", "diagonal", "diagonal-reverse", "diagonal-alt", "diagonal-alt-reverse"] },
+      "gradientSpread":    { "type": "string", "default": "balanced", "enum": ["soft", "balanced", "tight"] },
+      "gradientAnimate":   { "type": "boolean" }
     },
 
     "visual": {
-      "size":    { "type": "number", "default": 24 },
-      "shadow":  { "type": "string", "enum": ["sm", "md", "lg"] },
-      "glow":    { "type": "string", "enum": ["sm", "md", "lg", "secondary", "white"] }
+      "size":   { "type": "number", "default": 24 },
+      "shadow": { "type": "string", "enum": ["sm", "md", "lg", "elevated"] },
+      "glow":   { "type": "string", "enum": ["sm", "md", "lg"] }
     },
 
     "animation": {
       "animation":        { "type": "string", "enum": ["spin", "bounce", "shake", "float", "drift", "slide-up", "slide-down", "slide-left", "slide-right", "flip", "pulse", "ping", "pop", "squish", "heartbeat", "rubber-band", "fade", "blink", "flash", "glint", "shimmer", "twinkle", "wiggle", "swing", "rock", "nod", "attention", "celebrate", "enter", "exit"] },
       "animationTrigger": { "type": "string", "default": "hover", "enum": ["hover", "viewport", "autoplay", "loop", "interval", "click", "focus", "none"] },
-      "draw":             { "type": ["boolean", "string"], "enum": [true, "draw", "drawcenter", "chachaslide", "flashgordon", "rainbowchase", "pulse"] },
+      "draw":             { "type": ["boolean", "string"], "enum": [true, "draw", "drawcenter", "chachaslide", "pulse"] },
+      "drawMode":         { "type": "string", "default": "static", "enum": ["once", "static", "yoyo", "reverse-yoyo"] },
+      "drawLaser":        { "type": "boolean" },
+      "drawFill":         { "type": "boolean" },
+      "drawGhost":        { "type": "boolean" },
+      "drawColor":        { "type": "string", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "hero", "sunset", "brand-emerge", "brand-fade", "rainbow"] },
       "drawOnScroll":     { "type": "boolean" },
       "drawScrub":        { "type": "boolean" },
-      "drawColor":        { "type": "string" },
       "morphTo":          { "type": "string" },
-      "morphColor":       { "type": "string" }
+      "morphViaCircle":   { "type": "boolean" }
     }
   }
 }

@@ -1,14 +1,10 @@
 /* Icon.css — Base styles for the Icon component.
  * Animation is gated by JSON props → CSS classes.
  * No prop = no class in HTML = animation rules never match.
- *
- * Internal tokens (--_icon-*):
- *   --_icon-color
  */
 
 .icon {
-  /* ── Internal tokens — reads from global .color-- mixin (--_color) or pipeline token ── */
-  --_icon-color: var(--_color, var(--icon-color, inherit));
+  --_icon-color: var(--_color, inherit);
 
   display: inline-flex;
   align-items: center;
@@ -17,7 +13,6 @@
   height: 1.25em;
   color: var(--_icon-color);
 }
-
 
 .icon svg {
   width: 100%;
@@ -40,48 +35,48 @@
 /* Ghost stroke — origPaths only (overlays keep draw color for animation) */
 .icon--draw[data-icon-draw-ghost="true"] svg path:not(.icon-draw-overlay):not(.icon-draw-trail):not(.icon-draw-worm):not(.icon-draw-chase),
 .icon--draw[data-icon-draw-ghost="true"] svg circle:not(.icon-draw-overlay):not(.icon-draw-trail),
-.icon--draw[data-icon-draw-ghost="true"] svg polygon:not(.icon-draw-overlay):not(.icon-draw-trail) {
-  stroke: var(--icon-ghost-stroke, var(--neutral-tint));
+.icon--draw[data-icon-draw-ghost="true"] svg polygon:not(.icon-draw-overlay):not(.icon-draw-trail),
+.icon--draw[data-icon-draw-ghost="true"] svg polyline:not(.icon-draw-overlay):not(.icon-draw-trail) {
+  stroke: var(--svg-ghost-color);
   fill: none;
 }
 
 /* Ghost resting overlay — ghost color when no inline stroke from GSAP */
 .icon--draw[data-icon-draw-ghost="true"]:not(.icon--draw-fill) svg .icon-draw-overlay {
-  stroke: var(--icon-ghost-stroke, var(--neutral-tint));
+  stroke: var(--svg-ghost-color);
 }
 
 /* Ghost fill — origPaths get tint fill */
 .icon--draw[data-icon-draw-ghost="true"].icon--draw-fill svg path:not(.icon-draw-overlay):not(.icon-draw-trail):not(.icon-draw-worm):not(.icon-draw-chase),
 .icon--draw[data-icon-draw-ghost="true"].icon--draw-fill svg circle:not(.icon-draw-overlay),
-.icon--draw[data-icon-draw-ghost="true"].icon--draw-fill svg polygon:not(.icon-draw-overlay) {
-  fill: var(--icon-ghost-stroke, var(--neutral-tint));
+.icon--draw[data-icon-draw-ghost="true"].icon--draw-fill svg polygon:not(.icon-draw-overlay),
+.icon--draw[data-icon-draw-ghost="true"].icon--draw-fill svg polyline:not(.icon-draw-overlay) {
+  fill: var(--svg-ghost-color);
   stroke: none;
 }
 
 /* Draw fill: origPaths need fill — .icon--stroke normally excludes fill: currentColor */
 .icon--draw-fill svg path:not(.icon-draw-overlay):not(.icon-draw-trail):not(.icon-draw-worm):not(.icon-draw-chase),
 .icon--draw-fill svg circle:not(.icon-draw-overlay),
-.icon--draw-fill svg polygon:not(.icon-draw-overlay) {
+.icon--draw-fill svg polygon:not(.icon-draw-overlay),
+.icon--draw-fill svg polyline:not(.icon-draw-overlay) {
   fill: currentColor;
 }
 
 /* Colour — uses global .color--{name} mixin from colour.css */
-/* No per-atom colour classes needed */
 
 /* ── Shadow ──────────────────────────────────────────── */
 
-.icon--shadow-sm       { filter: var(--icon-shadow, var(--svg-drop-shadow)); }
-.icon--shadow-md       { filter: var(--icon-shadow, var(--svg-drop-shadow-md)); }
-.icon--shadow-lg       { filter: var(--icon-shadow, var(--svg-drop-shadow-lg)); }
-.icon--shadow-elevated { filter: var(--icon-shadow, var(--svg-drop-shadow-elevated)); }
+.icon--shadow-sm       { filter: var(--svg-drop-shadow); }
+.icon--shadow-md       { filter: var(--svg-drop-shadow-md); }
+.icon--shadow-lg       { filter: var(--svg-drop-shadow-lg); }
+.icon--shadow-elevated { filter: var(--svg-drop-shadow-elevated); }
 
-/* ── Glow ────────────────────────────────────────────── */
+/* ── Glow — colour from .color-- mixin via currentColor ── */
 
-.icon--glow-sm        { filter: var(--icon-glow, var(--svg-glow-sm)); }
-.icon--glow-md        { filter: var(--icon-glow, var(--svg-glow-md)); }
-.icon--glow-lg        { filter: var(--icon-glow, var(--svg-glow-lg)); }
-.icon--glow-secondary { filter: var(--icon-glow, var(--svg-glow-secondary)); }
-.icon--glow-white     { filter: var(--icon-glow, var(--svg-glow-white)); }
+.icon--glow-sm { filter: var(--svg-glow-sm); }
+.icon--glow-md { filter: var(--svg-glow-md); }
+.icon--glow-lg { filter: var(--svg-glow-lg); }
 
 /* ==========================================================
    ANIMATION — gated by JSON props → CSS classes
@@ -90,12 +85,5 @@
 
 /* Draw animation handled by GSAP DrawSVGPlugin (src/lib/animation/icon-animation.ts) */
 /* Icon.astro outputs data-icon-draw attributes, GSAP picks them up client-side */
-/* No CSS overrides — GSAP controls all fill/stroke state on originals and overlays */
 
-
-/* ── Micro-animations — prop-gated ────────────────────── */
-/* Motion gate (motion-gate.css) kills all .anim--* and .icon--spin/pulse/bounce. */
-
-.icon--spin   { animation: anim-spin var(--duration-continuous) linear infinite; }
-.icon--pulse  { animation: anim-pulse var(--duration-continuous-slow) var(--ease-expo-out) infinite; }
-.icon--bounce { animation: anim-bounce var(--duration-continuous-slow) var(--ease-expo-out) infinite; }
+/* Micro-animations: .icon--spin/pulse/bounce → moved to micro-animations.css */

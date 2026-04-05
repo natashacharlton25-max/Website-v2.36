@@ -93,7 +93,7 @@ function initDrawIcon(el: HTMLElement) {
   // Fill modes
   const showFill = el.dataset.iconDrawFill === 'true';
   const ghost = el.dataset.iconDrawGhost === 'true';
-  const ghostColor = el.dataset.iconDrawGhostColor || getComputedStyle(el).getPropertyValue('--neutral-tint').trim() || iconColor;
+  const ghostColor = el.dataset.iconDrawGhostColor || getComputedStyle(el).getPropertyValue('--svg-ghost-color').trim() || getComputedStyle(el).getPropertyValue('--neutral-tint').trim() || iconColor;
 
   if (showFill) {
     // Fill variant: origPaths keep their fill — static icon always visible underneath
@@ -394,7 +394,8 @@ function playDraw(
   const sw = 10;
   // Re-read ghost color fresh (theme may have changed since init)
   if (isGhostMode) {
-    const freshGhost = getComputedStyle(overlays[0] || document.documentElement).getPropertyValue('--neutral-tint').trim();
+    const freshGhost = getComputedStyle(overlays[0] || document.documentElement).getPropertyValue('--svg-ghost-color').trim()
+      || getComputedStyle(overlays[0] || document.documentElement).getPropertyValue('--neutral-tint').trim();
     if (freshGhost) ghostColor = freshGhost;
   }
   const master = gsap.timeline();
@@ -405,7 +406,13 @@ function playDraw(
     svg.querySelectorAll('.icon-draw-chase, .icon-draw-worm, .icon-draw-trail, .icon-draw-static').forEach(el => el.remove());
   }
   // Kill any competing tweens on overlays
-  overlays.forEach(o => gsap.killTweensOf(o));
+  overlays.forEach(o => {
+    gsap.killTweensOf(o);
+    if (isGhostMode) {
+      o.style.removeProperty('stroke');
+      o.style.removeProperty('fill');
+    }
+  });
 
   // Dim full fill during animation (ghost fill already dim, doesn't need this)
   const fillPaths = svg ? Array.from(
@@ -422,7 +429,7 @@ function playDraw(
   const worms: SVGPathElement[] = [];
   if (laser) {
     overlays.forEach(o => {
-      gsap.set(o, { stroke: color, strokeWidth: sw });
+      if (!isGhostMode) gsap.set(o, { stroke: color, strokeWidth: sw });
       const worm = o.cloneNode(true) as SVGPathElement;
       worm.classList.add('icon-draw-worm');
       gsap.set(worm, { fill: 'none', stroke: color, strokeWidth: sw, drawSVG: '0% 0%', opacity: 0 });
@@ -531,7 +538,7 @@ function playDraw(
         let animStart = fadeBookend;
 
         overlays.forEach(o => {
-          gsap.set(o, { stroke: color, strokeWidth: sw });
+          if (!isGhostMode) gsap.set(o, { stroke: color, strokeWidth: sw });
           if (isGhostMode) {
             gsap.set(o, { drawSVG: '0%', opacity: ghostOpacity });
           } else {
@@ -592,10 +599,20 @@ function playDraw(
           });
         });
 
-        // After worms finish: fade overlay back to rest opacity
+        // After worms finish: fade back to rest state
         const wormEnd = animStart + d + stagger * 2;
         if (!isGhostMode) {
           master.to(overlays, { opacity: restOpacity, duration: 1, ease: 'power2.out' }, wormEnd);
+        } else {
+          // Ghost: fade trails + worms out, overlay stays at ghost
+          master.call(() => {
+            if (svg) {
+              svg.querySelectorAll('.icon-draw-trail, .icon-draw-worm').forEach(el => {
+                gsap.to(el, { opacity: 0, duration: 0.5, ease: 'power2.out' });
+              });
+            }
+            overlays.forEach(o => o.style.removeProperty('stroke'));
+          }, [], wormEnd);
         }
       } else {
         const restOpacity = isGhostMode ? ghostOpacity : 1;
@@ -711,8 +728,6 @@ function playDraw(
           master.to(ghost, { opacity: restOpacity, duration: 0.8, ease: 'power2.out' }, eraseEnd);
         });
       } else {
-        const restOpacity = isGhostMode ? ghostOpacity : 1;
-
         const stagger = d * 0.35;
         const eraseOpacities = isGhostMode ? [0.7, 0.45, 0.25] : [0.5, 0.3, 0.15];
 
@@ -742,6 +757,13 @@ function playDraw(
           });
         }
 
+        // For full: erase overlay alongside first clone layer
+        if (!isGhostMode) {
+          overlays.forEach(o => {
+            master.to(o, { drawSVG: '0%', duration: d, ease: 'power2.inOut' }, fadeIn);
+          });
+        }
+
         // Staggered erase — each layer erases, icon gets dimmer
         eraseClones.forEach((layer, i) => {
           const offset = fadeIn + i * stagger;
@@ -754,10 +776,13 @@ function playDraw(
           master.add(eraseTl, offset);
         });
 
-        // After all erased: ghost visible, fade back to rest opacity
+        // After all erased: redraw overlay back to full
         const eraseEnd = fadeIn + d + stagger * 2;
         if (!isGhostMode) {
-          master.to(overlays, { opacity: restOpacity, duration: 1, ease: 'power2.out' }, eraseEnd);
+          overlays.forEach(o => {
+            master.set(o, { drawSVG: '0%' }, eraseEnd);
+            master.to(o, { drawSVG: '100%', opacity: 1, duration: d, ease: 'power2.out' }, eraseEnd + 0.2);
+          });
         }
       }
       break;

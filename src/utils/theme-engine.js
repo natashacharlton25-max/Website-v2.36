@@ -1020,6 +1020,17 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
   ln(`  --media-saturation: ${chromaPreset === 'grey' ? '0' : (isDark ? '0.90' : '1')};`);
   ln(`  --media-contrast: ${chromaPreset === 'grey' ? '1.05' : (isDark ? '0.98' : '1')};`);
 
+  // SVG ghost colour — per zone
+  if (definition.highContrast) {
+    ln(`  --svg-ghost-color: ${isDark ? 'var(--neutral-950)' : 'var(--neutral-200)'};`);
+  } else if (chromaPreset === 'calm') {
+    ln(`  --svg-ghost-color: var(--page-bg-raised);`);
+  } else if (isDark) {
+    ln(`  --svg-ghost-color: var(--page-bg-sunken);`);
+  } else {
+    ln(`  --svg-ghost-color: var(--neutral-tint);`);
+  }
+
   // Focus + highlight tokens
   ln();
   ln(`  /* -- FOCUS + HIGHLIGHT TOKENS -------------------- */`);

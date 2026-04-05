@@ -367,11 +367,12 @@ for (const atom of atoms) {
         issues.push({ rule: 25, ln: '--', file: schemaFile, msg: `missing prop groups: ${missing.join(', ')}` });
       }
 
-      // Rule 26: Colour group should only contain brandColor (not rainbow or generic color)
+      // Rule 26: Colour group should only contain brandColor, rainbowColor, colorTier
+      const COLOUR_GROUP_ALLOWED = ['brandColor', 'rainbowColor', 'colorTier', '_description'];
       if (props.colour) {
         for (const key of Object.keys(props.colour)) {
-          if (key !== 'brandColor') {
-            issues.push({ rule: 26, ln: '--', file: schemaFile, msg: `colour group has unexpected prop "${key}" — only brandColor belongs here` });
+          if (!COLOUR_GROUP_ALLOWED.includes(key)) {
+            issues.push({ rule: 26, ln: '--', file: schemaFile, msg: `colour group has unexpected prop "${key}" — allowed: ${COLOUR_GROUP_ALLOWED.join(', ')}` });
           }
         }
       }
