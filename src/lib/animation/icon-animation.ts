@@ -342,18 +342,26 @@ function addVariant(
   if (laser) {
     overlays.forEach((path, idx) => {
       const offset = idx * pathStagger;
-      const growD = d * 0.2;
-      const shrinkD = d * 0.2;
+
+      // Main path draws normally
+      gsap.set(path, { stroke: color, strokeWidth: sw });
+      tl.fromTo(path, { drawSVG: '0%' }, {
+        drawSVG: '100%', duration: d, ease: 'power2.inOut'
+      }, offset);
+
+      // Laser head: brighter/thicker clone travels slightly ahead
+      const head = path.cloneNode(true) as SVGPathElement;
+      head.classList.add('icon-draw-worm');
+      gsap.set(head, { fill: 'none', stroke: color, strokeWidth: sw * 1.5, opacity: 1, drawSVG: '0% 0%' });
+      path.parentNode!.appendChild(head);
+
+      // Head grows, travels, shrinks — always 8% segment
+      const growD = d * 0.08;
+      const shrinkD = d * 0.08;
       const travelD = d - growD - shrinkD;
-      tl.fromTo(path,
-        { drawSVG: '0% 0%', stroke: color, strokeWidth: sw },
-        { drawSVG: '0% 10%', duration: growD, ease: 'power2.out' }, offset);
-      tl.fromTo(path,
-        { drawSVG: '0% 10%' },
-        { drawSVG: '90% 100%', duration: travelD, ease: 'power2.inOut' }, offset + growD);
-      tl.fromTo(path,
-        { drawSVG: '90% 100%' },
-        { drawSVG: '100% 100%', duration: shrinkD, ease: 'power2.in' }, offset + growD + travelD);
+      tl.fromTo(head, { drawSVG: '0% 0%' }, { drawSVG: '0% 8%', duration: growD, ease: 'power2.out' }, offset);
+      tl.fromTo(head, { drawSVG: '0% 8%' }, { drawSVG: '92% 100%', duration: travelD, ease: 'power2.inOut' }, offset + growD);
+      tl.fromTo(head, { drawSVG: '92% 100%' }, { drawSVG: '100% 100%', duration: shrinkD, ease: 'power2.in' }, offset + growD + travelD);
     });
     return;
   }
