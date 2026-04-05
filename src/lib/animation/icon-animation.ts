@@ -160,8 +160,8 @@ function initDrawIcon(el: HTMLElement) {
   const drawTrigger = el.dataset.iconDrawTrigger || (onScroll ? (scrub ? 'scrub' : 'viewport') : 'hover');
   const hasMorphTarget = !!el.dataset.iconMorphTarget;
   const play = hasMorphTarget
-    ? () => playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor, variant, mode, laser)
-    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode);
+    ? () => playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor, variant, mode, laser, sw)
+    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode, sw);
 
   switch (drawTrigger) {
     case 'scrub': {
@@ -389,14 +389,15 @@ function playDraw(
   ghostOpacity = 0.15,
   isGhostMode = false,
   ghostColor = '',
-  isBorderMode = false
+  isBorderMode = false,
+  swOverride = 0
 ): gsap.core.Timeline {
   const motion = getMotionMode();
   const hover = getHoverMode();
   if (motion === 'none') return gsap.timeline();
   const gentle = motion === 'gentle' || hover === 'gentle';
   const d = gentle ? 4 : 2;
-  const sw = 10;
+  const sw = swOverride || 10;
   // Re-read ghost color fresh (theme may have changed since init)
   if (isGhostMode) {
     const freshGhost = getComputedStyle(overlays[0] || document.documentElement).getPropertyValue('--svg-ghost-color').trim()
@@ -879,12 +880,13 @@ function playDrawMorph(
   _ghostColor: string,
   variant: DrawVariant = 'draw',
   mode: DrawMode = 'static',
-  laser: boolean = false
+  laser: boolean = false,
+  swOverride: number = 0
 ): gsap.core.Timeline {
   const motion = getMotionMode();
   if (motion === 'none') return gsap.timeline();
   const d = motion === 'gentle' ? 4 : 2;
-  const sw = 10;
+  const sw = swOverride || 10;
   const master = gsap.timeline();
 
   // Clean up old temp clones
