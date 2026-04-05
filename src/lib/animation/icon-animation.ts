@@ -342,8 +342,13 @@ function addVariant(
   const pathStagger = overlays.length > 1 ? staggerTime : 0;
 
   if (laser) {
-    // Laser: draw with thicker stroke that thins as it completes
-    gsap.set(overlays, { stroke: color, strokeWidth: sw * 2 });
+    // Laser: each worm starts hidden, appears only when its animation begins
+    gsap.set(overlays, { stroke: color, strokeWidth: sw * 1.3, opacity: 0 });
+    // Stagger opacity on — each worm appears at its own start time
+    overlays.forEach((path, idx) => {
+      const offset = idx * pathStagger;
+      tl.set(path, { opacity: 1 }, offset);
+    });
     tl.fromTo(overlays, { drawSVG: '0%' }, {
       drawSVG: '100%', duration: d, ease: 'power2.inOut',
       stagger: { each: pathStagger, from: staggerFrom, ease: 'slow(0.7, 0.7, false)' }
