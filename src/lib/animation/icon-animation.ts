@@ -1001,6 +1001,11 @@ function initMorphIcon(el: HTMLElement) {
   const svg = el.querySelector('svg');
   if (!svg) return;
 
+  // Convert non-path elements to <path> for smoother morphing
+  svg.querySelectorAll('circle, rect, polygon, polyline, ellipse, line').forEach(e => {
+    MorphSVGPlugin.convertToPath(e as any);
+  });
+
   const paths = Array.from(svg.querySelectorAll('path')) as SVGPathElement[];
   if (!paths.length) return;
 
