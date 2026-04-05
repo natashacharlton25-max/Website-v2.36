@@ -20,7 +20,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(DrawSVGPlugin, MorphSVGPlugin, MotionPathPlugin, ScrollTrigger);
 
-type DrawVariant = 'draw' | 'drawcenter' | 'chachaslide' | 'pulse';
+type DrawVariant = 'draw' | 'drawcenter' | 'pulse';
 type DrawMode = 'once' | 'static' | 'yoyo' | 'reverse-yoyo';
 
 function prefersReducedMotion(): boolean {
@@ -393,36 +393,6 @@ function addVariant(
         stagger: { each: pathStagger, from: staggerFrom, ease: 'slow(0.7, 0.7, false)' }
       }, d * 0.5);
       break;
-    case 'chachaslide': {
-      const rootCs = getComputedStyle(document.documentElement);
-      const secondColor = rootCs.getPropertyValue('--color-Black').trim() || '#000';
-      const drawD = d * 0.35;
-      const holdD = d * 0.1;
-      const eraseD = d * 0.45;
-      const chase2Start = drawD + holdD + eraseD * 0.75;
-      const chase2D = d * 0.35;
-
-      overlays.forEach((path, idx) => {
-        const offset = idx * pathStagger;
-        tl.fromTo(path,
-          { drawSVG: '0%', stroke: color, strokeWidth: sw },
-          { drawSVG: '100%', duration: drawD, ease: 'power2.inOut' }, offset);
-        tl.fromTo(path,
-          { drawSVG: '0% 100%' },
-          { drawSVG: '100% 100%', duration: eraseD, ease: 'power1.in' },
-          offset + drawD + holdD);
-
-        const chase = path.cloneNode(true) as SVGPathElement;
-        chase.classList.add('icon-draw-chase');
-        gsap.set(chase, { fill: 'none', stroke: secondColor, strokeWidth: sw, drawSVG: '0%', opacity: 1 });
-        path.parentNode!.appendChild(chase);
-        tl.fromTo(chase,
-          { drawSVG: '0%' },
-          { drawSVG: '100%', duration: chase2D, ease: 'power2.inOut' },
-          offset + chase2Start);
-      });
-      break;
-    }
   }
 }
 
