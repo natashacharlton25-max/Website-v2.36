@@ -56,8 +56,16 @@ function initDrawIcon(el: HTMLElement) {
   const svg = el.querySelector('svg');
   if (!svg) return;
 
-  // Convert non-path elements (circle, rect, polygon, polyline, ellipse, line) to <path>
-  svg.querySelectorAll('circle, rect, polygon, polyline, ellipse, line').forEach(e => {
+  // Convert non-path elements to <path> — skip background rects (fill="none" full-size rects)
+  svg.querySelectorAll('circle, polygon, polyline, ellipse, line').forEach(e => {
+    MorphSVGPlugin.convertToPath(e as any);
+  });
+  // Only convert rects that aren't the Phosphor background rect
+  svg.querySelectorAll('rect').forEach(e => {
+    const w = e.getAttribute('width');
+    const h = e.getAttribute('height');
+    const fill = e.getAttribute('fill');
+    if (fill === 'none' && (w === '256' || w === '100%')) return; // skip background rect
     MorphSVGPlugin.convertToPath(e as any);
   });
 
