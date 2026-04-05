@@ -197,15 +197,22 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
 
   {svgContent && !isMask && <Fragment set:html={(() => {
     let s = svgContent;
-    // Add viewBox if missing (shapes are 256x256)
+    // Add viewBox if missing (shapes are 256x256), pad for stroke in draw mode
+    const svgPad = draw ? 4 : 0;
     if (!s.includes('viewBox')) {
-      s = s.replace(/<svg/, '<svg viewBox="0 0 256 256"');
+      s = s.replace(/<svg/, `<svg viewBox="${-svgPad} ${-svgPad} ${256 + svgPad * 2} ${256 + svgPad * 2}"`);
+    } else if (draw) {
+      // Expand existing viewBox for stroke padding
+      s = s.replace(/viewBox="(\d+)\s+(\d+)\s+(\d+)\s+(\d+)"/, (_, x, y, w, h) => {
+        return `viewBox="${Number(x) - svgPad} ${Number(y) - svgPad} ${Number(w) + svgPad * 2} ${Number(h) + svgPad * 2}"`;
+      });
     }
     // Remove fixed dimensions so SVG scales to container
     s = s.replace(/\s*width="\d+"/g, '');
     s = s.replace(/\s*height="\d+"/g, '');
-    // Strip overflow="visible" that breaks containment
+    // Strip overflow, add visible for draw mode
     s = s.replace(/\s*overflow="[^"]*"/g, '');
+    if (draw) s = s.replace(/<svg/, '<svg overflow="visible"');
     if (draw) {
       // Draw mode: convert fill to stroke for DrawSVG animation
       s = s.replace(/fill="rgb\([^"]*\)"/g, 'fill="none" stroke="currentColor" stroke-width="3"');
