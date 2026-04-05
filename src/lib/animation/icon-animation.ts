@@ -89,6 +89,10 @@ function initDrawIcon(el: HTMLElement) {
   const laser = el.dataset.iconDrawLaser === 'true';
   const onScroll = el.dataset.iconDrawScroll === 'true';
   const scrub = el.dataset.iconDrawScrub === 'true';
+  // Stagger: none=0, tight=0.1, normal=0.3, loose=0.6
+  const staggerMap: Record<string, number> = { none: 0, tight: 0.1, normal: 0.3, loose: 0.6 };
+  const drawStagger = staggerMap[el.dataset.iconDrawStagger || 'normal'] ?? 0.3;
+  const drawStaggerFrom = (el.dataset.iconDrawStaggerFrom || 'start') as 'start' | 'center' | 'end' | 'edges' | 'random';
   // Overlay color: drawColor can be a CSS colour OR a gradient name (e.g. "hero", "rainbow", "red")
   const cs = getComputedStyle(document.documentElement);
   const rawColor = el.dataset.iconDrawColor || '';
@@ -183,7 +187,7 @@ function initDrawIcon(el: HTMLElement) {
   const hasMorphTarget = !!el.dataset.iconMorphTarget;
   const play = hasMorphTarget
     ? () => playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor, variant, mode, laser, sw)
-    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode, sw);
+    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode, sw, drawStagger, drawStaggerFrom);
 
   switch (drawTrigger) {
     case 'scrub': {
@@ -326,9 +330,11 @@ function addVariant(
   _iconColor: string,
   d: number,
   sw: number,
-  laser: boolean
+  laser: boolean,
+  staggerTime = 0.3,
+  staggerFrom: 'start' | 'center' | 'end' | 'edges' | 'random' = 'start'
 ) {
-  const pathStagger = overlays.length > 1 ? 0.3 : 0;
+  const pathStagger = overlays.length > 1 ? staggerTime : 0;
 
   if (laser) {
     overlays.forEach((path, idx) => {
@@ -354,24 +360,24 @@ function addVariant(
       gsap.set(overlays, { stroke: color, strokeWidth: sw });
       tl.fromTo(overlays, { drawSVG: '0%' }, {
         drawSVG: '100%', duration: d, ease: 'power2.inOut',
-        stagger: { each: pathStagger, from: 'start' }
+        stagger: { each: pathStagger, from: staggerFrom }
       }, 0);
       break;
     case 'drawcenter':
       gsap.set(overlays, { stroke: color, strokeWidth: sw });
       tl.fromTo(overlays, { drawSVG: '50% 50%' }, {
         drawSVG: '0% 100%', duration: d, ease: 'power2.inOut',
-        stagger: { each: pathStagger, from: 'center' }
+        stagger: { each: pathStagger, from: staggerFrom }
       }, 0);
       break;
     case 'pulse':
       gsap.set(overlays, { stroke: color, strokeWidth: sw * 1.5, opacity: 0.8 });
       tl.fromTo(overlays, { drawSVG: '0%' }, {
         drawSVG: '100%', duration: d * 0.5, ease: 'power2.out',
-        stagger: { each: pathStagger, from: 'start' }
+        stagger: { each: pathStagger, from: staggerFrom }
       }, 0);
       tl.to(overlays, { strokeWidth: sw, opacity: 1, duration: d * 0.5,
-        stagger: { each: pathStagger, from: 'start' }
+        stagger: { each: pathStagger, from: staggerFrom }
       }, d * 0.5);
       break;
     case 'chachaslide': {
@@ -418,7 +424,9 @@ function playDraw(
   isGhostMode = false,
   ghostColor = '',
   isBorderMode = false,
-  swOverride = 0
+  swOverride = 0,
+  staggerTime = 0.3,
+  staggerFrom: 'start' | 'center' | 'end' | 'edges' | 'random' = 'start'
 ): gsap.core.Timeline {
   const motion = getMotionMode();
   const hover = getHoverMode();
@@ -490,14 +498,14 @@ function playDraw(
         });
         worms.forEach(w => master.set(w, { opacity: 1 }, t));
         const onceTl = gsap.timeline();
-        addVariant(onceTl, worms, variant, color, iconColor, d, sw, laser);
+        addVariant(onceTl, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
         master.add(onceTl, t);
         master.to(overlays, { opacity: 0, duration: 0.5 }, t + d);
         master.to(worms, { opacity: 0, duration: 0.5 }, t + d);
       } else {
         overlays.forEach(o => master.set(o, { opacity: 1 }, t));
         const onceTl = gsap.timeline();
-        addVariant(onceTl, overlays, variant, color, iconColor, d, sw, false);
+        addVariant(onceTl, overlays, variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
         master.add(onceTl, t);
         master.to(overlays, { opacity: 0, duration: 0.5 }, t + d);
       }
@@ -514,13 +522,13 @@ function playDraw(
             master.to(o, { opacity: ghostOpacity, duration: 1, ease: 'power2.out' }, 0);
           });
           worms.forEach(w => gsap.set(w, { opacity: 1 }));
-          addVariant(master, worms, variant, color, iconColor, d, sw, laser);
+          addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
           master.to(overlays, { opacity: restOpacity, duration: 1, ease: 'power2.out' }, d);
         } else {
           // Ghost: stays at ghost, worm passes over
           overlays.forEach(o => gsap.set(o, { drawSVG: '100%', opacity: ghostOpacity }));
           worms.forEach(w => gsap.set(w, { opacity: 1 }));
-          addVariant(master, worms, variant, color, iconColor, d, sw, laser);
+          addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
         }
       } else {
         // Full variant: dim to ghost → draw → brighten back
@@ -543,7 +551,7 @@ function playDraw(
         });
         const drawStart = isGhostMode ? 0 : 0.4;
         const drawTl = gsap.timeline();
-        addVariant(drawTl, brightClones, variant, color, iconColor, d, sw, false);
+        addVariant(drawTl, brightClones, variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
         master.add(drawTl, drawStart);
 
         // After draw: fade bright clone out, restore overlay to rest opacity
@@ -681,15 +689,15 @@ function playDraw(
 
         const tl1 = gsap.timeline();
         tl1.set(trails[0], { opacity: opacities[0] }, 0);
-        addVariant(tl1, trails[0], variant, color, iconColor, d, sw, false);
+        addVariant(tl1, trails[0], variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
 
         const tl2 = gsap.timeline();
         tl2.set(trails[1], { opacity: opacities[1] }, 0);
-        addVariant(tl2, trails[1], variant, color, iconColor, d, sw, false);
+        addVariant(tl2, trails[1], variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
 
         const tl3 = gsap.timeline();
         tl3.set(trails[2], { opacity: opacities[2] }, 0);
-        addVariant(tl3, trails[2], variant, color, iconColor, d, sw, false);
+        addVariant(tl3, trails[2], variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
 
         master.add(tl1, drawStart);
         master.add(tl2, drawStart + stagger);

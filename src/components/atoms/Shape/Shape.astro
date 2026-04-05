@@ -51,6 +51,8 @@ interface Props {
   drawLaser?: boolean;
   drawGhost?: boolean;
   drawColor?: string;
+  drawStagger?: 'none' | 'tight' | 'normal' | 'loose';
+  drawStaggerFrom?: 'start' | 'center' | 'end' | 'edges' | 'random';
   morphTo?: string;
   class?: string;
 }
@@ -61,7 +63,7 @@ const {
   size = 'md', variant = 'fill', borderWeight, shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
   media, animation, animationTrigger = 'hover',
-  draw, drawMode = 'static', drawLaser, drawGhost, drawColor, morphTo,
+  draw, drawMode = 'static', drawLaser, drawGhost, drawColor, drawStagger, drawStaggerFrom, morphTo,
   class: className,
 } = Astro.props;
 
@@ -117,6 +119,8 @@ if (draw) {
   if (drawLaser) dataAttrs['data-icon-draw-laser'] = 'true';
   if (drawGhost) dataAttrs['data-icon-draw-ghost'] = 'true';
   if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
+  if (drawStagger) dataAttrs['data-icon-draw-stagger'] = drawStagger;
+  if (drawStaggerFrom) dataAttrs['data-icon-draw-stagger-from'] = drawStaggerFrom;
 }
 // Morph target: built-in shape name or D1 slug
 let morphTargetSvg: string | null = null;
