@@ -1022,7 +1022,7 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
 
   // SVG ghost colour — per zone
   if (definition.highContrast) {
-    ln(`  --svg-ghost-color: ${isDark ? 'var(--neutral-950)' : 'var(--neutral-200)'};`);
+    ln(`  --svg-ghost-color: ${isDark ? 'var(--neutral-300)' : 'var(--neutral-200)'};`);
   } else if (chromaPreset === 'calm') {
     ln(`  --svg-ghost-color: var(--page-bg-raised);`);
   } else if (isDark) {
