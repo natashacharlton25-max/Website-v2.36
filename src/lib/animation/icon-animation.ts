@@ -837,11 +837,12 @@ function playDraw(
           }
         });
 
-        // Ghost: fade clones in gently before erase
+        // Ghost: fade clones in gently — start ghost colour, transition to vibrant
         if (isGhostMode) {
           eraseClones.forEach((layer, li) => {
             layer.forEach(clone => {
-              master.to(clone, { opacity: eraseOpacities[li], duration: fadeIn, ease: 'power2.out' }, 0);
+              gsap.set(clone, { stroke: ghostColor });
+              master.to(clone, { stroke: 'currentColor', opacity: eraseOpacities[li], duration: fadeIn, ease: 'power2.out' }, 0);
             });
           });
         }
