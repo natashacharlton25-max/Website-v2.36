@@ -824,13 +824,13 @@ function playDraw(
         overlays.forEach(o => gsap.set(o, { drawSVG: '100%', opacity: 1, stroke: overlayColor, strokeWidth: sw }));
 
         // 3 stacked erase clones
-        const fadeIn = isGhostMode ? 0.3 : 0;
+        const fadeIn = isGhostMode ? 1.2 : 0;
         const eraseClones: SVGPathElement[][] = [[], [], []];
         overlays.forEach(o => {
           for (let i = 0; i < 3; i++) {
             const clone = o.cloneNode(true) as SVGPathElement;
             clone.classList.add('icon-draw-trail');
-            gsap.set(clone, { fill: 'none', stroke: color, strokeWidth: sw, drawSVG: '100%', opacity: isGhostMode ? 0 : eraseOpacities[i] });
+            gsap.set(clone, { fill: 'none', stroke: 'currentColor', strokeWidth: sw, drawSVG: '100%', opacity: isGhostMode ? 0 : eraseOpacities[i] });
             o.parentNode!.appendChild(clone);
             eraseClones[i].push(clone);
           }
