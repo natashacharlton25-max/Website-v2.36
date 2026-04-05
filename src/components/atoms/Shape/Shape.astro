@@ -179,6 +179,8 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     // Replace hardcoded fills with currentColor
     s = s.replace(/fill="rgb\([^"]*\)"/g, 'fill="currentColor"');
     s = s.replace(/fill="#[a-fA-F0-9]+"/g, 'fill="currentColor"');
+    // Strip overflow="visible" that breaks containment
+    s = s.replace(/\s*overflow="[^"]*"/g, '');
     return s;
   })()} />}
 
