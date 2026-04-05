@@ -155,6 +155,12 @@
   overflow: visible;
 }
 
+.shape--glow-sm,
+.shape--glow-md,
+.shape--glow-lg {
+  color: var(--_color, var(--svg-ghost-color));
+}
+
 .shape--glow-sm { filter: var(--svg-glow-sm); }
 .shape--glow-md { filter: var(--svg-glow-md); }
 .shape--glow-lg { filter: var(--svg-glow-lg); }
@@ -174,11 +180,22 @@
   color: var(--color-Text);
 }
 
-/* Icons inside shapes: own colour, proportional sizing */
+/* Icons inside shapes: proportional sizing */
 .shape__content .icon {
-  color: var(--_icon-color);
   width: 50%;
   height: 50%;
+}
+
+/* Fill shapes: icon needs contrast colour (white on dark, dark on light) */
+.shape--fill .shape__content .icon {
+  color: oklch(from var(--_color, var(--svg-ghost-color)) round(1.21 - l) 0 0);
+}
+
+/* Outline/glass shapes: icon keeps its own mixin colour */
+.shape--outline .shape__content .icon,
+.shape--glass .shape__content .icon,
+.shape--liquid-glass .shape__content .icon {
+  color: var(--_color, var(--color-Text));
 }
 
 /* ── Mask def ───────────────────────────────────────── */
