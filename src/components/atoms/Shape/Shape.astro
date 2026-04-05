@@ -103,8 +103,6 @@ const SVG_SHAPES: Record<string, string> = {
   blob:    '<path d="M70,8 C90,15 98,35 96,55 C94,75 80,92 60,96 C40,100 18,90 8,72 C-2,54 2,30 15,15 C28,0 50,1 70,8 Z" />',
 };
 
-const isFill = variant === 'fill';
-const isGlass = variant === 'glass' || variant === 'liquid-glass';
 const isCssShape = ['circle', 'square', 'rounded', 'pill'].includes(shape) && !draw;
 const isSvgShape = !isCssShape;
 const builtinSvg = isSvgShape ? SVG_SHAPES[shape] : undefined;
@@ -176,11 +174,19 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     // Remove fixed dimensions so SVG scales to container
     s = s.replace(/\s*width="\d+"/g, '');
     s = s.replace(/\s*height="\d+"/g, '');
-    // Replace hardcoded fills with currentColor
-    s = s.replace(/fill="rgb\([^"]*\)"/g, 'fill="currentColor"');
-    s = s.replace(/fill="#[a-fA-F0-9]+"/g, 'fill="currentColor"');
     // Strip overflow="visible" that breaks containment
     s = s.replace(/\s*overflow="[^"]*"/g, '');
+    if (draw) {
+      // Draw mode: convert fill to stroke for DrawSVG animation
+      s = s.replace(/fill="rgb\([^"]*\)"/g, 'fill="none" stroke="currentColor" stroke-width="3"');
+      s = s.replace(/fill="#[a-fA-F0-9]+"/g, 'fill="none" stroke="currentColor" stroke-width="3"');
+      s = s.replace(/fill="currentColor"/g, 'fill="none" stroke="currentColor" stroke-width="3"');
+      s = s.replace(/fill="none"(?=\s*>)/, 'fill="none"');
+    } else {
+      // Normal: replace hardcoded fills with currentColor
+      s = s.replace(/fill="rgb\([^"]*\)"/g, 'fill="currentColor"');
+      s = s.replace(/fill="#[a-fA-F0-9]+"/g, 'fill="currentColor"');
+    }
     return s;
   })()} />}
 
