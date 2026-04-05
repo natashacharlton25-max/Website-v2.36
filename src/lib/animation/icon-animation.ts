@@ -884,11 +884,44 @@ function playDraw(
         const reverseFrom = staggerFrom === 'start' ? 'end' : staggerFrom === 'end' ? 'start' : staggerFrom;
         if (!isGhostMode) {
           const redrawStart = eraseEnd * 0.6;
-          master.set(overlays, { drawSVG: '100% 100%', opacity: 1 }, redrawStart);
-          master.fromTo(overlays, { drawSVG: '100% 100%' }, {
-            drawSVG: '0% 100%', duration: d, ease: 'power2.out',
-            stagger: { each: staggerTime > 0 ? staggerTime / Math.max(1, overlays.length - 1) : 0, from: reverseFrom, ease: 'slow(0.7, 0.7, false)' }
-          }, redrawStart);
+          const redrawStagger = staggerTime > 0 ? staggerTime / Math.max(1, overlays.length - 1) : 0;
+          const drawOpacities = [0.25, 0.5, 0.75];
+
+          // 3 staggered redraw layers — same pattern as erase but reversed
+          const redrawClones: SVGPathElement[][] = [[], [], []];
+          master.call(() => {
+            overlays.forEach(o => {
+              gsap.set(o, { drawSVG: '100% 100%', opacity: 0 });
+              for (let i = 0; i < 3; i++) {
+                const clone = o.cloneNode(true) as SVGPathElement;
+                clone.classList.add('icon-draw-trail');
+                gsap.set(clone, { fill: 'none', stroke: color, strokeWidth: sw, drawSVG: '100% 100%', opacity: drawOpacities[i] });
+                o.parentNode!.appendChild(clone);
+                redrawClones[i].push(clone);
+              }
+            });
+          }, [], redrawStart);
+
+          // Staggered redraw — each layer draws, icon gets brighter
+          redrawClones.forEach((layer, i) => {
+            const offset = redrawStart + 0.05 + i * (stagger * 0.5);
+            master.fromTo(layer, { drawSVG: '100% 100%' }, {
+              drawSVG: '0% 100%', duration: d, ease: 'power2.out',
+              stagger: { each: redrawStagger, from: reverseFrom, ease: 'slow(0.7, 0.7, false)' }
+            }, offset);
+          });
+
+          // After redraw: show overlay at full, clean up clones
+          const totalRedrawD = d + staggerTime;
+          const redrawEnd = redrawStart + totalRedrawD + stagger;
+          master.call(() => {
+            overlays.forEach(o => {
+              gsap.set(o, { drawSVG: '100%', opacity: 1 });
+            });
+            if (svg) svg.querySelectorAll('.icon-draw-trail').forEach(el => {
+              gsap.to(el, { opacity: 0, duration: 0.3, onComplete: () => el.remove() });
+            });
+          }, [], redrawEnd);
         }
       }
       break;
