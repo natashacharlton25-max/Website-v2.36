@@ -56,12 +56,29 @@ function initDrawIcon(el: HTMLElement) {
   if (!svg) return;
 
   // Convert non-path elements (circle, rect, polygon, polyline, ellipse, line) to <path>
-  // This makes DrawSVG and MorphSVG work consistently on all shape types
-  svg.querySelectorAll('circle, rect, polygon, polyline, ellipse, line').forEach(el => {
-    MorphSVGPlugin.convertToPath(el as any);
+  svg.querySelectorAll('circle, rect, polygon, polyline, ellipse, line').forEach(e => {
+    MorphSVGPlugin.convertToPath(e as any);
   });
 
-  // Base paths (stroke outlines) — leave visible, clone for overlays
+  // Split compound paths (single <path> with multiple M commands) into separate <path> elements
+  svg.querySelectorAll('path:not(.icon-draw-overlay)').forEach(p => {
+    const d = p.getAttribute('d');
+    if (!d) return;
+    // Split on M/m commands (except the very first one)
+    const subPaths = d.split(/(?=M\s)/i).filter(s => s.trim().length > 0);
+    if (subPaths.length <= 1) return;
+    // Replace single path with multiple paths
+    const parent = p.parentNode;
+    if (!parent) return;
+    subPaths.forEach(subD => {
+      const newPath = p.cloneNode(false) as SVGPathElement;
+      newPath.setAttribute('d', subD.trim());
+      parent.insertBefore(newPath, p);
+    });
+    p.remove();
+  });
+
+  // Base paths — now split and converted
   const origPaths = Array.from(
     svg.querySelectorAll('path:not(.icon-draw-overlay)')
   ).filter(p => p.tagName.toLowerCase() !== 'rect') as SVGPathElement[];
