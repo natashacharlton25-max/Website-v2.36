@@ -2,7 +2,11 @@
   "component": "Shape",
   "category": "atom",
   "renders": { "full": "Shape.astro", "reduced": "Shape.astro", "textonly": null },
-  "notes": "Decorative shape or container background. Built-in geometric shapes via CSS clip-path/border-radius. API shapes from D1. Can wrap child atoms (Icon, text). textonly: null for decorative, container children render without shape.",
+  "notes": "Decorative shape or container background. Built-in geometric shapes via CSS/SVG. API shapes from D1. Can wrap child atoms (Icon, text). textonly: null for decorative, container children render without shape.",
+
+  "_rules": [
+    { "rule": "icon-contrast-on-fill", "condition": "variant === 'fill' && media?.component === 'Icon' && (media.brandColor === brandColor || media.rainbowColor === rainbowColor || !media.brandColor && !media.rainbowColor)", "action": "Icon gets auto-contrast colour (oklch inversion) so it's visible against the filled shape background" }
+  ],
 
   "props": {
     "content": {
