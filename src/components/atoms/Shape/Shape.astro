@@ -12,6 +12,10 @@
  * Shares draw/morph animation with Icon (GSAP DrawSVG/MorphSVG).
  */
 
+import { Icon } from '../Icon';
+import { Image } from '../Image';
+import { LottieIcon } from '../LottieIcon';
+
 import type {
   BrandColour, RainbowColour, ColourTier,
   Shape as ShapeEnum, Variant, Shadow,
@@ -50,6 +54,9 @@ interface Props {
   gradientSpread?: GradientSpread;
   gradientAnimate?: boolean;
 
+  // ── Media — component node { component: "Icon"|"Image"|"LottieIcon", ...props }
+  media?: Record<string, any>;
+
   // ── Animation ───────────────────────────────────────────
   animation?: Animation;
   animationTrigger?: AnimationTriggerInteractive;
@@ -80,6 +87,7 @@ const {
   gradientDirection,
   gradientSpread,
   gradientAnimate,
+  media,
   animation,
   animationTrigger = 'hover',
   draw,
@@ -93,7 +101,10 @@ const {
 
 const resolvedColor = rainbowColor || brandColor || null;
 const hasSlot = Astro.slots.has('default');
-const isContainer = hasSlot || semanticRole === 'container';
+const hasMedia = !!media;
+const mediaComponent = media?.component;
+const { component: _mc, ...mediaProps } = media || {};
+const isContainer = hasSlot || hasMedia || semanticRole === 'container';
 
 // Fetch API shape if slug provided
 let svgContent: string | null = null;
@@ -163,5 +174,12 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
   {...dataAttrs}
 >
   {svgContent && <Fragment set:html={svgContent} />}
-  {isContainer && <div class="shape__content"><slot /></div>}
+  {isContainer && (
+    <div class="shape__content">
+      {mediaComponent === 'Icon' && <Icon {...mediaProps} />}
+      {mediaComponent === 'Image' && <Image {...mediaProps} />}
+      {mediaComponent === 'LottieIcon' && <LottieIcon {...mediaProps} />}
+      <slot />
+    </div>
+  )}
 </div>
