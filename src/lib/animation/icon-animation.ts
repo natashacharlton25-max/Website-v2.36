@@ -328,13 +328,11 @@ function addVariant(
   sw: number,
   laser: boolean
 ) {
-  const stagger = overlays.length > 1 ? d * 0.15 : 0;
+  const pathStagger = overlays.length > 1 ? 0.3 : 0;
 
-  overlays.forEach((path, idx) => {
-    const offset = idx * stagger;
-
-    if (laser) {
-      // Worm: grow at start → travel → shrink at end
+  if (laser) {
+    overlays.forEach((path, idx) => {
+      const offset = idx * pathStagger;
       const growD = d * 0.2;
       const shrinkD = d * 0.2;
       const travelD = d - growD - shrinkD;
@@ -347,62 +345,66 @@ function addVariant(
       tl.fromTo(path,
         { drawSVG: '90% 100%' },
         { drawSVG: '100% 100%', duration: shrinkD, ease: 'power2.in' }, offset + growD + travelD);
-      return;
-    }
+    });
+    return;
+  }
 
-    switch (variant) {
-      case 'draw':
-        tl.fromTo(path,
-          { drawSVG: '0%', stroke: color, strokeWidth: sw },
-          { drawSVG: '100%', duration: d, ease: 'power2.inOut' }, offset);
-        break;
-      case 'drawcenter':
-        tl.fromTo(path,
-          { drawSVG: '50% 50%', stroke: color, strokeWidth: sw },
-          { drawSVG: '0% 100%', duration: d, ease: 'power2.inOut' }, offset);
-        break;
-      case 'pulse':
-        tl.fromTo(path,
-          { drawSVG: '0%', stroke: color, strokeWidth: sw * 1.5, opacity: 0.8 },
-          { drawSVG: '100%', duration: d * 0.5, ease: 'power2.out' }, offset)
-          .to(path, { strokeWidth: sw, opacity: 1, duration: d * 0.5 }, offset + d * 0.5);
-        break;
-      case 'chachaslide': {
-        const rootCs = getComputedStyle(document.documentElement);
-        const secondColor = rootCs.getPropertyValue('--color-Black').trim() || '#000';
+  switch (variant) {
+    case 'draw':
+      gsap.set(overlays, { stroke: color, strokeWidth: sw });
+      tl.fromTo(overlays, { drawSVG: '0%' }, {
+        drawSVG: '100%', duration: d, ease: 'power2.inOut',
+        stagger: { each: pathStagger, from: 'start' }
+      }, 0);
+      break;
+    case 'drawcenter':
+      gsap.set(overlays, { stroke: color, strokeWidth: sw });
+      tl.fromTo(overlays, { drawSVG: '50% 50%' }, {
+        drawSVG: '0% 100%', duration: d, ease: 'power2.inOut',
+        stagger: { each: pathStagger, from: 'center' }
+      }, 0);
+      break;
+    case 'pulse':
+      gsap.set(overlays, { stroke: color, strokeWidth: sw * 1.5, opacity: 0.8 });
+      tl.fromTo(overlays, { drawSVG: '0%' }, {
+        drawSVG: '100%', duration: d * 0.5, ease: 'power2.out',
+        stagger: { each: pathStagger, from: 'start' }
+      }, 0);
+      tl.to(overlays, { strokeWidth: sw, opacity: 1, duration: d * 0.5,
+        stagger: { each: pathStagger, from: 'start' }
+      }, d * 0.5);
+      break;
+    case 'chachaslide': {
+      const rootCs = getComputedStyle(document.documentElement);
+      const secondColor = rootCs.getPropertyValue('--color-Black').trim() || '#000';
+      const drawD = d * 0.35;
+      const holdD = d * 0.1;
+      const eraseD = d * 0.45;
+      const chase2Start = drawD + holdD + eraseD * 0.75;
+      const chase2D = d * 0.35;
 
-        const drawD = d * 0.35;
-        const holdD = d * 0.1;
-        const eraseD = d * 0.45;
-        const chase2Start = drawD + holdD + eraseD * 0.75;
-        const chase2D = d * 0.35;
-
-        // Color 1: draw on
+      overlays.forEach((path, idx) => {
+        const offset = idx * pathStagger;
         tl.fromTo(path,
           { drawSVG: '0%', stroke: color, strokeWidth: sw },
           { drawSVG: '100%', duration: drawD, ease: 'power2.inOut' }, offset);
-
-        // Color 1: erase from start (front retreats, tail remains)
         tl.fromTo(path,
           { drawSVG: '0% 100%' },
           { drawSVG: '100% 100%', duration: eraseD, ease: 'power1.in' },
           offset + drawD + holdD);
 
-        // Color 2: clone draws on from start, chasing color 1
         const chase = path.cloneNode(true) as SVGPathElement;
         chase.classList.add('icon-draw-chase');
         gsap.set(chase, { fill: 'none', stroke: secondColor, strokeWidth: sw, drawSVG: '0%', opacity: 1 });
         path.parentNode!.appendChild(chase);
-
         tl.fromTo(chase,
           { drawSVG: '0%' },
           { drawSVG: '100%', duration: chase2D, ease: 'power2.inOut' },
           offset + chase2Start);
-
-        break;
-      }
+      });
+      break;
     }
-  });
+  }
 }
 
 function playDraw(
