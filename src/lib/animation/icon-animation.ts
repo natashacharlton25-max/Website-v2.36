@@ -112,11 +112,14 @@ function initDrawIcon(el: HTMLElement) {
 
   // Clone each path as a stroke overlay
   const overlays: SVGPathElement[] = [];
-  const startDrawn = mode === 'reverse-yoyo' || mode === 'static' || mode === 'yoyo';
+  // Ghost+fill: border starts hidden (draws on hover). All others: start drawn if static/yoyo/reverse-yoyo
+  const isBorderMode = ghost && showFill;
+  const startDrawn = isBorderMode ? false : (mode === 'reverse-yoyo' || mode === 'static' || mode === 'yoyo');
   const ghostOpacity = ghost ? 1 : 0.2;
   // Compute init opacity to match what playDraw creates visually
   let initOpacity = 0;
-  if (mode === 'static' || mode === 'yoyo') initOpacity = ghost ? ghostOpacity : 1;
+  if (isBorderMode) initOpacity = 0;
+  else if (mode === 'static' || mode === 'yoyo') initOpacity = ghost ? ghostOpacity : 1;
   else if (mode === 'reverse-yoyo') {
     if (ghost) {
       initOpacity = ghostOpacity;
@@ -156,8 +159,8 @@ function initDrawIcon(el: HTMLElement) {
   const drawTrigger = el.dataset.iconDrawTrigger || (onScroll ? (scrub ? 'scrub' : 'viewport') : 'hover');
   const hasMorphTarget = !!el.dataset.iconMorphTarget;
   const play = hasMorphTarget
-    ? () => playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor)
-    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor);
+    ? () => playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor, variant, mode, laser)
+    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode);
 
   switch (drawTrigger) {
     case 'scrub': {
@@ -384,7 +387,8 @@ function playDraw(
   laser: boolean,
   ghostOpacity = 0.15,
   isGhostMode = false,
-  ghostColor = ''
+  ghostColor = '',
+  isBorderMode = false
 ): gsap.core.Timeline {
   const motion = getMotionMode();
   const hover = getHoverMode();
@@ -618,8 +622,10 @@ function playDraw(
         const restOpacity = isGhostMode ? ghostOpacity : 1;
         const stagger = d * 0.35;
 
-        // Ghost overlay stays underneath
-        if (isGhostMode) {
+        // Border mode: overlay is the border — starts hidden, draws on hover
+        if (isBorderMode) {
+          overlays.forEach(o => gsap.set(o, { drawSVG: '0%', opacity: 1 }));
+        } else if (isGhostMode) {
           overlays.forEach(o => gsap.set(o, { drawSVG: '100%', opacity: ghostOpacity }));
         } else {
           // Full variant: dim from current opacity to ghost
@@ -682,34 +688,69 @@ function playDraw(
         const travelD = d - growD - shrinkD;
         const stagger = d * 0.2;
         const wormOpacities = [1, 0.5, 0.2];
+        const layerOpacities = [0.75, 0.5, 0.25];
 
-        worms.forEach((baseWorm, wi) => {
-          const ghost = overlays[wi];
+        // No pre-fade for full — starts at full brightness, worms erase it
+        const animStart = 0;
+
+        overlays.forEach(o => {
+          if (!isGhostMode) gsap.set(o, { stroke: color, strokeWidth: sw });
+          if (isGhostMode) {
+            gsap.set(o, { drawSVG: '100%', opacity: ghostOpacity });
+          } else {
+            gsap.set(o, { drawSVG: '100%', opacity: 1 });
+          }
+        });
+
+        // Build 3 visible layers + 3 reverse worms per overlay
+        animTargets.forEach((baseWorm, wi) => {
+          const baseLayer = overlays[wi];
           gsap.set(baseWorm, { opacity: 0 });
 
-          // Ghost erases alongside first worm
-          master.fromTo(ghost,
-            { drawSVG: '100%' },
-            { drawSVG: '90%', duration: growD, ease: 'power2.out' }, 0);
-          master.fromTo(ghost,
-            { drawSVG: '90%' },
-            { drawSVG: '0%', duration: travelD, ease: 'power2.inOut' }, growD);
-          master.to(ghost, { opacity: 0, duration: 0.1 }, growD + travelD);
-
-          // 3 reverse worms — visual effect, staggered
+          // 3 static layers — ghost starts hidden and fades in, full starts visible
+          const layers: SVGPathElement[] = [];
           const eWorms: SVGPathElement[] = [baseWorm];
-          for (let g = 1; g < 3; g++) {
-            const clone = baseWorm.cloneNode(true) as SVGPathElement;
-            clone.classList.add('icon-draw-trail');
-            gsap.set(clone, { fill: 'none', stroke: color, strokeWidth: sw, drawSVG: '100% 100%', opacity: 0 });
-            baseWorm.parentNode!.appendChild(clone);
-            eWorms.push(clone);
+          const fadeIn = isGhostMode ? d * 0.5 : 0;
+          for (let g = 0; g < 3; g++) {
+            const layerClone = baseLayer.cloneNode(true) as SVGPathElement;
+            layerClone.classList.add('icon-draw-trail');
+            if (isGhostMode) {
+              gsap.set(layerClone, { fill: 'none', stroke: ghostColor, strokeWidth: sw, drawSVG: '100%', opacity: 0 });
+            } else {
+              gsap.set(layerClone, { fill: 'none', stroke: color, strokeWidth: sw, drawSVG: '100%', opacity: layerOpacities[g] });
+            }
+            baseLayer.parentNode!.appendChild(layerClone);
+            layers.push(layerClone);
+
+            if (g > 0) {
+              const wormClone = baseWorm.cloneNode(true) as SVGPathElement;
+              wormClone.classList.add('icon-draw-trail');
+              gsap.set(wormClone, { fill: 'none', stroke: color, strokeWidth: sw, drawSVG: '100% 100%', opacity: 0 });
+              baseWorm.parentNode!.appendChild(wormClone);
+              eWorms.push(wormClone);
+            }
           }
 
+          // Full: overlay erases alongside first worm
+          if (!isGhostMode) {
+            master.to(baseLayer, { drawSVG: '0%', duration: d, ease: 'power2.inOut' }, animStart);
+          }
+
+          // Ghost: fade layers in gradually from ghost colour to draw colour
+          if (isGhostMode) {
+            layers.forEach((layer, li) => {
+              master.to(layer, { stroke: color, opacity: layerOpacities[li], duration: fadeIn, ease: 'power2.out' }, 0);
+            });
+          }
+
+          // Each worm eats its layer — staggered reverse travel
+          const eraseStart = isGhostMode ? fadeIn : animStart;
           wormOpacities.forEach((op, i) => {
-            const offset = i * stagger;
+            const offset = eraseStart + i * stagger;
+            const layer = layers[i];
             const worm = eWorms[i];
 
+            // Worm travels reverse: end → start, eating the layer behind it
             master.set(worm, { opacity: op }, offset);
             master.fromTo(worm,
               { drawSVG: '100% 100%' },
@@ -720,16 +761,32 @@ function playDraw(
             master.fromTo(worm,
               { drawSVG: '0% 10%' },
               { drawSVG: '0% 0%', duration: shrinkD, ease: 'power2.in' }, offset + growD + travelD);
+
+            // Layer erases alongside its worm
+            master.fromTo(layer,
+              { drawSVG: '100%' },
+              { drawSVG: '0%', duration: d, ease: 'power2.inOut' }, offset);
           });
 
-          // After erase: fade ghost back in at rest opacity
-          const eraseEnd = 2 * stagger + d;
-          master.set(ghost, { drawSVG: '100%' }, eraseEnd);
-          master.to(ghost, { opacity: restOpacity, duration: 0.8, ease: 'power2.out' }, eraseEnd);
+          // After all eaten: fade overlay back to rest
+          const eraseEnd = eraseStart + d + stagger * 2;
+          if (!isGhostMode) {
+            master.fromTo(baseLayer, { drawSVG: '0%', opacity: 0 }, { drawSVG: '100%', opacity: restOpacity, duration: 0.9, ease: 'power2.out' }, eraseEnd);
+          } else {
+            // Ghost: clean up trails, overlay stays at ghost
+            master.call(() => {
+              if (svg) {
+                svg.querySelectorAll('.icon-draw-trail, .icon-draw-worm').forEach(el => {
+                  gsap.to(el, { opacity: 0, duration: 0.5, ease: 'power2.out' });
+                });
+              }
+              overlays.forEach(o => o.style.removeProperty('stroke'));
+            }, [], eraseEnd);
+          }
         });
       } else {
-        const stagger = d * 0.35;
-        const eraseOpacities = isGhostMode ? [0.7, 0.45, 0.25] : [0.5, 0.3, 0.15];
+        const stagger = isGhostMode ? d * 0.35 : d * 0.2;
+        const eraseOpacities = isGhostMode ? [0.7, 0.45, 0.25] : [0.75, 0.5, 0.25];
 
         // Ghost overlay underneath — always visible (ghost uses neutral-mid, full uses draw color)
         const overlayColor = isGhostMode ? ghostColor : color;
@@ -760,7 +817,7 @@ function playDraw(
         // For full: erase overlay alongside first clone layer
         if (!isGhostMode) {
           overlays.forEach(o => {
-            master.to(o, { drawSVG: '0%', duration: d, ease: 'power2.inOut' }, fadeIn);
+            master.to(o, { drawSVG: '0%', duration: d * 0.6, ease: 'power2.inOut' }, fadeIn);
           });
         }
 
@@ -818,7 +875,10 @@ function playDrawMorph(
   color: string,
   _ghostOpacity: number,
   _isGhostMode: boolean,
-  _ghostColor: string
+  _ghostColor: string,
+  variant: DrawVariant = 'draw',
+  mode: DrawMode = 'static',
+  laser: boolean = false
 ): gsap.core.Timeline {
   const motion = getMotionMode();
   if (motion === 'none') return gsap.timeline();
