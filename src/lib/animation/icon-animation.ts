@@ -878,13 +878,16 @@ function playDraw(
           master.add(eraseTl, offset);
         });
 
-        // After all erased: redraw overlay back to full
-        const eraseEnd = fadeIn + d + stagger * 2;
+        // After all erased: redraw overlay back to full — reversed direction + stagger
+        const totalEraseD = d + staggerTime * Math.max(0, overlays.length - 1);
+        const eraseEnd = fadeIn + totalEraseD + stagger * 2;
+        const reverseFrom = staggerFrom === 'start' ? 'end' : staggerFrom === 'end' ? 'start' : staggerFrom;
         if (!isGhostMode) {
-          overlays.forEach(o => {
-            master.set(o, { drawSVG: '0%' }, eraseEnd);
-            master.to(o, { drawSVG: '100%', opacity: 1, duration: d, ease: 'power2.out' }, eraseEnd + 0.2);
-          });
+          gsap.set(overlays, { drawSVG: '0%' });
+          master.to(overlays, {
+            drawSVG: '100%', opacity: 1, duration: d, ease: 'power2.out',
+            stagger: { each: staggerTime > 0 ? staggerTime / Math.max(1, overlays.length - 1) : 0, from: reverseFrom, ease: 'slow(0.7, 0.7, false)' }
+          }, eraseEnd + 0.2);
         }
       }
       break;
