@@ -903,7 +903,7 @@ function playDraw(
 
               gsap.fromTo(layer, { drawSVG: '100% 100%' }, {
                 drawSVG: '0% 100%', duration: d, ease: 'power2.out',
-                delay: i * (stagger * 0.5),
+                delay: i * 0.3,
                 stagger: { each: redrawStagger, from: reverseFrom, ease: 'slow(0.7, 0.7, false)' }
               });
             }
