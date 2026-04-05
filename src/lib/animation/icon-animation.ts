@@ -500,14 +500,16 @@ function playDraw(
         const onceTl = gsap.timeline();
         addVariant(onceTl, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
         master.add(onceTl, t);
-        master.to(overlays, { opacity: 0, duration: 0.5 }, t + d);
-        master.to(worms, { opacity: 0, duration: 0.5 }, t + d);
+        const onceTotalD = d + staggerTime * Math.max(0, worms.length - 1);
+        master.to(overlays, { opacity: 0, duration: 0.5 }, t + onceTotalD);
+        master.to(worms, { opacity: 0, duration: 0.5 }, t + onceTotalD);
       } else {
         overlays.forEach(o => master.set(o, { opacity: 1 }, t));
         const onceTl = gsap.timeline();
         addVariant(onceTl, overlays, variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
         master.add(onceTl, t);
-        master.to(overlays, { opacity: 0, duration: 0.5 }, t + d);
+        const onceTotalD = d + staggerTime * Math.max(0, overlays.length - 1);
+        master.to(overlays, { opacity: 0, duration: 0.5 }, t + onceTotalD);
       }
       break;
     }
@@ -555,9 +557,11 @@ function playDraw(
         master.add(drawTl, drawStart);
 
         // After draw: fade bright clone out, restore overlay to rest opacity
-        master.to(brightClones, { opacity: 0, duration: 0.8, ease: 'power2.out' }, drawStart + d);
+        // Total duration includes stagger: d + stagger * (pathCount - 1)
+        const totalDrawD = d + staggerTime * Math.max(0, brightClones.length - 1);
+        master.to(brightClones, { opacity: 0, duration: 0.8, ease: 'power2.out' }, drawStart + totalDrawD);
         if (!isGhostMode) {
-          master.to(overlays, { opacity: restOpacity, duration: 0.8, ease: 'power2.out' }, drawStart + d);
+          master.to(overlays, { opacity: restOpacity, duration: 0.8, ease: 'power2.out' }, drawStart + totalDrawD);
         }
 
       }
