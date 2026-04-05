@@ -83,8 +83,10 @@ if (slug) {
   } catch { /* fallback to built-in */ }
 }
 
-// Stroke width from borderWeight
-const sw = borderWeight === 'lg' ? 4 : borderWeight === 'md' ? 3 : 2;
+// Stroke width — draw mode needs thicker lines to match GSAP's overlay (viewBox is 100, GSAP uses sw=10 on 256)
+const sw = draw
+  ? (borderWeight === 'lg' ? 6 : borderWeight === 'md' ? 5 : 4)
+  : (borderWeight === 'lg' ? 4 : borderWeight === 'md' ? 3 : 2);
 const pad = sw;
 const vb = `-${pad} -${pad} ${100 + pad * 2} ${100 + pad * 2}`;
 
