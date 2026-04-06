@@ -1356,13 +1356,19 @@ function initFillIcon(el: HTMLElement) {
     fillClones.push(clone);
   });
 
-  // Original paths: hide fill, optionally keep stroke outline
+  // Original paths: hide fill, optionally animate stroke outline
+  const isIconEl = el.classList.contains('icon');
+  const outlineSw = isIconEl ? '10' : (g.getAttribute('stroke-width') || '2');
   origPaths.forEach(p => {
+    p.removeAttribute('fill');
     (p as HTMLElement).style.fill = 'none';
     if (showOutline) {
-      const sw = g.getAttribute('stroke-width') || '2';
       (p as HTMLElement).style.stroke = 'currentColor';
-      (p as HTMLElement).style.strokeWidth = sw;
+      (p as HTMLElement).style.strokeWidth = outlineSw;
+      (p as HTMLElement).style.strokeLinejoin = 'round';
+      (p as HTMLElement).style.strokeLinecap = 'round';
+      // Start with stroke hidden — will draw in on trigger
+      gsap.set(p, { drawSVG: '0%' });
     }
   });
 
@@ -1385,6 +1391,17 @@ function initFillIcon(el: HTMLElement) {
 
     // Fresh color for theme responsiveness
     const targetColor = reverse ? getColor() : getTargetColor();
+
+    // Animate outline draw-in before fill bloom
+    if (showOutline && !reverse) {
+      origPaths.forEach(p => {
+        tl.fromTo(p, { drawSVG: '0%' }, { drawSVG: '100%', duration: d, ease: 'power2.inOut' }, 0);
+      });
+    } else if (showOutline && reverse) {
+      origPaths.forEach(p => {
+        tl.to(p, { drawSVG: '0%', duration: d * 0.5, ease: 'power2.in' }, 0);
+      });
+    }
 
     const pathCount = fillClones.length;
     const perPathStagger = pathCount > 1 ? staggerTotal / (pathCount - 1) : 0;
@@ -1416,8 +1433,11 @@ function initFillIcon(el: HTMLElement) {
     const rank = new Array(pathCount);
     ordered.forEach((origIdx, staggerIdx) => { rank[origIdx] = staggerIdx; });
 
+    // Offset fill bloom after outline draw starts
+    const fillOffset = showOutline ? d * 0.5 : 0;
+
     fillClones.forEach((clone, i) => {
-      const offset = rank[i] * perPathStagger;
+      const offset = fillOffset + rank[i] * perPathStagger;
 
       const hasColorMorph = targetColor !== getColor();
 
