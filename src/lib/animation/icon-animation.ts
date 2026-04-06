@@ -1878,14 +1878,14 @@ function onThemeChange() {
   // Shape SVG elements: clear inline fill/stroke so CSS vars update
   // Skip draw-mode origPaths (initDrawIcon set fill:none intentionally)
   // Skip gradient URLs (local gradient stops refreshed separately below)
-  document.querySelectorAll('.shape:not(.shape--draw) svg g, .shape:not(.shape--draw) svg path:not(.icon-fill-morph):not(.icon-draw-overlay), .shape:not(.shape--draw) svg circle, .shape:not(.shape--draw) svg polygon, .shape:not(.shape--draw) svg rect, .shape:not(.shape--draw) svg polyline, .shape:not(.shape--draw) svg ellipse').forEach(el => {
+  document.querySelectorAll('.shape:not(.shape--draw):not([data-icon-fill]) svg g, .shape:not(.shape--draw):not([data-icon-fill]) svg path:not(.icon-fill-morph):not(.icon-draw-overlay), .shape:not(.shape--draw):not([data-icon-fill]) svg circle, .shape:not(.shape--draw):not([data-icon-fill]) svg polygon, .shape:not(.shape--draw):not([data-icon-fill]) svg rect, .shape:not(.shape--draw):not([data-icon-fill]) svg polyline, .shape:not(.shape--draw):not([data-icon-fill]) svg ellipse').forEach(el => {
     const s = (el as HTMLElement).style;
     if (s.fill && !s.fill.includes('url(')) s.removeProperty('fill');
     if (s.stroke && !s.stroke.includes('url(')) s.removeProperty('stroke');
   });
 
   // Icon SVG: clear inline fill on non-draw, non-overlay paths
-  document.querySelectorAll('.icon:not(.icon--draw) svg path:not(.icon-fill-morph):not(.icon-draw-overlay)').forEach(el => {
+  document.querySelectorAll('.icon:not(.icon--draw):not([data-icon-fill]) svg path:not(.icon-fill-morph):not(.icon-draw-overlay)').forEach(el => {
     const s = (el as HTMLElement).style;
     if (s.fill && !s.fill.includes('url(')) s.removeProperty('fill');
     if (s.stroke && !s.stroke.includes('url(')) s.removeProperty('stroke');
