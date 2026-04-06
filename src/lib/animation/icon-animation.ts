@@ -1372,11 +1372,14 @@ function initFillIcon(el: HTMLElement) {
     }
   });
 
-  // Start filled if static mode
-  if (mode === 'static') {
+  // Start filled: static mode, or icons (should be visible on load, retrigger on hover)
+  if (mode === 'static' || isIconEl) {
     fillClones.forEach(clone => {
       gsap.set(clone, { scale: 1, opacity: 1 });
     });
+    if (showOutline) {
+      origPaths.forEach(p => gsap.set(p, { drawSVG: '100%' }));
+    }
   }
 
   const isFade = mode === 'fade' || (hasDraw && !el.dataset.iconFillMode);
@@ -1392,15 +1395,21 @@ function initFillIcon(el: HTMLElement) {
     // Fresh color for theme responsiveness
     const targetColor = reverse ? getColor() : getTargetColor();
 
-    // Animate outline draw-in before fill bloom
+    // Animate outline draw-in using addVariant (supports all draw variants + laser)
+    // Scale duration by element size
+    const outlineElSize = Math.max(el.offsetWidth, el.offsetHeight) || 64;
+    const outlineScale = outlineElSize < 50 ? 2.5 : outlineElSize < 100 ? 2 : outlineElSize < 200 ? 1.5 : 1;
+    const outlineDur = d * outlineScale;
     if (showOutline && !reverse) {
-      origPaths.forEach(p => {
-        tl.fromTo(p, { drawSVG: '0%' }, { drawSVG: '100%', duration: d, ease: 'power2.inOut' }, 0);
-      });
+      const outlineColor = getColor();
+      origPaths.forEach(p => gsap.set(p, { stroke: outlineColor, strokeWidth: outlineSw }));
+      const drawVariant = (el.dataset.iconFillDrawVariant || 'draw') as DrawVariant;
+      const drawLaser = el.dataset.iconFillDrawLaser === 'true';
+      addVariant(tl, origPaths as SVGPathElement[], drawVariant, outlineColor, outlineColor, outlineDur, parseFloat(outlineSw), drawLaser, 0, 'start');
     } else if (showOutline && reverse) {
-      origPaths.forEach(p => {
-        tl.to(p, { drawSVG: '0%', duration: d * 0.5, ease: 'power2.in' }, 0);
-      });
+      const eraseTl = gsap.timeline({ paused: true });
+      addVariant(eraseTl, origPaths as SVGPathElement[], 'draw', getColor(), getColor(), d * 0.5, parseFloat(outlineSw), false, 0, 'start');
+      tl.add(eraseTl.tweenFromTo(eraseTl.duration(), 0, { duration: d * 0.5, ease: 'power2.in' }), 0);
     }
 
     const pathCount = fillClones.length;
@@ -1434,7 +1443,14 @@ function initFillIcon(el: HTMLElement) {
     ordered.forEach((origIdx, staggerIdx) => { rank[origIdx] = staggerIdx; });
 
     // Offset fill bloom after outline draw starts
-    const fillOffset = showOutline ? d * 0.5 : 0;
+    // Small elements: fill starts AFTER outline finishes. Large: overlap at 50%
+    const fillOffset = showOutline
+      ? (outlineElSize < 300 ? outlineDur + 0.3 : outlineDur * 0.5)
+      : 0;
+    // Scale bloom duration by element size — smaller = slower for better visibility
+    const elSize = Math.max(el.offsetWidth, el.offsetHeight) || 64;
+    const sizeScale = elSize < 50 ? 3 : elSize < 100 ? 2.5 : elSize < 200 ? 1.8 : elSize < 400 ? 1.2 : 1;
+    const bloomDur = d * sizeScale;
 
     fillClones.forEach((clone, i) => {
       const offset = fillOffset + rank[i] * perPathStagger;
@@ -1449,17 +1465,17 @@ function initFillIcon(el: HTMLElement) {
           // Fade only — just opacity, no scale
           tl.fromTo(clone,
             { opacity: 0 },
-            { opacity: 1, duration: d, ease: 'power2.out' },
+            { opacity: 1, duration: bloomDur, ease: 'power2.out' },
             offset);
         } else {
           // Scale bloom + fade — opacity leads, scale follows with bounce
           tl.fromTo(clone,
             { opacity: 0 },
-            { opacity: 1, duration: d * 0.3, ease: 'power2.out' },
+            { opacity: 1, duration: bloomDur * 0.4, ease: 'power2.out' },
             offset);
           tl.fromTo(clone,
             { scale: 0.01 },
-            { scale: 1, duration: d, ease: easeType },
+            { scale: 1, duration: bloomDur, ease: easeType },
             offset);
         }
         // Color morph: separate slower tween so it doesn't rush
@@ -1576,6 +1592,7 @@ function initFillIcon(el: HTMLElement) {
       const fadeOutThenPlay = (cb: () => void) => {
         if (activeTl) activeTl.kill();
         const fadeOut = gsap.timeline();
+        // Fade fill clones
         fillClones.forEach(c => {
           if (isFade) {
             fadeOut.to(c, { opacity: 0, duration: 0.5, ease: 'power3.in' }, 0);
@@ -1583,8 +1600,15 @@ function initFillIcon(el: HTMLElement) {
             fadeOut.to(c, { opacity: 0, scale: 0.3, duration: 0.5, ease: 'power3.in' }, 0);
           }
         });
+        // Fade outline together with fill
+        if (showOutline) {
+          origPaths.forEach(p => {
+            fadeOut.to(p, { drawSVG: '0%', opacity: 0, duration: 0.5, ease: 'power3.in' }, 0);
+          });
+        }
         fadeOut.call(() => {
           fillClones.forEach(c => gsap.set(c, isFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 }));
+          if (showOutline) origPaths.forEach(p => gsap.set(p, { drawSVG: '0%', opacity: 1 }));
           cb();
         });
         activeTl = fadeOut;

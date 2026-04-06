@@ -69,6 +69,8 @@ interface Props {
   morphTrigger?: 'hover' | 'viewport' | 'scroll';
   fillAnimation?: boolean;
   fillOutline?: boolean;
+  fillDrawVariant?: 'draw' | 'drawcenter' | 'pulse';
+  fillDrawLaser?: boolean;
   fillMode?: 'once' | 'yoyo' | 'static' | 'fade';
   fillTrigger?: 'hover' | 'viewport' | 'scrub';
   fillDuration?: number;
@@ -88,7 +90,7 @@ const {
   animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawFill, drawFillMode = 'static', drawGhost, drawOnScroll, drawScrub, drawColor,
   morphTo, morphViaCircle, morphTrigger = 'hover',
-  fillAnimation, fillOutline, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom,
+  fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom,
   semanticRole, label,
 } = Astro.props;
 
@@ -270,6 +272,8 @@ if (morphTo && morphTargetContent) {
 if (fillAnimation) {
   dataAttrs['data-icon-fill'] = 'true';
   if (fillOutline) dataAttrs['data-icon-fill-outline'] = 'true';
+  if (fillDrawVariant) dataAttrs['data-icon-fill-draw-variant'] = fillDrawVariant;
+  if (fillDrawLaser) dataAttrs['data-icon-fill-draw-laser'] = 'true';
   if (fillMode !== 'once') dataAttrs['data-icon-fill-mode'] = fillMode;
   if (fillTrigger !== 'hover') dataAttrs['data-icon-fill-trigger'] = fillTrigger;
   if (fillDuration) dataAttrs['data-icon-fill-duration'] = String(fillDuration);
