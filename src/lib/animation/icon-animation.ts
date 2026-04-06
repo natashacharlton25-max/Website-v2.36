@@ -1875,9 +1875,28 @@ function onThemeChange() {
     (clone as HTMLElement).style.fill = ctx.fillStyle;
   });
 
-  // Draw overlays on shapes: clear inline fill too
-  document.querySelectorAll('.shape--draw svg path:not(.icon-draw-overlay)').forEach(el => {
-    (el as HTMLElement).style.removeProperty('fill');
+  // Shape SVG elements: clear inline fill/stroke so CSS vars update
+  // Skip draw-mode origPaths (initDrawIcon set fill:none intentionally)
+  // Skip gradient URLs (local gradient stops refreshed separately below)
+  document.querySelectorAll('.shape:not(.shape--draw) svg g, .shape:not(.shape--draw) svg path:not(.icon-fill-morph):not(.icon-draw-overlay), .shape:not(.shape--draw) svg circle, .shape:not(.shape--draw) svg polygon, .shape:not(.shape--draw) svg rect, .shape:not(.shape--draw) svg polyline, .shape:not(.shape--draw) svg ellipse').forEach(el => {
+    const s = (el as HTMLElement).style;
+    if (s.fill && !s.fill.includes('url(')) s.removeProperty('fill');
+    if (s.stroke && !s.stroke.includes('url(')) s.removeProperty('stroke');
+  });
+
+  // Icon SVG: clear inline fill on non-draw, non-overlay paths
+  document.querySelectorAll('.icon:not(.icon--draw) svg path:not(.icon-fill-morph):not(.icon-draw-overlay)').forEach(el => {
+    const s = (el as HTMLElement).style;
+    if (s.fill && !s.fill.includes('url(')) s.removeProperty('fill');
+    if (s.stroke && !s.stroke.includes('url(')) s.removeProperty('stroke');
+  });
+
+  // Fill outline origPaths: re-read stroke color
+  document.querySelectorAll('[data-icon-fill-outline] svg path:not(.icon-fill-morph)').forEach(p => {
+    const parent = (p as HTMLElement).closest('.shape, .icon') as HTMLElement;
+    if (parent) {
+      (p as HTMLElement).style.stroke = getComputedStyle(parent).color || 'currentColor';
+    }
   });
 
   // Rainbow scroll: rebuild timelines with fresh colors

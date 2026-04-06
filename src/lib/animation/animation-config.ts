@@ -256,9 +256,11 @@ export function onThemeChange(cb: ThemeChangeCallback): void {
   themeChangeCallbacks.push(cb);
 }
 
-/** Fire all theme change callbacks */
+/** Fire all theme change callbacks — slight delay to ensure CSS has applied */
 function fireThemeChange(): void {
-  themeChangeCallbacks.forEach(cb => cb());
+  requestAnimationFrame(() => {
+    themeChangeCallbacks.forEach(cb => cb());
+  });
 }
 
 // Listen for ThemeSwitcher event + MutationObserver fallback
