@@ -1659,6 +1659,149 @@ function initFillIcon(el: HTMLElement) {
 }
 
 /* ================================================================
+   ANIMATED GRADIENT — GSAP-driven SVG gradient animation
+   Injects a local linearGradient, animates rotation + optional
+   rainbow color cycling through stops.
+   ================================================================ */
+
+function initAnimatedGradient(el: HTMLElement) {
+  const svg = el.querySelector('svg');
+  if (!svg) return;
+  if (getMotionMode() === 'none') return;
+
+  const gradMode = el.dataset.iconGradAnim || 'rotate'; // rotate | rainbow
+  const dur = parseFloat(el.dataset.iconGradDur || '') || 8;
+  const gentle = getMotionMode() === 'gentle';
+  const d = gentle ? dur * 2 : dur;
+
+  const ns = 'http://www.w3.org/2000/svg';
+
+  // Find gradient reference — check style attribute (raw HTML) and computed style
+  let sharedGradId = '';
+  const gradTargets: Element[] = [];
+  const allEls = svg.querySelectorAll('g, path, circle, rect, polygon, polyline, ellipse');
+  allEls.forEach(child => {
+    // Check raw style attribute (Astro sets inline style)
+    const rawStyle = child.getAttribute('style') || '';
+    const fillAttr = child.getAttribute('fill') || '';
+    const combined = rawStyle + ' ' + fillAttr;
+    const match = combined.match(/url\(\s*#(grad-[^)"\s]+)\s*\)/);
+    if (match) {
+      sharedGradId = match[1];
+      gradTargets.push(child);
+    }
+  });
+  if (!sharedGradId || !gradTargets.length) return;
+
+  // Create local gradient with GSAP control
+  const localId = `anim-grad-${Math.random().toString(36).substring(2, 9)}`;
+  let defs = svg.querySelector('defs');
+  if (!defs) {
+    defs = document.createElementNS(ns, 'defs');
+    svg.insertBefore(defs, svg.firstChild);
+  }
+
+  // Remove any existing animateTransform (we're replacing with GSAP)
+  svg.querySelectorAll('animateTransform').forEach(at => at.remove());
+
+  const grad = document.createElementNS(ns, 'linearGradient');
+  grad.id = localId;
+  grad.setAttribute('gradientUnits', 'objectBoundingBox');
+  grad.setAttribute('x1', '0');
+  grad.setAttribute('y1', '0');
+  grad.setAttribute('x2', '1');
+  grad.setAttribute('y2', '1');
+  grad.setAttribute('gradientTransform', 'rotate(0, 0.5, 0.5)');
+  // Copy stops from shared gradient
+  const sharedGrad = document.getElementById(sharedGradId);
+  if (sharedGrad) {
+    sharedGrad.querySelectorAll('stop').forEach(s => {
+      grad.appendChild(s.cloneNode(true));
+    });
+  }
+  defs.appendChild(grad);
+
+  // Point all gradient targets + their children at the local gradient
+  const gradUrl = `url(#${localId})`;
+  gradTargets.forEach(p => {
+    const htmlEl = p as HTMLElement;
+    if (htmlEl.style?.fill) {
+      htmlEl.style.fill = gradUrl;
+      if (htmlEl.style.stroke && htmlEl.style.stroke.includes('url(#grad-')) {
+        htmlEl.style.stroke = gradUrl;
+      }
+    } else {
+      p.setAttribute('fill', gradUrl);
+    }
+    // Also apply to children so they don't inherit stale fill from CSS
+    p.querySelectorAll('path, circle, rect, polygon, polyline, ellipse').forEach(child => {
+      (child as HTMLElement).style.fill = gradUrl;
+    });
+  });
+
+  if (gradMode === 'rainbow') {
+    // Rainbow: cycle gradient rotation + morph stop colors through rainbow
+    const toHex = (cssColor: string): string => {
+      const ctx = document.createElement('canvas').getContext('2d')!;
+      ctx.fillStyle = cssColor;
+      return ctx.fillStyle;
+    };
+    const cs = getComputedStyle(document.documentElement);
+    const rainbowColors = [1, 2, 3, 4, 5, 6, 7].map(n =>
+      toHex(cs.getPropertyValue(`--rainbow-${n}`).trim() || '#888')
+    );
+
+    // Add local stops (override inherited ones for color control)
+    const stop1 = document.createElementNS(ns, 'stop');
+    stop1.setAttribute('offset', '0');
+    stop1.setAttribute('stop-color', rainbowColors[0]);
+    const stop2 = document.createElementNS(ns, 'stop');
+    stop2.setAttribute('offset', '1');
+    stop2.setAttribute('stop-color', rainbowColors[3]);
+    grad.appendChild(stop1);
+    grad.appendChild(stop2);
+
+    // Cycle both stops through rainbow on staggered timelines
+    const tl = gsap.timeline({ repeat: -1 });
+    const segDur = d / rainbowColors.length;
+
+    rainbowColors.forEach((color, i) => {
+      const nextColor = rainbowColors[(i + 1) % rainbowColors.length];
+      const offsetColor = rainbowColors[(i + 3) % rainbowColors.length];
+      const nextOffset = rainbowColors[(i + 4) % rainbowColors.length];
+      tl.to(stop1, { attr: { 'stop-color': nextColor }, duration: segDur, ease: 'none' }, i * segDur);
+      tl.to(stop2, { attr: { 'stop-color': nextOffset }, duration: segDur, ease: 'none' }, i * segDur);
+    });
+
+    // Rotation on top
+    gsap.to(grad, {
+      attr: { gradientTransform: `rotate(360, 0.5, 0.5)` },
+      duration: d,
+      ease: 'none',
+      repeat: -1,
+      modifiers: {
+        gradientTransform: (val: string) => {
+          const angle = parseFloat(val.match(/rotate\(([^,]+)/)?.[1] || '0') % 360;
+          return `rotate(${angle}, 0.5, 0.5)`;
+        }
+      }
+    });
+  } else {
+    // Simple rotation
+    const obj = { angle: 0 };
+    gsap.to(obj, {
+      angle: 360,
+      duration: d,
+      ease: 'none',
+      repeat: -1,
+      onUpdate: () => {
+        grad.setAttribute('gradientTransform', `rotate(${obj.angle}, 0.5, 0.5)`);
+      }
+    });
+  }
+}
+
+/* ================================================================
    INIT
    ================================================================ */
 
@@ -1680,6 +1823,7 @@ export function initIconAnimations() {
   document.querySelectorAll<HTMLElement>('[data-icon-draw]').forEach(initDrawIcon);
   document.querySelectorAll<HTMLElement>('[data-icon-morph]').forEach(initMorphIcon);
   document.querySelectorAll<HTMLElement>('[data-icon-fill]').forEach(initFillIcon);
+  document.querySelectorAll<HTMLElement>('[data-icon-grad-anim]').forEach(initAnimatedGradient);
 }
 
 // Clear inline stroke colours on theme change so currentColor takes over
