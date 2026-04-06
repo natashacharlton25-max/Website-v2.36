@@ -60,10 +60,7 @@ let warpLayers: WarpLayer[] = [];
    HELPERS
    ================================================================ */
 
-function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    document.documentElement.classList.contains('a11y-reduce-motion');
-}
+import { prefersReducedMotion, getScrollContainer } from './animation-config';
 
 function getIntensity(): number {
   const val = getComputedStyle(document.documentElement)
@@ -286,9 +283,7 @@ export function initWarpParallax(
     ? [zone]
     : Array.from(document.querySelectorAll<HTMLElement>('[data-pattern-mode]'));
 
-  const osViewport = document.querySelector<HTMLElement>(
-    '[data-overlayscrollbars-viewport]'
-  ) || undefined;
+  const osViewport = getScrollContainer();
 
   // Track which elements have already been assigned (avoid double-tweening)
   const assigned = new Set<HTMLElement>();
@@ -351,9 +346,7 @@ export function setWarpMode(zone: HTMLElement, mode: MotionMode): void {
   });
 
   // Re-init with new mode
-  const osViewport = document.querySelector<HTMLElement>(
-    '[data-overlayscrollbars-viewport]'
-  ) || undefined;
+  const osViewport = getScrollContainer();
 
   zone.querySelectorAll<HTMLElement>('[data-depth]').forEach(el => {
     const layer = createWarpLayer(el, zone, mode, osViewport);

@@ -5,25 +5,20 @@
  * Rotates .parallax-decor hue through the colour wheel as the page scrolls.
  * Side-effect import — auto-inits on DOMContentLoaded / astro:page-load.
  *
- * Respects reduce-motion (a11y panel + OS preference).
+ * Uses animation-config for motion checks, scroll container, and theme change.
  */
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import {
+  prefersReducedMotion, getScrollContainer, onThemeChange,
+} from './animation-config';
 
 gsap.registerPlugin(ScrollTrigger);
-
-/* ---- A11y ---- */
-
-function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    document.documentElement.classList.contains('a11y-reduce-motion');
-}
 
 /* ---- State ---- */
 
 let hueTriggers: ScrollTrigger[] = [];
-let hueObserver: MutationObserver | null = null;
 
 /* ---- Core ---- */
 
@@ -40,8 +35,7 @@ function initScrollHue(): void {
 
   if (prefersReducedMotion()) return;
 
-  const osViewport =
-    document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
+  const osViewport = getScrollContainer();
 
   document.querySelectorAll<HTMLElement>('.parallax-decor').forEach((decor) => {
     const tween = gsap.to(decor, {
@@ -59,36 +53,21 @@ function initScrollHue(): void {
   });
 }
 
-/* ---- A11y watcher ---- */
+/* ---- React to motion/theme changes via central config ---- */
 
-function watchA11y(): void {
-  hueObserver?.disconnect();
-
-  hueObserver = new MutationObserver(() => {
-    if (prefersReducedMotion()) {
-      destroyScrollHue();
-    } else if (hueTriggers.length === 0) {
-      initScrollHue();
-    }
-  });
-
-  hueObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
-
-  window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (e) => {
-    if (e.matches) destroyScrollHue();
-    else initScrollHue();
-  });
-}
+onThemeChange(() => {
+  if (prefersReducedMotion()) {
+    destroyScrollHue();
+  } else if (hueTriggers.length === 0) {
+    initScrollHue();
+  }
+});
 
 /* ---- Auto-init ---- */
 
 function setup(): void {
   setTimeout(() => {
     initScrollHue();
-    watchA11y();
   }, 450);
 }
 
