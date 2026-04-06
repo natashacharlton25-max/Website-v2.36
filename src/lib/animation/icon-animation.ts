@@ -1635,10 +1635,10 @@ function initFillIcon(el: HTMLElement) {
 
             fillClones.forEach((clone, i) => {
               const delay = order.indexOf(i) * spread;
-              // Gentle dim
-              tl.to(clone, { opacity: 0.1, duration: 0.4, ease: 'power3.in' }, delay);
-              // Soft pop back
-              tl.to(clone, { opacity: 1, duration: 0.6, ease: 'back.out(1.4)' }, delay + 0.4);
+              // Dim + slight shrink
+              tl.to(clone, { opacity: 0.1, scale: 0.85, duration: 0.4, ease: 'power3.in' }, delay);
+              // Pop back with chosen ease
+              tl.to(clone, { opacity: 1, scale: 1, duration: 0.6, ease: easeType }, delay + 0.4);
             });
 
             activeTl = tl;
