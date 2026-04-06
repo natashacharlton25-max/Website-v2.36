@@ -1592,7 +1592,11 @@ function initFillIcon(el: HTMLElement) {
       const fadeOutThenPlay = (cb: () => void) => {
         if (activeTl) activeTl.kill();
         const fadeOut = gsap.timeline();
-        // Fade fill clones
+        // Border disappears instantly
+        if (showOutline) {
+          origPaths.forEach(p => gsap.set(p, { drawSVG: '0%' }));
+        }
+        // Then fill fades + shrinks out
         fillClones.forEach(c => {
           if (isFade) {
             fadeOut.to(c, { opacity: 0, duration: 0.5, ease: 'power3.in' }, 0);
@@ -1600,12 +1604,6 @@ function initFillIcon(el: HTMLElement) {
             fadeOut.to(c, { opacity: 0, scale: 0.3, duration: 0.5, ease: 'power3.in' }, 0);
           }
         });
-        // Fade outline together with fill
-        if (showOutline) {
-          origPaths.forEach(p => {
-            fadeOut.to(p, { drawSVG: '0%', opacity: 0, duration: 0.5, ease: 'power3.in' }, 0);
-          });
-        }
         fadeOut.call(() => {
           fillClones.forEach(c => gsap.set(c, isFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 }));
           if (showOutline) origPaths.forEach(p => gsap.set(p, { drawSVG: '0%', opacity: 1 }));
