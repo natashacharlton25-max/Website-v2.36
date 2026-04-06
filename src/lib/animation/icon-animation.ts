@@ -1861,7 +1861,9 @@ if (typeof document !== 'undefined') {
     initIconAnimations();
   }
 
-  // Watch for theme changes (ThemeSwitcher sets data-mode, data-theme-chroma on <html>)
+  // Listen for ThemeSwitcher's custom event — single source of truth for theme changes
+  window.addEventListener('themeChanged', onThemeChange);
+  // Fallback: MutationObserver for any direct attribute changes
   const observer = new MutationObserver(onThemeChange);
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-mode', 'data-theme-chroma', 'class'] });
 }
