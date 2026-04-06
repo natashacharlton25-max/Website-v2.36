@@ -21,7 +21,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(DrawSVGPlugin, MorphSVGPlugin, MotionPathPlugin, ScrollTrigger);
 
 type DrawVariant = 'draw' | 'drawcenter' | 'pulse';
-type DrawMode = 'once' | 'static' | 'yoyo' | 'reverse-yoyo';
+type DrawMode = 'once' | 'static' | 'yoyo' | 'reverse-yoyo' | 'reveal';
 
 function prefersReducedMotion(): boolean {
   const wrapper = document.querySelector('#a11y-content-wrapper');
@@ -106,6 +106,7 @@ function initDrawIcon(el: HTMLElement) {
   const pathCount = origPaths.length;
   const drawStagger = pathCount > 1 ? staggerTotal / (pathCount - 1) : 0;
   const drawStaggerFrom = (el.dataset.iconDrawStaggerFrom || 'start') as 'start' | 'center' | 'end' | 'edges' | 'random';
+  const drawWormSize = parseFloat(el.dataset.iconDrawWormSize || '') || 10;
   // Overlay color: drawColor can be a CSS colour OR a gradient name (e.g. "hero", "rainbow", "red")
   const cs = getComputedStyle(document.documentElement);
   const rawColor = el.dataset.iconDrawColor || '';
@@ -154,7 +155,7 @@ function initDrawIcon(el: HTMLElement) {
   const overlays: SVGPathElement[] = [];
   // Ghost+fill: border starts hidden (draws on hover). All others: start drawn if static/yoyo/reverse-yoyo
   const isBorderMode = ghost && showFill;
-  const startDrawn = isBorderMode ? false : (mode === 'reverse-yoyo' || mode === 'static' || mode === 'yoyo');
+  const startDrawn = isBorderMode || mode === 'reveal' ? false : (mode === 'reverse-yoyo' || mode === 'static' || mode === 'yoyo');
   const ghostOpacity = ghost ? 1 : 0.2;
   // Compute init opacity to match what playDraw creates visually
   let initOpacity = 0;
@@ -194,7 +195,7 @@ function initDrawIcon(el: HTMLElement) {
   const hasMorphTarget = !!el.dataset.iconMorphTarget;
   const play = hasMorphTarget
     ? () => playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor, variant, mode, laser, sw)
-    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode, sw, drawStagger, drawStaggerFrom);
+    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode, sw, drawStagger, drawStaggerFrom, drawWormSize);
 
   switch (drawTrigger) {
     case 'scrub': {
@@ -206,8 +207,8 @@ function initDrawIcon(el: HTMLElement) {
         scrollTrigger: {
           trigger: el,
           scroller: osViewport || undefined,
-          start: 'top 80%',
-          end: 'top 30%',
+          start: 'top 70%',
+          end: 'bottom 40%',
           scrub: true,
         },
       });
@@ -339,12 +340,13 @@ function addVariant(
   sw: number,
   laser: boolean,
   staggerTime = 0.3,
-  staggerFrom: 'start' | 'center' | 'end' | 'edges' | 'random' = 'start'
+  staggerFrom: 'start' | 'center' | 'end' | 'edges' | 'random' = 'start',
+  _wormSize = 10
 ) {
   const pathStagger = overlays.length > 1 ? staggerTime : 0;
 
   if (laser) {
-    // Laser: worm (10% bright segment) travels, trail draws behind at lower opacity
+    // Laser: worm travels, trail draws behind — wormPct controls segment size
     overlays.forEach((path, idx) => {
       const offset = idx * pathStagger;
 
@@ -357,16 +359,19 @@ function addVariant(
       // Fade trail to full opacity after worm passes
       tl.to(path, { opacity: 1, duration: d * 0.4, ease: 'power2.out' }, offset + d * 0.6);
 
-      // Worm: bright thick 10% segment travels ahead
+      // Worm: bright segment travels ahead — scales with path length
       const worm = path.cloneNode(true) as SVGPathElement;
       worm.classList.add('icon-draw-worm');
       gsap.set(worm, { fill: 'none', strokeWidth: sw * 1.5, drawSVG: '0% 0%', opacity: 0 });
       path.parentNode!.appendChild(worm);
 
+      const wormPct = _wormSize;
+      const tailPct = 100 - wormPct;
+
       tl.set(worm, { opacity: 1 }, offset);
-      tl.fromTo(worm, { drawSVG: '0% 0%' }, { drawSVG: '0% 10%', duration: d * 0.08, ease: 'power2.out' }, offset);
-      tl.fromTo(worm, { drawSVG: '0% 10%' }, { drawSVG: '90% 100%', duration: d * 0.84, ease: 'power2.inOut' }, offset + d * 0.08);
-      tl.fromTo(worm, { drawSVG: '90% 100%' }, { drawSVG: '100% 100%', duration: d * 0.08, ease: 'power2.in' }, offset + d * 0.92);
+      tl.fromTo(worm, { drawSVG: '0% 0%' }, { drawSVG: `0% ${wormPct}%`, duration: d * 0.08, ease: 'power2.out' }, offset);
+      tl.fromTo(worm, { drawSVG: `0% ${wormPct}%` }, { drawSVG: `${tailPct}% 100%`, duration: d * 0.84, ease: 'power2.inOut' }, offset + d * 0.08);
+      tl.fromTo(worm, { drawSVG: `${tailPct}% 100%` }, { drawSVG: '100% 100%', duration: d * 0.08, ease: 'power2.in' }, offset + d * 0.92);
       tl.set(worm, { opacity: 0 }, offset + d);
     });
     return;
@@ -413,7 +418,8 @@ function playDraw(
   isBorderMode = false,
   swOverride = 0,
   staggerTime = 0.3,
-  staggerFrom: 'start' | 'center' | 'end' | 'edges' | 'random' = 'start'
+  staggerFrom: 'start' | 'center' | 'end' | 'edges' | 'random' = 'start',
+  wormSize = 10
 ): gsap.core.Timeline {
   const motion = getMotionMode();
   const hover = getHoverMode();
@@ -484,7 +490,7 @@ function playDraw(
           master.fromTo(o, { drawSVG: '10%' }, { drawSVG: '100%', duration: travelD, ease: 'power2.inOut' }, t + growD);
         });
         const onceTl = gsap.timeline();
-        addVariant(onceTl, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
+        addVariant(onceTl, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom, wormSize);
         master.add(onceTl, t);
         const onceTotalD = d + staggerTime * Math.max(0, worms.length - 1);
         master.to(overlays, { opacity: 0, duration: 0.5 }, t + onceTotalD);
@@ -492,7 +498,7 @@ function playDraw(
       } else {
         overlays.forEach(o => master.set(o, { opacity: 1 }, t));
         const onceTl = gsap.timeline();
-        addVariant(onceTl, overlays, variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
+        addVariant(onceTl, overlays, variant, color, iconColor, d, sw, false, staggerTime, staggerFrom, wormSize);
         master.add(onceTl, t);
         const onceTotalD = d + staggerTime * Math.max(0, overlays.length - 1);
         master.to(overlays, { opacity: 0, duration: 0.5 }, t + onceTotalD);
@@ -509,12 +515,12 @@ function playDraw(
             gsap.set(o, { drawSVG: '100%' });
             master.to(o, { opacity: ghostOpacity, duration: 1, ease: 'power2.out' }, 0);
           });
-          addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
+          addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom, wormSize);
           master.to(overlays, { opacity: restOpacity, duration: 1, ease: 'power2.out' }, d);
         } else {
           // Ghost: stays at ghost, worm passes over
           overlays.forEach(o => gsap.set(o, { drawSVG: '100%', opacity: ghostOpacity }));
-          addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom);
+          addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom, wormSize);
         }
       } else {
         // Full variant: dim to ghost → draw → brighten back
@@ -537,7 +543,7 @@ function playDraw(
         });
         const drawStart = isGhostMode ? 0 : 0.4;
         const drawTl = gsap.timeline();
-        addVariant(drawTl, brightClones, variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
+        addVariant(drawTl, brightClones, variant, color, iconColor, d, sw, false, staggerTime, staggerFrom, wormSize);
         master.add(drawTl, drawStart);
 
         // After draw: fade bright clone out, restore overlay to rest opacity
@@ -548,6 +554,28 @@ function playDraw(
           master.to(overlays, { opacity: restOpacity, duration: 0.8, ease: 'power2.out' }, drawStart + totalDrawD);
         }
 
+      }
+      break;
+    }
+    case 'reveal': {
+      // Starts invisible, draws in, stays visible
+      if (laser) {
+        overlays.forEach(o => gsap.set(o, { drawSVG: '0%', opacity: 0 }));
+        // Trail draws behind worm
+        overlays.forEach(o => {
+          master.set(o, { opacity: 0.3 }, 0);
+          master.fromTo(o, { drawSVG: '0%' }, { drawSVG: '100%', duration: d, ease: 'power2.inOut' }, 0);
+          master.to(o, { opacity: 1, duration: d * 0.4, ease: 'power2.out' }, d * 0.6);
+        });
+        addVariant(master, worms, variant, color, iconColor, d, sw, laser, staggerTime, staggerFrom, wormSize);
+      } else {
+        // Simple: overlays draw from 0% to 100%, fade to full opacity
+        overlays.forEach(o => {
+          gsap.set(o, { stroke: color, strokeWidth: sw, drawSVG: '0%', opacity: 1 });
+        });
+        const drawTl = gsap.timeline();
+        addVariant(drawTl, overlays, variant, color, iconColor, d, sw, false, staggerTime, staggerFrom, wormSize);
+        master.add(drawTl, 0);
       }
       break;
     }
@@ -606,25 +634,28 @@ function playDraw(
             const layer = layers[i];
             const worm = lapWorms[i];
 
+            const wp = wormSize;
+            const tp = 100 - wp;
+
             // Ghost layer: draws alongside worm
             master.set(layer, { opacity: layerOpacities[i] }, offset);
             master.fromTo(layer,
               { drawSVG: '0%' },
-              { drawSVG: '10%', duration: growD, ease: 'power2.out' }, offset);
+              { drawSVG: `${wp}%`, duration: growD, ease: 'power2.out' }, offset);
             master.fromTo(layer,
-              { drawSVG: '10%' },
+              { drawSVG: `${wp}%` },
               { drawSVG: '100%', duration: travelD, ease: 'power2.inOut' }, offset + growD);
 
             // Worm: full grow → travel → shrink
             master.set(worm, { opacity: op }, offset);
             master.fromTo(worm,
               { drawSVG: '0% 0%' },
-              { drawSVG: '0% 10%', duration: growD, ease: 'power2.out' }, offset);
+              { drawSVG: `0% ${wp}%`, duration: growD, ease: 'power2.out' }, offset);
             master.fromTo(worm,
-              { drawSVG: '0% 10%' },
-              { drawSVG: '90% 100%', duration: travelD, ease: 'power2.inOut' }, offset + growD);
+              { drawSVG: `0% ${wp}%` },
+              { drawSVG: `${tp}% 100%`, duration: travelD, ease: 'power2.inOut' }, offset + growD);
             master.fromTo(worm,
-              { drawSVG: '90% 100%' },
+              { drawSVG: `${tp}% 100%` },
               { drawSVG: '100% 100%', duration: shrinkD, ease: 'power2.in' }, offset + growD + travelD);
           });
         });
@@ -677,15 +708,15 @@ function playDraw(
 
         const tl1 = gsap.timeline();
         tl1.set(trails[0], { opacity: opacities[0] }, 0);
-        addVariant(tl1, trails[0], variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
+        addVariant(tl1, trails[0], variant, color, iconColor, d, sw, false, staggerTime, staggerFrom, wormSize);
 
         const tl2 = gsap.timeline();
         tl2.set(trails[1], { opacity: opacities[1] }, 0);
-        addVariant(tl2, trails[1], variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
+        addVariant(tl2, trails[1], variant, color, iconColor, d, sw, false, staggerTime, staggerFrom, wormSize);
 
         const tl3 = gsap.timeline();
         tl3.set(trails[2], { opacity: opacities[2] }, 0);
-        addVariant(tl3, trails[2], variant, color, iconColor, d, sw, false, staggerTime, staggerFrom);
+        addVariant(tl3, trails[2], variant, color, iconColor, d, sw, false, staggerTime, staggerFrom, wormSize);
 
         master.add(tl1, drawStart);
         master.add(tl2, drawStart + stagger);
@@ -777,15 +808,17 @@ function playDraw(
             const worm = eWorms[i];
 
             // Worm travels reverse: end → start, eating the layer behind it
+            const rwp = wormSize;
+            const rtp = 100 - rwp;
             master.set(worm, { opacity: op }, offset);
             master.fromTo(worm,
               { drawSVG: '100% 100%' },
-              { drawSVG: '90% 100%', duration: growD, ease: 'power2.out' }, offset);
+              { drawSVG: `${rtp}% 100%`, duration: growD, ease: 'power2.out' }, offset);
             master.fromTo(worm,
-              { drawSVG: '90% 100%' },
-              { drawSVG: '0% 10%', duration: travelD, ease: 'power2.inOut' }, offset + growD);
+              { drawSVG: `${rtp}% 100%` },
+              { drawSVG: `0% ${rwp}%`, duration: travelD, ease: 'power2.inOut' }, offset + growD);
             master.fromTo(worm,
-              { drawSVG: '0% 10%' },
+              { drawSVG: `0% ${rwp}%` },
               { drawSVG: '0% 0%', duration: shrinkD, ease: 'power2.in' }, offset + growD + travelD);
 
             // Layer erases alongside its worm

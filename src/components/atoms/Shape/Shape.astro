@@ -47,12 +47,16 @@ interface Props {
   animation?: Animation;
   animationTrigger?: AnimationTriggerInteractive;
   draw?: boolean | 'draw' | 'drawcenter' | 'pulse';
-  drawMode?: 'once' | 'static' | 'yoyo' | 'reverse-yoyo';
+  drawMode?: 'once' | 'static' | 'yoyo' | 'reverse-yoyo' | 'reveal';
   drawLaser?: boolean;
+  drawFill?: boolean;
   drawGhost?: boolean;
   drawColor?: string;
   drawStagger?: 'none' | 'tight' | 'normal' | 'loose';
   drawStaggerFrom?: 'start' | 'center' | 'end' | 'edges' | 'random';
+  drawWormSize?: number;
+  drawOnScroll?: boolean;
+  drawScrub?: boolean;
   morphTo?: string;
   class?: string;
 }
@@ -63,7 +67,7 @@ const {
   size = 'md', variant = 'fill', borderWeight, shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
   media, animation, animationTrigger = 'hover',
-  draw, drawMode = 'static', drawLaser, drawGhost, drawColor, drawStagger, drawStaggerFrom, morphTo,
+  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo,
   class: className,
 } = Astro.props;
 
@@ -117,10 +121,15 @@ if (draw) {
   dataAttrs['data-icon-draw-mode'] = drawMode;
   dataAttrs['data-icon-draw-sw'] = String(sw);
   if (drawLaser) dataAttrs['data-icon-draw-laser'] = 'true';
+  if (drawFill) dataAttrs['data-icon-draw-fill'] = 'true';
   if (drawGhost) dataAttrs['data-icon-draw-ghost'] = 'true';
   if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
   if (drawStagger) dataAttrs['data-icon-draw-stagger'] = drawStagger;
   if (drawStaggerFrom) dataAttrs['data-icon-draw-stagger-from'] = drawStaggerFrom;
+  if (drawWormSize) dataAttrs['data-icon-draw-worm-size'] = String(drawWormSize);
+  if (drawOnScroll) dataAttrs['data-icon-draw-scroll'] = 'true';
+  if (drawScrub) dataAttrs['data-icon-draw-scrub'] = 'true';
+  if (animationTrigger && animationTrigger !== 'hover') dataAttrs['data-icon-draw-trigger'] = animationTrigger;
 }
 // Morph target: built-in shape name or D1 slug
 let morphTargetSvg: string | null = null;
