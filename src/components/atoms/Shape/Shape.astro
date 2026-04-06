@@ -59,6 +59,11 @@ interface Props {
   drawScrub?: boolean;
   morphTo?: string;
   morphTrigger?: 'hover' | 'viewport' | 'scroll';
+  fillAnimation?: 'up' | 'down' | 'left' | 'right' | 'radial';
+  fillMode?: 'once' | 'yoyo' | 'static';
+  fillTrigger?: 'hover' | 'viewport' | 'scrub';
+  fillDuration?: number;
+  fillEase?: string;
   class?: string;
 }
 
@@ -69,6 +74,7 @@ const {
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
   media, animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover',
+  fillAnimation, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase,
   class: className,
 } = Astro.props;
 
@@ -113,7 +119,7 @@ const SVG_SHAPES: Record<string, string> = {
   blob:    '<path d="M70,8 C90,15 98,35 96,55 C94,75 80,92 60,96 C40,100 18,90 8,72 C-2,54 2,30 15,15 C28,0 50,1 70,8 Z" />',
 };
 
-const isCssShape = ['circle', 'square', 'subtle', 'soft', 'rounded', 'rounded-lg', 'pill'].includes(shape) && !draw && !morphTo;
+const isCssShape = ['circle', 'square', 'subtle', 'soft', 'rounded', 'rounded-lg', 'pill'].includes(shape) && !draw && !morphTo && !fillAnimation;
 const isSvgShape = !isCssShape;
 const builtinSvg = isSvgShape ? SVG_SHAPES[shape] : undefined;
 
@@ -134,6 +140,15 @@ if (draw) {
   if (drawOnScroll) dataAttrs['data-icon-draw-scroll'] = 'true';
   if (drawScrub) dataAttrs['data-icon-draw-scrub'] = 'true';
   if (animationTrigger && animationTrigger !== 'hover') dataAttrs['data-icon-draw-trigger'] = animationTrigger;
+}
+// Fill animation
+if (fillAnimation) {
+  dataAttrs['data-icon-fill'] = 'true';
+  dataAttrs['data-icon-fill-dir'] = fillAnimation;
+  if (fillMode !== 'once') dataAttrs['data-icon-fill-mode'] = fillMode;
+  if (fillTrigger !== 'hover') dataAttrs['data-icon-fill-trigger'] = fillTrigger;
+  if (fillDuration) dataAttrs['data-icon-fill-duration'] = String(fillDuration);
+  if (fillEase) dataAttrs['data-icon-fill-ease'] = fillEase;
 }
 // Morph target: built-in shape name or D1 slug
 let morphTargetSvg: string | null = null;

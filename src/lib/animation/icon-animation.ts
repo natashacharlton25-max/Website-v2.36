@@ -17,7 +17,6 @@ import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
 gsap.registerPlugin(DrawSVGPlugin, MorphSVGPlugin, MotionPathPlugin, ScrollTrigger);
 
 type DrawVariant = 'draw' | 'drawcenter' | 'pulse';
@@ -1212,6 +1211,178 @@ function initMorphIcon(el: HTMLElement) {
 }
 
 /* ================================================================
+   FILL ANIMATION — gradient stop offset
+   Injects a linearGradient into the SVG, applies it to the <g> fill.
+   Animates the stop offset to create a soft wipe-in effect.
+   ================================================================ */
+
+type FillDirection = 'up' | 'down' | 'left' | 'right';
+
+function initFillIcon(el: HTMLElement) {
+  const svg = el.querySelector('svg');
+  if (!svg) return;
+
+  const direction = (el.dataset.iconFillDir as FillDirection) || 'up';
+  const trigger = el.dataset.iconFillTrigger || 'hover';
+  const mode = el.dataset.iconFillMode || 'once';
+  const fillDuration = parseFloat(el.dataset.iconFillDuration || '') || 1.5;
+  const easeType = el.dataset.iconFillEase || 'power2.inOut';
+
+  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
+  const ns = 'http://www.w3.org/2000/svg';
+
+  // Find or create <g>
+  let g = svg.querySelector('g');
+  if (!g) {
+    g = document.createElementNS(ns, 'g');
+    const children = Array.from(svg.childNodes);
+    children.forEach(child => {
+      const tag = (child as Element).tagName;
+      if (tag !== 'defs') g!.appendChild(child);
+    });
+    svg.appendChild(g);
+  }
+
+  // Read color fresh — convert to hex for SVG gradient stops (oklch not supported)
+  const toHex = (cssColor: string): string => {
+    const ctx = document.createElement('canvas').getContext('2d')!;
+    ctx.fillStyle = cssColor;
+    return ctx.fillStyle; // always returns hex or rgb
+  };
+  const getColor = () => {
+    const cs = getComputedStyle(el);
+    const raw = cs.getPropertyValue('--_color').trim() || cs.color || '#c4907c';
+    return toHex(raw);
+  };
+
+  // Create gradient
+  const gradId = `fill-wipe-${Math.random().toString(36).substring(2, 9)}`;
+  let defs = svg.querySelector('defs');
+  if (!defs) {
+    defs = document.createElementNS(ns, 'defs');
+    svg.insertBefore(defs, svg.firstChild);
+  }
+
+  const grad = document.createElementNS(ns, 'linearGradient');
+  grad.id = gradId;
+
+  // Direction: gradient goes FROM transparent TO color
+  const dirs: Record<string, [string, string, string, string]> = {
+    up:    ['0', '1', '0', '0'],  // bottom to top
+    down:  ['0', '0', '0', '1'],  // top to bottom
+    left:  ['1', '0', '0', '0'],  // right to left
+    right: ['0', '0', '1', '0'],  // left to right
+  };
+  const [x1, y1, x2, y2] = dirs[direction] || dirs.up;
+  grad.setAttribute('x1', x1); grad.setAttribute('y1', y1);
+  grad.setAttribute('x2', x2); grad.setAttribute('y2', y2);
+
+  // Two stops: color and transparent
+  // Animate both offsets from 0→1 to fill, 1→0 to empty
+  // Stop 1 (color) leads, Stop 2 (transparent) follows — creates soft edge
+  const color = getColor();
+  const stop1 = document.createElementNS(ns, 'stop');
+  stop1.setAttribute('offset', '0');
+  stop1.setAttribute('stop-color', color);
+  stop1.setAttribute('stop-opacity', '1');
+
+  const stop2 = document.createElementNS(ns, 'stop');
+  stop2.setAttribute('offset', '0');
+  stop2.setAttribute('stop-color', color);
+  stop2.setAttribute('stop-opacity', '0');
+
+  grad.appendChild(stop1);
+  grad.appendChild(stop2);
+  defs.appendChild(grad);
+
+  // Convert non-path elements to <path> for reliable gradient fill
+  g.querySelectorAll('circle, polygon, polyline, ellipse, line, rect').forEach(e => {
+    MorphSVGPlugin.convertToPath(e as any);
+  });
+
+  // Apply gradient fill to each path via inline style (beats CSS)
+  g.querySelectorAll('path').forEach(p => {
+    (p as HTMLElement).style.fill = `url(#${gradId})`;
+  });
+
+  // Start filled or empty
+  if (mode === 'static') {
+    stop1.setAttribute('offset', '1');
+    stop2.setAttribute('offset', '1');
+  }
+
+  const playFill = (reverse = false) => {
+    const motion = getMotionMode();
+    if (motion === 'none') return gsap.timeline();
+    const d = motion === 'gentle' ? fillDuration * 2 : fillDuration;
+
+    // Re-read color for theme responsiveness
+    const fresh = getColor();
+    stop1.setAttribute('stop-color', fresh);
+    stop2.setAttribute('stop-color', fresh);
+
+    const tl = gsap.timeline();
+    const from = reverse ? 1 : 0;
+    const to = reverse ? 0 : 1;
+
+    // Stop1 (color) leads — defines the filled edge
+    // Stop2 (transparent) trails slightly — creates soft gradient edge
+    tl.fromTo(stop1, { attr: { offset: from } },
+      { attr: { offset: to }, duration: d, ease: easeType }, 0);
+    tl.fromTo(stop2, { attr: { offset: from } },
+      { attr: { offset: to }, duration: d * 1.15, ease: easeType }, 0);
+
+    return tl;
+  };
+
+  switch (trigger) {
+    case 'viewport': {
+      ScrollTrigger.create({
+        trigger: el,
+        scroller: osViewport || undefined,
+        start: 'top 60%',
+        once: mode === 'once',
+        onEnter: () => playFill(false),
+        onLeaveBack: mode !== 'once' ? () => playFill(true) : undefined,
+      });
+      break;
+    }
+    case 'scrub': {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: el,
+          scroller: osViewport || undefined,
+          start: 'top 80%',
+          end: 'top 20%',
+          scrub: true,
+        },
+      });
+      tl.fromTo(stop1, { attr: { offset: 0 } }, { attr: { offset: 1 }, duration: 1, ease: 'none' }, 0);
+      tl.fromTo(stop2, { attr: { offset: 0 } }, { attr: { offset: 1 }, duration: 1.15, ease: 'none' }, 0);
+      break;
+    }
+    case 'hover':
+    default: {
+      const hoverTarget = el.closest('button, a') || el;
+      let activeTl: gsap.core.Timeline | null = null;
+
+      if (mode === 'yoyo') {
+        hoverTarget.addEventListener('mouseenter', () => { if (activeTl) activeTl.kill(); activeTl = playFill(false); });
+        hoverTarget.addEventListener('mouseleave', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); });
+        hoverTarget.addEventListener('focusin', () => { if (activeTl) activeTl.kill(); activeTl = playFill(false); });
+        hoverTarget.addEventListener('focusout', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); });
+      } else {
+        let filled = false;
+        const doFill = () => { if (!filled) { if (activeTl) activeTl.kill(); activeTl = playFill(false); filled = true; } };
+        hoverTarget.addEventListener('mouseenter', doFill);
+        hoverTarget.addEventListener('focusin', doFill);
+      }
+      break;
+    }
+  }
+}
+
+/* ================================================================
    INIT
    ================================================================ */
 
@@ -1232,6 +1403,7 @@ export function initIconAnimations() {
   gateAnimatedGradients();
   document.querySelectorAll<HTMLElement>('[data-icon-draw]').forEach(initDrawIcon);
   document.querySelectorAll<HTMLElement>('[data-icon-morph]').forEach(initMorphIcon);
+  document.querySelectorAll<HTMLElement>('[data-icon-fill]').forEach(initFillIcon);
 }
 
 // Clear inline stroke colours on theme change so currentColor takes over
