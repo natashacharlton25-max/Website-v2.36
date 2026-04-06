@@ -59,6 +59,7 @@ interface Props {
   drawMode?: DrawMode;
   drawLaser?: boolean;
   drawFill?: boolean;
+  drawFillMode?: 'static' | 'bloom' | 'fade';
   drawGhost?: boolean;
   drawOnScroll?: boolean;
   drawScrub?: boolean;
@@ -85,7 +86,7 @@ const {
   shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
   animation, animationTrigger = 'hover',
-  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawOnScroll, drawScrub, drawColor,
+  draw, drawMode = 'static', drawLaser, drawFill, drawFillMode = 'static', drawGhost, drawOnScroll, drawScrub, drawColor,
   morphTo, morphViaCircle, morphTrigger = 'hover',
   fillAnimation, fillOutline, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom,
   semanticRole, label,
@@ -94,12 +95,12 @@ const {
 // Resolve colour: rainbow takes precedence, else brand
 const resolvedColor = rainbowColor || brandColor || null;
 
-// Weight rules: draw (with or without morph) → light for clean strokes, morph only → fill
-const resolvedWeight = draw
-  ? (weight === 'fill' || (!weight && DEFAULT_WEIGHT === 'fill') ? 'light' : (weight || 'light'))
-  : morphTo
-    ? (weight || 'fill')
-    : weight;
+// Weight rules: draw+morph → fill (single solid path), draw only → light, morph only → fill
+const resolvedWeight = morphTo
+  ? (weight || 'fill')
+  : draw && (weight === 'fill' || (!weight && DEFAULT_WEIGHT === 'fill'))
+    ? 'light'
+    : (draw ? (weight || 'light') : weight);
 
 // ─── Weight suffixes (for slug detection) ───────────────
 
@@ -157,8 +158,8 @@ async function fetchIcon(slug: string): Promise<string | null> {
 
 const needsWeightStrip = !!(draw || morphTo);
 const slug = resolveSlug(name, resolvedWeight, needsWeightStrip);
-// Draw morph: standard (not flat) for clean stroke paths. Morph only: flat for single fill path.
-const fetchSlug = (morphTo && !draw) ? `${slug}-flat` : slug;
+// Morph (with or without draw): flat for single clean path. Draw only: standard multi-stroke.
+const fetchSlug = morphTo ? `${slug}-flat` : slug;
 let iconContent = await fetchIcon(fetchSlug);
 
 // Fallback: non-flat, then fill weight
@@ -180,9 +181,16 @@ if (morphTo && !draw) {
     morphTargetContent = await fetchIcon(resolveSlug(morphTo, 'fill'));
   }
 } else if (morphTo && draw) {
-  // Draw morph: same light weight standard as primary icon
+  // Draw morph: light weight flat — single clean path
   const morphSlug = resolveSlug(morphTo, resolvedWeight);
-  morphTargetContent = await fetchIcon(morphSlug);
+  morphTargetContent = await fetchIcon(`${morphSlug}-flat`) || await fetchIcon(morphSlug);
+}
+
+// ─── Fill source for draw+fill combined (fill-weight SVG for bloom) ───
+let fillSvgContent: string | null = null;
+if (draw && fillAnimation) {
+  const fillSlug = resolveSlug(name, 'fill', true);
+  fillSvgContent = await fetchIcon(`${fillSlug}-flat`) || await fetchIcon(fillSlug);
 }
 
 // ─── SVG Transforms ─────────────────────────────────────
@@ -244,6 +252,7 @@ if (draw) {
   dataAttrs['data-icon-draw-mode'] = drawMode;
   if (drawLaser) dataAttrs['data-icon-draw-laser'] = 'true';
   if (drawFill) dataAttrs['data-icon-draw-fill'] = 'true';
+  if (drawFillMode && drawFillMode !== 'static') dataAttrs['data-icon-draw-fill-mode'] = drawFillMode;
   if (drawGhost) dataAttrs['data-icon-draw-ghost'] = 'true';
   if (drawOnScroll) dataAttrs['data-icon-draw-scroll'] = 'true';
   if (drawScrub) dataAttrs['data-icon-draw-scrub'] = 'true';
@@ -268,6 +277,7 @@ if (fillAnimation) {
   if (fillColor) dataAttrs['data-icon-fill-color'] = fillColor;
   if (fillStagger) dataAttrs['data-icon-fill-stagger'] = fillStagger;
   if (fillStaggerFrom) dataAttrs['data-icon-fill-stagger-from'] = fillStaggerFrom;
+  if (fillSvgContent) dataAttrs['data-icon-fill-svg'] = fillSvgContent;
 }
 
 ---
