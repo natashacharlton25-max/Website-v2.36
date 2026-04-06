@@ -1529,7 +1529,7 @@ function initFillIcon(el: HTMLElement) {
         if (activeTl) activeTl.kill();
         const fadeOut = gsap.timeline();
         fillClones.forEach(c => {
-          fadeOut.to(c, { opacity: 0, duration: 0.25, ease: 'power2.in' }, 0);
+          fadeOut.to(c, { opacity: 0, scale: 0.3, duration: 0.5, ease: 'power3.in' }, 0);
         });
         fadeOut.call(() => {
           fillClones.forEach(c => gsap.set(c, isFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 }));
