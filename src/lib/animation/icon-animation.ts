@@ -1816,10 +1816,39 @@ export function initIconAnimations() {
   document.querySelectorAll<HTMLElement>('[data-icon-grad-anim]').forEach(initAnimatedGradient);
 }
 
-// Clear inline stroke colours on theme change so currentColor takes over
+// Clear inline colours on theme change so CSS tokens take over
 function onThemeChange() {
+  // Draw overlays: clear inline stroke
   document.querySelectorAll('.icon-draw-overlay, .icon-draw-worm, .icon-draw-trail, .icon-draw-chase').forEach(el => {
     (el as HTMLElement).style.removeProperty('stroke');
+  });
+
+  // Fill clones: clear inline fill so CSS color updates
+  document.querySelectorAll('.icon-fill-morph').forEach(el => {
+    (el as HTMLElement).style.removeProperty('fill');
+  });
+
+  // Animated gradients: re-copy stops from shared defs
+  document.querySelectorAll<HTMLElement>('[data-icon-grad-anim]').forEach(el => {
+    const svg = el.querySelector('svg');
+    if (!svg) return;
+    // Find local gradient (has our generated ID)
+    svg.querySelectorAll('linearGradient[id^="anim-grad-"]').forEach(localGrad => {
+      // Find which shared gradient it was cloned from
+      const targets = svg.querySelectorAll('[style*="url(#' + localGrad.id + ')"]');
+      if (!targets.length) return;
+      const rawStyle = el.getAttribute('style') || '';
+      const allStyles = Array.from(svg.querySelectorAll('g, path')).map(e => e.getAttribute('style') || '').join(' ');
+      const sharedMatch = (rawStyle + allStyles).match(/url\(#(grad-[^)"]+)\)/);
+      if (!sharedMatch) return;
+      const sharedGrad = document.getElementById(sharedMatch[1]);
+      if (!sharedGrad) return;
+      // Replace stops
+      localGrad.querySelectorAll('stop').forEach(s => s.remove());
+      sharedGrad.querySelectorAll('stop').forEach(s => {
+        localGrad.appendChild(s.cloneNode(true));
+      });
+    });
   });
 }
 
