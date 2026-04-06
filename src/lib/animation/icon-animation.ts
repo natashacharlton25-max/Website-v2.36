@@ -1211,25 +1211,29 @@ function initMorphIcon(el: HTMLElement) {
 }
 
 /* ================================================================
-   FILL ANIMATION — gradient stop offset
-   Injects a linearGradient into the SVG, applies it to the <g> fill.
-   Animates the stop offset to create a soft wipe-in effect.
+   FILL ANIMATION — morph fill
+   Clones shape path, starts as tiny dot at center, morphs into
+   the full shape. Fill "blooms" outward organically.
+   Can morph color too.
    ================================================================ */
-
-type FillDirection = 'up' | 'down' | 'left' | 'right';
 
 function initFillIcon(el: HTMLElement) {
   const svg = el.querySelector('svg');
   if (!svg) return;
 
-  const direction = (el.dataset.iconFillDir as FillDirection) || 'up';
   const trigger = el.dataset.iconFillTrigger || 'hover';
   const mode = el.dataset.iconFillMode || 'once';
-  const fillDuration = parseFloat(el.dataset.iconFillDuration || '') || 1.5;
-  const easeType = el.dataset.iconFillEase || 'power2.inOut';
+  const fillDuration = parseFloat(el.dataset.iconFillDuration || '') || 1;
+  const easeType = el.dataset.iconFillEase || 'power3.out';
+  const fillColor = el.dataset.iconFillColor || '';
 
   const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
   const ns = 'http://www.w3.org/2000/svg';
+
+  // Get viewBox center for the starting dot
+  const vb = svg.viewBox.baseVal;
+  const cx = (vb.x || 0) + (vb.width || 100) / 2;
+  const cy = (vb.y || 0) + (vb.height || 100) / 2;
 
   // Find or create <g>
   let g = svg.querySelector('g');
@@ -1237,100 +1241,111 @@ function initFillIcon(el: HTMLElement) {
     g = document.createElementNS(ns, 'g');
     const children = Array.from(svg.childNodes);
     children.forEach(child => {
-      const tag = (child as Element).tagName;
-      if (tag !== 'defs') g!.appendChild(child);
+      if ((child as Element).tagName !== 'defs') g!.appendChild(child);
     });
     svg.appendChild(g);
   }
 
-  // Read color fresh — convert to hex for SVG gradient stops (oklch not supported)
-  const toHex = (cssColor: string): string => {
-    const ctx = document.createElement('canvas').getContext('2d')!;
-    ctx.fillStyle = cssColor;
-    return ctx.fillStyle; // always returns hex or rgb
-  };
-  const getColor = () => {
-    const cs = getComputedStyle(el);
-    const raw = cs.getPropertyValue('--_color').trim() || cs.color || '#c4907c';
-    return toHex(raw);
-  };
-
-  // Create gradient
-  const gradId = `fill-wipe-${Math.random().toString(36).substring(2, 9)}`;
-  let defs = svg.querySelector('defs');
-  if (!defs) {
-    defs = document.createElementNS(ns, 'defs');
-    svg.insertBefore(defs, svg.firstChild);
-  }
-
-  const grad = document.createElementNS(ns, 'linearGradient');
-  grad.id = gradId;
-
-  // Direction: gradient goes FROM transparent TO color
-  const dirs: Record<string, [string, string, string, string]> = {
-    up:    ['0', '1', '0', '0'],  // bottom to top
-    down:  ['0', '0', '0', '1'],  // top to bottom
-    left:  ['1', '0', '0', '0'],  // right to left
-    right: ['0', '0', '1', '0'],  // left to right
-  };
-  const [x1, y1, x2, y2] = dirs[direction] || dirs.up;
-  grad.setAttribute('x1', x1); grad.setAttribute('y1', y1);
-  grad.setAttribute('x2', x2); grad.setAttribute('y2', y2);
-
-  // Two stops: color and transparent
-  // Animate both offsets from 0→1 to fill, 1→0 to empty
-  // Stop 1 (color) leads, Stop 2 (transparent) follows — creates soft edge
-  const color = getColor();
-  const stop1 = document.createElementNS(ns, 'stop');
-  stop1.setAttribute('offset', '0');
-  stop1.setAttribute('stop-color', color);
-  stop1.setAttribute('stop-opacity', '1');
-
-  const stop2 = document.createElementNS(ns, 'stop');
-  stop2.setAttribute('offset', '0');
-  stop2.setAttribute('stop-color', color);
-  stop2.setAttribute('stop-opacity', '0');
-
-  grad.appendChild(stop1);
-  grad.appendChild(stop2);
-  defs.appendChild(grad);
-
-  // Convert non-path elements to <path> for reliable gradient fill
+  // Convert non-path elements to path
   g.querySelectorAll('circle, polygon, polyline, ellipse, line, rect').forEach(e => {
     MorphSVGPlugin.convertToPath(e as any);
   });
 
-  // Apply gradient fill to each path via inline style (beats CSS)
-  g.querySelectorAll('path').forEach(p => {
-    (p as HTMLElement).style.fill = `url(#${gradId})`;
+  // oklch → hex
+  const toHex = (cssColor: string): string => {
+    const ctx = document.createElement('canvas').getContext('2d')!;
+    ctx.fillStyle = cssColor;
+    return ctx.fillStyle;
+  };
+  const getColor = () => {
+    const cs = getComputedStyle(el);
+    return toHex(cs.getPropertyValue('--_color').trim() || cs.color || '#c4907c');
+  };
+  const getTargetColor = () => {
+    if (!fillColor) return getColor();
+    // fillColor can be a CSS variable name or a color value
+    if (fillColor.startsWith('--')) {
+      return toHex(getComputedStyle(document.documentElement).getPropertyValue(fillColor).trim());
+    }
+    return toHex(fillColor);
+  };
+
+  // Get original shape paths
+  const origPaths = Array.from(g.querySelectorAll('path:not(.icon-fill-morph):not(.icon-draw-overlay)')) as SVGPathElement[];
+  if (!origPaths.length) return;
+
+  // Store original path data and find each path's center for the dot origin
+  const fillClones: SVGPathElement[] = [];
+  origPaths.forEach(p => {
+    (p as any)._fillOrigD = p.getAttribute('d');
+
+    // Find this path's center via bounding box
+    const bbox = p.getBBox();
+    const pcx = bbox.x + bbox.width / 2;
+    const pcy = bbox.y + bbox.height / 2;
+    const dotR = 0.5;
+    const dotPath = `M${pcx - dotR},${pcy}a${dotR},${dotR},0,1,0,${dotR * 2},0a${dotR},${dotR},0,1,0,-${dotR * 2},0Z`;
+    (p as any)._fillDotPath = dotPath;
+
+    // Clone for fill morph — starts as dot at this path's center
+    const clone = p.cloneNode(true) as SVGPathElement;
+    clone.classList.add('icon-fill-morph');
+    clone.setAttribute('d', dotPath);
+    clone.removeAttribute('style');
+    clone.setAttribute('fill', getColor());
+    clone.setAttribute('stroke', 'none');
+    clone.style.opacity = '0';
+    // Insert behind original path so fill renders under stroke
+    p.parentNode!.insertBefore(clone, p);
+    fillClones.push(clone);
   });
 
-  // Start filled or empty
+  // Original paths: keep stroke outline visible, hide fill
+  const sw = g.getAttribute('stroke-width') || '2';
+  origPaths.forEach(p => {
+    (p as HTMLElement).style.fill = 'none';
+    (p as HTMLElement).style.stroke = 'currentColor';
+    (p as HTMLElement).style.strokeWidth = sw;
+  });
+
+  // Start filled if static mode
   if (mode === 'static') {
-    stop1.setAttribute('offset', '1');
-    stop2.setAttribute('offset', '1');
+    fillClones.forEach((clone, i) => {
+      clone.setAttribute('d', (origPaths[i] as any)._fillOrigD);
+      clone.style.opacity = '1';
+    });
   }
+
+  let isFilled = mode === 'static';
 
   const playFill = (reverse = false) => {
     const motion = getMotionMode();
     if (motion === 'none') return gsap.timeline();
     const d = motion === 'gentle' ? fillDuration * 2 : fillDuration;
-
-    // Re-read color for theme responsiveness
-    const fresh = getColor();
-    stop1.setAttribute('stop-color', fresh);
-    stop2.setAttribute('stop-color', fresh);
-
     const tl = gsap.timeline();
-    const from = reverse ? 1 : 0;
-    const to = reverse ? 0 : 1;
 
-    // Stop1 (color) leads — defines the filled edge
-    // Stop2 (transparent) trails slightly — creates soft gradient edge
-    tl.fromTo(stop1, { attr: { offset: from } },
-      { attr: { offset: to }, duration: d, ease: easeType }, 0);
-    tl.fromTo(stop2, { attr: { offset: from } },
-      { attr: { offset: to }, duration: d * 1.15, ease: easeType }, 0);
+    // Fresh color for theme responsiveness
+    const targetColor = reverse ? getColor() : getTargetColor();
+
+    fillClones.forEach((clone, i) => {
+      const fullShape = (origPaths[i] as any)._fillOrigD;
+      const dot = (origPaths[i] as any)._fillDotPath;
+
+      if (!reverse) {
+        // Dot → full shape (bloom in)
+        tl.fromTo(clone,
+          { morphSVG: { shape: dot, type: 'rotational' }, opacity: 0 },
+          { morphSVG: { shape: fullShape, type: 'rotational' }, opacity: 1,
+            fill: targetColor, duration: d, ease: easeType },
+          i * 0.05);
+      } else {
+        // Full shape → dot (shrink out)
+        tl.to(clone,
+          { morphSVG: { shape: dot, type: 'rotational' }, opacity: 0,
+            duration: d * 0.6, ease: 'power2.in' },
+          i * 0.05);
+      }
+    });
 
     return tl;
   };
@@ -1342,12 +1357,14 @@ function initFillIcon(el: HTMLElement) {
         scroller: osViewport || undefined,
         start: 'top 60%',
         once: mode === 'once',
-        onEnter: () => playFill(false),
-        onLeaveBack: mode !== 'once' ? () => playFill(true) : undefined,
+        onEnter: () => { if (!isFilled) { playFill(false); isFilled = true; } },
+        onLeaveBack: mode !== 'once' ? () => { playFill(true); isFilled = false; } : undefined,
       });
       break;
     }
     case 'scrub': {
+      // Scrub: morph progress tied to scroll
+      fillClones.forEach(c => { c.setAttribute('fill', getColor()); });
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: el,
@@ -1357,8 +1374,14 @@ function initFillIcon(el: HTMLElement) {
           scrub: true,
         },
       });
-      tl.fromTo(stop1, { attr: { offset: 0 } }, { attr: { offset: 1 }, duration: 1, ease: 'none' }, 0);
-      tl.fromTo(stop2, { attr: { offset: 0 } }, { attr: { offset: 1 }, duration: 1.15, ease: 'none' }, 0);
+      fillClones.forEach((clone, i) => {
+        const dot = (origPaths[i] as any)._fillDotPath;
+        tl.fromTo(clone,
+          { morphSVG: { shape: dot, type: 'rotational' }, opacity: 0 },
+          { morphSVG: { shape: (origPaths[i] as any)._fillOrigD, type: 'rotational' },
+            opacity: 1, duration: 1, ease: 'none' },
+          i * 0.05);
+      });
       break;
     }
     case 'hover':
@@ -1367,13 +1390,12 @@ function initFillIcon(el: HTMLElement) {
       let activeTl: gsap.core.Timeline | null = null;
 
       if (mode === 'yoyo') {
-        hoverTarget.addEventListener('mouseenter', () => { if (activeTl) activeTl.kill(); activeTl = playFill(false); });
-        hoverTarget.addEventListener('mouseleave', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); });
-        hoverTarget.addEventListener('focusin', () => { if (activeTl) activeTl.kill(); activeTl = playFill(false); });
-        hoverTarget.addEventListener('focusout', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); });
+        hoverTarget.addEventListener('mouseenter', () => { if (activeTl) activeTl.kill(); activeTl = playFill(false); isFilled = true; });
+        hoverTarget.addEventListener('mouseleave', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); isFilled = false; });
+        hoverTarget.addEventListener('focusin', () => { if (activeTl) activeTl.kill(); activeTl = playFill(false); isFilled = true; });
+        hoverTarget.addEventListener('focusout', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); isFilled = false; });
       } else {
-        let filled = false;
-        const doFill = () => { if (!filled) { if (activeTl) activeTl.kill(); activeTl = playFill(false); filled = true; } };
+        const doFill = () => { if (!isFilled) { if (activeTl) activeTl.kill(); activeTl = playFill(false); isFilled = true; } };
         hoverTarget.addEventListener('mouseenter', doFill);
         hoverTarget.addEventListener('focusin', doFill);
       }

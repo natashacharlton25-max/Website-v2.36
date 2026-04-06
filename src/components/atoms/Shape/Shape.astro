@@ -59,11 +59,12 @@ interface Props {
   drawScrub?: boolean;
   morphTo?: string;
   morphTrigger?: 'hover' | 'viewport' | 'scroll';
-  fillAnimation?: 'up' | 'down' | 'left' | 'right' | 'radial';
+  fillAnimation?: boolean;
   fillMode?: 'once' | 'yoyo' | 'static';
   fillTrigger?: 'hover' | 'viewport' | 'scrub';
   fillDuration?: number;
   fillEase?: string;
+  fillColor?: string;
   class?: string;
 }
 
@@ -74,7 +75,7 @@ const {
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
   media, animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover',
-  fillAnimation, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase,
+  fillAnimation, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor,
   class: className,
 } = Astro.props;
 
@@ -144,11 +145,11 @@ if (draw) {
 // Fill animation
 if (fillAnimation) {
   dataAttrs['data-icon-fill'] = 'true';
-  dataAttrs['data-icon-fill-dir'] = fillAnimation;
   if (fillMode !== 'once') dataAttrs['data-icon-fill-mode'] = fillMode;
   if (fillTrigger !== 'hover') dataAttrs['data-icon-fill-trigger'] = fillTrigger;
   if (fillDuration) dataAttrs['data-icon-fill-duration'] = String(fillDuration);
   if (fillEase) dataAttrs['data-icon-fill-ease'] = fillEase;
+  if (fillColor) dataAttrs['data-icon-fill-color'] = fillColor;
 }
 // Morph target: built-in shape name or D1 slug
 let morphTargetSvg: string | null = null;
