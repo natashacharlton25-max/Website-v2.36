@@ -82,11 +82,11 @@ const {
 // Resolve colour: rainbow takes precedence, else brand
 const resolvedColor = rainbowColor || brandColor || null;
 
-// Weight rules: morph (with or without draw) → fill only, draw (no morph) → never fill
-const resolvedWeight = morphTo
-  ? (weight || 'fill')
-  : draw && (weight === 'fill' || (!weight && DEFAULT_WEIGHT === 'fill'))
-    ? 'light'
+// Weight rules: draw (with or without morph) → light for clean strokes, morph only → fill
+const resolvedWeight = draw
+  ? (weight === 'fill' || (!weight && DEFAULT_WEIGHT === 'fill') ? 'light' : (weight || 'light'))
+  : morphTo
+    ? (weight || 'fill')
     : weight;
 
 // ─── Weight suffixes (for slug detection) ───────────────
@@ -145,7 +145,8 @@ async function fetchIcon(slug: string): Promise<string | null> {
 
 const needsWeightStrip = !!(draw || morphTo);
 const slug = resolveSlug(name, resolvedWeight, needsWeightStrip);
-const fetchSlug = morphTo ? `${slug}-flat` : slug;
+// Draw morph: standard (not flat) for clean stroke paths. Morph only: flat for single fill path.
+const fetchSlug = (morphTo && !draw) ? `${slug}-flat` : slug;
 let iconContent = await fetchIcon(fetchSlug);
 
 // Fallback: non-flat, then fill weight
@@ -167,9 +168,9 @@ if (morphTo && !draw) {
     morphTargetContent = await fetchIcon(resolveSlug(morphTo, 'fill'));
   }
 } else if (morphTo && draw) {
-  // Draw morph (DrawSVG): use resolved weight (never fill), prefer flat
+  // Draw morph: same light weight standard as primary icon
   const morphSlug = resolveSlug(morphTo, resolvedWeight);
-  morphTargetContent = await fetchIcon(`${morphSlug}-flat`) || await fetchIcon(morphSlug);
+  morphTargetContent = await fetchIcon(morphSlug);
 }
 
 // ─── SVG Transforms ─────────────────────────────────────

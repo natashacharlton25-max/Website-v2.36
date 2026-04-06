@@ -175,23 +175,18 @@ function initDrawIcon(el: HTMLElement) {
   origPaths.forEach(p => {
     const clone = p.cloneNode(true) as SVGPathElement;
     clone.classList.add('icon-draw-overlay');
-    if (ghost) {
-      // Ghost: no inline stroke/fill — CSS var(--neutral-tint) handles resting color
-      gsap.set(clone, {
-        fill: 'none',
-        strokeWidth: overlayStrokeWidth,
-        drawSVG: startDrawn ? '100%' : '0%',
-        opacity: initOpacity,
-      });
-    } else {
-      gsap.set(clone, {
-        fill: 'none',
-        strokeWidth: overlayStrokeWidth,
-        drawSVG: startDrawn ? '100%' : '0%',
-        opacity: initOpacity,
-      });
-    }
+    // Set SVG attributes directly for reliable initial state
+    clone.setAttribute('fill', 'none');
+    clone.setAttribute('stroke-width', String(overlayStrokeWidth));
+    clone.setAttribute('stroke-linejoin', 'round');
+    clone.setAttribute('stroke-linecap', 'round');
+    if (!ghost) clone.setAttribute('stroke', 'currentColor');
+    if (initOpacity < 1) clone.style.opacity = String(initOpacity);
+    // Append first so getTotalLength works for drawSVG
     p.parentNode!.appendChild(clone);
+    if (!startDrawn) {
+      gsap.set(clone, { drawSVG: '0%' });
+    }
     overlays.push(clone);
   });
 
@@ -917,8 +912,11 @@ function playDraw(
 }
 
 /* ================================================================
-   DRAW MORPH — erase → intermediary worm → draw new shape
-   Uses DrawSVG path swaps, no MorphSVG needed.
+   DRAW MORPH — shell that sequences two standard draw animations.
+   Phase 1: Erase icon A (reverse of addVariant)
+   Phase 2: Swap overlays to icon B at the zero point
+   Phase 3: Draw icon B (forward addVariant)
+   All animation logic lives in addVariant — this just orchestrates.
    ================================================================ */
 
 function playDrawMorph(
@@ -930,7 +928,7 @@ function playDrawMorph(
   _isGhostMode: boolean,
   _ghostColor: string,
   variant: DrawVariant = 'draw',
-  mode: DrawMode = 'static',
+  _mode: DrawMode = 'static',
   laser: boolean = false,
   swOverride: number = 0
 ): gsap.core.Timeline {
@@ -940,97 +938,95 @@ function playDrawMorph(
   const sw = swOverride || 10;
   const master = gsap.timeline();
 
-  // Clean up old temp clones
   const svg = overlays[0]?.closest('svg');
-  if (svg) {
-    svg.querySelectorAll('.icon-draw-chase, .icon-draw-worm, .icon-draw-trail, .icon-draw-static').forEach(el => el.remove());
-  }
+  if (!svg) return master;
+
+  // Clean up old temp clones
+  svg.querySelectorAll('.icon-draw-chase, .icon-draw-worm, .icon-draw-trail, .icon-draw-static, .icon-draw-morph-b').forEach(n => n.remove());
   overlays.forEach(o => gsap.killTweensOf(o));
 
-  // Parse morph target SVG — extract path d attributes
+  // Parse morph target SVG
   const morphHTML = el.dataset.iconMorphTarget || '';
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = morphHTML;
-  const targetPaths = Array.from(tempDiv.querySelectorAll('path')) as SVGPathElement[];
-
-  // Store original path data if not already
-  overlays.forEach(o => {
-    if (!(o as any)._originalD) (o as any)._originalD = o.getAttribute('d');
-  });
-
-
-
-  // Helper: find percentage along path closest to a point
-  function findClosestPct(path: SVGPathElement, targetX: number, targetY: number): number {
-    const total = path.getTotalLength();
-    let best = 0;
-    let bestDist = Infinity;
-    for (let s = 0; s <= 200; s++) {
-      const pt = path.getPointAtLength((s / 200) * total);
-      const dist = Math.hypot(pt.x - targetX, pt.y - targetY);
-      if (dist < bestDist) { bestDist = dist; best = (s / 200) * 100; }
-    }
-    return best;
-  }
-
-  // Track state — alternates between original and target
-  const isAtTarget = (overlays[0] as any)._atTarget === true;
-
-  // Reference point: top-center of 256x256 viewBox
-  const refX = 128, refY = 24;
-
-  // Find erase-to point on current shape
-  overlays.forEach(o => {
-    gsap.set(o, { opacity: 1, drawSVG: '100%', stroke: color, strokeWidth: sw });
-    (o as any)._eraseEnd = findClosestPct(o, refX, refY);
-  });
-
-  // ── Phase 1: Erase current shape — shrinks to the reference point ──
-  overlays.forEach(o => {
-    const ep = (o as any)._eraseEnd;
-    master.fromTo(o,
-      { drawSVG: `${ep}% ${ep + 100}%` },
-      { drawSVG: `${ep}% ${ep}%`, duration: d * 0.4, ease: 'power2.in' }, 0);
-  });
-
-  // ── Phase 2: Worm bridges from erase end to draw start ──
-  const eraseEnd = d * 0.4;
-  const newD = isAtTarget
-    ? overlays.map(o => (o as any)._originalD)
-    : targetPaths.map(p => p.getAttribute('d'));
-
-  // Swap path data and find draw-from point
-  master.call(() => {
-    overlays.forEach((o, i) => {
-      const pathD = newD[i] || newD[0];
-      if (pathD) o.setAttribute('d', pathD);
-      (o as any)._drawStart = findClosestPct(o, refX, refY);
-      gsap.set(o, { drawSVG: `${(o as any)._drawStart}% ${(o as any)._drawStart}%`, opacity: 1 });
+  // Convert non-path elements in target
+  const targetSvg = tempDiv.querySelector('svg');
+  if (targetSvg) {
+    targetSvg.querySelectorAll('circle, polygon, polyline, ellipse, line').forEach(e => {
+      MorphSVGPlugin.convertToPath(e as any);
     });
-  }, [], eraseEnd);
+    targetSvg.querySelectorAll('rect').forEach(e => {
+      const w = e.getAttribute('width');
+      const fill = e.getAttribute('fill');
+      if (fill === 'none' && (w === '256' || w === '100%')) return;
+      MorphSVGPlugin.convertToPath(e as any);
+    });
+  }
+  const targetPathEls = Array.from(tempDiv.querySelectorAll('path')) as SVGPathElement[];
 
-  // Worm: small segment appears at ref point, then shape draws out from it
-  const wormStart = eraseEnd + 0.05;
-  const growD = d * 0.1;
+  // Store originals for toggle-back
+  if (!(el as any)._morphOrigData) {
+    (el as any)._morphOrigData = overlays.map(o => o.getAttribute('d'));
+  }
+  const isAtTarget = (el as any)._morphAtTarget === true;
 
-  // ── Phase 3: Draw new shape from reference point ──
-  const drawStart = wormStart + growD;
+  // Which paths to draw next
+  const nextPaths = isAtTarget
+    ? (el as any)._morphOrigData as string[]
+    : targetPathEls.map(p => p.getAttribute('d') || '');
+
+  // ── Phase 1: Erase icon A — reverse of addVariant ──
+  // Set overlays to fully drawn state, then build a forward draw tl and play it reversed
   overlays.forEach(o => {
-    const ds = (o as any)._drawStart || 0;
-    // Grow worm from point
-    master.fromTo(o,
-      { drawSVG: `${ds}% ${ds}%` },
-      { drawSVG: `${ds}% ${ds + 5}%`, duration: growD, ease: 'power2.out' }, wormStart);
-    // Draw full shape
-    master.fromTo(o,
-      { drawSVG: `${ds}% ${ds + 5}%` },
-      { drawSVG: `${ds}% ${ds + 100}%`, duration: d * 0.5, ease: 'power2.out' }, drawStart);
+    gsap.set(o, { opacity: 1, stroke: color, strokeWidth: sw, drawSVG: '100%' });
   });
+  const eraseTl = gsap.timeline({ paused: true });
+  addVariant(eraseTl, overlays, variant, color, color, d, sw, laser, 0, 'start');
+  // Reverse: plays the draw animation backwards (100% → 0%) — accelerates into disappearance
+  master.add(eraseTl.tweenFromTo(eraseTl.duration(), 0, { duration: d * 0.5, ease: 'power3.in' }), 0);
+  // Fade out at end of erase
+  master.to(overlays, { opacity: 0, duration: 0.1, ease: 'power2.in' }, d * 0.5 - 0.1);
 
-  // Update state
+  // ── Phase 2: At zero point — create icon B overlays and draw them ──
   master.call(() => {
-    (overlays[0] as any)._atTarget = !isAtTarget;
-  });
+    // Hide icon A overlays
+    overlays.forEach(o => gsap.set(o, { opacity: 0 }));
+
+    // Create fresh overlays from icon B paths
+    const parent = svg.querySelector('g') || svg;
+    const newOverlays: SVGPathElement[] = [];
+    nextPaths.forEach(pathD => {
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', pathD);
+      p.setAttribute('fill', 'none');
+      p.setAttribute('stroke', 'currentColor');
+      p.setAttribute('stroke-width', String(sw));
+      p.setAttribute('stroke-linejoin', 'round');
+      p.setAttribute('stroke-linecap', 'round');
+      p.classList.add('icon-draw-overlay', 'icon-draw-morph-b');
+      parent.appendChild(p);
+      gsap.set(p, { stroke: color, strokeWidth: sw, drawSVG: '0%', opacity: 1 });
+      newOverlays.push(p);
+    });
+
+    // ── Phase 3: Draw icon B — standard forward addVariant with smooth ease ──
+    const drawTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    addVariant(drawTl, newOverlays, variant, color, color, d * 0.6, sw, laser, 0, 'start');
+    drawTl.timeScale(0.8);
+    drawTl.play();
+
+    // After draw completes: swap references so overlays array points to B
+    drawTl.call(() => {
+      // Remove old A overlays from DOM
+      overlays.forEach(o => o.remove());
+      overlays.length = 0;
+      newOverlays.forEach(o => {
+        o.classList.remove('icon-draw-morph-b');
+        overlays.push(o);
+      });
+      (el as any)._morphAtTarget = !isAtTarget;
+    });
+  }, [], d * 0.5 + 0.05);
 
   return master;
 }
