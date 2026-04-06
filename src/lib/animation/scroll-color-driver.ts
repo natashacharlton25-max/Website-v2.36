@@ -24,6 +24,7 @@
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { prefersReducedMotion, getScrollContainer } from './animation-config';
 gsap.registerPlugin(ScrollTrigger);
 
 /* ================================================================
@@ -117,10 +118,6 @@ export function initScrollColorDriver(
     paletteEl,
   } = options;
 
-  // Reduced motion check
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    || document.documentElement.classList.contains('a11y-reduce-motion');
-
   // Default: find all [data-zone-bg] on the page
   const triggerSections = sections
     ? Array.from(sections)
@@ -136,10 +133,10 @@ export function initScrollColorDriver(
   if (firstBg) target.style.backgroundColor = firstBg;
 
   // If reduce motion, stop here — static bg, no scroll transitions
-  if (reduceMotion) return [];
+  if (prefersReducedMotion()) return [];
 
   // OverlayScrollbars viewport — ScrollTrigger must use this as scroller
-  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]');
+  const osViewport = getScrollContainer();
 
   const triggers: ScrollTrigger[] = [];
 
@@ -195,16 +192,13 @@ export function initScrollPatternColor(
     paletteEl,
   } = options;
 
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    || document.documentElement.classList.contains('a11y-reduce-motion');
-
   const triggerSections = sections
     ? Array.from(sections)
     : Array.from(document.querySelectorAll<HTMLElement>('[data-scroll-pattern]'));
 
-  if (!triggerSections.length || reduceMotion) return [];
+  if (!triggerSections.length || prefersReducedMotion()) return [];
 
-  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]');
+  const osViewport = getScrollContainer();
   const resolveEl = paletteEl || overlay;
   const triggers: ScrollTrigger[] = [];
 

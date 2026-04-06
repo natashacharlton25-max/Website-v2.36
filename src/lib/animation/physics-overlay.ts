@@ -12,6 +12,7 @@
  * * A11y: skips init if reduce-motion or text-only is active.
  */
 import Matter from 'matter-js';
+import { prefersReducedMotion, onThemeChange } from './animation-config';
 
 interface PhysicsConfig {
   iconPaths: string[];
@@ -32,16 +33,6 @@ interface PhysicsConfig {
   lifespan: number;       // seconds, 0 = infinite
   spawnDelay: number;     // ms before first spawn
   spawnStagger: number;   // ms between each spawn
-}
-
-/* ---- A11y check ---- */
-function prefersReducedMotion(): boolean {
-  const wrapper = document.getElementById('a11y-content-wrapper');
-  return (
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    !!wrapper?.classList.contains('a11y-reduce-motion') ||
-    !!wrapper?.classList.contains('a11y-text-only')
-  );
 }
 
 /* ---- Resolve CSS variable to computed value ---- */
@@ -306,16 +297,13 @@ function initPhysicsOverlay(container: HTMLElement): void {
   window.addEventListener('resize', handleResize);
 
   // ---- A11y watcher — kill engine if reduce-motion toggled ----
-  const wrapper = document.getElementById('a11y-content-wrapper');
-  if (wrapper) {
-    new MutationObserver(() => {
-      if (prefersReducedMotion()) {
-        Matter.Render.stop(render);
-        Matter.Runner.stop(runner);
-        container.style.display = 'none';
-      }
-    }).observe(wrapper, { attributes: true, attributeFilter: ['class'] });
-  }
+  onThemeChange(() => {
+    if (prefersReducedMotion()) {
+      Matter.Render.stop(render);
+      Matter.Runner.stop(runner);
+      container.style.display = 'none';
+    }
+  });
 
   // ---- Start ----
   const runner = Matter.Runner.create();

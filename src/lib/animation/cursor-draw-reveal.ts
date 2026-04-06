@@ -6,6 +6,7 @@
 import { gsap } from 'gsap';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
+import { prefersReducedMotion, onThemeChange } from './animation-config';
 
 gsap.registerPlugin(DrawSVGPlugin, MorphSVGPlugin);
 
@@ -37,15 +38,6 @@ function resolveColor(val: string): string {
   const name = val.match(/var\((--[^,)]+)/)?.[1];
   if (!name) return val;
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || val;
-}
-
-function prefersReducedMotion(): boolean {
-  const w = document.getElementById('a11y-content-wrapper');
-  return (
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    !!w?.classList.contains('a11y-reduce-motion') ||
-    !!w?.classList.contains('a11y-text-only')
-  );
 }
 
 /* ================================================================
@@ -266,19 +258,16 @@ async function initContainer(container: HTMLElement): Promise<void> {
   });
 
   /* ---- A11y watcher — reset on reduce-motion toggle ---- */
-  const wrapper = document.getElementById('a11y-content-wrapper');
-  if (wrapper) {
-    new MutationObserver(() => {
-      if (prefersReducedMotion()) {
-        for (const s of states) {
-          gsap.killTweensOf(s.path);
-          s.active = false;
-          gsap.set(s.path, { drawSVG: '100%' });
-          s.path.style.stroke = accentColor;
-        }
+  onThemeChange(() => {
+    if (prefersReducedMotion()) {
+      for (const s of states) {
+        gsap.killTweensOf(s.path);
+        s.active = false;
+        gsap.set(s.path, { drawSVG: '100%' });
+        s.path.style.stroke = accentColor;
       }
-    }).observe(wrapper, { attributes: true, attributeFilter: ['class'] });
-  }
+    }
+  });
 }
 
 /* ================================================================

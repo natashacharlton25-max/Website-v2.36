@@ -6,6 +6,7 @@
 
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
+import { prefersReducedMotion as checkReducedMotion, onThemeChange } from './animation-config';
 
 const BRAND_PRIMARY = getComputedStyle(document.documentElement).getPropertyValue('--brand-c-primary').trim() || BRAND_PRIMARY;
 
@@ -67,12 +68,7 @@ export async function initHeroMorph() {
   if (!container || !textElement || !storage) return;
 
   // Check for reduced motion preference (user toggle, text-only, or system preference)
-  const prefersReducedMotion = () => {
-    const wrapper = document.getElementById('a11y-content-wrapper');
-    return (wrapper?.classList.contains('a11y-reduce-motion') || false) ||
-           (wrapper?.classList.contains('a11y-text-only') || false) ||
-           window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  };
+  const prefersReducedMotion = checkReducedMotion;
 
   // Function to show static content
   const showStaticContent = async () => {
@@ -112,21 +108,12 @@ export async function initHeroMorph() {
     }
   };
 
-  // Watch for changes to wrapper class (user toggling reduced motion)
-  const wrapper = document.getElementById('a11y-content-wrapper');
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === 'class') {
-        if (prefersReducedMotion() && animationActive) {
-          showStaticContent();
-        }
-      }
-    });
+  // Watch for theme/motion changes (user toggling reduced motion)
+  onThemeChange(() => {
+    if (prefersReducedMotion() && animationActive) {
+      showStaticContent();
+    }
   });
-
-  if (wrapper) {
-    observer.observe(wrapper, { attributes: true, attributeFilter: ['class'] });
-  }
 
   // Also listen for system preference changes
   window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (e) => {

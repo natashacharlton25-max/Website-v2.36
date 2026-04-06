@@ -29,17 +29,7 @@
  */
 
 import { gsap } from 'gsap';
-
-/* ── A11y: only disable for motion/text modes, NOT theme switches ── */
-
-const DISABLE_CLASSES = ['a11y-reduce-motion', 'a11y-text-only'];
-
-function isDisabled(): boolean {
-  const wrapper = document.getElementById('a11y-content-wrapper');
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
-  if (wrapper && DISABLE_CLASSES.some(cls => wrapper.classList.contains(cls))) return true;
-  return false;
-}
+import { prefersReducedMotion, getScrollContainer } from './animation-config';
 
 
 /* ── Color resolution — lazy, at animation time ── */
@@ -128,7 +118,7 @@ function cleanup(): void {
  * Initialize scroll-triggered background color changes.
  */
 function initScrollColors(): void {
-  if (isDisabled()) return;
+  if (prefersReducedMotion()) return;
 
   const sections = document.querySelectorAll<HTMLElement>('[data-scroll-bg]');
   if (sections.length === 0) return;
@@ -146,7 +136,7 @@ function initScrollColors(): void {
     index,
   }));
 
-  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]');
+  const osViewport = getScrollContainer() || null;
 
   // Resolve palette vars from the zone element (where ZonePalette.css tokens cascade)
   const paletteEl = sections[0]?.closest('.scroll-morph-zone') || target;

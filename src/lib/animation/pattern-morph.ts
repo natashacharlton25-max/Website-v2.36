@@ -26,20 +26,9 @@
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { resolveColor } from './scroll-color-driver';
+import { prefersReducedMotion, getScrollContainer } from './animation-config';
 
 gsap.registerPlugin(MorphSVGPlugin);
-
-/* ---- A11y ---- */
-const a11yDisabled = ['a11y-reduce-motion', 'a11y-text-only'];
-
-function prefersReducedMotion(): boolean {
-  const wrapper = document.getElementById('a11y-content-wrapper');
-  return (
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    !!wrapper?.classList.contains('a11y-reduce-motion') ||
-    !!wrapper?.classList.contains('a11y-text-only')
-  );
-}
 
 /* ---- Path cache ---- */
 const pathCache = new Map<string, string>();
@@ -132,9 +121,7 @@ function initPatternMorph(): void {
   }
 
   // OverlayScrollbars viewport as observer root
-  const osViewport = document.querySelector<HTMLElement>(
-    '[data-overlayscrollbars-viewport]',
-  );
+  const osViewport = getScrollContainer() || null;
 
   containers.forEach((container) => {
     const overlay = container.querySelector<HTMLElement>('.pattern-overlay--grid')

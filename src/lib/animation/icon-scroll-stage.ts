@@ -34,6 +34,7 @@ import { gsap } from 'gsap';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { prefersReducedMotion, getScrollContainer, onThemeChange } from './animation-config';
 
 gsap.registerPlugin(DrawSVGPlugin, MorphSVGPlugin, ScrollTrigger);
 
@@ -64,15 +65,6 @@ function resolveColor(val: string): string {
   const name = val.match(/var\((--[^,)]+)/)?.[1];
   if (!name) return val;
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || val;
-}
-
-function prefersReducedMotion(): boolean {
-  const w = document.getElementById('a11y-content-wrapper');
-  return (
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    !!w?.classList.contains('a11y-reduce-motion') ||
-    !!w?.classList.contains('a11y-text-only')
-  );
 }
 
 /* ================================================================
@@ -193,8 +185,7 @@ async function initStage(container: HTMLElement): Promise<void> {
   }
 
   // OverlayScrollbars viewport
-  const osViewport =
-    document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
+  const osViewport = getScrollContainer();
 
   // Build timeline — each section gets 1 unit of duration
   const tl = gsap.timeline({
@@ -253,16 +244,13 @@ async function initStage(container: HTMLElement): Promise<void> {
   });
 
   /* ---- A11y: reduce-motion → show icon fully drawn, no animation ---- */
-  const wrapper = document.getElementById('a11y-content-wrapper');
-  if (wrapper) {
-    new MutationObserver(() => {
-      if (prefersReducedMotion()) {
-        tl.scrollTrigger?.kill();
-        tl.kill();
-        gsap.set(path, { drawSVG: '100%' });
-      }
-    }).observe(wrapper, { attributes: true, attributeFilter: ['class'] });
-  }
+  onThemeChange(() => {
+    if (prefersReducedMotion()) {
+      tl.scrollTrigger?.kill();
+      tl.kill();
+      gsap.set(path, { drawSVG: '100%' });
+    }
+  });
 }
 
 /* ================================================================

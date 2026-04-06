@@ -49,6 +49,7 @@
 import { gsap } from 'gsap';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { prefersReducedMotion, getScrollContainer } from './animation-config';
 
 gsap.registerPlugin(DrawSVGPlugin, ScrollTrigger);
 
@@ -100,11 +101,6 @@ function getRainbowColors(): string[] {
     cs.getPropertyValue('--rainbow-5').trim(),
     cs.getPropertyValue('--rainbow-6').trim(),
   ].filter(Boolean);
-}
-
-function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    document.documentElement.classList.contains('a11y-reduce-motion');
 }
 
 /* ================================================================
@@ -446,7 +442,7 @@ export function initScrollDraw() {
   if (prefersReducedMotion()) return;
 
   // Detect OverlayScrollbars viewport — the actual scroll container
-  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
+  const osViewport = getScrollContainer();
 
   // Element draws
   document.querySelectorAll<HTMLElement>('[data-scroll-draw]').forEach(el => initElementDraw(el, osViewport));

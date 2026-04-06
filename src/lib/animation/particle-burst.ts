@@ -18,16 +18,9 @@
  *   fireConfetti(element);
  */
 
+import { prefersReducedMotion } from './animation-config';
 
 const COLOR_WHITE = getComputedStyle(document.documentElement).getPropertyValue('--color-White').trim() || '#ffffff';
-
-/** A11y: skip particles when reduce-motion or text-only is active */
-function isA11yActive(): boolean {
-  const wrapper = document.querySelector('#a11y-content-wrapper');
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    wrapper?.classList.contains('a11y-reduce-motion') === true ||
-    wrapper?.classList.contains('a11y-text-only') === true;
-}
 
 export type ParticleType = 'confetti' | 'hearts' | 'circle' | 'square' | 'star' | 'mixed' | 'emoji';
 
@@ -265,7 +258,7 @@ export function initParticleBurst(): void {
     if (trigger === 'hover') {
       let hasTriggered = false;
       htmlElement.addEventListener('mouseenter', () => {
-        if (!hasTriggered && !isA11yActive()) {
+        if (!hasTriggered && !prefersReducedMotion()) {
           createParticleBurst(htmlElement, options);
           hasTriggered = true;
           setTimeout(() => { hasTriggered = false; }, 2000);
@@ -273,7 +266,7 @@ export function initParticleBurst(): void {
       });
     } else {
       htmlElement.addEventListener('click', (e: MouseEvent) => {
-        if (isA11yActive()) return;
+        if (prefersReducedMotion()) return;
         createParticleBurst(htmlElement, options);
 
         // If it's a link, delay navigation for particles to show

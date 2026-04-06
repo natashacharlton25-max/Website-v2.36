@@ -35,6 +35,7 @@
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { prefersReducedMotion, getScrollContainer, onThemeChange } from './animation-config';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -51,7 +52,6 @@ interface ParallaxLayer {
 
 let layers: ParallaxLayer[] = [];
 let intensityProp = '--parallax-intensity';
-let a11yObserver: MutationObserver | null = null;
 
 /* ================================================================
    HELPERS
@@ -61,11 +61,6 @@ function getIntensity(): number {
   const cssVal = getComputedStyle(document.documentElement)
     .getPropertyValue(intensityProp).trim();
   return cssVal ? Number(cssVal) : 1;
-}
-
-function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    document.documentElement.classList.contains('a11y-reduce-motion');
 }
 
 /* ================================================================
@@ -130,7 +125,7 @@ export function initStellarParallax() {
   if (prefersReducedMotion()) return;
 
   // Detect OverlayScrollbars viewport — the actual scroll container
-  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
+  const osViewport = getScrollContainer();
 
   const elements = document.querySelectorAll<HTMLElement>('[data-depth]');
   elements.forEach(el => {
@@ -149,8 +144,6 @@ export function destroyStellarParallax() {
     layer.element.style.transitionProperty = '';
   });
   layers = [];
-  a11yObserver?.disconnect();
-  a11yObserver = null;
 }
 
 /**
@@ -163,25 +156,22 @@ export function setParallaxIntensity(value: number) {
 }
 
 /* ================================================================
-   A11Y WATCHER
+   A11Y WATCHER — uses centralised onThemeChange from animation-config
    ================================================================ */
 
+let a11yWatcherRegistered = false;
+
 function watchA11y() {
-  // Clean up previous observer (SPA nav re-init)
-  a11yObserver?.disconnect();
+  if (a11yWatcherRegistered) return;
+  a11yWatcherRegistered = true;
 
   // Kill parallax if reduced motion is toggled on mid-session
-  a11yObserver = new MutationObserver(() => {
+  onThemeChange(() => {
     if (prefersReducedMotion()) {
       destroyStellarParallax();
     } else if (layers.length === 0) {
       initStellarParallax();
     }
-  });
-
-  a11yObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
   });
 
   // System preference change

@@ -12,21 +12,13 @@
  */
 
 import { gsap } from 'gsap';
+import { prefersReducedMotion, onThemeChange } from './animation-config';
 
 const PROXIMITY_RADIUS = 150;
 const FOLLOW_STRENGTH = 0.4;
 const ELASTIC_EASE = 'elastic.out(1, 0.3)';
 const SNAP_DURATION = 0.5;
 const MOVE_DURATION = 0.3;
-
-function prefersReducedMotion(): boolean {
-  const wrapper = document.getElementById('a11y-content-wrapper');
-  return (
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    !!wrapper?.classList.contains('a11y-reduce-motion') ||
-    !!wrapper?.classList.contains('a11y-text-only')
-  );
-}
 
 function initMagnetic(overlay: HTMLElement): void {
   const cells = overlay.querySelectorAll<HTMLElement>('.pattern-overlay__cell');
@@ -74,14 +66,11 @@ if (document.readyState === 'loading') {
 document.addEventListener('astro:page-load', init);
 
 // Watch for a11y changes (kill magnetic if reduce-motion toggled on)
-const wrapper = document.getElementById('a11y-content-wrapper');
-if (wrapper) {
-  new MutationObserver(() => {
-    if (prefersReducedMotion()) {
-      // Reset all cells to origin
-      document.querySelectorAll<HTMLElement>('[data-pattern-magnetic="true"] .pattern-overlay__cell').forEach((cell) => {
-        gsap.set(cell, { x: 0, y: 0 });
-      });
-    }
-  }).observe(wrapper, { attributes: true, attributeFilter: ['class'] });
-}
+onThemeChange(() => {
+  if (prefersReducedMotion()) {
+    // Reset all cells to origin
+    document.querySelectorAll<HTMLElement>('[data-pattern-magnetic="true"] .pattern-overlay__cell').forEach((cell) => {
+      gsap.set(cell, { x: 0, y: 0 });
+    });
+  }
+});
