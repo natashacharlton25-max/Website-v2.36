@@ -1333,7 +1333,7 @@ function initFillIcon(el: HTMLElement) {
     clone.setAttribute('stroke', 'none');
     // Set transform origin to this path's center + start hidden
     if (mode === 'fade') {
-      gsap.set(clone, { opacity: 0 });
+      gsap.set(clone, { opacity: 0, svgOrigin: `${pcx} ${pcy}` });
     } else {
       gsap.set(clone, { scale: 0.01, opacity: 0, svgOrigin: `${pcx} ${pcy}` });
     }
@@ -1529,7 +1529,11 @@ function initFillIcon(el: HTMLElement) {
         if (activeTl) activeTl.kill();
         const fadeOut = gsap.timeline();
         fillClones.forEach(c => {
-          fadeOut.to(c, { opacity: 0, scale: 0.3, duration: 0.5, ease: 'power3.in' }, 0);
+          if (isFade) {
+            fadeOut.to(c, { opacity: 0, duration: 0.5, ease: 'power3.in' }, 0);
+          } else {
+            fadeOut.to(c, { opacity: 0, scale: 0.3, duration: 0.5, ease: 'power3.in' }, 0);
+          }
         });
         fadeOut.call(() => {
           fillClones.forEach(c => gsap.set(c, isFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 }));
