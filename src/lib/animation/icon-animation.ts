@@ -1524,7 +1524,21 @@ function initFillIcon(el: HTMLElement) {
       const hoverTarget = el.closest('button, a') || el;
       let activeTl: gsap.core.Timeline | null = null;
 
-      // Helper: reset clones to hidden state
+      // Helper: fade clones out smoothly, then run callback
+      const fadeOutThenPlay = (cb: () => void) => {
+        if (activeTl) activeTl.kill();
+        const fadeOut = gsap.timeline();
+        fillClones.forEach(c => {
+          fadeOut.to(c, { opacity: 0, duration: 0.25, ease: 'power2.in' }, 0);
+        });
+        fadeOut.call(() => {
+          fillClones.forEach(c => gsap.set(c, isFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 }));
+          cb();
+        });
+        activeTl = fadeOut;
+      };
+
+      // Instant reset (for first trigger or when not visible)
       const resetClones = () => {
         if (activeTl) { activeTl.kill(); activeTl = null; }
         fillClones.forEach(c => gsap.set(c, isFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 }));
@@ -1532,16 +1546,45 @@ function initFillIcon(el: HTMLElement) {
 
       switch (mode) {
         case 'yoyo': {
-          hoverTarget.addEventListener('mouseenter', () => { resetClones(); activeTl = playFill(false); isFilled = true; });
+          const enter = () => {
+            if (isFilled) { fadeOutThenPlay(() => { activeTl = playFill(false); }); }
+            else { resetClones(); activeTl = playFill(false); }
+            isFilled = true;
+          };
+          hoverTarget.addEventListener('mouseenter', enter);
           hoverTarget.addEventListener('mouseleave', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); isFilled = false; });
-          hoverTarget.addEventListener('focusin', () => { resetClones(); activeTl = playFill(false); isFilled = true; });
+          hoverTarget.addEventListener('focusin', enter);
           hoverTarget.addEventListener('focusout', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); isFilled = false; });
           break;
         }
         case 'static': {
           hoverTarget.addEventListener('mouseenter', () => {
-            resetClones();
-            activeTl = playFill(false);
+            fadeOutThenPlay(() => { activeTl = playFill(false); });
+          });
+          break;
+        }
+        case 'twinkle': {
+          // Starts filled. Each hover: pieces randomly dim to ~10% then pop back to full
+          fillClones.forEach(c => gsap.set(c, { scale: 1, opacity: 1 }));
+          isFilled = true;
+
+          hoverTarget.addEventListener('mouseenter', () => {
+            if (activeTl) activeTl.kill();
+            const tl = gsap.timeline();
+            const pathCount = fillClones.length;
+            const spread = pathCount > 1 ? 1.2 / (pathCount - 1) : 0;
+            // Random order each time
+            const order = Array.from({ length: pathCount }, (_, i) => i).sort(() => Math.random() - 0.5);
+
+            fillClones.forEach((clone, i) => {
+              const delay = order.indexOf(i) * spread;
+              // Gentle dim
+              tl.to(clone, { opacity: 0.1, duration: 0.4, ease: 'power3.in' }, delay);
+              // Soft pop back
+              tl.to(clone, { opacity: 1, duration: 0.6, ease: 'back.out(1.4)' }, delay + 0.4);
+            });
+
+            activeTl = tl;
           });
           break;
         }
