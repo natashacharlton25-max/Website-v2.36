@@ -17,11 +17,11 @@
  * Gating: checks data-render before observing. If reduced/textonly, no observers.
  */
 
+import { getAnimationConfig } from './animation-config';
+
 function initAnimTriggers() {
-  const render = document.documentElement.dataset.render;
-  const motion = document.documentElement.dataset.motion;
-  if (render === 'textonly' || render === 'reduced') return;
-  if (motion === 'none') return;
+  const config = getAnimationConfig();
+  if (!config.canAnimate) return;
 
   // ─── Viewport trigger ───
   // Plays continuously while element is in viewport, stops when out.
