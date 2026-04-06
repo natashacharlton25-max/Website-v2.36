@@ -1220,11 +1220,14 @@ function initMorphIcon(el: HTMLElement) {
 function initFillIcon(el: HTMLElement) {
   const svg = el.querySelector('svg');
   if (!svg) return;
+  // Allow overshoot from bounce/back easing
+  svg.setAttribute('overflow', 'visible');
+  svg.style.overflow = 'visible';
 
   const trigger = el.dataset.iconFillTrigger || 'hover';
   const mode = el.dataset.iconFillMode || 'once';
   const fillDuration = parseFloat(el.dataset.iconFillDuration || '') || 1;
-  const easeType = el.dataset.iconFillEase || 'power3.out';
+  const easeType = el.dataset.iconFillEase || 'back.out(1.7)';
   const fillColor = el.dataset.iconFillColor || '';
   const showOutline = el.dataset.iconFillOutline === 'true';
   // Stagger: total time divided by path count
@@ -1298,27 +1301,25 @@ function initFillIcon(el: HTMLElement) {
   const origPaths = Array.from(g.querySelectorAll('path:not(.icon-fill-morph):not(.icon-draw-overlay)')) as SVGPathElement[];
   if (!origPaths.length) return;
 
-  // Store original path data and find each path's center for the dot origin
+  // Clone each path — same shape, scales from center
   const fillClones: SVGPathElement[] = [];
   origPaths.forEach(p => {
-    (p as any)._fillOrigD = p.getAttribute('d');
-
     // Find this path's center via bounding box
     const bbox = p.getBBox();
     const pcx = bbox.x + bbox.width / 2;
     const pcy = bbox.y + bbox.height / 2;
-    const dotR = 0.5;
-    const dotPath = `M${pcx - dotR},${pcy}a${dotR},${dotR},0,1,0,${dotR * 2},0a${dotR},${dotR},0,1,0,-${dotR * 2},0Z`;
-    (p as any)._fillDotPath = dotPath;
 
-    // Clone for fill morph — starts as dot at this path's center
     const clone = p.cloneNode(true) as SVGPathElement;
     clone.classList.add('icon-fill-morph');
-    clone.setAttribute('d', dotPath);
     clone.removeAttribute('style');
     clone.setAttribute('fill', getColor());
     clone.setAttribute('stroke', 'none');
-    clone.style.opacity = '0';
+    // Set transform origin to this path's center + start hidden
+    if (mode === 'fade') {
+      gsap.set(clone, { opacity: 0 });
+    } else {
+      gsap.set(clone, { scale: 0.01, opacity: 0, svgOrigin: `${pcx} ${pcy}` });
+    }
     // Insert behind original path so fill renders under stroke
     p.parentNode!.insertBefore(clone, p);
     fillClones.push(clone);
@@ -1336,9 +1337,8 @@ function initFillIcon(el: HTMLElement) {
 
   // Start filled if static mode
   if (mode === 'static') {
-    fillClones.forEach((clone, i) => {
-      clone.setAttribute('d', (origPaths[i] as any)._fillOrigD);
-      clone.style.opacity = '1';
+    fillClones.forEach(clone => {
+      gsap.set(clone, { scale: 1, opacity: 1 });
     });
   }
 
@@ -1383,22 +1383,31 @@ function initFillIcon(el: HTMLElement) {
     const rank = new Array(pathCount);
     ordered.forEach((origIdx, staggerIdx) => { rank[origIdx] = staggerIdx; });
 
+    const isFade = mode === 'fade';
+
     fillClones.forEach((clone, i) => {
-      const fullShape = (origPaths[i] as any)._fillOrigD;
-      const dot = (origPaths[i] as any)._fillDotPath;
       const offset = rank[i] * perPathStagger;
 
       if (!reverse) {
-        tl.fromTo(clone,
-          { morphSVG: { shape: dot, type: 'rotational' }, opacity: 0 },
-          { morphSVG: { shape: fullShape, type: 'rotational' }, opacity: 1,
-            fill: targetColor, duration: d, ease: easeType },
-          offset);
+        if (isFade) {
+          // Fade in — just opacity, no scale
+          tl.fromTo(clone,
+            { opacity: 0 },
+            { opacity: 1, fill: targetColor, duration: d, ease: 'power2.out' },
+            offset);
+        } else {
+          // Scale up from center — shape stays the same, just grows
+          tl.fromTo(clone,
+            { scale: 0.01, opacity: 0 },
+            { scale: 1, opacity: 1, fill: targetColor, duration: d, ease: easeType },
+            offset);
+        }
       } else {
-        tl.to(clone,
-          { morphSVG: { shape: dot, type: 'rotational' }, opacity: 0,
-            duration: d * 0.6, ease: 'power2.in' },
-          offset);
+        if (isFade) {
+          tl.to(clone, { opacity: 0, duration: d * 0.6, ease: 'power2.in' }, offset);
+        } else {
+          tl.to(clone, { scale: 0.01, opacity: 0, duration: d * 0.6, ease: 'power2.in' }, offset);
+        }
       }
     });
 
@@ -1430,12 +1439,11 @@ function initFillIcon(el: HTMLElement) {
         },
       });
       const scrubPerPath = fillClones.length > 1 ? staggerTotal / (fillClones.length - 1) : 0;
+      const scrubFade = mode === 'fade';
       fillClones.forEach((clone, i) => {
-        const dot = (origPaths[i] as any)._fillDotPath;
         tl.fromTo(clone,
-          { morphSVG: { shape: dot, type: 'rotational' }, opacity: 0 },
-          { morphSVG: { shape: (origPaths[i] as any)._fillOrigD, type: 'rotational' },
-            opacity: 1, duration: 1, ease: 'none' },
+          scrubFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 },
+          scrubFade ? { opacity: 1, duration: 1, ease: 'none' } : { scale: 1, opacity: 1, duration: 1, ease: 'none' },
           i * scrubPerPath);
       });
       break;
