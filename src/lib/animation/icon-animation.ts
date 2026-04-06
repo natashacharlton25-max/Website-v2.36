@@ -17,39 +17,20 @@ import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import {
+  getMotionMode, getHoverMode, prefersReducedMotion,
+  getElementColor, getGhostColor, toHex, getScrollContainer,
+  onThemeChange as registerThemeCallback,
+} from './animation-config';
+
 gsap.registerPlugin(DrawSVGPlugin, MorphSVGPlugin, MotionPathPlugin, ScrollTrigger);
 
 type DrawVariant = 'draw' | 'drawcenter' | 'pulse';
 type DrawMode = 'once' | 'static' | 'yoyo' | 'reverse-yoyo' | 'reveal';
 
-function prefersReducedMotion(): boolean {
-  const wrapper = document.querySelector('#a11y-content-wrapper');
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    wrapper?.classList.contains('a11y-reduce-motion') === true ||
-    wrapper?.classList.contains('a11y-text-only') === true;
-}
-
 /* ================================================================
    DRAW ICONS
-   Original filled icon stays visible at all times.
-   Stroke overlay clones loop 3x on hover then stay visible.
-   Re-hover replays the animation.
    ================================================================ */
-
-function getMotionMode(): 'full' | 'gentle' | 'none' {
-  const val = document.documentElement.getAttribute('data-motion') || '';
-  if (val === 'none') return 'none';
-  if (val === 'gentle') return 'gentle';
-  return 'full';
-}
-
-function getHoverMode(): 'full' | 'gentle' | 'instant' | 'none' {
-  const val = document.documentElement.getAttribute('data-hover') || '';
-  if (val === 'none') return 'none';
-  if (val === 'instant') return 'instant';
-  if (val === 'gentle') return 'gentle';
-  return 'full';
-}
 
 function initDrawIcon(el: HTMLElement) {
   const svg = el.querySelector('svg');
@@ -128,7 +109,7 @@ function initDrawIcon(el: HTMLElement) {
   const sw = el.dataset.iconDrawSw ? parseFloat(el.dataset.iconDrawSw) : 10;
 
   // Detect scroll container — OverlayScrollbars viewport
-  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
+  const osViewport = getScrollContainer();
 
   // Fill modes
   const showFill = el.dataset.iconDrawFill === 'true';
@@ -1170,7 +1151,7 @@ function initMorphIcon(el: HTMLElement) {
   };
 
   // Detect scroll container
-  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
+  const osViewport = getScrollContainer();
   const morphTrigger = el.dataset.iconMorphTrigger || 'hover';
 
   switch (morphTrigger) {
@@ -1252,7 +1233,7 @@ function initFillIcon(el: HTMLElement) {
   const staggerTotal = isIcon ? 0 : (staggerTotalMap[el.dataset.iconFillStagger || 'normal'] ?? 1);
   const staggerFrom = (el.dataset.iconFillStaggerFrom || 'start') as 'start' | 'center' | 'end' | 'edges' | 'random';
 
-  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
+  const osViewport = getScrollContainer();
   const ns = 'http://www.w3.org/2000/svg';
 
   // Get viewBox center for the starting dot
@@ -1305,15 +1286,9 @@ function initFillIcon(el: HTMLElement) {
     parent.removeChild(p);
   });
 
-  // oklch → hex
-  const toHex = (cssColor: string): string => {
-    const ctx = document.createElement('canvas').getContext('2d')!;
-    ctx.fillStyle = cssColor;
-    return ctx.fillStyle;
-  };
+  // Use imported toHex + getElementColor from animation-config
   const getColor = () => {
-    const cs = getComputedStyle(el);
-    return toHex(cs.getPropertyValue('--_color').trim() || cs.color || '#c4907c');
+    return getElementColor(el);
   };
   const getTargetColor = () => {
     if (!fillColor) return getColor();
@@ -1664,14 +1639,10 @@ function initFillIcon(el: HTMLElement) {
         }
         case 'ghost': {
           // Start at ghost color, animate to full on hover, return to ghost on leave
-          const getGhostColor = () => toHex(
-            getComputedStyle(el).getPropertyValue('--svg-ghost-color').trim()
-            || getComputedStyle(document.documentElement).getPropertyValue('--neutral-tint').trim()
-            || '#ccc'
-          );
-          fillClones.forEach(c => gsap.set(c, { opacity: 1, scale: 1, fill: getGhostColor() }));
+          const getGhostFill = () => getGhostColor(el);
+          fillClones.forEach(c => gsap.set(c, { opacity: 1, scale: 1, fill: getGhostFill() }));
           if (showOutline) {
-            origPaths.forEach(p => { (p as HTMLElement).style.stroke = getGhostColor(); });
+            origPaths.forEach(p => { (p as HTMLElement).style.stroke = getGhostFill(); });
           }
           const ghostEnter = () => {
             if (activeTl) activeTl.kill();
@@ -1690,13 +1661,13 @@ function initFillIcon(el: HTMLElement) {
           const ghostLeave = () => {
             if (activeTl) activeTl.kill();
             activeTl = gsap.timeline();
-            const ghost = getGhostColor();
+            const ghostC = getGhostFill();
             fillClones.forEach(c => {
-              activeTl!.to(c, { fill: ghost, duration: combinedDuration * 0.6, ease: 'power2.in' }, 0);
+              activeTl!.to(c, { fill: ghostC, duration: combinedDuration * 0.6, ease: 'power2.in' }, 0);
             });
             if (showOutline) {
               origPaths.forEach(p => {
-                activeTl!.to(p, { stroke: ghost, duration: combinedDuration * 0.6, ease: 'power2.in' }, 0);
+                activeTl!.to(p, { stroke: ghostC, duration: combinedDuration * 0.6, ease: 'power2.in' }, 0);
               });
             }
           };
@@ -1934,9 +1905,6 @@ if (typeof document !== 'undefined') {
     initIconAnimations();
   }
 
-  // Listen for ThemeSwitcher's custom event — single source of truth for theme changes
-  window.addEventListener('themeChanged', onThemeChange);
-  // Fallback: MutationObserver for any direct attribute changes
-  const observer = new MutationObserver(onThemeChange);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-mode', 'data-theme-chroma', 'class'] });
+  // Theme change via central animation-config (listens to themeChanged + MutationObserver)
+  registerThemeCallback(onThemeChange);
 }
