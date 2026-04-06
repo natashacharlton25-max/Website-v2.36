@@ -1411,6 +1411,9 @@ function initFillIcon(el: HTMLElement) {
       const hasColorMorph = targetColor !== getColor();
 
       if (!reverse) {
+        // Set fresh color before animating
+        clone.setAttribute('fill', targetColor);
+
         if (isFade) {
           // Fade only — just opacity, no scale
           tl.fromTo(clone,
