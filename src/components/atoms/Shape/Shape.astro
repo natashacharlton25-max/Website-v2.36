@@ -64,6 +64,8 @@ interface Props {
   drawScrub?: boolean;
   morphTo?: string;
   morphTrigger?: 'hover' | 'viewport' | 'scroll';
+  morphStagger?: 'none' | 'tight' | 'normal' | 'loose';
+  morphStaggerFrom?: 'start' | 'center' | 'end' | 'edges' | 'random';
   fillAnimation?: boolean;
   fillOutline?: boolean;
   fillDrawVariant?: 'draw' | 'drawcenter' | 'pulse';
@@ -85,7 +87,7 @@ const {
   size = 'md', variant = 'fill', borderWeight, shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
   media, animation, animationTrigger = 'hover',
-  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover',
+  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom, fillTiming,
   class: className,
 } = Astro.props;
@@ -195,6 +197,8 @@ if (morphTo) {
   dataAttrs['data-icon-morph'] = 'true';
   if (morphTargetSvg) dataAttrs['data-icon-morph-target'] = morphTargetSvg;
   if (morphTrigger && morphTrigger !== 'hover') dataAttrs['data-icon-morph-trigger'] = morphTrigger;
+  if (morphStagger) dataAttrs['data-icon-morph-stagger'] = morphStagger;
+  if (morphStaggerFrom) dataAttrs['data-icon-morph-stagger-from'] = morphStaggerFrom;
 }
 
 const gradientName = gradientBlend || (gradient ? 'primary' : null);

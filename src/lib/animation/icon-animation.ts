@@ -1071,10 +1071,34 @@ function initMorphIcon(el: HTMLElement) {
   const svg = el.querySelector('svg');
   if (!svg) return;
 
+  const ns = 'http://www.w3.org/2000/svg';
+
   // Convert non-path elements to <path> for smoother morphing
   svg.querySelectorAll('circle, rect, polygon, polyline, ellipse, line').forEach(e => {
     MorphSVGPlugin.convertToPath(e as any);
   });
+
+  // Split compound paths for staggered morph (shapes only — icons keep compound for cutouts)
+  const isShape = el.classList.contains('shape');
+  if (isShape) {
+    svg.querySelectorAll('path').forEach(p => {
+      const rawPath = MotionPathPlugin.getRawPath(p as any);
+      if (rawPath.length <= 1) return;
+      const parent = p.parentNode;
+      if (!parent) return;
+      const attributes = Array.from(p.attributes);
+      rawPath.forEach((segment: any) => {
+        const newPath = document.createElementNS(ns, 'path');
+        attributes.forEach(attr => {
+          if (attr.nodeName !== 'd') newPath.setAttributeNS(null, attr.nodeName, attr.nodeValue || '');
+        });
+        newPath.setAttributeNS(null, 'd',
+          'M' + segment[0] + ',' + segment[1] + 'C' + segment.slice(2).join(',') + (segment.closed ? 'z' : ''));
+        parent.insertBefore(newPath, p);
+      });
+      parent.removeChild(p);
+    });
+  }
 
   const paths = Array.from(svg.querySelectorAll('path')) as SVGPathElement[];
   if (!paths.length) return;
@@ -1085,15 +1109,39 @@ function initMorphIcon(el: HTMLElement) {
   const morphColor = el.dataset.iconMorphColor;
   const viaCircle = el.dataset.iconMorphCircle === 'true';
 
-  // Parse target SVG — convert non-path elements to paths for MorphSVGPlugin
+  // Stagger props
+  const staggerTotalMap: Record<string, number> = { none: 0, tight: 0.3, normal: 0.6, loose: 1.2 };
+  const morphStagger = staggerTotalMap[el.dataset.iconMorphStagger || 'none'] ?? 0;
+  const morphStaggerFrom = (el.dataset.iconMorphStaggerFrom || 'start') as 'start' | 'center' | 'end' | 'edges' | 'random';
+
+  // Parse target SVG — convert + split compound paths
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = morphTargetHTML;
-  // Must append to DOM for convertToPath to work
   tempDiv.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
   document.body.appendChild(tempDiv);
   tempDiv.querySelectorAll('circle, rect, polygon, polyline, ellipse, line').forEach(e => {
     MorphSVGPlugin.convertToPath(e as any);
   });
+  // Split target compound paths too
+  if (isShape) {
+    tempDiv.querySelectorAll('path').forEach(p => {
+      const rawPath = MotionPathPlugin.getRawPath(p as any);
+      if (rawPath.length <= 1) return;
+      const parent = p.parentNode;
+      if (!parent) return;
+      const attributes = Array.from(p.attributes);
+      rawPath.forEach((segment: any) => {
+        const newPath = document.createElementNS(ns, 'path');
+        attributes.forEach(attr => {
+          if (attr.nodeName !== 'd') newPath.setAttributeNS(null, attr.nodeName, attr.nodeValue || '');
+        });
+        newPath.setAttributeNS(null, 'd',
+          'M' + segment[0] + ',' + segment[1] + 'C' + segment.slice(2).join(',') + (segment.closed ? 'z' : ''));
+        parent.insertBefore(newPath, p);
+      });
+      parent.removeChild(p);
+    });
+  }
   const targetPaths = Array.from(tempDiv.querySelectorAll('path')) as SVGPathElement[];
   document.body.removeChild(tempDiv);
   if (!targetPaths.length) return;
@@ -1119,31 +1167,46 @@ function initMorphIcon(el: HTMLElement) {
     const morphDur = getMotionMode() === 'gentle' ? 0.8 : 0.4;
     tl = gsap.timeline();
 
+    // Calculate stagger offsets
+    const pathCount = paths.length;
+    const perPathStagger = pathCount > 1 && morphStagger ? morphStagger / (pathCount - 1) : 0;
+    const indices = Array.from({ length: pathCount }, (_, i) => i);
+    let ordered: number[];
+    switch (morphStaggerFrom) {
+      case 'center': { const mid = (pathCount - 1) / 2; ordered = [...indices].sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid)); break; }
+      case 'end': ordered = [...indices].reverse(); break;
+      case 'edges': { const mid = (pathCount - 1) / 2; ordered = [...indices].sort((a, b) => Math.abs(b - mid) - Math.abs(a - mid)); break; }
+      case 'random': ordered = [...indices].sort(() => Math.random() - 0.5); break;
+      default: ordered = indices;
+    }
+    const rank = new Array(pathCount);
+    ordered.forEach((origIdx, staggerIdx) => { rank[origIdx] = staggerIdx; });
+
     paths.forEach((path, i) => {
-      const target = targetPaths[i];
+      const target = targetPaths[i % targetPaths.length];
       if (!target) return;
+      const offset = rank[i] * perPathStagger;
 
       if (viaCircle) {
         const halfDur = morphDur * 0.6;
         const targetShape = !morphed ? target : (path as any)._originalD;
-        // Shape → circle → target shape (no fill animation — CSS handles color)
         tl!.to(path, {
           morphSVG: { shape: circlePath, type: 'rotational' },
           duration: halfDur,
           ease: 'power2.in',
-        }, 0);
+        }, offset);
         tl!.to(path, {
           morphSVG: { shape: targetShape, type: 'rotational' },
           duration: halfDur,
           ease: 'power2.out',
-        }, halfDur);
+        }, offset + halfDur);
       } else {
         const targetShape = !morphed ? target : (path as any)._originalD;
         tl!.to(path, {
           morphSVG: { shape: targetShape, type: 'rotational' },
           duration: morphDur,
           ease: 'power2.inOut',
-        }, 0);
+        }, offset);
       }
     });
 
