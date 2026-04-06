@@ -135,8 +135,9 @@ export class ThemeSwitcher {
         // Save preference
         localStorage.setItem('color-theme', themeName);
 
-        // Remove loading state
+        // Remove loading state + reveal page (hidden by inline script to prevent flash)
         document.documentElement.classList.remove('theme-switching');
+        document.documentElement.style.visibility = '';
 
         // Update UI indicators
         this.updateThemeIndicators(themeName);
@@ -162,6 +163,7 @@ export class ThemeSwitcher {
 
         console.error(`Failed to load theme: ${themeName}`);
         document.documentElement.classList.remove('theme-switching');
+        document.documentElement.style.visibility = '';
         // Revert to previous theme on error
         this.currentTheme = previousTheme;
         reject(new Error(`Failed to load theme: ${themeName}`));

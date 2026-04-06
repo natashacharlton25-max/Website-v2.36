@@ -1217,6 +1217,9 @@ function initMorphIcon(el: HTMLElement) {
    Can morph color too.
    ================================================================ */
 
+// Registry for elements that need re-init on theme change
+const rainbowScrollElements: { el: HTMLElement, tl: gsap.core.Timeline, rebuild: () => void }[] = [];
+
 function initFillIcon(el: HTMLElement) {
   const svg = el.querySelector('svg');
   if (!svg) return;
@@ -1457,44 +1460,52 @@ function initFillIcon(el: HTMLElement) {
     }
     case 'rainbow': {
       // Rainbow scrub: cycles fill through all 7 rainbow tokens on scroll
-      // Animates origPaths directly — no clones needed for color cycling
-      const cs = getComputedStyle(document.documentElement);
-      const rainbowColors = [1, 2, 3, 4, 5, 6, 7].map(n =>
-        toHex(cs.getPropertyValue(`--rainbow-${n}`).trim() || '#888')
-      );
-
-      // Remove clones (not needed), restore origPaths fill
+      // Remove clones (not needed)
       fillClones.forEach(c => c.remove());
       fillClones.length = 0;
-      origPaths.forEach(p => {
-        (p as HTMLElement).style.fill = rainbowColors[0];
-        if (showOutline) {
-          const sw = g!.getAttribute('stroke-width') || '2';
-          (p as HTMLElement).style.stroke = 'currentColor';
-          (p as HTMLElement).style.strokeWidth = sw;
-        }
-      });
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: el,
-          scroller: osViewport || undefined,
-          start: 'top 90%',
-          end: 'bottom 10%',
-          scrub: true,
-        },
-      });
+      let rainbowTl: gsap.core.Timeline | null = null;
 
-      // Keyframe through all 7 colors — fill and stroke together
-      const segDur = 1 / (rainbowColors.length - 1);
-      origPaths.forEach(path => {
-        rainbowColors.forEach((color, ci) => {
-          if (ci === 0) return;
-          const props: Record<string, any> = { fill: color, duration: segDur, ease: 'none' };
-          if (showOutline) props.stroke = color;
-          tl.to(path, props, segDur * (ci - 1));
+      const buildRainbow = () => {
+        if (rainbowTl) { rainbowTl.scrollTrigger?.kill(); rainbowTl.kill(); }
+
+        const cs = getComputedStyle(document.documentElement);
+        const colors = [1, 2, 3, 4, 5, 6, 7].map(n =>
+          toHex(cs.getPropertyValue(`--rainbow-${n}`).trim() || '#888')
+        );
+
+        origPaths.forEach(p => {
+          (p as HTMLElement).style.fill = colors[0];
+          if (showOutline) {
+            const sw = g!.getAttribute('stroke-width') || '2';
+            (p as HTMLElement).style.stroke = 'currentColor';
+            (p as HTMLElement).style.strokeWidth = sw;
+          }
         });
-      });
+
+        rainbowTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: el,
+            scroller: osViewport || undefined,
+            start: 'top 90%',
+            end: 'bottom 10%',
+            scrub: true,
+          },
+        });
+
+        const segDur = 1 / (colors.length - 1);
+        origPaths.forEach(path => {
+          colors.forEach((color, ci) => {
+            if (ci === 0) return;
+            const props: Record<string, any> = { fill: color, duration: segDur, ease: 'none' };
+            if (showOutline) props.stroke = color;
+            rainbowTl!.to(path, props, segDur * (ci - 1));
+          });
+        });
+      };
+
+      buildRainbow();
+      rainbowScrollElements.push({ el, tl: rainbowTl!, rebuild: buildRainbow });
       break;
     }
     case 'scrub': {
@@ -1838,6 +1849,9 @@ function onThemeChange() {
   document.querySelectorAll('.shape--draw svg path:not(.icon-draw-overlay)').forEach(el => {
     (el as HTMLElement).style.removeProperty('fill');
   });
+
+  // Rainbow scroll: rebuild timelines with fresh colors
+  rainbowScrollElements.forEach(r => r.rebuild());
 
   // Animated gradients: re-copy stops from shared defs
   document.querySelectorAll('linearGradient[data-shared-grad]').forEach(localGrad => {

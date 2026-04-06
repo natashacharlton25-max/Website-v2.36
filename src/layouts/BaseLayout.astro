@@ -69,11 +69,20 @@ const {
   <!-- Lottie Player for animated icons -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
-  <!-- Early accessibility state restoration (prevents flash) -->
+  <!-- Early theme + accessibility restoration (prevents flash of default theme) -->
   <script is:inline>
+    // Hide page until theme CSS loads — prevents flash of default theme
+    try {
+      var savedTheme = localStorage.getItem('color-theme');
+      if (savedTheme && savedTheme !== 'default') {
+        document.documentElement.style.visibility = 'hidden';
+        // Safety: reveal after 2s if ThemeSwitcher hasn't loaded
+        setTimeout(function() { document.documentElement.style.visibility = ''; }, 2000);
+      }
+    } catch (e) {}
     // Restore text-only mode immediately before body renders
     try {
-      const settings = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
+      var settings = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
       if (settings.textOnly) {
         document.documentElement.classList.add('a11y-text-only-pending');
       }
