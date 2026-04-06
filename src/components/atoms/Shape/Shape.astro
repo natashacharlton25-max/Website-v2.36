@@ -105,7 +105,7 @@ const SVG_SHAPES: Record<string, string> = {
   blob:    '<path d="M70,8 C90,15 98,35 96,55 C94,75 80,92 60,96 C40,100 18,90 8,72 C-2,54 2,30 15,15 C28,0 50,1 70,8 Z" />',
 };
 
-const isCssShape = ['circle', 'square', 'rounded', 'pill'].includes(shape) && !draw;
+const isCssShape = ['circle', 'square', 'rounded', 'pill'].includes(shape) && !draw && !morphTo;
 const isSvgShape = !isCssShape;
 const builtinSvg = isSvgShape ? SVG_SHAPES[shape] : undefined;
 
@@ -184,11 +184,12 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
   {...dataAttrs}
 >
   {builtinSvg && !svgContent && (
-    <svg class:list={['shape__svg', `shape__svg--${variant}`]} viewBox={vb} overflow="visible" aria-hidden="true">
+    <svg class:list={['shape__svg', `shape__svg--${variant}`, gradientName && 'shape__svg--gradient']} viewBox={vb} overflow="visible" aria-hidden="true">
       <g
         stroke-width={String(sw)}
         stroke-linejoin="round"
         stroke-linecap="round"
+        style={gradientName ? `fill: url(#grad-${gradientName}); ${(variant === 'outline' || variant === 'glass' || variant === 'liquid-glass') ? `stroke: url(#grad-${gradientName});` : ''}` : undefined}
       >
         <Fragment set:html={builtinSvg} />
       </g>
@@ -219,6 +220,12 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
       s = s.replace(/fill="#[a-fA-F0-9]+"/g, 'fill="none" stroke="currentColor" stroke-width="3"');
       s = s.replace(/fill="currentColor"/g, 'fill="none" stroke="currentColor" stroke-width="3"');
       s = s.replace(/fill="none"(?=\s*>)/, 'fill="none"');
+    } else if (gradientName) {
+      // Gradient: replace fills with gradient URL reference
+      const gradFill = `fill="url(#grad-${gradientName})"`;
+      s = s.replace(/fill="rgb\([^"]*\)"/g, gradFill);
+      s = s.replace(/fill="#[a-fA-F0-9]+"/g, gradFill);
+      s = s.replace(/fill="currentColor"/g, gradFill);
     } else {
       // Normal: replace hardcoded fills with currentColor
       s = s.replace(/fill="rgb\([^"]*\)"/g, 'fill="currentColor"');

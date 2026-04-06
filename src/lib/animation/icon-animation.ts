@@ -1057,10 +1057,17 @@ function initMorphIcon(el: HTMLElement) {
   const morphColor = el.dataset.iconMorphColor;
   const viaCircle = el.dataset.iconMorphCircle === 'true';
 
-  // Parse target SVG
+  // Parse target SVG — convert non-path elements to paths for MorphSVGPlugin
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = morphTargetHTML;
+  // Must append to DOM for convertToPath to work
+  tempDiv.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+  document.body.appendChild(tempDiv);
+  tempDiv.querySelectorAll('circle, rect, polygon, polyline, ellipse, line').forEach(e => {
+    MorphSVGPlugin.convertToPath(e as any);
+  });
   const targetPaths = Array.from(tempDiv.querySelectorAll('path')) as SVGPathElement[];
+  document.body.removeChild(tempDiv);
   if (!targetPaths.length) return;
 
   // Get colours
@@ -1090,49 +1097,25 @@ function initMorphIcon(el: HTMLElement) {
 
       if (viaCircle) {
         const halfDur = morphDur * 0.6;
-        if (!morphed) {
-          // Shape A → circle → Shape B
-          tl!.to(path, {
-            morphSVG: { shape: circlePath, type: 'rotational' },
-            duration: halfDur,
-            ease: 'power2.in',
-          }, 0);
-          tl!.to(path, {
-            morphSVG: { shape: target, type: 'rotational' },
-            fill: targetFill,
-            duration: halfDur,
-            ease: 'power2.out',
-          }, halfDur);
-        } else {
-          // Shape B → circle → Shape A
-          tl!.to(path, {
-            morphSVG: { shape: circlePath, type: 'rotational' },
-            duration: halfDur,
-            ease: 'power2.in',
-          }, 0);
-          tl!.to(path, {
-            morphSVG: { shape: (path as any)._originalD, type: 'rotational' },
-            fill: originalFill,
-            duration: halfDur,
-            ease: 'power2.out',
-          }, halfDur);
-        }
+        const targetShape = !morphed ? target : (path as any)._originalD;
+        // Shape → circle → target shape (no fill animation — CSS handles color)
+        tl!.to(path, {
+          morphSVG: { shape: circlePath, type: 'rotational' },
+          duration: halfDur,
+          ease: 'power2.in',
+        }, 0);
+        tl!.to(path, {
+          morphSVG: { shape: targetShape, type: 'rotational' },
+          duration: halfDur,
+          ease: 'power2.out',
+        }, halfDur);
       } else {
-        if (!morphed) {
-          tl!.to(path, {
-            morphSVG: { shape: target, type: 'rotational' },
-            fill: targetFill,
-            duration: morphDur,
-            ease: 'power2.inOut',
-          }, 0);
-        } else {
-          tl!.to(path, {
-            morphSVG: { shape: (path as any)._originalD, type: 'rotational' },
-            fill: originalFill,
-            duration: morphDur,
-            ease: 'power2.inOut',
-          }, 0);
-        }
+        const targetShape = !morphed ? target : (path as any)._originalD;
+        tl!.to(path, {
+          morphSVG: { shape: targetShape, type: 'rotational' },
+          duration: morphDur,
+          ease: 'power2.inOut',
+        }, 0);
       }
     });
 
