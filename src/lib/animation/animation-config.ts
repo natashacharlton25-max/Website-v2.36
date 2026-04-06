@@ -256,19 +256,23 @@ export function onThemeChange(cb: ThemeChangeCallback): void {
   themeChangeCallbacks.push(cb);
 }
 
-/** Fire all theme change callbacks — slight delay to ensure CSS has applied */
+/** Fire all theme change callbacks */
 function fireThemeChange(): void {
-  requestAnimationFrame(() => {
-    themeChangeCallbacks.forEach(cb => cb());
-  });
+  themeChangeCallbacks.forEach(cb => cb());
 }
 
-// Listen for ThemeSwitcher event + MutationObserver fallback
+// Listen for ThemeSwitcher event + debounced MutationObserver fallback
 if (typeof document !== 'undefined') {
   window.addEventListener('themeChanged', fireThemeChange);
-  const observer = new MutationObserver(fireThemeChange);
+  // MutationObserver: debounce to avoid premature firing during page load
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  const debouncedFire = () => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(fireThemeChange, 100);
+  };
+  const observer = new MutationObserver(debouncedFire);
   observer.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-mode', 'data-theme-chroma', 'data-motion', 'data-hover', 'data-render', 'class']
+    attributeFilter: ['data-mode', 'data-theme-chroma', 'data-motion', 'data-hover', 'data-render']
   });
 }
