@@ -1634,17 +1634,18 @@ function initFillIcon(el: HTMLElement) {
         }
         case 'fade':
         default: {
-          // once/fade — fill on hover. Reset on re-enter if interrupted.
-          hoverTarget.addEventListener('mouseenter', () => {
-            resetClones();
-            activeTl = playFill(false);
+          // once/fade — fill on hover. Smooth fade out before replay on retrigger.
+          const doFill = () => {
+            if (isFilled) {
+              fadeOutThenPlay(() => { activeTl = playFill(false); });
+            } else {
+              resetClones();
+              activeTl = playFill(false);
+            }
             isFilled = true;
-          });
-          hoverTarget.addEventListener('focusin', () => {
-            resetClones();
-            activeTl = playFill(false);
-            isFilled = true;
-          });
+          };
+          hoverTarget.addEventListener('mouseenter', doFill);
+          hoverTarget.addEventListener('focusin', doFill);
           break;
         }
       }
