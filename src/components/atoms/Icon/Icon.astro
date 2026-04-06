@@ -66,6 +66,15 @@ interface Props {
   morphTo?: string;
   morphViaCircle?: boolean;
   morphTrigger?: 'hover' | 'viewport' | 'scroll';
+  fillAnimation?: boolean;
+  fillOutline?: boolean;
+  fillMode?: 'once' | 'yoyo' | 'static' | 'fade';
+  fillTrigger?: 'hover' | 'viewport' | 'scrub';
+  fillDuration?: number;
+  fillEase?: string;
+  fillColor?: string;
+  fillStagger?: 'none' | 'tight' | 'normal' | 'loose';
+  fillStaggerFrom?: 'start' | 'center' | 'end' | 'edges' | 'random';
 
   class?: string;
 }
@@ -77,7 +86,9 @@ const {
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
   animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawOnScroll, drawScrub, drawColor,
-  morphTo, morphViaCircle, morphTrigger = 'hover', semanticRole, label,
+  morphTo, morphViaCircle, morphTrigger = 'hover',
+  fillAnimation, fillOutline, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom,
+  semanticRole, label,
 } = Astro.props;
 
 // Resolve colour: rainbow takes precedence, else brand
@@ -245,6 +256,18 @@ if (morphTo && morphTargetContent) {
   dataAttrs['data-icon-morph-target'] = morphTargetContent;
   if (morphViaCircle) dataAttrs['data-icon-morph-circle'] = 'true';
   if (morphTrigger && morphTrigger !== 'hover') dataAttrs['data-icon-morph-trigger'] = morphTrigger;
+}
+
+if (fillAnimation) {
+  dataAttrs['data-icon-fill'] = 'true';
+  if (fillOutline) dataAttrs['data-icon-fill-outline'] = 'true';
+  if (fillMode !== 'once') dataAttrs['data-icon-fill-mode'] = fillMode;
+  if (fillTrigger !== 'hover') dataAttrs['data-icon-fill-trigger'] = fillTrigger;
+  if (fillDuration) dataAttrs['data-icon-fill-duration'] = String(fillDuration);
+  if (fillEase) dataAttrs['data-icon-fill-ease'] = fillEase;
+  if (fillColor) dataAttrs['data-icon-fill-color'] = fillColor;
+  if (fillStagger) dataAttrs['data-icon-fill-stagger'] = fillStagger;
+  if (fillStaggerFrom) dataAttrs['data-icon-fill-stagger-from'] = fillStaggerFrom;
 }
 
 ---

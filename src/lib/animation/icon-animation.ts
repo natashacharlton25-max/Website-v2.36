@@ -1254,8 +1254,17 @@ function initFillIcon(el: HTMLElement) {
     svg.appendChild(g);
   }
 
-  // Convert non-path elements to path
-  g.querySelectorAll('circle, polygon, polyline, ellipse, line, rect').forEach(e => {
+  // Convert non-path elements to path — skip Phosphor background rects
+  g.querySelectorAll('circle, polygon, polyline, ellipse, line').forEach(e => {
+    MorphSVGPlugin.convertToPath(e as any);
+  });
+  g.querySelectorAll('rect').forEach(e => {
+    const w = e.getAttribute('width');
+    const fill = e.getAttribute('fill');
+    if (fill === 'none' && (w === '256' || w === '100%')) {
+      e.remove(); // remove background rect entirely
+      return;
+    }
     MorphSVGPlugin.convertToPath(e as any);
   });
 
@@ -1390,23 +1399,29 @@ function initFillIcon(el: HTMLElement) {
 
       if (!reverse) {
         if (isFade) {
-          // Fade in — just opacity, no scale
+          // Fade only — just opacity, no scale
           tl.fromTo(clone,
             { opacity: 0 },
             { opacity: 1, fill: targetColor, duration: d, ease: 'power2.out' },
             offset);
         } else {
-          // Scale up from center — shape stays the same, just grows
+          // Scale bloom + fade — opacity leads, scale follows with bounce
           tl.fromTo(clone,
-            { scale: 0.01, opacity: 0 },
-            { scale: 1, opacity: 1, fill: targetColor, duration: d, ease: easeType },
+            { opacity: 0 },
+            { opacity: 1, duration: d * 0.3, ease: 'power2.out' },
+            offset);
+          tl.fromTo(clone,
+            { scale: 0.01 },
+            { scale: 1, fill: targetColor, duration: d, ease: easeType },
             offset);
         }
       } else {
         if (isFade) {
           tl.to(clone, { opacity: 0, duration: d * 0.6, ease: 'power2.in' }, offset);
         } else {
-          tl.to(clone, { scale: 0.01, opacity: 0, duration: d * 0.6, ease: 'power2.in' }, offset);
+          // Scale shrinks, opacity fades out at the end
+          tl.to(clone, { scale: 0.01, duration: d * 0.6, ease: 'power2.in' }, offset);
+          tl.to(clone, { opacity: 0, duration: d * 0.2, ease: 'power2.in' }, offset + d * 0.4);
         }
       }
     });
