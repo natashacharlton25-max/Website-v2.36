@@ -1225,12 +1225,11 @@ function initFillIcon(el: HTMLElement) {
   svg.style.overflow = 'visible';
 
   const trigger = el.dataset.iconFillTrigger || 'hover';
-  const mode = el.dataset.iconFillMode || 'once';
+  const hasDraw = !!el.dataset.iconDraw;
+  const mode = el.dataset.iconFillMode || (hasDraw ? 'fade' : 'once');
   const fillDuration = parseFloat(el.dataset.iconFillDuration || '') || 1;
   const fillColor = el.dataset.iconFillColor || '';
   const showOutline = el.dataset.iconFillOutline === 'true';
-  // When draw + fill are combined, delay fill and use slow exponential start
-  const hasDraw = !!el.dataset.iconDraw;
   const fillDelay = hasDraw ? 1 : 0; // starts when draw is ~50% through
   const easeType = el.dataset.iconFillEase || (hasDraw ? 'expoScale(0.5,7,power3.out)' : 'back.out(1.7)');
   const combinedDuration = hasDraw ? fillDuration * 1.5 : fillDuration;
