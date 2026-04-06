@@ -1230,7 +1230,12 @@ function initFillIcon(el: HTMLElement) {
   const fillDuration = parseFloat(el.dataset.iconFillDuration || '') || 1;
   const fillColor = el.dataset.iconFillColor || '';
   const showOutline = el.dataset.iconFillOutline === 'true';
-  const fillDelay = hasDraw ? 1 : 0; // starts when draw is ~50% through
+  // Fill timing relative to draw: 'after' waits for draw to finish, 'overlap' starts at ~50%
+  const fillTiming = el.dataset.iconFillTiming || (hasDraw ? 'overlap' : '');
+  const drawDuration = getMotionMode() === 'gentle' ? 4 : 2;
+  const fillDelay = fillTiming === 'after' ? drawDuration + 0.3
+    : hasDraw ? drawDuration * 0.5
+    : 0;
   const easeType = el.dataset.iconFillEase || (hasDraw ? 'expoScale(0.5,7,power3.out)' : 'back.out(1.7)');
   const combinedDuration = hasDraw ? fillDuration * 1.5 : fillDuration;
   // Stagger: total time divided by path count
@@ -1354,6 +1359,8 @@ function initFillIcon(el: HTMLElement) {
     });
   }
 
+  const isFade = mode === 'fade' || (hasDraw && !el.dataset.iconFillMode);
+
   let isFilled = mode === 'static';
 
   const playFill = (reverse = false) => {
@@ -1395,17 +1402,17 @@ function initFillIcon(el: HTMLElement) {
     const rank = new Array(pathCount);
     ordered.forEach((origIdx, staggerIdx) => { rank[origIdx] = staggerIdx; });
 
-    const isFade = mode === 'fade';
-
     fillClones.forEach((clone, i) => {
       const offset = rank[i] * perPathStagger;
+
+      const hasColorMorph = targetColor !== getColor();
 
       if (!reverse) {
         if (isFade) {
           // Fade only — just opacity, no scale
           tl.fromTo(clone,
             { opacity: 0 },
-            { opacity: 1, fill: targetColor, duration: d, ease: 'power2.out' },
+            { opacity: 1, duration: d, ease: 'power2.out' },
             offset);
         } else {
           // Scale bloom + fade — opacity leads, scale follows with bounce
@@ -1415,8 +1422,12 @@ function initFillIcon(el: HTMLElement) {
             offset);
           tl.fromTo(clone,
             { scale: 0.01 },
-            { scale: 1, fill: targetColor, duration: d, ease: easeType },
+            { scale: 1, duration: d, ease: easeType },
             offset);
+        }
+        // Color morph: separate slower tween so it doesn't rush
+        if (hasColorMorph) {
+          tl.to(clone, { fill: targetColor, duration: d * 1.5, ease: 'power2.inOut' }, offset);
         }
       } else {
         if (isFade) {
@@ -1444,8 +1455,50 @@ function initFillIcon(el: HTMLElement) {
       });
       break;
     }
+    case 'rainbow': {
+      // Rainbow scrub: cycles fill through all 7 rainbow tokens on scroll
+      // Animates origPaths directly — no clones needed for color cycling
+      const cs = getComputedStyle(document.documentElement);
+      const rainbowColors = [1, 2, 3, 4, 5, 6, 7].map(n =>
+        toHex(cs.getPropertyValue(`--rainbow-${n}`).trim() || '#888')
+      );
+
+      // Remove clones (not needed), restore origPaths fill
+      fillClones.forEach(c => c.remove());
+      fillClones.length = 0;
+      origPaths.forEach(p => {
+        (p as HTMLElement).style.fill = rainbowColors[0];
+        if (showOutline) {
+          const sw = g!.getAttribute('stroke-width') || '2';
+          (p as HTMLElement).style.stroke = 'currentColor';
+          (p as HTMLElement).style.strokeWidth = sw;
+        }
+      });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: el,
+          scroller: osViewport || undefined,
+          start: 'top 90%',
+          end: 'bottom 10%',
+          scrub: true,
+        },
+      });
+
+      // Keyframe through all 7 colors — fill and stroke together
+      const segDur = 1 / (rainbowColors.length - 1);
+      origPaths.forEach(path => {
+        rainbowColors.forEach((color, ci) => {
+          if (ci === 0) return;
+          const props: Record<string, any> = { fill: color, duration: segDur, ease: 'none' };
+          if (showOutline) props.stroke = color;
+          tl.to(path, props, segDur * (ci - 1));
+        });
+      });
+      break;
+    }
     case 'scrub': {
-      // Scrub: morph progress tied to scroll
+      // Scrub: fill progress tied to scroll
       fillClones.forEach(c => { c.setAttribute('fill', getColor()); });
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -1471,15 +1524,86 @@ function initFillIcon(el: HTMLElement) {
       const hoverTarget = el.closest('button, a') || el;
       let activeTl: gsap.core.Timeline | null = null;
 
-      if (mode === 'yoyo') {
-        hoverTarget.addEventListener('mouseenter', () => { if (activeTl) activeTl.kill(); activeTl = playFill(false); isFilled = true; });
-        hoverTarget.addEventListener('mouseleave', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); isFilled = false; });
-        hoverTarget.addEventListener('focusin', () => { if (activeTl) activeTl.kill(); activeTl = playFill(false); isFilled = true; });
-        hoverTarget.addEventListener('focusout', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); isFilled = false; });
-      } else {
-        const doFill = () => { if (!isFilled) { if (activeTl) activeTl.kill(); activeTl = playFill(false); isFilled = true; } };
-        hoverTarget.addEventListener('mouseenter', doFill);
-        hoverTarget.addEventListener('focusin', doFill);
+      // Helper: reset clones to hidden state
+      const resetClones = () => {
+        if (activeTl) { activeTl.kill(); activeTl = null; }
+        fillClones.forEach(c => gsap.set(c, isFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 }));
+      };
+
+      switch (mode) {
+        case 'yoyo': {
+          hoverTarget.addEventListener('mouseenter', () => { resetClones(); activeTl = playFill(false); isFilled = true; });
+          hoverTarget.addEventListener('mouseleave', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); isFilled = false; });
+          hoverTarget.addEventListener('focusin', () => { resetClones(); activeTl = playFill(false); isFilled = true; });
+          hoverTarget.addEventListener('focusout', () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); isFilled = false; });
+          break;
+        }
+        case 'static': {
+          hoverTarget.addEventListener('mouseenter', () => {
+            resetClones();
+            activeTl = playFill(false);
+          });
+          break;
+        }
+        case 'ghost': {
+          // Start at ghost color, animate to full on hover, return to ghost on leave
+          const getGhostColor = () => toHex(
+            getComputedStyle(el).getPropertyValue('--svg-ghost-color').trim()
+            || getComputedStyle(document.documentElement).getPropertyValue('--neutral-tint').trim()
+            || '#ccc'
+          );
+          fillClones.forEach(c => gsap.set(c, { opacity: 1, scale: 1, fill: getGhostColor() }));
+          if (showOutline) {
+            origPaths.forEach(p => { (p as HTMLElement).style.stroke = getGhostColor(); });
+          }
+          const ghostEnter = () => {
+            if (activeTl) activeTl.kill();
+            activeTl = gsap.timeline();
+            const target = getTargetColor();
+            fillClones.forEach(c => {
+              gsap.set(c, { scale: 1, opacity: 1 });
+              activeTl!.to(c, { fill: target, duration: combinedDuration, ease: easeType }, 0);
+            });
+            if (showOutline) {
+              origPaths.forEach(p => {
+                activeTl!.to(p, { stroke: target, duration: combinedDuration, ease: easeType }, 0);
+              });
+            }
+          };
+          const ghostLeave = () => {
+            if (activeTl) activeTl.kill();
+            activeTl = gsap.timeline();
+            const ghost = getGhostColor();
+            fillClones.forEach(c => {
+              activeTl!.to(c, { fill: ghost, duration: combinedDuration * 0.6, ease: 'power2.in' }, 0);
+            });
+            if (showOutline) {
+              origPaths.forEach(p => {
+                activeTl!.to(p, { stroke: ghost, duration: combinedDuration * 0.6, ease: 'power2.in' }, 0);
+              });
+            }
+          };
+          hoverTarget.addEventListener('mouseenter', ghostEnter);
+          hoverTarget.addEventListener('mouseleave', ghostLeave);
+          hoverTarget.addEventListener('focusin', ghostEnter);
+          hoverTarget.addEventListener('focusout', ghostLeave);
+          break;
+        }
+        case 'fade':
+        default: {
+          // once/fade — fill on hover. Reset on re-enter if interrupted.
+          hoverTarget.addEventListener('mouseenter', () => {
+            resetClones();
+            activeTl = playFill(false);
+            isFilled = true;
+          });
+          hoverTarget.addEventListener('focusin', () => {
+            resetClones();
+            activeTl = playFill(false);
+            isFilled = true;
+          });
+          break;
+        }
       }
       break;
     }
