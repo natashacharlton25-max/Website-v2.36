@@ -1227,9 +1227,13 @@ function initFillIcon(el: HTMLElement) {
   const trigger = el.dataset.iconFillTrigger || 'hover';
   const mode = el.dataset.iconFillMode || 'once';
   const fillDuration = parseFloat(el.dataset.iconFillDuration || '') || 1;
-  const easeType = el.dataset.iconFillEase || 'back.out(1.7)';
   const fillColor = el.dataset.iconFillColor || '';
   const showOutline = el.dataset.iconFillOutline === 'true';
+  // When draw + fill are combined, delay fill and use slow exponential start
+  const hasDraw = !!el.dataset.iconDraw;
+  const fillDelay = hasDraw ? 1 : 0; // starts when draw is ~50% through
+  const easeType = el.dataset.iconFillEase || (hasDraw ? 'expoScale(0.5,7,power3.out)' : 'back.out(1.7)');
+  const combinedDuration = hasDraw ? fillDuration * 1.5 : fillDuration;
   // Stagger: total time divided by path count
   const staggerTotalMap: Record<string, number> = { none: 0, tight: 0.5, normal: 1, loose: 2 };
   const staggerTotal = staggerTotalMap[el.dataset.iconFillStagger || 'normal'] ?? 1;
@@ -1356,8 +1360,8 @@ function initFillIcon(el: HTMLElement) {
   const playFill = (reverse = false) => {
     const motion = getMotionMode();
     if (motion === 'none') return gsap.timeline();
-    const d = motion === 'gentle' ? fillDuration * 2 : fillDuration;
-    const tl = gsap.timeline();
+    const d = motion === 'gentle' ? combinedDuration * 2 : combinedDuration;
+    const tl = gsap.timeline({ delay: reverse ? 0 : fillDelay });
 
     // Fresh color for theme responsiveness
     const targetColor = reverse ? getColor() : getTargetColor();
