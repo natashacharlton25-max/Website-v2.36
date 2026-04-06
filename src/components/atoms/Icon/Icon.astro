@@ -65,6 +65,7 @@ interface Props {
   drawColor?: string;
   morphTo?: string;
   morphViaCircle?: boolean;
+  morphTrigger?: 'hover' | 'viewport' | 'scroll';
 
   class?: string;
 }
@@ -76,7 +77,7 @@ const {
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
   animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawOnScroll, drawScrub, drawColor,
-  morphTo, morphViaCircle, semanticRole, label,
+  morphTo, morphViaCircle, morphTrigger = 'hover', semanticRole, label,
 } = Astro.props;
 
 // Resolve colour: rainbow takes precedence, else brand
@@ -243,6 +244,7 @@ if (morphTo && morphTargetContent) {
   dataAttrs['data-icon-morph'] = 'true';
   dataAttrs['data-icon-morph-target'] = morphTargetContent;
   if (morphViaCircle) dataAttrs['data-icon-morph-circle'] = 'true';
+  if (morphTrigger && morphTrigger !== 'hover') dataAttrs['data-icon-morph-trigger'] = morphTrigger;
 }
 
 ---

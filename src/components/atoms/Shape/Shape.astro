@@ -58,6 +58,7 @@ interface Props {
   drawOnScroll?: boolean;
   drawScrub?: boolean;
   morphTo?: string;
+  morphTrigger?: 'hover' | 'viewport' | 'scroll';
   class?: string;
 }
 
@@ -67,7 +68,7 @@ const {
   size = 'md', variant = 'fill', borderWeight, shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
   media, animation, animationTrigger = 'hover',
-  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo,
+  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover',
   class: className,
 } = Astro.props;
 
@@ -160,6 +161,7 @@ if (morphTo) {
   }
   dataAttrs['data-icon-morph'] = 'true';
   if (morphTargetSvg) dataAttrs['data-icon-morph-target'] = morphTargetSvg;
+  if (morphTrigger && morphTrigger !== 'hover') dataAttrs['data-icon-morph-trigger'] = morphTrigger;
 }
 
 const gradientName = gradientBlend || (gradient ? 'primary' : null);

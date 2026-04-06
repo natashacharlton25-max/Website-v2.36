@@ -207,8 +207,8 @@ function initDrawIcon(el: HTMLElement) {
         scrollTrigger: {
           trigger: el,
           scroller: osViewport || undefined,
-          start: 'top 70%',
-          end: 'bottom 40%',
+          start: 'top 80%',
+          end: 'top 20%',
           scrub: true,
         },
       });
@@ -362,7 +362,7 @@ function addVariant(
       // Worm: bright segment travels ahead — scales with path length
       const worm = path.cloneNode(true) as SVGPathElement;
       worm.classList.add('icon-draw-worm');
-      gsap.set(worm, { fill: 'none', strokeWidth: sw * 1.5, drawSVG: '0% 0%', opacity: 0 });
+      gsap.set(worm, { fill: 'none', strokeWidth: sw, drawSVG: '0% 0%', opacity: 0 });
       path.parentNode!.appendChild(worm);
 
       const wormPct = _wormSize;
@@ -427,7 +427,15 @@ function playDraw(
   const gentle = motion === 'gentle' || hover === 'gentle';
   const d = gentle ? 4 : 2;
   const sw = swOverride || 10;
-  // Re-read ghost color fresh (theme may have changed since init)
+  // Re-read colors fresh (theme may have changed since init)
+  if (!color.startsWith('url(')) {
+    // Solid color: re-read from CSS so theme changes are picked up
+    const el = overlays[0]?.closest('.shape, .icon') as HTMLElement;
+    if (el) {
+      const fresh = getComputedStyle(el).getPropertyValue('--_color').trim() || getComputedStyle(el).color;
+      if (fresh) { color = fresh; iconColor = fresh; }
+    }
+  }
   if (isGhostMode) {
     const freshGhost = getComputedStyle(overlays[0] || document.documentElement).getPropertyValue('--svg-ghost-color').trim()
       || getComputedStyle(overlays[0] || document.documentElement).getPropertyValue('--neutral-tint').trim();
@@ -969,6 +977,13 @@ function playDrawMorph(
   if (motion === 'none') return gsap.timeline();
   const d = motion === 'gentle' ? 4 : 2;
   const sw = swOverride || 10;
+
+  // Re-read color fresh (theme may have changed since init)
+  if (!color.startsWith('url(')) {
+    const fresh = getComputedStyle(el).getPropertyValue('--_color').trim() || getComputedStyle(el).color;
+    if (fresh) color = fresh;
+  }
+
   const master = gsap.timeline();
 
   const svg = overlays[0]?.closest('svg');
@@ -1155,15 +1170,45 @@ function initMorphIcon(el: HTMLElement) {
     morphed = !morphed;
   };
 
-  const morphTarget = el.closest('button, a') || el;
-  const hover = getHoverMode();
-  if (hover !== 'none') {
-    morphTarget.addEventListener('mouseenter', () => { if (!morphed) morph(); });
-    morphTarget.addEventListener('mouseleave', () => { if (morphed) morph(); });
+  // Detect scroll container
+  const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
+  const morphTrigger = el.dataset.iconMorphTrigger || 'hover';
+
+  switch (morphTrigger) {
+    case 'viewport': {
+      ScrollTrigger.create({
+        trigger: el,
+        scroller: osViewport || undefined,
+        start: 'top 60%',
+        onEnter: () => { if (!morphed) morph(); },
+        onLeaveBack: () => { if (morphed) morph(); },
+      });
+      break;
+    }
+    case 'scroll': {
+      ScrollTrigger.create({
+        trigger: el,
+        scroller: osViewport || undefined,
+        start: 'top 60%',
+        onEnter: () => { if (!morphed) morph(); },
+        onLeaveBack: () => { if (morphed) morph(); },
+      });
+      break;
+    }
+    case 'hover':
+    default: {
+      const morphTarget = el.closest('button, a') || el;
+      const hover = getHoverMode();
+      if (hover !== 'none') {
+        morphTarget.addEventListener('mouseenter', () => { if (!morphed) morph(); });
+        morphTarget.addEventListener('mouseleave', () => { if (morphed) morph(); });
+      }
+      morphTarget.addEventListener('focusin', () => { if (!morphed) morph(); });
+      morphTarget.addEventListener('focusout', () => { if (morphed) morph(); });
+      morphTarget.addEventListener('click', () => { morph(); });
+      break;
+    }
   }
-  morphTarget.addEventListener('focusin', () => { if (!morphed) morph(); });
-  morphTarget.addEventListener('focusout', () => { if (morphed) morph(); });
-  morphTarget.addEventListener('click', () => { morph(); });
 }
 
 /* ================================================================
