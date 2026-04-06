@@ -243,7 +243,11 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
         stroke-width={String(sw)}
         stroke-linejoin="round"
         stroke-linecap="round"
-        style={svgGradRef ? `fill: url(#${svgGradRef}); ${(variant === 'outline' || variant === 'glass' || variant === 'liquid-glass') ? `stroke: url(#${svgGradRef});` : ''}` : undefined}
+        style={svgGradRef
+          ? variant === 'outline'
+            ? `fill: none; stroke: url(#${svgGradRef});`
+            : `fill: url(#${svgGradRef}); ${(variant === 'glass' || variant === 'liquid-glass') ? `stroke: url(#${svgGradRef});` : ''}`
+          : undefined}
       >
         <Fragment set:html={builtinSvg} />
       </g>

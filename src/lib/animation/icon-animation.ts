@@ -1735,9 +1735,15 @@ function initAnimatedGradient(el: HTMLElement) {
     } else {
       p.setAttribute('fill', gradUrl);
     }
-    // Also apply to children so they don't inherit stale fill from CSS
+    // Also apply to children — respect outline variant (stroke only, no fill)
+    const isOutline = el.classList.contains('shape--outline');
     p.querySelectorAll('path, circle, rect, polygon, polyline, ellipse').forEach(child => {
-      (child as HTMLElement).style.fill = gradUrl;
+      if (isOutline) {
+        (child as HTMLElement).style.fill = 'none';
+        (child as HTMLElement).style.stroke = gradUrl;
+      } else {
+        (child as HTMLElement).style.fill = gradUrl;
+      }
     });
   });
 
