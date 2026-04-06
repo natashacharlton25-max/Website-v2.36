@@ -1848,9 +1848,19 @@ function onThemeChange() {
     (clone as HTMLElement).style.fill = ctx.fillStyle;
   });
 
-  // Draw overlays on shapes: clear inline fill too
-  document.querySelectorAll('.shape--draw svg path:not(.icon-draw-overlay)').forEach(el => {
-    (el as HTMLElement).style.removeProperty('fill');
+  // Shape SVG elements: clear inline fill/stroke so CSS vars update
+  document.querySelectorAll('.shape svg g, .shape svg path:not(.icon-fill-morph):not(.icon-draw-overlay), .shape svg circle, .shape svg polygon, .shape svg rect, .shape svg polyline, .shape svg ellipse').forEach(el => {
+    const s = (el as HTMLElement).style;
+    // Only clear if it's a solid color (not a gradient URL — those use local gradient with fresh stops)
+    if (s.fill && !s.fill.includes('url(')) s.removeProperty('fill');
+    if (s.stroke && !s.stroke.includes('url(')) s.removeProperty('stroke');
+  });
+
+  // Icon SVG: clear inline fill on non-overlay paths
+  document.querySelectorAll('.icon svg path:not(.icon-fill-morph):not(.icon-draw-overlay)').forEach(el => {
+    const s = (el as HTMLElement).style;
+    if (s.fill && !s.fill.includes('url(')) s.removeProperty('fill');
+    if (s.stroke && !s.stroke.includes('url(')) s.removeProperty('stroke');
   });
 
   // Rainbow scroll: rebuild timelines with fresh colors
