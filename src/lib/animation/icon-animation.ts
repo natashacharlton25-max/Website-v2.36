@@ -1225,7 +1225,15 @@ function initFillIcon(el: HTMLElement) {
   const fillDelay = fillTiming === 'after' ? drawDuration + 0.3
     : hasDraw ? drawDuration * 0.5
     : 0;
-  const easeType = el.dataset.iconFillEase || (hasDraw ? 'expoScale(0.5,7,power3.out)' : 'back.out(1.7)');
+  // Named fill eases
+  const FILL_EASES: Record<string, string> = {
+    jelly: 'back.out(2.5)',
+    wobble: 'elastic.out(1, 0.3)',
+    bounce: 'bounce.out',
+    snap: 'back.out(4)',
+  };
+  const rawEase = el.dataset.iconFillEase || (hasDraw ? 'expoScale(0.5,7,power3.out)' : 'back.out(1.7)');
+  const easeType = FILL_EASES[rawEase] || rawEase;
   const combinedDuration = hasDraw ? fillDuration * 1.5 : fillDuration;
   // Stagger: total time divided by path count — icons always bloom as one (no stagger)
   const isIcon = el.classList.contains('icon');
