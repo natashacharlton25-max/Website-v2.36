@@ -72,14 +72,13 @@ const {
   <!-- Theme link — ThemeSwitcher sets href, created early in head -->
   <link id="dynamic-theme-css" rel="stylesheet" type="text/css" href="">
 
-  <!-- Prevent flash of default theme — hide until ThemeSwitcher applies correct theme -->
+  <!-- Prevent flash of default theme -->
   <script is:inline>
     try {
       var st = localStorage.getItem('color-theme');
       if (st && st !== 'default') {
         document.documentElement.style.opacity = '0';
         document.documentElement.style.transition = 'opacity 0.15s ease';
-        // Safety: fade in after 1.5s if ThemeSwitcher hasn't loaded
         setTimeout(function() { document.documentElement.style.opacity = ''; }, 1500);
       }
     } catch(e) {}
