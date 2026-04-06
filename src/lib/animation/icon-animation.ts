@@ -1669,8 +1669,10 @@ function initAnimatedGradient(el: HTMLElement) {
   if (!svg) return;
   if (getMotionMode() === 'none') return;
 
-  const gradMode = el.dataset.iconGradAnim || 'rotate'; // rotate | rainbow
   const dur = parseFloat(el.dataset.iconGradDur || '') || 8;
+  const ease = el.dataset.iconGradEase || 'none';
+  const direction = el.dataset.iconGradDir || 'cw'; // cw | ccw | sway
+  const doScale = el.dataset.iconGradScale === 'true';
   const gentle = getMotionMode() === 'gentle';
   const d = gentle ? dur * 2 : dur;
 
@@ -1739,65 +1741,47 @@ function initAnimatedGradient(el: HTMLElement) {
     });
   });
 
-  if (gradMode === 'rainbow') {
-    // Rainbow: cycle gradient rotation + morph stop colors through rainbow
-    const toHex = (cssColor: string): string => {
-      const ctx = document.createElement('canvas').getContext('2d')!;
-      ctx.fillStyle = cssColor;
-      return ctx.fillStyle;
-    };
-    const cs = getComputedStyle(document.documentElement);
-    const rainbowColors = [1, 2, 3, 4, 5, 6, 7].map(n =>
-      toHex(cs.getPropertyValue(`--rainbow-${n}`).trim() || '#888')
-    );
+  animateGradTransform(grad, d, direction, ease, doScale);
+}
 
-    // Add local stops (override inherited ones for color control)
-    const stop1 = document.createElementNS(ns, 'stop');
-    stop1.setAttribute('offset', '0');
-    stop1.setAttribute('stop-color', rainbowColors[0]);
-    const stop2 = document.createElementNS(ns, 'stop');
-    stop2.setAttribute('offset', '1');
-    stop2.setAttribute('stop-color', rainbowColors[3]);
-    grad.appendChild(stop1);
-    grad.appendChild(stop2);
+function animateGradTransform(
+  grad: SVGLinearGradientElement,
+  d: number,
+  direction: string,
+  ease: string,
+  doScale: boolean
+) {
+  const state = { angle: 0, scale: 1 };
 
-    // Cycle both stops through rainbow on staggered timelines
-    const tl = gsap.timeline({ repeat: -1 });
-    const segDur = d / rainbowColors.length;
+  const update = () => {
+    let t = `rotate(${state.angle}, 0.5, 0.5)`;
+    if (doScale) {
+      t += ` translate(0.5, 0.5) scale(${state.scale}) translate(-0.5, -0.5)`;
+    }
+    grad.setAttribute('gradientTransform', t);
+  };
 
-    rainbowColors.forEach((color, i) => {
-      const nextColor = rainbowColors[(i + 1) % rainbowColors.length];
-      const offsetColor = rainbowColors[(i + 3) % rainbowColors.length];
-      const nextOffset = rainbowColors[(i + 4) % rainbowColors.length];
-      tl.to(stop1, { attr: { 'stop-color': nextColor }, duration: segDur, ease: 'none' }, i * segDur);
-      tl.to(stop2, { attr: { 'stop-color': nextOffset }, duration: segDur, ease: 'none' }, i * segDur);
-    });
-
-    // Rotation on top
-    gsap.to(grad, {
-      attr: { gradientTransform: `rotate(360, 0.5, 0.5)` },
-      duration: d,
-      ease: 'none',
-      repeat: -1,
-      modifiers: {
-        gradientTransform: (val: string) => {
-          const angle = parseFloat(val.match(/rotate\(([^,]+)/)?.[1] || '0') % 360;
-          return `rotate(${angle}, 0.5, 0.5)`;
-        }
-      }
-    });
+  if (direction === 'sway') {
+    gsap.fromTo(state,
+      { angle: -60 },
+      { angle: 60, duration: d / 2, ease: ease === 'none' ? 'sine.inOut' : ease,
+        yoyo: true, repeat: -1, onUpdate: update });
   } else {
-    // Simple rotation
-    const obj = { angle: 0 };
-    gsap.to(obj, {
-      angle: 360,
+    const target = direction === 'ccw' ? -360 : 360;
+    gsap.to(state, {
+      angle: `+=${target}`,
       duration: d,
-      ease: 'none',
+      ease: ease === 'none' ? 'none' : ease,
       repeat: -1,
-      onUpdate: () => {
-        grad.setAttribute('gradientTransform', `rotate(${obj.angle}, 0.5, 0.5)`);
-      }
+      onUpdate: update,
     });
+  }
+
+  if (doScale) {
+    gsap.fromTo(state,
+      { scale: 0.8 },
+      { scale: 1.5, duration: d * 0.75, ease: 'sine.inOut',
+        yoyo: true, repeat: -1, onUpdate: update });
   }
 }
 

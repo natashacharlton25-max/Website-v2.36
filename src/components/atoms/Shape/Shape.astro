@@ -43,7 +43,11 @@ interface Props {
   gradientDirection?: GradientDirection;
   gradientSpread?: GradientSpread;
   gradientAnimate?: boolean;
-  gradientAnimateMode?: 'rotate' | 'rainbow';
+  gradientAnimateMode?: 'rotate';
+  gradientAnimateSpeed?: number;
+  gradientAnimateEase?: string;
+  gradientAnimateDirection?: 'cw' | 'ccw' | 'sway';
+  gradientAnimateScale?: boolean;
   media?: Record<string, any>;
   animation?: Animation;
   animationTrigger?: AnimationTriggerInteractive;
@@ -77,7 +81,7 @@ const {
   shape = 'circle', mode = 'shape', slug, semanticRole = 'decorative', label,
   brandColor, rainbowColor, colorTier,
   size = 'md', variant = 'fill', borderWeight, shadow, glow,
-  gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate, gradientAnimateMode = 'rotate',
+  gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
   media, animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover',
   fillAnimation, fillOutline, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom, fillTiming,
@@ -193,6 +197,10 @@ const gradientName = gradientBlend || (gradient ? 'primary' : null);
 // Animated gradient via GSAP (SVG shapes only — CSS shapes use CSS animation)
 if (gradientAnimate && gradientName && !['circle', 'square', 'subtle', 'soft', 'rounded', 'rounded-lg', 'pill'].includes(shape)) {
   dataAttrs['data-icon-grad-anim'] = gradientAnimateMode;
+  if (gradientAnimateSpeed) dataAttrs['data-icon-grad-dur'] = String(gradientAnimateSpeed);
+  if (gradientAnimateEase) dataAttrs['data-icon-grad-ease'] = gradientAnimateEase;
+  if (gradientAnimateDirection !== 'cw') dataAttrs['data-icon-grad-dir'] = gradientAnimateDirection;
+  if (gradientAnimateScale) dataAttrs['data-icon-grad-scale'] = 'true';
 }
 // Gradient reference for SVG fill — GSAP creates its own local gradient at runtime for animated
 const svgGradRef = gradientName ? `grad-${gradientName}` : null;
