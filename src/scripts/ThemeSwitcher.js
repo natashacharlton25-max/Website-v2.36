@@ -137,6 +137,7 @@ export class ThemeSwitcher {
 
         // Remove loading state + reveal page (hidden by inline script to prevent flash)
         document.documentElement.classList.remove('theme-switching');
+        document.documentElement.style.opacity = '';
         document.documentElement.style.visibility = '';
 
         // Update UI indicators
@@ -163,6 +164,7 @@ export class ThemeSwitcher {
 
         console.error(`Failed to load theme: ${themeName}`);
         document.documentElement.classList.remove('theme-switching');
+        document.documentElement.style.opacity = '';
         document.documentElement.style.visibility = '';
         // Revert to previous theme on error
         this.currentTheme = previousTheme;

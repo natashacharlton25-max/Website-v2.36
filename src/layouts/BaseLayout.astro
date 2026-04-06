@@ -69,17 +69,24 @@ const {
   <!-- Lottie Player for animated icons -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
-  <!-- Early theme + accessibility restoration (prevents flash of default theme) -->
+  <!-- Theme link — ThemeSwitcher sets href, created early in head -->
+  <link id="dynamic-theme-css" rel="stylesheet" type="text/css" href="">
+
+  <!-- Prevent flash of default theme — hide until ThemeSwitcher applies correct theme -->
   <script is:inline>
-    // Hide page until theme CSS loads — prevents flash of default theme
     try {
-      var savedTheme = localStorage.getItem('color-theme');
-      if (savedTheme && savedTheme !== 'default') {
-        document.documentElement.style.visibility = 'hidden';
-        // Safety: reveal after 2s if ThemeSwitcher hasn't loaded
-        setTimeout(function() { document.documentElement.style.visibility = ''; }, 2000);
+      var st = localStorage.getItem('color-theme');
+      if (st && st !== 'default') {
+        document.documentElement.style.opacity = '0';
+        document.documentElement.style.transition = 'opacity 0.15s ease';
+        // Safety: fade in after 1.5s if ThemeSwitcher hasn't loaded
+        setTimeout(function() { document.documentElement.style.opacity = ''; }, 1500);
       }
-    } catch (e) {}
+    } catch(e) {}
+  </script>
+
+  <!-- Early accessibility restoration (prevents flash) -->
+  <script is:inline>
     // Restore text-only mode immediately before body renders
     try {
       var settings = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
