@@ -1708,6 +1708,7 @@ function initAnimatedGradient(el: HTMLElement) {
 
   const grad = document.createElementNS(ns, 'linearGradient');
   grad.id = localId;
+  grad.setAttribute('data-shared-grad', sharedGradId);
   grad.setAttribute('gradientUnits', 'objectBoundingBox');
   grad.setAttribute('x1', '0');
   grad.setAttribute('y1', '0');
@@ -1823,31 +1824,30 @@ function onThemeChange() {
     (el as HTMLElement).style.removeProperty('stroke');
   });
 
-  // Fill clones: clear inline fill so CSS color updates
-  document.querySelectorAll('.icon-fill-morph').forEach(el => {
+  // Fill clones: re-read color from parent's CSS token
+  document.querySelectorAll('.icon-fill-morph').forEach(clone => {
+    const parent = (clone as HTMLElement).closest('.shape, .icon') as HTMLElement;
+    if (!parent) return;
+    const ctx = document.createElement('canvas').getContext('2d')!;
+    const raw = getComputedStyle(parent).getPropertyValue('--_color').trim() || getComputedStyle(parent).color;
+    ctx.fillStyle = raw;
+    (clone as HTMLElement).style.fill = ctx.fillStyle;
+  });
+
+  // Draw overlays on shapes: clear inline fill too
+  document.querySelectorAll('.shape--draw svg path:not(.icon-draw-overlay)').forEach(el => {
     (el as HTMLElement).style.removeProperty('fill');
   });
 
   // Animated gradients: re-copy stops from shared defs
-  document.querySelectorAll<HTMLElement>('[data-icon-grad-anim]').forEach(el => {
-    const svg = el.querySelector('svg');
-    if (!svg) return;
-    // Find local gradient (has our generated ID)
-    svg.querySelectorAll('linearGradient[id^="anim-grad-"]').forEach(localGrad => {
-      // Find which shared gradient it was cloned from
-      const targets = svg.querySelectorAll('[style*="url(#' + localGrad.id + ')"]');
-      if (!targets.length) return;
-      const rawStyle = el.getAttribute('style') || '';
-      const allStyles = Array.from(svg.querySelectorAll('g, path')).map(e => e.getAttribute('style') || '').join(' ');
-      const sharedMatch = (rawStyle + allStyles).match(/url\(#(grad-[^)"]+)\)/);
-      if (!sharedMatch) return;
-      const sharedGrad = document.getElementById(sharedMatch[1]);
-      if (!sharedGrad) return;
-      // Replace stops
-      localGrad.querySelectorAll('stop').forEach(s => s.remove());
-      sharedGrad.querySelectorAll('stop').forEach(s => {
-        localGrad.appendChild(s.cloneNode(true));
-      });
+  document.querySelectorAll('linearGradient[data-shared-grad]').forEach(localGrad => {
+    const sharedId = localGrad.getAttribute('data-shared-grad');
+    if (!sharedId) return;
+    const sharedGrad = document.getElementById(sharedId);
+    if (!sharedGrad) return;
+    localGrad.querySelectorAll('stop').forEach(s => s.remove());
+    sharedGrad.querySelectorAll('stop').forEach(s => {
+      localGrad.appendChild(s.cloneNode(true));
     });
   });
 }
