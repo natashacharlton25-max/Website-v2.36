@@ -133,18 +133,26 @@ export function getScrollContainer(): HTMLElement | undefined {
 export interface TriggerOptions {
   /** The element that triggers the animation */
   el: HTMLElement;
-  /** What fires it: hover, click, focus, viewport, viewport-loop, scrub, autoplay */
+  /** What fires it: hover, click, focus, viewport, viewport-loop, loop, interval, scrub, autoplay */
   trigger?: string;
-  /** Called to play the animation forward */
-  onEnter: () => void;
+  /** Called to play the animation forward — return timeline for loop/instant control */
+  onEnter: () => any;
   /** Called to play the animation in reverse (optional — for yoyo/hover-leave) */
   onLeave?: () => void;
+  /** Called for instant mode — jump to end state (optional, defaults to onEnter) */
+  onInstant?: () => void;
+  /** Called when motion is 'none' — set static fallback state */
+  onStatic?: () => void;
   /** ScrollTrigger start position (default 'top 60%') */
   scrollStart?: string;
   /** ScrollTrigger end position (default 'top 20%') */
   scrollEnd?: string;
   /** Fire only once on viewport enter */
   once?: boolean;
+  /** Loop delay in seconds (default 3) */
+  loopDelay?: number;
+  /** Interval in ms (default 8000) */
+  intervalMs?: number;
 }
 
 /**
@@ -152,19 +160,22 @@ export interface TriggerOptions {
  * Respects motion and hover modes automatically.
  */
 export function registerTrigger(opts: TriggerOptions): void {
-  const { el, trigger = 'hover', onEnter, onLeave, scrollStart = 'top 60%', scrollEnd = 'top 20%', once = false } = opts;
+  const {
+    el, trigger = 'hover', onEnter, onLeave, onInstant, onStatic,
+    scrollStart = 'top 60%', scrollEnd = 'top 20%',
+    once = false, loopDelay = 3, intervalMs = 8000,
+  } = opts;
 
-  // Lazy import ScrollTrigger to avoid circular deps
-  const gsapModule = (window as any).gsap;
-  const ScrollTrigger = gsapModule?.plugins?.scrollTrigger || (window as any).ScrollTrigger;
+  const scroller = getScrollContainer();
+
+  // Static fallback when motion is none
+  if (!getAnimationConfig().canAnimate && onStatic) {
+    onStatic();
+  }
 
   switch (trigger) {
     case 'viewport': {
-      const config = getAnimationConfig();
-      if (!config.canAnimate) return;
-      const scroller = getScrollContainer();
-
-      // Dynamic import not needed — ScrollTrigger already registered by icon-animation
+      if (!getAnimationConfig().canAnimate) { onStatic?.(); return; }
       import('gsap/ScrollTrigger').then(({ ScrollTrigger: ST }) => {
         ST.create({
           trigger: el,
@@ -177,13 +188,59 @@ export function registerTrigger(opts: TriggerOptions): void {
       });
       break;
     }
+    case 'viewport-loop': {
+      if (!getAnimationConfig().canAnimate) return;
+      import('gsap/ScrollTrigger').then(({ ScrollTrigger: ST }) => {
+        ST.create({
+          trigger: el,
+          scroller: scroller || undefined,
+          start: scrollStart,
+          onEnter: () => {
+            const loopPlay = () => {
+              const tl = onEnter();
+              if (tl?.eventCallback) tl.eventCallback('onComplete', () => {
+                import('gsap').then(({ gsap }) => gsap.delayedCall(loopDelay, loopPlay));
+              });
+            };
+            loopPlay();
+          },
+          onLeave: onLeave,
+          onEnterBack: () => {
+            const loopPlay = () => {
+              const tl = onEnter();
+              if (tl?.eventCallback) tl.eventCallback('onComplete', () => {
+                import('gsap').then(({ gsap }) => gsap.delayedCall(loopDelay, loopPlay));
+              });
+            };
+            loopPlay();
+          },
+          onLeaveBack: onLeave,
+        });
+      });
+      break;
+    }
     case 'scrub': {
-      // Scrub is handled by the caller — they build their own ScrollTrigger timeline
-      // This case is a no-op placeholder
+      // Scrub: caller builds their own ScrollTrigger timeline
       break;
     }
     case 'autoplay': {
       if (getAnimationConfig().canAnimate) onEnter();
+      break;
+    }
+    case 'loop': {
+      const loopPlay = () => {
+        if (!getAnimationConfig().canAnimate) return;
+        const tl = onEnter();
+        if (tl?.eventCallback) tl.eventCallback('onComplete', () => {
+          import('gsap').then(({ gsap }) => gsap.delayedCall(loopDelay, loopPlay));
+        });
+      };
+      loopPlay();
+      break;
+    }
+    case 'interval': {
+      onEnter();
+      setInterval(() => { if (getAnimationConfig().canAnimate) onEnter(); }, intervalMs);
       break;
     }
     case 'click': {
@@ -197,48 +254,42 @@ export function registerTrigger(opts: TriggerOptions): void {
       el.addEventListener('focusin', () => {
         if (getAnimationConfig().canAnimate) onEnter();
       });
-      if (onLeave) {
-        el.addEventListener('focusout', () => onLeave());
-      }
+      if (onLeave) el.addEventListener('focusout', () => onLeave());
       break;
     }
     case 'hover':
     default: {
       const hoverTarget = el.closest('button, a') || el;
+      let activeTl: any = null;
 
-      // Hover
-      hoverTarget.addEventListener('mouseenter', (e: Event) => {
+      const triggerEnter = (e: Event) => {
         const config = getAnimationConfig();
         if (!config.canAnimate) return;
         if (!config.canHover && e.type === 'mouseenter') return;
         if (config.hover === 'instant') {
-          // Jump to end state
-          onEnter();
+          if (onInstant) { onInstant(); return; }
+          activeTl = onEnter();
+          if (activeTl?.progress) activeTl.progress(1);
           return;
         }
-        onEnter();
-      });
+        if (activeTl?.kill) activeTl.kill();
+        activeTl = onEnter();
+      };
+
+      // Static fallback
+      if (!getAnimationConfig().canAnimate && onStatic) onStatic();
+
+      hoverTarget.addEventListener('mouseenter', triggerEnter);
+      hoverTarget.addEventListener('focusin', triggerEnter);
+      hoverTarget.addEventListener('click', triggerEnter);
 
       if (onLeave) {
         hoverTarget.addEventListener('mouseleave', () => {
-          const config = getAnimationConfig();
-          if (!config.canAnimate) return;
+          if (!getAnimationConfig().canAnimate) return;
           onLeave();
         });
-      }
-
-      // Focus (always works, even when hover is off — a11y)
-      hoverTarget.addEventListener('focusin', () => {
-        if (getAnimationConfig().canAnimate) onEnter();
-      });
-      if (onLeave) {
         hoverTarget.addEventListener('focusout', () => onLeave());
       }
-
-      // Click (always works)
-      hoverTarget.addEventListener('click', () => {
-        if (getAnimationConfig().canAnimate) onEnter();
-      });
       break;
     }
   }
