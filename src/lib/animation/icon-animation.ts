@@ -131,26 +131,13 @@ function initDrawIcon(el: HTMLElement) {
   const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
 
   // Fill modes
-  const hasFillAnimation = !!el.dataset.iconFill;
   const showFill = el.dataset.iconDrawFill === 'true';
-  const drawFillMode = el.dataset.iconDrawFillMode || 'static'; // static | bloom | fade
   const ghost = el.dataset.iconDrawGhost === 'true';
   const ghostColor = el.dataset.iconDrawGhostColor || getComputedStyle(el).getPropertyValue('--svg-ghost-color').trim() || getComputedStyle(el).getPropertyValue('--neutral-tint').trim() || iconColor;
 
-  if (showFill && !hasFillAnimation && drawFillMode === 'static') {
+  if (showFill) {
     // Fill variant: origPaths keep their fill — static icon always visible underneath
-  } else if (showFill && !hasFillAnimation && (drawFillMode === 'bloom' || drawFillMode === 'fade')) {
-    // Animated fill: start hidden, animate in on trigger
-    origPaths.forEach(p => {
-      if (drawFillMode === 'bloom') {
-        const bbox = p.getBBox();
-        const pcx = bbox.x + bbox.width / 2;
-        const pcy = bbox.y + bbox.height / 2;
-        gsap.set(p, { scale: 0.01, opacity: 0, svgOrigin: `${pcx} ${pcy}`, fill: 'currentColor' });
-      } else {
-        gsap.set(p, { opacity: 0, fill: 'currentColor' });
-      }
-    });
+    // Overlay draws border on top. Nothing to do here.
   } else if (ghost) {
     // Ghost: CSS handles ghost color via .icon--draw[data-icon-draw-ghost] rules
   } else {
@@ -205,24 +192,9 @@ function initDrawIcon(el: HTMLElement) {
 
   const drawTrigger = el.dataset.iconDrawTrigger || (onScroll ? (scrub ? 'scrub' : 'viewport') : 'hover');
   const hasMorphTarget = !!el.dataset.iconMorphTarget;
-
-  // Animate fill bloom/fade on origPaths (when drawFillMode is bloom or fade)
-  const animateFillIn = () => {
-    if (!showFill || drawFillMode === 'static') return;
-    const fillD = (getMotionMode() === 'gentle' ? 4 : 2);
-    const delay = fillD * 0.5; // start when draw is ~50% done
-    origPaths.forEach(p => {
-      if (drawFillMode === 'bloom') {
-        gsap.to(p, { scale: 1, opacity: 1, duration: fillD, ease: 'back.out(1.7)', delay });
-      } else {
-        gsap.to(p, { opacity: 1, duration: fillD, ease: 'power2.out', delay });
-      }
-    });
-  };
-
   const play = hasMorphTarget
-    ? () => { const tl = playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor, variant, mode, laser, sw); animateFillIn(); return tl; }
-    : () => { const tl = playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode, sw, drawStagger, drawStaggerFrom, drawWormSize); animateFillIn(); return tl; };
+    ? () => playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor, variant, mode, laser, sw)
+    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode, sw, drawStagger, drawStaggerFrom, drawWormSize);
 
   switch (drawTrigger) {
     case 'scrub': {
@@ -1255,8 +1227,10 @@ function initFillIcon(el: HTMLElement) {
   svg.setAttribute('overflow', 'visible');
   svg.style.overflow = 'visible';
   // Remove root fill so origPaths can be hidden (API SVGs have fill="currentColor" on <svg>)
-  svg.removeAttribute('fill');
-  svg.style.fill = 'none';
+  if (el.classList.contains('icon')) {
+    svg.removeAttribute('fill');
+    svg.style.fill = 'none';
+  }
 
   const trigger = el.dataset.iconFillTrigger || 'hover';
   const hasDraw = !!el.dataset.iconDraw;
@@ -1310,28 +1284,25 @@ function initFillIcon(el: HTMLElement) {
     MorphSVGPlugin.convertToPath(e as any);
   });
 
-  // Split compound paths for shapes with stagger (each piece animates independently)
+  // Split compound paths for shapes (each piece animates independently)
   // Skip for icons — compound paths define cutouts/holes that must stay together
-  const isShape = el.classList.contains('shape');
-  if (isShape) {
-    g.querySelectorAll('path:not(.icon-fill-morph)').forEach(p => {
-      const rawPath = MotionPathPlugin.getRawPath(p as any);
-      if (rawPath.length <= 1) return;
-      const parent = p.parentNode;
-      if (!parent) return;
-      const attributes = Array.from(p.attributes);
-      rawPath.forEach((segment: any) => {
-        const newPath = document.createElementNS(ns, 'path');
-        attributes.forEach(attr => {
-          if (attr.nodeName !== 'd') newPath.setAttributeNS(null, attr.nodeName, attr.nodeValue || '');
-        });
-        newPath.setAttributeNS(null, 'd',
-          'M' + segment[0] + ',' + segment[1] + 'C' + segment.slice(2).join(',') + (segment.closed ? 'z' : ''));
-        parent.insertBefore(newPath, p);
+  if (el.classList.contains('shape')) g.querySelectorAll('path:not(.icon-fill-morph)').forEach(p => {
+    const rawPath = MotionPathPlugin.getRawPath(p as any);
+    if (rawPath.length <= 1) return;
+    const parent = p.parentNode;
+    if (!parent) return;
+    const attributes = Array.from(p.attributes);
+    rawPath.forEach((segment: any) => {
+      const newPath = document.createElementNS(ns, 'path');
+      attributes.forEach(attr => {
+        if (attr.nodeName !== 'd') newPath.setAttributeNS(null, attr.nodeName, attr.nodeValue || '');
       });
-      parent.removeChild(p);
+      newPath.setAttributeNS(null, 'd',
+        'M' + segment[0] + ',' + segment[1] + 'C' + segment.slice(2).join(',') + (segment.closed ? 'z' : ''));
+      parent.insertBefore(newPath, p);
     });
-  }
+    parent.removeChild(p);
+  });
 
   // oklch → hex
   const toHex = (cssColor: string): string => {
@@ -1356,73 +1327,43 @@ function initFillIcon(el: HTMLElement) {
   const origPaths = Array.from(g.querySelectorAll('path:not(.icon-fill-morph):not(.icon-draw-overlay)')) as SVGPathElement[];
   if (!origPaths.length) return;
 
-  // For draw+fill icons: parse fill-weight SVG for bloom source (different paths than draw)
-  const fillSvgHtml = el.dataset.iconFillSvg || '';
-  let fillSourcePaths: SVGPathElement[] = [];
-  if (fillSvgHtml && hasDraw) {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = fillSvgHtml;
-    // Remove background rect
-    tempDiv.querySelectorAll('rect').forEach(r => {
-      const w = r.getAttribute('width');
-      const fill = r.getAttribute('fill');
-      if (fill === 'none' && (w === '256' || w === '100%')) r.remove();
-    });
-    fillSourcePaths = Array.from(tempDiv.querySelectorAll('path')) as SVGPathElement[];
-  }
-
-  // Clone paths — use fill source if available (draw+fill icons need fill-weight paths)
-  const cloneSources = fillSourcePaths.length ? fillSourcePaths : origPaths;
+  // Clone each path — same shape, scales from center
   const fillClones: SVGPathElement[] = [];
-  cloneSources.forEach((src, i) => {
-    // Use origPath position for center (fill source paths aren't in DOM)
-    const ref = origPaths[Math.min(i, origPaths.length - 1)];
-    const bbox = ref.getBBox();
+  origPaths.forEach(p => {
+    // Find this path's center via bounding box
+    const bbox = p.getBBox();
     const pcx = bbox.x + bbox.width / 2;
     const pcy = bbox.y + bbox.height / 2;
 
-    const clone = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    clone.setAttribute('d', src.getAttribute('d') || '');
+    const clone = p.cloneNode(true) as SVGPathElement;
     clone.classList.add('icon-fill-morph');
+    clone.removeAttribute('style');
     clone.setAttribute('fill', getColor());
     clone.setAttribute('stroke', 'none');
     // Preserve fill-rule for cutouts (cog center, shield tick, etc.)
-    const srcRule = src.getAttribute('fill-rule');
-    clone.setAttribute('fill-rule', srcRule || 'evenodd');
+    if (!clone.getAttribute('fill-rule')) {
+      clone.setAttribute('fill-rule', 'evenodd');
+    }
     // Set transform origin to this path's center + start hidden
     if (mode === 'fade') {
       gsap.set(clone, { opacity: 0, svgOrigin: `${pcx} ${pcy}` });
     } else {
       gsap.set(clone, { scale: 0.01, opacity: 0, svgOrigin: `${pcx} ${pcy}` });
     }
-    // Insert at start of group so fill renders behind everything (origPaths + draw overlays)
-    const parent = p.parentNode!;
-    parent.insertBefore(clone, parent.firstChild);
+    // Insert behind original path so fill renders under stroke
+    p.parentNode!.insertBefore(clone, p);
     fillClones.push(clone);
   });
 
-  // Original paths: hide fill completely — remove fill attribute AND set inline none
+  // Original paths: hide fill, optionally keep stroke outline
   origPaths.forEach(p => {
-    p.removeAttribute('fill');
     (p as HTMLElement).style.fill = 'none';
     if (showOutline) {
-      // Icons use 256-unit viewBox, shapes use 100-unit — scale stroke accordingly
-      const isIcon = el.classList.contains('icon');
-      const sw = isIcon ? '10' : (g.getAttribute('stroke-width') || '2');
+      const sw = g.getAttribute('stroke-width') || '2';
       (p as HTMLElement).style.stroke = 'currentColor';
       (p as HTMLElement).style.strokeWidth = sw;
-      (p as HTMLElement).style.strokeLinejoin = 'round';
-      (p as HTMLElement).style.strokeLinecap = 'round';
     }
   });
-
-  // If draw overlays exist, move them to end of parent so they paint on top of fill clones
-  if (hasDraw) {
-    const parent = g || svg;
-    parent.querySelectorAll('.icon-draw-overlay').forEach(overlay => {
-      parent.appendChild(overlay);
-    });
-  }
 
   // Start filled if static mode
   if (mode === 'static') {
@@ -1479,8 +1420,6 @@ function initFillIcon(el: HTMLElement) {
 
       const hasColorMorph = targetColor !== getColor();
 
-      const maxOpacity = 1;
-
       if (!reverse) {
         // Set fresh color before animating
         clone.setAttribute('fill', targetColor);
@@ -1489,13 +1428,13 @@ function initFillIcon(el: HTMLElement) {
           // Fade only — just opacity, no scale
           tl.fromTo(clone,
             { opacity: 0 },
-            { opacity: maxOpacity, duration: d, ease: 'power2.out' },
+            { opacity: 1, duration: d, ease: 'power2.out' },
             offset);
         } else {
           // Scale bloom + fade — opacity leads, scale follows with bounce
           tl.fromTo(clone,
             { opacity: 0 },
-            { opacity: maxOpacity, duration: d * 0.3, ease: 'power2.out' },
+            { opacity: 1, duration: d * 0.3, ease: 'power2.out' },
             offset);
           tl.fromTo(clone,
             { scale: 0.01 },
@@ -1606,6 +1545,9 @@ function initFillIcon(el: HTMLElement) {
     }
     case 'hover':
     default: {
+      // Icons with draw: initDrawIcon owns hover — skip fill hover handlers
+      if (el.classList.contains('icon') && hasDraw) break;
+
       const hoverTarget = el.closest('button, a') || el;
       let activeTl: gsap.core.Timeline | null = null;
 
@@ -1919,19 +1861,9 @@ function onThemeChange() {
     (clone as HTMLElement).style.fill = ctx.fillStyle;
   });
 
-  // Shape SVG elements: clear inline fill/stroke so CSS vars update — skip draw mode
-  document.querySelectorAll('.shape:not(.shape--draw) svg g, .shape:not(.shape--draw) svg path:not(.icon-fill-morph):not(.icon-draw-overlay), .shape:not(.shape--draw) svg circle, .shape:not(.shape--draw) svg polygon, .shape:not(.shape--draw) svg rect, .shape:not(.shape--draw) svg polyline, .shape:not(.shape--draw) svg ellipse').forEach(el => {
-    const s = (el as HTMLElement).style;
-    // Only clear if it's a solid color (not a gradient URL — those use local gradient with fresh stops)
-    if (s.fill && !s.fill.includes('url(')) s.removeProperty('fill');
-    if (s.stroke && !s.stroke.includes('url(')) s.removeProperty('stroke');
-  });
-
-  // Icon SVG: clear inline fill on non-overlay paths — skip draw mode (initDrawIcon set fill:none intentionally)
-  document.querySelectorAll('.icon:not(.icon--draw) svg path:not(.icon-fill-morph):not(.icon-draw-overlay)').forEach(el => {
-    const s = (el as HTMLElement).style;
-    if (s.fill && !s.fill.includes('url(')) s.removeProperty('fill');
-    if (s.stroke && !s.stroke.includes('url(')) s.removeProperty('stroke');
+  // Draw overlays on shapes: clear inline fill too
+  document.querySelectorAll('.shape--draw svg path:not(.icon-draw-overlay)').forEach(el => {
+    (el as HTMLElement).style.removeProperty('fill');
   });
 
   // Rainbow scroll: rebuild timelines with fresh colors
