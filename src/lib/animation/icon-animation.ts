@@ -1226,6 +1226,11 @@ function initFillIcon(el: HTMLElement) {
   const fillDuration = parseFloat(el.dataset.iconFillDuration || '') || 1;
   const easeType = el.dataset.iconFillEase || 'power3.out';
   const fillColor = el.dataset.iconFillColor || '';
+  const showOutline = el.dataset.iconFillOutline === 'true';
+  // Stagger: total time divided by path count
+  const staggerTotalMap: Record<string, number> = { none: 0, tight: 0.5, normal: 1, loose: 2 };
+  const staggerTotal = staggerTotalMap[el.dataset.iconFillStagger || 'normal'] ?? 1;
+  const staggerFrom = (el.dataset.iconFillStaggerFrom || 'start') as 'start' | 'center' | 'end' | 'edges' | 'random';
 
   const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
   const ns = 'http://www.w3.org/2000/svg';
@@ -1249,6 +1254,25 @@ function initFillIcon(el: HTMLElement) {
   // Convert non-path elements to path
   g.querySelectorAll('circle, polygon, polyline, ellipse, line, rect').forEach(e => {
     MorphSVGPlugin.convertToPath(e as any);
+  });
+
+  // Split compound paths (single <path> with multiple M commands) into individual paths
+  g.querySelectorAll('path:not(.icon-fill-morph)').forEach(p => {
+    const rawPath = MotionPathPlugin.getRawPath(p as any);
+    if (rawPath.length <= 1) return;
+    const parent = p.parentNode;
+    if (!parent) return;
+    const attributes = Array.from(p.attributes);
+    rawPath.forEach((segment: any) => {
+      const newPath = document.createElementNS(ns, 'path');
+      attributes.forEach(attr => {
+        if (attr.nodeName !== 'd') newPath.setAttributeNS(null, attr.nodeName, attr.nodeValue || '');
+      });
+      newPath.setAttributeNS(null, 'd',
+        'M' + segment[0] + ',' + segment[1] + 'C' + segment.slice(2).join(',') + (segment.closed ? 'z' : ''));
+      parent.insertBefore(newPath, p);
+    });
+    parent.removeChild(p);
   });
 
   // oklch → hex
@@ -1300,12 +1324,14 @@ function initFillIcon(el: HTMLElement) {
     fillClones.push(clone);
   });
 
-  // Original paths: keep stroke outline visible, hide fill
-  const sw = g.getAttribute('stroke-width') || '2';
+  // Original paths: hide fill, optionally keep stroke outline
   origPaths.forEach(p => {
     (p as HTMLElement).style.fill = 'none';
-    (p as HTMLElement).style.stroke = 'currentColor';
-    (p as HTMLElement).style.strokeWidth = sw;
+    if (showOutline) {
+      const sw = g.getAttribute('stroke-width') || '2';
+      (p as HTMLElement).style.stroke = 'currentColor';
+      (p as HTMLElement).style.strokeWidth = sw;
+    }
   });
 
   // Start filled if static mode
@@ -1327,23 +1353,52 @@ function initFillIcon(el: HTMLElement) {
     // Fresh color for theme responsiveness
     const targetColor = reverse ? getColor() : getTargetColor();
 
+    const pathCount = fillClones.length;
+    const perPathStagger = pathCount > 1 ? staggerTotal / (pathCount - 1) : 0;
+
+    // Calculate stagger order indices based on direction
+    const indices = Array.from({ length: pathCount }, (_, i) => i);
+    let ordered: number[];
+    switch (staggerFrom) {
+      case 'center': {
+        const mid = (pathCount - 1) / 2;
+        ordered = indices.sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid));
+        break;
+      }
+      case 'end':
+        ordered = indices.reverse();
+        break;
+      case 'edges': {
+        const mid = (pathCount - 1) / 2;
+        ordered = indices.sort((a, b) => Math.abs(b - mid) - Math.abs(a - mid));
+        break;
+      }
+      case 'random':
+        ordered = indices.sort(() => Math.random() - 0.5);
+        break;
+      default:
+        ordered = indices;
+    }
+    // Map: original index → stagger rank
+    const rank = new Array(pathCount);
+    ordered.forEach((origIdx, staggerIdx) => { rank[origIdx] = staggerIdx; });
+
     fillClones.forEach((clone, i) => {
       const fullShape = (origPaths[i] as any)._fillOrigD;
       const dot = (origPaths[i] as any)._fillDotPath;
+      const offset = rank[i] * perPathStagger;
 
       if (!reverse) {
-        // Dot → full shape (bloom in)
         tl.fromTo(clone,
           { morphSVG: { shape: dot, type: 'rotational' }, opacity: 0 },
           { morphSVG: { shape: fullShape, type: 'rotational' }, opacity: 1,
             fill: targetColor, duration: d, ease: easeType },
-          i * 0.05);
+          offset);
       } else {
-        // Full shape → dot (shrink out)
         tl.to(clone,
           { morphSVG: { shape: dot, type: 'rotational' }, opacity: 0,
             duration: d * 0.6, ease: 'power2.in' },
-          i * 0.05);
+          offset);
       }
     });
 
@@ -1374,13 +1429,14 @@ function initFillIcon(el: HTMLElement) {
           scrub: true,
         },
       });
+      const scrubPerPath = fillClones.length > 1 ? staggerTotal / (fillClones.length - 1) : 0;
       fillClones.forEach((clone, i) => {
         const dot = (origPaths[i] as any)._fillDotPath;
         tl.fromTo(clone,
           { morphSVG: { shape: dot, type: 'rotational' }, opacity: 0 },
           { morphSVG: { shape: (origPaths[i] as any)._fillOrigD, type: 'rotational' },
             opacity: 1, duration: 1, ease: 'none' },
-          i * 0.05);
+          i * scrubPerPath);
       });
       break;
     }
