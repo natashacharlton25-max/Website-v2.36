@@ -1246,9 +1246,10 @@ function initFillIcon(el: HTMLElement) {
     : 0;
   const easeType = el.dataset.iconFillEase || (hasDraw ? 'expoScale(0.5,7,power3.out)' : 'back.out(1.7)');
   const combinedDuration = hasDraw ? fillDuration * 1.5 : fillDuration;
-  // Stagger: total time divided by path count
+  // Stagger: total time divided by path count — icons always bloom as one (no stagger)
+  const isIcon = el.classList.contains('icon');
   const staggerTotalMap: Record<string, number> = { none: 0, tight: 0.5, normal: 1, loose: 2 };
-  const staggerTotal = staggerTotalMap[el.dataset.iconFillStagger || 'normal'] ?? 1;
+  const staggerTotal = isIcon ? 0 : (staggerTotalMap[el.dataset.iconFillStagger || 'normal'] ?? 1);
   const staggerFrom = (el.dataset.iconFillStaggerFrom || 'start') as 'start' | 'center' | 'end' | 'edges' | 'random';
 
   const osViewport = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]') || undefined;
