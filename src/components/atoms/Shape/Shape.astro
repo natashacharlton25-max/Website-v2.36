@@ -14,28 +14,33 @@ import type {
   Variant, Shadow,
   GradientBlend, GradientDirection, GradientSpread,
   Animation, AnimationTriggerInteractive,
+  IconSemanticRole, ShapeSize, ShapeBorderWeight,
+  DrawVariant, DrawMode, DrawColour,
+  Stagger, StaggerFrom,
+  MorphTrigger,
+  FillMode, FillTrigger, FillTiming,
+  GradientAnimateDirection, GradientAnimateMode,
 } from '../../../lib/shared-enums';
+import { normalizeDrawColour } from '../../../lib/shared-enums';
 
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
 const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
 
 type ShapeType = 'circle' | 'square' | 'rounded' | 'pill' | 'hexagon' | 'diamond' | 'triangle' | 'star' | 'blob' | 'custom';
-type ShapeSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 type ShapeMode = 'shape' | 'mask';
-type BorderWeight = 'sm' | 'md' | 'lg';
 
 interface Props {
   shape?: ShapeType;
   mode?: ShapeMode;
   slug?: string;
-  semanticRole?: 'decorative' | 'container';
+  semanticRole?: IconSemanticRole;
   label?: string;
   brandColor?: BrandColour;
   rainbowColor?: RainbowColour;
   colorTier?: ColourTier;
   size?: ShapeSize;
   variant?: Variant;
-  borderWeight?: BorderWeight;
+  borderWeight?: ShapeBorderWeight;
   shadow?: Shadow;
   glow?: 'sm' | 'md' | 'lg';
   gradient?: boolean;
@@ -43,41 +48,41 @@ interface Props {
   gradientDirection?: GradientDirection;
   gradientSpread?: GradientSpread;
   gradientAnimate?: boolean;
-  gradientAnimateMode?: 'rotate';
+  gradientAnimateMode?: GradientAnimateMode;
   gradientAnimateSpeed?: number;
   gradientAnimateEase?: string;
-  gradientAnimateDirection?: 'cw' | 'ccw' | 'sway';
+  gradientAnimateDirection?: GradientAnimateDirection;
   gradientAnimateScale?: boolean;
   media?: Record<string, any>;
   animation?: Animation;
   animationTrigger?: AnimationTriggerInteractive;
-  draw?: boolean | 'draw' | 'drawcenter' | 'pulse';
-  drawMode?: 'once' | 'static' | 'yoyo' | 'reverse-yoyo' | 'reveal';
+  draw?: boolean | DrawVariant;
+  drawMode?: DrawMode;
   drawLaser?: boolean;
   drawFill?: boolean;
   drawGhost?: boolean;
-  drawColor?: string;
-  drawStagger?: 'none' | 'tight' | 'normal' | 'loose';
-  drawStaggerFrom?: 'start' | 'center' | 'end' | 'edges' | 'random';
+  drawColor?: DrawColour | string;
+  drawStagger?: Stagger;
+  drawStaggerFrom?: StaggerFrom;
   drawWormSize?: number;
   drawOnScroll?: boolean;
   drawScrub?: boolean;
   morphTo?: string;
-  morphTrigger?: 'hover' | 'viewport' | 'scroll';
-  morphStagger?: 'none' | 'tight' | 'normal' | 'loose';
-  morphStaggerFrom?: 'start' | 'center' | 'end' | 'edges' | 'random';
+  morphTrigger?: MorphTrigger;
+  morphStagger?: Stagger;
+  morphStaggerFrom?: StaggerFrom;
   fillAnimation?: boolean;
   fillOutline?: boolean;
-  fillDrawVariant?: 'draw' | 'drawcenter' | 'pulse';
+  fillDrawVariant?: DrawVariant;
   fillDrawLaser?: boolean;
-  fillMode?: 'once' | 'yoyo' | 'static' | 'fade' | 'ghost' | 'twinkle';
-  fillTrigger?: 'hover' | 'viewport' | 'scrub';
+  fillMode?: FillMode;
+  fillTrigger?: FillTrigger;
   fillDuration?: number;
   fillEase?: string;
   fillColor?: string;
-  fillStagger?: 'none' | 'tight' | 'normal' | 'loose';
-  fillStaggerFrom?: 'start' | 'center' | 'end' | 'edges' | 'random';
-  fillTiming?: 'overlap' | 'after';
+  fillStagger?: Stagger;
+  fillStaggerFrom?: StaggerFrom;
+  fillTiming?: FillTiming;
   class?: string;
 }
 
@@ -87,17 +92,49 @@ const {
   size = 'md', variant = 'fill', borderWeight, shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
   media, animation, animationTrigger = 'hover',
-  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
+  draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom, fillTiming,
   class: className,
 } = Astro.props;
+
+// Strip tier suffixes from drawColor (e.g. "red-tint" → "red") since draw
+// strokes need full opacity — tiers are opacity-based and would render the
+// stroke partially transparent.
+const drawColor = normalizeDrawColour(rawDrawColor);
 
 const resolvedColor = rainbowColor || brandColor || null;
 const hasSlot = Astro.slots.has('default');
 const hasMedia = !!media;
 const mediaComponent = media?.component;
 const { component: _mc, ...mediaProps } = media || {};
-const isContainer = hasSlot || hasMedia || semanticRole === 'container';
+// Container is auto-detected from slot/media — no separate prop needed
+const isContainer = hasSlot || hasMedia;
+// A11y: ui-control and content-symbol need labels, focus, and role
+const isInformational = semanticRole === 'ui-control' || semanticRole === 'content-symbol';
+if (isInformational && !label && import.meta.env.DEV) {
+  console.warn(`[Shape] semanticRole="${semanticRole}" requires a label for accessibility`);
+}
+
+// A11y: any shape with an interaction (hover/click/focus animation, draw,
+// morph, fill animation) MUST be focusable. Eye-gaze, switch access,
+// keyboard users — all OS-level AT translates input into focus/click events.
+// Interactivity is independent of decorative-vs-informational semanticRole.
+const interactiveTriggers = ['hover', 'click', 'focus'];
+const animationIsInteractive = !!animation && interactiveTriggers.includes(animationTrigger);
+const drawIsInteractive = !!draw && (drawOnScroll || drawScrub
+  ? false
+  : interactiveTriggers.includes((animationTrigger as string)));
+const morphIsInteractive = !!morphTo && morphTrigger === 'hover';
+const fillIsInteractive = !!fillAnimation && fillTrigger === 'hover';
+const isInteractive = isInformational
+  || animationIsInteractive
+  || drawIsInteractive
+  || morphIsInteractive
+  || fillIsInteractive;
+// Resolve role: informational shapes stay role="img"; pure-interactive
+// (hover/click animations without semanticRole) become role="button" so
+// screen readers announce them as activatable.
+const a11yRole = isInformational ? 'img' : (isInteractive ? 'button' : undefined);
 
 // Fetch API shape if slug provided
 let svgContent: string | null = null;
@@ -236,8 +273,10 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     isContainer && 'shape--container',
     className,
   ]}
-  aria-hidden={semanticRole === 'decorative' ? "true" : undefined}
-  aria-label={semanticRole !== 'decorative' ? label : undefined}
+  aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
+  aria-label={isInformational ? label : (isInteractive && label ? label : undefined)}
+  tabindex={isInteractive ? "0" : undefined}
+  role={a11yRole}
   data-semantic-role={semanticRole}
   data-grad-dir={gradientDirection || undefined}
   data-grad-spread={gradientSpread || undefined}

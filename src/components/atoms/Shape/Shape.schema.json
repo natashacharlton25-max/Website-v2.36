@@ -1,20 +1,23 @@
 {
   "component": "Shape",
   "category": "atom",
-  "renders": { "full": "Shape.astro", "reduced": "Shape.astro", "textonly": null },
-  "notes": "Decorative shape or container background. Built-in geometric shapes via CSS/SVG. API shapes from D1. Can wrap child atoms (Icon, text). textonly: null for decorative, container children render without shape.",
+  "renders": { "full": "Shape.astro", "reduced": "Shape.astro", "assistive": "Shape.astro", "textonly": null },
+  "notes": "Decorative shape or container background. Built-in geometric shapes via CSS/SVG. API shapes from D1. Can wrap child atoms (Icon, text). textonly: null for decorative. Container behaviour auto-detected from slot/media. Shapes can be ui-control / content-symbol for interactive scrollytelling — they get tabindex, role=img, aria-label, focus indicators just like Icon.",
 
   "_rules": [
-    { "rule": "icon-contrast-on-fill", "condition": "variant === 'fill' && media?.component === 'Icon' && (media.brandColor === brandColor || media.rainbowColor === rainbowColor || !media.brandColor && !media.rainbowColor)", "action": "Icon gets auto-contrast colour (oklch inversion) so it's visible against the filled shape background" }
+    { "rule": "icon-contrast-on-fill", "condition": "variant === 'fill' && media?.component === 'Icon' && (media.brandColor === brandColor || media.rainbowColor === rainbowColor || !media.brandColor && !media.rainbowColor)", "action": "Icon gets auto-contrast colour (oklch inversion) so it's visible against the filled shape background" },
+    { "rule": "label-required-for-informational", "condition": "semanticRole === 'ui-control' || semanticRole === 'content-symbol'", "requires": "label", "note": "ui-control and content-symbol shapes must have label for screen readers" },
+    { "rule": "draw-colour-base-only", "condition": "draw", "note": "drawColor only accepts base colour variants or rainbow — no tier modifiers (tint/mid/emphasis). Atom strips them at runtime via normalizeDrawColour." },
+    { "rule": "draw-fill-mutual-exclusion", "condition": "draw && fillAnimation && fillTiming === 'overlap'", "note": "When draw and fillAnimation are both used, fillTiming controls whether fill bloom overlaps draw at 50% (default) or starts after draw completes ('after')" }
   ],
 
   "props": {
     "content": {
-      "shape":        { "type": "string", "default": "circle", "enum": ["circle", "square", "rounded", "pill", "hexagon", "diamond", "triangle", "star", "blob", "custom"] },
+      "shape":        { "type": "string", "default": "circle", "enum": ["circle", "square", "subtle", "soft", "rounded", "rounded-lg", "pill", "hexagon", "diamond", "triangle", "star", "blob", "custom"] },
       "mode":         { "type": "string", "default": "shape", "enum": ["shape", "mask"], "_note": "shape: renders as visible shape. mask: uses shape as clip-path on content." },
       "slug":         { "type": "string", "_note": "API shape slug — fetches SVG from Asset Library" },
-      "semanticRole": { "type": "string", "default": "decorative", "enum": ["decorative", "container"] },
-      "label":        { "type": "string" }
+      "semanticRole": { "type": "string", "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"], "_note": "decorative: aria-hidden. ui-control: tabindex 0 + role=img + label. content-symbol: role=img + label. Container behaviour is auto-detected from slot/media — no separate value needed." },
+      "label":        { "type": "string", "_note": "Required for ui-control and content-symbol." }
     },
 
     "colour": {
@@ -27,36 +30,63 @@
     },
 
     "media": {
-      "media": { "type": "object", "textonly": false, "_description": "Component node: { component: 'Icon'|'Image'|'LottieIcon', ...atomProps }. Validated by the child atom's own schema." }
+      "media": { "type": "object", "textonly": false, "_description": "Component node: { component: 'Icon'|'Image'|'LottieIcon', ...atomProps }. Validated by the child atom's own schema. Presence of media auto-marks the shape as a container." }
     },
 
     "gradient": {
-      "gradient":          { "type": "boolean", "default": false },
-      "gradientBlend":     { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade", "emerge", "fade", "preset-tint", "preset-mid", "preset-base", "preset-emphasis", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "rainbow"] },
-      "gradientDirection": { "type": "string", "default": "diagonal", "enum": ["vertical", "vertical-reverse", "horizontal", "horizontal-reverse", "diagonal", "diagonal-reverse", "diagonal-alt", "diagonal-alt-reverse"] },
-      "gradientSpread":    { "type": "string", "default": "balanced", "enum": ["soft", "balanced", "tight"] },
-      "gradientAnimate":   { "type": "boolean" }
+      "gradient":                 { "type": "boolean", "default": false },
+      "gradientBlend":            { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade", "emerge", "fade", "preset-tint", "preset-mid", "preset-base", "preset-emphasis", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "rainbow"] },
+      "gradientDirection":        { "type": "string", "default": "diagonal", "enum": ["vertical", "vertical-reverse", "horizontal", "horizontal-reverse", "diagonal", "diagonal-reverse", "diagonal-alt", "diagonal-alt-reverse"] },
+      "gradientSpread":           { "type": "string", "default": "balanced", "enum": ["soft", "balanced", "tight"] },
+      "gradientAnimate":          { "type": "boolean" },
+      "gradientAnimateMode":      { "type": "string", "default": "rotate", "enum": ["rotate"] },
+      "gradientAnimateSpeed":     { "type": "number", "_note": "Duration in seconds. Default 8s, scales 2x for gentle motion mode." },
+      "gradientAnimateEase":      { "type": "string", "_note": "GSAP ease string (e.g. 'sine.inOut', 'power2.out'). Default 'none' for cw/ccw, 'sine.inOut' for sway." },
+      "gradientAnimateDirection": { "type": "string", "default": "cw", "enum": ["cw", "ccw", "sway"] },
+      "gradientAnimateScale":     { "type": "boolean", "_note": "Pulse scale 0.8→1.5 alongside rotation" }
     },
 
     "visual": {
-      "size":    { "type": "string", "default": "md", "enum": ["xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl"] },
+      "size":         { "type": "string", "default": "md", "enum": ["xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "8xl"] },
       "variant":      { "type": "string", "default": "fill", "enum": ["fill", "outline", "glass", "liquid-glass"] },
       "borderWeight": { "type": "string", "enum": ["sm", "md", "lg"] },
-      "shadow":  { "type": "string", "enum": ["sm", "md", "lg", "elevated"] },
-      "glow":    { "type": "string", "enum": ["sm", "md", "lg"] }
+      "shadow":       { "type": "string", "enum": ["sm", "md", "lg", "elevated"] },
+      "glow":         { "type": "string", "enum": ["sm", "md", "lg"] }
     },
 
     "animation": {
       "animation":        { "type": "string", "enum": ["spin", "bounce", "shake", "float", "drift", "slide-up", "slide-down", "slide-left", "slide-right", "flip", "pulse", "ping", "pop", "squish", "heartbeat", "rubber-band", "fade", "blink", "flash", "glint", "shimmer", "twinkle", "wiggle", "swing", "rock", "nod", "attention", "celebrate", "enter", "exit"] },
       "animationTrigger": { "type": "string", "default": "hover", "enum": ["hover", "viewport", "autoplay", "loop", "interval", "click", "focus", "none"] },
+
       "draw":             { "type": ["boolean", "string"], "enum": [true, "draw", "drawcenter", "pulse"] },
-      "drawMode":         { "type": "string", "default": "static", "enum": ["once", "static", "yoyo", "reverse-yoyo"] },
+      "drawMode":         { "type": "string", "default": "static", "enum": ["once", "static", "yoyo", "reverse-yoyo", "reveal"] },
       "drawLaser":        { "type": "boolean" },
-      "drawGhost":        { "type": "boolean" },
-      "drawColor":        { "type": "string", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "hero", "sunset", "brand-emerge", "brand-fade", "rainbow"] },
+      "drawFill":         { "type": "boolean", "_note": "Keep origPaths filled underneath while overlay draws border on top" },
+      "drawGhost":        { "type": "boolean", "_note": "Use --svg-ghost-color token for ghost stroke (no separate ghostColor prop needed)" },
+      "drawColor":        { "type": "string", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "hero", "sunset", "brand-emerge", "brand-fade", "rainbow"], "_note": "BASE colours only — no tier modifiers. Tier suffixes are stripped at runtime." },
       "drawStagger":      { "type": "string", "default": "normal", "enum": ["none", "tight", "normal", "loose"] },
       "drawStaggerFrom":  { "type": "string", "default": "start", "enum": ["start", "center", "end", "edges", "random"] },
-      "morphTo":          { "type": "string" }
+      "drawWormSize":     { "type": "number", "default": 10, "_note": "Laser worm segment size as percentage of path length (1-99)" },
+      "drawOnScroll":     { "type": "boolean", "_note": "Trigger draw when element enters viewport" },
+      "drawScrub":        { "type": "boolean", "_note": "Scrub draw progress with scroll position (only with drawOnScroll)" },
+
+      "morphTo":          { "type": "string", "_note": "Built-in shape name OR D1 slug. Goo morph technique applies automatically." },
+      "morphTrigger":     { "type": "string", "default": "hover", "enum": ["hover", "viewport", "scroll"] },
+      "morphStagger":     { "type": "string", "enum": ["none", "tight", "normal", "loose"] },
+      "morphStaggerFrom": { "type": "string", "default": "start", "enum": ["start", "center", "end", "edges", "random"] },
+
+      "fillAnimation":    { "type": "boolean", "_note": "Bloom fill from centre on trigger" },
+      "fillOutline":      { "type": "boolean", "_note": "Also draw stroke outline using addVariant — combines with fillDrawVariant/fillDrawLaser" },
+      "fillDrawVariant":  { "type": "string", "enum": ["draw", "drawcenter", "pulse"] },
+      "fillDrawLaser":    { "type": "boolean" },
+      "fillMode":         { "type": "string", "default": "once", "enum": ["once", "yoyo", "static", "fade", "ghost", "twinkle"] },
+      "fillTrigger":      { "type": "string", "default": "hover", "enum": ["hover", "viewport", "scrub", "rainbow"] },
+      "fillDuration":     { "type": "number", "default": 1, "_note": "Bloom duration in seconds. Auto-scaled by element size." },
+      "fillEase":         { "type": "string", "_note": "Named ease (jelly|wobble|bounce|snap) or raw GSAP ease string" },
+      "fillColor":        { "type": "string", "_note": "CSS variable name (--token) or hex/rgb. If absent, uses element colour." },
+      "fillStagger":      { "type": "string", "default": "normal", "enum": ["none", "tight", "normal", "loose"] },
+      "fillStaggerFrom":  { "type": "string", "default": "start", "enum": ["start", "center", "end", "edges", "random"] },
+      "fillTiming":       { "type": "string", "default": "overlap", "enum": ["overlap", "after"], "_note": "When draw + fill combined: overlap starts fill at 50% draw, after waits for draw to finish" }
     }
   }
 }

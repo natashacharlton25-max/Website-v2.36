@@ -1,15 +1,15 @@
 {
   "component": "Icon",
   "category": "atom",
-  "renders": { "full": "Icon.astro", "reduced": "Icon.astro", "textonly": null },
+  "renders": { "full": "Icon.astro", "reduced": "Icon.astro", "assistive": "Icon.astro", "textonly": null },
   "notes": "API-backed icon atom. Fetches SVG from Asset Library at build time. Weight resolved via brand config or explicit override. textonly: null for decorative. morph forces fill weight, draw forces non-fill (auto-corrected).",
 
   "_rules": [
     { "rule": "morph-requires-fill", "condition": "morphTo", "requires": "weight === 'fill' || weight === undefined" },
     { "rule": "draw-excludes-fill", "condition": "draw", "excludes": "weight === 'fill'" },
     { "rule": "gradient-draw-passthrough", "condition": "gradient && draw", "note": "gradient value used as drawColor for gradient stroke lines" },
-    { "rule": "draw-colour-base-only", "condition": "draw", "note": "drawColor only accepts base colour variants or rainbow — no tiers (tint/mid/emphasis)" },
-    { "rule": "label-required-for-informational", "condition": "semanticRole !== 'decorative'", "requires": "label", "note": "ui-control and content-symbol icons must have label for screen readers and textonly swap" }
+    { "rule": "draw-colour-base-only", "condition": "draw", "note": "drawColor only accepts base colour variants or rainbow — no tier modifiers (tint/mid/emphasis). Atom strips them at runtime via normalizeDrawColour." },
+    { "rule": "label-required-for-informational", "condition": "semanticRole === 'ui-control' || semanticRole === 'content-symbol'", "requires": "label", "note": "ui-control and content-symbol icons must have label for screen readers and textonly swap" }
   ],
 
   "props": {
@@ -46,16 +46,37 @@
     "animation": {
       "animation":        { "type": "string", "enum": ["spin", "bounce", "shake", "float", "drift", "slide-up", "slide-down", "slide-left", "slide-right", "flip", "pulse", "ping", "pop", "squish", "heartbeat", "rubber-band", "fade", "blink", "flash", "glint", "shimmer", "twinkle", "wiggle", "swing", "rock", "nod", "attention", "celebrate", "enter", "exit"] },
       "animationTrigger": { "type": "string", "default": "hover", "enum": ["hover", "viewport", "autoplay", "loop", "interval", "click", "focus", "none"] },
+
       "draw":             { "type": ["boolean", "string"], "enum": [true, "draw", "drawcenter", "pulse"] },
-      "drawMode":         { "type": "string", "default": "static", "enum": ["once", "static", "yoyo", "reverse-yoyo"] },
+      "drawMode":         { "type": "string", "default": "static", "enum": ["once", "static", "yoyo", "reverse-yoyo", "reveal"] },
       "drawLaser":        { "type": "boolean" },
       "drawFill":         { "type": "boolean" },
-      "drawGhost":        { "type": "boolean" },
-      "drawColor":        { "type": "string", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "hero", "sunset", "brand-emerge", "brand-fade", "rainbow"] },
+      "drawFillMode":     { "type": "string", "default": "static", "enum": ["static", "bloom", "fade"] },
+      "drawGhost":        { "type": "boolean", "_note": "Use --svg-ghost-color token for ghost stroke" },
+      "drawColor":        { "type": "string", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "hero", "sunset", "brand-emerge", "brand-fade", "rainbow"], "_note": "BASE colours only — no tier modifiers. Tier suffixes are stripped at runtime." },
+      "drawStagger":      { "type": "string", "default": "normal", "enum": ["none", "tight", "normal", "loose"] },
+      "drawStaggerFrom":  { "type": "string", "default": "start", "enum": ["start", "center", "end", "edges", "random"] },
+      "drawWormSize":     { "type": "number", "default": 10, "_note": "Laser worm segment size as percentage of path length (1-99)" },
       "drawOnScroll":     { "type": "boolean" },
       "drawScrub":        { "type": "boolean" },
+
       "morphTo":          { "type": "string" },
-      "morphViaCircle":   { "type": "boolean" }
+      "morphViaCircle":   { "type": "boolean", "_note": "Legacy — goo morph is now the default convergence technique" },
+      "morphTrigger":     { "type": "string", "default": "hover", "enum": ["hover", "viewport", "scroll"] },
+      "morphStagger":     { "type": "string", "enum": ["none", "tight", "normal", "loose"] },
+      "morphStaggerFrom": { "type": "string", "default": "start", "enum": ["start", "center", "end", "edges", "random"] },
+
+      "fillAnimation":    { "type": "boolean" },
+      "fillOutline":      { "type": "boolean" },
+      "fillDrawVariant":  { "type": "string", "enum": ["draw", "drawcenter", "pulse"] },
+      "fillDrawLaser":    { "type": "boolean" },
+      "fillMode":         { "type": "string", "default": "once", "enum": ["once", "yoyo", "static", "fade", "ghost", "twinkle"] },
+      "fillTrigger":      { "type": "string", "default": "hover", "enum": ["hover", "viewport", "scrub", "rainbow"] },
+      "fillDuration":     { "type": "number", "default": 1 },
+      "fillEase":         { "type": "string", "_note": "Named ease (jelly|wobble|bounce|snap) or raw GSAP ease string" },
+      "fillColor":        { "type": "string", "_note": "CSS variable name (--token) or hex/rgb" },
+      "fillStagger":      { "type": "string", "default": "normal", "enum": ["none", "tight", "normal", "loose"] },
+      "fillStaggerFrom":  { "type": "string", "default": "start", "enum": ["start", "center", "end", "edges", "random"] }
     }
   }
 }

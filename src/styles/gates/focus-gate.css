@@ -98,13 +98,19 @@
    FOCUS RING — applies to all focused elements
    ========================================================== */
 
-/* Focus state: strip effects — ring + fill handled by ::after pseudo */
+/* Focus state: strip effects — ring + fill handled by ::after pseudo
+ *
+ * Focus indicators must NOT change the element's own text/icon colour.
+ * Focus is a "where am I" signal, not a "what is it" replacement — the
+ * element should look exactly like itself, just ringed + highlighted.
+ * The background colour-mix and the ::after ring are enough to indicate
+ * focus (shape + colour change of the surrounding, not the element).
+ */
 [data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card):not(.a11y-save-slot__name):not(.form-field) {
   box-shadow: none !important;
   border-radius: 0 !important;
   border-color: transparent !important;
   background: color-mix(in oklch, var(--focus-color) 10%, transparent) !important;
-  color: var(--neutral-800) !important;
   overflow: visible !important;
   outline: none !important;
   position: relative !important;

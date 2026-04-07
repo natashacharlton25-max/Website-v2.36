@@ -288,3 +288,138 @@ export const SEMANTIC_ROLES = [
   'status', 'tag', 'label', 'none'
 ] as const;
 export type SemanticRole = typeof SEMANTIC_ROLES[number];
+
+// ── Icon/Shape Semantic Role (3 values) ────────────────
+// Used by Icon and Shape atoms — drives ARIA, tabindex, label requirement
+export const ICON_SEMANTIC_ROLES = [
+  'decorative', 'ui-control', 'content-symbol'
+] as const;
+export type IconSemanticRole = typeof ICON_SEMANTIC_ROLES[number];
+
+
+/* ================================================================
+   SHAPE / ICON SIZES — extended scale up to 8xl
+   ================================================================ */
+
+// ── Shape Size (15 values) ─────────────────────────────
+// Goes up to 8xl for large hero/scrolly stages
+export const SHAPE_SIZES = [
+  'xs', 'sm', 'md', 'lg', 'xl',
+  '2xl', '3xl', '4xl', '5xl', '6xl', '7xl', '8xl'
+] as const;
+export type ShapeSize = typeof SHAPE_SIZES[number];
+
+// ── Border Weight (Shape) (3 values) ───────────────────
+export const SHAPE_BORDER_WEIGHTS = [
+  'sm', 'md', 'lg'
+] as const;
+export type ShapeBorderWeight = typeof SHAPE_BORDER_WEIGHTS[number];
+
+
+/* ================================================================
+   DRAW ANIMATION — variants, modes, stagger, colours
+   ================================================================ */
+
+// ── Draw Variant (3 values) ────────────────────────────
+export const DRAW_VARIANTS = [
+  'draw', 'drawcenter', 'pulse'
+] as const;
+export type DrawVariant = typeof DRAW_VARIANTS[number];
+
+// ── Draw Mode (5 values) ───────────────────────────────
+export const DRAW_MODES = [
+  'once', 'static', 'yoyo', 'reverse-yoyo', 'reveal'
+] as const;
+export type DrawMode = typeof DRAW_MODES[number];
+
+// ── Draw Colour (15 values) — base colours + named gradients only
+// NO TIERS — draw uses solid stroke, tier opacity would break the line
+// `normalizeDrawColour()` strips any tier suffix at runtime as a safety net
+export const DRAW_COLOURS = [
+  'primary', 'secondary', 'neutral',
+  'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink',
+  'hero', 'sunset', 'brand-emerge', 'brand-fade', 'rainbow'
+] as const;
+export type DrawColour = typeof DRAW_COLOURS[number];
+
+/**
+ * Strip tier suffixes (-tint, -mid, -emphasis) from a colour string.
+ *
+ * Used by Icon and Shape draw props (drawColor) so that if an author
+ * accidentally passes a tier'd colour like `red-tint`, it gets normalised
+ * to just `red`. Tiers are opacity-based and would render the draw stroke
+ * partially transparent — the goo morph and stroke draw both need full
+ * opacity to read properly.
+ */
+export function normalizeDrawColour(value: string | undefined): string | undefined {
+  if (!value) return value;
+  return value.replace(/-(tint|mid|emphasis)$/, '');
+}
+
+
+/* ================================================================
+   STAGGER — used by draw, morph, fill animations
+   ================================================================ */
+
+// ── Stagger amount (4 values) ──────────────────────────
+export const STAGGERS = [
+  'none', 'tight', 'normal', 'loose'
+] as const;
+export type Stagger = typeof STAGGERS[number];
+
+// ── Stagger origin (5 values) ──────────────────────────
+export const STAGGER_FROMS = [
+  'start', 'center', 'end', 'edges', 'random'
+] as const;
+export type StaggerFrom = typeof STAGGER_FROMS[number];
+
+
+/* ================================================================
+   MORPH ANIMATION — triggers
+   ================================================================ */
+
+// ── Morph Trigger (3 values) ───────────────────────────
+export const MORPH_TRIGGERS = [
+  'hover', 'viewport', 'scroll'
+] as const;
+export type MorphTrigger = typeof MORPH_TRIGGERS[number];
+
+
+/* ================================================================
+   FILL ANIMATION — modes, triggers, timing
+   ================================================================ */
+
+// ── Fill Mode (6 values) ───────────────────────────────
+export const FILL_MODES = [
+  'once', 'yoyo', 'static', 'fade', 'ghost', 'twinkle'
+] as const;
+export type FillMode = typeof FILL_MODES[number];
+
+// ── Fill Trigger (4 values) ────────────────────────────
+export const FILL_TRIGGERS = [
+  'hover', 'viewport', 'scrub', 'rainbow'
+] as const;
+export type FillTrigger = typeof FILL_TRIGGERS[number];
+
+// ── Fill Timing (2 values) — relative to draw animation
+export const FILL_TIMINGS = [
+  'overlap', 'after'
+] as const;
+export type FillTiming = typeof FILL_TIMINGS[number];
+
+
+/* ================================================================
+   ANIMATED GRADIENT — direction, mode
+   ================================================================ */
+
+// ── Gradient Animate Direction (3 values) ──────────────
+export const GRADIENT_ANIMATE_DIRECTIONS = [
+  'cw', 'ccw', 'sway'
+] as const;
+export type GradientAnimateDirection = typeof GRADIENT_ANIMATE_DIRECTIONS[number];
+
+// ── Gradient Animate Mode (1 value for now) ────────────
+export const GRADIENT_ANIMATE_MODES = [
+  'rotate'
+] as const;
+export type GradientAnimateMode = typeof GRADIENT_ANIMATE_MODES[number];

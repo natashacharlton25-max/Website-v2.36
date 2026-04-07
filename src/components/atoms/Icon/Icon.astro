@@ -15,18 +15,21 @@ import type {
   IconWeight,
   Animation, AnimationTriggerInteractive,
   GradientBlend, GradientDirection, GradientSpread,
+  IconSemanticRole,
+  DrawVariant, DrawMode, DrawColour,
+  Stagger, StaggerFrom,
+  MorphTrigger,
+  FillMode, FillTrigger,
 } from '../../../lib/shared-enums';
+import { normalizeDrawColour } from '../../../lib/shared-enums';
 
 // ─── Brand config ───────────────────────────────────────
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
 const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
 const DEFAULT_WEIGHT = import.meta.env.ICON_WEIGHT || 'fill';
 
-type IconSemanticRole = 'decorative' | 'ui-control' | 'content-symbol';
 type IconShadow = 'sm' | 'md' | 'lg' | 'elevated';
 type IconGlow = 'sm' | 'md' | 'lg';
-type DrawVariant = 'draw' | 'drawcenter' | 'chachaslide' | 'pulse';
-type DrawMode = 'once' | 'static' | 'yoyo' | 'reverse-yoyo' | 'reveal';
 
 interface Props {
   // ── Content ─────────────────────────────────────────────
@@ -63,21 +66,26 @@ interface Props {
   drawGhost?: boolean;
   drawOnScroll?: boolean;
   drawScrub?: boolean;
-  drawColor?: string;
+  drawColor?: DrawColour | string;
+  drawStagger?: Stagger;
+  drawStaggerFrom?: StaggerFrom;
+  drawWormSize?: number;
   morphTo?: string;
   morphViaCircle?: boolean;
-  morphTrigger?: 'hover' | 'viewport' | 'scroll';
+  morphTrigger?: MorphTrigger;
+  morphStagger?: Stagger;
+  morphStaggerFrom?: StaggerFrom;
   fillAnimation?: boolean;
   fillOutline?: boolean;
-  fillDrawVariant?: 'draw' | 'drawcenter' | 'pulse';
+  fillDrawVariant?: DrawVariant;
   fillDrawLaser?: boolean;
-  fillMode?: 'once' | 'yoyo' | 'static' | 'fade';
-  fillTrigger?: 'hover' | 'viewport' | 'scrub';
+  fillMode?: FillMode;
+  fillTrigger?: FillTrigger;
   fillDuration?: number;
   fillEase?: string;
   fillColor?: string;
-  fillStagger?: 'none' | 'tight' | 'normal' | 'loose';
-  fillStaggerFrom?: 'start' | 'center' | 'end' | 'edges' | 'random';
+  fillStagger?: Stagger;
+  fillStaggerFrom?: StaggerFrom;
 
   class?: string;
 }
@@ -88,11 +96,48 @@ const {
   shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
   animation, animationTrigger = 'hover',
-  draw, drawMode = 'static', drawLaser, drawFill, drawFillMode = 'static', drawGhost, drawOnScroll, drawScrub, drawColor,
-  morphTo, morphViaCircle, morphTrigger = 'hover',
+  draw, drawMode = 'static', drawLaser, drawFill, drawFillMode = 'static', drawGhost, drawOnScroll, drawScrub, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize,
+  morphTo, morphViaCircle, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom,
   semanticRole, label,
 } = Astro.props;
+
+// Strip tier suffixes from drawColor (e.g. "red-tint" → "red") since draw
+// strokes need full opacity — tiers are opacity-based and would render the
+// stroke partially transparent.
+const drawColor = normalizeDrawColour(rawDrawColor);
+
+// A11y: ui-control and content-symbol need labels
+const isInformational = semanticRole === 'ui-control' || semanticRole === 'content-symbol';
+if (isInformational && !label && import.meta.env.DEV) {
+  console.warn(`[Icon ${name}] semanticRole="${semanticRole}" requires a label for accessibility`);
+}
+
+// A11y: any icon with an interaction (hover/click/focus animation, draw, morph,
+// fill animation) MUST be focusable. Eye-gaze trackers, switch access, keyboard
+// users — all OS-level AT translates input into focus/click events. If the
+// element isn't in the tab order, those users have NO way to trigger it.
+//
+// We don't gate on semanticRole here — interactivity is independent of
+// "decorative vs informational". An icon can be visually decorative AND have
+// a hover effect; that hover effect is still an interaction that needs a
+// non-mouse input path.
+const interactiveTriggers = ['hover', 'click', 'focus'];
+const animationIsInteractive = !!animation && interactiveTriggers.includes(animationTrigger);
+const drawIsInteractive = !!draw && (drawOnScroll || drawScrub
+  ? false
+  : interactiveTriggers.includes((animationTrigger as string)));
+const morphIsInteractive = !!morphTo && morphTrigger === 'hover';
+const fillIsInteractive = !!fillAnimation && fillTrigger === 'hover';
+const isInteractive = isInformational
+  || animationIsInteractive
+  || drawIsInteractive
+  || morphIsInteractive
+  || fillIsInteractive;
+// Resolve role: informational icons stay role="img"; pure-interactive
+// (hover/click animations without semanticRole) become role="button" so
+// screen readers announce them as activatable.
+const a11yRole = isInformational ? 'img' : (isInteractive ? 'button' : undefined);
 
 // Resolve colour: rainbow takes precedence, else brand
 const resolvedColor = rainbowColor || brandColor || null;
@@ -259,6 +304,9 @@ if (draw) {
   if (drawOnScroll) dataAttrs['data-icon-draw-scroll'] = 'true';
   if (drawScrub) dataAttrs['data-icon-draw-scrub'] = 'true';
   if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
+  if (drawStagger) dataAttrs['data-icon-draw-stagger'] = drawStagger;
+  if (drawStaggerFrom) dataAttrs['data-icon-draw-stagger-from'] = drawStaggerFrom;
+  if (drawWormSize) dataAttrs['data-icon-draw-worm-size'] = String(drawWormSize);
   if (animationTrigger && animationTrigger !== 'hover') dataAttrs['data-icon-draw-trigger'] = animationTrigger;
 }
 
@@ -267,6 +315,8 @@ if (morphTo && morphTargetContent) {
   dataAttrs['data-icon-morph-target'] = morphTargetContent;
   if (morphViaCircle) dataAttrs['data-icon-morph-circle'] = 'true';
   if (morphTrigger && morphTrigger !== 'hover') dataAttrs['data-icon-morph-trigger'] = morphTrigger;
+  if (morphStagger) dataAttrs['data-icon-morph-stagger'] = morphStagger;
+  if (morphStaggerFrom) dataAttrs['data-icon-morph-stagger-from'] = morphStaggerFrom;
 }
 
 if (fillAnimation) {
@@ -290,10 +340,10 @@ if (fillAnimation) {
 <span
   class:list={['icon', ...effectClasses, className]}
   style={size != null ? `width: ${size}px; height: ${size}px;` : undefined}
-  aria-hidden={semanticRole === 'decorative' || !semanticRole ? "true" : undefined}
-  aria-label={semanticRole && semanticRole !== 'decorative' ? label : undefined}
-  tabindex={semanticRole === 'ui-control' ? "0" : undefined}
-  role={semanticRole && semanticRole !== 'decorative' ? "img" : undefined}
+  aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
+  aria-label={isInformational ? label : (isInteractive && label ? label : undefined)}
+  tabindex={isInteractive ? "0" : undefined}
+  role={a11yRole}
   data-semantic-role={semanticRole}
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
   {...dataAttrs}

@@ -137,8 +137,8 @@ const {
       <Footer animated />
     )}
 
-    <!-- Cookie Consent Banner -->
-    <CookieBanner />
+    <!-- Cookie Consent Banner — DEV: temporarily disabled, RE-ENABLE BEFORE PRODUCTION -->
+    {/* <CookieBanner /> */}
 
     <!-- Toast Notifications Container (toasts are shown dynamically via JavaScript) -->
     <div id="toast-container"></div>
@@ -169,6 +169,11 @@ const {
     // (PatternOverlay, MasonryGrid, MasonryCard), not globally
     // Import focus system (keyboard focus detection, rainbow, dim, scroll)
     import '../lib/focus/focus-system';
+    // Reload overlay — covers the page during data-motion/hover/render/mode
+    // changes so the user never sees the default-then-target jerk while the
+    // page reloads with the new setting applied. CSS imported as side-effect.
+    import '../lib/reload-overlay/reload-overlay.css';
+    import '../lib/reload-overlay/reload-overlay';
     // Import custom caret (hides OS caret, renders tokenised custom caret)
     import { initCustomCaret } from '../lib/caret/custom-caret';
     initCustomCaret();

@@ -234,6 +234,24 @@ function initFocusSystem() {
     hideFocusLabel();
   });
 
+  // ARIA button keyboard activation —
+  // Elements with role="button" that AREN'T native <button> need Enter and
+  // Space to fire a click event manually. Native buttons get this for free
+  // from the browser; SVG icons / divs / spans with role="button" do not.
+  // Without this, every focusable Icon and Shape we just made keyboard-
+  // accessible would still be impossible to activate from the keyboard.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const active = document.activeElement as HTMLElement | null;
+    if (!active) return;
+    if (active.tagName === 'BUTTON' || active.tagName === 'A') return;
+    if (active.getAttribute('role') !== 'button') return;
+    // Don't intercept inside form fields (cards, inputs handle their own keys)
+    if (active.closest('.form-field')) return;
+    e.preventDefault();
+    active.click();
+  });
+
   // Card-select: arrow key navigation for checkbox groups
   document.addEventListener('keydown', (e) => {
     const active = document.activeElement as HTMLElement;

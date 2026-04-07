@@ -1,0 +1,123 @@
+/**
+ * Reload Overlay — fullscreen page-reload cover
+ *
+ * Goes over EVERYTHING (z-index above modals, panels, focus rings, etc.)
+ * during the brief window between "user changed a fundamental view setting"
+ * and "page has reloaded with the new setting".
+ *
+ * Loader is a gooey gradient spiral (Uiverse / fanishah, MIT) using the
+ * same SVG goo filter technique as our morph system — visual continuity.
+ *
+ * IMMUNE to motion-gate: this overlay must run even when the user has just
+ * set motion=none, because we're in the middle of reloading the page to
+ * apply that very setting. The CSS uses raw seconds, not duration tokens.
+ */
+
+.reload-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647; /* on top of literally everything */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--page-bg, #1a1a1a);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
+}
+
+.reload-overlay--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Goo filter container is invisible — only here to host the <filter> def */
+.reload-overlay__filter {
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+/* ─── Loader ──────────────────────────────────────────── */
+
+.reload-overlay__loader {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+/* The two stops cycle through brand colours via tokens. Default to brand
+ * primary/secondary; falls back to vibrant pink/orange if tokens missing. */
+.reload-overlay__stop1 {
+  stop-color: var(--primary-base, #f700a8);
+}
+.reload-overlay__stop2 {
+  stop-color: var(--secondary-base, #ff8000);
+}
+
+/* Goo filter applied to the spiral so the spinning halves blend gooey */
+.reload-overlay__spiral {
+  filter: url(#reload-overlay-goo);
+}
+
+/* The big sweeping arc */
+.reload-overlay__half {
+  animation: reload-overlay-spin 10s infinite linear;
+  stroke-dasharray: 180 800;
+  fill: none;
+  stroke: url(#reload-overlay-grad);
+  stroke-width: 23;
+  stroke-linecap: round;
+}
+
+/* The faster dot-arc on top */
+.reload-overlay__strecken {
+  animation: reload-overlay-spin 3s infinite linear;
+  stroke-dasharray: 26 54;
+  fill: none;
+  stroke: url(#reload-overlay-grad);
+  stroke-width: 23;
+  stroke-linecap: round;
+}
+
+/* Soft drop-shadow ghost behind the spiral for depth */
+.reload-overlay__shadow {
+  filter: blur(5px);
+  opacity: 0.3;
+  position: absolute;
+  inset: 0;
+  transform: translate(3px, 3px);
+}
+
+@keyframes reload-overlay-spin {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -403px; }
+}
+
+/* ─── Optional caption slot — populate later with quotes ──── */
+
+.reload-overlay__caption {
+  position: absolute;
+  bottom: 15vh;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 40ch;
+  text-align: center;
+  font-family: var(--font-body, sans-serif);
+  font-size: var(--text-base, 1rem);
+  color: var(--neutral-200, #ddd);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* ─── Forced colours / high contrast fallback ───────────── */
+
+@media (forced-colors: active) {
+  .reload-overlay {
+    background: Canvas;
+  }
+  .reload-overlay__half,
+  .reload-overlay__strecken {
+    stroke: LinkText;
+  }
+}

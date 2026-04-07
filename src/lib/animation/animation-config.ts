@@ -210,10 +210,10 @@ export interface TriggerOptions {
   el: HTMLElement;
   /** What fires it: hover, click, focus, viewport, viewport-loop, loop, interval, scrub, autoplay */
   trigger?: string;
-  /** Called to play the animation forward — return timeline for loop/instant control */
+  /** Called to play the animation forward — return timeline so the trigger can guard against re-trigger while it's still active */
   onEnter: () => any;
-  /** Called to play the animation in reverse (optional — for yoyo/hover-leave) */
-  onLeave?: () => void;
+  /** Called to play the animation in reverse (optional — for yoyo/hover-leave). Return a timeline for re-trigger protection */
+  onLeave?: () => any;
   /** Called for instant mode — jump to end state (optional, defaults to onEnter) */
   onInstant?: () => void;
   /** Called when motion is 'none' — set static fallback state */
@@ -248,6 +248,32 @@ export function registerTrigger(opts: TriggerOptions): void {
     onStatic();
   }
 
+  // ────────────────────────────────────────────────────────────
+  // Re-trigger guard: every animation registered through this helper
+  // tracks its currently-active timeline. Any new trigger attempt while
+  // that timeline is still running is IGNORED — animations always play
+  // through to completion before the next one can fire.
+  //
+  // For this to work, callers should return their timeline from onEnter
+  // (and onLeave). Calls that don't return a timeline aren't guarded
+  // (the helper has no way to know when they're done).
+  // ────────────────────────────────────────────────────────────
+  let activeTl: any = null;
+  const isActive = () => activeTl?.isActive?.() === true;
+
+  const guardedEnter = (): any => {
+    if (isActive()) return null;
+    const result = onEnter();
+    if (result?.isActive) activeTl = result;
+    return result;
+  };
+  const guardedLeave = onLeave ? (): any => {
+    if (isActive()) return null;
+    const result = onLeave();
+    if (result?.isActive) activeTl = result;
+    return result;
+  } : undefined;
+
   switch (trigger) {
     case 'viewport': {
       if (!getAnimationConfig().canAnimate) { onStatic?.(); return; }
@@ -257,8 +283,8 @@ export function registerTrigger(opts: TriggerOptions): void {
           scroller: scroller || undefined,
           start: scrollStart,
           once,
-          onEnter: () => { if (getAnimationConfig().canAnimate) onEnter(); },
-          onLeaveBack: onLeave ? () => { if (getAnimationConfig().canAnimate) onLeave(); } : undefined,
+          onEnter: () => { if (getAnimationConfig().canAnimate) guardedEnter(); },
+          onLeaveBack: guardedLeave ? () => { if (getAnimationConfig().canAnimate) guardedLeave(); } : undefined,
         });
       });
       break;
@@ -271,25 +297,30 @@ export function registerTrigger(opts: TriggerOptions): void {
           scroller: scroller || undefined,
           start: scrollStart,
           onEnter: () => {
+            // Loop play uses onEnter directly (not guarded) — looping needs
+            // the next iteration to run after the previous completes, and
+            // the onComplete callback handles its own scheduling.
             const loopPlay = () => {
               const tl = onEnter();
+              activeTl = tl;
               if (tl?.eventCallback) tl.eventCallback('onComplete', () => {
                 import('gsap').then(({ gsap }) => gsap.delayedCall(loopDelay, loopPlay));
               });
             };
             loopPlay();
           },
-          onLeave: onLeave,
+          onLeave: guardedLeave,
           onEnterBack: () => {
             const loopPlay = () => {
               const tl = onEnter();
+              activeTl = tl;
               if (tl?.eventCallback) tl.eventCallback('onComplete', () => {
                 import('gsap').then(({ gsap }) => gsap.delayedCall(loopDelay, loopPlay));
               });
             };
             loopPlay();
           },
-          onLeaveBack: onLeave,
+          onLeaveBack: guardedLeave,
         });
       });
       break;
@@ -299,13 +330,17 @@ export function registerTrigger(opts: TriggerOptions): void {
       break;
     }
     case 'autoplay': {
-      if (getAnimationConfig().canAnimate) onEnter();
+      if (getAnimationConfig().canAnimate) guardedEnter();
       break;
     }
     case 'loop': {
+      // Loop runs the user's onEnter directly (not guarded) — onComplete
+      // schedules the next iteration after the previous one finishes, so
+      // there's no overlap to guard against.
       const loopPlay = () => {
         if (!getAnimationConfig().canAnimate) return;
         const tl = onEnter();
+        activeTl = tl;
         if (tl?.eventCallback) tl.eventCallback('onComplete', () => {
           import('gsap').then(({ gsap }) => gsap.delayedCall(loopDelay, loopPlay));
         });
@@ -314,28 +349,27 @@ export function registerTrigger(opts: TriggerOptions): void {
       break;
     }
     case 'interval': {
-      onEnter();
-      setInterval(() => { if (getAnimationConfig().canAnimate) onEnter(); }, intervalMs);
+      guardedEnter();
+      setInterval(() => { if (getAnimationConfig().canAnimate) guardedEnter(); }, intervalMs);
       break;
     }
     case 'click': {
       const clickTarget = el.closest('button, a') || el;
       clickTarget.addEventListener('click', () => {
-        if (getAnimationConfig().canAnimate) onEnter();
+        if (getAnimationConfig().canAnimate) guardedEnter();
       });
       break;
     }
     case 'focus': {
       el.addEventListener('focusin', () => {
-        if (getAnimationConfig().canAnimate) onEnter();
+        if (getAnimationConfig().canAnimate) guardedEnter();
       });
-      if (onLeave) el.addEventListener('focusout', () => onLeave());
+      if (guardedLeave) el.addEventListener('focusout', () => guardedLeave());
       break;
     }
     case 'hover':
     default: {
       const hoverTarget = el.closest('button, a') || el;
-      let activeTl: any = null;
 
       const triggerEnter = (e: Event) => {
         const config = getAnimationConfig();
@@ -343,12 +377,14 @@ export function registerTrigger(opts: TriggerOptions): void {
         if (!config.canHover && e.type === 'mouseenter') return;
         if (config.hover === 'instant') {
           if (onInstant) { onInstant(); return; }
-          activeTl = onEnter();
-          if (activeTl?.progress) activeTl.progress(1);
+          // Instant mode: skip guard, jump straight to end state
+          const tl = onEnter();
+          if (tl?.progress) tl.progress(1);
+          activeTl = tl;
           return;
         }
-        if (activeTl?.kill) activeTl.kill();
-        activeTl = onEnter();
+        // Normal hover: re-trigger ignored while previous animation runs
+        guardedEnter();
       };
 
       // Static fallback
@@ -358,12 +394,12 @@ export function registerTrigger(opts: TriggerOptions): void {
       hoverTarget.addEventListener('focusin', triggerEnter);
       hoverTarget.addEventListener('click', triggerEnter);
 
-      if (onLeave) {
+      if (guardedLeave) {
         hoverTarget.addEventListener('mouseleave', () => {
           if (!getAnimationConfig().canAnimate) return;
-          onLeave();
+          guardedLeave();
         });
-        hoverTarget.addEventListener('focusout', () => onLeave());
+        hoverTarget.addEventListener('focusout', () => guardedLeave());
       }
       break;
     }
