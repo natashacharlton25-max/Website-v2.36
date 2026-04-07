@@ -3,6 +3,8 @@
  * Central config for brand assets, SEO, and component defaults.
  */
 
+import type { ReloadOverlayConfig } from '../reload-overlay/reload-overlay';
+
 export interface SharePlatform {
   name: string;
   /** URL template — {url} and {title} will be replaced */
@@ -44,6 +46,42 @@ export const BRAND_CONFIG = {
   footer: {
     defaultImage: '/Footer/Footer-Reveal.png',
   },
+
+  /**
+   * Reload Overlay — configures the fullscreen overlay shown during
+   * page reloads triggered by view setting changes (motion/hover/render/mode).
+   *
+   * `loader` — which visual to show:
+   *   - 'goo-spiral'   (default) — Uiverse gooey gradient spinner
+   *   - 'message-only' — text caption only, no spinner
+   *   - <object>       — provide your own ReloadLoader implementation
+   *                     (great for brand logo animations, mascots, adverts)
+   *
+   * `loaderText` — message strategy:
+   *   - false       — no caption text at all (loader visual only)
+   *   - 'default'   — use the lib's built-in friendly message pools
+   *   - 'custom'    — use this brand's own message pools (set `messages` below)
+   *
+   * `messages` — per-reason message pools (only used when loaderText: 'custom').
+   * Missing reasons fall back to the 'default' key, then to the lib defaults.
+   */
+  reloadOverlay: {
+    loader: 'goo-spiral',
+    loaderText: 'default',
+    // Example custom messages — uncomment + set loaderText: 'custom' to use:
+    // messages: {
+    //   default: [
+    //     'A small pause for you',
+    //     'Just a moment as we get ready',
+    //   ],
+    //   motion: [
+    //     'Slowing things down — take a breath',
+    //   ],
+    //   mode: [
+    //     'Adjusting the lighting',
+    //   ],
+    // },
+  } satisfies ReloadOverlayConfig,
 
   sharing: {
     platforms: [

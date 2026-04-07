@@ -172,6 +172,10 @@ const {
     // Reload overlay — covers the page during data-motion/hover/render/mode
     // changes so the user never sees the default-then-target jerk while the
     // page reloads with the new setting applied. CSS imported as side-effect.
+    // Inject brand reloadOverlay config into globalThis BEFORE the lib loads
+    // so it picks up loader + message overrides on its first read.
+    import { BRAND_CONFIG } from '../lib/config/brand';
+    (globalThis as any).__RELOAD_OVERLAY_CONFIG__ = BRAND_CONFIG.reloadOverlay;
     import '../lib/reload-overlay/reload-overlay.css';
     import '../lib/reload-overlay/reload-overlay';
     // Import custom caret (hides OS caret, renders tokenised custom caret)
