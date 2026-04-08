@@ -23,9 +23,13 @@ export const BRAND_COLOURS = [
 ] as const;
 export type BrandColour = typeof BRAND_COLOURS[number];
 
-// ── Rainbow Colour (7 values) — universal accents, adapted per mode
+// ── Rainbow Colour (7 values) — positional names that match the underlying
+// CSS tokens (--rainbow-1 through --rainbow-7). Names are palette-agnostic
+// because what "rainbow-1" actually looks like depends on the active palette
+// (default ROYGBIV, protan/tritan CVD-safe, mono greyscale, or brand custom).
 export const RAINBOW_COLOURS = [
-  'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'
+  'rainbow-1', 'rainbow-2', 'rainbow-3', 'rainbow-4',
+  'rainbow-5', 'rainbow-6', 'rainbow-7'
 ] as const;
 export type RainbowColour = typeof RAINBOW_COLOURS[number];
 
@@ -332,12 +336,13 @@ export const DRAW_MODES = [
 ] as const;
 export type DrawMode = typeof DRAW_MODES[number];
 
-// ── Draw Colour (15 values) — base colours + named gradients only
+// ── Draw Colour (15 values) — brand roles + rainbow tokens + named gradients
 // NO TIERS — draw uses solid stroke, tier opacity would break the line
 // `normalizeDrawColour()` strips any tier suffix at runtime as a safety net
+// Rainbow values use positional names (rainbow-1..7) matching CSS tokens
 export const DRAW_COLOURS = [
   'primary', 'secondary', 'neutral',
-  'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink',
+  'rainbow-1', 'rainbow-2', 'rainbow-3', 'rainbow-4', 'rainbow-5', 'rainbow-6', 'rainbow-7',
   'hero', 'sunset', 'brand-emerge', 'brand-fade', 'rainbow'
 ] as const;
 export type DrawColour = typeof DRAW_COLOURS[number];

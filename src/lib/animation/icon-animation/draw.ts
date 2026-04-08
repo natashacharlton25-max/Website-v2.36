@@ -80,7 +80,13 @@ export function initDrawIcon(el: HTMLElement) {
   const drawStagger = pathCount > 1 ? staggerTotal / (pathCount - 1) : 0;
   const drawStaggerFrom = (el.dataset.iconDrawStaggerFrom || 'start') as 'start' | 'center' | 'end' | 'edges' | 'random';
   const drawWormSize = parseFloat(el.dataset.iconDrawWormSize || '') || 10;
-  // Overlay color: drawColor can be a CSS colour OR a gradient name (e.g. "hero", "rainbow", "red")
+  // Overlay color: drawColor can be:
+  //   - A rainbow position (rainbow-1..7) → resolves to var(--rainbow-N) token
+  //   - A gradient name (hero, sunset, red, etc.) → resolves to url(#grad-NAME)
+  //   - A raw CSS colour value (#hex, rgb, etc.) → used directly
+  // Gradient names still use the legacy red/orange/... vocabulary because they
+  // refer to gradient definitions in SvgGradientDefs.astro, not rainbow tokens.
+  // The gradient catalogue refactor will revisit those names.
   const cs = getComputedStyle(document.documentElement);
   const rawColor = el.dataset.iconDrawColor || '';
   const GRADIENT_NAMES = ['primary','secondary','neutral','hero','sunset','brand-emerge','brand-fade','emerge','fade',
@@ -90,6 +96,7 @@ export function initDrawIcon(el: HTMLElement) {
     'red-emphasis','orange-emphasis','yellow-emphasis','teal-emphasis','blue-emphasis','purple-emphasis','pink-emphasis',
     'rainbow'];
   const isGradient = GRADIENT_NAMES.includes(rawColor);
+  const isRainbowToken = /^rainbow-[1-7]$/.test(rawColor);
   const elStyle = getComputedStyle(el);
   const iconColor = elStyle.getPropertyValue('--_color').trim()
     || elStyle.color
@@ -97,6 +104,8 @@ export function initDrawIcon(el: HTMLElement) {
     || '#c4907c';
   const color = isGradient
     ? `url(#grad-${rawColor})`
+    : isRainbowToken
+    ? cs.getPropertyValue(`--${rawColor}`).trim() || iconColor
     : rawColor || iconColor;
   // Stroke width: read from data attribute (Shape sets it), fallback 10 for icons (256-unit viewBox)
   const sw = el.dataset.iconDrawSw ? parseFloat(el.dataset.iconDrawSw) : 10;
