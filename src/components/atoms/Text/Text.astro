@@ -96,6 +96,14 @@ const {
   class: className,
 } = Astro.props;
 
+// Map highlight colour names to .color--* mixin class
+const highlightColourMap: Record<string, string> = {
+  primary: 'primary', secondary: 'secondary', neutral: 'neutral',
+  red: 'rainbow-1', orange: 'rainbow-2', yellow: 'rainbow-3',
+  teal: 'rainbow-4', blue: 'rainbow-5', purple: 'rainbow-6', pink: 'rainbow-7',
+};
+const highlightMixinClass = highlight ? `color--${highlightColourMap[highlightColor] || highlightColor}` : null;
+
 // Build-time AAC resolution
 let aacHtml = '';
 if (aac) {
@@ -117,7 +125,7 @@ const classes = [
   align && `text--align-${align}`,
   textTone && `text--tone-${textTone}`,
   highlight && 'text-highlight',
-  highlight && `text-highlight--${highlightColor}`,
+  highlightMixinClass,
   highlight && highlightHeight && `text-highlight--${highlightHeight}`,
   highlight && highlightOpacity && `text-highlight--${highlightOpacity}`,
   highlight && highlightShape && `text-highlight--${highlightShape}`,
