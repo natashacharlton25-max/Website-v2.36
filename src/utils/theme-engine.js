@@ -1019,7 +1019,13 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
   ln(`  --media-brightness: ${isDark ? '0.86' : '1'};`);
   ln(`  --media-saturation: ${chromaPreset === 'grey' ? '0' : (isDark ? '0.90' : '1')};`);
   ln(`  --media-contrast: ${chromaPreset === 'grey' ? '1.05' : (isDark ? '0.98' : '1')};`);
-  ln(`  --svg-ghost-color: var(--text-tint);`);
+  if (definition.highContrast) {
+    ln(`  --svg-ghost-color: var(--neutral-mid);`);
+  } else if (isDark) {
+    ln(`  --svg-ghost-color: var(--shadow-Black);`);
+  } else {
+    ln(`  --svg-ghost-color: var(--neutral-mid);`);
+  }
 
   // Focus + highlight tokens
   ln();
