@@ -70,13 +70,14 @@ export type Shape = typeof SHAPES[number];
 
 // ── Size (3 values) ────────────────────────────────────
 export const SIZES = [
-  'sm', 'md', 'lg'
+  'sm', 'md', 'lg', 'xl'
 ] as const;
 export type Size = typeof SIZES[number];
 
-// ── Heading Size (6 values) ───────────────────────────
+// ── Heading Size (11 values) — includes text sizes for gradient body text ──
 export const HEADING_SIZES = [
-  'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'xs', 'sm', 'base', 'lg', 'xl'
 ] as const;
 export type HeadingSize = typeof HEADING_SIZES[number];
 

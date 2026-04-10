@@ -16,7 +16,7 @@
 import { Icon } from '../Icon';
 import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
-import Heading from '../Heading/Heading.astro';
+import { Heading } from '../Heading';
 import type {
   BrandColour, RainbowColour, ColourTier,
   Variant, Shadow, GradientBlend, GradientDirection,
@@ -49,11 +49,13 @@ interface Props {
   gradientFade?: boolean;
   /** Colour cycle — cross-fades through the element's own tier tokens (tint→mid→base→emphasis). */
   gradientCycle?: boolean;
+  /** Reverse gradient direction on text (outline/glass: text runs opposite to border) */
+  gradientFlip?: boolean;
   animatedGradient?: boolean;
   /** Animation direction — cw (default), ccw, or sway */
   gradientAnimateDirection?: 'cw' | 'ccw' | 'sway';
-  /** Animation speed in seconds */
-  gradientAnimateSpeed?: number;
+  /** Animation speed — slow (20s), default (12s), fast (6s) */
+  gradientAnimateSpeed?: 'slow' | 'default' | 'fast';
   size?: Size;
   shape?: Shape;
   borderWeight?: BorderWeight;
@@ -80,6 +82,7 @@ const {
   gradientFocus,
   gradientEmerge = false,
   gradientFade = false,
+  gradientFlip = false,
   animatedGradient = false,
   gradientAnimateDirection,
   gradientAnimateSpeed,
@@ -103,18 +106,40 @@ const color = rainbowColor || brandColor;
 //   2. baseColour + colorTier (e.g. rainbow-1 + mid → rainbow-1-preset-mid)
 //   3. baseColour (rainbow-1, primary etc.)
 //   gradientType=radial appends `-radial` to any of the above.
+// Flip direction for gradient text when gradientFlip is set
+const reverseDir: Record<string, GradientDirection> = {
+  'vertical': 'vertical-reverse', 'vertical-reverse': 'vertical',
+  'horizontal': 'horizontal-reverse', 'horizontal-reverse': 'horizontal',
+  'diagonal': 'diagonal-reverse', 'diagonal-reverse': 'diagonal',
+  'diagonal-alt': 'diagonal-alt-reverse', 'diagonal-alt-reverse': 'diagonal-alt',
+};
+const textGradientDirection: GradientDirection | undefined = gradientFlip
+  ? (gradientDirection ? reverseDir[gradientDirection] : 'diagonal-reverse')
+  : gradientDirection;
+
+// For flip + fade/emerge on fill: text uses reversed fade/emerge gradient, oversized to cover badge padding.
+const flipTextStyle = (() => {
+  if (!gradientFlip || (!gradientFade && !gradientEmerge)) return undefined;
+  const colourVar = color?.startsWith('rainbow-') ? `var(--${color})` : `var(--${color}-base)`;
+  const bgVar = 'var(--_bg-context, var(--page-bg))';
+  const hold = gradientEmerge ? 38 : 30;
+  return `--_grad-computed: linear-gradient(315deg, ${bgVar} 0%, ${bgVar} ${hold}%, ${colourVar} ${hold + 5}%, ${colourVar} 100%); background-size: 170% 100%; background-position: center`;
+})();
+
 const tierSuffix = (gradient && colorTier && colorTier !== 'base') ? `-preset-${colorTier}` : '';
 const radialSuffix = gradientType === 'radial' ? '-radial' : '';
+const emergePrefix = gradientEmerge ? 'emerge-' : gradientFade ? 'fade-' : '';
 const baseGradientName = gradientBlend
-  || (gradient && color ? `${color}${tierSuffix}` : null)
-  || (gradient ? 'primary' : null);
+  || (gradient && color ? `${emergePrefix}${color}${tierSuffix}` : null)
+  || (gradient ? `${emergePrefix}primary` : null);
 const gradientName = baseGradientName ? `${baseGradientName}${radialSuffix}` : null;
 
 // Animated gradient / colour cycle — random animation-delay to desync multiple badges,
 // optional custom duration. Cycle reads the active gradient's stop tokens from the catalogue.
+const speedMap: Record<string, number> = { slow: 20, default: 12, fast: 6 };
 const badgeAnimParts: string[] = [];
 if ((animatedGradient && gradientName) || gradientCycle) {
-  if (gradientAnimateSpeed) badgeAnimParts.push(`--_grad-anim-duration:${gradientAnimateSpeed}s`);
+  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') badgeAnimParts.push(`--_grad-anim-duration:${speedMap[gradientAnimateSpeed]}s`);
   badgeAnimParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
 }
 if (gradientCycle && gradientName) {
@@ -163,8 +188,10 @@ const badgeAnimStyle = badgeAnimParts.length ? badgeAnimParts.join(';') : undefi
   {media?.component === 'Icon' && <Icon {...media} class="badge__icon" aria-hidden="true" />}
   {media?.component === 'LottieIcon' && <LottieIcon {...media} class="badge__icon" aria-hidden="true" />}
   {level ? (
-    <Heading level={level} flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} class:list={['badge__label', (gradient || gradientBlend) && variant !== 'fill' && 'gradient__text']}>{label}</Heading>
+    <Heading level={level} flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} gradient={gradient} gradientBlend={gradientBlend} gradientDirection={textGradientDirection} brandColor={!rainbowColor ? brandColor : undefined} rainbowColor={rainbowColor} colorTier={colorTier} class="badge__label">{label}</Heading>
+  ) : ((gradient || gradientBlend) && (variant !== 'fill' || gradientFlip)) ? (
+    <Heading level={6} flush family={fontFamily || 'body'} weight={fontWeight !== 'bold' ? fontWeight : undefined} gradient={(gradientEmerge || gradientFade) && !gradientFlip ? false : gradient} gradientBlend={flipTextStyle ? undefined : (gradientEmerge || gradientFade) ? undefined : gradientBlend} gradientDirection={flipTextStyle ? gradientDirection : textGradientDirection} style={flipTextStyle || (gradientFlip && !gradientBlend ? '--_grad-computed: linear-gradient(var(--_grad-angle, 135deg), var(--_tier-emphasis) 0%, var(--_color) 50%, var(--_tier-mid) 75%, var(--_tier-tint) 100%)' : undefined)} brandColor={!rainbowColor ? brandColor : undefined} rainbowColor={rainbowColor} colorTier={colorTier} class="badge__label">{label}</Heading>
   ) : (
-    <Text as="span" class:list={['badge__label', (gradient || gradientBlend) && variant !== 'fill' && 'gradient__text']} flush family={fontFamily !== 'heading' ? fontFamily : undefined} weight={fontWeight !== 'bold' ? fontWeight : undefined}>{label}</Text>
+    <Text as="span" class="badge__label" flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} color={(gradientEmerge || gradientFade) ? (rainbowColor || brandColor) : undefined}>{label}</Text>
   )}
 </span>

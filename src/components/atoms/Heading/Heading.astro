@@ -169,9 +169,9 @@ const mediaComponent = media?.component;
 const { component: _mc, ...mediaProps } = media || {};
 
 
-const sizeKey = visualSize.replace('h', '');
-const iconSizeMap: Record<string, number> = { '1': 56, '2': 44, '3': 32, '4': 28, '5': 24, '6': 20 };
-const mediaSizeMapAuto: Record<string, string> = { '1': 'lg', '2': 'lg', '3': 'md', '4': 'md', '5': 'sm', '6': 'sm' };
+const sizeKey = visualSize.startsWith('h') ? visualSize.replace('h', '') : visualSize;
+const iconSizeMap: Record<string, number> = { '1': 56, '2': 44, '3': 32, '4': 28, '5': 24, '6': 20, 'xs': 16, 'sm': 18, 'base': 20, 'lg': 24, 'xl': 28 };
+const mediaSizeMapAuto: Record<string, string> = { '1': 'lg', '2': 'lg', '3': 'md', '4': 'md', '5': 'sm', '6': 'sm', 'xs': 'sm', 'sm': 'sm', 'base': 'sm', 'lg': 'md', 'xl': 'md' };
 const computedMediaSize = mediaSize === 'auto' ? mediaSizeMapAuto[sizeKey] ?? 'md' : mediaSize;
 const computedIconSize = mediaSize === 'auto' ? (iconSizeMap[sizeKey] ?? 32) : (mediaSize === 'sm' ? 24 : mediaSize === 'md' ? 32 : 56);
 
@@ -255,7 +255,7 @@ const headingClassList = [
     )}
   </div>
 ) : (
-  <Tag class:list={[...headingClassList, className]} style={mergedStyle || undefined}>
+  <Tag class:list={[...headingClassList, className]} style={mergedStyle || undefined} data-grad-dir={gradientDirection || undefined}>
     <span class="heading__text-inner"><slot /></span>
     {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
   </Tag>

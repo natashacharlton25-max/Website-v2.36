@@ -1,73 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Page } from '../../components/atoms/Page';
-import { Section } from '../../components/atoms/Section';
-import { Heading } from '../../components/atoms/Heading';
-import { Text } from '../../components/atoms/Text';
-import { Grid } from '../../components/atoms/Grid';
-
+import Renderer from '../../components/Renderer.astro';
 import data from '../../data/test/text.json';
-
-const sections = data.children || [];
 ---
 
 <BaseLayout title="Text Atom Test">
-  <Page margin={data.margin as any}>
-    {sections.map((section: any) => (
-      <Section gap={section.gap as any} container={section.container as any}>
-        {(section.children || []).map((child: any) => {
-          if (child.component === 'Heading') {
-            return <Heading level={child.level as any} align={child.align as any} flush={child.flush}>{child.text}</Heading>;
-          }
-          if (child.component === 'Text') {
-            return (
-              <Text
-                as={child.as}
-                size={child.size}
-                weight={child.weight}
-                leading={child.leading}
-                color={child.color}
-                family={child.family}
-                align={child.align}
-                highlight={child.highlight}
-                highlightColor={child.highlightColor}
-                highlightHeight={child.highlightHeight}
-                highlightOpacity={child.highlightOpacity}
-                highlightShape={child.highlightShape}
-                uppercase={child.uppercase}
-                clamp={child.clamp}
-                flush={child.flush}
-                textTone={child.textTone}
-                aac={child.aac}
-              >{child.text}</Text>
-            );
-          }
-          if (child.component === 'Grid') {
-            return (
-              <Grid variant={child.variant as any} columns={child.columns as any} gap={child.gap as any}>
-                {(child.children || []).map((item: any) => (
-                  <Text
-                    as={item.as}
-                    size={item.size}
-                    weight={item.weight}
-                    leading={item.leading}
-                    color={item.color}
-                    family={item.family}
-                    align={item.align}
-                    highlight={item.highlight}
-                    highlightColor={item.highlightColor}
-                    uppercase={item.uppercase}
-                    clamp={item.clamp}
-                    flush={item.flush}
-                    textTone={item.textTone}
-                    aac={item.aac}
-                  >{item.text}</Text>
-                ))}
-              </Grid>
-            );
-          }
-        })}
-      </Section>
-    ))}
-  </Page>
+  <Renderer node={data} />
 </BaseLayout>

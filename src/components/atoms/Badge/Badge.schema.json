@@ -1,8 +1,8 @@
 {
   "component": "Badge",
   "category": "atom",
-  "renders": { "full": "Badge.astro", "reduced": "Badge.astro", "textonly": "Badge.astro" },
-  "notes": "Simple inline label. Colour via class enum. Icon is base name only — weight resolved from brand config or explicit iconWeight.",
+  "renders": { "full": "Badge.astro", "reduced": "Badge.astro", "assistive": "Badge.astro", "textonly": "Badge.astro" },
+  "notes": "Simple inline label. Colour via .color--{name} mixin. Icon props passed inside media object. Label renders via Text atom (default) or Heading atom (when level set or gradient text needed).",
 
   "props": {
     "content": {
@@ -20,28 +20,29 @@
 
     "gradient": {
       "gradient":          { "type": "boolean", "default": false },
-      "gradientBlend":     { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade", "preset-tint", "preset-mid", "preset-base", "preset-emphasis"] },
+      "gradientBlend":     { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade"] },
       "gradientDirection": { "type": "string", "default": "diagonal", "enum": ["vertical", "vertical-reverse", "horizontal", "horizontal-reverse", "diagonal", "diagonal-reverse", "diagonal-alt", "diagonal-alt-reverse"] },
       "gradientType":      { "type": "string", "default": "linear", "enum": ["linear", "radial"] },
       "gradientFocus":     { "type": "string", "default": "center", "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"], "_note": "Radial origin point — only used when gradientType=radial." },
       "gradientEmerge":    { "type": "boolean", "default": false, "_description": "Fade-in modifier — first 50% transparent, fades to solid. Combines with any gradient or solid colour." },
-      "gradientFade":      { "type": "boolean", "default": false, "_description": "Fade-out modifier — last 20% fades to transparent. Combines with any gradient or solid colour." }
+      "gradientFade":      { "type": "boolean", "default": false, "_description": "Fade-out modifier — last 20% fades to transparent. Combines with any gradient or solid colour." },
+      "gradientFlip":      { "type": "boolean", "default": false, "_description": "Reverse gradient direction on text. Outline/glass: always available. Fill: only with emerge/fade." }
     },
 
     "typography": {
-      "fontFamily": { "type": "string", "default": "heading", "enum": ["heading", "body", "body-alt", "handwriting", "mono"] },
+      "fontFamily": { "type": "string", "enum": ["heading", "body", "body-alt", "handwriting", "mono"], "_description": "Default: body via Text atom. When 'heading' is set, Text uses heading font. When level is set, Heading atom handles it." },
       "fontWeight": { "type": "string", "default": "bold", "enum": ["normal", "medium", "semibold", "bold", "extrabold"] },
       "uppercase":  { "type": "boolean", "default": true }
     },
 
     "media": {
-      "media": { "type": "object", "textonly": false, "_description": "Component node: { component: 'Icon'|'LottieIcon', ...atomProps }. Validated by the child atom's own schema." }
+      "media": { "type": "object", "textonly": false, "_description": "Icon only — { component: 'Icon'|'LottieIcon', ...atomProps }. Badge does not accept other media types. Props validated by Icon/LottieIcon schema." }
     },
 
     "visual": {
       "variant":      { "type": "string", "default": "fill", "enum": ["fill", "outline", "glass", "liquid-glass"] },
-      "shape":        { "type": "string", "default": "soft", "enum": ["sharp", "subtle", "soft", "rounded", "pill"] },
-      "size":         { "type": "string", "default": "md", "enum": ["sm", "md", "lg"] },
+      "shape":        { "type": "string", "default": "soft", "enum": ["sharp", "subtle", "soft", "rounded"] },
+      "size":         { "type": "string", "default": "md", "enum": ["sm", "md", "lg", "xl"] },
       "shadow":       { "type": "string", "default": "none", "enum": ["none", "out", "drop", "in", "elevated", "glow", "glow-intense", "glow-inner"] },
       "borderWeight": { "type": "string", "default": "thin", "enum": ["thin", "thick"] },
       "semanticRole": { "type": "string", "default": "status", "enum": ["status", "tag", "label", "none"] },
@@ -49,7 +50,10 @@
     },
 
     "animation": {
-      "animatedGradient": { "type": "boolean", "default": false }
+      "animatedGradient":          { "type": "boolean", "default": false },
+      "gradientAnimateDirection":  { "type": "string", "default": "cw", "enum": ["cw", "ccw", "sway"], "_description": "Animation direction — clockwise, counter-clockwise, or sway." },
+      "gradientAnimateSpeed":      { "type": "string", "default": "default", "enum": ["slow", "default", "fast"], "_description": "Animation speed — slow (20s), default (12s), fast (6s). Gated by motion settings." },
+      "gradientCycle":             { "type": "boolean", "default": false, "_description": "Colour cycle — cross-fades through the element's own tier tokens (tint→mid→base→emphasis)." }
     }
   },
 
