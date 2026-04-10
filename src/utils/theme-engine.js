@@ -1164,18 +1164,20 @@ export function generateThemeData(definition) {
   // Taken BEFORE any brand neutralHex override so text stays readable.
   const textScale = { ...scales.neutral };
 
-  // HC: text must be pure black (light) or pure white (dark) for maximum contrast.
+  // HC: clear 4-step text scale for maximum readability.
   if (definition.highContrast) {
     if (isDark) {
-      // HC dark: text is white
-      for (const pos of Object.keys(textScale)) textScale[pos] = '#ffffff';
-      textScale[200] = '#ffffff'; textScale[400] = '#cccccc';
-      textScale[600] = '#999999'; textScale[800] = '#ffffff';
+      // HC dark (on black bg): dim → bright
+      textScale[200] = '#555555';  // tint — dimmest, muted labels
+      textScale[400] = '#999999';  // mid — secondary text
+      textScale[600] = '#cccccc';  // base — body text
+      textScale[800] = '#ffffff';  // emphasis — headings, strong
     } else {
-      // HC light: text is black
-      for (const pos of Object.keys(textScale)) textScale[pos] = '#000000';
-      textScale[200] = '#cccccc'; textScale[400] = '#666666';
-      textScale[600] = '#333333'; textScale[800] = '#000000';
+      // HC light (on white bg): light → dark
+      textScale[200] = '#aaaaaa';  // tint — dimmest, muted labels
+      textScale[400] = '#666666';  // mid — secondary text
+      textScale[600] = '#333333';  // base — body text
+      textScale[800] = '#000000';  // emphasis — headings, strong
     }
   }
 

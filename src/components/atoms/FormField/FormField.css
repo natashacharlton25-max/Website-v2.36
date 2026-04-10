@@ -32,20 +32,20 @@
   gap: var(--space-xs);
 
   /* Colour tokens — default = primary */
-  --_field-brand: var(--primary-600);
-  --_field-brand-dark: var(--primary-800);
-  --_field-brand-light: var(--primary-200);
+  --_field-brand: var(--primary-base);
+  --_field-brand-dark: var(--primary-emphasis);
+  --_field-brand-light: var(--primary-tint);
 
   /* Surface / text tokens */
   --_field-bg: var(--page-bg-raised);
-  --_field-text: var(--neutral-800);
-  --_field-label: var(--neutral-800);
-  --_field-placeholder: var(--neutral-400);
+  --_field-text: var(--neutral-emphasis);
+  --_field-label: var(--neutral-emphasis);
+  --_field-placeholder: var(--neutral-mid);
   --_field-error: var(--color-Error);
   --_field-control-mark: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
 
   /* Border / contrast token */
-  --_field-border: var(--neutral-300);
+  --_field-border: var(--neutral-mid);
 
   /* Glass tokens — only consumed by .form-field--glass */
   --_field-glass-bg: var(--glass-bg);
@@ -66,17 +66,17 @@
    COLOUR VARIANTS
    ========================================================== */
 .form-field--secondary {
-  --_field-brand: var(--secondary-600);
-  --_field-brand-dark: var(--secondary-800);
-  --_field-brand-light: var(--secondary-200);
+  --_field-brand: var(--secondary-base);
+  --_field-brand-dark: var(--secondary-contrast);
+  --_field-brand-light: var(--secondary-tint);
 }
 
 .form-field--neutral {
-  --_field-brand: var(--neutral-600);
-  --_field-brand-dark: var(--neutral-800);
-  --_field-brand-light: var(--neutral-400);
-  --_field-bg: color-mix(in oklch, var(--neutral-400) 8%, var(--page-bg-raised));
-  --_field-border: var(--neutral-500);
+  --_field-brand: var(--neutral-base);
+  --_field-brand-dark: var(--neutral-emphasis);
+  --_field-brand-light: var(--neutral-mid);
+  --_field-bg: color-mix(in oklch, var(--neutral-mid) 8%, var(--page-bg-raised));
+  --_field-border: var(--neutral-base);
 }
 
 /* Shape variants */
@@ -150,8 +150,8 @@
 [data-hover="none"] .form-field.has-value .form-field__input:hover,
 [data-hover="none"] .form-field.has-value .form-field__input:focus,
 [data-hover="none"] .form-field.has-value .form-field__input:focus:hover {
-  border-color: var(--neutral-400);
-  background: color-mix(in oklch, var(--neutral-400) 8%, var(--_field-hover-base, transparent));
+  border-color: var(--neutral-mid);
+  background: color-mix(in oklch, var(--neutral-mid) 8%, var(--_field-hover-base, transparent));
 }
 
 
@@ -164,8 +164,8 @@
 
 /* Filled state — neutral border + tint when not focused */
 .form-field.has-value .form-field__input:not(:focus) {
-  border-color: var(--neutral-400);
-  background: color-mix(in oklch, var(--neutral-400) 8%, var(--_field-hover-base, transparent));
+  border-color: var(--neutral-mid);
+  background: color-mix(in oklch, var(--neutral-mid) 8%, var(--_field-hover-base, transparent));
 }
 
 .form-field__input:disabled {
@@ -1019,7 +1019,7 @@
 .form-field__caret {
   position: absolute;
   width: var(--caret-width, 2px);
-  background: var(--caret-color, var(--focus-color, var(--primary-600)));
+  background: var(--caret-color, var(--focus-color, var(--primary-base)));
   border-radius: var(--caret-radius, 1px);
   pointer-events: none;
   opacity: 0;
@@ -1078,7 +1078,7 @@
 
 /* ── Gate: textonly → match text colour ── */
 [data-render="textonly"] .form-field__caret {
-  --caret-color: var(--neutral-800);
+  --caret-color: var(--neutral-emphasis);
 }
 
 /* ── Caret shape: block ── */
@@ -1111,7 +1111,7 @@
   width: clamp(40px, 8vw, 70px);
   height: clamp(40px, 8vw, 70px);
   background: transparent;
-  color: var(--caret-color, var(--focus-color, var(--primary-600)));
+  color: var(--caret-color, var(--focus-color, var(--primary-base)));
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--hover-duration-fast, 0.12s) ease-out,
