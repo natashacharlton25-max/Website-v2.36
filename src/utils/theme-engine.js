@@ -1014,23 +1014,11 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
   ln(`  --parallax-intensity: 1;`);
   ln();
 
-  // Text + theme-specific
-  ln(`  /* -- TEXT + THEME-SPECIFIC ---------------------- */`);
-  if (definition.highContrast) {
-    ln(`  --color-Text: var(--color-Black);`);
-    ln(`  --color-Text-contrast: var(--color-White);`);
-  } else if (isDark) {
-    ln(`  --color-Text: var(--text-emphasis);`);
-    ln(`  --color-Text-contrast: var(--page-bg);`);
-  } else {
-    ln(`  --color-Text: var(--text-emphasis);`);
-    ln(`  --color-Text-contrast: var(--page-bg);`);
-  }
+  // Theme-specific media + ghost tokens
+  ln(`  /* -- THEME-SPECIFIC ----------------------------- */`);
   ln(`  --media-brightness: ${isDark ? '0.86' : '1'};`);
   ln(`  --media-saturation: ${chromaPreset === 'grey' ? '0' : (isDark ? '0.90' : '1')};`);
   ln(`  --media-contrast: ${chromaPreset === 'grey' ? '1.05' : (isDark ? '0.98' : '1')};`);
-
-  // SVG ghost colour — from text scale (always default neutral, never brand-overridden)
   ln(`  --svg-ghost-color: var(--text-tint);`);
 
   // Focus + highlight tokens
@@ -1175,6 +1163,22 @@ export function generateThemeData(definition) {
   // Text = snapshot of neutral AFTER dark flip (so dark themes get light text).
   // Taken BEFORE any brand neutralHex override so text stays readable.
   const textScale = { ...scales.neutral };
+
+  // HC: text must be pure black (light) or pure white (dark) for maximum contrast.
+  if (definition.highContrast) {
+    if (isDark) {
+      // HC dark: text is white
+      for (const pos of Object.keys(textScale)) textScale[pos] = '#ffffff';
+      textScale[200] = '#ffffff'; textScale[400] = '#cccccc';
+      textScale[600] = '#999999'; textScale[800] = '#ffffff';
+    } else {
+      // HC light: text is black
+      for (const pos of Object.keys(textScale)) textScale[pos] = '#000000';
+      textScale[200] = '#cccccc'; textScale[400] = '#666666';
+      textScale[600] = '#333333'; textScale[800] = '#000000';
+    }
+  }
+
   scales.text = textScale;
 
   // Now apply brand neutral override if provided (decorative — borders, chrome, UI).
