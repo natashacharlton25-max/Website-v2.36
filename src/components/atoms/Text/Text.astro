@@ -39,7 +39,7 @@ interface Props {
   leading?: 'tight' | 'snug' | 'normal' | 'relaxed';
 
   /** Colour token */
-  color?: 'default' | 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  color?: 'default' | 'primary' | 'secondary' | 'neutral' | 'rainbow-1' | 'rainbow-2' | 'rainbow-3' | 'rainbow-4' | 'rainbow-5' | 'rainbow-6' | 'rainbow-7';
 
   /** Font family variant */
   family?: 'body' | 'body-alt' | 'handwriting' | 'mono';
@@ -51,7 +51,7 @@ interface Props {
   highlight?: boolean;
 
   /** Highlight bar colour (independent from text colour) */
-  highlightColor?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  highlightColor?: 'primary' | 'secondary' | 'neutral' | 'rainbow-1' | 'rainbow-2' | 'rainbow-3' | 'rainbow-4' | 'rainbow-5' | 'rainbow-6' | 'rainbow-7';
   highlightHeight?: 'sm' | 'md' | 'lg' | 'full';
   highlightOpacity?: 'faint' | 'soft' | 'bold';
   highlightShape?: 'sharp' | 'rounded';
@@ -96,13 +96,21 @@ const {
   class: className,
 } = Astro.props;
 
-// Map highlight colour names to .color--* mixin class
-const highlightColourMap: Record<string, string> = {
+// Highlight colour — don't use .color--* mixin (it overrides text colour).
+// Instead set tier tokens directly via inline style on the highlight span.
+const highlightColourTokenMap: Record<string, string> = {
   primary: 'primary', secondary: 'secondary', neutral: 'neutral',
-  red: 'rainbow-1', orange: 'rainbow-2', yellow: 'rainbow-3',
-  teal: 'rainbow-4', blue: 'rainbow-5', purple: 'rainbow-6', pink: 'rainbow-7',
+  'rainbow-1': 'rainbow-1', 'rainbow-2': 'rainbow-2', 'rainbow-3': 'rainbow-3',
+  'rainbow-4': 'rainbow-4', 'rainbow-5': 'rainbow-5', 'rainbow-6': 'rainbow-6', 'rainbow-7': 'rainbow-7',
 };
-const highlightMixinClass = highlight ? `color--${highlightColourMap[highlightColor] || highlightColor}` : null;
+const hc = highlightColourTokenMap[highlightColor] || 'primary';
+const isRainbow = hc.startsWith('rainbow-');
+const highlightStyle = highlight ? [
+  `--_tier-tint: var(--${hc}-tint)`,
+  `--_tier-mid: var(--${isRainbow ? hc + '-mid' : hc + '-mid'})`,
+  `--_color: var(--${isRainbow ? hc : hc + '-base'})`,
+  `--_tier-emphasis: var(--${isRainbow ? hc + '-emphasis' : hc + '-emphasis'})`,
+].join(';') : undefined;
 
 // Build-time AAC resolution
 let aacHtml = '';
@@ -124,21 +132,23 @@ const classes = [
   family && `text--family-${family}`,
   align && `text--align-${align}`,
   textTone && `text--tone-${textTone}`,
-  highlight && 'text-highlight',
-  highlightMixinClass,
-  highlight && highlightHeight && `text-highlight--${highlightHeight}`,
-  highlight && highlightOpacity && `text-highlight--${highlightOpacity}`,
-  highlight && highlightShape && `text-highlight--${highlightShape}`,
   uppercase && 'text--uppercase',
   clamp && 'text--clamp',
   flush && 'text--flush',
   className,
 ];
 
+const highlightClasses = highlight ? [
+  'text-highlight',
+  highlightHeight && `text-highlight--${highlightHeight}`,
+  highlightOpacity && `text-highlight--${highlightOpacity}`,
+  highlightShape && `text-highlight--${highlightShape}`,
+] : [];
+
 const inlineStyle = clamp ? `--text-clamp: ${clamp}` : undefined;
 ---
 
 <Tag class:list={classes} style={inlineStyle}>
-  <span class="text__content"><slot /></span>
+  <span class:list={['text__content', ...highlightClasses]} style={highlightStyle}><slot /></span>
   {aacHtml && <span class="text__aac content-aac" set:html={aacHtml} />}
 </Tag>
