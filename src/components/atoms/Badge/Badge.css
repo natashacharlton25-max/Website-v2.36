@@ -99,6 +99,38 @@
   border-width: 0;
 }
 
+/* Drop the solid fill when gradient is present so the layered gradient shows */
+.badge--fill.gradient {
+  background-color: transparent;
+}
+
+/* Colour cycle — kill the gradient image so the cycling background-color is visible */
+.badge--fill.gradient.gradient--cycle {
+  background-image: none;
+}
+
+/* Emerge / fade modifiers — fade to surrounding bg (--_bg-context, falls back to --page-bg).
+   Coloured Sections set --_bg-context so badges fade into the section colour. */
+.badge--fill.gradient--emerge:not(.gradient):not([data-grad-focus]) {
+  background-color: transparent;
+  background-image: linear-gradient(var(--_grad-angle, 135deg) in oklab, var(--_bg-context, var(--page-bg)) 0%, var(--_bg-context, var(--page-bg)) 50%, var(--_color) 100%);
+}
+.badge--fill.gradient--fade:not(.gradient):not([data-grad-focus]) {
+  background-color: transparent;
+  background-image: linear-gradient(var(--_grad-angle, 135deg) in oklab, var(--_bg-context, var(--page-bg)) 0%, var(--_bg-context, var(--page-bg)) 30%, var(--_color) 100%);
+}
+
+/* Radial emerge — small bg-context centre, colour fills most of shape */
+.badge--fill.gradient--emerge[data-grad-focus]:not(.gradient) {
+  background-color: transparent;
+  background-image: radial-gradient(circle at var(--_grad-focus, center) in oklab, var(--_bg-context, var(--page-bg)) 0%, var(--_bg-context, var(--page-bg)) 20%, var(--_color) 100%);
+}
+/* Radial fade — small colour centre, dissolves to transparent at the edge */
+.badge--fill.gradient--fade[data-grad-focus]:not(.gradient) {
+  background-color: transparent;
+  background-image: radial-gradient(circle at var(--_grad-focus, center) in oklab, var(--_color) 0%, var(--_color) 5%, oklch(from var(--_color) l c h / 0) 70%);
+}
+
 
 /* ========== VARIANT: Outline ========== */
 

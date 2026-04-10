@@ -102,43 +102,73 @@ export function initAnimatedGradient(el: HTMLElement) {
 }
 
 function animateGradTransform(
-  grad: SVGLinearGradientElement,
+  grad: SVGLinearGradientElement | SVGRadialGradientElement,
   d: number,
   direction: string,
   ease: string,
   doScale: boolean
 ) {
-  const state = { angle: 0, scale: 1 };
+  const isRadial = grad.tagName === 'radialGradient';
+  const state = { angle: 0, offset: 0, scale: 1 };
+  // Random phase offset so multiple animated gradients don't sync-lock.
+  const phase = Math.random();
 
   const update = () => {
-    let t = `rotate(${state.angle}, 0.5, 0.5)`;
+    let t = '';
+    if (isRadial) {
+      // Radial: rotate around centre
+      t = `rotate(${state.angle}, 0.5, 0.5)`;
+    } else {
+      // Linear: translate side-to-side (matches CSS background-position flow)
+      t = `translate(${state.offset}, 0)`;
+    }
     if (doScale) {
       t += ` translate(0.5, 0.5) scale(${state.scale}) translate(-0.5, -0.5)`;
     }
     grad.setAttribute('gradientTransform', t);
   };
 
+  let mainTween: gsap.core.Tween;
   if (direction === 'sway') {
-    gsap.fromTo(state,
-      { angle: -60 },
-      { angle: 60, duration: d / 2, ease: ease === 'none' ? 'sine.inOut' : ease,
-        yoyo: true, repeat: -1, onUpdate: update });
+    if (isRadial) {
+      mainTween = gsap.fromTo(state,
+        { angle: -60 },
+        { angle: 60, duration: d / 2, ease: ease === 'none' ? 'sine.inOut' : ease,
+          yoyo: true, repeat: -1, onUpdate: update });
+    } else {
+      mainTween = gsap.fromTo(state,
+        { offset: -0.3 },
+        { offset: 0.3, duration: d / 2, ease: ease === 'none' ? 'sine.inOut' : ease,
+          yoyo: true, repeat: -1, onUpdate: update });
+    }
   } else {
-    const target = direction === 'ccw' ? -360 : 360;
-    gsap.to(state, {
-      angle: `+=${target}`,
-      duration: d,
-      ease: ease === 'none' ? 'none' : ease,
-      repeat: -1,
-      onUpdate: update,
-    });
+    if (isRadial) {
+      const target = direction === 'ccw' ? -360 : 360;
+      mainTween = gsap.to(state, {
+        angle: `+=${target}`,
+        duration: d,
+        ease: ease === 'none' ? 'none' : ease,
+        repeat: -1,
+        onUpdate: update,
+      });
+    } else {
+      // Linear flow: side-to-side yoyo (matches CSS background-position 0% → 100% → 0%)
+      const target = direction === 'ccw' ? -0.5 : 0.5;
+      mainTween = gsap.fromTo(state,
+        { offset: -target },
+        { offset: target, duration: d / 2, ease: ease === 'none' ? 'sine.inOut' : ease,
+          yoyo: true, repeat: -1, onUpdate: update });
+    }
   }
+  // Jump to a random phase so multiple gradients on the page don't animate in lockstep
+  mainTween.progress(phase);
 
   if (doScale) {
-    gsap.fromTo(state,
+    const scaleTween = gsap.fromTo(state,
       { scale: 0.8 },
       { scale: 1.5, duration: d * 0.75, ease: 'sine.inOut',
         yoyo: true, repeat: -1, onUpdate: update });
+    scaleTween.progress(Math.random());
   }
 }
 

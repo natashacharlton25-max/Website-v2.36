@@ -1,10 +1,10 @@
 /**
  * Monochrome rainbow — tinted grey with hue whisper
- * Each colour keeps its hue at very low saturation (oklch C=0.015–0.025).
+ * Each colour keeps its hue at very low saturation (oklch C=0.020).
  * Reads as neutral UI but feels alive on closer inspection.
+ * Even OKLCH lightness spacing matching default spec.
  * Gated: [data-theme-chroma="grey"]
  *
- * Per-hue chroma bias: yellow slightly higher (disappears), blue lower (feels strong).
  * 7 colours x 4 tiers = 28 tokens (tint/mid/base/emphasis).
  */
 
@@ -15,102 +15,55 @@
 /* Rainbow tinted mono values */
 [data-theme-chroma="grey"] {
   /* Red whisper */
-  --rainbow-1-tint: #e8dad9; --rainbow-1-mid: #b1a09e;
-  --rainbow-1: #806c6a;      --rainbow-1-emphasis: #443735;
+  --rainbow-1-tint: #d2cccb; --rainbow-1-mid: #aba2a1;
+  --rainbow-1: #8c7c79;      --rainbow-1-emphasis: #6a615f;
 
   /* Orange whisper */
-  --rainbow-2-tint: #e6dcd5; --rainbow-2-mid: #afa299;
-  --rainbow-2: #7e6e64;      --rainbow-2-emphasis: #433831;
+  --rainbow-2-tint: #d1cdca; --rainbow-2-mid: #aaa39e;
+  --rainbow-2: #8a7d75;      --rainbow-2-emphasis: #6a615c;
 
   /* Yellow whisper */
-  --rainbow-3-tint: #e2ded0; --rainbow-3-mid: #a9a593;
-  --rainbow-3: #77725c;      --rainbow-3-emphasis: #3f3b2b;
+  --rainbow-3-tint: #cfcec9; --rainbow-3-mid: #a7a59d;
+  --rainbow-3: #848073;      --rainbow-3-emphasis: #65635b;
 
-  /* Teal whisper */
-  --rainbow-4-tint: #d5e1dd; --rainbow-4-mid: #9aa8a4;
-  --rainbow-4: #647671;      --rainbow-4-emphasis: #313e3a;
+  /* Green whisper */
+  --rainbow-4-tint: #cccfcb; --rainbow-4-mid: #a0a79f;
+  --rainbow-4: #7a8378;      --rainbow-4-emphasis: #5f655e;
 
   /* Blue whisper */
-  --rainbow-5-tint: #d8dfe4; --rainbow-5-mid: #9da6ad;
-  --rainbow-5: #69737b;      --rainbow-5-emphasis: #343c41;
+  --rainbow-5-tint: #ccced2; --rainbow-5-mid: #a0a5ae;
+  --rainbow-5: #7a808d;      --rainbow-5-emphasis: #5f636b;
 
   /* Purple whisper */
-  --rainbow-6-tint: #dedce6; --rainbow-6-mid: #a5a3af;
-  --rainbow-6: #726f7e;      --rainbow-6-emphasis: #3b3943;
+  --rainbow-6-tint: #cecdd1; --rainbow-6-mid: #a6a3ac;
+  --rainbow-6: #827e8a;      --rainbow-6-emphasis: #64626a;
 
   /* Pink whisper */
-  --rainbow-7-tint: #e6dadf; --rainbow-7-mid: #afa0a6;
-  --rainbow-7: #7e6c74;      --rainbow-7-emphasis: #43363c;
+  --rainbow-7-tint: #d1ccce; --rainbow-7-mid: #aaa2a5;
+  --rainbow-7: #8a7c82;      --rainbow-7-emphasis: #696064;
 }
-
-/* Mono primary/secondary/mixed gradients — tint → base → black */
-[data-theme-chroma="grey"] .gradient-primary,
-[data-theme-chroma="grey"] [class*="--gradient-primary"]   { --_grad: linear-gradient(135deg, var(--primary-tint) 0%, var(--primary-base) 60%, var(--color-Black) 100%); }
-[data-theme-chroma="grey"] .gradient-secondary,
-[data-theme-chroma="grey"] [class*="--gradient-secondary"] { --_grad: linear-gradient(135deg, var(--secondary-tint) 0%, var(--secondary-base) 60%, var(--color-Black) 100%); }
-[data-theme-chroma="grey"] .gradient-neutral,
-[data-theme-chroma="grey"] [class*="--gradient-neutral"]   { --_grad: linear-gradient(135deg, var(--neutral-tint) 0%, var(--neutral-base) 60%, var(--color-Black) 100%); }
-[data-theme-chroma="grey"] .gradient-hero,
-[data-theme-chroma="grey"] [class*="--gradient-hero"]      { --_grad: linear-gradient(135deg, var(--primary-tint) 0%, var(--secondary-base) 60%, var(--color-Black) 100%); }
-[data-theme-chroma="grey"] .gradient-sunset,
-[data-theme-chroma="grey"] [class*="--gradient-sunset"]    { --_grad: linear-gradient(135deg, var(--primary-tint) 0%, var(--primary-mid) 40%, var(--secondary-base) 70%, var(--color-Black) 100%); }
-
-/* Mono gradients — simplified stops for grey range.
-   Tint = white → tint. Base = tint → base. Mid/emphasis unchanged. */
-
-/* Mono tint gradient: base → tint (visible grey range, no white wash-out) */
-[data-theme-chroma="grey"] [class*="--gradient-red-tint"],
-[data-theme-chroma="grey"][class*="--gradient-red-tint"]       { --_grad: linear-gradient(135deg, var(--rainbow-1) 0%, var(--rainbow-1-tint) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-orange-tint"],
-[data-theme-chroma="grey"][class*="--gradient-orange-tint"]    { --_grad: linear-gradient(135deg, var(--rainbow-2) 0%, var(--rainbow-2-tint) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-yellow-tint"],
-[data-theme-chroma="grey"][class*="--gradient-yellow-tint"]    { --_grad: linear-gradient(135deg, var(--rainbow-3) 0%, var(--rainbow-3-tint) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-teal-tint"],
-[data-theme-chroma="grey"][class*="--gradient-teal-tint"]      { --_grad: linear-gradient(135deg, var(--rainbow-4) 0%, var(--rainbow-4-tint) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-blue-tint"],
-[data-theme-chroma="grey"][class*="--gradient-blue-tint"]      { --_grad: linear-gradient(135deg, var(--rainbow-5) 0%, var(--rainbow-5-tint) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-purple-tint"],
-[data-theme-chroma="grey"][class*="--gradient-purple-tint"]    { --_grad: linear-gradient(135deg, var(--rainbow-6) 0%, var(--rainbow-6-tint) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-pink-tint"],
-[data-theme-chroma="grey"][class*="--gradient-pink-tint"]      { --_grad: linear-gradient(135deg, var(--rainbow-7) 0%, var(--rainbow-7-tint) 100%); }
-
-/* Mono base gradient: tint → base */
-[data-theme-chroma="grey"] [class*="--gradient-red"]:not([class*="--gradient-red-"]),
-[data-theme-chroma="grey"][class*="--gradient-red"]:not([class*="--gradient-red-"])       { --_grad: linear-gradient(135deg, var(--rainbow-1-tint) 0%, var(--rainbow-1) 60%, var(--color-Black) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-orange"]:not([class*="--gradient-orange-"]),
-[data-theme-chroma="grey"][class*="--gradient-orange"]:not([class*="--gradient-orange-"]) { --_grad: linear-gradient(135deg, var(--rainbow-2-tint) 0%, var(--rainbow-2) 60%, var(--color-Black) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-yellow"]:not([class*="--gradient-yellow-"]),
-[data-theme-chroma="grey"][class*="--gradient-yellow"]:not([class*="--gradient-yellow-"]) { --_grad: linear-gradient(135deg, var(--rainbow-3-tint) 0%, var(--rainbow-3) 60%, var(--color-Black) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-teal"]:not([class*="--gradient-teal-"]),
-[data-theme-chroma="grey"][class*="--gradient-teal"]:not([class*="--gradient-teal-"])     { --_grad: linear-gradient(135deg, var(--rainbow-4-tint) 0%, var(--rainbow-4) 60%, var(--color-Black) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-blue"]:not([class*="--gradient-blue-"]),
-[data-theme-chroma="grey"][class*="--gradient-blue"]:not([class*="--gradient-blue-"])     { --_grad: linear-gradient(135deg, var(--rainbow-5-tint) 0%, var(--rainbow-5) 60%, var(--color-Black) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-purple"]:not([class*="--gradient-purple-"]),
-[data-theme-chroma="grey"][class*="--gradient-purple"]:not([class*="--gradient-purple-"]) { --_grad: linear-gradient(135deg, var(--rainbow-6-tint) 0%, var(--rainbow-6) 60%, var(--color-Black) 100%); }
-[data-theme-chroma="grey"] [class*="--gradient-pink"]:not([class*="--gradient-pink-"]),
-[data-theme-chroma="grey"][class*="--gradient-pink"]:not([class*="--gradient-pink-"])     { --_grad: linear-gradient(135deg, var(--rainbow-7-tint) 0%, var(--rainbow-7) 60%, var(--color-Black) 100%); }
 
 /* Dark mono — tint/emphasis flipped, matching dark scale L targets */
 [data-mode="dark"][data-theme-chroma="grey"],
 [data-mode="dark"] [data-theme-chroma="grey"] {
-  --rainbow-1-tint: #352b2a; --rainbow-1-mid: #584948;
-  --rainbow-1: #806c6a;      --rainbow-1-emphasis: #cab9b7;
+  --rainbow-1-tint: #312d2c; --rainbow-1-mid: #534b4a;
+  --rainbow-1: #8c7c79;      --rainbow-1-emphasis: #c6bbb9;
 
-  --rainbow-2-tint: #342c27; --rainbow-2-mid: #564a43;
-  --rainbow-2: #7e6e64;      --rainbow-2-emphasis: #c8bbb2;
+  --rainbow-2-tint: #302d2b; --rainbow-2-mid: #524c48;
+  --rainbow-2: #8a7d75;      --rainbow-2-emphasis: #c5bcb6;
 
-  --rainbow-3-tint: #312e23; --rainbow-3-mid: #514d3d;
-  --rainbow-3: #77725c;      --rainbow-3-emphasis: #c3beab;
+  --rainbow-3-tint: #2f2e2a; --rainbow-3-mid: #4f4d46;
+  --rainbow-3: #848073;      --rainbow-3-emphasis: #c0beb5;
 
-  --rainbow-4-tint: #27302d; --rainbow-4-mid: #43504c;
-  --rainbow-4: #647671;      --rainbow-4-emphasis: #b2c2bd;
+  --rainbow-4-tint: #2c2f2c; --rainbow-4-mid: #494f48;
+  --rainbow-4: #7a8378;      --rainbow-4-emphasis: #b9c0b8;
 
-  --rainbow-5-tint: #292f33; --rainbow-5-mid: #464e54;
-  --rainbow-5: #69737b;      --rainbow-5-emphasis: #b6bfc6;
+  --rainbow-5-tint: #2c2e31; --rainbow-5-mid: #494d55;
+  --rainbow-5: #7a808d;      --rainbow-5-emphasis: #b9bec6;
 
-  --rainbow-6-tint: #2e2d34; --rainbow-6-mid: #4d4b56;
-  --rainbow-6: #726f7e;      --rainbow-6-emphasis: #bebcc8;
+  --rainbow-6-tint: #2e2d30; --rainbow-6-mid: #4e4b54;
+  --rainbow-6: #827e8a;      --rainbow-6-emphasis: #bfbcc5;
 
-  --rainbow-7-tint: #342b2f; --rainbow-7-mid: #56494f;
-  --rainbow-7: #7e6c74;      --rainbow-7-emphasis: #c8b9bf;
+  --rainbow-7-tint: #302d2e; --rainbow-7-mid: #524b4e;
+  --rainbow-7: #8a7c82;      --rainbow-7-emphasis: #c5babf;
 }

@@ -265,13 +265,37 @@
   100% { background-position: 0 0, 0% 0%; }
 }
 
-/* Single-layer gradient flow (for fill variant) */
+/* Gradient sway — slow diagonal back-and-forth via background-position on a larger-than-shape gradient. */
 @keyframes anim-gradient-flow {
   0%   { background-position: 0% 0%; }
-  25%  { background-position: 100% 0%; }
   50%  { background-position: 100% 100%; }
-  75%  { background-position: 0% 100%; }
   100% { background-position: 0% 0%; }
+}
+
+/* Colour cycle — cross-fades through 3 colours set inline via --_cycle-a/b/c.
+   Two keyframes so CSS shapes animate background-color and SVG shapes animate color
+   (which the SVG path picks up via fill:currentColor). Using one or the other avoids
+   painting the wrapper rect behind the SVG path on SVG shapes. */
+@keyframes anim-colour-cycle-bg {
+  0%   { background-color: var(--_cycle-a, var(--_tier-tint)); }
+  33%  { background-color: var(--_cycle-b, var(--_color)); }
+  66%  { background-color: var(--_cycle-c, var(--_tier-emphasis)); }
+  100% { background-color: var(--_cycle-a, var(--_tier-tint)); }
+}
+@keyframes anim-colour-cycle-color {
+  0%   { color: var(--_cycle-a, var(--_tier-tint)); }
+  33%  { color: var(--_cycle-b, var(--_color)); }
+  66%  { color: var(--_cycle-c, var(--_tier-emphasis)); }
+  100% { color: var(--_cycle-a, var(--_tier-tint)); }
+}
+
+/* SVG fill cycle — directly animates fill on the `<g>` inside the SVG path. Used so the
+   cycle works even when the element has no .color--{name} class (blend/rainbow cases). */
+@keyframes anim-colour-cycle-svg-fill {
+  0%   { fill: var(--_cycle-a, var(--_tier-tint)); }
+  33%  { fill: var(--_cycle-b, var(--_color)); }
+  66%  { fill: var(--_cycle-c, var(--_tier-emphasis)); }
+  100% { fill: var(--_cycle-a, var(--_tier-tint)); }
 }
 
 

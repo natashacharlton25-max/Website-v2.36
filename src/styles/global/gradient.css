@@ -22,87 +22,15 @@
 
 .gradient {
   --_grad-computed: linear-gradient(
-    var(--_grad-angle, 135deg),
-    var(--color-White) 0%,
-    var(--_tier-tint) 15%,
-    var(--_tier-mid) 35%,
-    var(--_color) 60%,
-    var(--_tier-emphasis) 85%,
-    var(--color-Black) 100%
-  );
-}
-
-/* Spread: soft — white → tint → mid (light wash) */
-.gradient[data-grad-spread="soft"] {
-  --_grad-computed: linear-gradient(
-    var(--_grad-angle, 135deg),
-    var(--color-White) 0%,
-    var(--_tier-tint) 40%,
-    var(--_tier-mid) 100%
-  );
-}
-
-/* Spread: tight — base → emphasis → black (dark end) */
-.gradient[data-grad-spread="tight"] {
-  --_grad-computed: linear-gradient(
-    var(--_grad-angle, 135deg),
-    var(--_color) 0%,
-    var(--_tier-emphasis) 60%,
-    var(--color-Black) 100%
-  );
-}
-
-/* Blend: emerge — page-bg → colour (appears from background) */
-.gradient--blend-emerge {
-  --_grad-computed: linear-gradient(
-    var(--_grad-angle, 135deg),
-    var(--page-bg) 0%,
-    var(--_color) 100%
-  );
-  background-size: var(--_grad-size) 100%;
-}
-
-/* Blend: fade — colour → page-bg (dissolves into background) */
-.gradient--blend-fade {
-  --_grad-computed: linear-gradient(
-    var(--_grad-angle, 135deg),
-    var(--_color) 0%,
-    var(--page-bg) 100%
-  );
-  background-size: var(--_grad-size) 100%;
-}
-
-/* Type: radial */
-.gradient[data-grad-type="radial"] {
-  --_grad-computed: radial-gradient(
-    circle at var(--_grad-focus, center),
-    var(--color-White) 0%,
-    var(--_tier-tint) 15%,
+    var(--_grad-angle, 135deg) in oklab,
+    var(--_tier-emphasis) 0%,
     var(--_color) 50%,
-    var(--_tier-emphasis) 85%,
-    var(--color-Black) 100%
+    var(--_tier-tint) 100%
   );
 }
 
-/* Radial + soft */
-.gradient[data-grad-type="radial"][data-grad-spread="soft"] {
-  --_grad-computed: radial-gradient(
-    circle at var(--_grad-focus, center),
-    var(--color-White) 0%,
-    var(--_tier-tint) 40%,
-    var(--_tier-mid) 100%
-  );
-}
-
-/* Radial + tight */
-.gradient[data-grad-type="radial"][data-grad-spread="tight"] {
-  --_grad-computed: radial-gradient(
-    circle at var(--_grad-focus, center),
-    var(--_color) 0%,
-    var(--_tier-emphasis) 60%,
-    var(--color-Black) 100%
-  );
-}
+/* Modifier rules and per-blend rules live in components/Shape.css and gradient-generated.css.
+   data-grad-spread / gradientSpread is REMOVED — use colorTier presets instead. */
 
 
 
@@ -131,12 +59,6 @@
   color: var(--color-White);
 }
 
-/* Soft spread = light gradient → dark text */
-.gradient--fill[data-grad-spread="soft"] {
-  color: var(--color-Black);
-}
-
-
 /* ========== OUTLINE VARIANT ========== */
 /* Outline border uses tier-only gradient (no white/black — they wash out against page-bg) */
 
@@ -146,29 +68,6 @@
     linear-gradient(var(--_grad-angle, 135deg), var(--_tier-tint) 0%, var(--_tier-mid) 25%, var(--_color) 50%, var(--_tier-emphasis) 100%) border-box;
 }
 
-.gradient.gradient--outline[data-grad-spread="soft"] {
-  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
-    linear-gradient(var(--_grad-angle, 135deg), var(--_tier-tint) 0%, var(--_tier-mid) 100%) border-box;
-}
-
-.gradient.gradient--outline[data-grad-spread="tight"] {
-  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
-    linear-gradient(var(--_grad-angle, 135deg), var(--_color) 0%, var(--_tier-emphasis) 100%) border-box;
-}
-
-/* Outline emerge: border fades FROM page-bg into colour */
-.gradient.gradient--outline.gradient--blend-emerge {
-  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
-    linear-gradient(var(--_grad-angle, 135deg), var(--page-bg) 0%, var(--_color) 100%) border-box;
-}
-
-/* Outline fade: border fades FROM colour into page-bg */
-.gradient.gradient--outline.gradient--blend-fade {
-  background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
-    linear-gradient(var(--_grad-angle, 135deg), var(--_color) 0%, var(--page-bg) 100%) border-box;
-}
-
-
 .gradient--outline .gradient__text {
   background: linear-gradient(
     var(--_grad-angle, 135deg),
@@ -176,25 +75,9 @@
     var(--_color) 40%,
     var(--_tier-mid) 100%
   );
-  background-size: var(--_grad-size) 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-/* Outline text responds to spread */
-.gradient--outline[data-grad-spread="soft"] .gradient__text {
-  background: linear-gradient(var(--_grad-angle, 135deg), var(--_tier-mid) 0%, var(--_tier-tint) 100%);
-  background-size: var(--_grad-size) 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-.gradient--outline[data-grad-spread="tight"] .gradient__text {
-  background: linear-gradient(var(--_grad-angle, 135deg), var(--_tier-emphasis) 0%, var(--_color) 100%);
-  background-size: var(--_grad-size) 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
 }
 
 
@@ -215,15 +98,31 @@
 }
 
 
-/* ========== ANIMATED ========== */
+/* ========== ANIMATED ==========
+   Per-instance speed + delay via custom properties set inline on the element:
+     --_grad-anim-duration (seconds, defaults 8s)
+     --_grad-anim-delay    (random negative value to desync gradients on same page) */
 
 .gradient--animated.gradient--fill {
   background: var(--_grad-computed);
-  background-size: 300% 300%;
+  /* Larger-than-shape background so the gradient bands span more pixels = smoother sway */
+  background-size: 200% 200%;
+  background-position: center;
   border: none;
   animation-name: anim-gradient-flow;
-  animation-duration: var(--duration-continuous-slower);
-  animation-timing-function: var(--ease-default);
+  animation-duration: var(--_grad-anim-duration, 12s);
+  animation-delay: var(--_grad-anim-delay, 0s);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Colour cycle — default animates background-color (for CSS-rendered shapes and badges).
+   SVG-rendered shapes override this to animate color instead (see .shape--svg.gradient--cycle in Shape.css). */
+.gradient--cycle {
+  animation-name: anim-colour-cycle-bg;
+  animation-duration: var(--_grad-anim-duration, 20s);
+  animation-delay: var(--_grad-anim-delay, 0s);
+  animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
 }
 
@@ -231,7 +130,8 @@
   background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_grad-computed) border-box;
   background-size: 100% 100%, 300% 300%;
   animation-name: anim-border-flow;
-  animation-duration: var(--duration-continuous-slower);
+  animation-duration: var(--_grad-anim-duration, 8s);
+  animation-delay: var(--_grad-anim-delay, 0s);
   animation-timing-function: var(--ease-default);
   animation-iteration-count: infinite;
 }
@@ -239,7 +139,8 @@
 .gradient--animated.gradient--glass {
   background-size: 300% 300%;
   animation-name: anim-gradient-flow;
-  animation-duration: var(--duration-continuous-slower);
+  animation-duration: var(--_grad-anim-duration, 8s);
+  animation-delay: var(--_grad-anim-delay, 0s);
   animation-timing-function: var(--ease-default);
   animation-iteration-count: infinite;
 }
@@ -247,55 +148,13 @@
 .gradient--animated .gradient__text {
   background-size: 300% 300%;
   animation-name: anim-gradient-flow;
-  animation-duration: var(--duration-continuous-slower);
+  animation-duration: var(--_grad-anim-duration, 8s);
+  animation-delay: var(--_grad-anim-delay, 0s);
   animation-timing-function: var(--ease-default);
   animation-iteration-count: infinite;
 }
 
 
-/* ========== MIXED BLENDS (hero, sunset etc.) ========== */
-/* These use two colour sources — can't be built from single tier tokens */
-
-.gradient--blend-hero {
-  --_grad-computed: linear-gradient(var(--_grad-angle, 135deg), var(--primary-base) 0%, var(--secondary-base) 100%);
-}
-
-.gradient--blend-sunset {
-  --_grad-computed: linear-gradient(var(--_grad-angle, 45deg), var(--primary-base) 0%, var(--primary-emphasis) 30%, var(--secondary-emphasis) 100%);
-}
-
-.gradient--blend-brand-emerge {
-  --_grad-computed: linear-gradient(var(--_grad-angle, 135deg), var(--primary-tint) 0%, var(--primary-base) 50%, var(--secondary-emphasis) 100%);
-}
-
-.gradient--blend-brand-fade {
-  --_grad-computed: linear-gradient(var(--_grad-angle, 135deg), var(--primary-emphasis) 0%, var(--secondary-base) 50%, var(--secondary-tint) 100%);
-}
-
-
-/* ========== TIER PRESETS — fixed stop patterns from the original system ========== */
-/* These are the hand-tuned gradients that looked great. Fixed direction (135deg). */
-
-/* Tint preset: mid → tint → white (flipped — dark starts first for text) */
-.gradient--preset-tint {
-  --_grad-computed: linear-gradient(135deg, var(--_tier-mid) 0%, var(--_tier-tint) 60%, var(--color-White) 100%);
-  background-size: var(--_grad-size) 100%;
-}
-
-/* Mid preset: emphasis → base → mid → tint (flipped) */
-.gradient--preset-mid {
-  --_grad-computed: linear-gradient(135deg, var(--_tier-emphasis) 0%, var(--_color) 35%, var(--_tier-mid) 65%, var(--_tier-tint) 100%);
-  background-size: var(--_grad-size) 100%;
-}
-
-/* Base preset: tint → mid → base → emphasis (full range) */
-.gradient--preset-base {
-  --_grad-computed: linear-gradient(135deg, var(--_tier-tint) 0%, var(--_tier-mid) 30%, var(--_color) 60%, var(--_tier-emphasis) 100%);
-  background-size: var(--_grad-size) 100%;
-}
-
-/* Emphasis preset: base → emphasis → black */
-.gradient--preset-emphasis {
-  --_grad-computed: linear-gradient(135deg, var(--_color) 0%, var(--_tier-emphasis) 60%, var(--color-Black) 100%);
-  background-size: var(--_grad-size) 100%;
-}
+/* All blend rules (hero, sunset, brand-emerge, brand-fade, presets, per-rainbow, radials)
+   are GENERATED from src/lib/gradient-catalogue.ts → src/styles/global/gradient-generated.css.
+   To add or change a blend, edit the catalogue and run `npm run build:gradients`. */

@@ -1,156 +1,21 @@
 /* ===================================
    GRADIENT TOKENS
-   Three tiers: base (dark), light mode override, HC override.
-   Rainbow gradients use rainbow tokens (CVD-safe, theme-aware).
+   Direction + focus data-attribute mappings.
+   All gradient blend rules are GENERATED — see gradient-generated.css.
    =================================== */
 
 :root {
-  /* ============================================
-     GRADIENT GEOMETRY — direction, type, focus, spread
-     Components set these via data attributes or classes.
-     Default: diagonal linear, balanced spread.
-     ============================================ */
-  --_grad-angle: 135deg;
+  /* Geometry defaults — components override via data attributes */
   --_grad-type: linear-gradient;
-  --_grad-focus: at center;
+  --_grad-focus: center;
   --_grad-size: 25rem;
-  --_grad-start: 0%;
-  --_grad-end: 100%;
-
-  /* ============================================
-     PRIMARY / SECONDARY / NEUTRAL — semantic tokens
-     ============================================ */
-  --gradient-primary: linear-gradient(160deg, var(--primary-emphasis) 0%, var(--primary-base) 45%, var(--primary-mid) 100%);
-  --gradient-primary-soft: linear-gradient(135deg, var(--primary-base) 0%, var(--primary-emphasis) 100%);
-  --gradient-primary-light: linear-gradient(135deg, var(--primary-tint) 0%, var(--primary-base) 100%);
-  --gradient-secondary: linear-gradient(135deg, var(--secondary-base) 0%, var(--secondary-emphasis) 100%);
-  --gradient-secondary-soft: linear-gradient(135deg, var(--secondary-mid) 0%, var(--secondary-base) 100%);
-  --gradient-neutral: linear-gradient(135deg, var(--neutral-base) 0%, var(--neutral-emphasis) 100%);
-
-  /* ============================================
-     MIXED — Primary + Secondary
-     ============================================ */
-  --gradient-hero: linear-gradient(135deg, var(--primary-base) 0%, var(--secondary-base) 100%);
-  --gradient-sunset: linear-gradient(45deg, var(--primary-base) 0%, var(--primary-emphasis) 30%, var(--secondary-emphasis) 100%);
-  --gradient-brand-emerge: linear-gradient(135deg, var(--page-bg) 0%, var(--primary-base) 50%, var(--secondary-emphasis) 100%);
-  --gradient-brand-fade: linear-gradient(135deg, var(--primary-emphasis) 0%, var(--secondary-base) 50%, var(--page-bg-raised) 100%);
-
-  /* ============================================
-     RAINBOW — 4 tiers per colour matching rainbow token tiers
-     tint (softest) → mid → base (vivid) → emphasis (strongest)
-     ============================================ */
-
-  /* ── Red ── */
-  --gradient-red-tint: linear-gradient(135deg, var(--rainbow-1-mid) 0%, var(--rainbow-1-tint) 60%, var(--color-White) 100%);
-  --gradient-red-mid: linear-gradient(135deg, var(--rainbow-1-emphasis) 0%, var(--rainbow-1) 35%, var(--rainbow-1-mid) 65%, var(--rainbow-1-tint) 100%);
-  --gradient-red: linear-gradient(135deg, var(--color-White) 0%, var(--rainbow-1-tint) 15%, var(--rainbow-1-mid) 35%, var(--rainbow-1) 60%, var(--rainbow-1-emphasis) 85%, var(--color-Black) 100%);
-  --gradient-red-emphasis: linear-gradient(135deg, var(--rainbow-1) 0%, var(--rainbow-1-emphasis) 60%, var(--color-Black) 100%);
-  /* ── Orange ── */
-  --gradient-orange-tint: linear-gradient(135deg, var(--rainbow-2-mid) 0%, var(--rainbow-2-tint) 60%, var(--color-White) 100%);
-  --gradient-orange-mid: linear-gradient(135deg, var(--rainbow-2-emphasis) 0%, var(--rainbow-2) 35%, var(--rainbow-2-mid) 65%, var(--rainbow-2-tint) 100%);
-  --gradient-orange: linear-gradient(135deg, var(--color-White) 0%, var(--rainbow-2-tint) 15%, var(--rainbow-2-mid) 35%, var(--rainbow-2) 60%, var(--rainbow-2-emphasis) 85%, var(--color-Black) 100%);
-  --gradient-orange-emphasis: linear-gradient(135deg, var(--rainbow-2) 0%, var(--rainbow-2-emphasis) 60%, var(--color-Black) 100%);
-  /* ── Yellow ── */
-  --gradient-yellow-tint: linear-gradient(135deg, var(--rainbow-3-mid) 0%, var(--rainbow-3-tint) 60%, var(--color-White) 100%);
-  --gradient-yellow-mid: linear-gradient(135deg, var(--rainbow-3-emphasis) 0%, var(--rainbow-3) 35%, var(--rainbow-3-mid) 65%, var(--rainbow-3-tint) 100%);
-  --gradient-yellow: linear-gradient(135deg, var(--color-White) 0%, var(--rainbow-3-tint) 15%, var(--rainbow-3-mid) 35%, var(--rainbow-3) 60%, var(--rainbow-3-emphasis) 85%, var(--color-Black) 100%);
-  --gradient-yellow-emphasis: linear-gradient(135deg, var(--rainbow-3) 0%, var(--rainbow-3-emphasis) 60%, var(--color-Black) 100%);
-  /* ── Teal ── */
-  --gradient-teal-tint: linear-gradient(135deg, var(--rainbow-4-mid) 0%, var(--rainbow-4-tint) 60%, var(--color-White) 100%);
-  --gradient-teal-mid: linear-gradient(135deg, var(--rainbow-4-emphasis) 0%, var(--rainbow-4) 35%, var(--rainbow-4-mid) 65%, var(--rainbow-4-tint) 100%);
-  --gradient-teal: linear-gradient(135deg, var(--color-White) 0%, var(--rainbow-4-tint) 15%, var(--rainbow-4-mid) 35%, var(--rainbow-4) 60%, var(--rainbow-4-emphasis) 85%, var(--color-Black) 100%);
-  --gradient-teal-emphasis: linear-gradient(135deg, var(--rainbow-4) 0%, var(--rainbow-4-emphasis) 60%, var(--color-Black) 100%);
-  /* ── Blue ── */
-  --gradient-blue-tint: linear-gradient(135deg, var(--rainbow-5-mid) 0%, var(--rainbow-5-tint) 60%, var(--color-White) 100%);
-  --gradient-blue-mid: linear-gradient(135deg, var(--rainbow-5-emphasis) 0%, var(--rainbow-5) 35%, var(--rainbow-5-mid) 65%, var(--rainbow-5-tint) 100%);
-  --gradient-blue: linear-gradient(135deg, var(--color-White) 0%, var(--rainbow-5-tint) 15%, var(--rainbow-5-mid) 35%, var(--rainbow-5) 60%, var(--rainbow-5-emphasis) 85%, var(--color-Black) 100%);
-  --gradient-blue-emphasis: linear-gradient(135deg, var(--rainbow-5) 0%, var(--rainbow-5-emphasis) 60%, var(--color-Black) 100%);
-  /* ── Purple ── */
-  --gradient-purple-tint: linear-gradient(135deg, var(--rainbow-6-mid) 0%, var(--rainbow-6-tint) 60%, var(--color-White) 100%);
-  --gradient-purple-mid: linear-gradient(135deg, var(--rainbow-6-emphasis) 0%, var(--rainbow-6) 35%, var(--rainbow-6-mid) 65%, var(--rainbow-6-tint) 100%);
-  --gradient-purple: linear-gradient(135deg, var(--color-White) 0%, var(--rainbow-6-tint) 15%, var(--rainbow-6-mid) 35%, var(--rainbow-6) 60%, var(--rainbow-6-emphasis) 85%, var(--color-Black) 100%);
-  --gradient-purple-emphasis: linear-gradient(135deg, var(--rainbow-6) 0%, var(--rainbow-6-emphasis) 60%, var(--color-Black) 100%);
-  /* ── Pink ── */
-  --gradient-pink-tint: linear-gradient(135deg, var(--rainbow-7-mid) 0%, var(--rainbow-7-tint) 60%, var(--color-White) 100%);
-  --gradient-pink-mid: linear-gradient(135deg, var(--rainbow-7-emphasis) 0%, var(--rainbow-7) 35%, var(--rainbow-7-mid) 65%, var(--rainbow-7-tint) 100%);
-  --gradient-pink: linear-gradient(135deg, var(--color-White) 0%, var(--rainbow-7-tint) 15%, var(--rainbow-7-mid) 35%, var(--rainbow-7) 60%, var(--rainbow-7-emphasis) 85%, var(--color-Black) 100%);
-  --gradient-pink-emphasis: linear-gradient(135deg, var(--rainbow-7) 0%, var(--rainbow-7-emphasis) 60%, var(--color-Black) 100%);
-  /* primary/secondary/neutral tint tokens REMOVED — inlined into class map */
-
-  /* ============================================
-     BACKGROUND — utility gradients
-     ============================================ */
-  --gradient-background-light: linear-gradient(135deg, var(--page-bg) 0%, var(--page-bg-raised) 100%);
-  --gradient-background-warm: linear-gradient(135deg, var(--page-bg-raised) 0%, var(--page-bg-raised) 100%);
-  --gradient-background-cool: linear-gradient(135deg, var(--page-bg) 0%, var(--neutral-mid) 100%);
-
-  /* Button/card bridge tokens REMOVED — use gradient enum directly.
-     Button hover = gradient-primary-dark or gradient-primary-soft.
-     Card bg = gradient-background-light or gradient-background-warm. */
 }
-
-/* ============================================
-   GLOBAL GRADIENT CLASS MAP
-   Inlined gradient values — var(--rainbow-*) resolves at element level,
-   not :root. This ensures mono/dark/HC/CVD overrides cascade correctly.
-   ============================================ */
-
-/* Primary / Secondary / Neutral / Mixed — inlined for cascade correctness */
-.gradient-primary,   [class*="--gradient-primary"]   { --_grad: linear-gradient(160deg, var(--primary-emphasis) 0%, var(--primary-base) 45%, var(--primary-mid) 100%);   --_grad-tint: linear-gradient(135deg, var(--primary-mid) 0%, var(--primary-tint) 60%, var(--color-White) 100%); }
-.gradient-secondary, [class*="--gradient-secondary"] { --_grad: linear-gradient(135deg, var(--secondary-base) 0%, var(--secondary-emphasis) 100%); --_grad-tint: linear-gradient(135deg, var(--secondary-mid) 0%, var(--secondary-tint) 60%, var(--color-White) 100%); }
-.gradient-neutral,   [class*="--gradient-neutral"]   { --_grad: linear-gradient(135deg, var(--neutral-base) 0%, var(--neutral-emphasis) 100%);   --_grad-tint: linear-gradient(135deg, var(--neutral-mid) 0%, var(--neutral-tint) 60%, var(--color-White) 100%); }
-.gradient-hero,      [class*="--gradient-hero"]      { --_grad: linear-gradient(135deg, var(--primary-base) 0%, var(--secondary-base) 100%);     --_grad-tint: linear-gradient(135deg, var(--primary-base) 0%, var(--secondary-base) 100%); }
-.gradient-sunset,    [class*="--gradient-sunset"]    { --_grad: linear-gradient(45deg, var(--primary-base) 0%, var(--primary-emphasis) 30%, var(--secondary-emphasis) 100%); --_grad-tint: linear-gradient(45deg, var(--primary-base) 0%, var(--primary-emphasis) 30%, var(--secondary-emphasis) 100%); }
-[class*="--gradient-brand-emerge"] { --_grad: linear-gradient(135deg, var(--primary-tint) 0%, var(--primary-base) 50%, var(--secondary-emphasis) 100%); }
-[class*="--gradient-brand-fade"]   { --_grad: linear-gradient(135deg, var(--primary-emphasis) 0%, var(--secondary-base) 50%, var(--secondary-tint) 100%); }
-
-/* Rainbow — base tier (inlined: all 4 semantic stops, no white/black) */
-[class*="--gradient-red"]:not([class*="--gradient-red-"])       { --_grad: linear-gradient(135deg, var(--rainbow-1-tint) 0%, var(--rainbow-1-mid) 30%, var(--rainbow-1) 60%, var(--rainbow-1-emphasis) 100%); }
-[class*="--gradient-orange"]:not([class*="--gradient-orange-"]) { --_grad: linear-gradient(135deg, var(--rainbow-2-tint) 0%, var(--rainbow-2-mid) 30%, var(--rainbow-2) 60%, var(--rainbow-2-emphasis) 100%); }
-[class*="--gradient-yellow"]:not([class*="--gradient-yellow-"]) { --_grad: linear-gradient(135deg, var(--rainbow-3-tint) 0%, var(--rainbow-3-mid) 30%, var(--rainbow-3) 60%, var(--rainbow-3-emphasis) 100%); }
-[class*="--gradient-teal"]:not([class*="--gradient-teal-"])     { --_grad: linear-gradient(135deg, var(--rainbow-4-tint) 0%, var(--rainbow-4-mid) 30%, var(--rainbow-4) 60%, var(--rainbow-4-emphasis) 100%); }
-[class*="--gradient-blue"]:not([class*="--gradient-blue-"])     { --_grad: linear-gradient(135deg, var(--rainbow-5-tint) 0%, var(--rainbow-5-mid) 30%, var(--rainbow-5) 60%, var(--rainbow-5-emphasis) 100%); }
-[class*="--gradient-purple"]:not([class*="--gradient-purple-"]) { --_grad: linear-gradient(135deg, var(--rainbow-6-tint) 0%, var(--rainbow-6-mid) 30%, var(--rainbow-6) 60%, var(--rainbow-6-emphasis) 100%); }
-[class*="--gradient-pink"]:not([class*="--gradient-pink-"])     { --_grad: linear-gradient(135deg, var(--rainbow-7-tint) 0%, var(--rainbow-7-mid) 30%, var(--rainbow-7) 60%, var(--rainbow-7-emphasis) 100%); }
-
-/* Rainbow — tint tier (white → tint → mid) */
-[class*="--gradient-red-tint"]    { --_grad: linear-gradient(135deg, var(--rainbow-1-mid) 0%, var(--rainbow-1-tint) 60%, var(--color-White) 100%); }
-[class*="--gradient-orange-tint"] { --_grad: linear-gradient(135deg, var(--rainbow-2-mid) 0%, var(--rainbow-2-tint) 60%, var(--color-White) 100%); }
-[class*="--gradient-yellow-tint"] { --_grad: linear-gradient(135deg, var(--rainbow-3-mid) 0%, var(--rainbow-3-tint) 60%, var(--color-White) 100%); }
-[class*="--gradient-teal-tint"]   { --_grad: linear-gradient(135deg, var(--rainbow-4-mid) 0%, var(--rainbow-4-tint) 60%, var(--color-White) 100%); }
-[class*="--gradient-blue-tint"]   { --_grad: linear-gradient(135deg, var(--rainbow-5-mid) 0%, var(--rainbow-5-tint) 60%, var(--color-White) 100%); }
-[class*="--gradient-purple-tint"] { --_grad: linear-gradient(135deg, var(--rainbow-6-mid) 0%, var(--rainbow-6-tint) 60%, var(--color-White) 100%); }
-[class*="--gradient-pink-tint"]   { --_grad: linear-gradient(135deg, var(--rainbow-7-mid) 0%, var(--rainbow-7-tint) 60%, var(--color-White) 100%); }
-
-/* Rainbow — mid tier (tint → mid → base → emphasis) */
-[class*="--gradient-red-mid"]    { --_grad: linear-gradient(135deg, var(--rainbow-1-emphasis) 0%, var(--rainbow-1) 35%, var(--rainbow-1-mid) 65%, var(--rainbow-1-tint) 100%); }
-[class*="--gradient-orange-mid"] { --_grad: linear-gradient(135deg, var(--rainbow-2-emphasis) 0%, var(--rainbow-2) 35%, var(--rainbow-2-mid) 65%, var(--rainbow-2-tint) 100%); }
-[class*="--gradient-yellow-mid"] { --_grad: linear-gradient(135deg, var(--rainbow-3-emphasis) 0%, var(--rainbow-3) 35%, var(--rainbow-3-mid) 65%, var(--rainbow-3-tint) 100%); }
-[class*="--gradient-teal-mid"]   { --_grad: linear-gradient(135deg, var(--rainbow-4-emphasis) 0%, var(--rainbow-4) 35%, var(--rainbow-4-mid) 65%, var(--rainbow-4-tint) 100%); }
-[class*="--gradient-blue-mid"]   { --_grad: linear-gradient(135deg, var(--rainbow-5-emphasis) 0%, var(--rainbow-5) 35%, var(--rainbow-5-mid) 65%, var(--rainbow-5-tint) 100%); }
-[class*="--gradient-purple-mid"] { --_grad: linear-gradient(135deg, var(--rainbow-6-emphasis) 0%, var(--rainbow-6) 35%, var(--rainbow-6-mid) 65%, var(--rainbow-6-tint) 100%); }
-[class*="--gradient-pink-mid"]   { --_grad: linear-gradient(135deg, var(--rainbow-7-emphasis) 0%, var(--rainbow-7) 35%, var(--rainbow-7-mid) 65%, var(--rainbow-7-tint) 100%); }
-
-/* Rainbow — emphasis tier (base → emphasis → black) */
-[class*="--gradient-red-emphasis"]    { --_grad: linear-gradient(135deg, var(--rainbow-1) 0%, var(--rainbow-1-emphasis) 60%, var(--color-Black) 100%); }
-[class*="--gradient-orange-emphasis"] { --_grad: linear-gradient(135deg, var(--rainbow-2) 0%, var(--rainbow-2-emphasis) 60%, var(--color-Black) 100%); }
-[class*="--gradient-yellow-emphasis"] { --_grad: linear-gradient(135deg, var(--rainbow-3) 0%, var(--rainbow-3-emphasis) 60%, var(--color-Black) 100%); }
-[class*="--gradient-teal-emphasis"]   { --_grad: linear-gradient(135deg, var(--rainbow-4) 0%, var(--rainbow-4-emphasis) 60%, var(--color-Black) 100%); }
-[class*="--gradient-blue-emphasis"]   { --_grad: linear-gradient(135deg, var(--rainbow-5) 0%, var(--rainbow-5-emphasis) 60%, var(--color-Black) 100%); }
-[class*="--gradient-purple-emphasis"] { --_grad: linear-gradient(135deg, var(--rainbow-6) 0%, var(--rainbow-6-emphasis) 60%, var(--color-Black) 100%); }
-[class*="--gradient-pink-emphasis"]   { --_grad: linear-gradient(135deg, var(--rainbow-7) 0%, var(--rainbow-7-emphasis) 60%, var(--color-Black) 100%); }
-
-/* Dark mode tint swap REMOVED — rainbow-dark.css and generateDarkScale
-   now produce correct tint/mid values for dark backgrounds.
-   Gradient tokens reference semantic names which resolve per-mode. */
-
-/* HC gradient overrides REMOVED — rainbow-hc.css provides proper HC
-   tint/mid/base/emphasis tokens. The :root gradient definitions reference
-   semantic rainbow tokens which resolve correctly in all modes. */
 
 /* ============================================
    GRADIENT DIRECTION — intent-based angle mapping
    Sets --_grad-angle which gradient definitions read.
+   NOTE: --_grad-angle is intentionally NOT set at :root — each gradient
+   rule provides its own fallback so blend gradients keep their hand-tuned angles.
    ============================================ */
 [data-grad-dir="vertical"]             { --_grad-angle: 180deg; }
 [data-grad-dir="vertical-reverse"]     { --_grad-angle: 0deg; }
@@ -162,8 +27,15 @@
 [data-grad-dir="diagonal-alt-reverse"] { --_grad-angle: 225deg; }
 
 /* ============================================
-   GRADIENT SPREAD — stop compression
+   GRADIENT FOCUS — radial gradient origin
+   Sets --_grad-focus which radial blend rules read.
    ============================================ */
-[data-grad-spread="soft"]     { --_grad-start: 0%;  --_grad-end: 100%; }
-[data-grad-spread="balanced"] { --_grad-start: 10%; --_grad-end: 90%; }
-[data-grad-spread="tight"]    { --_grad-start: 25%; --_grad-end: 75%; }
+[data-grad-focus="center"]       { --_grad-focus: center; }
+[data-grad-focus="top"]          { --_grad-focus: top; }
+[data-grad-focus="bottom"]       { --_grad-focus: bottom; }
+[data-grad-focus="left"]         { --_grad-focus: left; }
+[data-grad-focus="right"]        { --_grad-focus: right; }
+[data-grad-focus="top-left"]     { --_grad-focus: top left; }
+[data-grad-focus="top-right"]    { --_grad-focus: top right; }
+[data-grad-focus="bottom-left"]  { --_grad-focus: bottom left; }
+[data-grad-focus="bottom-right"] { --_grad-focus: bottom right; }

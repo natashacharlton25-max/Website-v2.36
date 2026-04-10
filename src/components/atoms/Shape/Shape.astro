@@ -12,7 +12,7 @@ import { LottieIcon } from '../LottieIcon';
 import type {
   BrandColour, RainbowColour, ColourTier,
   Variant, Shadow,
-  GradientBlend, GradientDirection, GradientSpread,
+  GradientBlend, GradientDirection,
   Animation, AnimationTriggerInteractive,
   IconSemanticRole, ShapeSize, ShapeBorderWeight,
   DrawVariant, DrawMode, DrawColour,
@@ -22,16 +22,20 @@ import type {
   GradientAnimateDirection, GradientAnimateMode,
 } from '../../../lib/shared-enums';
 import { normalizeDrawColour } from '../../../lib/shared-enums';
+import { resolveInlineGradient, getGradientStopColours } from '../../../lib/gradient-inline';
 
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
 const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
 
 type ShapeType = 'circle' | 'square' | 'rounded' | 'pill' | 'hexagon' | 'diamond' | 'triangle' | 'star' | 'blob' | 'custom';
 type ShapeMode = 'shape' | 'mask';
+type ShapeRenderAs = 'auto' | 'css' | 'svg';
 
 interface Props {
   shape?: ShapeType;
   mode?: ShapeMode;
+  /** Force a specific render path. 'auto' (default) uses CSS for circle/square/rounded/pill and SVG for everything else. */
+  renderAs?: ShapeRenderAs;
   slug?: string;
   semanticRole?: IconSemanticRole;
   label?: string;
@@ -46,7 +50,16 @@ interface Props {
   gradient?: boolean;
   gradientBlend?: GradientBlend;
   gradientDirection?: GradientDirection;
-  gradientSpread?: GradientSpread;
+  /** linear (default) or radial */
+  gradientType?: 'linear' | 'radial';
+  /** Radial origin — only used when gradientType=radial */
+  gradientFocus?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  /** Fade-in modifier — first 50% transparent, fades to solid */
+  gradientEmerge?: boolean;
+  /** Fade-out modifier — last 20% fades to transparent */
+  gradientFade?: boolean;
+  /** Colour cycle — cross-fades through the element's own tier tokens (tint→mid→base→emphasis). */
+  gradientCycle?: boolean;
   gradientAnimate?: boolean;
   gradientAnimateMode?: GradientAnimateMode;
   gradientAnimateSpeed?: number;
@@ -87,10 +100,10 @@ interface Props {
 }
 
 const {
-  shape = 'circle', mode = 'shape', slug, semanticRole = 'decorative', label,
+  shape = 'circle', mode = 'shape', renderAs = 'auto', slug, semanticRole = 'decorative', label,
   brandColor, rainbowColor, colorTier,
   size = 'md', variant = 'fill', borderWeight, shadow, glow,
-  gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
+  gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientEmerge, gradientFade, gradientCycle, gradientAnimate, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
   media, animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawFill, drawGhost, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom, fillTiming,
@@ -170,7 +183,11 @@ const SVG_SHAPES: Record<string, string> = {
   blob:    '<path d="M70,8 C90,15 98,35 96,55 C94,75 80,92 60,96 C40,100 18,90 8,72 C-2,54 2,30 15,15 C28,0 50,1 70,8 Z" />',
 };
 
-const isCssShape = ['circle', 'square', 'subtle', 'soft', 'rounded', 'rounded-lg', 'pill'].includes(shape) && !draw && !morphTo && !fillAnimation;
+const cssCapableShapes = ['circle', 'square', 'subtle', 'soft', 'rounded', 'rounded-lg', 'pill'];
+const cssCapable = cssCapableShapes.includes(shape) && !draw && !morphTo && !fillAnimation;
+// renderAs decides: 'css' forces CSS path (only valid for cssCapable shapes), 'svg' forces SVG path,
+// 'auto' (default) uses CSS for cssCapable shapes and SVG for everything else.
+const isCssShape = renderAs === 'svg' ? false : (renderAs === 'css' ? cssCapable : cssCapable);
 const isSvgShape = !isCssShape;
 const builtinSvg = isSvgShape ? SVG_SHAPES[shape] : undefined;
 
@@ -238,17 +255,77 @@ if (morphTo) {
   if (morphStaggerFrom) dataAttrs['data-icon-morph-stagger-from'] = morphStaggerFrom;
 }
 
-const gradientName = gradientBlend || (gradient ? 'primary' : null);
-// Animated gradient via GSAP (SVG shapes only — CSS shapes use CSS animation)
-if (gradientAnimate && gradientName && !['circle', 'square', 'subtle', 'soft', 'rounded', 'rounded-lg', 'pill'].includes(shape)) {
+// Resolve which gradient ID to reference. Priority:
+//   1. gradientBlend (named blends like hero/sunset/brand-emerge/brand-fade/rainbow)
+//   2. rainbowColor + colorTier (e.g. rainbow-1 + tint → grad-rainbow-1-preset-tint)
+//   3. rainbowColor (rainbow-1..7 → grad-rainbow-1..7)
+//   4. brandColor + colorTier (primary + mid → grad-primary-preset-mid)
+//   5. brandColor (primary/secondary/neutral → grad-primary etc.)
+//   6. fallback to primary if gradient enabled with no colour
+// gradientType=radial appends `-radial` to ANY of the above (catalogue generates radial twins).
+// All IDs come from the generated catalogue (scripts/build-gradients.mjs).
+const baseColour = rainbowColor || brandColor;
+const tierSuffix = (gradient && colorTier && colorTier !== 'base') ? `-preset-${colorTier}` : '';
+const radialSuffix = gradientType === 'radial' ? '-radial' : '';
+const baseGradientName = gradientBlend
+  || (gradient && baseColour ? `${baseColour}${tierSuffix}` : null)
+  || (gradient ? 'primary' : null);
+const gradientName = baseGradientName ? `${baseGradientName}${radialSuffix}` : null;
+// Animated gradient via GSAP — SVG render path only. CSS shapes animate via CSS keyframes.
+if (gradientAnimate && gradientName && !isCssShape) {
   dataAttrs['data-icon-grad-anim'] = gradientAnimateMode;
   if (gradientAnimateSpeed) dataAttrs['data-icon-grad-dur'] = String(gradientAnimateSpeed);
   if (gradientAnimateEase) dataAttrs['data-icon-grad-ease'] = gradientAnimateEase;
   if (gradientAnimateDirection !== 'cw') dataAttrs['data-icon-grad-dir'] = gradientAnimateDirection;
   if (gradientAnimateScale) dataAttrs['data-icon-grad-scale'] = 'true';
 }
-// Gradient reference for SVG fill — GSAP creates its own local gradient at runtime for animated
-const svgGradRef = gradientName ? `grad-${gradientName}` : null;
+
+// For CSS-rendered shapes, set inline CSS vars for duration + random delay to desync.
+const animStyleParts: string[] = [];
+if (gradientAnimate && gradientName && isCssShape) {
+  if (gradientAnimateSpeed) animStyleParts.push(`--_grad-anim-duration:${gradientAnimateSpeed}s`);
+  animStyleParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
+}
+// Colour cycle — reads the active gradient's own stop tokens from the catalogue.
+// For example, gradientBlend="brand-emerge" gives stops [primary-tint, secondary-emphasis],
+// and the cycle keyframe fades between them. Falls back to tier tokens if no gradient is set.
+if (gradientCycle) {
+  const stopColours = gradientName ? getGradientStopColours(gradientName) : null;
+  if (stopColours && stopColours.length >= 2) {
+    // Use first, middle, last for a smooth 3-stage cycle (or just pairs if only 2 stops).
+    const a = stopColours[0];
+    const b = stopColours.length > 2 ? stopColours[Math.floor(stopColours.length / 2)] : stopColours[1];
+    const c = stopColours[stopColours.length - 1];
+    animStyleParts.push(`--_cycle-a:${a}`);
+    animStyleParts.push(`--_cycle-b:${b}`);
+    animStyleParts.push(`--_cycle-c:${c}`);
+  }
+  if (gradientAnimateSpeed) animStyleParts.push(`--_grad-anim-duration:${gradientAnimateSpeed}s`);
+  animStyleParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
+}
+const animInlineStyle = animStyleParts.length ? animStyleParts.join(';') : undefined;
+// Gradient reference for SVG fill — GSAP creates its own local gradient at runtime for animated.
+// For solo emerge/fade we generate an inline gradient per shape so the direction can be
+// computed dynamically (the baked grad-emerge-{colour} defs are 135° only).
+// Solo emerge/fade — when no underlying gradient, use catalogue id `emerge-{colour}` / `fade-{colour}`.
+// gradientType=radial appends `-radial` to use the radial catalogue variant.
+const modifierColour = rainbowColor || brandColor || 'primary';
+const soloRadialSuffix = gradientType === 'radial' ? '-radial' : '';
+const soloModifierId = !gradientName && gradientEmerge ? `emerge-${modifierColour}${soloRadialSuffix}`
+  : !gradientName && gradientFade ? `fade-${modifierColour}${soloRadialSuffix}`
+  : null;
+const effectiveGradientName = gradientName || soloModifierId;
+
+// Inline SVG gradient — resolved from the catalogue when a direction or focus is set,
+// since the baked defs in SvgGradientDefs.astro are fixed-angle / center-only.
+// Returns null for the default (135° linear, center radial) — uses baked def in that case.
+const needsInline = effectiveGradientName && (gradientDirection || gradientType === 'radial');
+const inlineGradient = needsInline
+  ? resolveInlineGradient(effectiveGradientName, { direction: gradientDirection, focus: gradientFocus })
+  : null;
+const svgGradRef = inlineGradient?.id
+  || (effectiveGradientName ? `grad-${effectiveGradientName}` : null);
+
 const isMask = mode === 'mask';
 const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)}` : undefined;
 ---
@@ -258,6 +335,7 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     'shape',
     !svgContent && `shape--${shape}`,
     svgContent && 'shape--api',
+    !isCssShape && 'shape--svg',
     `shape--${size}`,
     `shape--${variant}`,
     resolvedColor && `color--${resolvedColor}`,
@@ -266,8 +344,13 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     glow && `shape--glow-${glow}`,
     gradientName && 'gradient',
     gradientName && `gradient--${variant}`,
-    gradientBlend && `gradient--blend-${gradientBlend}`,
+    /* Always emit blend class from gradientName so generated CSS rules match
+       (handles blends, single colours, AND tier presets like rainbow-1-preset-tint). */
+    gradientName && `gradient--blend-${gradientName}`,
+    gradientEmerge && 'gradient--emerge',
+    gradientFade && 'gradient--fade',
     gradientAnimate && 'gradient--animated',
+    gradientCycle && 'gradient--cycle',
     animation && `anim--${animation}`,
     draw && 'shape--draw',
     isContainer && 'shape--container',
@@ -279,18 +362,43 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
   role={a11yRole}
   data-semantic-role={semanticRole}
   data-grad-dir={gradientDirection || undefined}
-  data-grad-spread={gradientSpread || undefined}
+  data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
+  data-grad-anim-dir={gradientAnimate && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
+  style={animInlineStyle}
   {...dataAttrs}
 >
   {builtinSvg && !svgContent && (
-    <svg class:list={['shape__svg', `shape__svg--${variant}`, gradientName && 'shape__svg--gradient']} viewBox={vb} overflow="visible" aria-hidden="true">
-      {/* GSAP handles animated gradient via initAnimatedGradient — no animateTransform needed */}
+    <svg class:list={['shape__svg', `shape__svg--${variant}`, (gradientName || inlineGradient) && 'shape__svg--gradient']} viewBox={vb} overflow="visible" aria-hidden="true">
+      {/* Inline gradient def — built from catalogue stops with direction or focus override.
+          Only rendered when a direction/focus is set; otherwise the baked SvgGradientDefs def is used. */}
+      {inlineGradient && inlineGradient.kind === 'linear' && (
+        <defs>
+          <linearGradient id={inlineGradient.id} x1={inlineGradient.x1} y1={inlineGradient.y1} x2={inlineGradient.x2} y2={inlineGradient.y2}>
+            {inlineGradient.stops.map((s) => (
+              <stop offset={`${s.offset}%`} stop-color={s.colour} />
+            ))}
+          </linearGradient>
+        </defs>
+      )}
+      {inlineGradient && inlineGradient.kind === 'radial' && (
+        <defs>
+          <radialGradient id={inlineGradient.id} cx={inlineGradient.cx} cy={inlineGradient.cy} r={inlineGradient.r}>
+            {inlineGradient.stops.map((s) => (
+              <stop offset={`${s.offset}%`} stop-color={s.colour} />
+            ))}
+          </radialGradient>
+        </defs>
+      )}
+      {/* When gradientCycle is on, don't inline a fill — the CSS animation on .shape__svg g
+          handles it directly via anim-colour-cycle-svg-fill. */}
       <g
         stroke-width={String(sw)}
         stroke-linejoin="round"
         stroke-linecap="round"
-        style={svgGradRef
+        style={gradientCycle
+          ? undefined
+          : svgGradRef
           ? variant === 'outline'
             ? `fill: none; stroke: url(#${svgGradRef});`
             : `fill: url(#${svgGradRef}); ${(variant === 'glass' || variant === 'liquid-glass') ? `stroke: url(#${svgGradRef});` : ''}`

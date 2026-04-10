@@ -19,10 +19,11 @@ import { Text } from '../Text';
 import Heading from '../Heading/Heading.astro';
 import type {
   BrandColour, RainbowColour, ColourTier,
-  Variant, Shadow, GradientBlend, GradientDirection, GradientSpread,
+  Variant, Shadow, GradientBlend, GradientDirection,
   Size, Shape, BorderWeight,
   FontFamily, FontWeight, SemanticRole,
 } from '../../../lib/shared-enums';
+import { getGradientStopColours } from '../../../lib/gradient-inline';
 
 interface Props {
   label: string;
@@ -38,8 +39,21 @@ interface Props {
   /** Mixed blend — overrides single-colour gradient with two-colour blend */
   gradientBlend?: GradientBlend;
   gradientDirection?: GradientDirection;
-  gradientSpread?: GradientSpread;
+  /** linear (default) or radial */
+  gradientType?: 'linear' | 'radial';
+  /** Radial origin — only used when gradientType=radial */
+  gradientFocus?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  /** Fade-in modifier — first 50% transparent, fades to solid */
+  gradientEmerge?: boolean;
+  /** Fade-out modifier — last 20% fades to transparent */
+  gradientFade?: boolean;
+  /** Colour cycle — cross-fades through the element's own tier tokens (tint→mid→base→emphasis). */
+  gradientCycle?: boolean;
   animatedGradient?: boolean;
+  /** Animation direction — cw (default), ccw, or sway */
+  gradientAnimateDirection?: 'cw' | 'ccw' | 'sway';
+  /** Animation speed in seconds */
+  gradientAnimateSpeed?: number;
   size?: Size;
   shape?: Shape;
   borderWeight?: BorderWeight;
@@ -62,8 +76,14 @@ const {
   gradient = false,
   gradientBlend,
   gradientDirection,
-  gradientSpread,
+  gradientType,
+  gradientFocus,
+  gradientEmerge = false,
+  gradientFade = false,
   animatedGradient = false,
+  gradientAnimateDirection,
+  gradientAnimateSpeed,
+  gradientCycle = false,
   size = 'md',
   shape = 'soft',
   borderWeight,
@@ -78,21 +98,59 @@ const {
 // Resolve colour: rainbow takes precedence if set, else brand
 const color = rainbowColor || brandColor;
 
+// Resolve gradient name (matches Shape.astro logic):
+//   1. gradientBlend (named blends — hero, sunset, rainbow etc.)
+//   2. baseColour + colorTier (e.g. rainbow-1 + mid → rainbow-1-preset-mid)
+//   3. baseColour (rainbow-1, primary etc.)
+//   gradientType=radial appends `-radial` to any of the above.
+const tierSuffix = (gradient && colorTier && colorTier !== 'base') ? `-preset-${colorTier}` : '';
+const radialSuffix = gradientType === 'radial' ? '-radial' : '';
+const baseGradientName = gradientBlend
+  || (gradient && color ? `${color}${tierSuffix}` : null)
+  || (gradient ? 'primary' : null);
+const gradientName = baseGradientName ? `${baseGradientName}${radialSuffix}` : null;
+
+// Animated gradient / colour cycle — random animation-delay to desync multiple badges,
+// optional custom duration. Cycle reads the active gradient's stop tokens from the catalogue.
+const badgeAnimParts: string[] = [];
+if ((animatedGradient && gradientName) || gradientCycle) {
+  if (gradientAnimateSpeed) badgeAnimParts.push(`--_grad-anim-duration:${gradientAnimateSpeed}s`);
+  badgeAnimParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
+}
+if (gradientCycle && gradientName) {
+  const stopColours = getGradientStopColours(gradientName);
+  if (stopColours && stopColours.length >= 2) {
+    const a = stopColours[0];
+    const b = stopColours.length > 2 ? stopColours[Math.floor(stopColours.length / 2)] : stopColours[1];
+    const c = stopColours[stopColours.length - 1];
+    badgeAnimParts.push(`--_cycle-a:${a}`);
+    badgeAnimParts.push(`--_cycle-b:${b}`);
+    badgeAnimParts.push(`--_cycle-c:${c}`);
+  }
+}
+const badgeAnimStyle = badgeAnimParts.length ? badgeAnimParts.join(';') : undefined;
 ---
 
 <span
   data-semantic-role={semanticRole !== 'none' ? semanticRole : undefined}
   data-grad-dir={gradientDirection || undefined}
-  data-grad-spread={gradientSpread || undefined}
+  data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
+  data-grad-anim-dir={animatedGradient && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
+  style={badgeAnimStyle}
   class:list={[
     'badge',
     `color--${color}`,
     colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,
     `badge--${variant}`,
     shadow !== 'none' && `badge--shadow-${shadow}`,
-    (gradient || gradientBlend) && 'gradient',
-    (gradient || gradientBlend) && `gradient--${variant}`,
-    gradientBlend && `gradient--blend-${gradientBlend}`,
+    gradientName && 'gradient',
+    gradientName && `gradient--${variant}`,
+    /* Always emit blend class from gradientName so generated CSS rules match
+       (handles blends, single colours, AND tier presets like rainbow-1-preset-tint). */
+    gradientName && `gradient--blend-${gradientName}`,
+    gradientEmerge && 'gradient--emerge',
+    gradientFade && 'gradient--fade',
+    gradientCycle && 'gradient--cycle',
     animatedGradient && 'gradient--animated',
     size !== 'md' && `badge--${size}`,
     `badge--${shape}`,

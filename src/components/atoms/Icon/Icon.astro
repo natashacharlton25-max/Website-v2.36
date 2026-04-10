@@ -14,7 +14,7 @@ import type {
   BrandColour, RainbowColour, ColourTier,
   IconWeight,
   Animation, AnimationTriggerInteractive,
-  GradientBlend, GradientDirection, GradientSpread,
+  GradientBlend, GradientDirection,
   IconSemanticRole,
   DrawVariant, DrawMode, DrawColour,
   Stagger, StaggerFrom,
@@ -22,6 +22,7 @@ import type {
   FillMode, FillTrigger,
 } from '../../../lib/shared-enums';
 import { normalizeDrawColour } from '../../../lib/shared-enums';
+import { resolveInlineGradient } from '../../../lib/gradient-inline';
 
 // ─── Brand config ───────────────────────────────────────
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
@@ -52,7 +53,6 @@ interface Props {
   gradient?: boolean;
   gradientBlend?: GradientBlend;
   gradientDirection?: GradientDirection;
-  gradientSpread?: GradientSpread;
   gradientAnimate?: boolean;
 
   // ── Animation ───────────────────────────────────────────
@@ -94,7 +94,7 @@ const {
   name, weight, size, class: className = '',
   brandColor, rainbowColor, colorTier,
   shadow, glow,
-  gradient, gradientBlend, gradientDirection, gradientSpread, gradientAnimate,
+  gradient, gradientBlend, gradientDirection, gradientAnimate,
   animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawFill, drawFillMode = 'static', drawGhost, drawOnScroll, drawScrub, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize,
   morphTo, morphViaCircle, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
@@ -246,15 +246,20 @@ if (draw && fillAnimation) {
 // Icon.astro just outputs the normal icon + data attributes.
 // No server-side SVG surgery needed.
 
-// Gradient: reference shared SvgGradientDefs via url(#grad-{name})
+// Gradient: reference shared SvgGradientDefs via url(#grad-{name}) OR inline a direction-aware def.
 // SvgGradientDefs.astro must be included once in the layout.
 // gradient (boolean) + gradientBlend (named blend) — same as Badge/Heading
 const gradientName = gradientBlend || (gradient ? 'primary' : null);
 
+// If a direction is set, build an inline gradient def from the catalogue (baked defs are 135° only).
+const inlineGradient = (gradientName && gradientDirection)
+  ? resolveInlineGradient(gradientName, { direction: gradientDirection })
+  : null;
+
 if (gradientName && iconContent && !draw) {
   if (gradientAnimate) {
     const uid = `agrad-${Math.random().toString(36).substring(2, 9)}`;
-    const gradientId = `grad-${gradientName}`;
+    const gradientId = inlineGradient?.id || `grad-${gradientName}`;
     const animGradDef = `<defs><linearGradient id="${uid}" href="#${gradientId}" gradientUnits="objectBoundingBox"><animateTransform attributeName="gradientTransform" type="rotate" values="0 0.5 0.5; 90 0.5 0.5; 0 0.5 0.5; -90 0.5 0.5; 0 0.5 0.5" dur="8s" repeatCount="indefinite" /></linearGradient></defs>`;
 
     iconContent = iconContent.replace(/<svg([^>]*)>/, `<svg$1>${animGradDef}`);
@@ -263,7 +268,15 @@ if (gradientName && iconContent && !draw) {
       .replace(/fill="CurrentColor"/g, `fill="url(#${uid})"`);
     iconContent = iconContent.replace(/<path(?![^>]*fill=)/g, `<path fill="url(#${uid})"`);
   } else {
-    const gradientId = `grad-${gradientName}`;
+    const gradientId = inlineGradient?.id || `grad-${gradientName}`;
+    // If we have an inline gradient, inject its def into the SVG
+    if (inlineGradient && inlineGradient.kind === 'linear') {
+      const stopsXml = inlineGradient.stops
+        .map((s) => `<stop offset="${s.offset}%" stop-color="${s.colour}" />`)
+        .join('');
+      const inlineDef = `<defs><linearGradient id="${inlineGradient.id}" x1="${inlineGradient.x1}" y1="${inlineGradient.y1}" x2="${inlineGradient.x2}" y2="${inlineGradient.y2}">${stopsXml}</linearGradient></defs>`;
+      iconContent = iconContent.replace(/<svg([^>]*)>/, `<svg$1>${inlineDef}`);
+    }
     iconContent = iconContent
       .replace(/fill="currentColor"/g, `fill="url(#${gradientId})"`)
       .replace(/fill="CurrentColor"/g, `fill="url(#${gradientId})"`);

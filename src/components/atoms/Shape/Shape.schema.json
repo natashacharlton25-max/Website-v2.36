@@ -15,6 +15,7 @@
     "content": {
       "shape":        { "type": "string", "default": "circle", "enum": ["circle", "square", "subtle", "soft", "rounded", "rounded-lg", "pill", "hexagon", "diamond", "triangle", "star", "blob", "custom"] },
       "mode":         { "type": "string", "default": "shape", "enum": ["shape", "mask"], "_note": "shape: renders as visible shape. mask: uses shape as clip-path on content." },
+      "renderAs":     { "type": "string", "default": "auto", "enum": ["auto", "css", "svg"], "_note": "auto: CSS for circle/square/rounded/pill, SVG for everything else. css: force CSS path (only valid for css-capable shapes). svg: force SVG path." },
       "slug":         { "type": "string", "_note": "API shape slug — fetches SVG from Asset Library" },
       "semanticRole": { "type": "string", "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"], "_note": "decorative: aria-hidden. ui-control: tabindex 0 + role=img + label. content-symbol: role=img + label. Container behaviour is auto-detected from slot/media — no separate value needed." },
       "label":        { "type": "string", "_note": "Required for ui-control and content-symbol." }
@@ -35,9 +36,12 @@
 
     "gradient": {
       "gradient":                 { "type": "boolean", "default": false },
-      "gradientBlend":            { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade", "emerge", "fade", "preset-tint", "preset-mid", "preset-base", "preset-emphasis", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "rainbow"] },
+      "gradientBlend":            { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade", "preset-tint", "preset-mid", "preset-base", "preset-emphasis", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "rainbow"] },
       "gradientDirection":        { "type": "string", "default": "diagonal", "enum": ["vertical", "vertical-reverse", "horizontal", "horizontal-reverse", "diagonal", "diagonal-reverse", "diagonal-alt", "diagonal-alt-reverse"] },
-      "gradientSpread":           { "type": "string", "default": "balanced", "enum": ["soft", "balanced", "tight"] },
+      "gradientType":             { "type": "string", "default": "linear", "enum": ["linear", "radial"] },
+      "gradientFocus":            { "type": "string", "default": "center", "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"], "_note": "Radial origin point — only used when gradientType=radial." },
+      "gradientEmerge":           { "type": "boolean", "default": false, "_description": "Fade-in modifier — first 50% transparent, fades to solid. Combines with any gradient or solid colour." },
+      "gradientFade":             { "type": "boolean", "default": false, "_description": "Fade-out modifier — last 20% fades to transparent. Combines with any gradient or solid colour." },
       "gradientAnimate":          { "type": "boolean" },
       "gradientAnimateMode":      { "type": "string", "default": "rotate", "enum": ["rotate"] },
       "gradientAnimateSpeed":     { "type": "number", "_note": "Duration in seconds. Default 8s, scales 2x for gentle motion mode." },

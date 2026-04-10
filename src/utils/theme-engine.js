@@ -529,12 +529,12 @@ function computePageBackgrounds(isDark, chromaPreset = 'brand') {
       'page-bg-overlay': '#f8f4f3',   // modal — same as raised
     };
   }
-  // Warm off-white — colour personality in zones, not page
+  // Warm off-white — four visually distinct surfaces, no pure white
   return {
-    'page-bg':         '#f5f4f0',   // warm cream-white
-    'page-bg-raised':  '#ffffff',   // card — pure white lifts off
-    'page-bg-sunken':  '#edecea',   // recessed — slightly darker
-    'page-bg-overlay': '#ffffff',   // modal — clean white
+    'page-bg':         '#f0eeea',   // warm cream canvas
+    'page-bg-raised':  '#f8f7f3',   // card — visibly lighter than canvas
+    'page-bg-sunken':  '#e5e3df',   // recessed — noticeably darker
+    'page-bg-overlay': '#f4f2ed',   // modal — between canvas and raised
   };
 }
 
@@ -955,14 +955,22 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
   const SEMANTIC_MAP = chromaPreset === 'calm' && !isDark
     ? { 200: 'tint', 300: 'mid', 400: 'base', 500: 'emphasis' }
     : { 200: 'tint', 400: 'mid', 600: 'base', 800: 'emphasis' };
+  // Contrast tokens — accent hex from brand config for hover/interaction.
+  // Always output (falls back to emphasis) so brand contrast doesn't bleed into other themes.
+  const contrastMap = {
+    primary: definition.primaryAccent || null,
+    secondary: definition.secondaryAccent || null,
+  };
+
   for (const [family, scale] of Object.entries(scales)) {
     ln(`  /* -- ${family.toUpperCase()} SCALE ---- */`);
     for (const [pos, semName] of Object.entries(SEMANTIC_MAP)) {
       if (scale[pos]) ln(`  --${family}-${semName}: ${scale[pos]};`);
     }
-    // Numbered positions (backwards compat — same values)
-    const positions = Object.keys(scale).map(Number).sort((a, b) => a - b);
-    for (const pos of positions) ln(`  --${family}-${pos}: ${scale[pos]};`);
+    // Always output contrast — accent if provided, else same as emphasis
+    const emphasisPos = (chromaPreset === 'calm' && !isDark) ? 500 : 800;
+    const contrastVal = contrastMap[family] || scale[emphasisPos] || '';
+    if (contrastVal) ln(`  --${family}-contrast: ${contrastVal};`);
     ln();
   }
 
@@ -1009,27 +1017,21 @@ function buildCSS(definition, scales, pageBg, status, focusHighlight) {
   // Text + theme-specific
   ln(`  /* -- TEXT + THEME-SPECIFIC ---------------------- */`);
   if (definition.highContrast) {
-    // White/Black swap in dark mode, so these refs work in both modes
     ln(`  --color-Text: var(--color-Black);`);
     ln(`  --color-Text-contrast: var(--color-White);`);
+  } else if (isDark) {
+    ln(`  --color-Text: var(--text-emphasis);`);
+    ln(`  --color-Text-contrast: var(--page-bg);`);
   } else {
-    ln(`  --color-Text: var(--neutral-700);`);
+    ln(`  --color-Text: var(--text-emphasis);`);
     ln(`  --color-Text-contrast: var(--page-bg);`);
   }
   ln(`  --media-brightness: ${isDark ? '0.86' : '1'};`);
   ln(`  --media-saturation: ${chromaPreset === 'grey' ? '0' : (isDark ? '0.90' : '1')};`);
   ln(`  --media-contrast: ${chromaPreset === 'grey' ? '1.05' : (isDark ? '0.98' : '1')};`);
 
-  // SVG ghost colour — per zone
-  if (definition.highContrast) {
-    ln(`  --svg-ghost-color: ${isDark ? 'var(--neutral-300)' : 'var(--neutral-200)'};`);
-  } else if (chromaPreset === 'calm') {
-    ln(`  --svg-ghost-color: var(--page-bg-raised);`);
-  } else if (isDark) {
-    ln(`  --svg-ghost-color: var(--page-bg-sunken);`);
-  } else {
-    ln(`  --svg-ghost-color: var(--neutral-tint);`);
-  }
+  // SVG ghost colour — from text scale (always default neutral, never brand-overridden)
+  ln(`  --svg-ghost-color: var(--text-tint);`);
 
   // Focus + highlight tokens
   ln();
@@ -1066,10 +1068,10 @@ export function generateThemeData(definition) {
   } = definition;
 
   const isDark = luminance === 'dark';
-  const isMonoPalette = rawPrimary === rawSecondary;
-
+  // If no secondary provided, default to same as primary (mono palette)
   let primary = rawPrimary;
-  let secondary = rawSecondary;
+  let secondary = rawSecondary || rawPrimary;
+  const isMonoPalette = primary === secondary;
 
   const monoHue = isMonoPalette ? (chroma(primary).get('oklch.h') || 0) : null;
 
@@ -1094,11 +1096,10 @@ export function generateThemeData(definition) {
     priScale = generateHCScale(primary, pageBg['page-bg']);
     secScale = isMonoPalette ? generateGreyFullScale() : generateHCScale(secondary, pageBg['page-bg']);
   } else if (definition.brand && !isDark) {
-    // Brand light — 600 is sacred, 800 = accent if provided, else calculated
+    // Brand light — 600 is sacred. 800 = always computed (darker shade, same hue).
+    // Accent hex goes to --{family}-contrast (for hover), never overwrites 800.
     priScale = generateBrandScale(primary);
-    if (definition.primaryAccent) priScale[800] = definition.primaryAccent;
     secScale = isMonoPalette ? generateGreyFullScale() : generateBrandScale(secondary);
-    if (!isMonoPalette && definition.secondaryAccent) secScale[800] = definition.secondaryAccent;
   } else if (isDark) {
     // Dark mode (brand or global) — muted, purpose-built for dark bg
     priScale = generateDarkScale(primary);
@@ -1140,11 +1141,17 @@ export function generateThemeData(definition) {
     }
   }
 
-  // Neutral: mono themes get hue-tinted, otherwise warm or pure grey
+  // Neutral: computed from theme type (warm grey / pure / tinted for mono).
   const neutralHue = neutralType === 'pure' ? 0 : NEUTRAL_HUE;
-  const neuScale = isMonoPalette
+  let neuScale = isMonoPalette
     ? generateTintedNeutralScale(monoHue, 0.02)
     : neutralType === 'pure' ? generatePureGreyScale() : generateNeutralScale(neutralHue);
+
+  // Brand can override neutral with a custom hex (decorative use — borders, chrome, UI).
+  const neutralHex = definition.neutralHex || null;
+
+  // Text snapshot happens AFTER this point (after dark flip below) so it gets the right
+  // light/dark values. But BEFORE any brand neutralHex override so text stays readable.
   const scales = { primary: priScale, secondary: secScale, neutral: neuScale };
 
   // 3. Neutral still needs the dark flip — primary/secondary have their own
@@ -1164,6 +1171,18 @@ export function generateThemeData(definition) {
   }
 
   // HC pageBg + scale overrides handled by generateHCScale above — no manual overrides needed
+
+  // Text = snapshot of neutral AFTER dark flip (so dark themes get light text).
+  // Taken BEFORE any brand neutralHex override so text stays readable.
+  const textScale = { ...scales.neutral };
+  scales.text = textScale;
+
+  // Now apply brand neutral override if provided (decorative — borders, chrome, UI).
+  if (neutralHex) {
+    scales.neutral = definition.brand && !isDark ? generateBrandScale(neutralHex)
+      : isDark ? generateDarkScale(neutralHex)
+      : generateScale(neutralHex);
+  }
 
   // 5. Compute status colours (definition can override hues via statusHues field)
   const status = computeStatusColors(chromaPreset, isMonoPalette ? monoHue : null, definition.statusHues || null);

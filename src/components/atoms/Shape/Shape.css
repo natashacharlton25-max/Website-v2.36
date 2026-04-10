@@ -34,16 +34,58 @@
 .shape--rounded-lg { border-radius: var(--radius-lg); }
 .shape--pill       { border-radius: var(--radius-full); width: auto; aspect-ratio: 2 / 1; }
 
+/* Stretch — fills container width, keeps fixed height from size class */
+.shape.shape--stretch { width: 100%; aspect-ratio: 8 / 1; }
+
 /* ── CSS variants (circle/square/rounded/pill only) ─── */
 
 .shape--fill {
-  background: var(--_color, var(--svg-ghost-color));
+  background-color: var(--_color, var(--svg-ghost-color));
   color: oklch(from var(--_color, var(--svg-ghost-color)) round(1.21 - l) 0 0);
 }
 
 /* Gradient overrides fill background */
 .shape--fill.gradient {
-  background: var(--_grad-computed);
+  background-color: transparent;
+  background-image: var(--_grad-computed);
+}
+
+/* Colour cycle — CSS shapes: kill the gradient image so the cycling background-color shows */
+.shape--fill.gradient.gradient--cycle:not(.shape--svg) {
+  background-image: none;
+}
+
+/* Colour cycle — SVG shapes: kill the wrapper's bg animation (we don't want the container
+   rect to paint), then directly animate the SVG `<g>` fill. Inner `<g>` inherits duration/
+   delay from the wrapper's .gradient--cycle. */
+.shape.shape--svg.gradient--cycle {
+  animation-name: none;
+}
+.shape.shape--svg.gradient--cycle .shape__svg g {
+  animation: anim-colour-cycle-svg-fill var(--_grad-anim-duration, 20s) var(--_grad-anim-delay, 0s) ease-in-out infinite;
+}
+
+/* Emerge / fade modifiers — fade to surrounding bg (--_bg-context, falls back to --page-bg).
+   Coloured Sections set --_bg-context to their own colour so shapes fade into the section.
+   Linear (default) — direction comes from --_grad-angle. */
+div.shape.shape--fill.gradient--emerge.gradient--emerge:not(.shape--svg):not(.gradient):not([data-grad-focus]) {
+  background-color: transparent;
+  background-image: linear-gradient(var(--_grad-angle, 135deg) in oklab, var(--_bg-context, var(--page-bg)) 0%, var(--_bg-context, var(--page-bg)) 50%, var(--_color) 100%);
+}
+div.shape.shape--fill.gradient--fade.gradient--fade:not(.shape--svg):not(.gradient):not([data-grad-focus]) {
+  background-color: transparent;
+  background-image: linear-gradient(var(--_grad-angle, 135deg) in oklab, var(--_bg-context, var(--page-bg)) 0%, var(--_bg-context, var(--page-bg)) 30%, var(--_color) 100%);
+}
+
+/* Radial emerge — small bg-context centre, colour fills most of shape (focus controls origin). */
+div.shape.shape--fill.gradient--emerge.gradient--emerge[data-grad-focus]:not(.shape--svg):not(.gradient) {
+  background-color: transparent;
+  background-image: radial-gradient(circle at var(--_grad-focus, center) in oklab, var(--_bg-context, var(--page-bg)) 0%, var(--_bg-context, var(--page-bg)) 20%, var(--_color) 100%);
+}
+/* Radial fade — small colour centre, dissolves to transparent at the edge. */
+div.shape.shape--fill.gradient--fade.gradient--fade[data-grad-focus]:not(.shape--svg):not(.gradient) {
+  background-color: transparent;
+  background-image: radial-gradient(circle at var(--_grad-focus, center) in oklab, var(--_color) 0%, var(--_color) 5%, oklch(from var(--_color) l c h / 0) 70%);
 }
 
 .shape--outline {
@@ -86,29 +128,20 @@
 .shape--border-md { border-width: var(--border-width-md); }
 .shape--border-lg { border-width: var(--border-width-lg); }
 
-/* ── SVG shapes: no CSS background/border — SVG handles everything ── */
+/* ── SVG-rendered shapes: no CSS background/border — SVG paths handle everything.
+   .shape--svg is added whenever the SVG render path is active (renderAs="svg" or
+   shapes that have no CSS path: hexagon, diamond, triangle, star, blob, draw, morph, fill). */
 
-.shape--hexagon,
-.shape--diamond,
-.shape--triangle,
-.shape--star,
-.shape--blob,
+.shape.shape--svg,
 .shape.shape--draw,
 .shape[data-icon-morph],
 .shape[data-icon-fill] {
   background: none;
+  background-color: transparent;
+  background-image: none;
   border: none;
   border-radius: 0;
   overflow: visible;
-}
-
-/* SVG shapes with gradient: SVG handles fill, CSS background must stay off */
-.shape.shape--hexagon.gradient,
-.shape.shape--diamond.gradient,
-.shape.shape--triangle.gradient,
-.shape.shape--star.gradient,
-.shape.shape--blob.gradient {
-  background: none;
 }
 
 .shape--draw .shape__svg {
@@ -121,6 +154,13 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+}
+
+/* Any gradient on SVG: tiny blur to soften sRGB interpolation banding (CSS uses oklab, SVG can't). */
+.shape.gradient .shape__svg,
+.shape.gradient--emerge .shape__svg,
+.shape.gradient--fade .shape__svg {
+  filter: blur(0.5px);
 }
 
 /* SVG variant styles — fill/stroke via CSS so var() works */
