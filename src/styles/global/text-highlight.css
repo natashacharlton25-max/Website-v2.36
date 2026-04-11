@@ -10,7 +10,15 @@
  * Height: sm, md, lg, full — gradient stop position
  * Intensity: faint, soft, bold, solid — colour opacity via color-mix
  * Shape: sharp, rounded
+ * Cycle: animates --_highlight-bg through tier tokens (needs @property to interpolate)
  */
+
+/* Register --_highlight-bg as an animatable colour so keyframes can interpolate it */
+@property --_highlight-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
 
 
 /* ── Base — gradient background, wraps with text ── */
@@ -66,16 +74,35 @@
 
 .text-highlight--sm   { --_highlight-stop: 25%; }
 .text-highlight--md   { --_highlight-stop: 45%; }
-.text-highlight--lg   { --_highlight-stop: 90%; }
+.text-highlight--lg   { --_highlight-stop: 60%; }
 .text-highlight--full { --_highlight-stop: 130%; }
 
 
 /* ── Intensity — colour opacity via color-mix ── */
 
-.text-highlight--faint { --_highlight-bg: color-mix(in oklch, var(--_tier-mid, var(--neutral-mid)) 30%, transparent); }
+.text-highlight--faint { --_highlight-bg: color-mix(in oklch, var(--_tier-mid, var(--neutral-mid)) 25%, transparent); }
 .text-highlight--soft  { --_highlight-bg: color-mix(in oklch, var(--_tier-mid, var(--neutral-mid)) 50%, transparent); }
-.text-highlight--bold  { --_highlight-bg: color-mix(in oklch, var(--_tier-mid, var(--neutral-mid)) 80%, transparent); }
-.text-highlight--solid { --_highlight-bg: var(--_tier-mid, var(--neutral-mid)); }
+.text-highlight--bold  { --_highlight-bg: var(--_tier-mid, var(--neutral-mid)); }
+.text-highlight--solid { --_highlight-bg: var(--_color, var(--neutral-base)); }
+
+/* Highlight contrast shadow — auto-applied on solid opacity, can be forced on/off. */
+.text-highlight--solid,
+.text-highlight--shadow {
+  text-shadow:
+    0 0 2px var(--shadow-Black),
+    0 0 4px color-mix(in oklch, var(--shadow-Black) 60%, transparent);
+}
+
+.text-highlight--no-shadow {
+  text-shadow: none;
+}
+
+
+/* ── Cycle — animates --_highlight-bg through tier tokens ── */
+
+.text-highlight--cycle {
+  animation: anim-colour-cycle-highlight var(--_grad-anim-duration, 8s) ease-in-out var(--_grad-anim-delay, 0s) infinite;
+}
 
 
 /* ── Shape ── */

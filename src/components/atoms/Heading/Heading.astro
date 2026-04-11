@@ -22,11 +22,13 @@
  */
 import { Icon } from '../Icon';
 import { LottieIcon } from '../LottieIcon';
+import { Image } from '../Image';
+import { Shape } from '../Shape';
 import { Text } from '../Text';
 import { aacInline } from '../../../lib/aac/aac-inline';
 import '../../../components/molecules/aac/AacCard/AacCard.css';
 import type {
-  BrandColour, RainbowColour, ColourTier,
+  BrandColour, TextColour, RainbowColour, ColourTier,
   FontWeight, FontFamily, TextShadow,
   HeadingSize, HeadingVariant, TextSize, Alignment, Tracking, Spacing,
   HighlightHeight, HighlightOpacity,
@@ -43,7 +45,8 @@ interface Props {
   aac?: boolean;
 
   // ── Colour ──────────────────────────────────────────────
-  brandColor?: BrandColour;
+  /** Brand or text scale colour. 'text' = body text scale (always readable, never brand-overridden). */
+  brandColor?: TextColour;
   rainbowColor?: RainbowColour;
   colorTier?: ColourTier;
 
@@ -63,6 +66,10 @@ interface Props {
   highlightTier?: ColourTier;
   highlightHeight?: HighlightHeight;
   highlightOpacity?: HighlightOpacity;
+  /** Contrast shadow on solid highlights: auto (default, on for solid), on, off */
+  highlightShadow?: 'auto' | 'on' | 'off';
+  /** Animate highlight colour through tier tokens (tint → mid → base). */
+  highlightCycle?: boolean;
 
   // ── Underline ───────────────────────────────────────────
   underlineColor?: BrandColour | RainbowColour;
@@ -85,14 +92,26 @@ interface Props {
   gradient?: boolean;
   gradientBlend?: GradientBlend;
   gradientDirection?: GradientDirection;
+  gradientType?: 'linear' | 'radial';
+  gradientFocus?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  gradientEmerge?: boolean;
+  gradientFade?: boolean;
+  /** Reverse gradient direction on text for contrast with a wrap gradient. */
+  gradientFlip?: boolean;
 
-  // ── Media — component node { component: "Icon"|"LottieIcon"|"Image", ...props }
+  // ── Media — component node
+  // mediaBg=false (default): media is a single atom (Icon | LottieIcon | Image | Shape).
+  // mediaBg=true: media MUST be a Shape wrapping a child atom (Icon | LottieIcon | Image).
   media?: Record<string, any>;
+  mediaBg?: boolean;
   mediaPosition?: MediaPosition;
   mediaSize?: MediaSize;
 
   // ── Animation ───────────────────────────────────────────
   animatedGradient?: boolean;
+  gradientAnimateDirection?: 'cw' | 'ccw' | 'sway';
+  gradientAnimateSpeed?: 'slow' | 'default' | 'fast';
+  gradientCycle?: boolean;
 
   class?: string;
   style?: string;
@@ -121,6 +140,8 @@ const {
   highlightTier,
   highlightHeight,
   highlightOpacity,
+  highlightShadow = 'auto',
+  highlightCycle = false,
   underlineColor,
   underlineTier,
   underlineStyle = 'solid',
@@ -131,10 +152,19 @@ const {
   gradient = false,
   gradientBlend,
   gradientDirection,
+  gradientType,
+  gradientFocus,
+  gradientEmerge = false,
+  gradientFade = false,
+  gradientFlip = false,
   media,
+  mediaBg = false,
   mediaPosition = 'left',
   mediaSize = 'auto',
   animatedGradient = false,
+  gradientAnimateDirection,
+  gradientAnimateSpeed,
+  gradientCycle = false,
   spacing = 'normal',
   aac = false,
   class: className,
@@ -146,6 +176,40 @@ const textColor = rainbowColor || brandColor || null;
 const resolvedHighlightColor = highlightColor || textColor;
 const resolvedUnderlineColor = underlineColor || textColor;
 const resolvedDividerColor = dividerColor || textColor;
+
+// Resolve gradient name (matches Badge logic):
+//   1. gradientBlend (named blends)
+//   2. emerge/fade prefix + colour (fade-rainbow-4 etc.)
+//   3. baseColour (primary, rainbow-1 etc.)
+//   gradientType=radial appends -radial.
+const tierSuffix = (gradient && colorTier && colorTier !== 'base') ? `-preset-${colorTier}` : '';
+const radialSuffix = gradientType === 'radial' ? '-radial' : '';
+const emergePrefix = gradientEmerge ? 'emerge-' : gradientFade ? 'fade-' : '';
+const baseGradientName = gradientBlend
+  || (gradient && textColor ? `${emergePrefix}${textColor}${tierSuffix}` : null)
+  || (gradient ? `${emergePrefix}primary` : null);
+const resolvedGradientName = baseGradientName ? `${baseGradientName}${radialSuffix}` : null;
+
+// Flip direction for gradient text when gradientFlip is set
+const reverseDir: Record<string, GradientDirection> = {
+  'vertical': 'vertical-reverse', 'vertical-reverse': 'vertical',
+  'horizontal': 'horizontal-reverse', 'horizontal-reverse': 'horizontal',
+  'diagonal': 'diagonal-reverse', 'diagonal-reverse': 'diagonal',
+  'diagonal-alt': 'diagonal-alt-reverse', 'diagonal-alt-reverse': 'diagonal-alt',
+};
+const textGradientDirection: GradientDirection | undefined = gradientFlip
+  ? (gradientDirection ? reverseDir[gradientDirection] : 'diagonal-reverse')
+  : gradientDirection;
+
+// For flip + fade/emerge: inline --_grad-computed with mirrored gradient
+// (same stops, direction reversed via hardcoded 315deg, oversized for padding).
+const flipTextStyle = (() => {
+  if (!gradientFlip || (!gradientFade && !gradientEmerge)) return undefined;
+  const colourVar = textColor?.startsWith('rainbow-') ? `var(--${textColor})` : `var(--${textColor || 'primary'}-base)`;
+  const bgVar = 'var(--_bg-context, var(--page-bg))';
+  const hold = gradientEmerge ? 38 : 30;
+  return `--_grad-computed: linear-gradient(315deg, ${bgVar} 0%, ${bgVar} ${hold}%, ${colourVar} ${hold + 5}%, ${colourVar} 100%); background-size: 170% 100%; background-position: center`;
+})();
 
 // Build-time AAC resolution
 let aacHtml = '';
@@ -171,11 +235,19 @@ const { component: _mc, ...mediaProps } = media || {};
 
 const sizeKey = visualSize.startsWith('h') ? visualSize.replace('h', '') : visualSize;
 const iconSizeMap: Record<string, number> = { '1': 56, '2': 44, '3': 32, '4': 28, '5': 24, '6': 20, 'xs': 16, 'sm': 18, 'base': 20, 'lg': 24, 'xl': 28 };
-const mediaSizeMapAuto: Record<string, string> = { '1': 'lg', '2': 'lg', '3': 'md', '4': 'md', '5': 'sm', '6': 'sm', 'xs': 'sm', 'sm': 'sm', 'base': 'sm', 'lg': 'md', 'xl': 'md' };
-const computedMediaSize = mediaSize === 'auto' ? mediaSizeMapAuto[sizeKey] ?? 'md' : mediaSize;
 const computedIconSize = mediaSize === 'auto' ? (iconSizeMap[sizeKey] ?? 32) : (mediaSize === 'sm' ? 24 : mediaSize === 'md' ? 32 : 56);
 
-const mergedStyle = incomingStyle || '';
+// Animated gradient / colour cycle — random delay + optional speed
+const speedMap: Record<string, number> = { slow: 20, default: 12, fast: 6 };
+const headingAnimParts: string[] = [];
+if ((animatedGradient && resolvedGradientName) || gradientCycle) {
+  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') headingAnimParts.push(`--_grad-anim-duration:${speedMap[gradientAnimateSpeed]}s`);
+  headingAnimParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
+}
+const headingAnimStyle = headingAnimParts.length ? headingAnimParts.join(';') : '';
+
+const mergedStyle = [incomingStyle, headingAnimStyle].filter(Boolean).join(';') || '';
+const tagInlineStyle = flipTextStyle || undefined;
 
 const headingClassList = [
   'heading',
@@ -191,7 +263,9 @@ const headingClassList = [
   textShadow && textShadow !== 'none' && `text-shadow--${textShadow}`,
   (gradient || gradientBlend) && 'gradient__text',
   (gradient || gradientBlend) && animatedGradient && 'gradient__text--animated',
-  gradientBlend && `gradient--blend-${gradientBlend}`,
+  gradientCycle && 'gradient--cycle',
+  /* Resolved gradient name handles blends, solo colours, emerge/fade, radial */
+  resolvedGradientName && !flipTextStyle && `gradient--blend-${resolvedGradientName}`,
 ];
 ---
 
@@ -206,20 +280,24 @@ const headingClassList = [
     divider && dividerStyle !== 'solid' && `heading-wrap--divider-style-${dividerStyle}`,
     (gradient || gradientBlend) && 'gradient',
     (gradient || gradientBlend) && variant !== 'default' && `gradient--${variant}`,
-    gradientBlend && `gradient--blend-${gradientBlend}`,
+    resolvedGradientName && `gradient--blend-${resolvedGradientName}`,
     animatedGradient && 'gradient--animated',
+    gradientCycle && 'gradient--cycle',
     hasMedia && 'heading-wrap--has-media',
     hasMedia && `heading-wrap--media-${mediaPosition}`,
-    hasMedia && `heading-wrap--media-size-${computedMediaSize}`,
     className,
   ]}
     data-grad-dir={gradientDirection || undefined}
+    data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
+    data-grad-anim-dir={animatedGradient && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
     style={mergedStyle || undefined}>
     {hasMedia && mediaPosition === 'left' && (
       <div class="heading-wrap__media">
-        {mediaComponent === 'Icon' && <Icon name={mediaProps.name} {...mediaProps} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
-        {mediaComponent === 'LottieIcon' && <LottieIcon {...mediaProps} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
-        {mediaComponent === 'Image' && <img src={mediaProps.src} alt={mediaProps.alt || ''} class="heading-wrap__img" />}
+        {mediaBg && <Shape {...(mediaProps as any)} class="heading-wrap__shape" />}
+        {!mediaBg && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
+        {!mediaBg && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
+        {!mediaBg && mediaComponent === 'Image' && <Image {...(mediaProps as any)} class="heading-wrap__img" />}
+        {!mediaBg && mediaComponent === 'Shape' && <Shape {...(mediaProps as any)} class="heading-wrap__shape" />}
       </div>
     )}
 
@@ -233,7 +311,12 @@ const headingClassList = [
         variant === 'highlight' && 'text-highlight',
         variant === 'highlight' && highlightHeight && `text-highlight--${highlightHeight}`,
         variant === 'highlight' && highlightOpacity && `text-highlight--${highlightOpacity}`,
-      ]}>
+        variant === 'highlight' && highlightCycle && 'text-highlight--cycle',
+        variant === 'highlight' && highlightShadow === 'on' && 'text-highlight--shadow',
+        variant === 'highlight' && highlightShadow === 'off' && 'text-highlight--no-shadow',
+      ]}
+        data-grad-dir={textGradientDirection || undefined}
+        style={tagInlineStyle}>
         {variant === 'highlight' && <span class:list={['text-highlight__bar', resolvedHighlightColor && `color--${resolvedHighlightColor}`, highlightTier && highlightTier !== 'base' && `color--tier-${highlightTier}`]} aria-hidden="true"></span>}
         <span class="heading__text-inner"><slot /></span>
       </Tag>
@@ -248,14 +331,16 @@ const headingClassList = [
 
     {hasMedia && mediaPosition === 'right' && (
       <div class="heading-wrap__media">
-        {mediaComponent === 'Icon' && <Icon name={mediaProps.name} {...mediaProps} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
-        {mediaComponent === 'LottieIcon' && <LottieIcon {...mediaProps} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
-        {mediaComponent === 'Image' && <img src={mediaProps.src} alt={mediaProps.alt || ''} class="heading-wrap__img" />}
+        {mediaBg && <Shape {...(mediaProps as any)} class="heading-wrap__shape" />}
+        {!mediaBg && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
+        {!mediaBg && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
+        {!mediaBg && mediaComponent === 'Image' && <Image {...(mediaProps as any)} class="heading-wrap__img" />}
+        {!mediaBg && mediaComponent === 'Shape' && <Shape {...(mediaProps as any)} class="heading-wrap__shape" />}
       </div>
     )}
   </div>
 ) : (
-  <Tag class:list={[...headingClassList, className]} style={mergedStyle || undefined} data-grad-dir={gradientDirection || undefined}>
+  <Tag class:list={[...headingClassList, className]} style={[mergedStyle, tagInlineStyle].filter(Boolean).join(';') || undefined} data-grad-dir={textGradientDirection || undefined} data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}>
     <span class="heading__text-inner"><slot /></span>
     {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
   </Tag>

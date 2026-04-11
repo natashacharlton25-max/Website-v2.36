@@ -23,6 +23,14 @@ export const BRAND_COLOURS = [
 ] as const;
 export type BrandColour = typeof BRAND_COLOURS[number];
 
+// ── Text Colour — body text scale (snapshot of neutral, never overridden by brand).
+// Heading + Text atoms only. Not for backgrounds/borders on other atoms.
+// Uses --text-tint/mid/base/emphasis tokens from the theme engine.
+export const TEXT_COLOURS = [
+  'primary', 'secondary', 'neutral', 'text'
+] as const;
+export type TextColour = typeof TEXT_COLOURS[number];
+
 // ── Rainbow Colour (7 values) — positional names that match the underlying
 // CSS tokens (--rainbow-1 through --rainbow-7). Names are palette-agnostic
 // because what "rainbow-1" actually looks like depends on the active palette

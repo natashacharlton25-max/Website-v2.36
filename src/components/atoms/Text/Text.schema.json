@@ -1,8 +1,8 @@
 {
   "component": "Text",
   "category": "atom",
-  "renders": { "full": "Text.astro", "reduced": "Text.astro", "textonly": "Text.astro" },
-  "notes": "Single source of truth for all body text typography. Other components (Badge, Button, Link, List) use .text as their base class. All 4 renders use Text.astro — pipeline strips visual props (size, weight, colour, family, tone) in textonly, leaving plain semantic element. No animation. No internal bridge tokens — Text consumes global text tokens directly (--text-body, --text-secondary, --text-inverse, --brand-c-secondary, --link-color).",
+  "renders": { "full": "Text.astro", "reduced": "Text.astro", "assistive": "Text.astro", "textonly": "Text.astro" },
+  "notes": "Single source of truth for all body text typography. Other components (Badge, Button, Link, List) use .text as their base class. Pipeline strips visual props (size, weight, colour, family, tone) in textonly. No animation. Consumes text-scale tokens directly (--text-tint/mid/base/emphasis).",
 
   "props": {
     "content": {
@@ -15,11 +15,16 @@
       "size":      { "type": "string",  "required": false, "default": null, "enum": ["xs","sm","base","lg","xl"], "description": "Font size scale." },
       "weight":    { "type": "string",  "required": false, "default": null, "enum": ["light","normal","medium","semibold","bold","extrabold"], "description": "Font weight." },
       "leading":   { "type": "string",  "required": false, "default": null, "enum": ["tight","snug","normal","relaxed"], "description": "Line height." },
-      "color":     { "type": "string",  "required": false, "default": "default", "enum": ["default","primary","secondary","neutral","red","orange","yellow","teal","blue","purple","pink"], "description": "Colour variant. Default uses --color-Text." },
-      "family":    { "type": "string",  "required": false, "default": null, "enum": ["body","body-alt","handwriting","mono"], "description": "Font family." },
+      "color":     { "type": "string",  "required": false, "default": "default", "enum": ["default","primary","secondary","neutral","text","rainbow-1","rainbow-2","rainbow-3","rainbow-4","rainbow-5","rainbow-6","rainbow-7"], "_description": "Colour variant. 'default' inherits, 'text' uses text-scale (always readable)." },
+      "family":    { "type": "string",  "required": false, "default": null, "enum": ["heading","body","body-alt","handwriting","mono"], "description": "Font family." },
       "align":      { "type": "string",  "required": false, "default": null, "enum": ["left","center","right","justify"], "description": "Text alignment." },
-      "highlight":      { "type": "boolean", "required": false, "default": false, "description": "Highlight background bar behind text." },
-      "highlightColor": { "type": "string",  "required": false, "default": "primary", "enum": ["primary","secondary","neutral","rainbow-1","rainbow-2","rainbow-3","rainbow-4","rainbow-5","rainbow-6","rainbow-7"], "description": "Highlight bar colour — independent from text colour." },
+      "highlight":        { "type": "boolean", "required": false, "default": false, "description": "Highlight background bar behind text." },
+      "highlightColor":   { "type": "string",  "required": false, "default": "primary", "enum": ["primary","secondary","neutral","rainbow-1","rainbow-2","rainbow-3","rainbow-4","rainbow-5","rainbow-6","rainbow-7"], "description": "Highlight bar colour — independent from text colour." },
+      "highlightHeight":  { "type": "string",  "required": false, "default": "md", "enum": ["sm","md","lg","full"], "description": "Highlight bar height." },
+      "highlightOpacity": { "type": "string",  "required": false, "default": "soft", "enum": ["faint","soft","bold","solid"], "description": "Highlight colour intensity." },
+      "highlightShape":   { "type": "string",  "required": false, "default": "sharp", "enum": ["sharp","rounded"], "description": "Highlight shape." },
+      "highlightShadow":  { "type": "string",  "required": false, "default": "auto", "enum": ["auto","on","off"], "_description": "Contrast shadow on solid highlights. 'auto' = applies only to solid (default), 'on' = force on, 'off' = force off." },
+      "highlightCycle":   { "type": "boolean", "required": false, "default": false, "_description": "Animate highlight colour through tier tokens (tint → mid → base). Gated by motion settings." },
       "uppercase": { "type": "boolean", "required": false, "default": false, "description": "Uppercase text transform." },
       "clamp":     { "type": "number",  "required": false, "default": null, "description": "Line clamp count." },
       "flush":     { "type": "boolean", "required": false, "default": false, "description": "Remove bottom margin." },

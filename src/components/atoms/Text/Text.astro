@@ -39,7 +39,7 @@ interface Props {
   leading?: 'tight' | 'snug' | 'normal' | 'relaxed';
 
   /** Colour token */
-  color?: 'default' | 'primary' | 'secondary' | 'neutral' | 'rainbow-1' | 'rainbow-2' | 'rainbow-3' | 'rainbow-4' | 'rainbow-5' | 'rainbow-6' | 'rainbow-7';
+  color?: 'default' | 'primary' | 'secondary' | 'neutral' | 'text' | 'rainbow-1' | 'rainbow-2' | 'rainbow-3' | 'rainbow-4' | 'rainbow-5' | 'rainbow-6' | 'rainbow-7';
 
   /** Font family variant */
   family?: 'heading' | 'body' | 'body-alt' | 'handwriting' | 'mono';
@@ -53,8 +53,12 @@ interface Props {
   /** Highlight bar colour (independent from text colour) */
   highlightColor?: 'primary' | 'secondary' | 'neutral' | 'rainbow-1' | 'rainbow-2' | 'rainbow-3' | 'rainbow-4' | 'rainbow-5' | 'rainbow-6' | 'rainbow-7';
   highlightHeight?: 'sm' | 'md' | 'lg' | 'full';
-  highlightOpacity?: 'faint' | 'soft' | 'bold';
+  highlightOpacity?: 'faint' | 'soft' | 'bold' | 'solid';
   highlightShape?: 'sharp' | 'rounded';
+  /** Contrast shadow on solid highlights: auto (default, on for solid), on, off */
+  highlightShadow?: 'auto' | 'on' | 'off';
+  /** Animate highlight colour through tier tokens (tint → mid → base). */
+  highlightCycle?: boolean;
 
   /** Uppercase with letter-spacing */
   uppercase?: boolean;
@@ -89,6 +93,8 @@ const {
   highlightHeight,
   highlightOpacity,
   highlightShape,
+  highlightShadow = 'auto',
+  highlightCycle = false,
   uppercase = false,
   clamp,
   flush = false,
@@ -143,6 +149,9 @@ const highlightClasses = highlight ? [
   highlightHeight && `text-highlight--${highlightHeight}`,
   highlightOpacity && `text-highlight--${highlightOpacity}`,
   highlightShape && `text-highlight--${highlightShape}`,
+  highlightCycle && 'text-highlight--cycle',
+  highlightShadow === 'on' && 'text-highlight--shadow',
+  highlightShadow === 'off' && 'text-highlight--no-shadow',
 ] : [];
 
 const inlineStyle = clamp ? `--text-clamp: ${clamp}` : undefined;
