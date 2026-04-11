@@ -155,9 +155,9 @@ export const SHADOWS = [
 ] as const;
 export type Shadow = typeof SHADOWS[number];
 
-// ── Text Shadow (8 values) — matches Shadow enum for consistency ─
+// ── Text Shadow (9 values) — matches Shadow enum + halo for contrast on faded text ─
 export const TEXT_SHADOWS = [
-  'none', 'out', 'drop', 'in', 'elevated', 'glow', 'glow-intense', 'glow-inner'
+  'none', 'out', 'drop', 'in', 'elevated', 'glow', 'glow-intense', 'glow-inner', 'halo'
 ] as const;
 export type TextShadow = typeof TEXT_SHADOWS[number];
 

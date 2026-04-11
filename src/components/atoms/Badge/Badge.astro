@@ -117,14 +117,8 @@ const textGradientDirection: GradientDirection | undefined = gradientFlip
   ? (gradientDirection ? reverseDir[gradientDirection] : 'diagonal-reverse')
   : gradientDirection;
 
-// For flip + fade/emerge on fill: text uses reversed fade/emerge gradient, oversized to cover badge padding.
-const flipTextStyle = (() => {
-  if (!gradientFlip || (!gradientFade && !gradientEmerge)) return undefined;
-  const colourVar = color?.startsWith('rainbow-') ? `var(--${color})` : `var(--${color}-base)`;
-  const bgVar = 'var(--_bg-context, var(--page-bg))';
-  const hold = gradientEmerge ? 38 : 30;
-  return `--_grad-computed: linear-gradient(315deg, ${bgVar} 0%, ${bgVar} ${hold}%, ${colourVar} ${hold + 5}%, ${colourVar} 100%); background-size: 170% 100%; background-position: center`;
-})();
+// Flip inline style is handled by the nested Heading atom — Badge just forwards
+// gradientEmerge/gradientFade/gradientFlip props and Heading owns the mirror logic.
 
 const tierSuffix = (gradient && colorTier && colorTier !== 'base') ? `-preset-${colorTier}` : '';
 const radialSuffix = gradientType === 'radial' ? '-radial' : '';
@@ -188,9 +182,9 @@ const badgeAnimStyle = badgeAnimParts.length ? badgeAnimParts.join(';') : undefi
   {media?.component === 'Icon' && <Icon {...media} class="badge__icon" aria-hidden="true" />}
   {media?.component === 'LottieIcon' && <LottieIcon {...media} class="badge__icon" aria-hidden="true" />}
   {level ? (
-    <Heading level={level} flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} gradient={gradient} gradientBlend={gradientBlend} gradientDirection={textGradientDirection} brandColor={!rainbowColor ? brandColor : undefined} rainbowColor={rainbowColor} colorTier={colorTier} class="badge__label">{label}</Heading>
+    <Heading level={level} flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} gradient={gradient} gradientBlend={gradientBlend} gradientDirection={gradientDirection} gradientEmerge={gradientEmerge} gradientFade={gradientFade} gradientFlip={gradientFlip} brandColor={!rainbowColor ? brandColor : undefined} rainbowColor={rainbowColor} colorTier={colorTier} class="badge__label">{label}</Heading>
   ) : ((gradient || gradientBlend) && (variant !== 'fill' || gradientFlip)) ? (
-    <Heading level={6} flush family={fontFamily || 'body'} weight={fontWeight !== 'bold' ? fontWeight : undefined} gradient={(gradientEmerge || gradientFade) && !gradientFlip ? false : gradient} gradientBlend={flipTextStyle ? undefined : (gradientEmerge || gradientFade) ? undefined : gradientBlend} gradientDirection={flipTextStyle ? gradientDirection : textGradientDirection} style={flipTextStyle || (gradientFlip && !gradientBlend ? '--_grad-computed: linear-gradient(var(--_grad-angle, 135deg), var(--_tier-emphasis) 0%, var(--_color) 50%, var(--_tier-mid) 75%, var(--_tier-tint) 100%)' : undefined)} brandColor={!rainbowColor ? brandColor : undefined} rainbowColor={rainbowColor} colorTier={colorTier} class="badge__label">{label}</Heading>
+    <Heading level={6} flush family={fontFamily || 'body'} weight={fontWeight !== 'bold' ? fontWeight : undefined} gradient={gradient} gradientBlend={gradientBlend} gradientDirection={gradientDirection} gradientEmerge={gradientEmerge} gradientFade={gradientFade} gradientFlip={gradientFlip} brandColor={!rainbowColor ? brandColor : undefined} rainbowColor={rainbowColor} colorTier={colorTier} class="badge__label">{label}</Heading>
   ) : (
     <Text as="span" class="badge__label" flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} color={(gradientEmerge || gradientFade) ? (rainbowColor || brandColor) : undefined}>{label}</Text>
   )}

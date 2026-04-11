@@ -201,14 +201,18 @@ const textGradientDirection: GradientDirection | undefined = gradientFlip
   ? (gradientDirection ? reverseDir[gradientDirection] : 'diagonal-reverse')
   : gradientDirection;
 
-// For flip + fade/emerge: inline --_grad-computed with mirrored gradient
-// (same stops, direction reversed via hardcoded 315deg, oversized for padding).
+// Fade/emerge on heading text: text uses an oversized background so the soft
+// fade actually lands across the narrow glyph bounds (not compressed at one edge).
+// Non-flip: matches underline direction (bg → colour). Flip: swaps the stops (colour → bg).
 const flipTextStyle = (() => {
-  if (!gradientFlip || (!gradientFade && !gradientEmerge)) return undefined;
+  if (!gradientFade && !gradientEmerge) return undefined;
   const colourVar = textColor?.startsWith('rainbow-') ? `var(--${textColor})` : `var(--${textColor || 'primary'}-base)`;
   const bgVar = 'var(--_bg-context, var(--page-bg))';
   const hold = gradientEmerge ? 38 : 30;
-  return `--_grad-computed: linear-gradient(315deg, ${bgVar} 0%, ${bgVar} ${hold}%, ${colourVar} ${hold + 5}%, ${colourVar} 100%); background-size: 170% 100%; background-position: center`;
+  const stops = gradientFlip
+    ? `${colourVar} 0%, ${colourVar} ${hold}%, ${bgVar} ${hold + 15}%, ${bgVar} 100%`
+    : `${bgVar} 0%, ${bgVar} ${hold}%, ${colourVar} ${hold + 15}%, ${colourVar} 100%`;
+  return `--_grad-computed: linear-gradient(var(--_grad-angle, 135deg), ${stops}); background-size: 170% 100%; background-position: center`;
 })();
 
 // Build-time AAC resolution
@@ -263,6 +267,8 @@ const headingClassList = [
   textShadow && textShadow !== 'none' && `text-shadow--${textShadow}`,
   (gradient || gradientBlend) && 'gradient__text',
   (gradient || gradientBlend) && animatedGradient && 'gradient__text--animated',
+  /* Emerge/fade on text needs a contrast halo so the faded portion stays readable */
+  (gradientEmerge || gradientFade) && 'gradient__text--emerge-fade',
   gradientCycle && 'gradient--cycle',
   /* Resolved gradient name handles blends, solo colours, emerge/fade, radial */
   resolvedGradientName && !flipTextStyle && `gradient--blend-${resolvedGradientName}`,
@@ -302,7 +308,11 @@ const headingClassList = [
     )}
 
     {divider && (divider === 'left' || divider === 'both') && (
-      <div class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && gradientBlend && `gradient--blend-${gradientBlend}`, dividerStyle === 'gradient' && 'gradient', animatedGradient && 'divider--animated']} aria-hidden="true"></div>
+      <div
+        class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, animatedGradient && 'divider--animated']}
+        data-grad-dir={dividerStyle === 'gradient' ? gradientDirection : undefined}
+        data-grad-focus={dividerStyle === 'gradient' && gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
+        aria-hidden="true"></div>
     )}
 
     <div class="heading-wrap__content">
@@ -315,18 +325,28 @@ const headingClassList = [
         variant === 'highlight' && highlightShadow === 'on' && 'text-highlight--shadow',
         variant === 'highlight' && highlightShadow === 'off' && 'text-highlight--no-shadow',
       ]}
-        data-grad-dir={textGradientDirection || undefined}
+        data-grad-dir={gradientDirection || undefined}
         style={tagInlineStyle}>
         {variant === 'highlight' && <span class:list={['text-highlight__bar', resolvedHighlightColor && `color--${resolvedHighlightColor}`, highlightTier && highlightTier !== 'base' && `color--tier-${highlightTier}`]} aria-hidden="true"></span>}
         <span class="heading__text-inner"><slot /></span>
       </Tag>
-      {variant === 'underline' && <div class:list={['underline', underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`, underlineThickness && `underline--thickness-${underlineThickness}`, resolvedUnderlineColor && `color--${resolvedUnderlineColor}`, underlineTier && underlineTier !== 'base' && `color--tier-${underlineTier}`, underlineStyle === 'gradient' && gradientBlend && `gradient--blend-${gradientBlend}`, underlineStyle === 'gradient' && gradient && 'gradient', animatedGradient && 'underline--animated']} aria-hidden="true"></div>}
+      {variant === 'underline' && (
+        <div
+          class:list={['underline', underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`, underlineThickness && `underline--thickness-${underlineThickness}`, resolvedUnderlineColor && `color--${resolvedUnderlineColor}`, underlineTier && underlineTier !== 'base' && `color--tier-${underlineTier}`, underlineStyle === 'gradient' && 'gradient', underlineStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, animatedGradient && 'underline--animated']}
+          data-grad-dir={underlineStyle === 'gradient' ? gradientDirection : undefined}
+          data-grad-focus={underlineStyle === 'gradient' && gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
+          aria-hidden="true"></div>
+      )}
       {subtitle && <Text as="p" size={subtitleSize} flush class="heading-wrap__subtitle" color="neutral">{subtitle}</Text>}
       {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
     </div>
 
     {divider && (divider === 'right' || divider === 'both') && (
-      <div class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && gradientBlend && `gradient--blend-${gradientBlend}`, dividerStyle === 'gradient' && 'gradient', animatedGradient && 'divider--animated']} aria-hidden="true"></div>
+      <div
+        class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, animatedGradient && 'divider--animated']}
+        data-grad-dir={dividerStyle === 'gradient' ? gradientDirection : undefined}
+        data-grad-focus={dividerStyle === 'gradient' && gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
+        aria-hidden="true"></div>
     )}
 
     {hasMedia && mediaPosition === 'right' && (
