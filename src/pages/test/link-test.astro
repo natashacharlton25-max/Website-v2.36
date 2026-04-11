@@ -24,10 +24,11 @@ function textonlyProps(item: any) {
           <div style="display:flex;flex-direction:column;gap:var(--space-lg);">
             {section.items.map((item: any) => (
               <Text flush>{item.before}<Link
+                label={item.linkText}
                 href={item.href}
                 variant={item.variant}
                 color={item.color}
-              >{item.linkText}</Link>{item.after}</Text>
+              />{item.after}</Text>
             ))}
           </div>
         ) : (
@@ -36,9 +37,11 @@ function textonlyProps(item: any) {
               <Fragment>
                 <div class="render-full">
                   <Link
+                    label={item.label}
                     href={item.href}
                     variant={item.variant}
                     color={item.color}
+                    text={item.text}
                     weight={item.weight}
                     uppercase={item.uppercase}
                     flush={item.flush}
@@ -49,13 +52,13 @@ function textonlyProps(item: any) {
                     highlightGrow={item.highlightGrow}
                     shadowFill={item.shadowFill}
                     textSlide={item.textSlide}
-                  >{item.label}</Link>
+                  />
                 </div>
                 <div class="render-reduced">
-                  <Link href={item.href} variant={item.variant} color={item.color} weight={item.weight}>{item.label}</Link>
+                  <Link label={item.label} href={item.href} variant={item.variant} color={item.color} weight={item.weight} />
                 </div>
                 <div class="render-textonly">
-                  <Link href={item.href}>{item.label}</Link>
+                  <Link label={item.label} href={item.href} />
                 </div>
               </Fragment>
             ))}

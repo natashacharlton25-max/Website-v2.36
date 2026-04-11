@@ -7,11 +7,12 @@
     "assistive": "Link.astro",
     "textonly": "Link.astro"
   },
-  "notes": "Inline text link. Renders through Text atom for typography. For links that need visual weight (glass, pill, padding), use Button with href instead. All 4 renders use the same Link.astro — pipeline strips animation props in reduced/assistive/textonly. Textonly render: all links become plain underlined text (colour overrides, weight, uppercase all reset).",
+  "notes": "Inline text link. Label renders through Text atom for typography — any Text prop can be forwarded via 'text'. For links that need visual weight (glass, pill, padding), use Button with href instead. All 4 renders use the same Link.astro — pipeline strips animation props in reduced/assistive/textonly. Textonly render: all links become plain underlined text (colour overrides, weight, uppercase all reset). Click + keyboard handling is native <a href> + global focus-system.",
 
   "props": {
     "content": {
-      "_description": "Where the link goes and how it identifies itself",
+      "_description": "Link label and destination",
+      "label":     { "type": "string",  "required": true, "description": "Link text (required). Renders through the Text atom." },
       "href":      { "type": "string",  "required": true, "description": "Link destination." },
       "target":    { "type": "string",  "required": false, "default": null, "description": "Link target." },
       "download":  { "type": "string",  "required": false, "default": null, "description": "Download attribute." },
@@ -22,10 +23,18 @@
       "ariaLabel": { "type": "string",  "required": false, "default": null, "description": "Accessible label." }
     },
 
+    "text": {
+      "_description": "Text atom props for the label — spread onto the nested Text. Accepts any Text prop (family, size, weight, leading, etc). Link locks 'as=span' and 'flush' internally.",
+      "text": {
+        "type": "object",
+        "_description": "Forwarded to the Text atom. See Text.schema.json for the full prop list."
+      }
+    },
+
     "visual": {
       "_description": "How the link looks",
       "variant":   { "type": "string",  "required": false, "default": "default", "enum": ["default", "underline", "highlight", "border", "ghost"], "description": "Visual indicator style. default=colour only, underline=static underline, highlight=subtle background, border=thin border, ghost=subtle colour." },
-      "color":     { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"], "description": "Colour variant — sets link colour tokens." },
+      "color":     { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "text", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Colour variant — sets link colour tokens. 'text' = body text scale (always readable)." },
       "weight":    { "type": "string",  "required": false, "default": null, "enum": ["normal", "medium", "semibold", "bold", "extrabold"], "description": "Font weight override." },
       "uppercase": { "type": "boolean", "required": false, "default": false, "description": "Uppercase text transform." },
       "flush":     { "type": "boolean", "required": false, "default": false, "description": "Remove margin." },
@@ -50,9 +59,5 @@
       "linkText":      { "type": "token", "required": false, "default": "auto", "cssProperty": "--link-text",      "description": "Body text colour for ghost/textSlide." },
       "linkFillText":  { "type": "token", "required": false, "default": "auto", "cssProperty": "--link-fill-text", "description": "Text colour during shadowFill hover." }
     }
-  },
-
-  "slots": {
-    "default": "Link text content"
   }
 }

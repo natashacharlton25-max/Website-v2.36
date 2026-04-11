@@ -558,8 +558,11 @@
 /* Rainbow tokens auto-swap for dark mode. Headings without a colour prop     */
 /* fall back to --color-Text which also adapts.                                */
 
-/* ── Link dark — lighter tokens for readability ── */
-[data-mode="dark"] .link {
+/* ── Link dark — lighter tokens for readability ──
+   Only applies when the link has NO explicit colour class. Explicit colour classes
+   (.link--primary, .link--secondary, .link--neutral, .link--text, .link--rainbow-*)
+   keep their own tokens which adapt via the dark rainbow/theme token flips. */
+[data-mode="dark"] .link:not(.link--primary):not(.link--secondary):not(.link--neutral):not(.link--text):not([class*="link--rainbow-"]) {
   --_link-color: var(--link-color, var(--primary-contrast));
   --_link-hover: var(--link-hover, var(--primary-base));
   --_link-accent: var(--link-accent, var(--secondary-contrast));
@@ -570,8 +573,9 @@
   --_link-fill-text: var(--link-fill-text, var(--page-bg));
 }
 
-/* Textonly dark — swap static/hover so static is darker, hover lighter */
-[data-mode="dark"][data-render="textonly"] .link {
+/* Textonly dark — swap static/hover so static is darker, hover lighter.
+   Same scoping as above. */
+[data-mode="dark"][data-render="textonly"] .link:not(.link--primary):not(.link--secondary):not(.link--neutral):not(.link--text):not([class*="link--rainbow-"]) {
   --_link-color: var(--link-color, var(--primary-base));
   --_link-hover: var(--link-hover, var(--primary-contrast));
   --_link-accent: var(--link-accent, var(--secondary-base));

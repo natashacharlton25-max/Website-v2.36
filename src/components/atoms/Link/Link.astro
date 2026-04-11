@@ -4,23 +4,30 @@
  *
  * Every link should go through this component (except buttons — use <Button href>).
  * For links that need visual weight (glass, pill, padding), use Button with href.
- * Renders slot through Text atom for typography inheritance.
+ * The label renders through the Text atom — any Text prop can be forwarded via `text`.
  *
  * Styles: Link.css | Link.responsive.css
  *
  * Usage:
- *   <Link href="/about">About</Link>
- *   <Link href="/about" variant="underline">About</Link>
- *   <Link href="/about" variant="underline" underlineGrow>About</Link>
- *   <Link href="/legal" variant="ghost" color="text-light">Quiet link</Link>
- *   <Link href="https://example.com" external>External</Link>
+ *   { "component": "Link", "label": "About", "href": "/about" }
+ *   { "component": "Link", "label": "About", "href": "/about", "variant": "underline" }
+ *   { "component": "Link", "label": "Legal", "href": "/legal", "variant": "ghost",
+ *     "text": { "family": "body", "weight": "medium" } }
+ *   { "component": "Link", "label": "Example", "href": "https://example.com", "external": true }
  */
 import { Text } from '../Text';
+import type { TextColour, RainbowColour } from '../../../lib/shared-enums';
 
 interface Props {
+  /** Required link text. Renders through the Text atom. */
+  label: string;
   href: string;
   variant?: 'default' | 'underline' | 'highlight' | 'border' | 'ghost';
-  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  /** Link colour — sets marker tokens. 'text' = body text scale (always readable). */
+  color?: TextColour | RainbowColour;
+  /** Text atom props forwarded to the label's nested Text — accepts any Text prop
+   *  (family, size, weight, leading, uppercase, etc). Link locks 'as=span' and 'flush'. */
+  text?: Record<string, any>;
   weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
   uppercase?: boolean;
   flush?: boolean;
@@ -40,9 +47,11 @@ interface Props {
 }
 
 const {
+  label,
   href,
   variant = 'default',
   color,
+  text: textProps,
   weight,
   uppercase = false,
   flush = false,
@@ -95,4 +104,4 @@ const classes = [
   role={role as astroHTML.JSX.HTMLAttributes['role']}
   aria-label={ariaLabel}
   {...dataAttrs}
-><Text as="span" flush><slot /></Text></a>
+><Text {...(textProps as any)} as="span" flush>{label}</Text></a>
