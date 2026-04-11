@@ -25,8 +25,10 @@
  *   </List>
  */
 import { Icon } from '../Icon';
+import { Shape } from '../Shape';
 import { Link } from '../Link';
 import { Text } from '../Text';
+import type { TextColour, RainbowColour } from '../../../lib/shared-enums';
 
 type ListItem = string | { text: string; href?: string; };
 
@@ -35,10 +37,14 @@ interface Props {
   variant?: 'default' | 'none' | 'inline' | 'dot';
   dotSize?: 'sm' | 'md' | 'lg';
   icon?: string;
-  iconCollection?: string;
-  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  color?: TextColour | RainbowColour;
   spacing?: 'tight' | 'normal' | 'loose';
   flush?: boolean;
+  /** Nested atom node used as the list marker — { component: 'Icon'|'Shape', ...atomProps }.
+   *  Overrides the default bullet/icon/dot markers. Each list item renders its own instance.
+   *  Shape handles its own colour, size, animation, and background. LottieIcon excluded
+   *  (no click handler in list context — use an animated Icon instead). */
+  media?: Record<string, any>;
   class?: string;
   items?: ListItem[];
   [key: string]: any;
@@ -49,14 +55,23 @@ const {
   variant = 'default',
   dotSize = 'md',
   icon,
-  iconCollection = 'interface',
   color = 'primary',
   spacing = 'normal',
   flush = false,
+  media,
   class: className,
   items,
   ...rest
 } = Astro.props;
+
+const mediaComponent = media?.component;
+const { component: _mc, ...mediaProps } = media || {};
+const hasMedia = !!media;
+// Default marker size if the author didn't specify one.
+// Authors override by setting media.size (e.g. "xl" for a chunkier marker).
+const mediaPropsWithSize = hasMedia && mediaProps.size == null
+  ? { ...mediaProps, size: 'lg' }
+  : mediaProps;
 
 // Extract data-* attributes
 const dataAttrs = Object.fromEntries(
@@ -73,6 +88,7 @@ const classes = [
   'list',
   `list--${variant}`,
   hasIcon && 'list--has-icon',
+  hasMedia && 'list--has-media',
   variant === 'dot' && `list--dot-${dotSize}`,
   `list--${color}`,
   spacing !== 'normal' && `list--spacing-${spacing}`,
@@ -88,10 +104,12 @@ const classes = [
       const href = typeof item === 'string' ? undefined : item.href;
       return (
         <li class="list__item">
-          {hasIcon && (
-            <Icon name={`${iconCollection}/${icon}`} size={iconSize} class="list__icon" />
+          {hasMedia && mediaComponent === 'Icon' && <Icon {...(mediaPropsWithSize as any)} class="list__media" />}
+          {hasMedia && mediaComponent === 'Shape' && <Shape {...(mediaPropsWithSize as any)} class="list__media" />}
+          {!hasMedia && hasIcon && (
+            <Icon name={icon!} size={iconSize} class="list__icon" />
           )}
-          {variant === 'dot' && (
+          {!hasMedia && variant === 'dot' && (
             <span class="list__dot" aria-hidden="true"></span>
           )}
           {href ? (

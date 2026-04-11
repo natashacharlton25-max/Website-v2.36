@@ -31,7 +31,8 @@ interface Props {
   label?: string;
   /** Phosphor icon name for static fallback (shown in reduced/highlight/focus/textonly) */
   fallbackIcon?: string;
-  size?: number;
+  /** Named em-based size (xs–8xl, scales with parent text) or explicit pixel number. */
+  size?: number | 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | '8xl';
   /** Role determines a11y behaviour and textonly rendering */
   role?: 'decorative' | 'navigation' | 'informational';
   /** Override Lottie native colours with CSS color. Enum or 'native' to keep baked-in colours. */
@@ -52,7 +53,7 @@ const {
   label,
   fallbackIcon,
   role: roleProp = 'decorative',
-  size = 24,
+  size = 'lg',
   color = 'native',
   trigger = 'none',
   interval = 3000,
@@ -101,7 +102,7 @@ if (slug) {
 ---
 
 <div
-  class:list={['lottie-icon', color !== 'native' && `lottie-icon--${color}`, className]}
+  class:list={['lottie-icon', typeof size === 'string' && `lottie-icon--size-${size}`, color !== 'native' && `lottie-icon--${color}`, className]}
   data-lottie-icon
   data-lottie-trigger={trigger}
   data-lottie-interval={trigger === 'interval' ? interval : undefined}
@@ -110,7 +111,7 @@ if (slug) {
   data-semantic-role={roleProp}
   {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': 'true' })}
   tabindex={roleProp === 'navigation' || trigger === 'hover' ? '0' : undefined}
-  style={`width: ${size}px; height: ${size}px;`}
+  style={typeof size === 'number' ? `width: ${size}px; height: ${size}px;` : undefined}
   id={id}
   {...(src && !animationData ? { 'data-lottie-src': src } : {})}
 >

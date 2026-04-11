@@ -45,7 +45,10 @@ interface Props {
   colorTier?: ColourTier;
 
   // ── Visual ──────────────────────────────────────────────
-  size?: number;
+  /** Named em-based size scale (xs–8xl) or explicit pixel number.
+   *  Named sizes use --media-* tokens and scale with parent font-size.
+   *  Numeric sizes output fixed px for absolute control. */
+  size?: number | 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | '8xl';
   shadow?: IconShadow;
   glow?: IconGlow;
 
@@ -351,8 +354,8 @@ if (fillAnimation) {
 
 {/* Semantic roles: decorative=hidden, ui-control=labelled+focusable, content-symbol=labelled */}
 <span
-  class:list={['icon', ...effectClasses, className]}
-  style={size != null ? `width: ${size}px; height: ${size}px;` : undefined}
+  class:list={['icon', typeof size === 'string' && `icon--size-${size}`, ...effectClasses, className]}
+  style={typeof size === 'number' ? `width: ${size}px; height: ${size}px;` : undefined}
   aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
   aria-label={isInformational ? label : (isInteractive && label ? label : undefined)}
   tabindex={isInteractive ? "0" : undefined}

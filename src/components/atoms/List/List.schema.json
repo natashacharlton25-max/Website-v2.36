@@ -12,17 +12,28 @@
   "props": {
     "content": {
       "_description": "What the list contains",
-      "as":             { "type": "string",  "required": false, "default": "ul", "enum": ["ul", "ol"], "description": "HTML element — unordered or ordered." },
-      "items":          { "type": "array",   "required": false, "default": null, "description": "Simple string items. For complex content, use slot instead." },
-      "icon":           { "type": "string",  "required": false, "default": null, "textonly": false, "description": "Phosphor icon slug for list markers. Decorative — stripped in textonly, native bullets replace." },
-      "iconCollection": { "type": "string",  "required": false, "default": "interface", "description": "Icon collection override." }
+      "as":    { "type": "string",  "required": false, "default": "ul", "enum": ["ul", "ol"], "description": "HTML element — unordered or ordered." },
+      "items": { "type": "array",   "required": false, "default": null, "description": "Simple string items. For complex content, use slot instead." },
+      "icon":  { "type": "string",  "required": false, "default": null, "textonly": false, "description": "Phosphor icon slug for simple icon markers (fallback). Stripped in textonly, native bullets replace. Ignored if media is set." }
+    },
+
+    "media": {
+      "_description": "Rich marker atom — overrides the default bullet/icon/dot markers. Each list item renders its own instance.",
+      "media": {
+        "type": "object",
+        "textonly": false,
+        "_description": "Nested atom node. Child atom owns its own props (colour, size, animation, background). Shape can wrap an Icon. LottieIcon excluded — use an animated Icon instead.",
+        "properties": {
+          "component": { "type": "string", "required": true, "enum": ["Icon", "Shape"] }
+        }
+      }
     },
 
     "visual": {
       "_description": "How the list looks",
       "variant":   { "type": "string",  "required": false, "default": "default", "enum": ["default", "none", "inline", "dot"], "description": "List style variant." },
       "dotSize":   { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Dot variant marker size." },
-      "color":     { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink"], "description": "Colour variant for markers, icons, and dots." },
+      "color":     { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "text", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Colour variant for markers, icons, and dots. 'text' = body text scale (always readable)." },
       "spacing":   { "type": "string",  "required": false, "default": "normal", "enum": ["tight", "normal", "loose"], "description": "Item spacing." },
       "flush":     { "type": "boolean", "required": false, "default": false, "description": "Remove outer margin." },
       "class":     { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
