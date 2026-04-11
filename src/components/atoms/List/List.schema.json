@@ -13,7 +13,7 @@
     "content": {
       "_description": "What the list contains",
       "as":    { "type": "string",  "required": false, "default": "ul", "enum": ["ul", "ol"], "description": "HTML element — unordered or ordered." },
-      "items": { "type": "array",   "required": false, "default": null, "description": "Simple string items. For complex content, use slot instead." },
+      "items": { "type": "array",   "required": true,  "description": "Array of items. Each item is either a string (plain text) or { text, href } (linked item)." },
       "icon":  { "type": "string",  "required": false, "default": null, "textonly": false, "description": "Phosphor icon slug for simple icon markers (fallback). Stripped in textonly, native bullets replace. Ignored if media is set." }
     },
 
@@ -26,6 +26,14 @@
         "properties": {
           "component": { "type": "string", "required": true, "enum": ["Icon", "Shape"] }
         }
+      }
+    },
+
+    "text": {
+      "_description": "Text atom props for item text — spread onto each nested Text. Accepts any Text prop (color, family, size, weight, leading, uppercase, etc). List sets 'as=span' and 'flush' internally.",
+      "text": {
+        "type": "object",
+        "_description": "Forwarded to the Text atom. See Text.schema.json for the full prop list — all Text props are valid here except 'as' and 'flush' which are controlled by List."
       }
     },
 
@@ -47,9 +55,5 @@
       "listMarkerAccent": { "type": "token", "required": false, "default": "auto", "cssProperty": "--list-marker-accent", "description": "Accent colour for icon/dot markers." },
       "listText":         { "type": "token", "required": false, "default": "auto", "cssProperty": "--list-text",          "description": "Text colour for icon/dot markers." }
     }
-  },
-
-  "slots": {
-    "default": "Complex list items — use <li class=\"list__item\"><Text as=\"span\" flush>content</Text></li> for each"
   }
 }

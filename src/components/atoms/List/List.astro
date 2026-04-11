@@ -3,7 +3,7 @@
  * List — Atomic list primitive
  *
  * Every list should go through this component.
- * Item text renders through Text atom.
+ * Item text renders through Text atom (colour + family passed through).
  * List.css is the single source of truth for list styling.
  *
  * Styles: List.css | List.responsive.css
@@ -18,11 +18,7 @@
  *   <List variant="none" items={['Clean', 'No bullets']} />
  *   <List variant="inline" items={['Tag', 'Tag', 'Tag']} />
  *   <List flush items={['Tight', 'No margin']} />
- *
- *   <!-- Slot for complex content -->
- *   <List>
- *     <li class="list__item"><Text as="span" flush>Complex <strong>content</strong></Text></li>
- *   </List>
+ *   <List textColor="text" textFamily="body" items={['Body text']} />
  */
 import { Icon } from '../Icon';
 import { Shape } from '../Shape';
@@ -37,7 +33,12 @@ interface Props {
   variant?: 'default' | 'none' | 'inline' | 'dot';
   dotSize?: 'sm' | 'md' | 'lg';
   icon?: string;
+  /** Marker colour (bullet, icon, dot, ordered counter). */
   color?: TextColour | RainbowColour;
+  /** Text atom props for item text — spread onto each item's nested Text.
+   *  Accepts any Text prop (color, family, size, weight, leading, uppercase, etc).
+   *  List always sets `as="span"` and `flush` internally. */
+  text?: Record<string, any>;
   spacing?: 'tight' | 'normal' | 'loose';
   flush?: boolean;
   /** Nested atom node used as the list marker — { component: 'Icon'|'Shape', ...atomProps }.
@@ -56,6 +57,7 @@ const {
   dotSize = 'md',
   icon,
   color = 'primary',
+  text: textProps,
   spacing = 'normal',
   flush = false,
   media,
@@ -98,29 +100,25 @@ const classes = [
 ---
 
 <Tag class:list={classes} {...dataAttrs}>
-  {items ? (
-    items.map((item: ListItem) => {
-      const text = typeof item === 'string' ? item : item.text;
-      const href = typeof item === 'string' ? undefined : item.href;
-      return (
-        <li class="list__item">
-          {hasMedia && mediaComponent === 'Icon' && <Icon {...(mediaPropsWithSize as any)} class="list__media" />}
-          {hasMedia && mediaComponent === 'Shape' && <Shape {...(mediaPropsWithSize as any)} class="list__media" />}
-          {!hasMedia && hasIcon && (
-            <Icon name={icon!} size={iconSize} class="list__icon" />
-          )}
-          {!hasMedia && variant === 'dot' && (
-            <span class="list__dot" aria-hidden="true"></span>
-          )}
-          {href ? (
-            <Link href={href} class="list__content" variant="underline">{text}</Link>
-          ) : (
-            <Text as="span" class="list__content" flush>{text}</Text>
-          )}
-        </li>
-      );
-    })
-  ) : (
-    <slot />
-  )}
+  {(items || []).map((item: ListItem) => {
+    const text = typeof item === 'string' ? item : item.text;
+    const href = typeof item === 'string' ? undefined : item.href;
+    return (
+      <li class="list__item">
+        {hasMedia && mediaComponent === 'Icon' && <Icon {...(mediaPropsWithSize as any)} class="list__media" />}
+        {hasMedia && mediaComponent === 'Shape' && <Shape {...(mediaPropsWithSize as any)} class="list__media" />}
+        {!hasMedia && hasIcon && (
+          <Icon name={icon!} size={iconSize} class="list__icon" />
+        )}
+        {!hasMedia && variant === 'dot' && (
+          <span class="list__dot" aria-hidden="true"></span>
+        )}
+        {href ? (
+          <Link href={href} class="list__content" variant="underline">{text}</Link>
+        ) : (
+          <Text {...(textProps as any)} as="span" class="list__content" flush>{text}</Text>
+        )}
+      </li>
+    );
+  })}
 </Tag>
