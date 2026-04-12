@@ -142,6 +142,7 @@ export function initDrawIcon(el: HTMLElement) {
   // Compute init opacity to match what playDraw creates visually
   let initOpacity = 0;
   if (isBorderMode) initOpacity = 0;
+  else if (mode === 'once' && ghost) initOpacity = ghostOpacity;
   else if (mode === 'static' || mode === 'yoyo') initOpacity = ghost ? ghostOpacity : 1;
   else if (mode === 'reverse-yoyo') {
     if (ghost) {
