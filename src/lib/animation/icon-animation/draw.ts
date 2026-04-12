@@ -142,7 +142,7 @@ export function initDrawIcon(el: HTMLElement) {
   // Compute init opacity to match what playDraw creates visually
   let initOpacity = 0;
   if (isBorderMode) initOpacity = 0;
-  else if (mode === 'once' && ghost) initOpacity = ghostOpacity;
+  else if (mode === 'fade' && ghost) initOpacity = ghostOpacity;
   else if (mode === 'static' || mode === 'yoyo') initOpacity = ghost ? ghostOpacity : 1;
   else if (mode === 'reverse-yoyo') {
     if (ghost) {
@@ -307,7 +307,7 @@ function playDraw(
   const t = 0;
 
   switch (mode) {
-    case 'once': {
+    case 'fade': {
       if (laser) {
         // Worm draws ghost line alongside, then both fade out
         const growD = d * 0.2;

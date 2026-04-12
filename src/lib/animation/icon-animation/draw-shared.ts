@@ -17,7 +17,7 @@ import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 gsap.registerPlugin(DrawSVGPlugin);
 
 export type DrawVariant = 'draw' | 'drawcenter' | 'pulse';
-export type DrawMode = 'once' | 'static' | 'yoyo' | 'reverse-yoyo' | 'reveal';
+export type DrawMode = 'fade' | 'static' | 'yoyo' | 'reverse-yoyo' | 'reveal';
 
 /* Builds a single forward-pass of the draw variant into the given timeline */
 export function addVariant(
