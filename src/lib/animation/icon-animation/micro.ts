@@ -8,7 +8,7 @@
  */
 
 import { gsap } from 'gsap';
-import { registerTrigger } from '../animation-config';
+import { registerTrigger, getAnimationConfig } from '../animation-config';
 
 // ─── Animation builders ─────────────────────────────────
 // Each returns a function that creates and returns a timeline.
@@ -158,7 +158,8 @@ export function initMicroAnimations() {
     if (!builder) return;
 
     const trigger = el.dataset.animTrigger || 'hover';
-    const repeat = el.dataset.animRepeat || 'once';
+    const config = getAnimationConfig();
+    const repeat = config.isReduced ? 'once' : (el.dataset.animRepeat || 'once');
 
     // Strip CSS animation — GSAP owns this now
     el.classList.remove(animClass);
