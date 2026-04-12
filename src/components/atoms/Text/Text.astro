@@ -26,6 +26,9 @@ import { aacInline } from '../../../lib/aac/aac-inline';
 import '../../../components/molecules/aac/AacCard/AacCard.css';
 
 interface Props {
+  /** Text display content. Pipeline content key. */
+  contentText?: string;
+
   /** HTML element to render */
   as?: 'p' | 'span' | 'div' | 'small' | 'strong' | 'em' | 'figcaption' | 'blockquote';
 
@@ -80,6 +83,7 @@ interface Props {
 }
 
 const {
+  contentText,
   as: Tag = 'p',
   size,
   weight,
@@ -158,6 +162,6 @@ const inlineStyle = clamp ? `--text-clamp: ${clamp}` : undefined;
 ---
 
 <Tag class:list={classes} style={inlineStyle}>
-  <span class:list={['text__content', ...highlightClasses]} style={highlightStyle}><slot /></span>
+  <span class:list={['text__content', ...highlightClasses]} style={highlightStyle}>{contentText}</span>
   {aacHtml && <span class="text__aac content-aac" set:html={aacHtml} />}
 </Tag>

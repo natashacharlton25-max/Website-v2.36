@@ -19,15 +19,15 @@ import { Text } from '../Text';
 import type { TextColour, RainbowColour } from '../../../lib/shared-enums';
 
 interface Props {
-  /** Required link text. Renders through the Text atom. */
-  label: string;
+  /** Link display text. Pipeline content key. Renders through the Text atom. */
+  contentLink: string;
   href: string;
   variant?: 'default' | 'underline' | 'highlight' | 'border' | 'ghost';
   /** Link colour — sets marker tokens. 'text' = body text scale (always readable). */
   color?: TextColour | RainbowColour;
-  /** Text atom props forwarded to the label's nested Text — accepts any Text prop
+  /** Text atom styling props forwarded to the nested Text — accepts any Text prop
    *  (family, size, weight, leading, uppercase, etc). Link locks 'as=span' and 'flush'. */
-  text?: Record<string, any>;
+  textStyle?: Record<string, any>;
   weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
   uppercase?: boolean;
   flush?: boolean;
@@ -49,11 +49,11 @@ interface Props {
 }
 
 const {
-  label,
+  contentLink: label,
   href,
   variant = 'default',
   color,
-  text: textProps,
+  textStyle: textProps,
   weight,
   uppercase = false,
   flush = false,
@@ -110,7 +110,7 @@ const classes = [
   aria-disabled={disabled ? 'true' : undefined}
   tabindex={disabled ? -1 : undefined}
   {...dataAttrs}
-><Text {...(textProps as any)} as="span" flush>{label}</Text>{external && (
+><Text {...(textProps as any)} contentText={label} as="span" flush />{external && (
   <svg class="link__icon link__icon--external" viewBox="0 0 256 256" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
     <polyline points="144 40 216 40 216 112" />
     <line x1="216" y1="40" x2="112" y2="144" />

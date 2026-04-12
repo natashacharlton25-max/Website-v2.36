@@ -43,7 +43,9 @@ export const componentRegistry: Record<string, any> = {
 // ─── Props extraction ───
 // Separates structural keys (component, children, text) from component props.
 
-const STRUCTURAL_KEYS = new Set(['component', 'children', 'text']);
+// Structural keys are stripped from props — they control the render tree, not the component.
+// 'text' is NOT structural — it was moved to content-* props on each atom.
+const STRUCTURAL_KEYS = new Set(['component', 'children']);
 
 function extractProps(item: Record<string, any>): Record<string, any> {
   const props: Record<string, any> = {};
@@ -60,7 +62,6 @@ function extractProps(item: Record<string, any>): Record<string, any> {
 
 export interface RenderNode {
   component: string;
-  text?: string;
   children?: RenderNode[];
   [key: string]: any;
 }
@@ -72,14 +73,13 @@ export interface RenderNode {
 export function resolveNode(
   node: RenderNode,
   registry: Record<string, any>
-): { Component: any; props: Record<string, any>; slotText: string; children: RenderNode[] } | null {
+): { Component: any; props: Record<string, any>; children: RenderNode[] } | null {
   const Component = registry[node.component];
   if (!Component) return null;
 
   return {
     Component,
     props: extractProps(node),
-    slotText: node.text || '',
     children: node.children || [],
   };
 }

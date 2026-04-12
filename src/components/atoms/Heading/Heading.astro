@@ -40,6 +40,8 @@ import type {
 interface Props {
   // ── Content ─────────────────────────────────────────────
   level: 1 | 2 | 3 | 4 | 5 | 6;
+  /** Heading display text. Pipeline content key. */
+  contentHeading?: string;
   subtitle?: string;
   subtitleSize?: TextSize;
   aac?: boolean;
@@ -119,6 +121,7 @@ interface Props {
 
 const {
   level,
+  contentHeading: contentText,
   brandColor,
   rainbowColor,
   colorTier,
@@ -217,9 +220,8 @@ const flipTextStyle = (() => {
 
 // Build-time AAC resolution
 let aacHtml = '';
-if (aac) {
-  const slotContent = await Astro.slots.render('default');
-  const plainText = slotContent.replace(/<[^>]*>/g, '').trim();
+if (aac && contentText) {
+  const plainText = contentText.replace(/<[^>]*>/g, '').trim();
   if (plainText) {
     const apiBase = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
     aacHtml = await aacInline(plainText, apiBase);
@@ -328,7 +330,7 @@ const headingClassList = [
         data-grad-dir={gradientDirection || undefined}
         style={tagInlineStyle}>
         {variant === 'highlight' && <span class:list={['text-highlight__bar', resolvedHighlightColor && `color--${resolvedHighlightColor}`, highlightTier && highlightTier !== 'base' && `color--tier-${highlightTier}`]} aria-hidden="true"></span>}
-        <span class="heading__text-inner"><slot /></span>
+        <span class="heading__text-inner">{contentText}</span>
       </Tag>
       {variant === 'underline' && (
         <div
@@ -361,7 +363,7 @@ const headingClassList = [
   </div>
 ) : (
   <Tag class:list={[...headingClassList, className]} style={[mergedStyle, tagInlineStyle].filter(Boolean).join(';') || undefined} data-grad-dir={textGradientDirection || undefined} data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}>
-    <span class="heading__text-inner"><slot /></span>
+    <span class="heading__text-inner">{contentText}</span>
     {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
   </Tag>
 )}
