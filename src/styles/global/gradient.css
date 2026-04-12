@@ -45,10 +45,9 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* Animated gradient text */
+/* Animated gradient text — GSAP handles animation (micro.ts), CSS just sets background-size */
 .gradient__text--animated {
   background-size: 300% 100%;
-  animation: anim-gradient-flow var(--duration-continuous-slower) var(--ease-default) infinite;
 }
 
 /* Emerge/fade gradient text — faded portions lose contrast against page-bg.
@@ -106,55 +105,26 @@
      --_grad-anim-duration (seconds, defaults 8s)
      --_grad-anim-delay    (random negative value to desync gradients on same page) */
 
+/* Animated gradient — GSAP handles all animation (micro.ts).
+   CSS only sets background-size for the larger-than-shape gradient. */
 .gradient--animated.gradient--fill {
   background: var(--_grad-computed);
-  /* Larger-than-shape background so the gradient bands span more pixels = smoother sway */
   background-size: 200% 200%;
   background-position: center;
   border: none;
-  animation-name: anim-gradient-flow;
-  animation-duration: var(--_grad-anim-duration, 12s);
-  animation-delay: var(--_grad-anim-delay, 0s);
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-}
-
-/* Colour cycle — default animates background-color (for CSS-rendered shapes and badges).
-   SVG-rendered shapes override this to animate color instead (see .shape--svg.gradient--cycle in Shape.css). */
-.gradient--cycle {
-  animation-name: anim-colour-cycle-bg;
-  animation-duration: var(--_grad-anim-duration, 20s);
-  animation-delay: var(--_grad-anim-delay, 0s);
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
 }
 
 .gradient--animated.gradient--outline {
   background: linear-gradient(var(--page-bg), var(--page-bg)) padding-box, var(--_grad-computed) border-box;
   background-size: 100% 100%, 300% 300%;
-  animation-name: anim-border-flow;
-  animation-duration: var(--_grad-anim-duration, 8s);
-  animation-delay: var(--_grad-anim-delay, 0s);
-  animation-timing-function: var(--ease-default);
-  animation-iteration-count: infinite;
 }
 
 .gradient--animated.gradient--glass {
   background-size: 300% 300%;
-  animation-name: anim-gradient-flow;
-  animation-duration: var(--_grad-anim-duration, 8s);
-  animation-delay: var(--_grad-anim-delay, 0s);
-  animation-timing-function: var(--ease-default);
-  animation-iteration-count: infinite;
 }
 
 .gradient--animated .gradient__text {
   background-size: 300% 300%;
-  animation-name: anim-gradient-flow;
-  animation-duration: var(--_grad-anim-duration, 8s);
-  animation-delay: var(--_grad-anim-delay, 0s);
-  animation-timing-function: var(--ease-default);
-  animation-iteration-count: infinite;
 }
 
 

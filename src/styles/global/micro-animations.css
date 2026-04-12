@@ -1,398 +1,68 @@
 /**
- * Micro-animations — global animation presets
+ * Micro-animations — static class definitions only
  *
- * Reusable across all atoms: Icon, Badge, Button, Card, etc.
- * Each animation is a class: .anim--{name}:hover triggers on hover.
- * Atoms reference these via their animation enum prop.
+ * All animation is now GSAP (micro.ts via registerTrigger).
+ * This file only defines the .anim--{name} classes so the
+ * render system can identify which animation an element has.
+ * No @keyframes, no CSS animation properties.
  *
- * Categories: movement, scale, opacity, rotation, compound
+ * GSAP reads the class, strips it, and registers the equivalent
+ * GSAP tween through registerTrigger.
  */
 
 
 /* ==========================================================
-   BASE — smooth transition for all animated elements
+   BASE — transition for non-animated hover responses
    ========================================================== */
 
 [class*="anim--"] {
   transition: transform var(--duration-base) var(--ease-expo-out),
               filter var(--duration-base) var(--ease-expo-out),
               opacity var(--duration-base) var(--ease-expo-out);
-  will-change: transform, filter, opacity;
 }
 
 
 /* ==========================================================
-   MOVEMENT
-   ========================================================== */
-
-@keyframes anim-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-@keyframes anim-bounce {
-  0%   { transform: translateY(0); }
-  25%  { transform: translateY(-6px); }
-  45%  { transform: translateY(0); }
-  60%  { transform: translateY(-3px); }
-  75%  { transform: translateY(0); }
-  88%  { transform: translateY(-1px); }
-  100% { transform: translateY(0); }
-}
-
-@keyframes anim-shake {
-  0%   { transform: translateX(0) rotate(0deg); }
-  12%  { transform: translateX(-2px) rotate(-3deg); }
-  24%  { transform: translateX(2px) rotate(3deg); }
-  36%  { transform: translateX(-2px) rotate(-2deg); }
-  48%  { transform: translateX(2px) rotate(2deg); }
-  60%  { transform: translateX(-1px) rotate(-1deg); }
-  72%  { transform: translateX(1px) rotate(1deg); }
-  100% { transform: translateX(0) rotate(0deg); }
-}
-
-@keyframes anim-float {
-  0%   { transform: translateY(0) scale(1); }
-  25%  { transform: translateY(-4px) scale(1.01); }
-  50%  { transform: translateY(-7px) scale(1.02); }
-  75%  { transform: translateY(-4px) scale(1.01); }
-  100% { transform: translateY(0) scale(1); }
-}
-
-@keyframes anim-drift {
-  0%   { transform: translate(0, 0); }
-  25%  { transform: translate(3px, -4px); }
-  50%  { transform: translate(-2px, -6px); }
-  75%  { transform: translate(1px, -3px); }
-  100% { transform: translate(0, 0); }
-}
-
-@keyframes anim-slide-up {
-  0%   { transform: translateY(8px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes anim-slide-down {
-  0%   { transform: translateY(-8px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes anim-slide-left {
-  0%   { transform: translateX(8px); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes anim-slide-right {
-  0%   { transform: translateX(-8px); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes anim-flip {
-  0%   { transform: perspective(400px) rotateY(0deg); }
-  50%  { transform: perspective(400px) rotateY(180deg); }
-  100% { transform: perspective(400px) rotateY(360deg); }
-}
-
-
-/* ==========================================================
-   SCALE
-   ========================================================== */
-
-@keyframes anim-pulse {
-  0%   { transform: scale(1); }
-  20%  { transform: scale(1.12); }
-  40%  { transform: scale(0.97); }
-  60%  { transform: scale(1.05); }
-  80%  { transform: scale(0.99); }
-  100% { transform: scale(1); }
-}
-
-@keyframes anim-ping {
-  0%   { transform: scale(1); opacity: 1; }
-  35%  { transform: scale(1.25); opacity: 0.7; }
-  65%  { transform: scale(0.95); opacity: 1; }
-  85%  { transform: scale(1.03); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes anim-pop {
-  0%   { transform: scale(0.8); opacity: 0; }
-  50%  { transform: scale(1.08); opacity: 1; }
-  75%  { transform: scale(0.97); }
-  100% { transform: scale(1); }
-}
-
-@keyframes anim-squish {
-  0%   { transform: scale(1, 1); }
-  30%  { transform: scale(1.1, 0.9); }
-  50%  { transform: scale(0.93, 1.07); }
-  70%  { transform: scale(1.03, 0.97); }
-  100% { transform: scale(1, 1); }
-}
-
-@keyframes anim-heartbeat {
-  0%   { transform: scale(1); }
-  14%  { transform: scale(1.14); }
-  28%  { transform: scale(1); }
-  42%  { transform: scale(1.1); }
-  70%  { transform: scale(1); }
-}
-
-@keyframes anim-rubber-band {
-  0%   { transform: scaleX(1) scaleY(1); }
-  30%  { transform: scaleX(1.15) scaleY(0.85); }
-  40%  { transform: scaleX(0.85) scaleY(1.15); }
-  50%  { transform: scaleX(1.08) scaleY(0.92); }
-  65%  { transform: scaleX(0.97) scaleY(1.03); }
-  75%  { transform: scaleX(1.02) scaleY(0.98); }
-  100% { transform: scaleX(1) scaleY(1); }
-}
-
-
-/* ==========================================================
-   OPACITY / VISIBILITY
-   ========================================================== */
-
-@keyframes anim-fade {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-@keyframes anim-blink {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0; }
-}
-
-@keyframes anim-flash {
-  0%, 50%, 100% { opacity: 1; }
-  25%, 75%      { opacity: 0; }
-}
-
-@keyframes anim-glint {
-  0%   { filter: brightness(1) drop-shadow(0 0 0 transparent); }
-  30%  { filter: brightness(1.5) drop-shadow(0 0 4px currentColor); }
-  60%  { filter: brightness(1.2) drop-shadow(0 0 8px currentColor); }
-  100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
-}
-
-@keyframes anim-shimmer {
-  0%   { filter: brightness(1); }
-  25%  { filter: brightness(1.3); }
-  50%  { filter: brightness(1); }
-  75%  { filter: brightness(1.2); }
-  100% { filter: brightness(1); }
-}
-
-@keyframes anim-twinkle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.4; transform: scale(0.8); }
-}
-
-
-/* ==========================================================
-   ROTATION
-   ========================================================== */
-
-@keyframes anim-wiggle {
-  0%   { transform: rotate(0deg); }
-  15%  { transform: rotate(-10deg); }
-  30%  { transform: rotate(8deg); }
-  45%  { transform: rotate(-6deg); }
-  60%  { transform: rotate(4deg); }
-  75%  { transform: rotate(-2deg); }
-  100% { transform: rotate(0deg); }
-}
-
-@keyframes anim-swing {
-  0%, 100% { transform: rotate(0deg); transform-origin: top center; }
-  20%      { transform: rotate(10deg); }
-  40%      { transform: rotate(-8deg); }
-  60%      { transform: rotate(4deg); }
-  80%      { transform: rotate(-2deg); }
-}
-
-@keyframes anim-rock {
-  0%, 100% { transform: rotate(0deg); }
-  25%      { transform: rotate(12deg); }
-  75%      { transform: rotate(-12deg); }
-}
-
-@keyframes anim-nod {
-  0%, 100% { transform: translateY(0); }
-  30%      { transform: translateY(-4px); }
-  60%      { transform: translateY(2px); }
-}
-
-
-/* ==========================================================
-   COMPOUND
-   ========================================================== */
-
-@keyframes anim-attention {
-  0%   { transform: scale(1) translateX(0); }
-  15%  { transform: scale(1.06) translateX(-2px); }
-  30%  { transform: scale(1.06) translateX(2px); }
-  45%  { transform: scale(1.03) translateX(-1px); }
-  60%  { transform: scale(1) translateX(0); }
-  100% { transform: scale(1) translateX(0); }
-}
-
-@keyframes anim-celebrate {
-  0%   { transform: scale(1) rotate(0deg); }
-  20%  { transform: scale(1.18) rotate(-8deg); }
-  40%  { transform: scale(1.18) rotate(8deg); }
-  60%  { transform: scale(1.1) rotate(-4deg); }
-  80%  { transform: scale(1.04) rotate(2deg); }
-  100% { transform: scale(1) rotate(0deg); }
-}
-
-@keyframes anim-enter {
-  0%   { transform: translateY(12px) scale(0.9); opacity: 0; }
-  100% { transform: translateY(0) scale(1); opacity: 1; }
-}
-
-@keyframes anim-exit {
-  0%   { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-12px) scale(0.9); opacity: 0; }
-}
-
-/* Gradient flow — animated gradient shift for any component */
-@keyframes anim-border-flow {
-  0%   { background-position: 0 0, 0% 0%; }
-  25%  { background-position: 0 0, 100% 0%; }
-  50%  { background-position: 0 0, 100% 100%; }
-  75%  { background-position: 0 0, 0% 100%; }
-  100% { background-position: 0 0, 0% 0%; }
-}
-
-/* Gradient sway — slow diagonal back-and-forth via background-position on a larger-than-shape gradient. */
-@keyframes anim-gradient-flow {
-  0%   { background-position: 0% 0%; }
-  50%  { background-position: 100% 100%; }
-  100% { background-position: 0% 0%; }
-}
-
-/* Colour cycle — cross-fades through 3 colours set inline via --_cycle-a/b/c.
-   Two keyframes so CSS shapes animate background-color and SVG shapes animate color
-   (which the SVG path picks up via fill:currentColor). Using one or the other avoids
-   painting the wrapper rect behind the SVG path on SVG shapes. */
-@keyframes anim-colour-cycle-bg {
-  0%   { background-color: var(--_cycle-a, var(--_tier-tint)); }
-  33%  { background-color: var(--_cycle-b, var(--_color)); }
-  66%  { background-color: var(--_cycle-c, var(--_tier-emphasis)); }
-  100% { background-color: var(--_cycle-a, var(--_tier-tint)); }
-}
-@keyframes anim-colour-cycle-color {
-  0%   { color: var(--_cycle-a, var(--_tier-tint)); }
-  33%  { color: var(--_cycle-b, var(--_color)); }
-  66%  { color: var(--_cycle-c, var(--_tier-emphasis)); }
-  100% { color: var(--_cycle-a, var(--_tier-tint)); }
-}
-
-/* SVG fill cycle — directly animates fill on the `<g>` inside the SVG path. Used so the
-   cycle works even when the element has no .color--{name} class (blend/rainbow cases). */
-@keyframes anim-colour-cycle-svg-fill {
-  0%   { fill: var(--_cycle-a, var(--_tier-tint)); }
-  33%  { fill: var(--_cycle-b, var(--_color)); }
-  66%  { fill: var(--_cycle-c, var(--_tier-emphasis)); }
-  100% { fill: var(--_cycle-a, var(--_tier-tint)); }
-}
-
-/* Text highlight cycle — animates --_highlight-bg so the gradient bar shifts colour. */
-@keyframes anim-colour-cycle-highlight {
-  0%   { --_highlight-bg: var(--_tier-tint); }
-  33%  { --_highlight-bg: var(--_tier-mid); }
-  66%  { --_highlight-bg: var(--_color); }
-  100% { --_highlight-bg: var(--_tier-tint); }
-}
-
-
-/* ==========================================================
-   DEFINITIONS — each .anim--{name} sets internal tokens
-   Separate from triggers so any trigger mode can play any animation.
+   ANIMATION CLASSES — identity only, no animation properties
+   GSAP micro.ts reads these and converts to tweens.
    ========================================================== */
 
 /* Movement */
-.anim--spin        { --_anim: anim-spin;        --_anim-dur: var(--duration-continuous);       --_anim-ease: var(--ease-expo-out);  --_anim-count: infinite; }
-.anim--bounce      { --_anim: anim-bounce;      --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--shake       { --_anim: anim-shake;        --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--float       { --_anim: anim-float;        --_anim-dur: var(--duration-continuous-slower); --_anim-ease: var(--ease-expo-out);  --_anim-count: infinite; }
-.anim--drift       { --_anim: anim-drift;        --_anim-dur: var(--duration-continuous-drift);  --_anim-ease: var(--ease-expo-out);  --_anim-count: infinite; }
-.anim--slide-up    { --_anim: anim-slide-up;     --_anim-dur: var(--duration-slower);            --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--slide-down  { --_anim: anim-slide-down;   --_anim-dur: var(--duration-slower);            --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--slide-left  { --_anim: anim-slide-left;   --_anim-dur: var(--duration-slower);            --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--slide-right { --_anim: anim-slide-right;  --_anim-dur: var(--duration-slower);            --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--flip        { --_anim: anim-flip;          --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--spin        {}
+.anim--bounce      {}
+.anim--shake       {}
+.anim--float       {}
+.anim--drift       {}
+.anim--slide-up    {}
+.anim--slide-down  {}
+.anim--slide-left  {}
+.anim--slide-right {}
+.anim--flip        {}
 
 /* Scale */
-.anim--pulse       { --_anim: anim-pulse;        --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--ping        { --_anim: anim-ping;          --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--pop         { --_anim: anim-pop;            --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-bounce);    --_anim-count: 1; }
-.anim--squish      { --_anim: anim-squish;        --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--heartbeat   { --_anim: anim-heartbeat;    --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: infinite; }
-.anim--rubber-band { --_anim: anim-rubber-band;  --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--pulse       {}
+.anim--ping        {}
+.anim--pop         {}
+.anim--squish      {}
+.anim--heartbeat   {}
+.anim--rubber-band {}
 
 /* Opacity */
-.anim--fade        { --_anim: anim-fade;          --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-default);   --_anim-count: 1; }
-.anim--blink       { --_anim: anim-blink;          --_anim-dur: var(--duration-continuous);       --_anim-ease: var(--ease-default);   --_anim-count: 2; }
-.anim--flash       { --_anim: anim-flash;          --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-default);   --_anim-count: 1; }
-.anim--glint       { --_anim: anim-glint;          --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--shimmer     { --_anim: anim-shimmer;        --_anim-dur: var(--duration-continuous-slow);  --_anim-ease: var(--ease-default);   --_anim-count: infinite; }
-.anim--twinkle     { --_anim: anim-twinkle;        --_anim-dur: var(--duration-continuous-slow);  --_anim-ease: var(--ease-default);   --_anim-count: infinite; }
+.anim--fade        {}
+.anim--blink       {}
+.anim--flash       {}
+.anim--glint       {}
+.anim--shimmer     {}
+.anim--twinkle     {}
 
 /* Rotation */
-.anim--wiggle      { --_anim: anim-wiggle;        --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--swing       { --_anim: anim-swing;          --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--rock        { --_anim: anim-rock;            --_anim-dur: var(--duration-continuous-slow);  --_anim-ease: var(--ease-default);   --_anim-count: infinite; }
-.anim--nod         { --_anim: anim-nod;              --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
+.anim--wiggle      {}
+.anim--swing       {}
+.anim--rock        {}
+.anim--nod         {}
 
 /* Compound */
-.anim--attention   { --_anim: anim-attention;      --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--celebrate   { --_anim: anim-celebrate;      --_anim-dur: var(--duration-long);             --_anim-ease: var(--ease-bounce);    --_anim-count: 1; }
-.anim--enter       { --_anim: anim-enter;          --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-.anim--exit        { --_anim: anim-exit;            --_anim-dur: var(--duration-slower);           --_anim-ease: var(--ease-expo-out);  --_anim-count: 1; }
-
-
-/* ==========================================================
-   TRIGGERS — when animation plays
-   Uses individual animation properties (not shorthand) because
-   shorthand with multiple var() tokens fails silently in some browsers.
-   Icon owns the trigger via data-anim-trigger attribute.
-   ========================================================== */
-
-/* Hover — default for interactive elements (no data-anim-trigger = hover) */
-[class*="anim--"]:not([data-anim-trigger]):hover,
-[class*="anim--"]:not([data-anim-trigger]):focus-within {
-  animation-name: var(--_anim);
-  animation-duration: var(--_anim-dur);
-  animation-timing-function: var(--_anim-ease);
-  animation-iteration-count: var(--_anim-count);
-}
-
-/* Autoplay — plays continuously from page load */
-[data-anim-trigger="autoplay"][class*="anim--"],
-/* Loop — plays continuously (alias for autoplay) */
-[data-anim-trigger="loop"][class*="anim--"] {
-  animation-name: var(--_anim);
-  animation-duration: var(--_anim-dur);
-  animation-timing-function: var(--_anim-ease);
-  animation-iteration-count: infinite;
-}
-
-/* Viewport — plays continuously while visible, static when not
-   JS toggles .anim--playing on enter/exit */
-[data-anim-trigger="viewport"][class*="anim--"].anim--playing {
-  animation-name: var(--_anim);
-  animation-duration: var(--_anim-dur);
-  animation-timing-function: var(--_anim-ease);
-  animation-iteration-count: infinite;
-}
-
-/* Interval — plays once on timed interval while visible
-   JS toggles .anim--playing on each tick */
-[data-anim-trigger="interval"][class*="anim--"].anim--playing {
-  animation-name: var(--_anim);
-  animation-duration: var(--_anim-dur);
-  animation-timing-function: var(--_anim-ease);
-  animation-iteration-count: 1;
-}
+.anim--attention   {}
+.anim--celebrate   {}
+.anim--enter       {}
+.anim--exit        {}

@@ -144,12 +144,12 @@ const ANIMATIONS: Record<string, AnimBuilder> = {
 // ─── Init ───────────────────────────────────────────────
 
 /**
- * Convert CSS micro-animations to GSAP and register through
- * the global trigger system. Call once on page load.
+ * Convert CSS micro-animations and gradient animations to GSAP,
+ * registered through the global trigger system. Call once on page load.
  */
 export function initMicroAnimations() {
+  // 1. Named animations (anim--bounce, anim--spin, etc.)
   document.querySelectorAll<HTMLElement>('[class*="anim--"]').forEach(el => {
-    // Find which animation this element has
     const animClass = [...el.classList].find(cls => cls.startsWith('anim--') && cls !== 'anim--playing');
     if (!animClass) return;
 
@@ -157,19 +157,170 @@ export function initMicroAnimations() {
     const builder = ANIMATIONS[animName];
     if (!builder) return;
 
-    // Read trigger from data attribute
     const trigger = el.dataset.animTrigger || 'hover';
 
-    // Strip CSS animation classes — GSAP owns this now
+    // Strip CSS animation — GSAP owns this now
     el.classList.remove(animClass);
     el.classList.remove('anim--playing');
+    el.style.animationName = 'none';
 
-    // Register through global trigger system
     registerTrigger({
       el,
       trigger,
       onEnter: () => builder(el),
-      onStatic: () => {}, // at rest = no animation
+      onStatic: () => {},
+    });
+  });
+
+  // 2. Gradient flow animations (gradient--animated on CSS-rendered elements)
+  //    SVG gradient rotation is handled by gradient.ts — this covers CSS background-position
+  document.querySelectorAll<HTMLElement>('.gradient--animated:not([data-icon-grad-anim])').forEach(el => {
+    const dur = parseFloat(getComputedStyle(el).getPropertyValue('--_grad-anim-duration') || '') || 12;
+    const phase = Math.random();
+
+    // Kill CSS animation
+    el.style.animationName = 'none';
+
+    // Determine what to tween based on variant
+    const isOutline = el.classList.contains('gradient--outline');
+    const gradText = el.querySelector('.gradient__text') as HTMLElement;
+    if (gradText) gradText.style.animationName = 'none';
+
+    const playGradFlow = () => {
+      const tl = gsap.timeline();
+      if (isOutline) {
+        // Border flow: animate background-position of the border-box gradient
+        tl.fromTo(el,
+          { backgroundPosition: '0 0, 0% 0%' },
+          { backgroundPosition: '0 0, 100% 100%', duration: dur / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 }
+        );
+      } else {
+        // Fill/glass: sway background-position
+        tl.fromTo(el,
+          { backgroundPosition: '0% 0%' },
+          { backgroundPosition: '100% 100%', duration: dur / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 }
+        );
+      }
+      if (gradText) {
+        tl.fromTo(gradText,
+          { backgroundPosition: '0% 0%' },
+          { backgroundPosition: '100% 100%', duration: dur / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 },
+          0
+        );
+      }
+      tl.progress(phase); // desync
+      return tl;
+    };
+
+    registerTrigger({
+      el,
+      trigger: 'autoplay',
+      onEnter: playGradFlow,
+      onStatic: () => {},
+    });
+  });
+
+  // 3. Text highlight cycle (text-highlight--cycle)
+  document.querySelectorAll<HTMLElement>('.text-highlight--cycle').forEach(el => {
+    const dur = parseFloat(getComputedStyle(el).getPropertyValue('--_grad-anim-duration') || '') || 8;
+    const cs = getComputedStyle(el);
+    const tint = cs.getPropertyValue('--_tier-tint').trim();
+    const mid = cs.getPropertyValue('--_tier-mid').trim();
+    const base = cs.getPropertyValue('--_color').trim();
+    if (!tint || !mid || !base) return;
+
+    el.style.animationName = 'none';
+
+    const playCycle = () => {
+      const segDur = dur / 3;
+      return gsap.timeline()
+        .to(el, { '--_highlight-bg': mid, duration: segDur, ease: 'sine.inOut' })
+        .to(el, { '--_highlight-bg': base, duration: segDur, ease: 'sine.inOut' })
+        .to(el, { '--_highlight-bg': tint, duration: segDur, ease: 'sine.inOut' });
+    };
+
+    registerTrigger({
+      el,
+      trigger: 'autoplay',
+      onEnter: playCycle,
+      onStatic: () => {},
+    });
+  });
+
+  // 4. Underline/divider animated gradients
+  document.querySelectorAll<HTMLElement>('.underline--animated, .divider--animated').forEach(el => {
+    const isDivider = el.classList.contains('divider--animated');
+    const dur = 6;
+
+    el.style.animationName = 'none';
+
+    const playFlow = () => {
+      if (isDivider) {
+        return gsap.timeline().fromTo(el,
+          { backgroundPosition: '0% 0%' },
+          { backgroundPosition: '0% 100%', duration: dur / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 }
+        );
+      }
+      return gsap.timeline().fromTo(el,
+        { backgroundPosition: '0% 0%' },
+        { backgroundPosition: '100% 0%', duration: dur / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 }
+      );
+    };
+
+    registerTrigger({
+      el,
+      trigger: 'autoplay',
+      onEnter: playFlow,
+      onStatic: () => {},
+    });
+  });
+
+  // 5. Colour cycle animations (gradient--cycle on CSS-rendered elements)
+  document.querySelectorAll<HTMLElement>('.gradient--cycle:not([data-icon-grad-anim])').forEach(el => {
+    const dur = parseFloat(getComputedStyle(el).getPropertyValue('--_grad-anim-duration') || '') || 20;
+    const isSvg = el.classList.contains('shape--svg');
+
+    // Kill CSS animation
+    el.style.animationName = 'none';
+    if (isSvg) {
+      const svgG = el.querySelector('.shape__svg g') as HTMLElement;
+      if (svgG) svgG.style.animationName = 'none';
+    }
+
+    // Read cycle tokens
+    const cs = getComputedStyle(el);
+    const a = cs.getPropertyValue('--_cycle-a').trim() || cs.getPropertyValue('--_tier-tint').trim();
+    const b = cs.getPropertyValue('--_cycle-b').trim() || cs.getPropertyValue('--_color').trim();
+    const c = cs.getPropertyValue('--_cycle-c').trim() || cs.getPropertyValue('--_tier-emphasis').trim();
+
+    if (!a || !b || !c) return;
+
+    const playCycle = () => {
+      const tl = gsap.timeline();
+      const segDur = dur / 3;
+
+      if (isSvg) {
+        // SVG: animate fill on the <g>
+        const svgG = el.querySelector('.shape__svg g') as HTMLElement;
+        if (svgG) {
+          tl.to(svgG, { fill: b, duration: segDur, ease: 'sine.inOut' })
+            .to(svgG, { fill: c, duration: segDur, ease: 'sine.inOut' })
+            .to(svgG, { fill: a, duration: segDur, ease: 'sine.inOut' });
+        }
+      } else {
+        // CSS: animate background-color
+        tl.to(el, { backgroundColor: b, duration: segDur, ease: 'sine.inOut' })
+          .to(el, { backgroundColor: c, duration: segDur, ease: 'sine.inOut' })
+          .to(el, { backgroundColor: a, duration: segDur, ease: 'sine.inOut' });
+      }
+      return tl;
+    };
+
+    registerTrigger({
+      el,
+      trigger: 'autoplay',
+      onEnter: playCycle,
+      onStatic: () => {},
     });
   });
 }
