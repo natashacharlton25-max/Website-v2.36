@@ -82,7 +82,8 @@
   font-weight: var(--font-semibold);
   line-height: var(--leading-tight);
   color: var(--_heading-color);
-  margin-bottom: var(--space-md);
+  margin-top: var(--content-flow-before-h2);
+  margin-bottom: var(--content-flow-after-heading);
 }
 
 .heading--h3 {
@@ -90,7 +91,8 @@
   font-weight: var(--font-semibold);
   line-height: var(--leading-snug);
   color: var(--_heading-color);
-  margin-bottom: var(--space-md);
+  margin-top: var(--content-flow-before-h3);
+  margin-bottom: var(--content-flow-after-heading);
 }
 
 .heading--h4 {
@@ -98,7 +100,8 @@
   font-weight: var(--font-medium);
   line-height: var(--leading-snug);
   color: var(--_heading-color);
-  margin-bottom: var(--space-sm);
+  margin-top: var(--content-flow-before-h4);
+  margin-bottom: var(--content-flow-after-heading);
 }
 
 .heading--h5 {
@@ -106,7 +109,8 @@
   font-weight: var(--font-medium);
   line-height: var(--leading-snug);
   color: var(--_heading-color);
-  margin-bottom: var(--space-sm);
+  margin-top: var(--content-flow-before-h4);
+  margin-bottom: var(--content-flow-after-heading);
 }
 
 .heading--h6 {
@@ -114,8 +118,12 @@
   font-weight: var(--font-bold);
   line-height: var(--leading-snug);
   color: var(--_heading-color);
-  margin-bottom: var(--space-sm);
+  margin-top: var(--content-flow-before-h4);
+  margin-bottom: var(--content-flow-after-heading);
 }
+
+/* First child heading in a section — no top margin */
+.section-atom > .heading:first-child { margin-top: 0; }
 
 
 /* ── Text sizes — for gradient body text via Heading ── */
@@ -225,10 +233,21 @@
   display: flex;
   align-items: center;
   gap: var(--space-lg);
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--content-flow-after-heading);
 }
 
-.heading-wrap .heading { margin-bottom: 0; }
+/* Heading inside wrap — strip its own margins, the wrap handles spacing */
+.heading-wrap .heading { margin: 0; }
+
+/* Content-flow top margin on the wrap itself so icon + heading move together */
+.heading-wrap:has(.heading--h2) { margin-top: var(--content-flow-before-h2); }
+.heading-wrap:has(.heading--h3) { margin-top: var(--content-flow-before-h3); }
+.heading-wrap:has(.heading--h4),
+.heading-wrap:has(.heading--h5),
+.heading-wrap:has(.heading--h6) { margin-top: var(--content-flow-before-h4); }
+
+/* First child wrap in a section — no top margin */
+.section-atom > .heading-wrap:first-child { margin-top: 0; }
 
 .heading-wrap__content {
   display: flex;
