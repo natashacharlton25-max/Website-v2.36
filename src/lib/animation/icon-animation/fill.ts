@@ -26,7 +26,7 @@ import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getMotionMode, getHoverMode, getElementColor, getGhostColor, toHex, getScrollContainer } from '../animation-config';
+import { getMotionMode, getHoverMode, getElementColor, getGhostColor, toHex, getScrollContainer, registerTrigger } from '../animation-config';
 import { addVariant, type DrawVariant } from './draw-shared';
 
 gsap.registerPlugin(MorphSVGPlugin, MotionPathPlugin, ScrollTrigger);
@@ -313,248 +313,78 @@ export function initFillIcon(el: HTMLElement) {
     return tl;
   };
 
-  switch (trigger) {
-    case 'viewport': {
-      ScrollTrigger.create({
-        trigger: el,
-        scroller: osViewport || undefined,
-        start: 'top 60%',
-        once: mode === 'once',
-        onEnter: () => { if (!isFilled) { playFill(false); isFilled = true; } },
-        onLeaveBack: mode !== 'once' ? () => { playFill(true); isFilled = false; } : undefined,
-      });
-      break;
-    }
-    case 'rainbow': {
-      // Rainbow scrub: cycles fill through all 7 rainbow tokens on scroll
-      // Remove clones (not needed)
-      fillClones.forEach(c => c.remove());
-      fillClones.length = 0;
-
-      let rainbowTl: gsap.core.Timeline | null = null;
-
-      const buildRainbow = () => {
-        if (rainbowTl) { rainbowTl.scrollTrigger?.kill(); rainbowTl.kill(); }
-
-        const cs = getComputedStyle(document.documentElement);
-        const colors = [1, 2, 3, 4, 5, 6, 7].map(n =>
-          toHex(cs.getPropertyValue(`--rainbow-${n}`).trim() || '#888')
-        );
-
-        origPaths.forEach(p => {
-          (p as HTMLElement).style.fill = colors[0];
-          if (showOutline) {
-            const sw = g!.getAttribute('stroke-width') || '2';
-            (p as HTMLElement).style.stroke = 'currentColor';
-            (p as HTMLElement).style.strokeWidth = sw;
-          }
-        });
-
-        rainbowTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: el,
-            scroller: osViewport || undefined,
-            start: 'top 90%',
-            end: 'bottom 10%',
-            scrub: true,
-          },
-        });
-
-        const segDur = 1 / (colors.length - 1);
-        origPaths.forEach(path => {
-          colors.forEach((color, ci) => {
-            if (ci === 0) return;
-            const props: Record<string, any> = { fill: color, duration: segDur, ease: 'none' };
-            if (showOutline) props.stroke = color;
-            rainbowTl!.to(path, props, segDur * (ci - 1));
-          });
-        });
-      };
-
-      buildRainbow();
-      rainbowScrollElements.push({ el, tl: rainbowTl!, rebuild: buildRainbow });
-      break;
-    }
-    case 'scrub': {
-      // Scrub: fill progress tied to scroll
-      fillClones.forEach(c => { c.setAttribute('fill', getColor()); });
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: el,
-          scroller: osViewport || undefined,
-          start: 'top 80%',
-          end: 'top 20%',
-          scrub: true,
-        },
-      });
-      const scrubPerPath = fillClones.length > 1 ? staggerTotal / (fillClones.length - 1) : 0;
-      const scrubFade = mode === 'fade';
-      fillClones.forEach((clone, i) => {
-        tl.fromTo(clone,
-          scrubFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 },
-          scrubFade ? { opacity: 1, duration: 1, ease: 'none' } : { scale: 1, opacity: 1, duration: 1, ease: 'none' },
-          i * scrubPerPath);
-      });
-      break;
-    }
-    case 'hover':
-    default: {
-      // Icons with draw: initDrawIcon owns hover — skip fill hover handlers
-      if (el.classList.contains('icon') && hasDraw) break;
-
-      const hoverTarget = el.closest('button, a') || el;
-      let activeTl: gsap.core.Timeline | null = null;
-
-      // Trigger-time gating helper — wraps a handler so it runs only when
-      // motion is on AND hover is allowed. Focus is treated as "keyboard
-      // hover" — blocked by hover=none, same as mouse hover.
-      //
-      // Read at event time (not init time) so Your View Panel changes
-      // apply live without page reload.
-      //
-      // Click events bypass this gate entirely (explicit user intent,
-      // only blocked by motion=none).
-      const gate = (handler: (e: Event) => void) => (e: Event) => {
-        if (getMotionMode() === 'none') return;
-        const isHoverLikeEvent = e.type === 'mouseenter' || e.type === 'mouseleave'
-          || e.type === 'focusin' || e.type === 'focusout';
-        if (isHoverLikeEvent && getHoverMode() === 'none') return;
-        handler(e);
-      };
-
-      // Helper: fade clones out smoothly, then run callback
-      const fadeOutThenPlay = (cb: () => void) => {
-        if (activeTl) activeTl.kill();
-        const fadeOut = gsap.timeline();
-        // Border disappears instantly
+  // Scroll-driven triggers are special — they manage their own ScrollTrigger
+  if (trigger === 'rainbow') {
+    fillClones.forEach(c => c.remove());
+    fillClones.length = 0;
+    let rainbowTl: gsap.core.Timeline | null = null;
+    const buildRainbow = () => {
+      if (rainbowTl) { rainbowTl.scrollTrigger?.kill(); rainbowTl.kill(); }
+      const cs = getComputedStyle(document.documentElement);
+      const colors = [1, 2, 3, 4, 5, 6, 7].map(n =>
+        toHex(cs.getPropertyValue(`--rainbow-${n}`).trim() || '#888')
+      );
+      origPaths.forEach(p => {
+        (p as HTMLElement).style.fill = colors[0];
         if (showOutline) {
-          origPaths.forEach(p => gsap.set(p, { drawSVG: '0%' }));
+          const sw = g!.getAttribute('stroke-width') || '2';
+          (p as HTMLElement).style.stroke = 'currentColor';
+          (p as HTMLElement).style.strokeWidth = sw;
         }
-        // Then fill fades + shrinks out
-        fillClones.forEach(c => {
-          if (isFade) {
-            fadeOut.to(c, { opacity: 0, duration: 0.5, ease: 'power3.in' }, 0);
-          } else {
-            fadeOut.to(c, { opacity: 0, scale: 0.3, duration: 0.5, ease: 'power3.in' }, 0);
-          }
+      });
+      rainbowTl = gsap.timeline({
+        scrollTrigger: { trigger: el, scroller: osViewport || undefined, start: 'top 90%', end: 'bottom 10%', scrub: true },
+      });
+      const segDur = 1 / (colors.length - 1);
+      origPaths.forEach(path => {
+        colors.forEach((color, ci) => {
+          if (ci === 0) return;
+          const props: Record<string, any> = { fill: color, duration: segDur, ease: 'none' };
+          if (showOutline) props.stroke = color;
+          rainbowTl!.to(path, props, segDur * (ci - 1));
         });
-        fadeOut.call(() => {
-          fillClones.forEach(c => gsap.set(c, isFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 }));
-          if (showOutline) origPaths.forEach(p => gsap.set(p, { drawSVG: '0%', opacity: 1 }));
-          cb();
-        });
-        activeTl = fadeOut;
+      });
+    };
+    buildRainbow();
+    rainbowScrollElements.push({ el, tl: rainbowTl!, rebuild: buildRainbow });
+  } else if (trigger === 'scrub') {
+    fillClones.forEach(c => { c.setAttribute('fill', getColor()); });
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: el, scroller: osViewport || undefined, start: 'top 80%', end: 'top 20%', scrub: true },
+    });
+    const scrubPerPath = fillClones.length > 1 ? staggerTotal / (fillClones.length - 1) : 0;
+    const scrubFade = mode === 'fade';
+    fillClones.forEach((clone, i) => {
+      tl.fromTo(clone,
+        scrubFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 },
+        scrubFade ? { opacity: 1, duration: 1, ease: 'none' } : { scale: 1, opacity: 1, duration: 1, ease: 'none' },
+        i * scrubPerPath);
+    });
+  } else {
+    // Icons with draw: initDrawIcon owns hover — skip fill hover handlers
+    if (el.classList.contains('icon') && hasDraw && trigger === 'hover') {
+      // draw.ts handles this via registerTrigger
+    } else {
+      // Build enter/leave based on fill mode
+      const enterFn = () => {
+        if (!isFilled) { playFill(false); isFilled = true; }
+        return playFill(false);
       };
+      const leaveFn = (mode === 'yoyo' || mode === 'ghost')
+        ? () => { const tl = playFill(true); isFilled = false; return tl; }
+        : undefined;
 
-      // Instant reset (for first trigger or when not visible)
-      const resetClones = () => {
-        if (activeTl) { activeTl.kill(); activeTl = null; }
-        fillClones.forEach(c => gsap.set(c, isFade ? { opacity: 0 } : { scale: 0.01, opacity: 0 }));
-      };
-
-      switch (mode) {
-        case 'yoyo': {
-          const enter = () => {
-            if (isFilled) { fadeOutThenPlay(() => { activeTl = playFill(false); }); }
-            else { resetClones(); activeTl = playFill(false); }
-            isFilled = true;
-          };
-          const leave = () => { if (activeTl) activeTl.kill(); activeTl = playFill(true); isFilled = false; };
-          hoverTarget.addEventListener('mouseenter', gate(enter));
-          hoverTarget.addEventListener('mouseleave', gate(leave));
-          hoverTarget.addEventListener('focusin', gate(enter));
-          hoverTarget.addEventListener('focusout', gate(leave));
-          break;
-        }
-        case 'static': {
-          hoverTarget.addEventListener('mouseenter', gate(() => {
-            fadeOutThenPlay(() => { activeTl = playFill(false); });
-          }));
-          break;
-        }
-        case 'twinkle': {
-          // Starts filled. Each hover: pieces randomly dim to ~10% then pop back to full
+      registerTrigger({
+        el,
+        trigger,
+        onEnter: enterFn,
+        onLeave: leaveFn,
+        onStatic: () => {
+          // Static fallback: show filled state
           fillClones.forEach(c => gsap.set(c, { scale: 1, opacity: 1 }));
           isFilled = true;
-
-          hoverTarget.addEventListener('mouseenter', gate(() => {
-            if (activeTl) activeTl.kill();
-            const tl = gsap.timeline();
-            const pathCount = fillClones.length;
-            const spread = pathCount > 1 ? 1.2 / (pathCount - 1) : 0;
-            // Random order each time
-            const order = Array.from({ length: pathCount }, (_, i) => i).sort(() => Math.random() - 0.5);
-
-            fillClones.forEach((clone, i) => {
-              const delay = order.indexOf(i) * spread;
-              // Dim + slight shrink
-              tl.to(clone, { opacity: 0.1, scale: 0.85, duration: 0.4, ease: 'power3.in' }, delay);
-              // Pop back with chosen ease
-              tl.to(clone, { opacity: 1, scale: 1, duration: 0.6, ease: easeType }, delay + 0.4);
-            });
-
-            activeTl = tl;
-          }));
-          break;
-        }
-        case 'ghost': {
-          // Start at ghost color, animate to full on hover, return to ghost on leave
-          const getGhostFill = () => getGhostColor(el);
-          fillClones.forEach(c => gsap.set(c, { opacity: 1, scale: 1, fill: getGhostFill() }));
-          if (showOutline) {
-            origPaths.forEach(p => { (p as HTMLElement).style.stroke = getGhostFill(); });
-          }
-          const ghostEnter = () => {
-            if (activeTl) activeTl.kill();
-            activeTl = gsap.timeline();
-            const target = getTargetColor();
-            fillClones.forEach(c => {
-              gsap.set(c, { scale: 1, opacity: 1 });
-              activeTl!.to(c, { fill: target, duration: combinedDuration, ease: easeType }, 0);
-            });
-            if (showOutline) {
-              origPaths.forEach(p => {
-                activeTl!.to(p, { stroke: target, duration: combinedDuration, ease: easeType }, 0);
-              });
-            }
-          };
-          const ghostLeave = () => {
-            if (activeTl) activeTl.kill();
-            activeTl = gsap.timeline();
-            const ghostC = getGhostFill();
-            fillClones.forEach(c => {
-              activeTl!.to(c, { fill: ghostC, duration: combinedDuration * 0.6, ease: 'power2.in' }, 0);
-            });
-            if (showOutline) {
-              origPaths.forEach(p => {
-                activeTl!.to(p, { stroke: ghostC, duration: combinedDuration * 0.6, ease: 'power2.in' }, 0);
-              });
-            }
-          };
-          hoverTarget.addEventListener('mouseenter', gate(ghostEnter));
-          hoverTarget.addEventListener('mouseleave', gate(ghostLeave));
-          hoverTarget.addEventListener('focusin', gate(ghostEnter));
-          hoverTarget.addEventListener('focusout', gate(ghostLeave));
-          break;
-        }
-        case 'fade':
-        default: {
-          // once/fade — fill on hover. Smooth fade out before replay on retrigger.
-          const doFill = () => {
-            if (isFilled) {
-              fadeOutThenPlay(() => { activeTl = playFill(false); });
-            } else {
-              resetClones();
-              activeTl = playFill(false);
-            }
-            isFilled = true;
-          };
-          hoverTarget.addEventListener('mouseenter', gate(doFill));
-          hoverTarget.addEventListener('focusin', gate(doFill));
-          break;
-        }
-      }
-      break;
+        },
+      });
     }
   }
 }

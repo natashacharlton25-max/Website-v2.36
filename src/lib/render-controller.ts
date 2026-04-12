@@ -198,15 +198,13 @@ function transformTextonly(root: HTMLElement) {
 
 // ─── Reduced transforms ─────────────────────────────────
 
-function transformReduced(root: HTMLElement) {
-  // Strip animation prop classes only
-  root.querySelectorAll<HTMLElement>('[class*="anim--"]').forEach(el => {
-    stripClasses(el, cls => cls.startsWith('anim--'));
-  });
-  root.querySelectorAll<HTMLElement>('.gradient--animated').forEach(el => {
-    el.classList.remove('gradient--animated');
-    el.classList.remove('gradient--cycle');
-  });
+function transformReduced(_root: HTMLElement) {
+  // Reduced mode: animation systems handle their own gating.
+  // - GSAP animations: registerTrigger queues all into viewport stagger
+  // - CSS animations: anim-trigger.ts converts to viewport-once
+  // - Gradient animations: stopped by CSS (no gradient--animated class removal needed,
+  //   animation-config.isReduced gates the JS side)
+  // No DOM transforms needed — the animation layer owns reduced behaviour.
 }
 
 // ─── Mode registry ──────────────────────────────────────

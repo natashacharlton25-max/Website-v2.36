@@ -43,10 +43,9 @@ export function getRenderMode(): RenderMode {
 }
 
 export function prefersReducedMotion(): boolean {
-  const wrapper = document.querySelector('#a11y-content-wrapper');
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-    wrapper?.classList.contains('a11y-reduce-motion') === true ||
-    wrapper?.classList.contains('a11y-text-only') === true;
+  // Only check OS-level preference — app's reduced mode is handled
+  // by isReduced in getAnimationConfig() (viewport stagger queue)
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 // ================================================================
@@ -65,6 +64,8 @@ export interface AnimationConfig {
   isInstant: boolean;
   /** Whether animation/hover should be slowed down */
   isGentle: boolean;
+  /** Reduced mode — viewport stagger queue, gentle speed, no hover triggers */
+  isReduced: boolean;
   /** Base duration multiplier: 1 for full, 2 for gentle */
   durationScale: number;
   /** Hover duration multiplier: 0 for instant, 1 for full, 2 for gentle */
@@ -94,18 +95,21 @@ export function getAnimationConfig(): AnimationConfig {
   const motion = getMotionMode();
   const hover = getHoverMode();
   const render = getRenderMode();
-  const isGentle = motion === 'gentle' || hover === 'gentle';
-  const durationScale = motion === 'gentle' ? 2 : 1;
-  const hoverDurationScale = hover === 'instant' ? 0 : hover === 'gentle' ? 2 : 1;
+  const isReduced = render === 'reduced';
+  // Reduced mode forces gentle speed
+  const isGentle = isReduced || motion === 'gentle' || hover === 'gentle';
+  const durationScale = isReduced ? 2 : motion === 'gentle' ? 2 : 1;
+  const hoverDurationScale = hover === 'instant' ? 0 : (isReduced || hover === 'gentle') ? 2 : 1;
 
   return {
     motion,
     hover,
     render,
     canAnimate: motion !== 'none' && render !== 'textonly',
-    canHover: hover !== 'none',
+    canHover: hover !== 'none' && !isReduced,
     isInstant: hover === 'instant',
     isGentle,
+    isReduced,
     durationScale,
     hoverDurationScale,
     duration: (base = 2) => base * durationScale,
@@ -230,9 +234,75 @@ export interface TriggerOptions {
   intervalMs?: number;
 }
 
+// ================================================================
+// REDUCED MODE — viewport stagger queue
+// ================================================================
+
+/**
+ * Per-section animation queue for reduced mode.
+ * All animations in a section play one at a time, sequentially,
+ * with a 3s initial delay when the section enters the viewport.
+ */
+const sectionQueues = new Map<Element, { entries: Array<() => any>; started: boolean }>();
+
+function getSection(el: HTMLElement): Element | null {
+  return el.closest('.section-atom, section, [class*="section"]');
+}
+
+function queueReducedAnimation(el: HTMLElement, onEnter: () => any) {
+  const section = getSection(el) || document.body;
+  if (!sectionQueues.has(section)) {
+    sectionQueues.set(section, { entries: [], started: false });
+  }
+  const queue = sectionQueues.get(section)!;
+  queue.entries.push(onEnter);
+
+  // Set up viewport trigger for the section (once)
+  if (!queue.started) {
+    queue.started = true;
+    const scroller = getScrollContainer();
+    import('gsap/ScrollTrigger').then(({ ScrollTrigger: ST }) => {
+      ST.create({
+        trigger: section as HTMLElement,
+        scroller: scroller || undefined,
+        start: 'top 60%',
+        once: true,
+        onEnter: () => {
+          // 3s initial delay, then play queue sequentially
+          import('gsap').then(({ gsap }) => {
+            gsap.delayedCall(3, () => playQueue(queue.entries));
+          });
+        },
+      });
+    });
+  }
+}
+
+function playQueue(entries: Array<() => any>, index = 0) {
+  if (index >= entries.length) return;
+  const tl = entries[index]();
+  if (tl?.eventCallback) {
+    tl.eventCallback('onComplete', () => {
+      import('gsap').then(({ gsap }) => {
+        gsap.delayedCall(0.5, () => playQueue(entries, index + 1));
+      });
+    });
+  } else {
+    // No timeline returned, move to next after a brief pause
+    import('gsap').then(({ gsap }) => {
+      gsap.delayedCall(1.5, () => playQueue(entries, index + 1));
+    });
+  }
+}
+
+// ================================================================
+
 /**
  * Register animation triggers — centralises hover/focus/click/viewport logic.
  * Respects motion and hover modes automatically.
+ *
+ * Reduced mode: all triggers override to viewport stagger queue —
+ * animations play one at a time per section at gentle speed.
  */
 export function registerTrigger(opts: TriggerOptions): void {
   const {
@@ -242,10 +312,17 @@ export function registerTrigger(opts: TriggerOptions): void {
   } = opts;
 
   const scroller = getScrollContainer();
+  const config = getAnimationConfig();
 
   // Static fallback when motion is none
-  if (!getAnimationConfig().canAnimate && onStatic) {
+  if (!config.canAnimate && onStatic) {
     onStatic();
+  }
+
+  // Reduced mode: queue all animations for viewport stagger
+  if (config.isReduced) {
+    queueReducedAnimation(el, onEnter);
+    return;
   }
 
   // ────────────────────────────────────────────────────────────

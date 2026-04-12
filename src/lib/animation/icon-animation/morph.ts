@@ -29,7 +29,7 @@ import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getMotionMode, getHoverMode, getScrollContainer } from '../animation-config';
+import { getMotionMode, getHoverMode, getScrollContainer, registerTrigger } from '../animation-config';
 
 gsap.registerPlugin(MorphSVGPlugin, MotionPathPlugin, ScrollTrigger);
 
@@ -489,36 +489,12 @@ export function initMorphIcon(el: HTMLElement) {
     doToggle();
   };
 
-  switch (morphTrigger) {
-    case 'viewport': {
-      ScrollTrigger.create({
-        trigger: el,
-        scroller: osViewport || undefined,
-        start: 'top 60%',
-        onEnter: () => { if (canPlay()) doForward(); },
-        onLeaveBack: () => { if (canPlay()) doReverse(); },
-      });
-      break;
-    }
-    case 'scroll': {
-      ScrollTrigger.create({
-        trigger: el,
-        scroller: osViewport || undefined,
-        start: 'top 60%',
-        onEnter: () => { if (canPlay()) doForward(); },
-        onLeaveBack: () => { if (canPlay()) doReverse(); },
-      });
-      break;
-    }
-    case 'hover':
-    default: {
-      const morphTarget = el.closest('button, a') || el;
-      morphTarget.addEventListener('mouseenter', gatedForward);
-      morphTarget.addEventListener('mouseleave', gatedReverse);
-      morphTarget.addEventListener('focusin', gatedForward);
-      morphTarget.addEventListener('focusout', gatedReverse);
-      morphTarget.addEventListener('click', clickToggle);
-      break;
-    }
-  }
+  registerTrigger({
+    el,
+    trigger: morphTrigger,
+    onEnter: () => { doForward(); return tl; },
+    onLeave: () => { doReverse(); return tl; },
+    onInstant: () => { if (!morphed) { morph(); if (tl) tl.progress(1); } },
+    onStatic: () => {}, // morph at rest is already visible
+  });
 }

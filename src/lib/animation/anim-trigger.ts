@@ -23,8 +23,20 @@ function initAnimTriggers() {
   const config = getAnimationConfig();
   if (!config.canAnimate) return;
 
-  // ─── Viewport trigger ───
-  // Plays continuously while element is in viewport, stops when out.
+  // Reduced mode: kill all CSS animations — GSAP handles icon/shape motion
+  // via registerTrigger queue. CSS animations are decorative (badges, gradients).
+  if (config.isReduced) {
+    document.querySelectorAll<HTMLElement>('[class*="anim--"]').forEach(el => {
+      [...el.classList].forEach(cls => {
+        if (cls.startsWith('anim--')) el.classList.remove(cls);
+      });
+    });
+    return;
+  }
+
+  // ─── Full mode: original CSS trigger behaviour ───
+
+  // Viewport: plays while visible
   const viewportEls = document.querySelectorAll<HTMLElement>('[data-anim-trigger="viewport"]');
   if (viewportEls.length > 0) {
     requestAnimationFrame(() => {
@@ -37,20 +49,17 @@ function initAnimTriggers() {
           }
         }
       }, { root: null, rootMargin: '0px', threshold: 0.1 });
-
       viewportEls.forEach(el => observer.observe(el));
     });
   }
 
-  // ─── Interval trigger ───
-  // Plays animation once per interval, only while visible.
+  // Interval: plays on timed interval while visible
   const intervalEls = document.querySelectorAll<HTMLElement>('[data-anim-trigger="interval"]');
   if (intervalEls.length > 0) {
     const intervalObserver = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         const el = entry.target as HTMLElement;
         if (entry.isIntersecting) {
-          // Start interval when visible
           if (!el.dataset._intervalId) {
             const ms = parseInt(el.dataset.animInterval || '3000', 10);
             const id = setInterval(() => {
@@ -59,11 +68,9 @@ function initAnimTriggers() {
               el.classList.add('anim--playing');
             }, ms);
             el.dataset._intervalId = String(id);
-            // Play once immediately
             el.classList.add('anim--playing');
           }
         } else {
-          // Stop interval when not visible
           if (el.dataset._intervalId) {
             clearInterval(parseInt(el.dataset._intervalId));
             delete el.dataset._intervalId;
@@ -72,13 +79,11 @@ function initAnimTriggers() {
         }
       }
     }, { root: null, rootMargin: '0px', threshold: 0.1 });
-
     intervalEls.forEach(el => intervalObserver.observe(el));
   }
 
-  // ─── Click trigger ───
-  const clickEls = document.querySelectorAll<HTMLElement>('[data-anim-trigger="click"]');
-  clickEls.forEach(el => {
+  // Click
+  document.querySelectorAll<HTMLElement>('[data-anim-trigger="click"]').forEach(el => {
     el.addEventListener('click', () => {
       el.classList.remove('anim--playing');
       void el.offsetWidth;
@@ -86,9 +91,8 @@ function initAnimTriggers() {
     });
   });
 
-  // ─── Focus trigger ───
-  const focusEls = document.querySelectorAll<HTMLElement>('[data-anim-trigger="focus"]');
-  focusEls.forEach(el => {
+  // Focus
+  document.querySelectorAll<HTMLElement>('[data-anim-trigger="focus"]').forEach(el => {
     el.addEventListener('focusin', () => el.classList.add('anim--playing'));
     el.addEventListener('focusout', () => el.classList.remove('anim--playing'));
   });

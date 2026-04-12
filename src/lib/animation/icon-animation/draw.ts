@@ -19,7 +19,7 @@ import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getMotionMode, getHoverMode, getScrollContainer } from '../animation-config';
+import { getMotionMode, getHoverMode, getScrollContainer, registerTrigger } from '../animation-config';
 import { addVariant, type DrawVariant, type DrawMode } from './draw-shared';
 import { playDrawMorph } from './draw-morph';
 
@@ -179,12 +179,11 @@ export function initDrawIcon(el: HTMLElement) {
     ? () => playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor, variant, mode, laser, sw)
     : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode, sw, drawStagger, drawStaggerFrom, drawWormSize);
 
-  switch (drawTrigger) {
-    case 'scrub': {
-      if (getMotionMode() === 'none') {
-        overlays.forEach(o => gsap.set(o, { opacity: 1, drawSVG: '100%' }));
-        break;
-      }
+  // Scrub is a special case — needs its own ScrollTrigger timeline
+  if (drawTrigger === 'scrub') {
+    if (getMotionMode() === 'none') {
+      overlays.forEach(o => gsap.set(o, { opacity: 1, drawSVG: '100%' }));
+    } else {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: el,
@@ -200,127 +199,21 @@ export function initDrawIcon(el: HTMLElement) {
         tl.set(o, { opacity: 1 }, 0);
         tl.fromTo(o, { drawSVG: from }, { drawSVG: to, duration: 1, ease: 'none' }, i * 0.1);
       });
-      break;
     }
-    case 'viewport': {
-      if (getMotionMode() === 'none') {
-        overlays.forEach(o => gsap.set(o, { opacity: 1, drawSVG: '100%' }));
-        break;
-      }
-      ScrollTrigger.create({
-        trigger: el,
-        scroller: osViewport || undefined,
-        start: 'top 80%',
-        once: true,
-        onEnter: play,
-      });
-      break;
-    }
-    case 'viewport-loop': {
-      if (getMotionMode() === 'none') break;
-      ScrollTrigger.create({
-        trigger: el,
-        scroller: osViewport || undefined,
-        start: 'top 80%',
-        onEnter: () => {
-          const loopPlay = () => {
-            const tl = play();
-            tl.eventCallback('onComplete', () => {
-              gsap.delayedCall(3, loopPlay);
-            });
-          };
-          loopPlay();
-        },
-        onLeave: () => gsap.killTweensOf(overlays),
-        onEnterBack: () => {
-          const loopPlay = () => {
-            const tl = play();
-            tl.eventCallback('onComplete', () => {
-              gsap.delayedCall(3, loopPlay);
-            });
-          };
-          loopPlay();
-        },
-        onLeaveBack: () => gsap.killTweensOf(overlays),
-      });
-      break;
-    }
-    case 'autoplay': {
-      if (getMotionMode() === 'none') break;
-      play();
-      break;
-    }
-    case 'loop': {
-      const loopPlay = () => {
-        if (getMotionMode() === 'none') return;
-        const tl = play();
-        tl.eventCallback('onComplete', () => {
-          gsap.delayedCall(3, loopPlay);
-        });
-      };
-      loopPlay();
-      break;
-    }
-    case 'interval': {
-      play();
-      setInterval(play, 8000);
-      break;
-    }
-    case 'click': {
-      const clickTarget = el.closest('button, a') || el;
-      clickTarget.addEventListener('click', play);
-      break;
-    }
-    case 'focus': {
-      el.addEventListener('focus', play);
-      break;
-    }
-    case 'hover':
-    default: {
-      const hoverTarget = el.closest('button, a') || el;
-      let activeTl: gsap.core.Timeline | null = null;
-
-      // Gated trigger: mouseenter + focusin. Blocked by motion=none and
-      // hover=none. Focus is treated as "keyboard hover" (same rules as
-      // mouse hover), so a user who has disabled hover-triggered motion
-      // won't get animations auto-firing when they tab past — they must
-      // explicitly click or press Enter/Space.
-      const hoverTrigger = () => {
-        const motion = getMotionMode();
-        const hover = getHoverMode();
-        if (motion === 'none') return;
-        if (hover === 'none') return;
-        if (hover === 'instant') {
-          if (activeTl) activeTl.kill();
-          activeTl = play();
-          activeTl.progress(1);
-          return;
-        }
-        if (activeTl) activeTl.kill();
-        activeTl = play();
-      };
-
-      // Click bypasses the hover gate — explicit user intent always fires.
-      // Only blocked when motion is completely off.
-      const clickTrigger = () => {
-        const motion = getMotionMode();
-        if (motion === 'none') return;
-        if (activeTl) activeTl.kill();
-        activeTl = play();
-      };
-
-      if (getMotionMode() === 'none') {
-        // Static fallback: show resting state (ghost color for ghost, draw color for full)
+  } else {
+    // All other triggers go through registerTrigger
+    registerTrigger({
+      el,
+      trigger: drawTrigger,
+      onEnter: play,
+      onStatic: () => {
         overlays.forEach(o => {
           gsap.set(o, { drawSVG: '100%', opacity: 1 });
           if (!ghost && !o.style.stroke) o.style.stroke = color;
         });
-      }
-      hoverTarget.addEventListener('mouseenter', hoverTrigger);
-      hoverTarget.addEventListener('focusin', hoverTrigger);
-      hoverTarget.addEventListener('click', clickTrigger);
-      break;
-    }
+      },
+      scrollStart: 'top 80%',
+    });
   }
 }
 

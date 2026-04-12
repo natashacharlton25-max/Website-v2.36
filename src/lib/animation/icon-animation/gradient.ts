@@ -12,7 +12,7 @@
  */
 
 import { gsap } from 'gsap';
-import { getMotionMode } from '../animation-config';
+import { getMotionMode, registerTrigger } from '../animation-config';
 
 export function initAnimatedGradient(el: HTMLElement) {
   const svg = el.querySelector('svg');
@@ -98,7 +98,16 @@ export function initAnimatedGradient(el: HTMLElement) {
     });
   });
 
-  animateGradTransform(grad, d, direction, ease, doScale);
+  // Route through registerTrigger — in reduced mode this queues for viewport stagger
+  registerTrigger({
+    el,
+    trigger: 'autoplay',
+    onEnter: () => {
+      animateGradTransform(grad, d, direction, ease, doScale);
+      return null; // gradient loops don't return a timeline
+    },
+    onStatic: () => {}, // gradient at rest is already visible
+  });
 }
 
 function animateGradTransform(

@@ -22,29 +22,27 @@ import { initDrawIcon } from './draw';
 import { initMorphIcon } from './morph';
 import { initFillIcon, rainbowScrollElements } from './fill';
 import { initAnimatedGradient, gateAnimatedGradients } from './gradient';
+import { initMicroAnimations } from './micro';
 
 export function initIconAnimations() {
   // OS / system reduced motion preference — hard bail
   if (prefersReducedMotion()) return;
   // Motion mode "none" — user has explicitly killed animation
   if (getMotionMode() === 'none') {
-    // Still run the gradient gate so declarative <animateTransform>s get
-    // stripped — otherwise they'd run forever bypassing our JS.
     gateAnimatedGradients();
     return;
   }
-  // Render modes that don't show animation: reduced (calm), assistive
-  // (easy click), textonly (reading) — none of these need GSAP timelines
-  // because the CSS gates already strip the visual layer. Skipping init
-  // also avoids attaching event listeners and building DOM clones for
-  // animations that will never run.
+  // Textonly/assistive — no GSAP animations (render controller handles DOM)
   const render = getRenderMode();
-  if (render === 'reduced' || render === 'assistive' || render === 'textonly') {
+  if (render === 'assistive' || render === 'textonly') {
     gateAnimatedGradients();
     return;
   }
+  // Reduced mode: animations init but registerTrigger routes them
+  // through the viewport stagger queue (one at a time per section)
 
   gateAnimatedGradients();
+  initMicroAnimations(); // CSS keyframes → GSAP, through registerTrigger
   document.querySelectorAll<HTMLElement>('[data-icon-draw]').forEach(initDrawIcon);
   document.querySelectorAll<HTMLElement>('[data-icon-morph]').forEach(initMorphIcon);
   document.querySelectorAll<HTMLElement>('[data-icon-fill]').forEach(initFillIcon);
