@@ -34,7 +34,7 @@ import { gsap } from 'gsap';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { prefersReducedMotion, getScrollContainer, onThemeChange } from './animation-config';
+import { getAnimationConfig, getScrollContainer, onThemeChange } from './animation-config';
 
 gsap.registerPlugin(DrawSVGPlugin, MorphSVGPlugin, ScrollTrigger);
 
@@ -245,7 +245,7 @@ async function initStage(container: HTMLElement): Promise<void> {
 
   /* ---- A11y: reduce-motion → show icon fully drawn, no animation ---- */
   onThemeChange(() => {
-    if (prefersReducedMotion()) {
+    if (!getAnimationConfig().canAnimate) {
       tl.scrollTrigger?.kill();
       tl.kill();
       gsap.set(path, { drawSVG: '100%' });
@@ -258,7 +258,8 @@ async function initStage(container: HTMLElement): Promise<void> {
    ================================================================ */
 
 function init(): void {
-  if (prefersReducedMotion()) {
+  const config = getAnimationConfig();
+  if (!config.canAnimate) {
     document.querySelectorAll<HTMLElement>('[data-icon-scroll-stage]').forEach((c) => {
       const p = c.querySelector<SVGPathElement>('.stage-icon svg path');
       if (p) gsap.set(p, { drawSVG: '100%' });

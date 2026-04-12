@@ -11,7 +11,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
-  prefersReducedMotion, getScrollContainer, onThemeChange,
+  getAnimationConfig, getScrollContainer, onThemeChange,
 } from './animation-config';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -33,7 +33,8 @@ function destroyScrollHue(): void {
 function initScrollHue(): void {
   destroyScrollHue();
 
-  if (prefersReducedMotion()) return;
+  const config = getAnimationConfig();
+  if (!config.canAnimate) return;
 
   const osViewport = getScrollContainer();
 
@@ -56,7 +57,7 @@ function initScrollHue(): void {
 /* ---- React to motion/theme changes via central config ---- */
 
 onThemeChange(() => {
-  if (prefersReducedMotion()) {
+  if (!getAnimationConfig().canAnimate) {
     destroyScrollHue();
   } else if (hueTriggers.length === 0) {
     initScrollHue();

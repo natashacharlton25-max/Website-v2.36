@@ -60,7 +60,7 @@ let warpLayers: WarpLayer[] = [];
    HELPERS
    ================================================================ */
 
-import { prefersReducedMotion, getScrollContainer } from './animation-config';
+import { getAnimationConfig, getScrollContainer } from './animation-config';
 
 function getIntensity(): number {
   const val = getComputedStyle(document.documentElement)
@@ -276,7 +276,8 @@ export function initWarpParallax(
 ): void {
   destroyWarpParallax();
 
-  if (prefersReducedMotion()) return;
+  const animConfig = getAnimationConfig();
+  if (!animConfig.canAnimate) return;
 
   // Find zone(s)
   const zones = zone

@@ -24,7 +24,7 @@
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { prefersReducedMotion, getScrollContainer } from './animation-config';
+import { getAnimationConfig, getScrollContainer } from './animation-config';
 gsap.registerPlugin(ScrollTrigger);
 
 /* ================================================================
@@ -133,7 +133,8 @@ export function initScrollColorDriver(
   if (firstBg) target.style.backgroundColor = firstBg;
 
   // If reduce motion, stop here — static bg, no scroll transitions
-  if (prefersReducedMotion()) return [];
+  const animConfig = getAnimationConfig();
+  if (!animConfig.canAnimate) return [];
 
   // OverlayScrollbars viewport — ScrollTrigger must use this as scroller
   const osViewport = getScrollContainer();
@@ -196,7 +197,7 @@ export function initScrollPatternColor(
     ? Array.from(sections)
     : Array.from(document.querySelectorAll<HTMLElement>('[data-scroll-pattern]'));
 
-  if (!triggerSections.length || prefersReducedMotion()) return [];
+  if (!triggerSections.length || !getAnimationConfig().canAnimate) return [];
 
   const osViewport = getScrollContainer();
   const resolveEl = paletteEl || overlay;

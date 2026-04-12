@@ -29,7 +29,7 @@
  */
 
 import { gsap } from 'gsap';
-import { prefersReducedMotion, getScrollContainer } from './animation-config';
+import { getAnimationConfig, getScrollContainer } from './animation-config';
 
 
 /* ── Color resolution — lazy, at animation time ── */
@@ -118,7 +118,8 @@ function cleanup(): void {
  * Initialize scroll-triggered background color changes.
  */
 function initScrollColors(): void {
-  if (prefersReducedMotion()) return;
+  const config = getAnimationConfig();
+  if (!config.canAnimate) return;
 
   const sections = document.querySelectorAll<HTMLElement>('[data-scroll-bg]');
   if (sections.length === 0) return;

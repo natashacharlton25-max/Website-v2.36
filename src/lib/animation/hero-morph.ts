@@ -6,7 +6,7 @@
 
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
-import { prefersReducedMotion as checkReducedMotion, onThemeChange } from './animation-config';
+import { getAnimationConfig, onThemeChange } from './animation-config';
 
 const BRAND_PRIMARY = getComputedStyle(document.documentElement).getPropertyValue('--brand-c-primary').trim() || BRAND_PRIMARY;
 
@@ -68,7 +68,6 @@ export async function initHeroMorph() {
   if (!container || !textElement || !storage) return;
 
   // Check for reduced motion preference (user toggle, text-only, or system preference)
-  const prefersReducedMotion = checkReducedMotion;
 
   // Function to show static content
   const showStaticContent = async () => {
@@ -110,7 +109,7 @@ export async function initHeroMorph() {
 
   // Watch for theme/motion changes (user toggling reduced motion)
   onThemeChange(() => {
-    if (prefersReducedMotion() && animationActive) {
+    if (!getAnimationConfig().canAnimate && animationActive) {
       showStaticContent();
     }
   });
@@ -123,7 +122,8 @@ export async function initHeroMorph() {
   });
 
   // If reduced motion is enabled at load, show static content and exit
-  if (prefersReducedMotion()) {
+  const config = getAnimationConfig();
+  if (!config.canAnimate) {
     await showStaticContent();
     return;
   }

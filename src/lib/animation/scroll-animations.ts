@@ -12,6 +12,7 @@
 
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { getAnimationConfig } from './animation-config';
 
 // Register plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -40,6 +41,7 @@ export function initScrollAnimations(): void {
 }
 
 function setup(): void {
+  if (!getAnimationConfig().canAnimate) return;
   // Wait for page to fully settle before starting animations
   // This prevents jerky animations on page load/refresh
   setTimeout(() => {

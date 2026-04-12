@@ -35,7 +35,7 @@
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { prefersReducedMotion, getScrollContainer, onThemeChange } from './animation-config';
+import { getAnimationConfig, getScrollContainer, onThemeChange } from './animation-config';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -122,7 +122,8 @@ export function initStellarParallax() {
   // Clean up previous instances (View Transitions / SPA nav)
   destroyStellarParallax();
 
-  if (prefersReducedMotion()) return;
+  const config = getAnimationConfig();
+  if (!config.canAnimate) return;
 
   // Detect OverlayScrollbars viewport — the actual scroll container
   const osViewport = getScrollContainer();
@@ -167,7 +168,7 @@ function watchA11y() {
 
   // Kill parallax if reduced motion is toggled on mid-session
   onThemeChange(() => {
-    if (prefersReducedMotion()) {
+    if (!getAnimationConfig().canAnimate) {
       destroyStellarParallax();
     } else if (layers.length === 0) {
       initStellarParallax();

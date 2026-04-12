@@ -6,7 +6,7 @@
 import { gsap } from 'gsap';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
-import { prefersReducedMotion, onThemeChange } from './animation-config';
+import { getAnimationConfig, onThemeChange } from './animation-config';
 
 gsap.registerPlugin(DrawSVGPlugin, MorphSVGPlugin);
 
@@ -259,7 +259,7 @@ async function initContainer(container: HTMLElement): Promise<void> {
 
   /* ---- A11y watcher — reset on reduce-motion toggle ---- */
   onThemeChange(() => {
-    if (prefersReducedMotion()) {
+    if (!getAnimationConfig().canAnimate) {
       for (const s of states) {
         gsap.killTweensOf(s.path);
         s.active = false;
@@ -275,7 +275,8 @@ async function initContainer(container: HTMLElement): Promise<void> {
    ================================================================ */
 
 function init(): void {
-  if (prefersReducedMotion()) return;
+  const config = getAnimationConfig();
+  if (!config.canAnimate) return;
   document.querySelectorAll<HTMLElement>('[data-cursor-draw]').forEach(initContainer);
 }
 

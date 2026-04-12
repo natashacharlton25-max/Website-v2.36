@@ -26,7 +26,7 @@
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { resolveColor } from './scroll-color-driver';
-import { prefersReducedMotion, getScrollContainer } from './animation-config';
+import { getAnimationConfig, getScrollContainer } from './animation-config';
 
 gsap.registerPlugin(MorphSVGPlugin);
 
@@ -109,7 +109,8 @@ let activeObserver: IntersectionObserver | null = null;
 
 /* ---- Init ---- */
 function initPatternMorph(): void {
-  if (prefersReducedMotion()) return;
+  const config = getAnimationConfig();
+  if (!config.canAnimate) return;
 
   const containers = document.querySelectorAll<HTMLElement>('[data-scroll-morph]');
   if (containers.length === 0) return;
@@ -285,7 +286,7 @@ function initPatternMorph(): void {
 
     // Theme switch: re-resolve icon colour with new palette, instant snap
     window.addEventListener('themeChanged', () => {
-      if (prefersReducedMotion()) return;
+      if (!getAnimationConfig().canAnimate) return;
       currentColorResolved = '';  // force re-resolve
 
       // Find which section is currently in view

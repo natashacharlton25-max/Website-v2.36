@@ -49,7 +49,7 @@
 import { gsap } from 'gsap';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { prefersReducedMotion, getScrollContainer } from './animation-config';
+import { getAnimationConfig, getScrollContainer } from './animation-config';
 
 gsap.registerPlugin(DrawSVGPlugin, ScrollTrigger);
 
@@ -439,7 +439,8 @@ export function drawPatternGrid(
    ================================================================ */
 
 export function initScrollDraw() {
-  if (prefersReducedMotion()) return;
+  const config = getAnimationConfig();
+  if (!config.canAnimate) return;
 
   // Detect OverlayScrollbars viewport — the actual scroll container
   const osViewport = getScrollContainer();

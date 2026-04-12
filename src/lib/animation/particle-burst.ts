@@ -18,7 +18,7 @@
  *   fireConfetti(element);
  */
 
-import { prefersReducedMotion } from './animation-config';
+import { getAnimationConfig } from './animation-config';
 
 const COLOR_WHITE = getComputedStyle(document.documentElement).getPropertyValue('--color-White').trim() || '#ffffff';
 
@@ -258,7 +258,7 @@ export function initParticleBurst(): void {
     if (trigger === 'hover') {
       let hasTriggered = false;
       htmlElement.addEventListener('mouseenter', () => {
-        if (!hasTriggered && !prefersReducedMotion()) {
+        if (!hasTriggered && getAnimationConfig().canAnimate) {
           createParticleBurst(htmlElement, options);
           hasTriggered = true;
           setTimeout(() => { hasTriggered = false; }, 2000);
@@ -266,7 +266,7 @@ export function initParticleBurst(): void {
       });
     } else {
       htmlElement.addEventListener('click', (e: MouseEvent) => {
-        if (prefersReducedMotion()) return;
+        if (!getAnimationConfig().canAnimate) return;
         createParticleBurst(htmlElement, options);
 
         // If it's a link, delay navigation for particles to show

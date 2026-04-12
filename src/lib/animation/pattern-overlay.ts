@@ -12,7 +12,7 @@
  */
 
 import { gsap } from 'gsap';
-import { prefersReducedMotion, onThemeChange } from './animation-config';
+import { getAnimationConfig, onThemeChange } from './animation-config';
 
 const PROXIMITY_RADIUS = 150;
 const FOLLOW_STRENGTH = 0.4;
@@ -52,7 +52,8 @@ function initMagnetic(overlay: HTMLElement): void {
 }
 
 function init(): void {
-  if (prefersReducedMotion()) return;
+  const config = getAnimationConfig();
+  if (!config.canAnimate) return;
 
   document.querySelectorAll<HTMLElement>('[data-pattern-magnetic="true"]').forEach(initMagnetic);
 }
@@ -67,7 +68,7 @@ document.addEventListener('astro:page-load', init);
 
 // Watch for a11y changes (kill magnetic if reduce-motion toggled on)
 onThemeChange(() => {
-  if (prefersReducedMotion()) {
+  if (!getAnimationConfig().canAnimate) {
     // Reset all cells to origin
     document.querySelectorAll<HTMLElement>('[data-pattern-magnetic="true"] .pattern-overlay__cell').forEach((cell) => {
       gsap.set(cell, { x: 0, y: 0 });
