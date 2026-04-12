@@ -1,127 +1,57 @@
 /**
  * theme-chroma-calm.css
  *
- * Zone overrides for calm mode — strips visual noise.
- * Gated: [data-theme-chroma="calm"]
+ * Calm mode — two responsibilities:
+ * 1. THEME: reduced chroma tokens (rainbow-calm.css handles the palette)
+ * 2. RENDER: uses textonly rendering — same rules as [data-render="textonly"]
  *
- * Badges → glass primary
- * Headings → plain text (no gradients, media, highlights, dividers, underlines)
- * Shadows/glows → killed
- * Underlines → solid
- * Animations → motion gate (data-motion="none"), not this file
+ * This file handles calm-specific token overrides only.
+ * Rendering behaviour (hiding decorative elements, normalising badges, etc.)
+ * is handled by textonly-gate.css which targets BOTH [data-render="textonly"]
+ * and [data-theme-chroma="calm"].
  */
 
 
-/* ========== ALL BADGES → GLASS PRIMARY ========== */
+/* ========== CALM TOKEN OVERRIDES ========== */
+/* These are theme-level changes that affect colour tokens and spacing.
+   The reduced palette comes from rainbow-calm.css (imported separately).
+   Rendering rules (hiding decorative elements etc.) are in textonly-gate.css
+   which targets both [data-render="textonly"] and [data-theme-chroma="calm"]. */
 
-/* Calm badges: all normalised to same glass style, size, shape, font */
-[data-theme-chroma="calm"] .badge,
-[data-theme-chroma="calm"] .badge[class*="badge--"],
-[data-theme-chroma="calm"] .badge.gradient,
-[data-theme-chroma="calm"] .badge[class*="gradient--"] {
-  background: var(--glass-bg);
-  background-image: none;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--border-width) solid color-mix(in oklch, var(--primary-base) 20%, transparent);
-  border-radius: var(--radius-sm);
-  color: var(--primary-base);
-  box-shadow: none;
-  filter: none;
-  font-size: var(--text-fine);
-  font-family: var(--font-body);
-  font-weight: var(--font-medium);
-  padding: var(--space-xs) var(--space-sm);
-  letter-spacing: var(--letter-spacing-wide);
-  text-transform: none;
+/* Calm shadows — none (visual quiet) */
+[data-theme-chroma="calm"] {
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-elevated: none;
+  --shadow-neu-raised: none;
+  --shadow-neu-hover: none;
+  --shadow-neu-pressed: none;
+
+  /* Calm spacing — more breathing room than textonly */
+  --content-flow-before-h2: var(--space-4xl);
+  --content-flow-before-h3: var(--space-3xl);
+  --content-flow-before-h4: var(--space-2xl);
+  --content-flow-after-heading: var(--space-md);
+  --content-flow-after-text: var(--space-lg);
 }
 
-[data-theme-chroma="calm"] .badge .badge__label,
-[data-theme-chroma="calm"] .badge .gradient__text {
-  background: none;
-  -webkit-text-fill-color: var(--primary-base);
-  font-family: var(--font-body);
-  font-weight: var(--font-medium);
-}
-
-/* Hide icons in calm badges */
-[data-theme-chroma="calm"] .badge__icon {
-  display: none;
-}
-
-/* Kill all badge animations in calm */
-[data-theme-chroma="calm"] .badge.gradient--animated,
-[data-theme-chroma="calm"] .badge.gradient--cycle {
-  animation: none;
-}
-
-
-/* ========== HEADINGS → PLAIN TEXT ========== */
-/* No animations, no gradients, no media, no highlights */
-
-[data-theme-chroma="calm"] .heading.gradient__text {
-  background: none;
-  -webkit-text-fill-color: currentColor;
-}
-
-[data-theme-chroma="calm"] .heading-wrap.gradient,
-[data-theme-chroma="calm"] .heading-wrap.gradient--fill {
-  background: none;
-  color: inherit;
-}
-
-[data-theme-chroma="calm"] .heading-wrap__divider,
-[data-theme-chroma="calm"] .heading-wrap__media,
-[data-theme-chroma="calm"] .heading-wrap .underline,
-[data-theme-chroma="calm"] .text-highlight__bar {
-  display: none;
-}
-
-
-
-/* ========== SHAPES → PLAIN ========== */
-
-[data-theme-chroma="calm"] .shape[data-semantic-role="decorative"],
-[data-theme-chroma="calm"] .shape:not([data-semantic-role]) {
-  display: none;
-}
-
-
-/* ========== ICONS → PLAIN ========== */
-/* Decorative icons hidden. Informational icons stay but no shadows/glows/gradients. */
-
-[data-theme-chroma="calm"] .icon[data-semantic-role="decorative"],
-[data-theme-chroma="calm"] .icon:not([data-semantic-role]) {
-  display: none;
-}
-
-[data-theme-chroma="calm"] .icon[data-semantic-role="ui-control"],
-[data-theme-chroma="calm"] .icon[data-semantic-role="content-symbol"] {
-  filter: none;
-}
-
-[data-theme-chroma="calm"] .icon--has-gradient svg {
-  fill: currentColor;
-}
-
-
-/* ========== UNDERLINES → SOLID ========== */
-
+/* Calm underlines — always solid (no gradient/dashed/dotted) */
 [data-theme-chroma="calm"] .underline--gradient,
 [data-theme-chroma="calm"] .underline--dashed,
 [data-theme-chroma="calm"] .underline--dotted {
   background: currentColor;
 }
 
-
-/* ========== TEXT SHADOWS → NONE ========== */
-
+/* Calm text shadows — none */
 [data-theme-chroma="calm"] [class*="text-shadow--"] {
   text-shadow: none;
 }
 
-/* ========== NO GLOWS / SHADOWS ========== */
-
+/* Calm glows — none */
 [data-theme-chroma="calm"] [class*="--shadow-glow"],
 [data-theme-chroma="calm"] [class*="--shadow-elevated"],
 [data-theme-chroma="calm"] [class*="--shadow-glow-inner"],
