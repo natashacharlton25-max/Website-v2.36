@@ -227,12 +227,20 @@ export function applySettings(settings: A11ySettings): void {
 
   // Set data-render attribute (new system) alongside legacy classes
   // Priority: textonly > reduced > assistive > full
+  // Render mode changes require reload — render controller modifies DOM destructively
+  const prevRender = document.documentElement.dataset.render || 'full';
   if (settings.textOnly) {
     document.documentElement.dataset.render = 'textonly';
   } else if (settings.reduceMotion) {
     document.documentElement.dataset.render = 'reduced';
   } else {
     document.documentElement.removeAttribute('data-render');
+  }
+  const newRender = document.documentElement.dataset.render || 'full';
+  if (prevRender !== newRender) {
+    saveSettings(settings);
+    window.location.reload();
+    return;
   }
 
   target.classList.toggle('a11y-highlight-links', settings.highlightLinks);

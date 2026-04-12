@@ -69,60 +69,29 @@
 
 
 /* ── Badge ── */
+/* Interim CSS reset — will be removed when textonly layout renders badges
+   directly from contentBadge without Badge.astro */
 
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge {
-  display: inline-flex;
-  background-color: var(--_color);
-  color: oklch(from var(--_color) round(1.21 - l) 0 0);
-  border: var(--border-width) solid var(--neutral-mid);
-  border-radius: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  width: auto;
-  flex: none;
+:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge,
+:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge[class] {
+  all: unset;
+  display: inline;
   font-family: var(--font-body);
   font-size: var(--text-fine);
-  padding: var(--space-xs) var(--space-sm);
+  font-weight: var(--font-regular);
+  color: var(--text-emphasis);
+  border: var(--border-width) solid var(--neutral-mid);
+  padding: var(--space-2xs) var(--space-xs);
 }
 
-/* Reset size and shape overrides */
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge--sm,
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge--lg,
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge--xl {
-  font-size: var(--text-fine);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: 0;
-}
-
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge--sharp,
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge--subtle,
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge--soft,
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge--rounded {
-  border-radius: 0;
-  padding: var(--space-xs) var(--space-sm);
-}
-
-/* Beat compound selectors like .badge--lg.badge--rounded */
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge[class*="badge--"] {
-  border-radius: 0;
-  font-size: var(--text-fine);
-  padding: var(--space-xs) var(--space-sm);
-}
-
+/* Badge icons are always decorative in context — hide all */
 :is([data-render="textonly"], [data-theme-chroma="calm"]) .badge__icon,
 :is([data-render="textonly"], [data-theme-chroma="calm"]) .badge .lottie-icon {
   display: none;
 }
 
-/* Strip gradient text + shadows on badge labels */
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge .gradient__text {
-  background: none;
-  -webkit-text-fill-color: currentColor;
-}
-
-:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge[class*="badge--shadow-"] {
-  box-shadow: none;
+:is([data-render="textonly"], [data-theme-chroma="calm"]) .badge .badge__label {
+  all: unset;
 }
 
 

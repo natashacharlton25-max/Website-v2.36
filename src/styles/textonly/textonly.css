@@ -1,0 +1,316 @@
+/**
+ * Textonly (Reading Mode) — styles for pruned DOM
+ *
+ * The render controller (render-controller.ts) strips decorative nodes,
+ * simplifies badges, removes gradients/animations. This CSS styles what's left.
+ *
+ * Minimal rules — no overrides fighting full atom classes because those
+ * nodes are already gone.
+ */
+
+
+/* ==========================================================
+   HIDDEN — elements hidden by render controller
+   ========================================================== */
+
+[data-render="textonly"] [data-textonly-hidden] {
+  display: none;
+}
+
+
+/* ==========================================================
+   LAYOUT — single column, generous spacing
+   ========================================================== */
+
+[data-render="textonly"] #a11y-content-wrapper {
+  width: 100%;
+}
+
+[data-render="textonly"] .section {
+  margin-bottom: var(--content-flow-section);
+}
+
+[data-render="textonly"] .base-grid {
+  display: block;
+}
+
+
+/* ==========================================================
+   TYPOGRAPHY — body defaults
+   ========================================================== */
+
+[data-render="textonly"] .text,
+[data-render="textonly"] p {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-regular);
+  color: var(--text-emphasis);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--content-flow-after-text);
+}
+
+[data-render="textonly"] blockquote,
+[data-render="textonly"] blockquote.text,
+[data-render="textonly"] .text[data-as="blockquote"] {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-regular);
+  border-left: var(--border-width-md) solid var(--neutral-mid);
+  padding-left: var(--space-md);
+  margin: var(--content-flow) 0;
+  font-style: italic;
+  color: var(--text-base);
+}
+
+
+/* ==========================================================
+   HEADINGS — one style, sized by level
+   ========================================================== */
+
+[data-render="textonly"] .heading {
+  font-family: var(--font-heading);
+  font-weight: var(--font-bold);
+  color: var(--text-emphasis);
+  line-height: var(--leading-tight);
+  margin-top: var(--content-flow-before-h2);
+  margin-bottom: var(--content-flow-after-heading);
+}
+
+[data-render="textonly"] .heading--h1 { font-size: var(--text-h1); margin-top: 0; }
+[data-render="textonly"] .heading--h2 { font-size: var(--text-h2); margin-top: var(--content-flow-before-h2); }
+[data-render="textonly"] .heading--h3 { font-size: var(--text-h3); margin-top: var(--content-flow-before-h3); }
+[data-render="textonly"] .heading--h4 { font-size: var(--text-h4); margin-top: var(--content-flow-before-h4); }
+[data-render="textonly"] .heading--h5 { font-size: var(--text-h5); margin-top: var(--content-flow-before-h4); }
+[data-render="textonly"] .heading--h6 { font-size: var(--text-h6); margin-top: var(--content-flow-before-h4); }
+
+/* Heading wrap — strip flex/gap from media layout since media is removed */
+[data-render="textonly"] .heading-wrap {
+  display: block;
+}
+
+
+/* ==========================================================
+   BADGE — simplified by JS to .to-badge span
+   ========================================================== */
+
+[data-render="textonly"] .to-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-fine);
+  font-weight: var(--font-regular);
+  color: var(--text-emphasis);
+  border: var(--border-width) solid var(--neutral-mid);
+  padding: var(--space-2xs) var(--space-xs);
+  margin-right: var(--space-xs);
+  white-space: nowrap;
+}
+
+[data-render="textonly"] .to-badge .badge__label,
+[data-render="textonly"] .to-badge .badge__label.heading,
+[data-render="textonly"] .to-badge .badge__label.text {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  line-height: inherit;
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: inherit;
+  text-shadow: none;
+  filter: none;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ==========================================================
+   LINKS — underlined, no decoration
+   ========================================================== */
+
+[data-render="textonly"] .link,
+[data-render="textonly"] a {
+  color: var(--text-emphasis);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+[data-render="textonly"] .link:hover,
+[data-render="textonly"] a:hover {
+  color: var(--primary-base);
+}
+
+
+/* ==========================================================
+   LISTS — native markers, left-aligned
+   ========================================================== */
+
+[data-render="textonly"] ul.list {
+  list-style-type: disc;
+  padding-left: var(--space-lg);
+}
+
+[data-render="textonly"] ol.list {
+  list-style-type: decimal;
+  padding-left: var(--space-lg);
+}
+
+[data-render="textonly"] .list .list__item {
+  display: list-item;
+  margin-bottom: var(--space-sm);
+  padding: 0;
+  line-height: var(--leading-relaxed);
+}
+
+[data-render="textonly"] .list .list__item:has(.link) {
+  margin-bottom: var(--space-md);
+}
+
+/* All list variants get native markers in textonly */
+[data-render="textonly"] .list--none,
+[data-render="textonly"] .list--inline,
+[data-render="textonly"] .list--dot {
+  list-style-type: disc;
+  padding-left: var(--space-lg);
+}
+
+/* Kill the ::before counter/dot — native list-style takes over */
+[data-render="textonly"] .list .list__item::before {
+  display: none;
+  content: none;
+}
+
+[data-render="textonly"] .list .list__item::marker {
+  color: var(--primary-base);
+  font-size: 1.4em;
+}
+
+/* List content text */
+[data-render="textonly"] .list__content {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-emphasis);
+}
+
+
+/* ==========================================================
+   ICONS — content-symbol only (decorative removed by JS)
+   ========================================================== */
+
+[data-render="textonly"] .icon[data-semantic-role="content-symbol"] {
+  display: inline-block;
+  width: var(--media-xl);
+  height: var(--media-xl);
+  color: var(--primary-base);
+  --svg-ghost-color: var(--primary-base);
+  filter: none;
+  margin-right: var(--space-sm);
+  margin-bottom: var(--space-md);
+  vertical-align: middle;
+}
+
+/* ui-control label text (SVG removed by JS, label shown) */
+[data-render="textonly"] .icon[data-semantic-role="ui-control"] .icon__label {
+  display: inline;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-emphasis);
+}
+
+
+/* ==========================================================
+   IMAGES — content images stay, alt text visible
+   ========================================================== */
+
+[data-render="textonly"] figure {
+  margin: var(--content-flow) 0;
+}
+
+[data-render="textonly"] figure img {
+  max-width: 100%;
+  height: auto;
+}
+
+
+/* ==========================================================
+   CARDS — flat bordered box
+   ========================================================== */
+
+[data-render="textonly"] .card {
+  background: transparent;
+  border: var(--border-width) solid var(--neutral-mid);
+  border-radius: 0;
+  box-shadow: none;
+  padding: var(--space-md);
+}
+
+
+/* ==========================================================
+   BUTTONS — text + border, no effects
+   ========================================================== */
+
+[data-render="textonly"] .btn {
+  background: transparent;
+  color: var(--text-emphasis);
+  border: var(--border-width) solid var(--neutral-mid);
+  border-radius: 0;
+  box-shadow: none;
+  font-family: var(--font-body);
+  padding: var(--space-xs) var(--space-md);
+}
+
+
+/* ==========================================================
+   FORM FIELDS — simple bordered inputs
+   ========================================================== */
+
+[data-render="textonly"] .form-field__input {
+  background: transparent;
+  border: var(--border-width) solid var(--neutral-mid);
+  border-radius: 0;
+  box-shadow: none;
+  font-family: var(--font-body);
+  color: var(--text-emphasis);
+}
+
+[data-render="textonly"] .form-field__input:focus {
+  border-color: var(--secondary-base);
+  outline: none;
+}
+
+
+/* ==========================================================
+   FOCUS — outline ring only, no background tint
+   ========================================================== */
+
+[data-render="textonly"] :focus-visible {
+  outline: var(--border-width-md) solid var(--primary-base);
+  outline-offset: 2px;
+}
+
+[data-render="textonly"] [data-focus-active] {
+  background: transparent !important;
+  outline: var(--border-width-md) solid var(--focus-color, var(--primary-base));
+  outline-offset: 2px;
+}
+
+
+/* ==========================================================
+   PRINT — textonly is the print layout
+   ========================================================== */
+
+@media print {
+  [data-render="textonly"] #a11y-content-wrapper {
+    max-width: none;
+    padding: 0;
+  }
+
+  .to-badge {
+    border-color: currentColor;
+  }
+}

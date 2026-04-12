@@ -88,6 +88,9 @@ const {
       var settings = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
       if (settings.textOnly) {
         document.documentElement.classList.add('a11y-text-only-pending');
+        document.documentElement.setAttribute('data-render', 'textonly');
+      } else if (settings.reduceMotion) {
+        document.documentElement.setAttribute('data-render', 'reduced');
       }
     } catch (e) {}
   </script>
@@ -169,6 +172,8 @@ const {
     // (PatternOverlay, MasonryGrid, MasonryCard), not globally
     // Import focus system (keyboard focus detection, rainbow, dim, scroll)
     import '../lib/focus/focus-system';
+    // Render controller — runtime DOM transforms per render mode
+    import '../lib/render-controller';
     // Reload overlay — covers the page during data-motion/hover/render/mode
     // changes so the user never sees the default-then-target jerk while the
     // page reloads with the new setting applied. CSS imported as side-effect.
