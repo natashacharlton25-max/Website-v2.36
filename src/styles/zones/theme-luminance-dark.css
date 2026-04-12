@@ -569,7 +569,7 @@
   --_link-accent-hover: var(--link-accent-hover, var(--secondary-base));
   --_link-focus: var(--link-focus, var(--primary-contrast));
   --_link-highlight: var(--link-highlight, var(--primary-base));
-  --_link-text: var(--link-text, var(--neutral-emphasis));
+  --_link-text: var(--link-text, var(--text-emphasis));
   --_link-fill-text: var(--link-fill-text, var(--page-bg));
 }
 
@@ -586,6 +586,23 @@
   --_link-color: var(--_link-accent);
   --_link-hover: var(--_link-accent-hover);
   --_link-highlight: var(--secondary-base);
+}
+
+/* Ghost + disabled links — dark mode uses --text-tint (muted text scale)
+   instead of --svg-ghost-color so they stay legible but clearly ghosted. */
+[data-mode="dark"] .link--ghost,
+[data-mode="dark"] .link--ghost .text,
+[data-mode="dark"] .link--ghost[class*="link--"] .text,
+[data-mode="dark"] .link.link--disabled,
+[data-mode="dark"] .link.link--disabled .text,
+[data-mode="dark"] .link.link--disabled:hover,
+[data-mode="dark"] .link.link--disabled:hover .text {
+  color: var(--text-tint);
+}
+
+[data-mode="dark"] .link.link--disabled,
+[data-mode="dark"] .link.link--disabled .text {
+  text-decoration-color: var(--text-tint);
 }
 
 /* Text highlight — no dark override needed, tiers auto-adapt */

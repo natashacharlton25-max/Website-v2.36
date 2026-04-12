@@ -17,14 +17,17 @@
    ========================================================== */
 
 .link {
-  /* ── Internal tokens (bridge → internal, single point of truth) ── */
+  /* ── Internal tokens (bridge → internal, single point of truth) ──
+     --_link-color = the link's intent colour (e.g. primary for default, rainbow-1 for red).
+     --_link-text  = the actual rest colour of the text (body text scale by default).
+     --_link-hover = the hover colour (contrast token for brand families). */
   --_link-color:     var(--link-color, var(--primary-base));
-  --_link-hover:     var(--link-hover, var(--primary-emphasis));
+  --_link-hover:     var(--link-hover, var(--primary-contrast));
   --_link-accent-hover: var(--link-accent-hover, var(--secondary-contrast));
   --_link-focus:     var(--link-focus, var(--primary-base));
   --_link-highlight: var(--link-highlight, var(--primary-mid));
   --_link-accent:    var(--link-accent, var(--secondary-base));
-  --_link-text:      var(--link-text, var(--neutral-emphasis));
+  --_link-text:      var(--link-text, var(--text-emphasis));
   --_link-fill-text: var(--link-fill-text, var(--color-White));
 
   display: inline;
@@ -35,7 +38,7 @@
 }
 
 .link:hover {
-  color: var(--_link-color);
+  color: var(--_link-hover);
 }
 
 /* focus-visible → global focus-gate.css */
@@ -72,7 +75,7 @@
 }
 
 .link--underline:hover {
-  color: var(--_link-color);
+  color: var(--_link-hover);
 }
 
 .link--underline:hover .text {
@@ -89,7 +92,7 @@
 }
 
 .link--highlight:hover {
-  color: var(--_link-color);
+  color: var(--_link-hover);
 }
 
 .link--highlight .text {
@@ -126,7 +129,7 @@
 }
 
 .link--border:hover {
-  color: var(--_link-color);
+  color: var(--_link-hover);
   border-color: var(--_link-hover);
 }
 
@@ -135,8 +138,16 @@
    Just colour, no decoration, no background.
    ========================================================== */
 
+/* Ghost variant — always falls to the ghost colour regardless of any colour prop.
+   Declares a hard override on both the <a> and the nested Text to beat
+   .link .text--primary and other colour class rules. */
+.link--ghost,
+.link--ghost .text,
+.link--ghost[class*="link--"] .text {
+  color: var(--svg-ghost-color);
+}
+
 .link--ghost {
-  color: var(--_link-text);
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur, 8px));
   -webkit-backdrop-filter: blur(var(--glass-blur, 8px));
@@ -144,18 +155,23 @@
   border-radius: var(--radius-xs);
 }
 
-.link--ghost:hover {
-  color: var(--_link-color);
+.link--ghost:hover,
+.link--ghost:hover .text {
+  color: var(--_link-hover);
 }
 
 /* ==========================================================
    COLOUR VARIANTS — remap bridge tokens per colour
    ========================================================== */
 
-.link--primary   { --_link-color: var(--primary-base);   --_link-hover: var(--primary-emphasis);   --_link-highlight: var(--primary-mid); }
+/* Brand-family links hover to --{family}-contrast (accent hex if the brand provides
+   one, otherwise falls back to -emphasis). Text has no contrast token so it stays
+   on -emphasis for hover. Rainbow colours have no accent concept, also use -emphasis. */
+.link--primary   { --_link-color: var(--primary-base);   --_link-hover: var(--primary-contrast);   --_link-highlight: var(--primary-mid); }
 .link--secondary { --_link-color: var(--secondary-base); --_link-hover: var(--secondary-contrast); --_link-highlight: var(--secondary-mid); }
-.link--neutral   { --_link-color: var(--neutral-base);   --_link-hover: var(--neutral-emphasis);   --_link-highlight: var(--neutral-mid); }
-.link--text      { --_link-color: var(--text-base);      --_link-hover: var(--text-emphasis);      --_link-highlight: var(--text-mid); }
+/* Neutral + text hover to --text-mid (muted) since --text-emphasis is already the default rest colour. */
+.link--neutral   { --_link-color: var(--neutral-base);   --_link-hover: var(--text-mid);           --_link-highlight: var(--neutral-mid); }
+.link--text      { --_link-color: var(--text-base);      --_link-hover: var(--text-mid);           --_link-highlight: var(--text-mid); }
 .link--rainbow-1 { --_link-color: var(--rainbow-1);      --_link-hover: var(--rainbow-1-emphasis); --_link-highlight: var(--rainbow-1-mid); }
 .link--rainbow-2 { --_link-color: var(--rainbow-2);      --_link-hover: var(--rainbow-2-emphasis); --_link-highlight: var(--rainbow-2-mid); }
 .link--rainbow-3 { --_link-color: var(--rainbow-3);      --_link-hover: var(--rainbow-3-emphasis); --_link-highlight: var(--rainbow-3-mid); }
@@ -163,6 +179,82 @@
 .link--rainbow-5 { --_link-color: var(--rainbow-5);      --_link-hover: var(--rainbow-5-emphasis); --_link-highlight: var(--rainbow-5-mid); }
 .link--rainbow-6 { --_link-color: var(--rainbow-6);      --_link-hover: var(--rainbow-6-emphasis); --_link-highlight: var(--rainbow-6-mid); }
 .link--rainbow-7 { --_link-color: var(--rainbow-7);      --_link-hover: var(--rainbow-7-emphasis); --_link-highlight: var(--rainbow-7-mid); }
+
+
+/* ==========================================================
+   INLINE ICONS — external / download markers
+   Hardcoded SVGs (no asset API fetch) so they're always available.
+   ========================================================== */
+
+.link__icon {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  margin-left: 0.25em;
+  vertical-align: -0.1em;
+  flex-shrink: 0;
+}
+
+
+/* ==========================================================
+   DISABLED — modifier that works with any variant
+   No hover, no click, no focus, no highlight-links outline.
+   Strikethrough on text + not-allowed cursor + ghost colour + aria-disabled.
+   ========================================================== */
+
+.link.link--disabled,
+.link.link--disabled .text {
+  color: var(--svg-ghost-color);
+  pointer-events: none;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--svg-ghost-color);
+  opacity: 0.65;
+}
+
+/* Kill decoration from underline/highlight/border/ghost variants */
+.link.link--disabled::before,
+.link.link--disabled::after,
+.link.link--disabled .text::before,
+.link.link--disabled .text::after {
+  display: none;
+}
+
+.link.link--disabled {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* No hover / no focus response */
+.link.link--disabled:hover,
+.link.link--disabled:focus,
+.link.link--disabled:focus-visible,
+.link.link--disabled:hover .text,
+.link.link--disabled:focus .text {
+  color: var(--svg-ghost-color);
+  outline: none;
+  text-decoration: line-through;
+  text-decoration-color: var(--svg-ghost-color);
+  box-shadow: none;
+  background: transparent;
+}
+
+/* highlight-links should not affect disabled links */
+[data-highlight-links] .link.link--disabled,
+[data-highlight-links] .link.link--disabled .text,
+[data-highlight-links] .link.link--disabled:hover,
+[data-highlight-links] .link.link--disabled:hover .text {
+  outline: none;
+  text-decoration: line-through;
+  text-decoration-color: var(--svg-ghost-color);
+  color: var(--svg-ghost-color);
+  background: transparent;
+  box-shadow: none;
+}
 
 /* ── Hover gate: none — one global link style, no hover change, bold ── */
 [data-hover="none"] .link {
@@ -270,13 +362,19 @@
   transform: scaleX(1);
 }
 
-/* Animation: highlightGrow — background grows from bar to full on hover */
-.link--animate-highlight-grow::before {
-  transition: all var(--hover-duration);
+/* Animation: highlightGrow — highlight bar grows from the bottom 8px strip
+   to fully wrap the text (slightly taller than the line box) on hover.
+   Slow, smooth cubic for a deliberate feel. Targets .text::before (the bar). */
+.link--animate-highlight-grow .text::before {
+  transition:
+    height 450ms cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 450ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 450ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.link--animate-highlight-grow:hover::before {
-  bottom: 0;
-  height: 100%;
+.link--animate-highlight-grow:hover .text::before {
+  bottom: -0.25em;
+  height: 1.6em;
+  opacity: var(--opacity-medium);
 }
 
 /* Animation: shadowFill — box-shadow inset fills from left */

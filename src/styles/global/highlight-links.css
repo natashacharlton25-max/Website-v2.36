@@ -47,54 +47,14 @@
   text-underline-offset: 0.2em;
 }
 
-/* ── Link atom — all variants become border style from brand config ── */
+/* ── Link atom — overlay mode ──
+   Preserve the link's own variant, colour and animations. Just ADD an outline
+   ring in --highlight-link-color so it's obvious as a clickable element.
+   Original styling is untouched. */
 [data-highlight-links] .link {
-  color: var(--_link-text);
-  font-weight: var(--font-bold);
-  border: var(--highlight-link-outline-width, 3px) solid var(--secondary-base);
+  outline: var(--highlight-link-outline-width, 3px) solid var(--highlight-link-color);
+  outline-offset: 2px;
   border-radius: var(--highlight-link-shape, var(--radius-sm));
-  padding: var(--space-2xs) var(--space-xs);
-  background: transparent;
-  text-decoration: none;
-}
-
-[data-highlight-links] .link .text {
-  text-decoration: none;
-}
-
-[data-highlight-links] .link--underline .text {
-  text-decoration: none;
-}
-
-[data-highlight-links] .link--highlight .text::before {
-  display: none;
-}
-
-[data-highlight-links] .link--ghost {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-/* Strip all animation effects */
-[data-highlight-links] .link--animate-underline-grow::before { display: none; }
-[data-highlight-links] .link--animate-highlight-grow .text::before { display: none; }
-[data-highlight-links] .link--animate-shadow-fill:hover { box-shadow: none; }
-[data-highlight-links] .link--animate-text-slide {
-  background-image: none;
-  -webkit-text-fill-color: unset;
-  background-clip: unset;
-}
-[data-highlight-links] .link--animate-text-slide::before { display: none; }
-
-/* Strip colour overrides — all links same style */
-[data-highlight-links] .link[class*="link--"] {
-  color: var(--_link-text);
-}
-
-[data-highlight-links] .link:hover {
-  color: var(--_link-text);
-  background: color-mix(in oklch, var(--secondary-base) 10%, transparent);
-  border-color: var(--secondary-base);
 }
 
 /* ── List — loose spacing for border link items ── */
@@ -102,22 +62,10 @@
   margin-bottom: var(--space-sm);
 }
 
-/* Textonly + highlight-links — hover changes text + underline together */
-[data-highlight-links] [data-render="textonly"] .link:hover,
-[data-highlight-links] [data-render="textonly"] .link[class*="link--"]:hover {
-  color: var(--_link-hover);
-}
-
-[data-highlight-links] [data-render="textonly"] .link:hover .text {
-  text-decoration-color: var(--_link-hover);
-}
-
-/* Hover gate: none — no hover change on highlighted links */
+/* Hover gate: none — no hover change on highlighted links.
+   Outline remains visible since that's the indicator, but remove any hover transforms. */
 [data-highlight-links] [data-hover="none"] .link,
-[data-highlight-links] [data-hover="none"] .link:hover,
-[data-highlight-links] [data-render="textonly"][data-hover="none"] .link:hover,
-[data-highlight-links] [data-render="textonly"][data-hover="none"] .link[class*="link--"]:hover {
-  color: var(--_link-text);
+[data-highlight-links] [data-hover="none"] .link:hover {
   background: transparent;
 }
 

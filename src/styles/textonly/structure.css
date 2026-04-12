@@ -325,12 +325,13 @@
 
 /* ==========================================================
    LINK — textonly structure
+   Keep the link's own variant, colour, weight and hover behaviour.
+   Only strip decorative surfaces (background, border, padding) that
+   rely on visuals, and guarantee an underline so links are always
+   recognisable as clickable when text-only mode strips other cues.
    ========================================================== */
 
 [data-render="textonly"] .link {
-  color: var(--_link-color);
-  font-weight: var(--font-bold);
-  text-decoration: none;
   text-align: left;
   text-transform: none;
   letter-spacing: normal;
@@ -340,20 +341,6 @@
   text-decoration: underline;
   text-underline-offset: 5px;
   text-decoration-thickness: 2px;
-  text-decoration-color: var(--_link-color);
-}
-
-[data-render="textonly"] .link:hover,
-[data-render="textonly"] .link--underline:hover,
-[data-render="textonly"] .link--highlight:hover,
-[data-render="textonly"] .link--border:hover,
-[data-render="textonly"] .link--ghost:hover {
-  color: var(--_link-hover);
-}
-
-[data-render="textonly"] .link:hover .text,
-[data-render="textonly"] .link--underline:hover .text {
-  text-decoration-color: var(--_link-hover);
 }
 
 [data-render="textonly"] .link--highlight .text::before { display: none; }
@@ -373,24 +360,6 @@
 }
 
 [data-render="textonly"] .link--uppercase { text-transform: none; letter-spacing: normal; }
-
-/* All colour variants use primary in textonly */
-[data-render="textonly"] .link[class*="link--"] {
-  color: var(--_link-color);
-}
-
-[data-render="textonly"] .link[class*="link--"]:hover {
-  color: var(--_link-hover);
-}
-
-[data-render="textonly"][data-hover="none"] .link[class*="link--"]:hover {
-  color: var(--_link-color);
-}
-
-[data-render="textonly"][data-hover="none"] .link:hover .text,
-[data-render="textonly"][data-hover="none"] .link--underline:hover .text {
-  text-decoration-color: var(--_link-color);
-}
 
 
 /* ==========================================================
