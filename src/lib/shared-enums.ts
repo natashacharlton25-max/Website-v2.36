@@ -285,6 +285,12 @@ export const ANIMATION_TRIGGERS_INTERACTIVE = [
 ] as const;
 export type AnimationTriggerInteractive = typeof ANIMATION_TRIGGERS_INTERACTIVE[number];
 
+// ── Animation Repeat (4 values) ──────────────────────
+export const ANIMATION_REPEATS = [
+  'once', 'loop', 'three', 'threeloop'
+] as const;
+export type AnimationRepeat = typeof ANIMATION_REPEATS[number];
+
 
 /* ================================================================
    CONTENT — semantic role, accessibility

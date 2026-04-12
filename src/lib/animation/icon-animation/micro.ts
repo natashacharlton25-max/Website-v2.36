@@ -158,16 +158,49 @@ export function initMicroAnimations() {
     if (!builder) return;
 
     const trigger = el.dataset.animTrigger || 'hover';
+    const repeat = el.dataset.animRepeat || 'once';
 
     // Strip CSS animation — GSAP owns this now
     el.classList.remove(animClass);
     el.classList.remove('anim--playing');
     el.style.animationName = 'none';
 
+    // Build onEnter based on repeat mode
+    const buildOnEnter = () => {
+      switch (repeat) {
+        case 'loop':
+          // Infinite: play, onComplete → replay
+          return () => {
+            const tl = builder(el);
+            tl.repeat(-1).repeatDelay(1);
+            return tl;
+          };
+        case 'three':
+          // Play 3 times then stop
+          return () => {
+            const tl = builder(el);
+            tl.repeat(2).repeatDelay(0.5);
+            return tl;
+          };
+        case 'threeloop':
+          // Play 3 times, pause, repeat forever
+          return () => {
+            const tl = gsap.timeline({ repeat: -1, repeatDelay: 3 });
+            const inner = builder(el);
+            inner.repeat(2).repeatDelay(0.5);
+            tl.add(inner);
+            return tl;
+          };
+        case 'once':
+        default:
+          return () => builder(el);
+      }
+    };
+
     registerTrigger({
       el,
       trigger,
-      onEnter: () => builder(el),
+      onEnter: buildOnEnter(),
       onStatic: () => {},
     });
   });

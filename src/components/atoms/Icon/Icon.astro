@@ -61,6 +61,7 @@ interface Props {
   // ── Animation ───────────────────────────────────────────
   animation?: Animation;
   animationTrigger?: AnimationTriggerInteractive;
+  animationRepeat?: 'once' | 'loop' | 'three' | 'threeloop';
   draw?: boolean | DrawVariant;
   drawMode?: DrawMode;
   drawLaser?: boolean;
@@ -98,7 +99,7 @@ const {
   brandColor, rainbowColor, colorTier,
   shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientAnimate,
-  animation, animationTrigger = 'hover',
+  animation, animationTrigger = 'hover', animationRepeat = 'once',
   draw, drawMode = 'static', drawLaser, drawFill, drawFillMode = 'static', drawGhost, drawOnScroll, drawScrub, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize,
   morphTo, morphViaCircle, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom,
@@ -362,6 +363,7 @@ if (fillAnimation) {
   role={a11yRole}
   data-semantic-role={semanticRole}
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
+  data-anim-repeat={animation && animationRepeat !== 'once' ? animationRepeat : undefined}
   {...dataAttrs}
 >
   <Fragment set:html={iconContent || fallbackIcon} />
