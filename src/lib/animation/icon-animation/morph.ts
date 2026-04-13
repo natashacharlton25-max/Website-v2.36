@@ -455,28 +455,9 @@ export function initMorphIcon(el: HTMLElement) {
   svg.setAttribute('overflow', 'visible');
   svg.style.overflow = 'visible';
 
-  // Split compound paths for staggered morph (shapes only — icons keep
-  // compound paths for cutouts)
+  // No compound path splitting needed — standard fill variant
+  // already has individual <path>/<circle>/<rect> elements.
   const isShape = el.classList.contains('shape');
-  if (isShape) {
-    svg.querySelectorAll('path').forEach(p => {
-      const rawPath = MotionPathPlugin.getRawPath(p as any);
-      if (rawPath.length <= 1) return;
-      const parent = p.parentNode;
-      if (!parent) return;
-      const attributes = Array.from(p.attributes);
-      rawPath.forEach((segment: any) => {
-        const newPath = document.createElementNS(ns, 'path');
-        attributes.forEach(attr => {
-          if (attr.nodeName !== 'd') newPath.setAttributeNS(null, attr.nodeName, attr.nodeValue || '');
-        });
-        newPath.setAttributeNS(null, 'd',
-          'M' + segment[0] + ',' + segment[1] + 'C' + segment.slice(2).join(',') + (segment.closed ? 'z' : ''));
-        parent.insertBefore(newPath, p);
-      });
-      parent.removeChild(p);
-    });
-  }
 
   const paths = Array.from(svg.querySelectorAll('path')) as SVGPathElement[];
   if (!paths.length) return;
@@ -499,26 +480,7 @@ export function initMorphIcon(el: HTMLElement) {
   tempDiv.querySelectorAll('circle, rect, polygon, polyline, ellipse, line').forEach(e => {
     MorphSVGPlugin.convertToPath(e as any);
   });
-  // Split target compound paths (shapes only)
-  if (isShape) {
-    tempDiv.querySelectorAll('path').forEach(p => {
-      const rawPath = MotionPathPlugin.getRawPath(p as any);
-      if (rawPath.length <= 1) return;
-      const parent = p.parentNode;
-      if (!parent) return;
-      const attributes = Array.from(p.attributes);
-      rawPath.forEach((segment: any) => {
-        const newPath = document.createElementNS(ns, 'path');
-        attributes.forEach(attr => {
-          if (attr.nodeName !== 'd') newPath.setAttributeNS(null, attr.nodeName, attr.nodeValue || '');
-        });
-        newPath.setAttributeNS(null, 'd',
-          'M' + segment[0] + ',' + segment[1] + 'C' + segment.slice(2).join(',') + (segment.closed ? 'z' : ''));
-        parent.insertBefore(newPath, p);
-      });
-      parent.removeChild(p);
-    });
-  }
+  // No target splitting — fill variant already has separate elements
   const targetPaths = Array.from(tempDiv.querySelectorAll('path')) as SVGPathElement[];
 
   // Pre-compute raw paths for targets while still in DOM (getRawPath may
