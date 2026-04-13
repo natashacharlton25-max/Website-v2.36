@@ -53,8 +53,12 @@ interface ValidationResult {
   sanitized: Record<string, any>;
 }
 
-// Content prop prefixes — these carry displayable content
+// Content prop prefixes — these carry displayable content (free strings allowed)
 const CONTENT_PREFIXES = ['contentHeading', 'contentText', 'contentBadge', 'contentLink', 'contentList'];
+
+// Props that accept free strings — must be content* prefix OR have _format in schema
+// Everything else MUST have an enum
+const FREE_STRING_PROPS = new Set(['label', 'subtitle', 'ariaLabel', 'alt', 'altWord', 'altDescriptive', 'altAacHtml', 'placeholder', 'description', 'error', 'value']);
 
 // CSS values that must never appear in JSON content
 const CSS_PATTERNS = [
@@ -72,6 +76,44 @@ const STRUCTURAL_PROPS = new Set(['component', 'children', 'ref', 'printOutput']
 
 // Astro-only props that must never be in JSON content
 const FORBIDDEN_PROPS = new Set(['class', 'style']);
+
+/**
+ * Validate the schema itself — catch missing enums, bad types.
+ * Runs once per schema on first use.
+ */
+const validatedSchemas = new Set<string>();
+function validateSchemaIntegrity(schema: ComponentSchema): void {
+  if (validatedSchemas.has(schema.component)) return;
+  validatedSchemas.add(schema.component);
+
+  const flat = flattenSchema(schema);
+  for (const [prop, def] of flat.entries()) {
+    const types = Array.isArray(def.type) ? def.type : [def.type];
+    const isString = types.includes('string');
+    const isBoolean = types.includes('boolean');
+    const isObject = types.includes('object');
+    const isArray = types.includes('array');
+    const isContentProp = CONTENT_PREFIXES.some(p => prop === p);
+    const isFreeString = FREE_STRING_PROPS.has(prop);
+    const hasFormat = !!(def as any)._format;
+
+    // String props MUST have enum — unless content*, free string, or has _format
+    if (isString && !isBoolean && !isObject && !isArray && !def.enum && !isContentProp && !isFreeString && !hasFormat) {
+      console.warn(`[Schema] ${schema.component}.${prop}: string prop without enum — add enum or use content* prefix`);
+    }
+
+    // Media props MUST declare component enum
+    if (prop === 'media' && isObject) {
+      const mediaDef = def as any;
+      if (!mediaDef.properties?.component?.enum) {
+        console.warn(`[Schema] ${schema.component}.media: missing component enum — declare accepted media types`);
+      }
+      if (!mediaDef.properties?.semanticRole) {
+        console.warn(`[Schema] ${schema.component}.media: missing semanticRole — media must declare intent`);
+      }
+    }
+  }
+}
 
 /**
  * Flatten schema prop groups into a single map for lookup
@@ -96,6 +138,9 @@ export function validateComponent(
   item: Record<string, any>,
   schema: ComponentSchema
 ): ValidationResult {
+  // Validate schema integrity on first use
+  validateSchemaIntegrity(schema);
+
   const errors: ValidationError[] = [];
   const sanitized: Record<string, any> = {};
   const flat = flattenSchema(schema);
