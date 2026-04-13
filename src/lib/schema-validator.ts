@@ -54,7 +54,8 @@ interface ValidationResult {
 }
 
 // Content prop prefixes — these carry displayable content (free strings allowed)
-const CONTENT_PREFIXES = ['contentHeading', 'contentText', 'contentBadge', 'contentLink', 'contentList'];
+// Matches any prop starting with 'content' — contentText, contentAlt, contentAltWord, etc.
+const isContentProp = (prop: string) => prop.startsWith('content');
 
 // Props that accept free strings — must be content* prefix OR have _format in schema
 // Everything else MUST have an enum
@@ -93,12 +94,12 @@ function validateSchemaIntegrity(schema: ComponentSchema): void {
     const isBoolean = types.includes('boolean');
     const isObject = types.includes('object');
     const isArray = types.includes('array');
-    const isContentProp = CONTENT_PREFIXES.some(p => prop === p);
+    const isContent = isContentProp(prop);
     const isFreeString = FREE_STRING_PROPS.has(prop);
     const hasFormat = !!(def as any)._format;
 
     // String props MUST have enum — unless content*, free string, or has _format
-    if (isString && !isBoolean && !isObject && !isArray && !def.enum && !isContentProp && !isFreeString && !hasFormat) {
+    if (isString && !isBoolean && !isObject && !isArray && !def.enum && !isContent && !isFreeString && !hasFormat) {
       console.warn(`[Schema] ${schema.component}.${prop}: string prop without enum — add enum or use content* prefix`);
     }
 
@@ -181,11 +182,11 @@ export function validateComponent(
     const def = flat.get(key);
     if (!def) {
       // Content prop on wrong component — helpful error
-      const isContentProp = CONTENT_PREFIXES.some(p => key === p);
+      const isContent = isContentProp(key);
       errors.push({
         prop: key,
         value,
-        message: isContentProp
+        message: isContent
           ? `content prop "${key}" not in ${schema.component} schema — wrong component?`
           : `unknown prop "${key}" — not in schema`,
         severity: 'error',
