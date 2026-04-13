@@ -692,9 +692,27 @@ export function initMorphIcon(el: HTMLElement) {
     const cutoutDur = morphDur * 0.6;
     const fadeDur = morphDur * 0.4;
 
-    // Apply filter at offset 0, start with blur at 0 (solid)
-    tl.set(svg, { filter: 'url(#shape-goo)' }, 0);
-    if (gooBlurEl) tl.set(gooBlurEl, { attr: { stdDeviation: 0 } }, 0);
+    // ── Pre-filter: collapse cutouts via opacity fade before goo starts ──
+    let preFilterDur = 0;
+    const anySrcCutouts = keeperData.some(kd => kd.srcHasCutouts);
+    if (!morphed && anySrcCutouts) {
+      keepers.forEach((path, i) => {
+        const kd = keeperData[i];
+        if (kd.srcHasCutouts) {
+          // Morph cutouts closed while still sharp (no filter)
+          tl.to(path, {
+            morphSVG: { shape: kd.srcSolid, type: 'linear' },
+            duration: cutoutDur,
+            ease: 'power1.inOut',
+          }, 0);
+        }
+      });
+      preFilterDur = cutoutDur;
+    }
+
+    // Apply filter AFTER cutouts are collapsed
+    tl.set(svg, { filter: 'url(#shape-goo)' }, preFilterDur);
+    if (gooBlurEl) tl.set(gooBlurEl, { attr: { stdDeviation: 0 } }, preFilterDur);
 
     // STAGE 1: blur eases 0 → full
     if (gooBlurEl) {
@@ -702,10 +720,10 @@ export function initMorphIcon(el: HTMLElement) {
         attr: { stdDeviation: GOO_BLUR_FULL },
         duration: BLUR_IN_DUR,
         ease: 'sine.inOut',
-      }, 0);
+      }, preFilterDur);
     }
 
-    const morphStart = BLUR_IN_DUR;
+    const morphStart = preFilterDur + BLUR_IN_DUR;
 
     if (!morphed) {
       // ═══════════════════════════════════════════════════════
@@ -713,22 +731,7 @@ export function initMorphIcon(el: HTMLElement) {
       // ═══════════════════════════════════════════════════════
 
       let cursor = morphStart;
-
-      // ── Phase 0: Collapse source cutouts ──
-      const anySrcCutouts = keeperData.some(kd => kd.srcHasCutouts);
-      if (anySrcCutouts) {
-        keepers.forEach((path, i) => {
-          const kd = keeperData[i];
-          if (kd.srcHasCutouts) {
-            tl!.to(path, {
-              morphSVG: { shape: kd.srcSolid, type: 'linear' },
-              duration: cutoutDur,
-              ease: 'power1.inOut',
-            }, cursor);
-          }
-        });
-        cursor += cutoutDur;
-      }
+      // Cutouts already collapsed in pre-filter phase
 
       // ── Phase 1: All paths morph to blob / center circle (with stagger) ──
       // Keepers morph to their Blob A
@@ -796,23 +799,7 @@ export function initMorphIcon(el: HTMLElement) {
 
       let phase4End = blobMorphEnd + morphDur;
 
-      // ── Phase 5: Expand target cutouts ──
-      const anyTgtCutouts = keeperData.some(kd => kd.tgtHasCutouts);
-      if (anyTgtCutouts) {
-        keepers.forEach((path, i) => {
-          const kd = keeperData[i];
-          if (kd.tgtHasCutouts) {
-            tl!.to(path, {
-              morphSVG: { shape: kd.tgtFull, type: 'linear' },
-              duration: cutoutDur,
-              ease: 'power2.out',
-            }, phase4End);
-          }
-        });
-        phase4End += cutoutDur;
-      }
-
-      // STAGE 3: blur eases full → 0
+      // STAGE 3: blur eases full → 0 (before cutout expand)
       if (gooBlurEl) {
         tl!.to(gooBlurEl, {
           attr: { stdDeviation: 0 },
@@ -821,8 +808,26 @@ export function initMorphIcon(el: HTMLElement) {
         }, phase4End);
       }
 
-      // Clear filter at the end
-      tl!.set(svg, { filter: '' }, '+=0.05');
+      const fwdPostFilter = phase4End + BLUR_OUT_DUR;
+
+      // ── Phase 5: Expand target cutouts AFTER filter removed ──
+      const anyTgtCutouts = keeperData.some(kd => kd.tgtHasCutouts);
+      if (anyTgtCutouts) {
+        tl!.set(svg, { filter: '' }, fwdPostFilter);
+        keepers.forEach((path, i) => {
+          const kd = keeperData[i];
+          if (kd.tgtHasCutouts) {
+            tl!.to(path, {
+              morphSVG: { shape: kd.tgtFull, type: 'linear' },
+              duration: cutoutDur,
+              ease: 'power1.inOut',
+            }, fwdPostFilter);
+          }
+        });
+      } else {
+        // No cutouts — just clear filter
+        tl!.set(svg, { filter: '' }, fwdPostFilter + 0.05);
+      }
 
     } else {
       // ═══════════════════════════════════════════════════════
@@ -908,30 +913,32 @@ export function initMorphIcon(el: HTMLElement) {
 
       let phase4End = phase4Start + morphStagger + morphDur;
 
-      // ── Phase 5: Expand source cutouts ──
-      const anySrcCutouts = keeperData.some(kd => kd.srcHasCutouts);
-      if (anySrcCutouts) {
-        keepers.forEach((path, i) => {
-          const kd = keeperData[i];
-          if (kd.srcHasCutouts) {
-            // Morph from solid (cutouts collapsed) to original full path
-            tl!.to(path, {
-              morphSVG: { shape: (path as any)._originalD, type: 'linear' },
-              duration: cutoutDur,
-              ease: 'power2.out',
-            }, phase4End);
-          }
-        });
-        phase4End += cutoutDur;
-      }
-
-      // STAGE 3: blur eases full → 0
+      // STAGE 3: blur eases full → 0 (before cutout expand)
       if (gooBlurEl) {
         tl!.to(gooBlurEl, {
           attr: { stdDeviation: 0 },
           duration: BLUR_OUT_DUR,
           ease: 'sine.inOut',
         }, phase4End);
+      }
+
+      const postFilterStart = phase4End + BLUR_OUT_DUR;
+
+      // ── Phase 5: Expand source cutouts AFTER filter removed ──
+      if (anySrcCutouts) {
+        // Clear filter first so cutout expand is sharp
+        tl!.set(svg, { filter: '' }, postFilterStart);
+        keepers.forEach((path, i) => {
+          const kd = keeperData[i];
+          if (kd.srcHasCutouts) {
+            tl!.to(path, {
+              morphSVG: { shape: (path as any)._originalD, type: 'linear' },
+              duration: cutoutDur,
+              ease: 'power1.inOut',
+            }, postFilterStart);
+          }
+        });
+        phase4End = postFilterStart + cutoutDur;
       }
 
       // Clear filter at the end
