@@ -46,7 +46,9 @@ function initModal(): void {
       const key = b.dataset.testToggle!;
       const active = key === 'xlText'
         ? settings.fontSize >= 150
-        : (settings as any)[key] === true;
+        : key === 'animExplainerInline'
+          ? settings.animExplainer === 'inline'
+          : (settings as any)[key] === true;
       setActive(b, active);
     });
 
