@@ -68,6 +68,7 @@ interface Props {
   animationRepeat?: 'once' | 'loop' | 'three' | 'threeloop';
   draw?: boolean | DrawVariant;
   drawMode?: DrawMode;
+  drawOnce?: boolean;
   drawLaser?: boolean;
   drawGhost?: boolean;
   drawOnScroll?: boolean;
@@ -102,11 +103,14 @@ const {
   shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientAnimate, gradientAnimateDirection, gradientAnimateSpeed,
   animation, animationTrigger = 'hover', animationRepeat = 'once',
-  draw, drawMode = 'static', drawLaser, drawGhost, drawOnScroll, drawScrub, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize,
+  draw, drawMode: rawDrawMode = 'static', drawOnce, drawLaser, drawGhost, drawOnScroll, drawScrub, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize,
   morphTo, morphViaCircle, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom,
   semanticRole, label,
 } = Astro.props;
+
+// Resolve drawMode: drawOnce overrides to 'once', drawOnce+drawGhost → strip drawOnce
+const drawMode = (drawOnce && !drawGhost) ? 'once' : rawDrawMode;
 
 // Strip tier suffixes from drawColor (e.g. "red-tint" → "red") since draw
 // strokes need full opacity — tiers are opacity-based and would render the
