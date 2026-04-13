@@ -171,17 +171,19 @@ function generateMatchedBlob(
   cx: number,
   cy: number,
   radius: number,
-  seedOffset = 0
+  seedOffset = 0,
+  overrideAngle?: number,
+  overrideWinding?: number
 ): string {
   const numCurves = segmentPointCount(seg);
   if (numCurves < 1) return `M${cx},${cy}Z`;
 
-  // Start angle: angle from center to first on-curve point
-  const startAngle = Math.atan2(seg[1] - cy, seg[0] - cx);
+  // Start angle: use override (for blob→blob matching) or inherit from shape
+  const startAngle = overrideAngle ?? Math.atan2(seg[1] - cy, seg[0] - cx);
 
-  // Winding direction: positive signed area = CCW in SVG, negative = CW
+  // Winding direction: use override or inherit from shape
   const signedArea = segmentSignedArea(seg);
-  const windingDir = signedArea >= 0 ? 1 : -1; // 1=CCW, -1=CW
+  const windingDir = overrideWinding ?? (signedArea >= 0 ? 1 : -1);
 
   // Generate points around the circle. For a closed path with N curves,
   // there are N distinct on-curve points (the last connects back to the first).
@@ -401,7 +403,9 @@ function generateFullBlob(
   cy: number,
   radius: number,
   cutoutIndices: number[],
-  seedOffset = 0
+  seedOffset = 0,
+  overrideAngle?: number,
+  overrideWinding?: number
 ): string {
   const cutoutSet = new Set(cutoutIndices);
   const parts: string[] = [];
@@ -420,7 +424,7 @@ function generateFullBlob(
       parts.push(segD);
     } else {
       // Non-cutout: generate a blob matched to this segment's structure
-      parts.push(generateMatchedBlob(seg, cx, cy, radius, seedOffset));
+      parts.push(generateMatchedBlob(seg, cx, cy, radius, seedOffset, overrideAngle, overrideWinding));
     }
   }
 
@@ -626,11 +630,17 @@ export function initMorphIcon(el: HTMLElement) {
     // Target full: all segments at their real positions
     const tgtFull = rawPathToD(tgtRawPath);
 
-    // Generate blob A matched to source's structure (seed 0)
-    const blobA = generateFullBlob(srcRawPath, cx, cy, blobRadius, srcCutouts, 0);
+    // Both blobs share the SAME start angle (0°) and winding (CW=-1) so
+    // BlobA→BlobB is a gentle shape shift, not a rotation/flip.
+    // Only the seed differs → different wobble pattern.
+    const blobAngle = 0;
+    const blobWinding = -1; // CW
 
-    // Generate blob B matched to target's structure (seed 1 — visually distinct from A)
-    const blobB = generateFullBlob(tgtRawPath, cx, cy, blobRadius, tgtCutouts, 1);
+    // Generate blob A matched to source's point count (seed 0)
+    const blobA = generateFullBlob(srcRawPath, cx, cy, blobRadius, srcCutouts, 0, blobAngle, blobWinding);
+
+    // Generate blob B matched to target's point count (seed 1 — different wobble)
+    const blobB = generateFullBlob(tgtRawPath, cx, cy, blobRadius, tgtCutouts, 1, blobAngle, blobWinding);
 
     return {
       srcRawPath,
