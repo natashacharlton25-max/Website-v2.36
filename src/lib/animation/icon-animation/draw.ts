@@ -113,15 +113,11 @@ export function initDrawIcon(el: HTMLElement) {
   // Detect scroll container — OverlayScrollbars viewport
   const osViewport = getScrollContainer();
 
-  // Fill modes
-  const showFill = el.dataset.iconDrawFill === 'true';
+  // Ghost mode
   const ghost = el.dataset.iconDrawGhost === 'true';
   const ghostColor = el.dataset.iconDrawGhostColor || getComputedStyle(el).getPropertyValue('--svg-ghost-color').trim() || getComputedStyle(el).getPropertyValue('--neutral-tint').trim() || iconColor;
 
-  if (showFill) {
-    // Fill variant: origPaths keep their fill — static icon always visible underneath
-    // Overlay draws border on top. Nothing to do here.
-  } else if (ghost) {
+  if (ghost) {
     // Ghost: CSS handles ghost color via .icon--draw[data-icon-draw-ghost] rules
   } else {
     // Stroke-only: hide origPaths, overlay handles everything
@@ -130,19 +126,16 @@ export function initDrawIcon(el: HTMLElement) {
     });
   }
 
-  // Overlay stroke width: slightly thicker for border effect on filled/ghost icons
-  const overlayStrokeWidth = (showFill || ghost) ? sw * 1.2 : sw;
+  // Overlay stroke width: slightly thicker for ghost icons
+  const overlayStrokeWidth = ghost ? sw * 1.2 : sw;
 
   // Clone each path as a stroke overlay
   const overlays: SVGPathElement[] = [];
-  // Ghost+fill: border starts hidden (draws on hover). All others: start drawn if static/yoyo/reverse-yoyo
-  const isBorderMode = ghost && showFill;
-  const startDrawn = isBorderMode || mode === 'reveal' ? false : (mode === 'reverse-yoyo' || mode === 'static' || mode === 'yoyo');
+  const startDrawn = mode === 'reveal' ? false : (mode === 'reverse-yoyo' || mode === 'static' || mode === 'yoyo');
   const ghostOpacity = ghost ? 1 : 0.2;
   // Compute init opacity to match what playDraw creates visually
   let initOpacity = 0;
-  if (isBorderMode) initOpacity = 0;
-  else if (mode === 'fade' && ghost) initOpacity = ghostOpacity;
+  if (mode === 'fade' && ghost) initOpacity = ghostOpacity;
   else if (mode === 'static' || mode === 'yoyo') initOpacity = ghost ? ghostOpacity : 1;
   else if (mode === 'reverse-yoyo') {
     if (ghost) {
@@ -178,7 +171,7 @@ export function initDrawIcon(el: HTMLElement) {
   const hasMorphTarget = !!el.dataset.iconMorphTarget;
   const play = hasMorphTarget
     ? () => playDrawMorph(el, overlays, origPaths, color, ghostOpacity, ghost, ghostColor, variant, mode, laser, sw)
-    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, isBorderMode, sw, drawStagger, drawStaggerFrom, drawWormSize);
+    : () => playDraw(overlays, variant, color, iconColor, mode, laser, ghostOpacity, ghost, ghostColor, false, sw, drawStagger, drawStaggerFrom, drawWormSize);
 
   // Scrub is a special case — needs its own ScrollTrigger timeline
   if (drawTrigger === 'scrub') {

@@ -72,9 +72,19 @@ function onThemeChange() {
   });
 
   // Fill clones: re-read color from parent's CSS token
+  // Skip ghoststatic clones — they use --svg-ghost-color, not --_color
   document.querySelectorAll('.icon-fill-morph').forEach(clone => {
     const parent = (clone as HTMLElement).closest('.shape, .icon') as HTMLElement;
     if (!parent) return;
+    if (parent.dataset.iconFillMode === 'ghoststatic') {
+      const ghost = getComputedStyle(parent).getPropertyValue('--svg-ghost-color').trim()
+        || getComputedStyle(document.documentElement).getPropertyValue('--neutral-tint').trim()
+        || '#ccc';
+      const ctx2 = document.createElement('canvas').getContext('2d')!;
+      ctx2.fillStyle = ghost;
+      (clone as HTMLElement).style.fill = ctx2.fillStyle;
+      return;
+    }
     const ctx = document.createElement('canvas').getContext('2d')!;
     const raw = getComputedStyle(parent).getPropertyValue('--_color').trim() || getComputedStyle(parent).color;
     ctx.fillStyle = raw;

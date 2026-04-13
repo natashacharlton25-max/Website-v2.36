@@ -162,9 +162,17 @@ export function initFillIcon(el: HTMLElement) {
     if (!clone.getAttribute('fill-rule')) {
       clone.setAttribute('fill-rule', 'evenodd');
     }
-    // Set transform origin to this path's center + start hidden
+    // Set transform origin + initial state per mode
     if (mode === 'fade') {
       gsap.set(clone, { opacity: 0, svgOrigin: `${pcx} ${pcy}` });
+    } else if (mode === 'reduced') {
+      // Visible at rest, dims to 30% during draw, returns to 100% after
+      gsap.set(clone, { opacity: 1, svgOrigin: `${pcx} ${pcy}` });
+    } else if (mode === 'ghoststatic') {
+      // Static ghost fill — GSAP inline style wins over draw inheritance
+      const ghostFill = getGhostColor(el);
+      clone.setAttribute('fill', ghostFill);
+      gsap.set(clone, { fill: ghostFill, opacity: 1, svgOrigin: `${pcx} ${pcy}` });
     } else {
       gsap.set(clone, { scale: 0.01, opacity: 0, svgOrigin: `${pcx} ${pcy}` });
     }
@@ -190,7 +198,8 @@ export function initFillIcon(el: HTMLElement) {
   });
 
   // Start filled: static mode, or icons (should be visible on load, retrigger on hover)
-  if (mode === 'static' || isIconEl) {
+  // Reduced + ghost+draw: skip — they handle their own init state above
+  if ((mode === 'static' || isIconEl) && mode !== 'reduced' && mode !== 'ghoststatic') {
     fillClones.forEach(clone => {
       gsap.set(clone, { scale: 1, opacity: 1 });
     });
@@ -312,6 +321,75 @@ export function initFillIcon(el: HTMLElement) {
 
     return tl;
   };
+
+  // Ghoststatic: ghost fill dims, outline draws, outline fades out as fill restores
+  if (mode === 'ghoststatic') {
+    const ghostDrawEnter = () => {
+      const d = combinedDuration * 2.5;
+      const tl = gsap.timeline();
+      // Dim ghost fill
+      tl.to(fillClones, { opacity: 0.3, duration: d * 0.25, ease: 'power2.out' }, 0);
+      // Draw outline while fill is dimmed
+      if (showOutline) {
+        origPaths.forEach((p, i) => {
+          tl.fromTo(p, { drawSVG: '0%' }, { drawSVG: '100%', duration: d * 0.45, ease: 'power2.inOut' }, d * 0.1 + i * 0.15);
+        });
+      }
+      // Simultaneous: fill restores + outline fades out
+      const fadeStart = d * 0.6;
+      const fadeDur = d * 0.4;
+      tl.to(fillClones, { opacity: 1, duration: fadeDur, ease: 'power2.inOut' }, fadeStart);
+      if (showOutline) {
+        origPaths.forEach(p => {
+          tl.to(p, { opacity: 0, duration: fadeDur, ease: 'power2.inOut' }, fadeStart);
+        });
+        tl.set(origPaths, { opacity: 1, drawSVG: '0%' });
+      }
+      return tl;
+    };
+    registerTrigger({
+      el,
+      trigger,
+      onEnter: ghostDrawEnter,
+      onStatic: () => {},
+    });
+    return;
+  }
+
+  // Reduced: fill dims to 30%, outline draws, outline fades out as fill fades back in
+  if (mode === 'reduced') {
+    const reducedEnter = () => {
+      const d = combinedDuration * 2.5;
+      const tl = gsap.timeline();
+      // Dim fill
+      tl.to(fillClones, { opacity: 0.3, duration: d * 0.25, ease: 'power2.out' }, 0);
+      // Draw outline while fill is dimmed
+      if (showOutline) {
+        origPaths.forEach((p, i) => {
+          tl.fromTo(p, { drawSVG: '0%' }, { drawSVG: '100%', duration: d * 0.45, ease: 'power2.inOut' }, d * 0.1 + i * 0.15);
+        });
+      }
+      // Simultaneous: fill fades back in + outline fades out together
+      const fadeStart = d * 0.6;
+      const fadeDur = d * 0.4;
+      tl.to(fillClones, { opacity: 1, duration: fadeDur, ease: 'power2.inOut' }, fadeStart);
+      if (showOutline) {
+        origPaths.forEach(p => {
+          tl.to(p, { opacity: 0, duration: fadeDur, ease: 'power2.inOut' }, fadeStart);
+        });
+        // Reset outline for next trigger
+        tl.set(origPaths, { opacity: 1, drawSVG: '0%' });
+      }
+      return tl;
+    };
+    registerTrigger({
+      el,
+      trigger,
+      onEnter: reducedEnter,
+      onStatic: () => { fillClones.forEach(c => gsap.set(c, { opacity: 1 })); },
+    });
+    return;
+  }
 
   // Scroll-driven triggers are special — they manage their own ScrollTrigger
   if (trigger === 'rainbow') {

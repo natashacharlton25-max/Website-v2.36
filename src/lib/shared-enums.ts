@@ -405,7 +405,7 @@ export type MorphTrigger = typeof MORPH_TRIGGERS[number];
 
 // ── Fill Mode (6 values) ───────────────────────────────
 export const FILL_MODES = [
-  'once', 'yoyo', 'static', 'fade', 'ghost', 'twinkle'
+  'once', 'yoyo', 'static', 'fade', 'ghost', 'ghoststatic', 'twinkle', 'reduced'
 ] as const;
 export type FillMode = typeof FILL_MODES[number];
 
