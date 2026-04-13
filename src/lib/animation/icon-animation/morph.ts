@@ -739,7 +739,7 @@ export function initMorphIcon(el: HTMLElement) {
         const keeperIdx = paths.indexOf(path);
         const offset = keeperIdx >= 0 ? rank[keeperIdx] * perPathStagger : 0;
         tl!.to(path, {
-          morphSVG: { shape: kd.blobA, type: 'rotational', curveMode: true, smooth: 'auto' },
+          morphSVG: { shape: kd.blobA, type: 'linear', smooth: 'auto' },
           duration: morphDur,
           ease: 'power2.in',
         }, cursor + offset);
@@ -754,7 +754,7 @@ export function initMorphIcon(el: HTMLElement) {
         const pathIdx = paths.indexOf(path);
         const offset = pathIdx >= 0 ? rank[pathIdx] * perPathStagger : 0;
         tl!.to(path, {
-          morphSVG: { shape: simpleBlob, type: 'rotational', curveMode: true, smooth: 'auto' },
+          morphSVG: { shape: simpleBlob, type: 'linear', smooth: 'auto' },
           duration: morphDur,
           ease: 'power2.in',
         }, cursor + offset);
@@ -794,7 +794,7 @@ export function initMorphIcon(el: HTMLElement) {
       keepers.forEach((path, i) => {
         const kd = keeperData[i];
         tl!.to(path, {
-          morphSVG: { shape: kd.tgtSolid, type: 'rotational', curveMode: true, smooth: 'auto' },
+          morphSVG: { shape: kd.tgtSolid, type: 'linear', smooth: 'auto' },
           duration: morphDur,
           ease: 'power2.out',
         }, blobMorphEnd);
@@ -859,7 +859,7 @@ export function initMorphIcon(el: HTMLElement) {
       keepers.forEach((path, i) => {
         const kd = keeperData[i];
         tl!.to(path, {
-          morphSVG: { shape: kd.blobB, type: 'rotational', curveMode: true, smooth: 'auto' },
+          morphSVG: { shape: kd.blobB, type: 'linear', smooth: 'auto' },
           duration: morphDur,
           ease: 'power2.in',
         }, cursor);
@@ -901,7 +901,7 @@ export function initMorphIcon(el: HTMLElement) {
         const keeperIdx = paths.indexOf(path);
         const offset = keeperIdx >= 0 ? rank[keeperIdx] * perPathStagger : 0;
         tl!.to(path, {
-          morphSVG: { shape: kd.srcSolid, type: 'rotational', curveMode: true, smooth: 'auto' },
+          morphSVG: { shape: kd.srcSolid, type: 'linear', smooth: 'auto' },
           duration: morphDur,
           ease: 'power2.out',
         }, phase4Start + offset);
@@ -912,7 +912,7 @@ export function initMorphIcon(el: HTMLElement) {
         const pathIdx = paths.indexOf(path);
         const offset = pathIdx >= 0 ? rank[pathIdx] * perPathStagger : 0;
         tl!.to(path, {
-          morphSVG: { shape: (path as any)._originalD, type: 'rotational', curveMode: true, smooth: 'auto' },
+          morphSVG: { shape: (path as any)._originalD, type: 'linear', smooth: 'auto' },
           duration: morphDur,
           ease: 'power2.out',
         }, phase4Start + offset);
