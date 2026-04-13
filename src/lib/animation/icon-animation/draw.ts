@@ -157,7 +157,7 @@ export function initDrawIcon(el: HTMLElement) {
     clone.setAttribute('stroke-width', String(overlayStrokeWidth));
     clone.setAttribute('stroke-linejoin', 'round');
     clone.setAttribute('stroke-linecap', 'round');
-    if (!ghost) clone.setAttribute('stroke', 'currentColor');
+    clone.setAttribute('stroke', 'currentColor');
     if (initOpacity < 1) clone.style.opacity = String(initOpacity);
     // Append first so getTotalLength works for drawSVG
     p.parentNode!.appendChild(clone);
@@ -318,12 +318,14 @@ function playDraw(
         master.to(overlays, { opacity: 0, duration: 0.5 }, t + onceTotalD);
         master.to(worms, { opacity: 0, duration: 0.5 }, t + onceTotalD);
       } else {
-        overlays.forEach(o => master.set(o, { opacity: 1 }, t));
+        const fadeStartOpacity = isGhostMode ? ghostOpacity : 1;
+        const fadeEndOpacity = isGhostMode ? ghostOpacity : 0;
+        overlays.forEach(o => master.set(o, { opacity: fadeStartOpacity }, t));
         const onceTl = gsap.timeline();
         addVariant(onceTl, overlays, variant, color, iconColor, d, sw, false, staggerTime, staggerFrom, wormSize);
         master.add(onceTl, t);
         const onceTotalD = d + staggerTime * Math.max(0, overlays.length - 1);
-        master.to(overlays, { opacity: 0, duration: 0.5 }, t + onceTotalD);
+        master.to(overlays, { opacity: fadeEndOpacity, duration: 0.5 }, t + onceTotalD);
       }
       break;
     }
