@@ -170,7 +170,8 @@ function generateMatchedBlob(
   seg: RawSegment,
   cx: number,
   cy: number,
-  radius: number
+  radius: number,
+  seedOffset = 0
 ): string {
   const numCurves = segmentPointCount(seg);
   if (numCurves < 1) return `M${cx},${cy}Z`;
@@ -186,9 +187,8 @@ function generateMatchedBlob(
   // there are N distinct on-curve points (the last connects back to the first).
   const angleStep = (2 * Math.PI * windingDir) / numCurves;
 
-  // Seeded-ish random using segment data for consistency across calls
-  // (but different per segment)
-  let seed = Math.abs(seg[0] * 7 + seg[1] * 13 + numCurves * 31) % 1000;
+  // Seeded random — seedOffset ensures Blob A and Blob B are visually distinct
+  let seed = Math.abs(seg[0] * 7 + seg[1] * 13 + numCurves * 31 + seedOffset * 997) % 1000;
   const pseudoRandom = () => {
     seed = (seed * 1103515245 + 12345) % 2147483648;
     return (seed / 2147483648);
@@ -400,7 +400,8 @@ function generateFullBlob(
   cx: number,
   cy: number,
   radius: number,
-  cutoutIndices: number[]
+  cutoutIndices: number[],
+  seedOffset = 0
 ): string {
   const cutoutSet = new Set(cutoutIndices);
   const parts: string[] = [];
@@ -419,7 +420,7 @@ function generateFullBlob(
       parts.push(segD);
     } else {
       // Non-cutout: generate a blob matched to this segment's structure
-      parts.push(generateMatchedBlob(seg, cx, cy, radius));
+      parts.push(generateMatchedBlob(seg, cx, cy, radius, seedOffset));
     }
   }
 
@@ -625,11 +626,11 @@ export function initMorphIcon(el: HTMLElement) {
     // Target full: all segments at their real positions
     const tgtFull = rawPathToD(tgtRawPath);
 
-    // Generate blob A matched to source's structure
-    const blobA = generateFullBlob(srcRawPath, cx, cy, blobRadius, srcCutouts);
+    // Generate blob A matched to source's structure (seed 0)
+    const blobA = generateFullBlob(srcRawPath, cx, cy, blobRadius, srcCutouts, 0);
 
-    // Generate blob B matched to target's structure
-    const blobB = generateFullBlob(tgtRawPath, cx, cy, blobRadius, tgtCutouts);
+    // Generate blob B matched to target's structure (seed 1 — visually distinct from A)
+    const blobB = generateFullBlob(tgtRawPath, cx, cy, blobRadius, tgtCutouts, 1);
 
     return {
       srcRawPath,
