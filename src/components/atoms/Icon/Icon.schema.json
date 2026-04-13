@@ -9,7 +9,8 @@
     { "rule": "draw-excludes-fill", "condition": "draw", "excludes": "weight === 'fill'" },
     { "rule": "gradient-draw-passthrough", "condition": "gradient && draw", "note": "gradient value used as drawColor for gradient stroke lines" },
     { "rule": "draw-colour-base-only", "condition": "draw", "note": "drawColor only accepts base colour variants or rainbow — no tier modifiers (tint/mid/emphasis). Atom strips them at runtime via normalizeDrawColour." },
-    { "rule": "label-required-for-informational", "condition": "semanticRole === 'ui-control' || semanticRole === 'content-symbol'", "requires": "label", "note": "ui-control and content-symbol icons must have label for screen readers and textonly swap" }
+    { "rule": "label-required-for-informational", "condition": "semanticRole === 'ui-control' || semanticRole === 'content-symbol'", "requires": "label", "note": "ui-control and content-symbol icons must have label for screen readers and textonly swap" },
+    { "rule": "once-excludes-ghost", "condition": "drawMode === 'once'", "excludes": "drawGhost", "note": "once draws then disappears — ghost expects persistent strokes" }
   ],
 
   "props": {
@@ -51,7 +52,7 @@
       "animationRepeat":  { "type": "string", "default": "once", "enum": ["once", "loop", "three", "threeloop"], "description": "How many times to play: once, loop (infinite), three (3x), threeloop (3x then pause then repeat)" },
 
       "draw":             { "type": ["boolean", "string"], "enum": [true, "draw", "drawcenter", "pulse"] },
-      "drawMode":         { "type": "string", "default": "static", "enum": ["fade", "static", "yoyo", "reverse-yoyo", "reveal"] },
+      "drawMode":         { "type": "string", "default": "static", "enum": ["once", "static", "yoyo", "reverse-yoyo", "reveal"], "_note": "once: draws then disappears (not valid with drawGhost). static: draws and stays." },
       "drawLaser":        { "type": "boolean" },
       "drawGhost":        { "type": "boolean", "_note": "Use --svg-ghost-color token for ghost stroke" },
       "drawColor":        { "type": "string", "enum": ["primary", "secondary", "neutral", "text", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7", "hero", "sunset", "brand-emerge", "brand-fade", "rainbow"], "_note": "BASE colours only — no tier modifiers. Tier suffixes are stripped at runtime." },

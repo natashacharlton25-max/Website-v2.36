@@ -341,7 +341,7 @@ export type DrawVariant = typeof DRAW_VARIANTS[number];
 
 // ── Draw Mode (5 values) ───────────────────────────────
 export const DRAW_MODES = [
-  'fade', 'static', 'yoyo', 'reverse-yoyo', 'reveal'
+  'once', 'static', 'yoyo', 'reverse-yoyo', 'reveal'
 ] as const;
 export type DrawMode = typeof DRAW_MODES[number];
 
