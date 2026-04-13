@@ -39,7 +39,7 @@ import { getMotionMode, getHoverMode, getScrollContainer, registerTrigger } from
 gsap.registerPlugin(MorphSVGPlugin, MotionPathPlugin, ScrollTrigger);
 
 // Goo filter strength — animated by morph timelines via AttrPlugin
-const GOO_BLUR_FULL = 8;
+const GOO_BLUR_FULL = 5;
 let gooeyFilterInjected = false;
 let gooBlurEl: Element | null = null;
 
@@ -82,7 +82,7 @@ function ensureGooeyFilter() {
   const matrix = document.createElementNS(ns, 'feColorMatrix');
   matrix.setAttribute('in', 'blur');
   matrix.setAttribute('mode', 'matrix');
-  matrix.setAttribute('values', '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7');
+  matrix.setAttribute('values', '1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 12 -5');
   matrix.setAttribute('result', 'goo');
   const composite = document.createElementNS(ns, 'feComposite');
   composite.setAttribute('in', 'SourceGraphic');
@@ -689,7 +689,7 @@ export function initMorphIcon(el: HTMLElement) {
     //   BLUR IN → [cutout collapse] → morph to Blob A → morph Blob A→B → morph to target → [cutout expand] → BLUR OUT
     const BLUR_IN_DUR = 0.5;
     const BLUR_OUT_DUR = 0.5;
-    const cutoutDur = morphDur * 0.3;
+    const cutoutDur = morphDur * 0.6;
     const fadeDur = morphDur * 0.4;
 
     // Apply filter at offset 0, start with blur at 0 (solid)
@@ -723,7 +723,7 @@ export function initMorphIcon(el: HTMLElement) {
             tl!.to(path, {
               morphSVG: { shape: kd.srcSolid, type: 'linear' },
               duration: cutoutDur,
-              ease: 'power2.in',
+              ease: 'power1.inOut',
             }, cursor);
           }
         });
@@ -777,12 +777,12 @@ export function initMorphIcon(el: HTMLElement) {
         const kd = keeperData[i];
         tl!.to(path, {
           morphSVG: { shape: kd.blobB, type: 'linear' },
-          duration: morphDur * 0.6,
-          ease: 'sine.inOut',
+          duration: morphDur * 1.2,
+          ease: 'power1.inOut',
         }, blobMorphStart);
       });
 
-      const blobMorphEnd = blobMorphStart + morphDur * 0.6;
+      const blobMorphEnd = blobMorphStart + morphDur * 1.2;
 
       // ── Phase 4: Blob B → Target solid ──
       keepers.forEach((path, i) => {
