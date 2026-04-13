@@ -57,9 +57,8 @@ interface ValidationResult {
 // Matches any prop starting with 'content' — contentText, contentAlt, contentAltWord, etc.
 const isContentProp = (prop: string) => prop.startsWith('content');
 
-// Props that accept free strings — must be content* prefix OR have _format in schema
-// Everything else MUST have an enum
-const FREE_STRING_PROPS = new Set(['label', 'subtitle', 'ariaLabel', 'alt', 'altWord', 'altDescriptive', 'altAacHtml', 'placeholder', 'description', 'error', 'value']);
+// Props that accept free strings — content text that doesn't need enum
+const FREE_STRING_PROPS = new Set(['label', 'subtitle', 'ariaLabel', 'placeholder', 'description', 'error', 'value', 'id', 'text']);
 
 // CSS values that must never appear in JSON content
 const CSS_PATTERNS = [
