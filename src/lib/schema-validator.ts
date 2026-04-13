@@ -261,6 +261,26 @@ export function validateComponent(
       }
     }
 
+    // _ref objects — validate props against referenced atom schema
+    if (typeof value === 'object' && value !== null && !Array.isArray(value) && (def as any)._ref) {
+      const refName = (def as any)._ref;
+      // schemaMap passed via closure from Renderer — check if available
+      if (typeof globalThis !== 'undefined' && (globalThis as any).__schemaMap) {
+        const refSchema = (globalThis as any).__schemaMap.get(refName);
+        if (refSchema) {
+          const refResult = validateComponent(value, refSchema);
+          for (const err of refResult.errors) {
+            errors.push({
+              prop: `${key}.${err.prop}`,
+              value: err.value,
+              message: err.message,
+              severity: err.severity,
+            });
+          }
+        }
+      }
+    }
+
     // Passed all checks — include in sanitized output
     sanitized[key] = value;
   }
