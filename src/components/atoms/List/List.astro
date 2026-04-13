@@ -52,8 +52,9 @@ interface Props {
 }
 
 const {
-  as: Tag = 'ul',
+  as: asOverride,
   variant = 'default',
+  markerSize,
   dotSize = 'md',
   icon,
   color = 'primary',
@@ -65,6 +66,9 @@ const {
   contentList: items,
   ...rest
 } = Astro.props;
+
+// Resolve tag: numbered → ol, everything else → ul. asOverride for backward compat.
+const Tag = asOverride || (variant === 'numbered' ? 'ol' : 'ul');
 
 const mediaComponent = media?.component;
 const { component: _mc, ...mediaProps } = media || {};
