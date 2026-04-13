@@ -12,7 +12,6 @@
   "props": {
     "content": {
       "_description": "What the list contains",
-      "as":    { "type": "string",  "required": false, "default": "ul", "enum": ["ul", "ol"], "description": "HTML element — unordered or ordered." },
       "contentList": { "type": "array",   "required": true,  "description": "Array of items. Pipeline content key. Each item is either a string (plain text) or { contentLink, href } (linked item)." },
       "icon":  { "type": "string",  "required": false, "default": null, "textonly": false, "description": "Phosphor icon slug for simple icon markers (fallback). Stripped in textonly, native bullets replace. Ignored if media is set." }
     },
@@ -24,7 +23,8 @@
         "textonly": false,
         "_description": "Nested atom node. Child atom owns its own props (colour, size, animation, background). Shape can wrap an Icon. LottieIcon excluded — use an animated Icon instead.",
         "properties": {
-          "component": { "type": "string", "required": true, "enum": ["Icon", "Shape"] }
+          "component":    { "type": "string", "required": true, "enum": ["Icon", "Shape"] },
+          "semanticRole": { "type": "string", "required": true, "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] }
         }
       }
     },
@@ -39,21 +39,13 @@
 
     "visual": {
       "_description": "How the list looks",
-      "variant":   { "type": "string",  "required": false, "default": "default", "enum": ["default", "none", "inline", "dot"], "description": "List style variant." },
+      "variant":   { "type": "string",  "required": false, "default": "default", "enum": ["default", "numbered", "none", "inline", "dot"], "description": "List style. default=bullets, numbered=ordered numbers, none=no markers, inline=horizontal, dot=custom circles." },
       "dotSize":   { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Dot variant marker size." },
       "color":     { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "text", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Colour variant for markers, icons, and dots. 'text' = body text scale (always readable)." },
       "spacing":   { "type": "string",  "required": false, "default": "normal", "enum": ["tight", "normal", "loose"], "description": "Item spacing." },
-      "flush":     { "type": "boolean", "required": false, "default": false, "description": "Remove outer margin." },
-      "class":     { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+      "flush":     { "type": "boolean", "required": false, "default": false, "description": "Remove outer margin." }
     },
 
-    "animation": {},
-
-    "colour": {
-      "_description": "Pipeline colour tokens — set as inline styles. 'auto' = pipeline resolves from context.",
-      "listMarker":       { "type": "token", "required": false, "default": "auto", "cssProperty": "--list-marker",        "description": "Marker/icon/dot colour." },
-      "listMarkerAccent": { "type": "token", "required": false, "default": "auto", "cssProperty": "--list-marker-accent", "description": "Accent colour for icon/dot markers." },
-      "listText":         { "type": "token", "required": false, "default": "auto", "cssProperty": "--list-text",          "description": "Text colour for icon/dot markers." }
-    }
+    "animation": {}
   }
 }
