@@ -33,7 +33,7 @@ interface SchemaProps {
   colour?: Record<string, SchemaField>;
 }
 
-interface ComponentSchema {
+export interface ComponentSchema {
   component: string;
   category: string;
   renders: Record<string, string | null>;
@@ -225,22 +225,6 @@ export function validateComponent(
     errors,
     sanitized,
   };
-}
-
-/**
- * Build schema map from all atom schema files.
- * Import all schemas and map by component name.
- */
-export function buildSchemaMap(): Map<string, ComponentSchema> {
-  const schemas = import.meta.glob('../components/atoms/*/\*.schema.json', { eager: true });
-  const map = new Map<string, ComponentSchema>();
-  for (const [, mod] of Object.entries(schemas)) {
-    const schema = (mod as any).default || mod;
-    if (schema?.component) {
-      map.set(schema.component, schema as ComponentSchema);
-    }
-  }
-  return map;
 }
 
 /**
