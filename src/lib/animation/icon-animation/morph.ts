@@ -692,27 +692,10 @@ export function initMorphIcon(el: HTMLElement) {
     const cutoutDur = morphDur * 0.6;
     const fadeDur = morphDur * 0.4;
 
-    // ── Pre-filter: collapse cutouts via opacity fade before goo starts ──
-    let preFilterDur = 0;
-    const anySrcCutouts = keeperData.some(kd => kd.srcHasCutouts);
-    if (!morphed && anySrcCutouts) {
-      keepers.forEach((path, i) => {
-        const kd = keeperData[i];
-        if (kd.srcHasCutouts) {
-          // Morph cutouts closed while still sharp (no filter)
-          tl.to(path, {
-            morphSVG: { shape: kd.srcSolid, type: 'linear' },
-            duration: cutoutDur,
-            ease: 'power1.inOut',
-          }, 0);
-        }
-      });
-      preFilterDur = cutoutDur;
-    }
-
-    // Apply filter AFTER cutouts are collapsed
-    tl.set(svg, { filter: 'url(#shape-goo)' }, preFilterDur);
-    if (gooBlurEl) tl.set(gooBlurEl, { attr: { stdDeviation: 0 } }, preFilterDur);
+    // No pre-filter cutout collapse — goo blur naturally fills holes during blob phase.
+    // Apply filter immediately.
+    tl.set(svg, { filter: 'url(#shape-goo)' }, 0);
+    if (gooBlurEl) tl.set(gooBlurEl, { attr: { stdDeviation: 0 } }, 0);
 
     // STAGE 1: blur eases 0 → full
     if (gooBlurEl) {
@@ -720,10 +703,10 @@ export function initMorphIcon(el: HTMLElement) {
         attr: { stdDeviation: GOO_BLUR_FULL },
         duration: BLUR_IN_DUR,
         ease: 'sine.inOut',
-      }, preFilterDur);
+      }, 0);
     }
 
-    const morphStart = preFilterDur + BLUR_IN_DUR;
+    const morphStart = BLUR_IN_DUR;
 
     if (!morphed) {
       // ═══════════════════════════════════════════════════════
