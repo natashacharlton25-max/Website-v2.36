@@ -1,28 +1,33 @@
 /**
- * Goo morph for Icon and Shape atoms
+ * Goo morph for Icon and Shape atoms — two-blob approach
  *
  * Reads `data-icon-morph` + `data-icon-morph-target` (and related morphStagger
- * attributes) and animates a "convergence morph": every source path morphs to
- * a centred blob, extras fade out, keepers fan out to their target paths. The
- * whole thing runs through an SVG gooey filter (blur + threshold matrix) so
- * the merge looks like raindrops joining and separating.
+ * attributes) and animates a structurally-matched two-blob morph:
  *
- * Three-stage timeline (each direction):
- *   Stage 1: blur eases 0 → 8     (solid shapes → blob)
- *   Stage 2: convergence morph    (paths converge, extras fade, keepers fan out)
- *   Stage 3: blur eases 8 → 0     (blob shapes → solid targets)
+ *   Shape A (with holes)
+ *     → shrink cutouts to center
+ *   Shape A (solid)
+ *     → morph to Blob A (matched point count, angle, winding)
+ *   Blob A
+ *     → morph to Blob B (two amorphous shapes, no structure to flip)
+ *   Blob B
+ *     → morph to Shape B (solid) (matched point count, angle, winding)
+ *   Shape B (solid)
+ *     → grow cutouts from center
+ *   Shape B (with holes)
+ *
+ * Each blob is generated to match its source shape's point count, start angle,
+ * and winding direction. Because the blobs are structurally matched, every morph
+ * step uses `type: 'linear'` — no rotational correction needed. The goo blur
+ * filter masks any mid-tween artifacts during the blob-to-blob transition.
+ *
+ * Cutout handling: before the blob phase, cutout segments (holes inside the
+ * outer path) are identified via ray-casting containment test, then collapsed
+ * to their center points. After the blob phase, cutouts expand from zero on
+ * the target shape.
  *
  * Goo filter is a single shared <filter id="shape-goo"> injected once into
  * the document body. Its stdDeviation is animated per-morph via GSAP AttrPlugin.
- *
- * Compound path splitting is gated to shapes only — icons keep their compound
- * paths so cutouts (donut hole, gear centre, gift bow loops) are preserved.
- * The goo filter softens cutout edges through the blob phase, so even icons
- * with complex hole topology morph cleanly.
- *
- * The legacy iconMorphCircle (`viaCircle`) prop is still supported for
- * equal-path-count edge cases but rarely needed — convergence handles
- * everything by default.
  */
 
 import { gsap } from 'gsap';
@@ -44,7 +49,7 @@ let gooBlurEl: Element | null = null;
  * alpha, making overlapping shapes merge like raindrops.
  *
  * gooBlurEl is the captured feGaussianBlur element. GSAP's AttrPlugin animates
- * its stdDeviation attribute during phase 3 of the morph so the gooey silhouette
+ * its stdDeviation attribute during the morph so the gooey silhouette
  * tightens smoothly into the sharp target instead of snapping when the filter
  * is removed.
  */
@@ -92,6 +97,339 @@ function ensureGooeyFilter() {
   gooBlurEl = blur;
 }
 
+// ================================================================
+// BLOB GENERATION UTILITIES
+// ================================================================
+
+/** A GSAP raw path segment: flat array [x0, y0, cp1x, cp1y, cp2x, cp2y, x1, y1, ...] */
+type RawSegment = number[] & { closed?: boolean };
+type RawPath = RawSegment[];
+
+/**
+ * Compute the centroid of a raw path segment by averaging all on-curve points.
+ * On-curve points are at indices 0,1 then every 6 after (i.e. the endpoint of
+ * each cubic curve).
+ */
+function segmentCenter(seg: RawSegment): { x: number; y: number } {
+  let sx = 0, sy = 0, count = 0;
+  // First point
+  sx += seg[0]; sy += seg[1]; count++;
+  // Each curve endpoint: indices 6,7  12,13  18,19 ...
+  for (let i = 6; i < seg.length; i += 6) {
+    sx += seg[i]; sy += seg[i + 1]; count++;
+  }
+  return { x: sx / count, y: sy / count };
+}
+
+/**
+ * Count the number of cubic bezier curves in a segment.
+ * Segment layout: [x0, y0, cp1x, cp1y, cp2x, cp2y, x1, y1, ...]
+ * So numCurves = (length - 2) / 6
+ */
+function segmentPointCount(seg: RawSegment): number {
+  return (seg.length - 2) / 6;
+}
+
+/**
+ * Compute the signed area of a segment to determine winding direction.
+ * Uses the shoelace formula on the on-curve points.
+ * Positive = counter-clockwise, Negative = clockwise (in SVG coords where Y increases downward).
+ */
+function segmentSignedArea(seg: RawSegment): number {
+  const pts: { x: number; y: number }[] = [];
+  pts.push({ x: seg[0], y: seg[1] });
+  for (let i = 6; i < seg.length; i += 6) {
+    pts.push({ x: seg[i], y: seg[i + 1] });
+  }
+  let area = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const j = (i + 1) % pts.length;
+    area += pts[i].x * pts[j].y;
+    area -= pts[j].x * pts[i].y;
+  }
+  return area / 2;
+}
+
+/**
+ * Generate a blob path string that structurally matches the given raw path segment.
+ *
+ * The blob has the exact same number of cubic bezier curves as the source,
+ * starts at the same angle from center, winds in the same direction, and has
+ * randomised radius per point (±20% variation) to look organic.
+ *
+ * Uses Catmull-Rom → cubic bezier conversion to produce smooth curves through
+ * the generated points.
+ *
+ * @param seg - The source raw path segment to match
+ * @param cx - Center X of the blob
+ * @param cy - Center Y of the blob
+ * @param radius - Base radius of the blob
+ * @returns SVG path `d` string
+ */
+function generateMatchedBlob(
+  seg: RawSegment,
+  cx: number,
+  cy: number,
+  radius: number
+): string {
+  const numCurves = segmentPointCount(seg);
+  if (numCurves < 1) return `M${cx},${cy}Z`;
+
+  // Start angle: angle from center to first on-curve point
+  const startAngle = Math.atan2(seg[1] - cy, seg[0] - cx);
+
+  // Winding direction: positive signed area = CCW in SVG, negative = CW
+  const signedArea = segmentSignedArea(seg);
+  const windingDir = signedArea >= 0 ? 1 : -1; // 1=CCW, -1=CW
+
+  // Generate points around the circle. For a closed path with N curves,
+  // there are N distinct on-curve points (the last connects back to the first).
+  const angleStep = (2 * Math.PI * windingDir) / numCurves;
+
+  // Seeded-ish random using segment data for consistency across calls
+  // (but different per segment)
+  let seed = Math.abs(seg[0] * 7 + seg[1] * 13 + numCurves * 31) % 1000;
+  const pseudoRandom = () => {
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return (seed / 2147483648);
+  };
+
+  const points: { x: number; y: number }[] = [];
+  for (let i = 0; i < numCurves; i++) {
+    const angle = startAngle + i * angleStep;
+    // ±20% radius variation
+    const r = radius * (0.8 + 0.4 * pseudoRandom());
+    points.push({
+      x: cx + r * Math.cos(angle),
+      y: cy + r * Math.sin(angle),
+    });
+  }
+
+  // Convert points to cubic bezier path using Catmull-Rom to cubic conversion.
+  // For a closed curve through N points, each segment i→i+1 uses points
+  // [i-1, i, i+1, i+2] (wrapping around) to compute control points.
+  //
+  // Catmull-Rom → Cubic Bezier:
+  //   Given points P0, P1, P2, P3 (P1→P2 is the segment):
+  //   CP1 = P1 + (P2 - P0) / 6
+  //   CP2 = P2 - (P3 - P1) / 6
+  const n = points.length;
+  if (n < 2) {
+    // Degenerate: single point — make a tiny circle
+    const px = points[0].x, py = points[0].y;
+    const tiny = radius * 0.01;
+    return `M${px - tiny},${py}A${tiny},${tiny},0,1,1,${px + tiny},${py}A${tiny},${tiny},0,1,1,${px - tiny},${py}Z`;
+  }
+
+  let d = `M${points[0].x},${points[0].y}`;
+
+  for (let i = 0; i < n; i++) {
+    const p0 = points[(i - 1 + n) % n];
+    const p1 = points[i];
+    const p2 = points[(i + 1) % n];
+    const p3 = points[(i + 2) % n];
+
+    // Control point 1: P1 + (P2 - P0) / 6
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+
+    // Control point 2: P2 - (P3 - P1) / 6
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+    d += `C${cp1x},${cp1y},${cp2x},${cp2y},${p2.x},${p2.y}`;
+  }
+
+  d += 'Z';
+  return d;
+}
+
+// ================================================================
+// CUTOUT (HOLE) DETECTION AND HANDLING
+// ================================================================
+
+/**
+ * Ray-casting point-in-polygon test. Tests whether a point (px, py)
+ * is inside the polygon defined by the on-curve points of a segment.
+ */
+function pointInSegment(px: number, py: number, seg: RawSegment): boolean {
+  // Extract on-curve points
+  const pts: { x: number; y: number }[] = [];
+  pts.push({ x: seg[0], y: seg[1] });
+  for (let i = 6; i < seg.length; i += 6) {
+    pts.push({ x: seg[i], y: seg[i + 1] });
+  }
+
+  let inside = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const xi = pts[i].x, yi = pts[i].y;
+    const xj = pts[j].x, yj = pts[j].y;
+    const intersect = ((yi > py) !== (yj > py)) &&
+      (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+/**
+ * Determine whether innerSeg is a cutout (hole) contained within outerSeg.
+ * Tests the centroid of innerSeg against the polygon of outerSeg.
+ */
+function isContainedIn(innerSeg: RawSegment, outerSeg: RawSegment): boolean {
+  const center = segmentCenter(innerSeg);
+  return pointInSegment(center.x, center.y, outerSeg);
+}
+
+/**
+ * Given a raw path, return the indices of segments that are cutouts
+ * (contained within segment 0, the outer boundary).
+ */
+function findCutoutIndices(rawPath: RawPath): number[] {
+  if (rawPath.length <= 1) return [];
+  const outer = rawPath[0];
+  const cutouts: number[] = [];
+  for (let i = 1; i < rawPath.length; i++) {
+    if (isContainedIn(rawPath[i], outer)) {
+      cutouts.push(i);
+    }
+  }
+  return cutouts;
+}
+
+/**
+ * Build a path string where cutout segments have all their points collapsed
+ * to the segment's own centroid. The outer segment (and any non-cutout segments)
+ * are left unchanged.
+ *
+ * @param rawPath - The original raw path
+ * @param cutoutIndices - Indices of segments to collapse
+ * @returns SVG path `d` string with cutouts collapsed
+ */
+function collapseCutouts(rawPath: RawPath, cutoutIndices: number[]): string {
+  const cutoutSet = new Set(cutoutIndices);
+  const modifiedSegments: string[] = [];
+
+  for (let si = 0; si < rawPath.length; si++) {
+    const seg = rawPath[si];
+    if (cutoutSet.has(si)) {
+      // Collapse all points to this segment's center
+      const center = segmentCenter(seg);
+      const numCurves = segmentPointCount(seg);
+      // Build a degenerate path where every point is the center
+      let segD = `M${center.x},${center.y}`;
+      for (let c = 0; c < numCurves; c++) {
+        segD += `C${center.x},${center.y},${center.x},${center.y},${center.x},${center.y}`;
+      }
+      if (seg.closed) segD += 'Z';
+      modifiedSegments.push(segD);
+    } else {
+      // Keep original segment — reconstruct its path string
+      modifiedSegments.push(segmentToString(seg));
+    }
+  }
+
+  return modifiedSegments.join('');
+}
+
+/**
+ * Build a path string where cutout segments are collapsed to zero (their centers)
+ * while non-cutout segments use the target shape's data. This is the starting
+ * point for the "expand cutouts" animation on the target shape.
+ *
+ * @param targetRawPath - The target shape's raw path
+ * @param cutoutIndices - Indices of segments that are cutouts in the target
+ * @returns SVG path `d` string with target's cutouts at zero
+ */
+function expandCutoutsBase(targetRawPath: RawPath, cutoutIndices: number[]): string {
+  const cutoutSet = new Set(cutoutIndices);
+  const modifiedSegments: string[] = [];
+
+  for (let si = 0; si < targetRawPath.length; si++) {
+    const seg = targetRawPath[si];
+    if (cutoutSet.has(si)) {
+      // Cutout starts collapsed at its center
+      const center = segmentCenter(seg);
+      const numCurves = segmentPointCount(seg);
+      let segD = `M${center.x},${center.y}`;
+      for (let c = 0; c < numCurves; c++) {
+        segD += `C${center.x},${center.y},${center.x},${center.y},${center.x},${center.y}`;
+      }
+      if (seg.closed) segD += 'Z';
+      modifiedSegments.push(segD);
+    } else {
+      modifiedSegments.push(segmentToString(seg));
+    }
+  }
+
+  return modifiedSegments.join('');
+}
+
+/**
+ * Convert a raw path segment back to an SVG path `d` string fragment.
+ */
+function segmentToString(seg: RawSegment): string {
+  if (seg.length < 2) return '';
+  let d = `M${seg[0]},${seg[1]}`;
+  for (let i = 2; i < seg.length; i += 6) {
+    d += `C${seg[i]},${seg[i + 1]},${seg[i + 2]},${seg[i + 3]},${seg[i + 4]},${seg[i + 5]}`;
+  }
+  if (seg.closed) d += 'Z';
+  return d;
+}
+
+/**
+ * Convert an entire raw path (array of segments) to an SVG `d` string.
+ */
+function rawPathToD(rawPath: RawPath): string {
+  return rawPath.map(segmentToString).join('');
+}
+
+/**
+ * Generate the full blob path string for an entire raw path (multiple segments).
+ * The outer segment gets a blob. Cutout segments get collapsed to their centers.
+ *
+ * @param rawPath - Source raw path
+ * @param cx - Center X
+ * @param cy - Center Y
+ * @param radius - Base radius for the blob
+ * @param cutoutIndices - Which segments are cutouts
+ * @returns SVG path `d` string
+ */
+function generateFullBlob(
+  rawPath: RawPath,
+  cx: number,
+  cy: number,
+  radius: number,
+  cutoutIndices: number[]
+): string {
+  const cutoutSet = new Set(cutoutIndices);
+  const parts: string[] = [];
+
+  for (let si = 0; si < rawPath.length; si++) {
+    const seg = rawPath[si];
+    if (cutoutSet.has(si)) {
+      // Cutout: collapse to center (degenerate path with correct point count)
+      const center = segmentCenter(seg);
+      const numCurves = segmentPointCount(seg);
+      let segD = `M${center.x},${center.y}`;
+      for (let c = 0; c < numCurves; c++) {
+        segD += `C${center.x},${center.y},${center.x},${center.y},${center.x},${center.y}`;
+      }
+      if (seg.closed) segD += 'Z';
+      parts.push(segD);
+    } else {
+      // Non-cutout: generate a blob matched to this segment's structure
+      parts.push(generateMatchedBlob(seg, cx, cy, radius));
+    }
+  }
+
+  return parts.join('');
+}
+
+// ================================================================
+// MAIN INIT
+// ================================================================
+
 export function initMorphIcon(el: HTMLElement) {
   if (getMotionMode() === 'none') return;
   // Draw-morph handles this icon instead
@@ -107,10 +445,11 @@ export function initMorphIcon(el: HTMLElement) {
     MorphSVGPlugin.convertToPath(e as any);
   });
 
-  // Goo filter setup — applies to ALL morphs (icons + shapes) now
+  // Goo filter setup — applies to ALL morphs (icons + shapes)
   ensureGooeyFilter();
   svg.setAttribute('overflow', 'visible');
   svg.style.overflow = 'visible';
+
   // Split compound paths for staggered morph (shapes only — icons keep
   // compound paths for cutouts)
   const isShape = el.classList.contains('shape');
@@ -141,7 +480,6 @@ export function initMorphIcon(el: HTMLElement) {
   if (!morphTargetHTML) return;
 
   const morphColor = el.dataset.iconMorphColor;
-  const viaCircle = el.dataset.iconMorphCircle === 'true';
 
   // Stagger props
   const staggerTotalMap: Record<string, number> = { none: 0, tight: 0.3, normal: 0.6, loose: 1.2 };
@@ -177,6 +515,13 @@ export function initMorphIcon(el: HTMLElement) {
     });
   }
   const targetPaths = Array.from(tempDiv.querySelectorAll('path')) as SVGPathElement[];
+
+  // Pre-compute raw paths for targets while still in DOM (getRawPath may
+  // need computed geometry on some GSAP builds)
+  const targetRawPaths: RawPath[] = targetPaths.map(tp =>
+    MorphSVGPlugin.getRawPath(tp) as RawPath
+  );
+
   document.body.removeChild(tempDiv);
   if (!targetPaths.length) return;
 
@@ -185,61 +530,121 @@ export function initMorphIcon(el: HTMLElement) {
   const originalFill = computedStyle.color || '#fff';
   const targetFill = morphColor || originalFill;
 
-  // Intermediate "blob" path used as the convergence target — hand-crafted
-  // cubic bezier blob with asymmetric control points. Defined in normalized
-  // coords (-1 to 1) then scaled to fit any shape's viewBox.
+  // ViewBox measurements for blob generation
   const vb = svg.viewBox.baseVal;
   const vbW = vb.width || 256;
   const vbH = vb.height || 256;
   const cx = (vb.x || 0) + vbW / 2;
   const cy = (vb.y || 0) + vbH / 2;
-  const cr = Math.min(vbW, vbH) * 0.25;
-  // Helper: convert normalized (-1..1) blob coord to absolute viewBox coord
-  const p = (x: number, y: number) => `${cx + x * cr},${cy + y * cr}`;
-  // 4-segment cubic blob — top-right bulge, bottom drop, slight left indent
-  const circlePath =
-    `M${p(0, -1.05)}` +
-    ` C${p(0.75, -1.25)} ${p(1.30, -0.55)} ${p(1.10, 0.10)}` +
-    ` C${p(1.25, 0.80)} ${p(0.50, 1.30)} ${p(-0.10, 1.10)}` +
-    ` C${p(-0.80, 1.25)} ${p(-1.25, 0.45)} ${p(-1.00, -0.20)}` +
-    ` C${p(-1.15, -0.75)} ${p(-0.45, -1.15)} ${p(0, -1.05)}` +
-    ' Z';
+  const blobRadius = Math.min(vbW, vbH) * 0.25;
 
   // Store original path data
   paths.forEach(p => {
     (p as any)._originalD = p.getAttribute('d');
   });
 
-  // Compute keeper/extra mapping — every morph (shapes AND icons) uses the
-  // goo convergence technique. Each source path is assigned to a target via
-  // floor(i * N / M); the FIRST source per target group is the "keeper", the
-  // rest are "extras" that fade out. When M === N, every path is a keeper and
-  // extras is empty (clean 1:1 via-blob morph).
-  // The legacy iconMorphCircle prop is now redundant — goo morph is default.
+  // ================================================================
+  // KEEPER / EXTRAS MAPPING
+  // ================================================================
+  // Every source path is assigned to a target via floor(i * N / M).
+  // The FIRST source per target group is the "keeper", the rest are "extras"
+  // that fade out. When M === N, every path is a keeper.
   const M = paths.length;
   const N = targetPaths.length;
-  const useConvergence = true;
   const keepers: SVGPathElement[] = [];
   const keeperTargetIdx: number[] = [];
   const extras: SVGPathElement[] = [];
-  if (useConvergence) {
-    const seenTarget = new Set<number>();
-    paths.forEach((path, i) => {
-      const targetIdx = Math.floor((i * N) / M);
-      if (!seenTarget.has(targetIdx)) {
-        seenTarget.add(targetIdx);
-        keepers.push(path);
-        keeperTargetIdx.push(targetIdx);
-      } else {
-        extras.push(path);
-      }
-    });
-    // Safety: if some target indices were skipped, pull from extras to fill them
-    while (keepers.length < N && extras.length > 0) {
-      keepers.push(extras.shift()!);
-      keeperTargetIdx.push(keeperTargetIdx.length);
+
+  const seenTarget = new Set<number>();
+  paths.forEach((path, i) => {
+    const targetIdx = Math.floor((i * N) / M);
+    if (!seenTarget.has(targetIdx)) {
+      seenTarget.add(targetIdx);
+      keepers.push(path);
+      keeperTargetIdx.push(targetIdx);
+    } else {
+      extras.push(path);
     }
+  });
+  // Safety: if some target indices were skipped, pull from extras to fill them
+  while (keepers.length < N && extras.length > 0) {
+    keepers.push(extras.shift()!);
+    keeperTargetIdx.push(keeperTargetIdx.length);
   }
+
+  // ================================================================
+  // PRE-COMPUTE RAW PATHS, CUTOUTS, AND BLOB PATHS
+  // ================================================================
+  // For each keeper path, we pre-compute:
+  //   - Source raw path + cutout indices + blob A path
+  //   - Target raw path + cutout indices + blob B path
+  //   - Collapsed/expanded path strings for cutout animation
+
+  interface KeeperData {
+    srcRawPath: RawPath;
+    srcCutouts: number[];
+    tgtRawPath: RawPath;
+    tgtCutouts: number[];
+    /** Source shape with cutouts collapsed (solid) */
+    srcSolid: string;
+    /** Blob matched to source structure */
+    blobA: string;
+    /** Blob matched to target structure */
+    blobB: string;
+    /** Target shape with cutouts collapsed (solid) */
+    tgtSolid: string;
+    /** Target shape with cutouts fully open (final state) */
+    tgtFull: string;
+    /** Source has cutouts that need animating */
+    srcHasCutouts: boolean;
+    /** Target has cutouts that need animating */
+    tgtHasCutouts: boolean;
+  }
+
+  const keeperData: KeeperData[] = keepers.map((path, i) => {
+    const targetIdx = keeperTargetIdx[i];
+
+    // Get raw paths — source from live DOM, target from pre-computed cache
+    const srcRawPath = MorphSVGPlugin.getRawPath(path) as RawPath;
+    const tgtRawPath = targetRawPaths[targetIdx];
+
+    // Identify cutouts
+    const srcCutouts = findCutoutIndices(srcRawPath);
+    const tgtCutouts = findCutoutIndices(tgtRawPath);
+
+    // Source solid: cutouts collapsed to their centers
+    const srcSolid = srcCutouts.length > 0
+      ? collapseCutouts(srcRawPath, srcCutouts)
+      : rawPathToD(srcRawPath);
+
+    // Target solid: cutouts collapsed to their centers
+    const tgtSolid = tgtCutouts.length > 0
+      ? expandCutoutsBase(tgtRawPath, tgtCutouts)
+      : rawPathToD(tgtRawPath);
+
+    // Target full: all segments at their real positions
+    const tgtFull = rawPathToD(tgtRawPath);
+
+    // Generate blob A matched to source's structure
+    const blobA = generateFullBlob(srcRawPath, cx, cy, blobRadius, srcCutouts);
+
+    // Generate blob B matched to target's structure
+    const blobB = generateFullBlob(tgtRawPath, cx, cy, blobRadius, tgtCutouts);
+
+    return {
+      srcRawPath,
+      srcCutouts,
+      tgtRawPath,
+      tgtCutouts,
+      srcSolid,
+      blobA,
+      blobB,
+      tgtSolid,
+      tgtFull,
+      srcHasCutouts: srcCutouts.length > 0,
+      tgtHasCutouts: tgtCutouts.length > 0,
+    };
+  });
 
   let morphed = false;
   let isAnimating = false;
@@ -269,170 +674,258 @@ export function initMorphIcon(el: HTMLElement) {
     const rank = new Array(pathCount);
     ordered.forEach((origIdx, staggerIdx) => { rank[origIdx] = staggerIdx; });
 
-    // ============================================================
-    // SHAPES — convergence technique (from hero-morph)
-    // Forward: all source segments morph to circles at centre →
-    //          extras fade out → keepers fan out to targets
-    // Reverse: keepers morph back to centre circle → extras fade
-    //          back in → all morph back to original positions
-    // When M === N: extras is empty, runs as a clean via-circle morph
-    // ============================================================
-    if (useConvergence) {
-      // Three-stage timeline:
-      //   1. Solid → blob: blur eases 0 → full over BLUR_IN_DUR (shapes still
-      //      at original positions, just gradually goo-ing up)
-      //   2. Morph: convergence runs with FULL blur the entire time
-      //   3. Blob → solid: blur eases full → 0 over BLUR_OUT_DUR (shapes at
-      //      target positions, gradually de-goo-ing back to sharp)
-      const BLUR_IN_DUR = 0.5;
-      const BLUR_OUT_DUR = 0.5;
+    // Timeline phases:
+    //   BLUR IN → [cutout collapse] → morph to Blob A → morph Blob A→B → morph to target → [cutout expand] → BLUR OUT
+    const BLUR_IN_DUR = 0.5;
+    const BLUR_OUT_DUR = 0.5;
+    const cutoutDur = morphDur * 0.3;
+    const fadeDur = morphDur * 0.4;
 
-      const fadeDur = morphDur * 0.4;
-      // Morph phases all start AFTER the blur-in window
-      const morphStart = BLUR_IN_DUR;
-      const phase1End = morphStart + morphStagger + morphDur;
+    // Apply filter at offset 0, start with blur at 0 (solid)
+    tl.set(svg, { filter: 'url(#shape-goo)' }, 0);
+    if (gooBlurEl) tl.set(gooBlurEl, { attr: { stdDeviation: 0 } }, 0);
 
-      // Apply filter at offset 0 and immediately set blur to 0 (start solid)
-      tl.set(svg, { filter: 'url(#shape-goo)' }, 0);
-      if (gooBlurEl) tl.set(gooBlurEl, { attr: { stdDeviation: 0 } }, 0);
-
-      // STAGE 1: blur eases 0 → full while shapes are still solid at original
-      if (gooBlurEl) {
-        tl.to(gooBlurEl, {
-          attr: { stdDeviation: GOO_BLUR_FULL },
-          duration: BLUR_IN_DUR,
-          ease: 'sine.inOut',
-        }, 0);
-      }
-
-      if (!morphed) {
-        // FORWARD ─────────────────────────────────────────────
-        // Phase 1: every source path morphs to the centre circle (with stagger)
-        // Using type: 'linear' (not rotational) — linear interpolation can't
-        // produce flips for asymmetric shapes (tree, house). The mid-tween
-        // kinks linear is prone to are fully masked by the goo blur.
-        paths.forEach((path, i) => {
-          const offset = rank[i] * perPathStagger;
-          tl!.to(path, {
-            morphSVG: { shape: circlePath, type: 'linear', smooth: 'auto' },
-            duration: morphDur,
-            ease: 'power2.in',
-          }, morphStart + offset);
-        });
-
-        // Phase 2: fade out extras (now stacked at centre as circles)
-        extras.forEach(path => {
-          tl!.to(path, {
-            opacity: 0,
-            duration: fadeDur,
-            ease: 'power1.in',
-          }, phase1End);
-        });
-
-        // Phase 3: keepers morph from circle to their assigned target paths
-        keepers.forEach((path, i) => {
-          const target = targetPaths[keeperTargetIdx[i]];
-          if (!target) return;
-          tl!.to(path, {
-            morphSVG: { shape: target, type: 'linear', smooth: 'auto' },
-            duration: morphDur,
-            ease: 'power2.out',
-          }, phase1End + fadeDur);
-        });
-
-        // STAGE 3: blur eases full → 0 starting AFTER phase 3 ends
-        const phase3End = phase1End + fadeDur + morphDur;
-        if (gooBlurEl) {
-          tl!.to(gooBlurEl, {
-            attr: { stdDeviation: 0 },
-            duration: BLUR_OUT_DUR,
-            ease: 'sine.inOut',
-          }, phase3End);
-        }
-
-        // Clear filter at the end of the timeline (blur is already 0, invisible)
-        tl!.set(svg, { filter: '' }, '+=0.05');
-      } else {
-        // REVERSE ─────────────────────────────────────────────
-        // Phase 1: keepers morph back from target → centre circle
-        const phase1RevDur = morphDur * 0.8;
-        keepers.forEach(path => {
-          tl!.to(path, {
-            morphSVG: { shape: circlePath, type: 'rotational', smooth: 'auto' },
-            duration: phase1RevDur,
-            ease: 'power2.in',
-          }, morphStart);
-        });
-
-        // Phase 2: fade extras back in (still positioned as circles at centre)
-        extras.forEach(path => {
-          tl!.to(path, {
-            opacity: 1,
-            duration: fadeDur,
-            ease: 'power1.out',
-          }, morphStart + phase1RevDur);
-        });
-
-        // Phase 3: all M paths morph from circle back to their original shapes (with stagger)
-        const phase3Start = morphStart + phase1RevDur + fadeDur;
-        paths.forEach((path, i) => {
-          const offset = rank[i] * perPathStagger;
-          tl!.to(path, {
-            morphSVG: { shape: (path as any)._originalD, type: 'linear', smooth: 'auto' },
-            duration: morphDur,
-            ease: 'power2.out',
-          }, phase3Start + offset);
-        });
-
-        // STAGE 3: blur eases full → 0 starting AFTER the last staggered path
-        // in phase 3 finishes (covers the full stagger tail)
-        const phase3End = phase3Start + morphStagger + morphDur;
-        if (gooBlurEl) {
-          tl!.to(gooBlurEl, {
-            attr: { stdDeviation: 0 },
-            duration: BLUR_OUT_DUR,
-            ease: 'sine.inOut',
-          }, phase3End);
-        }
-
-        // Clear filter at the end of the timeline (blur is already 0, invisible)
-        tl!.set(svg, { filter: '' }, '+=0.05');
-      }
-
-      morphed = !morphed;
-      return;
+    // STAGE 1: blur eases 0 → full
+    if (gooBlurEl) {
+      tl.to(gooBlurEl, {
+        attr: { stdDeviation: GOO_BLUR_FULL },
+        duration: BLUR_IN_DUR,
+        ease: 'sine.inOut',
+      }, 0);
     }
 
-    // ============================================================
-    // EQUAL PATH COUNTS — direct 1:1 morph (existing behaviour)
-    // ============================================================
-    paths.forEach((path, i) => {
-      const target = targetPaths[i];
-      if (!target) return;
-      const offset = rank[i] * perPathStagger;
+    const morphStart = BLUR_IN_DUR;
 
-      if (viaCircle) {
-        const halfDur = morphDur * 0.6;
-        const targetShape = !morphed ? target : (path as any)._originalD;
-        tl!.to(path, {
-          morphSVG: { shape: circlePath, type: 'rotational', smooth: 'auto' },
-          duration: halfDur,
-          ease: 'power2.in',
-        }, offset);
-        tl!.to(path, {
-          morphSVG: { shape: targetShape, type: 'rotational', smooth: 'auto' },
-          duration: halfDur,
-          ease: 'power2.out',
-        }, offset + halfDur);
-      } else {
-        const targetShape = !morphed ? target : (path as any)._originalD;
-        tl!.to(path, {
-          morphSVG: { shape: targetShape, type: 'rotational', smooth: 'auto' },
-          duration: morphDur,
-          ease: 'power2.inOut',
-        }, offset);
+    if (!morphed) {
+      // ═══════════════════════════════════════════════════════
+      // FORWARD: Shape A → Blob A → Blob B → Shape B
+      // ═══════════════════════════════════════════════════════
+
+      let cursor = morphStart;
+
+      // ── Phase 0: Collapse source cutouts ──
+      const anySrcCutouts = keeperData.some(kd => kd.srcHasCutouts);
+      if (anySrcCutouts) {
+        keepers.forEach((path, i) => {
+          const kd = keeperData[i];
+          if (kd.srcHasCutouts) {
+            tl!.to(path, {
+              morphSVG: { shape: kd.srcSolid, type: 'linear' },
+              duration: cutoutDur,
+              ease: 'power2.in',
+            }, cursor);
+          }
+        });
+        cursor += cutoutDur;
       }
-    });
+
+      // ── Phase 1: All paths morph to blob / center circle (with stagger) ──
+      // Keepers morph to their Blob A
+      keepers.forEach((path, i) => {
+        const kd = keeperData[i];
+        const keeperIdx = paths.indexOf(path);
+        const offset = keeperIdx >= 0 ? rank[keeperIdx] * perPathStagger : 0;
+        tl!.to(path, {
+          morphSVG: { shape: kd.blobA, type: 'linear' },
+          duration: morphDur,
+          ease: 'power2.in',
+        }, cursor + offset);
+      });
+
+      // Extras also morph to a simple blob at center (they'll fade out anyway)
+      const simpleBlob = generateMatchedBlob(
+        // Use the first source path's outer segment for the extras blob
+        (keeperData[0]?.srcRawPath[0] || [cx, cy]) as RawSegment,
+        cx, cy, blobRadius
+      );
+      extras.forEach((path) => {
+        const pathIdx = paths.indexOf(path);
+        const offset = pathIdx >= 0 ? rank[pathIdx] * perPathStagger : 0;
+        tl!.to(path, {
+          morphSVG: { shape: simpleBlob, type: 'linear' },
+          duration: morphDur,
+          ease: 'power2.in',
+        }, cursor + offset);
+      });
+
+      const phase1End = cursor + morphStagger + morphDur;
+
+      // ── Phase 2: Fade out extras (stacked as blobs at center) ──
+      extras.forEach(path => {
+        tl!.to(path, {
+          opacity: 0,
+          duration: fadeDur,
+          ease: 'power1.in',
+        }, phase1End);
+      });
+
+      // ── Phase 3: Blob A → Blob B (keepers only) ──
+      // Both blobs are amorphous — no structure to flip
+      const blobMorphStart = phase1End + fadeDur;
+      keepers.forEach((path, i) => {
+        const kd = keeperData[i];
+        tl!.to(path, {
+          morphSVG: { shape: kd.blobB, type: 'linear' },
+          duration: morphDur * 0.6,
+          ease: 'sine.inOut',
+        }, blobMorphStart);
+      });
+
+      const blobMorphEnd = blobMorphStart + morphDur * 0.6;
+
+      // ── Phase 4: Blob B → Target solid ──
+      keepers.forEach((path, i) => {
+        const kd = keeperData[i];
+        tl!.to(path, {
+          morphSVG: { shape: kd.tgtSolid, type: 'linear' },
+          duration: morphDur,
+          ease: 'power2.out',
+        }, blobMorphEnd);
+      });
+
+      let phase4End = blobMorphEnd + morphDur;
+
+      // ── Phase 5: Expand target cutouts ──
+      const anyTgtCutouts = keeperData.some(kd => kd.tgtHasCutouts);
+      if (anyTgtCutouts) {
+        keepers.forEach((path, i) => {
+          const kd = keeperData[i];
+          if (kd.tgtHasCutouts) {
+            tl!.to(path, {
+              morphSVG: { shape: kd.tgtFull, type: 'linear' },
+              duration: cutoutDur,
+              ease: 'power2.out',
+            }, phase4End);
+          }
+        });
+        phase4End += cutoutDur;
+      }
+
+      // STAGE 3: blur eases full → 0
+      if (gooBlurEl) {
+        tl!.to(gooBlurEl, {
+          attr: { stdDeviation: 0 },
+          duration: BLUR_OUT_DUR,
+          ease: 'sine.inOut',
+        }, phase4End);
+      }
+
+      // Clear filter at the end
+      tl!.set(svg, { filter: '' }, '+=0.05');
+
+    } else {
+      // ═══════════════════════════════════════════════════════
+      // REVERSE: Shape B → Blob B → Blob A → Shape A
+      // ═══════════════════════════════════════════════════════
+
+      let cursor = morphStart;
+
+      // ── Phase 0: Collapse target cutouts ──
+      const anyTgtCutouts = keeperData.some(kd => kd.tgtHasCutouts);
+      if (anyTgtCutouts) {
+        keepers.forEach((path, i) => {
+          const kd = keeperData[i];
+          if (kd.tgtHasCutouts) {
+            tl!.to(path, {
+              morphSVG: { shape: kd.tgtSolid, type: 'linear' },
+              duration: cutoutDur,
+              ease: 'power2.in',
+            }, cursor);
+          }
+        });
+        cursor += cutoutDur;
+      }
+
+      // ── Phase 1: Keepers morph from target solid → Blob B ──
+      keepers.forEach((path, i) => {
+        const kd = keeperData[i];
+        tl!.to(path, {
+          morphSVG: { shape: kd.blobB, type: 'linear' },
+          duration: morphDur,
+          ease: 'power2.in',
+        }, cursor);
+      });
+
+      const phase1End = cursor + morphDur;
+
+      // ── Phase 2: Blob B → Blob A ──
+      keepers.forEach((path, i) => {
+        const kd = keeperData[i];
+        tl!.to(path, {
+          morphSVG: { shape: kd.blobA, type: 'linear' },
+          duration: morphDur * 0.6,
+          ease: 'sine.inOut',
+        }, phase1End);
+      });
+
+      const blobMorphEnd = phase1End + morphDur * 0.6;
+
+      // ── Phase 3: Fade extras back in (still as blobs at center) ──
+      extras.forEach(path => {
+        tl!.to(path, {
+          opacity: 1,
+          duration: fadeDur,
+          ease: 'power1.out',
+        }, blobMorphEnd);
+      });
+
+      // ── Phase 4: All paths morph from blob → source shapes (with stagger) ──
+      const phase4Start = blobMorphEnd + fadeDur;
+
+      // Keepers morph from Blob A → source solid
+      keepers.forEach((path, i) => {
+        const kd = keeperData[i];
+        const keeperIdx = paths.indexOf(path);
+        const offset = keeperIdx >= 0 ? rank[keeperIdx] * perPathStagger : 0;
+        tl!.to(path, {
+          morphSVG: { shape: kd.srcSolid, type: 'linear' },
+          duration: morphDur,
+          ease: 'power2.out',
+        }, phase4Start + offset);
+      });
+
+      // Extras morph back to their original path data
+      extras.forEach((path) => {
+        const pathIdx = paths.indexOf(path);
+        const offset = pathIdx >= 0 ? rank[pathIdx] * perPathStagger : 0;
+        tl!.to(path, {
+          morphSVG: { shape: (path as any)._originalD, type: 'linear' },
+          duration: morphDur,
+          ease: 'power2.out',
+        }, phase4Start + offset);
+      });
+
+      let phase4End = phase4Start + morphStagger + morphDur;
+
+      // ── Phase 5: Expand source cutouts ──
+      const anySrcCutouts = keeperData.some(kd => kd.srcHasCutouts);
+      if (anySrcCutouts) {
+        keepers.forEach((path, i) => {
+          const kd = keeperData[i];
+          if (kd.srcHasCutouts) {
+            // Morph from solid (cutouts collapsed) to original full path
+            tl!.to(path, {
+              morphSVG: { shape: (path as any)._originalD, type: 'linear' },
+              duration: cutoutDur,
+              ease: 'power2.out',
+            }, phase4End);
+          }
+        });
+        phase4End += cutoutDur;
+      }
+
+      // STAGE 3: blur eases full → 0
+      if (gooBlurEl) {
+        tl!.to(gooBlurEl, {
+          attr: { stdDeviation: 0 },
+          duration: BLUR_OUT_DUR,
+          ease: 'sine.inOut',
+        }, phase4End);
+      }
+
+      // Clear filter at the end
+      tl!.set(svg, { filter: '' }, '+=0.05');
+    }
 
     morphed = !morphed;
   };
