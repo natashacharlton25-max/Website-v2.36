@@ -53,6 +53,9 @@ interface ValidationResult {
   sanitized: Record<string, any>;
 }
 
+// Content prop prefixes — these carry displayable content
+const CONTENT_PREFIXES = ['contentHeading', 'contentText', 'contentBadge', 'contentLink', 'contentList'];
+
 // CSS values that must never appear in JSON content
 const CSS_PATTERNS = [
   /^var\(--/,
@@ -65,7 +68,7 @@ const CSS_PATTERNS = [
 ];
 
 // Structural props that aren't in schemas
-const STRUCTURAL_PROPS = new Set(['component', 'children', 'text', 'ref', 'printOutput']);
+const STRUCTURAL_PROPS = new Set(['component', 'children', 'ref', 'printOutput']);
 
 // Astro-only props that must never be in JSON content
 const FORBIDDEN_PROPS = new Set(['class', 'style']);
@@ -132,10 +135,14 @@ export function validateComponent(
     // Unknown prop
     const def = flat.get(key);
     if (!def) {
+      // Content prop on wrong component — helpful error
+      const isContentProp = CONTENT_PREFIXES.some(p => key === p);
       errors.push({
         prop: key,
         value,
-        message: `unknown prop "${key}" — not in schema`,
+        message: isContentProp
+          ? `content prop "${key}" not in ${schema.component} schema — wrong component?`
+          : `unknown prop "${key}" — not in schema`,
         severity: 'error',
       });
       continue;
@@ -172,11 +179,14 @@ export function validateComponent(
     // Type check
     const expectedType = Array.isArray(def.type) ? def.type : [def.type];
     if (def.type && value !== undefined && value !== null) {
-      const actualType = typeof value;
+      const actualType = Array.isArray(value) ? 'array' : typeof value;
       const typeOk = expectedType.some(t => {
         if (t === 'string') return actualType === 'string';
         if (t === 'number') return actualType === 'number';
         if (t === 'boolean') return actualType === 'boolean';
+        if (t === 'array') return actualType === 'array';
+        if (t === 'object') return actualType === 'object';
+        if (t === 'token') return actualType === 'string'; // pipeline tokens are strings
         return true;
       });
       if (!typeOk) {
@@ -190,6 +200,22 @@ export function validateComponent(
       }
     }
 
+    // Nested media object — validate component enum
+    if (key === 'media' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      const mediaComponent = value.component;
+      const mediaDef = def as any;
+      if (mediaDef.properties?.component?.enum && mediaComponent) {
+        if (!mediaDef.properties.component.enum.includes(mediaComponent)) {
+          errors.push({
+            prop: `${key}.component`,
+            value: mediaComponent,
+            message: `media component "${mediaComponent}" not in enum [${mediaDef.properties.component.enum.join(', ')}]`,
+            severity: 'error',
+          });
+        }
+      }
+    }
+
     // Passed all checks — include in sanitized output
     sanitized[key] = value;
   }
@@ -199,6 +225,22 @@ export function validateComponent(
     errors,
     sanitized,
   };
+}
+
+/**
+ * Build schema map from all atom schema files.
+ * Import all schemas and map by component name.
+ */
+export function buildSchemaMap(): Map<string, ComponentSchema> {
+  const schemas = import.meta.glob('../components/atoms/*/\*.schema.json', { eager: true });
+  const map = new Map<string, ComponentSchema>();
+  for (const [, mod] of Object.entries(schemas)) {
+    const schema = (mod as any).default || mod;
+    if (schema?.component) {
+      map.set(schema.component, schema as ComponentSchema);
+    }
+  }
+  return map;
 }
 
 /**
