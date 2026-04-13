@@ -771,6 +771,11 @@ export function initMorphIcon(el: HTMLElement) {
         }, phase1End);
       });
 
+      // ── Scale pulse: subtle inflate at blob phase masks transition points ──
+      const pulseStart = phase1End;
+      tl!.to(svg, { scale: 1.05, duration: morphDur * 0.4, ease: 'power2.out' }, pulseStart);
+      tl!.to(svg, { scale: 1, duration: morphDur * 0.4, ease: 'power2.in' }, pulseStart + morphDur * 0.8);
+
       // ── Phase 3: Blob A → Blob B (keepers only) ──
       // Both blobs are amorphous — no structure to flip
       const blobMorphStart = phase1End + fadeDur;
@@ -861,6 +866,10 @@ export function initMorphIcon(el: HTMLElement) {
       });
 
       const phase1End = cursor + morphDur;
+
+      // ── Scale pulse (reverse) ──
+      tl!.to(svg, { scale: 1.05, duration: morphDur * 0.4, ease: 'power2.out' }, phase1End);
+      tl!.to(svg, { scale: 1, duration: morphDur * 0.4, ease: 'power2.in' }, phase1End + morphDur * 0.8);
 
       // ── Phase 2: Blob B → Blob A ──
       keepers.forEach((path, i) => {
