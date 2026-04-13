@@ -118,7 +118,17 @@ const resolvedColor = rainbowColor || brandColor || null;
 const hasSlot = Astro.slots.has('default');
 const hasMedia = !!media;
 const mediaComponent = media?.component;
-const { component: _mc, ...mediaProps } = media || {};
+const { component: _mc, ...rawMediaProps } = media || {};
+// Child icon/lottie inherits shape size if not explicitly set
+const childSizeMap: Record<string, string> = {
+  xs: 'xs', sm: 'sm', base: 'sm', lg: 'base', xl: 'lg',
+  '2xl': 'xl', '3xl': '2xl', '4xl': '3xl', '5xl': '4xl',
+  '6xl': '5xl', '7xl': '6xl', '8xl': '7xl',
+};
+const childDefaultSize = childSizeMap[size] || 'base';
+const mediaProps = (mediaComponent === 'Icon' || mediaComponent === 'LottieIcon') && !rawMediaProps.size
+  ? { ...rawMediaProps, size: childDefaultSize }
+  : rawMediaProps;
 // Container is auto-detected from slot/media — no separate prop needed
 const isContainer = hasSlot || hasMedia;
 // A11y: ui-control and content-symbol need labels, focus, and role
