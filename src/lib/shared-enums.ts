@@ -339,9 +339,9 @@ export const DRAW_VARIANTS = [
 ] as const;
 export type DrawVariant = typeof DRAW_VARIANTS[number];
 
-// ── Draw Mode — 'fade' kept internal (not in JSON schema)
+// ── Draw Mode (5 values) ───────────────────────────────
 export const DRAW_MODES = [
-  'static', 'yoyo', 'reverse-yoyo', 'reveal', 'fade'
+  'fade', 'static', 'yoyo', 'reverse-yoyo', 'reveal'
 ] as const;
 export type DrawMode = typeof DRAW_MODES[number];
 
