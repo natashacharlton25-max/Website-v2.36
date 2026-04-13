@@ -234,14 +234,17 @@ const visualSize = size ?? `h${level}`;
 const hasMedia = !!media;
 const isDecorated = !!(divider || hasMedia || subtitle || variant !== 'default');
 
-// Media component type and props — spread onto the atom, Heading only adds size
+// Media component type and props
 const mediaComponent = media?.component;
-const { component: _mc, ...mediaProps } = media || {};
-
+const { component: _mc, ...rawMediaProps } = media || {};
 
 const sizeKey = visualSize.startsWith('h') ? visualSize.replace('h', '') : visualSize;
 const iconSizeMap: Record<string, number> = { '1': 56, '2': 44, '3': 32, '4': 28, '5': 24, '6': 20, 'xs': 16, 'sm': 18, 'base': 20, 'lg': 24, 'xl': 28 };
 const computedIconSize = mediaSize === 'auto' ? (iconSizeMap[sizeKey] ?? 32) : (mediaSize === 'sm' ? 24 : mediaSize === 'md' ? 32 : 56);
+// Inject heading icon size into Shape's child media so it scales with heading level
+const mediaProps = (mediaComponent === 'Shape' && rawMediaProps.media && !rawMediaProps.media.size)
+  ? { ...rawMediaProps, media: { ...rawMediaProps.media, size: computedIconSize } }
+  : rawMediaProps;
 
 // Animated gradient / colour cycle — random delay + optional speed
 const speedMap: Record<string, number> = { slow: 20, default: 12, fast: 6 };
