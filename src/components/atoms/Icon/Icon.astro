@@ -215,10 +215,14 @@ async function fetchIcon(slug: string): Promise<string | null> {
 
 const needsWeightStrip = !!(draw || morphTo);
 const slug = resolveSlug(name, resolvedWeight, needsWeightStrip);
-// Morph: use standard fill variant (separate elements, cutouts preserved).
-// Flat variant removed — standard fill already has individual paths/circles.
-const fetchSlug = slug;
+// Morph (with or without draw): flat for single clean path. Draw only: standard multi-stroke.
+const fetchSlug = morphTo ? `${slug}-flat` : slug;
 let iconContent = await fetchIcon(fetchSlug);
+
+// Fallback: non-flat, then fill weight
+if (!iconContent && morphTo) {
+  iconContent = await fetchIcon(slug);
+}
 if (!iconContent && !name.endsWith('-fill') && weight !== 'fill') {
   iconContent = await fetchIcon(resolveSlug(name, 'fill'));
 }
