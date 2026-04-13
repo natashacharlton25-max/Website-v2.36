@@ -51,6 +51,8 @@ export interface A11ySettings {
   aacFilter: 'none' | 'grayscale' | 'sepia';
   /** Image enlarge — click to open modal with enlarged image + alt text subtitle */
   imageEnlarge: boolean;
+  /** Animation explainer — AAC First/Then sequence cards for animated elements */
+  animExplainer: 'off' | 'inline' | 'overlay' | 'subtitle';
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -90,7 +92,8 @@ export const defaultSettings: A11ySettings = {
   motionMode: 'full',
   contentAac: false,
   aacFilter: 'none',
-  imageEnlarge: false
+  imageEnlarge: false,
+  animExplainer: 'off'
 };
 
 // ===================================
@@ -298,6 +301,14 @@ export function applySettings(settings: A11ySettings): void {
   const displayMode = settings.altDisplayMode || 'hidden';
   (target as HTMLElement).dataset.altDisplayMode = displayMode;
   document.documentElement.dataset.altDisplayMode = displayMode;
+
+  // Animation Explainer - AAC First/Then sequence cards
+  const animExplainer = settings.animExplainer || 'off';
+  if (animExplainer === 'off') {
+    document.documentElement.removeAttribute('data-anim-explainer');
+  } else {
+    document.documentElement.dataset.animExplainer = animExplainer;
+  }
 
   // Cognitive Level - AAC vocabulary depth (green/yellow/orange/full)
   const cogLevel = settings.cognitiveLevel || 'full';

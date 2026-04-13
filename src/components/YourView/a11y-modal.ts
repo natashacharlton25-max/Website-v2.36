@@ -156,6 +156,8 @@ function initModal(): void {
       const key = btn.dataset.testToggle!;
       if (key === 'xlText') {
         settings.fontSize = settings.fontSize >= 150 ? 100 : 150;
+      } else if (key === 'animExplainerInline') {
+        settings.animExplainer = settings.animExplainer === 'inline' ? 'off' : 'inline';
       } else {
         (settings as any)[key] = !(settings as any)[key];
       }
