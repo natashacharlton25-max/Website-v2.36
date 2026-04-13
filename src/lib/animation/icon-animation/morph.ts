@@ -664,7 +664,7 @@ export function initMorphIcon(el: HTMLElement) {
   const morph = () => {
     if (tl) tl.kill();
     isAnimating = true;
-    const morphDur = getMotionMode() === 'gentle' ? 0.8 : 0.4;
+    const morphDur = getMotionMode() === 'gentle' ? 1.0 : 0.6;
     tl = gsap.timeline({
       onComplete: () => { isAnimating = false; },
       onInterrupt: () => { isAnimating = false; },
