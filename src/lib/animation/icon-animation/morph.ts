@@ -733,22 +733,20 @@ export function initMorphIcon(el: HTMLElement) {
       let cursor = morphStart;
       // Cutouts already collapsed in pre-filter phase
 
-      // ── Phase 1: All paths morph to blob / center circle (with stagger) ──
-      // Keepers morph to their Blob A
+      // ── Phase 1: Shape A → Blob A (rotational — handles concavities) ──
       keepers.forEach((path, i) => {
         const kd = keeperData[i];
         const keeperIdx = paths.indexOf(path);
         const offset = keeperIdx >= 0 ? rank[keeperIdx] * perPathStagger : 0;
         tl!.to(path, {
-          morphSVG: { shape: kd.blobA, type: 'linear' },
+          morphSVG: { shape: kd.blobA, type: 'rotational' },
           duration: morphDur,
           ease: 'power2.in',
         }, cursor + offset);
       });
 
-      // Extras also morph to a simple blob at center (they'll fade out anyway)
+      // Extras also morph to a simple blob at center
       const simpleBlob = generateMatchedBlob(
-        // Use the first source path's outer segment for the extras blob
         (keeperData[0]?.srcRawPath[0] || [cx, cy]) as RawSegment,
         cx, cy, blobRadius
       );
@@ -756,7 +754,7 @@ export function initMorphIcon(el: HTMLElement) {
         const pathIdx = paths.indexOf(path);
         const offset = pathIdx >= 0 ? rank[pathIdx] * perPathStagger : 0;
         tl!.to(path, {
-          morphSVG: { shape: simpleBlob, type: 'linear' },
+          morphSVG: { shape: simpleBlob, type: 'rotational' },
           duration: morphDur,
           ease: 'power2.in',
         }, cursor + offset);
@@ -787,11 +785,11 @@ export function initMorphIcon(el: HTMLElement) {
 
       const blobMorphEnd = blobMorphStart + morphDur * 1.2;
 
-      // ── Phase 4: Blob B → Target solid ──
+      // ── Phase 4: Blob B → Target solid (rotational — safe entry) ──
       keepers.forEach((path, i) => {
         const kd = keeperData[i];
         tl!.to(path, {
-          morphSVG: { shape: kd.tgtSolid, type: 'linear' },
+          morphSVG: { shape: kd.tgtSolid, type: 'rotational' },
           duration: morphDur,
           ease: 'power2.out',
         }, blobMorphEnd);
@@ -852,11 +850,11 @@ export function initMorphIcon(el: HTMLElement) {
         cursor += cutoutDur;
       }
 
-      // ── Phase 1: Keepers morph from target solid → Blob B ──
+      // ── Phase 1: Target solid → Blob B (rotational — handles concavities) ──
       keepers.forEach((path, i) => {
         const kd = keeperData[i];
         tl!.to(path, {
-          morphSVG: { shape: kd.blobB, type: 'linear' },
+          morphSVG: { shape: kd.blobB, type: 'rotational' },
           duration: morphDur,
           ease: 'power2.in',
         }, cursor);
@@ -888,24 +886,24 @@ export function initMorphIcon(el: HTMLElement) {
       // ── Phase 4: All paths morph from blob → source shapes (with stagger) ──
       const phase4Start = blobMorphEnd + fadeDur;
 
-      // Keepers morph from Blob A → source solid
+      // Keepers morph from Blob A → source solid (rotational — safe entry)
       keepers.forEach((path, i) => {
         const kd = keeperData[i];
         const keeperIdx = paths.indexOf(path);
         const offset = keeperIdx >= 0 ? rank[keeperIdx] * perPathStagger : 0;
         tl!.to(path, {
-          morphSVG: { shape: kd.srcSolid, type: 'linear' },
+          morphSVG: { shape: kd.srcSolid, type: 'rotational' },
           duration: morphDur,
           ease: 'power2.out',
         }, phase4Start + offset);
       });
 
-      // Extras morph back to their original path data
+      // Extras morph back to their original path data (rotational)
       extras.forEach((path) => {
         const pathIdx = paths.indexOf(path);
         const offset = pathIdx >= 0 ? rank[pathIdx] * perPathStagger : 0;
         tl!.to(path, {
-          morphSVG: { shape: (path as any)._originalD, type: 'linear' },
+          morphSVG: { shape: (path as any)._originalD, type: 'rotational' },
           duration: morphDur,
           ease: 'power2.out',
         }, phase4Start + offset);
