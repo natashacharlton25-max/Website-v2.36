@@ -188,24 +188,28 @@ function transformTextonly(root: HTMLElement) {
   });
 
   // 13. Animation explainers in textonly — if explainer mode is on,
-  //     show inline cards for content-symbol icons only.
-  //     Decorative icons (already hidden) — hide their explainers too.
+  //     show inline explainer for ALL animated elements (content-symbol
+  //     gets cards instead of static icon, decorative gets cards instead
+  //     of being hidden). The explainer IS the textonly content.
   const animMode = document.documentElement.dataset.animExplainer;
   if (animMode && animMode !== 'off') {
     root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
       const animEl = wrapper.querySelector('[data-has-explainer]') as HTMLElement;
       const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
-      const role = animEl?.dataset.semanticRole;
+      if (!explainer) { wrapper.style.display = 'none'; return; }
 
-      if (role === 'content-symbol' && explainer) {
-        // Show explainer inline, hide icon + wrapper
-        wrapper.after(explainer);
-        explainer.style.display = 'flex';
-        if (animEl) animEl.style.display = 'none';
-        wrapper.style.display = 'none';
-      } else {
-        // Decorative — hide wrapper + explainer
-        wrapper.style.display = 'none';
+      // Move explainer out, show inline, hide wrapper + icon
+      wrapper.after(explainer);
+      explainer.style.display = 'flex';
+      explainer.removeAttribute('data-textonly-hidden');
+      if (animEl) animEl.style.display = 'none';
+      wrapper.style.display = 'none';
+
+      // Move out of heading containers
+      const container = explainer.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content');
+      if (container) {
+        const target = container.closest('.heading-wrap') || container;
+        target.after(explainer);
       }
     });
   }
