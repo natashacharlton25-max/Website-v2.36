@@ -280,9 +280,9 @@ function initFigCaptions(): void {
 // ═══════════════════════════════════════════════════════════
 
 function getAnimContent(el: HTMLElement): string {
-  // The .anim-explainer contains the full card sequence — return its innerHTML
+  // Return the full explainer with its flex container intact
   const explainer = el.classList.contains('anim-explainer') ? el : el.querySelector('.anim-explainer');
-  if (explainer) return explainer.innerHTML;
+  if (explainer) return `<span class="anim-explainer" style="display:inline-flex;flex-direction:row;align-items:center;gap:var(--space-sm);flex-wrap:wrap">${explainer.innerHTML}</span>`;
   return el.getAttribute('aria-label') || '';
 }
 
