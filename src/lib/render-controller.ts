@@ -187,7 +187,38 @@ function transformTextonly(root: HTMLElement) {
     });
   });
 
-  // 13. Strip inline styles set by gradient/animation systems
+  // 13. Animation explainers — textonly shows inline for content-symbol only
+  root.querySelectorAll<HTMLElement>('[data-anim-seq]').forEach(explainer => {
+    const tooltipWrapper = explainer.closest('.anim-explainer-tooltip');
+    const animEl = tooltipWrapper
+      ? tooltipWrapper.querySelector('[data-has-explainer]') as HTMLElement
+      : explainer.previousElementSibling as HTMLElement;
+
+    const role = animEl?.dataset.semanticRole;
+
+    if (role === 'content-symbol') {
+      // Show explainer inline, hide the icon
+      explainer.style.display = 'flex';
+      if (animEl) animEl.style.display = 'none';
+      if (tooltipWrapper) {
+        // Move explainer out of tooltip wrapper
+        tooltipWrapper.after(explainer);
+        tooltipWrapper.style.display = 'none';
+      }
+      // Move out of heading containers
+      const container = explainer.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content');
+      if (container) {
+        const target = container.closest('.heading-wrap') || container;
+        target.after(explainer);
+      }
+    } else {
+      // Decorative — hide explainer entirely
+      explainer.style.display = 'none';
+      if (tooltipWrapper) tooltipWrapper.style.display = 'none';
+    }
+  });
+
+  // 14. Strip inline styles set by gradient/animation systems
   root.querySelectorAll<HTMLElement>('[style]').forEach(el => {
     // Keep display styles (set by this controller), strip everything else
     const display = el.style.display;
