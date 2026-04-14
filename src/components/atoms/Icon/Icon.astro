@@ -391,8 +391,20 @@ function resolvePhosphorName(slug: string): string {
 // Label is for screen readers (intention), explainer describes the visual
 const explainerName = resolvePhosphorName(name);
 
-// Morph target name
-const explainerTargetName = morphTo ? resolvePhosphorName(morphTo) : undefined;
+// Morph target name — if same as source, use full slug name instead
+let explainerTargetName: string | undefined;
+if (morphTo) {
+  const shortName = resolvePhosphorName(morphTo);
+  if (shortName === explainerName) {
+    // Same first word — use full slug without weight suffix
+    const ws = ['light', 'regular', 'bold', 'fill', 'duotone', 'flat'];
+    const parts = morphTo.split('-');
+    while (parts.length > 1 && ws.includes(parts[parts.length - 1])) parts.pop();
+    explainerTargetName = parts.join(' ');
+  } else {
+    explainerTargetName = shortName;
+  }
+}
 
 
 ---
