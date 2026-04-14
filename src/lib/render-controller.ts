@@ -191,7 +191,9 @@ function transformTextonly(root: HTMLElement) {
 
   // 13. Animation explainers — find content-symbol icons with explainers,
   //     move explainer out of containers into document flow, show it.
-  root.querySelectorAll<HTMLElement>('[data-has-explainer][data-semantic-role="content-symbol"]').forEach(icon => {
+  const csIcons = root.querySelectorAll<HTMLElement>('[data-has-explainer][data-semantic-role="content-symbol"]');
+  console.log('[textonly step 13] found', csIcons.length, 'content-symbol icons with explainer');
+  csIcons.forEach(icon => {
     const wrapper = icon.closest('.anim-explainer-tooltip');
     const explainer = wrapper
       ? wrapper.querySelector('[data-anim-seq]') as HTMLElement
@@ -204,7 +206,7 @@ function transformTextonly(root: HTMLElement) {
       ? (container.closest('.heading-wrap') || container)
       : (wrapper || icon);
     insertAfter.after(explainer);
-    explainer.style.setProperty('display', 'flex', 'important');
+    explainer.classList.add('anim-explainer--textonly');
   });
 
   // 14. Strip inline styles set by gradient/animation systems
