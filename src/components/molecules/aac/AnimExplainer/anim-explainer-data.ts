@@ -53,6 +53,14 @@ export const typeWords: Record<string, string> = {
   colour: 'fills with colour',
 };
 
+// ── Short action labels for Next card (micro-animations) ──
+// Override default display when the animation key isn't a good label.
+
+export const actionLabels: Record<string, string> = {
+  'rubber-band': 'elastic',
+  celebrate: 'whirls',
+};
+
 // ── Baked action icon SVGs — keyed by action name ────────
 // Each key is the word shown on the Next card.
 // Paths from Phosphor fill weight, extracted once. Zero API calls.

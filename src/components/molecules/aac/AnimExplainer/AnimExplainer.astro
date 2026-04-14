@@ -2,24 +2,31 @@
 /**
  * AnimExplainer — AAC animation sequence cards
  *
- * Own card class (anim-seq-card) — isolated from AacCard's
- * cognitive level filtering, pictogram filters, and core-tier
- * colours. Same visual pattern, separate CSS namespace.
+ * Scalable card pattern:
+ *   First (green)  — starting state
+ *   Next/Then (yellow) — action stage(s), one or more
+ *   End   (red)    — final state
+ *   Words (dashed red) — description
  *
  * Card patterns:
- *   Morph:  First (icon A) → Next (swap) → Then (icon B) → Words
- *   Draw:   First (ghost)  → Next (scribble) → Then (drawn) → Words
- *   Fill:   First (ghost)  → Next (resize) → Then (filled) → Words
- *   Micro:  First (static) → Next (motion icon) → Words
+ *   Micro:      First → Next(action) → End (same) → Words
+ *   Morph:      First → Next(swap) → End(target) → Words
+ *   Draw:       First(ghost) → Next(scribble) → End(drawn) → Words
+ *   Fill:       First(ghost) → Next(action) → End(filled) → Words
+ *   Draw+Fill:  First(ghost) → Next(scribble) → Then(fill-icon) → End(filled) → Words
  *
  * Display gated by data-anim-explainer on <html>.
  * Content mode gated by data-anim-seq-mode on <html>.
- * Runtime behaviour (bar, tooltip) via figcaption.ts.
  */
 
-import { animWords, typeWords, getActionSvg } from './anim-explainer-data';
+import { animWords, typeWords, actionLabels, getActionSvg } from './anim-explainer-data';
 
 type AnimType = 'morph' | 'draw' | 'fill' | 'micro';
+
+interface ActionStage {
+  svg: string;
+  word: string;
+}
 
 interface Props {
   type: AnimType;
@@ -29,12 +36,14 @@ interface Props {
   targetName?: string;
   animation?: string;
   color?: string | null;
+  /** Optional override: array of action stages for multi-step animations (draw+fill etc) */
+  actions?: ActionStage[];
   class?: string;
 }
 
 const {
   type, sourceSvg, targetSvg, displayName, targetName,
-  animation, color, class: className,
+  animation, color, actions, class: className,
 } = Astro.props;
 
 const resolvedTargetName = targetName || displayName;
@@ -45,13 +54,32 @@ const actionPhrase = type === 'micro'
     : (typeWords[type] || 'animates');
 const words = `${displayName} ${actionPhrase}`;
 const ariaLabel = `Animation: ${words}`;
-// Morph, draw, fill all get a Then card (completed state)
-const hasThenCard = type === 'morph' || type === 'draw' || type === 'fill';
-const actionSvg = getActionSvg(type, animation);
-const actionWord = type === 'morph' ? 'changes to' : (animation || type);
+
+// Resolve action stages — either passed in, or default single stage
+const resolvedActions: ActionStage[] = actions && actions.length > 0
+  ? actions
+  : [{
+      svg: getActionSvg(type, animation),
+      word: type === 'morph'
+        ? 'changes to'
+        : (animation ? (actionLabels[animation] || animation) : type),
+    }];
+
+// End card shows the completed state — morph target or source icon
+const hasEndCard = type === 'morph' || type === 'draw' || type === 'fill';
+const endSvg = type === 'morph' && targetSvg ? targetSvg : sourceSvg;
+const endName = type === 'morph' ? resolvedTargetName : displayName;
 
 // Arrow SVG — Phosphor arrow-right bold
 const arrowSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="24" height="24"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69l-58.35-58.34a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg>';
+
+// Label for action stages — "Next" for first, "Then" for subsequent
+function actionLabel(index: number): string {
+  return index === 0 ? 'Next' : 'Then';
+}
+function actionPosClass(index: number): string {
+  return index === 0 ? 'anim-explainer__pos--next' : 'anim-explainer__pos--then';
+}
 ---
 
 <span class:list={['anim-explainer', color && `color--${color}`, className]}
@@ -66,33 +94,33 @@ const arrowSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" 
     </span>
   </span>
 
-  <span class="anim-explainer__arrow" aria-hidden="true">
-    <Fragment set:html={arrowSvg} />
-  </span>
-
-  {/* ── Next: action icon ─── */}
-  <span class="anim-explainer__pos anim-explainer__pos--next" aria-hidden="true">
-    <span class="anim-seq-card">
-      <span class="anim-seq-card__label">Next</span>
-      <span class="anim-seq-card__icon"><Fragment set:html={actionSvg} /></span>
-      <span class="anim-seq-card__name">{actionWord}</span>
-    </span>
-  </span>
-
-  {hasThenCard && (
+  {/* ── Action stages (Next, Then, Then...) ─── */}
+  {resolvedActions.map((action, i) => (
     <>
       <span class="anim-explainer__arrow" aria-hidden="true">
         <Fragment set:html={arrowSvg} />
       </span>
-
-      {/* ── Then: completed state (morph=target, draw/fill=full colour icon) ─── */}
-      <span class="anim-explainer__pos anim-explainer__pos--then" aria-hidden="true">
+      <span class={`anim-explainer__pos ${actionPosClass(i)}`} aria-hidden="true">
         <span class="anim-seq-card">
-          <span class="anim-seq-card__label">Then</span>
-          <span class="anim-seq-card__icon">
-            <Fragment set:html={type === 'morph' && targetSvg ? targetSvg : sourceSvg} />
-          </span>
-          <span class="anim-seq-card__name">{type === 'morph' ? resolvedTargetName : displayName}</span>
+          <span class="anim-seq-card__label">{actionLabel(i)}</span>
+          <span class="anim-seq-card__icon"><Fragment set:html={action.svg} /></span>
+          <span class="anim-seq-card__name">{action.word}</span>
+        </span>
+      </span>
+    </>
+  ))}
+
+  {/* ── End: final state ─── */}
+  {hasEndCard && (
+    <>
+      <span class="anim-explainer__arrow" aria-hidden="true">
+        <Fragment set:html={arrowSvg} />
+      </span>
+      <span class="anim-explainer__pos anim-explainer__pos--end" aria-hidden="true">
+        <span class="anim-seq-card">
+          <span class="anim-seq-card__label">End</span>
+          <span class="anim-seq-card__icon"><Fragment set:html={endSvg} /></span>
+          <span class="anim-seq-card__name">{endName}</span>
         </span>
       </span>
     </>
