@@ -44,6 +44,8 @@ interface Props {
   required?: boolean;
   disabled?: boolean;
   error?: string;
+  /** Correction hint shown with error — WCAG 3.3.3 */
+  suggestion?: string;
   description?: string;
   value?: string;
   checked?: boolean;
@@ -74,6 +76,7 @@ const {
   required = false,
   disabled = false,
   error,
+  suggestion,
   description,
   value,
   checked = false,
@@ -101,6 +104,7 @@ const fieldName = name || id;
 
 const describedBy = [
   error && `${id}-error`,
+  suggestion && `${id}-suggestion`,
   description && `${id}-desc`,
 ].filter(Boolean).join(' ') || undefined;
 
@@ -136,6 +140,7 @@ const describedBy = [
         class="form-field__checkbox"
         aria-describedby={describedBy}
         aria-invalid={error ? 'true' : undefined}
+        aria-required={required ? 'true' : undefined}
       />
       <span class="form-field__checkmark" aria-hidden="true"></span>
       <Text as="span" class="form-field__label-text" flush>{label}</Text>
@@ -154,6 +159,7 @@ const describedBy = [
         class="form-field__radio"
         aria-describedby={describedBy}
         aria-invalid={error ? 'true' : undefined}
+        aria-required={required ? 'true' : undefined}
       />
       <span class="form-field__radio-indicator" aria-hidden="true"></span>
       <Text as="span" class="form-field__label-text" flush>{label}</Text>
@@ -173,6 +179,7 @@ const describedBy = [
         aria-checked={checked ? 'true' : 'false'}
         aria-describedby={describedBy}
         aria-invalid={error ? 'true' : undefined}
+        aria-required={required ? 'true' : undefined}
       />
       <span class="form-field__toggle-track" aria-hidden="true">
         <span class="form-field__toggle-thumb"></span>
@@ -208,6 +215,7 @@ const describedBy = [
           class="form-field__input form-field__input--textarea"
           aria-describedby={describedBy}
           aria-invalid={error ? 'true' : undefined}
+          aria-required={required ? 'true' : undefined}
         >{value}</textarea>
       )}
 
@@ -314,14 +322,22 @@ const describedBy = [
           class="form-field__input"
           aria-describedby={describedBy}
           aria-invalid={error ? 'true' : undefined}
+          aria-required={required ? 'true' : undefined}
         />
       )}
     </Fragment>
   )}
 
-  <!-- Error message -->
-  {error && (
-    <Text as="span" class="form-field__error" id={`${id}-error`} role="alert" size="sm" flush>{error}</Text>
+  <!-- Error + suggestion — live region announces when errors appear/change -->
+  {(error || suggestion) && (
+    <div class="form-field__feedback" aria-live="assertive" aria-atomic="true">
+      {error && (
+        <Text as="span" class="form-field__error" id={`${id}-error`} role="alert" size="sm" flush>{error}</Text>
+      )}
+      {suggestion && (
+        <Text as="span" class="form-field__suggestion" id={`${id}-suggestion`} size="sm" flush>{suggestion}</Text>
+      )}
+    </div>
   )}
 </div>
 
