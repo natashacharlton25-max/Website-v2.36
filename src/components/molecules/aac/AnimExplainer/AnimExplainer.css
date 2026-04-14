@@ -75,6 +75,20 @@
   display: none;
 }
 
+/* Click gives focus which holds tooltip open via :focus-within.
+   Override: only show on :hover, not :focus-within.
+   Keyboard users see it on tab (hover equivalent via focusin). */
+[data-anim-explainer="tooltip"] .anim-explainer-tooltip:focus-within .tooltip__content {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+[data-anim-explainer="tooltip"] .anim-explainer-tooltip:hover .tooltip__content {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 /* Ensure explainer cards inside tooltip display as flex row */
 .anim-explainer-tooltip .tooltip__content .anim-explainer {
   display: inline-flex;
