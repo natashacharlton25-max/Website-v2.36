@@ -11,6 +11,7 @@
  */
 
 import { AnimExplainer } from '../../molecules/aac/AnimExplainer';
+import { Tooltip } from '../Tooltip';
 import phosphorMeta from '../../../../phosphor-meta.json';
 
 import type {
@@ -409,32 +410,52 @@ if (morphTo) {
 
 ---
 
-{/* Semantic roles: decorative=hidden, ui-control=labelled+focusable, content-symbol=labelled */}
-<span
-  class:list={['icon', typeof size === 'string' && `icon--size-${size}`, ...effectClasses, className]}
-  style={typeof size === 'number' ? `width: ${size}px; height: ${size}px;` : undefined}
-  aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
-  aria-label={isInformational ? label : (isInteractive && label ? label : undefined)}
-  tabindex={isInteractive ? "0" : undefined}
-  role={a11yRole}
-  data-semantic-role={semanticRole}
-  data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
-  data-anim-repeat={animation && animationRepeat !== 'once' ? animationRepeat : undefined}
-  data-has-explainer={showExplainer ? '' : undefined}
-  {...dataAttrs}
->
-  <Fragment set:html={iconContent || fallbackIcon} />
-  {label && semanticRole === 'ui-control' && <span class="icon__label">{label}</span>}
-</span>
-{/* Animation explainer — AAC sequence cards (molecule handles layout + API fetches) */}
+{/* Animated icon with explainer — wrapped in Tooltip for tooltip mode */}
 {showExplainer && (
-  <AnimExplainer
-    type={explainerType as any}
-    sourceSvg={iconContent || fallbackIcon}
-    targetSvg={morphTargetContent || undefined}
-    displayName={explainerName}
-    targetName={explainerTargetName}
-    animation={animation}
-    color={resolvedColor}
-  />
+  <Tooltip purpose="info" aac={false} class="anim-explainer-tooltip">
+    <span
+      class:list={['icon', typeof size === 'string' && `icon--size-${size}`, ...effectClasses, className]}
+      style={typeof size === 'number' ? `width: ${size}px; height: ${size}px;` : undefined}
+      aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
+      aria-label={isInformational ? label : (isInteractive && label ? label : undefined)}
+      tabindex={isInteractive ? "0" : undefined}
+      role={a11yRole}
+      data-semantic-role={semanticRole}
+      data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
+      data-anim-repeat={animation && animationRepeat !== 'once' ? animationRepeat : undefined}
+      data-has-explainer=""
+      {...dataAttrs}
+    >
+      <Fragment set:html={iconContent || fallbackIcon} />
+      {label && semanticRole === 'ui-control' && <span class="icon__label">{label}</span>}
+    </span>
+    <AnimExplainer
+      slot="content"
+      type={explainerType as any}
+      sourceSvg={iconContent || fallbackIcon}
+      targetSvg={morphTargetContent || undefined}
+      displayName={explainerName}
+      targetName={explainerTargetName}
+      animation={animation}
+      color={resolvedColor}
+    />
+  </Tooltip>
+)}
+{/* Non-animated or UI icon — no tooltip wrapper */}
+{!showExplainer && (
+  <span
+    class:list={['icon', typeof size === 'string' && `icon--size-${size}`, ...effectClasses, className]}
+    style={typeof size === 'number' ? `width: ${size}px; height: ${size}px;` : undefined}
+    aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
+    aria-label={isInformational ? label : (isInteractive && label ? label : undefined)}
+    tabindex={isInteractive ? "0" : undefined}
+    role={a11yRole}
+    data-semantic-role={semanticRole}
+    data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
+    data-anim-repeat={animation && animationRepeat !== 'once' ? animationRepeat : undefined}
+    {...dataAttrs}
+  >
+    <Fragment set:html={iconContent || fallbackIcon} />
+    {label && semanticRole === 'ui-control' && <span class="icon__label">{label}</span>}
+  </span>
 )}
