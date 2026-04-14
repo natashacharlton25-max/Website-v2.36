@@ -392,7 +392,7 @@ export function registerTrigger(opts: TriggerOptions): void {
   // hover:none → click once = explainer, click again = animation.
   // ────────────────────────────────────────────────────────────
   const explainerRemap = getExplainerTriggerRemap();
-  if (explainerRemap && el.nextElementSibling?.classList.contains('anim-explainer')) {
+  if (explainerRemap && el.hasAttribute('data-has-explainer')) {
     if (!config.canAnimate && onStatic) onStatic();
 
     const hoverTarget = el.closest('button, a') || el;
