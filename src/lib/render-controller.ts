@@ -204,19 +204,18 @@ function transformTextonly(root: HTMLElement) {
         : null;
 
     if (role === 'content-symbol' && explainer) {
-      // Hide the static icon
-      animEl.style.display = 'none';
-      if (tooltipWrapper) tooltipWrapper.style.display = 'none';
-
-      // Move explainer out of heading/container, show as own block
+      // Move explainer out FIRST, then hide the source
       const container = (tooltipWrapper || animEl).closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content, .card__media');
       const insertAfter = container
         ? (container.closest('.heading-wrap') || container)
         : (tooltipWrapper || animEl);
       insertAfter.after(explainer);
-      explainer.style.display = 'flex';
+      explainer.style.setProperty('display', 'flex', 'important');
+      // Now hide the static icon + wrapper
+      animEl.style.display = 'none';
+      if (tooltipWrapper) tooltipWrapper.style.display = 'none';
     } else if (explainer) {
-      // Decorative — hide explainer
+      // Decorative — hide explainer + wrapper
       explainer.style.display = 'none';
       if (tooltipWrapper) tooltipWrapper.style.display = 'none';
     }
