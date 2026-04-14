@@ -377,33 +377,30 @@ const showExplainer = hasAnimation && !isUiControl;
 const explainerType = morphTo ? 'morph' : draw ? 'draw' : fillAnimation ? 'fill' : 'micro';
 
 // Resolve short display name from a Phosphor slug
-function resolvePhosphorName(slug: string): string {
+// wordCount: how many PascalCase words to use (default 1)
+function resolvePhosphorName(slug: string, wordCount = 1): string {
   const ws = ['light', 'regular', 'bold', 'fill', 'duotone', 'flat'];
   const parts = slug.split('-');
   while (parts.length > 1 && ws.includes(parts[parts.length - 1])) parts.pop();
   const baseName = parts.join('-');
   const entry = phosphorMeta.find((e: any) => e.name === baseName);
-  if (entry) return entry.pascal_name.replace(/([A-Z])/g, ' $1').trim().split(' ')[0].toLowerCase();
-  return parts[0];
+  if (entry) {
+    const words = entry.pascal_name.replace(/([A-Z])/g, ' $1').trim().split(' ');
+    return words.slice(0, wordCount).join(' ').toLowerCase();
+  }
+  return parts.slice(0, wordCount).join(' ');
 }
 
 // Display name: always use phosphor name (what it looks like)
-// Label is for screen readers (intention), explainer describes the visual
 const explainerName = resolvePhosphorName(name);
 
-// Morph target name — if same as source, use full slug name instead
+// Morph target name — if same first word as source, use first two words
 let explainerTargetName: string | undefined;
 if (morphTo) {
   const shortName = resolvePhosphorName(morphTo);
-  if (shortName === explainerName) {
-    // Same first word — use full slug without weight suffix
-    const ws = ['light', 'regular', 'bold', 'fill', 'duotone', 'flat'];
-    const parts = morphTo.split('-');
-    while (parts.length > 1 && ws.includes(parts[parts.length - 1])) parts.pop();
-    explainerTargetName = parts.join(' ');
-  } else {
-    explainerTargetName = shortName;
-  }
+  explainerTargetName = shortName === explainerName
+    ? resolvePhosphorName(morphTo, 2)
+    : shortName;
 }
 
 
