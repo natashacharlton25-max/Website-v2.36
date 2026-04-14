@@ -226,7 +226,8 @@ export function isExplainerGated(el: HTMLElement): boolean {
  */
 export function getExplainerTriggerRemap(): 'click' | null {
   const mode = document.documentElement.dataset.animExplainer;
-  if (mode === 'tooltip' || mode === 'enlarge' || mode === 'subtitle') return 'click';
+  if (mode === 'tooltip' || mode === 'subtitle') return 'click';
+  // Enlarge: hover plays animation normally, click opens modal (handled by anim-explainer.ts)
   return null;
 }
 

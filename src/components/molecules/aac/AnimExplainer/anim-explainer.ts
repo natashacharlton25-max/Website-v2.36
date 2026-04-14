@@ -217,11 +217,13 @@ function initAnimExplainer(): void {
       if (isBarMode()) hideBar();
     }
 
-    // Enlarge — click opens modal. Subtitle hover:none — click shows bar.
+    // Enlarge — click opens modal (hover:none = double click)
+    // Subtitle hover:none — click shows bar
     function onClick(): void {
       if (!isActive()) return;
       if (isTooltipMode()) return; // click reserved for animation
       if (isEnlargeMode()) {
+        if (document.documentElement.dataset.hover === 'none') return; // dblclick handles it
         const content = getContent(el);
         if (content) openModal(content);
         return;
@@ -234,11 +236,20 @@ function initAnimExplainer(): void {
       }
     }
 
+    function onDblClick(): void {
+      if (!isActive()) return;
+      if (!isEnlargeMode()) return;
+      if (document.documentElement.dataset.hover !== 'none') return;
+      const content = getContent(el);
+      if (content) openModal(content);
+    }
+
     target.addEventListener('mouseenter', onEnter);
     target.addEventListener('mouseleave', onLeave);
     target.addEventListener('focusin', onEnter);
     target.addEventListener('focusout', onLeave);
     target.addEventListener('click', onClick);
+    target.addEventListener('dblclick', onDblClick);
   });
 }
 
