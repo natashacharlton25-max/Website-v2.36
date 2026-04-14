@@ -114,3 +114,72 @@ export function getActionSvg(type: string, animation?: string): string {
   if (!d) return '';
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="${d}"/></svg>`;
 }
+
+/** Get SVG path directly by action key — for recipe-defined actions. */
+export function getActionSvgByKey(key: string): string {
+  const d = actionPaths[key];
+  if (!d) return '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="${d}"/></svg>`;
+}
+
+
+// ══════════════════════════════════════════════════════════
+// RECIPE LOOKUP — resolves (type, variant) to card sequence
+// ══════════════════════════════════════════════════════════
+
+export type CardState = 'ghost' | 'ghost-colour' | 'filled' | 'drawn' | 'static' | 'first-icon' | 'last-icon';
+
+export interface ActionStage {
+  icon: string;   // action icon key (looked up in actionPaths)
+  word: string;   // word shown on the Next/Then card
+}
+
+export interface Recipe {
+  first: CardState;        // visual state of First card
+  actions: ActionStage[];  // one or more action stages (Next, Then, Then...)
+  end: CardState;          // visual state of End card
+  words: string;           // words template — {name}, {target} interpolated
+}
+
+export const recipes: Record<string, Recipe> = {
+  // ── DRAW — lines trace along paths ──
+  'draw:draw':          { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }], end: 'drawn', words: 'draws {name} from start to end' },
+  'draw:drawcenter':    { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }], end: 'drawn', words: 'draws {name} from the middle to the outside' },
+  'draw:pulse':         { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }], end: 'drawn', words: 'draws {name} with thick lines' },
+  'draw:draw+ghost':    { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }], end: 'drawn', words: 'draws {name} outline over the top' },
+  'draw:draw+laser':    { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }], end: 'drawn', words: 'draws {name} with a laser dot' },
+
+  // ── FILL — colour appears in shape ──
+  'fill:once':          { first: 'ghost',        actions: [{ icon: 'fill',  word: 'fill'  }, { icon: 'fill',  word: 'grows'   }], end: 'filled',       words: '{name} fills with colour from center dot' },
+  'fill:fade':          { first: 'ghost',        actions: [{ icon: 'fill',  word: 'fill'  }, { icon: 'fill',  word: 'fades'   }], end: 'filled',       words: '{name} fades in with colour' },
+  'fill:yoyo':          { first: 'ghost',        actions: [{ icon: 'fill',  word: 'grows' }, { icon: 'fill',  word: 'shrinks' }], end: 'filled',       words: '{name} grows full then shrinks to nothing' },
+  'fill:static':        { first: 'filled',       actions: [{ icon: 'fade',  word: 'fades' }, { icon: 'fill',  word: 'grows'   }], end: 'filled',       words: '{name} fades then fills with colour' },
+  'fill:ghost':         { first: 'ghost-colour', actions: [{ icon: 'fill',  word: 'fills' }, { icon: 'fill',  word: 'full colour' }], end: 'filled',  words: '{name} fills with colour' },
+  'fill:ghoststatic':   { first: 'ghost-colour', actions: [{ icon: 'draw',  word: 'draws' }, { icon: 'draw',  word: 'full colour' }], end: 'ghost-colour', words: 'draws over {name} with colour lines' },
+  'fill:reduced':       { first: 'filled',       actions: [{ icon: 'fade',  word: 'fades' }, { icon: 'draw',  word: 'draws'  }], end: 'filled',        words: '{name} fades then draws with colour then brightens' },
+  'fill:twinkle':       { first: 'filled',       actions: [{ icon: 'fade',  word: 'fades' }, { icon: 'twinkle', word: 'pops' }], end: 'filled',        words: '{name} fades and pops parts' },
+
+  // ── FILL + OUTLINE — draws stroke then fills ──
+  'fill:outline':       { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fill', word: 'fills' }], end: 'filled', words: 'draws {name} outline and fills with colour' },
+  'fill:outline+laser': { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fill', word: 'fills' }], end: 'filled', words: 'draws {name} with laser then fills with colour' },
+
+  // ── DRAW + FILL COMBINED ──
+  'draw+fill:overlap':  { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fill', word: 'fills' }], end: 'filled', words: 'draws {name} and colour fills' },
+  'draw+fill:after':    { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fill', word: 'fills' }], end: 'filled', words: 'draws {name} then fills with colour' },
+
+  // ── MORPH ──
+  'morph:hover':        { first: 'first-icon', actions: [{ icon: 'changes to', word: 'changes to' }], end: 'last-icon', words: '{name} changes to {target}' },
+  'morph:click':        { first: 'first-icon', actions: [{ icon: 'changes to', word: 'changes to' }], end: 'last-icon', words: '{name} changes to {target}' },
+  'morph:viewport':     { first: 'first-icon', actions: [{ icon: 'changes to', word: 'changes to' }], end: 'last-icon', words: '{name} changes to {target}' },
+};
+
+/** Look up a recipe by type and variant. Falls back to type defaults if variant not found. */
+export function getRecipe(type: string, variant?: string): Recipe | null {
+  if (variant) {
+    const key = `${type}:${variant}`;
+    if (recipes[key]) return recipes[key];
+  }
+  // Fallback: try first variant of type
+  const fallback = Object.keys(recipes).find(k => k.startsWith(`${type}:`));
+  return fallback ? recipes[fallback] : null;
+}
