@@ -187,34 +187,32 @@ function transformTextonly(root: HTMLElement) {
     });
   });
 
-  // 13. Animation explainers in textonly — if explainer mode is on,
+  // 13. Animation explainers in textonly — always process.
   //     content-symbol: show explainer cards, hide static icon
-  //     decorative: hide wrapper + explainer (already hidden by step 1)
-  const animMode = document.documentElement.dataset.animExplainer;
-  if (animMode && animMode !== 'off') {
-    root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
-      const animEl = wrapper.querySelector('[data-has-explainer]') as HTMLElement;
-      const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
-      const role = animEl?.dataset.semanticRole;
+  //     decorative: hide wrapper (already hidden by step 1)
+  //     Runs regardless of animMode — MutationObserver handles late setting.
+  root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
+    const animEl = wrapper.querySelector('[data-has-explainer]') as HTMLElement;
+    const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
+    const role = animEl?.dataset.semanticRole;
 
-      if (role === 'content-symbol' && explainer) {
-        // Show explainer inline, hide static icon + wrapper
-        wrapper.after(explainer);
-        explainer.style.display = 'flex';
-        if (animEl) animEl.style.display = 'none';
-        wrapper.style.display = 'none';
-        // Move out of heading containers
-        const container = explainer.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content');
-        if (container) {
-          const target = container.closest('.heading-wrap') || container;
-          target.after(explainer);
-        }
-      } else {
-        // Decorative — hide everything
-        wrapper.style.display = 'none';
+    if (role === 'content-symbol' && explainer) {
+      // Show explainer inline, hide static icon + wrapper
+      wrapper.after(explainer);
+      explainer.style.display = 'flex';
+      if (animEl) animEl.style.display = 'none';
+      wrapper.style.display = 'none';
+      // Move out of heading containers
+      const container = explainer.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content');
+      if (container) {
+        const target = container.closest('.heading-wrap') || container;
+        target.after(explainer);
       }
-    });
-  }
+    } else {
+      // Decorative — hide wrapper
+      wrapper.style.display = 'none';
+    }
+  });
 
   // 14. Strip inline styles set by gradient/animation systems
   root.querySelectorAll<HTMLElement>('[style]').forEach(el => {
