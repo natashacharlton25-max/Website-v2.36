@@ -212,9 +212,8 @@ function transformTextonly(root: HTMLElement) {
   root.querySelectorAll<HTMLElement>('[style]').forEach(el => {
     // Keep display styles (set by this controller), strip everything else
     const display = el.style.display;
-    const displayPriority = el.style.getPropertyPriority('display');
     el.removeAttribute('style');
-    if (display) el.style.setProperty('display', display, displayPriority);
+    if (display) el.style.display = display;
   });
 }
 
