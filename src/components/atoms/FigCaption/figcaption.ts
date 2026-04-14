@@ -1,12 +1,14 @@
 /**
- * FigCaption — runtime alt text tooltip for images
+ * FigCaption — runtime caption system for images AND animation explainers
  *
- * Reads alt text from .image-alt-word / .image-alt-descriptive / .image-alt-aac
- * already in the DOM (built at build time by Image atom).
- * Creates a <figcaption> with tooltip behaviour.
+ * Two content types, one display system:
+ *   1. Image alt text: reads .image-alt-word / .image-alt-descriptive / .image-alt-aac
+ *      Gated by data-alt-display-mode on <html>
+ *   2. Animation explainer: reads [data-anim-seq] containers (AacCard sequences)
+ *      Gated by data-anim-explainer on <html>
  *
- * Gated by data-alt-display-mode="tooltip" on <html>.
- * Uses same shared bar as Tooltip atom for textonly/mobile.
+ * Both use the same shared bar, hover gates, viewed state, and display behaviour.
+ * Content is built at build time by Image atom / AnimExplainer molecule.
  */
 
 let sharedBar: HTMLElement | null = null;
@@ -40,27 +42,48 @@ function getSharedBar(): HTMLElement {
 }
 
 function isBarMode(): boolean {
-  if (isSubtitleMode()) return true; // subtitle always uses bar
+  if (isSubtitleMode()) return true;
   const isMobile = window.innerWidth <= 640;
-  return isMobile; // only mobile uses bar, text-only uses popup
+  return isMobile;
 }
 
+// ── Image alt text mode checks ───────────────────────────
+
 function isTooltipMode(): boolean {
-  const mode = document.documentElement.dataset.altDisplayMode
-    || document.documentElement.dataset.altDisplayMode;
+  const mode = document.documentElement.dataset.altDisplayMode;
   return mode === 'tooltip' || mode === 'subtitle' || mode === 'inline';
 }
 
 function isSubtitleMode(): boolean {
-  const mode = document.documentElement.dataset.altDisplayMode
-    || document.documentElement.dataset.altDisplayMode;
+  const mode = document.documentElement.dataset.altDisplayMode;
   return mode === 'subtitle';
 }
 
 function isInlineMode(): boolean {
-  const mode = document.documentElement.dataset.altDisplayMode
-    || document.documentElement.dataset.altDisplayMode;
+  const mode = document.documentElement.dataset.altDisplayMode;
   return mode === 'inline';
+}
+
+// ── Animation explainer mode checks ──────────────────────
+
+function isAnimActive(): boolean {
+  const mode = document.documentElement.dataset.animExplainer;
+  return !!mode && mode !== 'off';
+}
+
+function isAnimTooltipMode(): boolean {
+  const mode = document.documentElement.dataset.animExplainer;
+  return mode === 'tooltip' || mode === 'subtitle' || mode === 'inline';
+}
+
+function isAnimSubtitleMode(): boolean {
+  return document.documentElement.dataset.animExplainer === 'subtitle';
+}
+
+function isAnimBarMode(): boolean {
+  if (isAnimSubtitleMode()) return true;
+  const isMobile = window.innerWidth <= 640;
+  return isMobile;
 }
 
 function showBar(html: string, permanent = false): void {
@@ -252,16 +275,90 @@ function initFigCaptions(): void {
   });
 }
 
+// ═══════════════════════════════════════════════════════════
+// ANIMATION EXPLAINER — same system, reads [data-anim-seq]
+// ═══════════════════════════════════════════════════════════
+
+function getAnimContent(el: HTMLElement): string {
+  // The .anim-explainer contains the full card sequence — return its innerHTML
+  const explainer = el.classList.contains('anim-explainer') ? el : el.querySelector('.anim-explainer');
+  if (explainer) return explainer.innerHTML;
+  return el.getAttribute('aria-label') || '';
+}
+
+function initAnimCaptions(): void {
+  if (!isAnimTooltipMode()) return;
+
+  document.querySelectorAll<HTMLElement>('[data-anim-seq]').forEach((el) => {
+    if (el.dataset.animcaptionInit) return;
+
+    el.dataset.animcaptionInit = 'true';
+
+    // For tooltip/overlay: create a caption element
+    let caption: HTMLElement | null = null;
+    if (document.documentElement.dataset.animExplainer === 'tooltip' ||
+        document.documentElement.dataset.animExplainer === 'overlay') {
+      caption = document.createElement('div');
+      caption.className = 'figcaption figcaption--anim';
+      caption.setAttribute('aria-hidden', 'true');
+      // Insert after the animated element (the previous sibling of the explainer)
+      const animatedEl = el.previousElementSibling as HTMLElement;
+      if (animatedEl) {
+        animatedEl.parentNode?.insertBefore(caption, el);
+      }
+    }
+
+    const isPermanent = () => isAnimSubtitleMode() && document.documentElement.dataset.hover === 'none';
+
+    function onEnter(): void {
+      if (!isAnimTooltipMode()) return;
+      if (isPermanent()) return;
+      if (document.documentElement.dataset.hover === 'none') return;
+      if (caption) caption.innerHTML = getAnimContent(el);
+      if (isAnimBarMode()) {
+        const content = getAnimContent(el);
+        if (content) showBar(content);
+      }
+    }
+
+    function onLeave(): void {
+      if (isPermanent()) return;
+      if (document.documentElement.dataset.hover === 'none') return;
+      if (isAnimBarMode()) hideBar();
+    }
+
+    function onClick(): void {
+      if (!isAnimTooltipMode()) return;
+      if (isPermanent()) {
+        const content = getAnimContent(el);
+        if (content) showBar(content, true);
+      } else if (document.documentElement.dataset.hover === 'none') {
+        if (isAnimBarMode()) {
+          const content = getAnimContent(el);
+          if (content) showBar(content, true);
+        }
+      }
+    }
+
+    // Find the animated element to attach hover/focus listeners
+    const target = el.previousElementSibling as HTMLElement || el;
+    target.addEventListener('mouseenter', onEnter);
+    target.addEventListener('mouseleave', onLeave);
+    target.addEventListener('focusin', onEnter);
+    target.addEventListener('focusout', onLeave);
+    target.addEventListener('click', onClick);
+  });
+}
+
 // Watch for display mode changes
 const observer = new MutationObserver(() => {
-  if (isTooltipMode()) {
-    initFigCaptions();
-  }
+  if (isTooltipMode()) initFigCaptions();
+  if (isAnimActive()) initAnimCaptions();
 });
 
 observer.observe(document.documentElement, {
   attributes: true,
-  attributeFilter: ['data-alt-display-mode', 'data-altdisplaymode']
+  attributeFilter: ['data-alt-display-mode', 'data-altdisplaymode', 'data-anim-explainer']
 });
 observer.observe(document.body, {
   attributes: true,
@@ -277,8 +374,13 @@ window.addEventListener('scroll', () => {
   }
 }, { passive: true });
 
-// Init
-document.addEventListener('astro:page-load', initFigCaptions);
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
+// Init — both content types
+function initAll() {
   initFigCaptions();
+  initAnimCaptions();
+}
+
+document.addEventListener('astro:page-load', initAll);
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  initAll();
 }

@@ -4,7 +4,8 @@
  *   data-anim-seq-mode  = what to show (visual / text / full)
  *   data-anim-explainer = how to show it (off / inline / subtitle / overlay / tooltip)
  *
- * Both axes set on <html> by the Your View panel.
+ * Display behaviour (bar, tooltip, hover gates) handled by figcaption.ts.
+ * This file handles: base layout, content mode gating, sequence colours.
  */
 
 /* ══════════════════════════════════════════════════════════
@@ -21,53 +22,9 @@
   flex-wrap: wrap;
 }
 
-
-/* ══════════════════════════════════════════════════════════
-   Axis 2: HOW to show — display mode
-   ══════════════════════════════════════════════════════════ */
-
-/* ── Inline — replaces animation ───────────────────── */
-
-[data-anim-explainer="inline"] .anim-explainer {
+/* Show when any anim-explainer mode is active */
+[data-anim-explainer]:not([data-anim-explainer="off"]) .anim-explainer {
   display: inline-flex;
-}
-
-/* ── Subtitle — below animation (both visible) ─────── */
-
-[data-anim-explainer="subtitle"] .anim-explainer {
-  display: inline-flex;
-}
-
-/* ── Overlay — on hover/focus, positioned below ────── */
-
-[data-anim-explainer="overlay"] :is(.icon, .shape, .lottie-icon):hover + .anim-explainer,
-[data-anim-explainer="overlay"] :is(.icon, .shape, .lottie-icon):focus-within + .anim-explainer {
-  display: inline-flex;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 10;
-  background: var(--page-bg);
-  border: var(--border-width) solid var(--neutral-mid);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-md);
-}
-
-/* ── Tooltip — smaller, centered below on hover/focus  */
-
-[data-anim-explainer="tooltip"] :is(.icon, .shape, .lottie-icon):hover + .anim-explainer,
-[data-anim-explainer="tooltip"] :is(.icon, .shape, .lottie-icon):focus-within + .anim-explainer {
-  display: inline-flex;
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  background: var(--page-bg);
-  border: var(--border-width) solid var(--neutral-mid);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
-  padding: var(--space-xs);
 }
 
 
@@ -80,10 +37,6 @@
 
 [data-anim-seq-mode="visual"] .anim-explainer .aac-card__word,
 [data-anim-seq-mode="visual"] .anim-explainer__pos--words {
-  display: none;
-}
-/* Hide the arrow before the hidden words card */
-[data-anim-seq-mode="visual"] .anim-explainer__pos--words + .anim-explainer__arrow {
   display: none;
 }
 
