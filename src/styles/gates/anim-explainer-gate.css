@@ -72,8 +72,83 @@
 
 /* ==========================================================
    DISPLAY MODE: ENLARGE — click opens modal
-   Handled by image-enlarge.css (modal) + anim-explainer.ts (JS)
+   Base modal styles from image-enlarge.css.
    ========================================================== */
+
+/* Panel behind cards — rounded rectangle with green border */
+.anim-explainer-modal__content {
+  background: var(--page-bg);
+  border: var(--border-width-lg) solid var(--rainbow-4);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  max-width: min(95vw, 900px);
+}
+
+/* Larger cards inside modal — responsive */
+.anim-explainer-modal__content .anim-seq-card {
+  padding: var(--space-sm) var(--space-md);
+  min-width: 5em;
+}
+
+.anim-explainer-modal__content .anim-seq-card__icon {
+  width: 4em;
+  height: 4em;
+}
+
+.anim-explainer-modal__content .anim-seq-card__label {
+  font-size: var(--text-base);
+}
+
+.anim-explainer-modal__content .anim-seq-card__name {
+  font-size: var(--text-base);
+}
+
+.anim-explainer-modal__content .anim-seq-card--words .anim-seq-card__name {
+  font-size: var(--text-lg);
+}
+
+.anim-explainer-modal__content .anim-explainer__arrow svg {
+  width: 2em;
+  height: 2em;
+}
+
+/* Close button — green, goes neutral after viewed */
+.anim-explainer-modal .image-enlarge-modal__close {
+  border-color: var(--rainbow-4);
+  color: var(--rainbow-4);
+}
+
+.anim-explainer-modal .image-enlarge-modal__close:hover,
+.anim-explainer-modal .image-enlarge-modal__close:focus {
+  background: var(--rainbow-4);
+  color: var(--page-bg);
+}
+
+/* Viewed state — panel and close go neutral */
+.anim-explainer-modal.anim-modal-viewed .image-enlarge-modal__close {
+  border-color: var(--neutral-mid);
+  color: var(--neutral-mid);
+}
+
+.anim-explainer-modal.anim-modal-viewed .anim-explainer-modal__content {
+  border-color: var(--neutral-mid);
+}
+
+/* Responsive — smaller cards on narrow screens */
+@media (max-width: 640px) {
+  .anim-explainer-modal__content .anim-seq-card__icon {
+    width: 3em;
+    height: 3em;
+  }
+  .anim-explainer-modal__content .anim-seq-card {
+    min-width: 3.5em;
+    padding: var(--space-xs) var(--space-sm);
+  }
+  .anim-explainer-modal__content .anim-explainer {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
 
 
 /* ==========================================================

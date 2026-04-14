@@ -152,6 +152,7 @@ function openModal(html: string): void {
 function closeModal(): void {
   if (!modal) return;
   modal.dataset.open = 'false';
+  modal.classList.add('anim-modal-viewed');
   document.body.style.overflow = '';
   if (modalPrevFocus) { modalPrevFocus.focus(); modalPrevFocus = null; }
 }
