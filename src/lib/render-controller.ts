@@ -189,18 +189,22 @@ function transformTextonly(root: HTMLElement) {
     });
   });
 
-  // 13. Animation explainers — move content-symbol explainers out of
-  //     tooltip/heading containers so they render in document flow.
-  //     CSS (anim-explainer-gate.css) handles show/hide.
-  root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip:has([data-semantic-role="content-symbol"])').forEach(wrapper => {
-    const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
+  // 13. Animation explainers — find content-symbol icons with explainers,
+  //     move explainer out of containers into document flow, show it.
+  root.querySelectorAll<HTMLElement>('[data-has-explainer][data-semantic-role="content-symbol"]').forEach(icon => {
+    const wrapper = icon.closest('.anim-explainer-tooltip');
+    const explainer = wrapper
+      ? wrapper.querySelector('[data-anim-seq]') as HTMLElement
+      : null;
     if (!explainer) return;
-    // Move explainer after the heading or container
-    const container = wrapper.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content, .card__media, .base-grid');
+
+    // Move explainer after the heading/grid/container
+    const container = (wrapper || icon).closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content, .card__media, .base-grid');
     const insertAfter = container
       ? (container.closest('.heading-wrap') || container)
-      : wrapper;
+      : (wrapper || icon);
     insertAfter.after(explainer);
+    explainer.style.setProperty('display', 'flex', 'important');
   });
 
   // 14. Strip inline styles set by gradient/animation systems
