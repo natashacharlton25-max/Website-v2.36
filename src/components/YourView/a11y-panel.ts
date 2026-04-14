@@ -52,7 +52,7 @@ export interface A11ySettings {
   /** Image enlarge — click to open modal with enlarged image + alt text subtitle */
   imageEnlarge: boolean;
   /** Animation explainer — how to display sequence cards */
-  animExplainer: 'off' | 'inline' | 'subtitle' | 'overlay' | 'tooltip';
+  animExplainer: 'off' | 'inline' | 'subtitle' | 'enlarge' | 'tooltip';
   /** Animation explainer content mode — what to show in the cards */
   animSeqMode: 'full' | 'visual' | 'text';
 }

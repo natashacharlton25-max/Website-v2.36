@@ -226,7 +226,7 @@ export function isExplainerGated(el: HTMLElement): boolean {
  */
 export function getExplainerTriggerRemap(): 'click' | null {
   const mode = document.documentElement.dataset.animExplainer;
-  if (mode === 'tooltip' || mode === 'overlay' || mode === 'subtitle') return 'click';
+  if (mode === 'tooltip' || mode === 'enlarge' || mode === 'subtitle') return 'click';
   return null;
 }
 

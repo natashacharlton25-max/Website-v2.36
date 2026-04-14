@@ -73,7 +73,7 @@ function isAnimActive(): boolean {
 
 function isAnimTooltipMode(): boolean {
   const mode = document.documentElement.dataset.animExplainer;
-  return mode === 'tooltip' || mode === 'subtitle' || mode === 'overlay' || mode === 'inline';
+  return mode === 'tooltip' || mode === 'subtitle' || mode === 'enlarge' || mode === 'inline';
 }
 
 function isAnimSubtitleMode(): boolean {
@@ -87,7 +87,7 @@ function isAnimBarMode(): boolean {
 }
 
 function isAnimOverlayMode(): boolean {
-  return document.documentElement.dataset.animExplainer === 'overlay';
+  return document.documentElement.dataset.animExplainer === 'enlarge';
 }
 
 // ── Overlay modal for animation explainer ─────────────────
@@ -346,7 +346,7 @@ function initAnimCaptions(): void {
     // For tooltip/overlay: create a caption element
     let caption: HTMLElement | null = null;
     if (document.documentElement.dataset.animExplainer === 'tooltip' ||
-        document.documentElement.dataset.animExplainer === 'overlay') {
+        document.documentElement.dataset.animExplainer === 'enlarge') {
       caption = document.createElement('div');
       caption.className = 'figcaption figcaption--anim';
       caption.setAttribute('aria-hidden', 'true');
