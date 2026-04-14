@@ -8,8 +8,8 @@
  *
  * Card patterns:
  *   Morph:  First (icon A) → Next (swap) → Then (icon B) → Words
- *   Draw:   First (ghost)  → Next (scribble) → Words
- *   Fill:   First (ghost)  → Next (paint bucket) → Words
+ *   Draw:   First (ghost)  → Next (scribble) → Then (drawn) → Words
+ *   Fill:   First (ghost)  → Next (resize) → Then (filled) → Words
  *   Micro:  First (static) → Next (motion icon) → Words
  *
  * Display gated by data-anim-explainer on <html>.
@@ -45,7 +45,8 @@ const actionPhrase = type === 'micro'
     : (typeWords[type] || 'animates');
 const words = `${displayName} ${actionPhrase}`;
 const ariaLabel = `Animation: ${words}`;
-const hasFourCards = type === 'morph' && !!targetSvg;
+// Morph, draw, fill all get a Then card (completed state)
+const hasThenCard = type === 'morph' || type === 'draw' || type === 'fill';
 const actionSvg = getActionSvg(type, animation);
 const actionWord = type === 'morph' ? 'changes to' : (animation || type);
 
@@ -78,24 +79,26 @@ const arrowSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" 
     </span>
   </span>
 
-  {hasFourCards && (
+  {hasThenCard && (
     <>
       <span class="anim-explainer__arrow" aria-hidden="true">
         <Fragment set:html={arrowSvg} />
       </span>
 
-      {/* ── Then: morph target ─── */}
+      {/* ── Then: completed state (morph=target, draw/fill=full colour icon) ─── */}
       <span class="anim-explainer__pos anim-explainer__pos--then" aria-hidden="true">
         <span class="anim-seq-card">
           <span class="anim-seq-card__label">Then</span>
-          <span class="anim-seq-card__icon"><Fragment set:html={targetSvg} /></span>
-          <span class="anim-seq-card__name">{resolvedTargetName}</span>
+          <span class="anim-seq-card__icon">
+            <Fragment set:html={type === 'morph' && targetSvg ? targetSvg : sourceSvg} />
+          </span>
+          <span class="anim-seq-card__name">{type === 'morph' ? resolvedTargetName : displayName}</span>
         </span>
       </span>
     </>
   )}
 
-  <span class="anim-explainer__arrow" aria-hidden="true">
+  <span class="anim-explainer__arrow anim-explainer__arrow--before-words" aria-hidden="true">
     <Fragment set:html={arrowSvg} />
   </span>
 
