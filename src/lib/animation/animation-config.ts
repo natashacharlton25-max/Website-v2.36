@@ -219,6 +219,17 @@ export function isExplainerGated(el: HTMLElement): boolean {
   return !!el.nextElementSibling?.classList.contains('anim-explainer');
 }
 
+/**
+ * When explainer is tooltip/overlay, hover triggers should be remapped
+ * to click so hover is free for showing explainer cards.
+ * Returns 'click' if remapping needed, null otherwise.
+ */
+export function getExplainerTriggerRemap(): 'click' | null {
+  const mode = document.documentElement.dataset.animExplainer;
+  if (mode === 'tooltip' || mode === 'overlay' || mode === 'subtitle') return 'click';
+  return null;
+}
+
 // ================================================================
 // SCROLL CONTAINER
 // ================================================================
@@ -470,20 +481,86 @@ export function registerTrigger(opts: TriggerOptions): void {
     case 'hover':
     default: {
       const hoverTarget = el.closest('button, a') || el;
+      const explainerRemap = getExplainerTriggerRemap();
 
+      // Explainer tooltip/overlay/subtitle active:
+      //   hover → reserved for explainer cards (figcaption handles)
+      //   click → plays animation
+      //   hover:none → click once = explainer, click twice = animation
+      //   Enter → first press = explainer, second = animation
+      //   Escape → close explainer without playing
+      if (explainerRemap && el.nextElementSibling?.classList.contains('anim-explainer')) {
+        // Static fallback
+        if (!getAnimationConfig().canAnimate && onStatic) onStatic();
+
+        let explainerShown = false;
+
+        hoverTarget.addEventListener('click', () => {
+          const config = getAnimationConfig();
+          if (!config.canAnimate) return;
+
+          if (config.canHover) {
+            // Hover available: click always plays animation
+            // (hover shows explainer via figcaption)
+            guardedEnter();
+          } else {
+            // Hover:none — click once = explainer, click again = animation
+            if (!explainerShown) {
+              // Figcaption handles showing the explainer on click
+              explainerShown = true;
+            } else {
+              guardedEnter();
+              explainerShown = false;
+            }
+          }
+        });
+
+        // focusin still plays for keyboard users after explainer
+        hoverTarget.addEventListener('keydown', (e: Event) => {
+          const key = (e as KeyboardEvent).key;
+          const config = getAnimationConfig();
+          if (!config.canAnimate) return;
+
+          if (key === 'Escape') {
+            // Close explainer without playing
+            explainerShown = false;
+          } else if (key === 'Enter') {
+            if (!explainerShown) {
+              // First Enter: figcaption shows explainer
+              explainerShown = true;
+            } else {
+              // Second Enter: play animation
+              guardedEnter();
+              explainerShown = false;
+            }
+          }
+        });
+
+        if (guardedLeave) {
+          hoverTarget.addEventListener('mouseleave', () => {
+            if (!getAnimationConfig().canAnimate) return;
+            guardedLeave();
+          });
+          hoverTarget.addEventListener('focusout', () => {
+            guardedLeave();
+            explainerShown = false;
+          });
+        }
+        break;
+      }
+
+      // Normal hover (no explainer remap)
       const triggerEnter = (e: Event) => {
         const config = getAnimationConfig();
         if (!config.canAnimate) return;
         if (!config.canHover && e.type === 'mouseenter') return;
         if (config.hover === 'instant') {
           if (onInstant) { onInstant(); return; }
-          // Instant mode: skip guard, jump straight to end state
           const tl = onEnter();
           if (tl?.progress) tl.progress(1);
           activeTl = tl;
           return;
         }
-        // Normal hover: re-trigger ignored while previous animation runs
         guardedEnter();
       };
 
