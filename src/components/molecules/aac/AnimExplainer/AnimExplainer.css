@@ -127,9 +127,24 @@
    Axis 1: WHAT to show — content mode
    ══════════════════════════════════════════════════════════ */
 
-/* Visual sequencing: icons + labels only, no text */
-[data-anim-seq-mode="visual"] .anim-seq-card__name,
+/* Visual sequencing: icons + labels only, no text visually.
+   Words card stays in accessibility tree (screen reader reads full sentence). */
+[data-anim-seq-mode="visual"] .anim-seq-card__name {
+  display: none;
+}
 [data-anim-seq-mode="visual"] .anim-explainer__pos--words {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* Hide the arrow before the visually-hidden words card */
+[data-anim-seq-mode="visual"] .anim-explainer__pos--words ~ .anim-explainer__arrow {
   display: none;
 }
 
