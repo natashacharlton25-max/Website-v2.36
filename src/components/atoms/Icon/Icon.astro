@@ -142,11 +142,14 @@ const drawIsInteractive = !!draw && (drawOnScroll || drawScrub
   : interactiveTriggers.includes((animationTrigger as string)));
 const morphIsInteractive = !!morphTo && morphTrigger === 'hover';
 const fillIsInteractive = !!fillAnimation && fillTrigger === 'hover';
+// Any animated non-UI icon is interactive when explainer is available
+const hasExplainerTarget = !!(morphTo || draw || fillAnimation || animation) && semanticRole !== 'ui-control';
 const isInteractive = isInformational
   || animationIsInteractive
   || drawIsInteractive
   || morphIsInteractive
-  || fillIsInteractive;
+  || fillIsInteractive
+  || hasExplainerTarget;
 // Resolve role: informational icons stay role="img"; pure-interactive
 // (hover/click animations without semanticRole) become role="button" so
 // screen readers announce them as activatable.
