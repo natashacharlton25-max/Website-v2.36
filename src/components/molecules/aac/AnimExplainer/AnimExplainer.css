@@ -27,12 +27,28 @@
   display: inline-flex;
 }
 
-/* Subtitle — cards show below animation (both visible) */
-[data-anim-explainer="subtitle"] .anim-explainer {
+/* Subtitle — hidden in place, figcaption.ts shows via bottom bar */
+
+/* Tooltip — popup on hover/focus, positioned below element */
+[data-anim-explainer="tooltip"] .icon:hover + .anim-explainer,
+[data-anim-explainer="tooltip"] .icon:focus-within + .anim-explainer,
+[data-anim-explainer="tooltip"] .shape:hover + .anim-explainer,
+[data-anim-explainer="tooltip"] .shape:focus-within + .anim-explainer {
   display: inline-flex;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-tooltip, 9000);
+  background: var(--page-bg);
+  border: var(--border-width) solid var(--neutral-mid);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-sm);
+  margin-top: var(--space-xs);
 }
 
-/* Overlay/tooltip — hidden by default, figcaption.ts handles show on hover/focus */
+/* Overlay — hidden in place, figcaption.ts shows as modal */
 
 
 /* ══════════════════════════════════════════════════════════
