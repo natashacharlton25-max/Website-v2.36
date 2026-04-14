@@ -190,23 +190,23 @@ function transformTextonly(root: HTMLElement) {
     });
   });
 
-  // 13. Animation explainers — find content-symbol icons with explainers,
-  //     move explainer out of containers into document flow, show it.
-  // Icons with explainers stayed in their tooltip wrappers (step 12 skipped them).
-  // Find the wrapper, extract the explainer, move it after the section heading.
-  root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
-    const icon = wrapper.querySelector('[data-semantic-role="content-symbol"]') as HTMLElement;
-    const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
-    if (!icon || !explainer) return;
+  // 13. Animation explainers — only when explainer mode is on.
+  //     Move explainer out, hide wrapper. CSS gates visibility.
+  const animMode = document.documentElement.dataset.animExplainer;
+  if (animMode && animMode !== 'off') {
+    root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
+      const icon = wrapper.querySelector('[data-semantic-role="content-symbol"]') as HTMLElement;
+      const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
+      if (!icon || !explainer) return;
 
-    // Place after the immediate container (grid, heading-wrap, etc)
-    const container = wrapper.closest('.base-grid, .heading-wrap, .heading-wrap__media');
-    const insertAfter = container || wrapper;
+      const container = wrapper.closest('.base-grid, .heading-wrap, .heading-wrap__media');
+      const insertAfter = container || wrapper;
 
-    insertAfter.after(explainer);
-    explainer.classList.add('anim-explainer--textonly');
-    wrapper.style.display = 'none';
-  });
+      insertAfter.after(explainer);
+      explainer.classList.add('anim-explainer--textonly');
+      wrapper.style.display = 'none';
+    });
+  }
 
   // 14. Strip inline styles set by gradient/animation systems
   root.querySelectorAll<HTMLElement>('[style]').forEach(el => {
