@@ -38,12 +38,14 @@ interface Props {
   /** Micro-animation key from shared-enums Animation type */
   animation?: string;
   color?: string | null;
+  /** ID for aria-describedby linking — animated element references this */
+  id?: string;
   class?: string;
 }
 
 const {
   type, variant, sourceSvg, targetSvg, displayName, targetName,
-  animation, color, class: className,
+  animation, color, id, class: className,
 } = Astro.props;
 
 const resolvedTargetName = targetName || displayName;
@@ -127,7 +129,7 @@ function actionPosClass(index: number): string {
 ---
 
 <span class:list={['anim-explainer', color && `color--${color}`, className]}
-  role="img" aria-label={ariaLabel} data-anim-seq>
+  id={id} role="img" aria-label={ariaLabel} data-anim-seq>
 
   {/* ── First: source element ─── */}
   <span class="anim-explainer__pos anim-explainer__pos--first" aria-hidden="true">

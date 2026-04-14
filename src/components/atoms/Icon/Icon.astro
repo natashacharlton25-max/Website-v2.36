@@ -428,6 +428,9 @@ function resolvePhosphorName(slug: string, wordCount = 1): string {
 // Display name: always use phosphor name (what it looks like)
 const explainerName = resolvePhosphorName(name);
 
+// Unique ID for aria-describedby linking
+const explainerId = showExplainer ? `anim-explainer-${Math.random().toString(36).slice(2, 8)}` : undefined;
+
 // Morph target name — if same first word as source, use first two words
 let explainerTargetName: string | undefined;
 if (morphTo) {
@@ -454,6 +457,7 @@ if (morphTo) {
       data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
       data-anim-repeat={animation && animationRepeat !== 'once' ? animationRepeat : undefined}
       data-has-explainer=""
+      aria-describedby={explainerId}
       {...dataAttrs}
     >
       <Fragment set:html={iconContent || fallbackIcon} />
@@ -461,6 +465,7 @@ if (morphTo) {
     </span>
     <AnimExplainer
       slot="content"
+      id={explainerId}
       type={explainerType as any}
       variant={explainerVariant}
       sourceSvg={iconContent || fallbackIcon}
