@@ -251,13 +251,17 @@ observer.observe(document.documentElement, {
   attributeFilter: ['data-anim-explainer']
 });
 
-// Scroll hides bar
+// Scroll hides bar + tooltip
 window.addEventListener('scroll', () => {
   if (sharedBar && sharedBar.style.opacity === '1') {
     if (barHideTimeout) clearTimeout(barHideTimeout);
     sharedBar.style.opacity = '0';
     sharedBar.style.visibility = 'hidden';
   }
+  // Hide any open tooltips
+  document.querySelectorAll('.anim-explainer--tooltip-show').forEach(el => {
+    el.classList.remove('anim-explainer--tooltip-show');
+  });
 }, { passive: true });
 
 // Init
