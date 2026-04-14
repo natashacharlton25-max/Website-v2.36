@@ -312,7 +312,26 @@ if (typeof document !== 'undefined') {
     const root = document.getElementById('main-content') || document.getElementById('a11y-content-wrapper');
     if (!root) return;
     const animMode = document.documentElement.dataset.animExplainer;
-    if (animMode === 'inline') {
+    const renderMode = document.documentElement.dataset.render || 'full';
+    const isTextonly = renderMode === 'textonly' || renderMode === 'reading';
+
+    if (isTextonly && animMode && animMode !== 'off') {
+      // Textonly: show content-symbol explainers inline
+      root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
+        const animEl = wrapper.querySelector('[data-has-explainer]') as HTMLElement;
+        const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
+        const role = animEl?.dataset.semanticRole;
+
+        if (role === 'content-symbol' && explainer) {
+          wrapper.after(explainer);
+          explainer.style.display = 'flex';
+          if (animEl) animEl.style.display = 'none';
+          wrapper.style.display = 'none';
+        } else {
+          wrapper.style.display = 'none';
+        }
+      });
+    } else if (animMode === 'inline' && !isTextonly) {
       transformAnimExplainerInline(root);
     }
   });
