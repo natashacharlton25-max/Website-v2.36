@@ -292,9 +292,9 @@ export function initRenderController() {
   const config = MODES[mode];
   if (config) config.transform(root);
 
-  // Anim explainer inline — independent of render mode
+  // Anim explainer inline — skip if textonly (step 13 handles it with semantic filtering)
   const animMode = document.documentElement.dataset.animExplainer;
-  if (animMode === 'inline') {
+  if (animMode === 'inline' && mode !== 'textonly' && mode !== 'reading') {
     transformAnimExplainerInline(root);
   }
 }
