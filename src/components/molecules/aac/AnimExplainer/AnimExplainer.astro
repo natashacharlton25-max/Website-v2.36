@@ -75,8 +75,8 @@ const arrowSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" 
   role="img" aria-label={ariaLabel} data-anim-seq>
 
   {/* ── First: source element ─── */}
-  <span aria-hidden="true">
-    <AacCard label="First" word={displayName} svgContent={sourceSvg} coreTier="green" size="lg" />
+  <span class="anim-explainer__pos anim-explainer__pos--first" aria-hidden="true">
+    <AacCard label="First" word={displayName} svgContent={sourceSvg} size="lg" />
   </span>
 
   <span class="anim-explainer__arrow" aria-hidden="true">
@@ -84,8 +84,8 @@ const arrowSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" 
   </span>
 
   {/* ── Next: action icon ─── */}
-  <span aria-hidden="true">
-    <AacCard label="Next" word={type === 'morph' ? 'changes to' : (animation || type)} svgContent={getActionSvg(type, animation)} coreTier="yellow" size="lg" />
+  <span class="anim-explainer__pos anim-explainer__pos--next" aria-hidden="true">
+    <AacCard label="Next" word={type === 'morph' ? 'changes to' : (animation || type)} svgContent={getActionSvg(type, animation)} size="lg" />
   </span>
 
   {hasFourCards && (
@@ -95,8 +95,8 @@ const arrowSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" 
       </span>
 
       {/* ── Then: morph target ─── */}
-      <span aria-hidden="true">
-        <AacCard label="Then" word={resolvedTargetName} svgContent={targetSvg} coreTier="orange" size="lg" />
+      <span class="anim-explainer__pos anim-explainer__pos--then" aria-hidden="true">
+        <AacCard label="Then" word={resolvedTargetName} svgContent={targetSvg} size="lg" />
       </span>
     </>
   )}
@@ -106,5 +106,7 @@ const arrowSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" 
   </span>
 
   {/* ── Words: text description (screen reader + learners) ─── */}
-  <AacCard word={words} coreTier={hasFourCards ? null : 'orange'} size="lg" />
+  <span class="anim-explainer__pos anim-explainer__pos--words">
+    <AacCard word={words} size="lg" />
+  </span>
 </span>

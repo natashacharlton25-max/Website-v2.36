@@ -1,10 +1,15 @@
 /* AnimExplainer — AAC animation sequence layout
- * Cards are AacCard components — this file handles the
- * sequence layout (flex row + arrows) and display mode gating.
- * Gated by data-anim-explainer on <html>.
+ *
+ * Two-axis system (same pattern as image alt text):
+ *   data-anim-seq-mode  = what to show (visual / text / full)
+ *   data-anim-explainer = how to show it (off / inline / subtitle / overlay / tooltip)
+ *
+ * Both axes set on <html> by the Your View panel.
  */
 
-/* ── Base: hidden ─────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   Base: hidden
+   ══════════════════════════════════════════════════════════ */
 
 .anim-explainer {
   display: none;
@@ -16,19 +21,24 @@
   flex-wrap: wrap;
 }
 
-/* ── Inline — hide animation, show sequence ────────── */
+
+/* ══════════════════════════════════════════════════════════
+   Axis 2: HOW to show — display mode
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Inline — replaces animation ───────────────────── */
 
 [data-anim-explainer="inline"] .anim-explainer {
   display: inline-flex;
 }
 
-/* ── Subtitle — both animation and sequence visible ── */
+/* ── Subtitle — below animation (both visible) ─────── */
 
 [data-anim-explainer="subtitle"] .anim-explainer {
   display: inline-flex;
 }
 
-/* ── Overlay — show on hover/focus, positioned below ─ */
+/* ── Overlay — on hover/focus, positioned below ────── */
 
 [data-anim-explainer="overlay"] :is(.icon, .shape, .lottie-icon):hover + .anim-explainer,
 [data-anim-explainer="overlay"] :is(.icon, .shape, .lottie-icon):focus-within + .anim-explainer {
@@ -43,7 +53,7 @@
   box-shadow: var(--shadow-md);
 }
 
-/* ── Tooltip — smaller, centered below ─────────────── */
+/* ── Tooltip — smaller, centered below on hover/focus  */
 
 [data-anim-explainer="tooltip"] :is(.icon, .shape, .lottie-icon):hover + .anim-explainer,
 [data-anim-explainer="tooltip"] :is(.icon, .shape, .lottie-icon):focus-within + .anim-explainer {
@@ -60,7 +70,78 @@
   padding: var(--space-xs);
 }
 
-/* ── Arrow ─────────────────────────────────────────── */
+
+/* ══════════════════════════════════════════════════════════
+   Axis 1: WHAT to show — content mode
+   Default (full) shows everything. Visual/text hide parts.
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Visual sequencing: icons + labels only, no text ── */
+
+[data-anim-seq-mode="visual"] .anim-explainer .aac-card__word,
+[data-anim-seq-mode="visual"] .anim-explainer__pos--words {
+  display: none;
+}
+/* Hide the arrow before the hidden words card */
+[data-anim-seq-mode="visual"] .anim-explainer__pos--words + .anim-explainer__arrow {
+  display: none;
+}
+
+/* ── Text sequencing: labels + words, no icons ─────── */
+
+[data-anim-seq-mode="text"] .anim-explainer .aac-card__pictogram,
+[data-anim-seq-mode="text"] .anim-explainer .aac-card__pictogram--svg {
+  display: none;
+}
+
+/* Full sequencing: default — no overrides needed */
+
+
+/* ══════════════════════════════════════════════════════════
+   Sequence position colours
+   Separate from AacCard's data-core-tier (AAC vocabulary).
+   Each position gets a rainbow colour for border + label.
+   ══════════════════════════════════════════════════════════ */
+
+.anim-explainer__pos--first .aac-card {
+  border-color: var(--rainbow-4-base);
+}
+.anim-explainer__pos--first .aac-card__label {
+  color: var(--rainbow-4-base);
+}
+
+.anim-explainer__pos--next .aac-card {
+  border-color: var(--rainbow-3-base);
+}
+.anim-explainer__pos--next .aac-card__label {
+  color: var(--rainbow-3-base);
+}
+
+.anim-explainer__pos--then .aac-card {
+  border-color: var(--rainbow-2-base);
+}
+.anim-explainer__pos--then .aac-card__label {
+  color: var(--rainbow-2-base);
+}
+
+.anim-explainer__pos--words .aac-card {
+  border-color: var(--rainbow-1-base);
+  border-style: dashed;
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   Words card — larger text
+   ══════════════════════════════════════════════════════════ */
+
+.anim-explainer__pos--words .aac-card__word {
+  font-size: var(--text-base);
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   Arrow
+   ══════════════════════════════════════════════════════════ */
 
 .anim-explainer__arrow {
   color: var(--text-emphasis);

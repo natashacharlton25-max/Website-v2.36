@@ -46,10 +46,18 @@ function initModal(): void {
       const key = b.dataset.testToggle!;
       const active = key === 'xlText'
         ? settings.fontSize >= 150
-        : key === 'animExplainerInline'
-          ? settings.animExplainer === 'inline'
-          : (settings as any)[key] === true;
+        : (settings as any)[key] === true;
       setActive(b, active);
+    });
+
+    // Animation explainer — how to show
+    panel!.querySelectorAll<HTMLElement>('[data-test-animexplainer]').forEach(b => {
+      setActive(b, b.dataset.testAnimexplainer === settings.animExplainer);
+    });
+
+    // Animation explainer — what to show
+    panel!.querySelectorAll<HTMLElement>('[data-test-animseq]').forEach(b => {
+      setActive(b, b.dataset.testAnimseq === settings.animSeqMode);
     });
 
     // Alt text mode buttons (what to show)
@@ -158,8 +166,6 @@ function initModal(): void {
       const key = btn.dataset.testToggle!;
       if (key === 'xlText') {
         settings.fontSize = settings.fontSize >= 150 ? 100 : 150;
-      } else if (key === 'animExplainerInline') {
-        settings.animExplainer = settings.animExplainer === 'inline' ? 'off' : 'inline';
       } else {
         (settings as any)[key] = !(settings as any)[key];
       }
@@ -247,6 +253,28 @@ function initModal(): void {
   panel.querySelectorAll<HTMLElement>('[data-test-aacfilter]').forEach(btn => {
     btn.addEventListener('click', () => {
       settings.aacFilter = btn.dataset.testAacfilter as A11ySettings['aacFilter'];
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
+  });
+
+  // ── Animation explainer — how to show ──
+
+  panel.querySelectorAll<HTMLElement>('[data-test-animexplainer]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settings.animExplainer = btn.dataset.testAnimexplainer as A11ySettings['animExplainer'];
+      saveSettings(settings);
+      applySettings(settings);
+      syncUI();
+    });
+  });
+
+  // ── Animation explainer — what to show ──
+
+  panel.querySelectorAll<HTMLElement>('[data-test-animseq]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settings.animSeqMode = btn.dataset.testAnimseq as A11ySettings['animSeqMode'];
       saveSettings(settings);
       applySettings(settings);
       syncUI();

@@ -51,8 +51,10 @@ export interface A11ySettings {
   aacFilter: 'none' | 'grayscale' | 'sepia';
   /** Image enlarge — click to open modal with enlarged image + alt text subtitle */
   imageEnlarge: boolean;
-  /** Animation explainer — AAC First/Then sequence cards for animated elements */
-  animExplainer: 'off' | 'inline' | 'overlay' | 'subtitle';
+  /** Animation explainer — how to display sequence cards */
+  animExplainer: 'off' | 'inline' | 'subtitle' | 'overlay' | 'tooltip';
+  /** Animation explainer content mode — what to show in the cards */
+  animSeqMode: 'full' | 'visual' | 'text';
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -93,7 +95,8 @@ export const defaultSettings: A11ySettings = {
   contentAac: false,
   aacFilter: 'none',
   imageEnlarge: false,
-  animExplainer: 'off'
+  animExplainer: 'off',
+  animSeqMode: 'full'
 };
 
 // ===================================
@@ -302,12 +305,20 @@ export function applySettings(settings: A11ySettings): void {
   (target as HTMLElement).dataset.altDisplayMode = displayMode;
   document.documentElement.dataset.altDisplayMode = displayMode;
 
-  // Animation Explainer - AAC First/Then sequence cards
+  // Animation Explainer - how to display (off/inline/subtitle/overlay/tooltip)
   const animExplainer = settings.animExplainer || 'off';
   if (animExplainer === 'off') {
     document.documentElement.removeAttribute('data-anim-explainer');
   } else {
     document.documentElement.dataset.animExplainer = animExplainer;
+  }
+
+  // Animation Explainer - what to show (full/visual/text)
+  const animSeqMode = settings.animSeqMode || 'full';
+  if (animSeqMode === 'full') {
+    document.documentElement.removeAttribute('data-anim-seq-mode');
+  } else {
+    document.documentElement.dataset.animSeqMode = animSeqMode;
   }
 
   // Cognitive Level - AAC vocabulary depth (green/yellow/orange/full)
