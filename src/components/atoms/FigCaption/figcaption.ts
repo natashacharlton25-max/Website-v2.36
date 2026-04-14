@@ -82,9 +82,57 @@ function isAnimSubtitleMode(): boolean {
 
 function isAnimBarMode(): boolean {
   if (isAnimSubtitleMode()) return true;
-  if (document.documentElement.dataset.animExplainer === 'overlay') return true;
   const isMobile = window.innerWidth <= 640;
   return isMobile;
+}
+
+function isAnimOverlayMode(): boolean {
+  return document.documentElement.dataset.animExplainer === 'overlay';
+}
+
+// ── Overlay modal for animation explainer ─────────────────
+
+let animOverlay: HTMLElement | null = null;
+let animOverlayPrevFocus: HTMLElement | null = null;
+
+function getAnimOverlay(): HTMLElement {
+  if (animOverlay) return animOverlay;
+  const el = document.createElement('div');
+  el.className = 'image-enlarge-modal anim-explainer-overlay';
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-modal', 'true');
+  el.setAttribute('aria-label', 'Animation explainer');
+  el.innerHTML = `
+    <button class="image-enlarge-modal__close" aria-label="Close explainer">&times;</button>
+    <div class="image-enlarge-modal__content anim-explainer-overlay__content"></div>
+  `;
+  document.body.appendChild(el);
+  animOverlay = el;
+
+  el.querySelector('.image-enlarge-modal__close')!.addEventListener('click', closeAnimOverlay);
+  el.addEventListener('click', (e: MouseEvent) => { if (e.target === el) closeAnimOverlay(); });
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && animOverlay?.dataset.open === 'true') closeAnimOverlay();
+  });
+
+  return el;
+}
+
+function showAnimOverlay(html: string): void {
+  const m = getAnimOverlay();
+  const content = m.querySelector('.anim-explainer-overlay__content') as HTMLElement;
+  content.innerHTML = html;
+  animOverlayPrevFocus = document.activeElement as HTMLElement;
+  m.dataset.open = 'true';
+  document.body.style.overflow = 'hidden';
+  (m.querySelector('.image-enlarge-modal__close') as HTMLElement).focus();
+}
+
+function closeAnimOverlay(): void {
+  if (!animOverlay) return;
+  animOverlay.dataset.open = 'false';
+  document.body.style.overflow = '';
+  if (animOverlayPrevFocus) { animOverlayPrevFocus.focus(); animOverlayPrevFocus = null; }
 }
 
 function showBar(html: string, permanent = false): void {
@@ -315,10 +363,13 @@ function initAnimCaptions(): void {
       if (!isAnimTooltipMode()) return;
       if (isPermanent()) return;
       if (document.documentElement.dataset.hover === 'none') return;
-      if (caption) caption.innerHTML = getAnimContent(el);
-      if (isAnimBarMode()) {
-        const content = getAnimContent(el);
+      const content = getAnimContent(el);
+      if (isAnimOverlayMode()) {
+        if (content) showAnimOverlay(content);
+      } else if (isAnimBarMode()) {
         if (content) showBar(content);
+      } else if (caption) {
+        caption.innerHTML = content;
       }
     }
 
@@ -326,16 +377,16 @@ function initAnimCaptions(): void {
       if (isPermanent()) return;
       if (document.documentElement.dataset.hover === 'none') return;
       if (isAnimBarMode()) hideBar();
+      // Overlay stays open until Escape/close — no hide on leave
     }
 
     function onClick(): void {
       if (!isAnimTooltipMode()) return;
-      if (isPermanent()) {
-        const content = getAnimContent(el);
-        if (content) showBar(content, true);
-      } else if (document.documentElement.dataset.hover === 'none') {
-        if (isAnimBarMode()) {
-          const content = getAnimContent(el);
+      const content = getAnimContent(el);
+      if (isPermanent() || document.documentElement.dataset.hover === 'none') {
+        if (isAnimOverlayMode()) {
+          if (content) showAnimOverlay(content);
+        } else if (isAnimBarMode()) {
           if (content) showBar(content, true);
         }
       }
