@@ -393,7 +393,10 @@ function initAnimCaptions(): void {
     }
 
     // Find the animated element to attach hover/focus listeners
-    const target = el.previousElementSibling as HTMLElement || el;
+    // Try previous sibling first, then look for nearest icon/shape with data-has-explainer
+    const target = (el.previousElementSibling as HTMLElement)
+      || el.parentElement?.querySelector('[data-has-explainer]') as HTMLElement
+      || el;
     target.addEventListener('mouseenter', onEnter);
     target.addEventListener('mouseleave', onLeave);
     target.addEventListener('focusin', onEnter);
