@@ -263,8 +263,16 @@ function initModal(): void {
 
   panel.querySelectorAll<HTMLElement>('[data-test-animexplainer]').forEach(btn => {
     btn.addEventListener('click', () => {
-      settings.animExplainer = btn.dataset.testAnimexplainer as A11ySettings['animExplainer'];
+      const newMode = btn.dataset.testAnimexplainer as A11ySettings['animExplainer'];
+      const oldMode = settings.animExplainer;
+      settings.animExplainer = newMode;
       saveSettings(settings);
+      // Inline mode mutates DOM (moves explainers, hides icons).
+      // Switching to/from inline requires reload to restore DOM.
+      if (oldMode === 'inline' || newMode === 'inline') {
+        location.reload();
+        return;
+      }
       applySettings(settings);
       syncUI();
     });
