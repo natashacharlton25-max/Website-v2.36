@@ -186,8 +186,12 @@ function initAnimExplainer(): void {
       if (isEnlargeMode()) return; // enlarge uses click
       if (isPermanent()) return;
       if (document.documentElement.dataset.hover === 'none') return;
-      const content = getContent(el);
-      if (isBarMode()) {
+
+      if (isTooltipMode()) {
+        // Show the explainer as a tooltip popup
+        el.classList.add('anim-explainer--tooltip-show');
+      } else if (isBarMode()) {
+        const content = getContent(el);
         if (content) showBar(content);
       }
     }
@@ -196,18 +200,28 @@ function initAnimExplainer(): void {
       if (isEnlargeMode()) return;
       if (isPermanent()) return;
       if (document.documentElement.dataset.hover === 'none') return;
+
+      if (isTooltipMode()) {
+        el.classList.remove('anim-explainer--tooltip-show');
+      }
       if (isBarMode()) hideBar();
     }
 
     function onClick(): void {
       if (!isActive()) return;
-      const content = getContent(el);
       if (isEnlargeMode()) {
+        const content = getContent(el);
         if (content) openModal(content);
+        return;
+      }
+      if (isTooltipMode() && document.documentElement.dataset.hover === 'none') {
+        // hover:none — click toggles tooltip
+        el.classList.toggle('anim-explainer--tooltip-show');
         return;
       }
       if (isPermanent() || document.documentElement.dataset.hover === 'none') {
         if (isBarMode()) {
+          const content = getContent(el);
           if (content) showBar(content, true);
         }
       }
