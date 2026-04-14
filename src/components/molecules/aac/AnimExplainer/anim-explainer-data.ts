@@ -101,7 +101,13 @@ const actionPaths: Record<string, string> = {
   // ── Type action icons ──────────────────────────────────
   'changes to':   'M224,48V152a16,16,0,0,1-16,16H112v16a8,8,0,0,1-13.66,5.66l-24-24a8,8,0,0,1,0-11.32l24-24A8,8,0,0,1,112,136v16h96V48H96v8a8,8,0,0,1-16,0V48A16,16,0,0,1,96,32H208A16,16,0,0,1,224,48ZM168,192a8,8,0,0,0-8,8v8H48V104h96v16a8,8,0,0,0,13.66,5.66l24-24a8,8,0,0,0,0-11.32l-24-24A8,8,0,0,0,144,72V88H48a16,16,0,0,0-16,16V208a16,16,0,0,0,16,16H160a16,16,0,0,0,16-16v-8A8,8,0,0,0,168,192Z',
   draw:           'M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM193.66,169.66l-8,8a9,9,0,0,0,0,12.68l4,4a8,8,0,0,1-11.32,11.32l-4-4a25,25,0,0,1,0-35.32l8-8a9,9,0,0,0,0-12.68,9,9,0,0,0-12.68,0l-48,48a25,25,0,0,1-35.32-35.32l72-72a9,9,0,0,0,0-12.68,9,9,0,0,0-12.68,0l-48,48A25,25,0,0,1,62.34,86.34l28-28a8,8,0,0,1,11.32,11.32l-28,28a9,9,0,0,0,0,12.68,9,9,0,0,0,12.68,0l48-48a25,25,0,0,1,35.32,35.32l-72,72a9,9,0,0,0,0,12.68,9,9,0,0,0,12.68,0l48-48a25,25,0,0,1,35.32,35.32Z',
+  // fill = resize icon (shape grows to fill) — "grows" is alias
   fill:           'M144,120v88a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V120a8,8,0,0,1,8-8h88A8,8,0,0,1,144,120Zm64,56a8,8,0,0,0-8,8v16H176a8,8,0,0,0,0,16h24a16,16,0,0,0,16-16V184A8,8,0,0,0,208,176Zm0-72a8,8,0,0,0-8,8v32a8,8,0,0,0,16,0V112A8,8,0,0,0,208,104Zm-8-64H184a8,8,0,0,0,0,16h16V72a8,8,0,0,0,16,0V56A16,16,0,0,0,200,40Zm-56,0H112a8,8,0,0,0,0,16h32a8,8,0,0,0,0-16ZM48,88a8,8,0,0,0,8-8V56H72a8,8,0,0,0,0-16H56A16,16,0,0,0,40,56V80A8,8,0,0,0,48,88Z',
+  grows:          'M144,120v88a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V120a8,8,0,0,1,8-8h88A8,8,0,0,1,144,120Zm64,56a8,8,0,0,0-8,8v16H176a8,8,0,0,0,0,16h24a16,16,0,0,0,16-16V184A8,8,0,0,0,208,176Zm0-72a8,8,0,0,0-8,8v32a8,8,0,0,0,16,0V112A8,8,0,0,0,208,104Zm-8-64H184a8,8,0,0,0,0,16h16V72a8,8,0,0,0,16,0V56A16,16,0,0,0,200,40Zm-56,0H112a8,8,0,0,0,0,16h32a8,8,0,0,0,0-16ZM48,88a8,8,0,0,0,8-8V56H72a8,8,0,0,0,0-16H56A16,16,0,0,0,40,56V80A8,8,0,0,0,48,88Z',
+  // fills = paint-bucket icon (colour fills into shape)
+  fills:          'M256,208a24,24,0,0,1-48,0c0-17.91,15.57-41.77,17.34-44.44a8,8,0,0,1,13.32,0C240.43,166.23,256,190.09,256,208ZM132.49,124.49a12,12,0,0,0-17-17l0,0s0,0,0,0a12,12,0,0,0,17,16.94ZM37.65,18.34A8,8,0,0,0,26.34,29.66l32.6,32.6L70.25,51ZM234.53,139.07a8,8,0,0,0,3.13-13.24L122.17,10.34a8,8,0,0,0-11.31,0L70.25,51l40.43,40.42a28,28,0,1,1-11.31,11.32L58.94,62.26,15,106.17a24,24,0,0,0,0,33.94L99.89,225a24,24,0,0,0,33.94,0l78.49-78.49Z',
+  // fades = sun-horizon icon (opacity fade in/out) — alias of fade for consistency
+  fades:          'M248,160a8,8,0,0,1-8,8H16a8,8,0,0,1,0-16H56.45a73.54,73.54,0,0,1-.45-8,72,72,0,0,1,144,0,73.54,73.54,0,0,1-.45,8H240A8,8,0,0,1,248,160Zm-40,32H48a8,8,0,0,0,0,16H208a8,8,0,0,0,0-16ZM80.84,59.58a8,8,0,0,0,14.32-7.16l-8-16a8,8,0,0,0-14.32,7.16ZM20.42,103.16l16,8a8,8,0,1,0,7.16-14.31l-16-8a8,8,0,1,0-7.16,14.31ZM216,112a8,8,0,0,0,3.57-.84l16-8a8,8,0,1,0-7.16-14.31l-16,8A8,8,0,0,0,216,112ZM164.42,63.16a8,8,0,0,0,10.74-3.58l8-16a8,8,0,0,0-14.32-7.16l-8,16A8,8,0,0,0,164.42,63.16Z',
   colour:         'M232,32a8,8,0,0,0-8-8c-44.08,0-89.31,49.71-114.43,82.63A60,60,0,0,0,32,164c0,30.88-19.54,44.73-20.47,45.37A8,8,0,0,0,16,224H92a60,60,0,0,0,57.37-77.57C182.3,121.31,232,76.08,232,32ZM124.42,113.55q5.14-6.66,10.09-12.55A76.23,76.23,0,0,1,155,121.49q-5.9,4.94-12.55,10.09A60.54,60.54,0,0,0,124.42,113.55Zm42.7-2.68a92.57,92.57,0,0,0-22-22c31.78-34.53,55.75-45,69.9-47.91C212.17,55.12,201.65,79.09,167.12,110.87Z',
 };
 
@@ -150,22 +156,22 @@ export const recipes: Record<string, Recipe> = {
   'draw:draw+laser':    { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }], end: 'drawn', words: 'draws {name} with a laser dot' },
 
   // ── FILL — colour appears in shape ──
-  'fill:once':          { first: 'ghost',        actions: [{ icon: 'fill',  word: 'fill'  }, { icon: 'fill',  word: 'grows'   }], end: 'filled',       words: '{name} fills with colour from center dot' },
-  'fill:fade':          { first: 'ghost',        actions: [{ icon: 'fill',  word: 'fill'  }, { icon: 'fill',  word: 'fades'   }], end: 'filled',       words: '{name} fades in with colour' },
-  'fill:yoyo':          { first: 'ghost',        actions: [{ icon: 'fill',  word: 'grows' }, { icon: 'fill',  word: 'shrinks' }], end: 'filled',       words: '{name} grows full then shrinks to nothing' },
-  'fill:static':        { first: 'filled',       actions: [{ icon: 'fade',  word: 'fades' }, { icon: 'fill',  word: 'grows'   }], end: 'filled',       words: '{name} fades then fills with colour' },
-  'fill:ghost':         { first: 'ghost-colour', actions: [{ icon: 'fill',  word: 'fills' }, { icon: 'fill',  word: 'full colour' }], end: 'filled',  words: '{name} fills with colour' },
+  'fill:once':          { first: 'ghost',        actions: [{ icon: 'fills', word: 'fills' }, { icon: 'grows', word: 'grows'   }], end: 'filled',       words: '{name} fills with colour from center dot' },
+  'fill:fade':          { first: 'ghost',        actions: [{ icon: 'fills', word: 'fills' }, { icon: 'fades', word: 'fades'   }], end: 'filled',       words: '{name} fades in with colour' },
+  'fill:yoyo':          { first: 'ghost',        actions: [{ icon: 'grows', word: 'grows' }, { icon: 'grows', word: 'shrinks' }], end: 'filled',       words: '{name} grows full then shrinks to nothing' },
+  'fill:static':        { first: 'filled',       actions: [{ icon: 'fades', word: 'fades' }, { icon: 'grows', word: 'grows'   }], end: 'filled',       words: '{name} fades then fills with colour' },
+  'fill:ghost':         { first: 'ghost-colour', actions: [{ icon: 'fills', word: 'fills' }, { icon: 'fills', word: 'full colour' }], end: 'filled',  words: '{name} fills with colour' },
   'fill:ghoststatic':   { first: 'ghost-colour', actions: [{ icon: 'draw',  word: 'draws' }, { icon: 'draw',  word: 'full colour' }], end: 'ghost-colour', words: 'draws over {name} with colour lines' },
-  'fill:reduced':       { first: 'filled',       actions: [{ icon: 'fade',  word: 'fades' }, { icon: 'draw',  word: 'draws'  }], end: 'filled',        words: '{name} fades then draws with colour then brightens' },
-  'fill:twinkle':       { first: 'filled',       actions: [{ icon: 'fade',  word: 'fades' }, { icon: 'twinkle', word: 'pops' }], end: 'filled',        words: '{name} fades and pops parts' },
+  'fill:reduced':       { first: 'filled',       actions: [{ icon: 'fades', word: 'fades' }, { icon: 'draw',  word: 'draws'  }], end: 'filled',        words: '{name} fades then draws with colour then brightens' },
+  'fill:twinkle':       { first: 'filled',       actions: [{ icon: 'fades', word: 'fades' }, { icon: 'twinkle', word: 'pops' }], end: 'filled',        words: '{name} fades and pops parts' },
 
   // ── FILL + OUTLINE — draws stroke then fills ──
-  'fill:outline':       { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fill', word: 'fills' }], end: 'filled', words: 'draws {name} outline and fills with colour' },
-  'fill:outline+laser': { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fill', word: 'fills' }], end: 'filled', words: 'draws {name} with laser then fills with colour' },
+  'fill:outline':       { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fills', word: 'fills' }], end: 'filled', words: 'draws {name} outline and fills with colour' },
+  'fill:outline+laser': { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fills', word: 'fills' }], end: 'filled', words: 'draws {name} with laser then fills with colour' },
 
   // ── DRAW + FILL COMBINED ──
-  'draw+fill:overlap':  { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fill', word: 'fills' }], end: 'filled', words: 'draws {name} and colour fills' },
-  'draw+fill:after':    { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fill', word: 'fills' }], end: 'filled', words: 'draws {name} then fills with colour' },
+  'draw+fill:overlap':  { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fills', word: 'fills' }], end: 'filled', words: 'draws {name} and colour fills' },
+  'draw+fill:after':    { first: 'ghost', actions: [{ icon: 'draw', word: 'draws' }, { icon: 'fills', word: 'fills' }], end: 'filled', words: 'draws {name} then fills with colour' },
 
   // ── MORPH ──
   'morph:hover':        { first: 'first-icon', actions: [{ icon: 'changes to', word: 'changes to' }], end: 'last-icon', words: '{name} changes to {target}' },
