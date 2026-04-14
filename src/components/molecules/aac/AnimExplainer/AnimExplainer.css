@@ -160,16 +160,20 @@
    Same pattern as FigCaption's ? indicator on images.
    ══════════════════════════════════════════════════════════ */
 
-[data-anim-explainer="subtitle"] .icon:has(+ .anim-explainer)::after,
-[data-anim-explainer="tooltip"] .icon:has(+ .anim-explainer)::after,
-[data-anim-explainer="overlay"] .icon:has(+ .anim-explainer)::after,
-[data-anim-explainer="subtitle"] .shape:has(+ .anim-explainer)::after,
-[data-anim-explainer="tooltip"] .shape:has(+ .anim-explainer)::after,
-[data-anim-explainer="overlay"] .shape:has(+ .anim-explainer)::after {
+/* Elements with explainer need position:relative for the indicator */
+[data-anim-explainer="subtitle"] [data-has-explainer],
+[data-anim-explainer="tooltip"] [data-has-explainer],
+[data-anim-explainer="overlay"] [data-has-explainer] {
+  position: relative;
+}
+
+[data-anim-explainer="subtitle"] [data-has-explainer]::after,
+[data-anim-explainer="tooltip"] [data-has-explainer]::after,
+[data-anim-explainer="overlay"] [data-has-explainer]::after {
   content: "★";
   position: absolute;
-  bottom: var(--space-2xs);
-  right: var(--space-2xs);
+  bottom: 0;
+  right: 0;
   z-index: 10;
   font-size: var(--text-fine);
   font-weight: var(--font-bold);
