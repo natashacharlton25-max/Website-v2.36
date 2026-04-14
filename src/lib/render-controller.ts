@@ -189,30 +189,36 @@ function transformTextonly(root: HTMLElement) {
     });
   });
 
-  // 13. Animation explainers in textonly — always process.
-  //     content-symbol: show explainer cards, hide static icon
-  //     decorative: hide wrapper (already hidden by step 1)
-  //     Runs regardless of animMode — MutationObserver handles late setting.
-  root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
-    const animEl = wrapper.querySelector('[data-has-explainer]') as HTMLElement;
-    const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
-    const role = animEl?.dataset.semanticRole;
+  // 13. Animation explainers in textonly —
+  //     Find ALL elements with data-has-explainer.
+  //     content-symbol: hide icon, show explainer in own container after heading
+  //     decorative: hide explainer too (icon already hidden by step 1)
+  root.querySelectorAll<HTMLElement>('[data-has-explainer]').forEach(animEl => {
+    const role = animEl.dataset.semanticRole;
+    // Find the explainer — sibling or inside tooltip wrapper
+    const tooltipWrapper = animEl.closest('.anim-explainer-tooltip');
+    const explainer = tooltipWrapper
+      ? tooltipWrapper.querySelector('[data-anim-seq]') as HTMLElement
+      : animEl.nextElementSibling?.matches('[data-anim-seq]')
+        ? animEl.nextElementSibling as HTMLElement
+        : null;
 
     if (role === 'content-symbol' && explainer) {
-      // Show explainer inline, hide static icon + wrapper
-      wrapper.after(explainer);
+      // Hide the static icon
+      animEl.style.display = 'none';
+      if (tooltipWrapper) tooltipWrapper.style.display = 'none';
+
+      // Move explainer out of heading/container, show as own block
+      const container = (tooltipWrapper || animEl).closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content, .card__media');
+      const insertAfter = container
+        ? (container.closest('.heading-wrap') || container)
+        : (tooltipWrapper || animEl);
+      insertAfter.after(explainer);
       explainer.style.display = 'flex';
-      if (animEl) animEl.style.display = 'none';
-      wrapper.style.display = 'none';
-      // Move out of heading containers
-      const container = explainer.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content');
-      if (container) {
-        const target = container.closest('.heading-wrap') || container;
-        target.after(explainer);
-      }
-    } else {
-      // Decorative — hide wrapper
-      wrapper.style.display = 'none';
+    } else if (explainer) {
+      // Decorative — hide explainer
+      explainer.style.display = 'none';
+      if (tooltipWrapper) tooltipWrapper.style.display = 'none';
     }
   });
 
