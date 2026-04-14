@@ -212,23 +212,33 @@ function transformReduced(_root: HTMLElement) {
 function transformAnimExplainerInline(root: HTMLElement) {
   // Move each .anim-explainer out of its parent container
   // and place it as a sibling after the nearest block ancestor.
-  // This breaks it out of heading-wrap__media, badge, etc.
+  // This breaks it out of heading-wrap__media, badge, tooltip wrapper, etc.
   root.querySelectorAll<HTMLElement>('[data-anim-seq]').forEach(explainer => {
-    // Find the animated element (previous sibling)
-    const animEl = explainer.previousElementSibling as HTMLElement;
+    // Find the animated element — may be in Tooltip wrapper
+    const tooltipWrapper = explainer.closest('.anim-explainer-tooltip');
+    const animEl = tooltipWrapper
+      ? tooltipWrapper.querySelector('[data-has-explainer]') as HTMLElement
+      : explainer.previousElementSibling as HTMLElement;
 
     // Find the nearest block-level container to break out of
-    // (heading-wrap__media, badge, shape__content, etc.)
-    const container = explainer.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content, .card__media');
+    const searchFrom = tooltipWrapper || explainer;
+    const container = searchFrom.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content, .card__media');
     if (container) {
-      // Move explainer after the container (or its parent wrapper)
       const target = container.closest('.heading-wrap') || container;
       target.after(explainer);
+    } else if (tooltipWrapper) {
+      // Not in a container but inside tooltip — move after tooltip wrapper
+      tooltipWrapper.after(explainer);
     }
 
     // Hide the animated element — explainer replaces it
     if (animEl && (animEl.classList.contains('icon') || animEl.classList.contains('shape'))) {
       animEl.style.display = 'none';
+    }
+
+    // Hide the tooltip wrapper if it's now empty of visible content
+    if (tooltipWrapper) {
+      tooltipWrapper.style.display = 'none';
     }
   });
 }
