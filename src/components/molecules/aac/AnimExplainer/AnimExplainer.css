@@ -4,8 +4,8 @@
  *   data-anim-seq-mode  = what to show (visual / text / full)
  *   data-anim-explainer = how to show it (off / inline / subtitle / overlay / tooltip)
  *
- * Display behaviour (bar, tooltip, hover gates) handled by figcaption.ts.
- * This file handles: base layout, content mode gating, sequence colours.
+ * Own card class (anim-seq-card) — isolated from AacCard.
+ * Display behaviour (bar, tooltip, hover gates) via figcaption.ts.
  */
 
 /* ══════════════════════════════════════════════════════════
@@ -22,73 +22,123 @@
   flex-wrap: wrap;
 }
 
-/* Show when any anim-explainer mode is active */
-[data-anim-explainer]:not([data-anim-explainer="off"]) .anim-explainer {
+/* Inline — cards replace animation in place */
+[data-anim-explainer="inline"] .anim-explainer {
   display: inline-flex;
+}
+
+/* Subtitle — cards show below animation (both visible) */
+[data-anim-explainer="subtitle"] .anim-explainer {
+  display: inline-flex;
+}
+
+/* Overlay/tooltip — hidden by default, figcaption.ts handles show on hover/focus */
+
+
+/* ══════════════════════════════════════════════════════════
+   Sequence card — isolated from AacCard
+   ══════════════════════════════════════════════════════════ */
+
+.anim-seq-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--neutral-tint);
+  border: 4px solid var(--neutral-mid);
+  border-radius: var(--radius-md);
+  min-width: 3.5em;
+  text-align: center;
+}
+
+.anim-seq-card__label {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  line-height: 1;
+}
+
+.anim-seq-card__icon {
+  width: 3em;
+  height: 3em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.anim-seq-card__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.anim-seq-card__name {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-muted);
+  line-height: var(--leading-tight);
+}
+
+/* Words card — larger text, dashed border */
+.anim-seq-card--words {
+  border-style: dashed;
+}
+
+.anim-seq-card--words .anim-seq-card__name {
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--text-emphasis);
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   Sequence position colours — rainbow tokens
+   ══════════════════════════════════════════════════════════ */
+
+.anim-explainer__pos--first .anim-seq-card {
+  border-color: var(--rainbow-4-base);
+}
+.anim-explainer__pos--first .anim-seq-card__label {
+  color: var(--rainbow-4-base);
+}
+
+.anim-explainer__pos--next .anim-seq-card {
+  border-color: var(--rainbow-3-base);
+}
+.anim-explainer__pos--next .anim-seq-card__label {
+  color: var(--rainbow-3-base);
+}
+
+.anim-explainer__pos--then .anim-seq-card {
+  border-color: var(--rainbow-2-base);
+}
+.anim-explainer__pos--then .anim-seq-card__label {
+  color: var(--rainbow-2-base);
+}
+
+.anim-explainer__pos--words .anim-seq-card {
+  border-color: var(--rainbow-1-base);
 }
 
 
 /* ══════════════════════════════════════════════════════════
    Axis 1: WHAT to show — content mode
-   Default (full) shows everything. Visual/text hide parts.
    ══════════════════════════════════════════════════════════ */
 
-/* ── Visual sequencing: icons + labels only, no text ── */
-
-[data-anim-seq-mode="visual"] .anim-explainer .aac-card__word,
+/* Visual sequencing: icons + labels only, no text */
+[data-anim-seq-mode="visual"] .anim-seq-card__name,
 [data-anim-seq-mode="visual"] .anim-explainer__pos--words {
   display: none;
 }
 
-/* ── Text sequencing: labels + words, no icons ─────── */
-
-[data-anim-seq-mode="text"] .anim-explainer .aac-card__pictogram,
-[data-anim-seq-mode="text"] .anim-explainer .aac-card__pictogram--svg {
+/* Text sequencing: labels + words, no icons */
+[data-anim-seq-mode="text"] .anim-seq-card__icon {
   display: none;
-}
-
-/* Full sequencing: default — no overrides needed */
-
-
-/* ══════════════════════════════════════════════════════════
-   Sequence position colours
-   Separate from AacCard's data-core-tier (AAC vocabulary).
-   Each position gets a rainbow colour for border + label.
-   ══════════════════════════════════════════════════════════ */
-
-.anim-explainer__pos--first .aac-card {
-  border-color: var(--rainbow-4-base);
-}
-.anim-explainer__pos--first .aac-card__label {
-  color: var(--rainbow-4-base);
-}
-
-.anim-explainer__pos--next .aac-card {
-  border-color: var(--rainbow-3-base);
-}
-.anim-explainer__pos--next .aac-card__label {
-  color: var(--rainbow-3-base);
-}
-
-.anim-explainer__pos--then .aac-card {
-  border-color: var(--rainbow-2-base);
-}
-.anim-explainer__pos--then .aac-card__label {
-  color: var(--rainbow-2-base);
-}
-
-.anim-explainer__pos--words .aac-card {
-  border-color: var(--rainbow-1-base);
-  border-style: dashed;
-}
-
-
-/* ══════════════════════════════════════════════════════════
-   Words card — larger text
-   ══════════════════════════════════════════════════════════ */
-
-.anim-explainer__pos--words .aac-card__word {
-  font-size: var(--text-base);
 }
 
 
