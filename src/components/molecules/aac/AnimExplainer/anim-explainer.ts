@@ -210,6 +210,10 @@ function initAnimExplainer(): void {
 
       el.classList.remove('anim-explainer--tooltip-show');
       if (isBarMode()) hideBar();
+
+      // Mark as viewed — border goes neutral
+      const tooltipWrapper = target.closest('.anim-explainer-tooltip');
+      if (tooltipWrapper) tooltipWrapper.classList.add('anim-viewed');
     }
 
     function onClick(): void {
