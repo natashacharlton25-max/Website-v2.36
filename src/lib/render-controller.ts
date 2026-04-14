@@ -182,8 +182,9 @@ function transformTextonly(root: HTMLElement) {
         // Stop at next heading
         if (sibling?.classList.contains('heading-wrap') || sibling?.classList.contains('heading')) break;
       }
-      // Move icons right after heading
+      // Move icons right after heading (skip icons with explainers — step 13 handles)
       icons.forEach(icon => {
+        if (icon.hasAttribute('data-has-explainer')) return;
         heading.after(icon);
       });
     });
@@ -191,22 +192,21 @@ function transformTextonly(root: HTMLElement) {
 
   // 13. Animation explainers — find content-symbol icons with explainers,
   //     move explainer out of containers into document flow, show it.
-  const csIcons = root.querySelectorAll<HTMLElement>('[data-has-explainer][data-semantic-role="content-symbol"]');
-  console.log('[textonly step 13] found', csIcons.length, 'content-symbol icons with explainer');
-  csIcons.forEach(icon => {
-    const wrapper = icon.closest('.anim-explainer-tooltip');
-    const explainer = wrapper
-      ? wrapper.querySelector('[data-anim-seq]') as HTMLElement
-      : null;
-    if (!explainer) return;
+  // Icons with explainers stayed in their tooltip wrappers (step 12 skipped them).
+  // Find the wrapper, extract the explainer, move it after the section heading.
+  root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
+    const icon = wrapper.querySelector('[data-semantic-role="content-symbol"]') as HTMLElement;
+    const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
+    if (!icon || !explainer) return;
 
-    // Move explainer after the heading/grid/container
-    const container = (wrapper || icon).closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content, .card__media, .base-grid');
-    const insertAfter = container
-      ? (container.closest('.heading-wrap') || container)
-      : (wrapper || icon);
+    // Find the section heading to place after
+    const section = wrapper.closest('.section-atom');
+    const heading = section?.querySelector('.heading-wrap, .heading') as HTMLElement;
+    const insertAfter = heading || wrapper;
+
     insertAfter.after(explainer);
     explainer.classList.add('anim-explainer--textonly');
+    wrapper.style.display = 'none';
   });
 
   // 14. Strip inline styles set by gradient/animation systems
