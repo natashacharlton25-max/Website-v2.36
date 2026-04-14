@@ -187,24 +187,20 @@ function transformTextonly(root: HTMLElement) {
     });
   });
 
-  // 13. Animation explainers — textonly shows inline for content-symbol only
-  root.querySelectorAll<HTMLElement>('[data-anim-seq]').forEach(explainer => {
-    const tooltipWrapper = explainer.closest('.anim-explainer-tooltip');
-    const animEl = tooltipWrapper
-      ? tooltipWrapper.querySelector('[data-has-explainer]') as HTMLElement
-      : explainer.previousElementSibling as HTMLElement;
-
+  // 13. Animation explainers + tooltip wrappers — textonly cleanup
+  //     Hide ALL tooltip wrappers (decorative icons already hidden by step 1,
+  //     but their tooltip wrappers survive). Show inline explainer for
+  //     content-symbol only.
+  root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
+    const animEl = wrapper.querySelector('[data-has-explainer]') as HTMLElement;
+    const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
     const role = animEl?.dataset.semanticRole;
 
-    if (role === 'content-symbol') {
-      // Show explainer inline, hide the icon
+    if (role === 'content-symbol' && explainer) {
+      // Move explainer out, show inline
+      wrapper.after(explainer);
       explainer.style.display = 'flex';
-      if (animEl) animEl.style.display = 'none';
-      if (tooltipWrapper) {
-        // Move explainer out of tooltip wrapper
-        tooltipWrapper.after(explainer);
-        tooltipWrapper.style.display = 'none';
-      }
+      wrapper.style.display = 'none';
       // Move out of heading containers
       const container = explainer.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content');
       if (container) {
@@ -212,9 +208,18 @@ function transformTextonly(root: HTMLElement) {
         target.after(explainer);
       }
     } else {
-      // Decorative — hide explainer entirely
+      // Decorative or no explainer — hide everything
+      wrapper.setAttribute('data-textonly-hidden', '');
+      if (explainer) explainer.style.display = 'none';
+    }
+  });
+
+  // Also hide standalone explainers (not in tooltip wrapper) for decorative
+  root.querySelectorAll<HTMLElement>('[data-anim-seq]:not(.anim-explainer-tooltip [data-anim-seq])').forEach(explainer => {
+    const animEl = explainer.previousElementSibling as HTMLElement;
+    const role = animEl?.dataset.semanticRole;
+    if (role !== 'content-symbol') {
       explainer.style.display = 'none';
-      if (tooltipWrapper) tooltipWrapper.style.display = 'none';
     }
   });
 
