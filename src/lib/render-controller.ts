@@ -199,10 +199,9 @@ function transformTextonly(root: HTMLElement) {
     const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
     if (!icon || !explainer) return;
 
-    // Find the section heading to place after
-    const section = wrapper.closest('.section-atom');
-    const heading = section?.querySelector('.heading-wrap, .heading') as HTMLElement;
-    const insertAfter = heading || wrapper;
+    // Place after the immediate container (grid, heading-wrap, etc)
+    const container = wrapper.closest('.base-grid, .heading-wrap, .heading-wrap__media');
+    const insertAfter = container || wrapper;
 
     insertAfter.after(explainer);
     explainer.classList.add('anim-explainer--textonly');
