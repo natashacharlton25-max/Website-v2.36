@@ -267,4 +267,18 @@ if (typeof document !== 'undefined') {
   } else {
     initRenderController();
   }
+
+  // Re-run when anim explainer mode changes (panel toggle after page load)
+  const renderObserver = new MutationObserver(() => {
+    const root = document.getElementById('main-content') || document.getElementById('a11y-content-wrapper');
+    if (!root) return;
+    const animMode = document.documentElement.dataset.animExplainer;
+    if (animMode === 'inline') {
+      transformAnimExplainerInline(root);
+    }
+  });
+  renderObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-anim-explainer']
+  });
 }
