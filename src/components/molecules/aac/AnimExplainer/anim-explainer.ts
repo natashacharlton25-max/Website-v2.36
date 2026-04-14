@@ -179,6 +179,20 @@ function initAnimExplainer(): void {
       || el.parentElement?.querySelector('[data-has-explainer]') as HTMLElement
       || el;
 
+    // Tooltip wrapper (if icon is wrapped in Tooltip atom)
+    const tooltipWrapper = target.closest('.anim-explainer-tooltip') as HTMLElement | null;
+
+    // Mark as viewed on first interaction — border goes neutral
+    function markViewed(): void {
+      if (tooltipWrapper) tooltipWrapper.classList.add('anim-viewed');
+    }
+
+    // Wire viewed state on the Tooltip wrapper's mouseleave
+    if (tooltipWrapper) {
+      tooltipWrapper.addEventListener('mouseleave', markViewed);
+      tooltipWrapper.addEventListener('focusout', markViewed);
+    }
+
     const isPermanent = () => isSubtitleMode() && document.documentElement.dataset.hover === 'none';
 
     // Position the explainer as a fixed tooltip below the target
