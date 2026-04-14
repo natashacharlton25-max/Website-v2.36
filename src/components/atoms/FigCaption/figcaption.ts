@@ -73,7 +73,7 @@ function isAnimActive(): boolean {
 
 function isAnimTooltipMode(): boolean {
   const mode = document.documentElement.dataset.animExplainer;
-  return mode === 'tooltip' || mode === 'subtitle' || mode === 'inline';
+  return mode === 'tooltip' || mode === 'subtitle' || mode === 'overlay' || mode === 'inline';
 }
 
 function isAnimSubtitleMode(): boolean {
@@ -82,6 +82,7 @@ function isAnimSubtitleMode(): boolean {
 
 function isAnimBarMode(): boolean {
   if (isAnimSubtitleMode()) return true;
+  if (document.documentElement.dataset.animExplainer === 'overlay') return true;
   const isMobile = window.innerWidth <= 640;
   return isMobile;
 }
