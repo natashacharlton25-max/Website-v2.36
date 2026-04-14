@@ -195,51 +195,36 @@ function initAnimExplainer(): void {
 
     const isPermanent = () => isSubtitleMode() && document.documentElement.dataset.hover === 'none';
 
-    // Position the explainer as a fixed tooltip below the target
-    function positionTooltip(): void {
-      const rect = target.getBoundingClientRect();
-      el.style.setProperty('--_tooltip-x', `${rect.left + rect.width / 2}px`);
-      el.style.setProperty('--_tooltip-y', `${rect.bottom}px`);
-    }
+    // Tooltip mode — Tooltip atom handles everything (hover, focus,
+    // positioning, mobile bar, scroll dismiss). No JS needed here.
 
+    // Subtitle — bottom bar on hover
     function onEnter(): void {
       if (!isActive()) return;
-      if (isEnlargeMode()) return;
+      if (isEnlargeMode() || isTooltipMode()) return;
       if (isPermanent()) return;
       if (document.documentElement.dataset.hover === 'none') return;
 
-      if (isTooltipMode()) {
-        positionTooltip();
-        el.classList.add('anim-explainer--tooltip-show');
-      } else if (isBarMode()) {
+      if (isBarMode()) {
         const content = getContent(el);
         if (content) showBar(content);
       }
     }
 
     function onLeave(): void {
-      if (isEnlargeMode()) return;
+      if (isEnlargeMode() || isTooltipMode()) return;
       if (isPermanent()) return;
       if (document.documentElement.dataset.hover === 'none') return;
-
-      el.classList.remove('anim-explainer--tooltip-show');
       if (isBarMode()) hideBar();
-
-      // Mark as viewed — border goes neutral
-      const tooltipWrapper = target.closest('.anim-explainer-tooltip');
-      if (tooltipWrapper) tooltipWrapper.classList.add('anim-viewed');
     }
 
+    // Enlarge — click opens modal. Subtitle hover:none — click shows bar.
     function onClick(): void {
       if (!isActive()) return;
+      if (isTooltipMode()) return; // click reserved for animation
       if (isEnlargeMode()) {
         const content = getContent(el);
         if (content) openModal(content);
-        return;
-      }
-      if (isTooltipMode() && document.documentElement.dataset.hover === 'none') {
-        positionTooltip();
-        el.classList.toggle('anim-explainer--tooltip-show');
         return;
       }
       if (isPermanent() || document.documentElement.dataset.hover === 'none') {
@@ -276,10 +261,6 @@ window.addEventListener('scroll', () => {
     sharedBar.style.opacity = '0';
     sharedBar.style.visibility = 'hidden';
   }
-  // Hide any open tooltips
-  document.querySelectorAll('.anim-explainer--tooltip-show').forEach(el => {
-    el.classList.remove('anim-explainer--tooltip-show');
-  });
 }, { passive: true });
 
 // Init
