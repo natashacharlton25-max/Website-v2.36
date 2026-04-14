@@ -174,13 +174,11 @@ function initAnimExplainer(): void {
     if (el.dataset.animExplainerInit) return;
     el.dataset.animExplainerInit = 'true';
 
-    // Find the animated element
-    const target = (el.previousElementSibling as HTMLElement)
-      || el.parentElement?.querySelector('[data-has-explainer]') as HTMLElement
-      || el;
-
-    // Tooltip wrapper (if icon is wrapped in Tooltip atom)
-    const tooltipWrapper = target.closest('.anim-explainer-tooltip') as HTMLElement | null;
+    // Find the animated element — may be in Tooltip wrapper structure
+    const tooltipWrapper = el.closest('.anim-explainer-tooltip') as HTMLElement | null;
+    const target = tooltipWrapper
+      ? tooltipWrapper.querySelector('[data-has-explainer]') as HTMLElement || el
+      : (el.previousElementSibling as HTMLElement) || el;
 
     // Mark as viewed on first interaction — border goes neutral
     function markViewed(): void {
