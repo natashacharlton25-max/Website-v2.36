@@ -189,37 +189,9 @@ function transformTextonly(root: HTMLElement) {
     });
   });
 
-  // 13. Animation explainers in textonly —
-  //     Find ALL elements with data-has-explainer.
-  //     content-symbol: hide icon, show explainer in own container after heading
-  //     decorative: hide explainer too (icon already hidden by step 1)
-  root.querySelectorAll<HTMLElement>('[data-has-explainer]').forEach(animEl => {
-    const role = animEl.dataset.semanticRole;
-    // Find the explainer — sibling or inside tooltip wrapper
-    const tooltipWrapper = animEl.closest('.anim-explainer-tooltip');
-    const explainer = tooltipWrapper
-      ? tooltipWrapper.querySelector('[data-anim-seq]') as HTMLElement
-      : animEl.nextElementSibling?.matches('[data-anim-seq]')
-        ? animEl.nextElementSibling as HTMLElement
-        : null;
-
-    if (role === 'content-symbol' && explainer) {
-      // Move explainer out FIRST, then hide the source
-      const container = (tooltipWrapper || animEl).closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content, .card__media');
-      const insertAfter = container
-        ? (container.closest('.heading-wrap') || container)
-        : (tooltipWrapper || animEl);
-      insertAfter.after(explainer);
-      explainer.style.setProperty('display', 'flex', 'important');
-      // Now hide the static icon + wrapper
-      animEl.style.display = 'none';
-      if (tooltipWrapper) tooltipWrapper.style.display = 'none';
-    } else if (explainer) {
-      // Decorative — hide explainer + wrapper
-      explainer.style.display = 'none';
-      if (tooltipWrapper) tooltipWrapper.style.display = 'none';
-    }
-  });
+  // 13. Animation explainers — handled by CSS in textonly.css
+  //     content-symbol: CSS shows .anim-explainer, hides static icon
+  //     decorative: CSS hides tooltip wrapper
 
   // 14. Strip inline styles set by gradient/animation systems
   root.querySelectorAll<HTMLElement>('[style]').forEach(el => {
