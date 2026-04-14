@@ -187,41 +187,28 @@ function transformTextonly(root: HTMLElement) {
     });
   });
 
-  // 13. Animation explainers + tooltip wrappers — textonly cleanup
-  //     Hide ALL tooltip wrappers (decorative icons already hidden by step 1,
-  //     but their tooltip wrappers survive). Show inline explainer for
-  //     content-symbol only.
-  root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
-    const animEl = wrapper.querySelector('[data-has-explainer]') as HTMLElement;
-    const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
-    const role = animEl?.dataset.semanticRole;
+  // 13. Animation explainers in textonly — if explainer mode is on,
+  //     show inline cards for content-symbol icons only.
+  //     Decorative icons (already hidden) — hide their explainers too.
+  const animMode = document.documentElement.dataset.animExplainer;
+  if (animMode && animMode !== 'off') {
+    root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip').forEach(wrapper => {
+      const animEl = wrapper.querySelector('[data-has-explainer]') as HTMLElement;
+      const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
+      const role = animEl?.dataset.semanticRole;
 
-    if (role === 'content-symbol' && explainer) {
-      // Move explainer out, show inline
-      wrapper.after(explainer);
-      explainer.style.display = 'flex';
-      wrapper.style.display = 'none';
-      // Move out of heading containers
-      const container = explainer.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content');
-      if (container) {
-        const target = container.closest('.heading-wrap') || container;
-        target.after(explainer);
+      if (role === 'content-symbol' && explainer) {
+        // Show explainer inline, hide icon + wrapper
+        wrapper.after(explainer);
+        explainer.style.display = 'flex';
+        if (animEl) animEl.style.display = 'none';
+        wrapper.style.display = 'none';
+      } else {
+        // Decorative — hide wrapper + explainer
+        wrapper.style.display = 'none';
       }
-    } else {
-      // Decorative or no explainer — hide everything
-      wrapper.setAttribute('data-textonly-hidden', '');
-      if (explainer) explainer.style.display = 'none';
-    }
-  });
-
-  // Also hide standalone explainers (not in tooltip wrapper) for decorative
-  root.querySelectorAll<HTMLElement>('[data-anim-seq]:not(.anim-explainer-tooltip [data-anim-seq])').forEach(explainer => {
-    const animEl = explainer.previousElementSibling as HTMLElement;
-    const role = animEl?.dataset.semanticRole;
-    if (role !== 'content-symbol') {
-      explainer.style.display = 'none';
-    }
-  });
+    });
+  }
 
   // 14. Strip inline styles set by gradient/animation systems
   root.querySelectorAll<HTMLElement>('[style]').forEach(el => {
