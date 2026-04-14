@@ -1,15 +1,10 @@
-/* AnimExplainer — AAC animation sequence layout
- *
- * Two-axis system (same pattern as image alt text):
- *   data-anim-seq-mode  = what to show (visual / text / full)
- *   data-anim-explainer = how to show it (off / inline / subtitle / enlarge / tooltip)
- *
- * Own card class (anim-seq-card) — isolated from AacCard.
- * Display behaviour (bar, tooltip, hover gates) via figcaption.ts.
+/* AnimExplainer — component styles only
+ * Gate rules in src/styles/gates/anim-explainer-gate.css
+ * Runtime display in anim-explainer.ts
  */
 
 /* ══════════════════════════════════════════════════════════
-   Base: hidden
+   Base layout — hidden by default, gate CSS shows it
    ══════════════════════════════════════════════════════════ */
 
 .anim-explainer {
@@ -20,79 +15,6 @@
   padding: var(--space-sm);
   margin-top: var(--space-sm);
   flex-wrap: wrap;
-}
-
-/* Inline — only mode that shows cards in place, own line.
-   width:100% forces it below siblings in a flex parent (heading, badge etc).
-   Collapses the animated element so only cards show. */
-[data-anim-explainer="inline"] .anim-explainer {
-  display: flex;
-  width: 100%;
-  flex-basis: 100%;
-}
-
-/* All other modes (subtitle/tooltip/enlarge) — anim-explainer.ts handles display */
-
-/* Tooltip — uses Tooltip atom wrapper. Hidden when explainer is off.
-   Only show tooltip content when explainer tooltip mode is active. */
-.anim-explainer-tooltip .tooltip__content {
-  display: none;
-}
-
-[data-anim-explainer="tooltip"] .anim-explainer-tooltip .tooltip__content {
-  display: block;
-  max-width: min(95vw, 800px);
-  width: max-content;
-  --_tooltip-border: var(--rainbow-4);
-}
-
-/* More gap between icon and tooltip popup */
-[data-anim-explainer="tooltip"] .anim-explainer-tooltip.tooltip--top .tooltip__content {
-  transform: translateX(-50%) translateY(calc(-100% - var(--space-md)));
-}
-
-/* Explainer border — green (rainbow-4) dotted, neutral after viewed */
-[data-anim-explainer="tooltip"] .anim-explainer-tooltip .tooltip__trigger,
-[data-anim-explainer="subtitle"] .anim-explainer-tooltip .tooltip__trigger,
-[data-anim-explainer="enlarge"] .anim-explainer-tooltip .tooltip__trigger {
-  outline: var(--border-width-md) dotted var(--rainbow-4);
-  outline-offset: var(--space-2xs);
-  border-radius: var(--radius-sm);
-  cursor: help;
-}
-
-/* Viewed state — neutral border after explainer has been seen */
-.anim-explainer-tooltip.anim-viewed .tooltip__trigger {
-  outline-color: var(--neutral-mid);
-}
-
-.anim-explainer-tooltip.anim-viewed .tooltip__content {
-  --_tooltip-border: var(--neutral-mid);
-}
-
-/* Hide the default ? indicator on explainer tooltips */
-.anim-explainer-tooltip .tooltip__trigger::after {
-  display: none;
-}
-
-/* Click gives focus which holds tooltip open via :focus-within.
-   Override: only show on :hover, not :focus-within.
-   Keyboard users see it on tab (hover equivalent via focusin). */
-[data-anim-explainer="tooltip"] .anim-explainer-tooltip:focus-within .tooltip__content {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-[data-anim-explainer="tooltip"] .anim-explainer-tooltip:hover .tooltip__content {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-/* Ensure explainer cards inside tooltip display as flex row */
-.anim-explainer-tooltip .tooltip__content .anim-explainer {
-  display: inline-flex;
-  flex-wrap: nowrap;
 }
 
 
@@ -130,17 +52,6 @@
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
-}
-
-/* Action icons — neutral by default (motion indicators don't convey colour) */
-.anim-explainer__pos--next .anim-seq-card__icon {
-  color: var(--text-emphasis);
-}
-
-/* Fill + draw action icons keep colour (they represent colour change) */
-.anim-explainer[aria-label*="colour fills"] .anim-explainer__pos--next .anim-seq-card__icon,
-.anim-explainer[aria-label*="lines draw"] .anim-explainer__pos--next .anim-seq-card__icon {
-  color: inherit;
 }
 
 .anim-seq-card__icon svg {
@@ -186,50 +97,18 @@
 
 
 /* ══════════════════════════════════════════════════════════
-   Axis 1: WHAT to show — content mode
+   Action icon colours
    ══════════════════════════════════════════════════════════ */
 
-/* Visual sequencing: icons + labels only, no text visually.
-   Words card stays in accessibility tree (screen reader reads full sentence). */
-[data-anim-seq-mode="visual"] .anim-seq-card__name {
-  display: none;
-}
-[data-anim-seq-mode="visual"] .anim-explainer__pos--words {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-/* Hide the arrow before the visually-hidden words card */
-[data-anim-seq-mode="visual"] .anim-explainer__pos--words ~ .anim-explainer__arrow {
-  display: none;
+/* Motion indicators — neutral (don't convey colour) */
+.anim-explainer__pos--next .anim-seq-card__icon {
+  color: var(--text-emphasis);
 }
 
-/* Text sequencing: labels + words, no icons */
-[data-anim-seq-mode="text"] .anim-seq-card__icon {
-  display: none;
-}
-
-
-/* ══════════════════════════════════════════════════════════
-   Indicator — ★ on animated elements when explainer is active
-   (not inline — inline already shows cards in place)
-   Same pattern as FigCaption's ? indicator on images.
-   ══════════════════════════════════════════════════════════ */
-
-/* Indicator — border ring on animated elements when explainer is active.
-   Works at any icon size, doesn't cover the icon. */
-[data-anim-explainer="subtitle"] [data-has-explainer],
-[data-anim-explainer="tooltip"] [data-has-explainer],
-[data-anim-explainer="enlarge"] [data-has-explainer] {
-  outline: var(--border-width-md) dotted var(--highlight-link-color);
-  outline-offset: var(--space-2xs);
-  border-radius: var(--radius-sm);
+/* Fill + draw action icons keep colour (represent colour change) */
+.anim-explainer[aria-label*="colour fills"] .anim-explainer__pos--next .anim-seq-card__icon,
+.anim-explainer[aria-label*="lines draw"] .anim-explainer__pos--next .anim-seq-card__icon {
+  color: inherit;
 }
 
 
