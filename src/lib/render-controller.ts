@@ -207,6 +207,32 @@ function transformReduced(_root: HTMLElement) {
   // No DOM transforms needed — the animation layer owns reduced behaviour.
 }
 
+// ─── Anim explainer inline transforms ───────────────────
+
+function transformAnimExplainerInline(root: HTMLElement) {
+  // Move each .anim-explainer out of its parent container
+  // and place it as a sibling after the nearest block ancestor.
+  // This breaks it out of heading-wrap__media, badge, etc.
+  root.querySelectorAll<HTMLElement>('[data-anim-seq]').forEach(explainer => {
+    // Find the animated element (previous sibling)
+    const animEl = explainer.previousElementSibling as HTMLElement;
+
+    // Find the nearest block-level container to break out of
+    // (heading-wrap__media, badge, shape__content, etc.)
+    const container = explainer.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content, .card__media');
+    if (container) {
+      // Move explainer after the container (or its parent wrapper)
+      const target = container.closest('.heading-wrap') || container;
+      target.after(explainer);
+    }
+
+    // Hide the animated element — explainer replaces it
+    if (animEl && (animEl.classList.contains('icon') || animEl.classList.contains('shape'))) {
+      animEl.style.display = 'none';
+    }
+  });
+}
+
 // ─── Mode registry ──────────────────────────────────────
 
 const MODES: Record<string, { transform: (root: HTMLElement) => void }> = {
@@ -219,14 +245,19 @@ const MODES: Record<string, { transform: (root: HTMLElement) => void }> = {
 // ─── Init ───────────────────────────────────────────────
 
 export function initRenderController() {
-  const mode = document.documentElement.dataset.render || 'full';
-  const config = MODES[mode];
-  if (!config) return;
-
-  const root = document.getElementById('main-content');
+  const root = document.getElementById('main-content') || document.getElementById('a11y-content-wrapper');
   if (!root) return;
 
-  config.transform(root);
+  // Render mode transforms
+  const mode = document.documentElement.dataset.render || 'full';
+  const config = MODES[mode];
+  if (config) config.transform(root);
+
+  // Anim explainer inline — independent of render mode
+  const animMode = document.documentElement.dataset.animExplainer;
+  if (animMode === 'inline') {
+    transformAnimExplainerInline(root);
+  }
 }
 
 // Auto-init on DOM ready
