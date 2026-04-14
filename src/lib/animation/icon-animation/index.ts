@@ -17,7 +17,7 @@
  * Loaded once globally by BaseLayout.astro.
  */
 
-import { prefersReducedMotion, getRenderMode, getMotionMode, onThemeChange as registerThemeCallback } from '../animation-config';
+import { prefersReducedMotion, getRenderMode, getMotionMode, isExplainerGated, onThemeChange as registerThemeCallback } from '../animation-config';
 import { initDrawIcon } from './draw';
 import { initMorphIcon } from './morph';
 import { initFillIcon, rainbowScrollElements } from './fill';
@@ -43,9 +43,15 @@ export function initIconAnimations() {
 
   gateAnimatedGradients();
   initMicroAnimations(); // CSS keyframes → GSAP, through registerTrigger
-  document.querySelectorAll<HTMLElement>('[data-icon-draw]').forEach(initDrawIcon);
-  document.querySelectorAll<HTMLElement>('[data-icon-morph]').forEach(initMorphIcon);
-  document.querySelectorAll<HTMLElement>('[data-icon-fill]').forEach(initFillIcon);
+  document.querySelectorAll<HTMLElement>('[data-icon-draw]').forEach(el => {
+    if (!isExplainerGated(el)) initDrawIcon(el);
+  });
+  document.querySelectorAll<HTMLElement>('[data-icon-morph]').forEach(el => {
+    if (!isExplainerGated(el)) initMorphIcon(el);
+  });
+  document.querySelectorAll<HTMLElement>('[data-icon-fill]').forEach(el => {
+    if (!isExplainerGated(el)) initFillIcon(el);
+  });
   document.querySelectorAll<HTMLElement>('[data-icon-grad-anim]').forEach(initAnimatedGradient);
 }
 

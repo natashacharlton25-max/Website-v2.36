@@ -197,6 +197,29 @@ export function applyStaticFallback(el: HTMLElement, type: 'draw' | 'fill' | 'mo
 }
 
 // ================================================================
+// EXPLAINER GATE
+// ================================================================
+
+/**
+ * Check if the animation explainer is in "inline" mode (replaces animation).
+ * In inline mode, animated non-UI elements show static explainer cards instead.
+ * Other modes (subtitle/overlay/tooltip) keep the animation playing.
+ */
+export function isExplainerInline(): boolean {
+  return document.documentElement.dataset.animExplainer === 'inline';
+}
+
+/**
+ * Check if a specific element should skip animation because the explainer
+ * replaces it. True when: inline mode is on AND the element is non-UI
+ * (has an adjacent .anim-explainer sibling).
+ */
+export function isExplainerGated(el: HTMLElement): boolean {
+  if (!isExplainerInline()) return false;
+  return !!el.nextElementSibling?.classList.contains('anim-explainer');
+}
+
+// ================================================================
 // SCROLL CONTAINER
 // ================================================================
 

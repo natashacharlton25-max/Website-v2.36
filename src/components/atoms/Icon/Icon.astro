@@ -10,6 +10,9 @@
  * Morph: GSAP MorphSVGPlugin (hover toggle).
  */
 
+import { AnimExplainer } from '../../molecules/aac/AnimExplainer';
+import phosphorMeta from '../../../../phosphor-meta.json';
+
 import type {
   BrandColour, RainbowColour, ColourTier,
   IconWeight,
@@ -367,49 +370,30 @@ if (gradientAnimate && gradientName && !draw) {
   if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') dataAttrs['data-icon-grad-dur'] = speedMap[gradientAnimateSpeed] || '8';
 }
 
-// ─── Animation sequence explainer data ──────────────────
-const animDesc: Record<string, string> = {
-  spin: 'Rotates', bounce: 'Bounces up and down', shake: 'Shakes quickly',
-  float: 'Floats upward', drift: 'Drifts around',
-  'slide-up': 'Slides up', 'slide-down': 'Slides down',
-  'slide-left': 'Slides left', 'slide-right': 'Slides right', flip: 'Flips over',
-  pulse: 'Pulses bigger', ping: 'Pings outward', pop: 'Pops in', squish: 'Squishes',
-  heartbeat: 'Beats like a heart', 'rubber-band': 'Stretches and snaps',
-  fade: 'Fades in', blink: 'Blinks on and off', flash: 'Flashes',
-  glint: 'Glows brightly', shimmer: 'Shimmers', twinkle: 'Twinkles',
-  wiggle: 'Wiggles side to side', swing: 'Swings from top', rock: 'Rocks left and right',
-  nod: 'Nods up and down', attention: 'Grabs attention', celebrate: 'Spins and grows',
-  enter: 'Enters view', exit: 'Leaves view',
-};
-// Motion indicator icon slugs (Phosphor names)
-const seqMotionSlugs: Record<string, string> = {
-  bounce: 'caret-circle-up-down', float: 'cloud-arrow-up', drift: 'sailboat',
-  spin: 'arrow-clockwise', wiggle: 'tilde', shake: 'approximate-equals',
-  pulse: 'arrows-down-up', heartbeat: 'pulse', swing: 'circle-user',
-  rock: 'hand-waving', nod: 'mouse-scroll', 'slide-up': 'escalator-up',
-  'slide-down': 'escalator-down', 'slide-left': 'arrow-bend-double-up-left',
-  'slide-right': 'arrow-bend-double-up-right', flip: 'git-diff',
-  glint: 'linktree-logo', fade: 'sun-horizon', shimmer: 'spinner',
-  twinkle: 'sketch-logo', celebrate: 'tornado', pop: 'flow-arrow',
-  squish: 'caret-line-down', 'rubber-band': 'arrows-out-simple',
-  blink: 'power', flash: 'siren', enter: 'arrow-square-in',
-  exit: 'arrow-square-out', attention: 'user-focus', ping: 'gps-fix',
-};
+// ─── Animation explainer — resolve everything for the molecule ─────
+const isUiControl = semanticRole === 'ui-control';
+const hasAnimation = !!(morphTo || draw || fillAnimation || animation);
+const showExplainer = hasAnimation && !isUiControl;
+const explainerType = morphTo ? 'morph' : draw ? 'draw' : fillAnimation ? 'fill' : 'micro';
 
-// Animation type slugs
-const seqTypeSlugs: Record<string, string> = {
-  morph: 'swap', draw: 'scribble', fill: 'paint-bucket',
-  grow: 'resize', shrink: 'arrows-in', rotate: 'fan',
-  colour: 'paint-brush', image: 'image', shape: 'shapes',
-  blur: 'star-half', sepia: 'star-half',
-};
+// Resolve short display name from a Phosphor slug
+function resolvePhosphorName(slug: string): string {
+  const ws = ['light', 'regular', 'bold', 'fill', 'duotone', 'flat'];
+  const parts = slug.split('-');
+  while (parts.length > 1 && ws.includes(parts[parts.length - 1])) parts.pop();
+  const baseName = parts.join('-');
+  const entry = phosphorMeta.find((e: any) => e.name === baseName);
+  if (entry) return entry.pascal_name.replace(/([A-Z])/g, ' $1').trim().split(' ')[0].toLowerCase();
+  return parts[0];
+}
 
-// Fetch motion indicator icon at build time
-const motionSlug = animation ? (seqMotionSlugs[animation] || 'arrows-down-up')
-  : (morphTo ? 'swap' : draw ? 'scribble' : fillAnimation ? 'paint-bucket' : '');
-const motionIconContent = motionSlug ? (await fetchIcon(`${motionSlug}-fill`) || await fetchIcon(motionSlug)) : '';
-const seqAnimLabel = animation ? (animDesc[animation] || 'Animates') : '';
-const seqAnimWord = `${name} ${seqAnimLabel.toLowerCase()}`;
+// Display name: always use phosphor name (what it looks like)
+// Label is for screen readers (intention), explainer describes the visual
+const explainerName = resolvePhosphorName(name);
+
+// Morph target name
+const explainerTargetName = morphTo ? resolvePhosphorName(morphTo) : undefined;
+
 
 ---
 
@@ -429,58 +413,15 @@ const seqAnimWord = `${name} ${seqAnimLabel.toLowerCase()}`;
   <Fragment set:html={iconContent || fallbackIcon} />
   {label && semanticRole === 'ui-control' && <span class="icon__label">{label}</span>}
 </span>
-{/* Animation sequence explainer — AAC First/Then pattern for all animated icons.
-    Only for GSAP animations (draw, morph, fill, micro-animations via registerTrigger). */}
-{(morphTo || draw || fillAnimation || animation) && (
-  <div class:list={['icon-anim-seq', resolvedColor && `color--${resolvedColor}`]} aria-label={`Animation: ${label || name} ${seqAnimLabel}`} role="img" data-anim-seq>
-    {/* Card 1: First — static icon */}
-    <div class="icon-anim-seq__card icon-anim-seq__card--first">
-      <span class="icon-anim-seq__symbol"><Fragment set:html={iconContent || fallbackIcon} /></span>
-      <span class="icon-anim-seq__label">First</span>
-    </div>
-    {/* Arrow between cards */}
-    <span class="icon-anim-seq__arrow" aria-hidden="true">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="20" height="20"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69l-58.35-58.34a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg>
-    </span>
-    {morphTo && morphTargetContent ? (
-      <>
-        {/* Morph: Card 2 = target icon */}
-        <div class="icon-anim-seq__card icon-anim-seq__card--then">
-          <span class="icon-anim-seq__symbol"><Fragment set:html={morphTargetContent} /></span>
-          <span class="icon-anim-seq__label">Then</span>
-        </div>
-      </>
-    ) : draw ? (
-      <>
-        {/* Draw: Card 2 = drawn state (full colour) */}
-        <div class="icon-anim-seq__card icon-anim-seq__card--then icon-anim-seq__card--drawn">
-          <span class="icon-anim-seq__symbol"><Fragment set:html={iconContent || fallbackIcon} /></span>
-          <span class="icon-anim-seq__label">Draws</span>
-        </div>
-      </>
-    ) : fillAnimation ? (
-      <>
-        {/* Fill: Card 2 = filled state */}
-        <div class="icon-anim-seq__card icon-anim-seq__card--then icon-anim-seq__card--filled">
-          <span class="icon-anim-seq__symbol"><Fragment set:html={iconContent || fallbackIcon} /></span>
-          <span class="icon-anim-seq__label">Fills</span>
-        </div>
-      </>
-    ) : animation && motionIconContent ? (
-      <>
-        {/* Micro-animation: Card 2 = motion type icon, Card 3 = icon name + motion word */}
-        <div class="icon-anim-seq__card icon-anim-seq__card--next">
-          <span class="icon-anim-seq__symbol"><Fragment set:html={motionIconContent} /></span>
-          <span class="icon-anim-seq__label">Next</span>
-        </div>
-        <span class="icon-anim-seq__arrow" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="20" height="20"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69l-58.35-58.34a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg>
-        </span>
-        <div class="icon-anim-seq__card icon-anim-seq__card--then">
-          <span class="icon-anim-seq__word">{seqAnimWord}</span>
-          <span class="icon-anim-seq__label">Then</span>
-        </div>
-      </>
-    ) : null}
-  </div>
+{/* Animation explainer — AAC sequence cards (molecule handles layout + API fetches) */}
+{showExplainer && (
+  <AnimExplainer
+    type={explainerType as any}
+    sourceSvg={iconContent || fallbackIcon}
+    targetSvg={morphTargetContent || undefined}
+    displayName={explainerName}
+    targetName={explainerTargetName}
+    animation={animation}
+    color={resolvedColor}
+  />
 )}

@@ -45,8 +45,12 @@ import { Text } from '../../../atoms/Text';
 
 interface Props {
   word: string;
+  /** Small uppercase label above the symbol — sequence position ("First", "Next", "Then") */
+  label?: string;
   bciIndex?: number;
   symbolSrc?: string;
+  /** Inline SVG content — used by AnimExplainer when the symbol is an icon SVG, not an image URL */
+  svgContent?: string;
   /** @deprecated Use bciIndex instead */
   symbolId?: number;
   coreTier?: 'green' | 'yellow' | 'orange' | null;
@@ -57,8 +61,10 @@ interface Props {
 
 const {
   word,
+  label,
   bciIndex,
   symbolSrc,
+  svgContent,
   symbolId,
   coreTier = null,
   isIndicator = false,
@@ -69,7 +75,7 @@ const {
 // bciIndex is primary, symbolId is deprecated alias
 const resolvedBci = bciIndex ?? symbolId ?? null;
 
-const isTextOnly = !symbolSrc;
+const isTextOnly = !symbolSrc && !svgContent;
 
 const tierValue = isIndicator ? undefined : (coreTier ?? 'fringe');
 
@@ -91,6 +97,9 @@ const classes = [
   {...(tierValue && { 'data-core-tier': tierValue })}
   {...(resolvedBci != null && { 'data-bci': String(resolvedBci) })}
 >
+  {label && (
+    <Text as="span" class="aac-card__label" size="sm" flush contentText={label} />
+  )}
   {symbolSrc && (
     <Image
       src={symbolSrc}
@@ -103,7 +112,11 @@ const classes = [
       class="aac-card__pictogram"
     />
   )}
-  <Text as="span" class="aac-card__word" size="sm" flush>
-    {word}
-  </Text>
+  {!symbolSrc && svgContent && (
+    <span class="aac-card__pictogram aac-card__pictogram--svg" aria-hidden="true"
+      style={`width:${px}px;height:${px}px;`}>
+      <Fragment set:html={svgContent} />
+    </span>
+  )}
+  <Text as="span" class="aac-card__word" size="sm" flush contentText={word} />
 </span>

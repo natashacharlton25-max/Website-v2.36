@@ -1,0 +1,75 @@
+/* AnimExplainer — AAC animation sequence layout
+ * Cards are AacCard components — this file handles the
+ * sequence layout (flex row + arrows) and display mode gating.
+ * Gated by data-anim-explainer on <html>.
+ */
+
+/* ── Base: hidden ─────────────────────────────────────── */
+
+.anim-explainer {
+  display: none;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  margin-top: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* ── Inline — hide animation, show sequence ────────── */
+
+[data-anim-explainer="inline"] .anim-explainer {
+  display: inline-flex;
+}
+
+/* ── Subtitle — both animation and sequence visible ── */
+
+[data-anim-explainer="subtitle"] .anim-explainer {
+  display: inline-flex;
+}
+
+/* ── Overlay — show on hover/focus, positioned below ─ */
+
+[data-anim-explainer="overlay"] :is(.icon, .shape, .lottie-icon):hover + .anim-explainer,
+[data-anim-explainer="overlay"] :is(.icon, .shape, .lottie-icon):focus-within + .anim-explainer {
+  display: inline-flex;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  background: var(--page-bg);
+  border: var(--border-width) solid var(--neutral-mid);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Tooltip — smaller, centered below ─────────────── */
+
+[data-anim-explainer="tooltip"] :is(.icon, .shape, .lottie-icon):hover + .anim-explainer,
+[data-anim-explainer="tooltip"] :is(.icon, .shape, .lottie-icon):focus-within + .anim-explainer {
+  display: inline-flex;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: var(--page-bg);
+  border: var(--border-width) solid var(--neutral-mid);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-xs);
+}
+
+/* ── Arrow ─────────────────────────────────────────── */
+
+.anim-explainer__arrow {
+  color: var(--text-emphasis);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.anim-explainer__arrow svg {
+  width: 1.5em;
+  height: 1.5em;
+}

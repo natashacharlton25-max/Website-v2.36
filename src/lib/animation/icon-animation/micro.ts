@@ -8,7 +8,7 @@
  */
 
 import { gsap } from 'gsap';
-import { registerTrigger, getAnimationConfig } from '../animation-config';
+import { registerTrigger, getAnimationConfig, isExplainerGated } from '../animation-config';
 
 // ─── Animation builders ─────────────────────────────────
 // Each returns a function that creates and returns a timeline.
@@ -156,6 +156,9 @@ export function initMicroAnimations() {
     const animName = animClass.replace('anim--', '');
     const builder = ANIMATIONS[animName];
     if (!builder) return;
+
+    // Explainer inline mode: skip animation, cards replace it
+    if (isExplainerGated(el)) return;
 
     const trigger = el.dataset.animTrigger || 'hover';
     const config = getAnimationConfig();

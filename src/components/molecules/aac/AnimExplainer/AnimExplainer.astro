@@ -1,0 +1,110 @@
+---
+/**
+ * AnimExplainer — AAC animation sequence cards
+ *
+ * Composes AacCard to explain what an animation does, using
+ * the AAC First/Then pattern with the same card system as
+ * content AAC pictograms.
+ *
+ * Visuals and words are separate layers:
+ *   - First/Next/Then cards are aria-hidden (visual only)
+ *   - Words card is the screen-reader announcement
+ *   - Learners see both together
+ *
+ * Card patterns (all use AacCard with svgContent):
+ *   Morph:  First (icon A) → Next (swap) → Then (icon B) → Words
+ *   Draw:   First (ghost)  → Next (scribble) → Words
+ *   Fill:   First (ghost)  → Next (paint bucket) → Words
+ *   Micro:  First (static) → Next (motion icon) → Words
+ *
+ * Display is gated by data-anim-explainer on <html>, using the
+ * same figcaption infrastructure as image alt text.
+ */
+
+import { AacCard } from '../AacCard';
+import { animWords, typeWords, getActionSvg } from './anim-explainer-data';
+
+type AnimType = 'morph' | 'draw' | 'fill' | 'micro';
+
+interface Props {
+  /** What kind of animation */
+  type: AnimType;
+  /** SVG content of the source element (icon/shape in its first state) */
+  sourceSvg: string;
+  /** SVG content of the target element (morph target — only for type=morph) */
+  targetSvg?: string;
+  /** Display name for the source element — resolved by parent atom */
+  displayName: string;
+  /** Display name for the morph target — resolved by parent atom */
+  targetName?: string;
+  /** Micro-animation key from shared-enums Animation type */
+  animation?: string;
+  /** Colour class to inherit (e.g. "primary", "rainbow-1") */
+  color?: string | null;
+  class?: string;
+}
+
+const {
+  type,
+  sourceSvg,
+  targetSvg,
+  displayName,
+  targetName,
+  animation,
+  color,
+  class: className,
+} = Astro.props;
+
+// ── Resolve words text ───────────────────────────────────
+const resolvedTargetName = targetName || displayName;
+const actionPhrase = type === 'micro'
+  ? (animation ? (animWords[animation] || 'animates') : 'animates')
+  : type === 'morph'
+    ? `changes to ${resolvedTargetName}`
+    : (typeWords[type] || 'animates');
+const words = `${displayName} ${actionPhrase}`;
+
+const ariaLabel = `Animation: ${words}`;
+const hasFourCards = type === 'morph' && !!targetSvg;
+
+// Arrow SVG — Phosphor arrow-right bold
+const arrowSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="24" height="24"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69l-58.35-58.34a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg>';
+---
+
+<span class:list={['anim-explainer', color && `color--${color}`, className]}
+  role="img" aria-label={ariaLabel} data-anim-seq>
+
+  {/* ── First: source element ─── */}
+  <span aria-hidden="true">
+    <AacCard label="First" word={displayName} svgContent={sourceSvg} coreTier="green" size="lg" />
+  </span>
+
+  <span class="anim-explainer__arrow" aria-hidden="true">
+    <Fragment set:html={arrowSvg} />
+  </span>
+
+  {/* ── Next: action icon ─── */}
+  <span aria-hidden="true">
+    <AacCard label="Next" word={type === 'morph' ? 'changes to' : (animation || type)} svgContent={getActionSvg(type, animation)} coreTier="yellow" size="lg" />
+  </span>
+
+  {hasFourCards && (
+    <>
+      <span class="anim-explainer__arrow" aria-hidden="true">
+        <Fragment set:html={arrowSvg} />
+      </span>
+
+      {/* ── Then: morph target ─── */}
+      <span aria-hidden="true">
+        <AacCard label="Then" word={resolvedTargetName} svgContent={targetSvg} coreTier="orange" size="lg" />
+      </span>
+    </>
+  )}
+
+  <span class="anim-explainer__arrow" aria-hidden="true">
+    <Fragment set:html={arrowSvg} />
+  </span>
+
+  {/* ── Words: text description (screen reader + learners) ─── */}
+  <AacCard word={words} coreTier={hasFourCards ? null : 'orange'} size="lg" />
+</span>
