@@ -48,7 +48,7 @@ export const animWords: Record<string, string> = {
 
 export const typeWords: Record<string, string> = {
   draw: 'lines draw',
-  fill: 'colour grows',
+  fill: 'grows',
   morph: 'changes to',
   colour: 'fills with colour',
 };
