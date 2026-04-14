@@ -189,9 +189,19 @@ function transformTextonly(root: HTMLElement) {
     });
   });
 
-  // 13. Animation explainers — handled by CSS in textonly.css
-  //     content-symbol: CSS shows .anim-explainer, hides static icon
-  //     decorative: CSS hides tooltip wrapper
+  // 13. Animation explainers — move content-symbol explainers out of
+  //     tooltip/heading containers so they render in document flow.
+  //     CSS (anim-explainer-gate.css) handles show/hide.
+  root.querySelectorAll<HTMLElement>('.anim-explainer-tooltip:has([data-semantic-role="content-symbol"])').forEach(wrapper => {
+    const explainer = wrapper.querySelector('[data-anim-seq]') as HTMLElement;
+    if (!explainer) return;
+    // Move explainer after the heading or container
+    const container = wrapper.closest('.heading-wrap__media, .heading-wrap, .badge, .shape__content, .card__media, .base-grid');
+    const insertAfter = container
+      ? (container.closest('.heading-wrap') || container)
+      : wrapper;
+    insertAfter.after(explainer);
+  });
 
   // 14. Strip inline styles set by gradient/animation systems
   root.querySelectorAll<HTMLElement>('[style]').forEach(el => {
