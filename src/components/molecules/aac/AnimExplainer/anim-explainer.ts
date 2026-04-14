@@ -181,14 +181,21 @@ function initAnimExplainer(): void {
 
     const isPermanent = () => isSubtitleMode() && document.documentElement.dataset.hover === 'none';
 
+    // Position the explainer as a fixed tooltip below the target
+    function positionTooltip(): void {
+      const rect = target.getBoundingClientRect();
+      el.style.setProperty('--_tooltip-x', `${rect.left + rect.width / 2}px`);
+      el.style.setProperty('--_tooltip-y', `${rect.bottom}px`);
+    }
+
     function onEnter(): void {
       if (!isActive()) return;
-      if (isEnlargeMode()) return; // enlarge uses click
+      if (isEnlargeMode()) return;
       if (isPermanent()) return;
       if (document.documentElement.dataset.hover === 'none') return;
 
       if (isTooltipMode()) {
-        // Show the explainer as a tooltip popup
+        positionTooltip();
         el.classList.add('anim-explainer--tooltip-show');
       } else if (isBarMode()) {
         const content = getContent(el);
@@ -201,9 +208,7 @@ function initAnimExplainer(): void {
       if (isPermanent()) return;
       if (document.documentElement.dataset.hover === 'none') return;
 
-      if (isTooltipMode()) {
-        el.classList.remove('anim-explainer--tooltip-show');
-      }
+      el.classList.remove('anim-explainer--tooltip-show');
       if (isBarMode()) hideBar();
     }
 
@@ -215,7 +220,7 @@ function initAnimExplainer(): void {
         return;
       }
       if (isTooltipMode() && document.documentElement.dataset.hover === 'none') {
-        // hover:none — click toggles tooltip
+        positionTooltip();
         el.classList.toggle('anim-explainer--tooltip-show');
         return;
       }

@@ -33,14 +33,17 @@
 
 /* All other modes (subtitle/tooltip/enlarge) — anim-explainer.ts handles display */
 
-/* Tooltip — popup near the element, shown by JS adding .anim-explainer--tooltip-show */
+/* Tooltip — fixed popup positioned by JS via --_tooltip-x/y vars.
+   Same positioning technique as Tooltip atom. */
 .anim-explainer--tooltip-show {
   display: flex;
-  position: absolute;
-  top: 100%;
-  left: 0;
+  position: fixed;
+  left: var(--_tooltip-x, 0);
+  top: var(--_tooltip-y, 0);
+  transform: translateX(-50%);
   z-index: var(--z-tooltip, 9000);
   margin-top: var(--space-xs);
+  max-width: min(95vw, 600px);
   background: var(--page-bg-raised);
   border: var(--border-width-md) solid var(--highlight-link-color);
   border-radius: var(--radius-md);
