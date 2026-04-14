@@ -89,7 +89,9 @@ function transformTextonly(root: HTMLElement) {
   });
 
   // Elements without semantic role that are purely decorative
+  // Skip heading-wrap__media if it contains an anim-explainer-tooltip (step 13 handles it)
   root.querySelectorAll('.heading-wrap__divider, .heading-wrap__media, .underline, .text-highlight__bar, .heading-wrap__subtitle').forEach(el => {
+    if (el.classList.contains('heading-wrap__media') && el.querySelector('.anim-explainer-tooltip')) return;
     el.setAttribute('data-textonly-hidden', '');
   });
 
