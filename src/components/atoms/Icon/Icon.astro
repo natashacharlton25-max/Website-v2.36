@@ -378,7 +378,37 @@ if (gradientAnimate && gradientName && !draw) {
 const isUiControl = semanticRole === 'ui-control';
 const hasAnimation = !!(morphTo || draw || fillAnimation || animation);
 const showExplainer = hasAnimation && !isUiControl;
-const explainerType = morphTo ? 'morph' : draw ? 'draw' : fillAnimation ? 'fill' : 'micro';
+
+// Resolve type — combined draw+fill when both are set
+const hasDrawAndFill = !!draw && !!fillAnimation;
+const explainerType: 'morph' | 'draw' | 'fill' | 'micro' | 'draw+fill' =
+  morphTo ? 'morph'
+  : hasDrawAndFill ? 'draw+fill'
+  : draw ? 'draw'
+  : fillAnimation ? 'fill'
+  : 'micro';
+
+// Resolve variant — maps to recipe lookup in anim-explainer-data.ts
+function resolveVariant(): string | undefined {
+  if (explainerType === 'morph') return morphTrigger || 'hover';
+  if (explainerType === 'micro') return animation;
+  if (explainerType === 'draw+fill') return 'after';
+  if (explainerType === 'fill') {
+    // fillMode + modifiers
+    if (fillOutline && fillDrawLaser) return 'outline+laser';
+    if (fillOutline) return 'outline';
+    return fillMode || 'once';
+  }
+  if (explainerType === 'draw') {
+    // drawVariant + modifiers
+    if (drawLaser) return 'draw+laser';
+    if (drawGhost) return 'draw+ghost';
+    const dv = typeof draw === 'string' ? draw : 'draw';
+    return dv;
+  }
+  return undefined;
+}
+const explainerVariant = resolveVariant();
 
 // Resolve short display name from a Phosphor slug
 // wordCount: how many PascalCase words to use (default 1)
@@ -432,6 +462,7 @@ if (morphTo) {
     <AnimExplainer
       slot="content"
       type={explainerType as any}
+      variant={explainerVariant}
       sourceSvg={iconContent || fallbackIcon}
       targetSvg={morphTargetContent || undefined}
       displayName={explainerName}
