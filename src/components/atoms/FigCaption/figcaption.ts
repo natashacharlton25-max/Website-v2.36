@@ -361,12 +361,11 @@ function initAnimCaptions(): void {
 
     function onEnter(): void {
       if (!isAnimTooltipMode()) return;
+      if (isAnimOverlayMode()) return; // enlarge uses click, not hover
       if (isPermanent()) return;
       if (document.documentElement.dataset.hover === 'none') return;
       const content = getAnimContent(el);
-      if (isAnimOverlayMode()) {
-        if (content) showAnimOverlay(content);
-      } else if (isAnimBarMode()) {
+      if (isAnimBarMode()) {
         if (content) showBar(content);
       } else if (caption) {
         caption.innerHTML = content;
@@ -374,19 +373,22 @@ function initAnimCaptions(): void {
     }
 
     function onLeave(): void {
+      if (isAnimOverlayMode()) return;
       if (isPermanent()) return;
       if (document.documentElement.dataset.hover === 'none') return;
       if (isAnimBarMode()) hideBar();
-      // Overlay stays open until Escape/close — no hide on leave
     }
 
     function onClick(): void {
       if (!isAnimTooltipMode()) return;
       const content = getAnimContent(el);
+      if (isAnimOverlayMode()) {
+        // Enlarge: click opens modal
+        if (content) showAnimOverlay(content);
+        return;
+      }
       if (isPermanent() || document.documentElement.dataset.hover === 'none') {
-        if (isAnimOverlayMode()) {
-          if (content) showAnimOverlay(content);
-        } else if (isAnimBarMode()) {
+        if (isAnimBarMode()) {
           if (content) showBar(content, true);
         }
       }
