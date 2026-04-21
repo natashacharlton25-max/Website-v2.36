@@ -215,12 +215,15 @@ const TRANSFORM_ALLOWED_TOKENS = (() => {
 
 function transformAllHexes(css, transform) {
   // Match a token declaration: `--token-name: #rrggbb;`
+  // transform receives (l, c, h, tokenName) — tokenName lets callers scope
+  // behaviour per family (e.g. don't nudge text-* since text is a low-chroma
+  // grey ladder where +0.15 L + chroma bump collapses positions visually).
   return css.replace(/(--[\w-]+)(\s*:\s*)(#[0-9a-fA-F]{6})\b/g, (match, tokenName, sep, _hex) => {
     const name = tokenName.slice(2); // strip leading --
     if (!TRANSFORM_ALLOWED_TOKENS.has(name)) return match;
     try {
       const [l, c, h] = chroma(_hex).oklch();
-      const [newL, newC, newH] = transform(l || 0, c || 0, h || 0);
+      const [newL, newC, newH] = transform(l || 0, c || 0, h || 0, name);
       const safeL = Math.max(0.05, Math.min(0.97, newL));
       const safeC = Math.max(0, newC);
       return tokenName + sep + chroma.oklch(safeL, safeC, newH).hex();
@@ -259,6 +262,7 @@ function variantSalt(variantName) {
 
 function familyAwareDisambiguate(css, variantName) {
   const isCalm = variantName.includes('calm'); // matches 'calm' AND 'cloudcalm' AND 'softcalm'
+  const isVivid = variantName.startsWith('vivid');
   const isHC = variantName.includes('-hc');
   const isMono = variantName.includes('-mono-') || variantName.startsWith('mono-');
   const isDark = variantName.includes('-dark');
@@ -278,10 +282,26 @@ function familyAwareDisambiguate(css, variantName) {
       return [l, c, h]; // scales untouched — avoid per-position hue drift
     });
   }
-  // HC: push harder — ±0.15 (was ±0.10), chroma +0.05 (was +0.04)
+  // VIVID: generator already produces HC-aware, CVD-aware L/C values per
+  // position. The validator should NOT apply a bulk ±0.15 L nudge on top —
+  // it crushes primary/secondary/neutral emphasis into near-black and
+  // collapses adjacent positions visually. Salt-only for variant uniqueness.
+  if (isVivid) {
+    return transformAllHexes(css, (l, c, h, name) => {
+      if (name.startsWith('text-') || name.startsWith('page-bg')) return [l, c, h];
+      return [l + saltL, c, h + saltH];
+    });
+  }
+  // HC: push harder — ±0.15 (was ±0.10), chroma +0.05 (was +0.04).
+  // Skip text-* (already a dense L ladder where a uniform L nudge collapses
+  // adjacent positions visually at high chroma post-CVD) and page-bg-* (the
+  // generator designed the surface depth offsets; uniform nudge breaks them).
   if (isHC) {
     const dL = isDark ? +0.15 : -0.15;
-    return transformAllHexes(css, (l, c, h) => [l + dL + saltL, c + (c > 0.02 ? 0.05 : 0), h + saltH]);
+    return transformAllHexes(css, (l, c, h, name) => {
+      if (name.startsWith('text-') || name.startsWith('page-bg')) return [l, c, h];
+      return [l + dL + saltL, c + (c > 0.02 ? 0.05 : 0), h + saltH];
+    });
   }
   // MONO: ±0.15 bg shift (was ±0.10)
   if (isMono) {
@@ -311,6 +331,65 @@ function familyAwareDisambiguate(css, variantName) {
 // so they don't overwrite each other.
 function applyFamilyRotations(css, rotations) {
   if (!rotations || rotations.length === 0) return css;
+
+  // Contrast handling for a pair A↔B:
+  //
+  // Case 1 — partner's contrast == its emphasis (derived default):
+  //   The "differs" side (e.g. text with var(--color-Black)) keeps its
+  //   deliberate anchor in its ORIGINAL slot. The destination slot gets
+  //   contrast = emphasis-after-rotation (since the differs-side brought
+  //   a SLOT-bound value that shouldn't travel, but the slot still needs
+  //   a contrast, so it inherits from the emphasis that just arrived).
+  //
+  // Case 2 — both sides differ (both accent overrides / anchors):
+  //   Both contrasts stay pinned in their original slots. Nothing travels.
+  //
+  // Case 3 — neither side differs (both are derived defaults):
+  //   Normal rotation. Contrasts follow their families.
+  const families = ['primary', 'secondary', 'neutral', 'text'];
+  const snapshot = {};
+  for (const f of families) {
+    const emphMatch = css.match(new RegExp(`--${f}-emphasis\\s*:\\s*([^;]+);`));
+    const contMatch = css.match(new RegExp(`--${f}-contrast\\s*:\\s*([^;]+);`));
+    if (!emphMatch || !contMatch) continue;
+    const emph = emphMatch[1].trim();
+    const cont = contMatch[1].trim();
+    snapshot[f] = { emphasis: emph, contrast: cont, differs: emph.toLowerCase() !== cont.toLowerCase() };
+  }
+
+  // Rotations come as [{from:A, to:B}, {from:B, to:A}] for a pair swap.
+  const pairs = [];
+  for (let i = 0; i < rotations.length; i += 2) {
+    const a = rotations[i];
+    const b = rotations[i + 1];
+    if (b && a.from === b.to && a.to === b.from) {
+      pairs.push([a.from, a.to]);
+    }
+  }
+
+  // Decide per slot what contrast to pin AFTER rotation.
+  //   - slotFallsToEmphasis: set contrast to emphasis-at-that-slot after swap
+  //   - slotKeepsOriginal:   restore original contrast value
+  const postRotation = {}; // slotName → { mode: 'emphasis' | 'original', original? }
+  for (const [A, B] of pairs) {
+    const sA = snapshot[A];
+    const sB = snapshot[B];
+    if (!sA || !sB) continue;
+    if (sA.differs && sB.differs) {
+      // Case 2 — both pin to original
+      postRotation[A] = { mode: 'original', original: sA.contrast };
+      postRotation[B] = { mode: 'original', original: sB.contrast };
+    } else if (sA.differs || sB.differs) {
+      // Case 1 — the differs side stays in its original slot;
+      //          the partner slot falls to its new emphasis
+      const differsSide = sA.differs ? A : B;
+      const partnerSide = sA.differs ? B : A;
+      postRotation[differsSide] = { mode: 'original', original: snapshot[differsSide].contrast };
+      postRotation[partnerSide] = { mode: 'emphasis' };
+    }
+    // Case 3 — no entry, normal rotation applies
+  }
+
   let out = css;
   // First pass: rename sources to temp prefixes
   const temps = rotations.map((r, i) => ({ ...r, temp: `__swap${i}__` }));
@@ -323,6 +402,26 @@ function applyFamilyRotations(css, rotations) {
     const re = new RegExp(`--${temp}-`, 'g');
     out = out.replace(re, `--${to}-`);
   }
+
+  // Post-rotation contrast fixups
+  for (const [slot, rule] of Object.entries(postRotation)) {
+    if (rule.mode === 'original') {
+      out = out.replace(
+        new RegExp(`(--${slot}-contrast\\s*:\\s*)([^;]+)(;)`),
+        `$1${rule.original}$3`
+      );
+    } else if (rule.mode === 'emphasis') {
+      const emphMatch = out.match(new RegExp(`--${slot}-emphasis\\s*:\\s*([^;]+);`));
+      if (emphMatch) {
+        const emph = emphMatch[1].trim();
+        out = out.replace(
+          new RegExp(`(--${slot}-contrast\\s*:\\s*)([^;]+)(;)`),
+          `$1${emph}$3`
+        );
+      }
+    }
+  }
+
   return out;
 }
 
@@ -509,6 +608,10 @@ function applyRoleSwap(css, canonicalCss = null, _variantName = '') {
   }
 
   // Readability check for a candidate — must keep text readable vs bg.
+  // Also enforces cross-family distinctness: each family's base must be
+  // perceptually distinct from every other family's base AND from bg,
+  // otherwise primary/text/neutral collapse onto the same hue and the
+  // preview reads as "two pink columns + a cyan column" nonsense.
   function isReadable(rotations, newBgHue) {
     // Apply rotations and bg retint, check contrast.
     const newMap = { bg };
@@ -527,6 +630,16 @@ function applyRoleSwap(css, canonicalCss = null, _variantName = '') {
     }
     if (newMap['text-emphasis'] && contrastRatio(newMap['text-emphasis'], newMap.bg) < 4.5) return false;
     if (newMap['primary-base']  && contrastRatio(newMap['primary-base'],  newMap.bg) < 3)   return false;
+    // Cross-family distinctness — all 5 roles must be perceptibly different
+    const roles = [newMap.bg, newMap['primary-base'], newMap['secondary-base'], newMap['neutral-base'], newMap['text-emphasis']];
+    for (let i = 0; i < roles.length; i++) {
+      for (let j = i + 1; j < roles.length; j++) {
+        if (!roles[i] || !roles[j]) continue;
+        try {
+          if (chroma.deltaE(roles[i], roles[j]) < DISTINCTNESS_DE) return false;
+        } catch (e) { /* skip */ }
+      }
+    }
     return true;
   }
 

@@ -1,0 +1,518 @@
+---
+/**
+ * Dev theme browser — personal tool for auditing all generated themes.
+ *
+ * Lists every theme from theme-names.json as a compact card (4-swatch preview).
+ * Click a card to expand inline: full token set with ΔE + WCAG + APCA Lc badges
+ * and pass/fail borders (logic ported from _reference/calm-preview.astro).
+ * "Apply to site" button sets data-theme on <html> to preview the theme live.
+ *
+ * Dev-only. No atom compliance, no textonly/assistive renders, no schema.
+ * If/when we want this production-grade, rebuild using the Swatch atom.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import themeNames from '../../styles/tokens/theme-names.json';
+
+// Build list of all theme entries sorted by category then name
+const themes = Object.entries(themeNames).map(([key, meta]: [string, any]) => ({
+  key,
+  title: typeof meta.title === 'object' ? meta.title.pro || meta.title.fun || key : (meta.title || key),
+  sample: typeof meta.sample === 'object' ? meta.sample.pro || meta.sample.fun || '' : (meta.sample || ''),
+  category: meta.category || 'unknown',
+  engine: meta.engine || '',
+  luminance: meta.luminance || '',
+  hc: !!meta.hc,
+  cvd: meta.cvd || null,
+  cvdRisk: meta.cvdRisk || null, // { score, severity, slots } — persisted by generator
+  safeFor: meta.safeFor || [],
+}));
+
+themes.sort((a, b) => {
+  if (a.category !== b.category) return a.category.localeCompare(b.category);
+  return a.key.localeCompare(b.key);
+});
+
+const categories = [...new Set(themes.map(t => t.category))].sort();
+---
+
+<BaseLayout title="Dev — Theme Browser" hideFooter>
+  <div class="dt-wrap">
+    <header class="dt-head">
+      <h1>Dev Theme Browser</h1>
+      <p>All {themes.length} generated themes. Click a card to expand; hit "Apply" to preview live.</p>
+      <div class="dt-filters">
+        <label class="dt-filter"><input type="checkbox" class="dt-cat-toggle" data-cat="all" checked /> All</label>
+        {categories.map(c => (
+          <label class="dt-filter"><input type="checkbox" class="dt-cat-toggle" data-cat={c} checked /> {c}</label>
+        ))}
+        <button class="dt-reset" id="dt-reset">Reset applied theme</button>
+      </div>
+    </header>
+
+    <section class="dt-grid" id="dt-grid">
+      {themes.map(t => (
+        <article class="dt-card" data-theme={t.key} data-category={t.category}>
+          <div class="dt-card-preview" data-theme-preview={t.key}>
+            <div class="dt-swatch-mini" data-token="primary-base"></div>
+            <div class="dt-swatch-mini" data-token="secondary-base"></div>
+            <div class="dt-swatch-mini" data-token="neutral-base"></div>
+            <div class="dt-swatch-mini" data-token="page-bg"></div>
+          </div>
+          <div class="dt-card-meta">
+            <h3>{t.title}</h3>
+            <code>{t.key}</code>
+            <p class="dt-card-sample">{t.sample}</p>
+            <div class="dt-card-tags">
+              <span class="dt-tag">{t.category}</span>
+              {t.engine && <span class="dt-tag">{t.engine}</span>}
+              {t.luminance && <span class="dt-tag">{t.luminance}</span>}
+              {t.hc && <span class="dt-tag dt-tag-hc">HC</span>}
+              {t.cvd && <span class={`dt-tag dt-tag-${t.cvd}`}>{t.cvd}</span>}
+              {t.cvdRisk && t.cvdRisk.severity !== 'safe' && (
+                <span
+                  class={`dt-tag dt-cvd-risk dt-cvd-risk-${t.cvdRisk.severity}`}
+                  title={`CVD risk score ${t.cvdRisk.score.toFixed(2)} — slots: ${t.cvdRisk.slots.join(', ')}`}
+                >CVD {t.cvdRisk.severity} {t.cvdRisk.score.toFixed(2)}</span>
+              )}
+              {t.cvdRisk && t.cvdRisk.severity === 'safe' && t.cvd && (
+                <span class="dt-tag dt-cvd-risk dt-cvd-risk-safe" title="CVD pre-shift applied or no risk detected">CVD ✓</span>
+              )}
+            </div>
+          </div>
+          <div class="dt-card-actions">
+            <button class="dt-expand" data-action="expand" data-theme={t.key}>Expand</button>
+            <button class="dt-apply" data-action="apply" data-theme={t.key}>Apply</button>
+          </div>
+          <div class="dt-card-expand" data-expand-host={t.key} hidden></div>
+        </article>
+      ))}
+    </section>
+  </div>
+
+  <script>
+    // @ts-nocheck
+    import chroma from 'chroma-js';
+    import { APCAcontrast, sRGBtoY } from 'apca-w3';
+
+    // ─── Token list we render in the expanded view ──────────────────────────
+    // Mirrors the token shape emitted by writer.js. Status tokens too.
+    const SCALE_FAMILIES = ['primary', 'secondary', 'neutral', 'text'];
+    const SCALE_STEPS = ['tint', 'mid', 'base', 'emphasis', 'contrast'];
+    const BG_TOKENS = ['page-bg', 'page-bg-raised', 'page-bg-sunken', 'page-bg-overlay'];
+    const STATUS_TOKENS = ['color-Success', 'color-Warning', 'color-Error', 'color-Info'];
+
+    // ─── Theme CSS parsing: fetch the theme file and extract tokens ─────────
+    // Themes live at /src/styles/themes/a11y/{variant}/{variant}.css but Astro
+    // serves them via the build pipeline. We load each theme by fetching its
+    // CSS as text and pulling token values via regex.
+    const themeCssCache = new Map();
+
+    async function loadThemeCss(key) {
+      if (themeCssCache.has(key)) return themeCssCache.get(key);
+      // Themes are imported by the dev build — we can read them from the
+      // already-loaded :root.--token values if the theme is applied, OR
+      // fetch the raw CSS. Fetch path: /@fs/.../a11y/{folder}/{key}.css
+      // Simpler: compute the path and fetch relative.
+      const folder = key.split('-')[0]; // "vivid-dark-protan" → "vivid"
+      const paths = [
+        `/src/styles/themes/a11y/${folder}/${key}.css`,
+        `/src/styles/themes/a11y/${key}/${key}.css`,
+      ];
+      for (const p of paths) {
+        try {
+          const res = await fetch(p);
+          if (res.ok) {
+            const text = await res.text();
+            const tokens = parseTokens(text);
+            themeCssCache.set(key, tokens);
+            return tokens;
+          }
+        } catch (e) { /* try next */ }
+      }
+      console.warn('Could not load theme CSS for', key);
+      return {};
+    }
+
+    function parseTokens(css) {
+      const tokens = {};
+      const re = /--([a-zA-Z0-9-]+)\s*:\s*([^;]+);/g;
+      let m;
+      while ((m = re.exec(css)) !== null) {
+        tokens[m[1]] = m[2].trim();
+      }
+      return tokens;
+    }
+
+    // Resolve a token value — follow var(--color-Black) indirection to black/white
+    function resolveToken(tokens, name) {
+      let val = tokens[name];
+      if (!val) return null;
+      // var(--color-Black) / var(--color-White) — these flip per luminance
+      // but for preview we treat them as their literal anchor hex
+      const varMatch = val.match(/var\(--([^)]+)\)/);
+      if (varMatch) {
+        const refName = varMatch[1];
+        if (refName === 'color-Black') return '#000000';
+        if (refName === 'color-White') return '#ffffff';
+        return tokens[refName] || val;
+      }
+      return val;
+    }
+
+    // ─── Swatch-card rendering (ported from _reference/calm-preview.astro) ──
+    function apcaLc(fgHex, bgHex) {
+      try {
+        const fg = chroma(fgHex).rgb();
+        const bg = chroma(bgHex).rgb();
+        return APCAcontrast(sRGBtoY(fg), sRGBtoY(bg));
+      } catch (e) { return 0; }
+    }
+
+    function ratio(fg, bg) {
+      const l1 = chroma(fg).luminance();
+      const l2 = chroma(bg).luminance();
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+
+    function isHexLike(val) {
+      return typeof val === 'string' && /^#[0-9a-fA-F]{6}$/.test(val);
+    }
+
+    // Render a single swatch cell with ΔE / Lc / ratio badges + pass/fail border.
+    function renderSwatch({ hex, compareHex, compareLabel, bgHex, role, isHC, isCalm }) {
+      if (!isHexLike(hex)) {
+        return `<div class="dt-swatch dt-swatch-empty"><span class="dt-hex">${hex || '—'}</span></div>`;
+      }
+      const crNum = ratio(hex, bgHex);
+      const cr = crNum.toFixed(1);
+      const swatchLum = chroma(hex).luminance();
+      const labelColor = swatchLum > 0.4 ? '#000' : '#fff';
+
+      const deNum = compareHex && isHexLike(compareHex) ? parseFloat(chroma.deltaE(compareHex, hex).toFixed(1)) : 0;
+      const de = deNum.toFixed(1);
+      const deClass = deNum < 5 ? 'dt-de-low' : deNum < 10 ? 'dt-de-mid' : 'dt-de-ok';
+      const deBadge = compareHex ? `<span class="dt-de ${deClass}" title="ΔE ${compareLabel}">Δ${de}</span>` : '';
+
+      const lcRaw = apcaLc(hex, bgHex);
+      const lcRounded = Math.round(lcRaw);
+      const lcAbs = Math.abs(lcRounded);
+      const lcClass = lcAbs >= 75 ? 'dt-lc-strong'
+        : lcAbs >= 60 ? 'dt-lc-body'
+        : lcAbs >= 45 ? 'dt-lc-large'
+        : lcAbs >= 30 ? 'dt-lc-ui'
+        : 'dt-lc-fail';
+      const lcBadge = `<span class="dt-lc ${lcClass}" title="APCA Lc">Lc ${lcRounded}</span>`;
+
+      // Role-aware pass/fail border (mirrors calm-preview logic)
+      let wcagClass, ratioTier;
+      if (role === 'tint') {
+        wcagClass = deNum >= 10 ? 'dt-wcag-aaa' : deNum >= 5 ? 'dt-wcag-aa' : 'dt-wcag-fail';
+        ratioTier = 'dt-wcag-aaa';
+      } else if (role === 'mid' && isCalm && !isHC) {
+        const dePass = deNum >= 5, lcPass = lcAbs >= 30;
+        wcagClass = (dePass && lcPass) ? 'dt-wcag-aaa' : (dePass || lcPass) ? 'dt-wcag-ui' : 'dt-wcag-fail';
+        ratioTier = 'dt-wcag-aaa';
+      } else if (role === 'mid' && isHC) {
+        wcagClass = crNum >= 4.5 ? 'dt-wcag-aaa' : crNum >= 3 ? 'dt-wcag-aa' : 'dt-wcag-fail';
+        ratioTier = crNum >= 4.5 ? 'dt-wcag-aaa' : crNum >= 3 ? 'dt-wcag-aa' : 'dt-wcag-fail';
+      } else if (isCalm && !isHC) {
+        // Calm base/emphasis: WCAG Large (3 AA, 4.5 AAA)
+        wcagClass = crNum >= 4.5 ? 'dt-wcag-aaa' : crNum >= 3 ? 'dt-wcag-aa' : 'dt-wcag-fail';
+        ratioTier = wcagClass;
+      } else {
+        // Normal body thresholds (HC + vivid + everything else non-calm)
+        wcagClass = crNum >= 7 ? 'dt-wcag-aaa'
+          : crNum >= 4.5 ? 'dt-wcag-aa'
+          : crNum >= 3 ? 'dt-wcag-ui'
+          : 'dt-wcag-fail';
+        ratioTier = wcagClass;
+      }
+
+      return `<div class="dt-swatch ${wcagClass}" style="background:${hex};color:${labelColor}">
+        ${deBadge}
+        ${lcBadge}
+        <span class="dt-hex">${hex}</span>
+        <span class="dt-ratio dt-ratio-badge ${ratioTier}">${cr}:1</span>
+      </div>`;
+    }
+
+    function renderFamilyRow(family, tokens, bgHex, isHC, isCalm) {
+      const cells = SCALE_STEPS.map((step, i) => {
+        const hex = resolveToken(tokens, `${family}-${step}`);
+        const compareHex = i === 0
+          ? bgHex
+          : resolveToken(tokens, `${family}-${SCALE_STEPS[i - 1]}`);
+        const compareLabel = i === 0 ? 'vs bg' : `vs ${SCALE_STEPS[i - 1]}`;
+        return renderSwatch({ hex, compareHex, compareLabel, bgHex, role: step, isHC, isCalm });
+      }).join('');
+      return `<div class="dt-row"><div class="dt-label">${family}</div>${cells}</div>`;
+    }
+
+    function renderStatusRow(tokens, bgHex) {
+      const cells = STATUS_TOKENS.map(name => {
+        const hex = resolveToken(tokens, name);
+        const label = name.replace('color-', '');
+        if (!isHexLike(hex)) {
+          return `<div class="dt-swatch dt-swatch-empty"><span class="dt-hex">${label}: —</span></div>`;
+        }
+        const crNum = ratio(hex, bgHex);
+        const cr = crNum.toFixed(1);
+        const wcag = crNum >= 4.5 ? 'dt-wcag-aaa' : crNum >= 3 ? 'dt-wcag-aa' : 'dt-wcag-fail';
+        const labelColor = chroma(hex).luminance() > 0.4 ? '#000' : '#fff';
+        return `<div class="dt-swatch ${wcag}" style="background:${hex};color:${labelColor}">
+          <span class="dt-hex">${label}</span>
+          <span class="dt-ratio dt-ratio-badge ${wcag}">${cr}:1</span>
+        </div>`;
+      }).join('');
+      return `<div class="dt-row dt-status-row"><div class="dt-label">status</div>${cells}</div>`;
+    }
+
+    function renderBgRow(tokens) {
+      const cells = BG_TOKENS.map(name => {
+        const hex = resolveToken(tokens, name);
+        if (!isHexLike(hex)) {
+          return `<div class="dt-swatch dt-swatch-empty"><span class="dt-hex">${name}: —</span></div>`;
+        }
+        const labelColor = chroma(hex).luminance() > 0.4 ? '#000' : '#fff';
+        return `<div class="dt-swatch" style="background:${hex};color:${labelColor}">
+          <span class="dt-hex">${name.replace('page-bg', 'bg').replace('-', ' ')}</span>
+          <span class="dt-ratio">${hex}</span>
+        </div>`;
+      }).join('');
+      return `<div class="dt-row dt-bg-row"><div class="dt-label">surface</div>${cells}</div>`;
+    }
+
+    function renderExpansion(themeKey, tokens) {
+      const bgHex = resolveToken(tokens, 'page-bg') || '#ffffff';
+      const isHC = themeKey.includes('-hc');
+      const isCalm = themeKey.includes('calm');
+      const rows = [
+        renderBgRow(tokens),
+        ...SCALE_FAMILIES.map(f => renderFamilyRow(f, tokens, bgHex, isHC, isCalm)),
+        renderStatusRow(tokens, bgHex),
+      ].join('');
+      const colHeads = ['tint', 'mid', 'base', 'emphasis', 'contrast']
+        .map(s => `<div class="dt-colhead">${s}</div>`).join('');
+      return `<div class="dt-expand-panel" style="background:${bgHex}">
+        <div class="dt-header"><div class="dt-label"></div>${colHeads}</div>
+        ${rows}
+      </div>`;
+    }
+
+    // ─── Mini preview swatches on each card ─────────────────────────────────
+    async function paintPreview(card, themeKey) {
+      const tokens = await loadThemeCss(themeKey);
+      const wrap = card.querySelector('[data-theme-preview]');
+      if (!wrap) return;
+      wrap.querySelectorAll('.dt-swatch-mini').forEach(el => {
+        const tokenName = el.getAttribute('data-token');
+        const hex = resolveToken(tokens, tokenName);
+        if (isHexLike(hex)) {
+          el.style.background = hex;
+          el.title = `${tokenName}: ${hex}`;
+        }
+      });
+    }
+
+    // Paint all previews lazily via IntersectionObserver
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          const card = entry.target;
+          const key = card.getAttribute('data-theme');
+          paintPreview(card, key);
+          io.unobserve(card);
+        }
+      }
+    }, { rootMargin: '200px' });
+    document.querySelectorAll('.dt-card').forEach(c => io.observe(c));
+
+    // ─── Expand / apply handlers ────────────────────────────────────────────
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const action = btn.getAttribute('data-action');
+      const key = btn.getAttribute('data-theme');
+
+      if (action === 'expand') {
+        const host = document.querySelector(`[data-expand-host="${key}"]`);
+        if (!host) return;
+        if (host.hasAttribute('hidden')) {
+          const tokens = await loadThemeCss(key);
+          host.innerHTML = renderExpansion(key, tokens);
+          host.removeAttribute('hidden');
+          btn.textContent = 'Collapse';
+        } else {
+          host.setAttribute('hidden', '');
+          btn.textContent = 'Expand';
+        }
+      }
+
+      if (action === 'apply') {
+        // Apply theme by setting data-theme on <html>. Existing ThemeSwitcher
+        // logic picks this up and loads the appropriate CSS.
+        document.documentElement.setAttribute('data-theme', key);
+        document.querySelectorAll('.dt-apply').forEach(b => b.classList.remove('dt-apply-active'));
+        btn.classList.add('dt-apply-active');
+      }
+    });
+
+    // Reset applied theme
+    document.getElementById('dt-reset')?.addEventListener('click', () => {
+      document.documentElement.removeAttribute('data-theme');
+      document.querySelectorAll('.dt-apply').forEach(b => b.classList.remove('dt-apply-active'));
+    });
+
+    // Category filter
+    document.querySelectorAll('.dt-cat-toggle').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const allBox = document.querySelector('.dt-cat-toggle[data-cat="all"]');
+        const cat = cb.getAttribute('data-cat');
+        if (cat === 'all') {
+          document.querySelectorAll('.dt-cat-toggle').forEach(b => { b.checked = cb.checked; });
+        } else if (!cb.checked && allBox) {
+          allBox.checked = false;
+        }
+        const enabled = new Set(
+          [...document.querySelectorAll('.dt-cat-toggle:checked')]
+            .map(b => b.getAttribute('data-cat'))
+            .filter(c => c !== 'all')
+        );
+        document.querySelectorAll('.dt-card').forEach(card => {
+          const c = card.getAttribute('data-category');
+          card.style.display = enabled.has(c) ? '' : 'none';
+        });
+      });
+    });
+  </script>
+
+  <style is:global>
+    .dt-wrap { max-width: 1800px; margin: 0 auto; padding: 1rem 1.5rem; }
+    .dt-head { margin-bottom: 1rem; }
+    .dt-head h1 { margin: 0 0 0.25rem; font-size: 1.75rem; font-weight: 600; }
+    .dt-head p { margin: 0 0 0.75rem; opacity: 0.7; font-size: 0.9rem; }
+    .dt-filters {
+      display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center;
+      padding: 0.5rem 0.75rem; border-radius: 0.35rem;
+      background: rgba(128,128,128,0.08);
+    }
+    .dt-filter { font-size: 0.85rem; cursor: pointer; }
+    .dt-reset {
+      margin-left: auto;
+      background: transparent; border: 1px solid rgba(128,128,128,0.4);
+      padding: 0.3rem 0.7rem; border-radius: 0.25rem; cursor: pointer;
+      font-size: 0.8rem; color: inherit;
+    }
+
+    .dt-grid {
+      display: grid; gap: 0.75rem;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+    .dt-card {
+      display: grid; grid-template-columns: auto 1fr auto;
+      gap: 0.75rem; align-items: center;
+      padding: 0.6rem 0.75rem; border-radius: 0.4rem;
+      border: 1px solid rgba(128,128,128,0.25);
+      background: rgba(255,255,255,0.02);
+    }
+    .dt-card-preview {
+      display: grid; grid-template-columns: repeat(2, 24px); grid-template-rows: repeat(2, 24px);
+      gap: 2px; border-radius: 3px; overflow: hidden;
+      border: 1px solid rgba(128,128,128,0.2);
+    }
+    .dt-swatch-mini { background: #ccc; }
+    .dt-card-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .dt-card-meta h3 { margin: 0; font-size: 0.9rem; font-weight: 600; }
+    .dt-card-meta code { font-size: 0.7rem; opacity: 0.55; font-family: monospace; }
+    .dt-card-sample { margin: 2px 0; font-size: 0.75rem; opacity: 0.7; }
+    .dt-card-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+    .dt-tag {
+      font-size: 0.65rem; padding: 1px 5px; border-radius: 2px;
+      background: rgba(128,128,128,0.15); font-family: monospace;
+    }
+    .dt-tag-hc { background: rgba(255,180,0,0.25); }
+    .dt-tag-protan { background: rgba(0,105,122,0.25); }
+    .dt-tag-deutan { background: rgba(192,38,166,0.25); }
+    .dt-tag-tritan { background: rgba(194,84,10,0.25); }
+    .dt-cvd-risk-safe   { background: #b8e6b8; color: #040; }
+    .dt-cvd-risk-low    { background: #ffe388; color: #640; }
+    .dt-cvd-risk-medium { background: #ffd8b0; color: #730; }
+    .dt-cvd-risk-high   { background: #ffb8b8; color: #600; }
+
+    .dt-card-actions { display: flex; flex-direction: column; gap: 4px; }
+    .dt-card-actions button {
+      background: transparent; border: 1px solid rgba(128,128,128,0.4);
+      padding: 3px 10px; border-radius: 3px; cursor: pointer;
+      font-size: 0.75rem; color: inherit; min-width: 70px;
+    }
+    .dt-card-actions button:hover { background: rgba(128,128,128,0.1); }
+    .dt-apply-active { border-color: #070 !important; background: rgba(0,120,0,0.15) !important; }
+
+    .dt-card-expand { grid-column: 1 / -1; margin-top: 0.5rem; }
+    .dt-expand-panel {
+      padding: 0.75rem; border-radius: 0.35rem;
+      border: 1px solid rgba(128,128,128,0.25);
+    }
+    .dt-header, .dt-row {
+      display: grid; grid-template-columns: 90px repeat(5, 1fr); gap: 4px;
+      margin-bottom: 4px;
+    }
+    .dt-bg-row, .dt-status-row {
+      grid-template-columns: 90px repeat(4, 1fr);
+    }
+    .dt-label { font-size: 0.8rem; opacity: 0.85; align-self: center; font-weight: 500; text-transform: capitalize; }
+    .dt-colhead { font-size: 0.7rem; text-align: center; opacity: 0.75; text-transform: uppercase; }
+
+    .dt-swatch {
+      min-height: 52px; border-radius: 3px; position: relative;
+      padding: 4px 8px; border: 2px solid transparent;
+    }
+    .dt-swatch-empty {
+      background: rgba(128,128,128,0.15);
+      color: rgba(0,0,0,0.4);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .dt-wcag-fail { border-color: #d23030; }
+    .dt-wcag-ui   { border-color: #e88030; }
+    .dt-wcag-aa   { border-color: #e2a900; }
+    .dt-wcag-aaa  { border-color: #1f9d1f; }
+
+    .dt-hex {
+      position: absolute; bottom: 2px; left: 4px;
+      font-family: monospace; font-size: 0.65rem;
+    }
+    .dt-ratio { position: absolute; bottom: 2px; right: 3px; }
+    .dt-swatch .dt-ratio-badge { font-size: 0.6rem; padding: 1px 3px; }
+    .dt-ratio-badge {
+      display: inline-block; padding: 1px 4px; border-radius: 2px;
+      font-size: 0.65rem; font-family: monospace;
+      border: 1px solid rgba(0,0,0,0.2);
+    }
+    .dt-ratio-badge.dt-wcag-fail { background: #ffb8b8; color: #600; }
+    .dt-ratio-badge.dt-wcag-ui   { background: #ffd8b0; color: #730; }
+    .dt-ratio-badge.dt-wcag-aa   { background: #ffe388; color: #640; }
+    .dt-ratio-badge.dt-wcag-aaa  { background: #b8e6b8; color: #040; }
+
+    .dt-de {
+      position: absolute; top: 2px; left: 3px;
+      font-family: monospace; font-size: 0.6rem; line-height: 1;
+      padding: 1px 3px; border-radius: 2px;
+      border: 1px solid rgba(0,0,0,0.2);
+    }
+    .dt-de-low { background: #ffb8b8; color: #600; border-color: #c00; }
+    .dt-de-mid { background: #ffe388; color: #640; border-color: #c80; }
+    .dt-de-ok  { background: #b8e6b8; color: #040; border-color: #070; }
+
+    .dt-lc {
+      position: absolute; top: 2px; right: 3px;
+      font-family: monospace; font-size: 0.6rem; line-height: 1;
+      padding: 1px 3px; border-radius: 2px;
+      border: 1px solid rgba(0,0,0,0.2);
+    }
+    .dt-lc-fail   { background: #ffb8b8; color: #600; }
+    .dt-lc-ui     { background: #ffd8b0; color: #730; }
+    .dt-lc-large  { background: #ffe388; color: #640; }
+    .dt-lc-body   { background: #d4ecd4; color: #042; }
+    .dt-lc-strong { background: #b8e6b8; color: #040; }
+  </style>
+</BaseLayout>

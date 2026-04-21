@@ -573,7 +573,7 @@ export function generateCloudcalm(input, variant = {}) {
     text = 'warm',
     pageBg = 'warm',
   } = input;
-  const { luminance = 'light', hc = false, cvd: cvdType = null } = variant;
+  const { luminance = 'light', hc = false, cvd: cvdType = null, cvdRisks = null } = variant;
 
   // ── Unpack { hex, hue } from validator output ────────────────────
   let primaryHex           = primary.hex;
@@ -591,6 +591,25 @@ export function generateCloudcalm(input, variant = {}) {
   // CVD runs post-scale — on the actually-rendered theme hexes.
   let cvdSafe = true;
   let cvdNotes = [];
+
+  // CVD pre-shift: when the validator flagged a brand slot as risky with
+  // score ≥ 0.3 for this CVD type, rewrite the brand hue BEFORE building
+  // scales. Stops the scale washing uniformly to bg-grey under simulation.
+  // Safe target hues: protan/deutan → 270° (violet), tritan → 330° (magenta).
+  const PRE_SHIFT_THRESHOLD = 0.3;
+  if (cvdType && cvdRisks && cvdRisks[cvdType] && cvdRisks[cvdType].slots && cvdRisks[cvdType].slots.length && cvdRisks[cvdType].score >= PRE_SHIFT_THRESHOLD) {
+    const risk = cvdRisks[cvdType];
+    const safeHue = (cvdType === 'tritan') ? 330 : 270;
+    for (const slot of risk.slots) {
+      const current = slot === 'primary' ? primary : (slot === 'secondary' ? secondary : null);
+      if (!current) continue;
+      const [L, C] = chroma(current.hex).oklch();
+      const shiftedHex = chroma.oklch(L, C || 0, safeHue).hex();
+      if (slot === 'primary')   primaryHex   = shiftedHex;
+      if (slot === 'secondary') secondaryHex = shiftedHex;
+      cvdNotes.push(`pre-shifted ${slot} hue → ${safeHue}° for ${cvdType} (${risk.severity} risk, score ${risk.score.toFixed(2)})`);
+    }
+  }
 
   // 1. Page background (text WCAG targeting needs it)
   const bgTokens = generateCloudcalmPageBg({

@@ -55,6 +55,36 @@ const HARMONY_ENUMS = ['mono', 'mono-shift', 'complementary', 'analogous'];
 // decorative accents. NEVER used for text. Target is WCAG 3:1 UI + ΔE + APCA Lc.
 const ACCENT_STRATEGY_ENUMS = ['emphasis', 'swap', 'tint', 'neutral', 'brand'];
 
+// CVD unsafe hue zones — same as cvd.js. Duplicated here so validator doesn't
+// import from shared (keeps the validator a pure leaf dependency).
+const CVD_UNSAFE_ZONES = {
+  protan: [[0, 40], [100, 165], [330, 360]],
+  deutan: [[0, 40], [100, 165], [330, 360]],
+  tritan: [[60, 110], [200, 260]],
+};
+
+// Extended danger-zone buffer for chroma zones where CVD wash is amplified.
+// Calm themes sit at low chroma already — a hue in the unsafe zone wouldn't
+// just shift slightly under CVD, it'd collapse completely to bg-grey. For
+// these zones we widen each unsafe range by ±10° so hues near the boundary
+// also get pre-shifted.
+const CVD_UNSAFE_ZONES_STRICT = {
+  protan: [[0, 50], [90, 175], [320, 360]],
+  deutan: [[0, 50], [90, 175], [320, 360]],
+  tritan: [[50, 120], [190, 270]],
+};
+
+// Bg modes that AMPLIFY a risky hue under CVD. A red primary against a
+// low-chroma warm bg collapses to "grey on grey" for protan users; against
+// a vivid cool bg the collision is much less severe. Only flag the risky
+// combos — everything else handled by the post-scale CVD collision check.
+const LOW_CHROMA_BG_MODES = new Set(['warm', 'cool', 'grey', 'grey-tint']);
+
+// Chroma zones — themes declare their chroma character so we know how
+// aggressive to be about CVD pre-shifts. Calm = low chroma, uses strict
+// zones. Vivid = high chroma, uses standard zones. Others default standard.
+const STRICT_CHROMA_ZONES = new Set(['calm']);
+
 /* ================================================================
    Primitives
    ================================================================ */
@@ -120,6 +150,118 @@ function deriveSecondary(primaryHsv, harmony) {
       throw new Error(`deriveSecondary: unknown harmony "${harmony}"`);
   }
   return { h: newHue, s, v };
+}
+
+function hueInZones(h, zones) {
+  const n = normaliseHue(h);
+  return zones.some(([lo, hi]) => n >= lo && n <= hi);
+}
+
+/**
+ * Detect brand-hue × bg-mode combinations that will wash out under CVD.
+ *
+ * The post-scale cvd.js only shifts hexes that COLLIDE with another hex. But
+ * a brand hue in a CVD unsafe zone paired with a low-chroma bg can wash the
+ * WHOLE scale to near-grey — the collision check doesn't catch it because
+ * no two scale positions are in conflict; they're all equally invisible.
+ *
+ * Example: user picks red primary (hue 10°), bg mode 'warm' (low chroma
+ * warm neutral). Under protan simulation, red → dark grey, warm bg → grey,
+ * scales built from this hue produce a scale of greys indistinguishable
+ * from the bg. Flag this combo so the generator pre-shifts the brand hue
+ * to a CVD-safe alternative BEFORE building scales.
+ *
+ * Returns: { protan: ['primary', 'secondary'], deutan: [...], tritan: [...] }
+ *          Empty arrays when nothing is at risk.
+ */
+/**
+ * How deep into an unsafe hue zone is `h`? Returns 0 (outside zone) to 1
+ * (dead centre of zone). Zones wrap (e.g. 330-360 + 0-40 for red); handle
+ * by evaluating each range independently and taking the max depth found.
+ */
+function zoneDepth(h, zones) {
+  const n = normaliseHue(h);
+  let maxDepth = 0;
+  for (const [lo, hi] of zones) {
+    if (n < lo || n > hi) continue;
+    const mid = (lo + hi) / 2;
+    const halfWidth = (hi - lo) / 2;
+    // Distance from centre, normalised to [0..1] where 0 = at edge, 1 = centre
+    const depth = halfWidth === 0 ? 1 : (1 - Math.abs(n - mid) / halfWidth);
+    if (depth > maxDepth) maxDepth = depth;
+  }
+  return maxDepth;
+}
+
+/**
+ * Compute a 0..1 CVD risk score for a single brand hex under a single CVD.
+ * Combines:
+ *   - hue depth inside unsafe zone (0 = outside, 1 = dead centre)
+ *   - chroma of the hex (low chroma amplifies wash — at C<0.08 risk ×1.5)
+ *   - luminance distance from a reference bg L (far from bg = dampens risk)
+ *
+ * When chromaZone is strict (calm), strict zones widen the unsafe range so
+ * boundary hues score non-zero where they'd pass the standard zones.
+ */
+function scoreBrandCvdRisk(entry, cvdType, chromaZone, bgL = 0.5) {
+  const zones = STRICT_CHROMA_ZONES.has(chromaZone)
+    ? CVD_UNSAFE_ZONES_STRICT[cvdType]
+    : CVD_UNSAFE_ZONES[cvdType];
+  const depth = zoneDepth(entry.hue, zones);
+  if (depth === 0) return 0;
+  const [L, C] = chroma(entry.hex).oklch();
+  // Chroma multiplier: low chroma = closer to grey under CVD = higher risk.
+  // C < 0.08 boosts risk; C > 0.20 dampens.
+  const chromaMult = C < 0.08 ? 1.5 : C > 0.20 ? 0.75 : 1.0;
+  // Luminance-distance multiplier: if the brand hex's L is near bg's L,
+  // there's no L-contrast to fall back on when hue washes — worse risk.
+  const lDist = Math.abs((L || 0.5) - bgL);
+  const lMult = lDist < 0.15 ? 1.3 : lDist > 0.40 ? 0.80 : 1.0;
+  const raw = depth * chromaMult * lMult;
+  return Math.max(0, Math.min(1, raw));
+}
+
+function detectCvdRisks(hexSet, chromaZone = 'standard') {
+  const risks = {
+    protan: { score: 0, slots: [], reasons: [], severity: 'safe' },
+    deutan: { score: 0, slots: [], reasons: [], severity: 'safe' },
+    tritan: { score: 0, slots: [], reasons: [], severity: 'safe' },
+  };
+  const bgMode = typeof hexSet.pageBg === 'string' ? hexSet.pageBg : null;
+  const bgRiskyForCvd = !bgMode || LOW_CHROMA_BG_MODES.has(bgMode);
+  // For strict chroma zones, skip the bg-risky gate — low-chroma themes
+  // are ALWAYS at risk regardless of bg mode.
+  const bgGate = STRICT_CHROMA_ZONES.has(chromaZone) ? true : bgRiskyForCvd;
+  if (!bgGate) return risks;
+
+  // Rough bg L estimate — we don't have the final bg hex here yet (generator
+  // picks it), but the bg MODE is a good proxy for its L character.
+  // warm/grey/grey-tint light themes ~0.92, cool ~0.94, deep dark ~0.25.
+  // We assume a light-ish surface (0.90) as the default estimate since most
+  // CVD wash-out risk is "near-bg" not "far-from-bg" — being wrong here just
+  // makes scores slightly generous, never missed-risky.
+  const bgLEstimate = 0.90;
+
+  for (const cvdType of Object.keys(CVD_UNSAFE_ZONES)) {
+    let maxScore = 0;
+    for (const slot of ['primary', 'secondary']) {
+      const entry = hexSet[slot];
+      if (!entry || typeof entry !== 'object' || !Number.isFinite(entry.hue)) continue;
+      const s = scoreBrandCvdRisk(entry, cvdType, chromaZone, bgLEstimate);
+      if (s > 0) {
+        risks[cvdType].slots.push(slot);
+        risks[cvdType].reasons.push(`${slot} hue ${entry.hue.toFixed(0)}° scored ${s.toFixed(2)} for ${cvdType}`);
+        if (s > maxScore) maxScore = s;
+      }
+    }
+    risks[cvdType].score = maxScore;
+    risks[cvdType].severity =
+      maxScore >= 0.6 ? 'high'
+      : maxScore >= 0.3 ? 'medium'
+      : maxScore > 0    ? 'low'
+      : 'safe';
+  }
+  return risks;
 }
 
 function assertEnum(slotName, value, allowed) {
@@ -220,5 +362,24 @@ export function validateInput(input = {}) {
     accentStrategy = input.accentStrategy;
   }
 
-  return { hexSet, accentStrategy, warnings };
+  // ── 10. CVD risk detection ───────────────────────────────────────
+  // Runs after brand slots are resolved. Flags each CVD type with the list
+  // of brand slots whose hue × bg combo will wash out under that CVD.
+  // Generators read this to pre-shift the brand hue when building a CVD
+  // variant, rather than waiting for post-scale collision detection which
+  // can't see "scale-uniformly-greyed" failures.
+  //
+  // chromaZone (optional on input) = 'calm' | 'vivid' | 'standard' — lets
+  // low-chroma themes widen the danger zones and skip the bg-mode gate.
+  const chromaZone = input.chromaZone || 'standard';
+  const cvdRisks = detectCvdRisks(hexSet, chromaZone);
+  for (const [cvdType, risk] of Object.entries(cvdRisks)) {
+    if (risk.slots.length) {
+      warnings.push(
+        `${cvdType}: ${risk.severity} risk (score ${risk.score.toFixed(2)}) on ${risk.slots.join(', ')} — will pre-shift for CVD variants`
+      );
+    }
+  }
+
+  return { hexSet, accentStrategy, warnings, cvdRisks };
 }
