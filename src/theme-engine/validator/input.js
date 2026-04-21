@@ -371,6 +371,27 @@ export function validateInput(input = {}) {
   //
   // chromaZone (optional on input) = 'calm' | 'vivid' | 'standard' — lets
   // low-chroma themes widen the danger zones and skip the bg-mode gate.
+  // Grey-tint split rule: neutral=primary, text=secondary. Mono harmony
+  // overrides this — mono explicitly means "same hue" for the mono aesthetic
+  // so both neutral and text derive from primary.
+  //
+  // Edge guard: if primary and secondary hues are < 30° apart (but not mono),
+  // bump text's derived hue to primary+30° so grey-tint neutral and text
+  // stay perceptually distinct. This only matters for the grey-tint enum.
+  const isMono = harmony === 'mono';
+  const primaryHue = hexSet.primary.hue;
+  const secondaryHue = hexSet.secondary ? hexSet.secondary.hue : primaryHue;
+  function hueDistance(a, b) {
+    const d = Math.abs(normaliseHue(a) - normaliseHue(b));
+    return Math.min(d, 360 - d);
+  }
+  const hueGap = hueDistance(primaryHue, secondaryHue);
+  const greyTintHues = isMono
+    ? { neutral: primaryHue, text: primaryHue }
+    : (hueGap < 30
+        ? { neutral: primaryHue, text: normaliseHue(primaryHue + 30) }
+        : { neutral: primaryHue, text: secondaryHue });
+
   const chromaZone = input.chromaZone || 'standard';
   const cvdRisks = detectCvdRisks(hexSet, chromaZone);
   for (const [cvdType, risk] of Object.entries(cvdRisks)) {
@@ -381,5 +402,18 @@ export function validateInput(input = {}) {
     }
   }
 
-  return { hexSet, accentStrategy, warnings, cvdRisks };
+  return {
+    hexSet,
+    accentStrategy,
+    warnings,
+    cvdRisks,
+    // Metadata about how neutral/text derive their hues when the user
+    // picks the 'grey-tint' enum. Generators read this so they don't have
+    // to duplicate the mono / split-by-secondary logic.
+    meta: {
+      isMono,
+      harmony: harmony || null,
+      greyTintHues, // { neutral: deg, text: deg }
+    },
+  };
 }

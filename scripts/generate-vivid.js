@@ -37,7 +37,7 @@ console.log(`\n⚡ Vivid generator`);
 console.log(`   Primary:   hsv(${def.primary.h}, ${(def.primary.s * 100).toFixed(1)}%, ${(def.primary.v * 100).toFixed(1)}%)`);
 console.log(`   Secondary: hsv(${def.secondary.h}, ${(def.secondary.s * 100).toFixed(1)}%, ${(def.secondary.v * 100).toFixed(1)}%)\n`);
 
-const { hexSet, warnings, cvdRisks } = validateInput(def);
+const { hexSet, warnings, cvdRisks, meta: inputMeta } = validateInput(def);
 if (warnings.length) warnings.forEach(w => console.log(`   ⚠️  ${w}`));
 
 function variantName({ luminance, hc, cvd }) {
@@ -69,7 +69,10 @@ let totalCvdUnsafe = 0;
 for (const luminance of ['light', 'dark']) {
   for (const hc of [false, true]) {
     for (const cvd of [null, 'protan', 'deutan', 'tritan']) {
-      const variant = { luminance, hc, cvd, cvdRisks };
+      const variant = {
+        luminance, hc, cvd, cvdRisks,
+        greyTintHues: inputMeta?.greyTintHues ?? null,
+      };
       const name = variantName(variant);
 
       try {

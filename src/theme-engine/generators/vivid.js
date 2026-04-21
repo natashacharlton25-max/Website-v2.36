@@ -54,13 +54,21 @@ export const VIVID_CHROMA = {
 };
 
 // Hue anchors — shared with cloudcalm (same bg/neutral/text palettes).
-const WARM_HUE = 40;
-const COOL_HUE = 266;
-const NEUTRAL_HUE = 40;
+// Shared with cloudcalm. Split per role so neutral vs text always distinct
+// when the user picks the same enum for both. See cloudcalm.js for the
+// rationale table. page-bg keeps its own warm/cool hues (40/266) because
+// surface colours aren't affected by the neutral/text split rule.
+const WARM_HUE = 40;              // page-bg warm (used in defaults file, not here)
+const COOL_HUE = 266;             // page-bg cool
+const NEUTRAL_WARM_HUE = 60;      // neutral when mode=warm
+const NEUTRAL_COOL_HUE = 240;     // neutral when mode=cool
+const NEUTRAL_GREY_HUE = 40;      // neutral when mode=grey
+const TEXT_GREY_HUE    = 240;     // text when mode=grey (whisper-cool)
+const TEXT_COOL_HUE    = 200;     // text when mode=cool
 // Vivid-specific: text warm hue shifted +20° from neutral warm so after
 // role-swap (text ↔ neutral/secondary) rows don't read as the same brown.
 // Neutral stays peach/salmon; text reads rusty/coffee.
-const TEXT_WARM_HUE = 60;
+const TEXT_WARM_HUE = 20;
 
 // Bg surfaces — identical to cloudcalm's (vivid shares calm's comfort surfaces).
 // Ported verbatim from cloudcalm.js generateCloudcalmPageBg fixed hexes.
@@ -208,26 +216,29 @@ export function generateVividScale(baseInput, { pageBgHex, hc = false } = {}) {
    NEUTRAL SCALE — same logic as cloudcalm (shared comfort)
    ================================================================ */
 
-export function generateVividNeutral(mode, { primaryHex, neutralHex, luminance = 'light', hc = false } = {}) {
+export function generateVividNeutral(mode, { primaryHex, neutralHex, luminance = 'light', hc = false, greyTintHue = null } = {}) {
   const scale = {};
+
+  function resolveHue() {
+    if (mode === 'warm')      return NEUTRAL_WARM_HUE;
+    if (mode === 'cool')      return NEUTRAL_COOL_HUE;
+    if (mode === 'grey-tint') return greyTintHue ?? (chroma(primaryHex).get('oklch.h') || 0);
+    return chroma(neutralHex || primaryHex).get('oklch.h') || 0;
+  }
+  function resolveTintChroma() {
+    if (mode === 'warm')      return 0.020;
+    if (mode === 'cool')      return 0.040;
+    if (mode === 'grey-tint') return 0.020;
+    return 0.025;
+  }
 
   if (mode === 'grey') {
     for (const { pos, lightness } of NEUTRAL_STEPS) {
       scale[pos] = chroma.oklch(lightness, 0, 0).hex();
     }
   } else {
-    let hue, tintChroma;
-    if (mode === 'warm') {
-      hue = WARM_HUE;      tintChroma = 0.020;  // was 0.010 — vivid amps shared neutrals
-    } else if (mode === 'cool') {
-      hue = COOL_HUE;      tintChroma = 0.040;  // was 0.028
-    } else if (mode === 'grey-tint') {
-      hue = chroma(primaryHex).get('oklch.h') || 0;
-      tintChroma = 0.020;  // was 0.010
-    } else {
-      hue = chroma(neutralHex || primaryHex).get('oklch.h') || 0;
-      tintChroma = 0.025;  // was 0.015
-    }
+    const hue = resolveHue();
+    const tintChroma = resolveTintChroma();
     for (const { pos, lightness } of NEUTRAL_STEPS) {
       scale[pos] = safeOklch(lightness, tintChroma, hue);
     }
@@ -238,13 +249,7 @@ export function generateVividNeutral(mode, { primaryHex, neutralHex, luminance =
   const level = hc ? 'hc' : 'nonHC';
   const overrides = VIVID_NEUTRAL_OVERRIDES[variant][level];
 
-  let overrideHue;
-  if (mode === 'grey') overrideHue = 0;
-  else if (mode === 'warm') overrideHue = NEUTRAL_HUE;
-  else if (mode === 'cool') overrideHue = COOL_HUE;
-  else if (mode === 'grey-tint') overrideHue = chroma(primaryHex).get('oklch.h') || 0;
-  else overrideHue = chroma(neutralHex || primaryHex).get('oklch.h') || 0;
-
+  const overrideHue = mode === 'grey' ? 0 : resolveHue();
   for (const [pos, { L, C }] of Object.entries(overrides)) {
     const chr = mode === 'grey' ? 0 : C;
     scale[pos] = chroma.oklch(L, chr, overrideHue).hex();
@@ -257,17 +262,20 @@ export function generateVividNeutral(mode, { primaryHex, neutralHex, luminance =
    TEXT SCALE — same logic as cloudcalm
    ================================================================ */
 
-export function generateVividText(mode, { primaryHex, textHex, luminance = 'light', hc = false } = {}) {
+export function generateVividText(mode, { primaryHex, textHex, luminance = 'light', hc = false, greyTintHue = null } = {}) {
   if (mode === 'black-white') {
     const anchor = 'var(--color-Black)';
     return { tint: anchor, mid: anchor, base: anchor, emphasis: anchor };
   }
 
+  // Fixed text anchors — distinct from neutral's anchors so warm+warm or
+  // cool+cool never collide. grey-tint's hue supplied by validator
+  // (secondary in split mode, primary in mono, primary+30° edge).
   let hue;
-  if (mode === 'grey') hue = 0;
+  if (mode === 'grey') hue = TEXT_GREY_HUE;
   else if (mode === 'warm') hue = TEXT_WARM_HUE;
-  else if (mode === 'cool') hue = COOL_HUE;
-  else if (mode === 'grey-tint') hue = chroma(primaryHex).get('oklch.h') || 0;
+  else if (mode === 'cool') hue = TEXT_COOL_HUE;
+  else if (mode === 'grey-tint') hue = greyTintHue ?? (chroma(primaryHex).get('oklch.h') || 0);
   else hue = chroma(textHex).get('oklch.h') || 0;
 
   const variant = luminance === 'dark' ? 'dark' : 'light';
@@ -437,7 +445,7 @@ export function generateVivid(input, variant = {}) {
     text = 'warm',
     pageBg = 'warm',
   } = input;
-  const { luminance = 'light', hc = false, cvd: cvdType = null, cvdRisks = null } = variant;
+  const { luminance = 'light', hc = false, cvd: cvdType = null, cvdRisks = null, greyTintHues = null } = variant;
 
   // Unpack { hex, hue } from validator output
   let primaryHex           = primary.hex;
@@ -497,13 +505,19 @@ export function generateVivid(input, variant = {}) {
   // 3. Neutral
   const neutralScale = generateVividNeutral(
     tertiaryIsHex ? 'brand' : tertiaryModeOrHex,
-    { primaryHex, neutralHex: tertiaryIsHex ? tertiaryHex : null, luminance, hc }
+    {
+      primaryHex, neutralHex: tertiaryIsHex ? tertiaryHex : null, luminance, hc,
+      greyTintHue: greyTintHues?.neutral ?? null,
+    }
   );
 
   // 4. Text
   const textScale = generateVividText(
     textIsHex ? 'brand' : textModeOrHex,
-    { primaryHex, textHex: textIsHex ? textHex : null, luminance, hc }
+    {
+      primaryHex, textHex: textIsHex ? textHex : null, luminance, hc,
+      greyTintHue: greyTintHues?.text ?? null,
+    }
   );
 
   // 5. Status + shadow

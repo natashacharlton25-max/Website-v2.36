@@ -129,10 +129,22 @@ const NEUTRAL_STEPS = [
   { pos: 950, lightness: 0.12, saturation: 0.08 },
 ];
 
-// Hue anchors.
-const WARM_HUE = 40;
-const COOL_HUE = 266;  // derived from HSL (221, 17%, 69.3%)
-const NEUTRAL_HUE = 40;  // for calm's hand-tuned neutral overrides (matches old engine)
+// Hue anchors — split per role so neutral and text always emit distinct
+// hues even when the user picks the same enum for both. Rule: a user picking
+// "warm neutral" and "warm text" still gets visually-separable columns.
+//
+//   warm:       neutral = 60°  (yellow-warm), text = 20°  (red-warm)
+//   cool:       neutral = 240° (blue-cool),   text = 200° (teal-cool)
+//   grey:       near-pure;      neutral whisper-warm, text whisper-cool
+//   grey-tint:  neutral = primary hue, text = secondary hue
+//               (mono harmony overrides: both = primary, L-only separation)
+const COOL_HUE = 266;            // page-bg cool blue-grey (unchanged)
+const NEUTRAL_WARM_HUE = 60;     // neutral when mode=warm
+const TEXT_WARM_HUE    = 20;     // text when mode=warm
+const NEUTRAL_COOL_HUE = 240;    // neutral when mode=cool
+const TEXT_COOL_HUE    = 200;    // text when mode=cool
+const NEUTRAL_GREY_HUE = 40;     // neutral when mode=grey (whisper-warm)
+const TEXT_GREY_HUE    = 240;    // text when mode=grey (whisper-cool)
 
 // Calm neutral overrides — hand-tuned L per position, per variant.
 // Ported verbatim from theme-engine.js (lines 1643-1658).
@@ -224,57 +236,47 @@ export function generateCalmScale(baseInput, { luminance = 'light', hc = false }
  * Brand hex mode uses the brand's hue at a slightly higher chroma (0.015),
  * same override pattern applied.
  */
-export function generateCloudcalmNeutral(mode, { primaryHex, neutralHex, luminance = 'light', hc = false } = {}) {
+export function generateCloudcalmNeutral(mode, { primaryHex, neutralHex, luminance = 'light', hc = false, greyTintHue = null } = {}) {
   const scale = {};
+
+  // Resolve the neutral anchor hue. Fixed anchors for warm/cool/grey so
+  // neutral never collides with text when the user picks the same enum
+  // for both. grey-tint: hue comes from the validator (= primary).
+  function resolveHue() {
+    if (mode === 'warm')      return NEUTRAL_WARM_HUE;
+    if (mode === 'cool')      return NEUTRAL_COOL_HUE;
+    if (mode === 'grey-tint') return greyTintHue ?? (chroma(primaryHex).get('oklch.h') || 0);
+    // brand hex
+    return chroma(neutralHex || primaryHex).get('oklch.h') || 0;
+  }
+  function resolveTintChroma() {
+    if (mode === 'warm')      return 0.010;
+    if (mode === 'cool')      return 0.028;
+    if (mode === 'grey-tint') return 0.010;
+    return 0.015;
+  }
 
   // ── Build the base ladder ────────────────────────────────────────
   if (mode === 'grey') {
+    // Pure grey stays chroma-free — matches old engine.
     for (const { pos, lightness } of NEUTRAL_STEPS) {
       scale[pos] = chroma.oklch(lightness, 0, 0).hex();
     }
   } else {
-    let hue, tintChroma;
-    if (mode === 'warm') {
-      hue = WARM_HUE;      tintChroma = 0.010;
-    } else if (mode === 'cool') {
-      hue = COOL_HUE;      tintChroma = 0.028;
-    } else if (mode === 'grey-tint') {
-      hue = chroma(primaryHex).get('oklch.h') || 0;
-      tintChroma = 0.010;
-    } else {
-      // brand hex
-      hue = chroma(neutralHex || primaryHex).get('oklch.h') || 0;
-      tintChroma = 0.015;
-    }
-
+    const hue = resolveHue();
+    const tintChroma = resolveTintChroma();
     for (const { pos, lightness } of NEUTRAL_STEPS) {
       scale[pos] = safeOklch(lightness, tintChroma, hue);
     }
   }
 
   // ── Apply calm-specific overrides at positions 200/300/400/500 ───
-  // The hue used for the overrides matches the ladder's hue (for tinted scales)
-  // or NEUTRAL_HUE for grey + warm. This preserves the calm look while using
-  // the hand-tuned L values for contrast + ΔE separation.
   const isDark = luminance === 'dark';
   const variant = isDark ? 'dark' : 'light';
   const level = hc ? 'hc' : 'nonHC';
   const overrides = CALM_NEUTRAL_OVERRIDES[variant][level];
 
-  // For non-grey ladders, use the ladder's hue; for grey, keep chroma 0.
-  let overrideHue;
-  if (mode === 'grey') {
-    overrideHue = 0;
-  } else if (mode === 'warm') {
-    overrideHue = NEUTRAL_HUE;  // matches old engine's use of NEUTRAL_HUE
-  } else if (mode === 'cool') {
-    overrideHue = COOL_HUE;
-  } else if (mode === 'grey-tint') {
-    overrideHue = chroma(primaryHex).get('oklch.h') || 0;
-  } else {
-    overrideHue = chroma(neutralHex || primaryHex).get('oklch.h') || 0;
-  }
-
+  const overrideHue = mode === 'grey' ? 0 : resolveHue();
   for (const [pos, { L, C }] of Object.entries(overrides)) {
     const chr = mode === 'grey' ? 0 : C;
     scale[pos] = chroma.oklch(L, chr, overrideHue).hex();
@@ -305,7 +307,7 @@ export function generateCloudcalmNeutral(mode, { primaryHex, neutralHex, luminan
  *   "grey-tint"  → primary hue at whisper chroma
  *   brand hex    → text hex's hue at slightly higher chroma
  */
-export function generateCloudcalmText(mode, { primaryHex, textHex, luminance = 'light', hc = false } = {}) {
+export function generateCloudcalmText(mode, { primaryHex, textHex, luminance = 'light', hc = false, greyTintHue = null } = {}) {
   // black-white: text refs point at the auto-flipping B/W anchor tokens.
   // All 4 positions point at the same var() — picker chose pure contrast.
   if (mode === 'black-white') {
@@ -313,19 +315,19 @@ export function generateCloudcalmText(mode, { primaryHex, textHex, luminance = '
     return { tint: anchor, mid: anchor, base: anchor, emphasis: anchor };
   }
 
-  // Same pattern as primary/secondary/neutral: resolve hue from the mode,
-  // apply calm's hand-tuned TEXT-specific L/C per variant (CALM_TEXT_OVERRIDES).
-  // Text is independent of neutral — separate table because body readability
-  // wants a wider ladder than neutral's UI-decoration spacing.
+  // Resolve hue from mode. Fixed anchors ensure neutral + text never emit
+  // the same hue for the same enum (warm vs warm, cool vs cool, grey vs grey).
+  // grey-tint: hue comes from the validator (secondary in split mode, primary
+  // in mono, primary+30° in narrow-gap edge).
   let hue;
   if (mode === 'grey') {
-    hue = 0; // achromatic — chroma 0 regardless of hue
+    hue = TEXT_GREY_HUE; // whisper-cool — distinct from neutral's whisper-warm
   } else if (mode === 'warm') {
-    hue = WARM_HUE;
+    hue = TEXT_WARM_HUE;
   } else if (mode === 'cool') {
-    hue = COOL_HUE;
+    hue = TEXT_COOL_HUE;
   } else if (mode === 'grey-tint') {
-    hue = chroma(primaryHex).get('oklch.h') || 0;
+    hue = greyTintHue ?? (chroma(primaryHex).get('oklch.h') || 0);
   } else {
     // brand hex supplied
     hue = chroma(textHex).get('oklch.h') || 0;
@@ -573,7 +575,7 @@ export function generateCloudcalm(input, variant = {}) {
     text = 'warm',
     pageBg = 'warm',
   } = input;
-  const { luminance = 'light', hc = false, cvd: cvdType = null, cvdRisks = null } = variant;
+  const { luminance = 'light', hc = false, cvd: cvdType = null, cvdRisks = null, greyTintHues = null } = variant;
 
   // ── Unpack { hex, hue } from validator output ────────────────────
   let primaryHex           = primary.hex;
@@ -626,13 +628,19 @@ export function generateCloudcalm(input, variant = {}) {
   // 3. Neutral scale (variant-aware, with calm overrides)
   const neutralScale = generateCloudcalmNeutral(
     tertiaryIsHex ? 'brand' : tertiaryModeOrHex,
-    { primaryHex, neutralHex: tertiaryIsHex ? tertiaryHex : null, luminance, hc }
+    {
+      primaryHex, neutralHex: tertiaryIsHex ? tertiaryHex : null, luminance, hc,
+      greyTintHue: greyTintHues?.neutral ?? null,
+    }
   );
 
   // 4. Text scale (variant-aware)
   const textScale = generateCloudcalmText(
     textIsHex ? 'brand' : textModeOrHex,
-    { primaryHex, textHex: textIsHex ? textHex : null, luminance, hc }
+    {
+      primaryHex, textHex: textIsHex ? textHex : null, luminance, hc,
+      greyTintHue: greyTintHues?.text ?? null,
+    }
   );
 
   // 5. Status + shadow anchors
