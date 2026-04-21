@@ -68,10 +68,20 @@ export function buildThemeCSS(tokens) {
     if (scale.mid)      ln(`  --${family}-mid: ${scale.mid};`);
     if (scale.base)     ln(`  --${family}-base: ${scale.base};`);
     if (scale.emphasis) ln(`  --${family}-emphasis: ${scale.emphasis};`);
-    // text has no contrast token (locked)
-    if (family !== 'text' && scale.contrast) {
-      ln(`  --${family}-contrast: ${scale.contrast};`);
+    // Every family gets a contrast token so shape is uniform across
+    // primary/secondary/neutral/text — enables family-prefix rotation
+    // in the validator's role-swap (see scripts/validate-themes.js).
+    // Text's contrast defaults to var(--color-Black) — the B/W anchor
+    // token that auto-flips per theme luminance (dark themes hold the
+    // light anchor in --color-Black). Gives text-contrast a guaranteed
+    // max-contrast value without hex-locking to either black or white.
+    let contrastVal;
+    if (family === 'text') {
+      contrastVal = scale.contrast || 'var(--color-Black)';
+    } else {
+      contrastVal = scale.contrast;
     }
+    if (contrastVal) ln(`  --${family}-contrast: ${contrastVal};`);
     ln();
   }
 

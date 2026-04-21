@@ -46,6 +46,9 @@ const WARM_LOWER_WRAP = 320;
 
 const NEUTRAL_ENUMS = ['warm', 'cool', 'grey', 'grey-tint'];
 const PAGEBG_ENUMS  = ['warm', 'cool', 'grey', 'grey-tint', 'tint', 'deep'];
+// Text accepts every NEUTRAL mode plus 'black-white' — when 'black-white',
+// text scale points to the var(--color-Black) anchor (auto-flips per theme).
+const TEXT_ENUMS    = ['warm', 'cool', 'grey', 'grey-tint', 'black-white'];
 const HARMONY_ENUMS = ['mono', 'mono-shift', 'complementary', 'analogous'];
 
 // Contrast/accent token is UI-DECORATION ONLY — hover, interaction,
@@ -191,7 +194,7 @@ export function validateInput(input = {}) {
   // ── 7. Text ──────────────────────────────────────────────────────
   if (input.text !== undefined) {
     if (typeof input.text === 'string') {
-      assertEnum('text', input.text, NEUTRAL_ENUMS);
+      assertEnum('text', input.text, TEXT_ENUMS);
       hexSet.text = input.text;
     } else {
       hexSet.text = hsvToHexAndHue('text', input.text);

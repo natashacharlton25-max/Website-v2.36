@@ -272,7 +272,14 @@ export function generateCloudcalmNeutral(mode, { primaryHex, neutralHex, luminan
  *   "grey-tint"  → primary hue at whisper chroma
  *   brand hex    → text hex's hue at slightly higher chroma
  */
-export function generateCloudcalmText(mode, { primaryHex, textHex, pageBgHex, luminance = 'light', hc = false } = {}) {
+export function generateCloudcalmText(mode, { primaryHex, textHex, pageBgHex, hc = false } = {}) {
+  // black-white: text refs point at the auto-flipping B/W anchor tokens.
+  // All 4 positions point at the same var() — picker chose pure contrast.
+  if (mode === 'black-white') {
+    const anchor = 'var(--color-Black)';
+    return { tint: anchor, mid: anchor, base: anchor, emphasis: anchor };
+  }
+
   // Resolve hue + chroma per mode.
   let hue, chromaVal;
   if (mode === 'grey') {
@@ -418,10 +425,21 @@ export function generateCloudcalmPageBg({
    STATUS + SHADOW + BLACK/WHITE ANCHORS
    ================================================================ */
 
-export function generateCloudcalmStatus() {
+// Status / anchor tokens.
+//
+//   --color-Black  / --color-White : FLIP per luminance. On dark themes,
+//   --color-Black holds the light anchor (#fafafa) and --color-White holds
+//   the dark anchor (#1a1a1a). That way CSS writing `var(--color-Black)`
+//   always picks the "dark-on-current-bg" anchor regardless of theme.
+//   Text tokens pointing to var(--color-Black) auto-flip per theme.
+//
+//   --shadow-Black / --shadow-White : NEVER flip. Shadow maths needs pure
+//   #000 / #fff for colour-mix calculations.
+export function generateCloudcalmStatus({ luminance = 'light' } = {}) {
+  const isDark = luminance === 'dark';
   return {
-    'color-Black':  '#1a1a1a',
-    'color-White':  '#fafafa',
+    'color-Black':  isDark ? '#fafafa' : '#1a1a1a',
+    'color-White':  isDark ? '#1a1a1a' : '#fafafa',
     'shadow-Black': '#000000',
     'shadow-White': '#ffffff',
   };
@@ -571,7 +589,7 @@ export function generateCloudcalm(input, variant = {}) {
   );
 
   // 5. Status + shadow anchors
-  const status = generateCloudcalmStatus();
+  const status = generateCloudcalmStatus({ luminance });
 
   // 6. Focus + highlight
   const focusHighlight = generateCloudcalmFocusHighlight({
