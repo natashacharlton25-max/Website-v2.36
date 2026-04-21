@@ -143,7 +143,6 @@ const NEUTRAL_WARM_HUE = 60;     // neutral when mode=warm
 const TEXT_WARM_HUE    = 20;     // text when mode=warm
 const NEUTRAL_COOL_HUE = 240;    // neutral when mode=cool
 const TEXT_COOL_HUE    = 200;    // text when mode=cool
-const NEUTRAL_GREY_HUE = 40;     // neutral when mode=grey (whisper-warm)
 const TEXT_GREY_HUE    = 240;    // text when mode=grey (whisper-cool)
 
 // Calm neutral overrides — hand-tuned L per position, per variant.
@@ -465,13 +464,50 @@ export function generateCloudcalmPageBg({
 //
 //   --shadow-Black / --shadow-White : NEVER flip. Shadow maths needs pure
 //   #000 / #fff for colour-mix calculations.
-export function generateCloudcalmStatus({ luminance = 'light' } = {}) {
+// Calm status palettes per CVD type. Hue-shifted to stay perceptually
+// distinct under each CVD's confusion axis. Chalky-muted chroma matches
+// calm's low-chroma identity.
+//
+//   standard (no CVD): green / orange / red / blue
+//   protan / deutan:   cyan / orange / magenta / blue (red-green axis fails)
+//   tritan:            green / red / magenta / purple (blue-yellow axis fails)
+//
+// Each palette emits light and dark variants (L-flipped for readability).
+const CALM_STATUS_PALETTES = {
+  standard: {
+    light: { Success: '#2f7a42', Warning: '#b47415', Error: '#b43a3a', Info: '#2f5f8a' },
+    dark:  { Success: '#7fb891', Warning: '#e6b87a', Error: '#e69999', Info: '#8aafd1' },
+  },
+  // Success shifted from green to teal-green (#008860) — stays distinct
+  // from Info blue under deutan. Error shifted to deeper magenta (#8a0060)
+  // to stay distinct from Info under both protan and deutan.
+  protan: {
+    light: { Success: '#008860', Warning: '#b47415', Error: '#8a0060', Info: '#2f5f8a' },
+    dark:  { Success: '#5fb094', Warning: '#e6b87a', Error: '#c06093', Info: '#8aafd1' },
+  },
+  deutan: {
+    light: { Success: '#008860', Warning: '#b47415', Error: '#8a0060', Info: '#2f5f8a' },
+    dark:  { Success: '#5fb094', Warning: '#e6b87a', Error: '#c06093', Info: '#8aafd1' },
+  },
+  tritan: {
+    light: { Success: '#2f7a42', Warning: '#a63424', Error: '#a63478', Info: '#6a3c8a' },
+    dark:  { Success: '#7fb891', Warning: '#d9998e', Error: '#d999c0', Info: '#b098cc' },
+  },
+};
+
+export function generateCloudcalmStatus({ luminance = 'light', cvd = null } = {}) {
   const isDark = luminance === 'dark';
+  const palette = CALM_STATUS_PALETTES[cvd] || CALM_STATUS_PALETTES.standard;
+  const p = palette[isDark ? 'dark' : 'light'];
   return {
     'color-Black':  isDark ? '#fafafa' : '#1a1a1a',
     'color-White':  isDark ? '#1a1a1a' : '#fafafa',
     'shadow-Black': '#000000',
     'shadow-White': '#ffffff',
+    'color-Success': p.Success,
+    'color-Warning': p.Warning,
+    'color-Error':   p.Error,
+    'color-Info':    p.Info,
   };
 }
 
@@ -601,10 +637,37 @@ export function generateCloudcalm(input, variant = {}) {
   const PRE_SHIFT_THRESHOLD = 0.3;
   if (cvdType && cvdRisks && cvdRisks[cvdType] && cvdRisks[cvdType].slots && cvdRisks[cvdType].slots.length && cvdRisks[cvdType].score >= PRE_SHIFT_THRESHOLD) {
     const risk = cvdRisks[cvdType];
-    const safeHue = (cvdType === 'tritan') ? 330 : 270;
+    // Aware pre-shift: pick a CVD-safe target hue for each unsafe slot that
+    // sits ≥60° from the OTHER brand slot. Otherwise shifting primary to
+    // 250° when secondary is already at 231° collapses both into the same
+    // blue family. Candidates are ordered by preference (first = ideal
+    // character for that CVD); we walk the list until one clears the gap.
+    const CANDIDATES = {
+      protan: [270, 240, 200, 60,  90],   // violet → blue → cyan → orange → yellow
+      deutan: [250, 210, 60,  90,  180],  // blue-violet → blue → orange → yellow → cyan
+      tritan: [330, 20,  300, 350, 40],   // magenta → red → pink-purple → pink → red-orange
+    };
+    function hueGap(a, b) {
+      const d = Math.abs(((a - b) % 360 + 360) % 360);
+      return Math.min(d, 360 - d);
+    }
+    function pickSafeHue(candidates, referenceHue) {
+      if (referenceHue === null || !Number.isFinite(referenceHue)) return candidates[0];
+      for (const h of candidates) {
+        if (hueGap(h, referenceHue) >= 60) return h;
+      }
+      return candidates[0];
+    }
+
     for (const slot of risk.slots) {
       const current = slot === 'primary' ? primary : (slot === 'secondary' ? secondary : null);
       if (!current) continue;
+      // Reference = the OTHER slot's CURRENT hue (may already have been
+      // pre-shifted earlier in this loop).
+      const otherHex = slot === 'primary' ? secondaryHex : primaryHex;
+      const otherHue = otherHex ? (chroma(otherHex).get('oklch.h') || 0) : null;
+      const candidates = CANDIDATES[cvdType] ?? [270];
+      const safeHue = pickSafeHue(candidates, otherHue);
       const [L, C] = chroma(current.hex).oklch();
       const shiftedHex = chroma.oklch(L, C || 0, safeHue).hex();
       if (slot === 'primary')   primaryHex   = shiftedHex;
@@ -644,7 +707,7 @@ export function generateCloudcalm(input, variant = {}) {
   );
 
   // 5. Status + shadow anchors
-  const status = generateCloudcalmStatus({ luminance });
+  const status = generateCloudcalmStatus({ luminance, cvd: cvdType });
 
   // 6. Focus + highlight
   const focusHighlight = generateCloudcalmFocusHighlight({
@@ -728,6 +791,19 @@ export function generateCloudcalm(input, variant = {}) {
     if (scales.primary.contrast   && scales.primary.contrast   !== scales.primary.emphasis)   cvdInput['primary-contrast']   = { hex: scales.primary.contrast,   locked: false };
     if (scales.secondary.contrast && scales.secondary.contrast !== scales.secondary.emphasis) cvdInput['secondary-contrast'] = { hex: scales.secondary.contrast, locked: false };
     if (scales.neutral.contrast   && scales.neutral.contrast   !== scales.neutral.emphasis)   cvdInput['neutral-contrast']   = { hex: scales.neutral.contrast,   locked: false };
+    // Focus + highlight-link — interaction signals. Must stay distinct from
+    // primary/secondary/neutral bases under CVD; otherwise keyboard users
+    // with CVD lose "where am I" and "what's clickable". Feed into the
+    // collision solver so their hues shift if they collapse.
+    if (focusHighlight['focus-color'])          cvdInput['focus-color']          = { hex: focusHighlight['focus-color'],          locked: false };
+    if (focusHighlight['highlight-link-color']) cvdInput['highlight-link-color'] = { hex: focusHighlight['highlight-link-color'], locked: false };
+    // Status colours — semantic meanings (success/warning/error/info).
+    // Critical that error stays distinct from success under CVD (red-green
+    // is the classic protan/deutan collision). Feed them into the solver too.
+    if (status['color-Success']) cvdInput['color-Success'] = { hex: status['color-Success'], locked: false };
+    if (status['color-Warning']) cvdInput['color-Warning'] = { hex: status['color-Warning'], locked: false };
+    if (status['color-Error'])   cvdInput['color-Error']   = { hex: status['color-Error'],   locked: false };
+    if (status['color-Info'])    cvdInput['color-Info']    = { hex: status['color-Info'],    locked: false };
 
     const result = cvd(cvdInput, cvdType);
     cvdSafe = result.cvdSafe;
@@ -777,6 +853,14 @@ export function generateCloudcalm(input, variant = {}) {
     if (result.hexSet['primary-contrast'])   scales.primary.contrast   = result.hexSet['primary-contrast'];
     if (result.hexSet['secondary-contrast']) scales.secondary.contrast = result.hexSet['secondary-contrast'];
     if (result.hexSet['neutral-contrast'])   scales.neutral.contrast   = result.hexSet['neutral-contrast'];
+    // Focus + highlight-link — apply shifts if CVD rewrote them
+    if (result.hexSet['focus-color'])          focusHighlight['focus-color']          = result.hexSet['focus-color'];
+    if (result.hexSet['highlight-link-color']) focusHighlight['highlight-link-color'] = result.hexSet['highlight-link-color'];
+    // Status colours — apply CVD shifts so error ≠ success etc.
+    if (result.hexSet['color-Success']) status['color-Success'] = result.hexSet['color-Success'];
+    if (result.hexSet['color-Warning']) status['color-Warning'] = result.hexSet['color-Warning'];
+    if (result.hexSet['color-Error'])   status['color-Error']   = result.hexSet['color-Error'];
+    if (result.hexSet['color-Info'])    status['color-Info']    = result.hexSet['color-Info'];
   }
 
   return {

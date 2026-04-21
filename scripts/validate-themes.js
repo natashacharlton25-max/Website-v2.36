@@ -276,9 +276,13 @@ function familyAwareDisambiguate(css, variantName) {
   // a uniform saltH produces different final hues when starting hues aren't
   // perfectly aligned. Leaving scales untouched preserves family coherence.
   if (isCalm) {
+    // Shift only near-bg lightness so the bg surfaces differ per variant,
+    // leaving the scales untouched (calm wants stable scale hues). The L
+    // window widens a bit for dark variants: calm-dark sits at L≈0.32-0.40,
+    // calm-dark-hc sits a touch lower. Include both in the dark window.
     return transformAllHexes(css, (l, c, h) => {
       if (!isDark && l > 0.85) return [l - 0.08 + saltL, c, h + saltH];
-      if (isDark && l < 0.20) return [l + 0.08 + saltL, c, h + saltH];
+      if (isDark && l < 0.42)  return [l + 0.08 + saltL, c, h + saltH];
       return [l, c, h]; // scales untouched — avoid per-position hue drift
     });
   }
@@ -521,7 +525,15 @@ function recomputeFocusHighlight(css, isHC) {
 //
 // Scoring: pick the rotation (+ optional bg retint) that maximises ΔE from
 // the canonical sibling, keeping the variant visually distinct.
-function applyRoleSwap(css, canonicalCss = null, _variantName = '') {
+//
+// `strategy` biases the pick when a CVD-sibling-only group needs three
+// variants to differ from each other (no shared non-CVD parent to rotate
+// against). Each sibling commits to moving on a different axis:
+//   'bg'       → score bg-retint combos higher (deutan default)
+//   'family'   → score family-rotation combos higher (protan default)
+//   'position' → identity+retint-none wins, fall through to family-shift salt (tritan)
+//   null       → balanced scoring (default)
+function applyRoleSwap(css, canonicalCss = null, _variantName = '', strategy = null) {
   const bg = getToken(css, 'page-bg');
   const pBase = getToken(css, 'primary-base');
   const sBase = getToken(css, 'secondary-base');
@@ -643,12 +655,28 @@ function applyRoleSwap(css, canonicalCss = null, _variantName = '') {
     return true;
   }
 
+  // Strategy boost multipliers. When an explicit strategy is set, nudge
+  // the scoring so the preferred axis wins ties and close calls. Still
+  // requires isReadable — a strategy can't produce an illegible result.
+  //   bg       → bumps scores where bg hue changes (newBgHue != null and differs)
+  //   family   → bumps scores where rotation is non-identity
+  //   position → bumps identity+no-retint (fallback to family-shift salt)
+  function strategyBoost(rotations, newBgHue) {
+    if (!strategy) return 1.0;
+    const bgChanged = newBgHue !== null && Math.abs(newBgHue - bgHue) > 2;
+    const rotationHappened = rotations.length > 0;
+    if (strategy === 'bg'       && bgChanged && !rotationHappened) return 2.0;
+    if (strategy === 'family'   && rotationHappened && !bgChanged) return 2.0;
+    if (strategy === 'position' && !rotationHappened && !bgChanged) return 2.0;
+    return 1.0;
+  }
+
   // Enumerate all (rotation × retint) combinations, score, pick max.
   let best = { rotations: [], newBgHue: null, score: -1 };
   for (const rot of rotationOptions) {
     for (const rt of retintOptions) {
       if (!isReadable(rot.rotations, rt.newHue)) continue;
-      const score = scoreCandidate(rot.rotations, rt.newHue);
+      const score = scoreCandidate(rot.rotations, rt.newHue) * strategyBoost(rot.rotations, rt.newHue);
       if (score > best.score) best = { rotations: rot.rotations, newBgHue: rt.newHue, score };
     }
   }
@@ -1016,6 +1044,25 @@ function main() {
           a.split('-').length - b.split('-').length || a.length - b.length
         );
         const [canonical, ...others] = sorted;
+
+        // Detect CVD-sibling-only groups: all group members end in a CVD
+        // suffix (-protan / -deutan / -tritan) AND they share the same
+        // non-CVD base. In that case no member is a natural canonical, so
+        // each sibling commits to a different distinction axis so all
+        // three end up distinct from each other (and from their shared
+        // non-CVD parent when one exists in neighbouring groups).
+        //
+        //   deutan → bg retint   (shift surface hue, keep scales)
+        //   protan → family swap (rotate primary↔text etc., keep bg)
+        //   tritan → position    (identity + family-shift salt only)
+        const isCvdOnlyGroup = group.names.every(n => /-(protan|deutan|tritan)$/.test(n));
+        const STRATEGY_BY_CVD = { deutan: 'bg', protan: 'family', tritan: 'position' };
+        function strategyFor(name) {
+          if (!isCvdOnlyGroup) return null;
+          const m = name.match(/-(protan|deutan|tritan)$/);
+          return m ? STRATEGY_BY_CVD[m[1]] : null;
+        }
+
         // Read canonical CSS once per group — role-swap uses it to pick the
         // rotation that's most perceptually different.
         const canonicalFile = themeFiles.find(f => variantNameFromPath(f) === canonical);
@@ -1035,7 +1082,7 @@ function main() {
           // with no valid rotation), family-shift alone handles it. If role-swap
           // succeeded, family-shift runs on top to make the bg also distinct
           // from the canonical sibling, so cards don't share identical bg.
-          let newCss = applyRoleSwap(css, canonicalCss, dupName);
+          let newCss = applyRoleSwap(css, canonicalCss, dupName, strategyFor(dupName));
           const swapChanged = newCss !== css;
           newCss = familyAwareDisambiguate(newCss, dupName);
           // If neither changed anything, fall back to aggressive family-shift

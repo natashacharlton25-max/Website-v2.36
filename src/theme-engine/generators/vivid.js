@@ -78,11 +78,24 @@ const WARM_BG_LIGHT = {
   'page-bg-sunken':  '#eae3e1',
   'page-bg-overlay': '#f8f4f3',
 };
+const WARM_BG_LIGHT_HC = {
+  'page-bg':         '#faf6f4',
+  'page-bg-raised':  '#fffcfa',
+  'page-bg-sunken':  '#f0e9e6',
+  'page-bg-overlay': '#fffcfa',
+};
 const WARM_BG_DARK = {
   'page-bg':         '#2c2828',
   'page-bg-raised':  '#3a3535',
   'page-bg-sunken':  '#221f1f',
   'page-bg-overlay': '#433d3d',
+};
+// Dark HC pushes bg deeper — near-black to give scales maximum L headroom.
+const WARM_BG_DARK_HC = {
+  'page-bg':         '#1a1616',
+  'page-bg-raised':  '#262121',
+  'page-bg-sunken':  '#120f0f',
+  'page-bg-overlay': '#2e2828',
 };
 
 // Neutral / text position overrides — same character as cloudcalm's neutrals.
@@ -101,33 +114,39 @@ const NEUTRAL_STEPS = [
   { pos: 950, lightness: 0.12 },
 ];
 
-// Neutral overrides — higher chroma than cloudcalm so neutrals read as
-// "tinted greys" that carry the theme's vivid character rather than pure grey.
+// Neutral overrides — standard 200/400/600/800 position grid (vivid's
+// whole character is a wider ladder; only calm uses 200/300/400/500).
+// Higher chroma than cloudcalm so neutrals read as "tinted greys" carrying
+// the theme's vivid character rather than pure grey.
+//
+// L spread wider than calm's: 0.80 tint → 0.38 emphasis on light, mirrored
+// on dark. This lets vivid neutrals span from bg-whisper to deep contrast
+// the same way primary/secondary do.
+// Chroma bumped so neutrals read as clearly "brand-tinted" — vivid's whole
+// character is bold colour, so neutrals shouldn't read as whisper-grey.
+// C 0.035-0.050 lands between calm (0.020) and full brand (0.20).
 export const VIVID_NEUTRAL_OVERRIDES = {
   light: {
-    nonHC: { 200: { L: 0.80, C: 0.020 }, 300: { L: 0.64, C: 0.025 }, 400: { L: 0.52, C: 0.025 }, 500: { L: 0.42, C: 0.025 } },
-    hc:    { 200: { L: 0.76, C: 0.020 }, 300: { L: 0.58, C: 0.025 }, 400: { L: 0.48, C: 0.025 }, 500: { L: 0.38, C: 0.025 } },
+    nonHC: { 200: { L: 0.84, C: 0.035 }, 400: { L: 0.64, C: 0.045 }, 600: { L: 0.48, C: 0.050 }, 800: { L: 0.35, C: 0.050 } },
+    hc:    { 200: { L: 0.80, C: 0.035 }, 400: { L: 0.58, C: 0.045 }, 600: { L: 0.42, C: 0.050 }, 800: { L: 0.28, C: 0.050 } },
   },
   dark: {
-    nonHC: { 200: { L: 0.48, C: 0.025 }, 300: { L: 0.64, C: 0.025 }, 400: { L: 0.75, C: 0.025 }, 500: { L: 0.88, C: 0.020 } },
-    hc:    { 200: { L: 0.52, C: 0.025 }, 300: { L: 0.62, C: 0.025 }, 400: { L: 0.72, C: 0.025 }, 500: { L: 0.82, C: 0.020 } },
+    nonHC: { 200: { L: 0.35, C: 0.050 }, 400: { L: 0.55, C: 0.050 }, 600: { L: 0.72, C: 0.045 }, 800: { L: 0.90, C: 0.035 } },
+    hc:    { 200: { L: 0.42, C: 0.050 }, 400: { L: 0.58, C: 0.050 }, 600: { L: 0.75, C: 0.045 }, 800: { L: 0.92, C: 0.035 } },
   },
 };
 
-// Text chroma bumped ~2× neutral's so text reads as visibly tinted warm/cool
-// while neutral stays subtler. Keeps text distinguishable from neutral when
-// both modes default to 'warm' (vivid's standard comfort surface).
-// Text chroma bumped ~2× neutral's so text reads as visibly tinted warm/cool
-// while neutral stays subtler. Keeps text distinguishable from neutral when
-// both modes default to 'warm' (vivid's standard comfort surface).
+// Text chroma bumped to 0.070-0.085 range — text should read as visibly
+// brand-coloured in vivid, not a quiet tinted grey. Still under the
+// primary/secondary chroma cap (0.20-0.22) so text stays softer than brand.
 export const VIVID_TEXT_OVERRIDES = {
   light: {
-    nonHC: { 200: { L: 0.76, C: 0.045 }, 300: { L: 0.60, C: 0.045 }, 400: { L: 0.50, C: 0.045 }, 500: { L: 0.42, C: 0.045 } },
-    hc:    { 200: { L: 0.70, C: 0.045 }, 300: { L: 0.55, C: 0.045 }, 400: { L: 0.45, C: 0.045 }, 500: { L: 0.35, C: 0.045 } },
+    nonHC: { 200: { L: 0.78, C: 0.060 }, 400: { L: 0.58, C: 0.075 }, 600: { L: 0.42, C: 0.085 }, 800: { L: 0.28, C: 0.085 } },
+    hc:    { 200: { L: 0.72, C: 0.060 }, 400: { L: 0.52, C: 0.075 }, 600: { L: 0.35, C: 0.085 }, 800: { L: 0.20, C: 0.085 } },
   },
   dark: {
-    nonHC: { 200: { L: 0.42, C: 0.045 }, 300: { L: 0.60, C: 0.045 }, 400: { L: 0.75, C: 0.045 }, 500: { L: 0.88, C: 0.045 } },
-    hc:    { 200: { L: 0.48, C: 0.045 }, 300: { L: 0.63, C: 0.045 }, 400: { L: 0.76, C: 0.045 }, 500: { L: 0.88, C: 0.045 } },
+    nonHC: { 200: { L: 0.28, C: 0.085 }, 400: { L: 0.52, C: 0.085 }, 600: { L: 0.72, C: 0.075 }, 800: { L: 0.92, C: 0.060 } },
+    hc:    { 200: { L: 0.35, C: 0.085 }, 400: { L: 0.55, C: 0.085 }, 600: { L: 0.75, C: 0.075 }, 800: { L: 0.95, C: 0.060 } },
   },
 };
 
@@ -285,9 +304,9 @@ export function generateVividText(mode, { primaryHex, textHex, luminance = 'ligh
 
   return {
     tint:     chroma.oklch(overrides[200].L, isGrey ? 0 : overrides[200].C, hue).hex(),
-    mid:      chroma.oklch(overrides[300].L, isGrey ? 0 : overrides[300].C, hue).hex(),
-    base:     chroma.oklch(overrides[400].L, isGrey ? 0 : overrides[400].C, hue).hex(),
-    emphasis: chroma.oklch(overrides[500].L, isGrey ? 0 : overrides[500].C, hue).hex(),
+    mid:      chroma.oklch(overrides[400].L, isGrey ? 0 : overrides[400].C, hue).hex(),
+    base:     chroma.oklch(overrides[600].L, isGrey ? 0 : overrides[600].C, hue).hex(),
+    emphasis: chroma.oklch(overrides[800].L, isGrey ? 0 : overrides[800].C, hue).hex(),
   };
 }
 
@@ -306,6 +325,7 @@ export function generateVividPageBg({
   const resolvedMode = bgMode === 'neutral' ? tertiaryMode : bgMode;
 
   if (resolvedMode === 'warm' || (resolvedMode === 'grey-tint' && !primaryHex)) {
+    if (hc) return isDark ? { ...WARM_BG_DARK_HC } : { ...WARM_BG_LIGHT_HC };
     return isDark ? { ...WARM_BG_DARK } : { ...WARM_BG_LIGHT };
   }
 
@@ -348,13 +368,19 @@ export function generateVividPageBg({
   const useDeep = resolvedMode === 'deep' || hc;
 
   if (isDark) {
-    const cPageBg = useDeep ? 0.035 : 0.018;  // was 0.020 / 0.010
-    const cOther  = useDeep ? 0.030 : 0.015;  // was 0.018 / 0.009
+    const cPageBg = useDeep ? 0.035 : 0.018;
+    const cOther  = useDeep ? 0.030 : 0.015;
+    // HC goes deeper than non-HC to give scales maximum L headroom — body
+    // text on dark-HC wants 7:1+ which needs bg ≤ L 0.20 or so.
+    const lPage   = hc ? 0.18 : 0.32;
+    const lRaised = hc ? 0.24 : 0.38;
+    const lSunken = hc ? 0.12 : 0.26;
+    const lOver   = hc ? 0.28 : 0.42;
     return {
-      'page-bg':         safeOklch(0.32, cPageBg, hue),
-      'page-bg-raised':  safeOklch(0.38, cPageBg, hue),
-      'page-bg-sunken':  safeOklch(0.26, cOther,  hue),
-      'page-bg-overlay': safeOklch(0.42, cPageBg, hue),
+      'page-bg':         safeOklch(lPage,   cPageBg, hue),
+      'page-bg-raised':  safeOklch(lRaised, cPageBg, hue),
+      'page-bg-sunken':  safeOklch(lSunken, cOther,  hue),
+      'page-bg-overlay': safeOklch(lOver,   cPageBg, hue),
     };
   }
   const cPageBg = useDeep ? 0.025 : 0.012;  // was 0.012 / 0.006
@@ -371,13 +397,40 @@ export function generateVividPageBg({
    STATUS + FOCUS/HIGHLIGHT — same as cloudcalm
    ================================================================ */
 
-export function generateVividStatus({ luminance = 'light' } = {}) {
+// Vivid status palettes — saturated equivalents of calm's. Same hue
+// mapping per CVD type (standard / protan|deutan / tritan) just bolder.
+const VIVID_STATUS_PALETTES = {
+  standard: {
+    light: { Success: '#1e7d3f', Warning: '#c26100', Error: '#c11f2f', Info: '#1e5a8a' },
+    dark:  { Success: '#6cc088', Warning: '#ffb870', Error: '#ff8a8a', Info: '#7fb3e2' },
+  },
+  protan: {
+    light: { Success: '#008f60', Warning: '#c26100', Error: '#9a0070', Info: '#1e5a8a' },
+    dark:  { Success: '#5fcfa0', Warning: '#ffb870', Error: '#d070a0', Info: '#7fb3e2' },
+  },
+  deutan: {
+    light: { Success: '#008f60', Warning: '#c26100', Error: '#9a0070', Info: '#1e5a8a' },
+    dark:  { Success: '#5fcfa0', Warning: '#ffb870', Error: '#d070a0', Info: '#7fb3e2' },
+  },
+  tritan: {
+    light: { Success: '#1e7d3f', Warning: '#c23424', Error: '#b03478', Info: '#6a3ca8' },
+    dark:  { Success: '#6cc088', Warning: '#ff8a7a', Error: '#ff85c0', Info: '#b098e0' },
+  },
+};
+
+export function generateVividStatus({ luminance = 'light', cvd = null } = {}) {
   const isDark = luminance === 'dark';
+  const palette = VIVID_STATUS_PALETTES[cvd] || VIVID_STATUS_PALETTES.standard;
+  const p = palette[isDark ? 'dark' : 'light'];
   return {
     'color-Black':  isDark ? '#fafafa' : '#1a1a1a',
     'color-White':  isDark ? '#1a1a1a' : '#fafafa',
     'shadow-Black': '#000000',
     'shadow-White': '#ffffff',
+    'color-Success': p.Success,
+    'color-Warning': p.Warning,
+    'color-Error':   p.Error,
+    'color-Info':    p.Info,
   };
 }
 
@@ -477,11 +530,32 @@ export function generateVivid(input, variant = {}) {
   const PRE_SHIFT_THRESHOLD = 0.3;
   if (cvdType && cvdRisks && cvdRisks[cvdType] && cvdRisks[cvdType].slots && cvdRisks[cvdType].slots.length && cvdRisks[cvdType].score >= PRE_SHIFT_THRESHOLD) {
     const risk = cvdRisks[cvdType];
-    const safeHue = (cvdType === 'tritan') ? 330 : 270;
+    // Aware pre-shift: candidates are CVD-safe hues ordered by preference.
+    // Walk the list until one sits ≥60° from the other slot's current hue.
+    const CANDIDATES = {
+      protan: [270, 240, 200, 60,  90],
+      deutan: [250, 210, 60,  90,  180],
+      tritan: [330, 20,  300, 350, 40],
+    };
+    function hueGap(a, b) {
+      const d = Math.abs(((a - b) % 360 + 360) % 360);
+      return Math.min(d, 360 - d);
+    }
+    function pickSafeHue(candidates, referenceHue) {
+      if (referenceHue === null || !Number.isFinite(referenceHue)) return candidates[0];
+      for (const h of candidates) {
+        if (hueGap(h, referenceHue) >= 60) return h;
+      }
+      return candidates[0];
+    }
+
     for (const slot of risk.slots) {
       const current = slot === 'primary' ? primary : (slot === 'secondary' ? secondary : null);
       if (!current) continue;
-      // Preserve the source hex's L and C, shift only hue
+      const otherHex = slot === 'primary' ? secondaryHex : primaryHex;
+      const otherHue = otherHex ? (chroma(otherHex).get('oklch.h') || 0) : null;
+      const candidates = CANDIDATES[cvdType] ?? [270];
+      const safeHue = pickSafeHue(candidates, otherHue);
       const [L, C] = chroma(current.hex).oklch();
       const shiftedHex = chroma.oklch(L, C || 0, safeHue).hex();
       if (slot === 'primary')   primaryHex   = shiftedHex;
@@ -521,7 +595,7 @@ export function generateVivid(input, variant = {}) {
   );
 
   // 5. Status + shadow
-  const status = generateVividStatus({ luminance });
+  const status = generateVividStatus({ luminance, cvd: cvdType });
 
   // 6. Focus + highlight
   const focusHighlight = generateVividFocusHighlight({
@@ -572,13 +646,14 @@ export function generateVivid(input, variant = {}) {
       emphasis: secondaryScale[800],
       contrast: contrast.secondary,
     },
-    // Neutral + text keep cloudcalm's compressed 200/300/400/500 positions
-    // (neutral/text are shared-comfort scales, not brand scales).
+    // Vivid's neutral + text use the SAME wider 200/400/600/800 semantic
+    // positions as primary/secondary — vivid's whole character is a wider
+    // ladder so all four families run on the same position grid.
     neutral: {
       tint:     neutralScale[200],
-      mid:      neutralScale[300],
-      base:     neutralScale[400],
-      emphasis: neutralScale[500],
+      mid:      neutralScale[400],
+      base:     neutralScale[600],
+      emphasis: neutralScale[800],
       contrast: contrast.neutral,
     },
     text: textScale,
@@ -596,6 +671,15 @@ export function generateVivid(input, variant = {}) {
     if (scales.primary.contrast   && scales.primary.contrast   !== scales.primary.emphasis)   cvdInput['primary-contrast']   = { hex: scales.primary.contrast,   locked: false };
     if (scales.secondary.contrast && scales.secondary.contrast !== scales.secondary.emphasis) cvdInput['secondary-contrast'] = { hex: scales.secondary.contrast, locked: false };
     if (scales.neutral.contrast   && scales.neutral.contrast   !== scales.neutral.emphasis)   cvdInput['neutral-contrast']   = { hex: scales.neutral.contrast,   locked: false };
+    // Focus + highlight-link must survive CVD — keyboard users with CVD
+    // rely on them to see "where am I" and "what's clickable".
+    if (focusHighlight['focus-color'])          cvdInput['focus-color']          = { hex: focusHighlight['focus-color'],          locked: false };
+    if (focusHighlight['highlight-link-color']) cvdInput['highlight-link-color'] = { hex: focusHighlight['highlight-link-color'], locked: false };
+    // Status semantics — error must stay distinct from success under CVD.
+    if (status['color-Success']) cvdInput['color-Success'] = { hex: status['color-Success'], locked: false };
+    if (status['color-Warning']) cvdInput['color-Warning'] = { hex: status['color-Warning'], locked: false };
+    if (status['color-Error'])   cvdInput['color-Error']   = { hex: status['color-Error'],   locked: false };
+    if (status['color-Info'])    cvdInput['color-Info']    = { hex: status['color-Info'],    locked: false };
 
     const result = cvd(cvdInput, cvdType);
     cvdSafe = result.cvdSafe;
@@ -678,6 +762,14 @@ export function generateVivid(input, variant = {}) {
     if (result.hexSet['primary-contrast'])   scales.primary.contrast   = result.hexSet['primary-contrast'];
     if (result.hexSet['secondary-contrast']) scales.secondary.contrast = result.hexSet['secondary-contrast'];
     if (result.hexSet['neutral-contrast'])   scales.neutral.contrast   = result.hexSet['neutral-contrast'];
+    // Apply any focus/highlight shifts
+    if (result.hexSet['focus-color'])          focusHighlight['focus-color']          = result.hexSet['focus-color'];
+    if (result.hexSet['highlight-link-color']) focusHighlight['highlight-link-color'] = result.hexSet['highlight-link-color'];
+    // Apply status shifts
+    if (result.hexSet['color-Success']) status['color-Success'] = result.hexSet['color-Success'];
+    if (result.hexSet['color-Warning']) status['color-Warning'] = result.hexSet['color-Warning'];
+    if (result.hexSet['color-Error'])   status['color-Error']   = result.hexSet['color-Error'];
+    if (result.hexSet['color-Info'])    status['color-Info']    = result.hexSet['color-Info'];
   }
 
   return {
