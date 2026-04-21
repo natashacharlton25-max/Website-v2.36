@@ -93,6 +93,45 @@ For the rebuild: detect achromatic input explicitly and either:
 
 Do not silently substitute a default hue without telling the user.
 
+### 7. CVD at low chroma: warm shift is correct, not a compromise
+
+At calm's chroma levels (around 0.02–0.05), most cool hues collapse to the same
+grey-blue under protan/deutan simulation. Pink, magenta, purple, and blue all
+look indistinguishable to the CVD eye when chroma is low — there isn't enough
+colour signal left for the visual system to separate hues in the cool half of
+the wheel. The only hues that remain meaningfully distinct from a given cool
+anchor (e.g. blue) under protan are **warm ones** — yellows, olives, browns.
+
+This means calm-protan's CVD-shifted primary often lands in the warm/olive
+range even when the source was pink. This is **not a bug and not a theme
+failure**. It is the unavoidable consequence of:
+
+- Low chroma (calm's comfort principle, non-negotiable for migraine users)
+- Protan/deutan collapsing the cool-half of the wheel to grey-blue
+- Needing distinguishability from the other brand colour
+
+If two brand colours sit in the cool half (blue + purple, or pink + teal), CVD
+will shift one of them warm to preserve distinctness. The warm result may feel
+off-brand, but it is **the most comfortable outcome** for the CVD user:
+
+- Dark-on-light contrast does most of the legibility work (neutrals/text handle that)
+- Warm-vs-cool pairs stay distinct where hue-vs-hue collapses
+- Calm's low-noise aesthetic is preserved
+
+For users who need vivid CVD distinction, route them to the **HC variant**
+(calm-HC-protan etc.) which has higher chroma (0.055+) — at that chroma level
+the hue wheel opens up and more distinctions become possible.
+
+**Do not** bump calm's chroma "to make CVD look nicer" — that breaks the
+migraine-comfort principle. Low chroma + warm-shifted CVD is the correct
+output, not a compromise.
+
+If the calm-protan variant returns `cvdSafe: false` for a particular brand
+pair, that's a legitimate flag. The post-build validator
+(`scripts/validate-themes.js`) handles role-swap as a fallback. Occasionally
+a specific brand pair just won't have a calm-protan-safe combination, and
+the calm-HC-protan variant is the answer for CVD users with that brand.
+
 ## What makes this engine different from "a theme engine"
 
 Most theme engines optimise for:

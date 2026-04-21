@@ -23,6 +23,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { ACCESSIBILITY_PROFILES } from '../src/lib/accessibility-profiles.js';
+import { DISTINCTNESS_DE } from '../src/theme-engine/shared/cvd.js';
 
 const require = createRequire(import.meta.url);
 const chroma = require('chroma-js');
@@ -206,43 +207,66 @@ function transformAllHexes(css, transform) {
 // Detects what family the variant belongs to (calm/hc/mono/dark/light) and
 // applies a transformation that respects the family's design intent.
 //
+// Each variant gets a small per-name SALT on top of the family transform so
+// that multiple members of the same duplicate group don't all shift by the
+// identical amount (which would leave them fingerprint-identical again).
+// The salt encodes the variant name into a tiny hue + L nudge that's
+// deterministic (same name → same salt) but distinct across variants.
+//
 // - calm:  bg darkens slightly, primary/secondary keep chalky feel (no chroma bump)
 // - hc:    one side lightens hard (already extreme, can go harder); chroma bump OK
 // - mono:  bg shifts (lighter or darker depending on dark mode), keeps mono identity
 // - dark:  lighten everything a touch — escapes near-black collision zone
 // - light: darken everything a touch + tiny chroma bump
+function variantSalt(variantName) {
+  // Simple hash → deterministic per-variant offsets.
+  // Kept small so the aesthetic stays recognisable.
+  let h = 0;
+  for (let i = 0; i < variantName.length; i++) {
+    h = ((h << 5) - h + variantName.charCodeAt(i)) | 0;
+  }
+  const hAbs = Math.abs(h);
+  // dL in ±0.04 range, dH in ±18° range
+  const dL = ((hAbs % 81) - 40) / 1000;       // −0.040..+0.040
+  const dH = ((hAbs >> 7) % 37) - 18;          // −18..+18 degrees
+  return { dL, dH };
+}
+
 function familyAwareDisambiguate(css, variantName) {
-  const isCalm = variantName.includes('-calm');
+  const isCalm = variantName.includes('calm'); // matches 'calm' AND 'cloudcalm' AND 'softcalm'
   const isHC = variantName.includes('-hc');
   const isMono = variantName.includes('-mono-') || variantName.startsWith('mono-');
   const isDark = variantName.includes('-dark');
 
-  // CALM: chalky-preserving — bg darkens 0.04, scales unchanged, no chroma change
+  const { dL: saltL, dH: saltH } = variantSalt(variantName);
+
+  // CALM: chalky-preserving but with a bigger near-bg nudge so cards differ.
+  // Scales still only shift hue slightly (keeps calm's muted character).
   if (isCalm) {
     return transformAllHexes(css, (l, c, h) => {
-      // Only nudge near-bg lightnesses (>0.85 in light, <0.20 in dark)
-      if (!isDark && l > 0.85) return [l - 0.04, c, h];
-      if (isDark && l < 0.20) return [l + 0.04, c, h];
-      return [l, c, h];
+      // Near-bg lightness nudge with per-variant salt (was 0.04 → 0.08)
+      if (!isDark && l > 0.85) return [l - 0.08 + saltL, c, h + saltH];
+      if (isDark && l < 0.20) return [l + 0.08 + saltL, c, h + saltH];
+      // Mid/scale tokens: keep L, nudge hue slightly per variant
+      return [l + saltL * 0.5, c, h + saltH];
     });
   }
-  // HC: push hard — lightness ±0.10, chroma +0.04
+  // HC: push harder — ±0.15 (was ±0.10), chroma +0.05 (was +0.04)
   if (isHC) {
-    const dL = isDark ? +0.10 : -0.10;
-    return transformAllHexes(css, (l, c, h) => [l + dL, c + (c > 0.02 ? 0.04 : 0), h]);
+    const dL = isDark ? +0.15 : -0.15;
+    return transformAllHexes(css, (l, c, h) => [l + dL + saltL, c + (c > 0.02 ? 0.05 : 0), h + saltH]);
   }
-  // MONO: bg shift — chalky/lighter in light, dustier/darker in dark.
-  // ±0.10 to match HC strength (±0.05 was too subtle to read as distinct).
+  // MONO: ±0.15 bg shift (was ±0.10)
   if (isMono) {
-    const dL = isDark ? -0.10 : +0.10;
-    return transformAllHexes(css, (l, c, h) => [l + dL, c, h]);
+    const dL = isDark ? -0.15 : +0.15;
+    return transformAllHexes(css, (l, c, h) => [l + dL + saltL, c, h + saltH]);
   }
-  // STANDARD DARK: lighten 0.06 — escapes near-black collision
+  // STANDARD DARK: lighten 0.10 (was 0.06) + salt + small chroma bump
   if (isDark) {
-    return transformAllHexes(css, (l, c, h) => [l + 0.06, c + (c > 0.02 ? 0.02 : 0), h]);
+    return transformAllHexes(css, (l, c, h) => [l + 0.10 + saltL, c + (c > 0.02 ? 0.03 : 0), h + saltH]);
   }
-  // STANDARD LIGHT: darken 0.06 + tiny chroma bump
-  return transformAllHexes(css, (l, c, h) => [l - 0.06, c + (c > 0.02 ? 0.02 : 0), h]);
+  // STANDARD LIGHT: darken 0.10 (was 0.06) + salt + small chroma bump
+  return transformAllHexes(css, (l, c, h) => [l - 0.10 + saltL, c + (c > 0.02 ? 0.03 : 0), h + saltH]);
 }
 
 // Build a swap map for a given newBg choice. Returns null if the rotation can't
@@ -338,12 +362,35 @@ function applyRoleSwap(css, canonicalCss = null, variantName = '') {
     .filter(c => c && c.toLowerCase() !== bg.toLowerCase())
     .filter(preservesFamily); // family-preserving
 
-  // Build all valid swap configs
+  // Mode 1: bg-rotation swap — try each candidate as new bg.
+  // Works when there's a family-preserving alternative bg colour in the set.
   const configs = [];
   for (const candidate of candidates) {
     const config = buildSwapForNewBg(bg, primary, secondary, text, candidate);
     if (config) configs.push(config);
   }
+
+  // Mode 2: bg-locked swap — keep the original bg, permute primary/secondary/text
+  // among themselves. Useful for narrow-palette themes (dark calm, etc.) where
+  // no non-bg colour is dark enough to serve as new-bg, but the three foreground
+  // colours can rotate roles among themselves to produce a visibly different
+  // layout without breaking the family.
+  const permutations3 = [
+    // [newPrimary, newSecondary, newText] assigned from (primary, secondary, text)
+    [secondary, text, primary],  // shift left
+    [text, primary, secondary],  // shift right
+    [primary, text, secondary],  // swap secondary↔text
+    [secondary, primary, text],  // swap primary↔secondary
+    [text, secondary, primary],  // swap primary↔text
+  ];
+  for (const [newPrimary, newSecondary, newText] of permutations3) {
+    // Readability: newText must still clear 4.5:1 against bg
+    if (contrastRatio(newText, bg) < 4.5) continue;
+    // Primary visibility: must clear 3:1 UI contrast against bg
+    if (contrastRatio(newPrimary, bg) < 3) continue;
+    configs.push({ newBg: bg, newPrimary, newSecondary, newText });
+  }
+
   if (configs.length === 0) return css;
 
   // Rank by perceptual distance from canonical (or just pick first if no canonical)
@@ -363,16 +410,72 @@ function applyRoleSwap(css, canonicalCss = null, variantName = '') {
   return applySwapConfig(css, oldHexes, best);
 }
 
-// Cross-variant duplication: two variants byte-identical on all 4 card tokens
-function findVariantDuplicates(parsedThemes) {
-  const fingerprints = {};
-  for (const [name, theme] of Object.entries(parsedThemes)) {
-    const fp = [theme.bg, theme.textEmphasis, theme.primary, theme.secondary]
-      .map(s => (s || '').toLowerCase()).join('|');
-    if (!fingerprints[fp]) fingerprints[fp] = [];
-    fingerprints[fp].push(name);
+// Cross-variant duplication: two variants PERCEPTUALLY identical on the 4
+// canonical card tokens (page-bg, text-emphasis, primary-base, secondary-base).
+//
+// Strict definition: two themes are duplicates when ALL FOUR token pairs
+// are within DISTINCTNESS_DE of each other. One clearly-different token is
+// enough to keep them distinct.
+//
+// This replaces hex-string fingerprinting — two themes with `#d0c599` and
+// `#d9c199` for the same token differ by 1 byte but ΔE ~2, i.e. visually
+// identical. The byte check missed that; the perceptual check catches it.
+//
+// Uses the shared DISTINCTNESS_DE constant (from cvd.js), same threshold
+// used throughout the engine for "perceptibly distinct" judgements.
+//
+// Complexity: O(n²) per brand — 4 deltaE calls per pair. For ~140 variants
+// that's ~40k deltaE calls, ~200ms. Acceptable at current scale; worth
+// revisiting if the catalogue grows past ~500 themes.
+
+function pairIsPerceptuallyEqual(a, b) {
+  const pairs = [
+    [a.bg, b.bg],
+    [a.textEmphasis, b.textEmphasis],
+    [a.primary, b.primary],
+    [a.secondary, b.secondary],
+  ];
+  for (const [x, y] of pairs) {
+    if (!x || !y) return false;
+    let de;
+    try { de = chroma.deltaE(x, y); } catch (e) { return false; }
+    if (de >= DISTINCTNESS_DE) return false; // any one pair distinct = not duplicates
   }
-  return Object.entries(fingerprints)
+  return true;
+}
+
+function findVariantDuplicates(parsedThemes) {
+  const entries = Object.entries(parsedThemes);
+  // Union-find grouping: merge two themes into the same group when all 4
+  // canonical tokens are within DISTINCTNESS_DE of each other.
+  const parent = {};
+  const find = (x) => {
+    if (parent[x] === undefined) parent[x] = x;
+    if (parent[x] === x) return x;
+    return parent[x] = find(parent[x]);
+  };
+  const union = (a, b) => {
+    const ra = find(a), rb = find(b);
+    if (ra !== rb) parent[ra] = rb;
+  };
+  for (const [n] of entries) parent[n] = n;
+
+  for (let i = 0; i < entries.length; i++) {
+    for (let j = i + 1; j < entries.length; j++) {
+      const [a, themeA] = entries[i];
+      const [b, themeB] = entries[j];
+      if (pairIsPerceptuallyEqual(themeA, themeB)) union(a, b);
+    }
+  }
+
+  // Collect groups with ≥2 members
+  const groups = {};
+  for (const [n] of entries) {
+    const root = find(n);
+    if (!groups[root]) groups[root] = [];
+    groups[root].push(n);
+  }
+  return Object.entries(groups)
     .filter(([, names]) => names.length > 1)
     .map(([fp, names]) => ({ fp, names }));
 }
@@ -648,12 +751,23 @@ function main() {
           if (!dupFile) continue;
           const css = fs.readFileSync(dupFile, 'utf8');
           swapHistory[dupName] = (swapHistory[dupName] || 0) + 1;
-          // Stragglers: after 2+ swap attempts, hand off to the family-aware
-          // disambiguator (calm preserves chalky, HC pushes harder, mono shifts
-          // bg lightness, dark/light nudge with optional chroma bump).
-          const newCss = swapHistory[dupName] >= 2
-            ? familyAwareDisambiguate(css, dupName)
-            : applyRoleSwap(css, canonicalCss, dupName);
+          // Apply BOTH mechanisms on top of each other:
+          //  - role-swap: rotates the 4 tokens through new positions (same
+          //    palette, different hierarchy)
+          //  - family-shift: small per-variant L/C/hue nudge so the bg and
+          //    scales differ from sibling variants of the same theme
+          //
+          // Role-swap is tried first. If it produces no change (narrow palette
+          // with no valid rotation), family-shift alone handles it. If role-swap
+          // succeeded, family-shift runs on top to make the bg also distinct
+          // from the canonical sibling, so cards don't share identical bg.
+          let newCss = applyRoleSwap(css, canonicalCss, dupName);
+          const swapChanged = newCss !== css;
+          newCss = familyAwareDisambiguate(newCss, dupName);
+          // If neither changed anything, fall back to aggressive family-shift
+          if (newCss === css && !swapChanged) {
+            newCss = familyAwareDisambiguate(css, dupName);
+          }
           if (newCss !== css) {
             fs.writeFileSync(dupFile, newCss);
             roleSwapsApplied++;
@@ -683,12 +797,16 @@ function main() {
         }
       }
     }
-    if (passSwaps === 0) break; // converged
-    // Re-detect duplicates for next pass — swaps may have produced new collisions
+    // Re-detect duplicates for next pass — swaps may have produced new
+    // collisions, OR swap attempts may have bailed (unreadable text etc).
+    // Counter still advances so the next pass tries a different strategy.
     for (const [brandKey, themes] of Object.entries(parsedThemesByBrand)) {
       const dupes = findVariantDuplicates(themes);
       variantDuplicates[brandKey] = dupes;
     }
+    // True convergence: no duplicates left at all
+    const totalDupes = Object.values(variantDuplicates).reduce((sum, g) => sum + g.length, 0);
+    if (totalDupes === 0) break;
   }
   if (roleSwapsApplied > 0) {
     console.log(`\n🔄 Applied role-swap fix to ${roleSwapsApplied} duplicate variants`);

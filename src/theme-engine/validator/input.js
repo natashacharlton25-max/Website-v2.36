@@ -1,34 +1,35 @@
 /**
  * input.js — Pre-theme input validator.
  *
- * Takes brand input (HSV per slot + enum modes), converts HSV → OKLCH at
- * the boundary, fills missing slots with sensible defaults derived from
- * primary, returns a complete OKLCH/enum set ready for the theme generator.
+ * Accepts HSV per slot (from the picker), converts to hex for downstream,
+ * and carries the user-picked hue forward as a guaranteed-present sibling.
+ * Fills missing slots with sensible defaults derived from primary.
  *
- * Transport:
- *   Picker native  = HSV   (hue survives S=0 / V=0)
- *   Engine native  = OKLCH (all downstream maths works in OKLCH)
- *   CSS output     = hex   (writer converts at the very end)
+ * Transport downstream is hex, but every hex slot is paired with its
+ * guaranteed hue so no one has to re-extract hue from a possibly-achromatic
+ * hex. Generators can read `.hex` for rendering and `.hue` for maths.
  *
  * Rules (locked):
- *   - primary is required; non-finite hue throws
+ *   - primary is required
+ *   - inputs must be HSV { h, s, v } (picker-native) — hex strings not accepted
  *   - missing secondary → derive via harmony (fallback: mono-shift + warning)
- *   - harmony changes hue only; L/C copied from primary
  *   - missing accents → null (generator decides)
  *   - missing tertiary → infer warm/cool from primary hue (boundary 150°/320°)
- *   - missing text → inherit tertiary's resolved mode (silent)
+ *   - missing text → inherit tertiary's resolved value (silent)
  *   - missing pageBg → null (generator picks type-specific default)
  *   - shiftability metadata is NOT set here (generator's job when calling CVD)
- *   - L/C for derived hexes copied from primary (harmony affects hue only)
+ *   - harmony changes hue only; s/v copied from primary
  *
  * Output:
- *   { oklchSet, accentStrategy, warnings }
- *   - oklchSet: { slot: { L, C, H } | enumString }
- *   - accentStrategy: string | null  (UI-decoration preference)
- *   - warnings: string[]
+ *   { hexSet, accentStrategy, warnings }
+ *   - hexSet[slot] = { hex, hue }  for colour slots
+ *   - hexSet[slot] = 'warm' | 'cool' | ... for enum modes
+ *   - hexSet.pageBg = enum-string | null
+ *   - accentStrategy = enum-string | null (UI-decoration preference)
+ *   - warnings = string[]
  */
 
-import { hsvToOklch } from '../shared/colour-maths.js';
+import chroma from 'chroma-js';
 
 /* ================================================================
    Constants
@@ -49,23 +50,12 @@ const HARMONY_ENUMS = ['mono', 'mono-shift', 'complementary', 'analogous'];
 
 // Contrast/accent token is UI-DECORATION ONLY — hover, interaction,
 // decorative accents. NEVER used for text. Target is WCAG 3:1 UI + ΔE + APCA Lc.
-//
-// Validator accepts all five forward-looking strategies. Generator support
-// is partial today:
-//   'emphasis' ✓ supported (copy primary-emphasis)
-//   'brand'    ✓ supported (use accent hex if supplied)
-//   'neutral'  ✓ supported (use neutral-emphasis)
-//   'swap'     ◦ not yet implemented — generator will fall back to 'emphasis'
-//   'tint'     ◦ not yet implemented — generator will fall back to 'emphasis'
 const ACCENT_STRATEGY_ENUMS = ['emphasis', 'swap', 'tint', 'neutral', 'brand'];
 
 /* ================================================================
    Primitives
    ================================================================ */
 
-/**
- * Does this value look like an HSV slot? Shape-check only.
- */
 function isHsv(v) {
   return (
     v !== null &&
@@ -81,52 +71,52 @@ function normaliseHue(h) {
 }
 
 /**
- * Convert an HSV slot input to OKLCH triple.
- * Delegates the hue-preservation work to hsvToOklch.
+ * Convert an HSV slot to { hex, hue }.
+ * Guarantees hue is a finite number (from picker slider, not extracted hex).
  */
-function slotToOklch(slotName, hsv) {
+function hsvToHexAndHue(slotName, hsv) {
   if (!isHsv(hsv)) {
     throw new Error(
-      `validateInput: slot "${slotName}" must be an HSV object ` +
-      `{ h, s, v } with numeric h, s, v. Got: ${JSON.stringify(hsv)}`
+      `validateInput: slot "${slotName}" must be HSV { h, s, v } with numeric values. ` +
+      `Got: ${JSON.stringify(hsv)}`
     );
   }
-  try {
-    return hsvToOklch(hsv.h, hsv.s, hsv.v);
-  } catch (err) {
-    throw new Error(`validateInput: slot "${slotName}": ${err.message}`);
+  if (!Number.isFinite(hsv.h)) {
+    throw new Error(`validateInput: slot "${slotName}" has non-finite hue: ${hsv.h}`);
   }
+  const hue = normaliseHue(hsv.h);
+  const hex = chroma.hsv(hue, hsv.s, hsv.v).hex();
+  return { hex, hue };
 }
 
 /**
- * Infer a warm/cool neutral mode from primary's OKLCH hue.
+ * Infer warm/cool neutral mode from primary's hue.
  */
-function inferNeutralMode(primaryOklch) {
-  const h = primaryOklch.H;
-  if (!Number.isFinite(h)) {
-    throw new Error(`inferNeutralMode: primary hue is not finite (${h})`);
+function inferNeutralMode(primaryHue) {
+  if (!Number.isFinite(primaryHue)) {
+    throw new Error(`inferNeutralMode: primary hue is not finite (${primaryHue})`);
   }
-  const n = normaliseHue(h);
+  const n = normaliseHue(primaryHue);
   if (n >= WARM_LOWER_WRAP || n < WARM_UPPER) return 'warm';
   return 'cool';
 }
 
 /**
- * Derive secondary OKLCH from primary OKLCH + harmony.
- * Hue rotates per harmony; L and C copied from primary.
+ * Derive secondary HSV from primary HSV + harmony.
+ * Hue rotates per harmony; s and v copied from primary.
  */
-function deriveSecondary(primaryOklch, harmony) {
-  const { L, C, H } = primaryOklch;
+function deriveSecondary(primaryHsv, harmony) {
+  const { h, s, v } = primaryHsv;
   let newHue;
   switch (harmony) {
-    case 'mono':          newHue = H; break;
-    case 'mono-shift':    newHue = normaliseHue(H + MONO_SHIFT_DEGREES); break;
-    case 'analogous':     newHue = normaliseHue(H + ANALOGOUS_DEGREES); break;
-    case 'complementary': newHue = normaliseHue(H + 180); break;
+    case 'mono':          newHue = h; break;
+    case 'mono-shift':    newHue = normaliseHue(h + MONO_SHIFT_DEGREES); break;
+    case 'analogous':     newHue = normaliseHue(h + ANALOGOUS_DEGREES); break;
+    case 'complementary': newHue = normaliseHue(h + 180); break;
     default:
       throw new Error(`deriveSecondary: unknown harmony "${harmony}"`);
   }
-  return { L, C, H: newHue };
+  return { h: newHue, s, v };
 }
 
 function assertEnum(slotName, value, allowed) {
@@ -144,13 +134,13 @@ function assertEnum(slotName, value, allowed) {
 
 export function validateInput(input = {}) {
   const warnings = [];
-  const oklchSet = {};
+  const hexSet = {};
 
   // ── 1. Primary ───────────────────────────────────────────────────
   if (input.primary === undefined) {
     throw new Error('validateInput: "primary" is required.');
   }
-  oklchSet.primary = slotToOklch('primary', input.primary);
+  hexSet.primary = hsvToHexAndHue('primary', input.primary);
 
   // ── 2. Harmony validation (if provided) ──────────────────────────
   let harmony = input.harmony;
@@ -160,7 +150,7 @@ export function validateInput(input = {}) {
 
   // ── 3. Secondary ─────────────────────────────────────────────────
   if (input.secondary !== undefined) {
-    oklchSet.secondary = slotToOklch('secondary', input.secondary);
+    hexSet.secondary = hsvToHexAndHue('secondary', input.secondary);
   } else {
     if (!harmony) {
       harmony = 'mono-shift';
@@ -168,55 +158,56 @@ export function validateInput(input = {}) {
         'secondary missing and no harmony specified — derived via "mono-shift" fallback (+15°)'
       );
     }
-    oklchSet.secondary = deriveSecondary(oklchSet.primary, harmony);
+    const derivedHsv = deriveSecondary(input.primary, harmony);
+    hexSet.secondary = hsvToHexAndHue('secondary', derivedHsv);
   }
 
   // ── 4. Accents ───────────────────────────────────────────────────
-  oklchSet.primaryAccent = input.primaryAccent !== undefined
-    ? slotToOklch('primaryAccent', input.primaryAccent)
+  hexSet.primaryAccent = input.primaryAccent !== undefined
+    ? hsvToHexAndHue('primaryAccent', input.primaryAccent)
     : null;
 
-  oklchSet.secondaryAccent = input.secondaryAccent !== undefined
-    ? slotToOklch('secondaryAccent', input.secondaryAccent)
+  hexSet.secondaryAccent = input.secondaryAccent !== undefined
+    ? hsvToHexAndHue('secondaryAccent', input.secondaryAccent)
     : null;
 
   // ── 5. Tertiary ──────────────────────────────────────────────────
   if (input.tertiary !== undefined) {
     if (typeof input.tertiary === 'string') {
       assertEnum('tertiary', input.tertiary, NEUTRAL_ENUMS);
-      oklchSet.tertiary = input.tertiary;
+      hexSet.tertiary = input.tertiary;
     } else {
-      oklchSet.tertiary = slotToOklch('tertiary', input.tertiary);
+      hexSet.tertiary = hsvToHexAndHue('tertiary', input.tertiary);
     }
   } else {
-    oklchSet.tertiary = inferNeutralMode(oklchSet.primary);
+    hexSet.tertiary = inferNeutralMode(hexSet.primary.hue);
   }
 
   // ── 6. Tertiary accent ───────────────────────────────────────────
-  oklchSet.tertiaryAccent = input.tertiaryAccent !== undefined
-    ? slotToOklch('tertiaryAccent', input.tertiaryAccent)
+  hexSet.tertiaryAccent = input.tertiaryAccent !== undefined
+    ? hsvToHexAndHue('tertiaryAccent', input.tertiaryAccent)
     : null;
 
   // ── 7. Text ──────────────────────────────────────────────────────
   if (input.text !== undefined) {
     if (typeof input.text === 'string') {
       assertEnum('text', input.text, NEUTRAL_ENUMS);
-      oklchSet.text = input.text;
+      hexSet.text = input.text;
     } else {
-      oklchSet.text = slotToOklch('text', input.text);
+      hexSet.text = hsvToHexAndHue('text', input.text);
     }
   } else {
-    // Default: inherit tertiary's resolved mode/value. Silent — most themes
+    // Default: inherit tertiary's resolved value. Silent — most themes
     // don't specify text explicitly.
-    oklchSet.text = oklchSet.tertiary;
+    hexSet.text = hexSet.tertiary;
   }
 
   // ── 8. Page background ───────────────────────────────────────────
   if (input.pageBg !== undefined) {
     assertEnum('pageBg', input.pageBg, PAGEBG_ENUMS);
-    oklchSet.pageBg = input.pageBg;
+    hexSet.pageBg = input.pageBg;
   } else {
-    oklchSet.pageBg = null;
+    hexSet.pageBg = null;
   }
 
   // ── 9. Accent strategy (UI decoration preference) ────────────────
@@ -226,5 +217,5 @@ export function validateInput(input = {}) {
     accentStrategy = input.accentStrategy;
   }
 
-  return { oklchSet, accentStrategy, warnings };
+  return { hexSet, accentStrategy, warnings };
 }

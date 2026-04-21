@@ -16,7 +16,6 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const themesDir = path.join(__dirname, '../styles/themes');
 const outputDir = path.join(__dirname, '../styles/themes/Preview');
-const coreTokensPath = path.join(outputDir, 'coretokens.css');
 const themeCardsPath = path.join(outputDir, 'theme-cards.css');
 
 /**
@@ -33,20 +32,14 @@ function buildTokenMap(cssText) {
 }
 
 /**
- * Resolve a value that might be a var() reference, following one level deep
+ * Return a literal value — tokens are hex literals in the current engine,
+ * no var() indirection to follow.
  */
-function resolveValue(value, tokenMap) {
+function resolveValue(value) {
   if (!value) return null;
-  const varMatch = value.match(/^var\(--([\w-]+)\)$/);
-  if (varMatch) {
-    const resolved = tokenMap[varMatch[1]];
-    // Don't follow deeper than one level; must resolve to a non-var value
-    if (resolved && !resolved.startsWith('var(')) {
-      return resolved;
-    }
-    return null; // Unresolvable
-  }
-  return value; // Already a literal (hex, rgb, etc.)
+  // Defensive: if a stray var() sneaks in, return null (never follow)
+  if (value.startsWith('var(')) return null;
+  return value;
 }
 
 /**
@@ -57,11 +50,16 @@ function extractCoreTokens(cssText) {
   const tokenMap = buildTokenMap(cssText);
   const tokens = { bg: null, text: null, primary: null, secondary: null };
 
-  // Read directly from scale tokens (brand-c-* tokens were removed)
-  tokens.bg = resolveValue(tokenMap['page-bg'], tokenMap) || tokenMap['page-bg'];
-  tokens.text = resolveValue(tokenMap['neutral-800'], tokenMap) || tokenMap['neutral-800'];
-  tokens.primary = resolveValue(tokenMap['primary-600'], tokenMap) || tokenMap['primary-600'];
-  tokens.secondary = resolveValue(tokenMap['secondary-600'], tokenMap) || tokenMap['secondary-600'];
+  // Read from semantic tokens (current engine convention).
+  // Fallback to positional tokens for any legacy theme files still using that shape.
+  tokens.bg        = resolveValue(tokenMap['page-bg']);
+  tokens.text      = resolveValue(tokenMap['text-emphasis'])
+                  || resolveValue(tokenMap['neutral-emphasis'])
+                  || resolveValue(tokenMap['neutral-800']);
+  tokens.primary   = resolveValue(tokenMap['primary-base'])
+                  || resolveValue(tokenMap['primary-600']);
+  tokens.secondary = resolveValue(tokenMap['secondary-base'])
+                  || resolveValue(tokenMap['secondary-600']);
 
   return tokens;
 }
@@ -100,33 +98,6 @@ function getThemeName(filePath) {
 }
 
 /**
- * Generate coretokens.css — static hex tokens for all themes on :root
- */
-function generateCoreTokensCSS(allTokens) {
-  let css = `/**
- * Core Theme Tokens - Auto-generated
- * DO NOT EDIT MANUALLY
- *
- * Static hex values for theme card previews.
- * Run: node src/scripts/generate-core-tokens.js
- */
-
-:root {\n`;
-
-  for (const { theme, tokens } of allTokens) {
-    const prefix = theme === 'default' ? 'brand' : `a11y-${theme}`;
-    css += `\n  /* ${theme} */\n`;
-    if (tokens.bg) css += `  --${prefix}-c-bg: ${tokens.bg};\n`;
-    if (tokens.text) css += `  --${prefix}-c-text: ${tokens.text};\n`;
-    if (tokens.primary) css += `  --${prefix}-c-primary: ${tokens.primary};\n`;
-    if (tokens.secondary) css += `  --${prefix}-c-secondary: ${tokens.secondary};\n`;
-  }
-
-  css += `}\n`;
-  return css;
-}
-
-/**
  * Generate theme-cards.css — per-theme card styles using the static hex values
  */
 function generateThemeCardsCSS(allTokens) {
@@ -144,46 +115,47 @@ function generateThemeCardsCSS(allTokens) {
 .a11y-theme-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 12px;
+  gap: 16px;
+  padding: 18px 20px;
   border: 2px solid color-mix(in oklch, var(--color-Black, #121212) 10%, transparent);
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
   width: 100%;
+  min-height: 72px;
 }
 
 .a11y-theme-card:hover {
-  border-color: var(--brand-c-primary);
+  border-color: var(--primary-base, currentColor);
   box-shadow: 0 2px 8px color-mix(in oklch, var(--color-Black) 12%, transparent);
 }
 
 .a11y-theme-card:focus-visible {
-  outline: 2px solid var(--brand-c-primary);
+  outline: 2px solid var(--primary-base, currentColor);
   outline-offset: 2px;
 }
 
 .a11y-theme-card[aria-pressed="true"] {
-  border-color: var(--brand-c-primary);
+  border-color: var(--primary-base, currentColor);
 }
 
 .a11y-theme-card__logo {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
 }
 
 .a11y-theme-card__text {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
   flex: 1;
 }
 
 .a11y-theme-card__title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.04em;
@@ -197,15 +169,15 @@ function generateThemeCardsCSS(allTokens) {
 /* Color Swatches */
 .a11y-theme-card__swatches {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .a11y-swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   border: 1px solid color-mix(in oklch, var(--color-Black, #121212) 12%, transparent);
   box-shadow: inset 0 1px 2px color-mix(in oklch, var(--color-White) 30%, transparent);
 }
@@ -217,7 +189,7 @@ function generateThemeCardsCSS(allTokens) {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 8px 0 4px;
-  color: var(--brand-c-text, #333);
+  color: var(--text-emphasis, #333);
 }
 
 /* ===================================
@@ -248,23 +220,27 @@ function generateThemeCardsCSS(allTokens) {
  * =================================== */
 @media (max-width: 768px) {
   .a11y-theme-card {
-    padding: 8px 10px;
-    gap: 8px;
+    padding: 14px 16px;
+    gap: 12px;
+    min-height: 60px;
   }
 
   .a11y-theme-card__logo {
-    width: 22px;
-    height: 22px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .a11y-theme-card__title {
+    font-size: 14px;
   }
 
   .a11y-theme-card__swatches {
-    flex-direction: row;
-    gap: 3px;
+    gap: 6px;
   }
 
   .a11y-swatch {
-    width: 10px;
-    height: 10px;
+    width: 22px;
+    height: 22px;
   }
 }
 `;
@@ -301,15 +277,10 @@ function main() {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  // Write coretokens.css
-  const coreCSS = generateCoreTokensCSS(allTokens);
-  fs.writeFileSync(coreTokensPath, coreCSS);
-  console.log(`\nWrote ${coreTokensPath}`);
-
-  // Write theme-cards.css
+  // Write theme-cards.css — per-theme card colour overrides (hex baked in)
   const cardsCSS = generateThemeCardsCSS(allTokens);
   fs.writeFileSync(themeCardsPath, cardsCSS);
-  console.log(`Wrote ${themeCardsPath}`);
+  console.log(`\nWrote ${themeCardsPath}`);
 
   console.log(`\n${allTokens.length} themes processed\n`);
 }

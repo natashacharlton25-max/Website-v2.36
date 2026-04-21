@@ -29,16 +29,6 @@ import { cvd } from '../shared/cvd.js';
 */
 export const CVD_LOCKED_SLOTS = [];
 
-/**
- * Convert an OKLCH triple to a hex string. Used at the boundary where
- * cloudcalm's internal functions need hex (they pass hex between each
- * other; hue is extracted again inside).
- */
-function oklchToHex(oklch) {
-  if (typeof oklch === 'string') return oklch;
-  if (!oklch || typeof oklch !== 'object') return '#888888';
-  return safeOklch(oklch.L, oklch.C || 0, oklch.H || 0);
-}
 
 /* ================================================================
    CONSTANTS — scale ladder
@@ -509,10 +499,10 @@ export function resolveContrastToken({ accentHex, baseHex, emphasisHex, pageBgHe
  * Generate a complete cloudcalm theme.
  *
  * Inputs (from validator):
- *   primary, secondary      — OKLCH triples { L, C, H }
- *   primaryAccent?, secondaryAccent?, tertiaryAccent? — OKLCH triples or null
- *   tertiary:  OKLCH | "warm" | "cool" | "grey" | "grey-tint"
- *   text:      OKLCH | "warm" | "cool" | "grey" | "grey-tint"
+ *   primary, secondary      — { hex, hue } objects (hue guaranteed finite)
+ *   primaryAccent?, secondaryAccent?, tertiaryAccent? — { hex, hue } or null
+ *   tertiary:  { hex, hue } | "warm" | "cool" | "grey" | "grey-tint"
+ *   text:      { hex, hue } | "warm" | "cool" | "grey" | "grey-tint"
  *   pageBg:    "warm" | "cool" | "grey" | "grey-tint" | "tint" | "deep" | null
  *
  * Variant:
@@ -521,6 +511,10 @@ export function resolveContrastToken({ accentHex, baseHex, emphasisHex, pageBgHe
  *   cvd:       'protan' | 'deutan' | 'tritan' | null
  *
  * Returns: tokens object + cvdSafe + cvdNotes.
+ *
+ * Flow: cloudcalm's inner functions take hex + use hue from the .hue field
+ * directly. CVD is called AFTER cloudcalm has computed chromatic hex values
+ * from the hue hints (rendered hex is always chromatic — safe for CVD).
  */
 export function generateCloudcalm(input, variant = {}) {
   const {
@@ -535,41 +529,22 @@ export function generateCloudcalm(input, variant = {}) {
   } = input;
   const { luminance = 'light', hc = false, cvd: cvdType = null } = variant;
 
-  // ── CVD pre-pass (if variant requires it) ──────────────────────────
-  // Build CVD input from the slots that are actual colour data (not enums).
-  // Cloudcalm locks nothing — everything shiftable.
+  // ── Unpack { hex, hue } from validator output ────────────────────
+  let primaryHex           = primary.hex;
+  let secondaryHex         = secondary.hex;
+  let primaryAccentHex     = primaryAccent   ? primaryAccent.hex   : null;
+  let secondaryAccentHex   = secondaryAccent ? secondaryAccent.hex : null;
+  let tertiaryAccentHex    = tertiaryAccent  ? tertiaryAccent.hex  : null;
+  const tertiaryIsHex      = tertiary && typeof tertiary === 'object';
+  let tertiaryHex          = tertiaryIsHex ? tertiary.hex : null;
+  const textIsHex          = text && typeof text === 'object';
+  let textHex              = textIsHex ? text.hex : null;
+  const tertiaryModeOrHex  = tertiaryIsHex ? 'brand' : tertiary;
+  const textModeOrHex      = textIsHex ? 'brand' : text;
+
+  // CVD runs post-scale — on the actually-rendered theme hexes.
   let cvdSafe = true;
   let cvdNotes = [];
-  let workingSlots = { primary, secondary, primaryAccent, secondaryAccent, tertiary, tertiaryAccent, text };
-
-  if (cvdType) {
-    const cvdInput = {};
-    for (const [slot, val] of Object.entries(workingSlots)) {
-      if (val && typeof val === 'object' && val.H !== undefined) {
-        cvdInput[slot] = { oklch: val, locked: CVD_LOCKED_SLOTS.includes(slot) };
-      }
-    }
-    const result = cvd(cvdInput, cvdType);
-    cvdSafe = result.cvdSafe;
-    cvdNotes = result.notes;
-    // Write CVD-adjusted OKLCH back into workingSlots
-    for (const [slot, oklch] of Object.entries(result.oklchSet)) {
-      workingSlots[slot] = oklch;
-    }
-  }
-
-  // Convert OKLCH slots to hex for internal use (inner functions read hue from hex).
-  const primaryHex         = oklchToHex(workingSlots.primary);
-  const secondaryHex       = oklchToHex(workingSlots.secondary);
-  const primaryAccentHex   = workingSlots.primaryAccent   ? oklchToHex(workingSlots.primaryAccent)   : null;
-  const secondaryAccentHex = workingSlots.secondaryAccent ? oklchToHex(workingSlots.secondaryAccent) : null;
-  const tertiaryAccentHex  = workingSlots.tertiaryAccent  ? oklchToHex(workingSlots.tertiaryAccent)  : null;
-  const tertiaryIsHex = workingSlots.tertiary && typeof workingSlots.tertiary === 'object';
-  const tertiaryHex = tertiaryIsHex ? oklchToHex(workingSlots.tertiary) : null;
-  const textIsHex = workingSlots.text && typeof workingSlots.text === 'object';
-  const textHex = textIsHex ? oklchToHex(workingSlots.text) : null;
-  const tertiaryModeOrHex = tertiaryIsHex ? tertiaryHex : workingSlots.tertiary;
-  const textModeOrHex     = textIsHex     ? textHex     : workingSlots.text;
 
   // 1. Page background (text WCAG targeting needs it)
   const bgTokens = generateCloudcalmPageBg({
@@ -631,7 +606,106 @@ export function generateCloudcalm(input, variant = {}) {
     }),
   };
 
-  // 8. Assemble output — 4 semantic positions per scale + contrast
+  // 8. Build output token set
+  const scales = {
+    primary: {
+      tint:     primaryScale[200],
+      mid:      primaryScale[300],
+      base:     primaryScale[400],
+      emphasis: primaryScale[500],
+      contrast: contrast.primary,
+    },
+    secondary: {
+      tint:     secondaryScale[200],
+      mid:      secondaryScale[300],
+      base:     secondaryScale[400],
+      emphasis: secondaryScale[500],
+      contrast: contrast.secondary,
+    },
+    neutral: {
+      tint:     neutralScale[200],
+      mid:      neutralScale[300],
+      base:     neutralScale[400],
+      emphasis: neutralScale[500],
+      contrast: contrast.neutral,
+    },
+    text: textScale,
+  };
+
+  // ── CVD post-scale pass ──────────────────────────────────────────
+  // Check cross-family pairs at the user-facing positions:
+  //   base for each family (default brand/neutral colour)
+  //   text-emphasis (body text)
+  //   page-bg (surface)
+  //   contrast tokens ONLY if they're distinct hues (user supplied an accent)
+  //
+  // Same-family gradients (primary-base vs primary-emphasis) are scale
+  // positions, not separate colours — skipped.
+  // If contrast === emphasis (default fallback), it's same-family — skipped.
+  if (cvdType) {
+    const cvdInput = {
+      'primary-base':  { hex: scales.primary.base,   locked: false },
+      'secondary-base':{ hex: scales.secondary.base, locked: false },
+      'neutral-base':  { hex: scales.neutral.base,   locked: false },
+      'text-emphasis': { hex: textScale.emphasis,    locked: false },
+      'page-bg':       { hex: bgTokens['page-bg'],   locked: false },
+    };
+    // Only pass contrast tokens when they're distinct hues (i.e. not just a
+    // same-family copy of emphasis). If contrast === emphasis, skip it.
+    if (scales.primary.contrast   && scales.primary.contrast   !== scales.primary.emphasis)   cvdInput['primary-contrast']   = { hex: scales.primary.contrast,   locked: false };
+    if (scales.secondary.contrast && scales.secondary.contrast !== scales.secondary.emphasis) cvdInput['secondary-contrast'] = { hex: scales.secondary.contrast, locked: false };
+    if (scales.neutral.contrast   && scales.neutral.contrast   !== scales.neutral.emphasis)   cvdInput['neutral-contrast']   = { hex: scales.neutral.contrast,   locked: false };
+
+    const result = cvd(cvdInput, cvdType);
+    cvdSafe = result.cvdSafe;
+    cvdNotes = result.notes;
+    if (result.hexSet['primary-base']     && result.hexSet['primary-base']     !== scales.primary.base) {
+      scales.primary.base     = result.hexSet['primary-base'];
+      // Rebuild emphasis + mid + tint at new hue via the same L/C they had
+      // (they shifted too — since they share primary's hue)
+      const [, , newH] = chroma(scales.primary.base).oklch();
+      const retint = (hex) => {
+        const [L, C] = chroma(hex).oklch();
+        return chroma.oklch(L, C || 0, newH).hex();
+      };
+      scales.primary.tint     = retint(scales.primary.tint);
+      scales.primary.mid      = retint(scales.primary.mid);
+      scales.primary.emphasis = retint(scales.primary.emphasis);
+      if (!primaryAccentHex) scales.primary.contrast = scales.primary.emphasis;
+    }
+    if (result.hexSet['secondary-base']   && result.hexSet['secondary-base']   !== scales.secondary.base) {
+      scales.secondary.base   = result.hexSet['secondary-base'];
+      const [, , newH] = chroma(scales.secondary.base).oklch();
+      const retint = (hex) => {
+        const [L, C] = chroma(hex).oklch();
+        return chroma.oklch(L, C || 0, newH).hex();
+      };
+      scales.secondary.tint     = retint(scales.secondary.tint);
+      scales.secondary.mid      = retint(scales.secondary.mid);
+      scales.secondary.emphasis = retint(scales.secondary.emphasis);
+      if (!secondaryAccentHex) scales.secondary.contrast = scales.secondary.emphasis;
+    }
+    if (result.hexSet['neutral-base']     && result.hexSet['neutral-base']     !== scales.neutral.base) {
+      scales.neutral.base     = result.hexSet['neutral-base'];
+      const [, , newH] = chroma(scales.neutral.base).oklch();
+      const retint = (hex) => {
+        const [L, C] = chroma(hex).oklch();
+        return chroma.oklch(L, C || 0, newH).hex();
+      };
+      scales.neutral.tint     = retint(scales.neutral.tint);
+      scales.neutral.mid      = retint(scales.neutral.mid);
+      scales.neutral.emphasis = retint(scales.neutral.emphasis);
+      if (!tertiaryAccentHex) scales.neutral.contrast = scales.neutral.emphasis;
+    }
+    if (result.hexSet['text-emphasis'])   textScale.emphasis    = result.hexSet['text-emphasis'];
+    if (result.hexSet['page-bg'])         bgTokens['page-bg']   = result.hexSet['page-bg'];
+
+    // Contrast tokens user-supplied — shifted independently
+    if (result.hexSet['primary-contrast'])   scales.primary.contrast   = result.hexSet['primary-contrast'];
+    if (result.hexSet['secondary-contrast']) scales.secondary.contrast = result.hexSet['secondary-contrast'];
+    if (result.hexSet['neutral-contrast'])   scales.neutral.contrast   = result.hexSet['neutral-contrast'];
+  }
+
   return {
     meta: {
       theme: 'cloudcalm',
@@ -640,36 +714,13 @@ export function generateCloudcalm(input, variant = {}) {
       cvd: cvdType,
       cvdSafe,
       cvdNotes,
-      chromaZone: 'calm',        // stacks with HC — fires theme-chroma-calm.css + high-contrast.css
-      intensityZone: 'soft',     // reserved — cloudcalm is always soft intensity
+      chromaZone: 'calm',
+      intensityZone: 'soft',
       bgMode: pageBg,
       tertiaryMode: tertiary,
       textMode: text,
     },
-    scales: {
-      primary: {
-        tint:     primaryScale[200],
-        mid:      primaryScale[300],
-        base:     primaryScale[400],
-        emphasis: primaryScale[500],
-        contrast: contrast.primary,
-      },
-      secondary: {
-        tint:     secondaryScale[200],
-        mid:      secondaryScale[300],
-        base:     secondaryScale[400],
-        emphasis: secondaryScale[500],
-        contrast: contrast.secondary,
-      },
-      neutral: {
-        tint:     neutralScale[200],
-        mid:      neutralScale[300],
-        base:     neutralScale[400],
-        emphasis: neutralScale[500],
-        contrast: contrast.neutral,
-      },
-      text: textScale,
-    },
+    scales,
     pageBg: bgTokens,
     status,
     focusHighlight,
