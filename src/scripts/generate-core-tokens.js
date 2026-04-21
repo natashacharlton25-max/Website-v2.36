@@ -65,6 +65,38 @@ function extractCoreTokens(cssText) {
 }
 
 /**
+ * Extract the FULL token set for dev theme cards — every scale step, bg
+ * surface, status colour. Resolves var(--color-Black) indirections to the
+ * theme's own declared anchor (handles dark-theme auto-flip where
+ * --color-Black actually holds white).
+ */
+function extractFullTokens(cssText) {
+  const tokenMap = buildTokenMap(cssText);
+  const resolved = {};
+
+  // Local resolver that follows var(--x) references within this theme's map,
+  // so text-contrast: var(--color-Black) gets the correct luminance-flipped value.
+  function resolve(value) {
+    if (!value) return null;
+    const varMatch = value.match(/var\(--([^,)]+)(?:,\s*[^)]+)?\)/);
+    if (varMatch) {
+      const refName = varMatch[1].trim();
+      if (tokenMap[refName]) return resolve(tokenMap[refName]);
+      if (refName === 'color-Black') return '#000000';
+      if (refName === 'color-White') return '#ffffff';
+      return null;
+    }
+    return value;
+  }
+
+  for (const [name, rawVal] of Object.entries(tokenMap)) {
+    const r = resolve(rawVal);
+    if (r) resolved[name] = r;
+  }
+  return resolved;
+}
+
+/**
  * Recursively find all CSS files in themes directory
  * Excludes the Preview folder to avoid processing our own output
  */
@@ -250,6 +282,133 @@ function generateThemeCardsCSS(allTokens) {
 }
 
 /**
+ * Generate theme-cards-dev.css — per-theme DEV card styles.
+ *
+ * Mirrors the `.a11y-theme-card--{theme}` pattern used by the accessibility
+ * page, but emits richer selectors for the dev theme browser: full swatch
+ * rows per family, status tiles, surface tiles. Every value is hex-baked so
+ * each card paints itself correctly regardless of the page's current theme.
+ */
+function generateDevCardsCSS(allFullTokens) {
+  const SCALE_FAMILIES = ['primary', 'secondary', 'neutral', 'text'];
+  const SCALE_STEPS = ['tint', 'mid', 'base', 'emphasis', 'contrast'];
+  const BG_TOKENS = ['page-bg', 'page-bg-raised', 'page-bg-sunken', 'page-bg-overlay'];
+  const STATUS_TOKENS = ['color-Success', 'color-Warning', 'color-Error', 'color-Info'];
+
+  let css = `/**
+ * Dev Theme Card Styles — Auto-generated
+ * DO NOT EDIT MANUALLY
+ *
+ * Per-theme swatches for /dev/themes browser. Each selector is scoped to
+ * the card's .dt-card--{theme} class so cards paint themselves without
+ * touching the rest of the page.
+ *
+ * Run: node src/scripts/generate-core-tokens.js
+ */
+
+`;
+
+  for (const { theme, tokens } of allFullTokens) {
+    const bg        = tokens['page-bg']        || '#ffffff';
+    const textEmph  = tokens['text-emphasis']  || '#222';
+    const textMid   = tokens['text-mid']       || '#666';
+    const bgRaised  = tokens['page-bg-raised'] || bg;
+    const primary   = tokens['primary-base']   || '#666';
+
+    const focusColor = tokens['focus-color'] || primary;
+    const focusBg    = tokens['focus-bg']    || bgRaised;
+    const primaryEmph = tokens['primary-emphasis'] || primary;
+
+    // Card frame
+    css += `.dt-card--${theme} {
+  background: ${bg};
+  color: ${textEmph};
+  border-color: ${bgRaised};
+  --dt-card-muted: ${textMid};
+  --dt-card-accent: ${primary};
+  --dt-card-title: ${primaryEmph};
+  --dt-card-focus: ${focusColor};
+  --dt-card-focus-bg: ${focusBg};
+}
+`;
+    const highlightColor = tokens['highlight-link-color'] || focusColor;
+    const success = tokens['color-Success'] || '#1f9d1f';
+    const error   = tokens['color-Error']   || '#d23030';
+
+    // Button colours per theme:
+    //   Expand → focus-color (this theme's focus identity)
+    //   Apply  → highlight-link-color (this theme's link/action identity)
+    // Two distinct semantic tokens so the buttons visually distinguish
+    // without reaching for hardcoded blues/oranges.
+    css += `.dt-card--${theme} .dt-expand {
+  color: ${focusColor};
+  border-color: ${focusColor};
+}
+.dt-card--${theme} .dt-expand:hover {
+  background: ${focusBg};
+}
+.dt-card--${theme} .dt-apply {
+  color: ${highlightColor};
+  border-color: ${highlightColor};
+}
+.dt-card--${theme} .dt-apply:hover,
+.dt-card--${theme} .dt-apply.dt-apply-active {
+  background: ${focusBg};
+  color: ${highlightColor};
+}
+/* Shields use the theme's own semantic status tokens — success/error —
+   so each card tells you "safe/unsafe" in its own visual language. */
+.dt-card--${theme} .dt-shield--safe svg  { fill: ${success}; }
+.dt-card--${theme} .dt-shield--low svg,
+.dt-card--${theme} .dt-shield--medium svg,
+.dt-card--${theme} .dt-shield--high svg  { fill: ${error}; }
+`;
+    // Mini swatches (collapsed card preview) — primary/secondary/neutral/text bases.
+    // Card bg already shows page-bg so we swap it for text-emphasis here.
+    const miniTokens = ['primary-base', 'secondary-base', 'neutral-base', 'text-emphasis'];
+    miniTokens.forEach((tok, i) => {
+      const hex = tokens[tok] || '#ccc';
+      css += `.dt-card--${theme} .dt-swatch-mini:nth-child(${i + 1}) { background: ${hex}; }\n`;
+    });
+
+    // Expand-panel inherits the card's bg + text, just carried through
+    css += `.dt-card--${theme} .dt-expand-panel {
+  background: ${bg};
+  color: ${textEmph};
+}
+`;
+
+    // Scale rows — 5 swatches per family × 4 families = 20 swatches
+    for (const family of SCALE_FAMILIES) {
+      for (const step of SCALE_STEPS) {
+        const hex = tokens[`${family}-${step}`];
+        if (!hex) continue;
+        css += `.dt-card--${theme} .dt-swatch--${family}-${step} { background: ${hex}; }\n`;
+      }
+    }
+
+    // Bg surface swatches (4)
+    for (const t of BG_TOKENS) {
+      const hex = tokens[t];
+      if (!hex) continue;
+      css += `.dt-card--${theme} .dt-swatch--${t} { background: ${hex}; }\n`;
+    }
+
+    // Status swatches (4)
+    for (const t of STATUS_TOKENS) {
+      const hex = tokens[t];
+      if (!hex) continue;
+      const short = t.replace('color-', '').toLowerCase();
+      css += `.dt-card--${theme} .dt-swatch--status-${short} { background: ${hex}; }\n`;
+    }
+
+    css += '\n';
+  }
+
+  return css;
+}
+
+/**
  * Main entry
  */
 function main() {
@@ -257,14 +416,17 @@ function main() {
 
   const themeFiles = findThemeFiles(themesDir);
   const allTokens = [];
+  const allFullTokens = [];
 
   for (const filePath of themeFiles) {
     const themeName = getThemeName(filePath);
     const cssText = fs.readFileSync(filePath, 'utf-8');
     const tokens = extractCoreTokens(cssText);
+    const fullTokens = extractFullTokens(cssText);
 
     if (tokens.bg || tokens.text || tokens.primary || tokens.secondary) {
       allTokens.push({ theme: themeName, tokens });
+      allFullTokens.push({ theme: themeName, tokens: fullTokens });
       console.log(`  ${themeName}: bg=${tokens.bg || '?'} text=${tokens.text || '?'} pri=${tokens.primary || '?'} sec=${tokens.secondary || '?'}`);
     } else {
       console.log(`  ${themeName}: (no tokens found)`);
@@ -273,6 +435,7 @@ function main() {
 
   // Sort by theme name for stable output
   allTokens.sort((a, b) => a.theme.localeCompare(b.theme));
+  allFullTokens.sort((a, b) => a.theme.localeCompare(b.theme));
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
@@ -282,6 +445,12 @@ function main() {
   const cardsCSS = generateThemeCardsCSS(allTokens);
   fs.writeFileSync(themeCardsPath, cardsCSS);
   console.log(`\nWrote ${themeCardsPath}`);
+
+  // Write theme-cards-dev.css — richer per-theme swatches for /dev/themes
+  const devCardsPath = path.join(outputDir, 'theme-cards-dev.css');
+  const devCSS = generateDevCardsCSS(allFullTokens);
+  fs.writeFileSync(devCardsPath, devCSS);
+  console.log(`Wrote ${devCardsPath}`);
 
   console.log(`\n${allTokens.length} themes processed\n`);
 }
