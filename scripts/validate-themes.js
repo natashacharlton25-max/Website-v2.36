@@ -189,17 +189,42 @@ function nudgeCalmContrast(css, isCalm) {
 //
 // Same colours used across the swatches, but visual hierarchy genuinely
 // flips AND text stays readable.
-// Walk every #hex in CSS and apply an OKLCH transform.
+// Walk token declarations in CSS and apply an OKLCH transform to their hex
+// values. Only touches:
+//   --primary-*, --secondary-*, --neutral-*, --text-*
+//     (positions: tint / mid / base / emphasis / contrast)
+//   --page-bg, --page-bg-raised, --page-bg-sunken, --page-bg-overlay
+//     (bg surfaces — validator can nudge per-variant salt here)
+//
+// Never touches:
+//   --color-Black / --color-White        — B/W anchors (flip per luminance
+//                                           at generation time only)
+//   --shadow-Black / --shadow-White      — pure #000/#fff for shadow maths
+//   --color-Success/Warning/Error/Info   — status semantic, theme-independent
+//   --focus-color / --focus-bg /
+//   --highlight-link-color               — generator computes via gap-split
+//   --media-* / --svg-ghost-color        — non-hex or var() references
+//
 // Transform receives [l, c, h] and returns [newL, newC, newH].
+const TRANSFORM_ALLOWED_TOKENS = (() => {
+  const names = new Set();
+  for (const f of SCALE_FAMILIES) for (const p of SCALE_STEPS) names.add(`${f}-${p}`);
+  for (const n of ['page-bg', 'page-bg-raised', 'page-bg-sunken', 'page-bg-overlay']) names.add(n);
+  return names;
+})();
+
 function transformAllHexes(css, transform) {
-  return css.replace(/#[0-9a-fA-F]{6}\b/g, (hex) => {
+  // Match a token declaration: `--token-name: #rrggbb;`
+  return css.replace(/(--[\w-]+)(\s*:\s*)(#[0-9a-fA-F]{6})\b/g, (match, tokenName, sep, _hex) => {
+    const name = tokenName.slice(2); // strip leading --
+    if (!TRANSFORM_ALLOWED_TOKENS.has(name)) return match;
     try {
-      const [l, c, h] = chroma(hex).oklch();
+      const [l, c, h] = chroma(_hex).oklch();
       const [newL, newC, newH] = transform(l || 0, c || 0, h || 0);
       const safeL = Math.max(0.05, Math.min(0.97, newL));
       const safeC = Math.max(0, newC);
-      return chroma.oklch(safeL, safeC, newH).hex();
-    } catch (e) { return hex; }
+      return tokenName + sep + chroma.oklch(safeL, safeC, newH).hex();
+    } catch (e) { return match; }
   });
 }
 
@@ -240,15 +265,17 @@ function familyAwareDisambiguate(css, variantName) {
 
   const { dL: saltL, dH: saltH } = variantSalt(variantName);
 
-  // CALM: chalky-preserving but with a bigger near-bg nudge so cards differ.
-  // Scales still only shift hue slightly (keeps calm's muted character).
+  // CALM: chalky-preserving. Only the near-bg surface lightness shifts per
+  // variant (so cards have distinguishable backgrounds). Scale tokens keep
+  // their hue EXACTLY — applying saltH to low-chroma hexes at varied L causes
+  // hue drift because gamut-clamping at extreme L loses hue precision, and
+  // a uniform saltH produces different final hues when starting hues aren't
+  // perfectly aligned. Leaving scales untouched preserves family coherence.
   if (isCalm) {
     return transformAllHexes(css, (l, c, h) => {
-      // Near-bg lightness nudge with per-variant salt (was 0.04 → 0.08)
       if (!isDark && l > 0.85) return [l - 0.08 + saltL, c, h + saltH];
       if (isDark && l < 0.20) return [l + 0.08 + saltL, c, h + saltH];
-      // Mid/scale tokens: keep L, nudge hue slightly per variant
-      return [l + saltL * 0.5, c, h + saltH];
+      return [l, c, h]; // scales untouched — avoid per-position hue drift
     });
   }
   // HC: push harder — ±0.15 (was ±0.10), chroma +0.05 (was +0.04)
@@ -316,6 +343,74 @@ function retintBgSurfaces(css, newHue) {
       return prefix + newHex;
     });
   }
+  return out;
+}
+
+// Recompute --focus-color and --highlight-link-color against the CURRENT
+// page-bg + page-bg-raised in the CSS. Run after any bg shift so the focus
+// indicator keeps its high-contrast guarantee against the new surface.
+//
+// Rule: preserve existing hue (the generator's gap-split picked a hue that
+// sits between primary and secondary — keep that), nudge L only until
+// contrast against both page-bg and page-bg-raised clears the target
+// (4.5:1 non-HC, 7:1 HC).
+//
+// Also updates --focus-bg to match the current page-bg (it's a mirror).
+function recomputeFocusHighlight(css, isHC) {
+  const pageBgHex = getToken(css, 'page-bg');
+  const cardBgHex = getToken(css, 'page-bg-raised');
+  if (!pageBgHex) return css;
+
+  const minRatio = isHC ? 7 : 4.5;
+
+  // Nudge a colour's L (preserving hue and chroma) until it clears minRatio
+  // against both pageBg and cardBg. Direction: lift if bg is light, darken
+  // if bg is dark.
+  const bgIsLight = chroma(pageBgHex).luminance() > 0.5;
+  function nudgeForContrast(hex) {
+    const [L, C, H] = chroma(hex).oklch();
+    const hue = Number.isFinite(H) ? H : 0;
+    const chr = C || 0;
+    let newL = L;
+    for (let i = 0; i < 40; i++) {
+      const candidate = chroma.oklch(
+        Math.max(0.05, Math.min(0.95, newL)),
+        chr,
+        hue
+      ).hex();
+      const c1 = contrastRatio(candidate, pageBgHex);
+      const c2 = contrastRatio(candidate, cardBgHex || pageBgHex);
+      if (c1 >= minRatio && c2 >= minRatio) return candidate;
+      newL += bgIsLight ? -0.02 : +0.02;
+    }
+    // Best-effort: hardest direction hit the clamp
+    return chroma.oklch(
+      Math.max(0.05, Math.min(0.95, newL)),
+      chr,
+      hue
+    ).hex();
+  }
+
+  let out = css;
+
+  // --focus-color: nudge existing hex
+  out = out.replace(
+    /(--focus-color:\s*)(#[0-9a-fA-F]+)/,
+    (_m, prefix, hex) => prefix + nudgeForContrast(hex)
+  );
+
+  // --highlight-link-color: same treatment
+  out = out.replace(
+    /(--highlight-link-color:\s*)(#[0-9a-fA-F]+)/,
+    (_m, prefix, hex) => prefix + nudgeForContrast(hex)
+  );
+
+  // --focus-bg mirrors page-bg exactly
+  out = out.replace(
+    /(--focus-bg:\s*)#[0-9a-fA-F]+/,
+    `$1${pageBgHex}`
+  );
+
   return out;
 }
 
@@ -450,6 +545,10 @@ function applyRoleSwap(css, canonicalCss = null, _variantName = '') {
   let out = applyFamilyRotations(css, best.rotations);
   if (best.newBgHue !== null && Math.abs(best.newBgHue - bgHue) > 2) {
     out = retintBgSurfaces(out, best.newBgHue);
+    // Focus/highlight were computed against the ORIGINAL bg; re-nudge them
+    // against the new bg so contrast guarantees hold.
+    const isHC = _variantName.includes('-hc');
+    out = recomputeFocusHighlight(out, isHC);
   }
   return out;
 }
@@ -504,10 +603,28 @@ function findVariantDuplicates(parsedThemes) {
   };
   for (const [n] of entries) parent[n] = n;
 
+  // Partition key: dedup only groups variants within the same axis slice.
+  // HC and non-HC are structurally different themes (different L/C tables)
+  // and should never dedup against each other — if they LOOK similar, that's
+  // a generator issue to tune, not something dedup should paper over by
+  // shifting one "off" the other. Same logic for luminance (dark vs light).
+  //
+  // Key = base-theme-name + luminance + hc-flag.
+  // CVD variants share the key with their parent (protan/deutan/tritan
+  // CAN be rotated off their same-axis base).
+  function partitionKey(variantName) {
+    // Strip cvd suffix (-protan / -deutan / -tritan) — CVD variants live in
+    // the same partition as their non-CVD sibling.
+    const base = variantName.replace(/-(protan|deutan|tritan)$/, '');
+    return base;
+  }
+
   for (let i = 0; i < entries.length; i++) {
     for (let j = i + 1; j < entries.length; j++) {
       const [a, themeA] = entries[i];
       const [b, themeB] = entries[j];
+      // Skip cross-partition pairs — HC/non-HC never dedup against each other.
+      if (partitionKey(a) !== partitionKey(b)) continue;
       if (pairIsPerceptuallyEqual(themeA, themeB)) union(a, b);
     }
   }
@@ -811,6 +928,12 @@ function main() {
           // If neither changed anything, fall back to aggressive family-shift
           if (newCss === css && !swapChanged) {
             newCss = familyAwareDisambiguate(css, dupName);
+          }
+          // Bg may have shifted via family-aware transform — recompute
+          // focus/highlight against the current bg to keep contrast.
+          if (newCss !== css) {
+            const isHC = dupName.includes('-hc');
+            newCss = recomputeFocusHighlight(newCss, isHC);
           }
           if (newCss !== css) {
             fs.writeFileSync(dupFile, newCss);

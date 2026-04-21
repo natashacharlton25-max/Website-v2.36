@@ -127,18 +127,16 @@ function generateThemeCardsCSS(allTokens) {
 }
 
 .a11y-theme-card:hover {
-  border-color: var(--primary-base, currentColor);
   box-shadow: 0 2px 8px color-mix(in oklch, var(--color-Black) 12%, transparent);
 }
 
 .a11y-theme-card:focus-visible {
-  outline: 2px solid var(--primary-base, currentColor);
   outline-offset: 2px;
 }
 
-.a11y-theme-card[aria-pressed="true"] {
-  border-color: var(--primary-base, currentColor);
-}
+/* Hover / focus / pressed border colour is emitted per theme so each card
+   uses its OWN primary colour, not the currently-active theme's primary.
+   See the per-theme block below. */
 
 .a11y-theme-card__logo {
   width: 40px;
@@ -211,6 +209,9 @@ function generateThemeCardsCSS(allTokens) {
 .a11y-theme-card--${theme} .a11y-theme-card__logo { fill: ${primary}; }
 .a11y-theme-card--${theme} .a11y-swatch--primary { background: ${primary}; }
 .a11y-theme-card--${theme} .a11y-swatch--secondary { background: ${secondary}; }
+.a11y-theme-card--${theme}:hover { border-color: ${primary}; }
+.a11y-theme-card--${theme}:focus-visible { outline: 2px solid ${primary}; }
+.a11y-theme-card--${theme}[aria-pressed="true"] { border-color: ${primary}; }
 `;
   }
 

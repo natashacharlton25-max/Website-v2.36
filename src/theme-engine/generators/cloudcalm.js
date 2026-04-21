@@ -14,7 +14,6 @@
 import chroma from 'chroma-js';
 import {
   safeOklch,
-  findLightnessForContrast,
   contrastRatio,
   ensureContrastAgainst,
 } from '../shared/colour-maths.js';
@@ -38,27 +37,33 @@ export const SCALE_POSITIONS = [100, 200, 300, 400, 500, 600, 700, 800, 900, 950
 
 // Ported verbatim from theme-engine.js CALM_LIGHTNESS_MAP (line 515).
 // Light mode reads positions 200/300/400/500 for tint/mid/base/emphasis.
+// Softened for Large-text WCAG (calm bumps body size so AA = 3:1 / AAA = 4.5:1).
+// Base + emphasis nudged lighter; previous values targeted 4.5:1/7:1 normal text.
 export const CALM_LIGHTNESS_MAP = {
   100: 0.90,
   200: 0.82,
-  300: 0.68,
-  400: 0.52,
-  500: 0.42,
-  600: 0.46,
-  700: 0.38,
-  800: 0.30,
-  900: 0.22,
-  950: 0.16,
+  300: 0.70,  // was 0.68 — slightly softer
+  400: 0.56,  // was 0.52 — base lifted
+  500: 0.46,  // was 0.42 — emphasis softened
+  600: 0.50,
+  700: 0.40,
+  800: 0.32,
+  900: 0.24,
+  950: 0.18,
 };
 
 // Calm HC light scale — stepped chroma lets ΔE hit green without emph going
 // too dark/bright. Ported verbatim from theme-engine.js (lines 1460-1472).
 // Applied to primary + secondary scales at positions 200/300/400/500.
+// HC at Large-text: AA = 3:1, AAA = 4.5:1. Softened — HC was punching to
+// 11+:1 which reads as glaring. Now targets ~5-6:1 emphasis (comfortably
+// AAA Large without bright-harsh feel). HC still has more chroma than
+// non-HC so the "bolder" signal remains, but the L range closes.
 export const CALM_HC_LIGHT_SCALE = {
-  200: { L: 0.78, C: 0.035 },  // tint — ΔE 10+ vs HC bg
-  300: { L: 0.50, C: 0.055 },  // mid — 4.6+:1 across all hues
-  400: { L: 0.39, C: 0.060 },  // base — 7.6:1, ΔE 10+ vs mid
-  500: { L: 0.28, C: 0.080 },  // emphasis — 11.66:1, ΔE 10+ vs base
+  200: { L: 0.78, C: 0.025 },  // tint — softer whisper
+  300: { L: 0.58, C: 0.040 },  // mid — L 0.52→0.58
+  400: { L: 0.48, C: 0.045 },  // base — L 0.42→0.48, ~4.5:1 emphasis-style
+  500: { L: 0.40, C: 0.055 },  // emphasis — L 0.32→0.40, targets ~5-6:1 AAA Large
 };
 
 // Calm dark scale — explicit L per position (non-HC).
@@ -67,24 +72,47 @@ export const CALM_HC_LIGHT_SCALE = {
 export const CALM_DARK_SCALE = {
   200: 0.46,  // tint
   300: 0.64,  // mid
-  400: 0.75,  // base (WCAG 4.95:1)
-  500: 0.88,  // emphasis (ΔE 10+ vs base)
+  400: 0.72,  // base — was 0.75, slightly dimmer
+  500: 0.85,  // emphasis — was 0.88, less glare
 };
 
 // Calm HC dark scale — same hue, deeper chroma, higher lightness for Lc.
 // Ported from theme-engine.js (lines 1719-1723).
+// HC dark: target ~5-6:1 AAA Large without bright-harsh glare. Previous
+// values punched to 11+:1 making dark HC read like an emergency alert.
 export const CALM_HC_DARK_L = {
   200: 0.52,  // tint
-  300: 0.70,  // mid (4.6+:1)
-  400: 0.82,  // base (7+:1)
-  500: 0.95,  // emphasis (ΔE 10+ vs base)
+  300: 0.62,  // mid — was 0.68
+  400: 0.70,  // base — was 0.78
+  500: 0.80,  // emphasis — was 0.92, brings dark HC into AAA Large range without glare
 };
 
 export const CALM_HC_DARK_C = {
-  200: 0.035,
-  300: 0.055,
-  400: 0.060,
-  500: 0.090,
+  200: 0.025,  // was 0.028
+  300: 0.040,  // was 0.045
+  400: 0.045,  // was 0.050
+  500: 0.055,  // was 0.070 — gentler emphasis chroma
+};
+
+// Calm TEXT scale — hand-tuned L per position, per variant.
+// Text is body readability — different L targets than neutral (which is UI
+// decoration). Text needs a wider ladder with more contrast at base/emphasis
+// while keeping tint/mid soft for secondary content.
+// Chroma stays very low (0.008-0.010) so text reads as grey, not tinted.
+export const CALM_TEXT_OVERRIDES = {
+  light: {
+    // Light bg ~0.92 — text wants progressively darker L down the ladder.
+    // Large-text thresholds: AA 3:1, AAA 4.5:1. Targets ~5-6:1 emphasis
+    // (clears AAA Large) without charcoal-heavy glare.
+    nonHC: { 200: { L: 0.76, C: 0.006 }, 300: { L: 0.60, C: 0.008 }, 400: { L: 0.50, C: 0.010 }, 500: { L: 0.42, C: 0.012 } },
+    hc:    { 200: { L: 0.70, C: 0.006 }, 300: { L: 0.55, C: 0.008 }, 400: { L: 0.45, C: 0.010 }, 500: { L: 0.35, C: 0.012 } },
+  },
+  dark: {
+    // Dark bg ~0.32 — text wants progressively lighter L down the ladder.
+    // Softened from 0.96 emphasis — that was near-white glare.
+    nonHC: { 200: { L: 0.42, C: 0.006 }, 300: { L: 0.60, C: 0.008 }, 400: { L: 0.75, C: 0.010 }, 500: { L: 0.88, C: 0.012 } },
+    hc:    { 200: { L: 0.48, C: 0.006 }, 300: { L: 0.63, C: 0.008 }, 400: { L: 0.76, C: 0.010 }, 500: { L: 0.88, C: 0.012 } },
+  },
 };
 
 // Ported from theme-engine.js NEUTRAL_STEPS (line 98).
@@ -110,16 +138,19 @@ const NEUTRAL_HUE = 40;  // for calm's hand-tuned neutral overrides (matches old
 // Ported verbatim from theme-engine.js (lines 1643-1658).
 // Only applied to positions 200/300/400/500 (the semantic positions calm reads).
 // Chroma stays at 0.008-0.010 — very low so neutral stays perceptually grey.
+// All positions target AAA Large (4.5:1) rather than AAA normal (7:1) —
+// calm (including HC) boosts body text size, so Large thresholds apply.
+// HC softened to avoid the "emergency alert" feel — now ~5-6:1 emphasis.
 export const CALM_NEUTRAL_OVERRIDES = {
   // Light mode
   light: {
     nonHC: { 200: { L: 0.80, C: 0.008 }, 300: { L: 0.64, C: 0.010 }, 400: { L: 0.52, C: 0.010 }, 500: { L: 0.42, C: 0.010 } },
-    hc:    { 200: { L: 0.76, C: 0.008 }, 300: { L: 0.50, C: 0.010 }, 400: { L: 0.39, C: 0.010 }, 500: { L: 0.28, C: 0.010 } },
+    hc:    { 200: { L: 0.76, C: 0.008 }, 300: { L: 0.58, C: 0.010 }, 400: { L: 0.48, C: 0.010 }, 500: { L: 0.38, C: 0.010 } },
   },
   // Dark mode — calm has its own "flip equivalent", these are explicit values not a swap
   dark: {
     nonHC: { 200: { L: 0.48, C: 0.010 }, 300: { L: 0.64, C: 0.010 }, 400: { L: 0.75, C: 0.010 }, 500: { L: 0.88, C: 0.010 } },
-    hc:    { 200: { L: 0.52, C: 0.010 }, 300: { L: 0.69, C: 0.010 }, 400: { L: 0.82, C: 0.010 }, 500: { L: 0.96, C: 0.010 } },
+    hc:    { 200: { L: 0.52, C: 0.010 }, 300: { L: 0.62, C: 0.010 }, 400: { L: 0.72, C: 0.010 }, 500: { L: 0.82, C: 0.010 } },
   },
 };
 
@@ -145,11 +176,13 @@ export function generateCalmScale(baseInput, { luminance = 'light', hc = false }
   const scale = {};
 
   // Start with the base calm ladder (light non-HC reference).
+  // Chroma softened from 0.025/0.020 → 0.020/0.018 — relaxes into greyer tones
+  // now that Large-text thresholds apply (AA 3:1 / AAA 4.5:1).
   for (const pos of SCALE_POSITIONS) {
     const targetL = CALM_LIGHTNESS_MAP[pos];
-    const chromaVal = targetL >= 0.75 ? 0.025
-                    : targetL >= 0.50 ? 0.025
-                    : 0.020;
+    const chromaVal = targetL >= 0.75 ? 0.020
+                    : targetL >= 0.50 ? 0.020
+                    : 0.018;
     scale[pos] = safeOklch(targetL, chromaVal, hue);
   }
 
@@ -272,7 +305,7 @@ export function generateCloudcalmNeutral(mode, { primaryHex, neutralHex, luminan
  *   "grey-tint"  → primary hue at whisper chroma
  *   brand hex    → text hex's hue at slightly higher chroma
  */
-export function generateCloudcalmText(mode, { primaryHex, textHex, pageBgHex, hc = false } = {}) {
+export function generateCloudcalmText(mode, { primaryHex, textHex, luminance = 'light', hc = false } = {}) {
   // black-white: text refs point at the auto-flipping B/W anchor tokens.
   // All 4 positions point at the same var() — picker chose pure contrast.
   if (mode === 'black-white') {
@@ -280,41 +313,36 @@ export function generateCloudcalmText(mode, { primaryHex, textHex, pageBgHex, hc
     return { tint: anchor, mid: anchor, base: anchor, emphasis: anchor };
   }
 
-  // Resolve hue + chroma per mode.
-  let hue, chromaVal;
+  // Same pattern as primary/secondary/neutral: resolve hue from the mode,
+  // apply calm's hand-tuned TEXT-specific L/C per variant (CALM_TEXT_OVERRIDES).
+  // Text is independent of neutral — separate table because body readability
+  // wants a wider ladder than neutral's UI-decoration spacing.
+  let hue;
   if (mode === 'grey') {
-    hue = 0;           chromaVal = 0;
+    hue = 0; // achromatic — chroma 0 regardless of hue
   } else if (mode === 'warm') {
-    hue = WARM_HUE;    chromaVal = 0.010;
+    hue = WARM_HUE;
   } else if (mode === 'cool') {
-    hue = COOL_HUE;    chromaVal = 0.028;
+    hue = COOL_HUE;
   } else if (mode === 'grey-tint') {
     hue = chroma(primaryHex).get('oklch.h') || 0;
-    chromaVal = 0.010;
   } else {
     // brand hex supplied
     hue = chroma(textHex).get('oklch.h') || 0;
-    chromaVal = 0.020;
   }
 
-  // WCAG contrast targets per variant.
-  const tTint     = 1.3;             // decorative, no floor
-  const tMid      = hc ? 3.0 : 1.8;  // HC UI 3:1 / non-HC decorative
-  const tBase     = hc ? 4.5 : 3.0;  // HC AA / non-HC AA Large
-  const tEmphasis = hc ? 7.0 : 4.5;  // HC AAA / non-HC AAA Large
+  const variant = luminance === 'dark' ? 'dark' : 'light';
+  const level = hc ? 'hc' : 'nonHC';
+  const overrides = CALM_TEXT_OVERRIDES[variant][level];
 
-  const build = (target) => {
-    const L = findLightnessForContrast(pageBgHex, hue, chromaVal, target);
-    return chromaVal === 0
-      ? chroma.oklch(L, 0, 0).hex()
-      : safeOklch(L, chromaVal, hue);
-  };
+  // Grey mode keeps chroma 0; everything else uses the per-position C from overrides.
+  const isGrey = mode === 'grey';
 
   return {
-    tint:     build(tTint),
-    mid:      build(tMid),
-    base:     build(tBase),
-    emphasis: build(tEmphasis),
+    tint:     chroma.oklch(overrides[200].L, isGrey ? 0 : overrides[200].C, hue).hex(),
+    mid:      chroma.oklch(overrides[300].L, isGrey ? 0 : overrides[300].C, hue).hex(),
+    base:     chroma.oklch(overrides[400].L, isGrey ? 0 : overrides[400].C, hue).hex(),
+    emphasis: chroma.oklch(overrides[500].L, isGrey ? 0 : overrides[500].C, hue).hex(),
   };
 }
 
@@ -585,7 +613,7 @@ export function generateCloudcalm(input, variant = {}) {
   // 4. Text scale (variant-aware)
   const textScale = generateCloudcalmText(
     textIsHex ? 'brand' : textModeOrHex,
-    { primaryHex, textHex: textIsHex ? textHex : null, pageBgHex, luminance, hc }
+    { primaryHex, textHex: textIsHex ? textHex : null, luminance, hc }
   );
 
   // 5. Status + shadow anchors

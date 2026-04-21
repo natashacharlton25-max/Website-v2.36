@@ -132,6 +132,36 @@ pair, that's a legitimate flag. The post-build validator
 a specific brand pair just won't have a calm-protan-safe combination, and
 the calm-HC-protan variant is the answer for CVD users with that brand.
 
+### 8. CVD preserves bg identity, shifts brand scales
+
+When CVD resolves a collision between brand colours, it **shifts the
+foreground scale (primary / secondary) to a distinguishable hue** and
+**leaves page-bg at its generator-computed hue**. Bg is built on the
+brand's input hue as part of the theme's surface identity — e.g. cloudcalm
+HC builds bg from primary's hue as a hue-tinted whisper surface.
+
+This produces variant CSS files where bg's hue and primary-base's hue may
+differ (e.g. pink-hued bg with a yellow primary on cloudcalm-dark-hc-deutan).
+**That is the correct output, not a bug.**
+
+- Bg stays pink → preserves "this is the cloudcalm theme" identity
+- Primary shifts to yellow → CVD-safe distinguishability from secondary
+- Under deutan simulation: bg reads as warm brown-grey, primary yellow,
+  secondary blue → three distinct visual zones, maximum contrast
+
+If CVD shifted both bg AND primary to the same safe hue, the CVD user
+would see a single-hue monochrome variant with no usable contrast between
+brand colour and surface. Preserving bg while shifting primary gives
+strictly more visual information to the CVD user.
+
+**Do not "fix" bg-primary hue mismatch in CVD variants** by retinting bg
+to match the shifted primary. The apparent mismatch is the mechanism
+producing maximum CVD-safe contrast.
+
+If brand identity requires bg+primary to always match hue, the brand
+must supply a CVD variant's input hexes explicitly (same pattern the old
+engine used) — rather than rely on auto-generation.
+
 ## What makes this engine different from "a theme engine"
 
 Most theme engines optimise for:
