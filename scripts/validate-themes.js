@@ -269,145 +269,189 @@ function familyAwareDisambiguate(css, variantName) {
   return transformAllHexes(css, (l, c, h) => [l - 0.10 + saltL, c + (c > 0.02 ? 0.03 : 0), h + saltH]);
 }
 
-// Build a swap map for a given newBg choice. Returns null if the rotation can't
-// produce a valid config (e.g. text contrast fails, or primary blends into bg).
-function buildSwapForNewBg(bg, primary, secondary, text, newBg) {
-  const remaining = [bg, primary, secondary, text].filter(c => c && c.toLowerCase() !== newBg.toLowerCase());
-  if (remaining.length < 1) return null;
+// (buildSwapForNewBg removed — bg no longer rotates with scale families.
+//  Family rotation happens at token-prefix level via applyFamilyRotations;
+//  bg retint happens via retintBgSurfaces.)
 
-  // Text = highest contrast vs newBg
-  const sortedByContrast = remaining
-    .map(c => ({ hex: c, ratio: contrastRatio(c, newBg) }))
-    .sort((a, b) => b.ratio - a.ratio);
-  const newText = sortedByContrast[0].hex;
-  if (sortedByContrast[0].ratio < 4.5) return null; // text unreadable — reject
-
-  const others = remaining.filter(c => c.toLowerCase() !== newText.toLowerCase());
-  // Primary must be visible against bg (≥3:1 UI contrast). Otherwise the
-  // primary swatch reads as "blank" — e.g. near-white primary on cream bg.
-  const visiblePrimaries = others.filter(c => contrastRatio(c, newBg) >= 3);
-  if (visiblePrimaries.length === 0) return null; // no visible primary — reject
-
-  let newPrimary = visiblePrimaries[0];
-  let newSecondary = others.find(c => c.toLowerCase() !== newPrimary.toLowerCase()) || newPrimary;
-  // Of the visible primaries, prefer the one with more chroma (feels "branded")
-  if (visiblePrimaries.length === 2) {
-    const c0 = chroma(visiblePrimaries[0]).oklch()[1] || 0;
-    const c1 = chroma(visiblePrimaries[1]).oklch()[1] || 0;
-    if (c1 > c0) { newPrimary = visiblePrimaries[1]; }
-    newSecondary = others.find(c => c.toLowerCase() !== newPrimary.toLowerCase()) || newPrimary;
-  }
-  return { newBg, newPrimary, newSecondary, newText };
-}
-
-// Apply a swap config to CSS by remapping every occurrence of the old role hexes.
-function applySwapConfig(css, oldHexes, config) {
-  const swap = {
-    [oldHexes.bg.toLowerCase()]: config.newBg,
-    [oldHexes.primary.toLowerCase()]: config.newPrimary,
-    [oldHexes.secondary.toLowerCase()]: config.newSecondary,
-    [oldHexes.text.toLowerCase()]: config.newText,
-  };
-  const allHexes = Object.keys(swap);
-  if (allHexes.length === 0) return css;
-  const re = new RegExp('(' + allHexes.map(h => h.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
-  return css.replace(re, (match) => swap[match.toLowerCase()] || match);
-}
-
-// Sum of perceptual distance between two configs across the 4 role slots.
-// Used to pick the rotation that's MOST visually different from canonical.
-function configDistance(configA, hexesB) {
-  const pairs = [
-    [configA.newBg, hexesB.bg],
-    [configA.newPrimary, hexesB.primary],
-    [configA.newSecondary, hexesB.secondary],
-    [configA.newText, hexesB.text],
-  ];
-  let total = 0;
-  for (const [a, b] of pairs) {
-    if (!a || !b) continue;
-    try { total += chroma.deltaE(a, b); } catch (e) { /* skip */ }
-  }
-  return total;
-}
-
-// Role-swap: try ALL 3 rotation directions (newBg = primary | secondary | text),
-// pick whichever produces the largest perceptual distance from `canonicalCss`
-// (the variant we're trying to differentiate from). Falls back to old behaviour
-// if canonicalCss isn't provided.
+// Apply a family-rotation swap by renaming token prefixes.
+// Bg stays put — only primary/secondary/neutral/text families rotate.
+// Every family has the same 5-slot shape (tint/mid/base/emphasis/contrast),
+// so renaming ALL tokens of one family to another preserves scale coherence.
 //
-// Family preservation: dark themes keep dark bg (newBg lightness < 0.50);
-// light themes keep light bg (newBg lightness > 0.50). Otherwise a swap can
-// flip dark→light visually, breaking the "After Dark" identity.
-function applyRoleSwap(css, canonicalCss = null, variantName = '') {
-  const bg = getToken(css, 'page-bg');
-  const primary = getToken(css, 'primary-base');
-  const secondary = getToken(css, 'secondary-base');
-  const text = getToken(css, 'text-emphasis');
-  if (!bg || !primary || !secondary || !text) return css;
+//   rotation: { from: 'primary', to: 'secondary' }  → all --primary-* become --secondary-*
+//
+// To swap two families (primary ↔ secondary), rename both pairs via a temp prefix
+// so they don't overwrite each other.
+function applyFamilyRotations(css, rotations) {
+  if (!rotations || rotations.length === 0) return css;
+  let out = css;
+  // First pass: rename sources to temp prefixes
+  const temps = rotations.map((r, i) => ({ ...r, temp: `__swap${i}__` }));
+  for (const { from, temp } of temps) {
+    const re = new RegExp(`--${from}-`, 'g');
+    out = out.replace(re, `--${temp}-`);
+  }
+  // Second pass: temp prefixes become their targets
+  for (const { to, temp } of temps) {
+    const re = new RegExp(`--${temp}-`, 'g');
+    out = out.replace(re, `--${to}-`);
+  }
+  return out;
+}
 
-  const isDark = variantName.includes('-dark');
-  const oldBgL = chroma(bg).oklch()[0] || 0;
-  // Family-preserving filter: keep bg in same lightness half (dark stays dark)
-  function preservesFamily(candidateHex) {
-    const candL = chroma(candidateHex).oklch()[0] || 0;
-    if (isDark) return candL < 0.50;
-    // Light: only keep light if original was light
-    if (oldBgL > 0.50) return candL > 0.50;
+// Retint the 4 bg surface tokens at a new hue, preserving each surface's
+// L and C from its original value. Returns updated CSS.
+// The four bg tokens are a derived "surface group" — they share a hue but
+// have deliberately different lightness (page-bg vs raised vs sunken vs
+// overlay) to create depth. Retinting = change hue only, keep the L depth
+// pattern.
+function retintBgSurfaces(css, newHue) {
+  const surfaces = ['page-bg', 'page-bg-raised', 'page-bg-sunken', 'page-bg-overlay'];
+  let out = css;
+  for (const name of surfaces) {
+    const re = new RegExp('(--' + name + ':\\s*)(#[0-9a-fA-F]+)');
+    out = out.replace(re, (_match, prefix, hex) => {
+      const [L, C] = chroma(hex).oklch();
+      const newHex = chroma.oklch(L, C || 0, newHue).hex();
+      return prefix + newHex;
+    });
+  }
+  return out;
+}
+
+// Role-swap: rotate token FAMILIES (primary ↔ secondary ↔ neutral ↔ text)
+// at the token-prefix level so ALL 5 positions per family swap atomically.
+// Bg does NOT rotate with a family (different shape: 4 surfaces vs 5 scale
+// positions). Bg can be RETINTED to a different family's hue as an optional
+// extra move.
+//
+// Scoring: pick the rotation (+ optional bg retint) that maximises ΔE from
+// the canonical sibling, keeping the variant visually distinct.
+function applyRoleSwap(css, canonicalCss = null, _variantName = '') {
+  const bg = getToken(css, 'page-bg');
+  const pBase = getToken(css, 'primary-base');
+  const sBase = getToken(css, 'secondary-base');
+  const nBase = getToken(css, 'neutral-base');
+  const tBase = getToken(css, 'text-emphasis');
+  if (!bg || !pBase || !sBase) return css;
+
+  // Each candidate rotation is a list of {from, to} family renames (swap is
+  // a pair of renames). Identity (no rotation) is the zero-change baseline.
+  const rotationOptions = [
+    { name: 'identity', rotations: [] },
+    { name: 'primary↔secondary', rotations: [{ from: 'primary', to: 'secondary' }, { from: 'secondary', to: 'primary' }] },
+    { name: 'primary↔neutral',   rotations: [{ from: 'primary', to: 'neutral' },   { from: 'neutral',   to: 'primary' }] },
+    { name: 'primary↔text',      rotations: [{ from: 'primary', to: 'text' },      { from: 'text',      to: 'primary' }] },
+    { name: 'secondary↔neutral', rotations: [{ from: 'secondary', to: 'neutral' }, { from: 'neutral',   to: 'secondary' }] },
+    { name: 'secondary↔text',    rotations: [{ from: 'secondary', to: 'text' },    { from: 'text',      to: 'secondary' }] },
+    { name: 'neutral↔text',      rotations: [{ from: 'neutral',   to: 'text' },    { from: 'text',      to: 'neutral' }] },
+  ];
+
+  // Bg retint options: keep bg's current hue, or adopt one of the family base hues.
+  const primaryHue = pBase ? (chroma(pBase).get('oklch.h') || 0) : null;
+  const secondaryHue = sBase ? (chroma(sBase).get('oklch.h') || 0) : null;
+  const neutralHue = nBase ? (chroma(nBase).get('oklch.h') || 0) : null;
+  const textHue = tBase ? (chroma(tBase).get('oklch.h') || 0) : null;
+  const bgHue = chroma(bg).get('oklch.h') || 0;
+  const retintOptions = [
+    { name: 'bg-keep',      newHue: null },           // no retint
+    { name: 'bg-to-primary',   newHue: primaryHue },
+    { name: 'bg-to-secondary', newHue: secondaryHue },
+    { name: 'bg-to-neutral',   newHue: neutralHue },
+    { name: 'bg-to-text',      newHue: textHue },
+  ].filter(o => o.newHue === null || Number.isFinite(o.newHue));
+
+  // Parse canonical for scoring
+  let cBg = null, cPrim = null, cSec = null, cText = null;
+  if (canonicalCss) {
+    cBg = getToken(canonicalCss, 'page-bg');
+    cPrim = getToken(canonicalCss, 'primary-base');
+    cSec = getToken(canonicalCss, 'secondary-base');
+    cText = getToken(canonicalCss, 'text-emphasis');
+  }
+
+  // Read the current base hexes for each family (for scoring)
+  const currentHexes = { bg, 'primary-base': pBase, 'secondary-base': sBase, 'neutral-base': nBase, 'text-emphasis': tBase };
+
+  // Score a candidate (rotation + retint) by its perceptual distance from canonical.
+  function scoreCandidate(rotations, newBgHue) {
+    if (!canonicalCss) return 0;
+    // Apply rotations to the token-name → hex map
+    const rotated = { ...currentHexes };
+    const baseTokens = ['primary-base', 'secondary-base', 'neutral-base', 'text-emphasis'];
+    const newMap = {};
+    for (const t of baseTokens) {
+      // Start with identity — overwritten below by the rotation pairs
+      newMap[t] = rotated[t];
+    }
+    // Identity-map via swap: token 'primary-base' now holds what 'secondary-base' had, etc.
+    for (const { from, to } of rotations) {
+      // After "from → to", the 'to-*' tokens should hold what 'from-*' had
+      const fromKey = from === 'text' ? 'text-emphasis' : `${from}-base`;
+      const toKey = to === 'text' ? 'text-emphasis' : `${to}-base`;
+      newMap[toKey] = currentHexes[fromKey];
+    }
+    // Apply bg retint to newMap.bg
+    let newBg = bg;
+    if (newBgHue !== null) {
+      const [L, C] = chroma(bg).oklch();
+      newBg = chroma.oklch(L, C || 0, newBgHue).hex();
+    }
+    newMap.bg = newBg;
+    // Distance: ΔE sum from canonical
+    let total = 0;
+    const pairs = [
+      [newMap.bg, cBg],
+      [newMap['primary-base'], cPrim],
+      [newMap['secondary-base'], cSec],
+      [newMap['text-emphasis'], cText],
+    ];
+    for (const [a, b] of pairs) {
+      if (!a || !b) continue;
+      try { total += chroma.deltaE(a, b); } catch (e) { /* skip */ }
+    }
+    return total;
+  }
+
+  // Readability check for a candidate — must keep text readable vs bg.
+  function isReadable(rotations, newBgHue) {
+    // Apply rotations and bg retint, check contrast.
+    const newMap = { bg };
+    for (const { from, to } of rotations) {
+      const fromKey = from === 'text' ? 'text-emphasis' : `${from}-base`;
+      const toKey = to === 'text' ? 'text-emphasis' : `${to}-base`;
+      newMap[toKey] = currentHexes[fromKey];
+    }
+    // Fill anything not rotated with current values
+    for (const t of ['primary-base', 'secondary-base', 'neutral-base', 'text-emphasis']) {
+      if (newMap[t] === undefined) newMap[t] = currentHexes[t];
+    }
+    if (newBgHue !== null) {
+      const [L, C] = chroma(bg).oklch();
+      newMap.bg = chroma.oklch(L, C || 0, newBgHue).hex();
+    }
+    if (newMap['text-emphasis'] && contrastRatio(newMap['text-emphasis'], newMap.bg) < 4.5) return false;
+    if (newMap['primary-base']  && contrastRatio(newMap['primary-base'],  newMap.bg) < 3)   return false;
     return true;
   }
 
-  const oldHexes = { bg, primary, secondary, text };
-  const candidates = [primary, secondary, text]
-    .filter(c => c && c.toLowerCase() !== bg.toLowerCase())
-    .filter(preservesFamily); // family-preserving
-
-  // Mode 1: bg-rotation swap — try each candidate as new bg.
-  // Works when there's a family-preserving alternative bg colour in the set.
-  const configs = [];
-  for (const candidate of candidates) {
-    const config = buildSwapForNewBg(bg, primary, secondary, text, candidate);
-    if (config) configs.push(config);
-  }
-
-  // Mode 2: bg-locked swap — keep the original bg, permute primary/secondary/text
-  // among themselves. Useful for narrow-palette themes (dark calm, etc.) where
-  // no non-bg colour is dark enough to serve as new-bg, but the three foreground
-  // colours can rotate roles among themselves to produce a visibly different
-  // layout without breaking the family.
-  const permutations3 = [
-    // [newPrimary, newSecondary, newText] assigned from (primary, secondary, text)
-    [secondary, text, primary],  // shift left
-    [text, primary, secondary],  // shift right
-    [primary, text, secondary],  // swap secondary↔text
-    [secondary, primary, text],  // swap primary↔secondary
-    [text, secondary, primary],  // swap primary↔text
-  ];
-  for (const [newPrimary, newSecondary, newText] of permutations3) {
-    // Readability: newText must still clear 4.5:1 against bg
-    if (contrastRatio(newText, bg) < 4.5) continue;
-    // Primary visibility: must clear 3:1 UI contrast against bg
-    if (contrastRatio(newPrimary, bg) < 3) continue;
-    configs.push({ newBg: bg, newPrimary, newSecondary, newText });
-  }
-
-  if (configs.length === 0) return css;
-
-  // Rank by perceptual distance from canonical (or just pick first if no canonical)
-  let best = configs[0];
-  if (canonicalCss) {
-    const cBg = getToken(canonicalCss, 'page-bg');
-    const cPrim = getToken(canonicalCss, 'primary-base');
-    const cSec = getToken(canonicalCss, 'secondary-base');
-    const cText = getToken(canonicalCss, 'text-emphasis');
-    if (cBg && cPrim && cSec && cText) {
-      const canonicalHexes = { bg: cBg, primary: cPrim, secondary: cSec, text: cText };
-      best = configs
-        .map(cfg => ({ cfg, dist: configDistance(cfg, canonicalHexes) }))
-        .sort((a, b) => b.dist - a.dist)[0].cfg;
+  // Enumerate all (rotation × retint) combinations, score, pick max.
+  let best = { rotations: [], newBgHue: null, score: -1 };
+  for (const rot of rotationOptions) {
+    for (const rt of retintOptions) {
+      if (!isReadable(rot.rotations, rt.newHue)) continue;
+      const score = scoreCandidate(rot.rotations, rt.newHue);
+      if (score > best.score) best = { rotations: rot.rotations, newBgHue: rt.newHue, score };
     }
   }
-  return applySwapConfig(css, oldHexes, best);
+
+  if (best.score < 0) return css; // nothing viable (shouldn't happen — identity passes readability)
+
+  let out = applyFamilyRotations(css, best.rotations);
+  if (best.newBgHue !== null && Math.abs(best.newBgHue - bgHue) > 2) {
+    out = retintBgSurfaces(out, best.newBgHue);
+  }
+  return out;
 }
 
 // Cross-variant duplication: two variants PERCEPTUALLY identical on the 4
