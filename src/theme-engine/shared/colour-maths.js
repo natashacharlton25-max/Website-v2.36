@@ -18,19 +18,54 @@ import chroma from 'chroma-js';
 
 /**
  * Binary search for maximum sRGB-safe chroma at a given OKLCH hue + lightness.
+ *
+ * chroma-js silently gamut-clamps internally — it never returns out-of-range
+ * RGB. Detect "requested chroma exceeds gamut" by asking the hex back for
+ * its OKLCH and comparing: if the read-back C is materially less than
+ * requested, we asked for more than the gamut can hold.
  */
 export function maxChromaForHue(hue, lightness) {
   let lo = 0, hi = 0.4;
   for (let i = 0; i < 30; i++) {
     const mid = (lo + hi) / 2;
     try {
-      const c = chroma.oklch(lightness, mid, hue);
-      const [r, g, b] = c.rgb();
-      if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) lo = mid;
+      const hex = chroma.oklch(lightness, mid, hue).hex();
+      const [, actualC] = chroma(hex).oklch();
+      // Gamut holds if readback C is within 0.005 of requested
+      if (Math.abs((actualC || 0) - mid) < 0.005) lo = mid;
       else hi = mid;
     } catch (e) { hi = mid; }
   }
   return lo;
+}
+
+/**
+ * Find the L where a given hue can sustain MAXIMUM sRGB-safe chroma —
+ * the "natural peak saturation lightness" for that hue.
+ *
+ *   red     (hue   30) → L ~0.63
+ *   yellow  (hue  100) → L ~0.97
+ *   green   (hue  142) → L ~0.87
+ *   cyan    (hue  195) → L ~0.90
+ *   blue    (hue  264) → L ~0.45
+ *   magenta (hue  328) → L ~0.70
+ *
+ * Samples L from 0.20 to 0.95 in 0.025 steps, reads maxChromaForHue at each,
+ * returns the L with the highest ceiling. Lets vivid ladders track each
+ * hue's natural peak instead of forcing all hues to a single L (which
+ * silently mutes cyan/yellow/green because they peak far from mid-L).
+ */
+export function findPeakChromaLightness(hue) {
+  let bestL = 0.6;
+  let bestC = 0;
+  for (let l = 0.20; l <= 0.95; l += 0.025) {
+    const c = maxChromaForHue(hue, l);
+    if (c > bestC) {
+      bestC = c;
+      bestL = l;
+    }
+  }
+  return bestL;
 }
 
 /**
