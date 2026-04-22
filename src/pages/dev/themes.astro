@@ -38,7 +38,6 @@ const categories = [...new Set(themes.map(t => t.category))].sort();
 
 const SCALE_FAMILIES = ['primary', 'secondary', 'neutral', 'text'] as const;
 const SCALE_STEPS = ['tint', 'mid', 'base', 'emphasis', 'contrast'] as const;
-const BG_TOKENS = ['page-bg', 'page-bg-raised', 'page-bg-sunken', 'page-bg-overlay'] as const;
 const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
 ---
 
@@ -106,6 +105,7 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
           </div>
 
           <div class="dt-expand-panel" hidden>
+            <span class="dt-panel-bg-pill" data-panel-bg>Background <span class="dt-panel-bg-hex"></span></span>
             <div class="dt-header">
               <div class="dt-label"></div>
               {SCALE_STEPS.map(s => <div class="dt-colhead">{s}</div>)}
@@ -122,12 +122,30 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
             ))}
             <div class="dt-row dt-bg-row">
               <div class="dt-label">surface</div>
-              {BG_TOKENS.map(tok => (
-                <div class={`dt-swatch dt-swatch--${tok}`}>
-                  <span class="dt-role-label">{tok.replace('page-bg', 'bg').replace('-', ' ').trim() || 'bg'}</span>
-                  <span class="dt-hex"></span>
+              <div class={`dt-swatch dt-swatch--page-bg`}>
+                <div class="dt-mini-row">
+                  <div class="dt-mini-card dt-mini-card--highlight" data-mini="highlight-link-color" data-mini-bg="page-bg">
+                    <span class="dt-mini-label">highlight link</span>
+                    <span class="dt-mini-hex"></span>
+                  </div>
+                  <div class="dt-mini-card dt-mini-card--focus" data-mini="focus-color" data-mini-bg="page-bg">
+                    <span class="dt-mini-label">focus ring</span>
+                    <span class="dt-mini-hex"></span>
+                  </div>
                 </div>
-              ))}
+              </div>
+              <div class={`dt-swatch dt-swatch--page-bg-raised`}>
+                <span class="dt-surface-tag">bg raised</span>
+                <span class="dt-surface-hex"></span>
+              </div>
+              <div class={`dt-swatch dt-swatch--page-bg-sunken`}>
+                <span class="dt-surface-tag">bg sunken</span>
+                <span class="dt-surface-hex"></span>
+              </div>
+              <div class={`dt-swatch dt-swatch--page-bg-overlay`}>
+                <span class="dt-surface-tag">bg overlay</span>
+                <span class="dt-surface-hex"></span>
+              </div>
             </div>
             <div class="dt-row dt-status-row">
               <div class="dt-label">status</div>
@@ -229,22 +247,43 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
           : lcAbs >= 30 ? 'dt-lc-ui'
           : 'dt-lc-fail';
 
-        // Role-aware WCAG border
+        // Role-aware WCAG border.
+        //
+        // Every scale position must clear ΔE ≥ 10 against its compare target
+        // (tint vs bg, others vs previous step) — positions within ΔE 10 of
+        // each other read as the same colour regardless of contrast ratio.
+        // The ΔE floor gates every scale step; the ratio threshold then
+        // determines the AA/AAA tier.
+        //
+        // Calm (all variants) applies the calm text-size zone: body bumped
+        // to ≥1.2rem. Base/emphasis use WCAG Large thresholds (3:1/4.5:1).
+        //
+        // Non-calm:
+        //   tint     = decorative, ΔE only (5 aa / 10 aaa)
+        //   mid      = UI/large headings (3:1 AA, 4.5:1 AAA)
+        //   base     = headings / large text (3:1 AA, 4.5:1 AAA)
+        //   emphasis = normal body text (4.5:1 AA, 7:1 AAA)
+        const deFail = isScale && step !== 'tint' && deNum < 10;
         let wcag;
         if (!isScale) {
           wcag = crNum >= 4.5 ? 'dt-wcag-aaa' : crNum >= 3 ? 'dt-wcag-aa' : 'dt-wcag-fail';
         } else if (step === 'tint') {
           wcag = deNum >= 10 ? 'dt-wcag-aaa' : deNum >= 5 ? 'dt-wcag-aa' : 'dt-wcag-fail';
-        } else if (step === 'mid' && isCalm && !isHC) {
-          const dePass = deNum >= 5, lcPass = lcAbs >= 30;
+        } else if (step === 'mid' && isCalm) {
+          const dePass = deNum >= 10, lcPass = lcAbs >= 30;
           wcag = (dePass && lcPass) ? 'dt-wcag-aaa' : (dePass || lcPass) ? 'dt-wcag-ui' : 'dt-wcag-fail';
-        } else if (step === 'mid' && isHC) {
+        } else if (step === 'mid') {
           wcag = crNum >= 4.5 ? 'dt-wcag-aaa' : crNum >= 3 ? 'dt-wcag-aa' : 'dt-wcag-fail';
-        } else if (isCalm && !isHC) {
+        } else if (step === 'base' && !isCalm) {
+          wcag = crNum >= 4.5 ? 'dt-wcag-aaa' : crNum >= 3 ? 'dt-wcag-aa' : 'dt-wcag-fail';
+        } else if (isCalm) {
           wcag = crNum >= 4.5 ? 'dt-wcag-aaa' : crNum >= 3 ? 'dt-wcag-aa' : 'dt-wcag-fail';
         } else {
           wcag = crNum >= 7 ? 'dt-wcag-aaa' : crNum >= 4.5 ? 'dt-wcag-aa' : crNum >= 3 ? 'dt-wcag-ui' : 'dt-wcag-fail';
         }
+        // ΔE floor gates every scale step except tint (which already scores on ΔE)
+        // and calm-mid (which uses its own ΔE+Lc rule above).
+        if (deFail && !(step === 'mid' && isCalm)) wcag = 'dt-wcag-fail';
         sw.classList.add(wcag);
 
         // Inject badges: existing hex span stays, append de/lc/ratio
@@ -262,6 +301,75 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
         rBadge.className = `dt-ratio dt-ratio-badge ${wcag}`;
         rBadge.textContent = `${cr}:1`;
         sw.appendChild(rBadge);
+      });
+
+      // Populate surface pill hex labels (inside swatches + the panel-level bg tag)
+      panel.querySelectorAll('.dt-surface-hex').forEach(el => {
+        const parentSw = el.closest('.dt-swatch');
+        const hex = getHex(parentSw);
+        if (hex) el.textContent = hex;
+      });
+      // Panel-level bg pill — one combined "Background #xxxxxx" label
+      const panelHex = panel.querySelector('[data-panel-bg] .dt-panel-bg-hex');
+      if (panelHex && bgHex) panelHex.textContent = bgHex;
+
+      // Score mini-cards (focus-ring, highlight-link) against declared bg.
+      // Gets the same badge set as scale/status swatches: ΔE top-left,
+      // Lc top-right, ratio bottom-right. Label stays in dt-mini-label.
+      panel.querySelectorAll('.dt-mini-card').forEach(mini => {
+        const hex = getHex(mini);
+        const bgKey = mini.getAttribute('data-mini-bg');
+        const bgSw = panel.querySelector(`.dt-swatch--${bgKey}`);
+        const miniBg = bgSw ? getHex(bgSw) : bgHex;
+        if (!hex || !miniBg) return;
+        const cr = ratio(hex, miniBg);
+        const de = chroma.deltaE(miniBg, hex);
+        const lcRaw = apcaLc(hex, miniBg);
+        const lcRounded = Math.round(lcRaw);
+        const lcAbs = Math.abs(lcRounded);
+
+        const token = mini.getAttribute('data-mini');
+        let tier;
+        if (token === 'focus-color') {
+          tier = cr >= 3 ? 'dt-wcag-aaa' : 'dt-wcag-fail';
+        } else if (token === 'text-base') {
+          tier = cr >= 4.5 ? 'dt-wcag-aaa' : cr >= 3 ? 'dt-wcag-aa' : 'dt-wcag-fail';
+        } else {
+          tier = cr >= 7 ? 'dt-wcag-aaa' : cr >= 4.5 ? 'dt-wcag-aa' : cr >= 3 ? 'dt-wcag-ui' : 'dt-wcag-fail';
+        }
+        mini.classList.add(tier);
+
+        // Replace hex slot with real hex
+        const hexSpan = mini.querySelector('.dt-mini-hex');
+        if (hexSpan) hexSpan.textContent = hex;
+
+        // ΔE badge (top-left)
+        const deClass = de < 5 ? 'dt-de-low' : de < 10 ? 'dt-de-mid' : 'dt-de-ok';
+        const deBadge = document.createElement('span');
+        deBadge.className = `dt-de ${deClass}`;
+        deBadge.textContent = `Δ${de.toFixed(1)}`;
+        mini.appendChild(deBadge);
+
+        // Lc badge (top-right)
+        const lcClass = lcAbs >= 75 ? 'dt-lc-strong'
+          : lcAbs >= 60 ? 'dt-lc-body'
+          : lcAbs >= 45 ? 'dt-lc-large'
+          : lcAbs >= 30 ? 'dt-lc-ui'
+          : 'dt-lc-fail';
+        const lcBadge = document.createElement('span');
+        lcBadge.className = `dt-lc ${lcClass}`;
+        lcBadge.textContent = `Lc ${lcRounded}`;
+        mini.appendChild(lcBadge);
+
+        // Ratio badge (bottom-right)
+        const rBadge = document.createElement('span');
+        rBadge.className = `dt-ratio dt-ratio-badge ${tier}`;
+        rBadge.textContent = `${cr.toFixed(1)}:1`;
+        mini.appendChild(rBadge);
+
+        // Colour the mini's text against its own bg for legibility
+        const lum = chroma(hex).luminance();
+        mini.style.color = lum > 0.4 ? '#000' : '#fff';
       });
 
       // After all swatches scored, set the WCAG shield state on the card.
@@ -297,14 +405,25 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
       }
       if (action === 'apply') {
         const key = btn.getAttribute('data-theme');
-        document.documentElement.setAttribute('data-theme', key);
+        // Use the site's real ThemeSwitcher (loaded by BaseLayout) — it
+        // swaps the <link rel="stylesheet"> and persists to localStorage.
+        // Just setting data-theme on <html> doesn't load the CSS file.
+        if (window.themeSwitcher?.switchTheme) {
+          window.themeSwitcher.switchTheme(key).catch(err => console.warn('Theme apply failed:', err));
+        } else {
+          document.documentElement.setAttribute('data-theme', key);
+        }
         document.querySelectorAll('.dt-apply').forEach(b => b.classList.remove('dt-apply-active'));
         btn.classList.add('dt-apply-active');
       }
     });
 
     document.getElementById('dt-reset')?.addEventListener('click', () => {
-      document.documentElement.removeAttribute('data-theme');
+      if (window.themeSwitcher?.switchTheme) {
+        window.themeSwitcher.switchTheme('default').catch(err => console.warn('Reset failed:', err));
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
       document.querySelectorAll('.dt-apply').forEach(b => b.classList.remove('dt-apply-active'));
     });
 
@@ -448,9 +567,20 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
     .dt-apply-active { font-weight: 700; }
 
     .dt-expand-panel {
-      margin-top: 1rem; padding: 1rem;
+      margin-top: 1rem; padding: 2.25rem 1rem 1rem;
       border: 1px solid rgba(128,128,128,0.25);
       border-radius: 6px;
+      position: relative;
+    }
+    .dt-panel-bg-pill {
+      position: absolute; top: 8px; left: 12px;
+      display: inline-flex; gap: 8px; align-items: center;
+      font-size: 0.75rem; font-family: monospace; font-weight: 600;
+      padding: 3px 10px; border-radius: 3px;
+      background: rgba(255,255,255,0.85); color: #000;
+    }
+    .dt-panel-bg-pill .dt-panel-bg-hex {
+      font-weight: 400;
     }
     .dt-header, .dt-row {
       display: grid; grid-template-columns: 120px repeat(5, 1fr); gap: 10px;
@@ -489,6 +619,60 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
       background: rgba(255,255,255,0.85); color: #000;
       text-transform: capitalize;
       white-space: nowrap;
+    }
+    /* Surface tile — the tile IS the bg context. Just a tiny label top-left
+       identifying which surface; the rest is mini-cards sampling tokens
+       against that surface. */
+    .dt-bg-row .dt-swatch {
+      display: flex; flex-direction: column;
+      padding: 0;
+      min-height: 96px;
+      box-shadow: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .dt-surface-tag {
+      position: absolute; top: 6px; left: 8px;
+      font-size: 0.7rem; font-family: monospace; font-weight: 600;
+      padding: 2px 6px; border-radius: 3px;
+      background: rgba(255,255,255,0.85); color: #000;
+      text-transform: capitalize;
+    }
+    .dt-bg-row .dt-surface-hex {
+      position: absolute; bottom: 6px; left: 8px;
+      font-size: 0.7rem; font-family: monospace;
+      padding: 2px 6px; border-radius: 3px;
+      background: rgba(255,255,255,0.85); color: #000;
+    }
+    .dt-mini-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+      width: 100%; height: 100%;
+    }
+    /* Mini-card — full height of the surface tile, shares the space
+       evenly with its sibling. Scored the same way as real swatches
+       (ΔE top-left, Lc top-right, hex bottom-left, ratio bottom-right). */
+    .dt-mini-card {
+      position: relative;
+      padding: 8px 10px; border-radius: 4px;
+      border: 3px solid transparent;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      min-width: 0; min-height: 80px;
+      display: flex; align-items: flex-end;
+    }
+    .dt-mini-label {
+      position: absolute; top: 50%; left: 6px;
+      transform: translateY(-50%);
+      font-size: 0.65rem; font-weight: 600;
+      padding: 1px 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.85); color: #000;
+      text-transform: capitalize;
+      white-space: nowrap; line-height: 1.2;
+    }
+    .dt-mini-hex {
+      font-family: monospace; font-size: 0.62rem; font-weight: 500;
+      padding: 1px 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.85); color: #000;
+      line-height: 1.2;
     }
     .dt-swatch .dt-ratio {
       position: absolute; bottom: 6px; right: 6px;

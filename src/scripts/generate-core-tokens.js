@@ -402,6 +402,16 @@ function generateDevCardsCSS(allFullTokens) {
       css += `.dt-card--${theme} .dt-swatch--status-${short} { background: ${hex}; }\n`;
     }
 
+    // Focus + highlight + text mini-cards inside surface tiles
+    const focusHex       = tokens['focus-color'];
+    const highlightHex   = tokens['highlight-link-color'];
+    const textBaseHex    = tokens['text-base'];
+    const textEmphHex    = tokens['text-emphasis'];
+    if (focusHex)     css += `.dt-card--${theme} .dt-mini-card--focus { background: ${focusHex}; }\n`;
+    if (highlightHex) css += `.dt-card--${theme} .dt-mini-card--highlight { background: ${highlightHex}; }\n`;
+    if (textBaseHex)  css += `.dt-card--${theme} .dt-mini-card--text-base { background: ${textBaseHex}; }\n`;
+    if (textEmphHex)  css += `.dt-card--${theme} .dt-mini-card--text-emphasis { background: ${textEmphHex}; }\n`;
+
     css += '\n';
   }
 

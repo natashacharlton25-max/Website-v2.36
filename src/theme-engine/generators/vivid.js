@@ -606,13 +606,17 @@ export function generateVivid(input, variant = {}) {
     luminance,
   });
 
-  // 7. Contrast tokens — vivid uses positions 600/800 (standard semantic map)
+  // 7. Contrast tokens — vivid uses positions 600/800 across ALL families
+  // (primary / secondary / neutral / text). Previously neutral read 400/500
+  // which produced a contrast hex that didn't match its emphasis — the
+  // "contrast differs from emphasis" preservation in the validator then
+  // treated it as a deliberate override and pinned the wrong hex.
   const primaryBase       = primaryScale[600];
   const secondaryBase     = secondaryScale[600];
-  const neutralBase       = neutralScale[400];
+  const neutralBase       = neutralScale[600];
   const primaryEmphasis   = primaryScale[800];
   const secondaryEmphasis = secondaryScale[800];
-  const neutralEmphasis   = neutralScale[500];
+  const neutralEmphasis   = neutralScale[800];
 
   const contrast = {
     primary: resolveContrastToken({
