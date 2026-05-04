@@ -1,0 +1,237 @@
+/**
+ * no-chroma.css
+ *
+ * Structural gate for users with no/limited hue perception (achromatopsia,
+ * severe acquired CVD, monochrome displays, OS-level greyscale mode).
+ *
+ * Two activation paths, both apply the same rules:
+ *
+ *   data-no-chroma         set by Your View panel toggle (user choice)
+ *   data-theme-no-chroma   set by ThemeSwitcher when a mono theme is
+ *                          active (auto, --theme-chroma: grey)
+ *
+ * Selectors use :is([data-no-chroma],[data-theme-no-chroma]) so either
+ * trigger fires the same CSS. Two attributes (not one) so switching
+ * away from a mono theme doesn't silently un-set the user's panel toggle.
+ *
+ * Independent of theme — works with mono themes (recommended pairing)
+ * AND chromatic themes (still strips hue-dependent affordances).
+ *
+ * Dependencies (sibling gates the panel auto-enables alongside this):
+ *   - xl text gate         — typography sizes bumped one tier
+ *   - opacity-off gate     — ghost/subtle states forced opaque
+ *   - (optional) reduced-motion gate — common comorbidity (nystagmus)
+ *
+ * This gate owns ONLY the rules unique to "no chroma perception":
+ * shape-based affordances replace colour-based ones, lightness does the
+ * discrimination work, redundant non-colour signals everywhere.
+ */
+
+/* ── Page-wide greyscale filter ─────────────────────────── */
+/* "No colour" means no colour anywhere — text, images, SVGs, gradients,
+   video, brand assets. Page-level filter on the root catches everything
+   in one rule.
+   Theme tokens like --media-saturation exist but aren't consumed by any
+   active component CSS; this filter is the actual mechanism that
+   strips chroma from rendered output. */
+:is([data-no-chroma],[data-theme-no-chroma]) {
+  filter: grayscale(1);
+}
+
+/* ── Lottie SVGs follow currentColor ────────────────────── */
+/* Native baked colours can't carry hue info for the user — force SVG
+   fills to inherit from the L-coded scale tokens via currentColor. */
+:is([data-no-chroma],[data-theme-no-chroma]) .lottie-icon__container svg path,
+:is([data-no-chroma],[data-theme-no-chroma]) .lottie-icon__container svg rect,
+:is([data-no-chroma],[data-theme-no-chroma]) .lottie-icon__container svg circle,
+:is([data-no-chroma],[data-theme-no-chroma]) .lottie-icon__container svg line,
+:is([data-no-chroma],[data-theme-no-chroma]) .lottie-icon__container svg ellipse,
+:is([data-no-chroma],[data-theme-no-chroma]) .lottie-icon__container svg polygon,
+:is([data-no-chroma],[data-theme-no-chroma]) .lottie-icon__container svg polyline {
+  stroke: currentColor !important;
+  fill: currentColor !important;
+}
+
+/* ── Focus ring — dashed outer + dotted inner ───────────── */
+/* Pattern carries the focus signal, not colour. Dashed outline is the
+   primary indicator (visible on any L bg). Inner dotted ring on
+   interactive elements gives a redundant signal that survives even
+   when focus-color contrasts poorly with the element's own fill. */
+:is([data-no-chroma],[data-theme-no-chroma]) :focus-visible {
+  outline: 3px dashed var(--focus-color) !important;
+  outline-offset: 3px !important;
+}
+
+:is([data-no-chroma],[data-theme-no-chroma]) button:focus-visible,
+:is([data-no-chroma],[data-theme-no-chroma]) a:focus-visible,
+:is([data-no-chroma],[data-theme-no-chroma]) [role="button"]:focus-visible,
+:is([data-no-chroma],[data-theme-no-chroma]) input:focus-visible,
+:is([data-no-chroma],[data-theme-no-chroma]) select:focus-visible,
+:is([data-no-chroma],[data-theme-no-chroma]) textarea:focus-visible,
+:is([data-no-chroma],[data-theme-no-chroma]) [tabindex]:focus-visible {
+  box-shadow:
+    0 0 0 1px var(--page-bg),
+    0 0 0 4px var(--focus-color) !important;
+}
+
+/* ── Links — mandatory underline + weight + pattern ────── */
+/* Underline carries link-ness through shape. Bold weight gives a second
+   non-colour signal. Dotted on hover/focus and dashed on visited add
+   state distinction without relying on hue. */
+:is([data-no-chroma],[data-theme-no-chroma]) a:not(.btn):not([class*="btn--"]) {
+  text-decoration: underline !important;
+  text-decoration-style: solid !important;
+  text-decoration-thickness: 0.1em !important;
+  text-underline-offset: 0.15em !important;
+  font-weight: 600 !important;
+}
+
+:is([data-no-chroma],[data-theme-no-chroma]) a:not(.btn):not([class*="btn--"]):hover,
+:is([data-no-chroma],[data-theme-no-chroma]) a:not(.btn):not([class*="btn--"]):focus-visible {
+  text-decoration-style: dotted !important;
+  text-decoration-thickness: 0.15em !important;
+}
+
+:is([data-no-chroma],[data-theme-no-chroma]) a:not(.btn):not([class*="btn--"]):visited {
+  text-decoration-style: dashed !important;
+}
+
+/* ── Disabled — strikethrough replaces opacity dim ─────── */
+/* Opacity-off gate kills the usual "disabled = faded" treatment.
+   Replace with a strikethrough + not-allowed cursor — disabled
+   communicated by shape, not by lightness shift. */
+:is([data-no-chroma],[data-theme-no-chroma]) [disabled],
+:is([data-no-chroma],[data-theme-no-chroma]) [aria-disabled="true"],
+:is([data-no-chroma],[data-theme-no-chroma]) .disabled {
+  text-decoration: line-through !important;
+  text-decoration-thickness: 0.08em !important;
+  cursor: not-allowed !important;
+}
+
+/* ── Status fills — text-colour pairing by L ──────────── */
+/* Each status fill sits at a specific L (mono engine outputs widely
+   spaced status Ls). Light fills need dark text; dark fills need
+   light text. Otherwise the label vanishes on its own status block.
+
+   Light mode L mapping (mono engine):
+     Error    L 0.32  → light text
+     Warning  L 0.50  → light text
+     Success  L 0.65  → dark text
+     Info     L 0.78  → dark text
+
+   Dark mode inverts — Error is L 0.88 (lightest), Info is L 0.42
+   (darkest). Text-colour pairing flips. */
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--info"]:not(.icon-info),
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--success"] {
+  color: var(--text-emphasis) !important;
+}
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--warning"],
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--error"] {
+  color: var(--page-bg) !important;
+}
+
+[data-mode="dark"]:is([data-no-chroma],[data-theme-no-chroma]) [class*="--info"]:not(.icon-info),
+[data-mode="dark"]:is([data-no-chroma],[data-theme-no-chroma]) [class*="--success"] {
+  color: var(--page-bg) !important;
+}
+[data-mode="dark"]:is([data-no-chroma],[data-theme-no-chroma]) [class*="--warning"],
+[data-mode="dark"]:is([data-no-chroma],[data-theme-no-chroma]) [class*="--error"] {
+  color: var(--text-emphasis) !important;
+}
+
+/* ── Borders on grouped surfaces ────────────────────────── */
+/* In normal renders, content groups via subtle bg-tint differences
+   (page-bg vs page-bg-raised vs page-bg-sunken). Without chroma those
+   tints are very small L deltas — easy to miss. Force visible borders
+   on cards / panels / sections so groupings read structurally. */
+:is([data-no-chroma],[data-theme-no-chroma]) .card,
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--raised"],
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--sunken"],
+:is([data-no-chroma],[data-theme-no-chroma]) .panel,
+:is([data-no-chroma],[data-theme-no-chroma]) section[class*="bg-"] {
+  border: 1px solid var(--neutral-base) !important;
+}
+
+:is([data-no-chroma],[data-theme-no-chroma]) .card--elevated,
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--overlay"] {
+  border: 2px solid var(--neutral-emphasis) !important;
+}
+
+/* ── Hover — non-lightness signal ───────────────────────── */
+/* Default hover is "slightly lighter bg" — a small L shift the user
+   can't reliably detect. Add a border-style change so hover reads
+   through pattern, not lightness. */
+:is([data-no-chroma],[data-theme-no-chroma]) button:not([disabled]):hover,
+:is([data-no-chroma],[data-theme-no-chroma]) a:not(.btn):not([class*="btn--"]):hover,
+:is([data-no-chroma],[data-theme-no-chroma]) [role="button"]:not([aria-disabled="true"]):hover {
+  border-style: dashed !important;
+}
+
+:is([data-no-chroma],[data-theme-no-chroma]) .btn:hover,
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="btn--"]:not([disabled]):hover {
+  outline: 2px dashed currentColor !important;
+  outline-offset: 2px !important;
+}
+
+/* ── Active / pressed — distinct from hover ─────────────── */
+/* Pressed is conventionally "slightly darker bg" — same L-shift problem
+   as hover. Replace with inset shadow + position shift so pressed reads
+   through depth + motion. */
+:is([data-no-chroma],[data-theme-no-chroma]) button:active,
+:is([data-no-chroma],[data-theme-no-chroma]) [role="button"]:active,
+:is([data-no-chroma],[data-theme-no-chroma]) .btn:active {
+  transform: translateY(1px) !important;
+  box-shadow: inset 0 2px 0 var(--neutral-emphasis) !important;
+}
+
+/* ── Selection — left-border pattern ───────────────────── */
+/* "This row/item is selected" via bg-tint shift becomes invisible
+   without chroma. Replace with a chunky left border + bold weight. */
+:is([data-no-chroma],[data-theme-no-chroma]) [aria-selected="true"],
+:is([data-no-chroma],[data-theme-no-chroma]) .selected,
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--selected"] {
+  border-left: 4px solid var(--text-emphasis) !important;
+  padding-left: calc(var(--space-md, 1rem) - 4px) !important;
+  font-weight: 600 !important;
+}
+
+/* ── Skeleton — lightness-only shimmer ────────────────── */
+/* Default skeleton uses chroma shimmer (faint hue sweep across grey).
+   Force lightness-only shimmer — animation goes between two greys at
+   different L, no hue component. */
+:is([data-no-chroma],[data-theme-no-chroma]) .skeleton,
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="skeleton-"] {
+  background: linear-gradient(
+    90deg,
+    var(--neutral-tint) 0%,
+    var(--neutral-mid) 50%,
+    var(--neutral-tint) 100%
+  ) !important;
+  background-size: 200% 100% !important;
+}
+
+/* ── Status icon enforcement (CSS-level flag) ──────────── */
+/* For achromatopsic users, a status component without an icon is
+   colour-only — meaning is unreadable. Mark such components visually
+   so the dev team catches them. Production warning, not a hard error.
+
+   A status block expects to contain an icon: <svg> or [class*="icon"].
+   If neither is present, this rule fires. */
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--info"]:not(:has(svg)):not(:has([class*="icon"])),
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--success"]:not(:has(svg)):not(:has([class*="icon"])),
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--warning"]:not(:has(svg)):not(:has([class*="icon"])),
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--error"]:not(:has(svg)):not(:has([class*="icon"])) {
+  outline: 3px dashed magenta !important;
+  position: relative;
+}
+
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--info"]:not(:has(svg)):not(:has([class*="icon"]))::before,
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--success"]:not(:has(svg)):not(:has([class*="icon"]))::before,
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--warning"]:not(:has(svg)):not(:has([class*="icon"]))::before,
+:is([data-no-chroma],[data-theme-no-chroma]) [class*="--error"]:not(:has(svg)):not(:has([class*="icon"]))::before {
+  content: "⚠ status component missing icon — colour-only meaning is invisible to no-chroma users";
+  display: block;
+  font-size: 0.75em;
+  color: magenta;
+  margin-bottom: 0.5em;
+}

@@ -51,6 +51,12 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
         {categories.map(c => (
           <label class="dt-filter"><input type="checkbox" class="dt-cat-toggle" data-cat={c} checked /> {c}</label>
         ))}
+        <span class="dt-filter-sep">·</span>
+        <span class="dt-filter-label">CVD sim:</span>
+        <label class="dt-filter"><input type="radio" name="dt-cvd-sim" value="none" checked /> Normal</label>
+        <label class="dt-filter"><input type="radio" name="dt-cvd-sim" value="protan" /> Protan</label>
+        <label class="dt-filter"><input type="radio" name="dt-cvd-sim" value="deutan" /> Deutan</label>
+        <label class="dt-filter"><input type="radio" name="dt-cvd-sim" value="tritan" /> Tritan</label>
         <button class="dt-reset" id="dt-reset">Reset applied theme</button>
       </div>
     </header>
@@ -166,6 +172,7 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
     // @ts-nocheck
     import chroma from 'chroma-js';
     import { APCAcontrast, sRGBtoY } from 'apca-w3';
+    import { simulateCvd } from '../../theme-engine/shared/cvd.js';
 
     // Compute + inject ΔE / Lc / WCAG badges for the swatches inside a panel.
     // Reads each swatch's actual computed background (the CSS paints it) so
@@ -447,6 +454,37 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
         });
       });
     });
+
+    // CVD simulation toggle — repaints every swatch + surface + mini-card
+    // with simulateCvd(). Cache each element's original background hex on
+    // first sim so we can restore on toggle back to Normal.
+    //
+    // Works on everything with a rendered bg, including mini-swatches on
+    // collapsed cards (primary/secondary/neutral base) + the card frame
+    // itself so the page re-skins as a CVD user would see it.
+    function applyCvdSim(mode) {
+      const elements = document.querySelectorAll(
+        '.dt-swatch, .dt-swatch-mini, .dt-mini-card, .dt-card, .dt-expand-panel'
+      );
+      for (const el of elements) {
+        // Cache original bg the first time we touch this element
+        if (!el.dataset.origBg) {
+          const cs = getComputedStyle(el).backgroundColor;
+          try { el.dataset.origBg = chroma(cs).hex(); }
+          catch { el.dataset.origBg = ''; }
+        }
+        const orig = el.dataset.origBg;
+        if (!orig) continue;
+        el.style.background = mode === 'none'
+          ? ''   // revert to CSS-computed bg
+          : simulateCvd(orig, mode);
+      }
+    }
+    document.querySelectorAll('input[name="dt-cvd-sim"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        applyCvdSim(e.target.value);
+      });
+    });
   </script>
 
   <style is:global>
@@ -460,6 +498,8 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
       background: rgba(128,128,128,0.08);
     }
     .dt-filter { font-size: 0.85rem; cursor: pointer; }
+    .dt-filter-sep { opacity: 0.4; padding: 0 0.25rem; }
+    .dt-filter-label { font-size: 0.8rem; opacity: 0.7; font-weight: 600; }
     .dt-reset {
       margin-left: auto;
       background: transparent; border: 1px solid rgba(128,128,128,0.4);

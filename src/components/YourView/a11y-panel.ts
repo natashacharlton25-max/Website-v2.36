@@ -55,6 +55,10 @@ export interface A11ySettings {
   animExplainer: 'off' | 'inline' | 'subtitle' | 'enlarge' | 'tooltip';
   /** Animation explainer content mode — what to show in the cards */
   animSeqMode: 'full' | 'visual' | 'text';
+  /** No-chroma mode — strips hue-dependent affordances for users with no
+   *  hue perception (achromatopsia, severe acquired CVD, mono displays).
+   *  Activates the no-chroma.css zone gate. Works with any theme. */
+  noChroma: boolean;
 }
 
 const STORAGE_KEY = 'a11y-settings';
@@ -96,7 +100,8 @@ export const defaultSettings: A11ySettings = {
   aacFilter: 'none',
   imageEnlarge: false,
   animExplainer: 'off',
-  animSeqMode: 'full'
+  animSeqMode: 'full',
+  noChroma: false
 };
 
 // ===================================
@@ -278,6 +283,11 @@ export function applySettings(settings: A11ySettings): void {
     document.documentElement.removeAttribute('data-enhanced-focus');
     document.documentElement.style.removeProperty('--focus-thickness');
   }
+
+  // No-chroma gate — strips hue-dependent affordances (focus pattern,
+  // link underlines, status text-pairing, surface borders, etc.).
+  // Activates src/styles/zones/no-chroma.css. Works with any theme.
+  document.documentElement.toggleAttribute('data-no-chroma', settings.noChroma);
 
   // Individual focus features
   document.documentElement.toggleAttribute('data-focus-dim', settings.focusDim);
@@ -522,7 +532,7 @@ export const presets: Record<string, Partial<A11ySettings>> = {
 // ===================================
 export function updateUI(container: HTMLElement, s: A11ySettings): void {
   // Toggle cards
-  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'focusRainbow', 'focusColorJourney', 'rainbowHighlight', 'customCaret', 'rainbowScroll', 'focusColourCycle', 'arrowTab', 'dropdownMouseClose', 'screenReaderMode', 'scrollbarEnhanced'];
+  const toggleCardSettings = ['textOnly', 'highlightLinks', 'reduceMotion', 'enhancedFocus', 'focusDim', 'focusScroll', 'focusPulse', 'focusLabel', 'focusRainbow', 'focusColorJourney', 'rainbowHighlight', 'customCaret', 'rainbowScroll', 'focusColourCycle', 'arrowTab', 'dropdownMouseClose', 'screenReaderMode', 'scrollbarEnhanced', 'noChroma'];
   toggleCardSettings.forEach(key => {
     const card = container.querySelector(`.a11y-toggle-card[data-setting="${key}"]`);
     if (card) {

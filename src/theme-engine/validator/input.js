@@ -207,6 +207,11 @@ function scoreBrandCvdRisk(entry, cvdType, chromaZone, bgL = 0.5) {
   const zones = STRICT_CHROMA_ZONES.has(chromaZone)
     ? CVD_UNSAFE_ZONES_STRICT[cvdType]
     : CVD_UNSAFE_ZONES[cvdType];
+  // Use HSV picker hue (entry.hue) — that's the user's SEMANTIC hue
+  // intent. HSV 282° is purple regardless of S/V; HSV 231° is blue
+  // regardless of whether OKLCH readback drifts the rendered hex by
+  // 30-50°. CVD unsafe zones are hue-family concepts, so test against
+  // the intent, not the rendered OKLCH.
   const depth = zoneDepth(entry.hue, zones);
   if (depth === 0) return 0;
   const [L, C] = chroma(entry.hex).oklch();

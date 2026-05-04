@@ -1,7 +1,9 @@
 /**
  * colour-maths.js — Pure colour maths helpers shared across every theme.
  *
- * Ported from src/utils/theme-engine.js. Browser-safe (chroma-js only).
+ * Canonical colour-math primitives shared across new-engine generators
+ * (vivid, cloudcalm, mono-grey) and the validator. Browser-safe
+ * (chroma-js only).
  *
  *   maxChromaForHue
  *   safeOklch

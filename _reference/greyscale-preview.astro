@@ -1,0 +1,878 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Greyscale Theme Preview" hideFooter>
+  <div class="gp-wrap">
+    <header class="gp-head">
+      <h1>Greyscale Theme Preview <span class="gp-head-mode" id="gp-head-mode"></span></h1>
+      <p>Pick any colours. We rebuild the theme as tinted greyscale. Tested for WCAG, Delta E and APCA.</p>
+    </header>
+
+    <section class="gp-input">
+      <label>
+        Primary
+        <input type="color" id="gp-primary" value="#7a808d" />
+        <input type="text" id="gp-primary-hex" value="#7a808d" maxlength="7" />
+      </label>
+      <label>
+        Secondary
+        <input type="color" id="gp-secondary" value="#5f636b" />
+        <input type="text" id="gp-secondary-hex" value="#5f636b" maxlength="7" />
+      </label>
+      <div class="gp-info">
+        <span>Primary hue: <b id="gp-primary-hue">—</b>°</span>
+        <span>Secondary hue: <b id="gp-secondary-hue">—</b>°</span>
+        <span class="gp-hue-dist" id="gp-hue-dist">Distance: <b>0°</b></span>
+        <div class="gp-shift-inline">
+          <label class="gp-shift-label" for="gp-shift-slider">Shift</label>
+          <input type="range" id="gp-shift-slider" min="0" max="60" value="0" step="1" class="gp-shift-slider" />
+          <span class="gp-shift-value"><b id="gp-shift-deg">0</b>°</span>
+        </div>
+      </div>
+    </section>
+
+
+    <div class="gp-tabs">
+      <button class="gp-tab gp-tab-active" data-tab="standard" type="button">Standard (Light + Dark)</button>
+      <button class="gp-tab" data-tab="hc" type="button">High Contrast (Light + Dark)</button>
+      <button class="gp-tab" data-tab="cvd" type="button">Colour-Blind Preview</button>
+      <button class="gp-collapse" id="gp-collapse-btn" type="button" title="Collapse/expand info panels" aria-label="Collapse info panels">−</button>
+    </div>
+    <div class="gp-panels" id="gp-panels">
+
+    <div class="gp-tab-panel" data-panel="standard">
+      <section class="gp-key">
+        <div class="gp-key-card">
+          <h3>Ratio badge (bottom right of each swatch)</h3>
+          <p class="gp-key-sub">How clearly can you read this colour? This is the official accessibility check. Higher means easier to read. Standard greyscale uses normal body text size.</p>
+          <ul class="gp-badge-list">
+            <li><span class="gp-ratio-badge gp-wcag-fail">&lt;3:1</span> Too faint. Not readable.</li>
+            <li><span class="gp-ratio-badge gp-wcag-ui">3:1–4.5:1</span> Only OK for large headings.</li>
+            <li><span class="gp-ratio-badge gp-wcag-aa">4.5:1–7:1</span> Fine for normal reading.</li>
+            <li><span class="gp-ratio-badge gp-wcag-aaa">7:1+</span> Very clear. Easy on the eyes, good for low vision.</li>
+          </ul>
+        </div>
+        <div class="gp-key-card">
+          <h3>Δ badge (top left of each swatch)</h3>
+          <p class="gp-key-sub">Can you tell these two colours apart? Tint is compared to the page background. Mid, base and emphasis are each compared to the slot just before them.</p>
+          <ul class="gp-badge-list">
+            <li><span class="gp-de gp-de-low">Δ &lt;5</span> Too similar. Look identical to the eye.</li>
+            <li><span class="gp-de gp-de-mid">Δ 5–10</span> Close, but you can tell them apart with a look.</li>
+            <li><span class="gp-de gp-de-ok">Δ 10+</span> Clearly different colours.</li>
+          </ul>
+        </div>
+        <div class="gp-key-card">
+          <h3>Lc badge (top right of each swatch)</h3>
+          <p class="gp-key-sub">A newer, smarter readability score that matches how your eyes actually see. It catches problems the old test misses — especially light text on dark backgrounds.</p>
+          <ul class="gp-badge-list">
+            <li><span class="gp-lc gp-lc-fail">Lc &lt;30</span> Too faint to see.</li>
+            <li><span class="gp-lc gp-lc-ui">Lc 30–45</span> Fine for icons and buttons.</li>
+            <li><span class="gp-lc gp-lc-large">Lc 45–60</span> Big headings read clearly.</li>
+            <li><span class="gp-lc gp-lc-body">Lc 60–75</span> Comfortable for reading.</li>
+            <li><span class="gp-lc gp-lc-strong">Lc 75+</span> Very clear. Reads easily at any size.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="gp-border-key">
+        <h3>Coloured borders — Standard greyscale</h3>
+        <p>Each swatch border shows whether it passes <b>for its role</b>. Standard themes pass at AA (Mid 3:1, Base + Emphasis 4.5:1).</p>
+        <div class="gp-border-key-rows">
+          <div class="gp-border-key-row">
+            <div class="gp-border-key-label"><b>Tint</b> <span>Decorative whisper</span></div>
+            <p class="gp-border-key-desc">Needs to stand out from the page background just enough to be noticeable.<br>Scored on Delta E.</p>
+            <div class="gp-border-key-tiers">
+              <span class="gp-border-box gp-wcag-aaa">Clearly visible</span>
+              <span class="gp-border-box gp-wcag-aa">Just visible</span>
+              <span class="gp-border-box gp-wcag-fail">Lost in the background</span>
+            </div>
+          </div>
+          <div class="gp-border-key-row">
+            <div class="gp-border-key-label"><b>Mid</b> <span>UI + very large headings</span></div>
+            <p class="gp-border-key-desc">Passes AA at 3:1.<br>Standard target met.</p>
+            <div class="gp-border-key-tiers">
+              <span class="gp-border-box gp-wcag-fail">Below 3:1 — fail</span>
+              <span class="gp-border-box gp-wcag-aaa">3:1+ — passes AA</span>
+            </div>
+          </div>
+          <div class="gp-border-key-row">
+            <div class="gp-border-key-label"><b>Base</b> <span>Body text normal</span></div>
+            <p class="gp-border-key-desc">Passes AA at 4.5:1.<br>Standard target met.</p>
+            <div class="gp-border-key-tiers">
+              <span class="gp-border-box gp-wcag-fail">Below 3:1 — fail</span>
+              <span class="gp-border-box gp-wcag-aa">3–4.5:1 — large only</span>
+              <span class="gp-border-box gp-wcag-aaa">4.5:1+ — passes AA</span>
+            </div>
+          </div>
+          <div class="gp-border-key-row">
+            <div class="gp-border-key-label"><b>Emphasis</b> <span>Body text small</span></div>
+            <p class="gp-border-key-desc">Passes AA at 4.5:1.<br>Standard target met.</p>
+            <div class="gp-border-key-tiers">
+              <span class="gp-border-box gp-wcag-fail">Below 3:1 — fail</span>
+              <span class="gp-border-box gp-wcag-aa">3–4.5:1 — large only</span>
+              <span class="gp-border-box gp-wcag-aaa">4.5:1+ — passes AA</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="gp-tab-panel" data-panel="hc" hidden>
+      <section class="gp-key">
+        <div class="gp-key-card">
+          <h3>Ratio badge (bottom right of each swatch)</h3>
+          <p class="gp-key-sub">How clearly can you read this colour? HC greyscale pushes everything to AAA contrast (7:1+) for low-vision users. Hue-tinted background carries the colour identity instead of the primaries.</p>
+          <ul class="gp-badge-list">
+            <li><span class="gp-ratio-badge gp-wcag-fail">&lt;3:1</span> Too faint. Not readable.</li>
+            <li><span class="gp-ratio-badge gp-wcag-ui">3:1–4.5:1</span> Only OK for large headings.</li>
+            <li><span class="gp-ratio-badge gp-wcag-aa">4.5:1–7:1</span> Fine for normal reading.</li>
+            <li><span class="gp-ratio-badge gp-wcag-aaa">7:1+</span> Very clear. Easy on the eyes, good for low vision.</li>
+          </ul>
+        </div>
+        <div class="gp-key-card">
+          <h3>Δ badge (top left of each swatch)</h3>
+          <p class="gp-key-sub">Can you tell these two colours apart? Tint is compared to the page background. Mid, base and emphasis are each compared to the slot just before them.</p>
+          <ul class="gp-badge-list">
+            <li><span class="gp-de gp-de-low">Δ &lt;5</span> Too similar. Look identical to the eye.</li>
+            <li><span class="gp-de gp-de-mid">Δ 5–10</span> Close, but you can tell them apart with a look.</li>
+            <li><span class="gp-de gp-de-ok">Δ 10+</span> Clearly different colours.</li>
+          </ul>
+        </div>
+        <div class="gp-key-card">
+          <h3>Lc badge (top right of each swatch)</h3>
+          <p class="gp-key-sub">A newer, smarter readability score that matches how your eyes actually see. It catches problems the old test misses — especially light text on dark backgrounds.</p>
+          <ul class="gp-badge-list">
+            <li><span class="gp-lc gp-lc-fail">Lc &lt;30</span> Too faint to see.</li>
+            <li><span class="gp-lc gp-lc-ui">Lc 30–45</span> Fine for icons and buttons.</li>
+            <li><span class="gp-lc gp-lc-large">Lc 45–60</span> Big headings read clearly.</li>
+            <li><span class="gp-lc gp-lc-body">Lc 60–75</span> Comfortable for reading.</li>
+            <li><span class="gp-lc gp-lc-strong">Lc 75+</span> Very clear. Reads easily at any size.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="gp-border-key">
+        <h3>Coloured borders — HC greyscale</h3>
+        <p>HC pushes everything to AAA (Mid 4.5:1, Base + Emphasis 7:1). Hue identity carried by the background tint, not the primaries.</p>
+        <div class="gp-border-key-rows">
+          <div class="gp-border-key-row">
+            <div class="gp-border-key-label"><b>Tint</b> <span>Decorative whisper</span></div>
+            <p class="gp-border-key-desc">Needs to stand out from the page background just enough to be noticeable.<br>Scored on Delta E.</p>
+            <div class="gp-border-key-tiers">
+              <span class="gp-border-box gp-wcag-aaa">Clearly visible</span>
+              <span class="gp-border-box gp-wcag-aa">Just visible</span>
+              <span class="gp-border-box gp-wcag-fail">Lost in the background</span>
+            </div>
+          </div>
+          <div class="gp-border-key-row">
+            <div class="gp-border-key-label"><b>Mid</b> <span>UI + very large headings</span></div>
+            <p class="gp-border-key-desc">Passes AAA at 4.5:1.<br>HC target met.</p>
+            <div class="gp-border-key-tiers">
+              <span class="gp-border-box gp-wcag-fail">Below 3:1 — fail</span>
+              <span class="gp-border-box gp-wcag-aa">3–4.5:1 — AA only</span>
+              <span class="gp-border-box gp-wcag-aaa">4.5:1+ — passes AAA</span>
+            </div>
+          </div>
+          <div class="gp-border-key-row">
+            <div class="gp-border-key-label"><b>Base</b> <span>Body text normal</span></div>
+            <p class="gp-border-key-desc">Passes AAA at 7:1.<br>HC target met.</p>
+            <div class="gp-border-key-tiers">
+              <span class="gp-border-box gp-wcag-fail">Below 3:1 — fail</span>
+              <span class="gp-border-box gp-wcag-ui">3–4.5:1 — large only</span>
+              <span class="gp-border-box gp-wcag-aa">4.5–7:1 — AA only</span>
+              <span class="gp-border-box gp-wcag-aaa">7:1+ — passes AAA</span>
+            </div>
+          </div>
+          <div class="gp-border-key-row">
+            <div class="gp-border-key-label"><b>Emphasis</b> <span>Body text small</span></div>
+            <p class="gp-border-key-desc">Passes AAA at 7:1.<br>HC target met.</p>
+            <div class="gp-border-key-tiers">
+              <span class="gp-border-box gp-wcag-fail">Below 3:1 — fail</span>
+              <span class="gp-border-box gp-wcag-ui">3–4.5:1 — large only</span>
+              <span class="gp-border-box gp-wcag-aa">4.5–7:1 — AA only</span>
+              <span class="gp-border-box gp-wcag-aaa">7:1+ — passes AAA</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="gp-tab-panel" data-panel="cvd" hidden>
+      <section class="gp-cvd">
+        <div class="gp-cvd-sim">
+          <div class="gp-cvd-head">
+            <h3>See your palette through colour-blind eyes</h3>
+            <p>About 1 in 12 men and 1 in 200 women have some form of colour-blindness. Pick a type to preview how your palette looks to them. The swatches below update live.</p>
+          </div>
+          <div class="gp-cvd-row">
+            <button class="gp-cvd-btn gp-cvd-none gp-cvd-active" data-cvd="none" title="Default palette">
+              <b>Default</b>
+              <span>Your palette as chosen.</span>
+            </button>
+            <button class="gp-cvd-btn gp-cvd-protan" data-cvd="protan" title="Red-weak">
+              <b>Protanopia</b>
+              <span>Reds look dark or brown. Around 1% of men.</span>
+            </button>
+            <button class="gp-cvd-btn gp-cvd-deutan" data-cvd="deutan" title="Green-weak">
+              <b>Deuteranopia</b>
+              <span>Greens and reds blur together. Around 6% of men.</span>
+            </button>
+            <button class="gp-cvd-btn gp-cvd-tritan" data-cvd="tritan" title="Blue-weak">
+              <b>Tritanopia</b>
+              <span>Blues and yellows blur. Rare. Affects both sexes.</span>
+            </button>
+          </div>
+        </div>
+        <div class="gp-cvd-fix">
+          <div class="gp-cvd-head">
+            <h3>Fix your palette for colour-blind users</h3>
+            <p>Shifts your input colours into hues that stay distinguishable. Opens in a new tab so you can compare side by side.</p>
+          </div>
+          <div class="gp-cvd-row">
+            <button class="gp-cvd-safe-btn gp-cvd-protan" data-cvd-safe="protan">
+              <b>Make protan-safe</b>
+              <span>Shifts reds toward orange-yellow. Avoids red-green confusion by moving off the red axis.</span>
+            </button>
+            <button class="gp-cvd-safe-btn gp-cvd-deutan" data-cvd-safe="deutan">
+              <b>Make deutan-safe</b>
+              <span>Shifts greens toward yellow-blue. Same red-green confusion. Similar fix to protan.</span>
+            </button>
+            <button class="gp-cvd-safe-btn gp-cvd-tritan" data-cvd-safe="tritan">
+              <b>Make tritan-safe</b>
+              <span>Shifts blues toward red-pink. Moves off the blue-yellow axis that tritan can't see.</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    </div>
+
+    <section class="gp-grid" id="gp-variants"></section>
+  </div>
+
+  <script>
+    // @ts-nocheck
+    import chroma from 'chroma-js';
+    import { APCAcontrast, sRGBtoY } from 'apca-w3';
+    import { generateThemeData } from '../../utils/theme-engine.js';
+    import { simulateCvd, makeCvdSafe } from '../../lib/cvd.js';
+    import { GREYSCALE_SEMANTIC_POS } from '../../lib/greyscale.js';
+
+    // Active CVD simulation mode — 'none' | 'protan' | 'deutan' | 'tritan'
+    let activeCvd = 'none';
+    function applyCvd(hex) {
+      return activeCvd === 'none' ? hex : simulateCvd(hex, activeCvd);
+    }
+
+    // Secondary hue shift in degrees (user-controlled via slider)
+    let hueShift = 0;
+    function shiftSecondary(hex) {
+      if (hueShift === 0) return hex;
+      const [l, c, h] = chroma(hex).oklch();
+      return chroma.oklch(l, c, ((h || 0) + hueShift) % 360).hex();
+    }
+    // Circular hue distance
+    function hueDistance(a, b) {
+      const d = Math.abs(a - b) % 360;
+      return d > 180 ? 360 - d : d;
+    }
+
+    function apcaLc(fgHex, bgHex) {
+      const fg = chroma(fgHex).rgb();
+      const bg = chroma(bgHex).rgb();
+      return APCAcontrast(sRGBtoY(fg), sRGBtoY(bg));
+    }
+
+    const VARIANTS = [
+      { key: 'light',    label: 'Standard Light',    note: 'Neutral background, body text at normal size', luminance: 'light', highContrast: false },
+      { key: 'dark',     label: 'Standard Dark',     note: 'Neutral dark background, body text at normal size', luminance: 'dark',  highContrast: false },
+      { key: 'light-hc', label: 'HC Light',          note: 'Hue-tinted background carries colour identity, AAA text', luminance: 'light', highContrast: true  },
+      { key: 'dark-hc',  label: 'HC Dark',           note: 'Hue-tinted dark background carries colour identity, AAA text', luminance: 'dark',  highContrast: true  },
+    ];
+
+    const SLOTS = ['tint', 'mid', 'base', 'emphasis'];
+    const SLOT_ROLES = {
+      tint: 'Decorative whisper',
+      mid: 'UI + large headings',
+      base: 'Body text normal',
+      emphasis: 'Body text small',
+    };
+    // Greyscale SEMANTIC_MAP positions — imported from src/lib/greyscale.js
+    const SEMANTIC_POS = GREYSCALE_SEMANTIC_POS;
+
+    function hueOf(hex) {
+      const h = chroma(hex).oklch()[2];
+      return Number.isFinite(h) ? h : 0;
+    }
+
+    function buildVariant(primaryHex, secondaryHex, variant) {
+      const def = {
+        name: 'preview-' + variant.key,
+        primary: primaryHex,
+        secondary: secondaryHex,
+        luminance: variant.luminance,
+        chroma: 'grey',
+        neutral: 'pure',
+        highContrast: variant.highContrast,
+      };
+      const result = generateThemeData(def);
+      const mapScale = (s) => ({
+        tint:     applyCvd(s[SEMANTIC_POS.tint]),
+        mid:      applyCvd(s[SEMANTIC_POS.mid]),
+        base:     applyCvd(s[SEMANTIC_POS.base]),
+        emphasis: applyCvd(s[SEMANTIC_POS.emphasis]),
+      });
+      return {
+        bgHex: applyCvd(result.pageBg['page-bg']),
+        primary:   mapScale(result.scales.primary),
+        secondary: mapScale(result.scales.secondary),
+        neutral:   mapScale(result.scales.neutral),
+      };
+    }
+
+    function ratio(fg, bgHex) {
+      const l1 = chroma(fg).luminance();
+      const l2 = chroma(bgHex).luminance();
+      return (Math.max(l1,l2) + 0.05) / (Math.min(l1,l2) + 0.05);
+    }
+
+    function render() {
+      const primaryHex = document.getElementById('gp-primary-hex').value;
+      const secondaryHex = document.getElementById('gp-secondary-hex').value;
+      const pHue = hueOf(primaryHex);
+      const shiftedSecondary = shiftSecondary(secondaryHex);
+      const sHue = hueOf(shiftedSecondary);
+      document.getElementById('gp-primary-hue').textContent = pHue.toFixed(0);
+      document.getElementById('gp-secondary-hue').textContent = sHue.toFixed(0);
+
+      // Hue distance + tier
+      const dist = hueDistance(pHue, sHue);
+      const distEl = document.getElementById('gp-hue-dist');
+      const suggestBtn = document.getElementById('gp-shift-suggest');
+      if (distEl) {
+        let tier;
+        if (dist >= 20) tier = 'gp-hue-ok';
+        else if (dist >= 5) tier = 'gp-hue-warn';
+        else tier = 'gp-hue-fail';
+        distEl.className = 'gp-hue-dist ' + tier;
+        distEl.innerHTML = 'Distance: <b>' + dist.toFixed(0) + '°</b>';
+      }
+      if (suggestBtn) {
+        suggestBtn.hidden = dist >= 20;
+      }
+
+      const host = document.getElementById('gp-variants');
+      if (!host) return;
+      host.innerHTML = '';
+
+      for (const v of VARIANTS) {
+        const built = buildVariant(primaryHex, shiftedSecondary, v);
+        const bgHex = built.bgHex;
+        const pri = built.primary;
+        const sec = built.secondary;
+        const neu = built.neutral;
+
+        const card = document.createElement('div');
+        card.className = 'gp-card';
+        card.style.background = bgHex;
+        card.style.color = neu.emphasis;
+
+        const rows = [
+          { label: 'Primary',   scale: pri },
+          { label: 'Secondary', scale: sec },
+          { label: 'Neutral',   scale: neu },
+        ];
+
+        const rowsHtml = rows.map(r => {
+          const cells = SLOTS.map((slot, i) => {
+            const hex = r.scale[slot];
+            const crNum = ratio(hex, bgHex);
+            const cr = crNum.toFixed(1);
+            const swatchLum = chroma(hex).luminance();
+            const labelColor = swatchLum > 0.4 ? '#000' : '#fff';
+            const compareHex = i === 0 ? bgHex : r.scale[SLOTS[i - 1]];
+            const compareLabel = i === 0 ? 'vs bg' : 'vs ' + SLOTS[i - 1];
+            const de = chroma.deltaE(compareHex, hex).toFixed(1);
+            const deNum = parseFloat(de);
+            const deClass = deNum < 5 ? 'gp-de-low' : deNum < 10 ? 'gp-de-mid' : 'gp-de-ok';
+            const deBadge = `<span class="gp-de ${deClass}" title="deltaE ${compareLabel}">Δ${de}</span>`;
+            const lcRaw = apcaLc(hex, bgHex);
+            const lcRounded = Math.round(lcRaw);
+            const lcAbs = Math.abs(lcRounded);
+            const lcClass = lcAbs >= 75 ? 'gp-lc-strong'
+              : lcAbs >= 60 ? 'gp-lc-body'
+              : lcAbs >= 45 ? 'gp-lc-large'
+              : lcAbs >= 30 ? 'gp-lc-ui'
+              : 'gp-lc-fail';
+            const lcBadge = `<span class="gp-lc ${lcClass}" title="APCA Lc (perceptual)">Lc ${lcRounded}</span>`;
+            // Role-aware border — Standard passes at AA, HC passes at AAA:
+            //   tint: decorative → ΔE only
+            //   mid (UI + very large headings): AA 3:1, AAA 4.5:1
+            //     Standard: green at 3:1 (AA pass). HC: green at 4.5:1 (AAA pass).
+            //   base + emphasis (body text): AA 4.5:1, AAA 7:1
+            //     Standard: green at 4.5:1 (AA pass). HC: green at 7:1 (AAA pass).
+            let wcagClass;
+            if (slot === 'tint') {
+              wcagClass = deNum >= 10 ? 'gp-wcag-aaa'
+                : deNum >= 5 ? 'gp-wcag-aa'
+                : 'gp-wcag-fail';
+            } else if (slot === 'mid') {
+              if (v.highContrast) {
+                wcagClass = crNum >= 4.5 ? 'gp-wcag-aaa'
+                  : crNum >= 3 ? 'gp-wcag-aa'
+                  : 'gp-wcag-fail';
+              } else {
+                wcagClass = crNum >= 3 ? 'gp-wcag-aaa'
+                  : 'gp-wcag-fail';
+              }
+            } else {
+              // base + emphasis
+              if (v.highContrast) {
+                wcagClass = crNum >= 7 ? 'gp-wcag-aaa'
+                  : crNum >= 4.5 ? 'gp-wcag-aa'
+                  : crNum >= 3 ? 'gp-wcag-ui'
+                  : 'gp-wcag-fail';
+              } else {
+                wcagClass = crNum >= 4.5 ? 'gp-wcag-aaa'
+                  : crNum >= 3 ? 'gp-wcag-aa'
+                  : 'gp-wcag-fail';
+              }
+            }
+            // Ratio badge — match role-aware border logic.
+            //   Standard: green at AA pass (mid 3+, base/emphasis 4.5+)
+            //   HC:       green at AAA pass (mid 4.5+, base/emphasis 7+)
+            let ratioTier;
+            if (slot === 'tint') {
+              ratioTier = 'gp-wcag-aaa';
+            } else if (slot === 'mid') {
+              if (v.highContrast) {
+                ratioTier = crNum >= 4.5 ? 'gp-wcag-aaa'
+                  : crNum >= 3 ? 'gp-wcag-aa'
+                  : 'gp-wcag-fail';
+              } else {
+                ratioTier = crNum >= 3 ? 'gp-wcag-aaa'
+                  : 'gp-wcag-fail';
+              }
+            } else {
+              if (v.highContrast) {
+                ratioTier = crNum >= 7 ? 'gp-wcag-aaa'
+                  : crNum >= 4.5 ? 'gp-wcag-aa'
+                  : crNum >= 3 ? 'gp-wcag-ui'
+                  : 'gp-wcag-fail';
+              } else {
+                ratioTier = crNum >= 4.5 ? 'gp-wcag-aaa'
+                  : crNum >= 3 ? 'gp-wcag-aa'
+                  : 'gp-wcag-fail';
+              }
+            }
+            return `<div class="gp-swatch ${wcagClass}" style="background:${hex};color:${labelColor}">
+              ${deBadge}
+              ${lcBadge}
+              <span class="gp-hex">${hex}</span>
+              <span class="gp-ratio gp-ratio-badge ${ratioTier}">${cr}:1</span>
+            </div>`;
+          }).join('');
+          return `<div class="gp-row"><div class="gp-label">${r.label}</div>${cells}</div>`;
+        }).join('');
+
+        card.innerHTML = `
+          <div class="gp-title">
+            <h2>${v.label}</h2>
+            <p class="gp-card-note">${v.note}</p>
+            <code>bg ${bgHex}</code>
+          </div>
+          <div class="gp-header">
+            <div class="gp-label"></div>
+            ${SLOTS.map(s => `<div class="gp-colhead"><b>${s[0].toUpperCase() + s.slice(1)}</b><br><span class="gp-role">${SLOT_ROLES[s]}</span></div>`).join('')}
+          </div>
+          ${rowsHtml}
+        `;
+        host.appendChild(card);
+      }
+    }
+
+    function syncPair(colorEl, textEl) {
+      colorEl.addEventListener('input', () => { textEl.value = colorEl.value; render(); });
+      textEl.addEventListener('input', () => {
+        if (/^#[0-9a-fA-F]{6}$/.test(textEl.value)) { colorEl.value = textEl.value; render(); }
+      });
+    }
+
+    syncPair(document.getElementById('gp-primary'), document.getElementById('gp-primary-hex'));
+    syncPair(document.getElementById('gp-secondary'), document.getElementById('gp-secondary-hex'));
+
+    // URL params: ?primary=...&secondary=...&cvd=protan — accept pre-filled hexes
+    // and CVD mode for comparison-in-new-tab flow.
+    const url = new URL(window.location.href);
+    const urlPrimary = url.searchParams.get('primary');
+    const urlSecondary = url.searchParams.get('secondary');
+    const urlCvd = url.searchParams.get('cvd');
+    if (urlPrimary && /^#[0-9a-fA-F]{6}$/.test('#' + urlPrimary.replace('#', ''))) {
+      const hex = '#' + urlPrimary.replace('#', '').toLowerCase();
+      document.getElementById('gp-primary').value = hex;
+      document.getElementById('gp-primary-hex').value = hex;
+    }
+    if (urlSecondary && /^#[0-9a-fA-F]{6}$/.test('#' + urlSecondary.replace('#', ''))) {
+      const hex = '#' + urlSecondary.replace('#', '').toLowerCase();
+      document.getElementById('gp-secondary').value = hex;
+      document.getElementById('gp-secondary-hex').value = hex;
+    }
+    // Note: cvd URL param is intentionally NOT auto-activated. The new tab
+    // opens showing the CVD-safe palette in Default (normal vision) mode so
+    // the user can verify it renders well first, then toggle CVD to compare.
+
+    render();
+
+    // Secondary hue-shift slider
+    const shiftSlider = document.getElementById('gp-shift-slider');
+    const shiftDeg = document.getElementById('gp-shift-deg');
+    const suggestBtn = document.getElementById('gp-shift-suggest');
+    if (shiftSlider) {
+      shiftSlider.addEventListener('input', () => {
+        hueShift = parseInt(shiftSlider.value, 10);
+        shiftDeg.textContent = hueShift;
+        render();
+      });
+    }
+    if (suggestBtn) {
+      suggestBtn.addEventListener('click', () => {
+        // Jump to a shift that gets distance above 20°
+        const pri = document.getElementById('gp-primary-hex').value;
+        const sec = document.getElementById('gp-secondary-hex').value;
+        const pHue = hueOf(pri);
+        const sHue = hueOf(sec);
+        const currentDist = hueDistance(pHue, sHue);
+        const needed = Math.max(0, Math.min(60, 25 - Math.floor(currentDist)));
+        const suggested = currentDist < 5 ? 25 : Math.max(needed, 20);
+        hueShift = suggested;
+        shiftSlider.value = suggested;
+        shiftDeg.textContent = suggested;
+        render();
+      });
+    }
+
+    // CVD simulation toggle + heading update
+    const CVD_LABELS = { none: '', protan: 'Protanopia simulation', deutan: 'Deuteranopia simulation', tritan: 'Tritanopia simulation' };
+    function updateHeadMode() {
+      const el = document.getElementById('gp-head-mode');
+      if (!el) return;
+      const label = CVD_LABELS[activeCvd] || '';
+      el.textContent = label ? '· ' + label : '';
+      el.className = 'gp-head-mode gp-cvd-' + activeCvd;
+    }
+    document.querySelectorAll('.gp-cvd-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeCvd = btn.getAttribute('data-cvd');
+        document.querySelectorAll('.gp-cvd-btn').forEach(b => b.classList.toggle('gp-cvd-active', b === btn));
+        updateHeadMode();
+        render();
+      });
+    });
+    updateHeadMode();
+
+    // Collapse/expand info panels
+    const collapseBtn = document.getElementById('gp-collapse-btn');
+    const panels = document.getElementById('gp-panels');
+    if (collapseBtn && panels) {
+      collapseBtn.addEventListener('click', () => {
+        const collapsed = panels.hasAttribute('hidden');
+        if (collapsed) {
+          panels.removeAttribute('hidden');
+          collapseBtn.textContent = '−';
+          collapseBtn.title = 'Collapse info panels';
+        } else {
+          panels.setAttribute('hidden', '');
+          collapseBtn.textContent = '+';
+          collapseBtn.title = 'Expand info panels';
+        }
+      });
+    }
+
+    // Make CVD-safe — shift input hexes to safe hues, open new tab with shifted palette.
+    document.querySelectorAll('.gp-cvd-safe-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cvdType = btn.getAttribute('data-cvd-safe');
+        const pri = document.getElementById('gp-primary-hex').value;
+        const sec = document.getElementById('gp-secondary-hex').value;
+        const safePri = makeCvdSafe(pri, cvdType);
+        const safeSec = makeCvdSafe(sec, cvdType);
+        const params = new URLSearchParams({
+          primary: safePri.slice(1),
+          secondary: safeSec.slice(1),
+        });
+        window.open(window.location.pathname + '?' + params.toString(), '_blank');
+      });
+    });
+
+    // Tab switching
+    document.querySelectorAll('.gp-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab');
+        document.querySelectorAll('.gp-tab').forEach(t => t.classList.toggle('gp-tab-active', t.getAttribute('data-tab') === target));
+        document.querySelectorAll('.gp-tab-panel').forEach(p => {
+          if (p.getAttribute('data-panel') === target) p.removeAttribute('hidden');
+          else p.setAttribute('hidden', '');
+        });
+      });
+    });
+  </script>
+
+  <style is:global>
+    .gp-wrap { max-width: none; margin: 0 auto; padding: 1rem 1.5rem; }
+    .gp-head {
+      display: flex; flex-direction: column; gap: 0.4rem;
+      margin: 0 auto 1rem; max-width: 1600px; padding: 0.5rem 0;
+    }
+    .gp-head h1 { margin: 0; font-size: 2rem; font-weight: 600; }
+    .gp-head p { margin: 0; opacity: 0.7; font-size: 1rem; }
+    .gp-head-mode {
+      font-size: 1.1rem; font-weight: 500; margin-left: 0.5rem;
+      padding: 0.15rem 0.6rem; border-radius: 0.3rem;
+      border: 2px solid transparent;
+    }
+    .gp-head-mode.gp-cvd-protan { border-color: #00697a; color: #00697a; }
+    .gp-head-mode.gp-cvd-deutan { border-color: #c026a6; color: #c026a6; }
+    .gp-head-mode.gp-cvd-tritan { border-color: #c2540a; color: #c2540a; }
+
+    .gp-input {
+      display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;
+      padding: 0.45rem 0.75rem; background: var(--page-bg-raised); border-radius: 0.35rem;
+      margin: 0 auto 0.75rem; max-width: 1600px;
+    }
+    .gp-input label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; }
+    .gp-input input[type="color"] { width: 28px; height: 28px; border: none; padding: 0; }
+    .gp-input input[type="text"] { font-family: monospace; width: 80px; padding: 0.2rem 0.4rem; font-size: 0.8rem; }
+    .gp-info {
+      display: flex; gap: 0.75rem; margin-left: auto; font-family: monospace; font-size: 0.8rem;
+      align-items: center; flex-wrap: wrap; justify-content: flex-end;
+    }
+    .gp-hue-dist {
+      padding: 2px 8px; border-radius: 3px;
+      border: 2px solid transparent;
+    }
+    .gp-hue-ok   { border-color: #1f9d1f; color: #1f7d1f; }
+    .gp-hue-warn { border-color: #e88030; color: #b05010; }
+    .gp-hue-fail { border-color: #d23030; color: #a02020; }
+    .gp-shift-inline {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 2px 8px; border-radius: 3px;
+      background: rgba(128,128,128,0.08);
+    }
+    .gp-shift-label { font-size: 0.75rem; opacity: 0.75; }
+    .gp-shift-slider { width: 120px; }
+    .gp-shift-value { min-width: 28px; text-align: right; }
+    .gp-shift-suggest {
+      background: transparent; border: 1px solid #e88030; color: #b05010;
+      padding: 2px 8px; border-radius: 3px;
+      font-size: 0.75rem; cursor: pointer; font-weight: 500;
+    }
+    .gp-shift-suggest:hover { background: rgba(232,128,48,0.1); }
+
+    .gp-cvd {
+      display: flex; flex-direction: column; gap: 1rem;
+      max-width: 1600px; margin: 0 auto 1rem;
+    }
+    .gp-cvd-sim, .gp-cvd-fix {
+      padding: 0.75rem 1rem; border-radius: 0.5rem;
+      background: var(--page-bg-raised);
+      border: 1px solid rgba(128,128,128,0.2);
+    }
+    .gp-cvd-head h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+    .gp-cvd-head p { margin: 0 0 0.6rem; font-size: 0.8rem; opacity: 0.7; }
+    .gp-cvd-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .gp-cvd-btn {
+      background: transparent; border: 1px solid rgba(128,128,128,0.35);
+      padding: 0.6rem 0.8rem; border-radius: 0.35rem;
+      cursor: pointer; color: inherit; flex: 1; min-width: 180px;
+      text-align: left; line-height: 1.35;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .gp-cvd-btn b { font-size: 0.95rem; font-weight: 600; }
+    .gp-cvd-btn span { font-size: 0.78rem; opacity: 0.75; }
+    .gp-cvd-btn:hover { background: rgba(128,128,128,0.1); }
+    .gp-cvd-active { border-width: 2px; padding: calc(0.6rem - 1px) calc(0.8rem - 1px); }
+
+    .gp-cvd-safe-btn {
+      background: transparent; border: 1px solid rgba(128,128,128,0.35);
+      padding: 0.6rem 0.8rem; border-radius: 0.35rem;
+      cursor: pointer; color: inherit; flex: 1; min-width: 180px;
+      text-align: left; line-height: 1.35;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .gp-cvd-safe-btn b { font-size: 0.95rem; font-weight: 600; }
+    .gp-cvd-safe-btn span { font-size: 0.78rem; opacity: 0.75; }
+    .gp-cvd-safe-btn:hover { background: rgba(128,128,128,0.1); }
+
+    /* CVD type colour accents — using hues distinguishable across ALL three
+       CVD types (not the confused axes themselves).
+       Protan: dark teal. Deutan: magenta. Tritan: burnt orange. None: neutral.
+       Defined after base .gp-cvd-safe-btn so border-left wins the shorthand. */
+    .gp-cvd-btn.gp-cvd-none,
+    .gp-cvd-safe-btn.gp-cvd-none   { border-left: 4px solid #888; }
+    .gp-cvd-btn.gp-cvd-protan,
+    .gp-cvd-safe-btn.gp-cvd-protan { border-left: 4px solid #00697a; }
+    .gp-cvd-btn.gp-cvd-deutan,
+    .gp-cvd-safe-btn.gp-cvd-deutan { border-left: 4px solid #c026a6; }
+    .gp-cvd-btn.gp-cvd-tritan,
+    .gp-cvd-safe-btn.gp-cvd-tritan { border-left: 4px solid #c2540a; }
+    .gp-cvd-none.gp-cvd-active   { background: rgba(136,136,136,0.15); border-color: #888; }
+    .gp-cvd-protan.gp-cvd-active { background: rgba(0,105,122,0.15); border-color: #00697a; }
+    .gp-cvd-deutan.gp-cvd-active { background: rgba(192,38,166,0.15); border-color: #c026a6; }
+    .gp-cvd-tritan.gp-cvd-active { background: rgba(194,84,10,0.15); border-color: #c2540a; }
+    .gp-cvd-safe-btn.gp-cvd-protan:hover { background: rgba(0,105,122,0.12); }
+    .gp-cvd-safe-btn.gp-cvd-deutan:hover { background: rgba(192,38,166,0.12); }
+    .gp-cvd-safe-btn.gp-cvd-tritan:hover { background: rgba(194,84,10,0.12); }
+
+    .gp-tabs {
+      display: flex; gap: 0.5rem;
+      max-width: 1600px; margin: 0 auto 0.75rem;
+      border-bottom: 1px solid rgba(128,128,128,0.25);
+    }
+    .gp-tab {
+      background: transparent; border: none; cursor: pointer;
+      padding: 0.6rem 1.25rem; font-size: 0.95rem; font-weight: 500;
+      border-bottom: 3px solid transparent; margin-bottom: -1px;
+      color: inherit; opacity: 0.6;
+    }
+    .gp-tab:hover { opacity: 1; }
+    .gp-tab-active { opacity: 1; border-bottom-color: currentColor; }
+    .gp-collapse {
+      margin-left: auto;
+      background: transparent; border: 1px solid rgba(128,128,128,0.35);
+      padding: 0.25rem 0.6rem; border-radius: 0.25rem;
+      font-size: 1.1rem; line-height: 1; font-weight: 600;
+      cursor: pointer; color: inherit; align-self: center;
+      margin-bottom: 0.25rem;
+    }
+    .gp-collapse:hover { background: rgba(128,128,128,0.1); }
+
+    .gp-key {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+      max-width: 1600px; margin: 0 auto 1rem;
+    }
+    .gp-key-card {
+      padding: 0.75rem 1rem; border-radius: 0.5rem;
+      background: var(--page-bg-raised);
+      border: 1px solid rgba(128,128,128,0.2);
+    }
+    .gp-key-card h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+    .gp-key-sub { margin: 0 0 0.5rem; font-size: 0.8rem; opacity: 0.7; }
+    .gp-badge-list {
+      list-style: none; padding: 0; margin: 0;
+      display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.85rem;
+    }
+    .gp-badge-list li {
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .gp-badge-list .gp-de,
+    .gp-badge-list .gp-lc,
+    .gp-badge-list .gp-ratio-badge {
+      position: static; flex-shrink: 0;
+    }
+
+    .gp-border-key {
+      max-width: 1600px; margin: 0 auto 1rem;
+      padding: 1rem 1.25rem; border-radius: 0.5rem;
+      background: var(--page-bg-raised);
+      border: 1px solid rgba(128,128,128,0.2);
+    }
+    .gp-border-key h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+    .gp-border-key > p { margin: 0 0 0.75rem; font-size: 0.85rem; opacity: 0.7; }
+    .gp-border-key-rows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .gp-border-key-row { display: flex; flex-direction: column; gap: 0.4rem; }
+    .gp-border-key-label { font-size: 0.85rem; line-height: 1.3; }
+    .gp-border-key-label b { font-size: 0.95rem; display: block; }
+    .gp-border-key-label span { opacity: 0.65; font-size: 0.75rem; }
+    .gp-border-key-desc { margin: 0; font-size: 0.8rem; opacity: 0.85; line-height: 1.4; }
+    .gp-border-key-tiers {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0.35rem;
+    }
+    .gp-border-box, .gp-ratio-badge {
+      display: inline-block; padding: 2px 6px; border-radius: 3px;
+      font-size: 0.7rem; font-weight: 500; line-height: 1.4;
+      font-family: monospace;
+      border: 1px solid rgba(0,0,0,0.2);
+    }
+    .gp-border-box.gp-wcag-fail, .gp-ratio-badge.gp-wcag-fail { background: #ffb8b8; border-color: #c00; color: #600; }
+    .gp-border-box.gp-wcag-ui, .gp-ratio-badge.gp-wcag-ui     { background: #ffd8b0; border-color: #d70; color: #730; }
+    .gp-border-box.gp-wcag-aa, .gp-ratio-badge.gp-wcag-aa     { background: #ffe388; border-color: #c80; color: #640; }
+    .gp-border-box.gp-wcag-aaa, .gp-ratio-badge.gp-wcag-aaa   { background: #b8e6b8; border-color: #070; color: #040; }
+
+    .gp-grid {
+      display: grid; grid-template-columns: 1fr; gap: 1rem;
+    }
+
+    .gp-card {
+      padding: 0.75rem 1rem; border-radius: 0.5rem; border: 1px solid rgba(128,128,128,0.2);
+      max-width: 1600px; margin: 0 auto; width: 100%;
+    }
+    .gp-title {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: baseline; gap: 1rem;
+      margin-bottom: 0.5rem; padding-bottom: 0.35rem;
+      border-bottom: 1px solid rgba(128,128,128,0.15);
+    }
+    .gp-title h2 { margin: 0; font-size: 1.75rem; font-weight: 600; justify-self: start; }
+    .gp-title code { font-size: 0.9rem; opacity: 0.7; justify-self: end; }
+    .gp-card-note { margin: 0; font-size: 0.95rem; opacity: 0.85; text-align: center; justify-self: center; }
+
+    .gp-header, .gp-row {
+      display: grid; grid-template-columns: 120px repeat(4, 1fr); gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+    .gp-label { font-size: 1rem; opacity: 0.9; align-self: center; font-weight: 500; }
+    .gp-colhead {
+      font-size: 0.95rem; text-align: center; line-height: 1.35;
+      display: flex; flex-direction: column; gap: 3px; padding: 0.25rem 0.15rem;
+    }
+    .gp-colhead b { font-weight: 600; }
+    .gp-role { font-size: 0.75rem; font-weight: normal; }
+    .gp-header { min-height: 40px; align-items: stretch; }
+
+    .gp-swatch {
+      height: 80px; border-radius: 0.35rem; position: relative;
+      display: grid; grid-template-rows: auto 1fr auto;
+      padding: 0.5rem 0.75rem; overflow: visible;
+      border: 2px solid transparent;
+    }
+    .gp-wcag-fail { border-color: #d23030; }
+    .gp-wcag-ui   { border-color: #e88030; }
+    .gp-wcag-aa   { border-color: #e2a900; }
+    .gp-wcag-aaa  { border-color: #1f9d1f; }
+    .gp-hex {
+      position: absolute; bottom: 4px; left: 6px;
+      font-family: monospace; font-size: 0.75rem;
+    }
+    .gp-ratio {
+      position: absolute; bottom: 4px; right: 4px;
+    }
+    .gp-swatch .gp-ratio-badge {
+      font-size: 0.65rem; padding: 2px 4px;
+    }
+    .gp-de {
+      position: absolute; top: 4px; left: 4px;
+      font-family: monospace; font-size: 0.65rem; line-height: 1;
+      padding: 2px 4px; border-radius: 3px;
+      background: rgba(255,255,255,0.9); color: #000;
+      border: 1px solid rgba(0,0,0,0.2);
+      width: fit-content;
+    }
+    .gp-de-low { background: #ffb8b8; border-color: #c00; color: #600; }
+    .gp-de-mid { background: #ffe388; border-color: #c80; color: #640; }
+    .gp-de-ok  { background: #b8e6b8; border-color: #070; color: #040; }
+    .gp-lc {
+      position: absolute; top: 4px; right: 4px;
+      font-family: monospace; font-size: 0.65rem; line-height: 1;
+      padding: 2px 4px; border-radius: 3px;
+      background: rgba(255,255,255,0.85); color: #000;
+      border: 1px solid rgba(0,0,0,0.2);
+    }
+    .gp-lc-fail   { background: #ffb8b8; border-color: #c00; color: #600; }
+    .gp-lc-ui     { background: #ffd8b0; border-color: #d70; color: #730; }
+    .gp-lc-large  { background: #ffe388; border-color: #c80; color: #640; }
+    .gp-lc-body   { background: #d4ecd4; border-color: #270; color: #042; }
+    .gp-lc-strong { background: #b8e6b8; border-color: #070; color: #040; }
+  </style>
+</BaseLayout>

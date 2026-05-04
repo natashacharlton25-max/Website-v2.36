@@ -11,7 +11,9 @@
  *   - src/styles/tokens/theme-validation.json — per-brand catalogue summary
  *     (positive certifications + suggested gaps)
  *
- * Auto-runs after generate-theme-tokens.js. Can also be invoked directly:
+ * Auto-runs after each new-engine generator (generate-vivid.js,
+ * generate-cloudcalm.js, generate-mono-grey.js). Can also be invoked
+ * directly:
  *   node scripts/validate-themes.js
  *
  * Profiles live in src/lib/accessibility-profiles.js — single source of
@@ -23,7 +25,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { ACCESSIBILITY_PROFILES } from '../src/lib/accessibility-profiles.js';
-import { DISTINCTNESS_DE } from '../src/theme-engine/shared/cvd.js';
+import { DISTINCTNESS_DE, simulateCvd } from '../src/theme-engine/shared/cvd.js';
+import { contrastRatio } from '../src/theme-engine/shared/colour-maths.js';
 
 const require = createRequire(import.meta.url);
 const chroma = require('chroma-js');
@@ -35,12 +38,9 @@ const namesPath = path.join(rootDir, 'src/styles/tokens/theme-names.json');
 const validationPath = path.join(rootDir, 'src/styles/tokens/theme-validation.json');
 
 // ── Helpers ─────────────────────────────────────────────────────────
-
-function contrastRatio(a, b) {
-  const la = chroma(a).luminance();
-  const lb = chroma(b).luminance();
-  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
-}
+// contrastRatio + relativeLuminance imported from shared/colour-maths.js
+// (verified empirically equivalent to the previous chroma-js .luminance()
+// approach — see colour math drift audit, 2026-05-04).
 
 function wcagLevel(ratio, isLargeText = false) {
   if (isLargeText) {
@@ -224,6 +224,11 @@ function transformAllHexes(css, transform) {
     try {
       const [l, c, h] = chroma(_hex).oklch();
       const [newL, newC, newH] = transform(l || 0, c || 0, h || 0, name);
+      // If the transform returned identical values (no-op), return the
+      // original hex untouched — don't rebuild via oklch, which would
+      // clamp near-white (L>0.97) and near-black (L<0.05) and collapse
+      // distinct surfaces into a single value.
+      if (newL === (l || 0) && newC === (c || 0) && newH === (h || 0)) return match;
       const safeL = Math.max(0.05, Math.min(0.97, newL));
       const safeC = Math.max(0, newC);
       return tokenName + sep + chroma.oklch(safeL, safeC, newH).hex();
@@ -333,6 +338,19 @@ function familyAwareDisambiguate(css, variantName) {
 //
 // To swap two families (primary ↔ secondary), rename both pairs via a temp prefix
 // so they don't overwrite each other.
+/**
+ * Replace all `--{family}-*` hex values with pure-grey equivalents (chroma 0,
+ * L preserved). Works on the full scale (tint/mid/base/emphasis/contrast).
+ * Leaves var(--color-Black) references alone.
+ */
+function greyifyFamily(css, family) {
+  const re = new RegExp(`(--${family}-(?:tint|mid|base|emphasis|contrast)\\s*:\\s*)(#[0-9a-fA-F]{6})`, 'g');
+  return css.replace(re, (_match, prefix, hex) => {
+    const [L] = chroma(hex).oklch();
+    return prefix + chroma.oklch(L, 0, 0).hex();
+  });
+}
+
 function applyFamilyRotations(css, rotations) {
   if (!rotations || rotations.length === 0) return css;
 
@@ -435,14 +453,22 @@ function applyFamilyRotations(css, rotations) {
 // have deliberately different lightness (page-bg vs raised vs sunken vs
 // overlay) to create depth. Retinting = change hue only, keep the L depth
 // pattern.
-function retintBgSurfaces(css, newHue) {
+/**
+ * Retint bg surfaces to a new hue. By default preserves C (hue swap only).
+ * When `minChroma` is provided, surfaces with C below it get bumped up —
+ * needed for light vivid variants where near-white (C < 0.02) doesn't
+ * show the new hue. A C=0.08 floor makes retinted bg actually read as
+ * a coloured surface instead of a near-white wash with a hue number.
+ */
+function retintBgSurfaces(css, newHue, minChroma = 0) {
   const surfaces = ['page-bg', 'page-bg-raised', 'page-bg-sunken', 'page-bg-overlay'];
   let out = css;
   for (const name of surfaces) {
     const re = new RegExp('(--' + name + ':\\s*)(#[0-9a-fA-F]+)');
     out = out.replace(re, (_match, prefix, hex) => {
       const [L, C] = chroma(hex).oklch();
-      const newHex = chroma.oklch(L, C || 0, newHue).hex();
+      const effectiveC = Math.max(C || 0, minChroma);
+      const newHex = chroma.oklch(L, effectiveC, newHue).hex();
       return prefix + newHex;
     });
   }
@@ -579,23 +605,27 @@ function applyRoleSwap(css, canonicalCss = null, _variantName = '', strategy = n
   // Read the current base hexes for each family (for scoring)
   const currentHexes = { bg, 'primary-base': pBase, 'secondary-base': sBase, 'neutral-base': nBase, 'text-emphasis': tBase };
 
-  // Score a candidate (rotation + retint) by its perceptual distance from canonical.
-  function scoreCandidate(rotations, newBgHue) {
-    if (!canonicalCss) return 0;
-    // Apply rotations to the token-name → hex map
+  // Build a newMap given rotation + greyify + bg retint — used by both
+  // scoring and readability checks.
+  function buildNewMap(rotations, greyify, newBgHue) {
     const rotated = { ...currentHexes };
     const baseTokens = ['primary-base', 'secondary-base', 'neutral-base', 'text-emphasis'];
     const newMap = {};
-    for (const t of baseTokens) {
-      // Start with identity — overwritten below by the rotation pairs
-      newMap[t] = rotated[t];
-    }
-    // Identity-map via swap: token 'primary-base' now holds what 'secondary-base' had, etc.
+    for (const t of baseTokens) newMap[t] = rotated[t];
     for (const { from, to } of rotations) {
-      // After "from → to", the 'to-*' tokens should hold what 'from-*' had
       const fromKey = from === 'text' ? 'text-emphasis' : `${from}-base`;
       const toKey = to === 'text' ? 'text-emphasis' : `${to}-base`;
       newMap[toKey] = currentHexes[fromKey];
+    }
+    // Apply greyify — convert specified families' base hex to pure grey at same L
+    if (greyify && greyify.length) {
+      for (const fam of greyify) {
+        const key = fam === 'text' ? 'text-emphasis' : `${fam}-base`;
+        if (newMap[key]) {
+          const [L] = chroma(newMap[key]).oklch();
+          newMap[key] = chroma.oklch(L, 0, 0).hex();
+        }
+      }
     }
     // Apply bg retint to newMap.bg
     let newBg = bg;
@@ -604,7 +634,13 @@ function applyRoleSwap(css, canonicalCss = null, _variantName = '', strategy = n
       newBg = chroma.oklch(L, C || 0, newBgHue).hex();
     }
     newMap.bg = newBg;
-    // Distance: ΔE sum from canonical
+    return newMap;
+  }
+
+  // Score a candidate by perceptual distance from canonical.
+  function scoreCandidate(rotations, newBgHue, greyify) {
+    if (!canonicalCss) return 0;
+    const newMap = buildNewMap(rotations, greyify, newBgHue);
     let total = 0;
     const pairs = [
       [newMap.bg, cBg],
@@ -624,26 +660,19 @@ function applyRoleSwap(css, canonicalCss = null, _variantName = '', strategy = n
   // perceptually distinct from every other family's base AND from bg,
   // otherwise primary/text/neutral collapse onto the same hue and the
   // preview reads as "two pink columns + a cyan column" nonsense.
-  function isReadable(rotations, newBgHue) {
-    // Apply rotations and bg retint, check contrast.
-    const newMap = { bg };
-    for (const { from, to } of rotations) {
-      const fromKey = from === 'text' ? 'text-emphasis' : `${from}-base`;
-      const toKey = to === 'text' ? 'text-emphasis' : `${to}-base`;
-      newMap[toKey] = currentHexes[fromKey];
-    }
-    // Fill anything not rotated with current values
-    for (const t of ['primary-base', 'secondary-base', 'neutral-base', 'text-emphasis']) {
-      if (newMap[t] === undefined) newMap[t] = currentHexes[t];
-    }
-    if (newBgHue !== null) {
-      const [L, C] = chroma(bg).oklch();
-      newMap.bg = chroma.oklch(L, C || 0, newBgHue).hex();
-    }
+  // Extract CVD type from variant name so role-swap can enforce CVD
+  // distinctness under simulation, not just normal-vision distinctness.
+  // A rotation that puts blue into neutral looks fine to normal vision
+  // but collapses against a teal bg for a tritan user.
+  const cvdMatch = _variantName.match(/-(protan|deutan|tritan)$/);
+  const variantCvd = cvdMatch ? cvdMatch[1] : null;
+
+  function isReadable(rotations, newBgHue, greyify) {
+    const newMap = buildNewMap(rotations, greyify, newBgHue);
     if (newMap['text-emphasis'] && contrastRatio(newMap['text-emphasis'], newMap.bg) < 4.5) return false;
     if (newMap['primary-base']  && contrastRatio(newMap['primary-base'],  newMap.bg) < 3)   return false;
-    // Cross-family distinctness — all 5 roles must be perceptibly different
     const roles = [newMap.bg, newMap['primary-base'], newMap['secondary-base'], newMap['neutral-base'], newMap['text-emphasis']];
+    // Normal-vision distinctness
     for (let i = 0; i < roles.length; i++) {
       for (let j = i + 1; j < roles.length; j++) {
         if (!roles[i] || !roles[j]) continue;
@@ -661,31 +690,47 @@ function applyRoleSwap(css, canonicalCss = null, _variantName = '', strategy = n
   //   bg       → bumps scores where bg hue changes (newBgHue != null and differs)
   //   family   → bumps scores where rotation is non-identity
   //   position → bumps identity+no-retint (fallback to family-shift salt)
-  function strategyBoost(rotations, newBgHue) {
-    if (!strategy) return 1.0;
+  function strategyBoost(rotations, newBgHue, greyify) {
     const bgChanged = newBgHue !== null && Math.abs(newBgHue - bgHue) > 2;
     const rotationHappened = rotations.length > 0;
-    if (strategy === 'bg'       && bgChanged && !rotationHappened) return 2.0;
-    if (strategy === 'family'   && rotationHappened && !bgChanged) return 2.0;
-    if (strategy === 'position' && !rotationHappened && !bgChanged) return 2.0;
-    return 1.0;
+    const greyApplied = greyify && greyify.length > 0;
+    // Greyify gets a strong boost — it guarantees visual distinctness
+    // (pure grey vs neon brand = high ΔE) with no hue collision risk.
+    // Combined rotate+greyify is the strongest pick because it changes
+    // all four families' visual identity at once.
+    let boost = 1.0;
+    if (greyApplied) boost *= 2.5;
+    if (greyApplied && rotationHappened) boost *= 1.5;  // combo = 3.75x
+    if (!strategy) return boost;
+    if (strategy === 'bg'       && bgChanged && !rotationHappened && !greyApplied) boost *= 2.0;
+    if (strategy === 'family'   && (rotationHappened || greyApplied) && !bgChanged) boost *= 2.0;
+    if (strategy === 'position' && !rotationHappened && !bgChanged && !greyApplied) boost *= 2.0;
+    return boost;
   }
 
   // Enumerate all (rotation × retint) combinations, score, pick max.
-  let best = { rotations: [], newBgHue: null, score: -1 };
+  let best = { rotations: [], greyify: [], newBgHue: null, score: -1 };
   for (const rot of rotationOptions) {
+    const greyify = rot.greyify || [];
     for (const rt of retintOptions) {
-      if (!isReadable(rot.rotations, rt.newHue)) continue;
-      const score = scoreCandidate(rot.rotations, rt.newHue) * strategyBoost(rot.rotations, rt.newHue);
-      if (score > best.score) best = { rotations: rot.rotations, newBgHue: rt.newHue, score };
+      if (!isReadable(rot.rotations, rt.newHue, greyify)) continue;
+      const score = scoreCandidate(rot.rotations, rt.newHue, greyify) * strategyBoost(rot.rotations, rt.newHue, greyify);
+      if (score > best.score) best = { rotations: rot.rotations, greyify, newBgHue: rt.newHue, score };
     }
   }
 
   if (best.score < 0) return css; // nothing viable (shouldn't happen — identity passes readability)
 
   let out = applyFamilyRotations(css, best.rotations);
+  for (const fam of best.greyify) out = greyifyFamily(out, fam);
   if (best.newBgHue !== null && Math.abs(best.newBgHue - bgHue) > 2) {
-    out = retintBgSurfaces(out, best.newBgHue);
+    // Vivid bg starts at very low chroma (near-white / near-black). When
+    // role-swap decides to retint bg to a new hue for variant distinction,
+    // bump chroma floor so the hue actually shows. Without this, retinted
+    // near-white surfaces all read the same regardless of hue.
+    const isVivid = _variantName.startsWith('vivid');
+    const minC = isVivid ? 0.08 : 0;
+    out = retintBgSurfaces(out, best.newBgHue, minC);
     // Focus/highlight were computed against the ORIGINAL bg; re-nudge them
     // against the new bg so contrast guarantees hold.
     const isHC = _variantName.includes('-hc');
@@ -811,12 +856,13 @@ function baseThemeFromVariant(variantName) {
     .replace(/-calm$/, '');
 }
 
-// Load all source theme definitions — keyed by base theme name
+// Load all source theme definitions — keyed by base theme name.
+// Brand JSONs live in src/themes/brands/ and contain an `engines` block
+// with per-engine title + sample. The validator uses these to enrich
+// theme-names.json entries with descriptive metadata (titles, samples).
 function loadSourceDefinitions() {
   const dirs = [
-    path.join(rootDir, 'src/themes/definitions/library'),
-    path.join(rootDir, 'src/themes/definitions/mono'),
-    path.join(rootDir, 'src/themes/definitions/brand'),
+    path.join(rootDir, 'src/themes/brands'),
   ];
   const defs = {};
   for (const dir of dirs) {
@@ -825,7 +871,25 @@ function loadSourceDefinitions() {
       if (!file.endsWith('.json')) continue;
       try {
         const json = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
-        defs[json.name] = json;
+        // Brand JSONs have `engines: { vivid: {...}, cloudcalm: {...} }`.
+        // Flatten so `defs[engineName]` returns the per-engine metadata
+        // (title, sample) merged with brand-level fields. Variants like
+        // `vivid-dark` strip back to `vivid` via baseThemeFromVariant.
+        if (json.engines && typeof json.engines === 'object') {
+          for (const [engineName, engineMeta] of Object.entries(json.engines)) {
+            defs[engineName] = {
+              ...engineMeta,
+              brand:    json.brand,
+              category: json.category,
+              primary:  json.primary,
+              secondary: json.secondary,
+            };
+          }
+        } else if (json.name) {
+          // Legacy single-theme JSON shape — keep working in case any
+          // older definitions reappear.
+          defs[json.name] = json;
+        }
       } catch { /* skip bad JSON */ }
     }
   }
@@ -909,7 +973,7 @@ function main() {
   console.log('\n🔍 Validating theme catalogue...\n');
 
   if (!fs.existsSync(namesPath)) {
-    console.error(`❌ Missing ${namesPath} — run generate-theme-tokens.js first`);
+    console.error(`❌ Missing ${namesPath} — run a new-engine generator first (e.g. generate-vivid.js, generate-cloudcalm.js, or generate-mono-grey.js)`);
     process.exit(1);
   }
 
@@ -1141,6 +1205,9 @@ function main() {
       const tag = disambiguated ? '🎨 family-shift' : '🔁 role-swap';
       console.log(`   [pass ${pass}] ${tag}  ${variant} ← ${swappedFrom}`);
     }
+  }
+
+  if (roleSwapsApplied > 0) {
     // Re-run generate-core-tokens so the card preview tokens reflect the swap.
     console.log('\n🔁 Regenerating coretokens + theme-cards CSS for swapped variants...');
     try {

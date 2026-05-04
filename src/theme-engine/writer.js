@@ -94,7 +94,13 @@ export function buildThemeCSS(tokens) {
   //   --high-contrast    → data-high-contrast    → high-contrast.css
   //   --theme-intensity  → data-theme-intensity  → theme-intensity-soft.css (reserved)
   //   --theme-contrast   → typography gates use this to bump text sizes
-  const textEmphasis = scales.text?.emphasis || scales.neutral?.emphasis;
+  // If text is a var() anchor (e.g. var(--color-Black) for vivid), use
+  // neutral-emphasis for the contrast calc — anchors auto-flip so their
+  // effective contrast is always near-max but we can't chroma() them.
+  const textEmphasisRaw = scales.text?.emphasis || scales.neutral?.emphasis;
+  const textEmphasis = (typeof textEmphasisRaw === 'string' && textEmphasisRaw.startsWith('#'))
+    ? textEmphasisRaw
+    : scales.neutral?.emphasis;
   const pageBgHex    = pageBg['page-bg'];
   const ratio = textEmphasis && pageBgHex ? contrastRatio(textEmphasis, pageBgHex) : 21;
   const contrastTier = ratio >= 7   ? 'strong'

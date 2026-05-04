@@ -57,15 +57,25 @@ export const SCALE_POSITIONS = [100, 200, 300, 400, 500, 600, 700, 800, 900, 950
 //
 // Clamps keep positions within sRGB-safe range (tint ≤ 0.95, emphasis
 // ≥ 0.30) regardless of where peak lands.
+// Position order (light): tint (lightest) > mid > base (peak) > emphasis (deepest)
+// Position order (dark):  tint (darkest) < mid < base (peak) < emphasis (lightest)
+//
+// Mid sits BETWEEN tint and base — NOT on the opposite side of base from
+// tint. Previously mid was -0.10 from peak which put it below base; scale
+// read tint→base→mid→emphasis. Corrected so mid is a step down from tint
+// toward base.
 export const VIVID_OFFSETS = {
   light: {
-    nonHC: { tint: +0.15, mid: -0.10, base: 0, emphasis: -0.25 },
-    hc:    { tint: +0.20, mid: -0.14, base: 0, emphasis: -0.32 },
+    // tint +0.15 → mid +0.07 → base 0 → emphasis -0.25. Mid halfway-ish
+    // between tint and base, preserving the ordering.
+    nonHC: { tint: +0.15, mid: +0.07, base: 0, emphasis: -0.25 },
+    hc:    { tint: +0.20, mid: +0.10, base: 0, emphasis: -0.32 },
   },
   dark: {
-    // Flipped: tint deep, emphasis light. Same magnitudes, signs reversed.
-    nonHC: { tint: -0.25, mid: +0.10, base: 0, emphasis: +0.15 },
-    hc:    { tint: -0.32, mid: +0.14, base: 0, emphasis: +0.20 },
+    // Flipped: tint -0.25 → mid -0.12 → base 0 → emphasis +0.15.
+    // Mid sits between tint (deep) and base (peak), below base.
+    nonHC: { tint: -0.25, mid: -0.12, base: 0, emphasis: +0.15 },
+    hc:    { tint: -0.32, mid: -0.16, base: 0, emphasis: +0.20 },
   },
 };
 
@@ -101,22 +111,23 @@ const TEXT_WARM_HUE = 20;
 // at much higher C. Surface depth (raised/sunken/overlay) offsets L by ±0.05.
 export const VIVID_BG_LADDER = {
   light: {
-    // Reference: violet light bg = #fadcff at L 0.93 C 0.057 (HSV 13.8% S,
-    // 100% V). Vivid light bg is a WHISPER-PASTEL wash — the lightest
-    // possible version of the brand hue, just a hint of tint in near-white.
-    // This lets neon primary/secondary pop properly against a quiet surface.
+    // Pushed toward near-white. At brand C 0.057 and L 0.93, neon primary
+    // (L 0.63 C 0.26) only clears 3.3:1 — fails 4.5 body text. Bg at L 0.97+
+    // with whisper-low chroma (~0.015) gives scales 7:1+ contrast headroom.
+    // The surface still carries a hint of brand hue so it doesn't feel
+    // clinical, but stays quiet enough for neon to pop.
     nonHC: {
-      'page-bg':         { L: 0.93, C: 0.057 },
-      'page-bg-raised':  { L: 0.97, C: 0.03 },
-      'page-bg-sunken':  { L: 0.88, C: 0.08 },
-      'page-bg-overlay': { L: 0.99, C: 0.02 },
+      'page-bg':         { L: 0.97, C: 0.015 },
+      'page-bg-raised':  { L: 0.99, C: 0.008 },
+      'page-bg-sunken':  { L: 0.94, C: 0.022 },
+      'page-bg-overlay': { L: 1.00, C: 0.005 },
     },
     hc: {
-      // HC slightly lighter + less chromatic (more headroom for scales).
-      'page-bg':         { L: 0.96, C: 0.04 },
-      'page-bg-raised':  { L: 0.99, C: 0.02 },
-      'page-bg-sunken':  { L: 0.92, C: 0.06 },
-      'page-bg-overlay': { L: 1.00, C: 0.01 },
+      // HC = essentially pure white with barely-visible brand whisper.
+      'page-bg':         { L: 0.99, C: 0.008 },
+      'page-bg-raised':  { L: 1.00, C: 0.004 },
+      'page-bg-sunken':  { L: 0.97, C: 0.012 },
+      'page-bg-overlay': { L: 1.00, C: 0.002 },
     },
   },
   dark: {
@@ -162,17 +173,21 @@ const NEUTRAL_STEPS = [
 // Higher chroma than cloudcalm so neutrals read as "tinted greys" carrying
 // the theme's vivid character rather than pure grey.
 //
-// Vivid neutral = NOT a chalky grey. A muted version of the brand colour,
-// running at ~40-50% of brand chroma. Reads as "brand at a quieter tier"
-// not "faintly tinted grey". C 0.08-0.12 range.
+// Vivid neutral = GENUINE grey. Very low chroma (0.008-0.020) so it reads
+// as grey with a whisper of hue — NOT as a muted brand colour. Primary and
+// secondary carry the neon; neutral stays quiet so scales don't compete.
+//
+// The hue applied comes from the mode (warm 60°, cool 240°, grey 0 C 0,
+// grey-tint = primary hue, etc.) — neutral_generate handles that selection.
+// The ladder just dictates L and how much C a whisper gets.
 export const VIVID_NEUTRAL_OVERRIDES = {
   light: {
-    nonHC: { 200: { L: 0.84, C: 0.08 }, 400: { L: 0.64, C: 0.10 }, 600: { L: 0.48, C: 0.12 }, 800: { L: 0.35, C: 0.10 } },
-    hc:    { 200: { L: 0.80, C: 0.08 }, 400: { L: 0.58, C: 0.10 }, 600: { L: 0.42, C: 0.12 }, 800: { L: 0.28, C: 0.10 } },
+    nonHC: { 200: { L: 0.92, C: 0.010 }, 400: { L: 0.72, C: 0.014 }, 600: { L: 0.50, C: 0.018 }, 800: { L: 0.28, C: 0.014 } },
+    hc:    { 200: { L: 0.95, C: 0.006 }, 400: { L: 0.70, C: 0.010 }, 600: { L: 0.42, C: 0.014 }, 800: { L: 0.18, C: 0.010 } },
   },
   dark: {
-    nonHC: { 200: { L: 0.35, C: 0.10 }, 400: { L: 0.55, C: 0.12 }, 600: { L: 0.72, C: 0.12 }, 800: { L: 0.90, C: 0.08 } },
-    hc:    { 200: { L: 0.42, C: 0.10 }, 400: { L: 0.58, C: 0.12 }, 600: { L: 0.75, C: 0.12 }, 800: { L: 0.92, C: 0.08 } },
+    nonHC: { 200: { L: 0.28, C: 0.014 }, 400: { L: 0.50, C: 0.018 }, 600: { L: 0.72, C: 0.014 }, 800: { L: 0.92, C: 0.010 } },
+    hc:    { 200: { L: 0.18, C: 0.010 }, 400: { L: 0.42, C: 0.014 }, 600: { L: 0.70, C: 0.010 }, 800: { L: 0.95, C: 0.006 } },
   },
 };
 
@@ -252,45 +267,74 @@ export function generateVividScale(baseInput, { luminance = 'light', hc = false 
    NEUTRAL SCALE — same logic as cloudcalm (shared comfort)
    ================================================================ */
 
-export function generateVividNeutral(mode, { primaryHex, neutralHex, luminance = 'light', hc = false, greyTintHue = null } = {}) {
-  const scale = {};
+/**
+ * Vivid neutral = grey with a whisper of mode hue. L from the ladder,
+ * chroma stays at whisper-level (0.004-0.012) so the scale reads as
+ * grey-with-hint, NOT as muted brand colour. Primary + secondary carry
+ * the neon — neutral stays the quiet non-brand slot.
+ *
+ * Modes apply hue ONLY at the whisper level:
+ *   warm       → hue 60 (yellow-warm whisper)
+ *   cool       → hue 240 (blue-cool whisper)
+ *   grey       → chroma 0 (pure grey)
+ *   grey-tint  → primary hue at whisper chroma
+ */
+/**
+ * CVD-aware neutral whisper hue.
+ *
+ * When a primary hue WASHES to grey under a CVD simulation (pink under
+ * protan/deutan, blue under tritan), pure-grey neutral would collide
+ * with simulated-primary under CVD — both read as "same grey". To keep
+ * neutral distinguishable, give it a whisper hue OUTSIDE primary's
+ * wash-zone.
+ *
+ * Returns null when pure grey is fine (primary doesn't wash).
+ */
+function cvdSafeNeutralHue(primaryHue, cvdType) {
+  if (!cvdType) return null;
+  const h = ((primaryHue % 360) + 360) % 360;
+  const inZone = (lo, hi) => h >= lo && h <= hi;
 
-  function resolveHue() {
-    if (mode === 'warm')      return NEUTRAL_WARM_HUE;
-    if (mode === 'cool')      return NEUTRAL_COOL_HUE;
-    if (mode === 'grey-tint') return greyTintHue ?? (chroma(primaryHex).get('oklch.h') || 0);
-    return chroma(neutralHex || primaryHex).get('oklch.h') || 0;
+  if (cvdType === 'protan' || cvdType === 'deutan') {
+    // Red zone (330-360, 0-40) OR green zone (100-165) → washes to grey
+    if (inZone(330, 360) || inZone(0, 40)) return 240;  // cool whisper
+    if (inZone(100, 165)) return 40;                    // warm whisper
   }
-  function resolveTintChroma() {
-    if (mode === 'warm')      return 0.020;
-    if (mode === 'cool')      return 0.040;
-    if (mode === 'grey-tint') return 0.020;
-    return 0.025;
+  if (cvdType === 'tritan') {
+    // Blue zone (200-260) → washes to grey
+    if (inZone(200, 260)) return 40;                    // warm whisper
   }
+  return null;
+}
 
-  if (mode === 'grey') {
-    for (const { pos, lightness } of NEUTRAL_STEPS) {
-      scale[pos] = chroma.oklch(lightness, 0, 0).hex();
-    }
-  } else {
-    const hue = resolveHue();
-    const tintChroma = resolveTintChroma();
-    for (const { pos, lightness } of NEUTRAL_STEPS) {
-      scale[pos] = safeOklch(lightness, tintChroma, hue);
-    }
-  }
-
-  // Apply overrides at semantic positions
+export function generateVividNeutral(mode, { primaryHex, luminance = 'light', hc = false, greyTintHue = null, cvd = null } = {}) {
   const variant = luminance === 'dark' ? 'dark' : 'light';
   const level = hc ? 'hc' : 'nonHC';
   const overrides = VIVID_NEUTRAL_OVERRIDES[variant][level];
+  const primaryHue = primaryHex ? (chroma(primaryHex).get('oklch.h') || 0) : 0;
 
-  const overrideHue = mode === 'grey' ? 0 : resolveHue();
+  // CVD override: if primary would wash to grey under this CVD, force
+  // neutral to a whisper hue that stays distinct from the washed primary.
+  // Overrides explicit mode (a user who picked "pure grey neutral" with
+  // a red brand under protan CANNOT have pure grey — it collides).
+  const cvdWhisperHue = cvdSafeNeutralHue(primaryHue, cvd);
+
+  // Resolve hue + whisper chroma per mode
+  let hue = 0;
+  let useChroma = true;
+  if (cvdWhisperHue !== null)    { hue = cvdWhisperHue; useChroma = true; }
+  else if (mode === 'warm')      hue = NEUTRAL_WARM_HUE;
+  else if (mode === 'cool')      hue = NEUTRAL_COOL_HUE;
+  else if (mode === 'grey')      useChroma = false;
+  else if (mode === 'grey-tint') hue = greyTintHue ?? (chroma(primaryHex).get('oklch.h') || 0);
+  else                           hue = NEUTRAL_WARM_HUE; // default warm whisper
+
+  const scale = {};
   for (const [pos, { L, C }] of Object.entries(overrides)) {
-    const chr = mode === 'grey' ? 0 : C;
-    scale[pos] = chroma.oklch(L, chr, overrideHue).hex();
+    scale[pos] = useChroma
+      ? safeOklch(L, C, hue)
+      : chroma.oklch(L, 0, 0).hex();
   }
-
   return scale;
 }
 
@@ -298,32 +342,47 @@ export function generateVividNeutral(mode, { primaryHex, neutralHex, luminance =
    TEXT SCALE — same logic as cloudcalm
    ================================================================ */
 
-export function generateVividText(mode, { primaryHex, textHex, luminance = 'light', hc = false, greyTintHue = null } = {}) {
-  if (mode === 'black-white') {
-    const anchor = 'var(--color-Black)';
-    return { tint: anchor, mid: anchor, base: anchor, emphasis: anchor };
-  }
+/**
+ * Vivid text = very dark (light theme) or very light (dark theme) with
+ * an OPTIONAL whisper of hue. Near-anchor luminance so text remains
+ * unmistakably readable; whisper chroma lets text pick up a mode flavour
+ * without reading as "coloured text."
+ *
+ * Modes work the same way as neutral — warm/cool whisper, grey pure,
+ * grey-tint picks up primary hue.
+ */
+export function generateVividText(mode, { primaryHex, luminance = 'light', greyTintHue = null } = {}) {
+  const isDark = luminance === 'dark';
 
-  // Fixed text anchors — distinct from neutral's anchors so warm+warm or
-  // cool+cool never collide. grey-tint's hue supplied by validator
-  // (secondary in split mode, primary in mono, primary+30° edge).
-  let hue;
-  if (mode === 'grey') hue = TEXT_GREY_HUE;
-  else if (mode === 'warm') hue = TEXT_WARM_HUE;
-  else if (mode === 'cool') hue = TEXT_COOL_HUE;
+  // Near-anchor L per position. Light = scale of very-dark, dark = scale of very-light.
+  // Matches vivid-HC-dark bg character (L 0.22, C 0.11) — "deep brand-tinted near-black"
+  // rather than pure black. Same on dark side: deep-tinted near-white.
+  const lLadder = isDark
+    ? { tint: 0.82, mid: 0.90, base: 0.95, emphasis: 0.98 }  // near-white
+    : { tint: 0.30, mid: 0.22, base: 0.14, emphasis: 0.08 }; // near-black, matches HC bg depth
+
+  // Tint chroma — generous enough to read as "brand-tinted dark/light"
+  // (like vivid-HC-dark bg at C 0.11) rather than pure B/W. Still well
+  // under brand scale chroma (0.23-0.26) so text stays the non-brand slot.
+  const whisperC = 0.08;
+
+  let hue = 0;
+  let useChroma = true;
+  if (mode === 'warm')           hue = TEXT_WARM_HUE;
+  else if (mode === 'cool')      hue = TEXT_COOL_HUE;
+  else if (mode === 'grey')      useChroma = false;
   else if (mode === 'grey-tint') hue = greyTintHue ?? (chroma(primaryHex).get('oklch.h') || 0);
-  else hue = chroma(textHex).get('oklch.h') || 0;
+  else                           useChroma = false;  // default pure B/W
 
-  const variant = luminance === 'dark' ? 'dark' : 'light';
-  const level = hc ? 'hc' : 'nonHC';
-  const overrides = VIVID_TEXT_OVERRIDES[variant][level];
-  const isGrey = mode === 'grey';
+  const make = (L) => useChroma
+    ? safeOklch(L, whisperC, hue)
+    : chroma.oklch(L, 0, 0).hex();
 
   return {
-    tint:     chroma.oklch(overrides[200].L, isGrey ? 0 : overrides[200].C, hue).hex(),
-    mid:      chroma.oklch(overrides[400].L, isGrey ? 0 : overrides[400].C, hue).hex(),
-    base:     chroma.oklch(overrides[600].L, isGrey ? 0 : overrides[600].C, hue).hex(),
-    emphasis: chroma.oklch(overrides[800].L, isGrey ? 0 : overrides[800].C, hue).hex(),
+    tint:     make(lLadder.tint),
+    mid:      make(lLadder.mid),
+    base:     make(lLadder.base),
+    emphasis: make(lLadder.emphasis),
   };
 }
 
@@ -396,96 +455,85 @@ export function generateVividPageBg({
 // Tritan specifically keeps success GREEN (144°) — tritan sees reds/greens
 // fine; only the blue-yellow axis fails. So warning moves off yellow/orange
 // to red, error stays magenta, info shifts from blue to purple.
-const VIVID_STATUS_PALETTES = {
-  standard: {
-    light: { Success: '#00a838', Warning: '#ff7a00', Error: '#e6002d', Info: '#0070e0' },
-    dark:  { Success: '#34f747', Warning: '#ffab3d', Error: '#ff5c7a', Info: '#4aa8ff' },
-  },
-  protan: {
-    // red-green axis fails. success → cyan-teal, error → hot magenta
-    light: { Success: '#00b0a0', Warning: '#ff7a00', Error: '#d000a0', Info: '#0070e0' },
-    dark:  { Success: '#30ffe0', Warning: '#ffab3d', Error: '#ff5ccc', Info: '#4aa8ff' },
-  },
-  deutan: {
-    light: { Success: '#00b0a0', Warning: '#ff7a00', Error: '#d000a0', Info: '#0070e0' },
-    dark:  { Success: '#30ffe0', Warning: '#ffab3d', Error: '#ff5ccc', Info: '#4aa8ff' },
-  },
-  tritan: {
-    // blue-yellow axis fails. keep success green, warning uses pure-red
-    // (no blue component — stays distinct from magenta error under sim),
-    // error magenta, info shifts to violet (off blue axis).
-    light: { Success: '#00a838', Warning: '#d04000', Error: '#c800a0', Info: '#7a00e0' },
-    dark:  { Success: '#34f747', Warning: '#ff4400', Error: '#ff5ccc', Info: '#b080ff' },
-  },
+// Status hues per role per CVD type. Each hue gets peak L via
+// findPeakChromaLightness — vivid neon treatment across the board.
+//
+// Standard: green success, orange warning, red error, blue info.
+// Protan/Deutan (red-green axis fails): teal success, orange warning,
+//   magenta error, blue info.
+// Tritan (blue-yellow axis fails): green success, red warning, magenta
+//   error, violet info.
+const VIVID_STATUS_HUES = {
+  standard: { Success: 144, Warning:  45, Error:  25, Info: 260 },
+  protan:   { Success: 190, Warning:  45, Error: 330, Info: 260 },
+  deutan:   { Success: 190, Warning:  45, Error: 330, Info: 260 },
+  tritan:   { Success: 144, Warning:  25, Error: 330, Info: 290 },
 };
+
+// Focus + highlight-link are interaction signals — fixed vivid hues.
+// Focus = yellow (attention), highlight-link = cyan (interactive).
+// Per CVD, shift to an anchor that stays distinct from brand scales +
+// status under that CVD's confusion.
+const VIVID_FOCUS_HUES = {
+  standard: { focus:  80, highlight: 195 },
+  protan:   { focus:  50, highlight: 210 },
+  deutan:   { focus:  50, highlight: 210 },
+  tritan:   { focus: 320, highlight: 300 },
+};
+
+/**
+ * Build a vivid neon hex. For scales/base this lives at the hue's peak L.
+ * For UI tokens (status/focus/highlight) on a light bg the peak-L variant
+ * often washes into the bg — peak yellow/green/cyan sit at L 0.85-0.97
+ * which is too close to the near-white bg. `luminance` shifts the L away
+ * from bg to guarantee contrast headroom.
+ *
+ *   luminance='light' → shift down from peak toward L 0.50-0.65
+ *   luminance='dark'  → shift up from peak toward L 0.75-0.90 (or stay at peak)
+ *   luminance='peak'  → pure peak, no shift (default, for scales)
+ */
+function vividNeon(hue, { luminance = 'peak' } = {}) {
+  const peakL = findPeakChromaLightness(hue);
+  let targetL = peakL;
+  if (luminance === 'light') {
+    // Target L ≤ 0.60 so vs bg L≥0.95 we clear ≥4.5:1 body text contrast.
+    targetL = Math.min(peakL, 0.55);
+  } else if (luminance === 'dark') {
+    // Target L ≥ 0.80 so vs dark bg L~0.28 we clear contrast.
+    targetL = Math.max(peakL, 0.80);
+  }
+  const maxC = Math.min(0.30, maxChromaForHue(hue, targetL) * 0.95);
+  return safeOklch(targetL, maxC, hue);
+}
 
 export function generateVividStatus({ luminance = 'light', cvd = null } = {}) {
   const isDark = luminance === 'dark';
-  const palette = VIVID_STATUS_PALETTES[cvd] || VIVID_STATUS_PALETTES.standard;
-  const p = palette[isDark ? 'dark' : 'light'];
+  const hues = VIVID_STATUS_HUES[cvd] || VIVID_STATUS_HUES.standard;
+  // Status tokens need contrast against bg — not at peak-L. Use the luminance
+  // variant so on light themes they sit darker than peak, on dark themes
+  // they sit lighter than peak.
+  const neonMode = isDark ? 'dark' : 'light';
   return {
     'color-Black':  isDark ? '#fafafa' : '#1a1a1a',
     'color-White':  isDark ? '#1a1a1a' : '#fafafa',
     'shadow-Black': '#000000',
     'shadow-White': '#ffffff',
-    'color-Success': p.Success,
-    'color-Warning': p.Warning,
-    'color-Error':   p.Error,
-    'color-Info':    p.Info,
+    'color-Success': vividNeon(hues.Success, { luminance: neonMode }),
+    'color-Warning': vividNeon(hues.Warning, { luminance: neonMode }),
+    'color-Error':   vividNeon(hues.Error,   { luminance: neonMode }),
+    'color-Info':    vividNeon(hues.Info,    { luminance: neonMode }),
   };
 }
 
-export function generateVividFocusHighlight({ primaryHex, secondaryHex, pageBg, hc = false, luminance = 'light' } = {}) {
-  const isDark = luminance === 'dark';
-  const pageBgHex = pageBg['page-bg'];
-  const cardBgHex = pageBg['page-bg-raised'];
-
-  const priHue = chroma(primaryHex).get('oklch.h') || 220;
-  const secHue = chroma(secondaryHex).get('oklch.h') || 330;
-
-  const gapCW = ((secHue - priHue) + 360) % 360;
-  const gapCCW = 360 - gapCW;
-  let gapStart, gapSize;
-  if (gapCW >= gapCCW) { gapStart = priHue; gapSize = gapCW; }
-  else                 { gapStart = secHue; gapSize = gapCCW; }
-
-  // Focus and highlight-link must NEVER be the same hue — they're distinct
-  // interaction signals. Gap-split puts them 1/3 and 2/3 into the larger
-  // hue gap. When primary/secondary are close together (e.g. after CVD
-  // pre-shift collapses them into the same safe zone), the gap is small
-  // and both land near each other. Force a minimum 120° separation between
-  // focus and highlight — if the gap can't support it, spread them to
-  // opposite sides of the wheel from the bisector instead.
-  let focusTargetHue, highlightTargetHue;
-  const splitGap = gapSize / 3;
-  if (splitGap >= 60) {
-    focusTargetHue     = (gapStart + splitGap) % 360;
-    highlightTargetHue = (gapStart + splitGap * 2) % 360;
-  } else {
-    // Fallback: centre on the bisector of primary/secondary and spread ±60°
-    const bisector = (gapStart + gapSize / 2) % 360;
-    focusTargetHue     = (bisector + 60) % 360;
-    highlightTargetHue = (bisector - 60 + 360) % 360;
-  }
-
-  const targetL  = isDark ? 0.82 : 0.62;
-  const minRatio = hc ? 7 : 4.5;
-
-  function nudgeForContrast(targetHue) {
-    let L = targetL;
-    let hex = safeOklch(L, 0.10, targetHue);
-    for (let i = 0; i < 30; i++) {
-      if (contrastRatio(hex, pageBgHex) >= minRatio && contrastRatio(hex, cardBgHex) >= minRatio) return hex;
-      L += isDark ? 0.03 : -0.03;
-      hex = safeOklch(L, 0.10, targetHue);
-    }
-    return hex;
-  }
-
+export function generateVividFocusHighlight({ pageBg, cvd = null, luminance = 'light' } = {}) {
+  // Fixed vivid-native anchor hues per CVD mode. Luminance-aware L shift
+  // so focus/highlight read-contrast against bg — not at peak-L.
+  const hues = VIVID_FOCUS_HUES[cvd] || VIVID_FOCUS_HUES.standard;
+  const neonMode = luminance === 'dark' ? 'dark' : 'light';
   return {
-    'focus-color':          nudgeForContrast(focusTargetHue),
-    'focus-bg':             pageBgHex,
-    'highlight-link-color': nudgeForContrast(highlightTargetHue),
+    'focus-color':          vividNeon(hues.focus,     { luminance: neonMode }),
+    'focus-bg':             pageBg['page-bg'],
+    'highlight-link-color': vividNeon(hues.highlight, { luminance: neonMode }),
   };
 }
 
@@ -530,63 +578,12 @@ export function generateVivid(input, variant = {}) {
   const tertiaryModeOrHex  = tertiaryIsHex ? 'brand' : tertiary;
   const textModeOrHex      = textIsHex ? 'brand' : text;
 
-  // CVD pre-shift: when the validator flagged brand slots as risky for this
-  // CVD type × bg combo, shift the brand hue to a CVD-safe anchor BEFORE
-  // generating the scales. This prevents the whole scale from washing to
-  // near-grey under the CVD simulation — something the post-scale collision
-  // check can't catch because the scale is uniformly invisible, not colliding.
-  //
-  // Safe target hues per CVD (picked so the shifted hue sits outside the
-  // unsafe zone and remains a plausible brand colour):
-  //   protan/deutan unsafe: [0-40, 100-165, 330-360] → shift to 270° (violet)
-  //   tritan unsafe:        [60-110, 200-260]        → shift to 330° (magenta)
+  // CVD is handled UPSTREAM via the cvd-gate — by the time hues reach the
+  // generator, they are already CVD-safe for whatever variant is being
+  // built. Engine stays pure: it takes hues, it builds scales. No CVD
+  // awareness inside.
   let cvdSafe = true;
   let cvdNotes = [];
-  // Pre-shift threshold: only rewrite brand hue when score ≥ 0.3. Below that
-  // the post-scale collision check handles it without losing brand identity.
-  const PRE_SHIFT_THRESHOLD = 0.3;
-  if (cvdType && cvdRisks && cvdRisks[cvdType] && cvdRisks[cvdType].slots && cvdRisks[cvdType].slots.length && cvdRisks[cvdType].score >= PRE_SHIFT_THRESHOLD) {
-    const risk = cvdRisks[cvdType];
-    // Aware pre-shift: candidates are CVD-safe hues ordered by preference.
-    // Walk the list until one sits ≥60° from the other slot's current hue.
-    // Candidates align with user's vivid anchors — pink 335°, yellow 95°,
-    // green 144° — so pre-shifted slots land on the "neon" character hues
-    // rather than generic safe mid-points that read muted under vivid chroma.
-    // Candidates ordered by gamut-friendliness for vivid. Hues near cyan
-    // (180-210°) and yellow-green (90-130°) cap at C 0.12-0.17 in sRGB at
-    // mid-L — they can't hit vivid's 0.26 chroma. Prefer hues with fat
-    // gamut: 260-340° (violet/magenta/pink) and 40° (orange) peak highest.
-    const CANDIDATES = {
-      protan: [290, 260, 320, 40,  144],   // violet → electric blue → magenta → orange → green
-      deutan: [260, 290, 230, 40,  330],   // electric blue → violet → blue → orange → magenta
-      tritan: [335, 20,  300, 350, 40],    // pink → red → magenta → pink → red-orange
-    };
-    function hueGap(a, b) {
-      const d = Math.abs(((a - b) % 360 + 360) % 360);
-      return Math.min(d, 360 - d);
-    }
-    function pickSafeHue(candidates, referenceHue) {
-      if (referenceHue === null || !Number.isFinite(referenceHue)) return candidates[0];
-      for (const h of candidates) {
-        if (hueGap(h, referenceHue) >= 60) return h;
-      }
-      return candidates[0];
-    }
-
-    for (const slot of risk.slots) {
-      const current = slot === 'primary' ? primary : (slot === 'secondary' ? secondary : null);
-      if (!current) continue;
-      const otherHex = slot === 'primary' ? secondaryHex : primaryHex;
-      const otherHue = otherHex ? (chroma(otherHex).get('oklch.h') || 0) : null;
-      const candidates = CANDIDATES[cvdType] ?? [270];
-      const safeHue = pickSafeHue(candidates, otherHue);
-      const [L, C] = chroma(current.hex).oklch();
-      const shiftedHex = chroma.oklch(L, C || 0, safeHue).hex();
-      if (slot === 'primary')   primaryHex   = shiftedHex;
-      if (slot === 'secondary') secondaryHex = shiftedHex;
-      cvdNotes.push(`pre-shifted ${slot} hue → ${safeHue}° for ${cvdType} (${risk.severity} risk, score ${risk.score.toFixed(2)})`);
-    }
-  }
 
   // 1. Page background
   const bgTokens = generateVividPageBg({
@@ -600,12 +597,15 @@ export function generateVivid(input, variant = {}) {
   const primaryScale   = generateVividScale(primaryHex,   { luminance, hc });
   const secondaryScale = generateVividScale(secondaryHex, { luminance, hc });
 
-  // 3. Neutral
+  // 3. Neutral — CVD-aware. If primary washes to grey under the active
+  // CVD, neutral gets a forced whisper hue so it stays distinguishable
+  // from the simulated-grey primary.
   const neutralScale = generateVividNeutral(
     tertiaryIsHex ? 'brand' : tertiaryModeOrHex,
     {
       primaryHex, neutralHex: tertiaryIsHex ? tertiaryHex : null, luminance, hc,
       greyTintHue: greyTintHues?.neutral ?? null,
+      cvd: cvdType,
     }
   );
 
@@ -623,10 +623,8 @@ export function generateVivid(input, variant = {}) {
 
   // 6. Focus + highlight
   const focusHighlight = generateVividFocusHighlight({
-    primaryHex,
-    secondaryHex,
     pageBg: bgTokens,
-    hc,
+    cvd: cvdType,
     luminance,
   });
 

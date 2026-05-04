@@ -13,9 +13,9 @@ function buildThemeMap(modules) {
     if (path.includes('/Preview/') || path.includes('brand-overrides')) continue;
     // Extract filename as theme name from subfolder structure:
     //   '../styles/themes/brand/mind-the-box/BrandDefault.css' -> 'default'
-    //   '../styles/themes/a11y/calm/calm-dark.css' -> 'calm-dark'
-    //   '../styles/themes/fun/ocean/ocean.css' -> 'ocean'
-    const match = path.match(/(?:a11y|fun|brand)\/.+\/([^/]+)\.css$/);
+    //   '../styles/themes/a11y/mono-grey/mono-pure.css'        -> 'mono-pure'
+    //   '../styles/themes/brands/default/vivid/vivid-dark.css' -> 'vivid-dark'
+    const match = path.match(/(?:a11y|fun|brand|brands)\/.+\/([^/]+)\.css$/);
     if (match) {
       let name = match[1];
       if (name === 'BrandDefault') name = 'default';
@@ -222,6 +222,19 @@ export class ThemeSwitcher {
         document.documentElement.setAttribute('data-theme-chroma', chroma);
       } else {
         document.documentElement.removeAttribute('data-theme-chroma');
+      }
+
+      // Theme-level no-chroma trigger — when the theme is mono (chroma=grey),
+      // auto-activate the no-chroma gate so images, focus, links etc. all
+      // get the no-hue treatment without the user needing to toggle it
+      // separately.
+      // Uses a SEPARATE attribute (data-theme-no-chroma) so it doesn't
+      // clash with the user's own panel toggle (data-no-chroma). The CSS
+      // gate in no-chroma.css matches either attribute.
+      if (chroma === 'grey') {
+        document.documentElement.setAttribute('data-theme-no-chroma', '');
+      } else {
+        document.documentElement.removeAttribute('data-theme-no-chroma');
       }
     }, 0);
 
