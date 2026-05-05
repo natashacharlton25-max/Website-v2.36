@@ -14,7 +14,7 @@
  * this production-grade we rebuild with the Swatch atom.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import themeNames from '../../styles/tokens/theme-names.json';
+import themeNames from '../../brands/mind-the-box/theme-names.json';
 import '../../styles/themes/Preview/theme-cards-dev.css';
 
 const themes = Object.entries(themeNames).map(([key, meta]: [string, any]) => ({
@@ -172,7 +172,29 @@ const STATUS_TOKENS = ['success', 'warning', 'error', 'info'] as const;
     // @ts-nocheck
     import chroma from 'chroma-js';
     import { APCAcontrast, sRGBtoY } from 'apca-w3';
-    import { simulateCvd } from '../../theme-engine/shared/cvd.js';
+
+    // Inlined CVD simulator — Machado 2009 LMS-space matrices. Used by the
+    // in-page CVD toggle. Engine-side `src/engine/shared/cvd.js` in
+    // theme-engine-studio carries the same matrices; if you change one,
+    // change the other (rare).
+    const CVD_MATRICES = {
+      protan: [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
+      deutan: [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.011820, 0.042940, 0.968881]],
+      tritan: [[1.255528, -0.076749, -0.178779], [-0.078411, 0.930809, 0.147602], [0.004733, 0.691367, 0.303900]],
+    };
+    function simulateCvd(hex, cvdType) {
+      if (!cvdType || !CVD_MATRICES[cvdType]) return hex;
+      const M = CVD_MATRICES[cvdType];
+      const [r, g, b] = chroma(hex).rgb();
+      const norm = [r / 255, g / 255, b / 255];
+      const out = [
+        M[0][0] * norm[0] + M[0][1] * norm[1] + M[0][2] * norm[2],
+        M[1][0] * norm[0] + M[1][1] * norm[1] + M[1][2] * norm[2],
+        M[2][0] * norm[0] + M[2][1] * norm[1] + M[2][2] * norm[2],
+      ];
+      const clamp = (v) => Math.max(0, Math.min(1, v));
+      return chroma.rgb(clamp(out[0]) * 255, clamp(out[1]) * 255, clamp(out[2]) * 255).hex();
+    }
 
     // Compute + inject ΔE / Lc / WCAG badges for the swatches inside a panel.
     // Reads each swatch's actual computed background (the CSS paints it) so

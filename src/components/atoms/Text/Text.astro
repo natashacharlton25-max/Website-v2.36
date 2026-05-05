@@ -123,9 +123,13 @@ const highlightStyle = highlight ? [
 ].join(';') : undefined;
 
 // Build-time AAC resolution
+//
+// Text accepts content from either a default slot or the contentText prop
+// (JSON pipeline path). AAC reads whichever is present — falling through
+// to '' means we skip AAC silently rather than crashing on undefined.
 let aacHtml = '';
 if (aac) {
-  const slotContent = await Astro.slots.render('default');
+  const slotContent = (await Astro.slots.render('default')) || contentText || '';
   const plainText = slotContent.replace(/<[^>]*>/g, '').trim();
   if (plainText) {
     const apiBase = import.meta.env.ASSET_API_URL || 'http://localhost:8787';

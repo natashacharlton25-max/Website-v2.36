@@ -97,26 +97,18 @@ function extractFullTokens(cssText) {
 }
 
 /**
- * Recursively find all CSS files in themes directory
- * Excludes the Preview folder to avoid processing our own output
+ * Find all theme CSS files in themes/ — one level only.
+ * Every CSS file directly in themes/ is a theme. The Preview/ subfolder
+ * is auto-excluded because we only look at files, not subfolders.
  */
 function findThemeFiles(dir) {
   const files = [];
-  const items = fs.readdirSync(dir);
-
-  for (const item of items) {
+  for (const item of fs.readdirSync(dir)) {
     const fullPath = path.join(dir, item);
-    const stat = fs.statSync(fullPath);
-
-    if (stat.isDirectory()) {
-      if (item !== 'Preview') {
-        files.push(...findThemeFiles(fullPath));
-      }
-    } else if (item.endsWith('.css')) {
+    if (fs.statSync(fullPath).isFile() && item.endsWith('.css')) {
       files.push(fullPath);
     }
   }
-
   return files;
 }
 

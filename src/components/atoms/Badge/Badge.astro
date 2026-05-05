@@ -24,6 +24,7 @@ import type {
   FontFamily, FontWeight, SemanticRole,
 } from '../../../lib/shared-enums';
 import { getGradientStopColours } from '../../../lib/gradient-inline';
+import { GRADIENT_ANIMATION_SPEED } from '../../../lib/animation/animation-config';
 
 interface Props {
   /** Badge display text. Pipeline content key. */
@@ -40,10 +41,6 @@ interface Props {
   /** Mixed blend — overrides single-colour gradient with two-colour blend */
   gradientBlend?: GradientBlend;
   gradientDirection?: GradientDirection;
-  /** linear (default) or radial */
-  gradientType?: 'linear' | 'radial';
-  /** Radial origin — only used when gradientType=radial */
-  gradientFocus?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   /** Fade-in modifier — first 50% transparent, fades to solid */
   gradientEmerge?: boolean;
   /** Fade-out modifier — last 20% fades to transparent */
@@ -79,8 +76,6 @@ const {
   gradient = false,
   gradientBlend,
   gradientDirection,
-  gradientType,
-  gradientFocus,
   gradientEmerge = false,
   gradientFade = false,
   gradientFlip = false,
@@ -106,7 +101,7 @@ const color = rainbowColor || brandColor;
 //   1. gradientBlend (named blends — hero, sunset, rainbow etc.)
 //   2. baseColour + colorTier (e.g. rainbow-1 + mid → rainbow-1-preset-mid)
 //   3. baseColour (rainbow-1, primary etc.)
-//   gradientType=radial appends `-radial` to any of the above.
+// Badge does not support radial gradients (linear only — radial is for Card/Section).
 // Flip direction for gradient text when gradientFlip is set
 const reverseDir: Record<string, GradientDirection> = {
   'vertical': 'vertical-reverse', 'vertical-reverse': 'vertical',
@@ -122,19 +117,16 @@ const textGradientDirection: GradientDirection | undefined = gradientFlip
 // gradientEmerge/gradientFade/gradientFlip props and Heading owns the mirror logic.
 
 const tierSuffix = (gradient && colorTier && colorTier !== 'base') ? `-preset-${colorTier}` : '';
-const radialSuffix = gradientType === 'radial' ? '-radial' : '';
 const emergePrefix = gradientEmerge ? 'emerge-' : gradientFade ? 'fade-' : '';
-const baseGradientName = gradientBlend
+const gradientName = gradientBlend
   || (gradient && color ? `${emergePrefix}${color}${tierSuffix}` : null)
   || (gradient ? `${emergePrefix}primary` : null);
-const gradientName = baseGradientName ? `${baseGradientName}${radialSuffix}` : null;
 
 // Animated gradient / colour cycle — random animation-delay to desync multiple badges,
 // optional custom duration. Cycle reads the active gradient's stop tokens from the catalogue.
-const speedMap: Record<string, number> = { slow: 20, default: 12, fast: 6 };
 const badgeAnimParts: string[] = [];
 if ((animatedGradient && gradientName) || gradientCycle) {
-  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') badgeAnimParts.push(`--_grad-anim-duration:${speedMap[gradientAnimateSpeed]}s`);
+  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') badgeAnimParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
   badgeAnimParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
 }
 if (gradientCycle && gradientName) {
@@ -154,7 +146,6 @@ const badgeAnimStyle = badgeAnimParts.length ? badgeAnimParts.join(';') : undefi
 <span
   data-semantic-role={semanticRole !== 'none' ? semanticRole : undefined}
   data-grad-dir={gradientDirection || undefined}
-  data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
   data-grad-anim-dir={animatedGradient && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
   style={badgeAnimStyle}
   class:list={[

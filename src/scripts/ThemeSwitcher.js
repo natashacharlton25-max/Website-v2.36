@@ -1,5 +1,7 @@
-// Import all theme CSS files dynamically via Vite glob
-const themeModules = import.meta.glob('../styles/themes/**/*.css', {
+// Import all theme CSS files dynamically via Vite glob.
+// One-level glob — every CSS file directly in themes/ is a theme.
+// The Preview/ subfolder isn't matched by `*.css` so it's auto-excluded.
+const themeModules = import.meta.glob('../styles/themes/*.css', {
   query: '?url',
   import: 'default',
   eager: true
@@ -9,13 +11,11 @@ const themeModules = import.meta.glob('../styles/themes/**/*.css', {
 function buildThemeMap(modules) {
   const themes = {};
   for (const [path, url] of Object.entries(modules)) {
-    // Skip Preview folder and brand-overrides (loaded statically)
-    if (path.includes('/Preview/') || path.includes('brand-overrides')) continue;
-    // Extract filename as theme name from subfolder structure:
-    //   '../styles/themes/brand/mind-the-box/BrandDefault.css' -> 'default'
-    //   '../styles/themes/a11y/mono-grey/mono-pure.css'        -> 'mono-pure'
-    //   '../styles/themes/brands/default/vivid/vivid-dark.css' -> 'vivid-dark'
-    const match = path.match(/(?:a11y|fun|brand|brands)\/.+\/([^/]+)\.css$/);
+    // Theme name = filename without extension. e.g.
+    //   '../styles/themes/vivid-dark.css'   -> 'vivid-dark'
+    //   '../styles/themes/mono-pure.css'    -> 'mono-pure'
+    //   '../styles/themes/BrandDefault.css' -> 'default' (special case)
+    const match = path.match(/\/([^/]+)\.css$/);
     if (match) {
       let name = match[1];
       if (name === 'BrandDefault') name = 'default';

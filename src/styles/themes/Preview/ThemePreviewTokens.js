@@ -6,19 +6,19 @@
  * are exported for use by the future theme picker redesign.
  */
 
-// Automatically import all theme CSS files using Vite glob (exclude Preview folder)
-const themeModules = import.meta.glob('../**/*.css', {
+// Automatically import all theme CSS files using Vite glob.
+// One-level glob — Preview/ subfolder is auto-excluded.
+const themeModules = import.meta.glob('../*.css', {
   query: '?url',
   import: 'default',
   eager: true
 });
 
-// Build allThemeFiles from glob results (all 112 variants, for URL lookup)
+// Build allThemeFiles from glob results (theme name → CSS URL)
 const allThemeFiles = {};
 Object.entries(themeModules).forEach(([path, url]) => {
-  if (path.includes('/Preview/')) return;
-  // Match: a11y/calm/calm.css, fun/ocean/ocean.css, brand/mind-the-box/BrandDefault.css
-  const match = path.match(/(?:a11y|fun|brand)\/.+\/([^/]+)\.css$/);
+  // Match: themes/vivid.css, themes/mono-pure.css, themes/BrandDefault.css
+  const match = path.match(/\/([^/]+)\.css$/);
   if (match) {
     let themeName = match[1];
     if (themeName === 'BrandDefault') themeName = 'default';
@@ -26,8 +26,8 @@ Object.entries(themeModules).forEach(([path, url]) => {
   }
 });
 
-// Theme metadata — loaded from generated theme-names.json
-import themeNames from '../theme-names.json';
+// Theme metadata — loaded from brand's theme-names.json (single source of truth)
+import themeNames from '../../../brands/mind-the-box/theme-names.json';
 
 /**
  * Compose a full theme variant name from base + luminance + CVD

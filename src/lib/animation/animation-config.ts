@@ -76,6 +76,21 @@ export interface AnimationConfig {
   hoverDuration: (baseDuration?: number) => number;
 }
 
+// ================================================================
+// GRADIENT ANIMATION SPEEDS
+// Single source for the slow/default/fast speed mapping used by
+// Badge, Heading, Icon (and any other atom with animatedGradient).
+// Schemas declare the names; this map owns the seconds.
+// ================================================================
+
+export const GRADIENT_ANIMATION_SPEED = {
+  slow: 20,
+  default: 12,
+  fast: 6,
+} as const;
+
+export type GradientAnimationSpeed = keyof typeof GRADIENT_ANIMATION_SPEED;
+
 /**
  * Get current animation config — call at animation trigger time (not init)
  * so it picks up theme/mode changes.
@@ -387,13 +402,16 @@ export function registerTrigger(opts: TriggerOptions): void {
   } : undefined;
 
   // ────────────────────────────────────────────────────────────
-  // Explainer mode: ALL triggers remap to click when explainer
+  // Explainer mode: only HOVER triggers remap to click when an explainer
   // tooltip/overlay/subtitle is active on this element.
   // Hover → shows explainer (figcaption). Click → plays animation.
   // hover:none → click once = explainer, click again = animation.
+  // Non-hover triggers (viewport / autoplay / loop / interval) fall
+  // through to the switch below and run as normal — they don't conflict
+  // with the explainer being on hover.
   // ────────────────────────────────────────────────────────────
   const explainerRemap = getExplainerTriggerRemap();
-  if (explainerRemap && el.hasAttribute('data-has-explainer')) {
+  if (explainerRemap && trigger === 'hover' && el.hasAttribute('data-has-explainer')) {
     if (!config.canAnimate && onStatic) onStatic();
 
     const hoverTarget = el.closest('button, a') || el;

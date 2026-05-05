@@ -57,6 +57,37 @@ function extractProps(item: Record<string, any>): Record<string, any> {
   return props;
 }
 
+// ─── Cross-atom pipeline rules ───
+// Parent-aware defaults injected before render. JSON authors can still
+// override per-instance — these are defaults, not enforcement.
+//
+// Current rules:
+//   Badge → media:Icon  →  noExplainer: true
+//     Animation explainers (the AAC card stack) are too heavy for badge-
+//     scale icons. Off by default; author opts in by setting
+//     noExplainer: false on a specific Icon if needed.
+
+const NO_EXPLAINER_PARENTS = new Set(['Badge']);
+
+function applyPipelineDefaults(node: RenderNode): RenderNode {
+  if (!node || typeof node !== 'object') return node;
+
+  // Walk the media slot — atoms compose other atoms via { ...media: {...} }
+  if (NO_EXPLAINER_PARENTS.has(node.component) && node.media && typeof node.media === 'object') {
+    const m = node.media as RenderNode;
+    if ((m.component === 'Icon' || m.component === 'LottieIcon') && m.noExplainer === undefined) {
+      node.media = { ...m, noExplainer: true };
+    }
+  }
+
+  // Walk children recursively
+  if (Array.isArray(node.children)) {
+    node.children = node.children.map(applyPipelineDefaults);
+  }
+
+  return node;
+}
+
 // ─── Render functions ───
 // These return Astro component nodes. renderTree is the entry point.
 
@@ -74,12 +105,13 @@ export function resolveNode(
   node: RenderNode,
   registry: Record<string, any>
 ): { Component: any; props: Record<string, any>; children: RenderNode[] } | null {
-  const Component = registry[node.component];
+  const transformed = applyPipelineDefaults(node);
+  const Component = registry[transformed.component];
   if (!Component) return null;
 
   return {
     Component,
-    props: extractProps(node),
-    children: node.children || [],
+    props: extractProps(transformed),
+    children: transformed.children || [],
   };
 }
