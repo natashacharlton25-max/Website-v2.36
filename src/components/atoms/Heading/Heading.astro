@@ -26,6 +26,7 @@ import { Image } from '../Image';
 import { Shape } from '../Shape';
 import { Text } from '../Text';
 import { aacInline } from '../../../lib/aac/aac-inline';
+import { GRADIENT_ANIMATION_SPEED } from '../../../lib/animation/animation-config';
 import '../../../components/molecules/aac/AacCard/AacCard.css';
 import type {
   BrandColour, TextColour, RainbowColour, ColourTier,
@@ -94,8 +95,6 @@ interface Props {
   gradient?: boolean;
   gradientBlend?: GradientBlend;
   gradientDirection?: GradientDirection;
-  gradientType?: 'linear' | 'radial';
-  gradientFocus?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   gradientEmerge?: boolean;
   gradientFade?: boolean;
   /** Reverse gradient direction on text for contrast with a wrap gradient. */
@@ -155,8 +154,6 @@ const {
   gradient = false,
   gradientBlend,
   gradientDirection,
-  gradientType,
-  gradientFocus,
   gradientEmerge = false,
   gradientFade = false,
   gradientFlip = false,
@@ -184,14 +181,12 @@ const resolvedDividerColor = dividerColor || textColor;
 //   1. gradientBlend (named blends)
 //   2. emerge/fade prefix + colour (fade-rainbow-4 etc.)
 //   3. baseColour (primary, rainbow-1 etc.)
-//   gradientType=radial appends -radial.
+// Heading does not support radial gradients (linear only — radial is for Card/Section).
 const tierSuffix = (gradient && colorTier && colorTier !== 'base') ? `-preset-${colorTier}` : '';
-const radialSuffix = gradientType === 'radial' ? '-radial' : '';
 const emergePrefix = gradientEmerge ? 'emerge-' : gradientFade ? 'fade-' : '';
-const baseGradientName = gradientBlend
+const resolvedGradientName = gradientBlend
   || (gradient && textColor ? `${emergePrefix}${textColor}${tierSuffix}` : null)
   || (gradient ? `${emergePrefix}primary` : null);
-const resolvedGradientName = baseGradientName ? `${baseGradientName}${radialSuffix}` : null;
 
 // Flip direction for gradient text when gradientFlip is set
 const reverseDir: Record<string, GradientDirection> = {
@@ -247,10 +242,9 @@ const mediaProps = (mediaComponent === 'Shape' && rawMediaProps.media && !rawMed
   : rawMediaProps;
 
 // Animated gradient / colour cycle — random delay + optional speed
-const speedMap: Record<string, number> = { slow: 20, default: 12, fast: 6 };
 const headingAnimParts: string[] = [];
 if ((animatedGradient && resolvedGradientName) || gradientCycle) {
-  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') headingAnimParts.push(`--_grad-anim-duration:${speedMap[gradientAnimateSpeed]}s`);
+  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') headingAnimParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
   headingAnimParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
 }
 const headingAnimStyle = headingAnimParts.length ? headingAnimParts.join(';') : '';
@@ -299,7 +293,6 @@ const headingClassList = [
     className,
   ]}
     data-grad-dir={gradientDirection || undefined}
-    data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
     data-grad-anim-dir={animatedGradient && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
     style={mergedStyle || undefined}>
     {hasMedia && mediaPosition === 'left' && (
@@ -316,7 +309,6 @@ const headingClassList = [
       <div
         class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, animatedGradient && 'divider--animated']}
         data-grad-dir={dividerStyle === 'gradient' ? gradientDirection : undefined}
-        data-grad-focus={dividerStyle === 'gradient' && gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
         aria-hidden="true"></div>
     )}
 
@@ -339,7 +331,6 @@ const headingClassList = [
         <div
           class:list={['underline', underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`, underlineThickness && `underline--thickness-${underlineThickness}`, resolvedUnderlineColor && `color--${resolvedUnderlineColor}`, underlineTier && underlineTier !== 'base' && `color--tier-${underlineTier}`, underlineStyle === 'gradient' && 'gradient', underlineStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, animatedGradient && 'underline--animated']}
           data-grad-dir={underlineStyle === 'gradient' ? gradientDirection : undefined}
-          data-grad-focus={underlineStyle === 'gradient' && gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
           aria-hidden="true"></div>
       )}
       {subtitle && <Text as="p" size={subtitleSize} flush class="heading-wrap__subtitle" color="neutral">{subtitle}</Text>}
@@ -350,7 +341,6 @@ const headingClassList = [
       <div
         class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, animatedGradient && 'divider--animated']}
         data-grad-dir={dividerStyle === 'gradient' ? gradientDirection : undefined}
-        data-grad-focus={dividerStyle === 'gradient' && gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
         aria-hidden="true"></div>
     )}
 
@@ -365,7 +355,7 @@ const headingClassList = [
     )}
   </div>
 ) : (
-  <Tag class:list={[...headingClassList, className]} style={[mergedStyle, tagInlineStyle].filter(Boolean).join(';') || undefined} data-grad-dir={textGradientDirection || undefined} data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}>
+  <Tag class:list={[...headingClassList, className]} style={[mergedStyle, tagInlineStyle].filter(Boolean).join(';') || undefined} data-grad-dir={textGradientDirection || undefined}>
     <span class="heading__text-inner">{contentText}</span>
     {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
   </Tag>

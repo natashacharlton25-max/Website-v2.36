@@ -256,7 +256,7 @@ for (const atom of atoms) {
 
   // ─── ASTRO RULES (8, 9, 10, 23, 24) ───
   const astroFiles = fs.readdirSync(dir).filter(f => f.endsWith('.astro'));
-  const styleExceptions = { Text: /inlineStyle|--text-clamp/, Icon: /size/, LottieIcon: /size/, Image: /maskIconStyle/, Heading: /mergedStyle/, Badge: /badgeAnimStyle/ };
+  const styleExceptions = { Text: /inlineStyle|--text-clamp/, Icon: /size/, LottieIcon: /size/, Image: /maskIconStyle/, Heading: /mergedStyle|tagInlineStyle/, Badge: /badgeAnimStyle/ };
   for (const file of astroFiles) {
     const lines = fs.readFileSync(path.join(dir, file), 'utf8').split('\n');
     lines.forEach((line, i) => {
