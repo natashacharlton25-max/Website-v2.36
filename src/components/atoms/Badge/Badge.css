@@ -155,13 +155,15 @@
 /* ========== VARIANT: Liquid Glass ========== */
 
 .badge--liquid-glass {
-  background: color-mix(in oklch, var(--_color) 8%, transparent);
-  backdrop-filter: var(--glass-blur-heavy);
-  -webkit-backdrop-filter: var(--glass-blur-heavy);
-  border-color: color-mix(in oklch, var(--_color) 20%, transparent);
+  /* Brand-tinted layer over the global liquid tint — keeps Badge's colour
+     identity while inheriting the global liquid feel (blur, glows, border). */
+  background: color-mix(in oklch, var(--_color) 8%, var(--liquid-tint));
+  backdrop-filter: var(--liquid-blur);
+  -webkit-backdrop-filter: var(--liquid-blur);
+  border-color: color-mix(in oklch, var(--_color) 20%, var(--liquid-border));
   box-shadow:
-    inset 0 1px 0 0 color-mix(in oklch, var(--_color) 15%, transparent),
-    0 0 var(--space-sm) color-mix(in oklch, var(--_color) 10%, transparent);
+    var(--liquid-inner-shadow),
+    var(--liquid-outer-shadow);
   color: var(--text-emphasis);
 }
 
