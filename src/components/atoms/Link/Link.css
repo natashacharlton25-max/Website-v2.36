@@ -33,7 +33,10 @@
      louder/more saturated tier, so coloured links remain visibly coloured. */
   --_link-text:      var(--_tier-emphasis);
   --_link-hover:     var(--_contrast);
-  --_link-highlight: var(--_tier-mid);
+  /* Highlight bar uses --_tier-mid blended into transparent (matches the
+     text-highlight global pattern). 40% mix is a balanced wash —
+     visible but not too saturated against brand colours. */
+  --_link-highlight: color-mix(in oklch, var(--_tier-mid) 40%, transparent);
   --_link-fill-text: var(--color-White);
 
   display: inline;
@@ -148,7 +151,6 @@
 
 .link--highlight:hover .text::before {
   background-color: var(--_link-highlight);
-  opacity: var(--opacity-low);
 }
 
 .link--highlight .text::before {
@@ -160,7 +162,6 @@
   height: 0.5em;
   z-index: -1;
   background-color: var(--_link-highlight);
-  opacity: var(--opacity-low);
   pointer-events: none;
 }
 
@@ -420,15 +421,33 @@
   padding: 0 0.25rem;
   margin: 0 -0.25rem;
   box-shadow: inset 0 0 0 0 var(--_link-color);
-  /* ease-default (ease-in-out) gives a steady sweep across the link.
-     expo-out would compress visible motion into the first fraction of
-     the duration and feel instant — wrong curve for "fill from left". */
+  /* Box-shadow sweeps over the duration; colour change is fast (ease-in)
+     and starts late so the text only turns white in the final third when
+     most of the fill is already behind it. Earlier = white text on page
+     bg, invisible. */
   transition:
-    color var(--hover-duration-slow) var(--ease-default),
+    color calc(var(--hover-duration-slow) * 0.5) var(--ease-default) calc(var(--hover-duration-slow) * 0.4),
     box-shadow var(--hover-duration-slow) var(--ease-default);
 }
-.link.link--animate-shadow-fill:hover {
+
+/* Same delayed colour transition on the inner Text span and the
+   .color--{name} mixin layer. Without this, those layers transition at
+   the global fast speed (or none) — they'd snap to white before the fill
+   arrives, leaving an invisible flash on hover-in. */
+.link.link--animate-shadow-fill .text,
+.link.link--animate-shadow-fill [class*="color--"] {
+  transition: color calc(var(--hover-duration-slow) * 0.5) var(--ease-default) calc(var(--hover-duration-slow) * 0.4);
+}
+/* Hover targets <a>, the inner Text span, and the .color--{name} mixin
+   layer so all three are pinned to --_link-fill-text. Without these,
+   .link:hover and .link:hover [class*="color--"] would animate the text
+   to brand contrast first, then to fill-text — visible flickering. */
+.link.link--animate-shadow-fill:hover,
+.link.link--animate-shadow-fill:hover .text,
+.link.link--animate-shadow-fill:hover [class*="color--"] {
   color: var(--_link-fill-text);
+}
+.link.link--animate-shadow-fill:hover {
   box-shadow: inset 20em 0 0 0 var(--_link-color);
 }
 
