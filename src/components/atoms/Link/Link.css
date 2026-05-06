@@ -25,13 +25,12 @@
      --_link-hover = hover colour, brand --_contrast (per-theme pair).
      --_link-fill-text is white for shadow-fill contrast. */
   --_link-color:     var(--_color);
-  /* --_link-text uses --_tier-emphasis (the darker tier) so links sit at
-     the same weight as body Heading/Text, which also render at emphasis.
-     Using --_color directly would render links at --{family}-base — too
-     light to read as body emphasis.
-     For brand-coloured links (color=primary etc) emphasis is also the
-     louder/more saturated tier, so coloured links remain visibly coloured. */
-  --_link-text:      var(--_tier-emphasis);
+  /* Token model: tint/mid/base = static state, emphasis/contrast = hover.
+     Rest text reads --_color (the base hex from the mixin). Hover shifts
+     to --_contrast — for themes with a real contrast pair this gives a
+     brand-paired hover; for themes without, the engine emits
+     contrast = emphasis so the shift is base → emphasis. */
+  --_link-text:      var(--_color);
   --_link-hover:     var(--_contrast);
   /* Highlight bar uses --_tier-mid blended into transparent (matches the
      text-highlight global pattern). 40% mix is a balanced wash —

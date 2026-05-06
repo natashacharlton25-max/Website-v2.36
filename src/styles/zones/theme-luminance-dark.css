@@ -566,24 +566,14 @@
    resolution correctly through the rainbow-dark.css token flips —
    no per-link dark zone override needed. */
 
-/* Rainbow rest text in dark mode — undo the black-mix that colour.css
-   applies, then mix emphasis with white (~10%) to brighten it slightly.
-   In dark mode rainbow rest text needs to be brighter than raw emphasis
-   to read clearly against the dark page. Hover still pops to --rainbow-N. */
-[data-mode="dark"] .color--rainbow-1 { --_tier-emphasis: color-mix(in oklch, var(--rainbow-1-emphasis) 90%, var(--shadow-White)); }
-[data-mode="dark"] .color--rainbow-2 { --_tier-emphasis: color-mix(in oklch, var(--rainbow-2-emphasis) 90%, var(--shadow-White)); }
-[data-mode="dark"] .color--rainbow-3 { --_tier-emphasis: color-mix(in oklch, var(--rainbow-3-emphasis) 90%, var(--shadow-White)); }
-[data-mode="dark"] .color--rainbow-4 { --_tier-emphasis: color-mix(in oklch, var(--rainbow-4-emphasis) 90%, var(--shadow-White)); }
-[data-mode="dark"] .color--rainbow-5 { --_tier-emphasis: color-mix(in oklch, var(--rainbow-5-emphasis) 90%, var(--shadow-White)); }
-[data-mode="dark"] .color--rainbow-6 { --_tier-emphasis: color-mix(in oklch, var(--rainbow-6-emphasis) 90%, var(--shadow-White)); }
-[data-mode="dark"] .color--rainbow-7 { --_tier-emphasis: color-mix(in oklch, var(--rainbow-7-emphasis) 90%, var(--shadow-White)); }
-
 /* Highlight bar in dark mode — use --_tier-tint instead of --_tier-mid.
    Tint in dark mode is the darkest shade (toward bg), giving a subtle
    dark wash behind bright text — proper "highlighter pen" feel against
-   the dark page. Mid is too saturated and reads as fighting the text. */
+   the dark page. Mid is too saturated and reads as fighting the text.
+   90% mix because tint values in dark are already low-luminance —
+   needs near-full opacity to read clearly. */
 [data-mode="dark"] .link {
-  --_link-highlight: color-mix(in oklch, var(--_tier-tint) 60%, transparent);
+  --_link-highlight: color-mix(in oklch, var(--_tier-tint) 90%, transparent);
 }
 
 /* Ghost + disabled links — dark mode uses --text-tint (muted text scale)
@@ -596,6 +586,16 @@
 [data-mode="dark"] .link.link--disabled:hover,
 [data-mode="dark"] .link.link--disabled:hover .text {
   color: var(--text-tint);
+}
+
+/* Ghost hover in dark mode — overrides the rest --text-tint with the
+   colour mixin's contrast pair. Without this, the rest rule above
+   wins on specificity (0,3,0 with .text descendant) over Link.css's
+   .link--ghost:hover and the hover colour change is invisible. */
+[data-mode="dark"] .link--ghost:hover,
+[data-mode="dark"] .link--ghost:hover .text,
+[data-mode="dark"] .link--ghost:hover [class*="color--"] {
+  color: var(--_contrast);
 }
 
 [data-mode="dark"] .link.link--disabled,
