@@ -54,8 +54,15 @@ interface ValidationResult {
 }
 
 // Content prop prefixes — these carry displayable content (free strings allowed)
-// Matches any prop starting with 'content' — contentText, contentAlt, contentAltWord, etc.
-const isContentProp = (prop: string) => prop.startsWith('content');
+// Matches:
+//   content* — contentBadge, contentHeading, contentHeadingSubtitle, etc.
+//             (visible text rendered into the page)
+//   label*  — labelIcon, labelShape, labelButton, etc.
+//             (a11y labels: aria-label / textonly swap)
+// Both are atom-suffixed so the prop name reveals which atom owns it
+// and avoids collisions when atoms compose other atoms.
+const isContentProp = (prop: string) =>
+  prop.startsWith('content') || /^label[A-Z]/.test(prop);
 
 // Props that accept free strings — content text that doesn't need enum
 const FREE_STRING_PROPS = new Set(['label', 'subtitle', 'ariaLabel', 'placeholder', 'description', 'error', 'value', 'id', 'text']);
@@ -97,9 +104,9 @@ function validateSchemaIntegrity(schema: ComponentSchema): void {
     const isFreeString = FREE_STRING_PROPS.has(prop);
     const hasFormat = !!(def as any)._format;
 
-    // String props MUST have enum — unless content*, free string, or has _format
+    // String props MUST have enum — unless content*, label<Atom>, free string, or has _format
     if (isString && !isBoolean && !isObject && !isArray && !def.enum && !isContent && !isFreeString && !hasFormat) {
-      console.warn(`[Schema] ${schema.component}.${prop}: string prop without enum — add enum or use content* prefix`);
+      console.warn(`[Schema] ${schema.component}.${prop}: string prop without enum — add enum, or use content* prefix (visible text) or label<Atom> (a11y label)`);
     }
 
     // Media props MUST declare component enum

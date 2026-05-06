@@ -182,21 +182,18 @@
 .badge--shadow-in       { box-shadow: var(--shadow-neu-hover); }
 .badge--shadow-elevated { box-shadow: var(--shadow-elevated); }
 
-.badge--shadow-glow {
-  box-shadow: 0 0 var(--space-md) color-mix(in oklch, var(--_color) 40%, transparent),
-              0 0 var(--space-xs) color-mix(in oklch, var(--_color) 20%, transparent);
-}
-
-.badge--shadow-glow-intense {
-  box-shadow: 0 0 var(--space-lg) color-mix(in oklch, var(--_color) 60%, transparent),
-              0 0 var(--space-sm) color-mix(in oklch, var(--_color) 30%, transparent);
-}
+/* Glow effects use global --glow-currentcolor* tokens so they're gated
+   by opacity-gate.css (data-visual=flat → none). currentColor inside
+   the token resolves to the badge's active --_color via the .badge
+   color-property setting (color: var(--_color) on .badge--fill etc). */
+.badge--shadow-glow         { box-shadow: var(--glow-currentcolor); }
+.badge--shadow-glow-intense { box-shadow: var(--glow-currentcolor-intense); }
 
 /* Inner glow only on glass/outline — fill background would hide it */
 .badge--glass.badge--shadow-glow-inner,
 .badge--liquid-glass.badge--shadow-glow-inner,
 .badge--outline.badge--shadow-glow-inner {
-  box-shadow: inset 0 0 var(--space-xl) calc(var(--space-sm) * -1) color-mix(in oklch, var(--_color) 50%, transparent);
+  box-shadow: var(--glow-currentcolor-inner);
 }
 
 
