@@ -101,7 +101,7 @@ interface Props {
 const {
   shape = 'circle', mode = 'shape', renderAs = 'auto', slug, semanticRole = 'decorative', label,
   brandColor, rainbowColor, colorTier,
-  size = 'md', variant = 'fill', borderWeight, shadow, glow,
+  size, variant = 'fill', borderWeight, shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientEmerge, gradientFade, gradientCycle, gradientAnimate, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
   media, animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawGhost, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
@@ -119,14 +119,16 @@ const hasSlot = Astro.slots.has('default');
 const hasMedia = !!media;
 const mediaComponent = media?.component;
 const { component: _mc, ...rawMediaProps } = media || {};
-// Child icon/lottie inherits shape size if not explicitly set
+// Child icon/lottie size: only injected when Shape itself has an explicit
+// size — child gets one tier smaller. When Shape size is undefined, the
+// child also stays unsized so both inherit text-size from their context.
 const childSizeMap: Record<string, string> = {
-  xs: 'xs', sm: 'sm', base: 'sm', lg: 'base', xl: 'lg',
+  xs: 'xs', sm: 'sm', md: 'sm', base: 'sm', lg: 'base', xl: 'lg',
   '2xl': 'xl', '3xl': '2xl', '4xl': '3xl', '5xl': '4xl',
   '6xl': '5xl', '7xl': '6xl', '8xl': '7xl',
 };
-const childDefaultSize = childSizeMap[size] || 'base';
-const mediaProps = (mediaComponent === 'Icon' || mediaComponent === 'LottieIcon') && !rawMediaProps.size
+const childDefaultSize = size ? childSizeMap[size] : undefined;
+const mediaProps = (mediaComponent === 'Icon' || mediaComponent === 'LottieIcon') && !rawMediaProps.size && childDefaultSize
   ? { ...rawMediaProps, size: childDefaultSize }
   : rawMediaProps;
 // Container is auto-detected from slot/media — no separate prop needed
@@ -344,7 +346,7 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     !svgContent && `shape--${shape}`,
     svgContent && 'shape--api',
     !isCssShape && 'shape--svg',
-    `shape--${size}`,
+    size && `shape--${size}`,
     `shape--${variant}`,
     resolvedColor && `color--${resolvedColor}`,
     colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,

@@ -236,13 +236,12 @@ const isDecorated = !!(divider || hasMedia || contentHeadingSubtitle || variant 
 const mediaComponent = media?.component;
 const { component: _mc, ...rawMediaProps } = media || {};
 
-const sizeKey = visualSize.startsWith('h') ? visualSize.replace('h', '') : visualSize;
-const iconSizeMap: Record<string, number> = { '1': 56, '2': 44, '3': 32, '4': 28, '5': 24, '6': 20, 'xs': 16, 'sm': 18, 'base': 20, 'lg': 24, 'xl': 28 };
-const computedIconSize = mediaSize === 'auto' ? (iconSizeMap[sizeKey] ?? 32) : (mediaSize === 'sm' ? 24 : mediaSize === 'md' ? 32 : 56);
-// Inject heading icon size into Shape's child media so it scales with heading level
-const mediaProps = (mediaComponent === 'Shape' && rawMediaProps.media && !rawMediaProps.media.size)
-  ? { ...rawMediaProps, media: { ...rawMediaProps.media, size: computedIconSize } }
-  : rawMediaProps;
+// Media sizing comes from CSS — .heading-wrap--{level} sets font-size to
+// var(--text-h{N}), which the .heading-wrap__media sibling inherits, and
+// the em-based --media-* tokens on Icon/Shape children resolve against
+// that. Token-driven: if --text-h1 changes in tokens, media follows.
+// mediaSize prop kept for explicit overrides via author.
+const mediaProps = rawMediaProps;
 
 // Animated gradient / colour cycle — random delay + optional speed
 const headingAnimParts: string[] = [];
@@ -280,6 +279,11 @@ const headingClassList = [
 {isDecorated ? (
   <div class:list={[
     'heading-wrap',
+    /* Level class on the wrap sets font-size: var(--text-h{N}) so the
+       sibling .heading-wrap__media inherits the heading's text scale.
+       Em-based --media-* tokens on Icon/Shape children then resolve to
+       the right pixel size automatically. Token-driven, no JS pixel maps. */
+    `heading-wrap--${visualSize}`,
     /* Apply colour class to the wrap so --_color cascades to media (icons,
        dividers) AND to the Tag below. Without this, the Tag has --_color
        but the icon inherits nothing. */
@@ -306,8 +310,8 @@ const headingClassList = [
     {hasMedia && mediaPosition === 'left' && (
       <div class="heading-wrap__media">
         {mediaBg && <Shape {...(mediaProps as any)} class="heading-wrap__shape" />}
-        {!mediaBg && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
-        {!mediaBg && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
+        {!mediaBg && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="heading-wrap__icon" />}
+        {!mediaBg && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="heading-wrap__icon" />}
         {!mediaBg && mediaComponent === 'Image' && <Image {...(mediaProps as any)} class="heading-wrap__img" />}
         {!mediaBg && mediaComponent === 'Shape' && <Shape {...(mediaProps as any)} class="heading-wrap__shape" />}
       </div>
@@ -355,8 +359,8 @@ const headingClassList = [
     {hasMedia && mediaPosition === 'right' && (
       <div class="heading-wrap__media">
         {mediaBg && <Shape {...(mediaProps as any)} class="heading-wrap__shape" />}
-        {!mediaBg && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
-        {!mediaBg && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} size={mediaProps.size || computedIconSize} class="heading-wrap__icon" />}
+        {!mediaBg && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="heading-wrap__icon" />}
+        {!mediaBg && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="heading-wrap__icon" />}
         {!mediaBg && mediaComponent === 'Image' && <Image {...(mediaProps as any)} class="heading-wrap__img" />}
         {!mediaBg && mediaComponent === 'Shape' && <Shape {...(mediaProps as any)} class="heading-wrap__shape" />}
       </div>
