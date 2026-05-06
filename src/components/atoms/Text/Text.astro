@@ -140,13 +140,20 @@ if (aac) {
   }
 }
 
+// Resolve the active colour class. rainbow wins over brand if both set.
+// Default to 'text' so the .color--text mixin always fires — gives Text
+// a defined --_color (= --text-base) without needing color: rules in
+// Text.css that would tie specificity with the mixin.
+const colourClass = rainbowColor
+  ? `color--${rainbowColor}`
+  : `color--${brandColor || 'text'}`;
+
 const classes = [
   'text',
   size && `text--${size}`,
   weight && `text--weight-${weight}`,
   leading && `text--leading-${leading}`,
-  rainbowColor && `text--${rainbowColor}`,
-  brandColor && `text--${brandColor}`,
+  colourClass,
   family && `text--family-${family}`,
   align && `text--align-${align}`,
   textTone && `text--tone-${textTone}`,

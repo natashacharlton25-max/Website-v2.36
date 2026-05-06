@@ -401,13 +401,19 @@ for (const atom of atoms) {
         issues.push({ rule: 25, ln: '--', file: schemaFile, msg: `missing prop groups: ${missing.join(', ')}` });
       }
 
-      // Rule 26: Colour group should only contain brandColor, rainbowColor, colorTier
-      const COLOUR_GROUP_ALLOWED = ['brandColor', 'rainbowColor', 'colorTier', '_description'];
+      // Rule 26: Colour group should only contain colour-selection props.
+      // Allowed: brandColor / rainbowColor / colorTier base (canonical),
+      // PLUS prefixed variants: highlightBrandColor, highlightRainbowColor,
+      // dividerBrandColor, accentRainbowColor, etc. — same shape, prefixed
+      // by what they colour. Pattern: <prefix?><Brand|Rainbow>Color or
+      // <prefix?>colorTier.
+      const COLOUR_GROUP_BASE = ['brandColor', 'rainbowColor', 'colorTier', '_description'];
+      const COLOUR_GROUP_PATTERN = /^(?:[a-z][A-Za-z]*)?(?:Brand|Rainbow)Color$|^(?:[a-z][A-Za-z]*)?[Cc]olorTier$/;
       if (props.colour) {
         for (const key of Object.keys(props.colour)) {
-          if (!COLOUR_GROUP_ALLOWED.includes(key)) {
-            issues.push({ rule: 26, ln: '--', file: schemaFile, msg: `colour group has unexpected prop "${key}" — allowed: ${COLOUR_GROUP_ALLOWED.join(', ')}` });
-          }
+          if (COLOUR_GROUP_BASE.includes(key)) continue;
+          if (COLOUR_GROUP_PATTERN.test(key)) continue;
+          issues.push({ rule: 26, ln: '--', file: schemaFile, msg: `colour group has unexpected prop "${key}" — allowed: brandColor/rainbowColor/colorTier (optionally prefixed: highlight<Brand|Rainbow>Color etc)` });
         }
       }
 
