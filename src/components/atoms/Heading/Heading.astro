@@ -43,7 +43,7 @@ interface Props {
   level: 1 | 2 | 3 | 4 | 5 | 6;
   /** Heading display text. Pipeline content key. */
   contentHeading?: string;
-  subtitle?: string;
+  contentHeadingSubtitle?: string;
   subtitleSize?: TextSize;
   aac?: boolean;
 
@@ -132,7 +132,7 @@ const {
   tracking,
   flush = false,
   textShadow,
-  subtitle,
+  contentHeadingSubtitle,
   subtitleSize = 'base',
   divider,
   dividerStyle = 'solid',
@@ -172,7 +172,10 @@ const {
 } = Astro.props;
 
 // Resolve colours — each element independently
-const textColor = rainbowColor || brandColor || null;
+// Default to 'text' colour class so the global .color--text mixin always
+// fires — sets --_color/--_tier-tint reliably so Heading.css internal
+// tokens have a definite value (no fallback chain needed).
+const textColor = rainbowColor || brandColor || 'text';
 const resolvedHighlightColor = highlightColor || textColor;
 const resolvedUnderlineColor = underlineColor || textColor;
 const resolvedDividerColor = dividerColor || textColor;
@@ -227,7 +230,7 @@ const Tag = `h${level}` as any;
 const visualSize = size ?? `h${level}`;
 
 const hasMedia = !!media;
-const isDecorated = !!(divider || hasMedia || subtitle || variant !== 'default');
+const isDecorated = !!(divider || hasMedia || contentHeadingSubtitle || variant !== 'default');
 
 // Media component type and props
 const mediaComponent = media?.component;
@@ -333,7 +336,7 @@ const headingClassList = [
           data-grad-dir={underlineStyle === 'gradient' ? gradientDirection : undefined}
           aria-hidden="true"></div>
       )}
-      {subtitle && <Text as="p" size={subtitleSize} flush class="heading-wrap__subtitle" color="neutral">{subtitle}</Text>}
+      {contentHeadingSubtitle && <Text as="p" size={subtitleSize} flush class="heading-wrap__subtitle" color="neutral">{contentHeadingSubtitle}</Text>}
       {aacHtml && <span class="heading__aac content-aac" set:html={aacHtml} />}
     </div>
 

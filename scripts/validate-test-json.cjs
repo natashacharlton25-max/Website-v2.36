@@ -145,6 +145,15 @@ function validateJson(data, label) {
         }
       }
 
+      // String minLength — content props that are present must have content.
+      // Empty strings are a third state that means nothing; either provide
+      // the prop with a real string or omit it entirely.
+      if (def.type === 'string' && typeof value === 'string' && def.minLength !== undefined) {
+        if (value.length < def.minLength) {
+          issues.push({ path: jsonPath, msg: `${component}.${key}: empty/too-short string (minLength ${def.minLength})` });
+        }
+      }
+
       // Type check
       if (def.type === 'boolean' && typeof value !== 'boolean') {
         issues.push({ path: jsonPath, msg: `${component}.${key}: expected boolean, got ${typeof value}` });
