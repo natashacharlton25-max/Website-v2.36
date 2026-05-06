@@ -27,6 +27,7 @@ import type {
 } from '../../../lib/shared-enums';
 import { normalizeDrawColour } from '../../../lib/shared-enums';
 import { resolveInlineGradient } from '../../../lib/gradient-inline';
+import { GRADIENT_ANIMATION_SPEED } from '../../../lib/animation/animation-config';
 
 // ─── Brand config ───────────────────────────────────────
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
@@ -41,7 +42,7 @@ interface Props {
   name: string;
   weight?: IconWeight;
   semanticRole?: IconSemanticRole;
-  label?: string;
+  iconLabel?: string;
 
   // ── Colour ──────────────────────────────────────────────
   brandColor?: BrandColour;
@@ -60,8 +61,6 @@ interface Props {
   gradient?: boolean;
   gradientBlend?: GradientBlend;
   gradientDirection?: GradientDirection;
-  gradientType?: 'linear' | 'radial';
-  gradientFocus?: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   gradientAnimate?: boolean;
   gradientAnimateDirection?: 'cw' | 'ccw' | 'sway';
   gradientAnimateSpeed?: 'slow' | 'default' | 'fast';
@@ -108,12 +107,12 @@ const {
   name, weight, size, class: className = '',
   brandColor, rainbowColor, colorTier,
   shadow, glow,
-  gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientAnimate, gradientAnimateDirection, gradientAnimateSpeed,
+  gradient, gradientBlend, gradientDirection, gradientAnimate, gradientAnimateDirection, gradientAnimateSpeed,
   animation, animationTrigger = 'hover', animationRepeat = 'threeloop', noExplainer,
   draw, drawMode: rawDrawMode = 'static', drawOnce, drawLaser, drawGhost, drawOnScroll, drawScrub, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize,
   morphTo, morphViaCircle, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom,
-  semanticRole, label,
+  semanticRole, iconLabel,
 } = Astro.props;
 
 // Resolve drawMode: drawOnce overrides to 'once', drawOnce+drawGhost → strip drawOnce
@@ -126,8 +125,8 @@ const drawColor = normalizeDrawColour(rawDrawColor);
 
 // A11y: ui-control and content-symbol need labels
 const isInformational = semanticRole === 'ui-control' || semanticRole === 'content-symbol';
-if (isInformational && !label && import.meta.env.DEV) {
-  console.warn(`[Icon ${name}] semanticRole="${semanticRole}" requires a label for accessibility`);
+if (isInformational && !iconLabel && import.meta.env.DEV) {
+  console.warn(`[Icon ${name}] semanticRole="${semanticRole}" requires an iconLabel for accessibility`);
 }
 
 // A11y: any icon with an interaction (hover/click/focus animation, draw, morph,
@@ -370,11 +369,12 @@ if (fillAnimation) {
 }
 
 // Gradient animation — GSAP via gradient.ts (replaces baked <animateTransform>)
+// Speeds come from the shared GRADIENT_ANIMATION_SPEED map (animation-config.ts)
+// so Icon, Badge, Heading agree on what slow/default/fast mean.
 if (gradientAnimate && gradientName && !draw) {
-  const speedMap: Record<string, string> = { slow: '16', default: '8', fast: '4' };
   dataAttrs['data-icon-grad-anim'] = 'true';
   if (gradientAnimateDirection && gradientAnimateDirection !== 'cw') dataAttrs['data-icon-grad-dir'] = gradientAnimateDirection;
-  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') dataAttrs['data-icon-grad-dur'] = speedMap[gradientAnimateSpeed] || '8';
+  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') dataAttrs['data-icon-grad-dur'] = String(GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]);
 }
 
 // ─── Animation explainer — resolve everything for the molecule ─────
@@ -457,7 +457,7 @@ if (morphTo) {
       class:list={['icon', typeof size === 'string' && `icon--size-${size}`, ...effectClasses, className]}
       style={typeof size === 'number' ? `width: ${size}px; height: ${size}px;` : undefined}
       aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
-      aria-label={isInformational ? label : (isInteractive && label ? label : undefined)}
+      aria-label={isInformational ? iconLabel : (isInteractive && iconLabel ? iconLabel : undefined)}
       tabindex={isInteractive ? "0" : undefined}
       role={a11yRole}
       data-semantic-role={semanticRole}
@@ -468,7 +468,7 @@ if (morphTo) {
       {...dataAttrs}
     >
       <Fragment set:html={iconContent || fallbackIcon} />
-      {label && semanticRole === 'ui-control' && <span class="icon__label">{label}</span>}
+      {iconLabel && semanticRole === 'ui-control' && <span class="icon__label">{iconLabel}</span>}
     </span>
     <AnimExplainer
       slot="content"
@@ -490,7 +490,7 @@ if (morphTo) {
     class:list={['icon', typeof size === 'string' && `icon--size-${size}`, ...effectClasses, className]}
     style={typeof size === 'number' ? `width: ${size}px; height: ${size}px;` : undefined}
     aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
-    aria-label={isInformational ? label : (isInteractive && label ? label : undefined)}
+    aria-label={isInformational ? iconLabel : (isInteractive && iconLabel ? iconLabel : undefined)}
     tabindex={isInteractive ? "0" : undefined}
     role={a11yRole}
     data-semantic-role={semanticRole}
@@ -499,6 +499,6 @@ if (morphTo) {
     {...dataAttrs}
   >
     <Fragment set:html={iconContent || fallbackIcon} />
-    {label && semanticRole === 'ui-control' && <span class="icon__label">{label}</span>}
+    {iconLabel && semanticRole === 'ui-control' && <span class="icon__label">{iconLabel}</span>}
   </span>
 )}

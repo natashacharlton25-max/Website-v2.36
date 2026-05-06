@@ -1,7 +1,7 @@
 {
   "component": "Icon",
   "category": "atom",
-  "renders": { "full": "Icon.astro", "reduced": "Icon.astro", "assistive": "Icon.astro", "textonly": null },
+  "renders": { "full": "Icon.astro", "reduced": "Icon.astro", "textonly": null },
   "notes": "API-backed icon atom. Fetches SVG from Asset Library at build time. Weight resolved via brand config or explicit override. textonly: null for decorative. morph forces fill weight, draw forces non-fill (auto-corrected).",
 
   "_rules": [
@@ -18,7 +18,7 @@
       "name":         { "type": "string", "required": true, "_format": "icon-slug", "description": "Phosphor icon slug from Asset Library (e.g. heart-fill, rocket-launch)." },
       "weight":       { "type": "string", "enum": ["light", "regular", "bold", "fill", "duotone"] },
       "semanticRole": { "type": "string", "required": true, "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"], "description": "Required. Declares intent — pipeline uses this to show/hide per render mode. Default: decorative (hidden in textonly/calm)." },
-      "label":        { "type": "string", "_note": "Required for ui-control and content-symbol. Screen reader text + textonly label swap for ui-control." }
+      "iconLabel":    { "type": "string", "_note": "Required for ui-control and content-symbol. Screen reader text (aria-label) + textonly label swap for ui-control. Atom-prefixed name avoids collisions when Icon is composed inside other atoms." }
     },
 
     "colour": {
@@ -31,8 +31,6 @@
       "gradient":          { "type": "boolean", "default": false },
       "gradientBlend":     { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade", "preset-tint", "preset-mid", "preset-base", "preset-emphasis", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "rainbow"] },
       "gradientDirection":        { "type": "string", "default": "diagonal", "enum": ["vertical", "vertical-reverse", "horizontal", "horizontal-reverse", "diagonal", "diagonal-reverse", "diagonal-alt", "diagonal-alt-reverse"] },
-      "gradientType":             { "type": "string", "default": "linear", "enum": ["linear", "radial"] },
-      "gradientFocus":            { "type": "string", "default": "center", "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"], "_note": "Radial origin — only used when gradientType=radial." },
       "gradientEmerge":           { "type": "boolean", "default": false },
       "gradientFade":             { "type": "boolean", "default": false },
       "gradientAnimate":          { "type": "boolean" },
