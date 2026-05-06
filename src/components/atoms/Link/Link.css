@@ -18,18 +18,22 @@
 
 .link {
   /* ── Internal tokens read from the global .color--{name} mixin ──
-     The mixin sets --_color, --_tier-tint, --_tier-mid, --_tier-emphasis
-     on the same element. Link's bridge tokens map those to its semantic
-     roles (link-color = base, link-hover = emphasis, etc).
-     --_link-text always uses --text-emphasis for body-readable rest text.
+     The mixin sets --_color, --_tier-tint, --_tier-mid, --_tier-emphasis,
+     --_contrast on the same element.
+     --_link-text  = rest text colour, follows the brand --_color so a
+                     coloured link visibly carries its brand hue.
+     --_link-hover = hover colour, brand --_contrast (per-theme pair).
      --_link-fill-text is white for shadow-fill contrast. */
   --_link-color:     var(--_color);
-  /* Brand families (primary/secondary/neutral) get the per-theme contrast
-     hex via --_contrast. Text + rainbow don't expose --_contrast, so they
-     fall back to --_tier-emphasis. */
-  --_link-hover:     var(--_contrast, var(--_tier-emphasis));
+  /* --_link-text uses --_tier-emphasis (the darker tier) so links sit at
+     the same weight as body Heading/Text, which also render at emphasis.
+     Using --_color directly would render links at --{family}-base — too
+     light to read as body emphasis.
+     For brand-coloured links (color=primary etc) emphasis is also the
+     louder/more saturated tier, so coloured links remain visibly coloured. */
+  --_link-text:      var(--_tier-emphasis);
+  --_link-hover:     var(--_contrast);
   --_link-highlight: var(--_tier-mid);
-  --_link-text:      var(--text-emphasis);
   --_link-fill-text: var(--color-White);
 
   display: inline;
@@ -182,19 +186,24 @@
    Just colour, no decoration, no background.
    ========================================================== */
 
-/* Ghost variant — always falls to the ghost colour regardless of any colour prop.
-   Declares a hard override on both the <a> and the nested Text to beat
-   .link .text--primary and other colour class rules. */
+/* Ghost variant — text uses --text-base (body colour) regardless of any
+   colour prop. --svg-ghost-color (text-mid) was too muted against the
+   sunken page-bg pill background in light mode. Hard override on both
+   <a> and nested Text to beat any .color--{name} mixin rule. */
 .link--ghost,
 .link--ghost .text,
 .link--ghost[class*="link--"] .text {
-  color: var(--svg-ghost-color);
+  color: var(--text-base);
 }
 
 .link--ghost {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur, 8px));
-  -webkit-backdrop-filter: blur(var(--glass-blur, 8px));
+  /* page-bg-sunken is theme-aware: slightly darker than the page on
+     light themes, slightly lighter on dark themes — gives a subtle
+     recessed pill that reads on both luminance modes. Glass tokens
+     don't flip per theme so they vanish in light mode. */
+  background: var(--page-bg-sunken);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   padding: var(--space-2xs) var(--space-xs);
   border-radius: var(--radius-xs);
 }
@@ -205,7 +214,16 @@
 }
 
 /* Per-colour rules removed — colour comes from .color--{name} global mixin.
-   See the bridge-token mapping at the top of .link {}. */
+   See the bridge-token mapping at the top of .link {}.
+
+   EXCEPTION: neutral. The default --_link-text reads --_tier-emphasis so
+   links match body Heading/Text darkness. For .color--neutral that resolves
+   to --neutral-emphasis, which is too dark to read as a "quiet" neutral
+   link — looks indistinguishable from text. Override to --neutral-base so
+   neutral links sit deliberately muted. */
+.link.color--neutral {
+  --_link-text: var(--neutral-base);
+}
 
 
 /* ==========================================================
@@ -364,10 +382,32 @@
     bottom var(--hover-duration-slow) var(--ease-expo-out),
     opacity var(--hover-duration-slow) var(--ease-expo-out);
 }
+
+/* Highlight-grow needs a coloured bar to be visible. When the link has
+   the default text colour (no brandColor/rainbowColor set), --_link-highlight
+   resolves to --text-mid (a neutral grey) — invisible against text. Force
+   the bar to primary-mid in that case so the animation always reads.
+   Explicit colour props still win because their .color--{name} mixin sets
+   --_tier-mid, which is what --_link-highlight reads from.
+   Targeting the bar's background-color directly so the primary override
+   only affects highlight-grow, not the rest of Link's colour system. */
+.color--text.link--animate-highlight-grow .text::before {
+  background-color: var(--primary-mid);
+}
 .link--animate-highlight-grow:hover .text::before {
   bottom: -0.25em;
   height: 1.6em;
   opacity: var(--opacity-medium);
+}
+
+/* Lock text to --text-emphasis on hover so it stays readable against the
+   coloured bar that's growing in. Without this the text would shift to
+   --_link-hover (brand contrast) which fights the bar visually. Targets
+   the inner Text span and the .color--{name} mixin layer to beat both. */
+.link--animate-highlight-grow:hover,
+.link--animate-highlight-grow:hover .text,
+.link--animate-highlight-grow:hover [class*="color--"] {
+  color: var(--text-emphasis);
 }
 
 /* Animation: shadowFill — box-shadow inset fills from left.

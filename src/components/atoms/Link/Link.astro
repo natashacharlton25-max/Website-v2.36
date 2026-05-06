@@ -89,10 +89,13 @@ const {
 const target = external ? '_blank' : targetProp;
 const rel = external ? (relProp ?? 'noopener noreferrer') : relProp;
 
-// Resolve colour: rainbow wins over brand if both set; default to primary.
+// Resolve colour: rainbow wins over brand if both set; default to 'text'
+// so blank links render at body-text colour (the expected default for
+// links inside paragraphs). Setting brandColor/rainbowColor explicitly
+// opts the link into a louder brand-coloured rest state.
 // Always emits a color--{name} class so the global mixin sets --_color
 // and Link.css reads from it via .link bridge tokens.
-const colour = rainbowColor || brandColor || 'primary';
+const colour = rainbowColor || brandColor || 'text';
 
 const classes = [
   'link',
