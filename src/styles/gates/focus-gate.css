@@ -360,6 +360,39 @@ html:not([data-focus-rainbow]) body:not([data-hover="none"]) [data-focus-active]
 
 
 
+/* ==========================================================
+   LINK — strip visual decoration when focus-active so the
+   focus ring (drawn here via [data-focus-active]::after) is
+   the dominant indicator, not the link's own variant chrome.
+   Extracted from Link.css so the gate file owns all
+   data-focus-active behaviour.
+   ========================================================== */
+
+.link[data-focus-active] .text {
+  text-decoration: none;
+}
+
+.link--highlight[data-focus-active] .text::before {
+  display: none;
+}
+
+.link--animate-underline-grow[data-focus-active]::before {
+  background: transparent;
+  transform: scaleX(0);
+}
+
+.link--animate-text-slide[data-focus-active] {
+  background-image: none;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+}
+
+.link--animate-text-slide[data-focus-active]::before {
+  background: transparent;
+  width: 0;
+}
+
+
 @media (forced-colors: active) {
   [data-focus-active] {
     box-shadow: none !important;

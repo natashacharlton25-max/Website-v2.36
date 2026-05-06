@@ -4,34 +4,47 @@
  *
  * Every link should go through this component (except buttons — use <Button href>).
  * For links that need visual weight (glass, pill, padding), use Button with href.
- * The label renders through the Text atom — any Text prop can be forwarded via `text`.
+ * The label renders through the Text atom — any Text prop can be forwarded via `textStyle`.
+ *
+ * Colour comes from the global .color--{name} mixin (colour.css). Link reads
+ * --_color, --_tier-tint/mid/emphasis from the mixin to set its bridge tokens.
  *
  * Styles: Link.css | Link.responsive.css
  *
  * Usage:
- *   { "component": "Link", "label": "About", "href": "/about" }
- *   { "component": "Link", "label": "About", "href": "/about", "variant": "underline" }
- *   { "component": "Link", "label": "Legal", "href": "/legal", "variant": "ghost",
- *     "text": { "family": "body", "weight": "medium" } }
- *   { "component": "Link", "label": "Example", "href": "https://example.com", "external": true }
+ *   { "component": "Link", "contentLink": "About", "href": "/about" }
+ *   { "component": "Link", "contentLink": "About", "href": "/about", "variant": "underline" }
+ *   { "component": "Link", "contentLink": "Legal", "href": "/legal", "variant": "ghost",
+ *     "textStyle": { "family": "body", "weight": "medium" } }
+ *   { "component": "Link", "contentLink": "Example", "href": "https://example.com", "external": true }
  */
 import { Text } from '../Text';
 import type { TextColour, RainbowColour } from '../../../lib/shared-enums';
 
+/** A single segment of a multi-part Link — either a plain text run or a clickable run. */
+type LinkSegment = { nolink: string } | { link: string };
+
 interface Props {
-  /** Link display text. Pipeline content key. Renders through the Text atom. */
-  contentLink: string;
+  /** Link content.
+   *  - String: whole phrase is the link (one <a href> wraps everything).
+   *  - Array of segments: each { link: "..." } becomes its own <a href> sharing this href,
+   *    each { nolink: "..." } renders as plain inline text. All segments share textStyle.
+   *  Pipeline content key. Renders through the Text atom. */
+  contentLink: string | LinkSegment[];
   href: string;
   variant?: 'default' | 'underline' | 'highlight' | 'border' | 'ghost';
-  /** Link colour — sets marker tokens. 'text' = body text scale (always readable). */
-  color?: TextColour | RainbowColour;
+  /** Brand-scale colour. Use one of brandColor or rainbowColor. */
+  brandColor?: TextColour;
+  /** Rainbow palette colour (1-7). Use one of brandColor or rainbowColor. */
+  rainbowColor?: RainbowColour;
   /** Text atom styling props forwarded to the nested Text — accepts any Text prop
    *  (family, size, weight, leading, uppercase, etc). Link locks 'as=span' and 'flush'. */
   textStyle?: Record<string, any>;
   weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
   uppercase?: boolean;
   flush?: boolean;
-  /** Disabled state — ghost appearance, no hover, not-allowed cursor, aria-disabled. */
+  /** Disabled state — strikethrough, not-allowed cursor, no hover/focus changes,
+   *  href dropped so the <a> can't navigate. Sets aria-disabled=true and tabindex=-1. */
   disabled?: boolean;
   external?: boolean;
   target?: string;
@@ -45,14 +58,14 @@ interface Props {
   shadowFill?: boolean;
   textSlide?: boolean;
   class?: string;
-  [key: string]: any;
 }
 
 const {
   contentLink: label,
   href,
   variant = 'default',
-  color,
+  brandColor,
+  rainbowColor,
   textStyle: textProps,
   weight,
   uppercase = false,
@@ -70,22 +83,21 @@ const {
   shadowFill = false,
   textSlide = false,
   class: className,
-  ...rest
 } = Astro.props;
 
 // External links get safety attributes
 const target = external ? '_blank' : targetProp;
 const rel = external ? (relProp ?? 'noopener noreferrer') : relProp;
 
-// Extract data-* attributes
-const dataAttrs = Object.fromEntries(
-  Object.entries(rest).filter(([key]) => key.startsWith('data-'))
-);
+// Resolve colour: rainbow wins over brand if both set; default to primary.
+// Always emits a color--{name} class so the global mixin sets --_color
+// and Link.css reads from it via .link bridge tokens.
+const colour = rainbowColor || brandColor || 'primary';
 
 const classes = [
   'link',
   `link--${variant}`,
-  color && `link--${color}`,
+  `color--${colour}`,
   weight && `link--weight-${weight}`,
   uppercase && 'link--uppercase',
   flush && 'link--flush',
@@ -96,30 +108,75 @@ const classes = [
   !disabled && textSlide && 'link--animate-text-slide',
   className,
 ];
+
+// Wrapper picks up className for the array-form parent (the per-segment <a>s
+// only need the link styling classes, not consumer-supplied wrapper classes).
+const phraseClasses = ['link-phrase', className];
+
+// Normalise contentLink into segments. String stays string (single-link
+// shorthand handled separately for back-compat). Array form is rendered
+// segment-by-segment below.
+const isArray = Array.isArray(label);
+const segments: LinkSegment[] = isArray ? (label as LinkSegment[]) : [];
 ---
 
-<a
-  href={href}
-  class:list={classes}
-  target={target}
-  download={download}
-  rel={rel}
-  id={id}
-  role={role as astroHTML.JSX.HTMLAttributes['role']}
-  aria-label={ariaLabel}
-  aria-disabled={disabled ? 'true' : undefined}
-  tabindex={disabled ? -1 : undefined}
-  {...dataAttrs}
-><Text {...(textProps as any)} contentText={label} as="span" flush />{external && (
-  <svg class="link__icon link__icon--external" viewBox="0 0 256 256" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="144 40 216 40 216 112" />
-    <line x1="216" y1="40" x2="112" y2="144" />
-    <path d="M184 144v64a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V80a8 8 0 0 1 8-8h64" />
-  </svg>
-)}{download && (
-  <svg class="link__icon link__icon--download" viewBox="0 0 256 256" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="128" y1="144" x2="128" y2="32" />
-    <polyline points="216 144 216 208 40 208 40 144" />
-    <polyline points="168 104 128 144 88 104" />
-  </svg>
-)}</a>
+{isArray ? (
+  <span class:list={phraseClasses}>
+    {segments.map((seg) => (
+      'link' in seg ? (
+        <a
+          href={disabled ? undefined : href}
+          class:list={classes}
+          target={target}
+          download={download}
+          rel={rel}
+          role={role as astroHTML.JSX.HTMLAttributes['role']}
+          aria-label={ariaLabel}
+          aria-disabled={disabled ? 'true' : undefined}
+          tabindex={disabled ? -1 : undefined}
+        ><Text {...(textProps as any)} contentText={seg.link} as="span" flush /></a>
+      ) : (
+        <span class="link-phrase__plain"><Text {...(textProps as any)} contentText={seg.nolink} as="span" flush /></span>
+      )
+    ))}
+    {external && (
+      <svg class="link__icon link__icon--external" viewBox="0 0 256 256" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="144 40 216 40 216 112" />
+        <line x1="216" y1="40" x2="112" y2="144" />
+        <path d="M184 144v64a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V80a8 8 0 0 1 8-8h64" />
+      </svg>
+    )}
+    {download && (
+      <svg class="link__icon link__icon--download" viewBox="0 0 256 256" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="128" y1="144" x2="128" y2="32" />
+        <polyline points="216 144 216 208 40 208 40 144" />
+        <polyline points="168 104 128 144 88 104" />
+      </svg>
+    )}
+  </span>
+) : (
+  <a
+    href={disabled ? undefined : href}
+    class:list={classes}
+    target={target}
+    download={download}
+    rel={rel}
+    id={id}
+    role={role as astroHTML.JSX.HTMLAttributes['role']}
+    aria-label={ariaLabel}
+    aria-disabled={disabled ? 'true' : undefined}
+    tabindex={disabled ? -1 : undefined}
+  ><Text {...(textProps as any)} contentText={label as string} as="span" flush />{external && (
+    <svg class="link__icon link__icon--external" viewBox="0 0 256 256" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="144 40 216 40 216 112" />
+      <line x1="216" y1="40" x2="112" y2="144" />
+      <path d="M184 144v64a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V80a8 8 0 0 1 8-8h64" />
+    </svg>
+  )}{download && (
+    <svg class="link__icon link__icon--download" viewBox="0 0 256 256" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="128" y1="144" x2="128" y2="32" />
+      <polyline points="216 144 216 208 40 208 40 144" />
+      <polyline points="168 104 128 144 88 104" />
+    </svg>
+  )}</a>
+)}

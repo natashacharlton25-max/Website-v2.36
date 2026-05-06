@@ -132,18 +132,82 @@
 
 /* ==========================================================
    LINKS — underlined, no decoration
+   All variants (default/underline/highlight/border/ghost) collapse
+   to plain underlined text in reading mode. The inner Text span
+   needs the rule too because Link.css sets text-decoration on
+   .link .text per-variant — without targeting .link .text here,
+   non-underline variants render with no visible underline.
    ========================================================== */
 
 [data-render="textonly"] .link,
+[data-render="textonly"] .link .text,
 [data-render="textonly"] a {
   color: var(--text-emphasis);
   text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: auto;
   text-underline-offset: 0.15em;
 }
 
+/* Strip variant decoration (border, background, padding, ::before) */
+[data-render="textonly"] .link {
+  border: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* text-slide variant uses -webkit-text-fill-color: transparent + a gradient
+   background painted into the text via background-clip. In textonly mode
+   the gradient/clip isn't reset, so text stays transparent (invisible).
+   Restore solid text painting. */
+[data-render="textonly"] .link--animate-text-slide {
+  background-image: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* shadow-fill paints an inset box-shadow on :hover that the base `.link`
+   reset above doesn't catch. Kill the hover state explicitly so reading
+   mode never gets a coloured fill behind the link text. */
+[data-render="textonly"] .link.link--animate-shadow-fill,
+[data-render="textonly"] .link.link--animate-shadow-fill:hover {
+  box-shadow: none;
+  color: var(--text-emphasis);
+}
+[data-render="textonly"] .link::before,
+[data-render="textonly"] .link::after,
+[data-render="textonly"] .link .text::before,
+[data-render="textonly"] .link .text::after {
+  display: none;
+}
+
+/* Hover uses the user's link-colour preference. --highlight-link-color
+   is the platform-wide token for "this is the colour links should be."
+   Honoured here even when the highlight-links gate is off, so reading
+   mode reflects the user's preferred link treatment. */
 [data-render="textonly"] .link:hover,
+[data-render="textonly"] .link:hover .text,
 [data-render="textonly"] a:hover {
-  color: var(--primary-base);
+  color: var(--highlight-link-color);
+  text-decoration-color: var(--highlight-link-color);
+}
+
+/* Link items inside a Grid stack one per line in textonly. The Grid
+   itself is `display: block` (above), so each Link needs to break
+   onto its own line. Using `width: max-content` keeps the hover/click
+   target sized to the actual text — `display: block` alone would
+   stretch the link the full container width and trigger hover from
+   the far edge. */
+[data-render="textonly"] .base-grid > .link,
+[data-render="textonly"] .base-grid > .link-phrase {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin-bottom: var(--space-xs);
 }
 
 

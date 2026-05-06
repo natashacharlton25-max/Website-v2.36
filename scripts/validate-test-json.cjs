@@ -161,6 +161,45 @@ function validateJson(data, label) {
       if (def.type === 'number' && typeof value !== 'number') {
         issues.push({ path: jsonPath, msg: `${component}.${key}: expected number, got ${typeof value}` });
       }
+
+      // Array-of-object segment validation. When a prop's schema declares
+      // `items: { type: 'object', properties: {...} }` and the JSON value
+      // is an array, each element must:
+      //   1. be a non-null object
+      //   2. only contain keys declared in items.properties
+      //   3. have exactly one key (segment shape: pick one of the declared keys)
+      // Generic — works for Link.contentLink (nolink|link) and any future
+      // atom that exposes a segment-array prop.
+      const items = def.items;
+      const wantsObjectArray = items && items.type === 'object' && items.properties;
+      if (wantsObjectArray && Array.isArray(value)) {
+        const allowedKeys = Object.keys(items.properties).filter(k => !k.startsWith('_'));
+        value.forEach((seg, i) => {
+          const segPath = `${jsonPath}.${key}[${i}]`;
+          if (seg === null || typeof seg !== 'object' || Array.isArray(seg)) {
+            issues.push({ path: segPath, msg: `${component}.${key}[${i}]: expected object, got ${Array.isArray(seg) ? 'array' : typeof seg}` });
+            return;
+          }
+          const segKeys = Object.keys(seg);
+          const unknown = segKeys.filter(k => !allowedKeys.includes(k));
+          for (const u of unknown) {
+            issues.push({ path: segPath, msg: `${component}.${key}[${i}]: unknown key "${u}" (allowed: ${allowedKeys.join(' | ')})` });
+          }
+          const known = segKeys.filter(k => allowedKeys.includes(k));
+          if (known.length === 0) {
+            issues.push({ path: segPath, msg: `${component}.${key}[${i}]: must have exactly one of ${allowedKeys.join(' | ')}` });
+          } else if (known.length > 1) {
+            issues.push({ path: segPath, msg: `${component}.${key}[${i}]: must have exactly one of ${allowedKeys.join(' | ')} (found: ${known.join(', ')})` });
+          }
+          // Type-check the segment's value against its declared item property type.
+          for (const k of known) {
+            const itemDef = items.properties[k];
+            if (itemDef.type === 'string' && typeof seg[k] !== 'string') {
+              issues.push({ path: segPath, msg: `${component}.${key}[${i}].${k}: expected string, got ${typeof seg[k]}` });
+            }
+          }
+        });
+      }
     }
   }
 

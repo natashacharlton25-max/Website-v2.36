@@ -17,18 +17,20 @@
    ========================================================== */
 
 .link {
-  /* ── Internal tokens (bridge → internal, single point of truth) ──
-     --_link-color = the link's intent colour (e.g. primary for default, rainbow-1 for red).
-     --_link-text  = the actual rest colour of the text (body text scale by default).
-     --_link-hover = the hover colour (contrast token for brand families). */
-  --_link-color:     var(--link-color, var(--primary-base));
-  --_link-hover:     var(--link-hover, var(--primary-contrast));
-  --_link-accent-hover: var(--link-accent-hover, var(--secondary-contrast));
-  --_link-focus:     var(--link-focus, var(--primary-base));
-  --_link-highlight: var(--link-highlight, var(--primary-mid));
-  --_link-accent:    var(--link-accent, var(--secondary-base));
-  --_link-text:      var(--link-text, var(--text-emphasis));
-  --_link-fill-text: var(--link-fill-text, var(--color-White));
+  /* ── Internal tokens read from the global .color--{name} mixin ──
+     The mixin sets --_color, --_tier-tint, --_tier-mid, --_tier-emphasis
+     on the same element. Link's bridge tokens map those to its semantic
+     roles (link-color = base, link-hover = emphasis, etc).
+     --_link-text always uses --text-emphasis for body-readable rest text.
+     --_link-fill-text is white for shadow-fill contrast. */
+  --_link-color:     var(--_color);
+  /* Brand families (primary/secondary/neutral) get the per-theme contrast
+     hex via --_contrast. Text + rainbow don't expose --_contrast, so they
+     fall back to --_tier-emphasis. */
+  --_link-hover:     var(--_contrast, var(--_tier-emphasis));
+  --_link-highlight: var(--_tier-mid);
+  --_link-text:      var(--text-emphasis);
+  --_link-fill-text: var(--color-White);
 
   display: inline;
   margin: 0;
@@ -57,6 +59,35 @@
 
 .link--flush { margin: 0; }
 
+
+/* ==========================================================
+   PHRASE — wraps the segment-array form of contentLink
+   Each link segment is its own <a class="link"> sibling;
+   nolink segments are <span class="link-phrase__plain">.
+   The wrapper itself is inline and unstyled — it just groups
+   the segments so they share textStyle and inherit the parent
+   paragraph/heading typography in plain (non-link) parts.
+   ========================================================== */
+
+.link-phrase {
+  display: inline;
+}
+
+.link-phrase__plain {
+  display: inline;
+  /* No colour set — inherits from parent (p, heading, etc.).
+     The clickable .link siblings carry their own colour rules. */
+}
+
+/* Border and ghost link variants have vertical padding that overlaps
+   surrounding text lines at the body default --leading-relaxed (1.625).
+   When a phrase contains either of those variants, loosen the line-height
+   on the phrase wrapper so adjacent lines clear the link's box. */
+.link-phrase:has(.link--border),
+.link-phrase:has(.link--ghost) {
+  line-height: var(--leading-loose);
+}
+
 /* ==========================================================
    VARIANT: Default
    Inline colour link, no underline. Inherits base .link styles.
@@ -77,8 +108,8 @@
 
 .link--underline .text {
   text-decoration: underline;
-  text-underline-offset: 5px;
-  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+  text-decoration-thickness: 0.125em;
   text-decoration-color: var(--_link-color);
 }
 
@@ -105,6 +136,10 @@
 
 .link--highlight .text {
   position: relative;
+  /* isolation creates a new stacking context so the bar's z-index: -1
+     stays inside .text (behind the text glyphs) rather than going behind
+     the page background. */
+  isolation: isolate;
 }
 
 .link--highlight:hover .text::before {
@@ -117,11 +152,12 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 3px;
-  height: 8px;
+  bottom: 0.25em;
+  height: 0.5em;
   z-index: -1;
   background-color: var(--_link-highlight);
   opacity: var(--opacity-low);
+  pointer-events: none;
 }
 
 /* ==========================================================
@@ -168,25 +204,8 @@
   color: var(--_link-hover);
 }
 
-/* ==========================================================
-   COLOUR VARIANTS — remap bridge tokens per colour
-   ========================================================== */
-
-/* Brand-family links hover to --{family}-contrast (accent hex if the brand provides
-   one, otherwise falls back to -emphasis). Text has no contrast token so it stays
-   on -emphasis for hover. Rainbow colours have no accent concept, also use -emphasis. */
-.link--primary   { --_link-color: var(--primary-base);   --_link-hover: var(--primary-contrast);   --_link-highlight: var(--primary-mid); }
-.link--secondary { --_link-color: var(--secondary-base); --_link-hover: var(--secondary-contrast); --_link-highlight: var(--secondary-mid); }
-/* Neutral + text hover to --text-mid (muted) since --text-emphasis is already the default rest colour. */
-.link--neutral   { --_link-color: var(--neutral-base);   --_link-hover: var(--text-mid);           --_link-highlight: var(--neutral-mid); }
-.link--text      { --_link-color: var(--text-base);      --_link-hover: var(--text-mid);           --_link-highlight: var(--text-mid); }
-.link--rainbow-1 { --_link-color: var(--rainbow-1);      --_link-hover: var(--rainbow-1-emphasis); --_link-highlight: var(--rainbow-1-mid); }
-.link--rainbow-2 { --_link-color: var(--rainbow-2);      --_link-hover: var(--rainbow-2-emphasis); --_link-highlight: var(--rainbow-2-mid); }
-.link--rainbow-3 { --_link-color: var(--rainbow-3);      --_link-hover: var(--rainbow-3-emphasis); --_link-highlight: var(--rainbow-3-mid); }
-.link--rainbow-4 { --_link-color: var(--rainbow-4);      --_link-hover: var(--rainbow-4-emphasis); --_link-highlight: var(--rainbow-4-mid); }
-.link--rainbow-5 { --_link-color: var(--rainbow-5);      --_link-hover: var(--rainbow-5-emphasis); --_link-highlight: var(--rainbow-5-mid); }
-.link--rainbow-6 { --_link-color: var(--rainbow-6);      --_link-hover: var(--rainbow-6-emphasis); --_link-highlight: var(--rainbow-6-mid); }
-.link--rainbow-7 { --_link-color: var(--rainbow-7);      --_link-hover: var(--rainbow-7-emphasis); --_link-highlight: var(--rainbow-7-mid); }
+/* Per-colour rules removed — colour comes from .color--{name} global mixin.
+   See the bridge-token mapping at the top of .link {}. */
 
 
 /* ==========================================================
@@ -206,19 +225,30 @@
 
 /* ==========================================================
    DISABLED — modifier that works with any variant
-   No hover, no click, no focus, no highlight-links outline.
-   Strikethrough on text + not-allowed cursor + ghost colour + aria-disabled.
+   Cursor: not-allowed (the "stop sign"). pointer-events stay on so
+   the cursor actually renders; Link.astro drops the href when
+   disabled, so the <a> can't navigate even when clicked.
+   Colour: --text-base (full body text colour — strikethrough conveys disabled).
    ========================================================== */
 
 .link.link--disabled,
-.link.link--disabled .text {
-  color: var(--svg-ghost-color);
-  pointer-events: none;
+.link.link--disabled .text,
+.link.link--disabled [class*="color--"] {
+  color: var(--text-base);
   cursor: not-allowed;
+  /* Override the global [aria-disabled] rule in opacity-gate.css that
+     sets pointer-events: none. Without pointer events, the cursor never
+     renders. Link.astro drops the href when disabled, so even though
+     pointer-events stay on, clicking does nothing. */
+  pointer-events: auto;
   text-decoration: line-through;
-  text-decoration-thickness: 2px;
-  text-decoration-color: var(--svg-ghost-color);
-  opacity: 0.65;
+  text-decoration-thickness: 0.125em;
+  text-decoration-color: var(--text-base);
+  opacity: var(--opacity-high);
+  /* No hover transitions on disabled — colour, decoration, and thickness
+     should stay locked. The global :where(.link) transition would animate
+     colour and shadow on hover; explicit transition: none here blocks it. */
+  transition: none;
 }
 
 /* Kill decoration from underline/highlight/border/ghost variants */
@@ -230,64 +260,36 @@
 }
 
 .link.link--disabled {
-  border-color: transparent;
+  border: none;
+  padding: 0;
   background: transparent;
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-/* No hover / no focus response */
+/* No hover / no focus response. text-decoration written longhand so the
+   thickness from the base rule (0.125em) isn't reset to `auto` by the
+   shorthand. Colour and outline still re-asserted here for safety. */
 .link.link--disabled:hover,
 .link.link--disabled:focus,
 .link.link--disabled:focus-visible,
 .link.link--disabled:hover .text,
-.link.link--disabled:focus .text {
-  color: var(--svg-ghost-color);
+.link.link--disabled:focus .text,
+.link.link--disabled:hover [class*="color--"],
+.link.link--disabled:focus [class*="color--"] {
+  color: var(--text-base);
   outline: none;
-  text-decoration: line-through;
-  text-decoration-color: var(--svg-ghost-color);
+  text-decoration-line: line-through;
+  text-decoration-color: var(--text-base);
+  text-decoration-thickness: 0.125em;
   box-shadow: none;
   background: transparent;
 }
 
-/* highlight-links should not affect disabled links */
-[data-highlight-links] .link.link--disabled,
-[data-highlight-links] .link.link--disabled .text,
-[data-highlight-links] .link.link--disabled:hover,
-[data-highlight-links] .link.link--disabled:hover .text {
-  outline: none;
-  text-decoration: line-through;
-  text-decoration-color: var(--svg-ghost-color);
-  color: var(--svg-ghost-color);
-  background: transparent;
-  box-shadow: none;
-}
-
-/* ── Hover gate: none — one global link style, no hover change, bold ── */
-[data-hover="none"] .link {
-  color: var(--_link-text);
-  font-weight: var(--font-bold);
-}
-
-[data-hover="none"] .link:hover,
-[data-hover="none"] .link--underline:hover,
-[data-hover="none"] .link--highlight:hover,
-[data-hover="none"] .link--border:hover,
-[data-hover="none"] .link--ghost:hover {
-  color: var(--_link-text);
-}
-
-[data-hover="none"] .link--underline:hover .text {
-  text-decoration-color: var(--_link-color);
-}
-
-/* ── Hover gate: none — suppress animation effects ── */
-[data-hover="none"] .link--animate-underline-grow::before { transform: scaleX(0); }
-[data-hover="none"] .link--animate-highlight-grow .text::before { display: none; }
-[data-hover="none"] .link--animate-shadow-fill:hover { color: var(--_link-text); box-shadow: none; }
-[data-hover="none"] .link--animate-text-slide:hover { background-position: -100%; }
-[data-hover="none"] .link--animate-text-slide:hover::before { width: 0; }
+/* highlight-links + disabled rules → src/styles/global/highlight-links.css
+   data-hover="none" rules → src/styles/gates/hover-gate.css
+   The gate file is the single authority on what data-hover modes do. */
 
 /* ==========================================================
    WEIGHT OVERRIDES
@@ -308,34 +310,8 @@
   letter-spacing: var(--letter-spacing-wide);
 }
 
-/* ==========================================================
-   FOCUS — strip effects when focus-gate is active
-   Focus ring drawn by focus-gate.css via [data-focus-active]::after
-   ========================================================== */
-
-.link[data-focus-active] .text {
-  text-decoration: none;
-}
-
-.link--highlight[data-focus-active] .text::before {
-  display: none;
-}
-
-.link--animate-underline-grow[data-focus-active]::before {
-  background: transparent;
-  transform: scaleX(0);
-}
-
-.link--animate-text-slide[data-focus-active] {
-  background-image: none;
-  -webkit-text-fill-color: unset;
-  background-clip: unset;
-}
-
-.link--animate-text-slide[data-focus-active]::before {
-  background: transparent;
-  width: 0;
-}
+/* data-focus-active rules → src/styles/gates/focus-gate.css
+   focus-gate.css owns all [data-focus-active] behaviour. */
 
 /* ================================================================
    ANIMATION EFFECTS — gated by animation props
@@ -358,12 +334,15 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 2px;
+  height: 0.125em;
   background: currentColor;
   border-radius: var(--radius-full);
   transform-origin: 0% 50%;
   transform: scaleX(0);
-  transition: transform var(--hover-duration) ease-out;
+  /* Override the global fast pseudo-transition — underline grow needs the
+     slow deliberate feel. --hover-duration-slow respects the hover-gate
+     (collapses to 0s for data-hover="none"). */
+  transition: transform var(--hover-duration-slow) var(--ease-expo-out);
 }
 
 .link--animate-underline-grow:hover::before {
@@ -372,12 +351,18 @@
 
 /* Animation: highlightGrow — highlight bar grows from the bottom 8px strip
    to fully wrap the text (slightly taller than the line box) on hover.
-   Slow, smooth cubic for a deliberate feel. Targets .text::before (the bar). */
+   Targets .text::before (the bar) — not covered by the global .link::before
+   rule, so transition is declared here. Uses --hover-duration-slow + expo-out
+   for a deliberate feel; the gate token collapses to 0s under data-hover="none". */
 .link--animate-highlight-grow .text::before {
+  /* Override the static highlight dimensions — start as a thin bottom
+     strip (marker stub), grow to wrap full text on hover. */
+  bottom: 0;
+  height: 0.15em;
   transition:
-    height 450ms cubic-bezier(0.22, 1, 0.36, 1),
-    bottom 450ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 450ms cubic-bezier(0.22, 1, 0.36, 1);
+    height var(--hover-duration-slow) var(--ease-expo-out),
+    bottom var(--hover-duration-slow) var(--ease-expo-out),
+    opacity var(--hover-duration-slow) var(--ease-expo-out);
 }
 .link--animate-highlight-grow:hover .text::before {
   bottom: -0.25em;
@@ -385,18 +370,30 @@
   opacity: var(--opacity-medium);
 }
 
-/* Animation: shadowFill — box-shadow inset fills from left */
-.link--animate-shadow-fill {
+/* Animation: shadowFill — box-shadow inset fills from left.
+   Width in em so the fill scales with the link's font-size. 20em is wide
+   enough to cover any reasonable single-line link at any text size.
+   The rest state declares a zero-width inset shadow so the transition
+   has a defined starting value (transitioning from `none` to a shadow
+   doesn't animate smoothly — must transition value-to-value). */
+.link.link--animate-shadow-fill {
   padding: 0 0.25rem;
   margin: 0 -0.25rem;
-  transition: color var(--hover-duration) ease-out, box-shadow var(--hover-duration) ease-out;
+  box-shadow: inset 0 0 0 0 var(--_link-color);
+  /* ease-default (ease-in-out) gives a steady sweep across the link.
+     expo-out would compress visible motion into the first fraction of
+     the duration and feel instant — wrong curve for "fill from left". */
+  transition:
+    color var(--hover-duration-slow) var(--ease-default),
+    box-shadow var(--hover-duration-slow) var(--ease-default);
 }
-.link--animate-shadow-fill:hover {
+.link.link--animate-shadow-fill:hover {
   color: var(--_link-fill-text);
-  box-shadow: inset 200px 0 0 0 var(--_link-color);
+  box-shadow: inset 20em 0 0 0 var(--_link-color);
 }
 
-/* Animation: textSlide — text colour sweeps from left + underline grows */
+/* Animation: textSlide — text colour sweeps from left + underline grows.
+   background-position is not in the global transition rule, so declared here. */
 .link--animate-text-slide {
   position: relative;
   background-image: linear-gradient(
@@ -410,7 +407,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  transition: all var(--hover-duration);
+  transition: background-position var(--hover-duration-slow) var(--ease-default);
 }
 .link--animate-text-slide::before {
   content: '';
@@ -421,7 +418,8 @@
   left: 0;
   width: 0;
   height: 3px;
-  transition: all var(--hover-duration);
+  /* width transition not in global rule for ::before; declared locally */
+  transition: width var(--hover-duration-slow) var(--ease-default);
 }
 .link--animate-text-slide:hover {
   background-position: 0;

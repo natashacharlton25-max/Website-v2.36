@@ -4,15 +4,26 @@
   "renders": {
     "full": "Link.astro",
     "reduced": "Link.astro",
-    "assistive": "Link.astro",
     "textonly": "Link.astro"
   },
-  "notes": "Inline text link. Label renders through Text atom for typography — any Text prop can be forwarded via 'text'. For links that need visual weight (glass, pill, padding), use Button with href instead. All 4 renders use the same Link.astro — pipeline strips animation props in reduced/assistive/textonly. Textonly render: all links become plain underlined text (colour overrides, weight, uppercase all reset). Click + keyboard handling is native <a href> + global focus-system.",
+  "notes": "Inline text link. Label renders through Text atom for typography. For links that need visual weight (glass, pill, padding), use Button with href instead. Pipeline strips animation props in reduced/textonly. Textonly: all variants degrade to plain underlined text. Click + keyboard handling is native <a href> + global focus-system. Colour comes from the global .color--{name} mixin (colour.css).",
 
   "props": {
     "content": {
       "_description": "Link label and destination",
-      "contentLink": { "type": "string",  "required": true, "description": "Link text. Pipeline content key. Renders through the Text atom." },
+      "contentLink": {
+        "type": ["string", "array"],
+        "required": true,
+        "description": "Link content. Either a string (whole phrase is the link) OR an array of segments. Each segment is { \"nolink\": \"plain text\" } or { \"link\": \"clickable word\" }. Each link segment renders as its own <a href> sharing this Link's href. Plain text segments render as <span>. All segments share the same textStyle.",
+        "items": {
+          "type": "object",
+          "_description": "Segment must have exactly one of nolink or link.",
+          "properties": {
+            "nolink": { "type": "string", "_description": "Plain (non-clickable) text segment." },
+            "link":   { "type": "string", "_description": "Clickable text segment — wrapped in <a href> with link styling." }
+          }
+        }
+      },
       "href":      { "type": "string",  "required": true, "_format": "url", "description": "Link destination." },
       "target":    { "type": "string",  "required": false, "default": null, "enum": ["_blank", "_self", "_parent", "_top"], "description": "Link target." },
       "download":  { "type": "string",  "required": false, "default": null, "_format": "filename", "description": "Download filename." },
@@ -32,19 +43,27 @@
       }
     },
 
+    "colour": {
+      "_description": "Brand-scale colour. Use one of brandColor or rainbowColor, never both.",
+      "brandColor": { "type": "string", "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "text"], "description": "Brand-scale colour. 'text' = body text scale (always readable, no link colour shift)." }
+    },
+
+    "rainbow": {
+      "_description": "Rainbow palette colour (1-7 positional). Use one of brandColor or rainbowColor.",
+      "rainbowColor": { "type": "string", "required": false, "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Positional rainbow colour: 1=red, 2=orange, 3=yellow, 4=teal, 5=blue, 6=purple, 7=pink." }
+    },
+
     "visual": {
       "_description": "How the link looks",
       "variant":   { "type": "string",  "required": false, "default": "default", "enum": ["default", "underline", "highlight", "border", "ghost"], "description": "Visual indicator style. default=colour only, underline=static underline, highlight=subtle background, border=thin border, ghost=subtle colour." },
-      "color":     { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "text", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Colour variant — sets link colour tokens. 'text' = body text scale (always readable)." },
       "weight":    { "type": "string",  "required": false, "default": null, "enum": ["normal", "medium", "semibold", "bold", "extrabold"], "description": "Font weight override." },
       "uppercase": { "type": "boolean", "required": false, "default": false, "description": "Uppercase text transform." },
       "flush":     { "type": "boolean", "required": false, "default": false, "description": "Remove margin." },
-      "disabled":  { "type": "boolean", "required": false, "default": false, "description": "Disabled state — strikethrough, not-allowed cursor, no hover/click/focus, no highlight-links outline. Sets aria-disabled=true and tabindex=-1." },
-      "class":     { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+      "disabled":  { "type": "boolean", "required": false, "default": false, "description": "Disabled state — strikethrough, not-allowed cursor, no hover/click/focus, no highlight-links outline. Sets aria-disabled=true and tabindex=-1." }
     },
 
     "animation": {
-      "_description": "Motion behaviour — stripped in reduced/assistive/textonly renders",
+      "_description": "Motion behaviour — stripped in reduced/textonly renders",
       "underlineGrow":  { "type": "boolean", "required": false, "default": false, "description": "Underline scales from left on hover. Requires variant=underline for static fallback." },
       "highlightGrow":  { "type": "boolean", "required": false, "default": false, "description": "Background highlight grows from bar to full coverage on hover. Requires variant=highlight for static fallback." },
       "shadowFill":     { "type": "boolean", "required": false, "default": false, "description": "Box-shadow inset fills from left on hover. Works with any variant." },

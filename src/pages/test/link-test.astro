@@ -1,72 +1,10 @@
+
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Heading } from '../../components/atoms/Heading';
-import { Link } from '../../components/atoms/Link';
-import { Text } from '../../components/atoms/Text';
-import { Section } from '../../components/atoms/Section';
-
-import testData from '../../data/test/link.json';
-
-// Pipeline: strip props per render mode
-function textonlyProps(item: any) {
-  return { href: item.href, label: item.label };
-}
+import Renderer from '../../components/Renderer.astro';
+import data from '../../data/test/link.json';
 ---
 
-<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
-  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
-
-    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
-
-    {testData.sections.map((section: any) => (
-      <Section label={section.label} separator gap={testData.layout.itemGap}>
-        {section.layout === 'block' ? (
-          <div style="display:flex;flex-direction:column;gap:var(--space-lg);">
-            {section.items.map((item: any) => (
-              <Text flush>{item.before}<Link
-                label={item.linkText}
-                href={item.href}
-                variant={item.variant}
-                color={item.color}
-              />{item.after}</Text>
-            ))}
-          </div>
-        ) : (
-          <div style="display:flex;flex-wrap:wrap;gap:var(--space-lg);align-items:center;">
-            {section.items.map((item: any) => (
-              <Fragment>
-                <div class="render-full">
-                  <Link
-                    label={item.label}
-                    href={item.href}
-                    variant={item.variant}
-                    color={item.color}
-                    text={item.text}
-                    weight={item.weight}
-                    uppercase={item.uppercase}
-                    flush={item.flush}
-                    disabled={item.disabled}
-                    external={item.external}
-                    download={item.download}
-                    ariaLabel={item.ariaLabel}
-                    underlineGrow={item.underlineGrow}
-                    highlightGrow={item.highlightGrow}
-                    shadowFill={item.shadowFill}
-                    textSlide={item.textSlide}
-                  />
-                </div>
-                <div class="render-reduced">
-                  <Link label={item.label} href={item.href} variant={item.variant} color={item.color} weight={item.weight} disabled={item.disabled} />
-                </div>
-                <div class="render-textonly">
-                  <Link label={item.label} href={item.href} />
-                </div>
-              </Fragment>
-            ))}
-          </div>
-        )}
-      </Section>
-    ))}
-
-  </Section>
+<BaseLayout title="Link Atom Test">
+  <Renderer node={data} />
 </BaseLayout>

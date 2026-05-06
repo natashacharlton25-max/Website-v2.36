@@ -270,7 +270,18 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
   transition: none;
 }
 
-/* None — all links become plain underline, no animation */
+/* None — all links become plain underline, no decorative variant chrome,
+   no hover state changes, no animation reveals.
+   These rules live here (not in Link.css) so the hover-gate is the single
+   authority on what data-hover="none" means for links. */
+
+/* Base: all links resolve to body text colour, bolded for prominence */
+[data-hover="none"] .link {
+  color: var(--_link-text);
+  font-weight: var(--font-bold);
+}
+
+/* All links pick up a static underline; coloured per --_link-color */
 [data-hover="none"] .link .text {
   text-decoration: underline;
   text-underline-offset: 5px;
@@ -278,6 +289,20 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
   text-decoration-color: var(--_link-color);
 }
 
+/* Hover never changes colour — stays at the rest --_link-text */
+[data-hover="none"] .link:hover,
+[data-hover="none"] .link--underline:hover,
+[data-hover="none"] .link--highlight:hover,
+[data-hover="none"] .link--border:hover,
+[data-hover="none"] .link--ghost:hover {
+  color: var(--_link-text);
+}
+
+[data-hover="none"] .link--underline:hover .text {
+  text-decoration-color: var(--_link-color);
+}
+
+/* Strip variant chrome (border padding, ghost glass, highlight bar) */
 [data-hover="none"] .link--highlight .text::before {
   display: none;
 }
@@ -295,3 +320,10 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
   padding: 0;
   border-radius: 0;
 }
+
+/* Suppress the four hover-driven animations entirely */
+[data-hover="none"] .link--animate-underline-grow::before { transform: scaleX(0); }
+[data-hover="none"] .link--animate-highlight-grow .text::before { display: none; }
+[data-hover="none"] .link--animate-shadow-fill:hover { color: var(--_link-text); box-shadow: none; }
+[data-hover="none"] .link--animate-text-slide:hover { background-position: -100%; }
+[data-hover="none"] .link--animate-text-slide:hover::before { width: 0; }
