@@ -280,6 +280,11 @@ const headingClassList = [
 {isDecorated ? (
   <div class:list={[
     'heading-wrap',
+    /* Apply colour class to the wrap so --_color cascades to media (icons,
+       dividers) AND to the Tag below. Without this, the Tag has --_color
+       but the icon inherits nothing. */
+    textColor && `color--${textColor}`,
+    colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,
     `heading-wrap--align-${align ?? 'left'}`,
     `heading-wrap--spacing-${spacing}`,
     `heading-wrap--variant-${variant}`,

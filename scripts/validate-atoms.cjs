@@ -59,6 +59,9 @@ const path = require('path');
  *    40   Per-atom colour classes in CSS — should use global .color--{name} mixin
  *    41   Zone/mode overrides in global/*.css — should be in zones/*.css
  *         (Card, Section). Atoms use linear direction + spread only.
+ *    42   Atom CSS @import in global.css when the atom's barrel (index.ts)
+ *         already imports the same file. Astro emits the rules twice into
+ *         the bundle, which can cause duplicate-rule + cascade-order bugs.
  *
  *   Coverage rules
  *    15   Colour enum count in CSS (10 classes expected: primary..pink)
@@ -92,6 +95,34 @@ const focusExceptions = {
 
 const summary = [];
 console.log('=== ATOM VALIDATOR ===\n');
+
+// Rule 42: detect atom CSS @import-ed in global.css when the atom's
+// barrel (index.ts) already imports the same file. Reports once per
+// duplicate, before the per-atom loop runs.
+const globalCssPath = path.join(__dirname, '..', 'src', 'styles', 'global.css');
+if (fs.existsSync(globalCssPath)) {
+  const globalCss = fs.readFileSync(globalCssPath, 'utf8');
+  const atomImportRe = /@import\s+['"][^'"]*\/components\/atoms\/([^/'"]+)\/([^'"]+\.css)['"]/g;
+  let match;
+  const dupes = [];
+  while ((match = atomImportRe.exec(globalCss)) !== null) {
+    const [, atomName, cssFile] = match;
+    const barrelPath = path.join(atomsDir, atomName, 'index.ts');
+    if (!fs.existsSync(barrelPath)) continue;
+    const barrel = fs.readFileSync(barrelPath, 'utf8');
+    if (barrel.includes(`./${cssFile}`)) {
+      dupes.push({ atom: atomName, file: cssFile });
+    }
+  }
+  if (dupes.length > 0) {
+    console.log('global.css ❌ ' + dupes.length + ' duplicate atom CSS import(s)');
+    for (const d of dupes) {
+      console.log('  FAIL  Rule 42  global.css  ' + d.atom + '/' + d.file + ' — already imported by ' + d.atom + '/index.ts');
+    }
+    console.log('');
+  }
+}
+
 
 for (const atom of atoms) {
   const dir = path.join(atomsDir, atom);

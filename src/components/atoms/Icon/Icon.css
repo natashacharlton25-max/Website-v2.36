@@ -4,7 +4,13 @@
  */
 
 .icon {
-  --_icon-color: var(--_color, inherit);
+  /* If a .color--{name} mixin set --_color on this element, use it.
+     Otherwise fall back to currentColor so the icon inherits the
+     parent's text colour (heading colour for icons inside Headings, etc).
+     Note: var(--x, inherit) does NOT do what it looks like — `inherit`
+     as a custom-property fallback inherits the *variable* not the colour.
+     `currentColor` is the actual colour-inheriting keyword. */
+  --_icon-color: var(--_color, currentColor);
 
   display: inline-flex;
   align-items: center;
