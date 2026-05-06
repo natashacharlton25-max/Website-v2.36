@@ -6,19 +6,21 @@
  * Item text renders through Text atom (colour + family passed through).
  * List.css is the single source of truth for list styling.
  *
+ * Colour comes from the global .color--{name} mixin (colour.css).
+ *
  * Styles: List.css | List.responsive.css
  *
  * Usage:
- *   <List items={['One', 'Two', 'Three']} />
- *   <List as="ol" items={['First', 'Second']} />
- *   <List icon="check-circle-fill" items={['Done', 'Done']} />
- *   <List icon="arrow-right-fill" color="secondary" items={['Go', 'Go']} />
- *   <List variant="dot" items={['Custom dots']} />
- *   <List variant="dot" dotSize="lg" items={['Big dots']} />
- *   <List variant="none" items={['Clean', 'No bullets']} />
- *   <List variant="inline" items={['Tag', 'Tag', 'Tag']} />
- *   <List flush items={['Tight', 'No margin']} />
- *   <List textColor="text" textFamily="body" items={['Body text']} />
+ *   <List contentList={['One', 'Two', 'Three']} />
+ *   <List as="ol" contentList={['First', 'Second']} />
+ *   <List icon="check-circle-fill" contentList={['Done', 'Done']} />
+ *   <List icon="arrow-right-fill" brandColor="secondary" contentList={['Go', 'Go']} />
+ *   <List variant="dot" contentList={['Custom dots']} />
+ *   <List variant="dot" dotSize="lg" contentList={['Big dots']} />
+ *   <List variant="none" contentList={['Clean', 'No bullets']} />
+ *   <List variant="inline" contentList={['Tag', 'Tag', 'Tag']} />
+ *   <List flush contentList={['Tight', 'No margin']} />
+ *   <List textStyle={{ family: 'body' }} contentList={['Body text']} />
  */
 import { Icon } from '../Icon';
 import { Shape } from '../Shape';
@@ -29,60 +31,63 @@ import type { TextColour, RainbowColour } from '../../../lib/shared-enums';
 type ListItem = string | { contentLink: string; href: string; };
 
 interface Props {
+  /** List items. Pipeline content key. */
+  contentList?: ListItem[];
   as?: 'ul' | 'ol';
-  variant?: 'default' | 'none' | 'inline' | 'dot';
+  variant?: 'default' | 'numbered' | 'none' | 'inline' | 'dot';
   dotSize?: 'sm' | 'md' | 'lg';
   icon?: string;
-  /** Marker colour (bullet, icon, dot, ordered counter). */
-  color?: TextColour | RainbowColour;
-  /** Text atom props for item text — spread onto each item's nested Text.
-   *  Accepts any Text prop (color, family, size, weight, leading, uppercase, etc).
-   *  List always sets `as="span"` and `flush` internally. */
-  text?: Record<string, any>;
+  /** Brand-scale marker colour. Use one of brandColor or rainbowColor. */
+  brandColor?: TextColour;
+  /** Rainbow palette marker colour (1-7). Use one of brandColor or rainbowColor. */
+  rainbowColor?: RainbowColour;
+  /** Text atom styling props forwarded to each item's Text. */
+  textStyle?: Record<string, any>;
   spacing?: 'tight' | 'normal' | 'loose';
   flush?: boolean;
   /** Nested atom node used as the list marker — { component: 'Icon'|'Shape', ...atomProps }. */
   media?: Record<string, any>;
-  /** Text atom styling props forwarded to each item's Text. */
-  textStyle?: Record<string, any>;
+  /** Media marker size: 'auto' resolves from the list's item text scale.
+   *  'sm' | 'md' | 'lg' override with explicit numeric pixel sizes. */
+  mediaSize?: 'auto' | 'sm' | 'md' | 'lg';
   class?: string;
-  /** List items. Pipeline content key. */
-  contentList?: ListItem[];
-  [key: string]: any;
 }
 
 const {
   as: asOverride,
   variant = 'default',
-  markerSize,
   dotSize = 'md',
   icon,
-  color = 'primary',
+  brandColor,
+  rainbowColor,
   textStyle: textProps,
   spacing = 'normal',
   flush = false,
   media,
+  mediaSize = 'auto',
   class: className,
   contentList: items,
-  ...rest
 } = Astro.props;
 
 // Resolve tag: numbered → ol, everything else → ul. asOverride for backward compat.
 const Tag = asOverride || (variant === 'numbered' ? 'ol' : 'ul');
 
-const mediaComponent = media?.component;
-const { component: _mc, ...mediaProps } = media || {};
-const hasMedia = !!media;
-// Default marker size if the author didn't specify one.
-// Authors override by setting media.size (e.g. "xl" for a chunkier marker).
-const mediaPropsWithSize = hasMedia && mediaProps.size == null
-  ? { ...mediaProps, size: 'lg' }
-  : mediaProps;
+// Resolve colour: rainbow wins over brand if both set; default to 'primary'
+// for marker visibility (markers are accents, body-text-coloured markers
+// would be invisible against text).
+const colour = rainbowColor || brandColor || 'primary';
 
-// Extract data-* attributes
-const dataAttrs = Object.fromEntries(
-  Object.entries(rest).filter(([key]) => key.startsWith('data-'))
-);
+const mediaComponent = media?.component;
+const { component: _mc, ...rawMediaProps } = media || {};
+const hasMedia = !!media;
+
+// Marker sizing strategy: do NOT inject sizes from List. Icon and Shape
+// atoms use em-based size tokens (--media-{xs..xl}) that inherit from
+// the list item's font-size, so a default Icon naturally renders at body
+// text scale. Authors override per-instance via media.size when they
+// want a chunkier marker. mediaSize prop is reserved for future
+// per-list scaling, not used yet.
+const mediaPropsWithSize = rawMediaProps;
 
 const hasIcon = !!icon;
 
@@ -96,14 +101,14 @@ const classes = [
   hasIcon && 'list--has-icon',
   hasMedia && 'list--has-media',
   variant === 'dot' && `list--dot-${dotSize}`,
-  `list--${color}`,
+  `color--${colour}`,
   spacing !== 'normal' && `list--spacing-${spacing}`,
   flush && 'list--flush',
   className,
 ];
 ---
 
-<Tag class:list={classes} {...dataAttrs}>
+<Tag class:list={classes}>
   {(items || []).map((item: ListItem) => {
     const text = typeof item === 'string' ? item : item.contentLink;
     const href = typeof item === 'string' ? undefined : item.href;

@@ -16,10 +16,13 @@
    ========================================================== */
 
 .list {
-  /* ── Internal tokens (bridge → internal, single point of truth) ── */
-  --_list-marker:        var(--list-marker, var(--primary-base));
-  --_list-marker-accent: var(--list-marker-accent, var(--secondary-base));
-  --_list-text:          var(--list-text, var(--text-emphasis));
+  /* ── Internal tokens read from the global .color--{name} mixin ──
+     The mixin sets --_color, --_tier-tint/mid/emphasis, --_contrast on
+     the same element. List uses --_color for markers (the canonical
+     base hex of whatever colour the list is set to). */
+  --_list-marker:        var(--_color);
+  --_list-marker-accent: var(--_tier-emphasis);
+  --_list-text:          var(--text-emphasis);
 
   margin: 0 0 var(--content-flow-after-text) 0;
   padding-left: var(--space-xl);
@@ -46,7 +49,7 @@ ul.list--default {
 
 ul.list--default .list__item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-sm);
 }
 
@@ -106,7 +109,7 @@ ol.list--default.list--has-media .list__item::before {
 .list--has-icon .list__item,
 .list--has-media .list__item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-sm);
 }
 
@@ -121,22 +124,16 @@ ol.list--default.list--has-media .list__item::before {
 .list__media {
   flex-shrink: 0;
   margin-top: 0.15em;
+  /* Lock font-size to body text token so em-based child sizes (Icon's
+     --media-* tokens, Shape's width/height) resolve against the body
+     text context — not the surrounding heading or section font-size
+     they'd otherwise inherit through the flex item cascade. */
+  font-size: var(--text-body);
 }
 
-/* ── Colour variants — remap marker token ── */
-/* Links inside lists — normal link behaviour, markers own their colour */
-
-.list--primary   { --_list-marker: var(--primary-base); }
-.list--secondary { --_list-marker: var(--secondary-base); }
-.list--neutral   { --_list-marker: var(--neutral-base); }
-.list--text      { --_list-marker: var(--text-base); }
-.list--rainbow-1 { --_list-marker: var(--rainbow-1); }
-.list--rainbow-2 { --_list-marker: var(--rainbow-2); }
-.list--rainbow-3 { --_list-marker: var(--rainbow-3); }
-.list--rainbow-4 { --_list-marker: var(--rainbow-4); }
-.list--rainbow-5 { --_list-marker: var(--rainbow-5); }
-.list--rainbow-6 { --_list-marker: var(--rainbow-6); }
-.list--rainbow-7 { --_list-marker: var(--rainbow-7); }
+/* Per-colour rules removed — colour comes from .color--{name} global
+   mixin. --_list-marker reads --_color from the mixin (see top of
+   .list {}). */
 
 /* ==========================================================
    VARIANT: None
@@ -178,7 +175,7 @@ ol.list--default.list--has-media .list__item::before {
 
 .list--dot .list__item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-sm);
 }
 
@@ -231,47 +228,6 @@ ol.list--default.list--has-media .list__item::before {
   margin: 0;
 }
 
-/* ================================================================
-   RENDER MODE OVERRIDES
-   ================================================================ */
-
-/* ── Assistive — vertical stacked, large dot markers, easy scanning ── */
-
-[data-render="assistive"] .list {
-  list-style: none;
-  padding-left: 0;
-}
-
-[data-render="assistive"] .list__item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-sm) 0;
-}
-
-[data-render="assistive"] .list__item::before {
-  content: '';
-  width: 0.75em;
-  height: 0.75em;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--_list-marker);
-}
-
-/* Inline collapses to vertical */
-[data-render="assistive"] .list--inline {
-  display: block;
-}
-
-/* Icons + media markers hidden — large CSS dot replaces them */
-[data-render="assistive"] .list__icon,
-[data-render="assistive"] .list__media {
-  display: none;
-}
-
-/* Variant dots hidden — CSS ::before dot replaces for consistency */
-[data-render="assistive"] .list__dot {
-  display: none;
-}
-
-/* Textonly → global textonly/structure.css */
+/* data-render="assistive" rules → src/styles/gates/assistive-gate.css
+   Textonly rules → src/styles/textonly/textonly.css
+   The gate files are the single authority on render-mode behaviour. */

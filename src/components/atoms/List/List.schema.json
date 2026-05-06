@@ -4,10 +4,9 @@
   "renders": {
     "full": "List.astro",
     "reduced": "List.astro",
-    "assistive": "List.astro",
     "textonly": "List.astro"
   },
-  "notes": "Every list on the site goes through this component. Items render through Text atom. Icon variant uses Icon atom for decorative markers. No animation. All 4 renders use List.astro — pipeline strips icon prop in textonly (native bullets replace). Assistive render: all variants normalise to vertical stacked with large dot markers, icons hidden. Textonly render: native disc/decimal bullets, icons hidden, inline collapses to vertical.",
+  "notes": "Every list on the site goes through this component. Items render through Text atom. Icon variant uses Icon atom for decorative markers. No animation. Pipeline strips icon prop in textonly (native bullets replace). Textonly render: native disc/decimal bullets, icons hidden, inline collapses to vertical. Colour comes from the global .color--{name} mixin (colour.css).",
 
   "props": {
     "content": {
@@ -38,11 +37,22 @@
       }
     },
 
+    "colour": {
+      "_description": "Brand-scale colour for markers. Use one of brandColor or rainbowColor.",
+      "brandColor": { "type": "string", "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "text"], "description": "Brand-scale colour for markers, icons, dots. 'text' = body text scale (always readable)." }
+    },
+
+    "rainbow": {
+      "_description": "Rainbow palette colour (1-7 positional) for markers.",
+      "rainbowColor": { "type": "string", "required": false, "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Positional rainbow colour: 1=red, 2=orange, 3=yellow, 4=teal, 5=blue, 6=purple, 7=pink." }
+    },
+
     "visual": {
       "_description": "How the list looks",
+      "as":        { "type": "string",  "required": false, "default": null, "enum": ["ul", "ol"], "description": "HTML element override. ul=unordered, ol=ordered. Auto-resolves from variant if omitted." },
       "variant":   { "type": "string",  "required": false, "default": "default", "enum": ["default", "numbered", "none", "inline", "dot"], "description": "List style. default=bullets, numbered=ordered numbers, none=no markers, inline=horizontal, dot=custom circles." },
+      "dotSize":   { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Dot marker size for variant=dot." },
       "markerSize": { "type": "string",  "required": false, "default": "base", "enum": ["xs", "sm", "base", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "8xl"], "description": "Marker size for dots, icons, numbers, and media markers. Uses --media-* em tokens." },
-      "color":     { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "text", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Colour variant for markers, icons, and dots. 'text' = body text scale (always readable)." },
       "spacing":   { "type": "string",  "required": false, "default": "normal", "enum": ["tight", "normal", "loose"], "description": "Item spacing." },
       "flush":     { "type": "boolean", "required": false, "default": false, "description": "Remove outer margin." }
     },

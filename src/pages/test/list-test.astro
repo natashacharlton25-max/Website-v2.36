@@ -1,62 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Heading } from '../../components/atoms/Heading';
-import { List } from '../../components/atoms/List';
-import { Section } from '../../components/atoms/Section';
-
-import testData from '../../data/test/list.json';
-
-// Pipeline: strip props per render mode
-function textonlyProps(item: any) {
-  return { items: item.items, as: item.as };
-}
+import Renderer from '../../components/Renderer.astro';
+import data from '../../data/test/list.json';
 ---
 
-<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
-  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
-
-    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
-
-    {testData.sections.map((section: any) => (
-      <Section label={section.label} separator gap={testData.layout.itemGap}>
-        <div style="display:flex;flex-direction:column;gap:var(--space-xl);">
-          {section.items.map((item: any) => (
-            <Fragment>
-              <div class="render-full">
-                <List
-                  as={item.as}
-                  variant={item.variant}
-                  dotSize={item.dotSize}
-                  icon={item.icon}
-                  media={item.media}
-                  text={item.text}
-                  color={item.color}
-                  spacing={item.spacing}
-                  flush={item.flush}
-                  items={item.items}
-                />
-              </div>
-              <div class="render-reduced">
-                <List
-                  as={item.as}
-                  variant={item.variant}
-                  dotSize={item.dotSize}
-                  icon={item.icon}
-                  media={item.media}
-                  text={item.text}
-                  color={item.color}
-                  spacing={item.spacing}
-                  items={item.items}
-                />
-              </div>
-              <div class="render-textonly">
-                <List as={item.as} items={item.items} />
-              </div>
-            </Fragment>
-          ))}
-        </div>
-      </Section>
-    ))}
-
-  </Section>
+<BaseLayout title="List Atom Test">
+  <Renderer node={data} />
 </BaseLayout>
