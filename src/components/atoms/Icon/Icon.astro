@@ -42,7 +42,7 @@ interface Props {
   name: string;
   weight?: IconWeight;
   semanticRole?: IconSemanticRole;
-  iconLabel?: string;
+  labelIcon?: string;
 
   // ── Colour ──────────────────────────────────────────────
   brandColor?: BrandColour;
@@ -112,7 +112,7 @@ const {
   draw, drawMode: rawDrawMode = 'static', drawOnce, drawLaser, drawGhost, drawOnScroll, drawScrub, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize,
   morphTo, morphViaCircle, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom,
-  semanticRole, iconLabel,
+  semanticRole, labelIcon,
 } = Astro.props;
 
 // Resolve drawMode: drawOnce overrides to 'once', drawOnce+drawGhost → strip drawOnce
@@ -125,8 +125,8 @@ const drawColor = normalizeDrawColour(rawDrawColor);
 
 // A11y: ui-control and content-symbol need labels
 const isInformational = semanticRole === 'ui-control' || semanticRole === 'content-symbol';
-if (isInformational && !iconLabel && import.meta.env.DEV) {
-  console.warn(`[Icon ${name}] semanticRole="${semanticRole}" requires an iconLabel for accessibility`);
+if (isInformational && !labelIcon && import.meta.env.DEV) {
+  console.warn(`[Icon ${name}] semanticRole="${semanticRole}" requires an labelIcon for accessibility`);
 }
 
 // A11y: any icon with an interaction (hover/click/focus animation, draw, morph,
@@ -457,7 +457,7 @@ if (morphTo) {
       class:list={['icon', typeof size === 'string' && `icon--size-${size}`, ...effectClasses, className]}
       style={typeof size === 'number' ? `width: ${size}px; height: ${size}px;` : undefined}
       aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
-      aria-label={isInformational ? iconLabel : (isInteractive && iconLabel ? iconLabel : undefined)}
+      aria-label={isInformational ? labelIcon : (isInteractive && labelIcon ? labelIcon : undefined)}
       tabindex={isInteractive ? "0" : undefined}
       role={a11yRole}
       data-semantic-role={semanticRole}
@@ -468,7 +468,7 @@ if (morphTo) {
       {...dataAttrs}
     >
       <Fragment set:html={iconContent || fallbackIcon} />
-      {iconLabel && semanticRole === 'ui-control' && <span class="icon__label">{iconLabel}</span>}
+      {labelIcon && semanticRole === 'ui-control' && <span class="icon__label">{labelIcon}</span>}
     </span>
     <AnimExplainer
       slot="content"
@@ -490,7 +490,7 @@ if (morphTo) {
     class:list={['icon', typeof size === 'string' && `icon--size-${size}`, ...effectClasses, className]}
     style={typeof size === 'number' ? `width: ${size}px; height: ${size}px;` : undefined}
     aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
-    aria-label={isInformational ? iconLabel : (isInteractive && iconLabel ? iconLabel : undefined)}
+    aria-label={isInformational ? labelIcon : (isInteractive && labelIcon ? labelIcon : undefined)}
     tabindex={isInteractive ? "0" : undefined}
     role={a11yRole}
     data-semantic-role={semanticRole}
@@ -499,6 +499,6 @@ if (morphTo) {
     {...dataAttrs}
   >
     <Fragment set:html={iconContent || fallbackIcon} />
-    {iconLabel && semanticRole === 'ui-control' && <span class="icon__label">{iconLabel}</span>}
+    {labelIcon && semanticRole === 'ui-control' && <span class="icon__label">{labelIcon}</span>}
   </span>
 )}
