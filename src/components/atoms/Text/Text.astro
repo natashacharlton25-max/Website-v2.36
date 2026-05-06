@@ -12,7 +12,7 @@
  * Usage:
  *   <Text>Body text content here.</Text>
  *   <Text size="lg">Lead paragraph.</Text>
- *   <Text as="span" size="sm" color="text-light">Caption</Text>
+ *   <Text as="span" size="sm" brandColor="text">Caption</Text>
  *   <Text as="small" size="xs">Fine print.</Text>
  *   <Text as="strong" weight="bold">Important</Text>
  *   <Text clamp={3}>{card.description}</Text>
@@ -24,7 +24,7 @@
  */
 import { aacInline } from '../../../lib/aac/aac-inline';
 import '../../../components/molecules/aac/AacCard/AacCard.css';
-import type { FontFamily, FontWeight } from '../../../lib/shared-enums';
+import type { FontFamily, FontWeight, TextColour, RainbowColour } from '../../../lib/shared-enums';
 
 interface Props {
   /** Text display content. Pipeline content key. */
@@ -42,8 +42,10 @@ interface Props {
   /** Line height override */
   leading?: 'tight' | 'snug' | 'normal' | 'relaxed';
 
-  /** Colour token */
-  color?: 'default' | 'primary' | 'secondary' | 'neutral' | 'text' | 'rainbow-1' | 'rainbow-2' | 'rainbow-3' | 'rainbow-4' | 'rainbow-5' | 'rainbow-6' | 'rainbow-7';
+  /** Brand-scale colour. Use one of brandColor or rainbowColor, never both. */
+  brandColor?: TextColour;
+  /** Rainbow palette colour (1-7). Use one of brandColor or rainbowColor. */
+  rainbowColor?: RainbowColour;
 
   /** Font family variant */
   family?: FontFamily;
@@ -54,8 +56,10 @@ interface Props {
   /** Highlight background bar behind text */
   highlight?: boolean;
 
-  /** Highlight bar colour (independent from text colour) */
-  highlightColor?: 'primary' | 'secondary' | 'neutral' | 'rainbow-1' | 'rainbow-2' | 'rainbow-3' | 'rainbow-4' | 'rainbow-5' | 'rainbow-6' | 'rainbow-7';
+  /** Highlight bar brand colour (independent from text colour) */
+  highlightBrandColor?: TextColour;
+  /** Highlight bar rainbow colour */
+  highlightRainbowColor?: RainbowColour;
   highlightHeight?: 'sm' | 'md' | 'lg' | 'full';
   highlightOpacity?: 'faint' | 'soft' | 'bold' | 'solid';
   highlightShape?: 'sharp' | 'rounded';
@@ -89,12 +93,14 @@ const {
   size,
   weight,
   leading,
-  color,
+  brandColor,
+  rainbowColor,
   family,
   align,
   textTone,
   highlight = false,
-  highlightColor = 'primary',
+  highlightBrandColor,
+  highlightRainbowColor,
   highlightHeight,
   highlightOpacity,
   highlightShape,
@@ -109,12 +115,8 @@ const {
 
 // Highlight colour — don't use .color--* mixin (it overrides text colour).
 // Instead set tier tokens directly via inline style on the highlight span.
-const highlightColourTokenMap: Record<string, string> = {
-  primary: 'primary', secondary: 'secondary', neutral: 'neutral',
-  'rainbow-1': 'rainbow-1', 'rainbow-2': 'rainbow-2', 'rainbow-3': 'rainbow-3',
-  'rainbow-4': 'rainbow-4', 'rainbow-5': 'rainbow-5', 'rainbow-6': 'rainbow-6', 'rainbow-7': 'rainbow-7',
-};
-const hc = highlightColourTokenMap[highlightColor] || 'primary';
+// Resolve from the two split props (brand or rainbow). Default = primary.
+const hc = highlightRainbowColor || highlightBrandColor || 'primary';
 const isRainbow = hc.startsWith('rainbow-');
 const highlightStyle = highlight ? [
   `--_tier-tint: var(--${hc}-tint)`,
@@ -143,7 +145,8 @@ const classes = [
   size && `text--${size}`,
   weight && `text--weight-${weight}`,
   leading && `text--leading-${leading}`,
-  color && color !== 'default' && `text--${color}`,
+  rainbowColor && `text--${rainbowColor}`,
+  brandColor && `text--${brandColor}`,
   family && `text--family-${family}`,
   align && `text--align-${align}`,
   textTone && `text--tone-${textTone}`,
