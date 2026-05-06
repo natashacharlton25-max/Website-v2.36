@@ -1,60 +1,56 @@
 {
   "component": "List",
   "category": "atom",
-  "renders": {
-    "full": "List.astro",
-    "reduced": "List.astro",
-    "textonly": "List.astro"
-  },
-  "notes": "Every list on the site goes through this component. Items render through Text atom. Icon variant uses Icon atom for decorative markers. No animation. Pipeline strips icon prop in textonly (native bullets replace). Textonly render: native disc/decimal bullets, icons hidden, inline collapses to vertical. Colour comes from the global .color--{name} mixin (colour.css).",
+  "renders": { "full": "List.astro", "reduced": "List.astro", "textonly": "List.astro" },
+  "notes": "Every list goes through this component. Items render via Text atom (per-item content). Marker pattern matches Heading.media — single media prop accepts { component: 'Icon'|'Shape', ...atomProps }. Pipeline strips media in textonly (native bullets replace). Colour comes from the global .color--{name} mixin.",
 
   "props": {
     "content": {
-      "_description": "What the list contains",
-      "contentList": { "type": "array",   "required": true,  "description": "Array of items. Pipeline content key. Each item is either a string (plain text) or { contentLink, href } (linked item)." },
-      "icon":  { "type": "string",  "required": false, "default": null, "textonly": false, "_format": "icon-slug", "description": "Phosphor icon slug for simple icon markers. Stripped in textonly. Ignored if media is set." }
-    },
-
-    "media": {
-      "_description": "Rich marker atom — overrides the default bullet/icon/dot markers. Each list item renders its own instance.",
-      "media": {
-        "type": "object",
-        "textonly": false,
-        "_description": "Nested atom node. Child atom owns its own props (colour, size, animation, background). Shape can wrap an Icon. LottieIcon excluded — use an animated Icon instead.",
-        "properties": {
-          "component":    { "type": "string", "required": true, "enum": ["Icon", "Shape"] },
-          "semanticRole": { "type": "string", "required": true, "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] }
-        }
-      }
-    },
-
-    "text": {
-      "_description": "Text atom styling props forwarded to each item's Text atom.",
-      "textStyle": {
-        "type": "object",
-        "_ref": "Text",
-        "_description": "Validated against Text.schema.json. List controls 'as' and 'flush' internally."
-      }
+      "contentList": { "type": "array", "required": true, "description": "Array of items. Each item is a string (plain text) or { contentLink, href } (linked item). Pipeline content key." }
     },
 
     "colour": {
-      "_description": "Brand-scale colour for markers. Use one of brandColor or rainbowColor.",
-      "brandColor": { "type": "string", "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral", "text"], "description": "Brand-scale colour for markers, icons, dots. 'text' = body text scale (always readable)." }
+      "brandColor": { "type": "string", "default": "primary", "enum": ["primary", "secondary", "neutral", "text"], "_description": "Marker colour. 'text' = body text scale, always readable." }
     },
 
     "rainbow": {
-      "_description": "Rainbow palette colour (1-7 positional) for markers.",
-      "rainbowColor": { "type": "string", "required": false, "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Positional rainbow colour: 1=red, 2=orange, 3=yellow, 4=teal, 5=blue, 6=purple, 7=pink." }
+      "rainbowColor": { "type": "string", "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"] }
+    },
+
+    "media": {
+      "media":       { "type": "object", "textonly": false, "_description": "Per-item marker atom. mediaBg=false: single Icon | Shape. mediaBg=true: Shape wrapping a child Icon via its own media prop.", "properties": { "component": { "type": "string", "required": true, "enum": ["Icon", "Shape"] }, "semanticRole": { "type": "string", "required": true, "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] } } },
+      "mediaBg":     { "type": "boolean", "default": false, "_description": "true = media is a Shape wrapping a child atom (background container)." },
+      "mediaBgSize": { "type": "string", "default": "normal", "enum": ["compact", "normal", "spacious"], "_description": "Padding around child in Shape container. Only used when mediaBg=true." },
+      "mediaSize":   { "type": "string", "default": "auto", "enum": ["auto", "xs", "sm", "md", "lg", "xl", "base", "2xl", "3xl"], "_description": "Marker size. 'auto' inherits item text size via em." }
+    },
+
+    "text": {
+      "textStyle": { "type": "object", "_description": "Partial spread of Text styling props forwarded to each item's Text. List controls content + 'as' internally.", "properties": {
+        "size":                  { "type": "string",  "enum": ["xs","sm","base","lg","xl"] },
+        "weight":                { "type": "string",  "enum": ["light","normal","medium","semibold","bold","extrabold"] },
+        "leading":               { "type": "string",  "enum": ["tight","snug","normal","relaxed"] },
+        "family":                { "type": "string",  "enum": ["heading","body","body-alt","handwriting","mono"] },
+        "align":                 { "type": "string",  "enum": ["left","center","right","justify"] },
+        "brandColor":            { "type": "string",  "enum": ["primary","secondary","neutral","text"] },
+        "rainbowColor":          { "type": "string",  "enum": ["rainbow-1","rainbow-2","rainbow-3","rainbow-4","rainbow-5","rainbow-6","rainbow-7"] },
+        "highlight":             { "type": "boolean" },
+        "highlightBrandColor":   { "type": "string",  "enum": ["primary","secondary","neutral","text"] },
+        "highlightRainbowColor": { "type": "string",  "enum": ["rainbow-1","rainbow-2","rainbow-3","rainbow-4","rainbow-5","rainbow-6","rainbow-7"] },
+        "highlightHeight":       { "type": "string",  "enum": ["sm","md","lg","full"] },
+        "highlightOpacity":      { "type": "string",  "enum": ["faint","soft","bold","solid"] },
+        "highlightShape":        { "type": "string",  "enum": ["sharp","rounded"] },
+        "highlightShadow":       { "type": "string",  "enum": ["auto","on","off"] },
+        "highlightCycle":        { "type": "boolean" },
+        "uppercase":             { "type": "boolean" },
+        "textTone":              { "type": "string",  "enum": ["light","dark"] }
+      } }
     },
 
     "visual": {
-      "_description": "How the list looks",
-      "as":        { "type": "string",  "required": false, "default": null, "enum": ["ul", "ol"], "description": "HTML element override. ul=unordered, ol=ordered. Auto-resolves from variant if omitted." },
-      "variant":   { "type": "string",  "required": false, "default": "default", "enum": ["default", "numbered", "none", "inline", "dot"], "description": "List style. default=bullets, numbered=ordered numbers, none=no markers, inline=horizontal, dot=custom circles." },
-      "dotSize":   { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Dot marker size for variant=dot." },
-      "markerSize": { "type": "string",  "required": false, "default": "base", "enum": ["xs", "sm", "base", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "8xl"], "description": "Marker size for dots, icons, numbers, and media markers. Uses --media-* em tokens." },
-      "spacing":   { "type": "string",  "required": false, "default": "normal", "enum": ["tight", "normal", "loose"], "description": "Item spacing." },
-      "flush":     { "type": "boolean", "required": false, "default": false, "description": "Remove outer margin." }
+      "variant": { "type": "string", "default": "default", "enum": ["default", "numbered", "none", "inline", "dot"], "_description": "default=bullets, numbered=ol, none=no markers, inline=horizontal, dot=custom circles." },
+      "dotSize": { "type": "string", "default": "md", "enum": ["sm", "md", "lg"], "_description": "Dot marker size for variant=dot only." },
+      "spacing": { "type": "string", "default": "normal", "enum": ["tight", "normal", "loose"] },
+      "flush":   { "type": "boolean", "default": false, "_description": "Remove outer margin." }
     },
 
     "animation": {}

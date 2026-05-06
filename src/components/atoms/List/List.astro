@@ -7,15 +7,16 @@
  * List.css is the single source of truth for list styling.
  *
  * Colour comes from the global .color--{name} mixin (colour.css).
+ * Marker pattern matches Heading.media: a single `media` prop accepts
+ * { component: 'Icon'|'Shape', ...atomProps }. Each list item renders
+ * its own instance.
  *
  * Styles: List.css | List.responsive.css
  *
  * Usage:
  *   <List contentList={['One', 'Two', 'Three']} />
- *   <List as="ol" contentList={['First', 'Second']} />
- *   <List icon="check-circle-fill" contentList={['Done', 'Done']} />
- *   <List icon="arrow-right-fill" brandColor="secondary" contentList={['Go', 'Go']} />
- *   <List variant="dot" contentList={['Custom dots']} />
+ *   <List variant="numbered" contentList={['First', 'Second']} />
+ *   <List media={{ component: 'Icon', name: 'check-circle-fill' }} contentList={['Done', 'Done']} />
  *   <List variant="dot" dotSize="lg" contentList={['Big dots']} />
  *   <List variant="none" contentList={['Clean', 'No bullets']} />
  *   <List variant="inline" contentList={['Tag', 'Tag', 'Tag']} />
@@ -33,10 +34,8 @@ type ListItem = string | { contentLink: string; href: string; };
 interface Props {
   /** List items. Pipeline content key. */
   contentList?: ListItem[];
-  as?: 'ul' | 'ol';
   variant?: 'default' | 'numbered' | 'none' | 'inline' | 'dot';
   dotSize?: 'sm' | 'md' | 'lg';
-  icon?: string;
   /** Brand-scale marker colour. Use one of brandColor or rainbowColor. */
   brandColor?: TextColour;
   /** Rainbow palette marker colour (1-7). Use one of brandColor or rainbowColor. */
@@ -45,32 +44,36 @@ interface Props {
   textStyle?: Record<string, any>;
   spacing?: 'tight' | 'normal' | 'loose';
   flush?: boolean;
-  /** Nested atom node used as the list marker — { component: 'Icon'|'Shape', ...atomProps }. */
+  /** Per-item marker atom — { component: 'Icon'|'Shape', ...atomProps }.
+   *  Pattern matches Heading.media. mediaBg=true wraps in Shape container. */
   media?: Record<string, any>;
-  /** Media marker size: 'auto' resolves from the list's item text scale.
-   *  'sm' | 'md' | 'lg' override with explicit numeric pixel sizes. */
-  mediaSize?: 'auto' | 'sm' | 'md' | 'lg';
+  /** true = media is a Shape wrapping a child atom (background container). */
+  mediaBg?: boolean;
+  /** Padding around child in Shape container mode. */
+  mediaBgSize?: 'compact' | 'normal' | 'spacious';
+  /** Marker size: 'auto' inherits item text size via em. */
+  mediaSize?: 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'base' | '2xl' | '3xl';
   class?: string;
 }
 
 const {
-  as: asOverride,
   variant = 'default',
   dotSize = 'md',
-  icon,
   brandColor,
   rainbowColor,
   textStyle: textProps,
   spacing = 'normal',
   flush = false,
   media,
+  mediaBg = false,
+  mediaBgSize = 'normal',
   mediaSize = 'auto',
   class: className,
   contentList: items,
 } = Astro.props;
 
-// Resolve tag: numbered → ol, everything else → ul. asOverride for backward compat.
-const Tag = asOverride || (variant === 'numbered' ? 'ol' : 'ul');
+// Resolve tag: numbered → ol, everything else → ul.
+const Tag = variant === 'numbered' ? 'ol' : 'ul';
 
 // Resolve colour: rainbow wins over brand if both set; default to 'primary'
 // for marker visibility (markers are accents, body-text-coloured markers
@@ -81,25 +84,18 @@ const mediaComponent = media?.component;
 const { component: _mc, ...rawMediaProps } = media || {};
 const hasMedia = !!media;
 
-// Marker sizing strategy: do NOT inject sizes from List. Icon and Shape
-// atoms use em-based size tokens (--media-{xs..xl}) that inherit from
-// the list item's font-size, so a default Icon naturally renders at body
-// text scale. Authors override per-instance via media.size when they
-// want a chunkier marker. mediaSize prop is reserved for future
-// per-list scaling, not used yet.
-const mediaPropsWithSize = rawMediaProps;
-
-const hasIcon = !!icon;
-
-// Fallback icon size — small inline markers, not standalone size
-const iconSizeMap: Record<string, string> = { sm: 'xs', md: 'sm', lg: 'md' };
-const iconSize = iconSizeMap[dotSize] || 'sm';
+// Marker sizing: when mediaSize is set explicitly, pass through to atom.
+// 'auto' = no size injection, atom inherits text size via em (1em default).
+const mediaPropsWithSize = (mediaSize !== 'auto' && rawMediaProps.size == null)
+  ? { ...rawMediaProps, size: mediaSize }
+  : rawMediaProps;
 
 const classes = [
   'list',
   `list--${variant}`,
-  hasIcon && 'list--has-icon',
   hasMedia && 'list--has-media',
+  hasMedia && mediaBg && 'list--has-media-bg',
+  hasMedia && mediaBg && `list--media-bg-${mediaBgSize}`,
   variant === 'dot' && `list--dot-${dotSize}`,
   `color--${colour}`,
   spacing !== 'normal' && `list--spacing-${spacing}`,
@@ -116,9 +112,6 @@ const classes = [
       <li class="list__item">
         {hasMedia && mediaComponent === 'Icon' && <Icon {...(mediaPropsWithSize as any)} class="list__media" />}
         {hasMedia && mediaComponent === 'Shape' && <Shape {...(mediaPropsWithSize as any)} class="list__media" />}
-        {!hasMedia && hasIcon && (
-          <Icon name={icon!} size={iconSize as any} semanticRole="decorative" class="list__icon" />
-        )}
         {!hasMedia && variant === 'dot' && (
           <span class="list__dot" aria-hidden="true"></span>
         )}

@@ -268,10 +268,11 @@ export function validateComponent(
       }
     }
 
-    // _ref objects — validate props against referenced atom schema
+    // _ref objects — validate props against referenced atom schema.
+    // (textStyle props on List/Link enumerate Text props inline now,
+    //  so this path is reserved for FULL atom-instance refs only.)
     if (typeof value === 'object' && value !== null && !Array.isArray(value) && (def as any)._ref) {
       const refName = (def as any)._ref;
-      // schemaMap passed via closure from Renderer — check if available
       if (typeof globalThis !== 'undefined' && (globalThis as any).__schemaMap) {
         const refSchema = (globalThis as any).__schemaMap.get(refName);
         if (refSchema) {
