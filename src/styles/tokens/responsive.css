@@ -117,6 +117,29 @@
     border-radius: var(--radius-md);
     gap: var(--space-sm);
   }
+
+  /* Lists: inline lists stack vertically, dots/numbers/bullets scale up */
+  .list--inline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .list .list__item {
+    padding: var(--space-sm) 0;
+  }
+  .list--dot-sm .list__dot,
+  .list--dot-md .list__dot,
+  .list--dot-lg .list__dot {
+    width: 0.75em;
+    height: 0.75em;
+  }
+  ol.list--default .list__item::before {
+    font-size: 1.25em;
+    min-width: 1.25em;
+  }
+  ul.list--default .list__item::before {
+    width: 0.6em;
+    height: 0.6em;
+  }
 }
 
 @media (max-width: 400px) {
@@ -276,5 +299,13 @@
     overflow: hidden;
   }
 
-  /* Lists: handled in List.responsive.css (loads after List.css) */
+  /* Lists: kill indent, let text wrap below marker */
+  .list,
+  ul.list--default,
+  ol.list--default {
+    padding-left: 0;
+  }
+  ol.list--default .list__item::before {
+    min-width: auto;
+  }
 }
