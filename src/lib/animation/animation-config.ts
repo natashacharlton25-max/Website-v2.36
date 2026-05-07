@@ -59,3 +59,5 @@ export { getScrollContainer } from './helpers/scroll';
 // Animation-type configs
 export { GRADIENT_ANIMATION_SPEED } from './config/gradient';
 export type { GradientAnimationSpeed } from './config/gradient';
+export { INTERVAL_TOKENS, getIntervalSeconds } from './config/interval';
+export type { IntervalToken } from './config/interval';

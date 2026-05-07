@@ -138,9 +138,14 @@ function validateJson(data, label) {
         }
       }
 
-      // Enum constraint
+      // Enum constraint. When the schema declares a union type like
+      // ["number", "string"] (size props that accept either a token or
+      // explicit pixel number), the enum applies only to the STRING side
+      // — numbers are always free-form. Skip the enum check for numeric
+      // values when the type union includes "number".
       if (def.enum && value !== undefined && value !== null) {
-        if (!def.enum.includes(value)) {
+        const numericInUnion = Array.isArray(def.type) && def.type.includes('number') && typeof value === 'number';
+        if (!numericInUnion && !def.enum.includes(value)) {
           issues.push({ path: jsonPath, msg: `${component}.${key}: "${value}" not in enum [${def.enum.join(', ')}]` });
         }
       }

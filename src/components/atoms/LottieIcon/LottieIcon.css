@@ -10,14 +10,18 @@
   align-items: center;
   justify-content: center;
   color: inherit;
-  width: var(--media-lg);
-  height: var(--media-lg);
+  /* No size class set → inherit text size. 1em = the surrounding text's
+     font-size, matching Icon's base behaviour. Authors set size="..."
+     for explicit --media-* tier. Consistent with Icon atom. */
+  width: 1em;
+  height: 1em;
 }
 
 /* Named size variants — em-based so the icon scales with parent text.
    Inline style on the element with a numeric px size overrides these. */
 .lottie-icon--size-xs   { width: var(--media-xs);   height: var(--media-xs); }
 .lottie-icon--size-sm   { width: var(--media-sm);   height: var(--media-sm); }
+.lottie-icon--size-md   { width: var(--media-md);   height: var(--media-md); }
 .lottie-icon--size-base { width: var(--media-base); height: var(--media-base); }
 .lottie-icon--size-lg   { width: var(--media-lg);   height: var(--media-lg); }
 .lottie-icon--size-xl   { width: var(--media-xl);   height: var(--media-xl); }
@@ -41,29 +45,25 @@
 
 /* Theme adaptation → high-contrast.css + theme-chroma-mono.css */
 
-/* ── Colour override — forces currentColor on Lottie SVG ── */
-.lottie-icon--inherit   { color: inherit; }
-.lottie-icon--primary   { color: var(--primary-base); }
-.lottie-icon--secondary { color: var(--secondary-base); }
-.lottie-icon--neutral   { color: var(--neutral-base); }
-.lottie-icon--red       { color: var(--rainbow-1); }
-.lottie-icon--orange    { color: var(--rainbow-2); }
-.lottie-icon--yellow    { color: var(--rainbow-3); }
-.lottie-icon--teal      { color: var(--rainbow-4); }
-.lottie-icon--blue      { color: var(--rainbow-5); }
-.lottie-icon--purple    { color: var(--rainbow-6); }
-.lottie-icon--pink      { color: var(--rainbow-7); }
+/* ── Colour override — global .color--{name} mixin sets --_color on the
+   .lottie-icon element. The .lottie-icon class then sets `color: var(--_color)`
+   and the SVG inherits via currentColor. Lottie's runtime injects inline
+   fill/stroke styles into every <path>/<rect>/etc; LottieIcon.astro's
+   stripLottieInlineColours() removes them after each frame so currentColor
+   wins via normal cascade (no specificity hacks needed). ── */
+.lottie-icon[class*="color--"] {
+  color: var(--_color);
+}
 
-/* When colour is set, override Lottie native colours */
-.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg path,
-.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg rect,
-.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg circle,
-.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg line,
-.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg ellipse,
-.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg polygon,
-.lottie-icon[class*="lottie-icon--"] .lottie-icon__container svg polyline {
-  stroke: currentColor !important;
-  fill: currentColor !important;
+.lottie-icon[class*="color--"] .lottie-icon__container svg path,
+.lottie-icon[class*="color--"] .lottie-icon__container svg rect,
+.lottie-icon[class*="color--"] .lottie-icon__container svg circle,
+.lottie-icon[class*="color--"] .lottie-icon__container svg line,
+.lottie-icon[class*="color--"] .lottie-icon__container svg ellipse,
+.lottie-icon[class*="color--"] .lottie-icon__container svg polygon,
+.lottie-icon[class*="color--"] .lottie-icon__container svg polyline {
+  stroke: currentColor;
+  fill: currentColor;
 }
 
 /* Static fallback — hidden by default */

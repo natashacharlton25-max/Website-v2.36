@@ -13,11 +13,14 @@
  */
 
 type ThemeChangeCallback = () => void;
-const themeChangeCallbacks: ThemeChangeCallback[] = [];
+const themeChangeCallbacks: Set<ThemeChangeCallback> = new Set();
 
-/** Register a callback to run on theme change */
-export function onThemeChange(cb: ThemeChangeCallback): void {
-  themeChangeCallbacks.push(cb);
+/** Register a callback to run on theme change.
+ *  Returns an unsubscribe function — call it before unmounting to
+ *  prevent orphaned callbacks accumulating across page navigations. */
+export function onThemeChange(cb: ThemeChangeCallback): () => void {
+  themeChangeCallbacks.add(cb);
+  return () => { themeChangeCallbacks.delete(cb); };
 }
 
 /** Fire all theme change callbacks */

@@ -53,7 +53,7 @@ interface Props {
   /** Named em-based size scale (xs–8xl) or explicit pixel number.
    *  Named sizes use --media-* tokens and scale with parent font-size.
    *  Numeric sizes output fixed px for absolute control. */
-  size?: number | 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | '8xl';
+  size?: number | 'xs' | 'sm' | 'md' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | '8xl';
   shadow?: IconShadow;
   glow?: IconGlow;
 
@@ -69,6 +69,10 @@ interface Props {
   animation?: Animation;
   animationTrigger?: AnimationTriggerInteractive;
   animationRepeat?: 'once' | 'loop' | 'three' | 'threeloop';
+  /** Gap between attention-pulse bursts. Token-driven (short/base/long/longer)
+   *  with motion-mode scaling — gentle = 2× longer pause. Used by
+   *  animationRepeat=threeloop and animationTrigger=interval. */
+  animationInterval?: 'short' | 'base' | 'long' | 'longer';
   /** Suppress the AAC animation explainer wrapper. Pipeline injects
    *  this for Icons inside Badges; authors can override per-instance. */
   noExplainer?: boolean;
@@ -108,7 +112,7 @@ const {
   brandColor, rainbowColor, colorTier,
   shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientAnimate, gradientAnimateDirection, gradientAnimateSpeed,
-  animation, animationTrigger = 'hover', animationRepeat = 'threeloop', noExplainer,
+  animation, animationTrigger = 'hover', animationRepeat = 'threeloop', animationInterval = 'base', noExplainer,
   draw, drawMode: rawDrawMode = 'static', drawOnce, drawLaser, drawGhost, drawOnScroll, drawScrub, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize,
   morphTo, morphViaCircle, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom,
@@ -463,6 +467,7 @@ if (morphTo) {
       data-semantic-role={semanticRole}
       data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
       data-anim-repeat={animation && animationRepeat !== 'once' ? animationRepeat : undefined}
+      data-anim-interval={animation && (animationRepeat === 'threeloop' || animationTrigger === 'interval') ? animationInterval : undefined}
       data-has-explainer=""
       aria-describedby={explainerId}
       {...dataAttrs}

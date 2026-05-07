@@ -1,48 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Page } from '../../components/atoms/Page';
-import { Section } from '../../components/atoms/Section';
-import { Heading } from '../../components/atoms/Heading';
-import { Text } from '../../components/atoms/Text';
-import { LottieIcon } from '../../components/atoms/LottieIcon';
-import { Grid } from '../../components/atoms/Grid';
-
+import Renderer from '../../components/Renderer.astro';
 import data from '../../data/test/lottie-icon.json';
-
-const sections = data.children || [];
 ---
 
 <BaseLayout title="LottieIcon Atom Test">
-  <Page margin={data.margin as any}>
-    {sections.map((section: any) => (
-      <Section gap={section.gap as any} container={section.container as any}>
-        {(section.children || []).map((child: any) => {
-          if (child.component === 'Heading') {
-            return <Heading level={child.level as any} align={child.align as any} flush={child.flush}>{child.text}</Heading>;
-          }
-          if (child.component === 'Grid') {
-            return (
-              <Grid variant={child.variant as any} gap={child.gap as any} align={child.align as any}>
-                {(child.children || []).map((lottie: any) => (
-                  <div style="text-align:center; display:inline-flex; flex-direction:column; align-items:center; gap:var(--space-xs);">
-                    <LottieIcon
-                      slug={lottie.slug}
-                      size={lottie.size}
-                      color={lottie.color}
-                      role={lottie.role}
-                      trigger={lottie.trigger}
-                      label={lottie.label}
-                      fallbackIcon={lottie.fallbackIcon}
-                      interval={lottie.interval}
-                    />
-                    {lottie.label && <Text as="span" size="xs" flush class="lottie-label">{lottie.label}</Text>}
-                  </div>
-                ))}
-              </Grid>
-            );
-          }
-        })}
-      </Section>
-    ))}
-  </Page>
+  <Renderer node={data} />
 </BaseLayout>

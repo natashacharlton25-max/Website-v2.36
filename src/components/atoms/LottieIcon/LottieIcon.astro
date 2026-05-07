@@ -1,26 +1,33 @@
 ---
 /**
- * LottieIcon — API-backed animated icon using Lottie
+ * LottieIcon — API-backed animated icon using Lottie.
  *
  * Fetches Lottie JSON from the Asset Library API at build/render time
- * and inlines it as animationData (no runtime network dependency).
- * Falls back to `src` prop (legacy filesystem path) if slug is not provided.
+ * and inlines it as animationData. Falls back to `src` (legacy filesystem
+ * path). When slug is provided, the API also returns the paired Phosphor
+ * fallbackIcon so authors don't have to declare it manually.
  *
- * Usage (API-backed):
- *   <LottieIcon slug="lottie-menu" size={24} />
+ * Colour: Lottie animations have baked-in colours by default
+ * (nativeMode=true). Set nativeMode=false + brandColor/rainbowColor to
+ * override every fill+stroke in the SVG with the global .color--{name}
+ * mixin's --_color (post-init style strip, no !important).
  *
- * Usage (legacy — filesystem path):
- *   <LottieIcon src="/Icons/Animated Icons/Menu V2/menuV2.json" size={24} />
+ * Motion: animation runtime is dynamically imported — when motion=none
+ * lottie-web is never loaded, the static fallback Icon renders instead.
  *
- * Control via JavaScript:
- *   const icon = document.querySelector('[data-lottie-icon]');
+ * Usage:
+ *   <LottieIcon slug="lottie-menu" semanticRole="ui-control" labelLottieIcon="Open menu" />
+ *   <LottieIcon slug="lottie-heart" animationTrigger="hover" animationRepeat="threeloop" />
+ *   <LottieIcon slug="lottie-spinner" animationTrigger="autoplay" animationRepeat="loop" nativeMode={false} brandColor="primary" />
+ *
+ * Control via events:
  *   icon.dispatchEvent(new CustomEvent('lottie:play'));
- *   icon.dispatchEvent(new CustomEvent('lottie:playReverse'));
  *   icon.dispatchEvent(new CustomEvent('lottie:stop'));
  *   icon.dispatchEvent(new CustomEvent('lottie:goToFrame', { detail: { frame: 0 } }));
  */
 
 import { Icon } from '../Icon';
+import type { TextColour, RainbowColour } from '../../../lib/shared-enums';
 
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
 const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
@@ -28,21 +35,28 @@ const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
 interface Props {
   slug?: string;
   src?: string;
-  label?: string;
-  /** Phosphor icon name for static fallback (shown in reduced/highlight/focus/textonly) */
+  /** Phosphor icon name for static fallback. Auto-resolved from API meta when slug is set. */
   fallbackIcon?: string;
-  /** Named em-based size (xs–8xl, scales with parent text) or explicit pixel number. */
-  size?: number | 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | '8xl';
-  /** Role determines a11y behaviour and textonly rendering */
-  role?: 'decorative' | 'navigation' | 'informational';
-  /** Override Lottie native colours with CSS color. Enum or 'native' to keep baked-in colours. */
-  color?: 'native' | 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink' | 'inherit';
-  /** Animation trigger mode — replaces autoplay/loop */
-  trigger?: 'autoplay' | 'loop' | 'hover' | 'viewport' | 'interval' | 'none';
-  /** Interval in ms (only used with trigger="interval") */
-  interval?: number;
-  loop?: boolean;
-  autoplay?: boolean;
+  /** Free-form label. Required when semanticRole is ui-control or content-symbol. */
+  labelLottieIcon?: string;
+  /** Semantic role — matches Icon's vocabulary so atoms compose cleanly. */
+  semanticRole?: 'decorative' | 'ui-control' | 'content-symbol';
+  /** Named em-based size token (xs–8xl).
+   *  Undefined = inherit text size via 1em (matches Icon atom). */
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'base' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl' | '8xl';
+  /** true (default) preserves Lottie baked colours. false applies brand/rainbow colour via mixin. */
+  nativeMode?: boolean;
+  /** Brand colour override (only used when nativeMode=false). */
+  brandColor?: TextColour;
+  /** Rainbow colour override (only used when nativeMode=false). */
+  rainbowColor?: RainbowColour;
+  /** Animation trigger — matches Icon's vocabulary exactly. */
+  animationTrigger?: 'hover' | 'viewport' | 'autoplay' | 'loop' | 'interval' | 'click' | 'focus' | 'none';
+  /** Repeat behaviour — matches Icon's vocabulary exactly. */
+  animationRepeat?: 'once' | 'loop' | 'three' | 'threeloop';
+  /** Gap between attention-pulse bursts. Token-driven (short/base/long/longer)
+   *  with motion-mode scaling — gentle = 2× longer pause. Matches Icon. */
+  animationInterval?: 'short' | 'base' | 'long' | 'longer';
   class?: string;
   id?: string;
 }
@@ -50,22 +64,28 @@ interface Props {
 const {
   slug,
   src,
-  label,
   fallbackIcon,
-  role: roleProp = 'decorative',
-  size = 'lg',
-  color = 'native',
-  trigger = 'none',
-  interval = 3000,
-  loop = false,
-  autoplay = false,
+  labelLottieIcon,
+  semanticRole = 'decorative',
+  size,
+  nativeMode = true,
+  brandColor,
+  rainbowColor,
+  animationTrigger = 'hover',
+  animationRepeat = 'threeloop',
+  animationInterval = 'base',
   class: className = '',
   id,
 } = Astro.props;
 
-// Resolve trigger to loop/autoplay for backward compat
-const resolvedLoop = trigger === 'loop' || loop;
-const resolvedAutoplay = trigger === 'autoplay' || trigger === 'loop' || autoplay;
+// Resolve colour: rainbow wins over brand. Only emitted when nativeMode=false.
+const colour = !nativeMode ? (rainbowColor || brandColor || 'primary') : null;
+
+// ui-control / content-symbol need a label for accessibility
+const isInformational = semanticRole === 'ui-control' || semanticRole === 'content-symbol';
+if (isInformational && !labelLottieIcon && import.meta.env.DEV) {
+  console.warn(`[LottieIcon] semanticRole="${semanticRole}" requires labelLottieIcon for accessibility`);
+}
 
 // Fetch Lottie JSON + fallback icon from API at build/render time
 let animationData: string | null = null;
@@ -99,19 +119,24 @@ if (slug) {
   }
 }
 
+const classes = [
+  'lottie-icon',
+  size && `lottie-icon--size-${size}`,
+  colour && `color--${colour}`,
+  className,
+];
 ---
 
 <div
-  class:list={['lottie-icon', typeof size === 'string' && `lottie-icon--size-${size}`, color !== 'native' && `lottie-icon--${color}`, className]}
+  class:list={classes}
   data-lottie-icon
-  data-lottie-trigger={trigger}
-  data-lottie-interval={trigger === 'interval' ? interval : undefined}
-  data-lottie-loop={resolvedLoop}
-  data-lottie-autoplay={resolvedAutoplay}
-  data-semantic-role={roleProp}
-  {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': 'true' })}
-  tabindex={roleProp === 'navigation' || trigger === 'hover' ? '0' : undefined}
-  style={typeof size === 'number' ? `width: ${size}px; height: ${size}px;` : undefined}
+  data-anim-trigger={animationTrigger}
+  data-anim-repeat={animationRepeat}
+  data-anim-interval={animationInterval}
+  data-lottie-native={nativeMode ? 'true' : 'false'}
+  data-semantic-role={semanticRole}
+  {...(labelLottieIcon ? { role: 'img', 'aria-label': labelLottieIcon } : { 'aria-hidden': 'true' })}
+  tabindex={semanticRole === 'ui-control' || animationTrigger === 'hover' || animationTrigger === 'click' || animationTrigger === 'focus' ? '0' : undefined}
   id={id}
   {...(src && !animationData ? { 'data-lottie-src': src } : {})}
 >
@@ -129,36 +154,85 @@ if (slug) {
 </div>
 
 <script>
-  import lottie from 'lottie-web';
-  import type { AnimationItem } from 'lottie-web';
+  // LottieIcon plays back via Lottie, but trigger orchestration goes
+  // through registerTrigger so motion/hover/render gates, viewport
+  // stagger queue, and click/focus/interval all behave consistently
+  // with Icon. Repeat semantics (once/loop/three/threeloop) match Icon.
+  // motion=none = no Lottie loaded at all (static fallback Icon shows).
+  import {
+    getAnimationConfig,
+    onThemeChange,
+    registerTrigger,
+    getIntervalSeconds,
+  } from '../../../lib/animation/animation-config';
 
   interface LottieIconElement extends HTMLElement {
-    _lottieAnim?: AnimationItem;
+    _lottieAnim?: any;
     _lottieDirection?: 1 | -1;
+    _lottieUnsubscribe?: () => void;
   }
 
-  function initLottieIcon(element: LottieIconElement) {
+  /**
+   * Strip Lottie's runtime-injected inline fill/stroke styles so the
+   * global .color--{name} mixin colour can win via currentColor.
+   *
+   * Runs once on DOMLoaded (covers the initial paint of all layers).
+   * For Lottie animations that DON'T animate colour values (the common
+   * case — most animated icons keep static layer colours), one strip is
+   * sufficient: Lottie only writes inline fill/stroke when a layer's
+   * keyframe value changes. Static colours = no rewrites = our strip
+   * persists.
+   *
+   * Edge case: colour-animated Lotties with nativeMode=false will only
+   * have their FIRST frame's colours overridden. Document if that becomes
+   * a real-world problem.
+   *
+   * nativeMode=true skips this entirely — the baked colours are preserved.
+   */
+  function stripLottieInlineColours(container: HTMLElement) {
+    const targets = container.querySelectorAll('path, rect, circle, line, ellipse, polygon, polyline');
+    targets.forEach(el => {
+      const svg = el as SVGElement;
+      svg.style.removeProperty('fill');
+      svg.style.removeProperty('stroke');
+    });
+  }
+
+  async function initLottieIcon(element: LottieIconElement) {
     const container = element.querySelector('[data-lottie-container]') as HTMLElement;
     if (!container || element._lottieAnim) return;
 
-    const loop = element.dataset.lottieLoop === 'true';
-    const autoplay = element.dataset.lottieAutoplay === 'true';
+    // Motion gate — bail if animation is off site-wide.
+    if (!getAnimationConfig().canAnimate) return;
+
+    const animTrigger = element.dataset.animTrigger || 'hover';
+    const animRepeat = (element.dataset.animRepeat || 'threeloop') as 'once' | 'loop' | 'three' | 'threeloop';
+    const intervalToken = (element.dataset.animInterval || 'base') as 'short' | 'base' | 'long' | 'longer';
+    const nativeMode = element.dataset.lottieNative !== 'false';
+
+    // Lottie's loop flag — only true when repeat=loop (continuous infinite).
+    // three/threeloop manage their own repeat counts via onComplete, so
+    // Lottie itself only plays once per "play" call in those modes.
+    const lottieLoop = animRepeat === 'loop';
 
     // Try inlined animation data first, then fall back to src URL
     const dataScript = element.querySelector('[data-lottie-data]');
     const src = element.dataset.lottieSrc;
 
-    let animConfig: Parameters<typeof lottie.loadAnimation>[0];
+    // Dynamic import — only loads lottie-web when an animation actually fires
+    const { default: lottie } = await import('lottie-web');
+
+    let animConfig: any;
 
     if (dataScript?.textContent) {
       try {
         const animationData = JSON.parse(dataScript.textContent);
-        animConfig = { container, renderer: 'svg', loop, autoplay, animationData };
+        animConfig = { container, renderer: 'svg', loop: lottieLoop, autoplay: false, animationData };
       } catch {
         return; // Invalid JSON — skip
       }
     } else if (src) {
-      animConfig = { container, renderer: 'svg', loop, autoplay, path: src };
+      animConfig = { container, renderer: 'svg', loop: lottieLoop, autoplay: false, path: src };
     } else {
       return; // No data source
     }
@@ -168,6 +242,30 @@ if (slug) {
 
       element._lottieAnim = anim;
       element._lottieDirection = 1;
+
+      // Apply duration scale so LottieIcon respects motion mode the same
+      // way Icon does. gentle = 2x slower, full = native speed. setSpeed(0.5)
+      // halves playback, setSpeed(1) is native. Inverse of durationScale
+      // because longer duration = slower speed. Re-applies on theme change
+      // so live mode-switching takes effect without remount.
+      const applySpeed = () => {
+        const cfg = getAnimationConfig();
+        anim.setSpeed(1 / cfg.durationScale);
+      };
+      applySpeed();
+      // Re-apply when theme/mode changes via the shared pub/sub. Single
+      // observer site-wide (in gates/theme-change.ts), every LottieIcon
+      // registers a callback into it. Stored on the element so cleanup
+      // can unsubscribe before unmount.
+      element._lottieUnsubscribe = onThemeChange(applySpeed);
+
+      // Colour override: when nativeMode=false, strip Lottie's inline
+      // fill/stroke styles after initial paint so the global .color--{name}
+      // mixin's currentColor inherits. One-shot on DOMLoaded — sufficient
+      // for static-colour Lotties (the common case). See function docstring.
+      if (!nativeMode) {
+        anim.addEventListener('DOMLoaded', () => stripLottieInlineColours(container));
+      }
 
       // Custom events for control
       element.addEventListener('lottie:play', () => {
@@ -182,13 +280,8 @@ if (slug) {
         anim.play();
       });
 
-      element.addEventListener('lottie:stop', () => {
-        anim.stop();
-      });
-
-      element.addEventListener('lottie:pause', () => {
-        anim.pause();
-      });
+      element.addEventListener('lottie:stop', () => { anim.stop(); });
+      element.addEventListener('lottie:pause', () => { anim.pause(); });
 
       element.addEventListener('lottie:goToFrame', ((e: CustomEvent) => {
         const frame = e.detail?.frame ?? 0;
@@ -206,88 +299,71 @@ if (slug) {
         anim.play();
       });
 
-      // Trigger modes
-      const trigger = element.dataset.lottieTrigger || 'none';
+      anim.stop();
 
-      if (trigger === 'hover') {
-        anim.autoplay = false;
-        anim.stop();
-
-        function isHoverGated(): boolean {
-          return document.body.dataset.hover === 'none';
-        }
-
-        element.addEventListener('mouseenter', () => {
-          if (isHoverGated()) return;
-          anim.setDirection(1); anim.play();
-        });
-        element.addEventListener('mouseleave', () => {
-          if (isHoverGated()) return;
-          anim.setDirection(-1); anim.play();
-        });
-        // Focus always works — keyboard/AT users need it regardless of hover gate
-        element.addEventListener('focusin', () => { anim.setDirection(1); anim.play(); });
-        element.addEventListener('focusout', () => { anim.setDirection(-1); anim.play(); });
-
-        // Click — hover-none fallback: toggle play/reverse on click
-        element.addEventListener('click', () => {
-          if (!isHoverGated()) return;
-          if (element._lottieDirection === 1) {
-            anim.setDirection(1); anim.play();
-            element._lottieDirection = -1;
-          } else {
-            anim.setDirection(-1); anim.play();
-            element._lottieDirection = 1;
-          }
-        });
-      }
-
-      if (trigger === 'viewport') {
-        anim.autoplay = false;
-        anim.stop();
-        // Wait a frame so initial layout settles, then observe
-        // Elements already in viewport on load get skipped until they scroll out and back
-        let hasBeenOutside = false;
-        requestAnimationFrame(() => {
-          const rect = element.getBoundingClientRect();
-          const isInView = rect.top < window.innerHeight && rect.bottom > 0;
-          if (!isInView) hasBeenOutside = true;
-
-          const observer = new IntersectionObserver((entries) => {
-            for (const entry of entries) {
-              if (!entry.isIntersecting) {
-                hasBeenOutside = true;
-              }
-              if (entry.isIntersecting && hasBeenOutside) {
-                anim.goToAndStop(0, true);
-                anim.play();
-                observer.unobserve(element);
-              }
-            }
-          }, { root: null, rootMargin: '0px', threshold: 0 });
-          observer.observe(element);
-        });
-      }
-
-      if (trigger === 'interval') {
-        const ms = parseInt(element.dataset.lottieInterval || '3000', 10);
-        const repeats = parseInt(element.dataset.lottieRepeats || '3', 10);
-        anim.autoplay = false;
-        anim.stop();
-        let playCount = 0;
-        anim.addEventListener('complete', () => {
-          playCount++;
-          if (playCount < repeats) {
+      // Repeat handler — counts plays per "burst" and rewinds/pauses
+      // per animationRepeat semantics. Wired once (we attach a single
+      // 'complete' listener); reset playCount each time onEnter is
+      // invoked so each new trigger starts a fresh burst.
+      let playCount = 0;
+      const handleComplete = () => {
+        playCount++;
+        if (animRepeat === 'three' && playCount < 3) {
+          anim.goToAndStop(0, true);
+          anim.play();
+        } else if (animRepeat === 'threeloop') {
+          if (playCount < 3) {
             anim.goToAndStop(0, true);
             anim.play();
           } else {
             anim.stop();
             playCount = 0;
-            setTimeout(() => { anim.goToAndStop(0, true); anim.play(); }, ms);
+            // Read interval at fire time so motion-mode scaling is current.
+            // getIntervalSeconds returns seconds; setTimeout takes ms.
+            const cfg = getAnimationConfig();
+            const intervalMs = getIntervalSeconds(intervalToken, cfg.durationScale) * 1000;
+            setTimeout(() => {
+              if (!getAnimationConfig().canAnimate) return;
+              anim.goToAndStop(0, true);
+              anim.play();
+            }, intervalMs);
           }
-        });
-        anim.play();
-      }
+        }
+        // 'once' = stop naturally; 'loop' = Lottie's own loop handles it.
+      };
+      anim.addEventListener('complete', handleComplete);
+
+      // Wire trigger via registerTrigger — same orchestration pipeline
+      // as Icon. Lottie remains the playback engine; registerTrigger
+      // handles motion/hover/render gating, viewport stagger queue,
+      // explainer click remap, re-trigger guard.
+      registerTrigger({
+        el: element,
+        trigger: animTrigger,
+        onEnter: () => {
+          playCount = 0;
+          element._lottieDirection = 1;
+          anim.setDirection(1);
+          anim.goToAndStop(0, true);
+          anim.play();
+          // No GSAP timeline to return — registerTrigger's re-trigger
+          // guard only protects against simultaneous fires, not Lottie
+          // playback overlap. Lottie handles overlap itself by ignoring
+          // play() on an already-playing instance.
+          return null;
+        },
+        onLeave: () => {
+          // Hover-leave: reverse playback for symmetric exit.
+          element._lottieDirection = -1;
+          anim.setDirection(-1);
+          anim.play();
+          return null;
+        },
+        onStatic: () => {
+          // motion=none — fallback Icon already in DOM via CSS swap.
+          // Nothing to do here; the dynamic Lottie import never runs.
+        },
+      });
 
     } catch (e) {
       console.error('Failed to load Lottie animation:', e);
@@ -296,7 +372,7 @@ if (slug) {
 
   function initAllLottieIcons() {
     const icons = document.querySelectorAll('[data-lottie-icon]') as NodeListOf<LottieIconElement>;
-    icons.forEach(initLottieIcon);
+    icons.forEach(el => { void initLottieIcon(el); });
   }
 
   // Initialize on load
@@ -309,13 +385,18 @@ if (slug) {
   // Support Astro page transitions
   document.addEventListener('astro:page-load', initAllLottieIcons);
 
-  // Cleanup before page swap — destroy animations to prevent orphaned timers
+  // Cleanup before page swap — destroy animations and unregister theme
+  // listeners so callbacks don't pile up across navigations.
   document.addEventListener('astro:before-swap', () => {
     const icons = document.querySelectorAll('[data-lottie-icon]') as NodeListOf<LottieIconElement>;
     icons.forEach(el => {
       if (el._lottieAnim) {
         el._lottieAnim.destroy();
         el._lottieAnim = undefined;
+      }
+      if (el._lottieUnsubscribe) {
+        el._lottieUnsubscribe();
+        el._lottieUnsubscribe = undefined;
       }
     });
   });

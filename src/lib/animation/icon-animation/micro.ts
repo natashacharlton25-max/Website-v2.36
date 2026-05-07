@@ -8,7 +8,7 @@
  */
 
 import { gsap } from 'gsap';
-import { registerTrigger, getAnimationConfig, isExplainerGated } from '../animation-config';
+import { registerTrigger, getAnimationConfig, isExplainerGated, getIntervalSeconds } from '../animation-config';
 
 // ─── Animation builders ─────────────────────────────────
 // Each returns a function that creates and returns a timeline.
@@ -163,6 +163,8 @@ export function initMicroAnimations() {
     const trigger = el.dataset.animTrigger || 'hover';
     const config = getAnimationConfig();
     const repeat = config.isReduced ? 'once' : (el.dataset.animRepeat || 'once');
+    const intervalToken = (el.dataset.animInterval || 'base') as 'short' | 'base' | 'long' | 'longer';
+    const intervalSeconds = getIntervalSeconds(intervalToken, config.durationScale);
 
     // Strip CSS animation — GSAP owns this now
     el.classList.remove(animClass);
@@ -187,9 +189,11 @@ export function initMicroAnimations() {
             return tl;
           };
         case 'threeloop':
-          // Play 3 times, pause, repeat forever
+          // Play 3 times, pause, repeat forever. repeatDelay reads from
+          // the interval token (resolved via getIntervalSeconds() — already
+          // motion-mode scaled).
           return () => {
-            const tl = gsap.timeline({ repeat: -1, repeatDelay: 3 });
+            const tl = gsap.timeline({ repeat: -1, repeatDelay: intervalSeconds });
             const inner = builder(el);
             inner.repeat(2).repeatDelay(0.5);
             tl.add(inner);
