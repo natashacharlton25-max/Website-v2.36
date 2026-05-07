@@ -84,11 +84,17 @@ const mediaComponent = media?.component;
 const { component: _mc, ...rawMediaProps } = media || {};
 const hasMedia = !!media;
 
-// Marker sizing: when mediaSize is set explicitly, pass through to atom.
-// 'auto' = no size injection, atom inherits text size via em (1em default).
-const mediaPropsWithSize = (mediaSize !== 'auto' && rawMediaProps.size == null)
-  ? { ...rawMediaProps, size: mediaSize }
-  : rawMediaProps;
+// Marker sizing strategy:
+//   - mediaSize="auto" (default): inject size="md" so the marker uses
+//     --media-md (1.5em). 1em alone matches the literal text font-size
+//     but icons have internal whitespace in their viewBox, so a 1em icon
+//     reads visually smaller than the text it's beside. md is the
+//     canonical "icon next to body text" tier across the system.
+//   - explicit mediaSize: pass through to the atom verbatim.
+//   - author-set media.size: always wins (explicit per-instance override).
+const mediaPropsWithSize = rawMediaProps.size != null
+  ? rawMediaProps
+  : { ...rawMediaProps, size: mediaSize === 'auto' ? 'md' : mediaSize };
 
 const classes = [
   'list',
