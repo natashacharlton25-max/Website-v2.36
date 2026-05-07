@@ -291,6 +291,15 @@ export const ANIMATION_REPEATS = [
 ] as const;
 export type AnimationRepeat = typeof ANIMATION_REPEATS[number];
 
+// ── Animation Interval (4 values) ────────────────────
+// Token names (not seconds) — actual durations live in
+// src/lib/animation/config/interval.ts as INTERVAL_TOKENS.
+// Used by animationRepeat=threeloop and animationTrigger=interval.
+export const ANIMATION_INTERVALS = [
+  'short', 'base', 'long', 'longer'
+] as const;
+export type AnimationInterval = typeof ANIMATION_INTERVALS[number];
+
 
 /* ================================================================
    CONTENT — semantic role, accessibility

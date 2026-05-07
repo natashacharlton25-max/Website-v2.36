@@ -13,7 +13,7 @@ import type {
   BrandColour, RainbowColour, ColourTier,
   Variant, Shadow,
   GradientBlend, GradientDirection,
-  Animation, AnimationTriggerInteractive,
+  Animation, AnimationTriggerInteractive, AnimationRepeat, AnimationInterval,
   IconSemanticRole, ShapeSize, ShapeBorderWeight,
   DrawVariant, DrawMode, DrawColour,
   Stagger, StaggerFrom,
@@ -23,6 +23,7 @@ import type {
 } from '../../../lib/shared-enums';
 import { normalizeDrawColour } from '../../../lib/shared-enums';
 import { resolveInlineGradient, getGradientStopColours } from '../../../lib/gradient-inline';
+import { GRADIENT_ANIMATION_SPEED } from '../../../lib/animation/animation-config';
 
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
 const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
@@ -62,13 +63,18 @@ interface Props {
   gradientCycle?: boolean;
   gradientAnimated?: boolean;
   gradientAnimateMode?: GradientAnimateMode;
-  gradientAnimateSpeed?: number;
+  /** Animation speed — slow (20s), default (12s), fast (6s). Matches Icon/Heading/Badge. */
+  gradientAnimateSpeed?: 'slow' | 'default' | 'fast';
   gradientAnimateEase?: string;
   gradientAnimateDirection?: GradientAnimateDirection;
   gradientAnimateScale?: boolean;
   media?: Record<string, any>;
   animation?: Animation;
   animationTrigger?: AnimationTriggerInteractive;
+  /** How many times to play. Matches Icon/LottieIcon. */
+  animationRepeat?: AnimationRepeat;
+  /** Gap between attention-pulse bursts. Token-driven. Matches Icon/LottieIcon. */
+  animationInterval?: AnimationInterval;
   draw?: boolean | DrawVariant;
   drawMode?: DrawMode;
   drawLaser?: boolean;
@@ -103,7 +109,7 @@ const {
   brandColor, rainbowColor, colorTier,
   size, variant = 'fill', borderWeight, shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientEmerge, gradientFade, gradientCycle, gradientAnimated, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
-  media, animation, animationTrigger = 'hover',
+  media, animation, animationTrigger = 'hover', animationRepeat = 'threeloop', animationInterval = 'base',
   draw, drawMode = 'static', drawLaser, drawGhost, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom, fillTiming,
   class: className,
@@ -288,7 +294,7 @@ const gradientName = baseGradientName ? `${baseGradientName}${radialSuffix}` : n
 // Animated gradient via GSAP — SVG render path only. CSS shapes animate via CSS keyframes.
 if (gradientAnimated && gradientName && !isCssShape) {
   dataAttrs['data-icon-grad-anim'] = gradientAnimateMode;
-  if (gradientAnimateSpeed) dataAttrs['data-icon-grad-dur'] = String(gradientAnimateSpeed);
+  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') dataAttrs['data-icon-grad-dur'] = String(GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]);
   if (gradientAnimateEase) dataAttrs['data-icon-grad-ease'] = gradientAnimateEase;
   if (gradientAnimateDirection !== 'cw') dataAttrs['data-icon-grad-dir'] = gradientAnimateDirection;
   if (gradientAnimateScale) dataAttrs['data-icon-grad-scale'] = 'true';
@@ -297,7 +303,7 @@ if (gradientAnimated && gradientName && !isCssShape) {
 // For CSS-rendered shapes, set inline CSS vars for duration + random delay to desync.
 const animStyleParts: string[] = [];
 if (gradientAnimated && gradientName && isCssShape) {
-  if (gradientAnimateSpeed) animStyleParts.push(`--_grad-anim-duration:${gradientAnimateSpeed}s`);
+  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') animStyleParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
   animStyleParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
 }
 // Colour cycle — reads the active gradient's own stop tokens from the catalogue.
@@ -314,7 +320,7 @@ if (gradientCycle) {
     animStyleParts.push(`--_cycle-b:${b}`);
     animStyleParts.push(`--_cycle-c:${c}`);
   }
-  if (gradientAnimateSpeed) animStyleParts.push(`--_grad-anim-duration:${gradientAnimateSpeed}s`);
+  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') animStyleParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
   animStyleParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
 }
 const animInlineStyle = animStyleParts.length ? animStyleParts.join(';') : undefined;
@@ -379,6 +385,8 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
   data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
   data-grad-anim-dir={gradientAnimated && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
+  data-anim-repeat={animation && animationRepeat !== 'once' ? animationRepeat : undefined}
+  data-anim-interval={animation && (animationRepeat === 'threeloop' || animationTrigger === 'interval') ? animationInterval : undefined}
   style={animInlineStyle}
   {...dataAttrs}
 >

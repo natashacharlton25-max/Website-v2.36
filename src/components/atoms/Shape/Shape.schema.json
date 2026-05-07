@@ -52,7 +52,7 @@
       "gradientFade":             { "type": "boolean", "default": false, "_description": "Fade-out modifier — last 20% fades to transparent. Combines with any gradient or solid colour." },
       "gradientAnimated":         { "type": "boolean" },
       "gradientAnimateMode":      { "type": "string", "default": "rotate", "enum": ["rotate"] },
-      "gradientAnimateSpeed":     { "type": "number", "_note": "Duration in seconds. Default 8s, scales 2x for gentle motion mode." },
+      "gradientAnimateSpeed":     { "type": "string", "default": "default", "enum": ["slow", "default", "fast"], "_note": "Animation speed — slow (20s), default (12s), fast (6s). Matches Icon/Heading/Badge. Gated by motion settings." },
       "gradientAnimateEase":      { "type": "string", "enum": ["jelly", "wobble", "bounce", "snap"] },
       "gradientAnimateDirection": { "type": "string", "default": "cw", "enum": ["cw", "ccw", "sway"] },
       "gradientAnimateScale":     { "type": "boolean", "_note": "Pulse scale 0.8→1.5 alongside rotation" }
@@ -68,7 +68,9 @@
 
     "animation": {
       "animation":        { "type": "string", "enum": ["spin", "bounce", "shake", "float", "drift", "slide-up", "slide-down", "slide-left", "slide-right", "flip", "pulse", "ping", "pop", "squish", "heartbeat", "rubber-band", "fade", "blink", "flash", "glint", "shimmer", "twinkle", "wiggle", "swing", "rock", "nod", "attention", "celebrate", "enter", "exit"] },
-      "animationTrigger": { "type": "string", "default": "hover", "enum": ["hover", "viewport", "autoplay", "loop", "interval", "click", "focus", "none"] },
+      "animationTrigger":  { "type": "string", "default": "hover", "enum": ["hover", "viewport", "autoplay", "loop", "interval", "click", "focus", "none"] },
+      "animationRepeat":   { "type": "string", "default": "threeloop", "enum": ["once", "loop", "three", "threeloop"], "description": "How many times to play: once, loop (infinite), three (3x then stop), threeloop (3x then pause [interval] then repeat). Default = threeloop, matches Icon/LottieIcon." },
+      "animationInterval": { "type": "string", "default": "base", "enum": ["short", "base", "long", "longer"], "description": "Gap between attention-pulse bursts. Token-driven (motion-mode scaled). Used by animationRepeat=threeloop and animationTrigger=interval. Matches Icon/LottieIcon." },
 
       "draw":             { "type": ["boolean", "string"], "enum": [true, "draw", "drawcenter", "pulse"] },
       "drawMode":         { "type": "string", "default": "static", "enum": ["static", "yoyo", "reverse-yoyo", "reveal"] },
