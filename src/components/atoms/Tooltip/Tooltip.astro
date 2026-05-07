@@ -100,32 +100,10 @@ const wrapperClasses = [
 </span>
 
 <script>
-  // Shared bottom bar element for textonly mode — persists text between tooltips
-  let sharedBar: HTMLElement | null = null;
-  let barHideTimeout: ReturnType<typeof setTimeout> | null = null;
-
-  function getSharedBar(): HTMLElement {
-    if (sharedBar) return sharedBar;
-    const bar = document.createElement('div');
-    bar.className = 'tooltip-bar';
-    bar.setAttribute('role', 'status');
-    bar.setAttribute('aria-live', 'polite');
-    bar.style.cssText = `
-      position: fixed; bottom: 0; left: 0; right: 0;
-      z-index: var(--z-tooltip, 9000);
-      text-align: center; white-space: normal;
-      padding: var(--space-md, 12px) var(--space-lg, 24px);
-      background: var(--page-bg-raised, #f5f5f5);
-      color: var(--neutral-800, #333);
-      border-top: 4px solid var(--primary-600, #666);
-      font-weight: 500;
-      opacity: 0; visibility: hidden;
-      transition: opacity 0.2s ease, visibility 0.2s ease;
-    `;
-    document.body.appendChild(bar);
-    sharedBar = bar;
-    return bar;
-  }
+  // Tooltip uses the shared tooltip-bar (src/lib/bar/shared-bar.ts) —
+  // same bar used by FigCaption + AnimExplainer. One DOM node, one
+  // state machine, one timeout, all consumers route through it.
+  import { showBar, hideBar, getSharedBar, hideBarOnScroll } from '../../../lib/bar/shared-bar';
 
   function isBarMode(): boolean {
     const hover = document.body.dataset.hover;
@@ -133,37 +111,6 @@ const wrapperClasses = [
     const render = document.body.dataset.render;
     const isMobile = window.innerWidth <= 640;
     return render === 'textonly' || isMobile;
-  }
-
-  function showBar(html: string, isAac: boolean = false): void {
-    const bar = getSharedBar();
-    // Cancel any pending hide — new tooltip keeps bar open
-    if (barHideTimeout) { clearTimeout(barHideTimeout); barHideTimeout = null; }
-    bar.innerHTML = html;
-
-    // AAC mode: force cards to display flex with images
-    if (isAac) {
-      bar.style.display = 'flex';
-      bar.style.flexWrap = 'wrap';
-      bar.style.justifyContent = 'center';
-      bar.style.gap = '8px';
-    } else {
-      bar.style.display = '';
-    }
-
-    bar.style.opacity = '1';
-    bar.style.visibility = 'visible';
-  }
-
-  function hideBar(): void {
-    // Cancel previous hide timer, restart fresh
-    if (barHideTimeout) clearTimeout(barHideTimeout);
-    barHideTimeout = setTimeout(() => {
-      const bar = getSharedBar();
-      bar.style.opacity = '0';
-      bar.style.visibility = 'hidden';
-      barHideTimeout = null;
-    }, 2000); // 2s — generous for assistive users, bar lingers after leaving
   }
 
   function initTooltips() {
@@ -224,7 +171,7 @@ const wrapperClasses = [
           } else {
             html = contentEl.textContent?.trim() || '';
           }
-          if (html) showBar(html, useAac);
+          if (html) showBar(html, { aac: useAac });
         } else {
           updatePosition();
         }
@@ -265,34 +212,21 @@ const wrapperClasses = [
   // Tap outside tooltip = dismiss bar on mobile
   document.addEventListener('click', (e: Event) => {
     const target = e.target as HTMLElement;
-    if (sharedBar && sharedBar.style.opacity === '1' && !target.closest('.tooltip')) {
-      if (barHideTimeout) clearTimeout(barHideTimeout);
-      sharedBar.style.opacity = '0';
-      sharedBar.style.visibility = 'hidden';
-    }
+    if (!target.closest('.tooltip')) hideBar(true);
   });
 
   // Scroll = user moved on, hide bar immediately
-  window.addEventListener('scroll', () => {
-    if (sharedBar && sharedBar.style.opacity === '1') {
-      if (barHideTimeout) clearTimeout(barHideTimeout);
-      sharedBar.style.opacity = '0';
-      sharedBar.style.visibility = 'hidden';
-    }
-  }, { passive: true });
+  window.addEventListener('scroll', hideBarOnScroll, { passive: true });
 
   // Hide bar when hover/render mode changes, kill bar entirely for hover none
   const barObserver = new MutationObserver(() => {
-    if (sharedBar) {
-      if (barHideTimeout) clearTimeout(barHideTimeout);
-      sharedBar.style.opacity = '0';
-      sharedBar.style.visibility = 'hidden';
-      // Hover none = no bar ever
-      if (document.body.dataset.hover === 'none') {
-        sharedBar.style.display = 'none';
-      } else {
-        sharedBar.style.display = '';
-      }
+    hideBar(true);
+    // Hover none = no bar ever (display:none survives until next showBar reset)
+    const bar = getSharedBar();
+    if (document.body.dataset.hover === 'none') {
+      bar.style.display = 'none';
+    } else {
+      bar.style.display = '';
     }
   });
   barObserver.observe(document.body, {

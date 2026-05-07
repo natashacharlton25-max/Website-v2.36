@@ -6,38 +6,10 @@
  * Creates a <figcaption> with tooltip behaviour.
  *
  * Gated by data-alt-display-mode="tooltip" on <html>.
- * Uses same shared bar as Tooltip atom for textonly/mobile.
+ * Uses the shared tooltip-bar from src/lib/bar/shared-bar.ts (same bar
+ * used by Tooltip atom + AnimExplainer).
  */
-
-let sharedBar: HTMLElement | null = null;
-let barHideTimeout: ReturnType<typeof setTimeout> | null = null;
-
-function getSharedBar(): HTMLElement {
-  // Reuse Tooltip's bar if it exists
-  const existing = document.querySelector('.tooltip-bar') as HTMLElement;
-  if (existing) { sharedBar = existing; return existing; }
-
-  if (sharedBar) return sharedBar;
-  const bar = document.createElement('div');
-  bar.className = 'tooltip-bar';
-  bar.setAttribute('role', 'status');
-  bar.setAttribute('aria-live', 'polite');
-  bar.style.cssText = `
-    position: fixed; bottom: 0; left: 0; right: 0;
-    z-index: var(--z-tooltip, 9000);
-    text-align: center; white-space: normal;
-    padding: var(--space-lg, 16px) var(--space-2xl, 32px);
-    background: var(--page-bg-raised, #f5f5f5);
-    color: var(--neutral-800, #333);
-    border-top: 4px solid var(--bar-border-color, var(--primary-600, #666));
-    font-weight: 500;
-    opacity: 0; visibility: hidden;
-    transition: opacity var(--hover-duration, 0.2s) ease, visibility var(--hover-duration, 0.2s) ease;
-  `;
-  document.body.appendChild(bar);
-  sharedBar = bar;
-  return bar;
-}
+import { showBar, hideBar, hideBarOnScroll } from '../../../lib/bar/shared-bar';
 
 function isBarMode(): boolean {
   if (isSubtitleMode()) return true; // subtitle always uses bar
@@ -58,49 +30,6 @@ function isSubtitleMode(): boolean {
 function isInlineMode(): boolean {
   const mode = document.documentElement.dataset.altDisplayMode;
   return mode === 'inline';
-}
-
-function showBar(html: string, permanent = false): void {
-  const bar = getSharedBar();
-  if (barHideTimeout) { clearTimeout(barHideTimeout); barHideTimeout = null; }
-
-  if (permanent) {
-    bar.innerHTML = `<span>${html}</span><button class="tooltip-bar__close" aria-label="Close" style="
-      position: absolute; right: var(--space-lg, 16px); top: 50%; transform: translateY(-50%);
-      background: var(--page-bg, #fff); border: 2px solid var(--bar-border-color, var(--primary-600, #666));
-      cursor: pointer; font-size: 1em; font-weight: bold;
-      color: var(--neutral-800, #333); padding: var(--space-xs, 4px) var(--space-sm, 8px);
-      border-radius: var(--radius-sm, 4px); line-height: 1;
-    ">&times;</button>`;
-    bar.style.position = 'fixed';
-    const closeBtn = bar.querySelector('.tooltip-bar__close');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => hideBar(true));
-    }
-  } else {
-    bar.innerHTML = html;
-  }
-
-  bar.style.visibility = 'visible';
-  requestAnimationFrame(() => {
-    bar.style.opacity = '1';
-  });
-}
-
-function hideBar(immediate = false): void {
-  if (barHideTimeout) clearTimeout(barHideTimeout);
-  if (immediate) {
-    const bar = getSharedBar();
-    bar.style.opacity = '0';
-    bar.style.visibility = 'hidden';
-    return;
-  }
-  barHideTimeout = setTimeout(() => {
-    const bar = getSharedBar();
-    bar.style.opacity = '0';
-    bar.style.visibility = 'hidden';
-    barHideTimeout = null;
-  }, 2000);
 }
 
 function getAltContent(figure: HTMLElement): string {
@@ -203,7 +132,7 @@ function initFigCaptions(): void {
       if (!isPermanentMode()) return;
       updateCaption();
       const content = getAltContent(figure);
-      if (content) showBar(content, true);
+      if (content) showBar(content, { permanent: true });
       figure.classList.add('alt-viewed');
     }
 
@@ -232,7 +161,7 @@ function initFigCaptions(): void {
         }
         if (isBarMode() && !isInlineMode()) {
           const content = getAltContent(figure);
-          if (content) showBar(content, true);
+          if (content) showBar(content, { permanent: true });
           figure.classList.add('alt-viewed');
           figure.classList.add('highlight-visited');
         }
@@ -264,13 +193,7 @@ observer.observe(document.body, {
 });
 
 // Scroll hides bar
-window.addEventListener('scroll', () => {
-  if (sharedBar && sharedBar.style.opacity === '1') {
-    if (barHideTimeout) clearTimeout(barHideTimeout);
-    sharedBar.style.opacity = '0';
-    sharedBar.style.visibility = 'hidden';
-  }
-}, { passive: true });
+window.addEventListener('scroll', hideBarOnScroll, { passive: true });
 
 // Init
 document.addEventListener('astro:page-load', initFigCaptions);

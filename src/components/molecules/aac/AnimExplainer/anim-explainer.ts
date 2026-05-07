@@ -6,82 +6,10 @@
  * Inline mode is CSS-only — no JS needed.
  *
  * Gated by data-anim-explainer on <html>.
- * Reuses shared tooltip bar from Tooltip atom.
+ * Uses the shared tooltip-bar from src/lib/bar/shared-bar.ts (same bar
+ * used by Tooltip atom + FigCaption).
  */
-
-// ── Shared bar (reuse Tooltip's bar) ─────────────────────
-
-let sharedBar: HTMLElement | null = null;
-let barHideTimeout: ReturnType<typeof setTimeout> | null = null;
-
-function getSharedBar(): HTMLElement {
-  const existing = document.querySelector('.tooltip-bar') as HTMLElement;
-  if (existing) { sharedBar = existing; return existing; }
-
-  if (sharedBar) return sharedBar;
-  const bar = document.createElement('div');
-  bar.className = 'tooltip-bar';
-  bar.setAttribute('role', 'status');
-  bar.setAttribute('aria-live', 'polite');
-  bar.style.cssText = `
-    position: fixed; bottom: 0; left: 0; right: 0;
-    z-index: var(--z-tooltip, 9000);
-    text-align: center; white-space: normal;
-    padding: var(--space-lg, 16px) var(--space-2xl, 32px);
-    background: var(--page-bg-raised, #f5f5f5);
-    color: var(--neutral-800, #333);
-    border-top: 4px solid var(--bar-border-color, var(--primary-600, #666));
-    font-weight: 500;
-    opacity: 0; visibility: hidden;
-    transition: opacity var(--hover-duration, 0.2s) ease, visibility var(--hover-duration, 0.2s) ease;
-  `;
-  document.body.appendChild(bar);
-  sharedBar = bar;
-  return bar;
-}
-
-function showBar(html: string, permanent = false): void {
-  const bar = getSharedBar();
-  if (barHideTimeout) { clearTimeout(barHideTimeout); barHideTimeout = null; }
-
-  if (permanent) {
-    bar.innerHTML = `<span>${html}</span><button class="tooltip-bar__close" aria-label="Close" style="
-      position: absolute; right: var(--space-lg, 16px); top: 50%; transform: translateY(-50%);
-      background: var(--page-bg, #fff); border: 2px solid var(--bar-border-color, var(--primary-600, #666));
-      cursor: pointer; font-size: 1em; font-weight: bold;
-      color: var(--neutral-800, #333); padding: var(--space-xs, 4px) var(--space-sm, 8px);
-      border-radius: var(--radius-sm, 4px); line-height: 1;
-    ">&times;</button>`;
-    bar.style.position = 'fixed';
-    const closeBtn = bar.querySelector('.tooltip-bar__close');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => hideBar(true));
-    }
-  } else {
-    bar.innerHTML = html;
-  }
-
-  bar.style.visibility = 'visible';
-  requestAnimationFrame(() => {
-    bar.style.opacity = '1';
-  });
-}
-
-function hideBar(immediate = false): void {
-  if (barHideTimeout) clearTimeout(barHideTimeout);
-  if (immediate) {
-    const bar = getSharedBar();
-    bar.style.opacity = '0';
-    bar.style.visibility = 'hidden';
-    return;
-  }
-  barHideTimeout = setTimeout(() => {
-    const bar = getSharedBar();
-    bar.style.opacity = '0';
-    bar.style.visibility = 'hidden';
-    barHideTimeout = null;
-  }, 2000);
-}
+import { showBar, hideBar, hideBarOnScroll } from '../../../../lib/bar/shared-bar';
 
 // ── Mode checks ──────────────────────────────────────────
 
@@ -231,7 +159,7 @@ function initAnimExplainer(): void {
       if (isPermanent() || document.documentElement.dataset.hover === 'none') {
         if (isBarMode()) {
           const content = getContent(el);
-          if (content) showBar(content, true);
+          if (content) showBar(content, { permanent: true });
         }
       }
     }
@@ -265,13 +193,7 @@ observer.observe(document.documentElement, {
 });
 
 // Scroll hides bar + tooltip
-window.addEventListener('scroll', () => {
-  if (sharedBar && sharedBar.style.opacity === '1') {
-    if (barHideTimeout) clearTimeout(barHideTimeout);
-    sharedBar.style.opacity = '0';
-    sharedBar.style.visibility = 'hidden';
-  }
-}, { passive: true });
+window.addEventListener('scroll', hideBarOnScroll, { passive: true });
 
 // Init
 document.addEventListener('astro:page-load', initAnimExplainer);
