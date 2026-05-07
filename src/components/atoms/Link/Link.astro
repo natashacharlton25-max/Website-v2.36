@@ -32,15 +32,15 @@ interface Props {
    *  Pipeline content key. Renders through the Text atom. */
   contentLink: string | LinkSegment[];
   href: string;
-  variant?: 'default' | 'underline' | 'highlight' | 'border' | 'ghost';
+  variant?: 'default' | 'bare' | 'underline' | 'highlight' | 'border' | 'ghost';
   /** Brand-scale colour. Use one of brandColor or rainbowColor. */
   brandColor?: TextColour;
   /** Rainbow palette colour (1-7). Use one of brandColor or rainbowColor. */
   rainbowColor?: RainbowColour;
   /** Text atom styling props forwarded to the nested Text — accepts any Text prop
-   *  (family, size, weight, leading, uppercase, etc). Link locks 'as=span' and 'flush'. */
+   *  (family, size, weight, leading, uppercase, etc). Link locks 'as=span' and 'flush'.
+   *  Default weight is semibold (set on .link CSS). Override via textStyle.weight. */
   textStyle?: Record<string, any>;
-  weight?: 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
   uppercase?: boolean;
   flush?: boolean;
   /** Disabled state — strikethrough, not-allowed cursor, no hover/focus changes,
@@ -67,7 +67,6 @@ const {
   brandColor = 'text',
   rainbowColor,
   textStyle: textProps,
-  weight,
   uppercase = false,
   flush = false,
   disabled = false,
@@ -101,7 +100,6 @@ const classes = [
   'link',
   `link--${variant}`,
   `color--${colour}`,
-  weight && `link--weight-${weight}`,
   uppercase && 'link--uppercase',
   flush && 'link--flush',
   disabled && 'link--disabled',

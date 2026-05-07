@@ -40,13 +40,23 @@
 
   display: inline;
   margin: 0;
-  text-decoration: none;
+  /* Slight bold so the default link is visually distinguishable even
+     when the variant doesn't add decoration. Authors override via
+     textStyle.weight if they want body weight. */
+  font-weight: var(--font-semibold);
   cursor: pointer;
   color: var(--_link-text);
 }
 
 .link:hover {
   color: var(--_link-hover);
+}
+
+/* Bare variant — no underline, colour + bold + hover shift only.
+   For inline links inside dense text where the underline would be
+   visual noise. Authors choose explicitly via variant="bare". */
+.link--bare {
+  text-decoration: none;
 }
 
 /* When a child Text element has its own .color--{name} class set
@@ -106,12 +116,21 @@
    when underlineGrow prop is passed.
    ========================================================== */
 
+/* Default + underline variants render the same — a static underline drawn
+   on the inner .text span (inline-block parent breaks text-decoration
+   propagation, so the line lives on the child). The only quiet variant
+   is .link--bare (colour-only). Authors choose explicitly:
+     variant="default" or variant="underline" → underlined link
+     variant="bare"                            → no underline
+   See Link.schema.json variant enum for full list. */
+.link--default,
 .link--underline {
   position: relative;
   color: var(--_link-text);
   text-decoration: none;
 }
 
+.link--default .text,
 .link--underline .text {
   text-decoration: underline;
   text-underline-offset: 0.3em;
@@ -119,10 +138,12 @@
   text-decoration-color: var(--_link-color);
 }
 
+.link--default:hover,
 .link--underline:hover {
   color: var(--_link-hover);
 }
 
+.link--default:hover .text,
 .link--underline:hover .text {
   text-decoration-color: var(--_link-hover);
 }
@@ -313,11 +334,10 @@
    WEIGHT OVERRIDES
    ========================================================== */
 
-.link--weight-normal    { font-weight: var(--font-normal); }
-.link--weight-medium    { font-weight: var(--font-medium); }
-.link--weight-semibold  { font-weight: var(--font-semibold); }
-.link--weight-bold      { font-weight: var(--font-bold); }
-.link--weight-extrabold { font-weight: var(--font-extrabold); }
+/* Per-weight classes removed — weight comes via textStyle.weight forwarded
+   to the inner Text atom (Text owns the .text--weight-* class system).
+   Default weight is semibold (set on .link above) — authors override in
+   JSON via textStyle: { weight: 'normal' }. */
 
 /* ==========================================================
    UPPERCASE
