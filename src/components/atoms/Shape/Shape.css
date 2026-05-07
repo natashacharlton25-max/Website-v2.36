@@ -1,5 +1,17 @@
 /* Shape — CSS for circle/square/rounded, SVG for complex shapes.
  * Colour from global .color-- mixin.
+ *
+ * EXCEPTION TO NO-FALLBACK RULE: this file uses var(--_color, var(--svg-ghost-color))
+ * and var(--_color, var(--primary-base)) fallbacks. Other atoms default brandColor
+ * to 'text' or 'primary' in the Astro frontmatter, so .color--{name} is always
+ * emitted. Shape deliberately allows no colour prop at all — when an author writes
+ *   <Shape gradient gradientBlend="hero" />
+ * the gradient provides the visible colour and --_color is genuinely undefined.
+ * Forcing a brand default would tint borders/glass/glow and override the gradient
+ * story. So Shape.astro keeps resolvedColor nullable and the CSS owns the literal
+ * fallback (a neutral ghost grey for SVG fills, primary-base for borders/text).
+ *
+ * Authors who want a specific colour pass brandColor or rainbowColor as normal.
  */
 
 .shape {

@@ -50,7 +50,12 @@ export function initFillIcon(el: HTMLElement) {
   const trigger = el.dataset.iconFillTrigger || 'hover';
   const hasDraw = !!el.dataset.iconDraw;
   const mode = el.dataset.iconFillMode || (hasDraw ? 'fade' : 'once');
-  const fillDuration = parseFloat(el.dataset.iconFillDuration || '') || 1;
+  // Fill duration: token vocabulary matches the schema enum. Map → seconds
+  // at the runtime boundary so authors think in tokens, GSAP gets numbers.
+  // Fallback chain handles legacy numeric data (mirrors drawWormSize pattern).
+  const fillDurationMap: Record<string, number> = { fast: 0.5, normal: 1, slow: 1.6, slower: 2.4 };
+  const fillDurationRaw = el.dataset.iconFillDuration || '';
+  const fillDuration = fillDurationMap[fillDurationRaw] ?? (parseFloat(fillDurationRaw) || 1);
   const fillColor = el.dataset.iconFillColor || '';
   const showOutline = el.dataset.iconFillOutline === 'true';
   // Fill timing relative to draw: 'after' waits for draw to finish, 'overlap' starts at ~50%

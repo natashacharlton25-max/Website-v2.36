@@ -448,6 +448,17 @@ export const FILL_TIMINGS = [
 ] as const;
 export type FillTiming = typeof FILL_TIMINGS[number];
 
+// ── Fill Duration (4 values) — token, resolved to seconds at runtime
+// Used by Icon and Shape fillAnimation. Handler in svg-animation/fill.ts
+// maps token → seconds. Default 'normal' = 1s baseline; gentle motion mode
+// scales separately. Matches the slow|default|fast pattern but uses
+// fast|normal|slow|slower for fill since 'default' would clash with
+// fillMode=once|yoyo|fade|... vocabulary.
+export const FILL_DURATIONS = [
+  'fast', 'normal', 'slow', 'slower'
+] as const;
+export type FillDuration = typeof FILL_DURATIONS[number];
+
 
 /* ================================================================
    ANIMATED GRADIENT — direction, mode
