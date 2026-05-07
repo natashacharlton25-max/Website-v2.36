@@ -61,7 +61,7 @@ interface Props {
   gradient?: boolean;
   gradientBlend?: GradientBlend;
   gradientDirection?: GradientDirection;
-  gradientAnimate?: boolean;
+  gradientAnimated?: boolean;
   gradientAnimateDirection?: 'cw' | 'ccw' | 'sway';
   gradientAnimateSpeed?: 'slow' | 'default' | 'fast';
 
@@ -111,7 +111,7 @@ const {
   name, weight, size, class: className = '',
   brandColor, rainbowColor, colorTier,
   shadow, glow,
-  gradient, gradientBlend, gradientDirection, gradientAnimate, gradientAnimateDirection, gradientAnimateSpeed,
+  gradient, gradientBlend, gradientDirection, gradientAnimated, gradientAnimateDirection, gradientAnimateSpeed,
   animation, animationTrigger = 'hover', animationRepeat = 'threeloop', animationInterval = 'base', noExplainer,
   draw, drawMode: rawDrawMode = 'static', drawOnce, drawLaser, drawGhost, drawOnScroll, drawScrub, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize,
   morphTo, morphViaCircle, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
@@ -280,7 +280,7 @@ const inlineGradient = (gradientName && gradientDirection)
   : null;
 
 if (gradientName && iconContent && !draw) {
-  if (gradientAnimate) {
+  if (gradientAnimated) {
     // GSAP gradient.ts handles animation via data-icon-grad-anim.
     // Still need to apply the gradient fill to paths.
     const gradientId = inlineGradient?.id || `grad-${gradientName}`;
@@ -379,7 +379,7 @@ if (fillAnimation) {
 // Gradient animation — GSAP via gradient.ts (replaces baked <animateTransform>)
 // Speeds come from the shared GRADIENT_ANIMATION_SPEED map (animation-config.ts)
 // so Icon, Badge, Heading agree on what slow/default/fast mean.
-if (gradientAnimate && gradientName && !draw) {
+if (gradientAnimated && gradientName && !draw) {
   dataAttrs['data-icon-grad-anim'] = 'true';
   if (gradientAnimateDirection && gradientAnimateDirection !== 'cw') dataAttrs['data-icon-grad-dir'] = gradientAnimateDirection;
   if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') dataAttrs['data-icon-grad-dur'] = String(GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]);
@@ -477,7 +477,8 @@ if (morphTo) {
       {...dataAttrs}
     >
       <Fragment set:html={iconContent || fallbackIcon} />
-      {labelIcon && semanticRole === 'ui-control' && <span class="icon__label">{labelIcon}</span>}
+      {/* Label is rendered only in the non-explainer branch — showExplainer
+          implies !isUiControl, so a ui-control label can never reach here. */}
     </span>
     <AnimExplainer
       slot="content"

@@ -243,13 +243,13 @@ export type GradientFocus = typeof GRADIENT_FOCUSES[number];
 
 /*
  * Gradient Rules (canonical — ALL components):
- *   - `animatedGradient: boolean` — every gradient component gets this prop
+ *   - `gradientAnimated: boolean` — every gradient component gets this prop
  *   - Fill: gradient animates background only, text is solid (--color-White/--color-Black)
  *   - Outline: gradient animates border (anim-border-flow), label gets background-clip:text
  *   - Glass: gradient animates background, label gets background-clip:text
  *   - Icon inside gradient component: always solid colour, never gradient
  *   - Gradient text colour: tint/mid → --color-Black, base/emphasis → --color-White
- *   - animatedGradient is INDEPENDENT of animation prop (icon/component motion)
+ *   - gradientAnimated is INDEPENDENT of animation prop (icon/component motion)
  */
 
 

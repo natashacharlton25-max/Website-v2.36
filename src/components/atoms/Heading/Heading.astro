@@ -109,7 +109,7 @@ interface Props {
   mediaSize?: MediaSize;
 
   // ── Animation ───────────────────────────────────────────
-  animatedGradient?: boolean;
+  gradientAnimated?: boolean;
   gradientAnimateDirection?: 'cw' | 'ccw' | 'sway';
   gradientAnimateSpeed?: 'slow' | 'default' | 'fast';
   gradientCycle?: boolean;
@@ -161,7 +161,7 @@ const {
   mediaBg = false,
   mediaPosition = 'left',
   mediaSize = 'auto',
-  animatedGradient = false,
+  gradientAnimated = false,
   gradientAnimateDirection,
   gradientAnimateSpeed,
   gradientCycle = false,
@@ -245,7 +245,7 @@ const mediaProps = rawMediaProps;
 
 // Animated gradient / colour cycle — random delay + optional speed
 const headingAnimParts: string[] = [];
-if ((animatedGradient && resolvedGradientName) || gradientCycle) {
+if ((gradientAnimated && resolvedGradientName) || gradientCycle) {
   if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') headingAnimParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
   headingAnimParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
 }
@@ -267,7 +267,7 @@ const headingClassList = [
   flush && 'heading--flush',
   textShadow && textShadow !== 'none' && `text-shadow--${textShadow}`,
   (gradient || gradientBlend) && 'gradient__text',
-  (gradient || gradientBlend) && animatedGradient && 'gradient__text--animated',
+  (gradient || gradientBlend) && gradientAnimated && 'gradient__text--animated',
   /* Emerge/fade on text needs a contrast halo so the faded portion stays readable */
   (gradientEmerge || gradientFade) && 'gradient__text--emerge-fade',
   gradientCycle && 'gradient--cycle',
@@ -298,14 +298,14 @@ const headingClassList = [
     (gradient || gradientBlend) && 'gradient',
     (gradient || gradientBlend) && variant !== 'default' && `gradient--${variant}`,
     resolvedGradientName && `gradient--blend-${resolvedGradientName}`,
-    animatedGradient && 'gradient--animated',
+    gradientAnimated && 'gradient--animated',
     gradientCycle && 'gradient--cycle',
     hasMedia && 'heading-wrap--has-media',
     hasMedia && `heading-wrap--media-${mediaPosition}`,
     className,
   ]}
     data-grad-dir={gradientDirection || undefined}
-    data-grad-anim-dir={animatedGradient && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
+    data-grad-anim-dir={gradientAnimated && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
     style={mergedStyle || undefined}>
     {hasMedia && mediaPosition === 'left' && (
       <div class="heading-wrap__media">
@@ -319,7 +319,7 @@ const headingClassList = [
 
     {divider && (divider === 'left' || divider === 'both') && (
       <div
-        class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, animatedGradient && 'divider--animated']}
+        class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, gradientAnimated && 'divider--animated']}
         data-grad-dir={dividerStyle === 'gradient' ? gradientDirection : undefined}
         aria-hidden="true"></div>
     )}
@@ -341,7 +341,7 @@ const headingClassList = [
       </Tag>
       {variant === 'underline' && (
         <div
-          class:list={['underline', underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`, underlineThickness && `underline--thickness-${underlineThickness}`, resolvedUnderlineColor && `color--${resolvedUnderlineColor}`, underlineTier && underlineTier !== 'base' && `color--tier-${underlineTier}`, underlineStyle === 'gradient' && 'gradient', underlineStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, animatedGradient && 'underline--animated']}
+          class:list={['underline', underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`, underlineThickness && `underline--thickness-${underlineThickness}`, resolvedUnderlineColor && `color--${resolvedUnderlineColor}`, underlineTier && underlineTier !== 'base' && `color--tier-${underlineTier}`, underlineStyle === 'gradient' && 'gradient', underlineStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, gradientAnimated && 'underline--animated']}
           data-grad-dir={underlineStyle === 'gradient' ? gradientDirection : undefined}
           aria-hidden="true"></div>
       )}
@@ -351,7 +351,7 @@ const headingClassList = [
 
     {divider && (divider === 'right' || divider === 'both') && (
       <div
-        class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, animatedGradient && 'divider--animated']}
+        class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, gradientAnimated && 'divider--animated']}
         data-grad-dir={dividerStyle === 'gradient' ? gradientDirection : undefined}
         aria-hidden="true"></div>
     )}

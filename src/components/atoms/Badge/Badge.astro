@@ -54,7 +54,7 @@ interface Props {
   gradientCycle?: boolean;
   /** Reverse gradient direction on text (outline/glass: text runs opposite to border) */
   gradientFlip?: boolean;
-  animatedGradient?: boolean;
+  gradientAnimated?: boolean;
   /** Animation direction — cw (default), ccw, or sway */
   gradientAnimateDirection?: 'cw' | 'ccw' | 'sway';
   /** Animation speed — slow (20s), default (12s), fast (6s) */
@@ -84,7 +84,7 @@ const {
   gradientEmerge = false,
   gradientFade = false,
   gradientFlip = false,
-  animatedGradient = false,
+  gradientAnimated = false,
   gradientAnimateDirection,
   gradientAnimateSpeed,
   gradientCycle = false,
@@ -130,7 +130,7 @@ const gradientName = gradientBlend
 // Animated gradient / colour cycle — random animation-delay to desync multiple badges,
 // optional custom duration. Cycle reads the active gradient's stop tokens from the catalogue.
 const badgeAnimParts: string[] = [];
-if ((animatedGradient && gradientName) || gradientCycle) {
+if ((gradientAnimated && gradientName) || gradientCycle) {
   if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') badgeAnimParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
   badgeAnimParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
 }
@@ -172,7 +172,7 @@ const headingLabelProps = {
   role={semanticRole !== 'none' ? 'note' : undefined}
   data-semantic-role={semanticRole !== 'none' ? semanticRole : undefined}
   data-grad-dir={gradientDirection || undefined}
-  data-grad-anim-dir={animatedGradient && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
+  data-grad-anim-dir={gradientAnimated && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
   style={badgeAnimStyle}
   class:list={[
     'badge',
@@ -188,7 +188,7 @@ const headingLabelProps = {
     gradientEmerge && 'gradient--emerge',
     gradientFade && 'gradient--fade',
     gradientCycle && 'gradient--cycle',
-    animatedGradient && 'gradient--animated',
+    gradientAnimated && 'gradient--animated',
     size !== 'md' && `badge--${size}`,
     `badge--${shape}`,
     borderWeight && `badge--border-${borderWeight}`,

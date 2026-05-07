@@ -60,7 +60,7 @@ interface Props {
   gradientFade?: boolean;
   /** Colour cycle — cross-fades through the element's own tier tokens (tint→mid→base→emphasis). */
   gradientCycle?: boolean;
-  gradientAnimate?: boolean;
+  gradientAnimated?: boolean;
   gradientAnimateMode?: GradientAnimateMode;
   gradientAnimateSpeed?: number;
   gradientAnimateEase?: string;
@@ -102,7 +102,7 @@ const {
   shape = 'circle', mode = 'shape', renderAs = 'auto', slug, semanticRole = 'decorative', label,
   brandColor, rainbowColor, colorTier,
   size, variant = 'fill', borderWeight, shadow, glow,
-  gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientEmerge, gradientFade, gradientCycle, gradientAnimate, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
+  gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientEmerge, gradientFade, gradientCycle, gradientAnimated, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
   media, animation, animationTrigger = 'hover',
   draw, drawMode = 'static', drawLaser, drawGhost, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom, fillTiming,
@@ -286,7 +286,7 @@ const baseGradientName = gradientBlend
   || (gradient ? 'primary' : null);
 const gradientName = baseGradientName ? `${baseGradientName}${radialSuffix}` : null;
 // Animated gradient via GSAP — SVG render path only. CSS shapes animate via CSS keyframes.
-if (gradientAnimate && gradientName && !isCssShape) {
+if (gradientAnimated && gradientName && !isCssShape) {
   dataAttrs['data-icon-grad-anim'] = gradientAnimateMode;
   if (gradientAnimateSpeed) dataAttrs['data-icon-grad-dur'] = String(gradientAnimateSpeed);
   if (gradientAnimateEase) dataAttrs['data-icon-grad-ease'] = gradientAnimateEase;
@@ -296,7 +296,7 @@ if (gradientAnimate && gradientName && !isCssShape) {
 
 // For CSS-rendered shapes, set inline CSS vars for duration + random delay to desync.
 const animStyleParts: string[] = [];
-if (gradientAnimate && gradientName && isCssShape) {
+if (gradientAnimated && gradientName && isCssShape) {
   if (gradientAnimateSpeed) animStyleParts.push(`--_grad-anim-duration:${gradientAnimateSpeed}s`);
   animStyleParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
 }
@@ -363,7 +363,7 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     gradientName && `gradient--blend-${gradientName}`,
     gradientEmerge && 'gradient--emerge',
     gradientFade && 'gradient--fade',
-    gradientAnimate && 'gradient--animated',
+    gradientAnimated && 'gradient--animated',
     gradientCycle && 'gradient--cycle',
     animation && `anim--${animation}`,
     draw && 'shape--draw',
@@ -377,7 +377,7 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
   data-semantic-role={semanticRole}
   data-grad-dir={gradientDirection || undefined}
   data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
-  data-grad-anim-dir={gradientAnimate && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
+  data-grad-anim-dir={gradientAnimated && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
   style={animInlineStyle}
   {...dataAttrs}

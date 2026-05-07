@@ -1307,7 +1307,7 @@ CSS mixin: `src/styles/global/gradient.css`. Components add `.gradient` + `.grad
 | Soft | `var(--color-Black)` | Light gradient bg |
 | Balanced/tight | `var(--color-White)` | Dark gradient bg |
 
-### `animatedGradient` prop
+### `gradientAnimated` prop
 
 - Boolean, independent of `animation` (icon/component motion)
 - Fill: `anim-gradient-flow` on background, text stays solid
@@ -1335,7 +1335,7 @@ CSS mixin: `src/styles/global/gradient.css`. Components add `.gradient` + `.grad
   "gradientSpread": { "type": "string", "enum": ["soft","balanced","tight"] }
 },
 "animation": {
-  "animatedGradient": { "type": "boolean" }
+  "gradientAnimated": { "type": "boolean" }
 }
 ```
 
