@@ -349,7 +349,7 @@ export function initFillIcon(el: HTMLElement) {
     };
     registerTrigger({
       el,
-      trigger,
+      animationTrigger: trigger,
       onEnter: ghostDrawEnter,
       onStatic: () => {},
     });
@@ -384,7 +384,7 @@ export function initFillIcon(el: HTMLElement) {
     };
     registerTrigger({
       el,
-      trigger,
+      animationTrigger: trigger,
       onEnter: reducedEnter,
       onStatic: () => { fillClones.forEach(c => gsap.set(c, { opacity: 1 })); },
     });
@@ -454,7 +454,7 @@ export function initFillIcon(el: HTMLElement) {
 
       registerTrigger({
         el,
-        trigger,
+        animationTrigger: trigger,
         onEnter: enterFn,
         onLeave: leaveFn,
         onStatic: () => {

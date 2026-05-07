@@ -1009,7 +1009,7 @@ export function initMorphIcon(el: HTMLElement) {
 
   registerTrigger({
     el,
-    trigger: morphTrigger,
+    animationTrigger: morphTrigger,
     onEnter: () => { doForward(); return tl; },
     onLeave: () => { doReverse(); return tl; },
     onInstant: () => { if (!morphed) { morph(); if (tl) tl.progress(1); } },

@@ -18,8 +18,11 @@ import { getScrollContainer } from '../helpers/scroll';
 export interface TriggerOptions {
   /** The element that triggers the animation */
   el: HTMLElement;
-  /** What fires it: hover, click, focus, viewport, viewport-loop, loop, interval, scrub, autoplay */
-  trigger?: string;
+  /** What fires it: hover, click, focus, viewport, viewport-loop, loop, interval, scrub, autoplay.
+   *  Named animationTrigger to match the atom-level prop on Icon/LottieIcon
+   *  (and future Shape) — JSON, schema, atom prop, and helper API are all
+   *  the same word from end to end. */
+  animationTrigger?: string;
   /** Called to play the animation forward — return timeline so the trigger can guard against re-trigger while it's still active */
   onEnter: () => any;
   /** Called to play the animation in reverse (optional — for yoyo/hover-leave). Return a timeline for re-trigger protection */
@@ -112,7 +115,7 @@ function playQueue(entries: Array<() => any>, index = 0) {
  */
 export function registerTrigger(opts: TriggerOptions): void {
   const {
-    el, trigger = 'hover', onEnter, onLeave, onInstant, onStatic,
+    el, animationTrigger = 'hover', onEnter, onLeave, onInstant, onStatic,
     scrollStart = 'top 60%', scrollEnd = 'top 20%',
     once = false, loopDelay = 3, intervalMs = 8000,
   } = opts;
@@ -167,7 +170,7 @@ export function registerTrigger(opts: TriggerOptions): void {
   // with the explainer being on hover.
   // ────────────────────────────────────────────────────────────
   const explainerRemap = getExplainerTriggerRemap();
-  if (explainerRemap && trigger === 'hover' && el.hasAttribute('data-has-explainer')) {
+  if (explainerRemap && animationTrigger === 'hover' && el.hasAttribute('data-has-explainer')) {
     if (!config.canAnimate && onStatic) onStatic();
 
     const hoverTarget = el.closest('button, a') || el;
@@ -221,7 +224,7 @@ export function registerTrigger(opts: TriggerOptions): void {
     return; // Don't fall through to normal trigger registration
   }
 
-  switch (trigger) {
+  switch (animationTrigger) {
     case 'viewport': {
       if (!getAnimationConfig().canAnimate) { onStatic?.(); return; }
       import('gsap/ScrollTrigger').then(({ ScrollTrigger: ST }) => {

@@ -207,7 +207,7 @@ export function initMicroAnimations() {
 
     registerTrigger({
       el,
-      trigger,
+      animationTrigger: trigger,
       onEnter: buildOnEnter(),
       onStatic: () => {},
     });
@@ -255,7 +255,7 @@ export function initMicroAnimations() {
 
     registerTrigger({
       el,
-      trigger: 'autoplay',
+      animationTrigger: 'autoplay',
       onEnter: playGradFlow,
       onStatic: () => {},
     });
@@ -282,7 +282,7 @@ export function initMicroAnimations() {
 
     registerTrigger({
       el,
-      trigger: 'autoplay',
+      animationTrigger: 'autoplay',
       onEnter: playCycle,
       onStatic: () => {},
     });
@@ -310,7 +310,7 @@ export function initMicroAnimations() {
 
     registerTrigger({
       el,
-      trigger: 'autoplay',
+      animationTrigger: 'autoplay',
       onEnter: playFlow,
       onStatic: () => {},
     });
@@ -359,7 +359,7 @@ export function initMicroAnimations() {
 
     registerTrigger({
       el,
-      trigger: 'autoplay',
+      animationTrigger: 'autoplay',
       onEnter: playCycle,
       onStatic: () => {},
     });

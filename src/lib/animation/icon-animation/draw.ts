@@ -198,7 +198,7 @@ export function initDrawIcon(el: HTMLElement) {
     // All other triggers go through registerTrigger
     registerTrigger({
       el,
-      trigger: drawTrigger,
+      animationTrigger: drawTrigger,
       onEnter: play,
       onStatic: () => {
         overlays.forEach(o => {

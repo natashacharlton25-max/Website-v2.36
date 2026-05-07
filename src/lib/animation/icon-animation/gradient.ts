@@ -101,7 +101,7 @@ export function initAnimatedGradient(el: HTMLElement) {
   // Route through registerTrigger — in reduced mode this queues for viewport stagger
   registerTrigger({
     el,
-    trigger: 'autoplay',
+    animationTrigger: 'autoplay',
     onEnter: () => {
       animateGradTransform(grad, d, direction, ease, doScale);
       return null; // gradient loops don't return a timeline
