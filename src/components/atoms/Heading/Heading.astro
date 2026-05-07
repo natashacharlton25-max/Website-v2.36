@@ -241,7 +241,13 @@ const { component: _mc, ...rawMediaProps } = media || {};
 // the em-based --media-* tokens on Icon/Shape children resolve against
 // that. Token-driven: if --text-h1 changes in tokens, media follows.
 // mediaSize prop kept for explicit overrides via author.
-const mediaProps = rawMediaProps;
+//
+// mediaBg=true means the Shape is wallpaper for a child atom — auto-inject
+// semanticRole='background' so authors can't accidentally mark it decorative
+// or claim a label. Runtime guarantee, not authoring discipline.
+const mediaProps = (mediaBg && mediaComponent === 'Shape')
+  ? { ...rawMediaProps, semanticRole: 'background' }
+  : rawMediaProps;
 
 // Animated gradient / colour cycle — random delay + optional speed
 const headingAnimParts: string[] = [];

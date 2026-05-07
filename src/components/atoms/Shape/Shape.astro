@@ -14,8 +14,8 @@ import type {
   Variant, Shadow,
   GradientBlend, GradientDirection,
   Animation, AnimationTriggerInteractive, AnimationRepeat, AnimationInterval,
-  IconSemanticRole, ShapeSize, ShapeBorderWeight,
-  DrawVariant, DrawMode, DrawColour,
+  ShapeSemanticRole, ShapeSize, ShapeBorderWeight,
+  DrawVariant, DrawMode, DrawColour, DrawWormSize,
   Stagger, StaggerFrom,
   MorphTrigger,
   FillMode, FillTrigger, FillTiming,
@@ -38,8 +38,11 @@ interface Props {
   /** Force a specific render path. 'auto' (default) uses CSS for circle/square/rounded/pill and SVG for everything else. */
   renderAs?: ShapeRenderAs;
   slug?: string;
-  semanticRole?: IconSemanticRole;
-  label?: string;
+  semanticRole?: ShapeSemanticRole;
+  /** Human-readable label. Required for ui-control and content-symbol.
+   *  Forbidden when semanticRole='background' (the child atom owns meaning).
+   *  Atom-suffixed name (label<Atom>) avoids collisions when Shape is composed inside other atoms. */
+  labelShape?: string;
   brandColor?: BrandColour;
   rainbowColor?: RainbowColour;
   colorTier?: ColourTier;
@@ -82,7 +85,7 @@ interface Props {
   drawColor?: DrawColour | string;
   drawStagger?: Stagger;
   drawStaggerFrom?: StaggerFrom;
-  drawWormSize?: number;
+  drawWormSize?: DrawWormSize;
   drawOnScroll?: boolean;
   drawScrub?: boolean;
   morphTo?: string;
@@ -105,7 +108,7 @@ interface Props {
 }
 
 const {
-  shape = 'circle', mode = 'shape', renderAs = 'auto', slug, semanticRole = 'decorative', label,
+  shape = 'circle', mode = 'shape', renderAs = 'auto', slug, semanticRole = 'decorative', labelShape,
   brandColor, rainbowColor, colorTier,
   size, variant = 'fill', borderWeight, shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientEmerge, gradientFade, gradientCycle, gradientAnimated, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
@@ -139,10 +142,21 @@ const mediaProps = (mediaComponent === 'Icon' || mediaComponent === 'LottieIcon'
   : rawMediaProps;
 // Container is auto-detected from slot/media — no separate prop needed
 const isContainer = hasSlot || hasMedia;
-// A11y: ui-control and content-symbol need labels, focus, and role
+// A11y: ui-control and content-symbol need labels, focus, and role.
+// background = explicit "I'm wallpaper around a child atom" — child owns
+// meaning, Shape stays aria-hidden with no label. Behaviour is identical to
+// 'decorative' but the explicit value lets the validator forbid labelShape
+// and require media, and lets authors signal intent in JSON.
 const isInformational = semanticRole === 'ui-control' || semanticRole === 'content-symbol';
-if (isInformational && !label && import.meta.env.DEV) {
-  console.warn(`[Shape] semanticRole="${semanticRole}" requires a label for accessibility`);
+const isBackground = semanticRole === 'background';
+if (isInformational && !labelShape && import.meta.env.DEV) {
+  console.warn(`[Shape] semanticRole="${semanticRole}" requires labelShape for accessibility`);
+}
+if (isBackground && labelShape && import.meta.env.DEV) {
+  console.warn(`[Shape] semanticRole="background" forbids labelShape — child atom owns meaning`);
+}
+if (isBackground && !hasMedia && !hasSlot && import.meta.env.DEV) {
+  console.warn(`[Shape] semanticRole="background" requires media (Shape is wallpaper for a child atom)`);
 }
 
 // A11y: any shape with an interaction (hover/click/focus animation, draw,
@@ -224,7 +238,7 @@ if (draw) {
   if (drawColor) dataAttrs['data-icon-draw-color'] = drawColor;
   if (drawStagger) dataAttrs['data-icon-draw-stagger'] = drawStagger;
   if (drawStaggerFrom) dataAttrs['data-icon-draw-stagger-from'] = drawStaggerFrom;
-  if (drawWormSize) dataAttrs['data-icon-draw-worm-size'] = String(drawWormSize);
+  if (drawWormSize) dataAttrs['data-icon-draw-worm-size'] = drawWormSize;
   if (drawOnScroll) dataAttrs['data-icon-draw-scroll'] = 'true';
   if (drawScrub) dataAttrs['data-icon-draw-scrub'] = 'true';
   if (animationTrigger && animationTrigger !== 'hover') dataAttrs['data-icon-draw-trigger'] = animationTrigger;
@@ -376,8 +390,8 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     isContainer && 'shape--container',
     className,
   ]}
-  aria-hidden={!isInteractive && (semanticRole === 'decorative' || !semanticRole) ? "true" : undefined}
-  aria-label={isInformational ? label : (isInteractive && label ? label : undefined)}
+  aria-hidden={!isInteractive && (semanticRole === 'decorative' || semanticRole === 'background' || !semanticRole) ? "true" : undefined}
+  aria-label={isInformational ? labelShape : (isInteractive && labelShape ? labelShape : undefined)}
   tabindex={isInteractive ? "0" : undefined}
   role={a11yRole}
   data-semantic-role={semanticRole}

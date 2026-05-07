@@ -79,7 +79,12 @@ export function initDrawIcon(el: HTMLElement) {
   const pathCount = origPaths.length;
   const drawStagger = pathCount > 1 ? staggerTotal / (pathCount - 1) : 0;
   const drawStaggerFrom = (el.dataset.iconDrawStaggerFrom || 'start') as 'start' | 'center' | 'end' | 'edges' | 'random';
-  const drawWormSize = parseFloat(el.dataset.iconDrawWormSize || '') || 10;
+  // Worm size token → path-percentage. Token vocabulary matches the project's
+  // size scale (xs/sm/md/lg/xl) so it composes with other size props authors
+  // already know. Fallback chain handles raw numeric strings (legacy data).
+  const wormSizePctMap: Record<string, number> = { xs: 5, sm: 10, md: 20, lg: 35, xl: 60 };
+  const wormSizeRaw = el.dataset.iconDrawWormSize || '';
+  const drawWormSize = wormSizePctMap[wormSizeRaw] ?? (parseFloat(wormSizeRaw) || 10);
   // Overlay color: drawColor can be:
   //   - A rainbow position (rainbow-1..7) → resolves to var(--rainbow-N) token
   //   - A gradient name (hero, sunset, red, etc.) → resolves to url(#grad-NAME)

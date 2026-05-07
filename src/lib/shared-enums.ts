@@ -300,6 +300,15 @@ export const ANIMATION_INTERVALS = [
 ] as const;
 export type AnimationInterval = typeof ANIMATION_INTERVALS[number];
 
+// ── Draw Worm Size (5 values) ────────────────────────
+// Laser worm segment length as a token. Resolved to a path-percentage at
+// runtime by the draw handler (src/lib/animation/svg-animation/draw.ts).
+// Used by Icon and Shape when drawLaser is on.
+export const DRAW_WORM_SIZES = [
+  'xs', 'sm', 'md', 'lg', 'xl'
+] as const;
+export type DrawWormSize = typeof DRAW_WORM_SIZES[number];
+
 
 /* ================================================================
    CONTENT — semantic role, accessibility
@@ -311,12 +320,21 @@ export const SEMANTIC_ROLES = [
 ] as const;
 export type SemanticRole = typeof SEMANTIC_ROLES[number];
 
-// ── Icon/Shape Semantic Role (3 values) ────────────────
-// Used by Icon and Shape atoms — drives ARIA, tabindex, label requirement
+// ── Icon Semantic Role (3 values) ──────────────────────
+// Used by Icon and LottieIcon — drives ARIA, tabindex, label requirement.
 export const ICON_SEMANTIC_ROLES = [
   'decorative', 'ui-control', 'content-symbol'
 ] as const;
 export type IconSemanticRole = typeof ICON_SEMANTIC_ROLES[number];
+
+// ── Shape Semantic Role (4 values) ─────────────────────
+// Extends Icon's set with 'background' — the Shape is wallpaper for a child
+// atom (the child owns aria/label; Shape stays aria-hidden with no label).
+// Used only by Shape because Icon is always a leaf, never a container.
+export const SHAPE_SEMANTIC_ROLES = [
+  'decorative', 'background', 'ui-control', 'content-symbol'
+] as const;
+export type ShapeSemanticRole = typeof SHAPE_SEMANTIC_ROLES[number];
 
 
 /* ================================================================

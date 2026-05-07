@@ -81,8 +81,15 @@ const Tag = variant === 'numbered' ? 'ol' : 'ul';
 const colour = rainbowColor || brandColor || 'primary';
 
 const mediaComponent = media?.component;
-const { component: _mc, ...rawMediaProps } = media || {};
+const { component: _mc, ...rawMediaPropsRaw } = media || {};
 const hasMedia = !!media;
+
+// mediaBg=true means the Shape is wallpaper for a child atom — auto-inject
+// semanticRole='background' so authors can't accidentally mark it decorative
+// or claim a label. Runtime guarantee, not authoring discipline.
+const rawMediaProps = (mediaBg && mediaComponent === 'Shape')
+  ? { ...rawMediaPropsRaw, semanticRole: 'background' }
+  : rawMediaPropsRaw;
 
 // Marker sizing strategy:
 //   - mediaSize="auto" (default): forward nothing — Icon/Shape base CSS

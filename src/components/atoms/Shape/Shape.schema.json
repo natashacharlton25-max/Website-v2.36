@@ -6,7 +6,8 @@
 
   "_rules": [
     { "rule": "icon-contrast-on-fill", "condition": "variant === 'fill' && media?.component === 'Icon' && (media.brandColor === brandColor || media.rainbowColor === rainbowColor || !media.brandColor && !media.rainbowColor)", "action": "Icon gets auto-contrast colour (oklch inversion) so it's visible against the filled shape background" },
-    { "rule": "label-required-for-informational", "condition": "semanticRole === 'ui-control' || semanticRole === 'content-symbol'", "requires": "label", "note": "ui-control and content-symbol shapes must have label for screen readers" },
+    { "rule": "labelShape-required-for-informational", "condition": "semanticRole === 'ui-control' || semanticRole === 'content-symbol'", "requires": "labelShape", "note": "ui-control and content-symbol shapes must have labelShape for screen readers" },
+    { "rule": "background-shape-no-label", "condition": "semanticRole === 'background'", "forbids": "labelShape", "requires": "media", "note": "Shape with semanticRole='background' is wallpaper for a child atom. The child owns aria/label; Shape stays aria-hidden. Use this when Shape appears as media inside Heading/List/Badge to make the intent explicit." },
     { "rule": "draw-colour-base-only", "condition": "draw", "note": "drawColor only accepts base colour variants or rainbow — no tier modifiers (tint/mid/emphasis). Atom strips them at runtime via normalizeDrawColour." },
     { "rule": "draw-fill-mutual-exclusion", "condition": "draw && fillAnimation && fillTiming === 'overlap'", "note": "When draw and fillAnimation are both used, fillTiming controls whether fill bloom overlaps draw at 50% (default) or starts after draw completes ('after')" }
   ],
@@ -17,8 +18,8 @@
       "mode":         { "type": "string", "default": "shape", "enum": ["shape", "mask"], "_note": "shape: renders as visible shape. mask: uses shape as clip-path on content." },
       "renderAs":     { "type": "string", "default": "auto", "enum": ["auto", "css", "svg"], "_note": "auto: CSS for circle/square/rounded/pill, SVG for everything else. css: force CSS path (only valid for css-capable shapes). svg: force SVG path." },
       "slug":         { "type": "string", "_format": "shape-slug", "_note": "API shape slug — fetches SVG from Asset Library" },
-      "semanticRole": { "type": "string", "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"], "_note": "decorative: aria-hidden. ui-control: tabindex 0 + role=img + label. content-symbol: role=img + label. Container behaviour is auto-detected from slot/media — no separate value needed." },
-      "label":        { "type": "string", "_note": "Required for ui-control and content-symbol." }
+      "semanticRole": { "type": "string", "default": "decorative", "enum": ["decorative", "background", "ui-control", "content-symbol"], "_note": "decorative: aria-hidden, no label. background: aria-hidden wallpaper for a child atom — child owns meaning, labelShape forbidden, media required. ui-control: tabindex 0 + role=img + labelShape. content-symbol: role=img + labelShape. Container behaviour (rendered shape__content wrapper) is auto-detected from slot/media." },
+      "labelShape":   { "type": "string", "_note": "Required for ui-control and content-symbol. Forbidden for background. Atom-suffixed name (label<Atom>) avoids collisions when Shape is composed inside other atoms." }
     },
 
     "colour": {
@@ -34,7 +35,7 @@
       "media": {
         "type": "object",
         "textonly": false,
-        "_description": "Nested atom node. Shape becomes a container for the child atom. Icon/Image/LottieIcon handle their own props (colour, weight, animation).",
+        "_description": "Nested atom node. Shape becomes a container for the child atom — the child owns its own props (colour, weight, animation). When Shape itself is purely wallpaper (composed inside Heading/List/Badge as mediaBg), set Shape's semanticRole='background' so meaning lives only on the child.",
         "properties": {
           "component":    { "type": "string", "required": true, "enum": ["Icon", "LottieIcon", "Image"] },
           "semanticRole": { "type": "string", "required": true, "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] }
@@ -80,7 +81,7 @@
       "drawColor":        { "type": "string", "enum": ["primary", "secondary", "neutral", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7", "hero", "sunset", "brand-emerge", "brand-fade", "rainbow"], "_note": "BASE colours only — no tier modifiers. Tier suffixes are stripped at runtime. Rainbow colours use positional names (rainbow-1..7) matching CSS tokens." },
       "drawStagger":      { "type": "string", "default": "normal", "enum": ["none", "tight", "normal", "loose"] },
       "drawStaggerFrom":  { "type": "string", "default": "start", "enum": ["start", "center", "end", "edges", "random"] },
-      "drawWormSize":     { "type": "number", "default": 10, "_note": "Laser worm segment size as percentage of path length (1-99)" },
+      "drawWormSize":     { "type": "string", "default": "sm", "enum": ["xs", "sm", "md", "lg", "xl"], "_note": "Laser worm segment length token. Resolved to path percentage at runtime (xs=5%, sm=10%, md=20%, lg=35%, xl=60%). Matches Icon." },
       "drawOnScroll":     { "type": "boolean", "_note": "Trigger draw when element enters viewport" },
       "drawScrub":        { "type": "boolean", "_note": "Scrub draw progress with scroll position (only with drawOnScroll)" },
 

@@ -4,6 +4,10 @@
   "renders": { "full": "Heading.astro", "reduced": "Heading.astro", "textonly": "Heading.astro" },
   "notes": "Every heading goes through this component. Media (Icon/LottieIcon/Image) passed as nested component node — child atoms own their props. Subtitle renders via Text atom. Pipeline strips visual/animation props in textonly.",
 
+  "_rules": [
+    { "rule": "mediaBg-shape-background", "condition": "mediaBg === true && media?.component === 'Shape'", "action": "Heading auto-injects semanticRole='background' on the Shape — runtime guarantee, JSON value (if any) is overridden. Shape is wallpaper for the child atom; child owns aria/label." }
+  ],
+
   "props": {
     "content": {
       "contentHeading": { "type": "string", "required": true, "description": "Heading text. Pipeline content key." },
@@ -45,7 +49,7 @@
       "media": {
         "type": "object",
         "textonly": false,
-        "_description": "Nested atom node. When mediaBg=false (default) media is a single atom (Icon | LottieIcon | Image | Shape). When mediaBg=true media must be a Shape containing a child atom (Icon | LottieIcon | Image) via its own media prop.",
+        "_description": "Nested atom node. When mediaBg=false (default) media is a single atom (Icon | LottieIcon | Image | Shape). When mediaBg=true media must be a Shape containing a child atom (Icon | LottieIcon | Image) via its own media prop — set the Shape's semanticRole='background' to declare intent (Shape is wallpaper, child owns meaning).",
         "properties": {
           "component":    { "type": "string", "required": true, "enum": ["Icon", "LottieIcon", "Image", "Shape"] },
           "semanticRole": { "type": "string", "required": true, "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] }

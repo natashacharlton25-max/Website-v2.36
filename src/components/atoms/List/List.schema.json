@@ -4,6 +4,10 @@
   "renders": { "full": "List.astro", "reduced": "List.astro", "textonly": "List.astro" },
   "notes": "Every list goes through this component. Items render via Text atom (per-item content). Marker pattern matches Heading.media — single media prop accepts { component: 'Icon'|'Shape', ...atomProps }. Pipeline strips media in textonly (native bullets replace). Colour comes from the global .color--{name} mixin.",
 
+  "_rules": [
+    { "rule": "mediaBg-shape-background", "condition": "mediaBg === true && media?.component === 'Shape'", "action": "List auto-injects semanticRole='background' on the Shape — runtime guarantee, JSON value (if any) is overridden. Shape is wallpaper for the child Icon; child owns aria/label." }
+  ],
+
   "props": {
     "content": {
       "contentList": { "type": "array", "required": true, "description": "Array of items. Each item is a string (plain text) or { contentLink, href } (linked item). Pipeline content key." }
@@ -18,7 +22,7 @@
     },
 
     "media": {
-      "media":       { "type": "object", "textonly": false, "_description": "Per-item marker atom. mediaBg=false: single Icon | Shape. mediaBg=true: Shape wrapping a child Icon via its own media prop.", "properties": { "component": { "type": "string", "required": true, "enum": ["Icon", "Shape"] }, "semanticRole": { "type": "string", "required": true, "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] } } },
+      "media":       { "type": "object", "textonly": false, "_description": "Per-item marker atom. mediaBg=false: single Icon | Shape. mediaBg=true: Shape wrapping a child Icon via its own media prop — set the Shape's semanticRole='background' to declare wallpaper intent (child owns meaning).", "properties": { "component": { "type": "string", "required": true, "enum": ["Icon", "Shape"] }, "semanticRole": { "type": "string", "required": true, "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] } } },
       "mediaBg":     { "type": "boolean", "default": false, "_description": "true = media is a Shape wrapping a child atom (background container)." },
       "mediaBgSize": { "type": "string", "default": "normal", "enum": ["compact", "normal", "spacious"], "_description": "Padding around child in Shape container. Only used when mediaBg=true." },
       "mediaSize":   { "type": "string", "default": "auto", "enum": ["auto", "xs", "sm", "md", "lg", "xl", "base", "2xl", "3xl"], "_description": "Marker size. 'auto' inherits item text size via em." }
