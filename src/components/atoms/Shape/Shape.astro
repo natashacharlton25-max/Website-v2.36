@@ -24,6 +24,7 @@ import type {
 import { normalizeDrawColour } from '../../../lib/shared-enums';
 import { resolveInlineGradient, getGradientStopColours } from '../../../lib/gradient-inline';
 import { GRADIENT_ANIMATION_SPEED } from '../../../lib/animation/animation-config';
+import { SHAPE_PATHS } from '../../../lib/shape-paths';
 
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
 const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
@@ -198,29 +199,15 @@ const sw = draw
 const pad = sw;
 const vb = `-${pad} -${pad} ${100 + pad * 2} ${100 + pad * 2}`;
 
-// Built-in SVG shapes — viewBox 0 0 100 100, padded by stroke width
-const SVG_SHAPES: Record<string, string> = {
-  circle:     '<circle cx="50" cy="50" r="48" />',
-  square:     '<rect x="2" y="2" width="96" height="96" />',
-  subtle:     '<rect x="2" y="2" width="96" height="96" rx="3" ry="3" />',
-  soft:       '<rect x="2" y="2" width="96" height="96" rx="8" ry="8" />',
-  rounded:    '<rect x="2" y="2" width="96" height="96" rx="12" ry="12" />',
-  'rounded-lg': '<rect x="2" y="2" width="96" height="96" rx="18" ry="18" />',
-  pill:       '<rect x="2" y="2" width="96" height="48" rx="24" ry="24" />',
-  hexagon: '<polygon points="50,2 97,27 97,73 50,98 3,73 3,27" />',
-  diamond: '<polygon points="50,2 98,50 50,98 2,50" />',
-  triangle:'<polygon points="50,2 98,98 2,98" />',
-  star:    '<polygon points="50,2 61,35 97,35 68,57 79,91 50,70 21,91 32,57 3,35 39,35" />',
-  blob:    '<path d="M70,8 C90,15 98,35 96,55 C94,75 80,92 60,96 C40,100 18,90 8,72 C-2,54 2,30 15,15 C28,0 50,1 70,8 Z" />',
-};
-
+// Built-in shape paths come from src/lib/shape-paths.ts (shared so morph.ts
+// and other handlers can import the same source of truth).
 const cssCapableShapes = ['circle', 'square', 'subtle', 'soft', 'rounded', 'rounded-lg', 'pill'];
 const cssCapable = cssCapableShapes.includes(shape) && !draw && !morphTo && !fillAnimation;
 // renderAs decides: 'css' forces CSS path (only valid for cssCapable shapes), 'svg' forces SVG path,
 // 'auto' (default) uses CSS for cssCapable shapes and SVG for everything else.
 const isCssShape = renderAs === 'svg' ? false : (renderAs === 'css' ? cssCapable : cssCapable);
 const isSvgShape = !isCssShape;
-const builtinSvg = isSvgShape ? SVG_SHAPES[shape] : undefined;
+const builtinSvg = isSvgShape ? SHAPE_PATHS[shape] : undefined;
 
 // Draw data attributes.
 // `data-icon-*` is the shared SVG-animation contract used by both Icon and
@@ -262,7 +249,7 @@ if (fillAnimation) {
 let morphTargetSvg: string | null = null;
 if (morphTo) {
   // Check if it's a built-in shape name
-  const builtinTarget = SVG_SHAPES[morphTo as keyof typeof SVG_SHAPES];
+  const builtinTarget = SHAPE_PATHS[morphTo];
   if (builtinTarget) {
     morphTargetSvg = `<svg viewBox="${vb}"><g>${builtinTarget}</g></svg>`;
   } else {
