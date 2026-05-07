@@ -26,7 +26,6 @@ import { Image } from '../Image';
 import { Shape } from '../Shape';
 import { Text } from '../Text';
 import { aacInline } from '../../../lib/aac/aac-inline';
-import { GRADIENT_ANIMATION_SPEED, randomGradientDelayVar } from '../../../lib/animation/animation-config';
 import '../../../components/molecules/aac/AacCard/AacCard.css';
 import type {
   BrandColour, TextColour, RainbowColour, ColourTier,
@@ -250,14 +249,9 @@ const mediaProps = (mediaBg && mediaComponent === 'Shape')
   : rawMediaProps;
 
 // Animated gradient / colour cycle — random delay + optional speed
-const headingAnimParts: string[] = [];
-if ((gradientAnimated && resolvedGradientName) || gradientCycle) {
-  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') headingAnimParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
-  headingAnimParts.push(randomGradientDelayVar());
-}
-const headingAnimStyle = headingAnimParts.length ? headingAnimParts.join(';') : '';
-
-const mergedStyle = [incomingStyle, headingAnimStyle].filter(Boolean).join(';') || '';
+// Speed is class-based (.gradient--speed-{slow|fast}); phase desync is GSAP's
+// job. No --_grad-anim-delay or --_grad-anim-duration emitted from here.
+const mergedStyle = incomingStyle || '';
 const tagInlineStyle = flipTextStyle || undefined;
 
 const headingClassList = [
@@ -305,6 +299,7 @@ const headingClassList = [
     (gradient || gradientBlend) && variant !== 'default' && `gradient--${variant}`,
     resolvedGradientName && `gradient--blend-${resolvedGradientName}`,
     gradientAnimated && 'gradient--animated',
+    gradientAnimated && gradientAnimateSpeed && gradientAnimateSpeed !== 'default' && `gradient--speed-${gradientAnimateSpeed}`,
     gradientCycle && 'gradient--cycle',
     hasMedia && 'heading-wrap--has-media',
     hasMedia && `heading-wrap--media-${mediaPosition}`,

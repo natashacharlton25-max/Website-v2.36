@@ -29,7 +29,6 @@ import type {
  *  rejects it). Local type keeps schema, CSS, and TS aligned. */
 type BadgeShape = 'sharp' | 'subtle' | 'soft' | 'rounded';
 import { getGradientStopColours } from '../../../lib/gradient-inline';
-import { GRADIENT_ANIMATION_SPEED, randomGradientDelayVar } from '../../../lib/animation/animation-config';
 
 interface Props {
   /** Badge display text. Pipeline content key. */
@@ -127,13 +126,11 @@ const gradientName = gradientBlend
   || (gradient && color ? `${emergePrefix}${color}${tierSuffix}` : null)
   || (gradient ? `${emergePrefix}primary` : null);
 
-// Animated gradient / colour cycle — random animation-delay to desync multiple badges,
-// optional custom duration. Cycle reads the active gradient's stop tokens from the catalogue.
+// Cycle reads the active gradient's stop tokens from the catalogue — these
+// are per-instance values (resolved from gradientName) so they stay inline.
+// Speed is class-based (.gradient--speed-{slow|fast}); phase desync is GSAP's
+// job. No --_grad-anim-delay or --_grad-anim-duration emitted from here.
 const badgeAnimParts: string[] = [];
-if ((gradientAnimated && gradientName) || gradientCycle) {
-  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') badgeAnimParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
-  badgeAnimParts.push(randomGradientDelayVar());
-}
 if (gradientCycle && gradientName) {
   const stopColours = getGradientStopColours(gradientName);
   if (stopColours && stopColours.length >= 2) {
@@ -189,6 +186,7 @@ const headingLabelProps = {
     gradientFade && 'gradient--fade',
     gradientCycle && 'gradient--cycle',
     gradientAnimated && 'gradient--animated',
+    gradientAnimated && gradientAnimateSpeed && gradientAnimateSpeed !== 'default' && `gradient--speed-${gradientAnimateSpeed}`,
     size !== 'md' && `badge--${size}`,
     `badge--${shape}`,
     borderWeight && `badge--border-${borderWeight}`,

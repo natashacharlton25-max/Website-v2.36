@@ -101,12 +101,18 @@
 
 
 /* ========== ANIMATED ==========
-   Per-instance speed + delay via custom properties set inline on the element:
-     --_grad-anim-duration (seconds, defaults 8s)
-     --_grad-anim-delay    (random negative value to desync gradients on same page) */
+   GSAP owns all animation (micro.ts for CSS-rendered, gradient.ts for SVG).
+   Speed picked via class:
+     .gradient--speed-slow  → 20s (read by GSAP via getComputedStyle)
+     (default)              → 12s
+     .gradient--speed-fast  → 6s
+   Per-instance phase desync is GSAP's job (tl.progress(Math.random())).
+   No --_grad-anim-delay is set or consumed — phase happens in JS only. */
 
-/* Animated gradient — GSAP handles all animation (micro.ts).
-   CSS only sets background-size for the larger-than-shape gradient. */
+.gradient--speed-slow { --_grad-anim-duration: 20s; }
+.gradient--speed-fast { --_grad-anim-duration: 6s; }
+
+/* Animated gradient — CSS only sets background-size for the larger-than-shape gradient. */
 .gradient--animated.gradient--fill {
   background: var(--_grad-computed);
   background-size: 200% 200%;

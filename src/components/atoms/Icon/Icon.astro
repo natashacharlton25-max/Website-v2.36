@@ -27,7 +27,6 @@ import type {
 } from '../../../lib/shared-enums';
 import { normalizeDrawColour } from '../../../lib/shared-enums';
 import { resolveInlineGradient } from '../../../lib/gradient-inline';
-import { GRADIENT_ANIMATION_SPEED } from '../../../lib/animation/animation-config';
 
 // ─── Brand config ───────────────────────────────────────
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
@@ -326,6 +325,7 @@ const effectClasses = [
   shadow && `icon--shadow-${shadow}`,
   glow && `icon--glow-${glow}`,
   gradientName && 'icon--has-gradient',
+  gradientAnimated && gradientAnimateSpeed && gradientAnimateSpeed !== 'default' && `gradient--speed-${gradientAnimateSpeed}`,
   animation && `anim--${animation}`,
   draw && 'icon--stroke',
   draw && 'icon--draw',
@@ -377,12 +377,12 @@ if (fillAnimation) {
 }
 
 // Gradient animation — GSAP via gradient.ts (replaces baked <animateTransform>)
-// Speeds come from the shared GRADIENT_ANIMATION_SPEED map (animation-config.ts)
-// so Icon, Badge, Heading agree on what slow/default/fast mean.
+// Speed read from --_grad-anim-duration (set by .gradient--speed-* class in
+// gradient.css). One mechanism for Icon, Badge, Heading, Shape — no parallel
+// data-attr for duration.
 if (gradientAnimated && gradientName && !draw) {
   dataAttrs['data-icon-grad-anim'] = 'true';
   if (gradientAnimateDirection && gradientAnimateDirection !== 'cw') dataAttrs['data-icon-grad-dir'] = gradientAnimateDirection;
-  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') dataAttrs['data-icon-grad-dur'] = String(GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]);
 }
 
 // ─── Animation explainer — resolve everything for the molecule ─────

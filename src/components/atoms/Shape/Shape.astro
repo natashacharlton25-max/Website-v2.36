@@ -23,7 +23,6 @@ import type {
 } from '../../../lib/shared-enums';
 import { normalizeDrawColour } from '../../../lib/shared-enums';
 import { resolveInlineGradient, getGradientStopColours } from '../../../lib/gradient-inline';
-import { GRADIENT_ANIMATION_SPEED, randomGradientDelayVar } from '../../../lib/animation/animation-config';
 import { SHAPE_PATHS } from '../../../lib/shape-paths';
 
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
@@ -317,29 +316,26 @@ const baseGradientName = gradientBlend
   || (gradient && baseColour ? `${baseColour}${tierSuffix}` : null)
   || (gradient ? 'primary' : null);
 const gradientName = baseGradientName ? `${baseGradientName}${radialSuffix}` : null;
-// Animated gradient via GSAP — SVG render path only. CSS shapes animate via CSS keyframes.
+// Animated gradient via GSAP — SVG render path. Handler reads speed from
+// --_grad-anim-duration (set by .gradient--speed-* class), so no data-attr
+// for duration is needed. Direction/ease/scale stay as data-attrs because
+// they're discrete enums consumed only by the GSAP handler.
 if (gradientAnimated && gradientName && !isCssShape) {
-  // Presence flag — handler selects on attribute presence, value isn't read
-  dataAttrs['data-icon-grad-anim'] = '';
-  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') dataAttrs['data-icon-grad-dur'] = String(GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]);
+  dataAttrs['data-icon-grad-anim'] = ''; // presence flag
   if (gradientAnimateEase) dataAttrs['data-icon-grad-ease'] = gradientAnimateEase;
   if (gradientAnimateDirection !== 'cw') dataAttrs['data-icon-grad-dir'] = gradientAnimateDirection;
   if (gradientAnimateScale) dataAttrs['data-icon-grad-scale'] = 'true';
 }
 
-// For CSS-rendered shapes, set inline CSS vars for duration + random delay to desync.
+// Colour cycle stop tokens — these are the only legitimate inline-style values.
+// They depend on gradientName (resolved per instance from the catalogue), so
+// they can't go in CSS classes. Speed is class-based (.gradient--speed-*),
+// phase desync is GSAP's job. No --_grad-anim-delay or --_grad-anim-duration
+// emitted from here.
 const animStyleParts: string[] = [];
-if (gradientAnimated && gradientName && isCssShape) {
-  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') animStyleParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
-  animStyleParts.push(randomGradientDelayVar());
-}
-// Colour cycle — reads the active gradient's own stop tokens from the catalogue.
-// For example, gradientBlend="brand-emerge" gives stops [primary-tint, secondary-emphasis],
-// and the cycle keyframe fades between them. Falls back to tier tokens if no gradient is set.
 if (gradientCycle) {
   const stopColours = gradientName ? getGradientStopColours(gradientName) : null;
   if (stopColours && stopColours.length >= 2) {
-    // Use first, middle, last for a smooth 3-stage cycle (or just pairs if only 2 stops).
     const a = stopColours[0];
     const b = stopColours.length > 2 ? stopColours[Math.floor(stopColours.length / 2)] : stopColours[1];
     const c = stopColours[stopColours.length - 1];
@@ -347,8 +343,6 @@ if (gradientCycle) {
     animStyleParts.push(`--_cycle-b:${b}`);
     animStyleParts.push(`--_cycle-c:${c}`);
   }
-  if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') animStyleParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
-  animStyleParts.push(randomGradientDelayVar());
 }
 const animInlineStyle = animStyleParts.length ? animStyleParts.join(';') : undefined;
 // Gradient reference for SVG fill — GSAP creates its own local gradient at runtime for animated.
@@ -397,6 +391,7 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     gradientEmerge && 'gradient--emerge',
     gradientFade && 'gradient--fade',
     gradientAnimated && 'gradient--animated',
+    gradientAnimated && gradientAnimateSpeed && gradientAnimateSpeed !== 'default' && `gradient--speed-${gradientAnimateSpeed}`,
     gradientCycle && 'gradient--cycle',
     animation && `anim--${animation}`,
     draw && 'shape--draw',

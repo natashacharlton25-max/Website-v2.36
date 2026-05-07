@@ -19,10 +19,11 @@ export function initAnimatedGradient(el: HTMLElement) {
   if (!svg) return;
   if (getMotionMode() === 'none') return;
 
-  // Default duration matches the schema's gradientAnimateSpeed='default' tier.
-  // Atom only emits data-icon-grad-dur when speed is non-default, so the fallback
-  // must agree with the schema or schema/runtime will drift.
-  const dur = parseFloat(el.dataset.iconGradDur || '') || GRADIENT_ANIMATION_SPEED.default;
+  // Speed read from --_grad-anim-duration (set by .gradient--speed-{slow|fast}
+  // class in src/styles/global/gradient.css). Default is 12s (the bare
+  // .gradient--animated class baseline). Same mechanism as micro.ts for
+  // CSS-rendered shapes — one source of truth, no parallel data-attr.
+  const dur = parseFloat(getComputedStyle(el).getPropertyValue('--_grad-anim-duration') || '') || GRADIENT_ANIMATION_SPEED.default;
   const ease = el.dataset.iconGradEase || 'none';
   const direction = el.dataset.iconGradDir || 'cw'; // cw | ccw | sway
   const doScale = el.dataset.iconGradScale === 'true';
