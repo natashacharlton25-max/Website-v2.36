@@ -8,7 +8,7 @@
  * @param label - Display text
  * @param variant - 'fill' (default), 'outline', 'glass'
  * @param size - 'sm', 'md' (default), 'lg'
- * @param shape - 'sharp', 'subtle', 'soft' (default), 'rounded', 'pill'
+ * @param shape - 'sharp', 'subtle', 'soft' (default), 'rounded'
  * @param icon - Optional Phosphor icon slug e.g. 'shield-check-fill'
  * @param uppercase - Uppercase text (default true)
  * @param semanticRole - 'status' (default), 'tag', 'label', 'none'
@@ -20,9 +20,14 @@ import { Heading } from '../Heading';
 import type {
   BrandColour, RainbowColour, ColourTier,
   Variant, Shadow, GradientBlend, GradientDirection,
-  Size, Shape, BorderWeight,
+  Size, BorderWeight,
   FontFamily, FontWeight, SemanticRole,
 } from '../../../lib/shared-enums';
+
+/** Badge-specific shape — narrower than the shared Shape enum which
+ *  includes 'pill' (Badge has no pill CSS rule and the schema enum
+ *  rejects it). Local type keeps schema, CSS, and TS aligned. */
+type BadgeShape = 'sharp' | 'subtle' | 'soft' | 'rounded';
 import { getGradientStopColours } from '../../../lib/gradient-inline';
 import { GRADIENT_ANIMATION_SPEED } from '../../../lib/animation/animation-config';
 
@@ -55,7 +60,7 @@ interface Props {
   /** Animation speed — slow (20s), default (12s), fast (6s) */
   gradientAnimateSpeed?: 'slow' | 'default' | 'fast';
   size?: Size;
-  shape?: Shape;
+  shape?: BadgeShape;
   borderWeight?: BorderWeight;
   /** Media — component node { component: "Icon"|"LottieIcon", ...atomProps } */
   media?: Record<string, any>;
@@ -141,6 +146,26 @@ if (gradientCycle && gradientName) {
   }
 }
 const badgeAnimStyle = badgeAnimParts.length ? badgeAnimParts.join(';') : undefined;
+
+// Shared props forwarded to the nested Heading when the badge label
+// renders as a heading (level prop set, OR gradient on non-fill variant).
+// Both code paths spread the same set; extracted so the JSX stays
+// readable and the two branches stay in sync if props are added.
+const headingLabelProps = {
+  contentHeading: label,
+  flush: true,
+  weight: fontWeight !== 'bold' ? fontWeight : undefined,
+  gradient,
+  gradientBlend,
+  gradientDirection,
+  gradientEmerge,
+  gradientFade,
+  gradientFlip,
+  brandColor: !rainbowColor ? brandColor : undefined,
+  rainbowColor,
+  colorTier,
+  class: 'badge__label',
+};
 ---
 
 <span
@@ -175,9 +200,9 @@ const badgeAnimStyle = badgeAnimParts.length ? badgeAnimParts.join(';') : undefi
   {media?.component === 'Icon' && <Icon {...media} class="badge__icon" aria-hidden="true" />}
   {media?.component === 'LottieIcon' && <LottieIcon {...media} class="badge__icon" aria-hidden="true" />}
   {level ? (
-    <Heading level={level} contentHeading={label} flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} gradient={gradient} gradientBlend={gradientBlend} gradientDirection={gradientDirection} gradientEmerge={gradientEmerge} gradientFade={gradientFade} gradientFlip={gradientFlip} brandColor={!rainbowColor ? brandColor : undefined} rainbowColor={rainbowColor} colorTier={colorTier} class="badge__label" />
+    <Heading {...headingLabelProps} level={level} family={fontFamily} />
   ) : ((gradient || gradientBlend) && (variant !== 'fill' || gradientFlip)) ? (
-    <Heading level={6} contentHeading={label} flush family={fontFamily || 'body'} weight={fontWeight !== 'bold' ? fontWeight : undefined} gradient={gradient} gradientBlend={gradientBlend} gradientDirection={gradientDirection} gradientEmerge={gradientEmerge} gradientFade={gradientFade} gradientFlip={gradientFlip} brandColor={!rainbowColor ? brandColor : undefined} rainbowColor={rainbowColor} colorTier={colorTier} class="badge__label" />
+    <Heading {...headingLabelProps} level={6} family={fontFamily || 'body'} />
   ) : (
     <Text contentText={label} as="span" class="badge__label" flush family={fontFamily} weight={fontWeight !== 'bold' ? fontWeight : undefined} color={(gradientEmerge || gradientFade) ? (rainbowColor || brandColor) : undefined} />
   )}
