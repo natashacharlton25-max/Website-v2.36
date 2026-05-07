@@ -19,7 +19,7 @@ import type {
   Stagger, StaggerFrom,
   MorphTrigger,
   FillMode, FillTrigger, FillTiming,
-  GradientAnimateDirection, GradientAnimateMode,
+  GradientAnimateDirection,
 } from '../../../lib/shared-enums';
 import { normalizeDrawColour } from '../../../lib/shared-enums';
 import { resolveInlineGradient, getGradientStopColours } from '../../../lib/gradient-inline';
@@ -66,7 +66,6 @@ interface Props {
   /** Colour cycle — cross-fades through the element's own tier tokens (tint→mid→base→emphasis). */
   gradientCycle?: boolean;
   gradientAnimated?: boolean;
-  gradientAnimateMode?: GradientAnimateMode;
   /** Animation speed — slow (20s), default (12s), fast (6s). Matches Icon/Heading/Badge. */
   gradientAnimateSpeed?: 'slow' | 'default' | 'fast';
   gradientAnimateEase?: string;
@@ -112,7 +111,7 @@ const {
   shape = 'circle', mode = 'shape', renderAs = 'auto', slug, semanticRole = 'decorative', labelShape,
   brandColor, rainbowColor, colorTier,
   size, variant = 'fill', borderWeight, shadow, glow,
-  gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientEmerge, gradientFade, gradientCycle, gradientAnimated, gradientAnimateMode = 'rotate', gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
+  gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientEmerge, gradientFade, gradientCycle, gradientAnimated, gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
   media, animation, animationTrigger = 'hover', animationRepeat = 'threeloop', animationInterval = 'base',
   draw, drawMode = 'static', drawLaser, drawGhost, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
   fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom, fillTiming,
@@ -302,7 +301,8 @@ const baseGradientName = gradientBlend
 const gradientName = baseGradientName ? `${baseGradientName}${radialSuffix}` : null;
 // Animated gradient via GSAP — SVG render path only. CSS shapes animate via CSS keyframes.
 if (gradientAnimated && gradientName && !isCssShape) {
-  dataAttrs['data-icon-grad-anim'] = gradientAnimateMode;
+  // Presence flag — handler selects on attribute presence, value isn't read
+  dataAttrs['data-icon-grad-anim'] = '';
   if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') dataAttrs['data-icon-grad-dur'] = String(GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]);
   if (gradientAnimateEase) dataAttrs['data-icon-grad-ease'] = gradientAnimateEase;
   if (gradientAnimateDirection !== 'cw') dataAttrs['data-icon-grad-dir'] = gradientAnimateDirection;

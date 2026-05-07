@@ -459,8 +459,3 @@ export const GRADIENT_ANIMATE_DIRECTIONS = [
 ] as const;
 export type GradientAnimateDirection = typeof GRADIENT_ANIMATE_DIRECTIONS[number];
 
-// ── Gradient Animate Mode (1 value for now) ────────────
-export const GRADIENT_ANIMATE_MODES = [
-  'rotate'
-] as const;
-export type GradientAnimateMode = typeof GRADIENT_ANIMATE_MODES[number];
