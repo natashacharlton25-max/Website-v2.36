@@ -204,16 +204,16 @@ div.shape.shape--fill.gradient--fade.gradient--fade[data-grad-focus]:not(.shape-
 
 .shape__svg--glass g {
   fill: var(--_color, var(--svg-ghost-color));
-  fill-opacity: 0.08;
+  fill-opacity: var(--svg-glass-fill-opacity);
   stroke: var(--_color, var(--svg-ghost-color));
-  stroke-opacity: 0.3;
+  stroke-opacity: var(--svg-glass-stroke-opacity);
 }
 
 .shape__svg--liquid-glass g {
   fill: var(--_color, var(--svg-ghost-color));
-  fill-opacity: 0.06;
+  fill-opacity: var(--svg-liquid-glass-fill-opacity);
   stroke: var(--_color, var(--svg-ghost-color));
-  stroke-opacity: 0.2;
+  stroke-opacity: var(--svg-liquid-glass-stroke-opacity);
 }
 
 /* API shape SVGs */
@@ -274,10 +274,17 @@ div.shape.shape--fill.gradient--fade.gradient--fade[data-grad-focus]:not(.shape-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-sm);
+  /* Padding via mediaBgSize tier — child atom keeps its own size, Shape
+     wraps to fit + the padding. Values are em-based so padding scales with
+     the child's text context. */
+  padding: var(--_shape-bg-padding, var(--space-sm));
   width: auto;
   height: auto;
 }
+
+.shape--bg-compact   { --_shape-bg-padding: 0.25em; }
+.shape--bg-normal    { --_shape-bg-padding: 0.5em;  }
+.shape--bg-spacious  { --_shape-bg-padding: 0.85em; }
 
 .shape__content {
   position: relative;

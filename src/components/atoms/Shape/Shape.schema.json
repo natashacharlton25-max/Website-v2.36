@@ -1,7 +1,7 @@
 {
   "component": "Shape",
   "category": "atom",
-  "renders": { "full": "Shape.astro", "reduced": "Shape.astro", "assistive": "Shape.astro", "textonly": null },
+  "renders": { "full": "Shape.astro", "reduced": "Shape.astro", "textonly": null },
   "notes": "Decorative shape or container background. Built-in geometric shapes via CSS/SVG. API shapes from D1. Can wrap child atoms (Icon, text). textonly: null for decorative. Container behaviour auto-detected from slot/media. Shapes can be ui-control / content-symbol for interactive scrollytelling — they get tabindex, role=img, aria-label, focus indicators just like Icon.",
 
   "_rules": [
@@ -9,7 +9,8 @@
     { "rule": "labelShape-required-for-informational", "condition": "semanticRole === 'ui-control' || semanticRole === 'content-symbol'", "requires": "labelShape", "note": "ui-control and content-symbol shapes must have labelShape for screen readers" },
     { "rule": "background-shape-no-label", "condition": "semanticRole === 'background'", "forbids": "labelShape", "requires": "media", "note": "Shape with semanticRole='background' is wallpaper for a child atom. The child owns aria/label; Shape stays aria-hidden. Use this when Shape appears as media inside Heading/List/Badge to make the intent explicit." },
     { "rule": "draw-colour-base-only", "condition": "draw", "note": "drawColor only accepts base colour variants or rainbow — no tier modifiers (tint/mid/emphasis). Atom strips them at runtime via normalizeDrawColour." },
-    { "rule": "draw-fill-mutual-exclusion", "condition": "draw && fillAnimation && fillTiming === 'overlap'", "note": "When draw and fillAnimation are both used, fillTiming controls whether fill bloom overlaps draw at 50% (default) or starts after draw completes ('after')" }
+    { "rule": "draw-fill-mutual-exclusion", "condition": "draw && fillAnimation && fillTiming === 'overlap'", "note": "When draw and fillAnimation are both used, fillTiming controls whether fill bloom overlaps draw at 50% (default) or starts after draw completes ('after')" },
+    { "rule": "radial-large-only", "condition": "gradientType === 'radial'", "requires": "size >= '2xl'", "note": "Radial gradients only read as radial at 2xl and above. Below that the gradient compresses into apparent flat colour. Runtime auto-downgrades to linear with a dev warn so AI-generated JSON can't render broken radial shapes. For radial on small surfaces, use Card or Section." }
   ],
 
   "props": {
@@ -60,6 +61,7 @@
 
     "visual": {
       "size":         { "type": "string", "default": "base", "enum": ["xs", "sm", "md", "lg", "xl", "base", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "8xl"] },
+      "mediaBgSize":  { "type": "string", "default": "normal", "enum": ["compact", "normal", "spacious"], "_note": "Padding around child atom when Shape wraps media (auto-detected). Matches Heading.mediaBgSize / List.mediaBgSize. Em-based so it scales with child's text context." },
       "variant":      { "type": "string", "default": "fill", "enum": ["fill", "outline", "glass", "liquid-glass"] },
       "borderWeight": { "type": "string", "enum": ["sm", "md", "lg"] },
       "shadow":       { "type": "string", "enum": ["sm", "md", "lg", "elevated"] },

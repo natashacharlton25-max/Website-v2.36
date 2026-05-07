@@ -48,6 +48,11 @@ interface Props {
   rainbowColor?: RainbowColour;
   colorTier?: ColourTier;
   size?: ShapeSize;
+  /** Padding around child atom when Shape contains media. Only applies when
+   *  Shape wraps a child (auto-detected from slot/media). compact = tight
+   *  hug, normal = default, spacious = generous breathing room. Matches
+   *  Heading.mediaBgSize and List.mediaBgSize. */
+  mediaBgSize?: 'compact' | 'normal' | 'spacious';
   variant?: Variant;
   borderWeight?: ShapeBorderWeight;
   shadow?: Shadow;
@@ -110,7 +115,7 @@ interface Props {
 const {
   shape = 'circle', mode = 'shape', renderAs = 'auto', slug, semanticRole = 'decorative', labelShape,
   brandColor, rainbowColor, colorTier,
-  size, variant = 'fill', borderWeight, shadow, glow,
+  size, mediaBgSize = 'normal', variant = 'fill', borderWeight, shadow, glow,
   gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientEmerge, gradientFade, gradientCycle, gradientAnimated, gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
   media, animation, animationTrigger = 'hover', animationRepeat = 'threeloop', animationInterval = 'base',
   draw, drawMode = 'static', drawLaser, drawGhost, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
@@ -128,18 +133,13 @@ const hasSlot = Astro.slots.has('default');
 const hasMedia = !!media;
 const mediaComponent = media?.component;
 const { component: _mc, ...rawMediaProps } = media || {};
-// Child icon/lottie size: only injected when Shape itself has an explicit
-// size — child gets one tier smaller. When Shape size is undefined, the
-// child also stays unsized so both inherit text-size from their context.
-const childSizeMap: Record<string, string> = {
-  xs: 'xs', sm: 'sm', md: 'sm', base: 'sm', lg: 'base', xl: 'lg',
-  '2xl': 'xl', '3xl': '2xl', '4xl': '3xl', '5xl': '4xl',
-  '6xl': '5xl', '7xl': '6xl', '8xl': '7xl',
-};
-const childDefaultSize = size ? childSizeMap[size] : undefined;
-const mediaProps = (mediaComponent === 'Icon' || mediaComponent === 'LottieIcon') && !rawMediaProps.size && childDefaultSize
-  ? { ...rawMediaProps, size: childDefaultSize }
-  : rawMediaProps;
+// Child sizing: when Shape contains media, the child atom keeps its own
+// size (or inherits text-size from context) and Shape wraps to fit + the
+// padding controlled by mediaBgSize. No size injection on the child here —
+// the visual hierarchy is "Shape is wallpaper, child owns its size".
+// (Previously a childSizeMap stepped the child down one tier from Shape's
+// size; that was the wrong direction — child is the subject, not Shape.)
+const mediaProps = rawMediaProps;
 // Container is auto-detected from slot/media — no separate prop needed
 const isContainer = hasSlot || hasMedia;
 // A11y: ui-control and content-symbol need labels, focus, and role.
@@ -298,9 +298,21 @@ if (morphTo) {
 //   6. fallback to primary if gradient enabled with no colour
 // gradientType=radial appends `-radial` to ANY of the above (catalogue generates radial twins).
 // All IDs come from the generated catalogue (scripts/build-gradients.mjs).
+// Radial gradients only read as radial above a size threshold. Below 2xl
+// they compress into apparent flat colour. Runtime gates the radial path so
+// AI-generated JSON requesting radial on tiny shapes silently downgrades to
+// linear (the safer fallback) instead of rendering a broken-looking shape.
+// Authors who really want radial on small elements should use Card/Section.
+const RADIAL_MIN_SIZES = new Set(['2xl', '3xl', '4xl', '5xl', '6xl', '7xl', '8xl']);
+const radialAllowed = !!size && RADIAL_MIN_SIZES.has(size);
+if (gradientType === 'radial' && !radialAllowed && import.meta.env.DEV) {
+  console.warn(`[Shape] gradientType="radial" only renders well at size 2xl+. Got size="${size ?? 'unset'}" — downgrading to linear.`);
+}
+const effectiveGradientType = gradientType === 'radial' && !radialAllowed ? 'linear' : gradientType;
+
 const baseColour = rainbowColor || brandColor;
 const tierSuffix = (gradient && colorTier && colorTier !== 'base') ? `-preset-${colorTier}` : '';
-const radialSuffix = gradientType === 'radial' ? '-radial' : '';
+const radialSuffix = effectiveGradientType === 'radial' ? '-radial' : '';
 const baseGradientName = gradientBlend
   || (gradient && baseColour ? `${baseColour}${tierSuffix}` : null)
   || (gradient ? 'primary' : null);
@@ -345,7 +357,7 @@ const animInlineStyle = animStyleParts.length ? animStyleParts.join(';') : undef
 // Solo emerge/fade — when no underlying gradient, use catalogue id `emerge-{colour}` / `fade-{colour}`.
 // gradientType=radial appends `-radial` to use the radial catalogue variant.
 const modifierColour = rainbowColor || brandColor || 'primary';
-const soloRadialSuffix = gradientType === 'radial' ? '-radial' : '';
+const soloRadialSuffix = effectiveGradientType === 'radial' ? '-radial' : '';
 const soloModifierId = !gradientName && gradientEmerge ? `emerge-${modifierColour}${soloRadialSuffix}`
   : !gradientName && gradientFade ? `fade-${modifierColour}${soloRadialSuffix}`
   : null;
@@ -354,7 +366,7 @@ const effectiveGradientName = gradientName || soloModifierId;
 // Inline SVG gradient — resolved from the catalogue when a direction or focus is set,
 // since the baked defs in SvgGradientDefs.astro are fixed-angle / center-only.
 // Returns null for the default (135° linear, center radial) — uses baked def in that case.
-const needsInline = effectiveGradientName && (gradientDirection || gradientType === 'radial');
+const needsInline = effectiveGradientName && (gradientDirection || effectiveGradientType === 'radial');
 const inlineGradient = needsInline
   ? resolveInlineGradient(effectiveGradientName, { direction: gradientDirection, focus: gradientFocus })
   : null;
@@ -389,6 +401,7 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
     animation && `anim--${animation}`,
     draw && 'shape--draw',
     isContainer && 'shape--container',
+    isContainer && `shape--bg-${mediaBgSize}`,
     className,
   ]}
   aria-hidden={!isInteractive && (semanticRole === 'decorative' || semanticRole === 'background' || !semanticRole) ? "true" : undefined}
@@ -397,7 +410,7 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
   role={a11yRole}
   data-semantic-role={semanticRole}
   data-grad-dir={gradientDirection || undefined}
-  data-grad-focus={gradientType === 'radial' ? (gradientFocus || 'center') : undefined}
+  data-grad-focus={effectiveGradientType === 'radial' ? (gradientFocus || 'center') : undefined}
   data-grad-anim-dir={gradientAnimated && gradientAnimateDirection && gradientAnimateDirection !== 'cw' ? gradientAnimateDirection : undefined}
   data-anim-trigger={animation && animationTrigger !== 'hover' ? animationTrigger : undefined}
   data-anim-repeat={animation && animationRepeat !== 'once' ? animationRepeat : undefined}
@@ -489,7 +502,7 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
   })()} />}
 
   {svgContent && isMask && maskId && (
-    <svg class="shape__mask-def" aria-hidden="true" style="position:absolute;width:0;height:0;">
+    <svg class="shape__mask-def" aria-hidden="true">
       <defs>
         <clipPath id={maskId} clipPathUnits="objectBoundingBox">
           <Fragment set:html={svgContent.replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '').replace(/<rect[^/]*\/>/, '')} />

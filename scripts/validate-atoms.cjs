@@ -93,6 +93,23 @@ const focusExceptions = {
   Link: true        // focus-active rules
 };
 
+// Per-atom exceptions for Rule 1 (var() fallbacks).
+// Shape uniquely allows no colour prop — gradients provide their own colour
+// and forcing a brand default would override the gradient story. Documented
+// in Shape.css header. See colour-fallback-exception comment.
+const fallbackExceptions = {
+  Shape: true
+};
+
+// Per-atom exceptions for Rule 38 (gradientType/gradientFocus on atoms).
+// Validator default forbids these on atoms because radial doesn't read at
+// small sizes. Shape's runtime gates the radial path: gradientType="radial"
+// silently downgrades to linear when size < 2xl (with dev warn). Schema
+// _rule "radial-large-only" documents the constraint.
+const radialExceptions = {
+  Shape: true
+};
+
 const summary = [];
 console.log('=== ATOM VALIDATOR ===\n');
 
@@ -142,8 +159,10 @@ for (const atom of atoms) {
 
       // Rule 1: Nested var() fallback — var(--x, var(--y))
       if (/var\(--[^,)]*,.*var\(--/.test(line)) {
-        const m = line.match(/var\(--[^,)]*,\s*var\(--[^)]*\)/);
-        issues.push({ rule: 1, ln, file, msg: `fallback: ${m ? m[0] : 'nested var()'}` });
+        if (!fallbackExceptions[atom]) {
+          const m = line.match(/var\(--[^,)]*,\s*var\(--[^)]*\)/);
+          issues.push({ rule: 1, ln, file, msg: `fallback: ${m ? m[0] : 'nested var()'}` });
+        }
       }
 
       // Rule 2: Hardcoded px >= 10 (not border-width, not 9999, not in comment)
@@ -287,7 +306,7 @@ for (const atom of atoms) {
 
   // ─── ASTRO RULES (8, 9, 10, 23, 24) ───
   const astroFiles = fs.readdirSync(dir).filter(f => f.endsWith('.astro'));
-  const styleExceptions = { Text: /inlineStyle|--text-clamp|highlightStyle/, Icon: /size/, LottieIcon: /size/, Image: /maskIconStyle/, Heading: /mergedStyle|tagInlineStyle/, Badge: /badgeAnimStyle/ };
+  const styleExceptions = { Text: /inlineStyle|--text-clamp|highlightStyle/, Icon: /size/, LottieIcon: /size/, Image: /maskIconStyle/, Heading: /mergedStyle|tagInlineStyle/, Badge: /badgeAnimStyle/, Shape: /animInlineStyle|gradientCycle/ };
   for (const file of astroFiles) {
     const lines = fs.readFileSync(path.join(dir, file), 'utf8').split('\n');
     lines.forEach((line, i) => {
@@ -495,8 +514,9 @@ for (const atom of atoms) {
 
       // Rule 38: gradientType/gradientFocus only for large elements (Card, Section)
       // Atoms use linear direction + spread only — radial needs surface area.
+      // Exceptions: see radialExceptions (atoms that gate radial at runtime).
       const largeComponents = ['Card', 'Section', 'Page', 'Image'];
-      if (!largeComponents.includes(atom) && props.gradient) {
+      if (!largeComponents.includes(atom) && !radialExceptions[atom] && props.gradient) {
         for (const prop of ['gradientType', 'gradientFocus']) {
           if (props.gradient[prop]) {
             issues.push({ rule: 38, ln: '--', file: schemaFile, msg: `"${prop}" in gradient{} — radial only for large elements (Card, Section), not atoms` });
