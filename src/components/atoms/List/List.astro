@@ -85,16 +85,16 @@ const { component: _mc, ...rawMediaProps } = media || {};
 const hasMedia = !!media;
 
 // Marker sizing strategy:
-//   - mediaSize="auto" (default): inject size="md" so the marker uses
-//     --media-md (1.5em). 1em alone matches the literal text font-size
-//     but icons have internal whitespace in their viewBox, so a 1em icon
-//     reads visually smaller than the text it's beside. md is the
-//     canonical "icon next to body text" tier across the system.
+//   - mediaSize="auto" (default): forward nothing — Icon/Shape base CSS
+//     uses width:1em so the marker inherits the list item's text size.
+//     Visual proportion lives in CSS (.list__media), not in JS literals.
 //   - explicit mediaSize: pass through to the atom verbatim.
 //   - author-set media.size: always wins (explicit per-instance override).
 const mediaPropsWithSize = rawMediaProps.size != null
   ? rawMediaProps
-  : { ...rawMediaProps, size: mediaSize === 'auto' ? 'md' : mediaSize };
+  : mediaSize === 'auto'
+    ? rawMediaProps
+    : { ...rawMediaProps, size: mediaSize };
 
 const classes = [
   'list',

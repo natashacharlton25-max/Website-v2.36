@@ -1,14 +1,17 @@
 /**
- * Icon Animation Initialiser — entry point for the shape/icon animation system
+ * SVG Animation Initialiser — entry point for the shared Icon/Shape animation system
  *
- * Picks up data-icon-* attributes from the Icon and Shape atoms and wires up
- * the right animation system per element. Each system lives in its own file
- * (draw, draw-morph, morph, fill, gradient) so a syntax error in one doesn't
- * break the others.
+ * Both Icon and Shape atoms emit a shared `data-icon-*` attribute namespace
+ * (intentional — this is the SVG animation contract, not Icon-specific).
+ * Each handler picks up its attribute and wires the right animation:
+ *   draw, draw-morph, morph, fill, gradient, micro.
  *
- * Despite the folder name "icon-animation", every animation works for BOTH
- * Icon and Shape atoms — the gating is via classList.contains('shape') /
- * classList.contains('icon') inside each init function.
+ * Per-atom branching inside each handler is via classList.contains('shape')
+ * vs classList.contains('icon') when the two need to behave differently
+ * (e.g. fill.ts treating Shape's solid fill differently from Icon's path fills).
+ *
+ * Each system lives in its own file so a syntax error in one doesn't break
+ * the others.
  *
  * Public API:
  *   initIconAnimations() — call once on page load to wire up every element

@@ -202,7 +202,11 @@ const isCssShape = renderAs === 'svg' ? false : (renderAs === 'css' ? cssCapable
 const isSvgShape = !isCssShape;
 const builtinSvg = isSvgShape ? SVG_SHAPES[shape] : undefined;
 
-// Draw data attributes
+// Draw data attributes.
+// `data-icon-*` is the shared SVG-animation contract used by both Icon and
+// Shape — handlers live in src/lib/animation/svg-animation/. The "icon"
+// prefix is historical, not Icon-specific. Shape participates in the same
+// draw/morph/fill/gradient pipeline.
 const drawVariant = typeof draw === 'string' ? draw : 'draw';
 const dataAttrs: Record<string, string | undefined> = {};
 if (draw) {
