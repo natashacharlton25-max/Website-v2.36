@@ -1,30 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Heading from '../components/atoms/Heading/Heading.astro';
-import Text from '../components/atoms/Text/Text.astro';
-import Card from '../components/atoms/Card/Card.astro';
-import Section from '../components/atoms/Section/Section.astro';
-import '../components/atoms/Section/Section.css';
-
-import testData from '../data/test/hub.json';
+import Renderer from '../components/Renderer.astro';
+import data from '../data/test/hub.json';
 ---
 
-<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
-  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
-
-    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
-    <Heading level={testData.subtitle.level as any} align={testData.subtitle.align as any} weight={testData.subtitle.weight as any} flush={testData.subtitle.flush} style={testData.subtitle.style}>{testData.subtitle.text}</Heading>
-
-    <Section gap={testData.layout.itemGap}>
-      {testData.cards.map((card: any) => (
-        <a href={card.href} style="text-decoration:none;color:inherit;">
-          <Card variant="outline" border="thin" hover="border" padding="lg" radius="lg">
-            <Heading level={3} flush>{card.title}</Heading>
-            <Text size="sm" color="muted" flush>{card.description}</Text>
-          </Card>
-        </a>
-      ))}
-    </Section>
-
-  </Section>
+<BaseLayout title="Atom Test Hub" hideFooter>
+  <Renderer node={data} />
 </BaseLayout>
