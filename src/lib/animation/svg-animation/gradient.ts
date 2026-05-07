@@ -12,14 +12,17 @@
  */
 
 import { gsap } from 'gsap';
-import { getMotionMode, registerTrigger } from '../animation-config';
+import { getMotionMode, registerTrigger, GRADIENT_ANIMATION_SPEED } from '../animation-config';
 
 export function initAnimatedGradient(el: HTMLElement) {
   const svg = el.querySelector('svg');
   if (!svg) return;
   if (getMotionMode() === 'none') return;
 
-  const dur = parseFloat(el.dataset.iconGradDur || '') || 8;
+  // Default duration matches the schema's gradientAnimateSpeed='default' tier.
+  // Atom only emits data-icon-grad-dur when speed is non-default, so the fallback
+  // must agree with the schema or schema/runtime will drift.
+  const dur = parseFloat(el.dataset.iconGradDur || '') || GRADIENT_ANIMATION_SPEED.default;
   const ease = el.dataset.iconGradEase || 'none';
   const direction = el.dataset.iconGradDir || 'cw'; // cw | ccw | sway
   const doScale = el.dataset.iconGradScale === 'true';
@@ -188,7 +191,10 @@ function animateGradTransform(
  */
 export function gateAnimatedGradients() {
   const motion = getMotionMode();
-  document.querySelectorAll<SVGAnimateTransformElement>('.icon svg animateTransform').forEach(el => {
+  // Both Icon and Shape can ship declarative <animateTransform> elements
+  // (legacy SVGs from the asset pipeline). Match both so motion gating is
+  // consistent with the rest of svg-animation/.
+  document.querySelectorAll<SVGAnimateTransformElement>('.icon svg animateTransform, .shape svg animateTransform').forEach(el => {
     if (motion === 'none') {
       el.remove();
     } else if (motion === 'gentle') {
