@@ -12,3 +12,17 @@ export const GRADIENT_ANIMATION_SPEED = {
 } as const;
 
 export type GradientAnimationSpeed = keyof typeof GRADIENT_ANIMATION_SPEED;
+
+/**
+ * Desync window for gradient animations. Each atom instance picks a random
+ * negative delay in [0, GRADIENT_DESYNC_WINDOW_SECONDS) so multiple animated
+ * gradients on the same page don't lockstep. Shared across atoms so they
+ * all desync from the same scale.
+ */
+export const GRADIENT_DESYNC_WINDOW_SECONDS = 8;
+
+/** Returns a randomised CSS-var declaration: `--_grad-anim-delay:-N.NNs`. */
+export function randomGradientDelayVar(): string {
+  const offset = Math.random() * GRADIENT_DESYNC_WINDOW_SECONDS;
+  return `--_grad-anim-delay:-${offset.toFixed(2)}s`;
+}

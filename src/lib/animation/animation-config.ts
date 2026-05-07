@@ -57,7 +57,7 @@ export { toHex, getElementColor, getGhostColor } from './helpers/color';
 export { getScrollContainer } from './helpers/scroll';
 
 // Animation-type configs
-export { GRADIENT_ANIMATION_SPEED } from './config/gradient';
+export { GRADIENT_ANIMATION_SPEED, GRADIENT_DESYNC_WINDOW_SECONDS, randomGradientDelayVar } from './config/gradient';
 export type { GradientAnimationSpeed } from './config/gradient';
 export { INTERVAL_TOKENS, getIntervalSeconds } from './config/interval';
 export type { IntervalToken } from './config/interval';

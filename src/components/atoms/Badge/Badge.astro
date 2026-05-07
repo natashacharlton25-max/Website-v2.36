@@ -29,7 +29,7 @@ import type {
  *  rejects it). Local type keeps schema, CSS, and TS aligned. */
 type BadgeShape = 'sharp' | 'subtle' | 'soft' | 'rounded';
 import { getGradientStopColours } from '../../../lib/gradient-inline';
-import { GRADIENT_ANIMATION_SPEED } from '../../../lib/animation/animation-config';
+import { GRADIENT_ANIMATION_SPEED, randomGradientDelayVar } from '../../../lib/animation/animation-config';
 
 interface Props {
   /** Badge display text. Pipeline content key. */
@@ -132,7 +132,7 @@ const gradientName = gradientBlend
 const badgeAnimParts: string[] = [];
 if ((gradientAnimated && gradientName) || gradientCycle) {
   if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') badgeAnimParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
-  badgeAnimParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
+  badgeAnimParts.push(randomGradientDelayVar());
 }
 if (gradientCycle && gradientName) {
   const stopColours = getGradientStopColours(gradientName);

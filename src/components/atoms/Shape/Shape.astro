@@ -23,7 +23,7 @@ import type {
 } from '../../../lib/shared-enums';
 import { normalizeDrawColour } from '../../../lib/shared-enums';
 import { resolveInlineGradient, getGradientStopColours } from '../../../lib/gradient-inline';
-import { GRADIENT_ANIMATION_SPEED } from '../../../lib/animation/animation-config';
+import { GRADIENT_ANIMATION_SPEED, randomGradientDelayVar } from '../../../lib/animation/animation-config';
 import { SHAPE_PATHS } from '../../../lib/shape-paths';
 
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
@@ -192,12 +192,20 @@ if (slug) {
   } catch { /* fallback to built-in */ }
 }
 
-// Stroke width — draw mode needs thicker lines to match GSAP's overlay (viewBox is 100, GSAP uses sw=10 on 256)
-const sw = draw
-  ? (borderWeight === 'lg' ? 6 : borderWeight === 'md' ? 5 : 4)
-  : (borderWeight === 'lg' ? 4 : borderWeight === 'md' ? 3 : 2);
+// Stroke width per borderWeight tier. Draw mode needs thicker lines because
+// GSAP renders an overlay path at viewBox 256 with sw=10; the built-in
+// shapes are viewBox 100 so we proportionally bump the stroke by ~2 to
+// keep visual weight consistent. Local map (only Shape uses it) — Icon
+// has its own stroke logic baked into its API SVGs.
+const STROKE_WIDTH_MAP = {
+  draw:   { sm: 4, md: 5, lg: 6 },
+  normal: { sm: 2, md: 3, lg: 4 },
+} as const;
+const swKey = (borderWeight ?? 'sm') as keyof typeof STROKE_WIDTH_MAP['draw'];
+const sw = (draw ? STROKE_WIDTH_MAP.draw : STROKE_WIDTH_MAP.normal)[swKey];
 const pad = sw;
-const vb = `-${pad} -${pad} ${100 + pad * 2} ${100 + pad * 2}`;
+const SHAPE_VIEWBOX_BASE = 100; // Built-in shapes are designed in 100×100 — see src/lib/shape-paths.ts
+const vb = `-${pad} -${pad} ${SHAPE_VIEWBOX_BASE + pad * 2} ${SHAPE_VIEWBOX_BASE + pad * 2}`;
 
 // Built-in shape paths come from src/lib/shape-paths.ts (shared so morph.ts
 // and other handlers can import the same source of truth).
@@ -305,7 +313,7 @@ if (gradientAnimated && gradientName && !isCssShape) {
 const animStyleParts: string[] = [];
 if (gradientAnimated && gradientName && isCssShape) {
   if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') animStyleParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
-  animStyleParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
+  animStyleParts.push(randomGradientDelayVar());
 }
 // Colour cycle — reads the active gradient's own stop tokens from the catalogue.
 // For example, gradientBlend="brand-emerge" gives stops [primary-tint, secondary-emphasis],
@@ -322,7 +330,7 @@ if (gradientCycle) {
     animStyleParts.push(`--_cycle-c:${c}`);
   }
   if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') animStyleParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
-  animStyleParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
+  animStyleParts.push(randomGradientDelayVar());
 }
 const animInlineStyle = animStyleParts.length ? animStyleParts.join(';') : undefined;
 // Gradient reference for SVG fill — GSAP creates its own local gradient at runtime for animated.
@@ -434,10 +442,13 @@ const maskId = isMask ? `shape-mask-${Math.random().toString(36).substring(2, 9)
 
   {svgContent && !isMask && <Fragment set:html={(() => {
     let s = svgContent;
-    // Add viewBox if missing (shapes are 256x256), pad for stroke in draw mode
-    const svgPad = draw ? 4 : 0;
+    // Add viewBox if missing (API shapes are 256x256), pad for stroke in draw mode.
+    // API_VIEWBOX_BASE matches the Asset Library convention; built-ins use SHAPE_VIEWBOX_BASE (100).
+    const API_VIEWBOX_BASE = 256;
+    const API_DRAW_STROKE_PAD = 4;
+    const svgPad = draw ? API_DRAW_STROKE_PAD : 0;
     if (!s.includes('viewBox')) {
-      s = s.replace(/<svg/, `<svg viewBox="${-svgPad} ${-svgPad} ${256 + svgPad * 2} ${256 + svgPad * 2}"`);
+      s = s.replace(/<svg/, `<svg viewBox="${-svgPad} ${-svgPad} ${API_VIEWBOX_BASE + svgPad * 2} ${API_VIEWBOX_BASE + svgPad * 2}"`);
     } else if (draw) {
       // Expand existing viewBox for stroke padding
       s = s.replace(/viewBox="(\d+)\s+(\d+)\s+(\d+)\s+(\d+)"/, (_, x, y, w, h) => {

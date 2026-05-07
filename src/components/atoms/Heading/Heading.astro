@@ -26,7 +26,7 @@ import { Image } from '../Image';
 import { Shape } from '../Shape';
 import { Text } from '../Text';
 import { aacInline } from '../../../lib/aac/aac-inline';
-import { GRADIENT_ANIMATION_SPEED } from '../../../lib/animation/animation-config';
+import { GRADIENT_ANIMATION_SPEED, randomGradientDelayVar } from '../../../lib/animation/animation-config';
 import '../../../components/molecules/aac/AacCard/AacCard.css';
 import type {
   BrandColour, TextColour, RainbowColour, ColourTier,
@@ -253,7 +253,7 @@ const mediaProps = (mediaBg && mediaComponent === 'Shape')
 const headingAnimParts: string[] = [];
 if ((gradientAnimated && resolvedGradientName) || gradientCycle) {
   if (gradientAnimateSpeed && gradientAnimateSpeed !== 'default') headingAnimParts.push(`--_grad-anim-duration:${GRADIENT_ANIMATION_SPEED[gradientAnimateSpeed]}s`);
-  headingAnimParts.push(`--_grad-anim-delay:-${(Math.random() * 8).toFixed(2)}s`);
+  headingAnimParts.push(randomGradientDelayVar());
 }
 const headingAnimStyle = headingAnimParts.length ? headingAnimParts.join(';') : '';
 
