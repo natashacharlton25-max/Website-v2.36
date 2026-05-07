@@ -63,8 +63,9 @@ const path = require('path');
  *         already imports the same file. Astro emits the rules twice into
  *         the bundle, which can cause duplicate-rule + cascade-order bugs.
  *
- *   Coverage rules
- *    15   Colour enum count in CSS (10 classes expected: primary..pink)
+ *   (Rule 15 — colour enum count in CSS — removed; superseded by Rule 40
+ *    which forbids per-atom colour classes. Colour comes from the global
+ *    .color--{name} mixin only.)
  */
 
 const atomsDir = path.join(__dirname, '..', 'src', 'components', 'atoms');
@@ -539,14 +540,12 @@ for (const atom of atoms) {
     issues.push({ rule: 13, ln: '--', file: '--', msg: 'missing schema.json' });
   }
 
-  // ─── RULE 15: Colour enum count ───
-  const colourEnums = ['primary', 'secondary', 'neutral', 'red', 'orange', 'yellow', 'teal', 'blue', 'purple', 'pink'];
-  const allCss = cssFiles.map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n');
-  const found = colourEnums.filter(c => new RegExp(`\\.\\w[\\w-]*--${c}\\b`).test(allCss));
-  if (found.length > 0 && found.length < 10) {
-    const missingColours = colourEnums.filter(c => !found.includes(c));
-    issues.push({ type: 'WARN', rule: 15, ln: '--', file: cssFiles[0], msg: `${found.length}/10 colour enums (missing: ${missingColours.join(', ')})` });
-  }
+  // Rule 15 (colour enum count) removed — was checking for per-atom colour
+  // classes like .link--primary / .heading--red, but the modern architecture
+  // forbids those (see Rule 40). Colour comes from the global .color--{name}
+  // mixin only. Rule 15 contradicted Rule 40 — atoms doing the right thing
+  // (no per-atom colour classes) got penalised. Rule 40 is the authoritative
+  // check for the no-per-atom-colour-classes contract.
 
   if (issues.length === 0) {
     console.log(`${atom} ✅ CLEAN`);
