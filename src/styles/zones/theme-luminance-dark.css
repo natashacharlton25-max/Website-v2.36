@@ -523,10 +523,14 @@
     0 0 9px 3px color-mix(in oklch, var(--neutral-base) 10%, transparent);
 }
 
-/* Comic dark: darker border + shadow */
-[data-mode="dark"] .btn--comic.btn--primary { border-color: var(--primary-mid); box-shadow: 4px 6px 0 var(--primary-mid); }
-[data-mode="dark"] .btn--comic.btn--secondary { border-color: var(--secondary-mid); box-shadow: 4px 6px 0 var(--secondary-mid); }
-[data-mode="dark"] .btn--comic.btn--neutral { border-color: var(--neutral-mid); box-shadow: 4px 6px 0 var(--neutral-mid); }
+/* Comic dark: set the SLOT tokens (not box-shadow directly) so the
+   hover/active shadow geometry from Button.css (.btn--comic:hover ->
+   2px 3px 0, :active -> 0 0 0) keeps the press-down illusion intact.
+   Setting box-shadow directly here had higher specificity than the
+   :hover rule and froze the shadow at 4px/6px on hover. */
+[data-mode="dark"] .btn--comic.btn--primary   { --btn-comic-border: var(--primary-mid);   --btn-comic-shadow: var(--primary-mid); }
+[data-mode="dark"] .btn--comic.btn--secondary { --btn-comic-border: var(--secondary-mid); --btn-comic-shadow: var(--secondary-mid); }
+[data-mode="dark"] .btn--comic.btn--neutral   { --btn-comic-border: var(--neutral-mid);   --btn-comic-shadow: var(--neutral-mid); }
 
 /* Comic dark + highlight links: strip comic styling, plain fill */
 [data-mode="dark"][data-highlight-links] .btn--comic,
