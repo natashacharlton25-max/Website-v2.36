@@ -24,7 +24,7 @@
     "colour": {
       "brandColor":   { "type": "string", "enum": ["primary", "secondary", "neutral", "text"] },
       "rainbowColor": { "type": "string", "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"] },
-      "colorTier":    { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"] }
+      "colorTier":    { "type": "string", "enum": ["tint", "mid", "base", "emphasis"], "_note": "Implicit baseline is 'base' (set by .color--{name} mixin; no .color--tier-* class emitted). Omit to use." }
     },
 
     "gradient": {
@@ -34,13 +34,13 @@
       "gradientEmerge":           { "type": "boolean", "default": false },
       "gradientFade":             { "type": "boolean", "default": false },
       "gradientAnimated":         { "type": "boolean" },
-      "gradientAnimateDirection": { "type": "string", "default": "cw", "enum": ["cw", "ccw", "sway"] },
-      "gradientAnimateSpeed":     { "type": "string", "default": "default", "enum": ["slow", "default", "fast"] }
+      "gradientAnimateDirection": { "type": "string", "enum": ["cw", "ccw", "sway"], "_note": "Implicit baseline is 'cw' (no [data-icon-grad-dir] attribute emitted). Omit to use." },
+      "gradientAnimateSpeed":     { "type": "string", "enum": ["slow", "default", "fast"], "_note": "Implicit baseline is 'default' (no .gradient--speed-* class emitted). Omit to use." }
     },
 
     "visual": {
       "size":   { "type": "string", "default": "base", "enum": ["xs", "sm", "md", "lg", "xl", "base", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "8xl"] },
-      "shadow": { "type": "string", "enum": ["none", "sm", "md", "lg", "xl", "2xl", "elevated"], "default": "none" },
+      "shadow": { "type": "string", "enum": ["none", "sm", "md", "lg", "xl", "2xl", "elevated"], "_note": "Implicit baseline is 'none' (no .icon--shadow-* class emitted). Omit to use." },
       "glow":   { "type": "string", "enum": ["sm", "md", "lg"] }
     },
 
@@ -49,6 +49,7 @@
       "animationTrigger":  { "type": "string", "default": "hover", "enum": ["hover", "viewport", "autoplay", "loop", "interval", "click", "focus", "none"] },
       "animationRepeat":   { "type": "string", "default": "threeloop", "enum": ["once", "loop", "three", "threeloop"], "description": "How many times to play: once, loop (infinite), three (3x then stop), threeloop (3x then pause [interval] then repeat). Default = threeloop." },
       "animationInterval": { "type": "string", "default": "base", "enum": ["short", "base", "long", "longer"], "description": "Gap between attention-pulse bursts. Token-driven (motion-mode scaled). Used by animationRepeat=threeloop and animationTrigger=interval." },
+      "noExplainer":       { "type": "boolean", "default": false, "_description": "Opt-out of the animation-explainer system. Pipeline injects this for Icons inside composite atoms (where the parent owns the explainer); authors set it explicitly to suppress per-instance." },
 
       "draw":             { "type": ["boolean", "string"], "enum": [true, "draw", "drawcenter", "pulse"] },
       "drawMode":         { "type": "string", "default": "static", "enum": ["static", "yoyo", "reverse-yoyo", "reveal"] },
