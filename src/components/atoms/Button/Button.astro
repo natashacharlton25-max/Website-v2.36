@@ -29,6 +29,7 @@
 import { Icon } from '../Icon';
 import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
+import type { BrandColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
 
 export interface DropdownItem {
   label: string;
@@ -38,8 +39,12 @@ export interface DropdownItem {
 }
 
 export interface Props {
+  /** Button label text. Forwarded to nested Text atom. Pipeline content key. */
+  contentButton?: string;
   variant?: 'fill' | 'outline' | 'ghost' | 'glass' | 'liquid-glass' | 'glassic' | 'glow' | 'rainbow-glow' | 'neumorphic' | 'neumorphic-3d' | 'neumorphic-inner';
-  color?: 'primary' | 'secondary' | 'neutral';
+  brandColor?: BrandColour;
+  rainbowColor?: RainbowColour;
+  colorTier?: ColourTier;
   shape?: 'rounded' | 'pill' | 'circle' | 'square' | 'sharp' | 'dropdown';
   size?: 'sm' | 'md' | 'lg';
   effect?: 'glint' | 'colour-flow' | 'jump' | 'comic' | 'tech' | 'expand' | 'magnetic' | 'spotlight' | 'split';
@@ -79,8 +84,11 @@ export interface Props {
 }
 
 const {
+  contentButton,
   variant: rawVariant = 'fill',
-  color: rawColor = 'primary',
+  brandColor: rawColor = 'primary',
+  rainbowColor,
+  colorTier,
   shape = 'rounded',
   size = 'md',
   effect,
@@ -107,8 +115,8 @@ const {
   confettiCount = 30,
   confettiSpread = 150,
   splitText,
-  iconSpin,
-  iconBounce,
+  iconSpin = false,
+  iconBounce = false,
   glowColors,
   dropdownItems = [],
   class: className = '',

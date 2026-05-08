@@ -4,45 +4,56 @@
   "renders": {
     "full": "Button.astro",
     "reduced": "Button.astro",
-    "assistive": "Button.astro",
     "textonly": "Button.astro"
   },
-  "notes": "Renders as <button>, <a>, or dropdown wrapper depending on props. Label renders through Text atom. Icon/LottieIcon for media. All motion gated behind animation props.",
+  "notes": "Renders as <button>, <a>, or dropdown wrapper depending on props. Label renders through Text atom (via contentButton). Icon/LottieIcon for media. All motion gated behind animation props. Colour comes from the global .color--{name} mixin via brandColor / rainbowColor — same pattern as Heading/Badge/Icon.",
 
   "props": {
     "content": {
       "_description": "What the button communicates and does",
+      "contentButton":  { "type": "string",  "required": false, "description": "Button label text. Pipeline content key. Forwarded to nested Text atom." },
       "href":           { "type": "string",  "required": false, "default": null, "description": "Makes it an <a> tag." },
-      "target":         { "type": "string",  "required": false, "default": null, "description": "Link target." },
-      "download":       { "type": "string",  "required": false, "default": null, "description": "Download attribute." },
+      "target":         { "type": "string",  "required": false, "default": null, "enum": ["_blank", "_self", "_parent", "_top"], "description": "Link target." },
+      "download":       { "type": "string",  "required": false, "default": null, "_format": "filename", "description": "Download attribute." },
       "type":           { "type": "string",  "required": false, "default": "button", "enum": ["button", "submit", "reset"], "description": "Button type." },
       "disabled":       { "type": "boolean", "required": false, "default": false, "description": "Disabled state." },
       "id":             { "type": "string",  "required": false, "default": null, "description": "Element ID." },
       "ariaLabel":      { "type": "string",  "required": false, "default": null, "description": "Accessible label for icon-only buttons." },
       "icon":           { "type": "string",  "required": false, "default": null, "_format": "icon-slug", "description": "Phosphor icon slug. Decorative — aria-hidden via Icon atom." },
-      "iconPosition":   { "type": "string",  "required": false, "default": "left", "enum": ["left", "right"], "description": "Icon position." },
       "iconCollection": { "type": "string",  "required": false, "default": null, "description": "Icon collection override." },
+      "splitText":      { "type": "string",  "required": false, "default": null, "description": "Text revealed after split effect opens — button sizes to longest. Freeform content string." },
       "dropdownItems":  { "type": "array",   "required": false, "default": [], "description": "Array of {label, href?, value?, fontFamily?} for dropdown mode." }
+    },
+
+    "colour": {
+      "_description": "Brand-scale colour. Use one of brandColor or rainbowColor, never both.",
+      "brandColor":   { "type": "string", "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral"], "description": "Brand-scale colour — sets brand tokens for any style variant. 'primary' is the default louder action colour; 'secondary' is the supporting accent; 'neutral' is the muted/utility colour." }
+    },
+
+    "rainbow": {
+      "_description": "Rainbow palette colour (1-7 positional). Use one of brandColor or rainbowColor.",
+      "rainbowColor": { "type": "string", "required": false, "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Positional rainbow colour: 1=red, 2=orange, 3=yellow, 4=teal, 5=blue, 6=purple, 7=pink." },
+      "colorTier":    { "type": "string", "required": false, "enum": ["tint", "mid", "base", "emphasis"], "_note": "Implicit baseline is 'base' (set by .color--{name} mixin; no .color--tier-* class emitted). Omit to use." }
     },
 
     "visual": {
       "_description": "How the button looks",
-      "variant":   { "type": "string",  "required": false, "default": "fill", "enum": ["fill", "outline", "ghost", "glass", "liquid-glass", "glassic", "glow", "rainbow-glow", "neumorphic", "neumorphic-3d", "neumorphic-inner"], "description": "Style variant." },
-      "color":     { "type": "string",  "required": false, "default": "primary", "enum": ["primary", "secondary", "neutral"], "description": "Colour variant — sets brand tokens for any style variant." },
-      "shape":     { "type": "string",  "required": false, "default": "rounded", "enum": ["rounded", "pill", "circle", "square", "sharp", "dropdown"], "description": "Border radius shape." },
-      "size":      { "type": "string",  "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Size variant." },
-      "alignment": { "type": "string",  "required": false, "default": null, "enum": ["left", "center"], "description": "Button alignment in container." },
-      "splitText":  { "type": "string",  "required": false, "default": null, "description": "Text revealed after split effect opens — button sizes to longest." }
+      "variant":     { "type": "string", "required": false, "default": "fill", "enum": ["fill", "outline", "ghost", "glass", "liquid-glass", "glassic", "glow", "rainbow-glow", "neumorphic", "neumorphic-3d", "neumorphic-inner"], "description": "Style variant." },
+      "shape":       { "type": "string", "required": false, "default": "rounded", "enum": ["rounded", "pill", "circle", "square", "sharp", "dropdown"], "description": "Border radius shape." },
+      "size":        { "type": "string", "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Size variant." },
+      "alignment":   { "type": "string", "required": false, "default": null, "enum": ["left", "center"], "description": "Button alignment in container." },
+      "iconPosition": { "type": "string", "required": false, "default": "left", "enum": ["left", "right"], "description": "Icon position relative to label." },
+      "glowColors":  { "type": "array",  "required": false, "default": null, "description": "Custom rainbow-glow gradient stops (array of CSS colour strings). Only used with variant='rainbow-glow'. Builds a linear-gradient(90deg, ...stops) for the glow ring." }
     },
 
     "animation": {
-      "_description": "Motion behaviour — stripped in reduced/assistive/textonly renders",
+      "_description": "Motion behaviour — stripped in reduced/textonly renders",
       "effect":         { "type": "string",  "required": false, "default": null, "enum": ["glint", "colour-flow", "jump", "comic", "tech", "expand", "magnetic", "spotlight", "split"], "description": "Hover/interaction effect." },
       "speed":          { "type": "string",  "required": false, "default": null, "enum": ["slow", "normal", "fast"], "description": "Effect speed." },
       "iconMorphTo":    { "type": "string",  "required": false, "default": null, "_format": "icon-slug", "description": "Icon morph target on hover." },
-      "iconMorphColor": { "type": "string",  "required": false, "default": null, "description": "Icon morph colour." },
+      "iconMorphColor": { "type": "string",  "required": false, "default": null, "enum": ["primary", "secondary", "neutral", "text", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7", "hero", "sunset", "brand-emerge", "brand-fade", "rainbow"], "description": "Icon morph colour — forwarded to Icon. Matches Icon.drawColour enum." },
       "iconDraw":       { "type": ["boolean", "string"], "required": false, "default": null, "enum": [true, "draw", "drawcenter", "chachaslide", "flashgordon", "rainbowchase", "pulse"], "description": "Icon draw animation. true = draw variant." },
-      "iconDrawColor":  { "type": "string",  "required": false, "default": null, "description": "Icon draw colour." },
+      "iconDrawColor":  { "type": "string",  "required": false, "default": null, "enum": ["primary", "secondary", "neutral", "text", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7", "hero", "sunset", "brand-emerge", "brand-fade", "rainbow"], "description": "Icon draw colour — forwarded to Icon. Matches Icon.drawColour enum." },
       "iconSpin":       { "type": "boolean", "required": false, "default": false, "description": "Spin animation on icon — forwarded to Icon atom." },
       "iconBounce":     { "type": "boolean", "required": false, "default": false, "description": "Bounce animation on icon — forwarded to Icon atom." },
       "lottieIcon":     { "type": "string",  "required": false, "default": null, "_format": "lottie-slug", "description": "Lottie animation slug for icon slot. Stripped in non-full renders, falls back to content.icon." },
@@ -52,9 +63,5 @@
       "confettiCount":  { "type": "number",  "required": false, "default": 30, "description": "Particle count." },
       "confettiSpread": { "type": "number",  "required": false, "default": 150, "description": "Particle spread." }
     }
-  },
-
-  "slots": {
-    "default": "Button label text"
   }
 }
