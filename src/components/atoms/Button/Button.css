@@ -57,12 +57,6 @@
   --btn-glass-border: var(--glass-border);
   --btn-glass-blur:   var(--glass-blur);
   --btn-spotlight:    var(--color-White);
-  --btn-dropdown-bg:           var(--page-bg-raised);
-  --btn-dropdown-border:       var(--primary-mid);
-  --btn-dropdown-shadow:       var(--shadow-dropdown-md);
-  --btn-dropdown-text:         var(--neutral-emphasis);
-  --btn-dropdown-hover:        var(--primary-tint);
-  --btn-dropdown-hover-text:   var(--primary-contrast);
 
   --_btn-brand:       var(--btn-bg);
   --_btn-brand-dark:  var(--btn-hover-bg);
@@ -302,16 +296,12 @@
   --btn-bg:       var(--secondary-base);
   --btn-hover-bg: var(--secondary-contrast);
   --btn-light-bg: var(--secondary-tint);
-  --btn-dropdown-hover:      var(--secondary-tint);
-  --btn-dropdown-hover-text: var(--secondary-contrast);
 }
 
 .btn--neutral {
   --btn-bg:       var(--neutral-base);
   --btn-hover-bg: var(--neutral-emphasis);
   --btn-light-bg: var(--neutral-tint);
-  --btn-dropdown-hover:      var(--neutral-mid);
-  --btn-dropdown-hover-text: var(--neutral-emphasis);
 }
 
 /* Fill variant hovers */
@@ -1200,6 +1190,27 @@
 .dropdown-wrapper {
   position: relative;
   display: inline-flex;
+  /* Dropdown slot defaults — defined on the wrapper so BOTH the trigger
+     button (.btn--dropdown) AND the menu (.dropdown-menu, sibling of the
+     button) inherit. Per-variant overrides live on .dropdown-theme--*
+     classes (set on .dropdown-menu by Button.astro) so they reach the
+     menu directly without needing to flow up through the button. */
+  --btn-dropdown-bg:           var(--page-bg-raised);
+  --btn-dropdown-border:       var(--primary-mid);
+  --btn-dropdown-shadow:       var(--shadow-dropdown-md);
+  --btn-dropdown-text:         var(--neutral-emphasis);
+  --btn-dropdown-hover:        var(--primary-tint);
+  --btn-dropdown-hover-text:   var(--primary-contrast);
+}
+
+/* Per-variant dropdown menu overrides — set on the menu itself. */
+.dropdown-theme--secondary {
+  --btn-dropdown-hover:      var(--secondary-tint);
+  --btn-dropdown-hover-text: var(--secondary-contrast);
+}
+.dropdown-theme--neutral {
+  --btn-dropdown-hover:      var(--neutral-mid);
+  --btn-dropdown-hover-text: var(--neutral-emphasis);
 }
 
 .btn--dropdown {
