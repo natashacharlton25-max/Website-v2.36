@@ -137,14 +137,35 @@ const resolvedColor = rainbowColor || brandColor || null;
 const hasSlot = Astro.slots.has('default');
 const hasMedia = !!media;
 const mediaComponent = media?.component;
-const { component: _mc, ...rawMediaProps } = media || {};
 // Child sizing: when Shape contains media, the child atom keeps its own
 // size (or inherits text-size from context) and Shape wraps to fit + the
 // padding controlled by mediaBgSize. No size injection on the child here —
 // the visual hierarchy is "Shape is wallpaper, child owns its size".
-// (Previously a childSizeMap stepped the child down one tier from Shape's
-// size; that was the wrong direction — child is the subject, not Shape.)
-const mediaProps = rawMediaProps;
+const { component: _mc, ...mediaProps } = media || {};
+
+// Auto-contrast safeguard: when Shape variant=fill and the child Icon/LottieIcon
+// has the same brand/rainbow colour + tier as Shape, the child would render in
+// the same colour as the fill — invisible. Strip the redundant colour prop so
+// the child falls back to inheriting currentColor, which Shape.css already
+// computes as an oklch contrast against --_color.
+// Detection: explicit colour matches (primary===primary, rainbow-1===rainbow-1)
+// AND tier matches (default 'base' both sides if either is undefined).
+const _shapeBaseColour = rainbowColor || brandColor;
+const _iconBaseColour = (mediaProps as any).rainbowColor || (mediaProps as any).brandColor;
+const _shapeTier = colorTier || 'base';
+const _iconTier = (mediaProps as any).colorTier || 'base';
+const _childInvisible = (
+  variant === 'fill' &&
+  (mediaComponent === 'Icon' || mediaComponent === 'LottieIcon') &&
+  !!_shapeBaseColour &&
+  _iconBaseColour === _shapeBaseColour &&
+  _iconTier === _shapeTier
+);
+if (_childInvisible) {
+  delete (mediaProps as any).brandColor;
+  delete (mediaProps as any).rainbowColor;
+  delete (mediaProps as any).colorTier;
+}
 // Container is auto-detected from slot/media — no separate prop needed
 const isContainer = hasSlot || hasMedia;
 // A11y: ui-control and content-symbol need labels, focus, and role.
