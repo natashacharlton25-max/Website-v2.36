@@ -168,8 +168,10 @@
 [data-hover="none"] .btn--comic:hover { transform: none; }
 [data-hover="none"] .btn--tech:hover { transform: none; }
 
-/* None — rainbow glow */
-[data-hover="none"] .btn--rainbow-glow::before,
+/* None — rainbow glow: freeze ring animation, hide halo */
+[data-hover="none"] .btn--rainbow-glow {
+  animation: none;
+}
 [data-hover="none"] .btn--rainbow-glow::after {
   animation: none;
   opacity: 0;
@@ -459,30 +461,19 @@
   --_grad-computed: linear-gradient(90deg, var(--rainbow-1), var(--rainbow-4), var(--rainbow-7), var(--rainbow-3), var(--rainbow-5), var(--rainbow-2), var(--rainbow-1));
   position: relative;
   z-index: 1;
-  border: none;
+  /* Gradient-border technique: background paints solid page-bg into the
+     padding-box, then the rainbow gradient into the border-box. The
+     transparent border lets the gradient show through as a 2px ring that
+     traces the pill shape exactly. Single source of truth — moves with
+     the button on any transform/hover. */
+  background:
+    linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
+    var(--_grad-computed) border-box;
+  background-size: auto, 200% 200%;
+  border: 2px solid transparent;
   border-radius: var(--radius-full);
   box-shadow: 0 4px 0.75em color-mix(in oklch, var(--neutral-emphasis) 25%, transparent), 0 2px 4px color-mix(in oklch, var(--neutral-emphasis) 15%, transparent);
-}
-
-/* Ring — masked gradient creates a 2px outline that traces the button's
-   pill shape exactly (mask uses content-box, so the inner cutout matches
-   the button's content area + padding). */
-.btn--rainbow-glow::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  padding: 2px;
-  background: var(--_grad-computed);
-  background-size: 200% 200%;
-  opacity: 0;
   animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: destination-out;
-  z-index: -1;
-  pointer-events: none;
 }
 
 /* Halo — blurred gradient extending outward from the button. */
@@ -495,19 +486,16 @@
   background-size: 200% 200%;
   filter: blur(clamp(1em, 3vw, 2.5em)) saturate(1.6) contrast(1.5);
   opacity: 0;
-  z-index: -2;
+  z-index: -1;
   animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
   pointer-events: none;
 }
 
 .btn--rainbow-glow:hover {
-  background-color: var(--page-bg);
   color: var(--neutral-emphasis);
-  border-color: transparent;
   box-shadow: var(--shadow-sm);
 }
 
-.btn--rainbow-glow:hover::before,
 .btn--rainbow-glow:hover::after {
   opacity: var(--opacity-high);
 }
