@@ -36,13 +36,46 @@
   isolation: isolate;
   margin: 0;
   overflow-wrap: normal;
-  --_btn-brand: var(--btn-bg, var(--primary-base));
-  --_btn-brand-dark: var(--btn-hover-bg, var(--primary-contrast));
-  --_btn-brand-light: var(--btn-light-bg, var(--primary-tint));
+
+  /* ── Slot defaults ──
+     Each --btn-* slot is the public override surface (authors set via
+     inline style or higher-specificity class). Defaults set here at the
+     .btn level; .btn--secondary / .btn--neutral override the colour slots
+     by cascade. Internal --_btn-brand* names re-read the slots so any
+     override flows through. Single-level var() at usage sites — Rule 1
+     compliant. */
+  --btn-bg:           var(--primary-base);
+  --btn-hover-bg:     var(--primary-contrast);
+  --btn-light-bg:     var(--primary-tint);
+  --btn-shadow:       var(--shadow-btn);
+  --btn-shadow-hover: var(--shadow-btn-hover);
+  --btn-ghost-bg:     transparent;
+  --btn-ghost-text:   var(--neutral-emphasis);
+  --btn-ghost-border: var(--neutral-mid);
+  --btn-glass-bg:     var(--glass-bg);
+  --btn-glass-text:   var(--neutral-emphasis);
+  --btn-glass-border: var(--glass-border);
+  --btn-glass-blur:   var(--glass-blur);
+  --btn-spotlight:    var(--color-White);
+  --btn-dropdown-bg:           var(--page-bg-raised);
+  --btn-dropdown-border:       var(--primary-mid);
+  --btn-dropdown-shadow:       var(--shadow-dropdown-md);
+  --btn-dropdown-text:         var(--neutral-emphasis);
+  --btn-dropdown-hover:        var(--primary-tint);
+  --btn-dropdown-hover-text:   var(--primary-contrast);
+
+  --_btn-brand:       var(--btn-bg);
+  --_btn-brand-dark:  var(--btn-hover-bg);
+  --_btn-brand-light: var(--btn-light-bg);
+
+  /* Comic + neumorphic variants read from --_btn-brand-dark; declared
+     here so usage sites are single-level. */
+  --btn-comic-border: var(--_btn-brand-dark);
+  --btn-comic-shadow: var(--_btn-brand-dark);
+
   background-color: var(--_btn-brand);
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
-
+  box-shadow: var(--btn-shadow);
 }
 
 /* focus → global focus-gate.css */
@@ -64,7 +97,7 @@
 [data-hover="none"] .btn:hover {
   background-color: var(--_btn-brand);
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  box-shadow: var(--btn-shadow);
   transform: none;
   filter: none;
 }
@@ -78,24 +111,24 @@
 
 [data-hover="none"] .btn--ghost:hover {
   background-color: var(--btn-ghost-bg, transparent);
-  color: var(--btn-ghost-text, var(--neutral-emphasis));
-  border-color: var(--btn-ghost-border, var(--neutral-mid));
+  color: var(--btn-ghost-text);
+  border-color: var(--btn-ghost-border);
   box-shadow: none;
 }
 
 [data-hover="none"] .btn--glass:hover {
-  background: var(--btn-glass-bg, var(--glass-bg));
-  color: var(--btn-glass-text, var(--neutral-emphasis));
-  border-color: var(--btn-glass-border, var(--glass-border));
+  background: var(--btn-glass-bg);
+  color: var(--btn-glass-text);
+  border-color: var(--btn-glass-border);
 }
 
 [data-hover="none"] .btn--liquid-glass:hover {
-  color: var(--btn-glass-text, var(--neutral-emphasis));
+  color: var(--btn-glass-text);
   border-color: color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
 }
 
 [data-hover="none"] .btn--glassic:hover {
-  color: var(--btn-glass-text, var(--neutral-emphasis));
+  color: var(--btn-glass-text);
   transform: none;
 }
 
@@ -168,7 +201,7 @@
 .btn[aria-disabled="true"]:hover {
   background-color: var(--_btn-brand);
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  box-shadow: var(--btn-shadow);
   transform: none;
   filter: none;
   animation: none;
@@ -185,8 +218,8 @@
 .btn--ghost:disabled:hover,
 .btn--ghost[aria-disabled="true"]:hover {
   background-color: var(--btn-ghost-bg, transparent);
-  color: var(--btn-ghost-text, var(--neutral-emphasis));
-  border-color: var(--btn-ghost-border, var(--neutral-mid));
+  color: var(--btn-ghost-text);
+  border-color: var(--btn-ghost-border);
   box-shadow: none;
 }
 
@@ -255,36 +288,42 @@
    COLOUR VARIANTS — just swap tokens, base handles the rest
    ========================================================== */
 
+/* .btn--primary uses .btn defaults — declared explicitly here for cascade
+   safety against any future change to .btn that bumps specificity. */
 .btn--primary {
-  --_btn-brand: var(--btn-bg, var(--primary-base));
-  --_btn-brand-dark: var(--btn-hover-bg, var(--primary-contrast));
-  --_btn-brand-light: var(--btn-light-bg, var(--primary-tint));
+  --btn-bg:       var(--primary-base);
+  --btn-hover-bg: var(--primary-contrast);
+  --btn-light-bg: var(--primary-tint);
 }
 
 .btn--secondary {
-  --_btn-brand: var(--btn-bg, var(--secondary-base));
-  --_btn-brand-dark: var(--btn-hover-bg, var(--secondary-contrast));
-  --_btn-brand-light: var(--btn-light-bg, var(--secondary-tint));
+  --btn-bg:       var(--secondary-base);
+  --btn-hover-bg: var(--secondary-contrast);
+  --btn-light-bg: var(--secondary-tint);
+  --btn-dropdown-hover:      var(--secondary-tint);
+  --btn-dropdown-hover-text: var(--secondary-contrast);
 }
 
 .btn--neutral {
-  --_btn-brand: var(--btn-bg, var(--neutral-base));
-  --_btn-brand-dark: var(--btn-hover-bg, var(--neutral-emphasis));
-  --_btn-brand-light: var(--btn-light-bg, var(--neutral-tint));
+  --btn-bg:       var(--neutral-base);
+  --btn-hover-bg: var(--neutral-emphasis);
+  --btn-light-bg: var(--neutral-tint);
+  --btn-dropdown-hover:      var(--neutral-mid);
+  --btn-dropdown-hover-text: var(--neutral-emphasis);
 }
 
 /* Fill variant hovers */
 .btn--fill:not(.btn--dropdown):not(.btn--expand):hover {
   background-color: var(--_btn-brand-dark);
   color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
-  box-shadow: var(--btn-shadow-hover, var(--shadow-btn-hover));
+  box-shadow: var(--btn-shadow-hover);
   transform: translateY(-1px);
 }
 
 .btn--fill:not(.btn--dropdown):not(.btn--expand):active {
   background-color: color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
   color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  box-shadow: var(--btn-shadow);
   transform: translateY(1px);
 }
 
@@ -320,8 +359,8 @@
 
 .btn--ghost {
   background-color: var(--btn-ghost-bg, transparent);
-  color: var(--btn-ghost-text, var(--neutral-emphasis));
-  border: 1px solid var(--btn-ghost-border, var(--neutral-mid));
+  color: var(--btn-ghost-text);
+  border: 1px solid var(--btn-ghost-border);
   box-shadow: none;
 }
 
@@ -337,25 +376,25 @@
 }
 
 .btn--glass {
-  background: var(--btn-glass-bg, var(--glass-bg));
-  backdrop-filter: var(--btn-glass-blur, var(--glass-blur));
-  -webkit-backdrop-filter: var(--btn-glass-blur, var(--glass-blur));
-  border: 1px solid var(--btn-glass-border, var(--glass-border));
-  color: var(--btn-glass-text, var(--neutral-emphasis));
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  background: var(--btn-glass-bg);
+  backdrop-filter: var(--btn-glass-blur);
+  -webkit-backdrop-filter: var(--btn-glass-blur);
+  border: 1px solid var(--btn-glass-border);
+  color: var(--btn-glass-text);
+  box-shadow: var(--btn-shadow);
 }
 
 .btn--glass:hover {
   background: var(--_btn-brand);
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   border-color: var(--_btn-brand);
-  box-shadow: var(--btn-shadow-hover, var(--shadow-btn-hover));
+  box-shadow: var(--btn-shadow-hover);
 }
 
 .btn--glass:active {
   background: var(--_btn-brand);
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  box-shadow: var(--btn-shadow, var(--shadow-btn));
+  box-shadow: var(--btn-shadow);
 }
 
 /* Glow pseudo — vibrant blurred halo behind button */
@@ -470,11 +509,11 @@
    Reduced-render animation kill moved to src/styles/gates/reduced-gate.css. */
 
 .btn--neumorphic {
-  box-shadow: var(--btn-shadow, var(--shadow-neu-raised));
+  box-shadow: var(--btn-shadow);
 }
 
 .btn--neumorphic:hover {
-  box-shadow: var(--btn-shadow-hover, var(--shadow-neu-hover));
+  box-shadow: var(--btn-shadow-hover);
 }
 
 .btn--neumorphic:active {
@@ -542,7 +581,7 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
-  color: var(--btn-glass-text, var(--neutral-emphasis));
+  color: var(--btn-glass-text);
   position: relative;
   overflow: hidden;
   box-shadow:
@@ -618,7 +657,7 @@
   backdrop-filter: blur(var(--liquid-blur));
   -webkit-backdrop-filter: blur(var(--liquid-blur));
   border: 1px solid color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
-  color: var(--btn-glass-text, var(--neutral-emphasis));
+  color: var(--btn-glass-text);
   box-shadow:
     var(--liquid-inner-shadow),
     var(--liquid-outer-shadow),
@@ -751,19 +790,19 @@
    ========================================================== */
 
 .btn--comic {
-  border: 3px solid var(--btn-comic-border, var(--_btn-brand-dark));
-  box-shadow: 4px 6px 0 var(--btn-comic-shadow, var(--_btn-brand-dark));
+  border: 3px solid var(--btn-comic-border);
+  box-shadow: 4px 6px 0 var(--btn-comic-shadow);
 }
 
 .btn--comic:hover {
   transform: translate(2px, 2px);
-  box-shadow: 2px 3px 0 var(--btn-comic-shadow, var(--_btn-brand-dark));
+  box-shadow: 2px 3px 0 var(--btn-comic-shadow);
   background-color: var(--_btn-brand);
 }
 
 .btn--comic:active {
   transform: translate(4px, 6px);
-  box-shadow: 0 0 0 var(--btn-comic-shadow, var(--_btn-brand-dark));
+  box-shadow: 0 0 0 var(--btn-comic-shadow);
   filter: saturate(0.75);
 }
 
@@ -983,7 +1022,7 @@
   border-radius: inherit;
   background: radial-gradient(
     circle 80px at var(--_spot-x) var(--_spot-y),
-    color-mix(in oklch, var(--btn-spotlight, var(--color-White)) 25%, transparent),
+    color-mix(in oklch, var(--btn-spotlight) 25%, transparent),
     transparent
   );
   opacity: 0;
@@ -1149,13 +1188,13 @@
 
 .btn--dropdown {
   background: transparent;
-  color: var(--_field-text, var(--neutral-emphasis));
+  color: var(--btn-dropdown-text);
   border: var(--border-width-2) solid var(--_btn-brand);
   border-radius: var(--radius-md);
   transition: border-radius var(--duration-fast) var(--ease-default),
-              background-color var(--hover-duration, var(--duration-base)) var(--ease-default),
-              color var(--hover-duration, var(--duration-base)) var(--ease-default),
-              border-color var(--hover-duration, var(--duration-base)) var(--ease-default);
+              background-color var(--hover-duration) var(--ease-default),
+              color var(--hover-duration) var(--ease-default),
+              border-color var(--hover-duration) var(--ease-default);
 }
 
 .dropdown-wrapper:hover .btn--dropdown,
@@ -1173,7 +1212,7 @@
 /* Hover none — no colour change on dropdown button */
 [data-hover="none"] .btn--dropdown:hover {
   background: transparent;
-  color: var(--_field-text, var(--neutral-emphasis));
+  color: var(--btn-dropdown-text);
   border-color: var(--_btn-brand);
 }
 
@@ -1194,18 +1233,18 @@
   top: 100%;
   left: 0;
   width: 100%;
-  background: var(--btn-dropdown-bg, var(--page-bg-raised));
+  background: var(--btn-dropdown-bg);
   border-radius: 0 0 var(--radius-md) var(--radius-md);
-  box-shadow: var(--btn-dropdown-shadow, var(--shadow-dropdown-md));
+  box-shadow: var(--btn-dropdown-shadow);
   z-index: var(--z-dropdown);
   padding: 0;
-  border: var(--border-width) solid var(--btn-dropdown-border, var(--primary-mid));
+  border: var(--border-width) solid var(--btn-dropdown-border);
   border-top: none;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
   visibility: hidden;
-  transition: max-height var(--hover-duration, var(--duration-base)) var(--ease-default), opacity var(--hover-duration-fast, var(--duration-fast)) var(--ease-default), visibility 0s var(--hover-duration, var(--duration-base));
+  transition: max-height var(--hover-duration) var(--ease-default), opacity var(--hover-duration-fast) var(--ease-default), visibility 0s var(--hover-duration);
 }
 
 .dropdown-wrapper:hover .dropdown-menu,
@@ -1213,7 +1252,7 @@
   max-height: 20rem;
   opacity: 1;
   visibility: visible;
-  transition: max-height var(--hover-duration, var(--duration-base)) var(--ease-default), opacity var(--hover-duration-fast, var(--duration-fast)) var(--ease-default), visibility 0s;
+  transition: max-height var(--hover-duration) var(--ease-default), opacity var(--hover-duration-fast) var(--ease-default), visibility 0s;
 }
 
 /* Hover none — only click (.show) opens, not hover */
@@ -1228,7 +1267,7 @@
   display: block;
   width: 100%;
   padding: var(--space-md) var(--space-lg);
-  color: var(--btn-dropdown-text, var(--neutral-emphasis));
+  color: var(--btn-dropdown-text);
   text-decoration: none;
   font-family: var(--font-body);
   font-weight: var(--font-medium);
@@ -1246,13 +1285,13 @@
 .dropdown-item--font-mono         { font-family: var(--font-mono); }
 
 /* Dropdown theme — inherits variant colour via class on .dropdown-menu */
-.dropdown-theme--primary .dropdown-item:hover { background-color: var(--btn-dropdown-hover, var(--primary-tint)); color: var(--btn-dropdown-hover-text, var(--primary-contrast)); }
-.dropdown-theme--secondary .dropdown-item:hover { background-color: var(--btn-dropdown-hover, var(--secondary-tint)); color: var(--btn-dropdown-hover-text, var(--secondary-contrast)); }
-.dropdown-theme--neutral .dropdown-item:hover { background-color: var(--btn-dropdown-hover, var(--neutral-mid)); color: var(--btn-dropdown-hover-text, var(--neutral-emphasis)); }
+.dropdown-theme--primary .dropdown-item:hover { background-color: var(--btn-dropdown-hover); color: var(--btn-dropdown-hover-text); }
+.dropdown-theme--secondary .dropdown-item:hover { background-color: var(--btn-dropdown-hover); color: var(--btn-dropdown-hover-text); }
+.dropdown-theme--neutral .dropdown-item:hover { background-color: var(--btn-dropdown-hover); color: var(--btn-dropdown-hover-text); }
 
 .dropdown-item:hover {
-  background-color: var(--btn-dropdown-hover, var(--primary-tint));
-  color: var(--btn-dropdown-hover-text, var(--primary-contrast));
+  background-color: var(--btn-dropdown-hover);
+  color: var(--btn-dropdown-hover-text);
   text-decoration: none;
 }
 
