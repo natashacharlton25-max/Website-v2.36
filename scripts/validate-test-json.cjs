@@ -51,7 +51,7 @@ for (const atom of atoms) {
       }
     }
 
-    schemas[atom] = { flatProps, required, renders: schema.renders || {} };
+    schemas[atom] = { flatProps, required, renders: schema.renders || {}, rules: schema._rules || [] };
   } catch (e) {
     console.log(`  WARN  Could not parse schema for ${atom}: ${e.message}`);
   }
@@ -204,6 +204,58 @@ function validateJson(data, label) {
             }
           }
         });
+      }
+    }
+
+    // ── Schema._rules enforcement ──────────────────────────────────
+    // Each rule may declare structured fields:
+    //   scope:           "root" (default) or any nested key like "media"
+    //   when:            optional JS expression — rule applies only when truthy
+    //                    Bindings: `root` (instance props), `media` (props.media || {})
+    //   forbid:          array of prop names that must NOT exist in scope
+    //   requireAny:      array — at least one must exist in scope
+    //   mutuallyExclusive: array — at most one may exist in scope
+    // Documentation-only rules (no enforcement fields) are silently ignored.
+    for (const rule of (schema.rules || [])) {
+      const scope = rule.scope || 'root';
+      const target = scope === 'root' ? props : (props[scope] || null);
+      if (!target || typeof target !== 'object' || Array.isArray(target)) continue;
+
+      // Skip if condition (when) doesn't apply.
+      if (rule.when) {
+        let applies = false;
+        try {
+          const fn = new Function('root', 'media', 'return (' + rule.when + ')');
+          applies = !!fn(props, props.media || {});
+        } catch {
+          continue; // broken condition — don't enforce
+        }
+        if (!applies) continue;
+      }
+
+      const scopePath = scope === 'root' ? jsonPath : `${jsonPath}.${scope}`;
+      const ruleNote = rule.note ? ` — ${rule.note}` : '';
+
+      if (Array.isArray(rule.forbid)) {
+        for (const prop of rule.forbid) {
+          if (prop in target) {
+            issues.push({ path: scopePath, msg: `${component}: rule "${rule.rule}" forbids "${prop}"${scope !== 'root' ? ' in ' + scope : ''}${ruleNote}` });
+          }
+        }
+      }
+
+      if (Array.isArray(rule.requireAny)) {
+        const hasOne = rule.requireAny.some(p => p in target);
+        if (!hasOne) {
+          issues.push({ path: scopePath, msg: `${component}: rule "${rule.rule}" requires at least one of [${rule.requireAny.join(', ')}]${scope !== 'root' ? ' in ' + scope : ''}${ruleNote}` });
+        }
+      }
+
+      if (Array.isArray(rule.mutuallyExclusive)) {
+        const present = rule.mutuallyExclusive.filter(p => p in target);
+        if (present.length > 1) {
+          issues.push({ path: scopePath, msg: `${component}: rule "${rule.rule}" allows only one of [${rule.mutuallyExclusive.join(', ')}]${scope !== 'root' ? ' in ' + scope : ''}; got [${present.join(', ')}]${ruleNote}` });
+        }
       }
     }
   }
