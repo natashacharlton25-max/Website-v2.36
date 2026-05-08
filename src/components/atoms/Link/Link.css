@@ -116,13 +116,14 @@
    when underlineGrow prop is passed.
    ========================================================== */
 
-/* Default + underline variants render the same — a static underline drawn
-   on the inner .text span (inline-block parent breaks text-decoration
-   propagation, so the line lives on the child). The only quiet variant
-   is .link--bare (colour-only). Authors choose explicitly:
-     variant="default" or variant="underline" → underlined link
-     variant="bare"                            → no underline
-   See Link.schema.json variant enum for full list. */
+/* Underline lives on the inner .text span — Link's <a> wraps a <Text as="span">
+   which is display:inline-block, breaking text-decoration propagation from the
+   <a>. Drawing on .text directly makes the line render against the actual glyphs.
+
+   default — straight underline, conventional inline body link
+   underline — wavy underline, playful "click me" energy. text-decoration-style:wavy
+               renders a sine-wave line natively (browser-painted, no SVG). */
+
 .link--default,
 .link--underline {
   position: relative;
@@ -130,11 +131,21 @@
   text-decoration: none;
 }
 
-.link--default .text,
-.link--underline .text {
+.link--default .text {
   text-decoration: underline;
   text-underline-offset: 0.3em;
   text-decoration-thickness: 0.125em;
+  text-decoration-color: var(--_link-color);
+}
+
+.link--underline .text {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  /* Wavy lines render thicker visually than straight ones at the same
+     thickness because each peak/trough adds vertical mass. Trim the
+     thickness so the wave reads as decorative not chunky. */
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.25em;
   text-decoration-color: var(--_link-color);
 }
 
@@ -504,6 +515,48 @@
 }
 .link--animate-text-slide:hover::before {
   width: 100%;
+}
+
+/* Animation: squiggle — replaces variant="underline" static wavy with an
+   animated sliding squiggle on hover. Only meaningful paired with
+   variant="underline" (the wavy line is what's being animated). On other
+   variants the prop is harmless — no underline to animate.
+
+   Implementation: kill the variant's static text-decoration, then paint
+   the wavy line as a ::after pseudo-element. The SVG mask shape is
+   colour-agnostic; the actual colour comes from background-color so it
+   honours the .color--{name} mixin's --_link-color. On hover, slide the
+   mask one tile to the left — the animation token controls duration. */
+.link--animate-squiggle.link--underline .text {
+  text-decoration: none;
+}
+
+.link--animate-squiggle::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.05em;
+  height: 0.45em;
+  background-color: var(--_link-color);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 4'><path fill='none' stroke='black' stroke-width='2' d='M0,3.5 c 5,0,5,-3,10,-3 s 5,3,10,3 c 5,0,5,-3,10,-3 s 5,3,10,3'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 4'><path fill='none' stroke='black' stroke-width='2' d='M0,3.5 c 5,0,5,-3,10,-3 s 5,3,10,3 c 5,0,5,-3,10,-3 s 5,3,10,3'/></svg>");
+  -webkit-mask-repeat: repeat-x;
+          mask-repeat: repeat-x;
+  -webkit-mask-position: 0 bottom;
+          mask-position: 0 bottom;
+  -webkit-mask-size: 1.25em auto;
+          mask-size: 1.25em auto;
+  pointer-events: none;
+}
+
+.link--animate-squiggle:hover::after {
+  background-color: var(--_link-hover);
+  animation: link-squiggle-slide var(--duration-base, 1.5s) linear infinite;
+}
+
+@keyframes link-squiggle-slide {
+  to { -webkit-mask-position: -1.25em bottom; mask-position: -1.25em bottom; }
 }
 
 /* ================================================================
