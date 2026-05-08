@@ -397,10 +397,15 @@
   box-shadow: var(--btn-shadow);
 }
 
-/* Glow pseudo — vibrant blurred halo behind button */
+/* Glow pseudo — vibrant blurred halo behind button.
+   Default gradient sourced from --_grad-computed (set here as a hero
+   blend). Authors can override per-instance via gradient + gradientBlend
+   props — the .gradient--blend-{name} class re-sets --_grad-computed
+   and the glow picks it up automatically. */
 .btn--glow {
   position: relative;
   overflow: visible;
+  --_grad-computed: linear-gradient(135deg in oklab, var(--primary-base) 0%, var(--secondary-base) 100%);
 }
 
 .btn--glow::after {
@@ -408,7 +413,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: var(--gradient-hero);
+  background: var(--_grad-computed);
   background-size: 200% 200%;
   opacity: 0;
   z-index: -1;
@@ -417,7 +422,7 @@
 }
 
 .btn--glow:hover {
-  background: var(--gradient-hero);
+  background: var(--_grad-computed);
   background-size: 200% 200%;
   animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
