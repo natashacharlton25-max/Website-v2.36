@@ -537,45 +537,76 @@ for (const atom of atoms) {
         }
       }
 
-      // Rule 43: schema-default vs astro-default drift.
-      // Yesterday's Shape.size bug — schema declared `default: "base"` but
-      // .astro destructured with `size,` (no default), so undefined slipped
-      // through to runtime and every default-sized Shape rendered 0×0
-      // invisible. Schema documentation must match runtime behaviour.
-      // For each prop with a "default" in schema, check the matching .astro
-      // destructure has the same default.
+      // Rule 43: schema-default vs astro-default drift (bidirectional).
+      // Schema documentation must match runtime behaviour. Two directions:
+      //   forward — schema has "default", .astro destructure must apply it
+      //             (yesterday's Shape.size bug — schema said 'base', .astro
+      //             had `size,`, undefined slipped through, default-sized
+      //             Shape rendered 0×0 invisible)
+      //   reverse — .astro destructure has `prop = value`, schema must
+      //             declare `"default": value`. Schema overclaim or under-
+      //             claim is a lie either way.
+      // Reverse direction only applies when the prop name appears in the
+      // schema (so `class: className`, internal aliases, and Astro-only
+      // surface props don't false-positive — schema doesn't track those).
       const astroPath = path.join(dir, atom + '.astro');
       if (fs.existsSync(astroPath)) {
         const astro = fs.readFileSync(astroPath, 'utf8');
         const destrMatch = astro.match(/const\s*\{([\s\S]*?)\}\s*=\s*Astro\.props/);
         if (destrMatch) {
           const destr = destrMatch[1];
+
+          // Build a flat schema map: propName → propDef across all groups.
+          // Used by both directions.
+          const schemaProps = new Map();
           for (const groupName of Object.keys(props)) {
             const group = props[groupName];
             if (!group || typeof group !== 'object') continue;
             for (const propName of Object.keys(group)) {
-              const def = group[propName];
-              if (!def || typeof def !== 'object' || !('default' in def)) continue;
-              const dflt = def.default;
-              if (dflt === null || dflt === undefined) continue;
-              // Match propName at start of line or after , { whitespace, optional `= value` capture, terminator , } or newline
-              const propRegex = new RegExp('(?:^|[,{\\s])' + propName + '\\s*(?:=([^,\\n]*?(?:\\([^)]*\\)|\\[[^\\]]*\\]|[^,\\n])*?))?(?=\\s*[,}\\n])');
-              const m = destr.match(propRegex);
-              if (!m) continue; // not destructured (probably forwarded as ...rest)
-              const astroDefault = (m[1] || '').trim();
-              const schemaStr = JSON.stringify(dflt);
-              if (!astroDefault) {
-                issues.push({ rule: 43, ln: '--', file: schemaFile, msg: `${propName}: schema default ${schemaStr} not mirrored in .astro destructure` });
-              } else {
-                const norm = astroDefault.replace(/^['"]|['"]$/g, '');
-                if (norm !== String(dflt) && astroDefault !== String(dflt)) {
-                  // Skip empty array vs literal [] noise
-                  if (!(astroDefault === '[]' && Array.isArray(dflt) && dflt.length === 0)) {
-                    issues.push({ rule: 43, ln: '--', file: schemaFile, msg: `${propName}: schema default ${schemaStr} ≠ .astro default ${astroDefault}` });
-                  }
+              if (propName.startsWith('_')) continue;
+              schemaProps.set(propName, group[propName]);
+            }
+          }
+
+          // Forward direction: every schema prop with a "default" must be
+          // mirrored in the destructure with the same value.
+          for (const [propName, def] of schemaProps) {
+            if (!def || typeof def !== 'object' || !('default' in def)) continue;
+            const dflt = def.default;
+            if (dflt === null || dflt === undefined) continue;
+            const propRegex = new RegExp('(?:^|[,{\\s])' + propName + '\\s*(?:=([^,\\n]*?(?:\\([^)]*\\)|\\[[^\\]]*\\]|[^,\\n])*?))?(?=\\s*[,}\\n])');
+            const m = destr.match(propRegex);
+            if (!m) continue; // not destructured (probably forwarded as ...rest)
+            const astroDefault = (m[1] || '').trim();
+            const schemaStr = JSON.stringify(dflt);
+            if (!astroDefault) {
+              issues.push({ rule: 43, ln: '--', file: schemaFile, msg: `${propName}: schema default ${schemaStr} not mirrored in .astro destructure` });
+            } else {
+              const norm = astroDefault.replace(/^['"]|['"]$/g, '');
+              if (norm !== String(dflt) && astroDefault !== String(dflt)) {
+                if (!(astroDefault === '[]' && Array.isArray(dflt) && dflt.length === 0)) {
+                  issues.push({ rule: 43, ln: '--', file: schemaFile, msg: `${propName}: schema default ${schemaStr} ≠ .astro default ${astroDefault}` });
                 }
               }
             }
+          }
+
+          // Reverse direction: every destructure entry with `prop = value`
+          // whose name appears in the schema must have a matching schema
+          // "default" key. .astro-authoritative defaults silently shadowed
+          // by a schema that doesn't document them are a documentation lie.
+          // Match `name = value` pairs in the destructure body.
+          const destrEntryRegex = /(?:^|[,{\s])([a-z][A-Za-z0-9]*)\s*=\s*([^,\n]*?(?:\([^)]*\)|\[[^\]]*\]|[^,\n])*?)(?=\s*[,}\n])/g;
+          let entryMatch;
+          while ((entryMatch = destrEntryRegex.exec(destr)) !== null) {
+            const propName = entryMatch[1];
+            const astroDefault = entryMatch[2].trim();
+            if (!schemaProps.has(propName)) continue; // not a schema prop, skip
+            const def = schemaProps.get(propName);
+            if (!def || typeof def !== 'object') continue;
+            if ('default' in def) continue; // forward direction handles this
+            // .astro has a default, schema doesn't claim one — overclaim/underclaim
+            issues.push({ rule: 43, ln: '--', file: schemaFile, msg: `${propName}: .astro defaults to ${astroDefault} but schema declares no "default"` });
           }
         }
       }
