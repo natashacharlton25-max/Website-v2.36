@@ -451,6 +451,9 @@
   padding: 0 0.25rem;
   margin: 0 -0.25rem;
   box-shadow: inset 0 0 0 0 var(--_link-color);
+  /* Shadow-fill IS the affordance — the sliding box-shadow gives the link
+     its visual signal, no need for a static underline on top. */
+  text-decoration: none;
   /* Box-shadow sweeps over the duration; colour change is fast (ease-in)
      and starts late so the text only turns white in the final third when
      most of the fill is already behind it. Earlier = white text on page
@@ -464,6 +467,10 @@
    .color--{name} mixin layer. Without this, those layers transition at
    the global fast speed (or none) — they'd snap to white before the fill
    arrives, leaving an invisible flash on hover-in. */
+.link.link--animate-shadow-fill .text {
+  text-decoration: none; /* override variant's static underline */
+}
+
 .link.link--animate-shadow-fill .text,
 .link.link--animate-shadow-fill [class*="color--"] {
   transition: color calc(var(--hover-duration-slow) * 0.5) var(--ease-default) calc(var(--hover-duration-slow) * 0.4);
@@ -482,7 +489,14 @@
 }
 
 /* Animation: textSlide — text colour sweeps from left + underline grows.
-   background-position is not in the global transition rule, so declared here. */
+   background-position is not in the global transition rule, so declared here.
+   Kills the variant's static underline (the ::before-driven grow IS the
+   affordance, plus the text-clip gradient means a static line drawn through
+   transparent glyphs would look broken). */
+.link--animate-text-slide .text {
+  text-decoration: none;
+}
+
 .link--animate-text-slide {
   position: relative;
   background-image: linear-gradient(
@@ -552,7 +566,10 @@
 
 .link--animate-squiggle:hover::after {
   background-color: var(--_link-hover);
-  animation: link-squiggle-slide var(--duration-base, 1.5s) linear infinite;
+  /* Continuous-loop token family — motion-gate.css slows to 3s in gentle
+     mode and zeros to 0s in none mode, so the squiggle freezes/disappears
+     when motion is suppressed without needing a per-rule override. */
+  animation: link-squiggle-slide var(--duration-continuous) linear infinite;
 }
 
 @keyframes link-squiggle-slide {
