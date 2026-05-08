@@ -373,14 +373,14 @@
   background-size: 200% 200%;
   opacity: 0;
   z-index: -1;
-  animation: btn-glowloop 2s linear infinite;
+  animation: btn-glowloop var(--duration-continuous-slow) var(--ease-linear) infinite;
   pointer-events: none;
 }
 
 .btn--glow:hover {
   background: var(--gradient-hero);
   background-size: 200% 200%;
-  animation: btn-glowloop 4s linear infinite;
+  animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
 }
 
@@ -425,7 +425,7 @@
     var(--rainbow-1)));
   background-size: 200% 200%;
   opacity: 0;
-  animation: btn-glowloop 8s linear infinite;
+  animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
@@ -446,7 +446,7 @@
   filter: blur(clamp(16px, 3vw, 40px)) saturate(1.6) contrast(1.5);
   opacity: 0;
   z-index: -2;
-  animation: btn-glowloop 8s linear infinite;
+  animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
 }
 
 .btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
@@ -466,18 +466,8 @@
   opacity: var(--opacity-high);
 }
 
-@keyframes btn-glowloop {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Reduced render — no animation */
-[data-render="reduced"] .btn--glow::after,
-[data-render="reduced"] .btn-rainbow-glow-wrap::before,
-[data-render="reduced"] .btn-rainbow-glow-wrap::after {
-  animation: none;
-}
+/* @keyframes btn-glowloop moved to src/styles/global/keyframes.css.
+   Reduced-render animation kill moved to src/styles/gates/reduced-gate.css. */
 
 .btn--neumorphic {
   box-shadow: var(--btn-shadow, var(--shadow-neu-raised));
@@ -1270,11 +1260,8 @@
   border-radius: 0 0 var(--radius-md) var(--radius-md);
 }
 
-/* Dropdown item: inset focus ring (structural — items overlap, outset ring clips) */
-.dropdown-item:focus-visible {
-  outline: 2px solid var(--focus-color);
-  outline-offset: -2px;
-}
+/* .dropdown-item:focus-visible moved to src/styles/gates/focus-gate.css —
+   structural inset ring (items overlap, outset would clip). */
 
 /* Dropdown theme variants — border inherits brand colour */
 .dropdown-theme--secondary { border-color: var(--secondary-mid); }
