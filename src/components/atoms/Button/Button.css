@@ -169,8 +169,8 @@
 [data-hover="none"] .btn--tech:hover { transform: none; }
 
 /* None — rainbow glow */
-[data-hover="none"] .btn-rainbow-glow-wrap::before,
-[data-hover="none"] .btn-rainbow-glow-wrap::after {
+[data-hover="none"] .btn--rainbow-glow::before,
+[data-hover="none"] .btn--rainbow-glow::after {
   animation: none;
   opacity: 0;
 }
@@ -439,11 +439,13 @@
 }
 
 /* ── Rainbow Glow — wrapper handles glow, button stays clean ── */
+/* Rainbow-glow ring + halo are pseudo-elements ON THE BUTTON itself
+   (not the wrap). This keeps them aligned through any button transform
+   on hover/active — when the button moves, its pseudos move with it.
+   The wrap stays as a thin layout shell for inline-block containment. */
 .btn-rainbow-glow-wrap {
   position: relative;
   display: inline-block;
-  border-radius: var(--radius-full);
-  padding: 2px;
   isolation: isolate;
 }
 
@@ -451,6 +453,10 @@
   --_btn-brand: var(--page-bg);
   --_btn-brand-dark: var(--page-bg);
   --btn-text: var(--neutral-emphasis);
+  /* Default rainbow gradient — matches gradient catalogue's rainbow blend.
+     Authors can override via gradient + gradientBlend props (.gradient--blend-X
+     re-sets --_grad-computed and the ring/halo pick it up). */
+  --_grad-computed: linear-gradient(90deg, var(--rainbow-1), var(--rainbow-4), var(--rainbow-7), var(--rainbow-3), var(--rainbow-5), var(--rainbow-2), var(--rainbow-1));
   position: relative;
   z-index: 1;
   border: none;
@@ -458,16 +464,16 @@
   box-shadow: 0 4px 0.75em color-mix(in oklch, var(--neutral-emphasis) 25%, transparent), 0 2px 4px color-mix(in oklch, var(--neutral-emphasis) 15%, transparent);
 }
 
-.btn-rainbow-glow-wrap::before {
+/* Ring — masked gradient creates a 2px outline that traces the button's
+   pill shape exactly (mask uses content-box, so the inner cutout matches
+   the button's content area + padding). */
+.btn--rainbow-glow::before {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: var(--radius-full);
+  inset: -2px;
+  border-radius: inherit;
   padding: 2px;
-  background: var(--_glow-gradient, linear-gradient(90deg,
-    var(--rainbow-1), var(--rainbow-4), var(--rainbow-7),
-    var(--rainbow-3), var(--rainbow-5), var(--rainbow-2),
-    var(--rainbow-1)));
+  background: var(--_grad-computed);
   background-size: 200% 200%;
   opacity: 0;
   animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
@@ -476,38 +482,33 @@
   mask-composite: exclude;
   -webkit-mask-composite: destination-out;
   z-index: -1;
+  pointer-events: none;
 }
 
-.btn-rainbow-glow-wrap::after {
+/* Halo — blurred gradient extending outward from the button. */
+.btn--rainbow-glow::after {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-full);
-  background: var(--_glow-gradient, linear-gradient(90deg,
-    var(--rainbow-1), var(--rainbow-4), var(--rainbow-7),
-    var(--rainbow-3), var(--rainbow-5), var(--rainbow-2),
-    var(--rainbow-1)));
+  border-radius: inherit;
+  background: var(--_grad-computed);
   background-size: 200% 200%;
   filter: blur(clamp(1em, 3vw, 2.5em)) saturate(1.6) contrast(1.5);
   opacity: 0;
   z-index: -2;
   animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
+  pointer-events: none;
 }
 
-.btn-rainbow-glow-wrap:hover .btn--rainbow-glow,
 .btn--rainbow-glow:hover {
   background-color: var(--page-bg);
   color: var(--neutral-emphasis);
   border-color: transparent;
   box-shadow: var(--shadow-sm);
-  transform: none;
 }
 
-.btn-rainbow-glow-wrap:hover::before {
-  opacity: var(--opacity-high);
-}
-
-.btn-rainbow-glow-wrap:hover::after {
+.btn--rainbow-glow:hover::before,
+.btn--rainbow-glow:hover::after {
   opacity: var(--opacity-high);
 }
 
