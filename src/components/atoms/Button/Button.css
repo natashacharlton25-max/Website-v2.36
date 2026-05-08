@@ -449,6 +449,13 @@
   position: relative;
   display: inline-block;
   isolation: isolate;
+  /* Default rainbow gradient — same value as .btn--rainbow-glow's
+     --_grad-computed so the wrap's halo and the button's ring stay
+     in sync. (Author overrides via gradientBlend only flow to the
+     button class; the halo keeps the rainbow default. Acceptable
+     trade-off — most rainbow-glow usages want the rainbow halo
+     regardless of inner ring colour.) */
+  --_grad-computed: linear-gradient(90deg, var(--rainbow-1), var(--rainbow-4), var(--rainbow-7), var(--rainbow-3), var(--rainbow-5), var(--rainbow-2), var(--rainbow-1));
 }
 
 .btn--rainbow-glow {
@@ -479,12 +486,16 @@
   animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
 }
 
-/* Halo — blurred gradient extending outward from the button. */
-.btn--rainbow-glow::after {
+/* Halo on the WRAP — blurred gradient bleeding outward from the button.
+   Lives on the wrap so it sits BEHIND the button (not over it) and the
+   button fill stays clean. The wrap inherits --_grad-computed from the
+   button via cascade (custom property inheritance) so author overrides
+   on the button still flow through to the halo. */
+.btn-rainbow-glow-wrap::after {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: inherit;
+  border-radius: var(--radius-full);
   background: var(--_grad-computed);
   background-size: 200% 200%;
   filter: blur(clamp(1em, 3vw, 2.5em)) saturate(1.6) contrast(1.5);
@@ -499,7 +510,7 @@
   box-shadow: var(--shadow-sm);
 }
 
-.btn--rainbow-glow:hover::after {
+.btn-rainbow-glow-wrap:hover::after {
   opacity: var(--opacity-high);
 }
 
