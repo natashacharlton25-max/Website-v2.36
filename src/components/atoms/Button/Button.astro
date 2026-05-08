@@ -1,34 +1,21 @@
 ---
 /**
- * Button — Unified button component
+ * Button — Unified button component (links, buttons, dropdowns).
  *
- * Handles: links, buttons, dropdowns, confetti effects.
- * Uses brand tokens for all colours. Icon component for icons.
+ * Colour: global .color--{name} mixin via brandColor / rainbowColor.
+ * Tiers NOT supported — preset variant styling (fill/outline/glass/glow/etc.)
+ * would break at non-base tiers.
  *
- * @param variant   - 'fill' (default), 'outline', 'ghost', 'glass', 'glow', 'neumorphic', etc.
- * @param color     - 'primary' (default), 'secondary', 'neutral'
- * @param shape     - 'rounded' (default), 'pill', 'circle', 'square', 'sharp', 'dropdown'
- * @param size      - 'sm', 'md' (default), 'lg'
- * @param alignment - 'left', 'center' — wraps button in alignment container
- * @param icon      - Phosphor icon name e.g. 'star-fill'
- * @param iconPosition - 'left' (default) or 'right'
- * @param href      - Makes it an <a> tag
- * @param target    - Link target
- * @param download  - Download attribute
- * @param type      - Button type: 'button', 'submit', 'reset'
- * @param disabled  - Disabled state
- * @param id        - Element ID
- * @param ariaLabel - Accessible label
- * @param confetti  - Particle effect: 'confetti', 'hearts', 'celebration', 'mixed'
- * @param confettiTrigger - 'click' (default) or 'hover'
- * @param confettiCount   - Particle count (default 30)
- * @param confettiSpread  - Particle spread (default 150)
- * @param dropdownItems   - Array of {label, href?, value?, fontFamily?} for dropdown mode
+ * Decorative icon (Icon | LottieIcon) lives on the `media` nested atom node —
+ * matches Heading/Badge/List family pattern. Heavy SVG features (morph/draw/
+ * fillAnimation) are NOT exposed for button chrome (see schema._rules).
+ *
+ * Confetti is no longer a Button prop — wrap with the Confetti atom.
  */
 import { Icon } from '../Icon';
 import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
-import type { BrandColour, RainbowColour, ColourTier, GradientBlend, GradientDirection, GradientAnimateDirection } from '../../../lib/shared-enums';
+import type { BrandColour, RainbowColour, GradientBlend, GradientDirection, GradientAnimateDirection } from '../../../lib/shared-enums';
 
 export interface DropdownItem {
   label: string;
@@ -40,10 +27,11 @@ export interface DropdownItem {
 export interface Props {
   /** Button label text. Forwarded to nested Text atom. Pipeline content key. */
   contentButton?: string;
+  /** Secondary label revealed by the split effect — button sizes to longest. */
+  contentButtonSplit?: string;
   variant?: 'fill' | 'outline' | 'ghost' | 'glass' | 'liquid-glass' | 'glassic' | 'glow' | 'rainbow-glow' | 'neumorphic' | 'neumorphic-3d' | 'neumorphic-inner';
   brandColor?: BrandColour;
   rainbowColor?: RainbowColour;
-  colorTier?: ColourTier;
   shape?: 'rounded' | 'pill' | 'circle' | 'square' | 'sharp' | 'dropdown';
   size?: 'sm' | 'md' | 'lg';
   effect?: 'glint' | 'colour-flow' | 'jump' | 'comic' | 'tech' | 'expand' | 'magnetic' | 'spotlight' | 'split';
@@ -55,24 +43,11 @@ export interface Props {
   href?: string;
   target?: string;
   download?: string | boolean;
-  icon?: string;
+  /** Decorative chrome — Icon | LottieIcon nested atom node. Mirrors Heading/Badge/List media pattern. */
+  media?: Record<string, any>;
+  /** Layout — icon left or right of label. Applies to whichever media is nested. */
   iconPosition?: 'left' | 'right';
-  iconMorphTo?: string;
-  iconMorphColor?: string;
-  iconDraw?: boolean | 'draw' | 'drawcenter' | 'chachaslide' | 'flashgordon' | 'rainbowchase' | 'pulse';
-  iconDrawColor?: string;
-  lottieIcon?: string;
-  lottieLoop?: boolean;
   ariaLabel?: string;
-  confetti?: 'confetti' | 'hearts' | 'celebration' | 'mixed';
-  confettiTrigger?: 'click' | 'hover';
-  confettiCount?: number;
-  confettiSpread?: number;
-  /** Secondary label revealed by the split effect — button sizes to longest. */
-  contentButtonSplit?: string;
-  /** Icon animation — forwarded to Icon atom */
-  iconSpin?: boolean;
-  iconBounce?: boolean;
   /** Gradient fill / glow — matches Shape/Icon/Heading/Badge gradient spec. */
   gradient?: boolean;
   gradientBlend?: GradientBlend;
@@ -91,10 +66,10 @@ export interface Props {
 
 const {
   contentButton,
+  contentButtonSplit,
   variant: rawVariant = 'fill',
   brandColor: rawColor = 'primary',
   rainbowColor,
-  colorTier,
   shape = 'rounded',
   size = 'md',
   effect,
@@ -106,22 +81,9 @@ const {
   href,
   target,
   download,
-  icon,
+  media,
   iconPosition = 'left',
-  iconMorphTo,
-  iconMorphColor,
-  iconDraw,
-  iconDrawColor,
-  lottieIcon,
-  lottieLoop = false,
   ariaLabel,
-  confetti,
-  confettiTrigger = 'click',
-  confettiCount = 30,
-  confettiSpread = 150,
-  contentButtonSplit,
-  iconSpin = false,
-  iconBounce = false,
   gradient = false,
   gradientBlend,
   gradientDirection = 'diagonal',
@@ -149,35 +111,25 @@ const dataAttrs = Object.fromEntries(
 
 const isLink = !!href;
 const isDropdown = shape === 'dropdown';
-const hasIcon = !!icon || !!lottieIcon;
+
+// Media nesting (Phase 1.6): icon/lottie chrome lives on the `media` prop —
+// matches Heading/Badge/List family pattern. Only Icon | LottieIcon are
+// allowed; heavy SVG features (morph/draw/fillAnimation) are not exposed
+// for button chrome (see Button.schema._rules.media-no-heavy-svg).
+const mediaComponent = media?.component;
+const hasIcon = mediaComponent === 'Icon' || mediaComponent === 'LottieIcon';
 const isIconOnly = hasIcon && (shape === 'circle' || shape?.startsWith('i-'));
+const { component: _mediaComponent, ...mediaProps } = media || {};
 
-// Glow gradient is now sourced from the family gradient spec (Phase 2 wires
-// the gradientBlend / gradientDirection props into the glow CSS). Custom
-// glowColors array removed in Phase 1.5.
-
-// Icon sizes per button size
 // Semantic role for AT context
 const semanticRole = type === 'submit' ? 'form-submit' : isIconOnly && ariaLabel ? 'control' : 'action';
 
 // Icon size omitted — .btn__icon CSS (1.25em) scales with button font-size.
 // Size variants handled by .btn--sm/.btn--lg font-size differences.
-const iconSize = undefined;
 
-// Direct slug — iconCollection prefix dropped (Asset Library uses flat slugs).
-const iconName = icon || '';
-
-// Icon props — all forwarded to Icon atom. Icon owns its own gates.
-const iconAnimProps = {
-  ...(iconMorphTo ? { morphTo: iconMorphTo } : {}),
-  ...(iconMorphColor ? { morphColor: iconMorphColor } : {}),
-  ...(iconDraw ? { draw: iconDraw } : {}),
-  ...(iconDrawColor ? { drawColor: iconDrawColor } : {}),
-  ...(iconSpin ? { spin: iconSpin } : {}),
-  ...(iconBounce ? { bounce: iconBounce } : {}),
-};
-
-// Build classes
+// Build classes — confetti classes dropped (Phase 1.6: confetti extracted
+// to its own atom). Tier classes never emitted on Button (preset variant
+// styling; see Button.schema._rules.no-tiers).
 const classes = [
   'btn',
   `btn--${variant}`,
@@ -189,24 +141,9 @@ const classes = [
   hasIcon && 'btn--has-icon',
   hasIcon && `btn--icon-${iconPosition}`,
   isIconOnly && 'btn--icon-only',
-  confetti && 'btn--confetti',
-  confetti === 'hearts' && 'btn--confetti-hearts',
-  confetti === 'celebration' && 'btn--confetti-celebration',
   alignment && `btn-align--${alignment}`,
   className,
 ].filter(Boolean);
-
-// Confetti data attributes
-const confettiAttrs = confetti ? {
-  'data-particle-burst': '',
-  'data-particle-type': confetti === 'celebration' ? 'mixed' : confetti,
-  'data-particle-trigger': confettiTrigger,
-  'data-particle-count': String(confettiCount),
-  'data-particle-spread': String(confettiSpread),
-} : {};
-
-// Lottie vs static icon
-const useLottie = !!lottieIcon;
 
 // Shared inner content
 const iconLeft = iconPosition === 'left' && hasIcon;
@@ -226,11 +163,12 @@ const iconRight = iconPosition === 'right' && hasIcon;
       aria-haspopup="true"
       data-semantic-role={semanticRole}
       {...dataAttrs}
-      {...confettiAttrs}
     >
-      {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       <Text as="span" class="btn__label" flush><slot /></Text>
-      {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       <Icon name="caret-down-fill" size={14} class="btn__chevron" />
     </button>
 
@@ -266,11 +204,12 @@ const iconRight = iconPosition === 'right' && hasIcon;
         aria-label={ariaLabel}
         data-semantic-role={semanticRole}
         {...dataAttrs}
-        {...confettiAttrs}
-      >
-        {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+        >
+        {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
         <Text as="span" class="btn__label" flush><slot /></Text>
-        {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+        {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       </a>
     </div>
   ) : (
@@ -284,11 +223,12 @@ const iconRight = iconPosition === 'right' && hasIcon;
       aria-label={ariaLabel}
       data-semantic-role={semanticRole}
       {...dataAttrs}
-      {...confettiAttrs}
     >
-      {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       <Text as="span" class="btn__label" flush><slot /></Text>
-      {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
     </a>
   )
 ) : variant === 'rainbow-glow' ? (
@@ -301,11 +241,12 @@ const iconRight = iconPosition === 'right' && hasIcon;
       aria-label={ariaLabel}
       data-semantic-role={semanticRole}
       {...dataAttrs}
-      {...confettiAttrs}
     >
-      {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       <Text as="span" class="btn__label" flush><slot /></Text>
-      {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+      {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
     </button>
   </div>
 ) : (
@@ -317,11 +258,12 @@ const iconRight = iconPosition === 'right' && hasIcon;
     aria-label={ariaLabel}
     data-semantic-role={semanticRole}
     {...dataAttrs}
-    {...confettiAttrs}
   >
-    {iconLeft && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+    {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+    {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
     <Text as="span" class="btn__label" flush><slot /></Text>
-    {iconRight && (useLottie ? <LottieIcon slug={lottieIcon!} size={iconSize} class="btn__icon" loop={lottieLoop} /> : <Icon name={iconName} size={iconSize} class="btn__icon" {...iconAnimProps} />)}
+    {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+    {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
   </button>
 )}
 
