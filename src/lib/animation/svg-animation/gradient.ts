@@ -24,7 +24,18 @@ export function initAnimatedGradient(el: HTMLElement) {
   // .gradient--animated class baseline). Same mechanism as micro.ts for
   // CSS-rendered shapes — one source of truth, no parallel data-attr.
   const dur = parseFloat(getComputedStyle(el).getPropertyValue('--_grad-anim-duration') || '') || GRADIENT_ANIMATION_SPEED.default;
-  const ease = el.dataset.iconGradEase || 'none';
+  // Named gradient eases — symmetric inOut variants since gradient animation
+  // loops (back-and-forth or full rotation cycles, not one-shot). Tokens match
+  // fillEase's vocabulary but resolve to inOut versions of the same GSAP eases.
+  // Raw GSAP strings (e.g. 'power2.inOut') pass through unchanged.
+  const GRAD_EASES: Record<string, string> = {
+    jelly:  'back.inOut(2.5)',
+    wobble: 'elastic.inOut(1, 0.3)',
+    bounce: 'bounce.inOut',
+    snap:   'back.inOut(4)',
+  };
+  const rawEase = el.dataset.iconGradEase || 'none';
+  const ease = GRAD_EASES[rawEase] || rawEase;
   const direction = el.dataset.iconGradDir || 'cw'; // cw | ccw | sway
   const doScale = el.dataset.iconGradScale === 'true';
   const gentle = getMotionMode() === 'gentle';
