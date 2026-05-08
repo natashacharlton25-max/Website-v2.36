@@ -179,6 +179,15 @@ function validateJson(data, label) {
       const wantsObjectArray = items && items.type === 'object' && items.properties;
       if (wantsObjectArray && Array.isArray(value)) {
         const allowedKeys = Object.keys(items.properties).filter(k => !k.startsWith('_'));
+        // Two array-of-object shapes:
+        //   "segment" — items have ONE distinguishing key (Link.contentLink:
+        //               {nolink} | {link}). No item property is required.
+        //   "record"  — items have multiple keys, at least one required
+        //               (Button.dropdownItems: required:label + optional
+        //               value/href/fontFamily). Treat each item as a record;
+        //               check required + enum + type per key.
+        const requiredItemKeys = allowedKeys.filter(k => items.properties[k].required === true);
+        const isRecordShape = requiredItemKeys.length > 0;
         value.forEach((seg, i) => {
           const segPath = `${jsonPath}.${key}[${i}]`;
           if (seg === null || typeof seg !== 'object' || Array.isArray(seg)) {
@@ -191,16 +200,31 @@ function validateJson(data, label) {
             issues.push({ path: segPath, msg: `${component}.${key}[${i}]: unknown key "${u}" (allowed: ${allowedKeys.join(' | ')})` });
           }
           const known = segKeys.filter(k => allowedKeys.includes(k));
-          if (known.length === 0) {
-            issues.push({ path: segPath, msg: `${component}.${key}[${i}]: must have exactly one of ${allowedKeys.join(' | ')}` });
-          } else if (known.length > 1) {
-            issues.push({ path: segPath, msg: `${component}.${key}[${i}]: must have exactly one of ${allowedKeys.join(' | ')} (found: ${known.join(', ')})` });
+
+          if (isRecordShape) {
+            // Record shape: required keys must be present.
+            for (const r of requiredItemKeys) {
+              if (!segKeys.includes(r)) {
+                issues.push({ path: segPath, msg: `${component}.${key}[${i}]: missing required key "${r}"` });
+              }
+            }
+          } else {
+            // Segment shape: exactly one key from the allowed set.
+            if (known.length === 0) {
+              issues.push({ path: segPath, msg: `${component}.${key}[${i}]: must have exactly one of ${allowedKeys.join(' | ')}` });
+            } else if (known.length > 1) {
+              issues.push({ path: segPath, msg: `${component}.${key}[${i}]: must have exactly one of ${allowedKeys.join(' | ')} (found: ${known.join(', ')})` });
+            }
           }
-          // Type-check the segment's value against its declared item property type.
+
+          // Per-key type + enum check (works for both shapes).
           for (const k of known) {
             const itemDef = items.properties[k];
             if (itemDef.type === 'string' && typeof seg[k] !== 'string') {
               issues.push({ path: segPath, msg: `${component}.${key}[${i}].${k}: expected string, got ${typeof seg[k]}` });
+            }
+            if (itemDef.enum && !itemDef.enum.includes(seg[k])) {
+              issues.push({ path: segPath, msg: `${component}.${key}[${i}].${k}: "${seg[k]}" not in enum [${itemDef.enum.join(', ')}]` });
             }
           }
         });
