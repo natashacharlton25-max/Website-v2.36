@@ -29,7 +29,7 @@
 
     "rainbow": {
       "rainbowColor": { "type": "string", "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"] },
-      "colorTier":    { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"] }
+      "colorTier":    { "type": "string", "enum": ["tint", "mid", "base", "emphasis"], "_note": "Implicit baseline is 'base' (set by .color--{name} mixin; no .color--tier-* class emitted). Omit to use." }
     },
 
     "media": {
@@ -48,15 +48,16 @@
       "gradient":                 { "type": "boolean", "default": false },
       "gradientBlend":            { "type": "string", "enum": ["hero", "sunset", "brand-emerge", "brand-fade", "preset-tint", "preset-mid", "preset-base", "preset-emphasis", "primary", "secondary", "neutral", "red", "orange", "yellow", "teal", "blue", "purple", "pink", "rainbow"] },
       "gradientDirection":        { "type": "string", "default": "diagonal", "enum": ["vertical", "vertical-reverse", "horizontal", "horizontal-reverse", "diagonal", "diagonal-reverse", "diagonal-alt", "diagonal-alt-reverse"] },
-      "gradientType":             { "type": "string", "default": "linear", "enum": ["linear", "radial"] },
-      "gradientFocus":            { "type": "string", "default": "center", "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"], "_note": "Radial origin point — only used when gradientType=radial." },
+      "gradientType":             { "type": "string", "enum": ["linear", "radial"], "_note": "Implicit baseline is 'linear' (no radial suffix added to gradient name; data-grad-focus attribute omitted). Omit to use." },
+      "gradientFocus":            { "type": "string", "enum": ["center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"], "_note": "Radial origin point — only used when gradientType=radial. Implicit baseline is 'center' (resolved via `gradientFocus || 'center'` fallback at runtime). Omit to use." },
       "gradientEmerge":           { "type": "boolean", "default": false, "_description": "Fade-in modifier — first 50% transparent, fades to solid. Combines with any gradient or solid colour." },
       "gradientFade":             { "type": "boolean", "default": false, "_description": "Fade-out modifier — last 20% fades to transparent. Combines with any gradient or solid colour." },
       "gradientAnimated":         { "type": "boolean" },
-      "gradientAnimateSpeed":     { "type": "string", "default": "default", "enum": ["slow", "default", "fast"], "_note": "Animation speed — slow (20s), default (12s), fast (6s). Matches Icon/Heading/Badge. Gated by motion settings." },
+      "gradientAnimateSpeed":     { "type": "string", "enum": ["slow", "default", "fast"], "_note": "Animation speed — slow (20s), default (12s), fast (6s). Matches Icon/Heading/Badge. Gated by motion settings. Implicit baseline is 'default' (no .gradient--speed-* class emitted). Omit to use." },
       "gradientAnimateEase":      { "type": "string", "enum": ["jelly", "wobble", "bounce", "snap"] },
-      "gradientAnimateDirection": { "type": "string", "default": "cw", "enum": ["cw", "ccw", "sway"] },
-      "gradientAnimateScale":     { "type": "boolean", "_note": "Pulse scale 0.8→1.5 alongside rotation" }
+      "gradientAnimateDirection": { "type": "string", "enum": ["cw", "ccw", "sway"], "_note": "Implicit baseline is 'cw' (no [data-grad-anim-dir] / [data-icon-grad-dir] attribute emitted). Omit to use." },
+      "gradientAnimateScale":     { "type": "boolean", "_note": "Pulse scale 0.8→1.5 alongside rotation" },
+      "gradientCycle":            { "type": "boolean", "default": false, "_description": "Colour cycle — cross-fades through the element's own tier tokens (tint→mid→base→emphasis). Matches Heading/Badge." }
     },
 
     "visual": {
@@ -95,7 +96,7 @@
       "fillOutline":      { "type": "boolean", "_note": "Also draw stroke outline using addVariant — combines with fillDrawVariant/fillDrawLaser" },
       "fillDrawVariant":  { "type": "string", "enum": ["draw", "drawcenter", "pulse"] },
       "fillDrawLaser":    { "type": "boolean" },
-      "fillMode":         { "type": "string", "default": "once", "enum": ["once", "yoyo", "static", "fade", "ghost", "ghoststatic", "twinkle", "reduced"] },
+      "fillMode":         { "type": "string", "enum": ["once", "yoyo", "static", "fade", "ghost", "ghoststatic", "twinkle", "reduced"], "_note": "Implicit baseline is 'once' (no [data-icon-fill-mode] attribute emitted). Omit to use." },
       "fillTrigger":      { "type": "string", "default": "hover", "enum": ["hover", "viewport", "scrub", "rainbow", "loop", "autoplay"] },
       "fillDuration":     { "type": "string", "default": "normal", "enum": ["fast", "normal", "slow", "slower"], "_note": "Bloom duration token. Resolved to seconds at runtime (fast=0.5s, normal=1s, slow=1.6s, slower=2.4s). Matches Icon." },
       "fillEase":         { "type": "string", "enum": ["jelly", "wobble", "bounce", "snap"] },

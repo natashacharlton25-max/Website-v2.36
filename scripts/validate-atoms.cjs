@@ -155,9 +155,32 @@ for (const atom of atoms) {
     const lines = fs.readFileSync(path.join(dir, file), 'utf8').split('\n');
 
     let isKeyframe = false;
+    let inBlockComment = false;
     lines.forEach((line, i) => {
       const ln = i + 1;
       const t = line.trim();
+      // Multi-line /* ... */ comment tracking. A line is inside a comment if
+      // we're currently in a block, OR the block opens before any code on this
+      // line. Skip the whole line — its content is documentation, not code.
+      if (inBlockComment) {
+        const closeIdx = line.indexOf('*/');
+        if (closeIdx !== -1) {
+          inBlockComment = false;
+          // If any code follows the */ on the same line, fall through to scanning.
+          // Otherwise skip.
+          if (!line.substring(closeIdx + 2).trim()) return;
+        } else {
+          return;
+        }
+      }
+      // Detect block-comment opening with no closing on this line — enter state.
+      const openIdx = line.indexOf('/*');
+      if (openIdx !== -1 && line.indexOf('*/', openIdx + 2) === -1) {
+        inBlockComment = true;
+        // If code precedes the /* on this line, scan that prefix only.
+        // Otherwise skip.
+        if (!line.substring(0, openIdx).trim()) return;
+      }
       if (t.startsWith('/*') || t.startsWith('*') || t.startsWith('//')) return;
       if (/@keyframes/.test(line)) isKeyframe = true;
       if (isKeyframe && /^\s*\}\s*$/.test(line)) { isKeyframe = false; return; }
@@ -570,6 +593,11 @@ for (const atom of atoms) {
 
           // Forward direction: every schema prop with a "default" must be
           // mirrored in the destructure with the same value.
+          // Third direction (filter check): if the .astro filters out the
+          // default value with a `prop !== 'value'` guard, both files are
+          // claiming a default that has no runtime effect — the agreement
+          // is consistent but it's a documentation lie. Only fires for
+          // primitive (string/number/boolean) defaults.
           for (const [propName, def] of schemaProps) {
             if (!def || typeof def !== 'object' || !('default' in def)) continue;
             const dflt = def.default;
@@ -589,6 +617,65 @@ for (const atom of atoms) {
                 }
               }
             }
+
+            // Filter-guard check (third direction). Only meaningful when both
+            // files agree on the default — i.e. forward direction passed.
+            // String/number primitives only; booleans use truthy guards which
+            // are legitimate (false IS the implicit baseline for booleans).
+            if (typeof dflt !== 'string' && typeof dflt !== 'number') continue;
+            const norm = (astroDefault || '').replace(/^['"]|['"]$/g, '');
+            if (astroDefault && norm !== String(dflt) && astroDefault !== String(dflt)) continue;
+            const dfltStr = String(dflt).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // `prop !== 'value'` or `prop !=='value'` (with optional space)
+            const guardRegex = new RegExp('\\b' + propName + '\\s*!==\\s*[\'"]' + dfltStr + '[\'"]');
+            if (!guardRegex.test(astro)) continue;
+            // Guard exists. Now check: is there ANY non-filter usage of propName
+            // anywhere in the .astro? Two flavours:
+            //   (a) Template-literal emit: `\`...${propName}...\`` (class/attr names)
+            //   (b) Non-template usage: comparisons like `propName === 'value'`,
+            //       function args like `array.includes(propName)`, JSX exprs, etc.
+            // Either flavour means the default has runtime effect — don't flag.
+            // Skip line ranges that are the destructure block or the Props
+            // interface (they reference the name but don't represent runtime usage).
+            const propWordRegex = new RegExp('\\b' + propName + '\\b');
+            // Strip comments from astro source so doc comments mentioning the
+            // prop aren't mistaken for runtime usage. Both line (//) and block
+            // (/* */) comments are stripped — preserves line numbers.
+            const astroNoComments = astro
+              .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+              .replace(/\/\/[^\n]*/g, '');
+            const astroLines = astroNoComments.split('\n');
+            // Destructure block: lines between `const {` and `} = Astro.props`
+            const destrStartIdx = astro.indexOf('const {');
+            const destrEndIdx = astro.indexOf('} = Astro.props');
+            let destrStartLn = -1, destrEndLn = -1;
+            if (destrStartIdx !== -1 && destrEndIdx !== -1) {
+              destrStartLn = astro.substring(0, destrStartIdx).split('\n').length - 1;
+              destrEndLn = astro.substring(0, destrEndIdx).split('\n').length - 1;
+            }
+            // Props interface block: from `interface Props {` to first `}` at start-of-line
+            let ifaceStartLn = -1, ifaceEndLn = -1;
+            const ifaceMatch = astro.match(/interface\s+Props\s*\{/);
+            if (ifaceMatch) {
+              const after = astro.substring(ifaceMatch.index + ifaceMatch[0].length);
+              const closeRel = after.search(/\n\}/m);
+              if (closeRel !== -1) {
+                ifaceStartLn = astro.substring(0, ifaceMatch.index).split('\n').length - 1;
+                ifaceEndLn = astro.substring(0, ifaceMatch.index + ifaceMatch[0].length + closeRel + 1).split('\n').length - 1;
+              }
+            }
+            let hasNonFilterUsage = false;
+            for (let i = 0; i < astroLines.length; i++) {
+              const line = astroLines[i];
+              if (!propWordRegex.test(line)) continue;
+              if (i >= destrStartLn && i <= destrEndLn) continue; // destructure block
+              if (i >= ifaceStartLn && i <= ifaceEndLn) continue; // Props interface
+              if (guardRegex.test(line)) continue; // filter line
+              hasNonFilterUsage = true;
+              break;
+            }
+            if (hasNonFilterUsage) continue;
+            issues.push({ rule: 43, ln: '--', file: schemaFile, msg: `${propName}: schema default ${schemaStr} is filtered by .astro guard \`${propName} !== ${schemaStr}\` — default has no runtime effect (drop default + add _note describing implicit baseline)` });
           }
 
           // Reverse direction: every destructure entry with `prop = value`

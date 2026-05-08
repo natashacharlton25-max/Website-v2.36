@@ -62,12 +62,12 @@ const {
   brandColor = 'primary',
   rainbowColor,
   textStyle: textProps,
-  spacing = 'normal',
+  spacing,
   flush = false,
   media,
   mediaBg = false,
-  mediaBgSize = 'normal',
-  mediaSize = 'auto',
+  mediaBgSize,
+  mediaSize,
   class: className,
   contentList: items,
 } = Astro.props;
@@ -87,8 +87,11 @@ const hasMedia = !!media;
 // mediaBg=true means the Shape is wallpaper for a child atom — auto-inject
 // semanticRole='background' so authors can't accidentally mark it decorative
 // or claim a label. Runtime guarantee, not authoring discipline.
+// mediaBgSize forwards padding control to the Shape (Shape applies its own
+// 'normal' default if undefined). Author can override per-instance by
+// setting mediaBgSize directly on the Shape's media object.
 const rawMediaProps = (mediaBg && mediaComponent === 'Shape')
-  ? { ...rawMediaPropsRaw, semanticRole: 'background' }
+  ? { ...rawMediaPropsRaw, semanticRole: 'background', mediaBgSize: rawMediaPropsRaw.mediaBgSize ?? mediaBgSize }
   : rawMediaPropsRaw;
 
 // Marker sizing strategy:
@@ -99,7 +102,7 @@ const rawMediaProps = (mediaBg && mediaComponent === 'Shape')
 //   - author-set media.size: always wins (explicit per-instance override).
 const mediaPropsWithSize = rawMediaProps.size != null
   ? rawMediaProps
-  : mediaSize === 'auto'
+  : (!mediaSize || mediaSize === 'auto')
     ? rawMediaProps
     : { ...rawMediaProps, size: mediaSize };
 
@@ -108,10 +111,9 @@ const classes = [
   `list--${variant}`,
   hasMedia && 'list--has-media',
   hasMedia && mediaBg && 'list--has-media-bg',
-  hasMedia && mediaBg && `list--media-bg-${mediaBgSize}`,
   variant === 'dot' && `list--dot-${dotSize}`,
   `color--${colour}`,
-  spacing !== 'normal' && `list--spacing-${spacing}`,
+  spacing && spacing !== 'normal' && `list--spacing-${spacing}`,
   flush && 'list--flush',
   className,
 ];

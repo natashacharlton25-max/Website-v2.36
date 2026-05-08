@@ -104,6 +104,9 @@ interface Props {
   // mediaBg=true: media MUST be a Shape wrapping a child atom (Icon | LottieIcon | Image).
   media?: Record<string, any>;
   mediaBg?: boolean;
+  /** Padding inside the Shape wrapper around the child icon. Forwarded to
+   *  the nested Shape atom. Implicit baseline 'normal' applied by Shape itself. */
+  mediaBgSize?: 'compact' | 'normal' | 'spacious';
   mediaPosition?: MediaPosition;
   mediaSize?: MediaSize;
 
@@ -134,32 +137,33 @@ const {
   contentHeadingSubtitle,
   subtitleSize = 'base',
   divider,
-  dividerStyle = 'solid',
+  dividerStyle,
   dividerEnds = 'rounded',
   variant = 'default',
   highlightColor,
-  highlightTier,
-  highlightHeight,
-  highlightOpacity,
-  highlightShadow = 'auto',
+  highlightTier = 'tint',
+  highlightHeight = 'md',
+  highlightOpacity = 'soft',
+  highlightShadow,
   highlightCycle = false,
   underlineColor,
   underlineTier,
-  underlineStyle = 'solid',
+  underlineStyle,
   underlineGap,
-  underlineThickness,
+  underlineThickness = 'md',
   dividerColor,
   dividerTier,
   gradient = false,
   gradientBlend,
-  gradientDirection,
+  gradientDirection = 'diagonal',
   gradientEmerge = false,
   gradientFade = false,
   gradientFlip = false,
   media,
   mediaBg = false,
+  mediaBgSize,
   mediaPosition = 'left',
-  mediaSize = 'auto',
+  mediaSize,
   gradientAnimated = false,
   gradientAnimateDirection,
   gradientAnimateSpeed,
@@ -239,14 +243,18 @@ const { component: _mc, ...rawMediaProps } = media || {};
 // var(--text-h{N}), which the .heading-wrap__media sibling inherits, and
 // the em-based --media-* tokens on Icon/Shape children resolve against
 // that. Token-driven: if --text-h1 changes in tokens, media follows.
-// mediaSize prop kept for explicit overrides via author.
+// mediaSize prop forwards an explicit size override to the child atom.
+// Implicit baseline 'auto' or undefined: forward nothing, child uses CSS em.
 //
 // mediaBg=true means the Shape is wallpaper for a child atom — auto-inject
 // semanticRole='background' so authors can't accidentally mark it decorative
 // or claim a label. Runtime guarantee, not authoring discipline.
-const mediaProps = (mediaBg && mediaComponent === 'Shape')
-  ? { ...rawMediaProps, semanticRole: 'background' }
+const baseMediaProps = (mediaBg && mediaComponent === 'Shape')
+  ? { ...rawMediaProps, semanticRole: 'background', mediaBgSize: rawMediaProps.mediaBgSize ?? mediaBgSize }
   : rawMediaProps;
+const mediaProps = (mediaSize && mediaSize !== 'auto' && baseMediaProps.size == null)
+  ? { ...baseMediaProps, size: mediaSize }
+  : baseMediaProps;
 
 // Animated gradient / colour cycle — random delay + optional speed
 // Speed is class-based (.gradient--speed-{slow|fast}); phase desync is GSAP's
@@ -294,7 +302,7 @@ const headingClassList = [
     `heading-wrap--variant-${variant}`,
     divider && `heading-wrap--divider-${divider}`,
     divider && `heading-wrap--divider-ends-${dividerEnds}`,
-    divider && dividerStyle !== 'solid' && `heading-wrap--divider-style-${dividerStyle}`,
+    divider && dividerStyle && dividerStyle !== 'solid' && `heading-wrap--divider-style-${dividerStyle}`,
     (gradient || gradientBlend) && 'gradient',
     (gradient || gradientBlend) && variant !== 'default' && `gradient--${variant}`,
     resolvedGradientName && `gradient--blend-${resolvedGradientName}`,
@@ -320,7 +328,7 @@ const headingClassList = [
 
     {divider && (divider === 'left' || divider === 'both') && (
       <div
-        class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, gradientAnimated && 'divider--animated']}
+        class:list={['divider', 'heading-wrap__divider', dividerStyle && dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, gradientAnimated && 'divider--animated']}
         data-grad-dir={dividerStyle === 'gradient' ? gradientDirection : undefined}
         aria-hidden="true"></div>
     )}
@@ -342,7 +350,7 @@ const headingClassList = [
       </Tag>
       {variant === 'underline' && (
         <div
-          class:list={['underline', underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`, underlineThickness && `underline--thickness-${underlineThickness}`, resolvedUnderlineColor && `color--${resolvedUnderlineColor}`, underlineTier && underlineTier !== 'base' && `color--tier-${underlineTier}`, underlineStyle === 'gradient' && 'gradient', underlineStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, gradientAnimated && 'underline--animated']}
+          class:list={['underline', underlineStyle && underlineStyle !== 'solid' && `underline--${underlineStyle}`, underlineGap && underlineGap !== 'default' && `underline--gap-${underlineGap}`, underlineThickness && `underline--thickness-${underlineThickness}`, resolvedUnderlineColor && `color--${resolvedUnderlineColor}`, underlineTier && underlineTier !== 'base' && `color--tier-${underlineTier}`, underlineStyle === 'gradient' && 'gradient', underlineStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, gradientAnimated && 'underline--animated']}
           data-grad-dir={underlineStyle === 'gradient' ? gradientDirection : undefined}
           aria-hidden="true"></div>
       )}
@@ -352,7 +360,7 @@ const headingClassList = [
 
     {divider && (divider === 'right' || divider === 'both') && (
       <div
-        class:list={['divider', 'heading-wrap__divider', dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, gradientAnimated && 'divider--animated']}
+        class:list={['divider', 'heading-wrap__divider', dividerStyle && dividerStyle !== 'solid' && `divider--${dividerStyle}`, resolvedDividerColor && `color--${resolvedDividerColor}`, dividerTier && dividerTier !== 'base' && `color--tier-${dividerTier}`, dividerStyle === 'gradient' && 'gradient', dividerStyle === 'gradient' && resolvedGradientName && `gradient--blend-${resolvedGradientName}`, gradientAnimated && 'divider--animated']}
         data-grad-dir={dividerStyle === 'gradient' ? gradientDirection : undefined}
         aria-hidden="true"></div>
     )}

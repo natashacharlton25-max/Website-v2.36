@@ -490,28 +490,45 @@
 
 /* Animation: textSlide — text colour sweeps from left + underline grows.
    background-position is not in the global transition rule, so declared here.
-   Kills the variant's static underline (the ::before-driven grow IS the
-   affordance, plus the text-clip gradient means a static line drawn through
-   transparent glyphs would look broken). */
-.link--animate-text-slide .text {
+   Kills the variant's static underline on BOTH the <a> and the inner .text
+   so the text-clip gradient owns the colour story uncontested. Without
+   these, a static text-decoration drawn at --_link-color renders on top of
+   the transparent gradient-clipped text and visually flattens the sweep. */
+.link.link--animate-text-slide,
+.link.link--animate-text-slide .text {
   text-decoration: none;
 }
 
 .link--animate-text-slide {
   position: relative;
+}
+
+/* Gradient stops sweep between REST (--_link-text, the colour shown when
+   not hovered) and HOVER (--_link-hover, the brand contrast colour the
+   token system pairs with --_color per theme). Using --_link-color and
+   --_link-text both resolves to the same value (both are var(--_color))
+   so the sweep would be invisible — --_link-hover is the only token
+   guaranteed to differ from rest.
+
+   Applied to BOTH .text and .text__content (Text atom's nested span
+   structure) — whichever element successfully clips the gradient against
+   its glyphs shows the effect. */
+.link--animate-text-slide .text,
+.link--animate-text-slide .text__content {
   background-image: linear-gradient(
     to right,
-    var(--_link-color),
-    var(--_link-color) 50%,
+    var(--_link-hover),
+    var(--_link-hover) 50%,
     var(--_link-text) 50%
   );
   background-size: 200% 100%;
   background-position: -100%;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
   transition: background-position var(--hover-duration-slow) var(--ease-default);
 }
+
 .link--animate-text-slide::before {
   content: '';
   background: var(--_link-color);
@@ -524,7 +541,8 @@
   /* width transition not in global rule for ::before; declared locally */
   transition: width var(--hover-duration-slow) var(--ease-default);
 }
-.link--animate-text-slide:hover {
+.link--animate-text-slide:hover .text,
+.link--animate-text-slide:hover .text__content {
   background-position: 0;
 }
 .link--animate-text-slide:hover::before {
@@ -553,8 +571,8 @@
   bottom: -0.05em;
   height: 0.45em;
   background-color: var(--_link-color);
-  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 4'><path fill='none' stroke='black' stroke-width='2' d='M0,3.5 c 5,0,5,-3,10,-3 s 5,3,10,3 c 5,0,5,-3,10,-3 s 5,3,10,3'/></svg>");
-          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 4'><path fill='none' stroke='black' stroke-width='2' d='M0,3.5 c 5,0,5,-3,10,-3 s 5,3,10,3 c 5,0,5,-3,10,-3 s 5,3,10,3'/></svg>");
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -1 20 6'><path fill='none' stroke='black' stroke-width='2' stroke-linecap='round' d='M-1,3.5 L0,3.5 c 5,0,5,-3,10,-3 s 5,3,10,3 L21,3.5'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -1 20 6'><path fill='none' stroke='black' stroke-width='2' stroke-linecap='round' d='M-1,3.5 L0,3.5 c 5,0,5,-3,10,-3 s 5,3,10,3 L21,3.5'/></svg>");
   -webkit-mask-repeat: repeat-x;
           mask-repeat: repeat-x;
   -webkit-mask-position: 0 bottom;
@@ -566,14 +584,11 @@
 
 .link--animate-squiggle:hover::after {
   background-color: var(--_link-hover);
-  /* Continuous-loop token family — motion-gate.css slows to 3s in gentle
-     mode and zeros to 0s in none mode, so the squiggle freezes/disappears
-     when motion is suppressed without needing a per-rule override. */
+  /* Keyframe lives in src/styles/global/keyframes.css. The continuous-loop
+     duration token: motion-gate.css slows to 3s in gentle mode and zeros
+     to 0s in none mode, so the squiggle freezes/disappears when motion is
+     suppressed. Hover-gate.css adds the explicit kill under [data-hover="none"]. */
   animation: link-squiggle-slide var(--duration-continuous) linear infinite;
-}
-
-@keyframes link-squiggle-slide {
-  to { -webkit-mask-position: -1.25em bottom; mask-position: -1.25em bottom; }
 }
 
 /* ================================================================

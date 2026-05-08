@@ -1,0 +1,32 @@
+/**
+ * Keyframes — shared CSS @keyframes
+ *
+ * Home for reusable CSS keyframes that don't fit the GSAP micro.ts
+ * model (e.g. pseudo-element mask animations, hover-driven loops on
+ * ::before/::after that GSAP can't tween directly).
+ *
+ * Gating contract:
+ *   - Duration MUST come from a var(--duration-*) token so motion-gate.css
+ *     can zero it under data-motion="none" / "gentle".
+ *   - Hover-driven loops MUST also have an explicit kill rule in
+ *     hover-gate.css under [data-hover="none"] so the animation freezes
+ *     when decorative hover is suppressed.
+ *   - Render-mode kills (data-render="textonly") live in motion-gate.css.
+ *
+ * GSAP-driven animations belong in src/lib/animation/svg-animation/micro.ts
+ * — they go through registerTrigger which the reduced-mode queue respects
+ * automatically. Use this file ONLY when GSAP can't reach the target
+ * (pseudo-elements, mask-position, etc.).
+ */
+
+
+/* ==========================================================
+   link-squiggle-slide — Link variant="underline" + animate="squiggle"
+   Used by .link--animate-squiggle::after to slide the masked
+   wavy line one tile to the left in a continuous loop on hover.
+   Duration: var(--duration-continuous) — gated by motion-gate.
+   Hover kill: hover-gate.css under [data-hover="none"].
+   ========================================================== */
+@keyframes link-squiggle-slide {
+  to { -webkit-mask-position: -1.25em bottom; mask-position: -1.25em bottom; }
+}

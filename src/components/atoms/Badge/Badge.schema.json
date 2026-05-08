@@ -15,7 +15,7 @@
 
     "rainbow": {
       "rainbowColor": { "type": "string", "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"] },
-      "colorTier":    { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"], "_note": "Tier values: tint=faintest, mid=softer, base=full saturation (default), emphasis=loudest. Applied uniformly across all variants." }
+      "colorTier":    { "type": "string", "enum": ["tint", "mid", "base", "emphasis"], "_note": "Tier values: tint=faintest, mid=softer, base=full saturation, emphasis=loudest. Applied uniformly across all variants. Implicit baseline is 'base' (set by .color--{name} mixin; no .color--tier-* class emitted). Omit to use." }
     },
 
     "gradient": {
@@ -29,7 +29,7 @@
 
     "typography": {
       "fontFamily": { "type": "string", "enum": ["heading", "body", "body-alt", "handwriting", "mono"], "_description": "Default: body via Text atom. When 'heading' is set, Text uses heading font. When level is set, Heading atom handles it." },
-      "fontWeight": { "type": "string", "default": "bold", "enum": ["normal", "medium", "semibold", "bold", "extrabold"] },
+      "fontWeight": { "type": "string", "enum": ["normal", "medium", "semibold", "bold", "extrabold"], "_note": "Implicit baseline is 'bold' (no weight prop forwarded to nested Text/Heading; Badge CSS sets bold). Omit to use." },
       "uppercase":  { "type": "boolean", "default": true }
     },
 
@@ -48,8 +48,8 @@
     "visual": {
       "variant":      { "type": "string", "default": "fill", "enum": ["fill", "outline", "glass", "liquid-glass"] },
       "shape":        { "type": "string", "default": "soft", "enum": ["sharp", "subtle", "soft", "rounded"] },
-      "size":         { "type": "string", "default": "md", "enum": ["sm", "md", "lg", "xl"] },
-      "shadow":       { "type": "string", "default": "none", "enum": ["none", "out", "drop", "in", "elevated", "glow", "glow-intense", "glow-inner"] },
+      "size":         { "type": "string", "enum": ["sm", "md", "lg", "xl"], "_note": "Implicit baseline is 'md' (no .badge--* size class emitted; CSS default sizing applies). Omit to use." },
+      "shadow":       { "type": "string", "enum": ["none", "out", "drop", "in", "elevated", "glow", "glow-intense", "glow-inner"], "_note": "Implicit baseline is 'none' (no .badge--shadow-* class emitted). Omit to use." },
       "borderWeight": { "type": "string", "enum": ["thin", "thick"], "_note": "Optional — when unset, badge renders without the explicit border-width override." },
       "semanticRole": { "type": "string", "default": "status", "enum": ["status", "tag", "label", "none"] },
       "level":        { "type": "number", "enum": [1, 2, 3, 4, 5, 6] }
@@ -57,8 +57,8 @@
 
     "animation": {
       "gradientAnimated":          { "type": "boolean", "default": false },
-      "gradientAnimateDirection":  { "type": "string", "default": "cw", "enum": ["cw", "ccw", "sway"], "_description": "Animation direction — clockwise, counter-clockwise, or sway." },
-      "gradientAnimateSpeed":      { "type": "string", "default": "default", "enum": ["slow", "default", "fast"], "_description": "Animation speed — slow (20s), default (12s), fast (6s). Gated by motion settings." },
+      "gradientAnimateDirection":  { "type": "string", "enum": ["cw", "ccw", "sway"], "_description": "Animation direction — clockwise, counter-clockwise, or sway.", "_note": "Implicit baseline is 'cw' (no [data-grad-anim-dir] attribute emitted). Omit to use." },
+      "gradientAnimateSpeed":      { "type": "string", "enum": ["slow", "default", "fast"], "_description": "Animation speed — slow (20s), default (12s), fast (6s). Gated by motion settings.", "_note": "Implicit baseline is 'default' (no .gradient--speed-* class emitted). Omit to use." },
       "gradientCycle":             { "type": "boolean", "default": false, "_description": "Colour cycle — cross-fades through the element's own tier tokens (tint→mid→base→emphasis)." }
     }
   },

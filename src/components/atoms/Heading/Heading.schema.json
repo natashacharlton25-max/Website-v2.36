@@ -22,7 +22,7 @@
 
     "rainbow": {
       "rainbowColor": { "type": "string", "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"] },
-      "colorTier":    { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"] }
+      "colorTier":    { "type": "string", "enum": ["tint", "mid", "base", "emphasis"], "_note": "Implicit baseline is 'base' (set by .color--{name} mixin). Omit to use." }
     },
 
     "gradient": {
@@ -42,7 +42,7 @@
       "tracking":   { "type": "string", "enum": ["normal", "wide", "wider"] },
       "uppercase":  { "type": "boolean", "default": false },
       "flush":      { "type": "boolean", "default": false },
-      "textShadow": { "type": "string", "default": "none", "enum": ["none", "out", "drop", "in", "elevated", "glow", "glow-intense", "glow-inner"] }
+      "textShadow": { "type": "string", "enum": ["none", "out", "drop", "in", "elevated", "glow", "glow-intense", "glow-inner"], "_note": "Implicit baseline is 'none' (no .text-shadow--* class emitted). Omit to use." }
     },
 
     "media": {
@@ -56,9 +56,9 @@
         }
       },
       "mediaBg":       { "type": "boolean", "default": false, "_description": "true = media is a Shape wrapping a child atom (used as background container)." },
-      "mediaBgSize":   { "type": "string", "default": "normal", "enum": ["compact", "normal", "spacious"], "_description": "Padding around child in Shape container. Only used when mediaBg=true." },
+      "mediaBgSize":   { "type": "string", "enum": ["compact", "normal", "spacious"], "_description": "Padding inside the Shape wrapper around the child icon. Only used when mediaBg=true; value is forwarded to the nested Shape atom.", "_note": "Implicit baseline is 'normal' (applied by Shape's own default). Omit to use." },
       "mediaPosition": { "type": "string", "default": "left", "enum": ["left", "right"] },
-      "mediaSize":     { "type": "string", "default": "auto", "enum": ["auto", "xs", "sm", "md", "lg", "xl", "base", "2xl", "3xl"] }
+      "mediaSize":     { "type": "string", "enum": ["auto", "xs", "sm", "md", "lg", "xl", "base", "2xl", "3xl"], "_note": "Implicit baseline is 'auto' (no size prop forwarded to child atom; child uses CSS em-based sizing inherited from .heading-wrap--{level}). Omit to use." }
     },
 
     "visual": {
@@ -67,17 +67,17 @@
       "highlightTier":    { "type": "string", "default": "tint", "enum": ["tint", "mid", "base", "emphasis"] },
       "highlightHeight":  { "type": "string", "default": "md", "enum": ["sm", "md", "lg", "full"] },
       "highlightOpacity": { "type": "string", "default": "soft", "enum": ["faint", "soft", "bold", "solid"] },
-      "highlightShadow":  { "type": "string", "default": "auto", "enum": ["auto", "on", "off"], "_description": "Contrast shadow on solid highlights. 'auto' = applies only to solid (default), 'on' = force on, 'off' = force off." },
+      "highlightShadow":  { "type": "string", "enum": ["auto", "on", "off"], "_description": "Contrast shadow on solid highlights. 'auto' = applies only to solid (default), 'on' = force on, 'off' = force off.", "_note": "Implicit baseline is 'auto' (no .text-highlight--shadow or --no-shadow class emitted; CSS handles auto-shadow on solid variants). Omit to use." },
       "highlightCycle":   { "type": "boolean", "default": false, "_description": "Animate highlight colour through tier tokens (tint → mid → base → back). Gated by motion settings." },
       "underlineColor":   { "type": "string", "enum": ["primary", "secondary", "neutral", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"] },
-      "underlineTier":    { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"] },
-      "underlineStyle":     { "type": "string", "default": "solid", "enum": ["solid", "gradient", "dashed", "dotted"] },
-      "underlineGap":       { "type": "string", "default": "default", "enum": ["close", "default", "loose"] },
+      "underlineTier":    { "type": "string", "enum": ["tint", "mid", "base", "emphasis"], "_note": "Implicit baseline is 'base' (set by .color--{name} mixin). Omit to use." },
+      "underlineStyle":     { "type": "string", "enum": ["solid", "gradient", "dashed", "dotted"], "_note": "Implicit baseline is 'solid' (no .underline--* style class emitted). Omit to use." },
+      "underlineGap":       { "type": "string", "enum": ["close", "default", "loose"], "_note": "Implicit baseline is 'default' (no .underline--gap-* class emitted). Omit to use." },
       "underlineThickness": { "type": "string", "default": "md", "enum": ["sm", "md", "lg"] },
       "divider":          { "type": "string", "enum": ["left", "right", "both", "none"] },
       "dividerColor":     { "type": "string", "enum": ["primary", "secondary", "neutral", "rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"] },
-      "dividerTier":      { "type": "string", "default": "base", "enum": ["tint", "mid", "base", "emphasis"] },
-      "dividerStyle":     { "type": "string", "default": "solid", "enum": ["solid", "gradient", "dashed", "dotted"] },
+      "dividerTier":      { "type": "string", "enum": ["tint", "mid", "base", "emphasis"], "_note": "Implicit baseline is 'base' (set by .color--{name} mixin). Omit to use." },
+      "dividerStyle":     { "type": "string", "enum": ["solid", "gradient", "dashed", "dotted"], "_note": "Implicit baseline is 'solid' (no .divider--* class emitted). Omit to use." },
       "dividerEnds":      { "type": "string", "default": "rounded", "enum": ["rounded", "square"] },
       "spacing":          { "type": "string", "default": "normal", "enum": ["tight", "normal", "loose"] },
       "subtitleSize":     { "type": "string", "default": "base", "enum": ["xs", "sm", "base", "lg", "xl"] }
@@ -85,8 +85,8 @@
 
     "animation": {
       "gradientAnimated":          { "type": "boolean", "default": false },
-      "gradientAnimateDirection":  { "type": "string", "default": "cw", "enum": ["cw", "ccw", "sway"], "_description": "Animation direction — clockwise, counter-clockwise, or sway." },
-      "gradientAnimateSpeed":      { "type": "string", "default": "default", "enum": ["slow", "default", "fast"], "_description": "Animation speed — slow (20s), default (12s), fast (6s). Gated by motion settings." },
+      "gradientAnimateDirection":  { "type": "string", "enum": ["cw", "ccw", "sway"], "_description": "Animation direction — clockwise, counter-clockwise, or sway.", "_note": "Implicit baseline is 'cw' (no [data-grad-anim-dir] attribute emitted). Omit to use." },
+      "gradientAnimateSpeed":      { "type": "string", "enum": ["slow", "default", "fast"], "_description": "Animation speed — slow (20s), default (12s), fast (6s). Gated by motion settings.", "_note": "Implicit baseline is 'default' (no .gradient--speed-* class emitted). Omit to use." },
       "gradientCycle":             { "type": "boolean", "default": false, "_description": "Colour cycle — cross-fades through the element's own tier tokens (tint→mid→base→emphasis)." }
     }
   }

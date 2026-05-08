@@ -84,6 +84,8 @@ interface Props {
   animationInterval?: AnimationInterval;
   draw?: boolean | DrawVariant;
   drawMode?: DrawMode;
+  /** Draws then disappears. Not valid with drawGhost. Mirrors Icon.drawOnce. */
+  drawOnce?: boolean;
   drawLaser?: boolean;
   drawGhost?: boolean;
   drawColor?: DrawColour | string;
@@ -115,10 +117,10 @@ const {
   shape = 'circle', mode = 'shape', renderAs = 'auto', slug, semanticRole = 'decorative', labelShape,
   brandColor, rainbowColor, colorTier,
   size = 'base', mediaBgSize = 'normal', variant = 'fill', borderWeight, shadow, glow,
-  gradient, gradientBlend, gradientDirection, gradientType, gradientFocus, gradientEmerge, gradientFade, gradientCycle, gradientAnimated, gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection = 'cw', gradientAnimateScale,
+  gradient = false, gradientBlend, gradientDirection = 'diagonal', gradientType, gradientFocus, gradientEmerge = false, gradientFade = false, gradientCycle = false, gradientAnimated, gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection, gradientAnimateScale,
   media, animation, animationTrigger = 'hover', animationRepeat = 'threeloop', animationInterval = 'base',
-  draw, drawMode = 'static', drawLaser, drawGhost, drawColor: rawDrawColor, drawStagger, drawStaggerFrom, drawWormSize, drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom,
-  fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode = 'once', fillTrigger = 'hover', fillDuration, fillEase, fillColor, fillStagger, fillStaggerFrom, fillTiming,
+  draw, drawMode: rawDrawMode = 'static', drawOnce, drawLaser, drawGhost, drawColor: rawDrawColor, drawStagger = 'normal', drawStaggerFrom = 'start', drawWormSize = 'sm', drawOnScroll, drawScrub, morphTo, morphTrigger = 'hover', morphStagger, morphStaggerFrom = 'start',
+  fillAnimation, fillOutline, fillDrawVariant, fillDrawLaser, fillMode, fillTrigger = 'hover', fillDuration = 'normal', fillEase, fillColor, fillStagger = 'normal', fillStaggerFrom = 'start', fillTiming = 'overlap',
   class: className,
 } = Astro.props;
 
@@ -126,6 +128,10 @@ const {
 // strokes need full opacity — tiers are opacity-based and would render the
 // stroke partially transparent.
 const drawColor = normalizeDrawColour(rawDrawColor);
+
+// drawOnce overrides drawMode to 'once'. Combined with drawGhost (persistent
+// strokes) it cancels — drawGhost wins. Mirrors Icon's same-named override.
+const drawMode = (drawOnce && !drawGhost) ? 'once' : rawDrawMode;
 
 const resolvedColor = rainbowColor || brandColor || null;
 const hasSlot = Astro.slots.has('default');
@@ -245,7 +251,7 @@ if (draw) {
 // Fill animation
 if (fillAnimation) {
   dataAttrs['data-icon-fill'] = 'true';
-  if (fillMode !== 'once') dataAttrs['data-icon-fill-mode'] = fillMode;
+  if (fillMode && fillMode !== 'once') dataAttrs['data-icon-fill-mode'] = fillMode;
   if (fillTrigger !== 'hover') dataAttrs['data-icon-fill-trigger'] = fillTrigger;
   if (fillDuration) dataAttrs['data-icon-fill-duration'] = fillDuration;
   if (fillEase) dataAttrs['data-icon-fill-ease'] = fillEase;

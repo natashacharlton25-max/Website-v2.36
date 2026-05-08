@@ -74,9 +74,9 @@ const {
   contentBadge: label,
   brandColor = 'primary',
   rainbowColor,
-  colorTier = 'base',
+  colorTier,
   variant = 'fill',
-  shadow = 'none',
+  shadow,
   gradient = false,
   gradientBlend,
   gradientDirection = 'diagonal',
@@ -84,15 +84,15 @@ const {
   gradientFade = false,
   gradientFlip = false,
   gradientAnimated = false,
-  gradientAnimateDirection = 'cw',
-  gradientAnimateSpeed = 'default',
+  gradientAnimateDirection,
+  gradientAnimateSpeed,
   gradientCycle = false,
-  size = 'md',
+  size,
   shape = 'soft',
   borderWeight,
   media,
   fontFamily,
-  fontWeight = 'bold',
+  fontWeight,
   uppercase = true,
   semanticRole = 'status',
   level,
@@ -106,19 +106,8 @@ const color = rainbowColor || brandColor;
 //   2. baseColour + colorTier (e.g. rainbow-1 + mid → rainbow-1-preset-mid)
 //   3. baseColour (rainbow-1, primary etc.)
 // Badge does not support radial gradients (linear only — radial is for Card/Section).
-// Flip direction for gradient text when gradientFlip is set
-const reverseDir: Record<string, GradientDirection> = {
-  'vertical': 'vertical-reverse', 'vertical-reverse': 'vertical',
-  'horizontal': 'horizontal-reverse', 'horizontal-reverse': 'horizontal',
-  'diagonal': 'diagonal-reverse', 'diagonal-reverse': 'diagonal',
-  'diagonal-alt': 'diagonal-alt-reverse', 'diagonal-alt-reverse': 'diagonal-alt',
-};
-const textGradientDirection: GradientDirection | undefined = gradientFlip
-  ? (gradientDirection ? reverseDir[gradientDirection] : 'diagonal-reverse')
-  : gradientDirection;
-
-// Flip inline style is handled by the nested Heading atom — Badge just forwards
-// gradientEmerge/gradientFade/gradientFlip props and Heading owns the mirror logic.
+// Flip inline style + reverseDir mapping handled by the nested Heading atom —
+// Badge just forwards gradientEmerge/gradientFade/gradientFlip props.
 
 const tierSuffix = (gradient && colorTier && colorTier !== 'base') ? `-preset-${colorTier}` : '';
 const emergePrefix = gradientEmerge ? 'emerge-' : gradientFade ? 'fade-' : '';
@@ -176,7 +165,7 @@ const headingLabelProps = {
     `color--${color}`,
     colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,
     `badge--${variant}`,
-    shadow !== 'none' && `badge--shadow-${shadow}`,
+    shadow && shadow !== 'none' && `badge--shadow-${shadow}`,
     gradientName && 'gradient',
     gradientName && `gradient--${variant}`,
     /* Always emit blend class from gradientName so generated CSS rules match
@@ -187,7 +176,7 @@ const headingLabelProps = {
     gradientCycle && 'gradient--cycle',
     gradientAnimated && 'gradient--animated',
     gradientAnimated && gradientAnimateSpeed && gradientAnimateSpeed !== 'default' && `gradient--speed-${gradientAnimateSpeed}`,
-    size !== 'md' && `badge--${size}`,
+    size && size !== 'md' && `badge--${size}`,
     `badge--${shape}`,
     borderWeight && `badge--border-${borderWeight}`,
     level && 'badge--heading',
@@ -195,8 +184,8 @@ const headingLabelProps = {
     !uppercase && 'badge--lowercase',
   ]}
 >
-  {media?.component === 'Icon' && <Icon {...media} class="badge__icon" aria-hidden="true" />}
-  {media?.component === 'LottieIcon' && <LottieIcon {...media} class="badge__icon" aria-hidden="true" />}
+  {media?.component === 'Icon' && <Icon {...(media as any)} class="badge__icon" aria-hidden="true" />}
+  {media?.component === 'LottieIcon' && <LottieIcon {...(media as any)} class="badge__icon" aria-hidden="true" />}
   {level ? (
     <Heading {...headingLabelProps} level={level} family={fontFamily} />
   ) : ((gradient || gradientBlend) && (variant !== 'fill' || gradientFlip)) ? (
