@@ -12,7 +12,6 @@
  * @param alignment - 'left', 'center' — wraps button in alignment container
  * @param icon      - Phosphor icon name e.g. 'star-fill'
  * @param iconPosition - 'left' (default) or 'right'
- * @param iconCollection - Icon folder (optional — auto-searches if omitted)
  * @param href      - Makes it an <a> tag
  * @param target    - Link target
  * @param download  - Download attribute
@@ -29,7 +28,7 @@
 import { Icon } from '../Icon';
 import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
-import type { BrandColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
+import type { BrandColour, RainbowColour, ColourTier, GradientBlend, GradientDirection, GradientAnimateDirection } from '../../../lib/shared-enums';
 
 export interface DropdownItem {
   label: string;
@@ -58,7 +57,6 @@ export interface Props {
   download?: string | boolean;
   icon?: string;
   iconPosition?: 'left' | 'right';
-  iconCollection?: string;
   iconMorphTo?: string;
   iconMorphColor?: string;
   iconDraw?: boolean | 'draw' | 'drawcenter' | 'chachaslide' | 'flashgordon' | 'rainbowchase' | 'pulse';
@@ -70,13 +68,21 @@ export interface Props {
   confettiTrigger?: 'click' | 'hover';
   confettiCount?: number;
   confettiSpread?: number;
-  /** Text revealed after split effect opens — button sizes to longest */
-  splitText?: string;
+  /** Secondary label revealed by the split effect — button sizes to longest. */
+  contentButtonSplit?: string;
   /** Icon animation — forwarded to Icon atom */
   iconSpin?: boolean;
   iconBounce?: boolean;
-  /** Rainbow glow custom colours — 2-7 token stops. Defaults to --rainbow-1 thru 7 */
-  glowColors?: string[];
+  /** Gradient fill / glow — matches Shape/Icon/Heading/Badge gradient spec. */
+  gradient?: boolean;
+  gradientBlend?: GradientBlend;
+  gradientDirection?: GradientDirection;
+  gradientEmerge?: boolean;
+  gradientFade?: boolean;
+  gradientAnimated?: boolean;
+  gradientAnimateDirection?: GradientAnimateDirection;
+  gradientAnimateSpeed?: 'slow' | 'default' | 'fast';
+  gradientCycle?: boolean;
   dropdownItems?: DropdownItem[];
   class?: string;
   style?: string;
@@ -102,7 +108,6 @@ const {
   download,
   icon,
   iconPosition = 'left',
-  iconCollection,
   iconMorphTo,
   iconMorphColor,
   iconDraw,
@@ -114,10 +119,18 @@ const {
   confettiTrigger = 'click',
   confettiCount = 30,
   confettiSpread = 150,
-  splitText,
+  contentButtonSplit,
   iconSpin = false,
   iconBounce = false,
-  glowColors,
+  gradient = false,
+  gradientBlend,
+  gradientDirection = 'diagonal',
+  gradientEmerge = false,
+  gradientFade = false,
+  gradientAnimated = false,
+  gradientAnimateDirection,
+  gradientAnimateSpeed,
+  gradientCycle = false,
   dropdownItems = [],
   class: className = '',
   ...rest
@@ -139,12 +152,9 @@ const isDropdown = shape === 'dropdown';
 const hasIcon = !!icon || !!lottieIcon;
 const isIconOnly = hasIcon && (shape === 'circle' || shape?.startsWith('i-'));
 
-// Rainbow glow: build custom gradient from colors array
-let glowGradientStyle = '';
-if (glowColors && glowColors.length >= 2) {
-  const stops = [...glowColors, glowColors[0]].join(', ');
-  glowGradientStyle = `--_glow-gradient: linear-gradient(90deg, ${stops})`;
-}
+// Glow gradient is now sourced from the family gradient spec (Phase 2 wires
+// the gradientBlend / gradientDirection props into the glow CSS). Custom
+// glowColors array removed in Phase 1.5.
 
 // Icon sizes per button size
 // Semantic role for AT context
@@ -154,8 +164,8 @@ const semanticRole = type === 'submit' ? 'form-submit' : isIconOnly && ariaLabel
 // Size variants handled by .btn--sm/.btn--lg font-size differences.
 const iconSize = undefined;
 
-// Build icon name — only prefix with collection if explicitly provided
-const iconName = icon ? (iconCollection ? `${iconCollection}/${icon}` : icon) : '';
+// Direct slug — iconCollection prefix dropped (Asset Library uses flat slugs).
+const iconName = icon || '';
 
 // Icon props — all forwarded to Icon atom. Icon owns its own gates.
 const iconAnimProps = {
@@ -245,7 +255,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
   </div>
 ) : isLink ? (
   variant === 'rainbow-glow' ? (
-    <div class="btn-rainbow-glow-wrap" style={glowGradientStyle || undefined}>
+    <div class="btn-rainbow-glow-wrap">
       <a
         href={href}
         target={target}
@@ -282,7 +292,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     </a>
   )
 ) : variant === 'rainbow-glow' ? (
-  <div class="btn-rainbow-glow-wrap" style={glowGradientStyle || undefined}>
+  <div class="btn-rainbow-glow-wrap">
     <button
       class:list={classes}
       type={type}
