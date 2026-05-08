@@ -113,13 +113,58 @@ const isLink = !!href;
 const isDropdown = shape === 'dropdown';
 
 // Media nesting (Phase 1.6): icon/lottie chrome lives on the `media` prop —
-// matches Heading/Badge/List family pattern. Only Icon | LottieIcon are
-// allowed; heavy SVG features (morph/draw/fillAnimation) are not exposed
-// for button chrome (see Button.schema._rules.media-no-heavy-svg).
+// matches Heading/Badge/List family pattern. Only Icon | LottieIcon allowed.
 const mediaComponent = media?.component;
 const hasIcon = mediaComponent === 'Icon' || mediaComponent === 'LottieIcon';
 const isIconOnly = hasIcon && (shape === 'circle' || shape?.startsWith('i-'));
-const { component: _mediaComponent, ...mediaProps } = media || {};
+const { component: _mediaComponent, ...rawMediaProps } = media || {};
+
+// ─── Runtime rule enforcement (Phase 2) ────────────────────────────
+// Mirrors validator + schema._rules. Three layers, same rules: schema
+// documents, validator warns, atom enforces. AI-generated JSON or pipeline
+// drift can't render a broken button — we silently fix or strip here.
+
+// Rule: heavy-svg-icon-only — when the button has a text label or non-
+// icon-only shape, strip morph/draw/fillAnimation props from the media
+// spread. The icon is supplementary chrome in those cases; heavy SVG
+// would distract from the label.
+const heavySvgProps = ['morphTo', 'morphTrigger', 'draw', 'drawMode', 'drawColor', 'fillAnimation', 'fillMode', 'fillTrigger', 'fillColor'] as const;
+const _heavySvgAllowed = !contentButton && !contentButtonSplit && (shape === 'circle' || shape?.startsWith('i-'));
+let mediaProps: Record<string, any> = rawMediaProps;
+if (hasIcon && !_heavySvgAllowed) {
+  mediaProps = { ...rawMediaProps };
+  for (const k of heavySvgProps) delete mediaProps[k];
+}
+
+// Rule: icon-contrast-on-fill — when variant is fill/glow/rainbow-glow
+// and the child icon shares Button's brand/rainbow colour at the same
+// tier, the icon would render in the same colour as the fill (invisible).
+// Strip the matching colour props so the child inherits currentColor —
+// Button.css computes contrast via oklch lightness inversion (Phase 3 CSS).
+// Mirrors Shape's identical safeguard.
+const _fillVariants = ['fill', 'glow', 'rainbow-glow'];
+const _shapeBaseColour = rainbowColor || rawColor;
+const _iconBaseColour = mediaProps.rainbowColor || mediaProps.brandColor;
+const _iconTier = mediaProps.colorTier || 'base';
+const _childInvisible = (
+  hasIcon &&
+  _fillVariants.includes(variant) &&
+  !!_shapeBaseColour &&
+  _iconBaseColour === _shapeBaseColour &&
+  _iconTier === 'base'
+);
+if (_childInvisible) {
+  mediaProps = { ...mediaProps };
+  delete mediaProps.brandColor;
+  delete mediaProps.rainbowColor;
+  delete mediaProps.colorTier;
+}
+
+// Rule: no-tiers-on-button — already structurally enforced. colorTier
+// is not in Props (TS error if typed) and not in the destructure (lands
+// in `rest`); `rest` is filtered to `data-*` attrs only at line 108-110,
+// so colorTier silently disappears even if a non-typed caller passes it.
+// No explicit strip needed.
 
 // Semantic role for AT context
 const semanticRole = type === 'submit' ? 'form-submit' : isIconOnly && ariaLabel ? 'control' : 'action';
@@ -166,7 +211,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush><slot /></Text>
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>
       {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       <Icon name="caret-down-fill" size={14} class="btn__chevron" />
@@ -207,7 +252,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
         >
         {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-        <Text as="span" class="btn__label" flush><slot /></Text>
+        <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>
         {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       </a>
@@ -226,7 +271,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush><slot /></Text>
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>
       {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
     </a>
@@ -244,7 +289,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush><slot /></Text>
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>
       {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
     </button>
@@ -261,7 +306,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
   >
     {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
     {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-    <Text as="span" class="btn__label" flush><slot /></Text>
+    <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>
     {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
     {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
   </button>
