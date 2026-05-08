@@ -7,15 +7,17 @@ import { Section } from '../../components/atoms/Section';
 import testData from '../../data/test/button.json';
 
 // Pipeline: strip props per render mode
-// Reduced: strip animation props (effect, confetti, lottieIcon, speed)
+// Reduced: strip animation/effect props. media stays — Icon/LottieIcon
+// own their own gates. Pre-Phase 1.6 props (confetti, iconMorphTo, etc.)
+// stripped too for any legacy entries that haven't migrated.
 function reducedProps(b: any) {
   const { effect, speed, confetti, confettiTrigger, confettiCount, confettiSpread, lottieIcon, lottieLoop, iconMorphTo, iconMorphColor, iconDraw, iconDrawColor, ...rest } = b;
   return rest;
 }
 
-// Textonly: label + href only
+// Textonly: contentButton + href only
 function textonlyProps(b: any) {
-  return { label: b.label, href: b.href, variant: 'outline', disabled: b.disabled };
+  return { contentButton: b.contentButton, href: b.href, variant: 'outline' as const, disabled: b.disabled };
 }
 ---
 
@@ -32,8 +34,10 @@ function textonlyProps(b: any) {
             <Fragment>
               <div class="render-full">
                 <Button
+                  contentButton={b.contentButton}
+                  contentButtonSplit={b.contentButtonSplit}
                   variant={b.variant}
-                  brandColor={b.brandColor ?? b.color}
+                  brandColor={b.brandColor}
                   rainbowColor={b.rainbowColor}
                   shape={b.shape}
                   size={b.size}
@@ -46,19 +50,17 @@ function textonlyProps(b: any) {
                   disabled={b.disabled}
                   ariaLabel={b.ariaLabel}
                   dropdownItems={b.dropdownItems}
-                  contentButtonSplit={b.contentButtonSplit}
                   gradient={b.gradient}
                   gradientBlend={b.gradientBlend}
                   style={b.style}
-                >
-                  {b.shape !== 'circle' && !b.shape?.startsWith('i-') ? b.label : null}
-                </Button>
+                />
               </div>
               <div class="render-reduced">
                 {(() => { const r = reducedProps(b); return (
                   <Button
+                    contentButton={r.contentButton}
                     variant={r.variant as any}
-                    brandColor={r.brandColor ?? r.color}
+                    brandColor={r.brandColor}
                     rainbowColor={r.rainbowColor}
                     shape={r.shape}
                     size={r.size}
@@ -70,20 +72,17 @@ function textonlyProps(b: any) {
                     ariaLabel={r.ariaLabel}
                     dropdownItems={r.dropdownItems}
                     style={r.style}
-                  >
-                    {r.label}
-                  </Button>
+                  />
                 ); })()}
               </div>
               <div class="render-textonly">
                 {(() => { const t = textonlyProps(b); return (
                   <Button
-                    variant={t.variant as any}
+                    contentButton={t.contentButton}
+                    variant={t.variant}
                     href={t.href}
                     disabled={t.disabled}
-                  >
-                    {t.label}
-                  </Button>
+                  />
                 ); })()}
               </div>
             </Fragment>
