@@ -102,12 +102,25 @@ const {
 const colorVariants = ['primary', 'secondary', 'neutral'] as const;
 const isLegacyVariant = colorVariants.includes(rawVariant as any);
 const variant = isLegacyVariant ? 'fill' : rawVariant;
-const color = isLegacyVariant ? rawVariant : rawColor;
+// rainbowColor wins over brandColor when both set (matches Heading/Badge convention)
+const color = isLegacyVariant ? rawVariant : (rainbowColor || rawColor);
+
+// Gradient resolution — same pattern as Heading/Badge. No tier preset
+// suffix because Button doesn't accept colorTier (see _rules.no-tiers-on-button).
+const _emergePrefix = gradientEmerge ? 'emerge-' : gradientFade ? 'fade-' : '';
+const gradientName = gradientBlend
+  || (gradient && color ? `${_emergePrefix}${color}` : null)
+  || (gradient ? `${_emergePrefix}primary` : null);
 
 // Extract data-* attributes
-const dataAttrs = Object.fromEntries(
+const dataAttrs: Record<string, string | undefined> = Object.fromEntries(
   Object.entries(rest).filter(([key]) => key.startsWith('data-'))
 );
+// Gradient direction data-attrs (matches Heading/Badge/Shape pattern)
+if (gradientName && gradientDirection) dataAttrs['data-grad-dir'] = gradientDirection;
+if (gradientAnimated && gradientAnimateDirection && gradientAnimateDirection !== 'cw') {
+  dataAttrs['data-grad-anim-dir'] = gradientAnimateDirection;
+}
 
 const isLink = !!href;
 const isDropdown = shape === 'dropdown';
@@ -187,6 +200,17 @@ const classes = [
   hasIcon && `btn--icon-${iconPosition}`,
   isIconOnly && 'btn--icon-only',
   alignment && `btn-align--${alignment}`,
+  // Gradient classes — same shape as Heading/Badge/Shape. Phase 3 CSS
+  // hooks .btn--rainbow-glow + gradient--blend-* into --_glow-gradient
+  // (currently the wrap::before falls back to the static rainbow gradient).
+  gradientName && 'gradient',
+  gradientName && `gradient--${variant}`,
+  gradientName && `gradient--blend-${gradientName}`,
+  gradientEmerge && 'gradient--emerge',
+  gradientFade && 'gradient--fade',
+  gradientCycle && 'gradient--cycle',
+  gradientAnimated && 'gradient--animated',
+  gradientAnimated && gradientAnimateSpeed && gradientAnimateSpeed !== 'default' && `gradient--speed-${gradientAnimateSpeed}`,
   className,
 ].filter(Boolean);
 
@@ -211,7 +235,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
       {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       <Icon name="caret-down-fill" size={14} class="btn__chevron" />
@@ -223,14 +247,17 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {dropdownItems.map((item) => (
         item.href ? (
-          <a href={item.href} class="dropdown-item" role="menuitem">{item.label}</a>
+          <a
+            href={item.href}
+            class:list={['dropdown-item', item.fontFamily && `dropdown-item--font-${item.fontFamily}`]}
+            role="menuitem"
+          >{item.label}</a>
         ) : (
           <button
             type="button"
-            class="dropdown-item"
+            class:list={['dropdown-item', item.fontFamily && `dropdown-item--font-${item.fontFamily}`]}
             data-value={item.value}
             role="menuitem"
-            style={item.fontFamily ? `font-family: ${item.fontFamily};` : undefined}
           >{item.label}</button>
         )
       ))}
@@ -252,7 +279,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
         >
         {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-        <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>
+        <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
         {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       </a>
@@ -271,7 +298,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
       {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
     </a>
@@ -289,7 +316,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
       {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
     </button>
@@ -306,7 +333,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
   >
     {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
     {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-    <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>
+    <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
     {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
     {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
   </button>
