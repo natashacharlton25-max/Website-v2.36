@@ -227,22 +227,37 @@ export function initMicroAnimations() {
     const gradText = el.querySelector('.gradient__text') as HTMLElement;
     if (gradText) gradText.style.animationName = 'none';
 
+    // Buttons gate the flow to hover/focus only with a faster, infinite,
+    // single-direction pan over a wider background-size — so the motion
+    // reads clearly on a small element. Other elements keep the slower
+    // yoyo sway used in viewport-once contexts.
+    const isButton = el.classList.contains('btn');
+    const btnDur = isButton ? Math.max(2, dur / 3) : dur; // 12s default → 4s on buttons
+
     const playGradFlow = () => {
       const tl = gsap.timeline();
-      if (isOutline) {
-        // Border flow: animate background-position of the border-box gradient
+      if (isButton) {
+        // Tween a registered custom prop so the button bg AND the gradient
+        // halo (::after) read from the same phase — keeps the glow's colour
+        // sweep locked to the surface. Yoyo to dodge the non-periodic blend
+        // wrap; sine.inOut keeps direction changes soft.
+        el.style.backgroundSize = '400% 400%';
+        tl.fromTo(el,
+          { '--_btn-gpos-x': '0%' },
+          { '--_btn-gpos-x': '100%', duration: btnDur, ease: 'sine.inOut', yoyo: true, repeat: -1 }
+        );
+      } else if (isOutline) {
         tl.fromTo(el,
           { backgroundPosition: '0 0, 0% 0%' },
           { backgroundPosition: '0 0, 100% 100%', duration: dur / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 }
         );
       } else {
-        // Fill/glass: sway background-position
         tl.fromTo(el,
           { backgroundPosition: '0% 0%' },
           { backgroundPosition: '100% 100%', duration: dur / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 }
         );
       }
-      if (gradText) {
+      if (gradText && !isButton) {
         tl.fromTo(gradText,
           { backgroundPosition: '0% 0%' },
           { backgroundPosition: '100% 100%', duration: dur / 2, ease: 'sine.inOut', yoyo: true, repeat: 1 },

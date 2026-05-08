@@ -141,12 +141,18 @@
 
 [data-render="textonly"] .link,
 [data-render="textonly"] .link .text,
-[data-render="textonly"] a {
+[data-render="textonly"] a:not(.btn) {
   color: var(--text-emphasis);
   text-decoration: underline;
   text-decoration-color: currentColor;
   text-decoration-thickness: auto;
   text-underline-offset: 0.15em;
+}
+
+/* Link buttons (Button rendered as <a>) shouldn't be underlined — they
+   read as buttons, not prose links. */
+[data-render="textonly"] a.btn {
+  text-decoration: none;
 }
 
 /* Strip variant decoration (border, background, padding, ::before) */
@@ -333,10 +339,190 @@
   background: transparent;
   color: var(--text-emphasis);
   border: var(--border-width) solid var(--neutral-mid);
-  border-radius: 0;
+  border-radius: var(--radius-sm);
   box-shadow: none;
   font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-regular);
+  letter-spacing: normal;
+  text-transform: none;
   padding: var(--space-xs) var(--space-md);
+  margin-right: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+/* Belt-and-braces: kill any gradient halo / surface pseudo that leaked
+   through render-controller's class strip (e.g. GSAP re-applied inline
+   background-size after the strip ran). Textonly buttons are uniform
+   across every variant / effect / colour / gradient combo. */
+[data-render="textonly"] .btn::before,
+[data-render="textonly"] .btn::after {
+  content: none !important;
+}
+
+/* If GSAP re-set inline background-size on the button itself, neutralise
+   it — textonly bg is always transparent. */
+[data-render="textonly"] .btn {
+  background-image: none !important;
+}
+
+/* Kill the .text margin-bottom inherited from the textonly .text rule —
+   inside a flex button it offsets the label box and pushes visible text up. */
+[data-render="textonly"] .btn .btn__label,
+[data-render="textonly"] .btn .text {
+  margin-bottom: 0;
+}
+
+/* Hover feedback — border colour shifts to the user's link colour, inset
+   box-shadow doubles the perceived border thickness without changing the
+   button's outer box (no layout shift on hover). */
+[data-render="textonly"] .btn:hover {
+  border-color: var(--highlight-link-color);
+  box-shadow: inset 0 0 0 var(--border-width) var(--highlight-link-color);
+}
+
+/* Hover-none — suppress the textonly hover feedback so buttons hold their
+   rest border/shadow regardless of pointer state. (0,3,0) beats the
+   :hover rule above (0,2,0). */
+[data-render="textonly"][data-hover="none"] .btn:hover {
+  border-color: var(--neutral-mid);
+  box-shadow: none;
+}
+
+/* Expand effect — show the caret + label statically (no slide, no opacity
+   transition, no absolute positioning). Render-controller keeps .btn--expand
+   and .btn--has-icon on the element so we can target them here. */
+[data-render="textonly"] .btn--expand {
+  padding-left: var(--space-md);
+  padding-right: var(--space-md);
+  overflow: visible;
+  gap: var(--space-xs);
+}
+
+[data-render="textonly"] .btn--expand .btn__label {
+  transform: none !important;
+  transition: none !important;
+}
+
+[data-render="textonly"] .btn--expand::before {
+  position: static;
+  width: 0.85em;
+  height: 0.85em;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  flex: none;
+  order: 1;
+}
+
+[data-render="textonly"] .btn--expand.btn--has-icon::before {
+  display: none;
+}
+
+[data-render="textonly"] .btn--expand.btn--has-icon .btn__icon {
+  position: static;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  /* Force icon to right of label regardless of iconPosition prop —
+     expand's contract is "arrow reveal on right", so the static
+     fallback should match that intent. */
+  order: 1;
+}
+
+/* Disabled — Button.css's .btn:disabled (0,2,0) ties with this file's
+   [data-render="textonly"] .btn (also 0,2,0) and loses on cascade order,
+   so the not-allowed cursor doesn't reach textonly. Restore it explicitly
+   plus kill the hover feedback above on disabled. */
+[data-render="textonly"] .btn:disabled,
+[data-render="textonly"] .btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+[data-render="textonly"] .btn:disabled:hover,
+[data-render="textonly"] .btn[aria-disabled="true"]:hover {
+  background: transparent;
+  color: var(--text-emphasis);
+  border-color: var(--neutral-mid);
+  box-shadow: none;
+}
+
+/* Dropdown — keep the popup behaviour but render it visually attached
+   to the trigger: menu has no top border, sharp top corners, rounded
+   bottom only; the trigger flattens its bottom corners when the menu
+   is open so the two share a clean seam. The base attached-corners
+   rule in Button.css uses .btn--dropdown (stripped in textonly), so
+   re-target the surviving .dropdown-btn class here. */
+[data-render="textonly"] .dropdown-menu {
+  background: var(--page-bg);
+  border: var(--border-width) solid var(--neutral-mid);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  box-shadow: none;
+}
+
+/* Dark-mode override: theme-luminance-dark.css paints the menu border in
+   the brand colour + adds a glow box-shadow at specificity (0,3,0). Match
+   that specificity with the .dropdown-theme--{x} chain so the textonly
+   neutral border wins on cascade order (textonly.css loads after dark). */
+[data-render="textonly"] .dropdown-menu.dropdown-theme--primary,
+[data-render="textonly"] .dropdown-menu.dropdown-theme--secondary,
+[data-render="textonly"] .dropdown-menu.dropdown-theme--neutral {
+  border-color: var(--neutral-mid);
+  box-shadow: none;
+}
+
+/* Move the trigger's bottom margin onto the wrapper — otherwise it inflates
+   the wrapper height and the menu (positioned at top: 100% of wrapper)
+   appears with a gap below the button. */
+[data-render="textonly"] .dropdown-wrapper {
+  margin-right: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+[data-render="textonly"] .dropdown-btn {
+  margin: 0;
+}
+
+[data-render="textonly"] .dropdown-wrapper:hover .dropdown-btn,
+[data-render="textonly"] .dropdown-wrapper.open .dropdown-btn,
+[data-render="textonly"] .dropdown-wrapper:focus-within .dropdown-btn {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+[data-render="textonly"] .dropdown-item {
+  color: var(--text-emphasis);
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-regular);
+  text-decoration: none;
+  border: none;
+  border-radius: 0;
+  padding: var(--space-sm) var(--space-md);
+}
+
+/* Match the menu's bottom-corner radius (Button.css gives the last item
+   --radius-md by default, which leaves the hover shadow more rounded than
+   the menu's outer --radius-sm border). */
+[data-render="textonly"] .dropdown-item:last-child {
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+/* Override the per-theme dropdown-hover rules from Button.css explicitly —
+   their .dropdown-theme--{x} .dropdown-item:hover selectors have the same
+   specificity as a plain textonly rule, so a single .dropdown-item:hover
+   here can lose. Inset box-shadow gives the highlight-colour border without
+   the 1px layout shift a real border would cause. */
+[data-render="textonly"] .dropdown-item:hover,
+[data-render="textonly"] .dropdown-theme--primary .dropdown-item:hover,
+[data-render="textonly"] .dropdown-theme--secondary .dropdown-item:hover,
+[data-render="textonly"] .dropdown-theme--neutral .dropdown-item:hover {
+  background: transparent;
+  color: var(--highlight-link-color);
+  box-shadow: inset 0 0 0 var(--border-width) var(--highlight-link-color);
 }
 
 

@@ -15,6 +15,7 @@
 import { Icon } from '../Icon';
 import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
+import InlineSvg from '../../InlineSvg.astro';
 import type { BrandColour, RainbowColour, GradientBlend, GradientDirection, GradientAnimateDirection } from '../../../lib/shared-enums';
 
 export interface DropdownItem {
@@ -32,9 +33,9 @@ export interface Props {
   variant?: 'fill' | 'outline' | 'ghost' | 'glass' | 'liquid-glass' | 'glassic' | 'glow' | 'rainbow-glow' | 'neumorphic' | 'neumorphic-3d' | 'neumorphic-inner';
   brandColor?: BrandColour;
   rainbowColor?: RainbowColour;
-  shape?: 'rounded' | 'pill' | 'circle' | 'square' | 'sharp' | 'dropdown';
+  shape?: 'sharp' | 'subtle' | 'soft' | 'rounded' | 'pill' | 'square' | 'circle' | 'dropdown' | 'i-sharp' | 'i-subtle' | 'i-soft' | 'i-rounded';
   size?: 'sm' | 'md' | 'lg';
-  effect?: 'glint' | 'colour-flow' | 'jump' | 'comic' | 'tech' | 'expand' | 'magnetic' | 'spotlight' | 'split';
+  effect?: 'glint' | 'colour-flow' | 'jump' | 'tech' | 'magnetic' | 'spotlight' | 'split' | 'expand';
   speed?: 'slow' | 'normal' | 'fast';
   alignment?: 'left' | 'center';
   type?: 'button' | 'submit' | 'reset';
@@ -105,6 +106,23 @@ const variant = isLegacyVariant ? 'fill' : rawVariant;
 // rainbowColor wins over brandColor when both set (matches Heading/Badge convention)
 const color = isLegacyVariant ? rawVariant : (rainbowColor || rawColor);
 
+// Rule: forbidden-variant-effect-combos — these combinations conflict
+// visually because the effect owns chrome that fights the variant's
+// styling (e.g. expand's transparent bg + circle ::before vs glassic's
+// 3D layers). Strip the effect, keep the variant.
+// Mirrors validator + schema._rules. Three layers: schema documents,
+// validator warns, atom enforces.
+const FORBIDDEN_COMBOS: Record<string, readonly string[]> = {
+  outline:        ['split'],
+  glow:           ['colour-flow', 'split'],
+  'rainbow-glow': ['colour-flow'],
+};
+const _effectForbidden = !!effect && FORBIDDEN_COMBOS[variant]?.includes(effect);
+if (_effectForbidden && import.meta.env.DEV) {
+  console.warn(`[Button] effect="${effect}" not supported with variant="${variant}". Effect stripped.`);
+}
+const _effect = _effectForbidden ? undefined : effect;
+
 // Gradient resolution — same pattern as Heading/Badge. No tier preset
 // suffix because Button doesn't accept colorTier (see _rules.no-tiers-on-button).
 const _emergePrefix = gradientEmerge ? 'emerge-' : gradientFade ? 'fade-' : '';
@@ -127,10 +145,11 @@ const isDropdown = shape === 'dropdown';
 
 // Media nesting (Phase 1.6): icon/lottie chrome lives on the `media` prop —
 // matches Heading/Badge/List family pattern. Only Icon | LottieIcon allowed.
-const mediaComponent = media?.component;
+const effectiveMedia = media;
+const mediaComponent = effectiveMedia?.component;
 const hasIcon = mediaComponent === 'Icon' || mediaComponent === 'LottieIcon';
 const isIconOnly = hasIcon && (shape === 'circle' || shape?.startsWith('i-'));
-const { component: _mediaComponent, ...rawMediaProps } = media || {};
+const { component: _mediaComponent, ...rawMediaProps } = effectiveMedia || {};
 
 // ─── Runtime rule enforcement (Phase 2) ────────────────────────────
 // Mirrors validator + schema._rules. Three layers, same rules: schema
@@ -194,7 +213,7 @@ const classes = [
   `btn--${color}`,
   `btn--${shape}`,
   size !== 'md' && `btn--${size}`,
-  effect && `btn--${effect}`,
+  _effect && `btn--${_effect}`,
   speed && `btn--speed-${speed}`,
   hasIcon && 'btn--has-icon',
   hasIcon && `btn--icon-${iconPosition}`,
@@ -223,7 +242,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
 {isDropdown ? (
   <div class="dropdown-wrapper">
     <button
-      class:list={[...classes, 'btn--dropdown', 'dropdown-btn']}
+      class:list={[...classes, 'dropdown-btn']}
       type={type}
       disabled={disabled}
       id={id}
@@ -235,7 +254,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && _effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
       {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       <Icon name="caret-down-fill" size={14} class="btn__chevron" />
@@ -279,9 +298,10 @@ const iconRight = iconPosition === 'right' && hasIcon;
         >
         {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-        <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
+        <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && _effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
         {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
+      {target === '_blank' && !hasIcon && <InlineSvg name="external" class="btn__external" />}
       </a>
     </div>
   ) : (
@@ -298,9 +318,10 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && _effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
       {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
+      {target === '_blank' && !hasIcon && <InlineSvg name="external" class="btn__external" />}
     </a>
   )
 ) : variant === 'rainbow-glow' ? (
@@ -316,7 +337,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && _effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
       {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
     </button>
@@ -333,7 +354,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
   >
     {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
     {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-    <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
+    <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && _effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
     {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
     {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
   </button>
@@ -475,10 +496,11 @@ const iconRight = iconPosition === 'right' && hasIcon;
       const strength = 8; // max px shift
 
       el.addEventListener('mousemove', (e) => {
-        // Gate: no movement in highlight-links or hover-none mode
+        // Gate: no movement in highlight-links / hover-none / textonly modes
         if (document.documentElement.hasAttribute('data-highlight-links') ||
             document.documentElement.hasAttribute('data-highlight') ||
-            document.body.dataset.hover === 'none') return;
+            document.documentElement.dataset.render === 'textonly' ||
+            document.documentElement.dataset.hover === 'none') return;
 
         const rect = el.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
@@ -498,10 +520,11 @@ const iconRight = iconPosition === 'right' && hasIcon;
       el.setAttribute('data-spot-bound', '1');
 
       el.addEventListener('mousemove', (e) => {
-        // Gate: no spotlight in highlight-links or hover-none mode
+        // Gate: no spotlight in highlight-links / hover-none / textonly modes
         if (document.documentElement.hasAttribute('data-highlight-links') ||
             document.documentElement.hasAttribute('data-highlight') ||
-            document.body.dataset.hover === 'none') return;
+            document.documentElement.dataset.render === 'textonly' ||
+            document.documentElement.dataset.hover === 'none') return;
 
         const rect = el.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -522,16 +545,25 @@ const iconRight = iconPosition === 'right' && hasIcon;
 </script>
 
 <script>
-  // Lottie icons inside buttons — play on hover/focus, reverse on leave/blur
+  // Lottie icons inside buttons — play on hover/focus, reverse on leave/blur.
+  // Hover-driven playback is gated on data-hover="none" / textonly to match
+  // the CSS gates (which suppress hover animations there). Focus-driven
+  // playback still fires (assistive triggers don't go through hover).
   function initButtonLottie() {
     document.querySelectorAll<HTMLElement>('.btn [data-lottie-icon]:not([data-btn-lottie-bound])').forEach(el => {
       el.setAttribute('data-btn-lottie-bound', '1');
       const trigger = el.closest('button, a') || el;
 
+      const hoverGated = () =>
+        document.documentElement.dataset.hover === 'none' ||
+        document.documentElement.dataset.render === 'textonly';
+
       trigger.addEventListener('mouseenter', () => {
+        if (hoverGated()) return;
         el.dispatchEvent(new CustomEvent('lottie:play'));
       });
       trigger.addEventListener('mouseleave', () => {
+        if (hoverGated()) return;
         el.dispatchEvent(new CustomEvent('lottie:playReverse'));
       });
       trigger.addEventListener('focusin', () => {
@@ -546,3 +578,4 @@ const iconRight = iconPosition === 'right' && hasIcon;
   initButtonLottie();
   document.addEventListener('astro:page-load', initButtonLottie);
 </script>
+

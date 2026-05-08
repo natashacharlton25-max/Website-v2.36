@@ -65,11 +65,6 @@
   --_btn-brand-dark:  var(--btn-hover-bg);
   --_btn-brand-light: var(--btn-light-bg);
 
-  /* Comic + neumorphic variants read from --_btn-brand-dark; declared
-     here so usage sites are single-level. */
-  --btn-comic-border: var(--_btn-brand-dark);
-  --btn-comic-shadow: var(--_btn-brand-dark);
-
   background-color: var(--_btn-brand);
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   box-shadow: var(--btn-shadow);
@@ -77,113 +72,10 @@
 
 /* focus → global focus-gate.css */
 
-/* ==========================================================
-   HOVER GATE — uses tokens from src/styles/gates/hover-gate.css
-
-   none:    resolve hover to default state (zero visual change)
-   instant: colour only, duration 0s (from tokens)
-   gentle:  authored hover with slow duration (from tokens)
-   full:    authored hover (default, from tokens)
-
-   All transitions use --hover-duration-fast which resolves to
-   0s when none/instant. Per-variant resets below ensure the
-   hover STATE values also return to static when none.
-   ========================================================== */
-
-/* None — resolve every decorative hover back to static state */
-[data-hover="none"] .btn:hover {
-  background-color: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  box-shadow: var(--btn-shadow);
-  transform: none;
-  filter: none;
-}
-
-[data-hover="none"] .btn--outline:hover {
-  background-color: transparent;
-  color: var(--_btn-brand);
-  border-color: var(--_btn-brand);
-  box-shadow: none;
-}
-
-[data-hover="none"] .btn--ghost:hover {
-  background-color: var(--btn-ghost-bg, transparent);
-  color: var(--btn-ghost-text);
-  border-color: var(--btn-ghost-border);
-  box-shadow: none;
-}
-
-[data-hover="none"] .btn--glass:hover {
-  background: var(--btn-glass-bg);
-  color: var(--btn-glass-text);
-  border-color: var(--btn-glass-border);
-}
-
-[data-hover="none"] .btn--liquid-glass:hover {
-  color: var(--btn-glass-text);
-  border-color: color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
-}
-
-[data-hover="none"] .btn--glassic:hover {
-  color: var(--btn-glass-text);
-  transform: none;
-}
-
-[data-hover="none"] .btn--colour-flow:hover {
-  background: color-mix(in oklch, var(--_btn-brand) 10%, transparent);
-  color: var(--_btn-brand);
-}
-
-[data-hover="none"] .btn--neumorphic-3d:hover {
-  background: var(--_btn-brand);
-  transform: none;
-}
-
-[data-hover="none"] .btn--neumorphic-inner:hover {
-  background: var(--_btn-brand-light);
-}
-
-[data-hover="none"] .btn--glow:hover {
-  background: var(--_btn-brand);
-  animation: none;
-}
-
-[data-hover="none"] .btn--glow::after {
-  animation: none;
-  opacity: 0;
-}
-
-/* None — kill all pseudo-element hover effects */
-[data-hover="none"] .btn--glint:hover::before { left: -100%; }
-[data-hover="none"] .btn--colour-flow:hover::before { top: 100%; }
-[data-hover="none"] .btn--colour-flow:hover::after { top: 180%; }
-[data-hover="none"] .btn--expand:hover::before { width: var(--_expand-circle); border-radius: var(--_expand-r-start); }
-[data-hover="none"] .btn--spotlight:hover::before { opacity: 0; }
-[data-hover="none"] .btn--split:hover::before { transform: none; }
-[data-hover="none"] .btn--split:hover::after { transform: none; }
-[data-hover="none"] .btn--jump:hover { transform: none; }
-[data-hover="none"] .btn--comic:hover { transform: none; }
-[data-hover="none"] .btn--tech:hover { transform: none; }
-
-/* None — rainbow glow: freeze ring animation, hide halo */
-[data-hover="none"] .btn--rainbow-glow {
-  animation: none;
-}
-[data-hover="none"] .btn--rainbow-glow::after {
-  animation: none;
-  opacity: 0;
-}
-
-/* Instant — colour changes, no movement/transform */
-[data-hover="instant"] .btn:hover {
-  transform: none;
-}
-
-[data-hover="instant"] .btn::before,
-[data-hover="instant"] .btn::after {
-  transition: none;
-  animation: none;
-}
+/* Hover gate — moved to src/styles/gates/hover-gate.css.
+   The gate is the single authority for what data-hover="none" / "instant"
+   means for buttons. Variant resets, dropdown click-only behaviour, and
+   pseudo-element kills all live there. */
 
 /* ==========================================================
    DISABLED — after all hover gates so it wins cascade.
@@ -194,6 +86,11 @@
 .btn[aria-disabled="true"] {
   opacity: var(--opacity-disabled);
   cursor: not-allowed;
+  /* Override the global [disabled] gate (opacity-gate.css) which sets
+     pointer-events: none — that suppresses hover events, so the cursor
+     rule never fires. Click suppression already comes from the native
+     `disabled` attribute and aria-disabled handlers. */
+  pointer-events: auto;
 }
 
 .btn:disabled:hover,
@@ -201,6 +98,7 @@
   background-color: var(--_btn-brand);
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   box-shadow: var(--btn-shadow);
+  cursor: not-allowed;
   transform: none;
   filter: none;
   animation: none;
@@ -212,6 +110,7 @@
   color: var(--_btn-brand);
   border-color: var(--_btn-brand);
   box-shadow: none;
+  cursor: not-allowed;
 }
 
 .btn--ghost:disabled:hover,
@@ -220,6 +119,23 @@
   color: var(--btn-ghost-text);
   border-color: var(--btn-ghost-border);
   box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Catch-all — every variant's hover state on disabled forces the stop
+   cursor. The variant-specific :hover rules above (.btn--fill:not(...)
+   chain at higher specificity, .btn--neumorphic-3d:hover, etc.) don't
+   declare cursor, so this matches their specificity bracket and wins by
+   source order. */
+.btn:disabled,
+.btn:disabled:hover,
+.btn:disabled:active,
+.btn:disabled:focus,
+.btn[aria-disabled="true"],
+.btn[aria-disabled="true"]:hover,
+.btn[aria-disabled="true"]:active,
+.btn[aria-disabled="true"]:focus {
+  cursor: not-allowed;
 }
 
 .btn:disabled::before,
@@ -273,6 +189,16 @@
   fill: currentColor;
 }
 
+/* External link indicator (rendered when href + target='_blank'). Inherits
+   currentColor from the button text so it picks up the right contrast in
+   every variant + render mode. */
+.btn__external {
+  width: 0.85em;
+  height: 0.85em;
+  flex-shrink: 0;
+  color: inherit;
+}
+
 /* Hover: 90° anticlockwise (down → right) */
 .dropdown-wrapper:hover .btn__chevron {
   transform: rotate(-90deg);
@@ -307,19 +233,144 @@
   --btn-light-bg: var(--neutral-tint);
 }
 
-/* Fill variant hovers */
-.btn--fill:not(.btn--dropdown):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):hover {
+/* Fill variant hovers — :not() chain excludes effect variants that own
+   their own hover, plus disabled / aria-disabled so the hover-bg/lift
+   doesn't fire on a button that can't be activated. */
+.btn--fill:not(.btn--dropdown):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):not(.gradient--animated):not(:disabled):not([aria-disabled="true"]):hover {
   background-color: var(--_btn-brand-dark);
   color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
   box-shadow: var(--btn-shadow-hover);
   transform: translateY(-1px);
 }
 
-.btn--fill:not(.btn--dropdown):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):active {
+.btn--fill:not(.btn--dropdown):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):not(.gradient--animated):not(:disabled):not([aria-disabled="true"]):active {
   background-color: color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
   color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
   box-shadow: var(--btn-shadow);
   transform: translateY(1px);
+}
+
+/* Animated gradient — gradient halo behind the button. The ::after clones
+   --_grad-computed (same blend, same colours, same animation phase) and
+   blurs it so the bleed reads as a coloured glow that matches whatever the
+   surface is showing. Hidden at rest, fades in on hover. */
+@property --_btn-gpos-x {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
+.btn.gradient--animated {
+  position: relative;
+  isolation: isolate;
+  /* Allow halo to bleed outside the button bounds. */
+  overflow: visible;
+  background-position: var(--_btn-gpos-x) 50%;
+}
+
+.btn.gradient--animated::after {
+  content: '';
+  position: absolute;
+  /* Tight bleed — just enough for the blur to read as a glow at the edge,
+     not enough to crowd neighbouring buttons. */
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--_grad-computed);
+  background-size: 400% 400%;
+  background-position: var(--_btn-gpos-x) 50%;
+  filter: blur(0.35em) saturate(1.2);
+  opacity: 0;
+  transition: opacity var(--hover-duration) var(--ease-default);
+  pointer-events: none;
+}
+
+.btn.gradient--animated:not(:disabled):not([aria-disabled="true"]):hover::after,
+.btn.gradient--animated:not(:disabled):not([aria-disabled="true"]):focus-visible::after {
+  opacity: 0.65;
+}
+
+.btn.gradient--animated:not(:disabled):not([aria-disabled="true"]):hover {
+  transform: translateY(-1px);
+}
+
+.btn.gradient--animated:not(:disabled):not([aria-disabled="true"]):active {
+  transform: translateY(1px);
+}
+
+/* ── gradientAnimated × variant matrix ──
+   Each variant paints --_grad-computed onto its surface in a way that
+   respects the variant's intent. Specificity is (0,3,0) so we win over
+   the variant's own (0,1,0) background. The ::after halo above (0,2,0)
+   handles the bleed for every variant uniformly. */
+
+/* fill, neumorphic — solid surface, replace bg with gradient */
+.btn.gradient--animated.btn--fill,
+.btn.gradient--animated.btn--neumorphic {
+  background: var(--_grad-computed);
+  background-size: 400% 400%;
+  background-position: var(--_btn-gpos-x) 50%;
+}
+
+/* neumorphic-inner — replace --_btn-brand-light bg, keep inset shadow */
+.btn.gradient--animated.btn--neumorphic-inner {
+  background: var(--_grad-computed);
+  background-size: 400% 400%;
+  background-position: var(--_btn-gpos-x) 50%;
+}
+
+/* outline — paint gradient into the border-box only, keep page-bg fill.
+   Mirrors the gradient-border technique used by .btn--rainbow-glow. */
+.btn.gradient--animated.btn--outline {
+  background:
+    linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
+    var(--_grad-computed) border-box;
+  background-size: auto, 400% 400%;
+  background-position: 0 0, var(--_btn-gpos-x) 50%;
+  border: 2px solid transparent;
+  color: var(--color-Text);
+}
+
+/* ghost — gradient hidden at rest (transparent), reveals on hover.
+   The ::after halo handles the bleed; this rule paints the surface. */
+.btn.gradient--animated.btn--ghost {
+  background: transparent;
+  transition: background var(--hover-duration) var(--ease-default);
+}
+
+.btn.gradient--animated.btn--ghost:not(:disabled):not([aria-disabled="true"]):hover,
+.btn.gradient--animated.btn--ghost:not(:disabled):not([aria-disabled="true"]):focus-visible {
+  background: var(--_grad-computed);
+  background-size: 400% 400%;
+  background-position: var(--_btn-gpos-x) 50%;
+}
+
+/* liquid-glass — gradient lives BEHIND the glass tint via ::before so the
+   backdrop-filter blur reads through it. Variant's own bg/border/shadow
+   stays. ::before is layered above the ::after halo (z-index ordering). */
+.btn.gradient--animated.btn--liquid-glass {
+  position: relative;
+}
+
+.btn.gradient--animated.btn--liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Sits above the halo (-2) but below the variant's content (which is the
+     default 0 layer for the button text/icon). */
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--_grad-computed);
+  background-size: 400% 400%;
+  background-position: var(--_btn-gpos-x) 50%;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Push the halo below the surface gradient on liquid-glass so the bleed
+   doesn't blur out the readable surface colour. */
+.btn.gradient--animated.btn--liquid-glass::after {
+  z-index: -2;
 }
 
 /* Dropdown hover — fill with brand colour */
@@ -341,13 +392,13 @@
   box-shadow: none;
 }
 
-.btn--outline:hover {
+.btn--outline:not(.gradient--animated):hover {
   background-color: var(--_btn-brand);
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   border-color: var(--_btn-brand);
 }
 
-.btn--outline:active {
+.btn--outline:not(.gradient--animated):active {
   background-color: var(--_btn-brand-dark);
   box-shadow: none;
 }
@@ -425,7 +476,7 @@
 
 .btn--glow:hover::after {
   opacity: 1;
-  filter: blur(clamp(1em, 3vw, 2.5em)) saturate(1.6) contrast(1.5);
+  filter: blur(0.4em) saturate(1.2) contrast(1.1);
 }
 
 .btn--glow:active {
@@ -491,7 +542,7 @@
   border-radius: var(--radius-full);
   background: var(--_grad-computed);
   background-size: 200% 200%;
-  filter: blur(clamp(1em, 3vw, 2.5em)) saturate(1.6) contrast(1.5);
+  filter: blur(0.4em) saturate(1.2) contrast(1.1);
   opacity: 0;
   z-index: -1;
   animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
@@ -648,13 +699,13 @@
   box-shadow: var(--shadow-neu-pressed);
 }
 
-.btn--neumorphic-inner:hover {
+.btn--neumorphic-inner:not(.gradient--animated):hover {
   background: var(--secondary-mid);
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   box-shadow: var(--shadow-neu-pressed);
 }
 
-.btn--neumorphic-inner:active {
+.btn--neumorphic-inner:not(.gradient--animated):active {
   background: var(--neutral-mid);
   box-shadow: var(--shadow-neu-pressed);
 }
@@ -675,7 +726,7 @@
   overflow: hidden;
 }
 
-.btn--liquid-glass:hover {
+.btn--liquid-glass:not(.gradient--animated):hover {
   background: color-mix(in oklch, var(--_btn-brand) 20%, var(--liquid-tint));
   border-color: var(--liquid-inner-glow);
   box-shadow:
@@ -684,7 +735,7 @@
     0 6px 1.25em color-mix(in oklch, var(--_btn-brand) 30%, transparent);
 }
 
-.btn--liquid-glass:active {
+.btn--liquid-glass:not(.gradient--animated):active {
   color: var(--color-White);
   box-shadow: var(--liquid-inner-shadow), var(--shadow-sm);
 }
@@ -794,50 +845,6 @@
 }
 
 /* ==========================================================
-   EFFECT: COMIC — opt-in via .btn--comic
-   Hard shadow, thick border, colour sweep from left.
-   ========================================================== */
-
-.btn--comic {
-  border: 3px solid var(--btn-comic-border);
-  box-shadow: 4px 6px 0 var(--btn-comic-shadow);
-}
-
-.btn--comic:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 3px 0 var(--btn-comic-shadow);
-  background-color: var(--_btn-brand);
-}
-
-.btn--comic:active {
-  transform: translate(4px, 6px);
-  box-shadow: 0 0 0 var(--btn-comic-shadow);
-  filter: saturate(0.75);
-}
-
-/* Text + icon above sweep */
-.btn--comic .btn__label,
-.btn--comic .btn__icon {
-  position: relative;
-  z-index: 1;
-}
-
-/* Colour sweep from left */
-.btn--comic::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--_btn-brand-dark);
-  z-index: 0;
-  transform: translateX(-100%);
-  pointer-events: none;
-}
-
-.btn--comic:hover::after {
-  transform: translateX(0);
-}
-
-/* ==========================================================
    EFFECT: TECH — opt-in via .btn--tech
    Offset border frame swaps position on hover.
    ========================================================== */
@@ -879,132 +886,86 @@
   transform: translate(3px, 3px);
 }
 
-/* ==========================================================
-   EFFECT: EXPAND — opt-in via .btn--expand
-   SCB-style: circle sits left, expands to fill on hover.
-   Button size stays fixed — zero layout shift.
-   ========================================================== */
-
-.btn--expand {
-  --_expand-circle: 2.5rem;
-  --_expand-r-start: var(--radius-full);
-  --_expand-r-end: var(--radius-full);
-  background: transparent;
-  color: oklch(from var(--page-bg) round(1.21 - l) 0 0);
-  box-shadow: none;
-  /* Vertical padding matches .btn base so the expand sits inline with
-     other buttons. Left padding is asymmetric to clear the circle. */
-  padding: var(--space-sm) var(--space-lg) var(--space-sm) calc(var(--_expand-circle) + var(--space-sm));
-  overflow: visible;
-  isolation: auto;
-}
-
-/* Kill base hover bg — circle handles it */
-.btn--expand:hover,
-.btn--expand:active {
-  background: transparent;
-  color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
-  box-shadow: none;
-  transform: none;
-}
-
-/* Shape element via ::before — anchored left, grows right only */
-.btn--expand::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: var(--_expand-circle);
-  height: var(--_expand-circle);
-  transform: translateY(-50%);
-  border-radius: var(--_expand-r-start);
-  background-color: var(--_btn-brand);
-  transition: width var(--hover-duration-slow) cubic-bezier(0.65, 0, 0.076, 1),
-              border-radius var(--hover-duration-slow) cubic-bezier(0.65, 0, 0.076, 1);
-  pointer-events: none;
-}
-
-.btn--expand:hover::before {
-  width: 100%;
-  border-radius: var(--_expand-r-end);
-  background-color: var(--_btn-brand-dark);
-}
-
-/* Default (pill shape): circle → pill */
-/* No extra rules needed — defaults are var(--radius-full) → var(--radius-full) */
-
-/* Rounded shape: rounded square → rounded rect */
-.btn--rounded.btn--expand {
-  --_expand-r-start: var(--radius-md);
-  --_expand-r-end: var(--radius-md);
-}
-
-/* Sharp shape: square → sharp rect */
-.btn--sharp.btn--expand {
-  --_expand-r-start: 0;
-  --_expand-r-end: 0;
-}
-
-/* Icon pinned to circle centre, rotates on hover */
-.btn--expand .btn__icon {
-  position: absolute;
-  left: calc(var(--_expand-circle) / 2);
-  top: 50%;
-  transform: translate(-50%, -50%) rotate(0deg);
-  z-index: 1;
-  color: inherit;
-}
-
-.btn--expand:hover .btn__icon {
-  transform: translate(-50%, -50%);
-}
-
-/* Default chevron when no icon — SVG arrow-right via ::after on circle.
-   Hidden when .btn--has-icon is set (Icon atom takes over). */
-.btn--expand:not(.btn--has-icon)::after {
-  content: '';
-  position: absolute;
-  left: calc(var(--_expand-circle) / 2);
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 1.25em;
-  height: 1.25em;
-  z-index: 1;
-  background: currentColor;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z'/%3E%3C/svg%3E") center / contain no-repeat;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
-.btn--expand:not(.btn--has-icon):hover::after {
-  transform: translate(-50%, -50%);
-}
-
-/* Text — contrast against page static, contrast against fill on hover */
-.btn--expand .btn__label {
-  position: relative;
-  z-index: 2;
-  color: oklch(from var(--page-bg) round(1.21 - l) 0 0);
-}
-
-.btn--expand:hover .btn__label {
-  color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
-}
-
-/* Size variants */
-.btn--sm.btn--expand {
-  --_expand-circle: 2rem;
-  padding: 0.8rem 1rem 0.8rem calc(var(--_expand-circle) + 0.4rem);
-}
-
-.btn--lg.btn--expand {
-  --_expand-circle: 3.5rem;
-  padding: 1.4rem 1.8rem 1.4rem calc(var(--_expand-circle) + 0.6rem);
-}
-
-
 .btn--underline:active {
   background: transparent;
   transform: none;
+}
+
+/* ==========================================================
+   EFFECT: EXPAND — opt-in via .btn--expand
+   Button keeps its variant shape/size. Label shifts left on hover and
+   an arrow reveals from the right edge. Works on top of any variant.
+   ========================================================== */
+
+.btn--expand {
+  position: relative;
+  overflow: hidden;
+  /* Padding-left needs to be at least the hover shift (-1.5em) so the
+     label doesn't clip at the left edge when it slides. Padding-right
+     reserves space for the reveal arrow at the right edge. */
+  padding-left: calc(var(--space-lg) + 1.5em);
+  padding-right: calc(var(--space-lg) + 1.5em);
+}
+
+.btn--expand .btn__label {
+  transition: transform var(--hover-duration) var(--ease-default);
+}
+
+/* Arrow indicator — Phosphor caret-right rendered as a CSS mask so we
+   don't rely on an SVG element. Hidden at rest (translated right and
+   transparent), slides in + fades on hover. */
+.btn--expand::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 1em;
+  bottom: 0;
+  width: 1.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z'/%3E%3C/svg%3E") center / 0.85em no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z'/%3E%3C/svg%3E") center / 0.85em no-repeat;
+  opacity: 0;
+  transform: translateX(0.5em);
+  transition: opacity var(--hover-duration) var(--ease-default),
+              transform var(--hover-duration) var(--ease-default);
+  pointer-events: none;
+}
+
+.btn--expand:hover .btn__label,
+.btn--expand:focus-visible .btn__label {
+  transform: translateX(-1.5em);
+}
+
+.btn--expand:hover::before,
+.btn--expand:focus-visible::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* When the user provides their own media icon (.btn--has-icon), hide
+   the default caret and let their icon act as the reveal arrow. */
+.btn--expand.btn--has-icon::before {
+  display: none;
+}
+
+.btn--expand.btn--has-icon .btn__icon {
+  position: absolute;
+  top: 50%;
+  right: 1.5em;
+  transform: translate(0.5em, -50%);
+  opacity: 0;
+  transition: opacity var(--hover-duration) var(--ease-default),
+              transform var(--hover-duration) var(--ease-default);
+  pointer-events: none;
+}
+
+.btn--expand.btn--has-icon:hover .btn__icon,
+.btn--expand.btn--has-icon:focus-visible .btn__icon {
+  opacity: 1;
+  transform: translate(0, -50%);
 }
 
 /* ==========================================================
@@ -1047,12 +1008,13 @@
 
 /* ==========================================================
    EFFECT: SPLIT — opt-in via .btn--split
-   Top/bottom halves slide apart revealing darker bg beneath.
+   Top half wipes left-to-right, bottom wipes right-to-left,
+   revealing the darker bg beneath in a diagonal reveal.
    ========================================================== */
 
 .btn--split {
   background: var(--_btn-brand-dark);
-  overflow: visible;
+  overflow: hidden;
 }
 
 /* Split text — always visible, just the split animation around it */
@@ -1086,6 +1048,7 @@
   border-radius: inherit;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  transform-origin: right center;
 }
 
 .btn--split::after {
@@ -1093,6 +1056,7 @@
   border-radius: inherit;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+  transform-origin: left center;
 }
 
 .btn--split:hover {
@@ -1101,11 +1065,11 @@
 }
 
 .btn--split:hover::before {
-  transform: translate(-1.5em, -1.5em);
+  transform: scaleX(0);
 }
 
 .btn--split:hover::after {
-  transform: translate(1.5em, 1.5em);
+  transform: scaleX(0);
 }
 
 .btn--split:active {
@@ -1113,11 +1077,11 @@
 }
 
 .btn--split:active::before {
-  transform: translate(-0.75em, -0.75em);
+  transform: scaleX(0.5);
 }
 
 .btn--split:active::after {
-  transform: translate(0.75em, 0.75em);
+  transform: scaleX(0.5);
 }
 
 /* ==========================================================
@@ -1136,6 +1100,19 @@
   padding: var(--space-md) var(--space-xl);
   font-size: var(--text-base);
   min-height: 3.25rem;
+}
+
+/* Expand effect needs reserved horizontal space for the label slide + arrow
+   reveal. Per-size rules at (0,2,0) win over .btn--sm/.btn--lg padding (0,1,0)
+   so the reservation survives no matter which size is set. */
+.btn--sm.btn--expand {
+  padding-left: calc(var(--space-md) + 1.5em);
+  padding-right: calc(var(--space-md) + 1.5em);
+}
+
+.btn--lg.btn--expand {
+  padding-left: calc(var(--space-xl) + 1.5em);
+  padding-right: calc(var(--space-xl) + 1.5em);
 }
 
 /* ==========================================================
@@ -1235,30 +1212,14 @@
   border-bottom-right-radius: 0;
 }
 
-/* Hover none — only flatten on click-open, not hover */
-[data-hover="none"] .dropdown-wrapper:not(.open):hover .btn--dropdown {
-  border-bottom-left-radius: var(--radius-md);
-  border-bottom-right-radius: var(--radius-md);
-}
-
-/* Hover none — no colour change on dropdown button */
-[data-hover="none"] .btn--dropdown:hover {
-  background: transparent;
-  color: var(--btn-dropdown-text);
-  border-color: var(--_btn-brand);
-}
-
 /* Dropdown selected — neutral border + tint */
 .form-field.has-value .btn--dropdown {
   border-color: var(--neutral-mid);
   background: color-mix(in oklch, var(--neutral-mid) 8%, var(--_field-hover-base, transparent));
 }
 
-/* Dropdown selected + hover-none — stay neutral */
-[data-hover="none"] .form-field.has-value .btn--dropdown:hover {
-  border-color: var(--neutral-mid);
-  background: color-mix(in oklch, var(--neutral-mid) 8%, var(--_field-hover-base, transparent));
-}
+/* Dropdown hover-none rules (click-only open, no colour change on hover)
+   live in src/styles/gates/hover-gate.css. */
 
 .dropdown-menu {
   position: absolute;
@@ -1287,12 +1248,8 @@
   transition: max-height var(--hover-duration) var(--ease-default), opacity var(--hover-duration-fast) var(--ease-default), visibility 0s;
 }
 
-/* Hover none — only click (.show) opens, not hover */
-[data-hover="none"] .dropdown-wrapper:hover .dropdown-menu:not(.show) {
-  max-height: 0;
-  opacity: 0;
-  visibility: hidden;
-}
+/* Hover-none dropdown menu suppression (click-only open via .show class)
+   moved to src/styles/gates/hover-gate.css. */
 
 
 .dropdown-item {

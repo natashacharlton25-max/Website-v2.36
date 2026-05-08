@@ -12,7 +12,16 @@
     { "rule": "no-tiers-on-button", "scope": "root", "forbid": ["colorTier"], "note": "Button itself does NOT accept colorTier — variant styling (fill/outline/glass/glow/etc.) is preset and tier shifts would break those contracts. The nested media child (Icon/LottieIcon) CAN use colorTier freely — that's a child-atom concern, not a button-level one." },
     { "rule": "heavy-svg-icon-only", "scope": "media", "forbid": ["morphTo", "morphTrigger", "draw", "drawMode", "drawColor", "fillAnimation", "fillMode", "fillTrigger", "fillColor"], "when": "!(!root.contentButton && !root.contentButtonSplit && (root.shape === 'circle' || (typeof root.shape === 'string' && root.shape.startsWith('i-'))))", "note": "Heavy SVG effects (morph/draw/fillAnimation) are allowed on the Icon ONLY when the button is icon-only (no contentButton, shape='circle' or 'i-*'). The icon is the focal point in that case. Buttons with text labels treat the icon as supplementary chrome — heavy SVG would distract; only spin/bounce/micro.ts animations apply there." },
     { "rule": "icon-contrast-on-fill", "_runtime": true, "_condition": "(variant === 'fill' || variant === 'glow' || variant === 'rainbow-glow') && media && ((media.brandColor && media.brandColor === brandColor) || (media.rainbowColor && media.rainbowColor === rainbowColor)) && (media.colorTier ?? 'base') === 'base'", "_action": "Button strips the matching colour props from the child media spread so the child falls back to inheriting currentColor — Button.css computes this as an oklch lightness inversion of --_color, producing visible contrast against the filled background. Mirrors Shape's same-named rule. Phase 3 CSS implements the oklch contrast on .btn--fill / .btn--glow / .btn--rainbow-glow.", "note": "Runtime auto-strip — not a JSON validation rule. Phase 2 astro implements." },
-    { "rule": "media-icon-or-lottie", "_enforced_via": "media.properties.component.enum", "note": "Button.media accepts only Icon or LottieIcon (decorative chrome). Already enforced by the media.component enum in the schema; this rule entry is documentation only." }
+    { "rule": "media-icon-or-lottie", "_enforced_via": "media.properties.component.enum", "note": "Button.media accepts only Icon or LottieIcon (decorative chrome). Already enforced by the media.component enum in the schema; this rule entry is documentation only." },
+    { "rule": "forbidden-variant-effect-combos", "_runtime": true, "_combos": [
+        { "variant": "outline",          "effect": "split" },
+        { "variant": "glow",             "effect": "colour-flow" },
+        { "variant": "glow",             "effect": "split" },
+        { "variant": "rainbow-glow",     "effect": "colour-flow" }
+      ],
+      "_action": "Strip the effect prop, keep the variant. Console warns in DEV.",
+      "note": "These specific combos conflict visually: outline+split (split's halves cover the outlined border), glow+colour-flow / glow+split / rainbow-glow+colour-flow (effects fight glow's gradient/halo). Author needs to choose either the variant OR the effect, not both."
+    }
   ],
 
   "props": {
@@ -108,7 +117,7 @@
 
     "animation": {
       "_description": "Button-level motion — stripped in reduced/textonly renders. Icon-level animation lives on the media object (media.animation, media.animationTrigger, etc.).",
-      "effect":            { "type": "string",  "required": false, "default": null, "enum": ["glint", "colour-flow", "jump", "comic", "tech", "expand", "magnetic", "spotlight", "split"], "description": "Hover/interaction effect on the button itself." },
+      "effect":            { "type": "string",  "required": false, "default": null, "enum": ["glint", "colour-flow", "jump", "tech", "magnetic", "spotlight", "split", "expand"], "description": "Hover/interaction effect on the button itself. `expand` shifts label left and reveals arrow on right. Variant chrome stays intact." },
       "speed":             { "type": "string",  "required": false, "default": null, "enum": ["slow", "normal", "fast"], "description": "Effect speed." },
       "gradientAnimated":         { "type": "boolean", "default": false, "_description": "Animate the gradient (rotation + sweep). Matches Heading/Badge/Shape gradient animation." },
       "gradientAnimateDirection": { "type": "string", "enum": ["cw", "ccw", "sway"], "_note": "Implicit baseline is 'cw' (no [data-grad-anim-dir] attribute emitted). Omit to use." },

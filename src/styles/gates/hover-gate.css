@@ -22,14 +22,20 @@
 }
 
 /* ── None — zero decorative hover change ── */
-/* Only zeroes hover transition tokens. Animation/transition
-   speed is owned by motion-gate.css. */
+/* Zeros hover transition tokens. Animation/transition speed is owned
+   by motion-gate.css. Also remaps any tokenised hover-final-value
+   tokens to their rest equivalents so variants that use them (e.g.
+   .btn--neumorphic uses --btn-shadow-hover) get rest values back via
+   the cascade — no per-variant override needed. */
 [data-hover="none"] {
   --hover-duration: 0s;
   --hover-duration-fast: 0s;
   --hover-duration-slow: 0s;
   --hover-duration-extralong: 0s;
   --hover-state: 0;
+  /* Remap shadow-hover slot to rest shadow so .btn--neumorphic:hover
+     paints the rest shadow on hover. */
+  --btn-shadow-hover: var(--btn-shadow);
 }
 
 
@@ -328,3 +334,673 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 [data-hover="none"] .link--animate-text-slide:hover { background-position: -100%; }
 [data-hover="none"] .link--animate-text-slide:hover::before { width: 0; }
 [data-hover="none"] .link--animate-squiggle:hover::after { animation: none; background-color: var(--_link-color); }
+
+
+/* ══════════════════════════════════════════════════════════════
+   Button hover gates
+
+   data-hover="none": every variant's hover state resolves back to
+   the rest state — no fill change, no transform, no shadow shift.
+   Pseudo-element effects (glint sweep, expand circle, spotlight,
+   split halves, comic sweep) freeze in their rest position.
+   Animations (glow loop, rainbow halo) freeze.
+
+   Dropdown is the one functional exception: hover doesn't open
+   the menu in this mode; only the JS-added .show class does.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Base — match .btn rest state. Each variant's :hover rule still fires
+   under data-hover="none" but these overrides resolve every paint-changing
+   property back to the rest values. transition durations are 0s thanks
+   to the token resets above so changes happen instantly anyway.
+   Color is intentionally NOT set here — variants whose hover changes
+   colour (fill, neumorphic-3d) have explicit overrides; the rest leave
+   variant :hover to set the same formula as rest, so cascade preserves
+   the rest text colour without my rule forcing oklch contrast on
+   variants where rest text comes from .color--text or other tokens. */
+[data-hover="none"] .btn:hover {
+  background-color: var(--_btn-brand);
+  box-shadow: var(--btn-shadow);
+  transform: none;
+  filter: none;
+}
+
+/* Fill variant — Button.css's `.btn--fill:not(.btn--dropdown):not(...)`
+   chain at (0,10,1) beats the (0,3,0) generic rule above and paints
+   --_btn-brand-dark on hover. Match its :not() chain so primary/
+   secondary/neutral hold their rest fill in hover-none. (0,11,1) wins. */
+[data-hover="none"] .btn--fill:not(.btn--dropdown):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):not(.gradient--animated):not(:disabled):not([aria-disabled="true"]):hover,
+[data-hover="none"] .btn--fill:not(.btn--dropdown):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):not(.gradient--animated):not(:disabled):not([aria-disabled="true"]):active {
+  background-color: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  box-shadow: var(--btn-shadow);
+  transform: none;
+}
+
+/* Dark mode fill — theme-luminance-dark.css's `.btn--fill:not(.btn--comic)
+   :not(...)` rule at (0,8,0) wins over the generic hover-none. Match its
+   chain to beat with (0,9,1). border-color: transparent matches the dark
+   rest's `border: 2px solid transparent` so the primary-contrast border
+   doesn't appear on hover. */
+[data-hover="none"][data-mode="dark"] .btn--fill:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):not(.gradient--animated):hover {
+  background-color: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  box-shadow: var(--btn-shadow);
+  border-color: transparent;
+  transform: none;
+}
+
+/* Dark mode colour-flow — dark rest is `color-mix(brand 25%)`, my generic
+   hover-none rule above uses 10% (light rest). Restate the 25% mix here. */
+[data-hover="none"][data-mode="dark"] .btn--colour-flow:hover {
+  background: color-mix(in oklch, var(--_btn-brand) 25%, transparent);
+}
+
+/* Dark mode tech — theme-luminance-dark.css has per-colour rules at
+   (0,4,0) like `.btn--tech.btn--primary:hover { background-color:
+   var(--primary-emphasis); ... }` that change bg/border/colour on hover.
+   Match each colour at (0,5,1) to restore rest values. The ::before
+   pseudo (the offset frame) also has its own border-color hover change
+   per colour — restore that to rest too at (0,5,2). */
+[data-hover="none"][data-mode="dark"] .btn--tech.btn--primary:hover {
+  background-color: var(--primary-base);
+  border-color: var(--primary-emphasis);
+  color: var(--primary-mid);
+}
+
+[data-hover="none"][data-mode="dark"] .btn--tech.btn--primary:hover::before {
+  border-color: var(--primary-emphasis);
+}
+
+[data-hover="none"][data-mode="dark"] .btn--tech.btn--secondary:hover {
+  background-color: var(--secondary-base);
+  border-color: var(--secondary-emphasis);
+  color: var(--secondary-mid);
+}
+
+[data-hover="none"][data-mode="dark"] .btn--tech.btn--secondary:hover::before {
+  border-color: var(--secondary-emphasis);
+}
+
+[data-hover="none"][data-mode="dark"] .btn--tech.btn--neutral:hover {
+  background-color: var(--neutral-base);
+  border-color: var(--neutral-emphasis);
+  color: var(--neutral-mid);
+}
+
+[data-hover="none"][data-mode="dark"] .btn--tech.btn--neutral:hover::before {
+  border-color: var(--neutral-emphasis);
+}
+
+/* Dark mode fill+split — bumped specificity. (0,5,0) wasn't winning
+   for some reason; try (0,6,0) by chaining .btn. */
+[data-hover="none"][data-mode="dark"] .btn.btn--fill.btn--split:hover {
+  border-color: transparent;
+}
+
+/* Dark mode liquid-glass — theme-luminance-dark.css gives liquid-glass
+   a primary-base border + brand-glow shadow at rest, which the variant
+   :hover then intensifies. My generic hover-none rule uses light-mode
+   tokens (--liquid-tint, --liquid-inner/outer-shadow) which don't
+   match the dark rest values. Mirror the dark rest exactly. (0,4,1). */
+[data-hover="none"][data-mode="dark"] .btn--liquid-glass:not(.gradient--animated):hover {
+  border: 1px solid var(--primary-base);
+  background: var(--liquid-tint);
+  box-shadow:
+    inset 0 0 10px color-mix(in oklch, var(--primary-base) 40%, transparent),
+    0 0 9px 3px color-mix(in oklch, var(--primary-base) 10%, transparent);
+}
+
+/* Dark mode glassic — theme-luminance-dark.css gives glassic an inner
+   brand glow + 3D layers at rest, hover intensifies. Mirror dark rest. */
+[data-hover="none"][data-mode="dark"] .btn--glassic:hover {
+  border: 1px solid var(--primary-base);
+  background: var(--glass-bg);
+  transform: none;
+  box-shadow:
+    inset 0 0 10px color-mix(in oklch, var(--primary-base) 40%, transparent),
+    0 0 9px 3px color-mix(in oklch, var(--primary-base) 10%, transparent),
+    0 0.0625em 0 0 var(--primary-mid),
+    0 0.125em 0 0 var(--primary-base),
+    0 0.25em 0 0 var(--primary-base),
+    0 0.3125em 0 0 var(--primary-base),
+    0 0.375em 0 0 var(--primary-emphasis),
+    0 0.425em 0 0 color-mix(in oklch, var(--shadow-Black) 10%, transparent),
+    0 0.425em 0.5em 0 var(--primary-base);
+}
+
+/* Variant resets — each restates the variant's rest-state values so the
+   variant's :hover rule can't paint over them. */
+[data-hover="none"] .btn--outline:not(.gradient--animated):hover {
+  background-color: transparent;
+  color: var(--_btn-brand);
+  border-color: var(--_btn-brand);
+  box-shadow: none;
+}
+
+[data-hover="none"] .btn--ghost:not(.gradient--animated):hover {
+  background-color: var(--btn-ghost-bg, transparent);
+  color: var(--btn-ghost-text);
+  border-color: var(--btn-ghost-border);
+  box-shadow: none;
+}
+
+[data-hover="none"] .btn--glass:hover {
+  background: var(--btn-glass-bg);
+  color: var(--btn-glass-text);
+  border-color: var(--btn-glass-border);
+}
+
+[data-hover="none"] .btn--liquid-glass:not(.gradient--animated):hover {
+  color: var(--btn-glass-text);
+  border-color: color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
+}
+
+[data-hover="none"] .btn--glassic:hover {
+  color: var(--btn-glass-text);
+  transform: none;
+}
+
+/* Neumorphic-3d hover-none — restate the FULL rest box-shadow so the
+   variant :hover rule's pressed shadow doesn't paint over it. (0,3,0)
+   beats variant :hover (0,2,0). */
+[data-hover="none"] .btn--neumorphic-3d:hover {
+  background: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  transform: none;
+  box-shadow:
+    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
+}
+
+/* Neumorphic-inner hover-none — variant hover changes bg only (shadow
+   matches rest already), but the GENERIC .btn:hover rule above sets
+   box-shadow: var(--btn-shadow), which would overwrite the inset
+   pressed shadow. Restate it. */
+[data-hover="none"] .btn--neumorphic-inner:not(.gradient--animated):hover {
+  background: var(--_btn-brand-light);
+  box-shadow: var(--shadow-neu-pressed);
+}
+
+/* Glassic hover-none — same pattern as neumorphic-3d, restate rest bg
+   + transform + full box-shadow. */
+[data-hover="none"] .btn--glassic:hover {
+  background: var(--glass-bg);
+  transform: none;
+  box-shadow:
+    inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
+    -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
+    inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+}
+
+/* Liquid-glass hover-none — restore rest bg/border/shadow. */
+[data-hover="none"] .btn--liquid-glass:not(.gradient--animated):hover {
+  background: var(--liquid-tint);
+  border-color: color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
+  box-shadow:
+    var(--liquid-inner-shadow),
+    var(--liquid-outer-shadow),
+    var(--shadow-md);
+}
+
+/* Animated gradient hover-none — kill the lift transform AND the active
+   dip. Halo opacity is left to fade in/out (it's not movement, just a
+   visual change), but if you want to suppress that too, add an opacity
+   override here. (0,3,1) beats Button.css's (0,2,1) hover/active rules. */
+[data-hover="none"] .btn.gradient--animated:hover,
+[data-hover="none"] .btn.gradient--animated:active,
+[data-hover="none"] .btn.gradient--animated:focus-visible {
+  transform: none !important;
+}
+
+/* Expand hover-none — disable the entire reveal mechanism. Arrow ::before
+   and user-icon both display:none. Label keeps no transform and no
+   transition. Reserved hover-shift padding shrinks back to the size's
+   default since there's nothing to slide. Eliminates every hover-driven
+   layout/transform change for expand variants. */
+[data-hover="none"] .btn--expand::before {
+  display: none !important;
+}
+
+[data-hover="none"] .btn--expand.btn--has-icon .btn__icon {
+  display: none !important;
+}
+
+[data-hover="none"] .btn--expand .btn__label {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+[data-hover="none"] .btn--expand:hover .btn__label,
+[data-hover="none"] .btn--expand:focus-visible .btn__label {
+  transform: none !important;
+}
+
+[data-hover="none"] .btn--expand {
+  padding-left: var(--space-lg) !important;
+  padding-right: var(--space-lg) !important;
+}
+
+[data-hover="none"] .btn--sm.btn--expand {
+  padding-left: var(--space-md) !important;
+  padding-right: var(--space-md) !important;
+}
+
+[data-hover="none"] .btn--lg.btn--expand {
+  padding-left: var(--space-xl) !important;
+  padding-right: var(--space-xl) !important;
+}
+
+/* Defensive: preserve each variant's REST background on hover when
+   .btn--expand is present. Some variants' :hover bg-paint rules don't
+   currently exclude expand — restate the rest values here so the bg
+   doesn't change on hover. (0,4,1) beats variant :hover at (0,2,0).
+   Fill keeps its rest brand bg via the generic .btn rest rule, no
+   override needed. Outline stays transparent. Ghost is already
+   handled by [data-hover="none"] .btn--ghost:not(.gradient--animated):hover. */
+[data-hover="none"] .btn--fill.btn--expand:hover,
+[data-hover="none"] .btn--fill.btn--expand:active,
+[data-hover="none"] .btn--fill.btn--expand:focus-visible {
+  background-color: var(--_btn-brand);
+}
+
+[data-hover="none"] .btn--outline.btn--expand:hover,
+[data-hover="none"] .btn--outline.btn--expand:active,
+[data-hover="none"] .btn--outline.btn--expand:focus-visible {
+  background-color: transparent;
+  color: var(--_btn-brand);
+  border-color: var(--_btn-brand);
+}
+
+[data-hover="none"] .btn--ghost.btn--expand:hover,
+[data-hover="none"] .btn--ghost.btn--expand:active,
+[data-hover="none"] .btn--ghost.btn--expand:focus-visible {
+  background-color: var(--btn-ghost-bg, transparent);
+  color: var(--btn-ghost-text);
+  border-color: var(--btn-ghost-border);
+}
+
+[data-hover="none"] .btn--glass.btn--expand:hover,
+[data-hover="none"] .btn--glass.btn--expand:active,
+[data-hover="none"] .btn--glass.btn--expand:focus-visible {
+  background: var(--btn-glass-bg);
+  color: var(--btn-glass-text);
+  border-color: var(--btn-glass-border);
+}
+
+[data-hover="none"] .btn--liquid-glass.btn--expand:hover,
+[data-hover="none"] .btn--liquid-glass.btn--expand:active,
+[data-hover="none"] .btn--liquid-glass.btn--expand:focus-visible {
+  background: var(--liquid-tint);
+  color: var(--btn-glass-text);
+  border-color: color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
+}
+
+[data-hover="none"] .btn--glassic.btn--expand:hover,
+[data-hover="none"] .btn--glassic.btn--expand:active,
+[data-hover="none"] .btn--glassic.btn--expand:focus-visible {
+  background: var(--glass-bg);
+  color: var(--btn-glass-text);
+}
+
+[data-hover="none"] .btn--neumorphic.btn--expand:hover,
+[data-hover="none"] .btn--neumorphic.btn--expand:active,
+[data-hover="none"] .btn--neumorphic.btn--expand:focus-visible {
+  background-color: var(--_btn-brand);
+}
+
+[data-hover="none"] .btn--neumorphic-3d.btn--expand:hover,
+[data-hover="none"] .btn--neumorphic-3d.btn--expand:active,
+[data-hover="none"] .btn--neumorphic-3d.btn--expand:focus-visible {
+  background: var(--_btn-brand);
+}
+
+[data-hover="none"] .btn--neumorphic-inner.btn--expand:hover,
+[data-hover="none"] .btn--neumorphic-inner.btn--expand:active,
+[data-hover="none"] .btn--neumorphic-inner.btn--expand:focus-visible {
+  background: var(--_btn-brand-light);
+}
+
+/* Glow hover-none — kill the gradient bg fill, animation, and the
+   ::after halo. Match .btn rest's oklch contrast formula for color so
+   variant :hover (which uses the same formula) is a no-op visually. */
+[data-hover="none"] .btn--glow:hover {
+  background: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  animation: none;
+  box-shadow: none;
+}
+
+[data-hover="none"] .btn--glow::after,
+[data-hover="none"] .btn--glow:hover::after {
+  animation: none;
+  opacity: 0;
+  filter: none;
+}
+
+/* Rainbow-glow hover-none — variant hover changes shadow to var(--shadow-sm)
+   and color to var(--neutral-emphasis); both differ from rest. Rest shadow
+   is the custom 2-layer pattern below; rest text is the .btn oklch
+   contrast formula (which for rainbow-glow's --_btn-brand: var(--page-bg)
+   resolves to contrast against the page bg). Match rest exactly. */
+[data-hover="none"] .btn--rainbow-glow:hover {
+  box-shadow:
+    0 4px 0.75em color-mix(in oklch, var(--neutral-emphasis) 25%, transparent),
+    0 2px 4px color-mix(in oklch, var(--neutral-emphasis) 15%, transparent);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+}
+
+[data-hover="none"] .btn-rainbow-glow-wrap:hover::after {
+  opacity: 0;
+  animation: none;
+}
+
+/* Colour-flow hover-none — restore rest bg/box-shadow on the button,
+   and rest positions on the blob pseudos so they stay below the button.
+   Color: oklch contrast against --_btn-brand matches rest formula —
+   needed for outline+colour-flow combos where my outline hover-none
+   would otherwise set color to var(--_btn-brand) (brand instead of
+   contrast). colour-flow rule comes after outline in this file → wins
+   source-order at tied (0,3,0) specificity. */
+[data-hover="none"] .btn--colour-flow:hover {
+  background: color-mix(in oklch, var(--_btn-brand) 10%, transparent);
+  box-shadow: var(--shadow-btn);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+}
+
+[data-hover="none"] .btn--colour-flow:hover::before {
+  top: 100%;
+  background-color: color-mix(in oklch, var(--color-Black) 10%, transparent);
+  transform: translateX(-50%) scaleY(1) scaleX(1.25);
+}
+
+[data-hover="none"] .btn--colour-flow:hover::after {
+  top: 180%;
+  background-color: color-mix(in oklch, var(--_btn-brand) 70%, transparent);
+  transform: translateX(-50%) scaleY(1) scaleX(1.45);
+}
+
+/* Tech hover-none — kill button transform + ::before swap. Don't set
+   background-color so outline+tech preserves transparent bg from the
+   outline override. */
+[data-hover="none"] .btn--tech:hover {
+  transform: none;
+}
+
+[data-hover="none"] .btn--tech:hover::before {
+  transform: translate(-5px, -5px);
+}
+
+/* Expand hover-none — variant rest is `background: transparent` (the
+   button itself is invisible; the ::before circle is the only visible
+   chrome). The generic .btn:hover rule sets bg = var(--_btn-brand)
+   which would fill the whole button on hover. Force transparent here.
+   Then suppress ::before width/border-radius/bg, icon rotation, and
+   chevron transform. */
+[data-hover="none"] .btn--expand:hover {
+  background: transparent;
+  color: oklch(from var(--page-bg) round(1.21 - l) 0 0);
+  box-shadow: none;
+}
+
+/* Expand pseudo-element rules removed — new expand variant uses flex
+   width/padding transitions, no ::before circle. The `.btn--expand:hover`
+   width-collapse rule earlier in this file handles hover-none. */
+
+/* Pseudo-element hover effects — return to rest position. */
+[data-hover="none"] .btn--glint:hover::before { left: -100%; }
+[data-hover="none"] .btn--colour-flow:hover::before { top: 100%; }
+[data-hover="none"] .btn--colour-flow:hover::after { top: 180%; }
+/* expand has no ::before anymore — moved to flex/width based design. */
+[data-hover="none"] .btn--spotlight:hover::before { opacity: 0; }
+[data-hover="none"] .btn--split:hover::before { transform: none; }
+[data-hover="none"] .btn--split:hover::after { transform: none; }
+[data-hover="none"] .btn--jump:hover { transform: none; }
+[data-hover="none"] .btn--tech:hover { transform: none; }
+
+/* Split's rest sets `background: var(--_btn-brand-dark)` — visible as a
+   ring through the transparent fill border. Generic .btn:hover above
+   sets `background-color: var(--_btn-brand)`, which would change the
+   ring colour from brand-dark to brand on hover. Restate brand-dark. */
+[data-hover="none"] .btn--split:hover {
+  background: var(--_btn-brand-dark);
+}
+
+/* Rainbow glow — freeze the continuous ring animation and hide halo. */
+[data-hover="none"] .btn--rainbow-glow {
+  animation: none;
+}
+[data-hover="none"] .btn--rainbow-glow::after {
+  animation: none;
+  opacity: 0;
+}
+
+/* Instant — colour changes, no movement/transform. Pseudo-element
+   transitions instant too. */
+[data-hover="instant"] .btn:hover {
+  transform: none;
+}
+
+/* Pseudo-element transitions — variant effects use their own duration
+   tokens (--glint-speed, --transition-extralong, etc.) that aren't
+   affected by the hover-duration resets at the top of this file. Force
+   transition: none on hover-none and instant so glint sweeps, comic
+   sweeps, expand circles etc. don't animate even though their rest-state
+   targets are restored above. */
+[data-hover="none"] .btn::before,
+[data-hover="none"] .btn::after,
+[data-hover="instant"] .btn::before,
+[data-hover="instant"] .btn::after {
+  transition: none;
+  animation: none;
+}
+
+/* Dropdown — click-only open in hover-none. The trigger doesn't change
+   colour; the wrapper's :hover doesn't open the menu (only the JS-added
+   .show class does); the trigger keeps its rounded bottom corners until
+   the menu actually opens. The :focus-within case matters because after
+   clicking-to-close, the trigger keeps focus and the highlight-links
+   rule at (0,3,0) would otherwise hold corners flat. */
+/* Use .dropdown-btn (the JS hook class) rather than .btn--dropdown — the
+   render-controller strips btn--* modifiers in textonly mode, so
+   .btn--dropdown only exists in non-textonly modes. .dropdown-btn
+   survives the strip and is the reliable target. */
+[data-hover="none"] .dropdown-wrapper:not(.open):hover .dropdown-btn,
+[data-hover="none"] .dropdown-wrapper:not(.open):focus-within .dropdown-btn {
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
+}
+
+/* Textonly-only (no highlight-links): rest radius is --radius-sm from
+   textonly.css's .btn rule. When highlight-links is ALSO active, its
+   .dropdown-btn rule wins source-order with --radius-md — so this rule
+   is excluded then via :not([data-highlight-links]) and the generic
+   --radius-md restore above takes over. */
+[data-hover="none"][data-render="textonly"]:not([data-highlight-links]) .dropdown-wrapper:not(.open):hover .dropdown-btn,
+[data-hover="none"][data-render="textonly"]:not([data-highlight-links]) .dropdown-wrapper:not(.open):focus-within .dropdown-btn {
+  border-bottom-left-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+}
+
+[data-hover="none"] .dropdown-btn:hover {
+  background: transparent;
+  color: var(--btn-dropdown-text);
+  border-color: var(--_btn-brand);
+}
+
+[data-hover="none"] .form-field.has-value .dropdown-btn:hover {
+  border-color: var(--neutral-mid);
+  background: color-mix(in oklch, var(--neutral-mid) 8%, var(--_field-hover-base, transparent));
+}
+
+[data-hover="none"] .dropdown-wrapper:hover .dropdown-menu:not(.show) {
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Chevron — Button.css rotates the caret -90deg on wrapper:hover and
+   -180deg on .open (click). In hover-none, suppress the hover rotation
+   only — the .open rotation still fires (and stays at -180deg) because
+   we exclude .open from this selector. When the menu is closed and
+   cursor is on the wrapper, chevron stays at 0deg. */
+[data-hover="none"] .dropdown-wrapper:not(.open):hover .btn__chevron {
+  transform: rotate(0deg);
+}
+
+/* Menu items — Button.css's .dropdown-item:hover (and .dropdown-theme--*
+   variants) paint a tinted hover bg + contrast text. Suppress in
+   hover-none so items hold their rest appearance. (0,3,0) beats the
+   per-theme (0,2,0) and the plain (0,1,1). */
+[data-hover="none"] .dropdown-item:hover,
+[data-hover="none"] .dropdown-theme--primary .dropdown-item:hover,
+[data-hover="none"] .dropdown-theme--secondary .dropdown-item:hover,
+[data-hover="none"] .dropdown-theme--neutral .dropdown-item:hover {
+  background-color: transparent;
+  color: var(--btn-dropdown-text);
+}
+
+/* Textonly + hover-none + dropdown items — textonly.css paints a
+   highlight-link-color text + inset-shadow border on item hover at
+   (0,4,0). The plain hover-none rule above ties on specificity but
+   loses cascade order (textonly.css loads after hover-gate.css).
+   Bumped to (0,5,0) here so item hover truly holds rest state. */
+[data-hover="none"][data-render="textonly"] .dropdown-item:hover,
+[data-hover="none"][data-render="textonly"] .dropdown-theme--primary .dropdown-item:hover,
+[data-hover="none"][data-render="textonly"] .dropdown-theme--secondary .dropdown-item:hover,
+[data-hover="none"][data-render="textonly"] .dropdown-theme--neutral .dropdown-item:hover {
+  background: transparent;
+  color: var(--text-emphasis);
+  box-shadow: none;
+}
+
+/* Highlight-links + hover-none + dropdown items — preserve rest state
+   exactly: same colour (--text-emphasis), keep the underline (which
+   Button.css's .dropdown-item:hover at (0,2,0) sets to none — beat it
+   by matching the rest's text-decoration: underline here too). */
+[data-hover="none"][data-highlight-links] .dropdown-item:hover,
+[data-hover="none"][data-highlight-links] .dropdown-theme--primary .dropdown-item:hover,
+[data-hover="none"][data-highlight-links] .dropdown-theme--secondary .dropdown-item:hover,
+[data-hover="none"][data-highlight-links] .dropdown-theme--neutral .dropdown-item:hover {
+  background: transparent;
+  color: var(--text-emphasis);
+  text-decoration: underline;
+  text-decoration-color: var(--highlight-link-color);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+/* Click feedback — underline persists at --neutral-mid after click via
+   the .highlight-visited class (JS in a11y-panel.ts adds it on any
+   click in highlight-links mode). :active alone wouldn't persist past
+   the mouse release; the visited class keeps the indicator visible
+   afterwards as a "you've clicked this" cue. */
+[data-hover="none"][data-highlight-links] .dropdown-item.highlight-visited,
+[data-hover="none"][data-highlight-links] .dropdown-theme--primary .dropdown-item.highlight-visited,
+[data-hover="none"][data-highlight-links] .dropdown-theme--secondary .dropdown-item.highlight-visited,
+[data-hover="none"][data-highlight-links] .dropdown-theme--neutral .dropdown-item.highlight-visited {
+  text-decoration-color: var(--neutral-mid);
+}
+
+/* Dark mode hover-none + highlight-links menu items — the
+   highlight-links.css per-theme rule at (0,5,0) wins over my (0,4,0)
+   light-mode hover-none rule above. Match its [data-mode="dark"] chain
+   to bump to (0,6,0). */
+[data-hover="none"][data-mode="dark"][data-highlight-links] .dropdown-item:hover,
+[data-hover="none"][data-mode="dark"][data-highlight-links] .dropdown-theme--primary .dropdown-item:hover,
+[data-hover="none"][data-mode="dark"][data-highlight-links] .dropdown-theme--secondary .dropdown-item:hover,
+[data-hover="none"][data-mode="dark"][data-highlight-links] .dropdown-theme--neutral .dropdown-item:hover {
+  background: transparent;
+  color: var(--text-emphasis);
+  text-decoration: underline;
+  text-decoration-color: var(--highlight-link-color);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+[data-hover="none"][data-mode="dark"][data-highlight-links] .dropdown-item.highlight-visited,
+[data-hover="none"][data-mode="dark"][data-highlight-links] .dropdown-theme--primary .dropdown-item.highlight-visited,
+[data-hover="none"][data-mode="dark"][data-highlight-links] .dropdown-theme--secondary .dropdown-item.highlight-visited,
+[data-hover="none"][data-mode="dark"][data-highlight-links] .dropdown-theme--neutral .dropdown-item.highlight-visited {
+  text-decoration-color: var(--neutral-mid);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Hover-none + highlight-links / textonly combos
+
+   Both modes add their own hover feedback (highlight-link fill ring,
+   textonly inset border) via specificity-keyed rules that don't check
+   the hover gate. Suppress them when data-hover="none" is active, so
+   buttons truly hold their rest state on hover.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Textonly + hover-none — no border/shadow shift, and reset background.
+   The base [data-hover="none"] .btn:hover rule above forces bg to
+   var(--_btn-brand) (matching .btn's rest), but textonly's rest is
+   transparent — so the matched-spec hover-none rule paints the brand
+   colour over textonly's transparent. Explicit transparent here wins. */
+[data-hover="none"][data-render="textonly"] .btn:hover {
+  background: transparent;
+  color: var(--text-emphasis);
+  border-color: var(--neutral-mid);
+  box-shadow: none;
+}
+
+/* Highlight-links light + hover-none — no fill on hover. Dropdown
+   trigger excluded via :not(.btn--dropdown):not(.dropdown-btn) — its
+   own dedicated rule below handles it (with the highlight-link border
+   preserved). */
+[data-hover="none"][data-highlight-links] .btn:not(.dropdown-btn):not(:disabled):not([aria-disabled="true"]):hover,
+[data-hover="none"][data-highlight-links] .btn--fill:not(.btn--dropdown):not(.dropdown-btn):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):not(:disabled):not([aria-disabled="true"]):hover {
+  background: transparent;
+  color: var(--neutral-emphasis);
+  border-color: var(--highlight-link-color);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Highlight-links dark + hover-none — same suppression. Dropdown
+   excluded so the dedicated dropdown rule below keeps its border. */
+[data-hover="none"][data-mode="dark"][data-highlight-links] .btn:not(.dropdown-btn):not(:disabled):not([aria-disabled="true"]):hover,
+[data-hover="none"][data-mode="dark"][data-highlight-links] .btn--fill:not(.btn--dropdown):not(.dropdown-btn):not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):not(:disabled):not([aria-disabled="true"]):hover {
+  background: transparent;
+  color: var(--neutral-emphasis);
+  border: none;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Dropdown trigger override — same rule applies in highlight-links so
+   the trigger doesn't pick up a hover fill. */
+[data-hover="none"][data-highlight-links] .dropdown-btn:hover {
+  background: transparent;
+  color: var(--neutral-emphasis);
+  border-color: var(--highlight-link-color);
+}
+
+/* Dropdown trigger in dark+highlight-links+hover-none — match the
+   theme-luminance-dark `:not()` chain to beat its hover rule
+   (`.btn--fill:not(.btn--comic):not(...):not(.btn--tech):hover` at
+   (0,8,0)) which otherwise sets a brand-dark border-colour that reads
+   as "disappeared" against the dark bg. (0,11,0) wins. */
+[data-hover="none"][data-mode="dark"][data-highlight-links] .btn.dropdown-btn:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover {
+  background: transparent;
+  color: var(--neutral-emphasis);
+  border: 2px solid var(--highlight-link-color);
+}

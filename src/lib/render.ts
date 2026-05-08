@@ -67,10 +67,13 @@ function extractProps(item: Record<string, any>): Record<string, any> {
 //     scale icons. Off by default; author opts in by setting
 //     noExplainer: false on a specific Icon if needed.
 
-// Empty for now — animation triggers fire correctly even with explainers
-// present (see trigger==='hover' guard in animation-config.ts). Add atom
-// names here if a future cross-atom rule needs to suppress explainers.
-const NO_EXPLAINER_PARENTS = new Set<string>([]);
+// Animation triggers fire correctly even with explainers present (see
+// trigger==='hover' guard in animation-config.ts). Atoms listed here
+// suppress the explainer wrapper on their nested Icon/LottieIcon — the
+// AAC card stack is too heavy for chrome-scale icons inside compact UI
+// surfaces (Button labels, etc.) and the wrapper itself takes layout
+// space that pushes the parent's content off-centre.
+const NO_EXPLAINER_PARENTS = new Set<string>(['Button']);
 
 function applyPipelineDefaults(node: RenderNode): RenderNode {
   if (!node || typeof node !== 'object') return node;

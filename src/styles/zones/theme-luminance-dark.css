@@ -44,9 +44,15 @@
   --shadow-xl: 0 16px 32px 0 var(--shadow-Black);
   --shadow-2xl: 0 24px 48px 0 var(--shadow-Black);
   --shadow-elevated: 0 0 0 1px var(--shadow-Black), 0 0.5px 0.8px var(--shadow-Black), 0 1.5px 3px var(--shadow-Black), 0 6px 12px var(--shadow-Black);
-  --shadow-neu-raised: 8px 8px 16px var(--shadow-Black);
-  --shadow-neu-hover: inset 6px 6px 12px var(--shadow-Black);
-  --shadow-neu-pressed: inset 8px 8px 16px var(--shadow-Black);
+  --shadow-neu-raised:
+    8px 8px 16px color-mix(in oklch, var(--shadow-Black) 60%, transparent),
+    -8px -8px 16px color-mix(in oklch, var(--shadow-White) 8%, transparent);
+  --shadow-neu-hover:
+    inset 6px 6px 12px color-mix(in oklch, var(--shadow-Black) 70%, transparent),
+    inset -6px -6px 12px color-mix(in oklch, var(--shadow-White) 5%, transparent);
+  --shadow-neu-pressed:
+    inset 8px 8px 16px color-mix(in oklch, var(--shadow-Black) 80%, transparent),
+    inset -8px -8px 16px color-mix(in oklch, var(--shadow-White) 4%, transparent);
 
   /* SVG drop shadows — larger spread for dark backgrounds */
   --svg-drop-shadow: drop-shadow(0 3px 6px var(--shadow-Black));
@@ -323,15 +329,6 @@
     0 0 40px color-mix(in oklch, var(--shadow-White) 5%, transparent);
 }
 
-/* ── Neumorphic pressed — dark bg can't show black inset, use deeper dark ── */
-
-[data-mode="dark"] {
-  --shadow-neu-pressed: inset 2px 5px 10px var(--shadow-Black);
-  --shadow-neu-raised:
-    8px 8px 16px var(--shadow-Black),
-    -8px -8px 16px color-mix(in oklch, var(--shadow-White) 4%, transparent);
-}
-
 /* ── Comic — border invisible when --color-Black matches bg ── */
 
 [data-mode="dark"] .card--comic {
@@ -429,43 +426,6 @@
    mode without needing a per-mode override. The old override forced
    --_btn-brand-dark to equal --_btn-brand, killing hover feedback. */
 
-/* Highlight links — strip dark mode button fills */
-[data-mode="dark"][data-highlight-links] .btn:not(.dropdown-btn),
-[data-mode="dark"][data-highlight-links] .btn--primary:not(.dropdown-btn),
-[data-mode="dark"][data-highlight-links] .btn--secondary:not(.dropdown-btn),
-[data-mode="dark"][data-highlight-links] .btn--neutral:not(.dropdown-btn) {
-  background: transparent !important;
-  border: none !important;
-  color: var(--neutral-mid) !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-[data-mode="dark"][data-highlight-links] .btn:not(.dropdown-btn):hover,
-[data-mode="dark"][data-highlight-links] .btn--primary:not(.dropdown-btn):hover,
-[data-mode="dark"][data-highlight-links] .btn--secondary:not(.dropdown-btn):hover,
-[data-mode="dark"][data-highlight-links] .btn--neutral:not(.dropdown-btn):hover {
-  background: transparent !important;
-  transform: none !important;
-}
-
-/* ALL buttons stripped in dark + highlight — one rule to beat everything */
-[data-mode="dark"][data-highlight-links] .btn:not(.dropdown-btn):not(.dropdown-item) {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  text-shadow: none !important;
-  color: var(--neutral-mid) !important;
-  transform: none !important;
-}
-
-[data-mode="dark"][data-highlight-links] .btn:not(.dropdown-btn):not(.dropdown-item)::before,
-[data-mode="dark"][data-highlight-links] .btn:not(.dropdown-btn):not(.dropdown-item)::after {
-  display: none !important;
-}
-
 /* Transparent border for fill variants only (not effects that own their border) */
 [data-mode="dark"] .btn--fill:not(.btn--tech):not(.btn--comic):not(.btn--dropdown) {
   border: 2px solid transparent;
@@ -486,12 +446,6 @@
 [data-mode="dark"] .btn--tech.btn--neutral::before { border-color: var(--neutral-emphasis); }
 [data-mode="dark"] .btn--tech.btn--neutral:hover { background-color: var(--neutral-emphasis); border-color: var(--neutral-base); color: var(--neutral-mid); }
 [data-mode="dark"] .btn--tech.btn--neutral:hover::before { border-color: var(--neutral-base); }
-
-/* Expand: no border — circle handles it */
-[data-mode="dark"] .btn--expand {
-  border: none;
-}
-
 
 /* Dropdown button dark — visible text + solid brand border */
 [data-mode="dark"] .btn.btn--dropdown {
@@ -523,29 +477,12 @@
     0 0 9px 3px color-mix(in oklch, var(--neutral-base) 10%, transparent);
 }
 
-/* Comic dark: set the SLOT tokens (not box-shadow directly) so the
-   hover/active shadow geometry from Button.css (.btn--comic:hover ->
-   2px 3px 0, :active -> 0 0 0) keeps the press-down illusion intact.
-   Setting box-shadow directly here had higher specificity than the
-   :hover rule and froze the shadow at 4px/6px on hover. */
-[data-mode="dark"] .btn--comic.btn--primary   { --btn-comic-border: var(--primary-mid);   --btn-comic-shadow: var(--primary-mid); }
-[data-mode="dark"] .btn--comic.btn--secondary { --btn-comic-border: var(--secondary-mid); --btn-comic-shadow: var(--secondary-mid); }
-[data-mode="dark"] .btn--comic.btn--neutral   { --btn-comic-border: var(--neutral-mid);   --btn-comic-shadow: var(--neutral-mid); }
-
-/* Comic dark + highlight links: strip comic styling, plain fill */
-[data-mode="dark"][data-highlight-links] .btn--comic,
-[data-mode="dark"][data-highlight="static"] .btn--comic,
-[data-mode="dark"][data-highlight="animated"] .btn--comic {
-  border-color: transparent;
-  box-shadow: none;
-}
-
 /* Colour-flow dark — more visible static bg */
 [data-mode="dark"] .btn--colour-flow {
   background: color-mix(in oklch, var(--_btn-brand) 25%, transparent);
 }
 
-[data-mode="dark"] .btn--fill:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover {
+[data-mode="dark"] .btn--fill:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):not(.gradient--animated):hover {
   background-color: var(--_btn-brand-light);
   color: var(--_btn-brand-dark);
   border-color: var(--_btn-brand-dark);

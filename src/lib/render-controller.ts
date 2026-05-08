@@ -55,9 +55,75 @@ function matchesStripPattern(cls: string): boolean {
 
 function transformTextonly(root: HTMLElement) {
 
+  // 0. Icon-only buttons — the icon carries the meaning and must survive
+  //    textonly. Detected by empty .btn__label (works for any shape — the
+  //    old class-based filter (.btn--icon-only / --circle / --i-*) missed
+  //    rounded/square buttons that happened to have no label text).
+  //    Prefers aria-label as visible text when present (reading mode is
+  //    text-first); falls back to keeping the icon visible if no label.
+  //    Runs before step 1 (semantic-role hide) and step 7 (button class strip).
+  root.querySelectorAll<HTMLElement>('.btn').forEach(btn => {
+    const innerIcon = btn.querySelector<HTMLElement>('.btn__icon');
+    if (!innerIcon) return;
+    // When animation is set, Icon.astro wraps the .btn__icon span in a
+    // Tooltip with class .anim-explainer-tooltip. The tooltip wrapper is
+    // the actual layout-occupying element — operate on it, otherwise the
+    // wrapper stays visible and pushes the label off-centre.
+    const icon = innerIcon.closest<HTMLElement>('.anim-explainer-tooltip') ?? innerIcon;
+    const label = btn.querySelector<HTMLElement>('.btn__label');
+    const hasLabelText = !!label?.textContent?.trim();
+    if (hasLabelText) return;
+
+    const ariaLabel = btn.getAttribute('aria-label')?.trim();
+    if (ariaLabel && label) {
+      icon.setAttribute('data-textonly-hidden', '');
+      label.textContent = ariaLabel;
+    } else {
+      icon.setAttribute('data-textonly-keep', '');
+      stripClasses(icon, cls =>
+        cls.includes('--draw') || cls.includes('--stroke') ||
+        cls.includes('--morph') || cls.includes('--fill-anim')
+      );
+      [...icon.attributes].forEach(attr => {
+        if (attr.name.startsWith('data-icon-')) icon.removeAttribute(attr.name);
+      });
+    }
+  });
+
+  // 0a. Dropdown chevron — the caret indicates "this opens a menu" and is
+  //     load-bearing UI even in reading mode. Mark it so the decorative
+  //     pass at step 1 leaves it visible.
+  root.querySelectorAll<HTMLElement>('.dropdown-btn .btn__chevron').forEach(chevron => {
+    chevron.setAttribute('data-textonly-keep', '');
+  });
+
+  // 0b. LottieIcon — the animated player target is meaningless in reading
+  //     mode. Strip it for every LottieIcon; for non-decorative roles (or
+  //     icon-only buttons that need to keep their icon) swap to the static
+  //     fallback Icon. Decorative LottieIcons not already kept by step 0
+  //     fall through to step 1's default hide.
+  root.querySelectorAll<HTMLElement>('[data-lottie-icon]').forEach(lottie => {
+    const role = lottie.dataset.semanticRole;
+    const stepZeroKept = lottie.hasAttribute('data-textonly-keep');
+    const isMeaningful = role === 'ui-control' || role === 'content-symbol';
+    if (!stepZeroKept && !isMeaningful) return;
+
+    lottie.setAttribute('data-textonly-keep', '');
+    const container = lottie.querySelector<HTMLElement>('.lottie-icon__container');
+    if (container) container.setAttribute('data-textonly-hidden', '');
+    const staticIcon = lottie.querySelector<HTMLElement>('.lottie-icon__static');
+    if (staticIcon) staticIcon.setAttribute('data-textonly-keep', '');
+    // Kill the lottie player init so the runtime never tries to mount
+    ['data-lottie-src', 'data-anim-trigger', 'data-anim-repeat', 'data-anim-interval', 'data-lottie-native'].forEach(attr => {
+      lottie.removeAttribute(attr);
+    });
+  });
+
   // 1. Decorative elements — hide via attribute (CSS does display:none)
-  //    content-symbol + ui-control stay visible
+  //    content-symbol + ui-control stay visible.
+  //    Icons inside icon-only buttons (data-textonly-keep) stay visible too.
   root.querySelectorAll<HTMLElement>('[data-semantic-role]').forEach(el => {
+    if (el.hasAttribute('data-textonly-keep')) return;
     const role = el.dataset.semanticRole;
     if (!role || role === 'decorative') {
       el.setAttribute('data-textonly-hidden', '');
@@ -139,9 +205,34 @@ function transformTextonly(root: HTMLElement) {
     });
   });
 
-  // 7. Buttons — strip visual prop classes
+  // 7. Buttons — collapse every variant/effect/shape/size to base .btn so
+  //    textonly renders one consistent fill style. Strip ALL btn-- modifiers
+  //    (the granular pattern list misses --split, --jump, --comic, --tech,
+  //    --expand, --magnetic, --spotlight, --glint, --colour-flow,
+  //    --neumorphic*, --glassic, --ghost, --circle, --pill, --i-* etc.,
+  //    leaving their pseudo-elements rendering as visual junk).
+  //    Also clears any inline transform left behind by the magnetic JS
+  //    that may have bound before this controller ran.
   root.querySelectorAll<HTMLElement>('.btn').forEach(el => {
-    stripClasses(el, matchesStripPattern);
+    // Strip every btn--/gradient class except .btn--expand: textonly keeps
+    // the expand affordance (static caret / inline icon) but kills its
+    // animation in textonly.css. Without the class the arrow ::before would
+    // disappear entirely.
+    stripClasses(el, cls =>
+      (cls.startsWith('btn--') && cls !== 'btn--expand' && cls !== 'btn--has-icon') ||
+      cls.startsWith('gradient')
+    );
+    el.style.transform = '';
+    el.style.removeProperty('--_spot-x');
+    el.style.removeProperty('--_spot-y');
+    el.style.removeProperty('--_btn-gpos-x');
+  });
+
+  // 7a. Rainbow-glow wrapper — its ::after halo would still apply via the
+  //     .btn-rainbow-glow-wrap class even after the inner .btn--rainbow-glow
+  //     is stripped. Drop the wrap class so the halo never renders.
+  root.querySelectorAll<HTMLElement>('.btn-rainbow-glow-wrap').forEach(el => {
+    el.classList.remove('btn-rainbow-glow-wrap');
   });
 
   // 8. Links — strip visual prop classes

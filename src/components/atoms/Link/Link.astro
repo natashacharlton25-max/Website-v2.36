@@ -19,6 +19,7 @@
  *   { "component": "Link", "contentLink": "Example", "href": "https://example.com", "external": true }
  */
 import { Text } from '../Text';
+import InlineSvg from '../../InlineSvg.astro';
 import type { TextColour, RainbowColour } from '../../../lib/shared-enums';
 
 /** A single segment of a multi-part Link — either a plain text run or a clickable run. */
@@ -146,20 +147,8 @@ const segments: LinkSegment[] = isArray ? (label as LinkSegment[]) : [];
         <span class="link-phrase__plain"><Text {...(textProps as any)} contentText={seg.nolink} as="span" flush /></span>
       )
     ))}
-    {external && (
-      <svg class="link__icon link__icon--external" viewBox="0 0 256 256" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="144 40 216 40 216 112" />
-        <line x1="216" y1="40" x2="112" y2="144" />
-        <path d="M184 144v64a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V80a8 8 0 0 1 8-8h64" />
-      </svg>
-    )}
-    {download && (
-      <svg class="link__icon link__icon--download" viewBox="0 0 256 256" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="128" y1="144" x2="128" y2="32" />
-        <polyline points="216 144 216 208 40 208 40 144" />
-        <polyline points="168 104 128 144 88 104" />
-      </svg>
-    )}
+    {external && <InlineSvg name="external" class="link__icon link__icon--external" />}
+    {download && <InlineSvg name="download" class="link__icon link__icon--download" />}
   </span>
 ) : (
   <a

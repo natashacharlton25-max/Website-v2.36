@@ -8,35 +8,73 @@
  * Uses outline (not border) so element layout is unaffected and gap is automatic.
  */
 
-/* ── Dropdown button — ghost, outline, keeps own shape ── */
-/* ── Dropdown — brand highlight style ── */
+/* ── Dropdown — mirrors the textonly dropdown structure (popup attached
+   to trigger, plain bordered menu, no shadows) but uses
+   --highlight-link-color for borders and hover fill so it integrates
+   with the highlight-links indicator system. ── */
+
+/* Trigger spacing — match textonly pattern (margin lives on wrapper, not
+   button, so wrapper height = trigger height and the menu sits flush). */
+[data-highlight-links] .dropdown-wrapper {
+  margin-right: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+/* Border + hover bg use --highlight-link-color directly (no slot fallback)
+   so per-brand overrides at brand-overrides.css can't substitute their own
+   secondary/primary colours for the indicator. The slot tokens are
+   bypassed for indicator-bearing properties; bg/text/radius can still
+   be brand-customised via their slots. */
 [data-highlight-links] .dropdown-btn {
   background: var(--btn-highlight-bg, transparent);
   color: var(--btn-highlight-text, var(--neutral-emphasis));
-  border: var(--btn-highlight-border, 2px solid var(--primary-base));
+  border: 2px solid var(--highlight-link-color);
   border-radius: var(--btn-highlight-radius, var(--radius-md));
-  outline: var(--btn-highlight-outline, none);
-  outline-offset: var(--btn-highlight-outline-offset, 0);
+  outline: none;
+  outline-offset: 0;
+  margin: 0;
+  text-decoration: underline;
+  text-decoration-color: var(--highlight-link-color);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
 }
 
 [data-highlight-links] .dropdown-btn .icon {
   color: inherit;
 }
 
+/* Hover fills with highlight-link colour at 80% (60% in dark mode below). */
 [data-highlight-links] .dropdown-btn:hover {
-  background: var(--btn-highlight-hover-bg, var(--primary-base));
-  color: oklch(from var(--btn-highlight-hover-bg, var(--primary-base)) round(1.21 - l) 0 0);
-  border-color: var(--btn-highlight-hover-bg, var(--primary-base));
+  background: color-mix(in oklch, var(--highlight-link-color) 80%, transparent);
+  color: oklch(from var(--highlight-link-color) round(1.21 - l) 0 0);
+  border-color: var(--highlight-link-color);
 }
 
-/* Dropdown menu — brand border */
+/* Trigger attached to menu — flatten bottom corners when menu is visible. */
+[data-highlight-links] .dropdown-wrapper:hover .dropdown-btn,
+[data-highlight-links] .dropdown-wrapper.open .dropdown-btn,
+[data-highlight-links] .dropdown-wrapper:focus-within .dropdown-btn {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Menu — flush against trigger, sharp top, rounded bottom only. */
 [data-highlight-links] .dropdown-wrapper .dropdown-menu,
 [data-highlight-links] .dropdown-menu.show {
-  border: 2px solid var(--primary-base);
+  background: var(--page-bg);
+  border: 2px solid var(--highlight-link-color);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: none;
 }
 
-[data-highlight-links] .dropdown-wrapper:hover .dropdown-menu {
-  border-color: var(--primary-emphasis);
+/* Dark mode override for theme-coloured borders/glow on the menu. */
+[data-mode="dark"][data-highlight-links] .dropdown-menu.dropdown-theme--primary,
+[data-mode="dark"][data-highlight-links] .dropdown-menu.dropdown-theme--secondary,
+[data-mode="dark"][data-highlight-links] .dropdown-menu.dropdown-theme--neutral {
+  border-color: var(--highlight-link-color);
+  border-top: none;
+  box-shadow: none;
 }
 
 /* ── Inline text links — underline ── */
@@ -76,17 +114,44 @@
   outline-offset: 1px;
 }
 
-/* ── Dropdown items — underline label only, no border ── */
+/* ── Dropdown items — plain rows, hover fills with highlight-link
+   colour (matches the trigger button's hover treatment). ── */
 [data-highlight-links] .dropdown-item {
+  color: var(--text-emphasis);
+  background: transparent;
+  font-family: var(--font-body);
+  font-weight: var(--font-regular);
   text-decoration: underline;
-  text-decoration-color: var(--primary-base);
+  text-decoration-color: var(--highlight-link-color);
   text-decoration-thickness: 2px;
   text-underline-offset: 0.2em;
+  border: none;
+  border-radius: 0;
   outline: none;
 }
 
-[data-highlight-links] .dropdown-item:hover {
-  text-decoration-color: var(--primary-emphasis);
+[data-highlight-links] .dropdown-item:last-child {
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+/* Override per-theme hover backgrounds from Button.css explicitly — they
+   match plain .dropdown-item:hover in specificity and would otherwise
+   paint the brand-tinted hover bg. */
+[data-highlight-links] .dropdown-item:hover,
+[data-highlight-links] .dropdown-theme--primary .dropdown-item:hover,
+[data-highlight-links] .dropdown-theme--secondary .dropdown-item:hover,
+[data-highlight-links] .dropdown-theme--neutral .dropdown-item:hover {
+  background: color-mix(in oklch, var(--highlight-link-color) 80%, transparent);
+  color: oklch(from var(--highlight-link-color) round(1.21 - l) 0 0);
+  text-decoration-color: var(--highlight-link-color);
+}
+
+/* Dark-mode hover — drop the mix percentage to match buttons. */
+[data-mode="dark"][data-highlight-links] .dropdown-item:hover,
+[data-mode="dark"][data-highlight-links] .dropdown-theme--primary .dropdown-item:hover,
+[data-mode="dark"][data-highlight-links] .dropdown-theme--secondary .dropdown-item:hover,
+[data-mode="dark"][data-highlight-links] .dropdown-theme--neutral .dropdown-item:hover {
+  background: color-mix(in oklch, var(--highlight-link-color) 60%, transparent);
 }
 
 /* ── Form fields — same as text-only + outline ring ── */
@@ -238,7 +303,9 @@
   text-decoration-color: var(--neutral-mid);
 }
 
-[data-highlight-links] .btn.highlight-visited {
+/* Dropdown triggers excluded — clicking opens a menu, it isn't a "visit"
+   so they shouldn't go neutral after click. */
+[data-highlight-links] .btn.highlight-visited:not(.dropdown-btn) {
   border-color: var(--neutral-mid);
   outline-color: var(--neutral-mid);
 }
@@ -272,34 +339,254 @@
   outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
 
-/* ── Buttons — brand highlight style from brandconfig.json ── */
+/* ── Buttons — strip variant chrome, paint highlight-link colour as the
+   indicator. Underline marks them as actionable text-link-like surfaces;
+   border + outline ring use --highlight-link-color directly (no slot
+   fallback) so brand overrides can't substitute secondary/primary for
+   the indicator colour. ── */
 [data-highlight-links] .btn:not(.dropdown-btn) {
   background: var(--btn-highlight-bg, transparent);
   color: var(--btn-highlight-text, var(--neutral-emphasis));
-  border: var(--btn-highlight-border, none);
+  border: none;
   border-radius: var(--btn-highlight-radius, var(--radius-md));
-  outline: var(--btn-highlight-outline, 3px solid var(--secondary-base));
-  outline-offset: var(--btn-highlight-outline-offset, 3px);
+  outline: 3px solid var(--highlight-link-color);
+  outline-offset: 3px;
+  text-decoration: underline;
+  text-decoration-color: var(--highlight-link-color);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   box-shadow: none;
   text-shadow: none;
 }
 
-/* Strip glow + pseudo-element effects */
-[data-highlight-links] .btn:not(.dropdown-btn)::before,
-[data-highlight-links] .btn:not(.dropdown-btn)::after,
+/* Animated gradient — Button.css's .btn.gradient--animated.btn--{variant}
+   rules paint --_grad-computed as a coloured surface at (0,3,0), beating
+   the highlight-links base above at (0,2,0). Restate the highlight-links
+   surface here at (0,3,1) (id-less but with one more class) so gradient
+   buttons render the uniform highlight-links chrome regardless of variant. */
+[data-highlight-links] .btn.gradient--animated:not(.dropdown-btn) {
+  background: var(--btn-highlight-bg, transparent);
+  background-image: none;
+  color: var(--btn-highlight-text, var(--neutral-emphasis));
+  border: none;
+}
+
+/* Kill the gradient halo + any liquid-glass surface pseudo so the highlight
+   ring around the button isn't masked by a coloured blur. */
+[data-highlight-links] .btn.gradient--animated::before,
+[data-highlight-links] .btn.gradient--animated::after {
+  display: none;
+}
+
+/* Strip glow + pseudo-element effects. Icon-only shapes need their
+   ::after for the underline indicator (drawn via pseudo so it doesn't
+   rotate when the icon has a hover/scroll animation). Expand keeps its
+   ::before — it's the static caret affordance, not decoration. */
+[data-highlight-links] .btn:not(.dropdown-btn):not(.btn--expand)::before,
+[data-highlight-links] .btn:not(.dropdown-btn):not(.btn--icon-only):not(.btn--circle):not(.btn--i-sharp):not(.btn--i-subtle):not(.btn--i-soft):not(.btn--i-rounded)::after,
 [data-highlight-links] .btn-rainbow-glow-wrap::before,
 [data-highlight-links] .btn-rainbow-glow-wrap::after {
   display: none;
 }
 
-/* Hover — colour change only, no movement */
-[data-highlight-links] .btn:not(.dropdown-btn):hover {
-  background: var(--btn-highlight-hover-bg, var(--primary-emphasis));
-  color: var(--btn-highlight-hover-text, oklch(from var(--primary-emphasis) round(1.21 - l) 0 0));
+/* Expand effect — caret + label render statically. No slide, no opacity
+   transition, no absolute positioning so the icon flows inline beside
+   the label. Matches the textonly treatment for consistent low-motion
+   chrome across both customisation modes. */
+[data-highlight-links] .btn--expand {
+  padding-left: var(--space-md);
+  padding-right: var(--space-md);
+  overflow: visible;
+  gap: var(--space-xs);
+}
+
+[data-highlight-links] .btn--expand .btn__label {
+  transform: none !important;
+  transition: none !important;
+}
+
+[data-highlight-links] .btn--expand::before {
+  position: static;
+  width: 0.85em;
+  height: 0.85em;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  flex: none;
+  order: 1;
+}
+
+[data-highlight-links] .btn--expand.btn--has-icon::before {
+  display: none;
+}
+
+[data-highlight-links] .btn--expand.btn--has-icon .btn__icon {
+  position: static;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  /* Force icon to right of label regardless of iconPosition prop —
+     expand's contract is "arrow reveal on right", so the static
+     fallback should match that intent. */
+  order: 1;
+}
+
+/* Icons and other focusable descendants inside buttons share the
+   button's own outline — they shouldn't carry a second indicator
+   from the global :where(button, [tabindex="0"], [role="button"])
+   block-element rule above. */
+[data-highlight-links] .btn .btn__icon,
+[data-highlight-links] .btn [tabindex="0"],
+[data-highlight-links] .btn [role="button"] {
+  outline: none;
+}
+
+/* Icon-only buttons — underline drawn as a ::after pseudo on the BUTTON
+   (not on .btn__icon) so it doesn't rotate when the icon has a
+   spin/bounce/draw animation. Positioned at the icon's bottom edge,
+   width matched to the icon (1.25em) and centred. */
+[data-highlight-links] .btn--icon-only:not(.dropdown-btn)::after,
+[data-highlight-links] .btn--circle:not(.dropdown-btn)::after,
+[data-highlight-links] .btn--i-sharp:not(.dropdown-btn)::after,
+[data-highlight-links] .btn--i-subtle:not(.dropdown-btn)::after,
+[data-highlight-links] .btn--i-soft:not(.dropdown-btn)::after,
+[data-highlight-links] .btn--i-rounded:not(.dropdown-btn)::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 0.625em);
+  transform: translateX(-50%);
+  width: 1.25em;
+  height: 2px;
+  background: var(--highlight-link-color);
+  pointer-events: none;
+}
+
+/* Hover — fill with highlight-link colour at 80% opacity (slight tint
+   shows the rest-state border ring through). Contrast text via oklch
+   inversion. No movement. Disabled buttons skip the hover fill — see
+   the dedicated rule below.
+   The second selector explicitly matches the fill variant's 9-:not()
+   chain to bump specificity above .btn--fill:not(...):hover (0,10,1).
+   Non-fill variants are at (0,2,0) and the first selector already wins. */
+/* Hover fill — single high-specificity rule covering every variant.
+   Repeating .btn 12 times pushes specificity past Button.css's
+   .btn--fill 10-:not() chain at (0,10,2). One element matches the
+   repeated class fine; only the cascade specificity changes. */
+[data-highlight-links] .btn.btn.btn.btn.btn.btn.btn.btn.btn.btn.btn.btn:not(.dropdown-btn):not(:disabled):not([aria-disabled="true"]):hover,
+[data-highlight-links] .btn.btn.btn.btn.btn.btn.btn.btn.btn.btn.btn.btn.gradient--animated:not(.dropdown-btn):not(:disabled):not([aria-disabled="true"]):focus-visible {
+  background: color-mix(in oklch, var(--highlight-link-color) 80%, transparent);
+  background-image: none;
+  color: oklch(from var(--highlight-link-color) round(1.21 - l) 0 0);
+  border-color: transparent;
   transform: none;
   box-shadow: none;
+}
+
+/* Hover-none — suppress the highlight-links hover fill. Mirrors the
+   12-class chain above and adds [data-hover="none"] to win on attribute
+   count. Buttons hold the rest-state outline ring + transparent surface
+   regardless of pointer state. */
+[data-highlight-links][data-hover="none"] .btn.btn.btn.btn.btn.btn.btn.btn.btn.btn.btn.btn:not(.dropdown-btn):not(:disabled):not([aria-disabled="true"]):hover,
+[data-highlight-links][data-hover="none"] .btn.btn.btn.btn.btn.btn.btn.btn.btn.btn.btn.btn.gradient--animated:not(.dropdown-btn):not(:disabled):not([aria-disabled="true"]):focus-visible {
+  background: var(--btn-highlight-bg, transparent);
+  background-image: none;
+  color: var(--btn-highlight-text, var(--neutral-emphasis));
+  border-color: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Disabled in highlight-links — preserve rest-state appearance on hover.
+   Without this, Button.css's .btn:disabled:hover (0,3,0) would paint the
+   brand colour on hover. Specificity (0,4,1) beats it. */
+[data-highlight-links] .btn:not(.dropdown-btn):disabled:hover,
+[data-highlight-links] .btn:not(.dropdown-btn)[aria-disabled="true"]:hover {
+  background: transparent;
+  color: var(--neutral-emphasis);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Dark mode adjustments —
+   1) Strip the dark-fill border (theme-luminance-dark adds 2px transparent
+      that reads as a coloured edge under the semi-transparent fill).
+   2) Strip per-variant hover border-colours (primary→primary-contrast,
+      secondary→secondary, neutral→neutral) so they don't compete with
+      the highlight outline ring.
+   3) Drop the mix percentage — 80% over dark page-bg reads more solid
+      than over light. 60% gives equivalent perceived translucency.
+   Specificity bumped via .btn.btn chain to beat dark-mode variant rules
+   like `[data-mode="dark"] .btn--fill:not(...):not(...):not(...)` (0,5,0). */
+[data-mode="dark"][data-highlight-links] .btn.btn:not(.dropdown-btn),
+[data-mode="dark"][data-highlight-links] .btn.btn:not(.dropdown-btn):hover,
+[data-mode="dark"][data-highlight-links] .btn.btn:not(.dropdown-btn):active,
+[data-mode="dark"][data-highlight-links] .btn.btn:not(.dropdown-btn):focus {
+  border: none;
+}
+
+/* Dark hover override — matches theme-luminance-dark.css's hover rule
+   `.btn--fill:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover` (0,8,0)
+   for specificity, plus :not(:disabled):not([aria-disabled]) so disabled
+   buttons fall through to the disabled rule below. The 5 effect
+   exclusions stay (those own their complete hover), but jump and
+   dropdown are no longer excluded — highlight-links overrides their
+   hover fill too. (0,11,0) wins. */
+[data-mode="dark"][data-highlight-links] .btn:not(.dropdown-btn):not(:disabled):not([aria-disabled="true"]):hover,
+[data-mode="dark"][data-highlight-links] .btn--fill:not(.btn--dropdown):not(.dropdown-btn):not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):not(:disabled):not([aria-disabled="true"]):hover {
+  background: color-mix(in oklch, var(--highlight-link-color) 60%, transparent);
+  color: oklch(from var(--highlight-link-color) round(1.21 - l) 0 0);
+  border: none;
+}
+
+/* Dark disabled hover override — preserves rest state. Mirrors the same
+   :not() chain so it beats theme-luminance-dark's hover rule for the
+   disabled state (which Button.css's :disabled:hover at (0,3,0) loses
+   to without help). (0,10,0) wins. Dropdown excluded since its dedicated
+   rule handles the disabled case at (0,4,1). */
+[data-mode="dark"][data-highlight-links] .btn:not(.dropdown-btn):disabled:hover,
+[data-mode="dark"][data-highlight-links] .btn:not(.dropdown-btn)[aria-disabled="true"]:hover,
+[data-mode="dark"][data-highlight-links] .btn--fill:not(.btn--dropdown):not(.dropdown-btn):not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):disabled:hover,
+[data-mode="dark"][data-highlight-links] .btn--fill:not(.btn--dropdown):not(.dropdown-btn):not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech)[aria-disabled="true"]:hover {
+  background: transparent;
+  color: var(--neutral-emphasis);
+  border: none;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Dark-mode dropdown trigger — theme-luminance-dark.css's hover rule
+   `.btn--fill:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover`
+   is at (0,8,0) and matches dropdown triggers (which are .btn--fill via
+   legacy variant migration) — its :not() chain doesn't exclude
+   .btn--dropdown. Match its specificity by mirroring the same :not()
+   chain so the highlight-link indicator wins on dark+hover. */
+[data-mode="dark"][data-highlight-links] .btn.btn--dropdown {
+  border: 2px solid var(--highlight-link-color);
+  color: var(--neutral-emphasis);
+  background: transparent;
+}
+
+[data-mode="dark"][data-highlight-links] .btn.btn--dropdown:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):hover {
+  border: 2px solid var(--highlight-link-color);
+  background: color-mix(in oklch, var(--highlight-link-color) 60%, transparent);
+  color: oklch(from var(--highlight-link-color) round(1.21 - l) 0 0);
+}
+
+/* Combined highlight-links + textonly — restore visible spacing between
+   buttons. textonly's --space-sm margin is consumed by the highlight-links
+   outline ring (3px solid + 3px offset = 6px halo per side) so adjacent
+   rings touch / overlap. Bump to --space-md so the gap reads cleanly. */
+[data-highlight-links][data-render="textonly"] .btn:not(.dropdown-btn) {
+  margin-right: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+[data-highlight-links][data-render="textonly"] .dropdown-wrapper {
+  margin-right: var(--space-md);
+  margin-bottom: var(--space-md);
 }
 
 
