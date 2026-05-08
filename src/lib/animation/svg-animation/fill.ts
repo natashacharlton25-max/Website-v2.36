@@ -139,11 +139,23 @@ export function initFillIcon(el: HTMLElement) {
   };
   const getTargetColor = () => {
     if (!fillColor) return getColor();
-    // fillColor can be a CSS variable name or a color value
-    if (fillColor.startsWith('--')) {
-      return toHex(getComputedStyle(document.documentElement).getPropertyValue(fillColor).trim());
+    // fillColor can be:
+    //   - Bare schema slug ("rainbow-4", "primary") → auto-resolve to canonical
+    //     CSS var. Rainbow N → --rainbow-N. Brand scale → --{name}-base.
+    //   - CSS variable name with -- prefix ("--rainbow-4", "--brand-c-primary")
+    //   - Raw colour ("#hex", "rgb(...)", named colours) → used directly.
+    let resolved = fillColor;
+    if (!resolved.startsWith('--') && !resolved.startsWith('#') && !/^(rgb|hsl|oklch)/.test(resolved)) {
+      if (/^rainbow-[1-7]$/.test(resolved)) {
+        resolved = `--${resolved}`;
+      } else if (['primary', 'secondary', 'neutral', 'text'].includes(resolved)) {
+        resolved = `--${resolved}-base`;
+      }
     }
-    return toHex(fillColor);
+    if (resolved.startsWith('--')) {
+      return toHex(getComputedStyle(document.documentElement).getPropertyValue(resolved).trim());
+    }
+    return toHex(resolved);
   };
 
   // Get original shape paths
