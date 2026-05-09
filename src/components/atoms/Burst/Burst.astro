@@ -1,0 +1,138 @@
+---
+/**
+ * Burst — Particle burst wrapper.
+ *
+ * Wraps any child (Button, Link, Card, raw element) and fires a particle
+ * burst on click or hover. Particle visual is delegated to a Shape config
+ * — the Shape is rendered into a hidden <template> at build time and the
+ * runtime clones it per particle. Shape covers everything (primitives,
+ * Phosphor icons via media, D1 logos via slug, custom SVG).
+ *
+ * Two engines:
+ *   - fly      → DOM particles, Web Animations API, fade-out (particle-burst.ts)
+ *   - physics  → DOM particles, gravity + AABB collision against page text,
+ *                optional cursor magnet (particle-physics.ts)
+ *
+ * Colour:
+ *   - Solid: brandColor (+ colorTier) OR rainbowColor — single colour
+ *   - palette="tiers"   → cycle particles through 4 tiers of brandColor
+ *   - palette="rainbow" → cycle particles through all 7 rainbow colours
+ *
+ * Both modules are imported globally via BaseLayout so Burst doesn't need
+ * its own <script>. The wrapper element holds all data-particle-* attrs;
+ * the runtime auto-binds click/hover.
+ */
+import { Shape } from '../Shape';
+import { Icon } from '../Icon';
+import type { BrandColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
+
+type Engine = 'fly' | 'physics';
+type Trigger = 'click' | 'hover';
+type Palette = 'tiers' | 'rainbow';
+
+interface Props {
+  /** Shape config used as the particle visual. Build-time rendered into a
+   *  hidden template; runtime clones it per particle. Any Shape prop works
+   *  (shape, slug, media, gradient, size, animation). */
+  particle?: Record<string, any>;
+
+  /** Single brand colour applied to every particle. Mutually exclusive with palette. */
+  brandColor?: BrandColour;
+  /** Tier modifier for brandColor (single-colour mode). */
+  colorTier?: ColourTier;
+  /** Single rainbow colour applied to every particle. Mutually exclusive with palette. */
+  rainbowColor?: RainbowColour;
+  /** Multi-particle colour cycle. tiers: 4 tiers of brandColor. rainbow: 7 rainbow colours. */
+  palette?: Palette;
+
+  /** fly: DOM particles fly outward + fade. physics: gravity + collide with text + optional magnet. */
+  engine?: Engine;
+  trigger?: Trigger;
+  /** Number of particles per burst. */
+  count?: number;
+  /** Spread radius (fly) / horizontal scatter (physics) in px. */
+  spread?: number;
+  /** Lifespan in ms before fade. */
+  lifespan?: number;
+
+  /** [physics only] Gravity strength (px/frame²). Default 0.4. */
+  gravity?: number;
+  /** [physics only] Particles attract toward cursor while alive. */
+  magnet?: boolean;
+  /** [physics only] Particles stop on contact with p/h1-h3/button/a rects. Default true. */
+  collide?: boolean;
+
+  class?: string;
+}
+
+const {
+  particle,
+  brandColor,
+  colorTier,
+  rainbowColor,
+  palette,
+  engine = 'fly',
+  trigger = 'click',
+  count = 30,
+  spread = 150,
+  lifespan = 2500,
+  gravity = 0.4,
+  magnet = false,
+  collide = true,
+  class: className = '',
+} = Astro.props;
+
+// Strip structural keys — particle component receives the rest. Shape
+// is the default; Icon allows clean glyph particles without a wrapper.
+const { component: particleComponent = 'Shape', ...particleProps } = particle || {};
+const ParticleComponent = particleComponent === 'Icon' ? Icon : Shape;
+
+// Build the per-particle colour overrides for palette modes. Each entry
+// becomes a separate hidden <template>; the runtime picks one at random
+// per particle. Single-colour mode uses one template with the prop's
+// colour applied (or whatever the particle config already declared).
+type ColourOverride = Partial<{ brandColor: BrandColour; colorTier: ColourTier; rainbowColor: RainbowColour }>;
+
+let variants: ColourOverride[] = [{}];
+
+if (palette === 'tiers' && brandColor) {
+  const tiers: ColourTier[] = ['tint', 'mid', 'base', 'emphasis'];
+  variants = tiers.map(t => ({ brandColor, colorTier: t }));
+} else if (palette === 'rainbow') {
+  const rainbows: RainbowColour[] = [
+    'rainbow-1','rainbow-2','rainbow-3','rainbow-4','rainbow-5','rainbow-6','rainbow-7',
+  ];
+  variants = rainbows.map(r => ({ rainbowColor: r }));
+} else if (brandColor) {
+  variants = [{ brandColor, ...(colorTier ? { colorTier } : {}) }];
+} else if (rainbowColor) {
+  variants = [{ rainbowColor }];
+}
+
+// One unique template ID per Burst instance so multiple Bursts on a page
+// don't collide. Random suffix is fine — IDs only need to be unique
+// within the document.
+const burstId = `burst-${Math.random().toString(36).slice(2, 10)}`;
+const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
+---
+
+<span
+  class:list={['burst', className]}
+  data-particle-burst
+  data-particle-engine={engine}
+  data-particle-trigger={trigger}
+  data-particle-count={String(count)}
+  data-particle-spread={String(spread)}
+  data-particle-lifespan={String(lifespan)}
+  data-particle-templates={particle ? templateIds.join(',') : undefined}
+  data-particle-gravity={engine === 'physics' ? String(gravity) : undefined}
+  data-particle-magnet={engine === 'physics' && magnet ? '' : undefined}
+  data-particle-collide={engine === 'physics' && !collide ? 'off' : undefined}
+>
+  {particle && variants.map((override, i) => (
+    <template id={templateIds[i]} data-burst-template>
+      <ParticleComponent {...particleProps} {...override} />
+    </template>
+  ))}
+  <slot />
+</span>

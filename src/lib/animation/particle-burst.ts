@@ -22,7 +22,7 @@ import { getAnimationConfig } from './animation-config';
 
 const COLOR_WHITE = getComputedStyle(document.documentElement).getPropertyValue('--color-White').trim() || '#ffffff';
 
-export type ParticleType = 'confetti' | 'hearts' | 'circle' | 'square' | 'star' | 'mixed' | 'emoji';
+export type ParticleType = 'confetti' | 'hearts' | 'circle' | 'square' | 'star' | 'mixed' | 'emoji' | 'template';
 
 export interface ParticleBurstOptions {
   type?: ParticleType;
@@ -33,6 +33,9 @@ export interface ParticleBurstOptions {
   duration?: { min: number; max: number };
   emojis?: string[];
   trigger?: 'click' | 'hover';
+  /** When type='template', the runtime clones one of these <template> elements
+   *  per particle (random pick). Used by the Burst atom for Shape-as-particle. */
+  templates?: HTMLTemplateElement[];
 }
 
 // Get CSS token values from computed styles
@@ -60,6 +63,7 @@ const DEFAULT_OPTIONS: Required<ParticleBurstOptions> = {
   duration: { min: 1500, max: 2500 },
   emojis: ['❤', '🧡', '💛', '💚', '💙', '💜', '🤎'],
   trigger: 'click',
+  templates: [],
 };
 
 /**
@@ -126,6 +130,19 @@ function createParticle(x: number, y: number, opts: Required<ParticleBurstOption
       particle.style.background = color;
       particle.style.clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
       break;
+
+    case 'template': {
+      // Clone a Shape <template> rendered by the Burst atom. Random pick
+      // when multiple templates (palette mode). The template's content
+      // sets its own size — leave width/height to natural rendering.
+      const tpl = opts.templates[Math.floor(Math.random() * opts.templates.length)];
+      if (tpl) {
+        const clone = tpl.content.cloneNode(true) as DocumentFragment;
+        particle.appendChild(clone);
+      }
+      width = height = 0; // Cloned content owns its dimensions
+      break;
+    }
   }
 
   if (width > 0) {
@@ -186,9 +203,18 @@ export function createParticleBurst(
   }
 
   if (options.emojis) opts.emojis = options.emojis;
+  if (options.templates) opts.templates = options.templates;
 
-  // Get element center position
-  const rect = element.getBoundingClientRect();
+  // Get element center position. For the Burst atom, the wrapper holds
+  // hidden <template> siblings before the actual interactive child — and
+  // a parent Grid can stretch the wrapper wider than its content. Walk to
+  // the first non-template child so the burst originates from the real
+  // visual element, not the stretched bounding box.
+  let originEl: Element = element;
+  for (const child of Array.from(element.children)) {
+    if (child.tagName !== 'TEMPLATE') { originEl = child; break; }
+  }
+  const rect = originEl.getBoundingClientRect();
   const x = rect.left + rect.width / 2;
   const y = rect.top + rect.height / 2;
 
@@ -228,6 +254,11 @@ export function initParticleBurst(): void {
 
   document.querySelectorAll('[data-particle-burst]').forEach((element) => {
     if (element.hasAttribute('data-particle-initialized')) return;
+
+    // Burst atom routes engine='physics' to particle-physics.ts. Skip here
+    // so the two modules don't both bind handlers to the same element.
+    if (element.getAttribute('data-particle-engine') === 'physics') return;
+
     element.setAttribute('data-particle-initialized', 'true');
 
     const htmlElement = element as HTMLElement;
@@ -252,6 +283,21 @@ export function initParticleBurst(): void {
 
     const emojisAttr = element.getAttribute('data-particle-emojis');
     if (emojisAttr) options.emojis = emojisAttr.split(',').map(e => e.trim());
+
+    // Burst atom — comma-list of <template> IDs. Each template holds a
+    // server-rendered Shape; runtime clones one per particle (random pick
+    // when palette mode emits multiple).
+    const templatesAttr = element.getAttribute('data-particle-templates');
+    if (templatesAttr) {
+      const tpls = templatesAttr
+        .split(',')
+        .map(id => document.getElementById(id.trim()))
+        .filter((el): el is HTMLTemplateElement => el instanceof HTMLTemplateElement);
+      if (tpls.length) {
+        options.templates = tpls;
+        options.type = 'template';
+      }
+    }
 
     const trigger = options.trigger || 'click';
 

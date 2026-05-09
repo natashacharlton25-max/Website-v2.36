@@ -1,0 +1,62 @@
+{
+  "component": "Burst",
+  "category": "atom",
+  "renders": { "full": "Burst.astro", "reduced": "Burst.astro", "textonly": "Burst.astro" },
+  "notes": "Particle burst wrapper. Wraps any child (Button, Link, Card, raw element) and fires a particle burst on click or hover. Particle visual is a Shape config — rendered to a hidden <template> at build time, cloned per particle at runtime. Two engines: fly (Web Animations, fade-out) and physics (gravity + AABB collision against page text + optional cursor magnet). Modules import globally via BaseLayout. In textonly the wrapper still renders so children survive — runtime gates auto-init via render-mode check.",
+
+  "_rules": [
+    { "rule": "palette-tiers-needs-brandColor", "condition": "palette === 'tiers'", "requires": "brandColor", "note": "palette='tiers' cycles through 4 tiers of brandColor. Without brandColor there's nothing to cycle." },
+    { "rule": "palette-overrides-single-colour", "condition": "!!palette", "note": "palette='rainbow' ignores brandColor/rainbowColor; palette='tiers' uses brandColor but ignores colorTier and rainbowColor (cycles instead)." },
+    { "rule": "physics-only-flags", "condition": "engine !== 'physics'", "forbids": ["gravity", "magnet", "collide"], "note": "gravity/magnet/collide only meaningful when engine='physics' — runtime ignores them otherwise." }
+  ],
+
+  "props": {
+    "content": {
+      "_description": "Particle visual + wrapped child",
+      "particle": {
+        "type": "object",
+        "_description": "Particle visual — Shape or Icon config. Build-time rendered into a hidden template; cloned per particle at runtime. Shape covers primitives, D1 logos via slug, custom SVG. Icon renders Phosphor glyphs directly. When palette is set, the particle renders multiple times — once per palette colour.",
+        "properties": {
+          "component": { "type": "string", "required": true, "default": "Shape", "enum": ["Shape", "Icon"] }
+        }
+      }
+    },
+
+    "colour": {
+      "_description": "Single brand colour for every particle. Mutually exclusive with palette.",
+      "brandColor": { "type": "string", "required": false, "enum": ["primary", "secondary", "neutral"], "description": "Brand-scale colour applied uniformly to every particle." },
+      "colorTier":  { "type": "string", "required": false, "enum": ["tint", "mid", "base", "emphasis"], "description": "Tier modifier for brandColor. Ignored when palette='tiers' (which cycles all four)." }
+    },
+
+    "rainbow": {
+      "_description": "Single rainbow colour for every particle. Mutually exclusive with palette.",
+      "rainbowColor": { "type": "string", "required": false, "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Positional rainbow colour applied uniformly." }
+    },
+
+    "palette": {
+      "_description": "Multi-particle colour cycle — runtime picks a different palette colour per particle.",
+      "palette": {
+        "type": "string",
+        "required": false,
+        "enum": ["tiers", "rainbow"],
+        "description": "tiers: cycles particles through tint/mid/base/emphasis of brandColor (4 colours). rainbow: cycles particles through rainbow-1..rainbow-7 (7 colours)."
+      }
+    },
+
+    "behaviour": {
+      "_description": "Burst engine + trigger + counts",
+      "engine":   { "type": "string",  "required": false, "default": "fly", "enum": ["fly", "physics"], "description": "fly: outward burst, fade out (Web Animations). physics: gravity, AABB collision against page text/buttons, optional cursor magnet." },
+      "trigger":  { "type": "string",  "required": false, "default": "click", "enum": ["click", "hover"], "description": "click: fire on click (links delay nav 400ms). hover: fire on first mouseenter, retrigger after 2s." },
+      "count":    { "type": "number",  "required": false, "default": 30, "description": "Number of particles per burst." },
+      "spread":   { "type": "number",  "required": false, "default": 150, "description": "Spread radius in px (fly) or horizontal scatter (physics)." },
+      "lifespan": { "type": "number",  "required": false, "default": 2500, "description": "Particle lifetime in ms before fade-out." }
+    },
+
+    "physics": {
+      "_description": "Physics engine knobs — engine='physics' only, ignored otherwise",
+      "gravity":  { "type": "number",  "required": false, "default": 0.4, "description": "Vertical acceleration in px/frame². Higher = particles fall faster." },
+      "magnet":   { "type": "boolean", "required": false, "default": false, "description": "Particles attract toward cursor while alive." },
+      "collide":  { "type": "boolean", "required": false, "default": true, "description": "Particles stop on contact with p/h1/h2/h3/button/a rects (text 'lands' on words). Set false to fall to viewport floor only." }
+    }
+  }
+}

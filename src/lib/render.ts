@@ -34,10 +34,11 @@ import { LottieIcon } from '../components/atoms/LottieIcon';
 import { Tooltip } from '../components/atoms/Tooltip';
 import { FormField } from '../components/atoms/FormField';
 import { Shape } from '../components/atoms/Shape';
+import { Burst } from '../components/atoms/Burst';
 
 export const componentRegistry: Record<string, any> = {
   Page, Section, Grid, Heading, Text, Badge, Button, Card,
-  Icon, Image, Link, List, LottieIcon, Tooltip, FormField, Shape,
+  Icon, Image, Link, List, LottieIcon, Tooltip, FormField, Shape, Burst,
 };
 
 // ─── Props extraction ───
