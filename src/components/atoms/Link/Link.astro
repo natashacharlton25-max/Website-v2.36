@@ -51,6 +51,9 @@ interface Props {
   target?: string;
   download?: string | boolean;
   rel?: string;
+  /** Fire confetti particle burst on click. Wires into particle-burst.ts —
+   *  navigation is delayed 400ms so the burst is visible. */
+  confetti?: boolean;
   id?: string;
   role?: string;
   ariaLabel?: string;
@@ -79,6 +82,7 @@ const {
   target: targetProp,
   download,
   rel: relProp,
+  confetti = false,
   id,
   role,
   ariaLabel,
@@ -142,6 +146,8 @@ const segments: LinkSegment[] = isArray ? (label as LinkSegment[]) : [];
           aria-label={ariaLabel}
           aria-disabled={disabled ? 'true' : undefined}
           tabindex={disabled ? -1 : undefined}
+          data-particle-burst={confetti ? '' : undefined}
+          data-particle-type={confetti ? 'confetti' : undefined}
         ><Text {...(textProps as any)} contentText={seg.link} as="span" flush /></a>
       ) : (
         <span class="link-phrase__plain"><Text {...(textProps as any)} contentText={seg.nolink} as="span" flush /></span>
@@ -162,5 +168,7 @@ const segments: LinkSegment[] = isArray ? (label as LinkSegment[]) : [];
     aria-label={ariaLabel}
     aria-disabled={disabled ? 'true' : undefined}
     tabindex={disabled ? -1 : undefined}
+    data-particle-burst={confetti ? '' : undefined}
+    data-particle-type={confetti ? 'confetti' : undefined}
   ><Text {...(textProps as any)} contentText={label as string} as="span" flush />{external && <Icon name="arrow-square-out" weight="bold" semanticRole="decorative" class="link__icon link__icon--external" />}{download && <Icon name="download-simple" weight="bold" semanticRole="decorative" class="link__icon link__icon--download" />}</a>
 )}

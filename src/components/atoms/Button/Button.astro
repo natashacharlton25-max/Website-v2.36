@@ -33,7 +33,7 @@ export interface Props {
   rainbowColor?: RainbowColour;
   shape?: 'sharp' | 'subtle' | 'soft' | 'rounded' | 'pill' | 'square' | 'circle' | 'dropdown' | 'i-sharp' | 'i-subtle' | 'i-soft' | 'i-rounded';
   size?: 'sm' | 'md' | 'lg';
-  effect?: 'glint' | 'colour-flow' | 'jump' | 'tech' | 'magnetic' | 'spotlight' | 'split' | 'expand';
+  effect?: 'glint' | 'colour-flow' | 'jump' | 'tech' | 'magnetic' | 'spotlight' | 'split' | 'expand' | 'confetti';
   speed?: 'slow' | 'normal' | 'fast';
   alignment?: 'left' | 'center';
   type?: 'button' | 'submit' | 'reset';
@@ -130,6 +130,15 @@ const dataAttrs: Record<string, string | undefined> = Object.fromEntries(
 if (gradientName && gradientDirection) dataAttrs['data-grad-dir'] = gradientDirection;
 if (gradientAnimated && gradientAnimateDirection && gradientAnimateDirection !== 'cw') {
   dataAttrs['data-grad-anim-dir'] = gradientAnimateDirection;
+}
+// Confetti effect — wire into the existing particle-burst system. The
+// auto-init in particle-burst.ts picks up [data-particle-burst] elements
+// on DOM-ready + Astro page-load and binds a click handler that respects
+// the motion gate. For links it also delays navigation 400ms so the
+// burst is visible.
+if (_effect === 'confetti') {
+  dataAttrs['data-particle-burst'] = '';
+  dataAttrs['data-particle-type'] = 'confetti';
 }
 
 const isLink = !!href;
