@@ -111,6 +111,10 @@
   border-radius: 0 !important;
   border-color: transparent !important;
   background: color-mix(in oklch, var(--focus-color) 10%, transparent) !important;
+  /* Text contrast — --color-Black auto-flips per theme mode (#1a1a1a
+     in light, #fafafa in dark) so labels stay readable on the focus
+     tint across all variants without per-variant overrides. */
+  color: var(--color-Black) !important;
   overflow: visible !important;
   outline: none !important;
   position: relative !important;
@@ -120,23 +124,46 @@
   text-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  transition: background var(--focus-appear-duration) ease-out !important;
+  transition: background var(--focus-appear-duration) ease-out, color var(--focus-appear-duration) ease-out !important;
 }
 
-/* Focus ring as pseudo-element — on top for border, no fill */
+/* Focus + hover — same auto-flip text token. Keeps contrast across
+   the highlight-link-color fill that gets applied below. */
+html:not([data-focus-rainbow]) body:not([data-hover="none"]) [data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card):not(.a11y-save-slot__name):not(.form-field):hover {
+  color: var(--color-Black) !important;
+}
+
+/* Focus ring as pseudo-element — on top for border, no fill.
+ *
+ * !important on geometry/animation properties so effects (glow halo,
+ * split panels, gradient halo, etc.) writing to the same ::after can't
+ * displace the ring. Background omitted from !important on purpose so
+ * the per-element fill rule below (line ~210) still applies for
+ * buttons/links/form fields. Focus visibility is a WCAG non-negotiable
+ * per this file's header — ring shape wins, fill cascades normally. */
 [data-focus-active]::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 0;
+  content: '' !important;
+  /* display:block !important so highlight-links.css's `.btn::after { display: none }`
+     can't kill the focus ring in highlight-links mode. */
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: 0 !important;
   box-shadow:
     0 0 0 var(--focus-thickness) var(--focus-bg),
-    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color);
-  background: transparent;
-  opacity: 1;
-  pointer-events: none;
-  z-index: 1036;
-  transition: box-shadow var(--focus-move-duration) ease-out;
+    0 0 0 calc(var(--focus-thickness) * 2) var(--focus-color) !important;
+  background-image: none !important;
+  background-size: auto !important;
+  background-position: 0 0 !important;
+  width: auto !important;
+  height: auto !important;
+  opacity: 1 !important;
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+  pointer-events: none !important;
+  z-index: 1036 !important;
+  transition: box-shadow var(--focus-move-duration) ease-out !important;
 }
 
 /* Dropdown menu items: inset focus ring + fill, shrunk to text */
@@ -235,16 +262,27 @@ html:not([data-focus-rainbow]) select[data-focus-active]::after {
   display: none !important;
 }
 
-/* Focused + hovered: shift to Success — only when hover is full/instant/gentle */
+/* Focused + hovered: shift fill AND ring to highlight-link-color so the
+   user gets a visible "this is the focused element you're hovering"
+   signal across both axes simultaneously. Only when hover is
+   full/instant/gentle (data-hover="none" suppresses hover signals). */
 html:not([data-focus-rainbow]) body:not([data-hover="none"]) [data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card):not(.a11y-save-slot__name):not(.form-field):hover {
-  background: color-mix(in oklch, var(--color-Success) 10%, transparent) !important;
+  background: color-mix(in oklch, var(--highlight-link-color) 10%, transparent) !important;
 }
 
-/* Form fields: fill + token override to Success on hover */
+/* Ring also shifts to highlight-link-color on focus + hover */
+html:not([data-focus-rainbow]) body:not([data-hover="none"]) [data-focus-active]:not(.form-field):hover::after {
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--highlight-link-color) !important;
+  background: color-mix(in oklch, var(--highlight-link-color) 25%, transparent) !important;
+}
+
+/* Form fields: fill + token override to highlight-link-color on hover */
 html:not([data-focus-rainbow]) body:not([data-hover="none"]) .form-field[data-focus-active]:hover {
-  background: color-mix(in oklch, var(--color-Success) 5%, transparent) !important;
-  --_field-brand: var(--color-Success);
-  --_field-border: var(--color-Success);
+  background: color-mix(in oklch, var(--highlight-link-color) 5%, transparent) !important;
+  --_field-brand: var(--highlight-link-color);
+  --_field-border: var(--highlight-link-color);
 }
 
 html:not([data-focus-rainbow]) body:not([data-hover="none"]) .form-field[data-focus-active]:hover .form-field__input {

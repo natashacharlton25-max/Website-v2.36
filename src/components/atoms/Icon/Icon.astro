@@ -154,12 +154,18 @@ const morphIsInteractive = !!morphTo && morphTrigger === 'hover';
 const fillIsInteractive = !!fillAnimation && fillTrigger === 'hover';
 // Any animated non-UI icon is interactive when explainer is available
 const hasExplainerTarget = !!(morphTo || draw || fillAnimation || animation) && semanticRole !== 'ui-control';
-const isInteractive = isInformational
+// noExplainer signals the icon is composed inside a parent that owns
+// interaction (Button etc). Suppress tabindex/role=button so the parent
+// is the only focus target — prevents focus-trap where button + icon
+// each take their own focus stop.
+const isInteractive = !noExplainer && (
+  isInformational
   || animationIsInteractive
   || drawIsInteractive
   || morphIsInteractive
   || fillIsInteractive
-  || hasExplainerTarget;
+  || hasExplainerTarget
+);
 // Resolve role: informational icons stay role="img"; pure-interactive
 // (hover/click animations without semanticRole) become role="button" so
 // screen readers announce them as activatable.

@@ -42,6 +42,12 @@
   --transition-fast: var(--duration-fast) var(--ease-default);
   --transition-base: var(--duration-base) var(--ease-default);
   --transition-slow: var(--duration-slow) var(--ease-default);
+
+  /* Hover durations — slower so hover transitions feel calmer too */
+  --hover-duration: 400ms;
+  --hover-duration-fast: 240ms;
+  --hover-duration-slow: 1s;
+  --hover-duration-extralong: 3s;
 }
 
 
@@ -71,6 +77,80 @@
   --transition-base: 0s;
   --transition-slow: 0s;
   --transition-extralong: 0s;
+
+  /* Hover transitions are still motion. Override hover-gate's defaults
+     here so motion=none + hover=full (default) gives instant hover
+     snap. Without this, Button.css transitions that read
+     var(--hover-duration) still animate at 200ms. */
+  --hover-duration: 0s;
+  --hover-duration-fast: 0s;
+  --hover-duration-slow: 0s;
+  --hover-duration-extralong: 0s;
+}
+
+/* None — buttons. Transform changes on hover/active are motion even when
+   the transition is 0s — the button still shifts position. Strip every
+   transform on .btn states so motion=none = truly no movement. */
+[data-motion="none"] .btn:hover,
+[data-motion="none"] .btn:active,
+[data-motion="none"] .btn:focus-visible {
+  transform: none !important;
+}
+
+/* Per-effect surgical kills. The broad :hover::before/::after { transform:
+   none } approach was breaking effects that use transform for layout
+   (colour-flow uses translateX(-50%) for blob centering, not motion).
+   Each effect handled individually below. */
+
+/* Glint — sliding light pseudo. Hide entirely. */
+[data-motion="none"] .btn--glint::before {
+  display: none !important;
+}
+
+/* Colour-flow — rising blob pseudos. Hide entirely. */
+[data-motion="none"] .btn--colour-flow::before,
+[data-motion="none"] .btn--colour-flow::after {
+  display: none !important;
+}
+
+/* Tech — offset frame. Pin pseudo at rest position so it doesn't slide
+   to the hover position. Keep transform: translate(-5px, -5px) (rest). */
+[data-motion="none"] .btn--tech:hover::before,
+[data-motion="none"] .btn--tech:active::before,
+[data-motion="none"] .btn--tech:focus-visible::before {
+  transform: translate(-5px, -5px) !important;
+}
+
+/* Expand — kill the label slide on hover. Caret/icon transitions snap
+   via 0s duration tokens so they appear instantly without sliding. */
+[data-motion="none"] .btn--expand:hover .btn__label,
+[data-motion="none"] .btn--expand:active .btn__label,
+[data-motion="none"] .btn--expand:focus-visible .btn__label {
+  transform: none !important;
+}
+
+/* Spotlight — cursor-following pseudo. Hide entirely so the radial
+   gradient doesn't track on motion=none. JS still sets --_spot-x/y
+   inline but the pseudo's opacity:0 override here makes it invisible. */
+[data-motion="none"] .btn--spotlight::before,
+[data-motion="none"] .btn--spotlight:hover::before,
+[data-motion="none"] .btn--spotlight:focus-visible::before {
+  opacity: 0 !important;
+}
+
+/* Animated gradient — GSAP tweens --_btn-gpos-x as inline style. Pin
+   --_btn-gpos-x AND override background-size so the gradient fills
+   the button exactly without 400% pan room (no hard colour-stop edges
+   visible). Halo ::after hidden too. */
+[data-motion="none"] .btn.gradient--animated {
+  --_btn-gpos-x: 50% !important;
+  background-size: 100% 100% !important;
+}
+
+[data-motion="none"] .btn.gradient--animated::after,
+[data-motion="none"] .btn.gradient--animated:hover::after,
+[data-motion="none"] .btn.gradient--animated:focus-visible::after {
+  opacity: 0 !important;
 }
 
 /* None — kill all CSS animation explicitly (belt + suspenders with 0s tokens) */
