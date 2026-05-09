@@ -153,6 +153,71 @@
   opacity: 0 !important;
 }
 
+/* None — links. Same shape as button rules above: kill the decorative
+   hover effects so motion=none = static link presentation. */
+[data-motion="none"] .link--animate-underline-grow::before {
+  transform: scaleX(0) !important;
+}
+
+[data-motion="none"] .link--animate-highlight-grow .text::before {
+  display: none !important;
+}
+
+[data-motion="none"] .link--animate-shadow-fill:hover {
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+[data-motion="none"] .link--animate-shadow-fill:hover .text,
+[data-motion="none"] .link--animate-shadow-fill:hover [class*="color--"] {
+  color: inherit !important;
+}
+
+[data-motion="none"] .link--animate-text-slide:hover {
+  background-position: -100% !important;
+}
+
+[data-motion="none"] .link--animate-text-slide:hover::before {
+  width: 0 !important;
+}
+
+[data-motion="none"] .link--animate-squiggle::after,
+[data-motion="none"] .link--animate-squiggle:hover::after {
+  animation: none !important;
+}
+
+/* Frame variant brackets — show STATICALLY at rest position (no
+   transition, no fade-in). The brackets are the link's visual
+   indicator; in motion=none they need to be permanently visible. */
+[data-motion="none"] .link--frame::before,
+[data-motion="none"] .link--frame::after,
+[data-motion="none"] .link--frame .text::before,
+[data-motion="none"] .link--frame .text::after {
+  opacity: 1 !important;
+  transform: translate(0, 0) !important;
+  transition: none !important;
+}
+
+/* Static underline fallback for variants/effects that rely on hover
+   animation to indicate link-ness. In motion=none those animations
+   can't run, so add an underline so users can still see what's a link. */
+[data-motion="none"] .link--bare .text,
+[data-motion="none"] .link--animate-underline-grow .text,
+[data-motion="none"] .link--animate-highlight-grow .text,
+[data-motion="none"] .link--animate-shadow-fill .text,
+[data-motion="none"] .link--animate-text-slide .text {
+  text-decoration: underline !important;
+  text-decoration-color: var(--_link-color) !important;
+  text-underline-offset: 0.3em !important;
+  text-decoration-thickness: 0.125em !important;
+  /* For text-slide: kill the gradient text-clip so the underline reads
+     against actual text colour, not transparent fill. */
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+}
+
 /* None — kill all CSS animation explicitly (belt + suspenders with 0s tokens) */
 [data-motion="none"] [class*="anim--"],
 [data-motion="none"] .gradient--animated,

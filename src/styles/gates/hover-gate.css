@@ -248,7 +248,9 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 }
 
 [data-hover="gentle"] .link .text {
-  transition: text-decoration-color 0.8s ease-in-out;
+  /* color INCLUDED so the .text colour shift slows with the rest in
+     gentle mode (variant rules set color on .text via :hover .text). */
+  transition: color 0.8s ease-in-out, text-decoration-color 0.8s ease-in-out;
 }
 
 [data-hover="gentle"] .link--border {
@@ -267,8 +269,11 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
   transition: opacity 0.8s ease-in-out, bottom 0.8s ease-in-out, height 0.8s ease-in-out;
 }
 
-/* Instant — snap link changes */
-[data-hover="instant"] .link {
+/* Instant — snap link changes. Both .link and .link .text need the
+   suppression because variant rules set color on .text directly on hover
+   and the .text transition would still animate without an explicit kill. */
+[data-hover="instant"] .link,
+[data-hover="instant"] .link .text {
   transition: none;
 }
 
@@ -300,7 +305,22 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 [data-hover="none"] .link--underline:hover,
 [data-hover="none"] .link--highlight:hover,
 [data-hover="none"] .link--border:hover,
-[data-hover="none"] .link--ghost:hover {
+[data-hover="none"] .link--ghost:hover,
+[data-hover="none"] .link--frame:hover {
+  color: var(--_link-text);
+}
+
+/* Variant rules set color explicitly on .text on hover (e.g.
+   `.link--default:hover .text { color: var(--_link-hover) }`). The
+   .link:hover rule above covers the link element, but .text is shifted
+   by these higher-specificity rules. Restate rest colour on .text too. */
+[data-hover="none"] .link:hover .text,
+[data-hover="none"] .link--default:hover .text,
+[data-hover="none"] .link--underline:hover .text,
+[data-hover="none"] .link--highlight:hover .text,
+[data-hover="none"] .link--border:hover .text,
+[data-hover="none"] .link--ghost:hover .text,
+[data-hover="none"] .link--frame:hover .text {
   color: var(--_link-text);
 }
 
@@ -334,6 +354,33 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 [data-hover="none"] .link--animate-text-slide:hover { background-position: -100%; }
 [data-hover="none"] .link--animate-text-slide:hover::before { width: 0; }
 [data-hover="none"] .link--animate-squiggle:hover::after { animation: none; background-color: var(--_link-color); }
+
+/* Animation-variant .text colour was leaking through — these animations set
+   color on .text (or color--{name} children) at higher specificity than the
+   generic link:hover rule. Restate rest text colour on .text/children too. */
+[data-hover="none"] .link--animate-shadow-fill:hover .text,
+[data-hover="none"] .link--animate-shadow-fill:hover [class*="color--"],
+[data-hover="none"] .link--animate-text-slide:hover .text,
+[data-hover="none"] .link--animate-text-slide:hover .text__content {
+  color: var(--_link-text) !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+}
+
+/* Frame variant — suppress bracket reveal in hover-none. */
+[data-hover="none"] .link--frame::before,
+[data-hover="none"] .link--frame::after,
+[data-hover="none"] .link--frame .text::before,
+[data-hover="none"] .link--frame .text::after {
+  opacity: 0 !important;
+  transition: none !important;
+}
+
+[data-hover="none"] .link--frame {
+  padding: 0 !important;
+}
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -430,12 +477,6 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 
 [data-hover="none"][data-mode="dark"] .btn--tech.btn--neutral:hover::before {
   border-color: var(--neutral-emphasis);
-}
-
-/* Dark mode fill+split — bumped specificity. (0,5,0) wasn't winning
-   for some reason; try (0,6,0) by chaining .btn. */
-[data-hover="none"][data-mode="dark"] .btn.btn--fill.btn--split:hover {
-  border-color: transparent;
 }
 
 /* Dark mode liquid-glass — theme-luminance-dark.css gives liquid-glass
@@ -758,17 +799,86 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 [data-hover="none"] .btn--colour-flow:hover::after { top: 180%; }
 /* expand has no ::before anymore — moved to flex/width based design. */
 [data-hover="none"] .btn--spotlight:hover::before { opacity: 0; }
-[data-hover="none"] .btn--split:hover::before { transform: none; }
-[data-hover="none"] .btn--split:hover::after { transform: none; }
 [data-hover="none"] .btn--jump:hover { transform: none; }
 [data-hover="none"] .btn--tech:hover { transform: none; }
 
-/* Split's rest sets `background: var(--_btn-brand-dark)` — visible as a
-   ring through the transparent fill border. Generic .btn:hover above
-   sets `background-color: var(--_btn-brand)`, which would change the
-   ring colour from brand-dark to brand on hover. Restate brand-dark. */
-[data-hover="none"] .btn--split:hover {
-  background: var(--_btn-brand-dark);
+/* Split — pseudos stay at rest width:0, no transition. Box-shadow-based
+   variants (neumorphic family / glassic / neumorphic-inner) keep their
+   rest shadow stack with zero-size split insets. */
+[data-hover="none"] .btn--split::before,
+[data-hover="none"] .btn--split::after {
+  transition: none !important;
+}
+
+[data-hover="none"] .btn--split:hover::before,
+[data-hover="none"] .btn--split:hover::after,
+[data-hover="none"] .btn--split:focus-visible::before,
+[data-hover="none"] .btn--split:focus-visible::after {
+  width: 0 !important;
+}
+
+[data-hover="none"] .btn--neumorphic-inner.btn--split,
+[data-hover="none"] .btn--neumorphic.btn--split,
+[data-hover="none"] .btn--neumorphic-3d.btn--split,
+[data-hover="none"] .btn--glassic.btn--split {
+  transition: none !important;
+}
+
+[data-hover="none"] .btn--neumorphic-inner.btn--split:hover,
+[data-hover="none"] .btn--neumorphic-inner.btn--split:focus-visible {
+  box-shadow:
+    var(--shadow-neu-pressed),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+}
+
+[data-hover="none"] .btn--neumorphic.btn--split:hover,
+[data-hover="none"] .btn--neumorphic.btn--split:focus-visible {
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    var(--shadow-neu-raised);
+}
+
+[data-hover="none"] .btn--neumorphic-3d.btn--split:hover,
+[data-hover="none"] .btn--neumorphic-3d.btn--split:focus-visible {
+  background-color: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  transform: none;
+  /* Restate full rest shadow stack — without this, the variant's
+     :hover rule (50em inset panels + 3D stack) wins and the panels
+     fill the button instantly. */
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
+}
+
+[data-hover="none"] .btn--glassic.btn--split:hover,
+[data-hover="none"] .btn--glassic.btn--split:focus-visible {
+  /* Restate full rest shadow stack — same reason as neu-3d above. */
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
+    -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
+    inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
 }
 
 /* Rainbow glow — freeze the continuous ring animation and hide halo. */

@@ -287,7 +287,7 @@
 
 .btn.gradient--animated:not(:disabled):not([aria-disabled="true"]):hover::after,
 .btn.gradient--animated:not(:disabled):not([aria-disabled="true"]):focus-visible::after {
-  opacity: 0.65;
+  opacity: var(--opacity-medium);
 }
 
 .btn.gradient--animated:not(:disabled):not([aria-disabled="true"]):hover {
@@ -363,7 +363,7 @@
   background: var(--_grad-computed);
   background-size: 400% 400%;
   background-position: var(--_btn-gpos-x) 50%;
-  opacity: 0.5;
+  opacity: var(--opacity-disabled);
   pointer-events: none;
 }
 
@@ -1015,76 +1015,204 @@
    revealing the darker bg beneath in a diagonal reveal.
    ========================================================== */
 
+/* Two semi-transparent panels grow inward from each edge and meet in
+   the middle on hover. Pseudo-element approach for variants without
+   inset shadows in their stack — box-shadow inset approach for
+   neumorphic family / glassic / neumorphic-inner so the variant's
+   inner shadow stays visible. Speed-gated via var(--duration-slower)
+   so motion-gate scales naturally. */
+
 .btn--split {
-  background: var(--_btn-brand-dark);
-  overflow: hidden;
-}
-
-/* Split text — always visible, just the split animation around it */
-.btn--split .btn__label {
   position: relative;
-  z-index: 2;
-}
-
-/* Split secondary label (contentButtonSplit) — data-wired in Phase 2 but
-   hidden until Phase 3 CSS adds the proper reveal animation. Keeping the
-   span in the DOM lets the runtime forward content; CSS controls visibility. */
-.btn__label-split {
-  display: none;
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .btn--split::before,
 .btn--split::after {
   content: '';
   position: absolute;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  background: var(--_btn-brand);
-  transition: transform var(--hover-duration) cubic-bezier(0.65, 0, 0.076, 1);
-  transition-delay: calc(var(--hover-duration) * 0.3);
-  pointer-events: none;
-}
-
-.btn--split::before {
   top: 0;
-  border-radius: inherit;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  transform-origin: right center;
-}
-
-.btn--split::after {
   bottom: 0;
-  border-radius: inherit;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  transform-origin: left center;
+  width: 0;
+  background: color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+  transition: width var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.btn--split:hover {
-  background: var(--_btn-brand-dark);
+/* left:auto / right:auto resets defend against variants like .btn--glow
+   that declare `inset: 0` on their ::after — without these resets, the
+   inset shorthand sets left:0 AND right:0, and the browser ignores our
+   right:0 (when all three of left/right/width are specified, width+left
+   wins), so ::after collapses onto ::before at the left edge. */
+.btn--split::before { left: 0;  right: auto; }
+.btn--split::after  { right: 0; left: auto;  }
+
+.btn--split:hover::before,
+.btn--split:hover::after,
+.btn--split:focus-visible::before,
+.btn--split:focus-visible::after {
+  width: 50%;
+}
+
+/* Label/icon sit above the growing panels */
+.btn--split .btn__label,
+.btn--split .btn__icon {
+  position: relative;
+  z-index: 1;
+}
+
+/* Glow override — its existing ::after halo (opacity:0 at rest,
+   blur+saturate on hover) was bleeding through to the right panel,
+   making it render as a fading circle. Reset glow halo properties on
+   the ::after panel so it renders as a hard rectangle. */
+.btn--glow.btn--split::after {
+  inset: auto;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: auto;
+  border-radius: 0;
+  opacity: 1;
+  animation: none;
+  filter: none;
+  background: color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+}
+
+.btn--glow.btn--split:hover::after,
+.btn--glow.btn--split:focus-visible::after {
+  opacity: 1;
+  filter: none;
+}
+
+/* Box-shadow inset approach for variants with their own inset shadows
+   in the stack. Pseudo elements disabled. CSS box-shadow paints in
+   REVERSE list order — first in list = top. 50em offset (instead of
+   5em) so panels meet in the middle on any button width — overlaps
+   harmlessly on narrow buttons (clipped by border-box).
+   ========================================================== */
+
+.btn--neumorphic-inner.btn--split::before,
+.btn--neumorphic-inner.btn--split::after,
+.btn--neumorphic.btn--split::before,
+.btn--neumorphic.btn--split::after,
+.btn--neumorphic-3d.btn--split::before,
+.btn--neumorphic-3d.btn--split::after,
+.btn--glassic.btn--split::before,
+.btn--glassic.btn--split::after {
+  display: none;
+}
+
+/* neumorphic-inner — variant pressed shadow on TOP (uniform, doesn't
+   block edge zone). */
+.btn--neumorphic-inner.btn--split {
+  box-shadow:
+    var(--shadow-neu-pressed),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+  transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btn--neumorphic-inner.btn--split:hover,
+.btn--neumorphic-inner.btn--split:focus-visible {
+  box-shadow:
+    var(--shadow-neu-pressed),
+    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+}
+
+/* neumorphic — drop only at rest, panels paint over cleanly */
+.btn--neumorphic.btn--split {
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    var(--shadow-neu-raised);
+  transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btn--neumorphic.btn--split:hover,
+.btn--neumorphic.btn--split:focus-visible {
+  box-shadow:
+    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    var(--shadow-neu-raised);
+}
+
+/* neumorphic-3d — keep rest 3D layer stack, panels grow on top.
+   Bg/color/transform locked at rest values so brand-dark panels read
+   against brand bg (variant hover would paint brand-dark bg = same
+   colour as panels = invisible). */
+.btn--neumorphic-3d.btn--split {
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
+  transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btn--neumorphic-3d.btn--split:hover,
+.btn--neumorphic-3d.btn--split:focus-visible {
+  background-color: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
   transform: none;
+  box-shadow:
+    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
 }
 
-.btn--split:hover::before {
-  transform: scaleX(0);
+/* glassic — keep rest stack, panels grow on top */
+.btn--glassic.btn--split {
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
+    -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
+    inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+  transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-.btn--split:hover::after {
-  transform: scaleX(0);
-}
-
-.btn--split:active {
-  transform: none;
-}
-
-.btn--split:active::before {
-  transform: scaleX(0.5);
-}
-
-.btn--split:active::after {
-  transform: scaleX(0.5);
+.btn--glassic.btn--split:hover,
+.btn--glassic.btn--split:focus-visible {
+  box-shadow:
+    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
+    -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
+    inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
 }
 
 /* ==========================================================

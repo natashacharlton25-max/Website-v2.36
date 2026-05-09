@@ -17,6 +17,7 @@ import { LottieIcon } from '../LottieIcon';
 import { Text } from '../Text';
 import InlineSvg from '../../InlineSvg.astro';
 import type { BrandColour, RainbowColour, GradientBlend, GradientDirection, GradientAnimateDirection } from '../../../lib/shared-enums';
+import { FORBIDDEN_COMBOS } from './forbidden-combos';
 
 export interface DropdownItem {
   label: string;
@@ -28,8 +29,6 @@ export interface DropdownItem {
 export interface Props {
   /** Button label text. Forwarded to nested Text atom. Pipeline content key. */
   contentButton?: string;
-  /** Secondary label revealed by the split effect — button sizes to longest. */
-  contentButtonSplit?: string;
   variant?: 'fill' | 'outline' | 'ghost' | 'glass' | 'liquid-glass' | 'glassic' | 'glow' | 'rainbow-glow' | 'neumorphic' | 'neumorphic-3d' | 'neumorphic-inner';
   brandColor?: BrandColour;
   rainbowColor?: RainbowColour;
@@ -67,7 +66,6 @@ export interface Props {
 
 const {
   contentButton,
-  contentButtonSplit,
   variant: rawVariant = 'fill',
   brandColor: rawColor = 'primary',
   rainbowColor,
@@ -112,11 +110,6 @@ const color = isLegacyVariant ? rawVariant : (rainbowColor || rawColor);
 // 3D layers). Strip the effect, keep the variant.
 // Mirrors validator + schema._rules. Three layers: schema documents,
 // validator warns, atom enforces.
-const FORBIDDEN_COMBOS: Record<string, readonly string[]> = {
-  outline:        ['split'],
-  glow:           ['colour-flow', 'split'],
-  'rainbow-glow': ['colour-flow'],
-};
 const _effectForbidden = !!effect && FORBIDDEN_COMBOS[variant]?.includes(effect);
 if (_effectForbidden && import.meta.env.DEV) {
   console.warn(`[Button] effect="${effect}" not supported with variant="${variant}". Effect stripped.`);
@@ -161,7 +154,7 @@ const { component: _mediaComponent, ...rawMediaProps } = effectiveMedia || {};
 // spread. The icon is supplementary chrome in those cases; heavy SVG
 // would distract from the label.
 const heavySvgProps = ['morphTo', 'morphTrigger', 'draw', 'drawMode', 'drawColor', 'fillAnimation', 'fillMode', 'fillTrigger', 'fillColor'] as const;
-const _heavySvgAllowed = !contentButton && !contentButtonSplit && (shape === 'circle' || shape?.startsWith('i-'));
+const _heavySvgAllowed = !contentButton && (shape === 'circle' || shape?.startsWith('i-'));
 let mediaProps: Record<string, any> = rawMediaProps;
 if (hasIcon && !_heavySvgAllowed) {
   mediaProps = { ...rawMediaProps };
@@ -254,8 +247,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && _effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
-      {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>      {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       <Icon name="caret-down-fill" size={14} class="btn__chevron" />
     </button>
@@ -298,8 +290,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
         >
         {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-        <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && _effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
-        {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+        <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>        {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       {target === '_blank' && !hasIcon && <InlineSvg name="external" class="btn__external" />}
       </a>
@@ -318,8 +309,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && _effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
-      {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>      {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
       {target === '_blank' && !hasIcon && <InlineSvg name="external" class="btn__external" />}
     </a>
@@ -337,8 +327,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
     >
       {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && _effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
-      {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+      <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>      {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
       {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
     </button>
   </div>
@@ -354,8 +343,7 @@ const iconRight = iconPosition === 'right' && hasIcon;
   >
     {iconLeft && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
     {iconLeft && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
-    <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>{contentButtonSplit && _effect === 'split' && <Text as="span" class="btn__label-split" flush>{contentButtonSplit}</Text>}
-    {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
+    <Text as="span" class="btn__label" flush>{contentButton ?? <slot />}</Text>    {iconRight && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="btn__icon" />}
     {iconRight && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="btn__icon" />}
   </button>
 )}

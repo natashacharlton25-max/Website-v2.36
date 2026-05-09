@@ -48,6 +48,15 @@
   color: var(--_link-text);
 }
 
+/* Speed-gate the colour change. Uses --hover-duration-slow (500ms default,
+   1s in motion=gentle, 0s in motion=none) — the same token underlineGrow,
+   shadowFill, textSlide already use, so every link animation stays in
+   sync at every motion mode. Both .link and .link .text transition
+   because variant rules set color on .text directly on hover. */
+.link, .link .text {
+  transition: color var(--hover-duration-slow) var(--ease-default);
+}
+
 .link:hover {
   color: var(--_link-hover);
 }
@@ -100,7 +109,8 @@
    When a phrase contains either of those variants, loosen the line-height
    on the phrase wrapper so adjacent lines clear the link's box. */
 .link-phrase:has(.link--border),
-.link-phrase:has(.link--ghost) {
+.link-phrase:has(.link--ghost),
+.link-phrase:has(.link--frame) {
   line-height: var(--leading-loose);
 }
 
@@ -242,6 +252,96 @@
 
 .link--ghost:hover,
 .link--ghost:hover .text {
+  color: var(--_link-hover);
+}
+
+/* ==========================================================
+   VARIANT: Frame
+   Four L-bracket corners reveal on hover, framing the link like
+   a viewfinder. Brackets are em-relative so they scale with text
+   size. Two pseudos on .link (top-left, bottom-left) + two on the
+   nested .text span (top-right, bottom-right) — variants are mutually
+   exclusive so .link--frame .text::before/::after don't conflict
+   with other variants' use of those pseudos.
+   ========================================================== */
+
+.link--frame {
+  position: relative;
+  /* Padding gives the corner brackets room to sit cleanly past the text
+     edge without crowding the glyphs. Inline placements get loosened
+     line-height via .link-phrase:has(.link--frame) above so brackets
+     don't overlap the lines above and below. */
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.link--frame::before,
+.link--frame::after,
+.link--frame .text::before,
+.link--frame .text::after {
+  content: '';
+  position: absolute;
+  width: 0.5em;
+  height: 0.5em;
+  border: 0.18em solid var(--_link-color);
+  opacity: 0;
+  transition:
+    opacity var(--hover-duration) var(--ease-default),
+    transform var(--hover-duration) var(--ease-default),
+    border-color var(--hover-duration) var(--ease-default);
+  pointer-events: none;
+}
+
+/* Top-left corner — borders top + left only, transformed up-left at rest */
+.link--frame::before {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+  transform: translate(-50%, -50%);
+}
+
+/* Bottom-left corner — borders bottom + left only, transformed down-left at rest */
+.link--frame::after {
+  bottom: 0;
+  left: 0;
+  border-right: none;
+  border-top: none;
+  transform: translate(-50%, 50%);
+}
+
+/* Top-right corner — borders top + right only, transformed up-right at rest */
+.link--frame .text::before {
+  top: 0;
+  right: 0;
+  border-left: none;
+  border-bottom: none;
+  transform: translate(50%, -50%);
+}
+
+/* Bottom-right corner — borders bottom + right only, transformed down-right at rest */
+.link--frame .text::after {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+  transform: translate(50%, 50%);
+}
+
+.link--frame:hover::before,
+.link--frame:hover::after,
+.link--frame:hover .text::before,
+.link--frame:hover .text::after,
+.link--frame:focus-visible::before,
+.link--frame:focus-visible::after,
+.link--frame:focus-visible .text::before,
+.link--frame:focus-visible .text::after {
+  opacity: 1;
+  transform: translate(0, 0);
+  border-color: var(--_link-hover);
+}
+
+.link--frame:hover,
+.link--frame:focus-visible {
   color: var(--_link-hover);
 }
 

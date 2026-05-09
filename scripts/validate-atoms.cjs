@@ -292,9 +292,23 @@ for (const atom of atoms) {
         issues.push({ type: 'WARN', rule: 21, ln, file, msg: `transition rule (→ transitions.css?): ${t.substring(0, 60)}` });
       }
 
-      // Rule 22: :focus-visible in component CSS (→ focus-gate.css) — MOVE with exceptions
+      // Rule 22: :focus-visible in component CSS (→ focus-gate.css) — MOVE with exceptions.
+      // Skip when paired with :hover anywhere in the same selector group (e.g.
+      // `.btn:hover::before, .btn:focus-visible::before { ... }` — multi-line).
+      // Those pairings are intentional keyboard-equivalents for hover effects; splitting
+      // would force duplicate maintenance across two files for one effect. Reconstruct
+      // the full selector group by walking backwards to the previous brace and forwards
+      // to the opening brace, then check if both :hover and :focus-visible appear in it.
       if (!focusExceptions[atom] && /:focus-visible/.test(line)) {
-        issues.push({ type: 'MOVE', rule: 22, ln, file, msg: `focus-visible rule (→ focus-gate.css): ${t.substring(0, 60)}` });
+        let backIdx = i;
+        while (backIdx > 0 && !/[{}]/.test(lines[backIdx - 1])) backIdx--;
+        let fwdIdx = i;
+        while (fwdIdx < lines.length - 1 && !/\{/.test(lines[fwdIdx])) fwdIdx++;
+        const selectorGroup = lines.slice(backIdx, fwdIdx + 1).join(' ');
+        const isPairedWithHover = /:hover/.test(selectorGroup);
+        if (!isPairedWithHover) {
+          issues.push({ type: 'MOVE', rule: 22, ln, file, msg: `focus-visible rule (→ focus-gate.css): ${t.substring(0, 60)}` });
+        }
       }
 
       // Rule 29: :hover in component CSS (→ hover-gate.css) — WARN with exceptions
