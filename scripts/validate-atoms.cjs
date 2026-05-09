@@ -98,6 +98,17 @@ const focusExceptions = {
   Link: true        // focus-active rules
 };
 
+// Per-atom exceptions for Rule 44 (hardcoded inline <svg> in .astro files).
+// These atoms legitimately handle SVG content (defs containers, dynamic
+// SVG construction from API data, gradient-def sprites, etc).
+const inlineSvgExceptions = {
+  Icon: true,        // SVG content fetched from API and inlined
+  Image: true,       // detects SVG content in image src
+  Shape: true,       // dynamic SVG construction from shape data
+  Card: true,        // gradient-def sprite container
+  TextEffect: true   // text-effect defs container
+};
+
 // Per-atom exceptions for Rule 1 (var() fallbacks).
 // Shape uniquely allows no colour prop — gradients provide their own colour
 // and forcing a brand default would override the gradient story. Documented
@@ -385,6 +396,15 @@ for (const atom of atoms) {
       // Rule 24: Scoped <style> block in .astro (should use external CSS)
       if (/^\s*<style[\s>]/.test(line) && !/is:global/.test(line)) {
         issues.push({ rule: 24, ln, file, msg: 'scoped <style> block (use external .css file)' });
+      }
+
+      // Rule 44: hardcoded inline <svg> block in .astro file. All icons
+      // come from the Asset Library API (Phosphor) via the Icon atom — it
+      // inlines them at build time so there's no runtime network cost.
+      // Exceptions in inlineSvgExceptions for atoms that legitimately handle
+      // SVG content (Icon, Image, Shape, Card defs, TextEffect defs).
+      if (!inlineSvgExceptions[atom] && /<svg[\s>]/.test(line)) {
+        issues.push({ type: 'WARN', rule: 44, ln, file, msg: `hardcoded <svg> (→ use Icon atom): ${line.trim().substring(0, 60)}` });
       }
     });
 
