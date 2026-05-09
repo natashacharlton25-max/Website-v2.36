@@ -58,6 +58,7 @@ interface Particle {
   vy: number;
   rotation: number;
   spin: number;
+  scale: number;
   alive: boolean;
   born: number;
 }
@@ -129,17 +130,22 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     // Initial velocity — upward cone, scaled by spread
     const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
     const speed = 4 + Math.random() * (opts.spread / 30);
+    // Stagger emit ~10ms per particle so the burst doesn't look like
+    // they all came out at once. born+i*delay → tick skips them until ready.
+    const emitDelay = i * 10;
     particles.push({
       el,
       x: cx,
       y: cy,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed - 4,
-      rotation: 0,
-      spin: (Math.random() - 0.5) * 8,
+      rotation: Math.random() * 360,
+      spin: (Math.random() - 0.5) * 14,
+      scale: 0.6 + Math.random() * 0.7,
       alive: true,
-      born: startTime,
+      born: startTime + emitDelay,
     });
+    el.style.opacity = '0';
   }
 
   function tick(now: number) {
@@ -150,6 +156,8 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       if (!p.alive) continue;
       anyAlive = true;
       const age = now - p.born;
+      // Pre-emit phase — particle staggered after burst start, hold invisible at origin
+      if (age < 0) continue;
       if (age > opts.lifespan) { p.el.remove(); p.alive = false; continue; }
 
       // Gravity
@@ -191,7 +199,7 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       const fadeStart = opts.lifespan - 400;
       const opacity = age < fadeStart ? 1 : Math.max(0, 1 - (age - fadeStart) / 400);
       p.el.style.opacity = String(opacity);
-      p.el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) rotate(${p.rotation}deg)`;
+      p.el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) rotate(${p.rotation}deg) scale(${p.scale})`;
     }
 
     if (anyAlive) requestAnimationFrame(tick);

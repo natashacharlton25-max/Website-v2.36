@@ -145,6 +145,11 @@ function createParticle(x: number, y: number, opts: Required<ParticleBurstOption
     }
   }
 
+  // Per-particle size variation. Templates own their dimensions, so
+  // scaling the wrapper varies size without redefining tokens. 0.6–1.3
+  // gives visible variety without breaking the visual rhythm.
+  const scale = 0.6 + Math.random() * 0.7;
+
   if (width > 0) {
     particle.style.width = `${width}px`;
     particle.style.height = `${height}px`;
@@ -158,15 +163,16 @@ function createParticle(x: number, y: number, opts: Required<ParticleBurstOption
   // Animation duration
   const duration = Math.random() * (opts.duration.max - opts.duration.min) + opts.duration.min;
 
-  // Animate using Web Animations API
+  // Animate using Web Animations API. Scale baked into both keyframes
+  // so size variation persists across the full burst.
   const animation = particle.animate(
     [
       {
-        transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(0deg)`,
+        transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(0deg) scale(${scale})`,
         opacity: 1,
       },
       {
-        transform: `translate(-50%, -50%) translate(${destinationX}px, ${destinationY}px) rotate(${rotation}deg)`,
+        transform: `translate(-50%, -50%) translate(${destinationX}px, ${destinationY}px) rotate(${rotation}deg) scale(${scale})`,
         opacity: 0,
       },
     ],
