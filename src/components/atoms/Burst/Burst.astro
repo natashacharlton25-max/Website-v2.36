@@ -22,6 +22,8 @@
  * its own <script>. The wrapper element holds all data-particle-* attrs;
  * the runtime auto-binds click/hover.
  */
+import fs from 'node:fs';
+import path from 'node:path';
 import { Shape } from '../Shape';
 import { Icon } from '../Icon';
 import type { BrandColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
@@ -29,12 +31,22 @@ import type { BrandColour, RainbowColour, ColourTier } from '../../../lib/shared
 type Engine = 'fly' | 'physics';
 type Trigger = 'click' | 'hover';
 type Palette = 'tiers' | 'rainbow';
+type PhysicsMode = 'fall' | 'explode' | 'float' | 'orbit' | 'shake';
 
 interface Props {
-  /** Shape config used as the particle visual. Build-time rendered into a
-   *  hidden template; runtime clones it per particle. Any Shape prop works
-   *  (shape, slug, media, gradient, size, animation). */
+  /** Shape or Icon config used as the particle visual. Build-time rendered
+   *  into a hidden template; runtime clones it per particle. */
   particle?: Record<string, any>;
+
+  /** Raw SVG markup OR public/-relative path (e.g. "Animations/Hero Morph/1.svg").
+   *  Read at build time and embedded verbatim into a hidden template. Bypasses
+   *  the Shape/Icon delegation — use when you have an arbitrary logo or custom
+   *  SVG that isn't in the Asset Library. Paths get fill="currentColor"
+   *  injected so colour/palette props apply via the .color--{name} mixin. */
+  particleSvg?: string;
+  /** Particle size in px (Shape/Icon size tokens are honoured by their own
+   *  components; particleSvg needs an explicit dimension). Default 32. */
+  particleSize?: number;
 
   /** Single brand colour applied to every particle. Mutually exclusive with palette. */
   brandColor?: BrandColour;
@@ -47,10 +59,13 @@ interface Props {
 
   /** fly: DOM particles fly outward + fade. physics: gravity + collide with text + optional magnet. */
   engine?: Engine;
+  /** [physics only] Force preset. fall = upward burst + gravity. explode = radial.
+   *  float = rise + drift. orbit = circle the cursor. shake = bounce on collision. */
+  mode?: PhysicsMode;
   trigger?: Trigger;
   /** Number of particles per burst. */
   count?: number;
-  /** Spread radius (fly) / horizontal scatter (physics) in px. */
+  /** Spread radius (fly) / initial velocity range (physics) in px. */
   spread?: number;
   /** Lifespan in ms before fade. */
   lifespan?: number;
@@ -67,11 +82,14 @@ interface Props {
 
 const {
   particle,
+  particleSvg,
+  particleSize = 32,
   brandColor,
   colorTier,
   rainbowColor,
   palette,
   engine = 'fly',
+  mode,
   trigger = 'click',
   count = 30,
   spread = 150,
@@ -81,6 +99,45 @@ const {
   collide = true,
   class: className = '',
 } = Astro.props;
+
+// Resolve particleSvg — either inline markup (starts with <svg) or a path
+// relative to the public/ folder. Read at build time so the runtime just
+// clones the hidden template content, no fetch.
+let svgMarkup: string | null = null;
+if (particleSvg) {
+  if (particleSvg.trim().startsWith('<svg') || particleSvg.includes('<?xml')) {
+    svgMarkup = particleSvg;
+  } else {
+    try {
+      const resolved = path.join(process.cwd(), 'public', particleSvg);
+      svgMarkup = fs.readFileSync(resolved, 'utf-8');
+    } catch (err) {
+      console.warn(`[Burst] Could not read particleSvg "${particleSvg}":`, err);
+    }
+  }
+  // Normalise the SVG so it picks up CSS colour from the wrapper:
+  //   - Strip XML prelude + DOCTYPE (Astro's HTML parser chokes on them)
+  //   - Inject fill="currentColor" on paths that don't declare a fill,
+  //     so .color--{name} on the wrapper sets the actual paint
+  //   - Force width/height to 100% so wrapper-driven sizing works
+  if (svgMarkup) {
+    svgMarkup = svgMarkup
+      .replace(/<\?xml[^?]*\?>/g, '')
+      .replace(/<!DOCTYPE[^>]*>/g, '')
+      .replace(/<path(\s)([^>]*)\/?>/g, (m, ws, attrs) => {
+        if (/\bfill\s*=/.test(attrs)) return m;
+        return `<path${ws}fill="currentColor" ${attrs}>`;
+      })
+      .replace(/<svg([^>]*)>/, (_m, attrs) => {
+        // Strip any explicit width/height; keep viewBox for aspect ratio
+        const cleaned = (attrs as string)
+          .replace(/\s*width="[^"]*"/g, '')
+          .replace(/\s*height="[^"]*"/g, '');
+        return `<svg width="100%" height="100%"${cleaned}>`;
+      })
+      .trim();
+  }
+}
 
 // Strip structural keys — particle component receives the rest. Shape
 // is the default; Icon allows clean glyph particles without a wrapper.
@@ -120,18 +177,38 @@ const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
   class:list={['burst', className]}
   data-particle-burst
   data-particle-engine={engine}
+  data-particle-mode={engine === 'physics' && mode ? mode : undefined}
   data-particle-trigger={trigger}
   data-particle-count={String(count)}
   data-particle-spread={String(spread)}
   data-particle-lifespan={String(lifespan)}
-  data-particle-templates={particle ? templateIds.join(',') : undefined}
+  data-particle-templates={(particle || svgMarkup) ? templateIds.join(',') : undefined}
   data-particle-gravity={engine === 'physics' ? String(gravity) : undefined}
   data-particle-magnet={engine === 'physics' && magnet ? '' : undefined}
   data-particle-collide={engine === 'physics' && !collide ? 'off' : undefined}
 >
-  {particle && variants.map((override, i) => (
+  {svgMarkup ? variants.map((override, i) => {
+    // Wrap each SVG variant in a sized + colour-keyed span. The .color--{name}
+    // mixin sets currentColor; the SVG's injected fill="currentColor" picks
+    // it up. One template per palette variant so the runtime can pick.
+    const colourClass = override.rainbowColor
+      ? `color--${override.rainbowColor}`
+      : override.brandColor
+      ? `color--${override.brandColor}${override.colorTier ? ` color--tier-${override.colorTier}` : ''}`
+      : '';
+    return (
+      <template id={templateIds[i]} data-burst-template>
+        <span
+          class={`burst-svg ${colourClass}`}
+          style={`display:inline-block;width:${particleSize}px;height:${particleSize}px;line-height:0;`}
+        >
+          <Fragment set:html={svgMarkup} />
+        </span>
+      </template>
+    );
+  }) : particle && variants.map((override, i) => (
     <template id={templateIds[i]} data-burst-template>
-      <ParticleComponent {...particleProps} {...override} />
+      <ParticleComponent {...(particleProps as any)} {...override} />
     </template>
   ))}
   <slot />

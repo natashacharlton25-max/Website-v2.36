@@ -7,7 +7,8 @@
   "_rules": [
     { "rule": "palette-tiers-needs-brandColor", "condition": "palette === 'tiers'", "requires": "brandColor", "note": "palette='tiers' cycles through 4 tiers of brandColor. Without brandColor there's nothing to cycle." },
     { "rule": "palette-overrides-single-colour", "condition": "!!palette", "note": "palette='rainbow' ignores brandColor/rainbowColor; palette='tiers' uses brandColor but ignores colorTier and rainbowColor (cycles instead)." },
-    { "rule": "physics-only-flags", "condition": "engine !== 'physics'", "forbids": ["gravity", "magnet", "collide"], "note": "gravity/magnet/collide only meaningful when engine='physics' — runtime ignores them otherwise." }
+    { "rule": "physics-only-flags", "condition": "engine !== 'physics'", "forbids": ["gravity", "magnet", "collide", "mode"], "note": "gravity/magnet/collide/mode only meaningful when engine='physics' — runtime ignores them otherwise." },
+    { "rule": "particleSvg-vs-particle", "condition": "particleSvg && particle", "note": "Use one or the other. particleSvg embeds raw markup; particle delegates to Shape or Icon. If both provided, particleSvg wins." }
   ],
 
   "props": {
@@ -19,6 +20,17 @@
         "properties": {
           "component": { "type": "string", "required": true, "default": "Shape", "enum": ["Shape", "Icon"] }
         }
+      },
+      "particleSvg": {
+        "type": "string",
+        "required": false,
+        "_description": "Raw SVG markup OR a public/-relative path (e.g. \"Animations/Hero Morph/1.svg\"). Read at build time and embedded verbatim into a hidden template. Bypasses the Shape/Icon delegation — use for arbitrary logos or custom SVGs that aren't in the Asset Library. Paths get fill=\"currentColor\" injected so colour/palette props apply via the .color--{name} mixin."
+      },
+      "particleSize": {
+        "type": "number",
+        "required": false,
+        "default": 32,
+        "_description": "Particle size in px — used for particleSvg only. Shape/Icon size tokens come from their own props."
       }
     },
 
@@ -46,6 +58,7 @@
     "behaviour": {
       "_description": "Burst engine + trigger + counts",
       "engine":   { "type": "string",  "required": false, "default": "fly", "enum": ["fly", "physics"], "description": "fly: outward burst, fade out (Web Animations). physics: gravity, AABB collision against page text/buttons, optional cursor magnet." },
+      "mode":     { "type": "string",  "required": false, "default": "fall", "enum": ["fall", "explode", "float", "orbit", "shake"], "description": "[physics only] Force preset. fall: upward emit + gravity (default). explode: full-radial outward, low gravity, no collide. float: rise + sinusoidal drift, no collide. orbit: tangential force around cursor, no collide. shake: like fall but bounces twice on collision before settling." },
       "trigger":  { "type": "string",  "required": false, "default": "click", "enum": ["click", "hover"], "description": "click: fire on click (links delay nav 400ms). hover: fire on first mouseenter, retrigger after 2s." },
       "count":    { "type": "number",  "required": false, "default": 30, "description": "Number of particles per burst." },
       "spread":   { "type": "number",  "required": false, "default": 150, "description": "Spread radius in px (fly) or horizontal scatter (physics)." },
