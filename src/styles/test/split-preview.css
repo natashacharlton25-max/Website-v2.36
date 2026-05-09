@@ -1,0 +1,308 @@
+/* ──────────────────────────────────────────────────────────────
+   SPLIT EFFECT — PREVIEW (.btn--split-preview)
+   Pseudo-element panels grow in WIDTH from each edge and meet in
+   the middle on hover. Visual port of the SCSS reference using
+   pseudo-elements instead of box-shadow inset (avoids conflict
+   with variants that own their own box-shadow).
+   ────────────────────────────────────────────────────────────── */
+
+.btn--split-preview {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.btn--split-preview::before,
+.btn--split-preview::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  /* Semi-transparent fill — variant chrome reads through. */
+  background: color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+  transition: width var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* left:auto / right:auto resets defend against variants like .btn--glow
+   that declare `inset: 0` on their ::after — without these resets, the
+   inset shorthand sets left:0 AND right:0, and the browser ignores our
+   right:0 (when all three of left/right/width are specified, width+left
+   wins), so ::after collapses onto ::before at the left edge. */
+.btn--split-preview::before { left: 0;    right: auto; }
+.btn--split-preview::after  { right: 0;   left: auto;  }
+
+.btn--split-preview:hover::before,
+.btn--split-preview:hover::after,
+.btn--split-preview:focus-visible::before,
+.btn--split-preview:focus-visible::after {
+  width: 50%;
+}
+
+/* Label and icon sit above the growing panels */
+.btn--split-preview .btn__label,
+.btn--split-preview .btn__icon {
+  position: relative;
+  z-index: 1;
+}
+
+/* PREVIEW-ONLY override — the live .btn--fill hover rule excludes
+   .btn--split via :not() chain so fill+split keeps brand bg on hover
+   and the split panels read as visible darker overlays. The preview
+   class isn't in that production exclusion, so we force the rest bg
+   here with !important. When we promote to live, this rule isn't
+   needed because :not(.btn--split) already handles it. */
+.btn--fill.btn--split-preview:hover,
+.btn--fill.btn--split-preview:focus-visible {
+  background-color: var(--_btn-brand) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   VARIANTS WITH INSET SHADOWS — use box-shadow inset for the panels
+   so the variant's inner shadow paints ON TOP. CSS box-shadow paints
+   in REVERSE list order — first in list = top. Variant shadow first,
+   split insets after. 50em offset (instead of 5em) so panels meet in
+   the middle on any button width — overlaps harmlessly on small ones.
+   Pseudo elements disabled for these variants so they don't double-up.
+   ────────────────────────────────────────────────────────────── */
+
+.btn--neumorphic-inner.btn--split-preview::before,
+.btn--neumorphic-inner.btn--split-preview::after,
+.btn--neumorphic.btn--split-preview::before,
+.btn--neumorphic.btn--split-preview::after,
+.btn--neumorphic-3d.btn--split-preview::before,
+.btn--neumorphic-3d.btn--split-preview::after,
+.btn--glassic.btn--split-preview::before,
+.btn--glassic.btn--split-preview::after {
+  display: none;
+}
+
+/* ── neumorphic-inner ──
+   Variant pressed shadow on TOP (uniform, doesn't block edge zone).
+   Slowed to 600ms for smoother feel. */
+.btn--neumorphic-inner.btn--split-preview {
+  box-shadow:
+    var(--shadow-neu-pressed),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+  transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btn--neumorphic-inner.btn--split-preview:hover,
+.btn--neumorphic-inner.btn--split-preview:focus-visible {
+  box-shadow:
+    var(--shadow-neu-pressed),
+    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+}
+
+/* ── neumorphic, neumorphic-3d, glassic ──
+   Variant has edge-positioned inset shadows that block panel visibility
+   when on top. Trade-off: put panels FIRST in shadow list (paints on top
+   of variant identity) and keep REST shadow (no hover-state shadow swap)
+   so the variant chrome stays consistent and the panels grow visibly. */
+
+/* neumorphic — drop only, no inset, panels paint over cleanly */
+.btn--neumorphic.btn--split-preview {
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    var(--shadow-neu-raised);
+  transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btn--neumorphic.btn--split-preview:hover,
+.btn--neumorphic.btn--split-preview:focus-visible {
+  box-shadow:
+    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    var(--shadow-neu-raised);
+}
+
+/* neumorphic-3d — keep rest 3D layer stack, panels grow on top */
+.btn--neumorphic-3d.btn--split-preview {
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
+  transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btn--neumorphic-3d.btn--split-preview:hover,
+.btn--neumorphic-3d.btn--split-preview:focus-visible {
+  /* Lock variant's hover overrides at rest values — same-colour clash
+     (variant paints brand-dark bg, our panels are also brand-dark) and
+     the transform translateY would shift the button mid-animation. */
+  background-color: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  transform: none;
+  box-shadow:
+    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
+}
+
+/* glassic — keep rest stack, panels grow on top */
+.btn--glassic.btn--split-preview {
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
+    -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
+    inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+  transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btn--glassic.btn--split-preview:hover,
+.btn--glassic.btn--split-preview:focus-visible {
+  box-shadow:
+    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
+    -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
+    inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   GLOW VARIANT — its existing ::after halo (opacity:0 at rest,
+   blur+saturate on hover) was bleeding through to my split panel,
+   making the right side render as a fading circle. Override here
+   to neutralise the halo behaviour when split-preview is on.
+   ────────────────────────────────────────────────────────────── */
+
+.btn--glow.btn--split-preview::after {
+  /* Reset glow halo properties on the ::after panel */
+  inset: auto;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: auto;
+  border-radius: 0;
+  opacity: 1;
+  animation: none;
+  filter: none;
+  background: color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+}
+
+.btn--glow.btn--split-preview:hover::after,
+.btn--glow.btn--split-preview:focus-visible::after {
+  /* Override .btn--glow:hover::after { opacity: 1; filter: blur(...) } */
+  opacity: 1;
+  filter: none;
+}
+
+/* Hover-none — pseudos stay invisible, no transition */
+[data-hover="none"] .btn--split-preview::before,
+[data-hover="none"] .btn--split-preview::after {
+  transition: none !important;
+}
+
+[data-hover="none"] .btn--split-preview:hover::before,
+[data-hover="none"] .btn--split-preview:hover::after,
+[data-hover="none"] .btn--split-preview:focus-visible::before,
+[data-hover="none"] .btn--split-preview:focus-visible::after {
+  width: 0 !important;
+}
+
+/* Hover-none for box-shadow-based variants — kill the hover transition
+   and restate REST shadow stack. (0,3,1) beats my hover rules (0,2,1)
+   without needing !important. */
+
+[data-hover="none"] .btn--neumorphic-inner.btn--split-preview {
+  transition: none !important;
+}
+[data-hover="none"] .btn--neumorphic-inner.btn--split-preview:hover,
+[data-hover="none"] .btn--neumorphic-inner.btn--split-preview:focus-visible {
+  box-shadow:
+    var(--shadow-neu-pressed),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+}
+
+[data-hover="none"] .btn--neumorphic.btn--split-preview {
+  transition: none !important;
+}
+[data-hover="none"] .btn--neumorphic.btn--split-preview:hover,
+[data-hover="none"] .btn--neumorphic.btn--split-preview:focus-visible {
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    var(--shadow-neu-raised);
+}
+
+[data-hover="none"] .btn--neumorphic-3d.btn--split-preview {
+  transition: none !important;
+}
+[data-hover="none"] .btn--neumorphic-3d.btn--split-preview:hover,
+[data-hover="none"] .btn--neumorphic-3d.btn--split-preview:focus-visible {
+  background-color: var(--_btn-brand);
+  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  transform: none;
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
+}
+
+[data-hover="none"] .btn--glassic.btn--split-preview {
+  transition: none !important;
+}
+[data-hover="none"] .btn--glassic.btn--split-preview:hover,
+[data-hover="none"] .btn--glassic.btn--split-preview:focus-visible {
+  box-shadow:
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
+    8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
+    -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
+    inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
+    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+}

@@ -718,7 +718,12 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
    would otherwise set color to var(--_btn-brand) (brand instead of
    contrast). colour-flow rule comes after outline in this file → wins
    source-order at tied (0,3,0) specificity. */
-[data-hover="none"] .btn--colour-flow:hover {
+/* .btn.btn--colour-flow chain bumps specificity to (0,3,1) so it ties
+   with the variant hover-none rules (outline/ghost/liquid-glass/neumorphic-
+   inner each at 0,3,1 due to :not(.gradient--animated) chain) and wins
+   source order at line 721. Sets only bg/color/shadow — variant rules
+   keep painting border-color so each variant's rest border is preserved. */
+[data-hover="none"] .btn.btn--colour-flow:hover {
   background: color-mix(in oklch, var(--_btn-brand) 10%, transparent);
   box-shadow: var(--shadow-btn);
   color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
@@ -746,22 +751,6 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 [data-hover="none"] .btn--tech:hover::before {
   transform: translate(-5px, -5px);
 }
-
-/* Expand hover-none — variant rest is `background: transparent` (the
-   button itself is invisible; the ::before circle is the only visible
-   chrome). The generic .btn:hover rule sets bg = var(--_btn-brand)
-   which would fill the whole button on hover. Force transparent here.
-   Then suppress ::before width/border-radius/bg, icon rotation, and
-   chevron transform. */
-[data-hover="none"] .btn--expand:hover {
-  background: transparent;
-  color: oklch(from var(--page-bg) round(1.21 - l) 0 0);
-  box-shadow: none;
-}
-
-/* Expand pseudo-element rules removed — new expand variant uses flex
-   width/padding transitions, no ::before circle. The `.btn--expand:hover`
-   width-collapse rule earlier in this file handles hover-none. */
 
 /* Pseudo-element hover effects — return to rest position. */
 [data-hover="none"] .btn--glint:hover::before { left: -100%; }
