@@ -28,12 +28,38 @@ import { Shape } from '../Shape';
 import { Icon } from '../Icon';
 import type { BrandColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
 
-type Engine = 'fly' | 'physics';
+type Engine = 'fly' | 'physics' | 'string';
 type Trigger = 'click' | 'hover';
 type Palette = 'tiers' | 'rainbow';
 type PhysicsMode = 'fall' | 'explode' | 'float' | 'orbit' | 'shake';
+type Preset = 'starfall';
+
+// Named presets — pre-configured prop bundles. Author still overrides any
+// individual prop (the preset only fills in undefined values). Presets are
+// the canonical "this is the look we want" entry point; modes are the
+// underlying physics primitives.
+const PRESETS: Record<Preset, Record<string, any>> = {
+  // Starfall — the beautiful cascading rainbow icons that fly high, pass
+  // through most text, and pool spectacularly on the viewport floor.
+  // Higher pressure for taller arcs, low stickiness for the cascade effect.
+  starfall: {
+    engine: 'physics',
+    mode: 'fall',
+    palette: 'rainbow',
+    count: 80,
+    spread: 220,         // wider arc + higher launch
+    gravity: 0.4,
+    stickiness: 0.35,    // mostly cascade past text, pile on floor
+    lifespan: 6500,
+    particle: { component: 'Icon', name: 'star-fill', weight: 'fill', size: 'sm' },
+  },
+};
 
 interface Props {
+  /** Pre-configured prop bundle — applies a named preset. Author-supplied
+   *  individual props still win (preset fills only undefined props). */
+  preset?: Preset;
+
   /** Shape or Icon config used as the particle visual. Build-time rendered
    *  into a hidden template; runtime clones it per particle. */
   particle?: Record<string, any>;
@@ -76,8 +102,35 @@ interface Props {
   magnet?: boolean;
   /** [physics only] Particles stop on contact with p/h1-h3/button/a rects. Default true. */
   collide?: boolean;
+  /** [physics + string] 0–1 probability a falling particle/strand-point sticks
+   *  on a top-edge contact. 0.5 default — half pass through to the next rect
+   *  below, distributing across rows instead of clumping on the highest. 1.0
+   *  = original behaviour (stick on first contact). */
+  stickiness?: number;
+
+  /** [string only] Strands emitted per click. Default 1. */
+  strands?: number;
+  /** [string only] Points per strand. Default 60. */
+  length?: number;
+  /** [string only] Initial point speed in px/frame. Default 8. */
+  pressure?: number;
+  /** [string only] Emit duration in ms — strand grows over this period. Default 350. */
+  emitDuration?: number;
+  /** [string only] Stroke width in px. Default 3. */
+  thick?: number;
 
   class?: string;
+}
+
+// Resolve preset first. Author-supplied props win — preset only fills
+// keys that the author left undefined.
+const _rawProps = Astro.props as Record<string, any>;
+const _presetDefaults = _rawProps.preset && PRESETS[_rawProps.preset as Preset]
+  ? PRESETS[_rawProps.preset as Preset]
+  : {};
+const _resolvedProps: Record<string, any> = { ..._presetDefaults };
+for (const [k, v] of Object.entries(_rawProps)) {
+  if (v !== undefined) _resolvedProps[k] = v;
 }
 
 const {
@@ -93,12 +146,29 @@ const {
   trigger = 'click',
   count = 30,
   spread = 150,
-  lifespan = 2500,
+  lifespan,
   gravity = 0.4,
   magnet = false,
-  collide = true,
+  collide,
+  stickiness,
+  strands,
+  length,
+  pressure,
+  emitDuration,
+  thick,
   class: className = '',
-} = Astro.props;
+} = _resolvedProps;
+
+// Per-engine default for collide: string defaults off (silly-string flies
+// across surfaces), physics defaults on (particles land on text/buttons).
+const _collideDefault = engine === 'string' ? false : true;
+const _effectiveCollide = collide === undefined ? _collideDefault : collide;
+
+// Per-engine lifespan default. String strands need long lives so they
+// have time to settle on the floor and pool — 8s minimum looks like
+// silly-string. Fly/physics bursts die in 2.5s.
+const _lifespanDefault = engine === 'string' ? 12000 : 2500;
+const _effectiveLifespan = lifespan === undefined ? _lifespanDefault : lifespan;
 
 // Resolve particleSvg — either inline markup (starts with <svg) or a path
 // relative to the public/ folder. Read at build time so the runtime just
@@ -181,11 +251,17 @@ const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
   data-particle-trigger={trigger}
   data-particle-count={String(count)}
   data-particle-spread={String(spread)}
-  data-particle-lifespan={String(lifespan)}
-  data-particle-templates={(particle || svgMarkup) ? templateIds.join(',') : undefined}
-  data-particle-gravity={engine === 'physics' ? String(gravity) : undefined}
+  data-particle-lifespan={String(_effectiveLifespan)}
+  data-particle-templates={(particle || svgMarkup || engine === 'string') ? templateIds.join(',') : undefined}
+  data-particle-gravity={(engine === 'physics' || engine === 'string') ? String(gravity) : undefined}
   data-particle-magnet={engine === 'physics' && magnet ? '' : undefined}
-  data-particle-collide={engine === 'physics' && !collide ? 'off' : undefined}
+  data-particle-collide={(engine === 'physics' || engine === 'string') ? (_effectiveCollide ? 'on' : 'off') : undefined}
+  data-particle-stickiness={(engine === 'physics' || engine === 'string') && stickiness !== undefined ? String(stickiness) : undefined}
+  data-particle-strands={engine === 'string' && strands ? String(strands) : undefined}
+  data-particle-length={engine === 'string' && length ? String(length) : undefined}
+  data-particle-pressure={engine === 'string' && pressure ? String(pressure) : undefined}
+  data-particle-emit-duration={engine === 'string' && emitDuration ? String(emitDuration) : undefined}
+  data-particle-thick={engine === 'string' && thick ? String(thick) : undefined}
 >
   {svgMarkup ? variants.map((override, i) => {
     // Wrap each SVG variant in a sized + colour-keyed span. The .color--{name}
@@ -206,10 +282,24 @@ const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
         </span>
       </template>
     );
-  }) : particle && variants.map((override, i) => (
+  }) : particle ? variants.map((override, i) => (
     <template id={templateIds[i]} data-burst-template>
       <ParticleComponent {...(particleProps as any)} {...override} />
     </template>
-  ))}
+  )) : engine === 'string' ? variants.map((override, i) => {
+    // String engine doesn't clone particles — but the runtime still probes
+    // these templates for their computed colour. Minimal colour-keyed span
+    // is enough.
+    const colourClass = override.rainbowColor
+      ? `color--${override.rainbowColor}`
+      : override.brandColor
+      ? `color--${override.brandColor}${override.colorTier ? ` color--tier-${override.colorTier}` : ''}`
+      : '';
+    return (
+      <template id={templateIds[i]} data-burst-template>
+        <span class={colourClass}>.</span>
+      </template>
+    );
+  }) : null}
   <slot />
 </span>

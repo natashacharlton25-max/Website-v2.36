@@ -12,6 +12,16 @@
   ],
 
   "props": {
+    "preset": {
+      "_description": "Pre-configured prop bundle. Author-supplied props still win — the preset only fills keys you left undefined.",
+      "preset": {
+        "type": "string",
+        "required": false,
+        "enum": ["starfall"],
+        "description": "starfall: rainbow star icons cascading from a click point, passing through most text and pooling spectacularly on the viewport floor. Bundles engine='physics', mode='fall', palette='rainbow', count=80, spread=220, gravity=0.4, stickiness=0.35, lifespan=6500, particle=Icon star-fill."
+      }
+    },
+
     "content": {
       "_description": "Particle visual + wrapped child",
       "particle": {
@@ -57,7 +67,7 @@
 
     "behaviour": {
       "_description": "Burst engine + trigger + counts",
-      "engine":   { "type": "string",  "required": false, "default": "fly", "enum": ["fly", "physics"], "description": "fly: outward burst, fade out (Web Animations). physics: gravity, AABB collision against page text/buttons, optional cursor magnet." },
+      "engine":   { "type": "string",  "required": false, "default": "fly", "enum": ["fly", "physics", "string"], "description": "fly: outward burst, fade out (Web Animations). physics: gravity, AABB collision against page text/buttons, optional cursor magnet. string: silly-string Verlet rope — connected points sprayed from origin, gravity, AABB collision, render as SVG path." },
       "mode":     { "type": "string",  "required": false, "default": "fall", "enum": ["fall", "explode", "float", "orbit", "shake"], "description": "[physics only] Force preset. fall: upward emit + gravity (default). explode: full-radial outward, low gravity, no collide. float: rise + sinusoidal drift, no collide. orbit: tangential force around cursor, no collide. shake: like fall but bounces twice on collision before settling." },
       "trigger":  { "type": "string",  "required": false, "default": "click", "enum": ["click", "hover"], "description": "click: fire on click (links delay nav 400ms). hover: fire on first mouseenter, retrigger after 2s." },
       "count":    { "type": "number",  "required": false, "default": 30, "description": "Number of particles per burst." },
@@ -67,9 +77,19 @@
 
     "physics": {
       "_description": "Physics engine knobs — engine='physics' only, ignored otherwise",
-      "gravity":  { "type": "number",  "required": false, "default": 0.4, "description": "Vertical acceleration in px/frame². Higher = particles fall faster." },
+      "gravity":  { "type": "number",  "required": false, "default": 0.4, "description": "Vertical acceleration in px/frame². Higher = particles fall faster. Also used by engine='string'." },
       "magnet":   { "type": "boolean", "required": false, "default": false, "description": "Particles attract toward cursor while alive." },
-      "collide":  { "type": "boolean", "required": false, "default": true, "description": "Particles stop on contact with p/h1/h2/h3/button/a rects (text 'lands' on words). Set false to fall to viewport floor only." }
+      "collide":  { "type": "boolean", "required": false, "default": true, "description": "Particles stop on contact with p/h1/h2/h3/button/a rects (text 'lands' on words). Set false to fall to viewport floor only. Also used by engine='string'." },
+      "stickiness": { "type": "number", "required": false, "default": 0.5, "description": "0–1 probability a falling particle/strand-point sticks on a top-edge contact. 0.5 = half pass through to the next rect below (distributes across rows). 1.0 = always stick on first contact. Lower = more particles fall further. Particles are gated to falling motion only — upward burst phase ignores collision." }
+    },
+
+    "string": {
+      "_description": "Verlet-rope engine knobs — engine='string' only, ignored otherwise. Particle visual props (particle/particleSvg) are unused for this engine; palette/brandColor/rainbowColor still drive strand colour.",
+      "strands":      { "type": "number",  "required": false, "default": 1, "description": "Strands emitted per click. Each strand picks a random colour from the palette." },
+      "length":       { "type": "number",  "required": false, "default": 60, "description": "Points per strand. More = longer rope." },
+      "pressure":     { "type": "number",  "required": false, "default": 8, "description": "Initial point speed (px/frame). Higher = strand sprays farther before gravity catches it." },
+      "emitDuration": { "type": "number",  "required": false, "default": 350, "description": "ms over which the strand grows. Shorter = whip-crack, longer = lazy spray." },
+      "thick":        { "type": "number",  "required": false, "default": 3, "description": "Stroke width of the rendered strand path in px." }
     }
   }
 }

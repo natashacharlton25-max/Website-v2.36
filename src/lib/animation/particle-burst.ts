@@ -261,9 +261,11 @@ export function initParticleBurst(): void {
   document.querySelectorAll('[data-particle-burst]').forEach((element) => {
     if (element.hasAttribute('data-particle-initialized')) return;
 
-    // Burst atom routes engine='physics' to particle-physics.ts. Skip here
-    // so the two modules don't both bind handlers to the same element.
-    if (element.getAttribute('data-particle-engine') === 'physics') return;
+    // Burst atom routes engine='physics' to particle-physics.ts and
+    // engine='string' to particle-string.ts. Skip here so modules don't
+    // double-bind handlers on the same element.
+    const engineAttr = element.getAttribute('data-particle-engine');
+    if (engineAttr === 'physics' || engineAttr === 'string') return;
 
     element.setAttribute('data-particle-initialized', 'true');
 
