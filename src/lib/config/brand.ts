@@ -48,6 +48,23 @@ export const BRAND_CONFIG = {
   },
 
   /**
+   * Brand logo paths. Resolved via the `particleSvg: "logo:primary"` shorthand
+   * in the Burst atom (and any other component that wants the brand logo).
+   * Keys are enum'd — only these slot names exist; add to the schema if you
+   * need new ones rather than allowing arbitrary strings.
+   */
+  logo: {
+    /** Main brand logo — full colour, fallback for everything */
+    primary:    '/Animations/Hero Morph/1.svg',
+    /** Monochrome variant — single-colour silhouette for inverse contexts */
+    monochrome: '/Animations/Hero Morph/1.svg',
+    /** Favicon-scale glyph — simplified for tiny sizes */
+    favicon:    '/favicon.svg',
+    /** Wordmark — text-based logotype, for headers and footers */
+    wordmark:   '/Logo/SEO Image.png',
+  } as const,
+
+  /**
    * Reload Overlay — configures the fullscreen overlay shown during
    * page reloads triggered by view setting changes (motion/hover/render/mode).
    *

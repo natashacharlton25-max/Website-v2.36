@@ -183,6 +183,312 @@
           ]
         }
       ]
+    },
+
+    {
+      "component": "Section",
+      "container": "7xl",
+      "gap": "md",
+      "children": [
+        {
+          "component": "Heading",
+          "level": 2,
+          "contentHeading": "7. Reverse confetti (from edges → button)"
+        },
+        {
+          "component": "Text",
+          "contentText": "from='edges' + to='origin' → particles spawn at random viewport edges and converge on the button."
+        },
+        {
+          "component": "Burst",
+          "particle": { "component": "Icon", "name": "star-fill", "weight": "fill", "size": "md" },
+          "palette": "rainbow",
+          "engine": "physics",
+          "from": "edges",
+          "to": "origin",
+          "count": 120,
+          "lifespan": 3500,
+          "gravity": 0,
+          "collide": false,
+          "trigger": "click",
+          "children": [
+            { "component": "Button", "contentButton": "Implode rainbow", "variant": "fill" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "component": "Section",
+      "container": "7xl",
+      "gap": "md",
+      "children": [
+        {
+          "component": "Heading",
+          "level": 2,
+          "contentHeading": "8. String — reverse silly-string (from edges)"
+        },
+        {
+          "component": "Burst",
+          "engine": "string",
+          "palette": "rainbow",
+          "strands": 5,
+          "from": "edges",
+          "to": "origin",
+          "length": 80,
+          "pressure": 22,
+          "emitDuration": 400,
+          "thick": 4,
+          "trigger": "click",
+          "children": [
+            { "component": "Button", "contentButton": "Strings fly inward", "variant": "outline" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "component": "Section",
+      "container": "7xl",
+      "gap": "md",
+      "children": [
+        {
+          "component": "Heading",
+          "level": 2,
+          "contentHeading": "9. Hero text reveal (target selector)"
+        },
+        {
+          "component": "Text",
+          "contentText": "Click the button. Strings rain inward to the heading below. data-string-landed fires after arrival; CSS fades the heading from bg-coloured (invisible) to primary (visible)."
+        },
+        {
+          "component": "Heading",
+          "level": 1,
+          "contentHeading": "Hidden hero text",
+          "class": "burst-reveal-target"
+        },
+        {
+          "component": "Burst",
+          "engine": "string",
+          "palette": "rainbow",
+          "strands": 7,
+          "from": "edges",
+          "to": "target",
+          "target": ".burst-reveal-target",
+          "length": 80,
+          "pressure": 22,
+          "emitDuration": 500,
+          "thick": 4,
+          "trigger": "click",
+          "children": [
+            { "component": "Button", "contentButton": "Reveal hero", "variant": "fill", "brandColor": "secondary" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "component": "Section",
+      "container": "7xl",
+      "gap": "md",
+      "children": [
+        {
+          "component": "Heading",
+          "level": 2,
+          "contentHeading": "10. Vortex preset (cursor-magnet swarm)"
+        },
+        {
+          "component": "Text",
+          "contentText": "preset: 'vortex' — rainbow sparkles fly inward from viewport edges and magnet to your cursor. Move the cursor while particles are alive to drag the swarm around."
+        },
+        {
+          "component": "Burst",
+          "preset": "vortex",
+          "trigger": "click",
+          "children": [
+            { "component": "Button", "contentButton": "Summon swarm", "variant": "fill" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "component": "Section",
+      "container": "7xl",
+      "gap": "md",
+      "children": [
+        {
+          "component": "Heading",
+          "level": 2,
+          "contentHeading": "11. tracePath — strings draw a curve"
+        },
+        {
+          "component": "Text",
+          "contentText": "Strands fly inward then snap to positions sampled along an SVG path. Each strand draws its own wave, palette-coloured. Replace the path data with your logo / signature / text-as-path for arbitrary 'silly string handwriting' effects."
+        },
+        {
+          "component": "Burst",
+          "engine": "string",
+          "palette": "rainbow",
+          "strands": 7,
+          "from": "edges",
+          "to": "origin",
+          "length": 80,
+          "pressure": 22,
+          "emitDuration": 500,
+          "thick": 4,
+          "tracePath": "M-260,0 Q-200,-50 -130,0 T0,0 T130,0 T260,0",
+          "trigger": "click",
+          "children": [
+            { "component": "Button", "contentButton": "Draw a wave", "variant": "fill", "brandColor": "secondary" }
+          ]
+        },
+        {
+          "component": "Burst",
+          "engine": "string",
+          "palette": "rainbow",
+          "strands": 7,
+          "from": "edges",
+          "to": "origin",
+          "length": 120,
+          "pressure": 22,
+          "emitDuration": 500,
+          "thick": 4,
+          "tracePath": "logo:primary",
+          "traceSize": 280,
+          "trigger": "click",
+          "children": [
+            { "component": "Button", "contentButton": "Draw the logo", "variant": "outline" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "component": "Section",
+      "container": "7xl",
+      "gap": "md",
+      "children": [
+        {
+          "component": "Heading",
+          "level": 2,
+          "contentHeading": "12. magnetCursor — string-engine cursor swarm"
+        },
+        {
+          "component": "Text",
+          "contentText": "Strands fly inward from edges, then after emit completes every point soft-pulls toward your live cursor. Move the cursor to drag the rope-swarm around. Verlet links + repulsion stop it collapsing into a knot."
+        },
+        {
+          "component": "Burst",
+          "engine": "string",
+          "palette": "rainbow",
+          "strands": 5,
+          "from": "edges",
+          "to": "cursor",
+          "magnetCursor": true,
+          "length": 60,
+          "pressure": 8,
+          "emitDuration": 400,
+          "thick": 4,
+          "lifespan": 15000,
+          "trigger": "click",
+          "children": [
+            { "component": "Button", "contentButton": "Conjure swarm strings", "variant": "fill" }
+          ]
+        },
+        {
+          "component": "Text",
+          "contentText": "With collide:true added, one end of each strand pins to a random text/heading on the page — rainbow tendrils reaching from random elements toward your cursor."
+        },
+        {
+          "component": "Burst",
+          "engine": "string",
+          "palette": "rainbow",
+          "strands": 6,
+          "from": "edges",
+          "to": "cursor",
+          "magnetCursor": true,
+          "collide": true,
+          "length": 70,
+          "pressure": 10,
+          "emitDuration": 400,
+          "thick": 4,
+          "lifespan": 18000,
+          "trigger": "click",
+          "children": [
+            { "component": "Button", "contentButton": "Conjure tethered tendrils", "variant": "outline" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "component": "Section",
+      "container": "7xl",
+      "gap": "md",
+      "children": [
+        {
+          "component": "Heading",
+          "level": 2,
+          "contentHeading": "13. tracePath: 'phrase:welcome' (text-as-path)"
+        },
+        {
+          "component": "Text",
+          "contentText": "Strands write the word 'WELCOME' in the brand font. Pre-baked at build time via opentype.js (npm run build:text-paths) — zero runtime cost. Add phrases to src/lib/text-paths/registry.json."
+        },
+        {
+          "component": "Burst",
+          "engine": "string",
+          "palette": "rainbow",
+          "strands": 7,
+          "from": "edges",
+          "to": "origin",
+          "length": 300,
+          "pressure": 22,
+          "emitDuration": 500,
+          "thick": 4,
+          "tracePath": "phrase:welcome",
+          "traceSize": 460,
+          "traceOffsetY": -180,
+          "trigger": "click",
+          "children": [
+            { "component": "Button", "contentButton": "Write WELCOME", "variant": "fill" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "component": "Section",
+      "container": "7xl",
+      "gap": "md",
+      "children": [
+        {
+          "component": "Heading",
+          "level": 2,
+          "contentHeading": "14. Brand logo via BRAND_CONFIG"
+        },
+        {
+          "component": "Text",
+          "contentText": "particleSvg: 'logo:primary' resolves to BRAND_CONFIG.logo.primary at build time. No hardcoded paths in JSON."
+        },
+        {
+          "component": "Burst",
+          "particleSvg": "logo:primary",
+          "particleSize": 36,
+          "palette": "rainbow",
+          "engine": "physics",
+          "mode": "fall",
+          "trigger": "click",
+          "count": 40,
+          "lifespan": 6000,
+          "gravity": 0.4,
+          "stickiness": 0.4,
+          "children": [
+            { "component": "Button", "contentButton": "Brand logo cascade", "variant": "fill" }
+          ]
+        }
+      ]
     }
   ]
 }

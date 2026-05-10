@@ -25,6 +25,8 @@
 import { getAnimationConfig } from './animation-config';
 
 export type PhysicsMode = 'fall' | 'explode' | 'float' | 'orbit' | 'shake';
+export type SpawnFrom = 'origin' | 'top' | 'bottom' | 'left' | 'right' | 'edges' | 'viewport';
+export type SpawnTo = 'away' | 'origin' | 'cursor' | 'target';
 
 interface PhysicsOptions {
   mode: PhysicsMode;
@@ -41,6 +43,11 @@ interface PhysicsOptions {
   stickiness: number;
   templates: HTMLTemplateElement[];
   trigger: 'click' | 'hover';
+  from: SpawnFrom;
+  to: SpawnTo;
+  /** Element matched by `target` selector (resolved at spawn time). When
+   *  `to === 'target'`, particles aim at this element's centre. */
+  targetEl: Element | null;
 }
 
 const DEFAULTS: PhysicsOptions = {
@@ -58,7 +65,32 @@ const DEFAULTS: PhysicsOptions = {
   stickiness: 0.9,
   templates: [],
   trigger: 'click',
+  from: 'origin',
+  to: 'away',
+  targetEl: null,
 };
+
+// Pick a per-particle spawn position based on the `from` enum. Edge values
+// sample randomly along that viewport edge. 'edges' picks one of the four
+// at random per particle. 'viewport' picks anywhere.
+function pickSpawnPos(from: SpawnFrom, originX: number, originY: number): { x: number; y: number } {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  switch (from) {
+    case 'top':      return { x: Math.random() * vw, y: 0 };
+    case 'bottom':   return { x: Math.random() * vw, y: vh };
+    case 'left':     return { x: 0, y: Math.random() * vh };
+    case 'right':    return { x: vw, y: Math.random() * vh };
+    case 'edges': {
+      const edge = Math.floor(Math.random() * 4);
+      if (edge === 0) return { x: Math.random() * vw, y: 0 };
+      if (edge === 1) return { x: Math.random() * vw, y: vh };
+      if (edge === 2) return { x: 0, y: Math.random() * vh };
+      return { x: vw, y: Math.random() * vh };
+    }
+    case 'viewport': return { x: Math.random() * vw, y: Math.random() * vh };
+    default:         return { x: originX, y: originY };
+  }
+}
 
 // Selector for elements that "catch" particles. Tuned for the typical
 // content surface — text and interactive controls.
@@ -86,6 +118,14 @@ interface Particle {
   /** True when the particle has settled on a text/control rect (not the
    *  floor). Scroll handler unsticks these by resetting vy + collide=false. */
   stuckOnText: boolean;
+  /** Convergence mode: origin/target. When set, the tick loop ignores
+   *  vx/vy/gravity/floor and lerps from spawn to dest with ease-out so
+   *  the particle actually arrives and settles instead of flying past. */
+  converge: boolean;
+  spawnX: number;
+  spawnY: number;
+  destX: number;
+  destY: number;
 }
 
 // Global registry of all live particles across all bursts. Lets the scroll
@@ -183,6 +223,15 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
   const particles: Particle[] = [];
   const startTime = performance.now();
 
+  // Resolve target centre once (used by `to: 'target'`). Falls back to
+  // origin if selector doesn't match.
+  let targetX = cx, targetY = cy;
+  if (opts.to === 'target' && opts.targetEl) {
+    const tr = opts.targetEl.getBoundingClientRect();
+    targetX = tr.left + tr.width / 2;
+    targetY = tr.top + tr.height / 2;
+  }
+
   for (let i = 0; i < opts.count; i++) {
     const el = document.createElement('div');
     el.className = 'particle-physics';
@@ -206,43 +255,71 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     }
     document.body.appendChild(el);
 
-    // Initial velocity — branched per mode. Each preset is just a
-    // different angle/speed combo; the tick loop owns the rest.
-    let angle: number, speed: number;
-    switch (opts.mode) {
-      case 'explode':
-        // Full radial — no upward bias. Bigger speed for splash.
-        angle = Math.random() * Math.PI * 2;
-        speed = 6 + Math.random() * (opts.spread / 20);
-        break;
-      case 'float':
-        // Gentle upward drift — narrow cone, low speed.
-        angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.6;
-        speed = 1 + Math.random() * 1.5;
-        break;
-      case 'orbit':
-        // Tiny radial nudge so they spread before tangential force kicks in.
-        angle = Math.random() * Math.PI * 2;
-        speed = 0.5 + Math.random() * 1.5;
-        break;
-      case 'fall':
-      case 'shake':
-      default:
-        // Upward cone, scaled by spread.
-        angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
-        speed = 4 + Math.random() * (opts.spread / 30);
-        break;
+    // Per-particle spawn position from the `from` enum
+    const { x: spawnX, y: spawnY } = pickSpawnPos(opts.from, cx, cy);
+
+    // Initial velocity. When `to !== 'away'`, particles AIM at a destination
+    // (origin / cursor / target element) — convergence pattern. Otherwise
+    // the existing per-mode angle/speed logic gives radial-outward motion.
+    let vx0: number, vy0: number;
+    if (opts.to !== 'away') {
+      const destX = opts.to === 'cursor' ? cursorX
+                  : opts.to === 'target' ? targetX
+                  : cx; // 'origin'
+      const destY = opts.to === 'cursor' ? cursorY
+                  : opts.to === 'target' ? targetY
+                  : cy;
+      // Travel time scaled by lifespan so particles arrive before fade-out.
+      // 60fps × 0.7 of lifespan in seconds = frames available.
+      const travelFrames = Math.max(20, (opts.lifespan / 1000) * 60 * 0.7);
+      vx0 = (destX - spawnX) / travelFrames;
+      vy0 = (destY - spawnY) / travelFrames;
+      // Add a small per-particle jitter so the swarm doesn't fly as one solid block
+      const jitter = 0.6;
+      vx0 += (Math.random() - 0.5) * jitter;
+      vy0 += (Math.random() - 0.5) * jitter;
+    } else {
+      // Original radial outward logic — branched per mode.
+      let angle: number, speed: number;
+      switch (opts.mode) {
+        case 'explode':
+          angle = Math.random() * Math.PI * 2;
+          speed = 6 + Math.random() * (opts.spread / 20);
+          break;
+        case 'float':
+          angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.6;
+          speed = 1 + Math.random() * 1.5;
+          break;
+        case 'orbit':
+          angle = Math.random() * Math.PI * 2;
+          speed = 0.5 + Math.random() * 1.5;
+          break;
+        case 'fall':
+        case 'shake':
+        default:
+          angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
+          speed = 4 + Math.random() * (opts.spread / 30);
+          break;
+      }
+      vx0 = Math.cos(angle) * speed;
+      vy0 = Math.sin(angle) * speed - (opts.mode === 'fall' || opts.mode === 'shake' ? 4 : 0);
     }
 
     // Stagger emit ~10ms per particle so the burst doesn't look like
     // they all came out at once. born+i*delay → tick skips them until ready.
     const emitDelay = i * 10;
+    // Convergence destination — origin/target use a fixed point. Cursor
+    // stays in vx/vy mode (continuous attraction would be nicer; deferring).
+    const converge = opts.to === 'origin' || opts.to === 'target';
+    const dX = opts.to === 'target' ? targetX : cx;
+    const dY = opts.to === 'target' ? targetY : cy;
+
     const particle: Particle = {
       el,
-      x: cx,
-      y: cy,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - (opts.mode === 'fall' || opts.mode === 'shake' ? 4 : 0),
+      x: spawnX,
+      y: spawnY,
+      vx: vx0,
+      vy: vy0,
       rotation: Math.random() * 360,
       spin: (Math.random() - 0.5) * 14,
       scale: 0.6 + Math.random() * 0.7,
@@ -252,6 +329,11 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       bounces: 0,
       collide: opts.collide,
       stuckOnText: false,
+      converge,
+      spawnX,
+      spawnY,
+      destX: dX,
+      destY: dY,
     };
     particles.push(particle);
     allParticles.push(particle);
@@ -273,6 +355,36 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
         p.alive = false;
         const gIdx = allParticles.indexOf(p);
         if (gIdx > -1) allParticles.splice(gIdx, 1);
+        continue;
+      }
+
+      // Convergence particles use ease-out lerp from spawn to dest.
+      // Stellar-parallax depth: scale varies in [0.6, 1.3], and we use that
+      // to randomise arrival speed + opacity per particle. Bigger = closer
+      // to camera = faster arrival + more opaque. Smaller = distant =
+      // slower arrival + faded. Gives the swarm visual depth instead of
+      // marching as one synchronised wave. Fade starts at arrival (not at
+      // lifespan-400) so particles dissolve into the target rather than
+      // sitting visibly at the destination.
+      if (p.converge) {
+        const scaleNorm = Math.min(Math.max((p.scale - 0.6) / 0.7, 0), 1); // 0..1
+        // Wider parallax spread — big particles arrive at 40% of lifespan
+        // (much faster, snappier), small ones still at 85% (slow background
+        // drift). The 45-point gap reads as real depth: foreground stars
+        // crash in fast, background stars float in late.
+        const arrivalFrac = 0.85 - 0.45 * scaleNorm; // big=0.40 (fast), small=0.85 (slow)
+        const baseOpacity = 0.55 + 0.45 * scaleNorm; // big=1.0, small=0.55
+        const arrivalAge = opts.lifespan * arrivalFrac;
+        const t = Math.min(age / arrivalAge, 1);
+        const ease = 1 - (1 - t) * (1 - t); // ease-out quad
+        p.x = p.spawnX + (p.destX - p.spawnX) * ease;
+        p.y = p.spawnY + (p.destY - p.spawnY) * ease;
+        p.rotation += p.spin * (1 - t * 0.7); // spin slows as particle arrives
+        const fadeWindow = Math.min(opts.lifespan - arrivalAge, 600);
+        const fadeProgress = age < arrivalAge ? 0 : Math.min((age - arrivalAge) / fadeWindow, 1);
+        const opacity = baseOpacity * (1 - fadeProgress);
+        p.el.style.opacity = String(opacity);
+        p.el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) rotate(${p.rotation}deg) scale(${p.scale})`;
         continue;
       }
 
@@ -369,6 +481,20 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     if (anyAlive) requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
+
+  // Target reveal flag — fire once at the convergence-arrival point
+  // (~70% of lifespan, matching the travelFrames calculation above).
+  // CSS can hook [data-string-landed] for reveal effects on the targeted
+  // element. Decoupled from collision so the target doesn't need to be in
+  // COLLIDE_SELECTOR.
+  if (opts.to === 'target' && opts.targetEl) {
+    const tEl = opts.targetEl;
+    setTimeout(() => {
+      if (!tEl.hasAttribute('data-string-landed')) {
+        tEl.setAttribute('data-string-landed', 'true');
+      }
+    }, opts.lifespan * 0.6);
+  }
 }
 
 function readOptions(el: Element): PhysicsOptions {
@@ -385,6 +511,19 @@ function readOptions(el: Element): PhysicsOptions {
   if (get('lifespan')) opts.lifespan = parseInt(get('lifespan')!);
   if (get('stickiness')) opts.stickiness = parseFloat(get('stickiness')!);
   if (el.hasAttribute('data-particle-magnet')) opts.magnet = true;
+
+  const validFrom: SpawnFrom[] = ['origin', 'top', 'bottom', 'left', 'right', 'edges', 'viewport'];
+  const fromAttr = get('from');
+  if (fromAttr && validFrom.includes(fromAttr as SpawnFrom)) opts.from = fromAttr as SpawnFrom;
+
+  const validTo: SpawnTo[] = ['away', 'origin', 'cursor', 'target'];
+  const toAttr = get('to');
+  if (toAttr && validTo.includes(toAttr as SpawnTo)) opts.to = toAttr as SpawnTo;
+
+  const targetSelector = get('target');
+  if (opts.to === 'target' && targetSelector) {
+    opts.targetEl = document.querySelector(targetSelector);
+  }
   const c = get('collide');
   if (c === 'on') opts.collide = true;
   else if (c === 'off') opts.collide = false;

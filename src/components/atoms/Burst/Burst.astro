@@ -26,13 +26,27 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { Shape } from '../Shape';
 import { Icon } from '../Icon';
+import { BRAND_CONFIG } from '../../../lib/config/brand';
+import { TEXT_PATHS } from '../../../lib/text-paths/generated';
 import type { BrandColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
+
+type LogoKey = 'primary' | 'monochrome' | 'favicon' | 'wordmark';
 
 type Engine = 'fly' | 'physics' | 'string';
 type Trigger = 'click' | 'hover';
 type Palette = 'tiers' | 'rainbow';
 type PhysicsMode = 'fall' | 'explode' | 'float' | 'orbit' | 'shake';
-type Preset = 'starfall';
+type Preset = 'starfall' | 'vortex';
+/** Where each particle/strand spawns. origin = burst element centre.
+ *  Edge values (top/bottom/left/right) sample a random position along that
+ *  viewport edge. edges = random pick from all four. viewport = random
+ *  anywhere on screen. */
+type SpawnFrom = 'origin' | 'top' | 'bottom' | 'left' | 'right' | 'edges' | 'viewport';
+/** Where particles head. away = radial outward (current default). origin =
+ *  converge on burst element centre (reverse confetti). cursor = aim at
+ *  cursor position at fire time. target = converge on the element matched
+ *  by `target` selector (used for hero text reveal etc.). */
+type SpawnTo = 'away' | 'origin' | 'cursor' | 'target';
 
 // Named presets — pre-configured prop bundles. Author still overrides any
 // individual prop (the preset only fills in undefined values). Presets are
@@ -52,6 +66,21 @@ const PRESETS: Record<Preset, Record<string, any>> = {
     stickiness: 0.35,    // mostly cascade past text, pile on floor
     lifespan: 6500,
     particle: { component: 'Icon', name: 'star-fill', weight: 'fill', size: 'sm' },
+  },
+  // Vortex — sparkles fly inward from viewport edges to the cursor, then
+  // magnet-orbit the cursor as it moves. Stellar-parallax depth (large
+  // sparkles arrive fast and bright, small ones drift slow and faded).
+  vortex: {
+    engine: 'physics',
+    from: 'edges',
+    to: 'cursor',
+    magnet: true,        // continuous attraction → orbit after arrival
+    palette: 'rainbow',
+    count: 70,
+    lifespan: 5000,
+    gravity: 0,
+    collide: false,
+    particle: { component: 'Icon', name: 'sparkle-fill', weight: 'fill', size: 'sm' },
   },
 };
 
@@ -85,6 +114,15 @@ interface Props {
 
   /** fly: DOM particles fly outward + fade. physics: gravity + collide with text + optional magnet. */
   engine?: Engine;
+  /** Where each particle/strand spawns. Default 'origin' (burst element centre). */
+  from?: SpawnFrom;
+  /** Where particles head. Default 'away' (radial outward). 'target' pairs
+   *  with the `target` selector to converge on a specific element. */
+  to?: SpawnTo;
+  /** CSS selector used when to='target'. The element's centre becomes the
+   *  destination, and `data-string-landed` is set on first contact (CSS can
+   *  hook this for reveal effects, e.g. hero-text fade-in). */
+  target?: string;
   /** [physics only] Force preset. fall = upward burst + gravity. explode = radial.
    *  float = rise + drift. orbit = circle the cursor. shake = bounce on collision. */
   mode?: PhysicsMode;
@@ -118,6 +156,28 @@ interface Props {
   emitDuration?: number;
   /** [string only] Stroke width in px. Default 3. */
   thick?: number;
+  /** [string only] SVG path data, OR a `logo:KEY` shorthand. After the
+   *  strand flies in, each point lerps to a sampled position along this
+   *  path — strand "writes" or "draws" the shape. Path is auto-centred
+   *  on the burst origin and scaled to traceSize px wide. Examples:
+   *    "M-100,0 Q0,-50 100,0"  → strand traces a curve
+   *    "logo:primary"          → strand traces the brand logo paths */
+  tracePath?: string;
+  /** [string only] Target width in px for the traced shape. Path is
+   *  auto-centred and scaled so its bounding box matches this size.
+   *  Default 240. */
+  traceSize?: number;
+  /** [string only] Offset the traced shape from the burst origin in px.
+   *  Default 0,0 (centred on origin). Useful when the source button
+   *  would obscure the trace — e.g. traceOffsetY: -180 moves the
+   *  shape above the button. */
+  traceOffsetX?: number;
+  traceOffsetY?: number;
+  /** [string only] After emit completes, every live point applies a
+   *  soft per-frame pull toward the live cursor. The strand becomes a
+   *  Verlet-rope swarm-cloud that follows the cursor as it moves.
+   *  Mutually exclusive with tracePath — if both set, magnetCursor wins. */
+  magnetCursor?: boolean;
 
   class?: string;
 }
@@ -143,6 +203,9 @@ const {
   palette,
   engine = 'fly',
   mode,
+  from = 'origin',
+  to = 'away',
+  target,
   trigger = 'click',
   count = 30,
   spread = 150,
@@ -156,6 +219,11 @@ const {
   pressure,
   emitDuration,
   thick,
+  tracePath,
+  traceSize = 240,
+  traceOffsetX = 0,
+  traceOffsetY = 0,
+  magnetCursor = false,
   class: className = '',
 } = _resolvedProps;
 
@@ -170,19 +238,79 @@ const _effectiveCollide = collide === undefined ? _collideDefault : collide;
 const _lifespanDefault = engine === 'string' ? 12000 : 2500;
 const _effectiveLifespan = lifespan === undefined ? _lifespanDefault : lifespan;
 
-// Resolve particleSvg — either inline markup (starts with <svg) or a path
-// relative to the public/ folder. Read at build time so the runtime just
-// clones the hidden template content, no fetch.
+// Resolve particleSvg — three input shapes:
+//   1. Inline SVG markup ("<svg>...</svg>")
+//   2. "logo:KEY" shorthand → looks up BRAND_CONFIG.logo[KEY] for the path
+//   3. public/-relative path ("Animations/Hero Morph/1.svg")
 let svgMarkup: string | null = null;
-if (particleSvg) {
-  if (particleSvg.trim().startsWith('<svg') || particleSvg.includes('<?xml')) {
-    svgMarkup = particleSvg;
+let resolvedSvgPath: string | null = particleSvg ?? null;
+if (resolvedSvgPath && resolvedSvgPath.startsWith('logo:')) {
+  const key = resolvedSvgPath.slice('logo:'.length) as LogoKey;
+  const path_ = (BRAND_CONFIG as any).logo?.[key];
+  if (path_) {
+    resolvedSvgPath = path_.startsWith('/') ? path_.slice(1) : path_;
+  } else {
+    console.warn(`[Burst] Unknown logo key "${key}" — valid keys: primary, monochrome, favicon, wordmark`);
+    resolvedSvgPath = null;
+  }
+}
+// Resolve tracePath. Four input shapes:
+//   - "logo:KEY" → read SVG, extract one <path d> per logo path (kept as
+//     array so each strand can trace its own — multi-path logos like Hero
+//     Morph (4 paths) read better as 4 separate strand-shapes than as one
+//     concatenated mess with subpath jumps).
+//   - "phrase:KEY" → look up TEXT_PATHS[KEY] (pre-baked at build time by
+//     scripts/build-text-paths.mjs from src/lib/text-paths/registry.json).
+//     Strand "writes" the phrase as silly-string. Add new phrases by
+//     editing registry.json and running `npm run build:text-paths`.
+//   - Single path data string → array of length 1 (all strands trace it).
+//   - undefined → empty array, no path tracing.
+let resolvedTracePaths: string[] = [];
+if (tracePath && tracePath.startsWith('logo:')) {
+  const key = tracePath.slice('logo:'.length) as LogoKey;
+  const logoPath = (BRAND_CONFIG as any).logo?.[key];
+  if (logoPath) {
+    try {
+      const file = path.join(process.cwd(), 'public', logoPath.startsWith('/') ? logoPath.slice(1) : logoPath);
+      const svgText = fs.readFileSync(file, 'utf-8');
+      resolvedTracePaths = Array.from(svgText.matchAll(/<path[^>]*\sd="([^"]+)"/g)).map(m => m[1]);
+    } catch (err) {
+      console.warn(`[Burst] Could not read logo path "${key}":`, err);
+    }
+  } else {
+    console.warn(`[Burst] Unknown logo key "${key}"`);
+  }
+} else if (tracePath && tracePath.startsWith('phrase:')) {
+  const key = tracePath.slice('phrase:'.length);
+  const phrasePaths = TEXT_PATHS[key];
+  if (phrasePaths && phrasePaths.length) {
+    // Per-letter array. Auto-strands logic will set strands = letter count
+    // (so "WELCOME" → 7 strands → 7 palette colours, one per letter).
+    resolvedTracePaths = phrasePaths;
+  } else {
+    console.warn(`[Burst] Unknown phrase "${key}" — add it to src/lib/text-paths/registry.json and run npm run build:text-paths`);
+  }
+} else if (tracePath) {
+  resolvedTracePaths = [tracePath];
+}
+
+// When tracePath resolves to multiple paths (multi-path logo), force
+// strands count to match so each strand traces one path. User's strands
+// value is ignored here — "one strand per path" is the right default for
+// logo tracing. Single-path traces respect user's strands count.
+const _effectiveStrands = resolvedTracePaths.length > 1
+  ? resolvedTracePaths.length
+  : strands;
+
+if (resolvedSvgPath) {
+  if (resolvedSvgPath.trim().startsWith('<svg') || resolvedSvgPath.includes('<?xml')) {
+    svgMarkup = resolvedSvgPath;
   } else {
     try {
-      const resolved = path.join(process.cwd(), 'public', particleSvg);
+      const resolved = path.join(process.cwd(), 'public', resolvedSvgPath);
       svgMarkup = fs.readFileSync(resolved, 'utf-8');
     } catch (err) {
-      console.warn(`[Burst] Could not read particleSvg "${particleSvg}":`, err);
+      console.warn(`[Burst] Could not read particleSvg "${resolvedSvgPath}":`, err);
     }
   }
   // Normalise the SVG so it picks up CSS colour from the wrapper:
@@ -248,6 +376,9 @@ const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
   data-particle-burst
   data-particle-engine={engine}
   data-particle-mode={engine === 'physics' && mode ? mode : undefined}
+  data-particle-from={from !== 'origin' ? from : undefined}
+  data-particle-to={to !== 'away' ? to : undefined}
+  data-particle-target={to === 'target' && target ? target : undefined}
   data-particle-trigger={trigger}
   data-particle-count={String(count)}
   data-particle-spread={String(spread)}
@@ -257,11 +388,16 @@ const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
   data-particle-magnet={engine === 'physics' && magnet ? '' : undefined}
   data-particle-collide={(engine === 'physics' || engine === 'string') ? (_effectiveCollide ? 'on' : 'off') : undefined}
   data-particle-stickiness={(engine === 'physics' || engine === 'string') && stickiness !== undefined ? String(stickiness) : undefined}
-  data-particle-strands={engine === 'string' && strands ? String(strands) : undefined}
+  data-particle-strands={engine === 'string' && _effectiveStrands ? String(_effectiveStrands) : undefined}
   data-particle-length={engine === 'string' && length ? String(length) : undefined}
   data-particle-pressure={engine === 'string' && pressure ? String(pressure) : undefined}
   data-particle-emit-duration={engine === 'string' && emitDuration ? String(emitDuration) : undefined}
   data-particle-thick={engine === 'string' && thick ? String(thick) : undefined}
+  data-particle-trace={engine === 'string' && resolvedTracePaths.length ? resolvedTracePaths.join('|') : undefined}
+  data-particle-trace-size={engine === 'string' && resolvedTracePaths.length ? String(traceSize) : undefined}
+  data-particle-trace-offset-x={engine === 'string' && resolvedTracePaths.length && traceOffsetX !== 0 ? String(traceOffsetX) : undefined}
+  data-particle-trace-offset-y={engine === 'string' && resolvedTracePaths.length && traceOffsetY !== 0 ? String(traceOffsetY) : undefined}
+  data-particle-magnet-cursor={engine === 'string' && magnetCursor ? '' : undefined}
 >
   {svgMarkup ? variants.map((override, i) => {
     // Wrap each SVG variant in a sized + colour-keyed span. The .color--{name}

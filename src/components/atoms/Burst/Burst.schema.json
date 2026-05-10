@@ -17,8 +17,8 @@
       "preset": {
         "type": "string",
         "required": false,
-        "enum": ["starfall"],
-        "description": "starfall: rainbow star icons cascading from a click point, passing through most text and pooling spectacularly on the viewport floor. Bundles engine='physics', mode='fall', palette='rainbow', count=80, spread=220, gravity=0.4, stickiness=0.35, lifespan=6500, particle=Icon star-fill."
+        "enum": ["starfall", "vortex"],
+        "description": "starfall: rainbow star icons cascading from a click point, passing through most text and pooling on the viewport floor. vortex: rainbow sparkles fly inward from viewport edges to the cursor, then magnet-orbit the cursor as it moves — stellar-parallax depth (big = fast/bright, small = slow/faded)."
       }
     },
 
@@ -34,7 +34,7 @@
       "particleSvg": {
         "type": "string",
         "required": false,
-        "_description": "Raw SVG markup OR a public/-relative path (e.g. \"Animations/Hero Morph/1.svg\"). Read at build time and embedded verbatim into a hidden template. Bypasses the Shape/Icon delegation — use for arbitrary logos or custom SVGs that aren't in the Asset Library. Paths get fill=\"currentColor\" injected so colour/palette props apply via the .color--{name} mixin."
+        "_description": "Three input shapes accepted: (1) raw SVG markup '<svg>...</svg>', (2) 'logo:KEY' shorthand resolved from BRAND_CONFIG.logo (KEY ∈ primary | monochrome | favicon | wordmark), (3) public/-relative path. Read at build time, embedded verbatim. Paths get fill='currentColor' injected so colour/palette props apply via the .color--{name} mixin."
       },
       "particleSize": {
         "type": "number",
@@ -68,6 +68,9 @@
     "behaviour": {
       "_description": "Burst engine + trigger + counts",
       "engine":   { "type": "string",  "required": false, "default": "fly", "enum": ["fly", "physics", "string"], "description": "fly: outward burst, fade out (Web Animations). physics: gravity, AABB collision against page text/buttons, optional cursor magnet. string: silly-string Verlet rope — connected points sprayed from origin, gravity, AABB collision, render as SVG path." },
+      "from":     { "type": "string",  "required": false, "default": "origin", "enum": ["origin", "top", "bottom", "left", "right", "edges", "viewport"], "description": "Where each particle/strand spawns. origin (default) = burst element centre. top/bottom/left/right = random along that viewport edge. edges = random pick from all four. viewport = random anywhere on screen." },
+      "to":       { "type": "string",  "required": false, "default": "away", "enum": ["away", "origin", "cursor", "target"], "description": "Where particles head. away (default) = radial outward. origin = converge on burst element centre (reverse confetti). cursor = aim at cursor position at fire time. target = converge on the element matched by 'target' selector (hero reveal pattern)." },
+      "target":   { "type": "string",  "required": false, "_format": "css-selector", "description": "CSS selector used when to='target'. The element's centre becomes the destination, and data-string-landed is set on first contact (CSS hooks for reveal effects)." },
       "mode":     { "type": "string",  "required": false, "default": "fall", "enum": ["fall", "explode", "float", "orbit", "shake"], "description": "[physics only] Force preset. fall: upward emit + gravity (default). explode: full-radial outward, low gravity, no collide. float: rise + sinusoidal drift, no collide. orbit: tangential force around cursor, no collide. shake: like fall but bounces twice on collision before settling." },
       "trigger":  { "type": "string",  "required": false, "default": "click", "enum": ["click", "hover"], "description": "click: fire on click (links delay nav 400ms). hover: fire on first mouseenter, retrigger after 2s." },
       "count":    { "type": "number",  "required": false, "default": 30, "description": "Number of particles per burst." },
@@ -89,7 +92,10 @@
       "length":       { "type": "number",  "required": false, "default": 60, "description": "Points per strand. More = longer rope." },
       "pressure":     { "type": "number",  "required": false, "default": 8, "description": "Initial point speed (px/frame). Higher = strand sprays farther before gravity catches it." },
       "emitDuration": { "type": "number",  "required": false, "default": 350, "description": "ms over which the strand grows. Shorter = whip-crack, longer = lazy spray." },
-      "thick":        { "type": "number",  "required": false, "default": 3, "description": "Stroke width of the rendered strand path in px." }
+      "thick":        { "type": "number",  "required": false, "default": 3, "description": "Stroke width of the rendered strand path in px." },
+      "tracePath":    { "type": "string",  "required": false, "_format": "svg-path", "description": "SVG path data, or 'logo:KEY' shorthand. After the strand flies in, each point lerps to a sampled position along this path — strand 'writes' or 'draws' the shape. Multi-path logos render as N strand-shapes (one strand per path) preserving original layout. Coordinates auto-centred + scaled to traceSize. Mutually exclusive with magnetCursor." },
+      "traceSize":    { "type": "number",  "required": false, "default": 240, "description": "Target width in px — traced path is auto-centred and scaled so its bounding box matches this size." },
+      "magnetCursor": { "type": "boolean", "required": false, "default": false, "description": "After emit completes, every live point applies a soft per-frame pull toward the live cursor. Strand becomes a Verlet-rope swarm that follows the cursor. Pull capped at 0.6 px/frame. Mutually exclusive with tracePath — magnetCursor wins if both set." }
     }
   }
 }
