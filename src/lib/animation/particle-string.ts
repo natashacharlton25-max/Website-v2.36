@@ -336,6 +336,12 @@ class Strand {
    *  Active each frame after magnetActiveAt has elapsed. */
   magnetCursor: MagnetMode = 'off';
   magnetActiveAt: number = 0;
+  /** True when pts[0] is pinned to a page-element rect (tethered tendril
+   *  pattern: magnetCursor='attract' + collide=true). Anchor pin sets
+   *  pts[0].done = true outside of the collision system, so the scroll
+   *  handler — which unsticks done points based on collide — has to also
+   *  unpin anchor[0] explicitly when the page scrolls. */
+  anchored: boolean = false;
   constructor(public color: string, public thick: number, svg: SVGSVGElement) {
     this.pathEl = document.createElementNS(SVG_NS, 'path');
     this.pathEl.setAttribute('fill', 'none');
@@ -434,9 +440,19 @@ if (typeof window !== 'undefined') {
   // window covers the case where the project ever drops OS, and the OS
   // viewport (when found, after DOM ready) covers the live setup.
   const onScroll = () => {
-    if (!allStrands.some(s => s.alive && s.collide)) return;
+    if (!allStrands.some(s => s.alive && (s.collide || s.anchored))) return;
     for (const s of allStrands) {
-      if (!s.alive || !s.collide) continue;
+      if (!s.alive) continue;
+      // Anchored tendrils pin pts[0] outside the collision system — the
+      // anchor point sits at fixed viewport coords and stays pinned even
+      // after scroll, so the tendril looks broken. Unpin pts[0] so
+      // physics finishes the strand naturally; clear the anchored flag
+      // so we don't re-trigger.
+      if (s.anchored && s.pts[0]?.done) {
+        s.pts[0].done = false;
+        s.anchored = false;
+      }
+      if (!s.collide) continue;
       s.collide = false;
       for (const p of s.pts) {
         if (p.done && p.y < window.innerHeight - 2) {
@@ -918,6 +934,7 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     // would be incoherent (point pinned at one end while being pushed
     // away from cursor at the other).
     const isAnchored = opts.magnetCursor === 'attract' && opts.collide;
+    if (isAnchored) strand.anchored = true;
     let anchorX = spawn.x, anchorY = spawn.y;
     if (isAnchored) {
       // Re-query elements (not just rects) so we can read computed colour
@@ -975,21 +992,22 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       }, i * interval);
     }
 
-    // Lifespan: fade in last 1s of life, then remove. Special case
-    // lifespan === 0 means "persistent" — strand never auto-fades, used
-    // for ambient decoration (e.g. permanent LED-strings around a
-    // heading). Strand still gets removed when the active-strand cap
-    // evicts the oldest, so persistent strands compete for the cap.
-    if (opts.lifespan > 0) {
-      const fadeStart = Math.max(opts.lifespan - 1000, 1000);
-      setTimeout(() => { strand.pathEl.style.opacity = '0'; }, fadeStart);
-      setTimeout(() => {
-        strand.pathEl.remove();
-        strand.alive = false;
-        const idx = allStrands.indexOf(strand);
-        if (idx > -1) allStrands.splice(idx, 1);
-      }, opts.lifespan);
-    }
+    // Lifespan: fade in last 1s of life, then remove. Floor at 1000ms
+    // so a tiny lifespan still gets a visible fade. The lifespan === 0
+    // "persistent strand" path was removed: it leaked tick() forever
+    // (allStrands never empties → tickRunning never resets) and competed
+    // with regular bursts under the active-strand cap, so "permanent"
+    // wasn't actually permanent. Reintroduce as a separate `persistent`
+    // flag with its own cap when there's a real use case.
+    const lifespan = Math.max(opts.lifespan, 1000);
+    const fadeStart = Math.max(lifespan - 1000, 1000);
+    setTimeout(() => { strand.pathEl.style.opacity = '0'; }, fadeStart);
+    setTimeout(() => {
+      strand.pathEl.remove();
+      strand.alive = false;
+      const idx = allStrands.indexOf(strand);
+      if (idx > -1) allStrands.splice(idx, 1);
+    }, lifespan);
   }
 
   // Mask is only useful during the spawn-emit window — after that, all
@@ -1126,8 +1144,26 @@ function readOptions(el: Element): StringOptions {
   return opts;
 }
 
+// Tracks live hover-hold intervals so they can be cleared if the
+// host element is detached during an Astro view transition. Without
+// this, the interval keeps firing forever — its closure references
+// the now-orphaned element and the original mouseleave listener that
+// would have cleared it is gone with the element.
+const hoverHoldIntervals = new Map<Element, ReturnType<typeof setInterval>>();
+
 export function initParticleString(): void {
   if (typeof window === 'undefined') return;
+
+  // GC orphaned hover-hold intervals from prior page navigations.
+  // Persistent elements (still in DOM) keep their existing interval —
+  // they're skipped by the data-particle-string-bound check below
+  // and continue running uninterrupted.
+  for (const [el, id] of hoverHoldIntervals) {
+    if (!el.isConnected) {
+      clearInterval(id);
+      hoverHoldIntervals.delete(el);
+    }
+  }
 
   document.querySelectorAll('[data-particle-burst][data-particle-engine="string"]').forEach((element) => {
     if (element.hasAttribute('data-particle-string-bound')) return;
@@ -1167,16 +1203,21 @@ export function initParticleString(): void {
       // time for a previous burst to fade out before the next fires
       // (otherwise the strand cap kicks in and bursts get evicted).
       // Stops emitting on mouseleave; resumes on next mouseenter.
+      // Interval ID is also tracked in hoverHoldIntervals so that across
+      // Astro view transitions, intervals attached to elements that have
+      // been removed from the DOM get garbage-collected on next init.
       let intervalId: ReturnType<typeof setInterval> | null = null;
       htmlEl.addEventListener('mouseenter', (e) => {
         fire(e);
         if (intervalId !== null) return;
         intervalId = setInterval(() => fire(new MouseEvent('hover')), 1500);
+        hoverHoldIntervals.set(htmlEl, intervalId);
       });
       htmlEl.addEventListener('mouseleave', () => {
         if (intervalId !== null) {
           clearInterval(intervalId);
           intervalId = null;
+          hoverHoldIntervals.delete(htmlEl);
         }
       });
     } else {
