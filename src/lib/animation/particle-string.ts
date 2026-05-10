@@ -19,6 +19,7 @@ import { getAnimationConfig } from './animation-config';
 
 export type SpawnFrom = 'origin' | 'top' | 'bottom' | 'left' | 'right' | 'edges' | 'viewport';
 export type SpawnTo = 'away' | 'origin' | 'cursor' | 'target';
+export type MagnetMode = 'off' | 'attract' | 'repel';
 
 interface StringOptions {
   strands: number;
@@ -44,12 +45,13 @@ interface StringOptions {
    *  set negative Y to render the shape above the button. */
   traceOffsetX: number;
   traceOffsetY: number;
-  /** When true, after the emit phase completes the strand applies a soft
-   *  per-frame pull toward the live cursor — the rope becomes a swarm-
-   *  cloud that follows the cursor as it moves. Mutually exclusive with
-   *  tracePaths (a strand can't both trace a fixed shape AND follow the
-   *  cursor); if both set, magnetCursor wins. */
-  magnetCursor: boolean;
+  /** Cursor magnet mode applied each frame after the emit phase
+   *  completes. 'attract' pulls points toward the cursor (swarm cloud
+   *  follows). 'repel' pushes them away (cursor parts the rope as you
+   *  wade through). 'off' = no cursor force. Mutually exclusive with
+   *  tracePaths (can't both trace a fixed shape AND follow the cursor);
+   *  if both set, magnet wins. */
+  magnetCursor: MagnetMode;
   /** 0–1 probability a falling strand point sticks on a top-edge contact.
    *  Default 0.9 — strands mostly stick on first contact (predictable
    *  drape-over-text). Lower values cascade past upper rects and settle
@@ -58,9 +60,14 @@ interface StringOptions {
   thick: number;
   /** Total ms before strand fades out (fade itself takes 1s). */
   lifespan: number;
-  trigger: 'click' | 'hover';
+  trigger: 'click' | 'hover' | 'hover-hold';
   /** Resolved hex/rgb colours. Runtime cycles per strand. */
   colors: string[];
+  /** When true (and the strand is anchored — magnetCursor='attract' +
+   *  collide=true), each strand's colour is read from its anchor
+   *  element's computed text colour instead of the palette. Tendrils
+   *  blend into the page they're hanging from. */
+  inheritAnchorColour: boolean;
 }
 
 const DEFAULTS: StringOptions = {
@@ -89,7 +96,8 @@ const DEFAULTS: StringOptions = {
   traceSize: 240,
   traceOffsetX: 0,
   traceOffsetY: 0,
-  magnetCursor: false,
+  magnetCursor: 'off',
+  inheritAnchorColour: false,
 };
 
 // A trace frame describes the shared coordinate transform applied to one
@@ -314,10 +322,10 @@ class Strand {
   targetClosed: boolean = false;
   /** ms (relative to performance.now) after which path-snap lerping starts. */
   arrivedAt: number = 0;
-  /** Cursor-magnet swarm — when true, every live point gets a soft pull
-   *  toward the live cursor each frame after magnetActiveAt has elapsed.
-   *  Strand becomes a Verlet-rope swarm following the cursor. */
-  magnetCursor: boolean = false;
+  /** Cursor-magnet mode — 'attract' pulls toward cursor (swarm follows),
+   *  'repel' pushes away (cursor parts the rope), 'off' = no cursor force.
+   *  Active each frame after magnetActiveAt has elapsed. */
+  magnetCursor: MagnetMode = 'off';
   magnetActiveAt: number = 0;
   constructor(public color: string, public thick: number, svg: SVGSVGElement) {
     this.pathEl = document.createElementNS(SVG_NS, 'path');
@@ -479,15 +487,27 @@ function tick() {
     // collapsing onto it. Pull is capped at 0.6 px/frame so close points
     // don't oscillate and far points don't snap; 0.008 multiplier is the
     // tunable "lazy ↔ whippy" knob.
-    if (s.magnetCursor && performance.now() >= s.magnetActiveAt) {
+    if (s.magnetCursor !== 'off' && performance.now() >= s.magnetActiveAt) {
+      // attract: positive pull toward cursor. repel: negative pull, points
+      // pushed away. Repel uses an inverse-distance falloff so close points
+      // get pushed harder than far ones (cursor parts the rope on contact
+      // instead of broadcasting a uniform push across the whole viewport).
+      const sign = s.magnetCursor === 'repel' ? -1 : 1;
+      const REPEL_FALLOFF_R = 220; // pixels — repel only effective within this radius
       for (const p of s.pts) {
         if (p.done) continue;
         const dx = stringCursorX - p.x;
         const dy = stringCursorY - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
-        const pull = Math.min(dist * 0.008, 0.6);
-        p.x += (dx / dist) * pull;
-        p.y += (dy / dist) * pull;
+        let pull;
+        if (sign > 0) {
+          pull = Math.min(dist * 0.008, 0.6);
+        } else {
+          // Repel: stronger at close range, fades to zero past R
+          pull = Math.max(0, (REPEL_FALLOFF_R - dist) / REPEL_FALLOFF_R) * 1.4;
+        }
+        p.x += (dx / dist) * pull * sign;
+        p.y += (dy / dist) * pull * sign;
       }
     }
 
@@ -760,11 +780,11 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     strand.gravity = (
       opts.to === 'origin' ||
       opts.to === 'target' ||
-      opts.magnetCursor
+      opts.magnetCursor !== 'off'
     ) ? 0 : opts.gravity;
     strand.stickiness = opts.stickiness;
-    if (opts.magnetCursor) {
-      strand.magnetCursor = true;
+    if (opts.magnetCursor !== 'off') {
+      strand.magnetCursor = opts.magnetCursor;
       strand.magnetActiveAt = performance.now() + opts.emitDuration;
     }
 
@@ -839,16 +859,36 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     //     line gaps where an anchor would look like it's grabbing nothing)
     //   - Y is the rect's vertical centre (where text actually sits)
     //   - X has 15% margin on each side (avoid corners)
-    const isAnchored = opts.magnetCursor && opts.collide;
+    // Tethered tendrils only apply to attract magnet — repel + anchored
+    // would be incoherent (point pinned at one end while being pushed
+    // away from cursor at the other).
+    const isAnchored = opts.magnetCursor === 'attract' && opts.collide;
     let anchorX = spawn.x, anchorY = spawn.y;
     if (isAnchored) {
-      const allRects = getCollisionRects();
-      const candidates = allRects.filter(r => r.height < 80);
-      const pool = candidates.length > 0 ? candidates : allRects;
+      // Re-query elements (not just rects) so we can read computed colour
+      // when inheritAnchorColour is on. Same filter logic as before:
+      // skip tall multi-line paragraphs, prefer the smaller-rect set.
+      const els = Array.from(document.querySelectorAll(COLLIDE_SELECTOR));
+      const tagged = els
+        .map(el => ({ el, rect: el.getBoundingClientRect() }))
+        .filter(t => t.rect.width > 0 && t.rect.height > 0);
+      const shortPool = tagged.filter(t => t.rect.height < 80);
+      const pool = shortPool.length > 0 ? shortPool : tagged;
       if (pool.length > 0) {
-        const r = pool[Math.floor(Math.random() * pool.length)];
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        const r = pick.rect;
         anchorX = r.left + r.width * (0.15 + Math.random() * 0.7);
         anchorY = r.top + r.height * 0.5;
+        // Inherit anchor element's text colour. getComputedStyle returns
+        // an rgb()/rgba() string — usable directly as SVG stroke value.
+        // We mutate strand.pathEl.stroke; the strand was already created
+        // with the palette colour, this overrides it.
+        if (opts.inheritAnchorColour) {
+          const anchorColour = getComputedStyle(pick.el).color;
+          if (anchorColour && anchorColour !== 'rgba(0, 0, 0, 0)') {
+            strand.pathEl.setAttribute('stroke', anchorColour);
+          }
+        }
       }
     }
 
@@ -874,15 +914,21 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       }, i * interval);
     }
 
-    // Lifespan: fade in last 1s of life, then remove
-    const fadeStart = Math.max(opts.lifespan - 1000, 1000);
-    setTimeout(() => { strand.pathEl.style.opacity = '0'; }, fadeStart);
-    setTimeout(() => {
-      strand.pathEl.remove();
-      strand.alive = false;
-      const idx = allStrands.indexOf(strand);
-      if (idx > -1) allStrands.splice(idx, 1);
-    }, opts.lifespan);
+    // Lifespan: fade in last 1s of life, then remove. Special case
+    // lifespan === 0 means "persistent" — strand never auto-fades, used
+    // for ambient decoration (e.g. permanent LED-strings around a
+    // heading). Strand still gets removed when the active-strand cap
+    // evicts the oldest, so persistent strands compete for the cap.
+    if (opts.lifespan > 0) {
+      const fadeStart = Math.max(opts.lifespan - 1000, 1000);
+      setTimeout(() => { strand.pathEl.style.opacity = '0'; }, fadeStart);
+      setTimeout(() => {
+        strand.pathEl.remove();
+        strand.alive = false;
+        const idx = allStrands.indexOf(strand);
+        if (idx > -1) allStrands.splice(idx, 1);
+      }, opts.lifespan);
+    }
   }
 
   // Mask is only useful during the spawn-emit window — after that, all
@@ -962,7 +1008,9 @@ function readOptions(el: Element): StringOptions {
   const c = get('collide');
   if (c === 'on') opts.collide = true;
   else if (c === 'off') opts.collide = false;
-  if (get('trigger') === 'hover') opts.trigger = 'hover';
+  const triggerAttr = get('trigger');
+  if (triggerAttr === 'hover') opts.trigger = 'hover';
+  else if (triggerAttr === 'hover-hold') opts.trigger = 'hover-hold';
 
   const validFrom: SpawnFrom[] = ['origin', 'top', 'bottom', 'left', 'right', 'edges', 'viewport'];
   const fromAttr = get('from');
@@ -983,12 +1031,20 @@ function readOptions(el: Element): StringOptions {
   if (get('trace-offset-x')) opts.traceOffsetX = parseFloat(get('trace-offset-x')!);
   if (get('trace-offset-y')) opts.traceOffsetY = parseFloat(get('trace-offset-y')!);
 
-  if (el.hasAttribute('data-particle-magnet-cursor')) opts.magnetCursor = true;
+  if (el.hasAttribute('data-particle-inherit-anchor-colour')) opts.inheritAnchorColour = true;
+
+  // magnetCursor is now an enum: 'off' | 'attract' | 'repel'. Backwards
+  // compat: presence of data-particle-magnet-cursor without value (or
+  // value 'true' / '') means attract (the original behaviour).
+  const magnetAttr = get('magnet-cursor');
+  if (magnetAttr === 'repel') opts.magnetCursor = 'repel';
+  else if (magnetAttr === 'attract' || magnetAttr === '' || magnetAttr === 'true') opts.magnetCursor = 'attract';
+  else if (el.hasAttribute('data-particle-magnet-cursor')) opts.magnetCursor = 'attract';
 
   // Mutual exclusion — strand can't both trace a fixed shape AND follow
   // the cursor. Magnet wins (more dynamic effect; if author wants the
   // shape they can just leave magnetCursor off).
-  if (opts.magnetCursor && opts.tracePaths.length) {
+  if (opts.magnetCursor !== 'off' && opts.tracePaths.length) {
     console.warn('[particle-string] magnetCursor and tracePath are mutually exclusive — magnetCursor wins');
     opts.tracePaths = [];
   }
@@ -1032,14 +1088,35 @@ export function initParticleString(): void {
       }
     };
 
-    const trigger = element.getAttribute('data-particle-trigger') === 'hover' ? 'hover' : 'click';
+    const triggerVal = element.getAttribute('data-particle-trigger');
+    const trigger = triggerVal === 'hover' ? 'hover'
+                  : triggerVal === 'hover-hold' ? 'hover-hold'
+                  : 'click';
     if (trigger === 'hover') {
+      // Single fire on mouseenter, 2s cooldown before next fire.
       let cooldown = false;
       htmlEl.addEventListener('mouseenter', (e) => {
         if (cooldown) return;
         cooldown = true;
         fire(e);
         setTimeout(() => { cooldown = false; }, 2000);
+      });
+    } else if (trigger === 'hover-hold') {
+      // Continuous re-fire while hovered. Interval is 1500ms — enough
+      // time for a previous burst to fade out before the next fires
+      // (otherwise the strand cap kicks in and bursts get evicted).
+      // Stops emitting on mouseleave; resumes on next mouseenter.
+      let intervalId: ReturnType<typeof setInterval> | null = null;
+      htmlEl.addEventListener('mouseenter', (e) => {
+        fire(e);
+        if (intervalId !== null) return;
+        intervalId = setInterval(() => fire(new MouseEvent('hover')), 1500);
+      });
+      htmlEl.addEventListener('mouseleave', () => {
+        if (intervalId !== null) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
       });
     } else {
       // Per-element click cooldown — prevents 50-click-spam from melting

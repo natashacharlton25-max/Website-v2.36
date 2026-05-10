@@ -42,7 +42,7 @@ interface PhysicsOptions {
    *  clumping on the nearest one. 1 = original "stick on first contact". */
   stickiness: number;
   templates: HTMLTemplateElement[];
-  trigger: 'click' | 'hover';
+  trigger: 'click' | 'hover' | 'hover-hold';
   from: SpawnFrom;
   to: SpawnTo;
   /** Element matched by `target` selector (resolved at spawn time). When
@@ -350,7 +350,9 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       const age = now - p.born;
       // Pre-emit phase — particle staggered after burst start, hold invisible at origin
       if (age < 0) continue;
-      if (age > opts.lifespan) {
+      // lifespan === 0 means persistent — particle never auto-removes
+      // (still subject to active-particle cap eviction).
+      if (opts.lifespan > 0 && age > opts.lifespan) {
         p.el.remove();
         p.alive = false;
         const gIdx = allParticles.indexOf(p);
@@ -471,9 +473,11 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
         }
       }
 
-      // Fade in last 400ms of life
+      // Fade in last 400ms of life. lifespan=0 (persistent) → no fade.
       const fadeStart = opts.lifespan - 400;
-      const opacity = age < fadeStart ? 1 : Math.max(0, 1 - (age - fadeStart) / 400);
+      const opacity = opts.lifespan === 0 ? 1
+                    : age < fadeStart ? 1
+                    : Math.max(0, 1 - (age - fadeStart) / 400);
       p.el.style.opacity = String(opacity);
       p.el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) rotate(${p.rotation}deg) scale(${p.scale})`;
     }
@@ -527,7 +531,9 @@ function readOptions(el: Element): PhysicsOptions {
   const c = get('collide');
   if (c === 'on') opts.collide = true;
   else if (c === 'off') opts.collide = false;
-  if (get('trigger') === 'hover') opts.trigger = 'hover';
+  const triggerAttr = get('trigger');
+  if (triggerAttr === 'hover') opts.trigger = 'hover';
+  else if (triggerAttr === 'hover-hold') opts.trigger = 'hover-hold';
 
   // Mode-specific defaults — explode/float/orbit ignore collision entirely
   // (the motion shape doesn't want particles snagging on text). For "land
@@ -575,6 +581,20 @@ export function initParticlePhysics(): void {
         cooldown = true;
         fire(e);
         setTimeout(() => { cooldown = false; }, 2000);
+      });
+    } else if (opts.trigger === 'hover-hold') {
+      // Continuous re-fire while hovered. Same pattern as string engine.
+      let intervalId: ReturnType<typeof setInterval> | null = null;
+      htmlEl.addEventListener('mouseenter', (e) => {
+        fire(e);
+        if (intervalId !== null) return;
+        intervalId = setInterval(() => fire(new MouseEvent('hover')), 1500);
+      });
+      htmlEl.addEventListener('mouseleave', () => {
+        if (intervalId !== null) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
       });
     } else {
       // Per-element click cooldown — 120ms = max ~8 fires/sec per button.

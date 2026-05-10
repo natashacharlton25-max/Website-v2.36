@@ -33,7 +33,7 @@ import type { BrandColour, RainbowColour, ColourTier } from '../../../lib/shared
 type LogoKey = 'primary' | 'monochrome' | 'favicon' | 'wordmark';
 
 type Engine = 'fly' | 'physics' | 'string';
-type Trigger = 'click' | 'hover';
+type Trigger = 'click' | 'hover' | 'hover-hold';
 type Palette = 'tiers' | 'rainbow';
 type PhysicsMode = 'fall' | 'explode' | 'float' | 'orbit' | 'shake';
 type Preset = 'starfall' | 'vortex';
@@ -176,8 +176,16 @@ interface Props {
   /** [string only] After emit completes, every live point applies a
    *  soft per-frame pull toward the live cursor. The strand becomes a
    *  Verlet-rope swarm-cloud that follows the cursor as it moves.
-   *  Mutually exclusive with tracePath — if both set, magnetCursor wins. */
-  magnetCursor?: boolean;
+   *  Mutually exclusive with tracePath — if both set, magnetCursor wins.
+   *  'attract' (default when true): swarm follows cursor.
+   *  'repel': cursor pushes points away (parts the rope mid-flight).
+   *  Boolean true → 'attract' for backwards-compat. */
+  magnetCursor?: boolean | 'attract' | 'repel';
+  /** [string only] When tethered (magnetCursor=attract + collide=true),
+   *  each strand reads its colour from the anchor element's computed
+   *  text colour instead of the burst's palette. Tendrils blend into
+   *  whatever element they're hanging from. */
+  inheritAnchorColour?: boolean;
 
   class?: string;
 }
@@ -223,7 +231,8 @@ const {
   traceSize = 240,
   traceOffsetX = 0,
   traceOffsetY = 0,
-  magnetCursor = false,
+  magnetCursor,
+  inheritAnchorColour = false,
   class: className = '',
 } = _resolvedProps;
 
@@ -397,7 +406,12 @@ const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
   data-particle-trace-size={engine === 'string' && resolvedTracePaths.length ? String(traceSize) : undefined}
   data-particle-trace-offset-x={engine === 'string' && resolvedTracePaths.length && traceOffsetX !== 0 ? String(traceOffsetX) : undefined}
   data-particle-trace-offset-y={engine === 'string' && resolvedTracePaths.length && traceOffsetY !== 0 ? String(traceOffsetY) : undefined}
-  data-particle-magnet-cursor={engine === 'string' && magnetCursor ? '' : undefined}
+  data-particle-magnet-cursor={
+    engine === 'string' && magnetCursor
+      ? (magnetCursor === 'repel' ? 'repel' : 'attract')
+      : undefined
+  }
+  data-particle-inherit-anchor-colour={engine === 'string' && inheritAnchorColour ? '' : undefined}
 >
   {svgMarkup ? variants.map((override, i) => {
     // Wrap each SVG variant in a sized + colour-keyed span. The .color--{name}
