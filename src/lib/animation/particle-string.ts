@@ -156,7 +156,7 @@ function samplePath(
   offsetX: number,
   offsetY: number,
   frame: TraceFrame,
-): { x: number; y: number }[] {
+): { points: { x: number; y: number }[]; breaks: number[] } {
   const tmpSvg = document.createElementNS(SVG_NS, 'svg');
   tmpSvg.setAttribute('width', '0');
   tmpSvg.setAttribute('height', '0');
@@ -193,9 +193,17 @@ function samplePath(
   const interiorBudget = Math.max(n - closureCount, subpaths.length * 3);
 
   const points: { x: number; y: number }[] = [];
+  // Indices in `points` where a new subpath begins (i.e. first point of
+  // subpath 2, 3, ...). Used by the caller to mark the inter-subpath
+  // strand link as broken so the renderer inserts an SVG M (moveTo)
+  // instead of an L — otherwise multi-contour glyphs (a, e, g, o, etc.)
+  // get a stray line drawn from the outer contour's closing point
+  // straight to the inner counter's first point, slicing the letter.
+  const breaks: number[] = [];
   for (let i = 0; i < subpaths.length; i++) {
     const len = lengths[i];
     if (len < 0.5) continue;                   // skip degenerate subpaths
+    if (points.length > 0) breaks.push(points.length);
     // Distribute interiorBudget proportionally across subpaths by length,
     // min 3 per subpath so even tiny features get a triangle of points.
     const subN = Math.max(3, Math.round(interiorBudget * len / totalLen));
@@ -216,7 +224,7 @@ function samplePath(
   }
 
   document.body.removeChild(tmpSvg);
-  return points;
+  return { points, breaks };
 }
 
 // Per-strand spawn position from `from` enum. Edges sample randomly along
@@ -315,6 +323,12 @@ class Strand {
   // Each strand point i lerps toward targetPositions[i] once arrivedAt
   // has elapsed. null = no path tracing (regular Verlet behaviour).
   targetPositions: { x: number; y: number }[] | null = null;
+  /** Indices in targetPositions where a new subpath begins. Applied to
+   *  lks once the strand has been fully populated — marks the inter-
+   *  contour link as broken so the renderer inserts an M (moveTo)
+   *  instead of an L there. Without this, multi-contour glyphs (a, e,
+   *  g, o, S, etc.) get a stray line bisecting them. */
+  targetBreaks: number[] = [];
   /** True when the source path ended with Z (closed). Path build appends
    *  an explicit L back to pts[0] so the rendered loop closes — required
    *  because some browsers / fonts don't include Z's length in
@@ -458,7 +472,11 @@ let tickRunning = false;
 // 50 click-spammed bursts of 7 strands each (350 total) would melt the
 // CPU. Cap at 30 — evict oldest when a new burst would exceed it. Keeps
 // the worst case bounded regardless of click frequency.
-const MAX_ACTIVE_STRANDS = 30;
+// Bumped from 30 to accommodate tracePath retriggers — old strands
+// linger on the floor for ~2.4s while the new burst (up to 17 strands
+// for "Walking with a Smile") writes over the top. Worst case = 17 old
+// falling + 17 new = 34 active. 40 leaves a small headroom buffer.
+const MAX_ACTIVE_STRANDS = 40;
 function evictOldestStrands(toMake: number) {
   while (allStrands.length + toMake > MAX_ACTIVE_STRANDS) {
     const oldest = allStrands[0];
@@ -525,6 +543,29 @@ function tick() {
     // shape with many samples). Lks aren't broken so the rendered path
     // stays continuous (the path builder uses the broken flag, not done).
     if (s.targetPositions && performance.now() >= s.arrivedAt) {
+      // Apply subpath-boundary breaks once, on first snap frame. lks is
+      // fully populated by now (arrivedAt = emitDuration + 200ms). Mark
+      // the link spanning each subpath gap as broken so the render pass
+      // emits an SVG M (moveTo) there — kills the stray line that would
+      // otherwise bisect multi-contour glyphs. Clear the array so we
+      // don't re-mark every frame.
+      // Apply breaks lazily. When many strands spawn at once the timer
+      // queue saturates and a strand's setTimeout-driven add() loop may
+      // be only partway through populating pts by the time arrivedAt
+      // fires — so a break index like 154 can sit outside an lks of
+      // length 99. Defer those; retry next tick as pts grows toward
+      // opts.length. Drop indices only once they've landed in range.
+      if (s.targetBreaks.length) {
+        const remaining: number[] = [];
+        for (const idx of s.targetBreaks) {
+          if (idx > 0 && idx - 1 < s.lks.length) {
+            s.lks[idx - 1].broken = true;
+          } else {
+            remaining.push(idx);
+          }
+        }
+        s.targetBreaks = remaining;
+      }
       for (let i = 0; i < s.pts.length && i < s.targetPositions.length; i++) {
         const p = s.pts[i];
         const target = s.targetPositions[i];
@@ -737,9 +778,21 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     targetY = tr.top + tr.height / 2;
   }
 
-  // Cap concurrent strands before adding new ones — keeps cross-strand
-  // repulsion bounded under click-spam.
-  evictOldestStrands(opts.strands);
+  // For tracePath retriggers: instant-clear existing strands so the new
+  // burst is a clean rewrite. Fading stale strand pathEls in DOM piled
+  // up under rapid clicks (each click stranded its predecessor's
+  // mid-flight rendering for ~800ms while a new burst spawned over the
+  // top). The strand cap also chops a partial slice out of the old
+  // phrase mid-flight if we let it run, so we override that here.
+  if (opts.tracePaths.length > 0 && allStrands.length > 0) {
+    for (const old of allStrands) {
+      old.pathEl.remove();
+      old.alive = false;
+    }
+    allStrands.length = 0;
+  } else {
+    evictOldestStrands(opts.strands);
+  }
 
   const svg = getOverlay();
   const palette = opts.colors.length
@@ -802,7 +855,15 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       const pathData = opts.tracePaths[s % opts.tracePaths.length];
       const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
       const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
-      strand.targetPositions = samplePath(pathData, opts.length, offsetX, offsetY, traceFrame);
+      const sampled = samplePath(pathData, opts.length, offsetX, offsetY, traceFrame);
+      strand.targetPositions = sampled.points;
+      // Mark the strand link that crosses each subpath boundary as
+      // broken — render loop already checks `lks[i-1].broken` and emits
+      // an SVG M instead of L there, so multi-contour glyphs draw as
+      // separate strokes (no stray line bisecting 'a', 'e', 'g', etc.).
+      // Run after first emission tick has populated lks; queue via
+      // microtask so spawn loop can finish adding all points first.
+      strand.targetBreaks = sampled.breaks;
       // Detect Z-terminated path so path-build can force-close the loop.
       // Some browsers / fonts don't include Z's length in getTotalLength,
       // so pts[N-1] won't equal pts[0] for closed shapes — we'd lose the
