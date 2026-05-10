@@ -1,0 +1,146 @@
+---
+/**
+ * Burst Hero Reveal — production demo
+ *
+ * Pattern: an invisible hero heading (text colour matches page background)
+ * becomes visible when a Burst's particles converge on it.
+ *
+ * How it wires together:
+ *   1. Heading has class `.hero-reveal-target` and starts with
+ *      `color: var(--page-bg)` so it's invisible on initial render
+ *   2. Burst is configured with `to: target` + `target: '.hero-reveal-target'`
+ *      so its particles aim at the heading's bounding rect
+ *   3. After the convergence-arrival window (emitDuration + 200ms) the
+ *      runtime sets `data-string-landed="true"` on the target element
+ *   4. CSS hooks the attribute and transitions the heading to its final
+ *      brand colour over 1.4s — heading materialises as the strands arrive
+ *
+ * Decoupling: the runtime never touches the heading's class or style. It
+ * only sets one data attribute. All visual changes are CSS, so the page
+ * author owns the look (colour, font weight, easing, etc).
+ *
+ * Production considerations:
+ *   - Heading is real <h1> for SEO and screen readers — the reveal is
+ *     purely visual; the text is in the DOM from the start
+ *   - Initial colour matches page background so the reveal doesn't show
+ *     an empty placeholder; once the particles converge the heading
+ *     brightens up
+ *   - Reveal can be triggered automatically (e.g. on scroll/viewport
+ *     entry) or by explicit user action (button click). This demo shows
+ *     button-click; for viewport-trigger, swap `trigger: 'click'` for
+ *     `trigger: 'hover-hold'` on a sentinel + IntersectionObserver glue
+ *
+ * Accessibility:
+ *   - Burst is decorative (aria-hidden via the runtime's SVG overlay);
+ *     the heading itself remains in the AT tree
+ *   - getAnimationConfig() in the runtime gates motion so prefers-
+ *     reduced-motion users skip the particles; the heading still appears
+ *     because data-string-landed gets set immediately under that gate
+ *     (deferred behaviour — see motion-gate work in next session's queue)
+ *   - The reveal is opt-in cosmetic; if the JS fails to run the heading
+ *     will read as empty. For SEO-critical headings, make the default
+ *     colour visible and treat the reveal as a layered enhancement
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Renderer from '../../components/Renderer.astro';
+
+const data = {
+  component: 'Page',
+  children: [
+    {
+      component: 'Section',
+      container: '7xl',
+      gap: 'lg',
+      class: 'hero-reveal-page',
+      children: [
+        {
+          component: 'Text',
+          contentText: 'Click the button. Strands fly inward from the viewport edges. The heading below materialises as they converge.',
+        },
+        {
+          component: 'Burst',
+          engine: 'string',
+          palette: 'rainbow',
+          strands: 7,
+          from: 'edges',
+          to: 'target',
+          target: '.hero-reveal-target',
+          length: 200,
+          pressure: 22,
+          emitDuration: 600,
+          thick: 4,
+          trigger: 'click',
+          children: [
+            {
+              component: 'Button',
+              contentButton: 'Reveal the headline',
+              variant: 'fill',
+              brandColor: 'primary',
+              size: 'lg',
+            },
+          ],
+        },
+        {
+          component: 'Heading',
+          level: 1,
+          contentHeading: 'Walking with a Smile',
+          class: 'hero-reveal-target',
+        },
+        {
+          component: 'Text',
+          contentText: 'A subhead can be revealed the same way — give it the target class and use a separate Burst aimed at it.',
+          class: 'hero-reveal-subtitle',
+        },
+      ],
+    },
+  ],
+};
+---
+
+<BaseLayout title="Burst Hero Reveal — Demo">
+  <Renderer node={data} />
+</BaseLayout>
+
+<style is:global>
+  /* Hero reveal: invisible until data-string-landed fires.
+   *
+   * Heading initial colour matches page bg → no placeholder visible.
+   * On reveal, transition to brand primary over 1.4s with ease-out.
+   * Subtitle reveals 0.4s later for a staggered feel.
+   *
+   * In production, copy these rules into the actual hero component's
+   * stylesheet — the Burst runtime only sets data-string-landed; the
+   * full visual is yours to compose. */
+
+  .hero-reveal-page {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-reveal-target {
+    color: var(--page-bg);
+    transition: color 1.4s ease-out;
+    /* Optional: scale up slightly when revealed to add a "settling in" beat */
+    transform: scale(0.98);
+    transition: color 1.4s ease-out, transform 1.4s ease-out;
+  }
+  .hero-reveal-target[data-string-landed] {
+    color: var(--rainbow-1-base, var(--primary-600));
+    transform: scale(1);
+  }
+
+  .hero-reveal-subtitle {
+    color: var(--page-bg);
+    transition: color 1.0s ease-out 0.4s;
+  }
+  /* Subtitle reveals when the heading does — sibling selector via
+   * :has() chains the cascade. Falls back to JS-set attribute if
+   * :has() isn't supported (Safari < 15.4 etc). */
+  .hero-reveal-page:has(.hero-reveal-target[data-string-landed]) .hero-reveal-subtitle {
+    color: var(--neutral-700);
+  }
+</style>

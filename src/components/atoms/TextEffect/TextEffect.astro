@@ -8,6 +8,35 @@
  *
  * Hover gates: animation gated by data-hover on body
  * Render modes: textonly strips to plain text, reduced kills animation
+ *
+ * ─────────────────────────────────────────────────────────────────────────
+ * AUDIT TODO — text-as-SVG-paths integration
+ * ─────────────────────────────────────────────────────────────────────────
+ * The Burst atom's text-to-SVG pipeline (`scripts/build-text-paths.mjs` →
+ * `src/lib/text-paths/generated.ts` → TEXT_PATHS map of pre-baked
+ * per-character SVG path arrays) is the right primitive for unlocking
+ * advanced text effects on this atom:
+ *
+ *   - Draw-in stroke animation — text "writes itself" stroke-by-stroke
+ *     on viewport entry using GSAP DrawSVG (same engine as Icon's draw)
+ *   - SVG gradient fills that flow through the actual letter shapes
+ *     (not just CSS gradient on a text bounding box)
+ *   - Phrase morph — "BEFORE" → "AFTER" via GSAP MorphSVG, letters
+ *     interpolate between their path data
+ *   - No FOUT — paths render exactly the same way regardless of font
+ *     load state, since the path is pre-baked at build time
+ *
+ * Implementation when audited:
+ *   - Add `renderAs: 'svg'` opt-in (default 'html' stays for SEO/AT)
+ *   - SVG mode reads phrase from registry.json (or runtime opentype if
+ *     dynamic text needed — bigger bundle cost)
+ *   - Existing Burst.astro already resolves `phrase:KEY` shorthand;
+ *     extract that resolver to a shared lib so TextEffect can call it
+ *   - Wire DrawSVG / MorphSVG via the existing Icon animation hooks
+ *     (svg-animation/draw.ts and morph.ts)
+ *
+ * Not blocked on anything — defer to the per-effect audit pass.
+ * ─────────────────────────────────────────────────────────────────────────
  */
 
 interface Props {
