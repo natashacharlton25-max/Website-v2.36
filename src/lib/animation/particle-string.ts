@@ -26,8 +26,9 @@ interface StringOptions {
   gravity: number;
   collide: boolean;
   /** 0–1 probability a falling strand point sticks on a top-edge contact.
-   *  0.5 default — half pass through to the next rect below. Lets a strand
-   *  drape across multiple text rows instead of clumping on the highest. */
+   *  Default 0.9 — strands mostly stick on first contact (predictable
+   *  drape-over-text). Lower values cascade past upper rects and settle
+   *  on lower rows; the Starfall preset uses 0.35. */
   stickiness: number;
   thick: number;
   /** Total ms before strand fades out (fade itself takes 1s). */
@@ -62,6 +63,17 @@ const DEFAULTS: StringOptions = {
 const COLLIDE_SELECTOR = 'p, h1, h2, h3, h4, h5, h6, li';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+// Verlet rope tuning — these three are coupled, don't tune one in isolation.
+//   LK_REST     = link target distance (chain neighbour pairwise pull)
+//   LK_BREAK    = link snap distance (above this, the link breaks)
+//   REPEL_DIST  = pairwise repulsion radius. MUST be < LK_REST so chain
+//                 neighbours at slack distance don't trigger repulsion
+//                 against the link constraint. Typical: REPEL ≈ 0.6 × REST.
+const LK_REST = 10;
+const LK_BREAK = 80;
+const REPEL_DIST = LK_REST * 0.6;
+const REPEL_DIST_SQ = REPEL_DIST * REPEL_DIST;
+
 // Verlet point — position + previous position. Velocity is implicit (x - ox).
 class Pt {
   x: number; y: number; ox: number; oy: number;
@@ -74,11 +86,12 @@ class Pt {
 }
 
 // Link between two consecutive points — keeps them at target distance.
-// rest=10 (was 2.5 in CodePen) so a static-spawn click produces a strand
-// that's ~length × 10 px long instead of compressing into a 150px clump.
-// breakAt=80 lets strands stretch dramatically before snapping.
+// rest=LK_REST so a static-spawn click produces a strand that spans
+// ~length × rest px instead of compressing into a clump (was 2.5 in
+// CodePen, but that assumes cursor movement during emit). LK_BREAK lets
+// strands stretch dramatically before snapping.
 class Lk {
-  rest = 10;
+  rest = LK_REST;
   broken = false;
   constructor(public a: Pt, public b: Pt) {}
   solve() {
@@ -86,7 +99,7 @@ class Lk {
     const dx = this.b.x - this.a.x;
     const dy = this.b.y - this.a.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 0.001;
-    if (d > 80) { this.broken = true; return; }
+    if (d > LK_BREAK) { this.broken = true; return; }
     const f = (this.rest - d) / d * 0.25;
     if (!this.a.done) { this.a.x -= dx * f; this.a.y -= dy * f; }
     if (!this.b.done) { this.b.x += dx * f; this.b.y += dy * f; }
@@ -273,6 +286,13 @@ function tick() {
       // different points settle on different rows. Side/bottom approaches
       // still always stick (those are strand-wrap-around cases — link
       // constraints pulling tail points sideways into a rect).
+      //
+      // Pass-through advances workingNewY to r.bottom + 1, which can teleport
+      // the point a full rect height in one frame. Acceptable trade-off at
+      // typical text rect heights (~20-30px); would need line-segment
+      // intersection if we ever extend to large/dense collision targets.
+      // Iteration relies on rects being sorted top-to-bottom (see
+      // getCollisionRects) so the next loop iteration is genuinely "below".
       let blocked = false;
       let workingNewY = newY;
       if (s.collide && (newY - p.oy) > 0) {
@@ -283,6 +303,9 @@ function tick() {
             if (Math.random() < s.stickiness) {
               p.x = newX; p.y = r.top - 1;
               p.oy = p.y;
+              // Damp horizontal velocity so points settle on the rect
+              // rather than sliding off the end (mirrors floor friction).
+              p.ox = p.x + (p.x - p.ox) * 0.6;
               p.st += 4;
               blocked = true;
               break;
@@ -339,19 +362,18 @@ function tick() {
     }
 
     // Intra-strand repulsion. j starts at i+2 so the immediate chain
-    // neighbour (already governed by Lk) doesn't fight repulsion. REPEL
-    // is intentionally smaller than Lk.rest=10 so slack chain neighbours
-    // don't trigger it — keep this relationship if you ever tune Lk.rest.
-    const REPEL = 6, REPEL_SQ = REPEL * REPEL;
+    // neighbour (already governed by Lk) doesn't fight repulsion.
+    // REPEL_DIST = LK_REST × 0.6 so slack chain neighbours don't trigger
+    // it — relationship is module-level so tuning one moves the other.
     for (let i = 0; i < s.pts.length; i++) {
       const a = s.pts[i];
       for (let j = i + 2; j < s.pts.length; j++) {
         const b = s.pts[j];
         const dx = b.x - a.x, dy = b.y - a.y;
         const dsq = dx * dx + dy * dy;
-        if (dsq > REPEL_SQ || dsq < 0.01) continue;
+        if (dsq > REPEL_DIST_SQ || dsq < 0.01) continue;
         const d = Math.sqrt(dsq);
-        const overlap = (REPEL - d) / d * 0.5;
+        const overlap = (REPEL_DIST - d) / d * 0.5;
         const px = dx * overlap, py = dy * overlap;
         if (!a.done) { a.x -= px; a.y -= py; }
         if (!b.done) { b.x += px; b.y += py; }
@@ -361,14 +383,13 @@ function tick() {
 
   // Cross-strand repulsion. Strands don't share link constraints with each
   // other — two strands landing in the same spot would happily overlap
-  // unless we check across them. Same REPEL distance as intra-strand.
+  // unless we check across them. Same REPEL_DIST as intra-strand.
   // Skipped entirely when fewer than 2 live strands (single-strand bursts
   // pay zero cost). At 7 strands × 100 pts = ~245k pairs/frame — borderline
   // but tractable. Spatial hashing is the upgrade path if it ever bites.
   const liveStrands: Strand[] = [];
   for (const s of allStrands) if (s.alive) liveStrands.push(s);
   if (liveStrands.length >= 2) {
-    const XREPEL = 6, XREPEL_SQ = XREPEL * XREPEL;
     for (let si = 0; si < liveStrands.length; si++) {
       const sa = liveStrands[si];
       for (let sj = si + 1; sj < liveStrands.length; sj++) {
@@ -377,9 +398,9 @@ function tick() {
           for (const b of sb.pts) {
             const dx = b.x - a.x, dy = b.y - a.y;
             const dsq = dx * dx + dy * dy;
-            if (dsq > XREPEL_SQ || dsq < 0.01) continue;
+            if (dsq > REPEL_DIST_SQ || dsq < 0.01) continue;
             const d = Math.sqrt(dsq);
-            const overlap = (XREPEL - d) / d * 0.5;
+            const overlap = (REPEL_DIST - d) / d * 0.5;
             const px = dx * overlap, py = dy * overlap;
             if (!a.done) { a.x -= px; a.y -= py; }
             if (!b.done) { b.x += px; b.y += py; }
