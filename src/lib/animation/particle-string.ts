@@ -329,11 +329,6 @@ class Strand {
    *  instead of an L there. Without this, multi-contour glyphs (a, e,
    *  g, o, S, etc.) get a stray line bisecting them. */
   targetBreaks: number[] = [];
-  /** True when the source path ended with Z (closed). Path build appends
-   *  an explicit L back to pts[0] so the rendered loop closes — required
-   *  because some browsers / fonts don't include Z's length in
-   *  getTotalLength, leaving the closing edge unsampled (~20% gap). */
-  targetClosed: boolean = false;
   /** ms (relative to performance.now) after which path-snap lerping starts. */
   arrivedAt: number = 0;
   /** Cursor-magnet mode — 'attract' pulls toward cursor (swarm follows),
@@ -516,7 +511,12 @@ function tick() {
         if (p.done) continue;
         const dx = stringCursorX - p.x;
         const dy = stringCursorY - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        // Cursor sitting on top of a point — direction is undefined and
+        // dx/dist would amplify floating-point noise into a teleport.
+        // Skip force this frame; next frame the point or cursor will
+        // have moved by Verlet/mouse and dist will be > 0.
+        if (dist < 1) continue;
         let pull;
         if (sign > 0) {
           pull = Math.min(dist * 0.008, 0.6);
@@ -864,15 +864,9 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       // Run after first emission tick has populated lks; queue via
       // microtask so spawn loop can finish adding all points first.
       strand.targetBreaks = sampled.breaks;
-      // Detect Z-terminated path so path-build can force-close the loop.
-      // Some browsers / fonts don't include Z's length in getTotalLength,
-      // so pts[N-1] won't equal pts[0] for closed shapes — we'd lose the
-      // closing segment otherwise.
-      strand.targetClosed = /Z\s*$/i.test(pathData.trim());
       strand.arrivedAt = performance.now() + opts.emitDuration + 200;
     }
     if (needsMask) strand.pathEl.setAttribute('mask', `url(#${maskId})`);
-    allStrands.push(strand);
 
     // Per-strand spawn position from `from`. Each strand can spawn at a
     // different edge point (so an `edges` burst of 7 strands fans across
@@ -952,6 +946,12 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
         }
       }
     }
+
+    // Push to active list now that all stroke/anchor setup is final —
+    // tick() never sees the strand with stale palette colour before the
+    // anchor inheritance kicks in (race-free even though pts.length === 0
+    // means the renderer would skip it anyway).
+    allStrands.push(strand);
 
     const interval = opts.emitDuration / opts.length;
 
