@@ -186,6 +186,17 @@ interface Props {
   traceDrawDelay?: number;
   /** ms over which the GSAP draw completes. Default 1200. */
   traceDrawDuration?: number;
+  /** [string only, trace mode] Wiggle preset for snapped trace points.
+   *  Points orbit a small radius around their target with per-point
+   *  phase offsets so adjacent points wiggle out of sync. Keeps the
+   *  rope-y silly-string motion through the finished outline instead
+   *  of locking it perfectly still.
+   *    'off'     — 0px, snap fully locks (clean traced outline)
+   *    'subtle'  — 1.5px, barely visible motion (default)
+   *    'soft'    — 3px, gentle rope-y sway
+   *    'heavy'   — 6px, pronounced silly-string flailing
+   *  Pure aesthetic knob; letter readability stays intact through 'soft'. */
+  traceWiggle?: 'off' | 'subtle' | 'soft' | 'heavy';
   /** [string only] After emit completes, every live point applies a
    *  soft per-frame pull toward the live cursor. The strand becomes a
    *  Verlet-rope swarm-cloud that follows the cursor as it moves.
@@ -247,6 +258,7 @@ const {
   tracePathDrawIn = false,
   traceDrawDelay = 700,
   traceDrawDuration = 1200,
+  traceWiggle = 'subtle',
   magnetCursor,
   inheritAnchorColour = false,
   class: className = '',
@@ -410,6 +422,7 @@ const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
   data-particle-trace-size={engine === 'string' && resolvedTracePaths.length ? String(traceSize) : undefined}
   data-particle-trace-offset-x={engine === 'string' && resolvedTracePaths.length && traceOffsetX !== 0 ? String(traceOffsetX) : undefined}
   data-particle-trace-offset-y={engine === 'string' && resolvedTracePaths.length && traceOffsetY !== 0 ? String(traceOffsetY) : undefined}
+  data-particle-trace-wiggle={engine === 'string' && resolvedTracePaths.length ? String({ off: 0, subtle: 1.5, soft: 3, heavy: 6 }[traceWiggle]) : undefined}
   data-particle-magnet-cursor={
     engine === 'string' && magnetCursor
       ? (magnetCursor === 'repel' ? 'repel' : 'attract')

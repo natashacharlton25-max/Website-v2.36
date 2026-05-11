@@ -45,6 +45,11 @@ interface StringOptions {
    *  set negative Y to render the shape above the button. */
   traceOffsetX: number;
   traceOffsetY: number;
+  /** Wiggle amplitude in px applied to snapped trace points so the
+   *  finished outline retains rope-y motion instead of locking
+   *  perfectly still. Resolved from Burst's traceWiggle preset
+   *  enum: off=0, subtle=1.5, soft=3, heavy=6. */
+  traceWiggle: number;
   /** Cursor magnet mode applied each frame after the emit phase
    *  completes. 'attract' pulls points toward the cursor (swarm cloud
    *  follows). 'repel' pushes them away (cursor parts the rope as you
@@ -96,6 +101,7 @@ const DEFAULTS: StringOptions = {
   traceSize: 240,
   traceOffsetX: 0,
   traceOffsetY: 0,
+  traceWiggle: 1.5,
   magnetCursor: 'off',
   inheritAnchorColour: false,
 };
@@ -278,6 +284,11 @@ class Pt {
   x: number; y: number; ox: number; oy: number;
   done = false;
   st = 0; // stickiness — accumulates on collisions, > 14 = settled
+  /** ms when the point was emitted (performance.now timebase). Used by
+   *  progressive trace-snap so each point starts snapping after its
+   *  own flight window elapses — head writes the letter while tail
+   *  still curls in flight. 0 means "not tracked" (non-trace strands). */
+  bornAt = 0;
   constructor(x: number, y: number, vx = 0, vy = 0) {
     this.x = x; this.y = y;
     this.ox = x - vx; this.oy = y - vy;
@@ -342,6 +353,13 @@ class Strand {
    *  handler — which unsticks done points based on collide — has to also
    *  unpin anchor[0] explicitly when the page scrolls. */
   anchored: boolean = false;
+  /** Wiggle amplitude in px for snapped trace points. 0 = static
+   *  outline (snap fully locks). >0 = each point orbits a circle of
+   *  this radius around its target, with per-point phase offsets so
+   *  adjacent points wiggle out-of-sync — keeps the rope-y motion
+   *  through the finished outline. Set per-burst by Burst's traceWiggle
+   *  preset (off=0, subtle=1.5, soft=3, heavy=6). */
+  traceWiggle: number = 1.5;
   constructor(public color: string, public thick: number, svg: SVGSVGElement) {
     this.pathEl = document.createElementNS(SVG_NS, 'path');
     this.pathEl.setAttribute('fill', 'none');
@@ -582,26 +600,33 @@ function tick() {
         }
         s.targetBreaks = remaining;
       }
-      // Soft lerp toward target + perpetual wiggle. Without the wiggle
-      // the strand snaps exactly onto the letter outline and reads as
-      // a clean traced shape — the silly-string aesthetic disappears.
-      // With wiggle, each point orbits a small radius around its
-      // target on different sin phases, so the rope retains organic
-      // motion while still spelling out the phrase legibly.
-      //
-      // Lerp rate 0.05 ≈ 30 frames to close most of the gap (~500ms
-      // at 60fps). Wiggle amplitude 1.5px keeps the letter shape
-      // readable; phase offset per point breaks synchronisation so
-      // adjacent points don't all wiggle in the same direction.
-      const wiggleAmp = 1.5;
+      // Progressive snap — each point snaps to its target after its
+      // own flight window elapses (200ms post-emit, speedgate-scaled).
+      // Head points (lowest indices, emitted earliest) start writing
+      // the outline while tail points (highest indices) are still
+      // mid-flight, so the strand looks like a pen-tip drawing — the
+      // visible-rope tail trails the writing head. Plus per-point
+      // wiggle on settled points keeps the rope-y motion through the
+      // finished outline.
+      const now = performance.now();
+      const tickSpeedScale = getAnimationConfig().durationScale;
+      const flightWindow = 200 * tickSpeedScale;
+      const wiggleAmp = s.traceWiggle;
       const wiggleFreqX = 0.003;
       const wiggleFreqY = 0.0021;
       for (let i = 0; i < s.pts.length && i < s.targetPositions.length; i++) {
         const p = s.pts[i];
+        // Skip if this point hasn't completed its own flight yet —
+        // the tail of the strand keeps curling via Verlet/jitter.
+        if (p.bornAt === 0 || now - p.bornAt < flightWindow) continue;
         const target = s.targetPositions[i];
         p.done = true;
-        const wx = target.x + Math.sin(performance.now() * wiggleFreqX + i * 0.4) * wiggleAmp;
-        const wy = target.y + Math.cos(performance.now() * wiggleFreqY + i * 0.4) * wiggleAmp;
+        const wx = wiggleAmp > 0
+          ? target.x + Math.sin(now * wiggleFreqX + i * 0.4) * wiggleAmp
+          : target.x;
+        const wy = wiggleAmp > 0
+          ? target.y + Math.cos(now * wiggleFreqY + i * 0.4) * wiggleAmp
+          : target.y;
         p.x += (wx - p.x) * 0.05;
         p.y += (wy - p.y) * 0.05;
         p.ox = p.x;
@@ -871,6 +896,7 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       opts.magnetCursor !== 'off'
     ) ? 0 : opts.gravity;
     strand.stickiness = opts.stickiness;
+    strand.traceWiggle = opts.traceWiggle;
     if (opts.magnetCursor !== 'off') {
       strand.magnetCursor = opts.magnetCursor;
       strand.magnetActiveAt = performance.now() + opts.emitDuration * speedScale;
@@ -1047,6 +1073,13 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
           const speed = opts.pressure + Math.random() * 2;
           strand.add(spawn.x, spawn.y, Math.cos(a) * speed, Math.sin(a) * speed);
         }
+        // Stamp bornAt for trace strands so the progressive snap can
+        // figure out each point's individual flight window — head
+        // points snap to outline first, tail points stay flying.
+        if (opts.tracePaths.length) {
+          const newPt = strand.pts[strand.pts.length - 1];
+          if (newPt) newPt.bornAt = performance.now();
+        }
       }, i * interval);
     }
 
@@ -1163,6 +1196,10 @@ function readOptions(el: Element): StringOptions {
   if (get('trace-size')) opts.traceSize = parseFloat(get('trace-size')!);
   if (get('trace-offset-x')) opts.traceOffsetX = parseFloat(get('trace-offset-x')!);
   if (get('trace-offset-y')) opts.traceOffsetY = parseFloat(get('trace-offset-y')!);
+  // traceWiggle preset enum → px amplitude. Burst.astro emits the px
+  // value directly so authors think in preset names but the runtime
+  // gets a number with no mapping table to keep in sync.
+  if (get('trace-wiggle')) opts.traceWiggle = parseFloat(get('trace-wiggle')!);
 
   if (el.hasAttribute('data-particle-inherit-anchor-colour')) opts.inheritAnchorColour = true;
 
