@@ -27,10 +27,9 @@ import path from 'node:path';
 import { Shape } from '../Shape';
 import { Icon } from '../Icon';
 import { BRAND_CONFIG } from '../../../lib/config/brand';
-import { TEXT_PATHS } from '../../../lib/text-paths/generated';
+import { resolveTraceShorthand } from '../../../lib/text-paths/resolver';
+import type { LogoKey } from '../../../lib/text-paths/resolver';
 import type { BrandColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
-
-type LogoKey = 'primary' | 'monochrome' | 'favicon' | 'wordmark';
 
 type Engine = 'fly' | 'physics' | 'string';
 type Trigger = 'click' | 'hover' | 'hover-hold';
@@ -263,44 +262,22 @@ if (resolvedSvgPath && resolvedSvgPath.startsWith('logo:')) {
     resolvedSvgPath = null;
   }
 }
-// Resolve tracePath. Four input shapes:
-//   - "logo:KEY" → read SVG, extract one <path d> per logo path (kept as
-//     array so each strand can trace its own — multi-path logos like Hero
-//     Morph (4 paths) read better as 4 separate strand-shapes than as one
-//     concatenated mess with subpath jumps).
-//   - "phrase:KEY" → look up TEXT_PATHS[KEY] (pre-baked at build time by
-//     scripts/build-text-paths.mjs from src/lib/text-paths/registry.json).
-//     Strand "writes" the phrase as silly-string. Add new phrases by
-//     editing registry.json and running `npm run build:text-paths`.
-//   - Single path data string → array of length 1 (all strands trace it).
-//   - undefined → empty array, no path tracing.
+// Resolve tracePath via the shared resolver (logo:KEY → BRAND_CONFIG
+// lookup + file read + path extraction; phrase:KEY → TEXT_PATHS_META
+// lookup). Raw SVG path data passes through as a single-element array.
+// undefined → empty array, no path tracing.
 let resolvedTracePaths: string[] = [];
-if (tracePath && tracePath.startsWith('logo:')) {
-  const key = tracePath.slice('logo:'.length) as LogoKey;
-  const logoPath = (BRAND_CONFIG as any).logo?.[key];
-  if (logoPath) {
-    try {
-      const file = path.join(process.cwd(), 'public', logoPath.startsWith('/') ? logoPath.slice(1) : logoPath);
-      const svgText = fs.readFileSync(file, 'utf-8');
-      resolvedTracePaths = Array.from(svgText.matchAll(/<path[^>]*\sd="([^"]+)"/g)).map(m => m[1]);
-    } catch (err) {
-      console.warn(`[Burst] Could not read logo path "${key}":`, err);
-    }
-  } else {
-    console.warn(`[Burst] Unknown logo key "${key}"`);
+if (tracePath) {
+  const resolved = resolveTraceShorthand(tracePath);
+  if (resolved) {
+    // Multi-path logos give N paths; phrases give one per letter.
+    // Auto-strands logic downstream sets strands = letter count when
+    // palette is in play ("WELCOME" → 7 strands → 7 palette colours).
+    resolvedTracePaths = resolved.paths;
+  } else if (!tracePath.startsWith('logo:') && !tracePath.startsWith('phrase:')) {
+    // Not a shorthand — treat as raw SVG path data.
+    resolvedTracePaths = [tracePath];
   }
-} else if (tracePath && tracePath.startsWith('phrase:')) {
-  const key = tracePath.slice('phrase:'.length);
-  const phrasePaths = TEXT_PATHS[key];
-  if (phrasePaths && phrasePaths.length) {
-    // Per-letter array. Auto-strands logic will set strands = letter count
-    // (so "WELCOME" → 7 strands → 7 palette colours, one per letter).
-    resolvedTracePaths = phrasePaths;
-  } else {
-    console.warn(`[Burst] Unknown phrase "${key}" — add it to src/lib/text-paths/registry.json and run npm run build:text-paths`);
-  }
-} else if (tracePath) {
-  resolvedTracePaths = [tracePath];
 }
 
 // When tracePath resolves to multiple paths (multi-path logo), force
