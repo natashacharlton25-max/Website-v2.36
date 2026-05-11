@@ -36,7 +36,12 @@ export interface ResolvedSvg {
  * Shape consumes this verbatim via its existing svgContent pipeline.
  */
 function buildSvgMarkup(viewBox: string, paths: string[]): string {
-  const pathTags = paths.map(d => `<path d="${d}" />`).join('');
+  // fill="currentColor" lets Shape's .color--{name} mixin flow through
+  // for static rendering, AND lets Shape's draw-mode regex catch the
+  // path and convert it to a stroke for GSAP DrawSVG animation. Without
+  // this attribute the paths render with the user-agent default fill
+  // and draw mode can't find a fill to swap.
+  const pathTags = paths.map(d => `<path d="${d}" fill="currentColor" />`).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet">${pathTags}</svg>`;
 }
 

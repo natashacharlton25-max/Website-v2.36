@@ -24,6 +24,8 @@ import type {
 import { normalizeDrawColour } from '../../../lib/shared-enums';
 import { resolveInlineGradient, getGradientStopColours } from '../../../lib/gradient-inline';
 import { SHAPE_PATHS } from '../../../lib/shape-paths';
+import { resolveLogoToSvg, resolvePhraseToSvg } from '../../../lib/text-paths/resolver';
+import type { LogoKey } from '../../../lib/text-paths/resolver';
 
 const ASSET_API_URL = import.meta.env.ASSET_API_URL || 'http://localhost:8787';
 const ASSET_API_TOKEN = import.meta.env.ASSET_API_TOKEN || '';
@@ -38,6 +40,17 @@ interface Props {
   /** Force a specific render path. 'auto' (default) uses CSS for circle/square/rounded/pill and SVG for everything else. */
   renderAs?: ShapeRenderAs;
   slug?: string;
+  /** BRAND_CONFIG.logo key shorthand — resolves to inline SVG at build
+   *  time via the shared text-paths resolver. Mutually exclusive with
+   *  slug and phraseKey. Use for animated brand logos in headers/footers,
+   *  hero intros, etc. */
+  logoKey?: LogoKey;
+  /** registry.json phrase key shorthand — resolves to inline SVG at
+   *  build time via the shared text-paths resolver. The path data is
+   *  pre-baked by scripts/build-text-paths.mjs. Mutually exclusive with
+   *  slug and logoKey. Use for animated brand phrases / decorative
+   *  typography. */
+  phraseKey?: string;
   semanticRole?: ShapeSemanticRole;
   /** Human-readable label. Required for ui-control and content-symbol.
    *  Forbidden when semanticRole='background' (the child atom owns meaning).
@@ -114,7 +127,7 @@ interface Props {
 }
 
 const {
-  shape = 'circle', mode = 'shape', renderAs = 'auto', slug, semanticRole = 'decorative', labelShape,
+  shape = 'circle', mode = 'shape', renderAs = 'auto', slug, logoKey, phraseKey, semanticRole = 'decorative', labelShape,
   brandColor, rainbowColor, colorTier,
   size = 'base', mediaBgSize = 'normal', variant = 'fill', borderWeight, shadow, glow,
   gradient = false, gradientBlend, gradientDirection = 'diagonal', gradientType, gradientFocus, gradientEmerge = false, gradientFade = false, gradientCycle = false, gradientAnimated, gradientAnimateSpeed, gradientAnimateEase, gradientAnimateDirection, gradientAnimateScale,
@@ -206,9 +219,21 @@ const isInteractive = isInformational
 // screen readers announce them as activatable.
 const a11yRole = isInformational ? 'img' : (isInteractive ? 'button' : undefined);
 
-// Fetch API shape if slug provided
+// Resolve inline SVG content. Three sources, evaluated in priority order:
+//   1. logoKey   → BRAND_CONFIG.logo lookup via shared resolver (build-time)
+//   2. phraseKey → registry.json phrase via shared resolver (build-time)
+//   3. slug      → Asset Library API fetch (build-time HTTP)
+// First match wins. svgContent flows into the same downstream render path
+// regardless of source, so GSAP draw / colour / stagger / gradient all
+// behave identically.
 let svgContent: string | null = null;
-if (slug) {
+if (logoKey) {
+  const resolved = resolveLogoToSvg(logoKey);
+  if (resolved) svgContent = resolved.markup;
+} else if (phraseKey) {
+  const resolved = resolvePhraseToSvg(phraseKey);
+  if (resolved) svgContent = resolved.markup;
+} else if (slug) {
   try {
     const headers: Record<string, string> = {};
     if (ASSET_API_TOKEN) headers['Authorization'] = `Bearer ${ASSET_API_TOKEN}`;
