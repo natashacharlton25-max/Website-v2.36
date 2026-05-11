@@ -632,6 +632,19 @@ function tick() {
       for (const idx of s.targetBreaks) {
         if (idx > 0 && idx - 1 < s.lks.length) s.lks[idx - 1].broken = true;
       }
+      // TEMP DEBUG — log once per strand on first snap frame.
+      // Strand index = position in allStrands at snap time. For
+      // "Walking with a Smile" e is index 16, g is index 6.
+      if (!(s as any)._loggedBreaks) {
+        (s as any)._loggedBreaks = true;
+        // eslint-disable-next-line no-console
+        console.log('[burst-string] strand snap', {
+          ptsLen: s.pts.length,
+          lksLen: s.lks.length,
+          targetsLen: s.targetPositions.length,
+          breaks: [...s.targetBreaks],
+        });
+      }
       const wiggleAmp = s.traceWiggle;
       const wiggleFreqX = 0.003;
       const wiggleFreqY = 0.0021;
