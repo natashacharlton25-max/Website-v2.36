@@ -888,6 +888,38 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       // microtask so spawn loop can finish adding all points first.
       strand.targetBreaks = sampled.breaks;
       strand.arrivedAt = performance.now() + (opts.emitDuration + 200) * speedScale;
+    } else if (opts.to !== 'away' && opts.magnetCursor === 'off') {
+      // Snap-on-arrival for plain converge modes (to: origin / cursor /
+      // target without tracePath). Without this, strands fly toward the
+      // destination via Verlet, then cross-strand repulsion scatters
+      // the convergence and the cluster ends up off-target. Snapping
+      // each point to the destination at arrivedAt locks them in place.
+      //
+      // Magnet attract / repel are excluded — those want continuous
+      // cursor-following behaviour, not a one-time snap.
+      let destX: number, destY: number;
+      if (opts.to === 'cursor') {
+        destX = stringCursorX; destY = stringCursorY;
+      } else if (opts.to === 'target') {
+        destX = targetX; destY = targetY;
+      } else { // origin
+        destX = cx; destY = cy;
+      }
+      // Distribute points in a small radius around dest so the strand
+      // doesn't collapse to a single dot. Random spiral gives a tight
+      // visible cluster — enough to read as "rope piled at button" but
+      // small enough that all strands stack on the destination.
+      const positions: { x: number; y: number }[] = [];
+      for (let i = 0; i < opts.length; i++) {
+        const angle = (i / opts.length) * Math.PI * 2 + Math.random() * 0.3;
+        const radius = 4 + Math.random() * 14;
+        positions.push({
+          x: destX + Math.cos(angle) * radius,
+          y: destY + Math.sin(angle) * radius,
+        });
+      }
+      strand.targetPositions = positions;
+      strand.arrivedAt = performance.now() + (opts.emitDuration + 200) * speedScale;
     }
     if (needsMask) strand.pathEl.setAttribute('mask', `url(#${maskId})`);
 
