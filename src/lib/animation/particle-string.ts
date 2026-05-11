@@ -600,37 +600,56 @@ function tick() {
         }
         s.targetBreaks = remaining;
       }
-      // Progressive snap — each point snaps to its target after its
-      // own flight window elapses (200ms post-emit, speedgate-scaled).
-      // Head points (lowest indices, emitted earliest) start writing
-      // the outline while tail points (highest indices) are still
-      // mid-flight, so the strand looks like a pen-tip drawing — the
-      // visible-rope tail trails the writing head. Plus per-point
-      // wiggle on settled points keeps the rope-y motion through the
-      // finished outline.
+      // Progressive snap with ramped pull — each point starts being
+      // attracted to its target after its flightWindow elapses
+      // (200ms post-emit). Pull strength ramps from 0 → 0.05 over
+      // the settleWindow (300ms), so:
+      //   - 0..200ms post-emit: full Verlet, no pull (rope flies free)
+      //   - 200..500ms: Verlet motion continues but a growing pull
+      //     gradually steers the point toward its target
+      //   - 500ms+: full pull, point locked + wiggle
+      // The earlier hard switch from "Verlet" to "lerping" caused the
+      // visible velocity change mid-flight the user flagged. Ramping
+      // bridges the two regimes smoothly — Verlet damping (0.97/frame)
+      // naturally decays inherited velocity over ~30 frames, matching
+      // the pull ramp-up window.
       const now = performance.now();
       const tickSpeedScale = getAnimationConfig().durationScale;
       const flightWindow = 200 * tickSpeedScale;
+      const settleWindow = 300 * tickSpeedScale;
+      const maxLerp = 0.05;
       const wiggleAmp = s.traceWiggle;
       const wiggleFreqX = 0.003;
       const wiggleFreqY = 0.0021;
       for (let i = 0; i < s.pts.length && i < s.targetPositions.length; i++) {
         const p = s.pts[i];
-        // Skip if this point hasn't completed its own flight yet —
+        // Skip if this point hasn't started its settle window yet —
         // the tail of the strand keeps curling via Verlet/jitter.
-        if (p.bornAt === 0 || now - p.bornAt < flightWindow) continue;
+        if (p.bornAt === 0) continue;
+        const sinceFlightEnd = now - p.bornAt - flightWindow;
+        if (sinceFlightEnd < 0) continue;
+        // Linear ramp from 0 → maxLerp over settleWindow. After
+        // settleWindow the pull is full strength and the point can
+        // be marked done (locks out Verlet entirely).
+        const settleProgress = Math.min(sinceFlightEnd / settleWindow, 1);
+        const lerpRate = maxLerp * settleProgress;
         const target = s.targetPositions[i];
-        p.done = true;
         const wx = wiggleAmp > 0
           ? target.x + Math.sin(now * wiggleFreqX + i * 0.4) * wiggleAmp
           : target.x;
         const wy = wiggleAmp > 0
           ? target.y + Math.cos(now * wiggleFreqY + i * 0.4) * wiggleAmp
           : target.y;
-        p.x += (wx - p.x) * 0.05;
-        p.y += (wy - p.y) * 0.05;
-        p.ox = p.x;
-        p.oy = p.y;
+        // During ramp, DON'T zero p.ox/p.oy — that would kill
+        // inherited velocity and recreate the hard switch. Only
+        // overwrite once settleProgress hits 1.
+        p.x += (wx - p.x) * lerpRate;
+        p.y += (wy - p.y) * lerpRate;
+        if (settleProgress >= 1) {
+          p.done = true;
+          p.ox = p.x;
+          p.oy = p.y;
+        }
       }
     }
 
