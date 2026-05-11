@@ -582,17 +582,28 @@ function tick() {
         }
         s.targetBreaks = remaining;
       }
-      // Soft lerp toward target. Rate 0.05 ≈ 30 frames to close most
-      // of the gap — about 500ms at 60fps. Earlier 0.12 closed in
-      // 100ms which read as an abrupt jump. The slower lerp gives a
-      // visible "settling" motion as strands ease into their final
-      // outline positions.
+      // Soft lerp toward target + perpetual wiggle. Without the wiggle
+      // the strand snaps exactly onto the letter outline and reads as
+      // a clean traced shape — the silly-string aesthetic disappears.
+      // With wiggle, each point orbits a small radius around its
+      // target on different sin phases, so the rope retains organic
+      // motion while still spelling out the phrase legibly.
+      //
+      // Lerp rate 0.05 ≈ 30 frames to close most of the gap (~500ms
+      // at 60fps). Wiggle amplitude 1.5px keeps the letter shape
+      // readable; phase offset per point breaks synchronisation so
+      // adjacent points don't all wiggle in the same direction.
+      const wiggleAmp = 1.5;
+      const wiggleFreqX = 0.003;
+      const wiggleFreqY = 0.0021;
       for (let i = 0; i < s.pts.length && i < s.targetPositions.length; i++) {
         const p = s.pts[i];
         const target = s.targetPositions[i];
         p.done = true;
-        p.x += (target.x - p.x) * 0.05;
-        p.y += (target.y - p.y) * 0.05;
+        const wx = target.x + Math.sin(performance.now() * wiggleFreqX + i * 0.4) * wiggleAmp;
+        const wy = target.y + Math.cos(performance.now() * wiggleFreqY + i * 0.4) * wiggleAmp;
+        p.x += (wx - p.x) * 0.05;
+        p.y += (wy - p.y) * 0.05;
         p.ox = p.x;
         p.oy = p.y;
       }
@@ -744,30 +755,21 @@ function tick() {
   for (const s of allStrands) {
     if (!s.alive) continue;
     if (s.pts.length >= 2) {
-      // Rendering switches by mode:
-      //   - In-flight (Verlet rope) → L-segments. Sample density is low
-      //     (60–100 points along the rope), and L preserves the per-
-      //     point angular jitter that makes the rope curl visibly. Q
-      //     smoothing here averages out the jitter and strands look
-      //     like straight lines.
-      //   - Post-snap to a trace → Q-curves. Sample density is HIGH
-      //     (220 points along a letter outline) and adjacent L points
-      //     sit sub-pixel apart, stacking stroke-linecap:round into
-      //     visible dots. Q smooths those out cleanly.
-      const snapped = s.targetPositions !== null && performance.now() >= s.arrivedAt;
+      // Always L-segments. Q-curves smoothed out both the in-flight
+      // jitter (rope looked straight) AND the post-snap wiggle (rope
+      // looked like a clean traced outline). With the per-frame wiggle
+      // applied to snapped points, L preserves the rope-y motion the
+      // user expects. The earlier dots/dashes issue at high density
+      // is mitigated by the wiggle keeping adjacent points moving in
+      // different sin phases — sub-pixel sample noise becomes a
+      // visible rope wobble instead of stacked linecap dots.
       let d = `M${s.pts[0].x.toFixed(1)} ${s.pts[0].y.toFixed(1)}`;
       for (let i = 1; i < s.pts.length; i++) {
         if (i - 1 < s.lks.length && s.lks[i - 1].broken) {
           d += ` M${s.pts[i].x.toFixed(1)} ${s.pts[i].y.toFixed(1)}`;
           continue;
         }
-        if (snapped) {
-          const px = s.pts[i - 1].x, py = s.pts[i - 1].y;
-          const cx = (px + s.pts[i].x) / 2, cy = (py + s.pts[i].y) / 2;
-          d += ` Q${px.toFixed(1)} ${py.toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)}`;
-        } else {
-          d += ` L${s.pts[i].x.toFixed(1)} ${s.pts[i].y.toFixed(1)}`;
-        }
+        d += ` L${s.pts[i].x.toFixed(1)} ${s.pts[i].y.toFixed(1)}`;
       }
       // Closure handling moved to samplePath (per-subpath closure samples
       // appended after each Z-terminated subpath). This avoids the
