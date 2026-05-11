@@ -1,0 +1,144 @@
+---
+/**
+ * Burst scrollytelling — string narrative loop demo.
+ *
+ * Click the first button to start. Strands fly in and form "WELCOME".
+ * Scroll down → strands release and fall to the floor (persistent —
+ * they stay there). When the next section enters viewport, the SAME
+ * physical strings fly UP and re-form around the next word. Continues
+ * through every section.
+ *
+ * Tests the four-stage scrollytelling loop (Phase 6, batches 17–20):
+ *   1. Universal scroll-release (any locked strand drops to floor)
+ *   2. trigger='viewport' (GSAP ScrollTrigger onEnter / onEnterBack)
+ *   3. persistent strands (lifespan setTimeouts skip removal)
+ *   4. Re-snatch on next trace fire (re-aim existing pts at new
+ *      letter outline, Verlet kick toward new letter centre)
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Renderer from '../../components/Renderer.astro';
+
+const sharedBurstProps = {
+  engine: 'string',
+  palette: 'rainbow',
+  strands: 7,
+  length: 120,
+  pressure: 22,
+  emitDuration: 500,
+  thick: 5,
+  lifespan: 8000,
+  from: 'edges',
+  to: 'origin',
+  traceSize: 600,
+  traceOffsetY: -120,
+  traceWiggle: 'subtle',
+};
+
+const data = {
+  component: 'Page',
+  children: [
+    // Section 1 — click to start
+    {
+      component: 'Section',
+      container: '7xl',
+      gap: 'lg',
+      class: 'scrolly-section scrolly-start',
+      children: [
+        { component: 'Heading', level: 1, contentHeading: 'Scrollytelling string loop', size: 'xl' },
+        {
+          component: 'Text',
+          contentText: 'Click the button to start. Strands fly in and form "WELCOME". Then scroll down — they release and fall to the floor. When the next section enters viewport, the SAME strings fly UP to form the next word. Repeats through every section.',
+        },
+        {
+          ...sharedBurstProps,
+          component: 'Burst',
+          tracePath: 'phrase:welcome',
+          trigger: 'click',
+          children: [
+            { component: 'Button', contentButton: 'Begin', variant: 'fill', brandColor: 'primary', size: 'lg' },
+          ],
+        },
+      ],
+    },
+    // Section 2 — auto-fire on viewport entry → form "Hello"
+    {
+      component: 'Section',
+      container: '7xl',
+      gap: 'lg',
+      class: 'scrolly-section',
+      children: [
+        { component: 'Heading', level: 2, contentHeading: 'Scroll triggered →', size: 'lg' },
+        { component: 'Text', contentText: 'The same strings fly up from the floor and re-form around "Hello".' },
+        {
+          ...sharedBurstProps,
+          component: 'Burst',
+          tracePath: 'phrase:hello',
+          trigger: 'viewport',
+          children: [
+            { component: 'Text', contentText: '(target)', size: 'sm' },
+          ],
+        },
+      ],
+    },
+    // Section 3 — back to "WELCOME"
+    {
+      component: 'Section',
+      container: '7xl',
+      gap: 'lg',
+      class: 'scrolly-section',
+      children: [
+        { component: 'Heading', level: 2, contentHeading: 'Loop continues →', size: 'lg' },
+        { component: 'Text', contentText: 'Same physical strands, re-aimed at the next target each viewport entry.' },
+        {
+          ...sharedBurstProps,
+          component: 'Burst',
+          tracePath: 'phrase:welcome',
+          trigger: 'viewport',
+          children: [
+            { component: 'Text', contentText: '(target)', size: 'sm' },
+          ],
+        },
+      ],
+    },
+    // Section 4 — form "Hello" again
+    {
+      component: 'Section',
+      container: '7xl',
+      gap: 'lg',
+      class: 'scrolly-section',
+      children: [
+        { component: 'Heading', level: 2, contentHeading: 'And again →', size: 'lg' },
+        { component: 'Text', contentText: 'Scroll back up — onEnterBack re-fires, so the loop works in reverse too.' },
+        {
+          ...sharedBurstProps,
+          component: 'Burst',
+          tracePath: 'phrase:hello',
+          trigger: 'viewport',
+          children: [
+            { component: 'Text', contentText: '(target)', size: 'sm' },
+          ],
+        },
+      ],
+    },
+  ],
+};
+---
+
+<BaseLayout title="Burst scrollytelling — Demo">
+  <Renderer node={data} />
+</BaseLayout>
+
+<style is:global>
+  .scrolly-section {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-lg, 2rem);
+  }
+  .scrolly-start {
+    min-height: 100vh;
+  }
+</style>
