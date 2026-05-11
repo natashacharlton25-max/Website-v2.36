@@ -777,6 +777,13 @@ function tick() {
 
 function spawnString(origin: HTMLElement, opts: StringOptions) {
   bindStringCursor();
+  // Speedgate: read once per spawn so every derived timing in this
+  // burst respects the same scale. durationScale combines render mode
+  // (full=1, reduced=2) with user-pref speed (fast=0.75, normal=1,
+  // gentle=1.5, slow=2). Particle pressure/velocity stays at author
+  // values — the strand still covers the same distance, it just
+  // emits slower and lives longer.
+  const speedScale = getAnimationConfig().durationScale;
   // Walk past hidden <template> siblings to the real interactive child
   let originEl: Element = origin;
   for (const child of Array.from(origin.children)) {
@@ -854,7 +861,7 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     strand.stickiness = opts.stickiness;
     if (opts.magnetCursor !== 'off') {
       strand.magnetCursor = opts.magnetCursor;
-      strand.magnetActiveAt = performance.now() + opts.emitDuration;
+      strand.magnetActiveAt = performance.now() + opts.emitDuration * speedScale;
     }
 
     // Path-trace setup — sample N points along the SVG path, position them
@@ -880,7 +887,7 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       // Run after first emission tick has populated lks; queue via
       // microtask so spawn loop can finish adding all points first.
       strand.targetBreaks = sampled.breaks;
-      strand.arrivedAt = performance.now() + opts.emitDuration + 200;
+      strand.arrivedAt = performance.now() + (opts.emitDuration + 200) * speedScale;
     }
     if (needsMask) strand.pathEl.setAttribute('mask', `url(#${maskId})`);
 
@@ -970,7 +977,7 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     // means the renderer would skip it anyway).
     allStrands.push(strand);
 
-    const interval = opts.emitDuration / opts.length;
+    const interval = (opts.emitDuration * speedScale) / opts.length;
 
     for (let i = 0; i < opts.length; i++) {
       setTimeout(() => {
@@ -984,8 +991,15 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
           strand.add(anchorX, anchorY, 0, 0);
           strand.pts[0].done = true;
         } else {
-          // Curl + jitter: sin wave for coiling, random for chaos
-          const a = angleBase + Math.sin(i * 0.3) * 0.4 + (Math.random() - 0.5) * 0.4;
+          // Curl + jitter: sin wave for coiling, random for chaos. Trace
+          // bursts double the curl coefficients so strands take visibly
+          // curvy flight paths to their letter destinations instead of
+          // arrowing straight in. For free silly-string the lower values
+          // keep the rope from flailing too wildly.
+          const isTracing = opts.tracePaths.length > 0;
+          const sinAmp = isTracing ? 0.9 : 0.4;
+          const randAmp = isTracing ? 0.8 : 0.4;
+          const a = angleBase + Math.sin(i * 0.3) * sinAmp + (Math.random() - 0.5) * randAmp;
           const speed = opts.pressure + Math.random() * 2;
           strand.add(spawn.x, spawn.y, Math.cos(a) * speed, Math.sin(a) * speed);
         }
@@ -993,14 +1007,10 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     }
 
     // Lifespan: fade in last 1s of life, then remove. Floor at 1000ms
-    // so a tiny lifespan still gets a visible fade. The lifespan === 0
-    // "persistent strand" path was removed: it leaked tick() forever
-    // (allStrands never empties → tickRunning never resets) and competed
-    // with regular bursts under the active-strand cap, so "permanent"
-    // wasn't actually permanent. Reintroduce as a separate `persistent`
-    // flag with its own cap when there's a real use case.
-    const lifespan = Math.max(opts.lifespan, 1000);
-    const fadeStart = Math.max(lifespan - 1000, 1000);
+    // so a tiny lifespan still gets a visible fade. Speedgate-scaled so
+    // gentle/slow modes proportionally extend on-screen time.
+    const lifespan = Math.max(opts.lifespan, 1000) * speedScale;
+    const fadeStart = Math.max(lifespan - 1000 * speedScale, 1000 * speedScale);
     setTimeout(() => { strand.pathEl.style.opacity = '0'; }, fadeStart);
     setTimeout(() => {
       strand.pathEl.remove();
@@ -1015,7 +1025,7 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
   // later motion that drifts back across the button (looks broken).
   // Strip the mask attribute from each strand the moment emit finishes,
   // then remove the mask def itself shortly after.
-  const emitWindow = opts.emitDuration + 80;
+  const emitWindow = (opts.emitDuration + 80) * speedScale;
   const burstStrands: Strand[] = allStrands.slice(allStrands.length - opts.strands);
   if (needsMask) {
     setTimeout(() => {
@@ -1035,7 +1045,7 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       if (!tEl.hasAttribute('data-string-landed')) {
         tEl.setAttribute('data-string-landed', 'true');
       }
-    }, opts.emitDuration + 200);
+    }, (opts.emitDuration + 200) * speedScale);
   }
 
   if (!tickRunning) {
@@ -1190,18 +1200,20 @@ export function initParticleString(): void {
                   : triggerVal === 'hover-hold' ? 'hover-hold'
                   : 'click';
     if (trigger === 'hover') {
-      // Single fire on mouseenter, 2s cooldown before next fire.
+      // Single fire on mouseenter, 2s cooldown before next fire (scaled
+      // by the speedgate so gentle/slow modes hold the cooldown longer).
       let cooldown = false;
       htmlEl.addEventListener('mouseenter', (e) => {
         if (cooldown) return;
         cooldown = true;
         fire(e);
-        setTimeout(() => { cooldown = false; }, 2000);
+        setTimeout(() => { cooldown = false; }, 2000 * getAnimationConfig().durationScale);
       });
     } else if (trigger === 'hover-hold') {
-      // Continuous re-fire while hovered. Interval is 1500ms — enough
-      // time for a previous burst to fade out before the next fires
-      // (otherwise the strand cap kicks in and bursts get evicted).
+      // Continuous re-fire while hovered. Interval is 1500ms baseline —
+      // enough time for a previous burst to fade out before the next
+      // fires (otherwise the strand cap kicks in and bursts get evicted).
+      // Speedgate-scaled so gentle/slow modes also slow the re-fire rate.
       // Stops emitting on mouseleave; resumes on next mouseenter.
       // Interval ID is also tracked in hoverHoldIntervals so that across
       // Astro view transitions, intervals attached to elements that have
@@ -1210,7 +1222,7 @@ export function initParticleString(): void {
       htmlEl.addEventListener('mouseenter', (e) => {
         fire(e);
         if (intervalId !== null) return;
-        intervalId = setInterval(() => fire(new MouseEvent('hover')), 1500);
+        intervalId = setInterval(() => fire(new MouseEvent('hover')), 1500 * getAnimationConfig().durationScale);
         hoverHoldIntervals.set(htmlEl, intervalId);
       });
       htmlEl.addEventListener('mouseleave', () => {

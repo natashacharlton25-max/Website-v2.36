@@ -198,6 +198,15 @@ export function createParticleBurst(
 ): void {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
+  // Speedgate — scale per-particle animation duration so gentle/slow
+  // modes proportionally extend the fly-out window. The range is
+  // randomised per particle so we scale both min and max.
+  const speedScale = getAnimationConfig().durationScale;
+  opts.duration = {
+    min: opts.duration.min * speedScale,
+    max: opts.duration.max * speedScale,
+  };
+
   // Use CSS tokens if colors not provided
   if (!options.colors || options.colors.length === 0) {
     opts.colors = getCSSColors();
@@ -315,7 +324,7 @@ export function initParticleBurst(): void {
         if (!hasTriggered && getAnimationConfig().canAnimate) {
           createParticleBurst(htmlElement, options);
           hasTriggered = true;
-          setTimeout(() => { hasTriggered = false; }, 2000);
+          setTimeout(() => { hasTriggered = false; }, 2000 * getAnimationConfig().durationScale);
         }
       });
     } else {

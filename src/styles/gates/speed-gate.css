@@ -1,0 +1,36 @@
+/**
+ * Speed gate — user-controlled animation speed override.
+ *
+ * Sets a CSS custom property `--anim-speed-mult` on <html> that
+ * scales animation/transition durations across the site. Read it
+ * via `calc()` anywhere you set a duration, e.g.:
+ *
+ *   transition: opacity calc(var(--anim-speed-mult, 1) * 0.3s) ease;
+ *   animation: spin calc(var(--anim-speed-mult, 1) * 8s) linear infinite;
+ *
+ * The JS layer reads the same data-anim-speed attribute via
+ * getAnimationConfig().speedScale, so CSS-driven and JS-driven
+ * animations stay in sync — toggling the attribute in Your View
+ * updates both worlds simultaneously.
+ *
+ * Render-mode baseline (gentle/reduced) is separate — that's owned
+ * by motion-gate.css and reduced-gate.css. This file is only the
+ * user-pref multiplier; it stacks with the render-mode scale via
+ * the JS combiner in getAnimationConfig.
+ */
+
+html {
+  --anim-speed-mult: 1;
+}
+
+html[data-anim-speed="fast"] {
+  --anim-speed-mult: 0.75;
+}
+
+html[data-anim-speed="gentle"] {
+  --anim-speed-mult: 1.5;
+}
+
+html[data-anim-speed="slow"] {
+  --anim-speed-mult: 2;
+}

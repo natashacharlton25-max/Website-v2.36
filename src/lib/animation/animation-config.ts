@@ -26,9 +26,10 @@ export {
   getMotionMode,
   getHoverMode,
   getRenderMode,
+  getSpeedMode,
   prefersReducedMotion,
 } from './gates/mode-readers';
-export type { MotionMode, HoverMode, RenderMode } from './gates/mode-readers';
+export type { MotionMode, HoverMode, RenderMode, SpeedMode } from './gates/mode-readers';
 
 // The gate factory + config interface
 export { getAnimationConfig } from './gates/animation-config';

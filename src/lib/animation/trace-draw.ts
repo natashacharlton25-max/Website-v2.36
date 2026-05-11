@@ -30,14 +30,19 @@ function primePath(p: SVGPathElement): void {
 }
 
 function runDraw(wrapper: HTMLElement): void {
-  if (!getAnimationConfig().canAnimate) return;
+  const cfg = getAnimationConfig();
+  if (!cfg.canAnimate) return;
   const targetSpan = wrapper.querySelector<HTMLElement>('[data-burst-trace-draw-target]');
   if (!targetSpan) return;
   const paths = Array.from(targetSpan.querySelectorAll<SVGPathElement>('path'));
   if (paths.length === 0) return;
 
-  const delay = parseInt(wrapper.getAttribute('data-trace-draw-delay') || '700', 10);
-  const duration = parseInt(wrapper.getAttribute('data-trace-draw-duration') || '1200', 10);
+  // Speedgate-scaled — gentle/slow modes proportionally extend the
+  // delay AND the draw duration so the rhythm with the silly-string
+  // landing stays coherent regardless of user pref.
+  const speedScale = cfg.durationScale;
+  const delay = parseInt(wrapper.getAttribute('data-trace-draw-delay') || '700', 10) * speedScale;
+  const duration = parseInt(wrapper.getAttribute('data-trace-draw-duration') || '1200', 10) * speedScale;
 
   // Prime + animate. gsap.fromTo on drawSVG ensures the from-state lands
   // before the delay starts, so we don't see a flash of the fully-drawn
@@ -51,7 +56,7 @@ function runDraw(wrapper: HTMLElement): void {
       delay: delay / 1000,
       ease: 'power2.inOut',
       stagger: {
-        each: 0.06,
+        each: 0.06 * speedScale,
         from: 'start',
       },
     },

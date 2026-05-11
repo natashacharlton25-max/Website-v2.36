@@ -207,6 +207,12 @@ if (document.readyState === 'loading') {
 document.addEventListener('astro:page-load', () => setTimeout(attachOsScrollPhysics, 300));
 
 function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
+  // Speedgate: scale lifespan once at spawn so every downstream age
+  // comparison, fade window, and convergence frac uses the same value.
+  // opts is a fresh object per call (readOptions returns {...DEFAULTS}),
+  // so mutation is burst-local and safe.
+  const speedScale = getAnimationConfig().durationScale;
+  if (opts.lifespan > 0) opts.lifespan *= speedScale;
   // Burst wrapper holds <template>s before the slotted child. Walk to the
   // first non-template child for the real visual rect (a Grid parent can
   // stretch the wrapper, which would push origin past the button edge).
@@ -580,15 +586,16 @@ export function initParticlePhysics(): void {
         if (cooldown) return;
         cooldown = true;
         fire(e);
-        setTimeout(() => { cooldown = false; }, 2000);
+        setTimeout(() => { cooldown = false; }, 2000 * getAnimationConfig().durationScale);
       });
     } else if (opts.trigger === 'hover-hold') {
       // Continuous re-fire while hovered. Same pattern as string engine.
+      // Speedgate-scaled so gentle/slow modes hold the re-fire rate.
       let intervalId: ReturnType<typeof setInterval> | null = null;
       htmlEl.addEventListener('mouseenter', (e) => {
         fire(e);
         if (intervalId !== null) return;
-        intervalId = setInterval(() => fire(new MouseEvent('hover')), 1500);
+        intervalId = setInterval(() => fire(new MouseEvent('hover')), 1500 * getAnimationConfig().durationScale);
       });
       htmlEl.addEventListener('mouseleave', () => {
         if (intervalId !== null) {

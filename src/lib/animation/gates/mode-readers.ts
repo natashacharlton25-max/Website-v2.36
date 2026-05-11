@@ -16,6 +16,7 @@
 export type MotionMode = 'full' | 'gentle' | 'none';
 export type HoverMode = 'full' | 'gentle' | 'instant' | 'none';
 export type RenderMode = 'full' | 'reduced' | 'assistive' | 'textonly';
+export type SpeedMode = 'fast' | 'normal' | 'gentle' | 'slow';
 
 export function getMotionMode(): MotionMode {
   const val = document.documentElement.getAttribute('data-motion') || '';
@@ -44,4 +45,16 @@ export function prefersReducedMotion(): boolean {
   // Only check OS-level preference — app's reduced mode is handled
   // by isReduced in getAnimationConfig() (viewport stagger queue)
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/** User-controlled animation speed override read from <html data-anim-speed>.
+ *  Stacks multiplicatively with the render-mode default in getAnimationConfig
+ *  — so "slow" user pref + "reduced" render mode = 2.0 × 2.0 = 4.0× duration.
+ *  Defaults to "normal" (1.0×) when the attribute is missing or unknown. */
+export function getSpeedMode(): SpeedMode {
+  const val = document.documentElement.getAttribute('data-anim-speed') || '';
+  if (val === 'fast') return 'fast';
+  if (val === 'gentle') return 'gentle';
+  if (val === 'slow') return 'slow';
+  return 'normal';
 }
