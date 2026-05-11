@@ -916,14 +916,24 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       // Run after first emission tick has populated lks; queue via
       // microtask so spawn loop can finish adding all points first.
       strand.targetBreaks = sampled.breaks;
-      // arrivedAt timing — needs to fire while Verlet still has
-      // visible residual motion, otherwise the strand decays to
-      // a stop and there's a visible pause before snap kicks in.
-      // Verlet damping (0.97/frame): velocity drops to ~30% by
-      // frame 40 (~660ms). Firing snap around then makes the
-      // transition feel continuous — strand still moving when the
-      // lerp takes over.
-      strand.arrivedAt = performance.now() + (opts.emitDuration * 1.4 + 100) * speedScale;
+      // arrivedAt timing — three sequential phases:
+      //   1. Verlet flight (all points emitted + flown via physics)
+      //   2. Snap (all points lerp to outline together)
+      //   3. GSAP draw (writes the letters via tracePathDrawIn)
+      //
+      // Snap must fire AFTER all points have actually finished
+      // entering, otherwise the tail (just-emitted points near spawn)
+      // get pulled in a long straight line to the outline.
+      //
+      // The browser clamps setTimeout intervals to ~4ms minimum, so
+      // for long strands the real emit time = max(emitDuration,
+      // length*4ms). e.g. length 220 / emitDuration 600 → interval
+      // 2.7ms clamps to 4ms → real emit = 880ms. We compute the
+      // actual emit time and add a flight window so all points
+      // have meaningfully flown before snap.
+      const realEmitDuration = Math.max(opts.emitDuration, opts.length * 4);
+      const flightWindowAfterEmit = 400;
+      strand.arrivedAt = performance.now() + (realEmitDuration + flightWindowAfterEmit) * speedScale;
     } else if (opts.to !== 'away' && opts.magnetCursor === 'off') {
       // Snap-on-arrival for plain converge modes (to: origin / cursor /
       // target without tracePath). Without this, strands fly toward the
