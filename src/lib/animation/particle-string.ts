@@ -916,11 +916,14 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       // Run after first emission tick has populated lks; queue via
       // microtask so spawn loop can finish adding all points first.
       strand.targetBreaks = sampled.breaks;
-      // Extended Verlet phase — strands had been snapping too soon.
-      // 2.5× emitDuration lets the rope curl naturally and travel
-      // most of the way to the outline before the lerp kicks in,
-      // so the transition is barely visible.
-      strand.arrivedAt = performance.now() + (opts.emitDuration * 2.5 + 200) * speedScale;
+      // arrivedAt timing — needs to fire while Verlet still has
+      // visible residual motion, otherwise the strand decays to
+      // a stop and there's a visible pause before snap kicks in.
+      // Verlet damping (0.97/frame): velocity drops to ~30% by
+      // frame 40 (~660ms). Firing snap around then makes the
+      // transition feel continuous — strand still moving when the
+      // lerp takes over.
+      strand.arrivedAt = performance.now() + (opts.emitDuration * 1.4 + 100) * speedScale;
     } else if (opts.to !== 'away' && opts.magnetCursor === 'off') {
       // Snap-on-arrival for plain converge modes (to: origin / cursor /
       // target without tracePath). Without this, strands fly toward the
