@@ -1,0 +1,277 @@
+---
+/**
+ * Burst catalogue — visual oracle for every burst personality.
+ *
+ * Standing regression check: walk this page before/after any burst
+ * refactor and eyeball that every card still behaves correctly. Each
+ * card is a self-contained Burst + caption describing what to look for.
+ *
+ * Speedgate testing: toggle data-anim-speed on <html> via DevTools
+ * (fast / normal / gentle / slow) and confirm every card scales.
+ *
+ * Phase 5 of animation-tightening-plan.md. Cards are intentionally
+ * tuned for clarity not aesthetics — minimal props per card so the
+ * pattern being demonstrated is obvious. Phase 6 walks this page and
+ * notes ✓ / ⚠ / ✗ per card; the punch list drives theme-grouped fixes.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Renderer from '../../components/Renderer.astro';
+
+interface Card {
+  title: string;
+  caption: string;
+  burst: Record<string, any>;
+}
+
+/* ─────────────────────────── STRING ENGINE ─────────────────────────── */
+
+const stringCards: Card[] = [
+  {
+    title: 'Click confetti',
+    caption: 'Default silly-string. Click → radial burst from button, gravity drops on viewport floor.',
+    burst: {
+      engine: 'string',
+      palette: 'rainbow',
+      strands: 6,
+      length: 60,
+      pressure: 14,
+      lifespan: 6000,
+      trigger: 'click',
+    },
+  },
+  {
+    title: 'Hover spray',
+    caption: 'Single fire on mouseenter, 2s cooldown.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 6, length: 60, pressure: 14, lifespan: 5000, trigger: 'hover' },
+  },
+  {
+    title: 'Hover-hold continuous',
+    caption: 'Re-fires every 1.5s while hovered. Move away to stop.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 3, length: 40, pressure: 10, lifespan: 3000, trigger: 'hover-hold' },
+  },
+  {
+    title: 'From edges → converge',
+    caption: 'Strands spawn at viewport edges, converge on the button.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 8, length: 80, pressure: 18, lifespan: 5000, from: 'edges', to: 'origin', trigger: 'click' },
+  },
+  {
+    title: 'From viewport → cursor',
+    caption: 'Random spawn anywhere on screen, aim at live cursor position.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 8, length: 60, pressure: 14, lifespan: 4000, from: 'viewport', to: 'cursor', trigger: 'click' },
+  },
+  {
+    title: 'Magnet attract (free swarm)',
+    caption: 'Points follow the cursor after emit. Move the mouse and watch them chase.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 4, length: 80, pressure: 12, lifespan: 8000, magnetCursor: 'attract', trigger: 'click' },
+  },
+  {
+    title: 'Magnet repel (parts the rope)',
+    caption: 'Cursor pushes points away. Wade the mouse through the swarm.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 4, length: 100, pressure: 8, lifespan: 8000, magnetCursor: 'repel', trigger: 'click' },
+  },
+  {
+    title: 'Tethered tendrils',
+    caption: 'magnetCursor=attract + collide=true → pinned to random text rect, reaches toward cursor.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 5, length: 80, pressure: 10, lifespan: 10000, magnetCursor: 'attract', collide: true, trigger: 'click' },
+  },
+  {
+    title: 'Tethered + anchor colour',
+    caption: 'Same as above but each tendril inherits the anchor element\'s text colour. Blends into context.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 5, length: 80, pressure: 10, lifespan: 10000, magnetCursor: 'attract', collide: true, inheritAnchorColour: true, trigger: 'click' },
+  },
+  {
+    title: 'Trace logo (multi-path)',
+    caption: 'Each strand traces one path of the brand logo, preserving relative layout.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 4, length: 180, pressure: 18, emitDuration: 600, lifespan: 8000, from: 'edges', to: 'origin', tracePath: 'logo:primary', traceSize: 400, trigger: 'click' },
+  },
+  {
+    title: 'Trace phrase (per-letter)',
+    caption: 'One strand per letter, palette colour distributed. Multi-subpath glyphs (a, e, g, S) render with pen-lifts between contours.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 17, length: 220, pressure: 22, emitDuration: 600, thick: 5, lifespan: 8000, from: 'edges', to: 'origin', tracePath: 'phrase:brand', traceSize: 900, traceOffsetY: -200, trigger: 'click' },
+  },
+  {
+    title: 'Trace + drawIn (composite)',
+    caption: 'Strands fly in AND the trace target draws itself via GSAP DrawSVG after a 700ms delay. The illusion: string appears to write the phrase.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 6, length: 80, pressure: 14, lifespan: 6000, from: 'top', to: 'target', tracePath: 'phrase:welcome', traceSize: 400, traceOffsetY: -120, tracePathDrawIn: true, traceDrawDelay: 600, traceDrawDuration: 1200, trigger: 'click' },
+  },
+  {
+    title: 'Collide on text (drape)',
+    caption: 'Strands fall from above and stick on top edges of nearby text/buttons. Stickiness controls how many pass through to lower rects.',
+    burst: { engine: 'string', palette: 'rainbow', strands: 6, length: 80, pressure: 12, lifespan: 8000, gravity: 0.6, from: 'top', collide: true, stickiness: 0.6, trigger: 'click' },
+  },
+  {
+    title: 'Single strand',
+    caption: 'Edge case — one rainbow rope. Shows the pure Verlet rope behaviour without cross-strand interaction.',
+    burst: { engine: 'string', strands: 1, length: 100, pressure: 14, lifespan: 5000, rainbowColor: 'rainbow-4', trigger: 'click' },
+  },
+];
+
+/* ─────────────────────────── FLY ENGINE ─────────────────────────── */
+
+const flyCards: Card[] = [
+  {
+    title: 'Click confetti (fly)',
+    caption: 'DOM particles via Web Animations API. Radial burst, fade-out as they fly.',
+    burst: { engine: 'fly', palette: 'rainbow', count: 30, spread: 200, lifespan: 2500, trigger: 'click', particle: { component: 'Shape', shape: 'star', size: 'xs' } },
+  },
+  {
+    title: 'Hover sparkle',
+    caption: 'Fires once on hover. Different particle (heart) to verify visual variants.',
+    burst: { engine: 'fly', palette: 'rainbow', count: 20, spread: 120, lifespan: 2000, trigger: 'hover', particle: { component: 'Shape', shape: 'circle', size: 'xs' } },
+  },
+  {
+    title: 'Fly to cursor',
+    caption: 'Particles converge on the live cursor position.',
+    burst: { engine: 'fly', palette: 'rainbow', count: 25, spread: 150, lifespan: 2500, from: 'edges', to: 'cursor', trigger: 'click', particle: { component: 'Shape', shape: 'star', size: 'xs' } },
+  },
+  {
+    title: 'Icon particles',
+    caption: 'Particle visual is a Phosphor icon instead of a Shape primitive.',
+    burst: { engine: 'fly', palette: 'rainbow', count: 18, spread: 150, lifespan: 2500, trigger: 'click', particle: { component: 'Icon', slug: 'heart-fill', size: 'sm' } },
+  },
+  {
+    title: 'High count burst',
+    caption: 'Stress test — 100 particles in one click. Should remain smooth.',
+    burst: { engine: 'fly', palette: 'rainbow', count: 100, spread: 250, lifespan: 2500, trigger: 'click', particle: { component: 'Shape', shape: 'circle', size: 'xs' } },
+  },
+];
+
+/* ─────────────────────────── PHYSICS ENGINE ─────────────────────────── */
+
+const physicsCards: Card[] = [
+  {
+    title: 'Fall mode (default)',
+    caption: 'Gravity drops particles, AABB collision lands them on top edges of nearby text.',
+    burst: { engine: 'physics', palette: 'rainbow', count: 25, spread: 150, lifespan: 4000, trigger: 'click', particle: { component: 'Shape', shape: 'star', size: 'xs' } },
+  },
+  {
+    title: 'No-collide rainfall',
+    caption: 'Same as fall but particles pass through everything and pool on viewport floor.',
+    burst: { engine: 'physics', palette: 'rainbow', count: 25, spread: 150, lifespan: 4000, collide: false, trigger: 'click', particle: { component: 'Shape', shape: 'star', size: 'xs' } },
+  },
+  {
+    title: 'Explode mode',
+    caption: 'Full radial outward, low gravity, no collide. Fireworks-style.',
+    burst: { engine: 'physics', palette: 'rainbow', count: 30, spread: 200, lifespan: 2500, mode: 'explode', trigger: 'click', particle: { component: 'Shape', shape: 'star', size: 'xs' } },
+  },
+  {
+    title: 'Float mode',
+    caption: 'Particles rise with sinusoidal drift, no collide. Bubbles / balloons.',
+    burst: { engine: 'physics', palette: 'rainbow', count: 20, spread: 100, lifespan: 4000, mode: 'float', trigger: 'click', particle: { component: 'Shape', shape: 'circle', size: 'xs' } },
+  },
+  {
+    title: 'Orbit mode',
+    caption: 'Tangential force around the cursor. Particles swirl.',
+    burst: { engine: 'physics', palette: 'rainbow', count: 25, spread: 100, lifespan: 4000, mode: 'orbit', trigger: 'click', particle: { component: 'Shape', shape: 'circle', size: 'xs' } },
+  },
+  {
+    title: 'Magnet attract',
+    caption: 'Particles attract toward cursor while alive. Combines with fall gravity by default.',
+    burst: { engine: 'physics', palette: 'rainbow', count: 20, spread: 150, lifespan: 4000, magnet: true, trigger: 'click', particle: { component: 'Shape', shape: 'star', size: 'xs' } },
+  },
+];
+
+/* ─────────────────────────── PRESETS ─────────────────────────── */
+
+const presetCards: Card[] = [
+  {
+    title: 'Preset: starfall',
+    caption: 'Rainbow stars cascading from click point, pass through text, pool on viewport floor.',
+    burst: { preset: 'starfall', trigger: 'click' },
+  },
+  {
+    title: 'Preset: vortex',
+    caption: 'Rainbow sparkles fly inward from edges to cursor, then orbit. Stellar-parallax depth.',
+    burst: { preset: 'vortex', trigger: 'click' },
+  },
+];
+
+/* ─────────────────────────── BUILD THE TREE ─────────────────────────── */
+
+function buildCard(c: Card) {
+  return {
+    component: 'Card',
+    variant: 'outline',
+    class: 'catalogue-card',
+    children: [
+      { component: 'Heading', level: 3, contentHeading: c.title, size: 'sm' },
+      { component: 'Text', contentText: c.caption, size: 'sm' },
+      {
+        ...c.burst,
+        component: 'Burst',
+        children: [
+          { component: 'Button', contentButton: 'Fire', variant: 'fill', brandColor: 'primary', size: 'md' },
+        ],
+      },
+    ],
+  };
+}
+
+function buildSection(title: string, cards: Card[]) {
+  return {
+    component: 'Section',
+    container: '7xl',
+    gap: 'lg',
+    class: 'catalogue-section',
+    children: [
+      { component: 'Heading', level: 2, contentHeading: title, size: 'lg' },
+      {
+        component: 'Grid',
+        cols: 3,
+        gap: 'md',
+        children: cards.map(buildCard),
+      },
+    ],
+  };
+}
+
+const data = {
+  component: 'Page',
+  children: [
+    {
+      component: 'Section',
+      container: '7xl',
+      gap: 'md',
+      children: [
+        { component: 'Heading', level: 1, contentHeading: 'Burst catalogue', size: 'xl' },
+        {
+          component: 'Text',
+          contentText: 'Visual oracle for every burst personality. Walk this page before/after any refactor. Toggle data-anim-speed on <html> in DevTools to test the speedgate.',
+        },
+      ],
+    },
+    buildSection('String engine', stringCards),
+    buildSection('Fly engine', flyCards),
+    buildSection('Physics engine', physicsCards),
+    buildSection('Presets', presetCards),
+  ],
+};
+---
+
+<BaseLayout title="Burst catalogue — Dev">
+  <Renderer node={data} />
+</BaseLayout>
+
+<style is:global>
+  .catalogue-section {
+    padding-block: var(--space-xl, 4rem);
+    border-top: 1px solid var(--neutral-300, #ddd);
+  }
+  .catalogue-card {
+    padding: var(--space-md, 1.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm, 1rem);
+    min-height: 240px;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .catalogue-card .heading {
+    margin: 0;
+  }
+  .catalogue-card .text {
+    flex: 1;
+    color: var(--neutral-700, #555);
+  }
+</style>
