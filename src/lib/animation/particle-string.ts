@@ -377,6 +377,12 @@ class Strand {
    *  have fallen to the floor stay there indefinitely, ready to be
    *  re-snatched by a viewport-trigger Burst (scrollytelling loop). */
   persistent: boolean = false;
+  /** performance.now() when this strand was re-snatched (scrollytelling
+   *  loop). Used by the scroll handler to skip release on a strand
+   *  that's currently flying to its NEXT word — without this guard
+   *  the same scroll that triggers viewport→re-snatch would also
+   *  re-release the strand before it lands. 0 = never re-snatched. */
+  relaunchedAt: number = 0;
   constructor(public color: string, public thick: number, svg: SVGSVGElement) {
     this.pathEl = document.createElementNS(SVG_NS, 'path');
     this.pathEl.setAttribute('fill', 'none');
@@ -488,13 +494,16 @@ if (typeof window !== 'undefined') {
     const now = performance.now();
     for (const s of allStrands) {
       if (!s.alive) continue;
-      // Skip strands still in flight or mid-settle. Scrollytelling
-      // re-snatch sets a new arrivedAt for relaunched strands —
-      // scrolling during that flight would otherwise immediately
-      // re-release them and they'd never reach the new word. Once
-      // arrivedAt has elapsed + a settle grace period (1000ms),
-      // they're fully formed at the new outline and OK to release.
-      if (s.arrivedAt > now - 1000) continue;
+      // Skip strands that just re-snatched (scrollytelling loop). The
+      // same scroll that fires the viewport trigger will also reach
+      // this release handler — without the guard, the re-launched
+      // strand would be re-released before it could reach the new
+      // word. 3-second protection window lets the new flight + snap
+      // complete. Once the strand is fully settled at its new word,
+      // a subsequent scroll releases it normally.
+      // (No equivalent protection for click-spawned strands — those
+      // should be releasable immediately on any scroll.)
+      if (s.relaunchedAt > 0 && s.relaunchedAt > now - 3000) continue;
       // Kill every locking mechanism so the strand falls cleanly:
       //   - anchored: anchor pin
       //   - targetPositions: trace/converge snap
@@ -928,6 +937,7 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       s.targetPositions = sampled.points;
       s.targetBreaks = sampled.breaks;
       s.persistent = false;
+      s.relaunchedAt = now;
       s.collide = false;
       s.anchored = false;
       s.gravity = 0; // trace mode flies clean
