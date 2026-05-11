@@ -143,6 +143,29 @@ Sequencing is dependency-driven. Earlier phases unblock later ones.
 
 **Effort:** 1 audit session + 3–5 fix sessions depending on themes.
 
+**Batches landed 2026-05-12 session:**
+- 1–6: small-bug-sweep audit items
+- 7: snap-on-arrival for converge modes (to: origin/cursor/target without tracePath)
+- 8: Q→L→Q renderer iteration (settled on L always)
+- 9–12: progressive snap + ramped pull + match-flight-speed iteration → settled on strand-level snap with fixed-step velocity, per-strand damping, per-frame wiggle preset
+- 13: trace strands skip floor stickiness (bottom-spawn fix)
+- 14: safety-net (reverted)
+- 15: temp debug logging
+- 16: **bug fix** — removed legacy snap block that was draining `targetBreaks` before the heal-and-reapply block could read it. This was the root cause of "e/g connecting paths" issue
+- 17: universal scroll-release for ALL string strands (trace, converge, magnet, anchored, collide) — was previously only handling collide + anchored
+- 18: stage 1 of scrollytelling — removed obsolete drawtrace code (-149 lines)
+- 19: stage 2 — `trigger: 'viewport'` via GSAP ScrollTrigger (lazy-imported)
+- 20: stage 3 — persistent strands skip fade/remove after scroll-release
+- 21: stage 4 — **re-snatch persistent floor strands** when next viewport-trigger burst fires. Same physical strings travel through the scrollytelling narrative
+- 22: scroll-handler skip-relaunched guard via `relaunchedAt` timestamp
+- 23: reset lifespan timers on re-snatch (was firing original 8s timer mid-relaunch, fading strands before they reached the new word)
+- 24: demo page at `/dev/burst-scrollytelling`
+
+**Still pending in Phase 6 (next session):**
+- Fine-tune individual string effects (some still need polish)
+- Fine-tune particle effects (fly + physics engines untouched in this audit)
+- Audit walk across catalogue cards by engine
+
 **Open issue carried in:** Subsequent-render artifacts on trace bursts (random breaks on click 2+). Hypothesis: setTimeout queue throttling under load. Likely fix: swap strand emit from setTimeout-chain to rAF-paced. Lands in Phase 6 as a "timing" theme item.
 
 
