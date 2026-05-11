@@ -1339,8 +1339,36 @@ export function initParticleString(): void {
     const triggerVal = element.getAttribute('data-particle-trigger');
     const trigger = triggerVal === 'hover' ? 'hover'
                   : triggerVal === 'hover-hold' ? 'hover-hold'
+                  : triggerVal === 'viewport' ? 'viewport'
                   : 'click';
-    if (trigger === 'hover') {
+    if (trigger === 'viewport') {
+      // Fire on viewport entry via GSAP ScrollTrigger. onEnter fires the
+      // first time the wrapper scrolls into view from below; onEnterBack
+      // fires when the user scrolls back UP to it from a section below.
+      // Both re-fire the burst so the scrollytelling loop works in both
+      // directions.
+      //
+      // Late-import so the GSAP/ScrollTrigger bundle isn't pulled in for
+      // pages that don't use viewport-trigger bursts.
+      (async () => {
+        const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ]);
+        gsap.registerPlugin(ScrollTrigger);
+        // OverlayScrollbars: the real scroller is data-overlayscrollbars-
+        // viewport, not window. ScrollTrigger needs explicit pointer
+        // when the project uses a custom scroll container.
+        const osScroller = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]');
+        ScrollTrigger.create({
+          trigger: htmlEl,
+          scroller: osScroller || undefined,
+          start: 'top 80%',
+          onEnter: () => fire(new Event('viewport')),
+          onEnterBack: () => fire(new Event('viewport')),
+        });
+      })();
+    } else if (trigger === 'hover') {
       // Single fire on mouseenter, 2s cooldown before next fire (scaled
       // by the speedgate so gentle/slow modes hold the cooldown longer).
       let cooldown = false;
