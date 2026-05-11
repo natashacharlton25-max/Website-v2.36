@@ -178,15 +178,6 @@ function samplePath(
   // Split on M / m (start of new subpath). Filter empty strings from
   // leading whitespace. Each subpath is a self-contained "M ... [Z]".
   const subpaths = pathData.split(/(?=[Mm])/).filter(s => s.trim().length > 0);
-  // TEMP DEBUG
-  if (subpaths.length > 1 || pathData.length > 200) {
-    // eslint-disable-next-line no-console
-    console.log('[samplePath]', {
-      pathDataPreview: pathData.slice(0, 80),
-      subpathsCount: subpaths.length,
-      subpathPreviews: subpaths.slice(0, 3).map(s => s.slice(0, 30)),
-    });
-  }
 
   // Build path elements for each subpath up front so we can measure all
   // lengths before allocating per-subpath sample budgets.
@@ -239,16 +230,6 @@ function samplePath(
   }
 
   document.body.removeChild(tmpSvg);
-  // TEMP DEBUG — log return value for multi-subpath paths
-  if (breaks.length > 0 || subpaths.length > 1) {
-    // eslint-disable-next-line no-console
-    console.log('[samplePath return]', {
-      subpathsCount: subpaths.length,
-      pointsCount: points.length,
-      breaks: [...breaks],
-      lengthsPerSubpath: lengths.map(l => Math.round(l)),
-    });
-  }
   return { points, breaks };
 }
 
@@ -612,25 +593,6 @@ function tick() {
       // fully populated by now (arrivedAt = emitDuration + 200ms). Mark
       // the link spanning each subpath gap as broken so the render pass
       // emits an SVG M (moveTo) there — kills the stray line that would
-      // otherwise bisect multi-contour glyphs. Clear the array so we
-      // don't re-mark every frame.
-      // Apply breaks lazily. When many strands spawn at once the timer
-      // queue saturates and a strand's setTimeout-driven add() loop may
-      // be only partway through populating pts by the time arrivedAt
-      // fires — so a break index like 154 can sit outside an lks of
-      // length 99. Defer those; retry next tick as pts grows toward
-      // opts.length. Drop indices only once they've landed in range.
-      if (s.targetBreaks.length) {
-        const remaining: number[] = [];
-        for (const idx of s.targetBreaks) {
-          if (idx > 0 && idx - 1 < s.lks.length) {
-            s.lks[idx - 1].broken = true;
-          } else {
-            remaining.push(idx);
-          }
-        }
-        s.targetBreaks = remaining;
-      }
       // Strand-level snap with fixed-speed step. Each point moves
       // toward its target at the strand's flight velocity (tracePressure
       // ≈ residual Verlet speed at snap time), so the transition from
