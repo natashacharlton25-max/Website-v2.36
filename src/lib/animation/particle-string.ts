@@ -632,6 +632,18 @@ function tick() {
       for (const idx of s.targetBreaks) {
         if (idx > 0 && idx - 1 < s.lks.length) s.lks[idx - 1].broken = true;
       }
+      // Safety net: force-break any link where adjacent points are
+      // >30px apart. Legitimate adjacent samples on a letter outline
+      // sit 1–3px apart, so a 30px+ gap must be a stray connecting
+      // line (e.g. between subpath closure and unknown stretched
+      // neighbour). Catches any cases the explicit targetBreaks
+      // missed.
+      for (let i = 1; i < s.pts.length; i++) {
+        if (!s.lks[i - 1] || s.lks[i - 1].broken) continue;
+        const dx = s.pts[i].x - s.pts[i - 1].x;
+        const dy = s.pts[i].y - s.pts[i - 1].y;
+        if (dx * dx + dy * dy > 900) s.lks[i - 1].broken = true;
+      }
       const wiggleAmp = s.traceWiggle;
       const wiggleFreqX = 0.003;
       const wiggleFreqY = 0.0021;
