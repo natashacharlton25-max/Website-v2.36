@@ -887,12 +887,80 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     targetY = tr.top + tr.height / 2;
   }
 
-  // For tracePath retriggers: instant-clear existing strands so the new
-  // burst is a clean rewrite. Fading stale strand pathEls in DOM piled
-  // up under rapid clicks (each click stranded its predecessor's
-  // mid-flight rendering for ~800ms while a new burst spawned over the
-  // top). The strand cap also chops a partial slice out of the old
-  // phrase mid-flight if we let it run, so we override that here.
+  // Scrollytelling stage 4: re-snatch persistent floor strands. When a
+  // tracePath burst fires AND there are persistent strands from a
+  // previous scroll-release, repurpose them instead of spawning new.
+  // The SAME physical strings travel through the scrollytelling
+  // narrative — fly from word 1 → fall to floor → fly to word 2 → etc.
+  const persistentStrands = opts.tracePaths.length > 0
+    ? allStrands.filter(s => s.alive && s.persistent)
+    : [];
+  if (persistentStrands.length > 0) {
+    // Compute trace frame across the new paths so multi-path layouts
+    // (logos with N paths, phrases with N letters) preserve spacing.
+    const traceFrameForRelaunch = computeTraceFrame(opts.tracePaths, opts.traceSize);
+    const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
+    const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
+    const now = performance.now();
+    const realEmitDuration = Math.max(opts.emitDuration, opts.length * 4);
+    const flightWindowAfterEmit = 1200;
+    const relaunchArrivedAt = now + (realEmitDuration + flightWindowAfterEmit) * speedScale;
+    for (let i = 0; i < persistentStrands.length; i++) {
+      const s = persistentStrands[i];
+      const pathData = opts.tracePaths[i % opts.tracePaths.length];
+      const sampled = samplePath(pathData, opts.length, offsetX, offsetY, traceFrameForRelaunch);
+      // Compute new target centre for the per-point velocity kick —
+      // each pt heads roughly toward the new letter, with Verlet curl
+      // along the way. Snap eventually locks at exact target.
+      let avgTX = 0, avgTY = 0;
+      for (const tp of sampled.points) { avgTX += tp.x; avgTY += tp.y; }
+      avgTX /= sampled.points.length;
+      avgTY /= sampled.points.length;
+      // Reset strand state for relaunch
+      s.targetPositions = sampled.points;
+      s.targetBreaks = sampled.breaks;
+      s.persistent = false;
+      s.collide = false;
+      s.anchored = false;
+      s.gravity = 0; // trace mode flies clean
+      s.arrivedAt = relaunchArrivedAt;
+      // Re-launch each pt: clear done + stickiness, give upward-toward-
+      // target velocity kick. Verlet picks them up and carries them.
+      const kickSpeed = opts.pressure;
+      for (const p of s.pts) {
+        p.done = false;
+        p.st = 0;
+        const dx = avgTX - p.x;
+        const dy = avgTY - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const vx = (dx / dist) * kickSpeed;
+        const vy = (dy / dist) * kickSpeed;
+        // Verlet velocity is implicit (x - ox). Set ox/oy so the
+        // implied velocity is (vx, vy).
+        p.ox = p.x - vx;
+        p.oy = p.y - vy;
+      }
+      // Heal all physics breaks from the previous flight so the new
+      // letter renders cleanly. Intentional subpath breaks get
+      // re-applied each snap frame via the existing healing logic.
+      for (const lk of s.lks) lk.broken = false;
+    }
+    if (!tickRunning) {
+      tickRunning = true;
+      requestAnimationFrame(tick);
+    }
+    // Re-snatch is a full replacement for spawn — return early so the
+    // normal emit loop doesn't double-spawn fresh strands.
+    return;
+  }
+
+  // For tracePath retriggers (NO persistent strands): instant-clear
+  // existing strands so the new burst is a clean rewrite. Fading stale
+  // strand pathEls in DOM piled up under rapid clicks (each click
+  // stranded its predecessor's mid-flight rendering for ~800ms while
+  // a new burst spawned over the top). The strand cap also chops a
+  // partial slice out of the old phrase mid-flight if we let it run,
+  // so we override that here.
   if (opts.tracePaths.length > 0 && allStrands.length > 0) {
     for (const old of allStrands) {
       old.pathEl.remove();
