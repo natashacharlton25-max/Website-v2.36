@@ -744,25 +744,30 @@ function tick() {
   for (const s of allStrands) {
     if (!s.alive) continue;
     if (s.pts.length >= 2) {
-      // Always render with Q (quadratic) curves through the sampled
-      // points. Earlier the snapped branch used L (line) segments to
-      // "preserve sharp letter corners" but at high sample density
-      // (220 points along a letter outline) adjacent L endpoints sit
-      // sub-pixel apart and stroke-linecap: round stacks into visible
-      // dots/dashes. Q curves smooth over those — the very-slight
-      // corner rounding is invisible at typical render sizes and
-      // looks intentionally rope-like which is on-brand for silly-
-      // string. The Q→L flip on snap was also visually abrupt — the
-      // strand appeared to "become straight" mid-animation.
+      // Rendering switches by mode:
+      //   - In-flight (Verlet rope) → L-segments. Sample density is low
+      //     (60–100 points along the rope), and L preserves the per-
+      //     point angular jitter that makes the rope curl visibly. Q
+      //     smoothing here averages out the jitter and strands look
+      //     like straight lines.
+      //   - Post-snap to a trace → Q-curves. Sample density is HIGH
+      //     (220 points along a letter outline) and adjacent L points
+      //     sit sub-pixel apart, stacking stroke-linecap:round into
+      //     visible dots. Q smooths those out cleanly.
+      const snapped = s.targetPositions !== null && performance.now() >= s.arrivedAt;
       let d = `M${s.pts[0].x.toFixed(1)} ${s.pts[0].y.toFixed(1)}`;
       for (let i = 1; i < s.pts.length; i++) {
         if (i - 1 < s.lks.length && s.lks[i - 1].broken) {
           d += ` M${s.pts[i].x.toFixed(1)} ${s.pts[i].y.toFixed(1)}`;
           continue;
         }
-        const px = s.pts[i - 1].x, py = s.pts[i - 1].y;
-        const cx = (px + s.pts[i].x) / 2, cy = (py + s.pts[i].y) / 2;
-        d += ` Q${px.toFixed(1)} ${py.toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)}`;
+        if (snapped) {
+          const px = s.pts[i - 1].x, py = s.pts[i - 1].y;
+          const cx = (px + s.pts[i].x) / 2, cy = (py + s.pts[i].y) / 2;
+          d += ` Q${px.toFixed(1)} ${py.toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)}`;
+        } else {
+          d += ` L${s.pts[i].x.toFixed(1)} ${s.pts[i].y.toFixed(1)}`;
+        }
       }
       // Closure handling moved to samplePath (per-subpath closure samples
       // appended after each Z-terminated subpath). This avoids the
