@@ -458,34 +458,50 @@ function getCollisionRects() {
 if (typeof window !== 'undefined') {
   window.addEventListener('resize', () => { rectsCachedAt = 0; });
 
-  // Scroll handler — only collide-true strands need correction. Strands
-  // stuck on text/buttons stay pinned to fixed viewport coords as the
-  // page scrolls past, so they look broken; we unstick them (flip collide
-  // off + reactivate text-settled points) and physics finishes them.
-  // Floor piles (collide=false) deliberately stay — they read correctly
-  // as "string resting on the screen bottom".
+  // Scroll handler — release EVERY strand from whatever's locking it
+  // in place so they all fall to the viewport floor. Strands pinned at
+  // fixed viewport coords (anchored tendrils, trace-snapped outlines,
+  // converge piles, text-settled collide points) all look broken when
+  // the page scrolls past them, so unlock universally on scroll.
+  //
+  // Floor piles (already at vh) stay where they are — they read
+  // correctly as "string resting on the screen bottom" regardless of
+  // scroll position.
   //
   // This site uses OverlayScrollbars: the actual scroll element is
   // [data-overlayscrollbars-viewport], NOT window. Listen on both —
   // window covers the case where the project ever drops OS, and the OS
   // viewport (when found, after DOM ready) covers the live setup.
   const onScroll = () => {
-    if (!allStrands.some(s => s.alive && (s.collide || s.anchored))) return;
+    // Early-out only if no strand has anything to release. Look for
+    // ANY strand with locked points, an active trace, magnet, anchor,
+    // or collide flag.
+    if (!allStrands.some(s => s.alive && (
+      s.collide || s.anchored || s.targetPositions !== null ||
+      s.magnetCursor !== 'off' || s.pts.some(p => p.done)
+    ))) return;
     for (const s of allStrands) {
       if (!s.alive) continue;
-      // Anchored tendrils pin pts[0] outside the collision system — the
-      // anchor point sits at fixed viewport coords and stays pinned even
-      // after scroll, so the tendril looks broken. Unpin pts[0] so
-      // physics finishes the strand naturally; clear the anchored flag
-      // so we don't re-trigger.
-      if (s.anchored && s.pts[0]?.done) {
-        s.pts[0].done = false;
-        s.anchored = false;
-      }
-      if (!s.collide) continue;
+      // Kill every locking mechanism so the strand falls cleanly:
+      //   - anchored: anchor pin
+      //   - targetPositions: trace/converge snap
+      //   - magnetCursor: cursor pull (kept after emit for follow)
+      //   - collide: AABB stick on text rects
+      s.anchored = false;
+      s.targetPositions = null;
+      s.magnetCursor = 'off';
       s.collide = false;
+      // Restore gravity so released points actually fall. Trace, magnet
+      // and converge modes zero gravity at spawn for clean motion; when
+      // released by scroll they need normal gravity to drop.
+      if (s.gravity === 0) s.gravity = DEFAULTS.gravity;
+      // Release all done points that aren't already on the floor —
+      // floor-pile points stay where they are (reading correctly as
+      // resting on the screen bottom), but text-settled / outline-
+      // locked / cursor-attached points unfreeze and fall.
+      const floor = window.innerHeight - 2;
       for (const p of s.pts) {
-        if (p.done && p.y < window.innerHeight - 2) {
+        if (p.done && p.y < floor) {
           p.done = false;
           p.st = 0;
         }
