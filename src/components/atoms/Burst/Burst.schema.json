@@ -8,7 +8,8 @@
     { "rule": "palette-tiers-needs-brandColor", "condition": "palette === 'tiers'", "requires": "brandColor", "note": "palette='tiers' cycles through 4 tiers of brandColor. Without brandColor there's nothing to cycle." },
     { "rule": "palette-overrides-single-colour", "condition": "!!palette", "note": "palette='rainbow' ignores brandColor/rainbowColor; palette='tiers' uses brandColor but ignores colorTier and rainbowColor (cycles instead)." },
     { "rule": "physics-only-flags", "condition": "engine !== 'physics'", "forbids": ["gravity", "magnet", "collide", "mode"], "note": "gravity/magnet/collide/mode only meaningful when engine='physics' — runtime ignores them otherwise." },
-    { "rule": "particleSvg-vs-particle", "condition": "particleSvg && particle", "note": "Use one or the other. particleSvg embeds raw markup; particle delegates to Shape or Icon. If both provided, particleSvg wins." }
+    { "rule": "particleSvg-vs-particle", "condition": "particleSvg && particle", "note": "Use one or the other. particleSvg embeds raw markup; particle delegates to Shape or Icon. If both provided, particleSvg wins." },
+    { "rule": "tracePathDrawIn-needs-tracePath", "condition": "tracePathDrawIn", "requires": "tracePath", "note": "tracePathDrawIn renders + animates the trace target; without tracePath there's nothing to render." }
   ],
 
   "props": {
@@ -95,6 +96,9 @@
       "thick":        { "type": "number",  "required": false, "default": 3, "description": "Stroke width of the rendered strand path in px." },
       "tracePath":    { "type": "string",  "required": false, "_format": "svg-path", "description": "SVG path data, or 'logo:KEY' shorthand. After the strand flies in, each point lerps to a sampled position along this path — strand 'writes' or 'draws' the shape. Multi-path logos render as N strand-shapes (one strand per path) preserving original layout. Coordinates auto-centred + scaled to traceSize. Mutually exclusive with magnetCursor." },
       "traceSize":    { "type": "number",  "required": false, "default": 240, "description": "Target width in px — traced path is auto-centred and scaled so its bounding box matches this size." },
+      "tracePathDrawIn":   { "type": "boolean", "required": false, "default": false, "description": "Render the trace target as a visible SVG inside the burst wrapper AND animate a GSAP DrawSVG stroke-in on the same trigger as the particle/strand spawn. Hero-reveal pattern: silly-string flies in around a heading while the heading writes itself. Requires tracePath." },
+      "traceDrawDelay":    { "type": "number",  "required": false, "default": 700, "description": "ms after burst trigger before the GSAP draw starts. Lets the silly-string flight phase land first, then the letters appear to write themselves as the strings settle." },
+      "traceDrawDuration": { "type": "number",  "required": false, "default": 1200, "description": "ms over which the GSAP draw-in animation completes." },
       "magnetCursor": { "type": ["boolean", "string"], "required": false, "default": false, "enum": [true, false, "attract", "repel"], "description": "Cursor magnet mode. true / 'attract' = swarm follows cursor. 'repel' = cursor pushes points away (parts the rope as you wade through). false / 'off' = no cursor force. Mutually exclusive with tracePath — magnet wins if both set." },
       "inheritAnchorColour": { "type": "boolean", "required": false, "default": false, "description": "When tethered (magnetCursor=attract + collide=true), each strand reads its colour from the anchor element's computed text colour instead of the palette. Tendrils blend into whatever element they hang from." }
     }

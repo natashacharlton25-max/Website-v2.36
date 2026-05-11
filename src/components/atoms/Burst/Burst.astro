@@ -172,6 +172,20 @@ interface Props {
    *  shape above the button. */
   traceOffsetX?: number;
   traceOffsetY?: number;
+  /** Render the trace target as a visible SVG inside the burst wrapper
+   *  AND animate a GSAP DrawSVG stroke-in on the same trigger as the
+   *  particle/strand spawn. Useful for the hero-reveal pattern where
+   *  silly-string flies in around a heading while the heading writes
+   *  itself. Combines with tracePath (logo:KEY / phrase:KEY / raw path).
+   *  Position + size of the rendered SVG follow traceOffsetX/Y and
+   *  traceSize. */
+  tracePathDrawIn?: boolean;
+  /** ms after burst trigger before the GSAP draw starts. Lets the
+   *  silly-string flight phase land first, then the letters appear to
+   *  write themselves as the strings settle. Default 700. */
+  traceDrawDelay?: number;
+  /** ms over which the GSAP draw completes. Default 1200. */
+  traceDrawDuration?: number;
   /** [string only] After emit completes, every live point applies a
    *  soft per-frame pull toward the live cursor. The strand becomes a
    *  Verlet-rope swarm-cloud that follows the cursor as it moves.
@@ -230,6 +244,9 @@ const {
   traceSize = 240,
   traceOffsetX = 0,
   traceOffsetY = 0,
+  tracePathDrawIn = false,
+  traceDrawDelay = 700,
+  traceDrawDuration = 1200,
   magnetCursor,
   inheritAnchorColour = false,
   class: className = '',
@@ -267,6 +284,7 @@ if (resolvedSvgPath && resolvedSvgPath.startsWith('logo:')) {
 // lookup). Raw SVG path data passes through as a single-element array.
 // undefined → empty array, no path tracing.
 let resolvedTracePaths: string[] = [];
+let resolvedTraceMarkup: string | null = null;
 if (tracePath) {
   const resolved = resolveTraceShorthand(tracePath);
   if (resolved) {
@@ -274,6 +292,15 @@ if (tracePath) {
     // Auto-strands logic downstream sets strands = letter count when
     // palette is in play ("WELCOME" → 7 strands → 7 palette colours).
     resolvedTracePaths = resolved.paths;
+    if (tracePathDrawIn) {
+      // For the draw-in pattern we render the trace target as a visible
+      // SVG and animate stroke-dashoffset. Swap fill="currentColor" →
+      // stroke="currentColor" fill="none" so the paths read as outlines
+      // ready for DrawSVG to animate. The runtime owns the timing.
+      resolvedTraceMarkup = resolved.markup
+        .replace(/fill="currentColor"/g, 'fill="none" stroke="currentColor" stroke-width="3"')
+        .replace(/<svg /, '<svg overflow="visible" ');
+    }
   } else if (!tracePath.startsWith('logo:') && !tracePath.startsWith('phrase:')) {
     // Not a shorthand — treat as raw SVG path data.
     resolvedTracePaths = [tracePath];
@@ -389,6 +416,10 @@ const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
       : undefined
   }
   data-particle-inherit-anchor-colour={engine === 'string' && inheritAnchorColour ? '' : undefined}
+  data-trace-draw={resolvedTraceMarkup ? '' : undefined}
+  data-trace-draw-delay={resolvedTraceMarkup ? String(traceDrawDelay) : undefined}
+  data-trace-draw-duration={resolvedTraceMarkup ? String(traceDrawDuration) : undefined}
+  style={resolvedTraceMarkup ? 'position: relative; display: inline-block;' : undefined}
 >
   {svgMarkup ? variants.map((override, i) => {
     // Wrap each SVG variant in a sized + colour-keyed span. The .color--{name}
@@ -428,5 +459,15 @@ const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
       </template>
     );
   }) : null}
+  {resolvedTraceMarkup && (
+    <span
+      class="burst-trace-draw"
+      data-burst-trace-draw-target
+      style={`position: absolute; left: 50%; top: 50%; width: ${traceSize}px; height: auto; transform: translate(calc(-50% + ${traceOffsetX}px), calc(-50% + ${traceOffsetY}px)); pointer-events: none; line-height: 0;`}
+      aria-hidden="true"
+    >
+      <Fragment set:html={resolvedTraceMarkup} />
+    </span>
+  )}
   <slot />
 </span>
