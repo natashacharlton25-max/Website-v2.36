@@ -178,6 +178,15 @@ function samplePath(
   // Split on M / m (start of new subpath). Filter empty strings from
   // leading whitespace. Each subpath is a self-contained "M ... [Z]".
   const subpaths = pathData.split(/(?=[Mm])/).filter(s => s.trim().length > 0);
+  // TEMP DEBUG
+  if (subpaths.length > 1 || pathData.length > 200) {
+    // eslint-disable-next-line no-console
+    console.log('[samplePath]', {
+      pathDataPreview: pathData.slice(0, 80),
+      subpathsCount: subpaths.length,
+      subpathPreviews: subpaths.slice(0, 3).map(s => s.slice(0, 30)),
+    });
+  }
 
   // Build path elements for each subpath up front so we can measure all
   // lengths before allocating per-subpath sample budgets.
