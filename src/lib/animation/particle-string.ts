@@ -360,6 +360,12 @@ class Strand {
    *  through the finished outline. Set per-burst by Burst's traceWiggle
    *  preset (off=0, subtle=1.5, soft=3, heavy=6). */
   traceWiggle: number = 1.5;
+  /** Per-strand emit speed (px/frame) — set at spawn from the author's
+   *  pressure prop, possibly auto-scaled for far-spawn strands so they
+   *  can physically reach their target via Verlet. The snap step
+   *  matches this speed so the transition from flight → outline reads
+   *  as continuous motion at the same velocity. */
+  tracePressure: number = 14;
   constructor(public color: string, public thick: number, svg: SVGSVGElement) {
     this.pathEl = document.createElementNS(SVG_NS, 'path');
     this.pathEl.setAttribute('fill', 'none');
@@ -600,14 +606,34 @@ function tick() {
         }
         s.targetBreaks = remaining;
       }
-      // Strand-level snap — all points lerp toward their targets
-      // simultaneously once arrivedAt elapses. Lerp rate 0.05 ≈ 30
-      // frames to close most of the gap. Wiggle keeps the outline
-      // alive after settling.
+      // Strand-level snap with fixed-speed step. Each point moves
+      // toward its target at the strand's flight velocity (tracePressure
+      // ≈ residual Verlet speed at snap time), so the transition from
+      // flight to settling reads as continuous motion at the same
+      // velocity. Earlier percentage-lerp closed 5% of remaining
+      // distance per frame, which was much faster than Verlet for
+      // far points (visible accelerated dash) and much slower for
+      // near points (visible deceleration).
+      //
+      // Heal physics-broken links. During flight, adjacent points
+      // sometimes stretch past LK_BREAK (80px) — at high pressure this
+      // happens reliably, and once a link is broken it stays broken,
+      // splitting the letter into visible dashes at render time. Reset
+      // all breaks each snap frame, then re-mark only the intentional
+      // subpath-boundary breaks from targetBreaks (kept around for this
+      // purpose). targetBreaks isn't cleared on snap anymore.
+      for (const lk of s.lks) lk.broken = false;
+      for (const idx of s.targetBreaks) {
+        if (idx > 0 && idx - 1 < s.lks.length) s.lks[idx - 1].broken = true;
+      }
       const wiggleAmp = s.traceWiggle;
       const wiggleFreqX = 0.003;
       const wiggleFreqY = 0.0021;
       const now = performance.now();
+      // Step speed matches the flight velocity at snap time. Verlet
+      // residual after ~24 frames of damping = pressure × 0.97^24 ≈
+      // pressure × 0.48, so half the initial pressure feels right.
+      const stepSpeed = s.tracePressure * 0.5;
       for (let i = 0; i < s.pts.length && i < s.targetPositions.length; i++) {
         const p = s.pts[i];
         const target = s.targetPositions[i];
@@ -618,8 +644,17 @@ function tick() {
         const wy = wiggleAmp > 0
           ? target.y + Math.cos(now * wiggleFreqY + i * 0.4) * wiggleAmp
           : target.y;
-        p.x += (wx - p.x) * 0.05;
-        p.y += (wy - p.y) * 0.05;
+        const dx = wx - p.x, dy = wy - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist <= stepSpeed) {
+          // Within one step of target — snap exactly and wiggle from here
+          p.x = wx;
+          p.y = wy;
+        } else {
+          // Move at fixed speed toward target
+          p.x += (dx / dist) * stepSpeed;
+          p.y += (dy / dist) * stepSpeed;
+        }
         p.ox = p.x;
         p.oy = p.y;
       }
@@ -932,7 +967,7 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       // actual emit time and add a flight window so all points
       // have meaningfully flown before snap.
       const realEmitDuration = Math.max(opts.emitDuration, opts.length * 4);
-      const flightWindowAfterEmit = 400;
+      const flightWindowAfterEmit = 1200;
       strand.arrivedAt = performance.now() + (realEmitDuration + flightWindowAfterEmit) * speedScale;
     } else if (opts.to !== 'away' && opts.magnetCursor === 'off') {
       // Snap-on-arrival for plain converge modes (to: origin / cursor /
@@ -973,6 +1008,14 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     // different edge point (so an `edges` burst of 7 strands fans across
     // the whole viewport perimeter rather than from one origin).
     const spawn = pickSpawnPos(opts.from, cx, cy);
+
+    // Author's pressure used as-is — auto-scaling per-distance made
+    // far-spawn strands fly fast enough that the curl was invisible
+    // and adjacent points stretched past LK_BREAK, fracturing the
+    // rendered path into dashes. Better to keep flight visibly curl-y
+    // and let snap handle whatever distance Verlet didn't cover.
+    const strandPressure = opts.pressure;
+    strand.tracePressure = strandPressure;
 
     // Initial emit angle — branches by `to`. 'away' uses the existing
     // even-distribution cone (radial outward). Convergence modes aim
@@ -1076,7 +1119,7 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
           const sinAmp = isTracing ? 0.9 : 0.4;
           const randAmp = isTracing ? 0.8 : 0.4;
           const a = angleBase + Math.sin(i * 0.3) * sinAmp + (Math.random() - 0.5) * randAmp;
-          const speed = opts.pressure + Math.random() * 2;
+          const speed = strandPressure + Math.random() * 2;
           strand.add(spawn.x, spawn.y, Math.cos(a) * speed, Math.sin(a) * speed);
         }
       }, i * interval);
