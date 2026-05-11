@@ -736,14 +736,22 @@ function tick() {
       // Viewport floor + walls. Floor: clamp y, add a tiny upward rebound
       // (prevents the dead-flat-line stacking) and damp horizontal velocity
       // so points stop sliding sideways and let later points pile on top.
+      //
+      // For trace strands (targetPositions set), skip the stickiness +
+      // horizontal damping at the floor — strands spawning at the bottom
+      // edge would otherwise stick instantly, never reaching their letter
+      // target. They still get clamped to viewport bounds, but no lock.
       const vh = window.innerHeight, vw = window.innerWidth;
+      const isTracing = s.targetPositions !== null;
       if (p.y > vh - 1) {
         p.y = vh - 1;
-        p.oy = p.y + 0.3;                          // tiny upward bounce
-        p.ox = p.x + (p.x - p.ox) * 0.6;           // 40% horizontal friction
-        p.st += 4;
+        if (!isTracing) {
+          p.oy = p.y + 0.3;                          // tiny upward bounce
+          p.ox = p.x + (p.x - p.ox) * 0.6;           // 40% horizontal friction
+          p.st += 4;
+        }
       }
-      if (p.y < 0) { p.y = 0; p.oy = 0; }
+      if (p.y < 0) { p.y = 0; if (!isTracing) p.oy = 0; }
       if (p.x < 0) p.x = 0;
       if (p.x > vw) p.x = vw;
       // Stickiness threshold = 20 (was 14): points get ~5 contact frames
