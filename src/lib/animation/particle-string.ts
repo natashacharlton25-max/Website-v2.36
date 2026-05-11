@@ -485,8 +485,16 @@ if (typeof window !== 'undefined') {
       s.collide || s.anchored || s.targetPositions !== null ||
       s.magnetCursor !== 'off' || s.pts.some(p => p.done)
     ))) return;
+    const now = performance.now();
     for (const s of allStrands) {
       if (!s.alive) continue;
+      // Skip strands still in flight or mid-settle. Scrollytelling
+      // re-snatch sets a new arrivedAt for relaunched strands —
+      // scrolling during that flight would otherwise immediately
+      // re-release them and they'd never reach the new word. Once
+      // arrivedAt has elapsed + a settle grace period (1000ms),
+      // they're fully formed at the new outline and OK to release.
+      if (s.arrivedAt > now - 1000) continue;
       // Kill every locking mechanism so the strand falls cleanly:
       //   - anchored: anchor pin
       //   - targetPositions: trace/converge snap
