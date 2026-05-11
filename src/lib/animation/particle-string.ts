@@ -600,43 +600,28 @@ function tick() {
         }
         s.targetBreaks = remaining;
       }
-      // Physics stays untouched — points fly Verlet-only with their
-      // original emit velocity and per-point jitter. The transition
-      // to the outline happens at the RENDER layer (see path-building
-      // pass below): each point's drawn position blends from its
-      // Verlet position to its target via smoothstep over a long
-      // uniform window, so adjacent points blend at nearly-identical
-      // rates (no spatial breaks in the rendered path).
-      //
-      // Once a point's settle is complete, we lock it (p.done) to
-      // stop Verlet drift and keep the outline stable — but only
-      // AFTER the full settle has elapsed, so physics motion shows
-      // for the full duration.
-      const now = performance.now();
-      const tickSpeedScale = getAnimationConfig().durationScale;
-      const flightWindow = 200 * tickSpeedScale;
-      const settleWindow = 1500 * tickSpeedScale;
+      // Strand-level snap — all points lerp toward their targets
+      // simultaneously once arrivedAt elapses. Lerp rate 0.05 ≈ 30
+      // frames to close most of the gap. Wiggle keeps the outline
+      // alive after settling.
       const wiggleAmp = s.traceWiggle;
       const wiggleFreqX = 0.003;
       const wiggleFreqY = 0.0021;
+      const now = performance.now();
       for (let i = 0; i < s.pts.length && i < s.targetPositions.length; i++) {
         const p = s.pts[i];
-        if (p.bornAt === 0) continue;
-        const sinceFlightEnd = now - p.bornAt - flightWindow;
-        if (sinceFlightEnd < settleWindow) continue;
-        // Full settle: lock to wiggling target so Verlet stops
         const target = s.targetPositions[i];
+        p.done = true;
         const wx = wiggleAmp > 0
           ? target.x + Math.sin(now * wiggleFreqX + i * 0.4) * wiggleAmp
           : target.x;
         const wy = wiggleAmp > 0
           ? target.y + Math.cos(now * wiggleFreqY + i * 0.4) * wiggleAmp
           : target.y;
-        p.x = wx;
-        p.y = wy;
-        p.ox = wx;
-        p.oy = wy;
-        p.done = true;
+        p.x += (wx - p.x) * 0.05;
+        p.y += (wy - p.y) * 0.05;
+        p.ox = p.x;
+        p.oy = p.y;
       }
     }
 
@@ -931,7 +916,11 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       // Run after first emission tick has populated lks; queue via
       // microtask so spawn loop can finish adding all points first.
       strand.targetBreaks = sampled.breaks;
-      strand.arrivedAt = performance.now() + (opts.emitDuration + 200) * speedScale;
+      // Extended Verlet phase — strands had been snapping too soon.
+      // 2.5× emitDuration lets the rope curl naturally and travel
+      // most of the way to the outline before the lerp kicks in,
+      // so the transition is barely visible.
+      strand.arrivedAt = performance.now() + (opts.emitDuration * 2.5 + 200) * speedScale;
     } else if (opts.to !== 'away' && opts.magnetCursor === 'off') {
       // Snap-on-arrival for plain converge modes (to: origin / cursor /
       // target without tracePath). Without this, strands fly toward the
@@ -1068,37 +1057,14 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
           strand.pts[0].done = true;
         } else {
           // Curl + jitter: sin wave for coiling, random for chaos.
-          //
-          // Trace strands: each point's emit angle aims at ITS specific
-          // target position on the outline (not the strand's overall
-          // destination). Per-point aim means each point's straight
-          // Verlet trajectory naturally lands on its target — no snap
-          // force needed, the strand arrives in letter shape via pure
-          // physics. The mass of strand points all aiming at different
-          // letter positions, combined with per-point jitter, gives
-          // the visible curl/zigzag during flight.
-          //
-          // Free strands: shared angleBase aimed at the strand's
-          // destination, with jitter for curl. Original behaviour.
-          const isTracing = opts.tracePaths.length > 0 && strand.targetPositions && i < strand.targetPositions.length;
-          let aimBase: number;
-          if (isTracing) {
-            const target = strand.targetPositions![i];
-            aimBase = Math.atan2(target.y - spawn.y, target.x - spawn.x);
-          } else {
-            aimBase = angleBase;
-          }
-          const sinAmp = isTracing ? 0.5 : 0.4;
-          const randAmp = isTracing ? 0.6 : 0.4;
-          const a = aimBase + Math.sin(i * 0.3) * sinAmp + (Math.random() - 0.5) * randAmp;
+          // Shared angleBase aims the whole strand at its destination;
+          // per-point jitter creates the visible rope curl.
+          const isTracing = opts.tracePaths.length > 0;
+          const sinAmp = isTracing ? 0.9 : 0.4;
+          const randAmp = isTracing ? 0.8 : 0.4;
+          const a = angleBase + Math.sin(i * 0.3) * sinAmp + (Math.random() - 0.5) * randAmp;
           const speed = opts.pressure + Math.random() * 2;
           strand.add(spawn.x, spawn.y, Math.cos(a) * speed, Math.sin(a) * speed);
-        }
-        // Stamp bornAt for trace strands so the lock-in pass knows when
-        // each point's flight window has elapsed.
-        if (opts.tracePaths.length) {
-          const newPt = strand.pts[strand.pts.length - 1];
-          if (newPt) newPt.bornAt = performance.now();
         }
       }, i * interval);
     }
