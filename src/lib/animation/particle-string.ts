@@ -372,6 +372,11 @@ class Strand {
    *  window between flight-end and snap-fire, instead of decaying
    *  to a crawl. */
   damping: number = 0.97;
+  /** True if the strand should NOT auto-remove via its lifespan
+   *  setTimeouts. Set by the scroll-release handler so strands that
+   *  have fallen to the floor stay there indefinitely, ready to be
+   *  re-snatched by a viewport-trigger Burst (scrollytelling loop). */
+  persistent: boolean = false;
   constructor(public color: string, public thick: number, svg: SVGSVGElement) {
     this.pathEl = document.createElementNS(SVG_NS, 'path');
     this.pathEl.setAttribute('fill', 'none');
@@ -491,6 +496,12 @@ if (typeof window !== 'undefined') {
       s.targetPositions = null;
       s.magnetCursor = 'off';
       s.collide = false;
+      // Mark as persistent so the lifespan setTimeouts skip both fade
+      // and removal — strand stays on floor until re-snatched by a
+      // viewport-trigger Burst (scrollytelling loop). Restore opacity
+      // in case fade had already started before release.
+      s.persistent = true;
+      s.pathEl.style.opacity = '1';
       // Restore gravity so released points actually fall. Trace, magnet
       // and converge modes zero gravity at spawn for clean motion; when
       // released by scroll they need normal gravity to drop.
@@ -1146,10 +1157,18 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     // Lifespan: fade in last 1s of life, then remove. Floor at 1000ms
     // so a tiny lifespan still gets a visible fade. Speedgate-scaled so
     // gentle/slow modes proportionally extend on-screen time.
+    //
+    // Persistent strands (scroll-released, floor-piled) skip both fade
+    // and removal — they wait on the floor until a viewport-trigger
+    // Burst re-snatches them. The flag is set by the scroll handler.
     const lifespan = Math.max(opts.lifespan, 1000) * speedScale;
     const fadeStart = Math.max(lifespan - 1000 * speedScale, 1000 * speedScale);
-    setTimeout(() => { strand.pathEl.style.opacity = '0'; }, fadeStart);
     setTimeout(() => {
+      if (strand.persistent) return;
+      strand.pathEl.style.opacity = '0';
+    }, fadeStart);
+    setTimeout(() => {
+      if (strand.persistent) return;
       strand.pathEl.remove();
       strand.alive = false;
       const idx = allStrands.indexOf(strand);
