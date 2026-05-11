@@ -366,6 +366,12 @@ class Strand {
    *  matches this speed so the transition from flight → outline reads
    *  as continuous motion at the same velocity. */
   tracePressure: number = 14;
+  /** Per-frame Verlet velocity damping. Default 0.97 (3% loss per
+   *  frame — velocity drops to ~16% by frame 60). Trace strands set
+   *  this higher (0.99) so motion stays energetic through the float
+   *  window between flight-end and snap-fire, instead of decaying
+   *  to a crawl. */
+  damping: number = 0.97;
   constructor(public color: string, public thick: number, svg: SVGSVGElement) {
     this.pathEl = document.createElementNS(SVG_NS, 'path');
     this.pathEl.setAttribute('fill', 'none');
@@ -663,8 +669,8 @@ function tick() {
     // Verlet update — integrate each point
     for (const p of s.pts) {
       if (p.done) continue;
-      const vx = (p.x - p.ox) * 0.97;
-      const vy = (p.y - p.oy) * 0.97;
+      const vx = (p.x - p.ox) * s.damping;
+      const vy = (p.y - p.oy) * s.damping;
       p.ox = p.x; p.oy = p.y;
       const newX = p.x + vx;
       const newY = p.y + vy + s.gravity;
@@ -1016,6 +1022,12 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     // and let snap handle whatever distance Verlet didn't cover.
     const strandPressure = opts.pressure;
     strand.tracePressure = strandPressure;
+    // Trace strands need a long float window between flight-end and
+    // snap-fire so all points enter the screen. Default damping (0.97)
+    // decays velocity to ~16% by frame 60 — strand crawls toward the
+    // end of the window. Higher damping (0.99) keeps motion energetic
+    // through the float so strands "float" not "crawl" before snap.
+    strand.damping = opts.tracePaths.length ? 0.99 : 0.97;
 
     // Initial emit angle — branches by `to`. 'away' uses the existing
     // even-distribution cone (radial outward). Convergence modes aim
