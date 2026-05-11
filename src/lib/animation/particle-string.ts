@@ -383,6 +383,12 @@ class Strand {
    *  the same scroll that triggers viewport→re-snatch would also
    *  re-release the strand before it lands. 0 = never re-snatched. */
   relaunchedAt: number = 0;
+  /** Pending lifespan timer IDs so re-snatch can cancel + reschedule.
+   *  Without this, the original fade/removal timers fire on schedule
+   *  even after the strand has been re-snatched for a new word —
+   *  causing it to fade out mid-flight. */
+  fadeTimerId: ReturnType<typeof setTimeout> | null = null;
+  removeTimerId: ReturnType<typeof setTimeout> | null = null;
   constructor(public color: string, public thick: number, svg: SVGSVGElement) {
     this.pathEl = document.createElementNS(SVG_NS, 'path');
     this.pathEl.setAttribute('fill', 'none');
@@ -942,6 +948,25 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
       s.anchored = false;
       s.gravity = 0; // trace mode flies clean
       s.arrivedAt = relaunchArrivedAt;
+      // Cancel the original lifespan timers (would fire on schedule
+      // from FIRST spawn and fade/remove this strand mid-flight to
+      // its new word) and schedule fresh ones starting now.
+      if (s.fadeTimerId) clearTimeout(s.fadeTimerId);
+      if (s.removeTimerId) clearTimeout(s.removeTimerId);
+      const newLifespan = Math.max(opts.lifespan, 1000) * speedScale;
+      const newFadeStart = Math.max(newLifespan - 1000 * speedScale, 1000 * speedScale);
+      const strandRef = s;
+      s.fadeTimerId = setTimeout(() => {
+        if (strandRef.persistent) return;
+        strandRef.pathEl.style.opacity = '0';
+      }, newFadeStart);
+      s.removeTimerId = setTimeout(() => {
+        if (strandRef.persistent) return;
+        strandRef.pathEl.remove();
+        strandRef.alive = false;
+        const idx = allStrands.indexOf(strandRef);
+        if (idx > -1) allStrands.splice(idx, 1);
+      }, newLifespan);
       // Re-launch each pt: clear done + stickiness, give upward-toward-
       // target velocity kick. Verlet picks them up and carries them.
       const kickSpeed = opts.pressure;
@@ -1249,11 +1274,11 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
     // Burst re-snatches them. The flag is set by the scroll handler.
     const lifespan = Math.max(opts.lifespan, 1000) * speedScale;
     const fadeStart = Math.max(lifespan - 1000 * speedScale, 1000 * speedScale);
-    setTimeout(() => {
+    strand.fadeTimerId = setTimeout(() => {
       if (strand.persistent) return;
       strand.pathEl.style.opacity = '0';
     }, fadeStart);
-    setTimeout(() => {
+    strand.removeTimerId = setTimeout(() => {
       if (strand.persistent) return;
       strand.pathEl.remove();
       strand.alive = false;
