@@ -600,39 +600,31 @@ function tick() {
         }
         s.targetBreaks = remaining;
       }
-      // Progressive snap with ramped pull — each point starts being
-      // attracted to its target after its flightWindow elapses
-      // (200ms post-emit). Pull strength ramps from 0 → 0.05 over
-      // the settleWindow (300ms), so:
-      //   - 0..200ms post-emit: full Verlet, no pull (rope flies free)
-      //   - 200..500ms: Verlet motion continues but a growing pull
-      //     gradually steers the point toward its target
-      //   - 500ms+: full pull, point locked + wiggle
-      // The earlier hard switch from "Verlet" to "lerping" caused the
-      // visible velocity change mid-flight the user flagged. Ramping
-      // bridges the two regimes smoothly — Verlet damping (0.97/frame)
-      // naturally decays inherited velocity over ~30 frames, matching
-      // the pull ramp-up window.
+      // Physics stays untouched — points fly Verlet-only with their
+      // original emit velocity and per-point jitter. The transition
+      // to the outline happens at the RENDER layer (see path-building
+      // pass below): each point's drawn position blends from its
+      // Verlet position to its target via smoothstep over a long
+      // uniform window, so adjacent points blend at nearly-identical
+      // rates (no spatial breaks in the rendered path).
+      //
+      // Once a point's settle is complete, we lock it (p.done) to
+      // stop Verlet drift and keep the outline stable — but only
+      // AFTER the full settle has elapsed, so physics motion shows
+      // for the full duration.
       const now = performance.now();
       const tickSpeedScale = getAnimationConfig().durationScale;
       const flightWindow = 200 * tickSpeedScale;
-      const settleWindow = 300 * tickSpeedScale;
-      const maxLerp = 0.05;
+      const settleWindow = 1500 * tickSpeedScale;
       const wiggleAmp = s.traceWiggle;
       const wiggleFreqX = 0.003;
       const wiggleFreqY = 0.0021;
       for (let i = 0; i < s.pts.length && i < s.targetPositions.length; i++) {
         const p = s.pts[i];
-        // Skip if this point hasn't started its settle window yet —
-        // the tail of the strand keeps curling via Verlet/jitter.
         if (p.bornAt === 0) continue;
         const sinceFlightEnd = now - p.bornAt - flightWindow;
-        if (sinceFlightEnd < 0) continue;
-        // Linear ramp from 0 → maxLerp over settleWindow. After
-        // settleWindow the pull is full strength and the point can
-        // be marked done (locks out Verlet entirely).
-        const settleProgress = Math.min(sinceFlightEnd / settleWindow, 1);
-        const lerpRate = maxLerp * settleProgress;
+        if (sinceFlightEnd < settleWindow) continue;
+        // Full settle: lock to wiggling target so Verlet stops
         const target = s.targetPositions[i];
         const wx = wiggleAmp > 0
           ? target.x + Math.sin(now * wiggleFreqX + i * 0.4) * wiggleAmp
@@ -640,16 +632,11 @@ function tick() {
         const wy = wiggleAmp > 0
           ? target.y + Math.cos(now * wiggleFreqY + i * 0.4) * wiggleAmp
           : target.y;
-        // During ramp, DON'T zero p.ox/p.oy — that would kill
-        // inherited velocity and recreate the hard switch. Only
-        // overwrite once settleProgress hits 1.
-        p.x += (wx - p.x) * lerpRate;
-        p.y += (wy - p.y) * lerpRate;
-        if (settleProgress >= 1) {
-          p.done = true;
-          p.ox = p.x;
-          p.oy = p.y;
-        }
+        p.x = wx;
+        p.y = wy;
+        p.ox = wx;
+        p.oy = wy;
+        p.done = true;
       }
     }
 
@@ -1080,21 +1067,35 @@ function spawnString(origin: HTMLElement, opts: StringOptions) {
           strand.add(anchorX, anchorY, 0, 0);
           strand.pts[0].done = true;
         } else {
-          // Curl + jitter: sin wave for coiling, random for chaos. Trace
-          // bursts double the curl coefficients so strands take visibly
-          // curvy flight paths to their letter destinations instead of
-          // arrowing straight in. For free silly-string the lower values
-          // keep the rope from flailing too wildly.
-          const isTracing = opts.tracePaths.length > 0;
-          const sinAmp = isTracing ? 0.9 : 0.4;
-          const randAmp = isTracing ? 0.8 : 0.4;
-          const a = angleBase + Math.sin(i * 0.3) * sinAmp + (Math.random() - 0.5) * randAmp;
+          // Curl + jitter: sin wave for coiling, random for chaos.
+          //
+          // Trace strands: each point's emit angle aims at ITS specific
+          // target position on the outline (not the strand's overall
+          // destination). Per-point aim means each point's straight
+          // Verlet trajectory naturally lands on its target — no snap
+          // force needed, the strand arrives in letter shape via pure
+          // physics. The mass of strand points all aiming at different
+          // letter positions, combined with per-point jitter, gives
+          // the visible curl/zigzag during flight.
+          //
+          // Free strands: shared angleBase aimed at the strand's
+          // destination, with jitter for curl. Original behaviour.
+          const isTracing = opts.tracePaths.length > 0 && strand.targetPositions && i < strand.targetPositions.length;
+          let aimBase: number;
+          if (isTracing) {
+            const target = strand.targetPositions![i];
+            aimBase = Math.atan2(target.y - spawn.y, target.x - spawn.x);
+          } else {
+            aimBase = angleBase;
+          }
+          const sinAmp = isTracing ? 0.5 : 0.4;
+          const randAmp = isTracing ? 0.6 : 0.4;
+          const a = aimBase + Math.sin(i * 0.3) * sinAmp + (Math.random() - 0.5) * randAmp;
           const speed = opts.pressure + Math.random() * 2;
           strand.add(spawn.x, spawn.y, Math.cos(a) * speed, Math.sin(a) * speed);
         }
-        // Stamp bornAt for trace strands so the progressive snap can
-        // figure out each point's individual flight window — head
-        // points snap to outline first, tail points stay flying.
+        // Stamp bornAt for trace strands so the lock-in pass knows when
+        // each point's flight window has elapsed.
         if (opts.tracePaths.length) {
           const newPt = strand.pts[strand.pts.length - 1];
           if (newPt) newPt.bornAt = performance.now();
