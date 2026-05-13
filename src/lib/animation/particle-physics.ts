@@ -699,15 +699,16 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       vy: vy0,
       rotation: Math.random() * 360,
       spin: (Math.random() - 0.5) * 14,
-      // Trace particles: scale tied to the path-to-screen scale of THIS
-      // burst so dots fill the natural dot-pitch regardless of phrase
-      // length. Long phrases get clamped to viewport-max → smaller
-      // traceFrame.scale → smaller dots. Short phrases render larger →
-      // bigger dots fill the wider gap. Multiplier 1.0 maps traceFrame
-      // scale directly to dot scale; clamps keep it sane.
+      // Trace particles: scale tied to the path-to-screen scale of this
+      // burst so dot diameter matches the font's natural dot-pitch in
+      // screen pixels. Doto's pitch is ~20 path-units between dot
+      // centres. At traceFrame.scale × 20 path-units = pitch in px.
+      // dot diameter (xs Shape = ~12px) at scale = pitch / 12 means
+      // multiplier ≈ 20/12 ≈ 1.67 so dots fill the pitch exactly.
+      // Slightly under (1.5) so beads just touch instead of overlapping.
       // Non-trace bursts keep the stellar-parallax scale variance.
       scale: isTracing && traceFrame
-        ? Math.max(0.4, Math.min(1.2, traceFrame.scale * 0.7))
+        ? Math.max(0.4, Math.min(2.0, traceFrame.scale * 1.5))
         : 0.6 + Math.random() * 0.7,
       alive: true,
       born: startTime + emitDelay,
