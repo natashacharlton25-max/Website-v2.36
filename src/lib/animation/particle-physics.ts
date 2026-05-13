@@ -293,13 +293,12 @@ function onPhysicsScroll() {
       let angle: number;
       let flySpeed: number;
       if (p.releaseStyle === 'fall-to-edges') {
-        // Downward-biased angle: pick from the lower half of the circle
-        // (π/4 to 3π/4 in atan2 space = downward arc). Particles spray
-        // out the bottom + bottom-corners, drifting down + outward as
-        // gravity carries them. Slightly higher speed so they actually
-        // reach the viewport bottom edge before drag decays them.
+        // Downward-biased angle (π/4..3π/4 = lower arc). Low initial
+        // speed so the release doesn't look instant — gravity takes
+        // over and cascades them down. Reads like beads tipping out of
+        // a tray as the word slides off the top of the viewport.
         angle = Math.PI / 4 + Math.random() * (Math.PI / 2);
-        flySpeed = 12 + Math.random() * 8;
+        flySpeed = 2 + Math.random() * 4;
       } else {
         // Radial fly-out from the word centroid, with ±90° random jitter
         // so all four viewport edges get particles even though the word's
@@ -642,9 +641,14 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       vy0 = Math.sin(angle) * speed - (opts.mode === 'fall' || opts.mode === 'shake' ? 4 : 0);
     }
 
-    // Stagger emit ~10ms per particle so the burst doesn't look like
-    // they all came out at once. born+i*delay → tick skips them until ready.
-    const emitDelay = i * 10;
+    // Stagger emit so the burst doesn't look like one synchronised block.
+    // Trace bursts use a TINY stagger (≤300ms total) so the word forms
+    // snappily — without this, a 1500-particle word takes 15s to even
+    // start. Non-trace bursts keep the original 10ms-per-particle stagger
+    // which reads as a flowing emission for ~30-particle fly bursts.
+    const emitDelay = isTracing
+      ? (i / opts.count) * 300
+      : i * 10;
     // Convergence destination — trace mode uses per-particle sampled
     // point so the swarm forms a letter outline. origin/target use a
     // shared point. Cursor stays in vx/vy mode.
@@ -737,13 +741,12 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
         let fadeAfterArrival: boolean;
         if (p.isTracing) {
           // Tracing dots (scrollytelling): fast random arrival, no
-          // post-arrival fade — they stay until scroll-release. Each
-          // particle gets a random arrivalAge in 400–1600ms so the
-          // swarm reads as chaotic (not a synchronised marching wave).
-          // driftSeed (already per-particle random) is reused as the
-          // jitter source.
+          // post-arrival fade — they stay until scroll-release. Tight
+          // 250–650ms range so the formation feels snappy (was 400–
+          // 1600ms which read as a slow drift-in). driftSeed (already
+          // per-particle random) is reused as the jitter source.
           const jitter = (Math.sin(p.driftSeed * 13.37) + 1) * 0.5; // 0..1
-          arrivalAge = 400 + jitter * 1200;
+          arrivalAge = 250 + jitter * 400;
           baseOpacity = 1;
           fadeAfterArrival = false;
         } else {
