@@ -347,50 +347,26 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
   // would all clump on the first letter.
   let traceDests: { x: number; y: number }[] = [];
   if (opts.tracePaths.length > 0) {
+    // Same approach as the string engine: each letter gets the SAME N
+    // outline samples regardless of perimeter. samplePath handles the
+    // per-subpath distribution internally — outer contour + inner
+    // counters all get traced. The string engine connects samples with
+    // line segments (so the shape reads even at low N); the dot engine
+    // shows just the points, so we want a count tuned to give discrete-
+    // dot-outline legibility (not so dense it blobs, not so sparse it
+    // loses the letter shape).
     const traceFrame = computeTraceFrame(opts.tracePaths, opts.traceSize);
     const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
     const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
-
-    // Measure each letter's outline perimeter so we can allocate samples
-    // proportionally — wide letters need more dots than narrow ones to
-    // keep per-pixel density constant across the word.
-    const lengths: number[] = [];
-    const tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    tmpSvg.style.position = 'absolute';
-    tmpSvg.style.left = '-9999px';
-    document.body.appendChild(tmpSvg);
-    for (const d of opts.tracePaths) {
-      const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      pe.setAttribute('d', d);
-      tmpSvg.appendChild(pe);
-      lengths.push(pe.getTotalLength());
-    }
-    document.body.removeChild(tmpSvg);
-    const totalLen = lengths.reduce((a, b) => a + b, 0) || 1;
-
-    // Two-phase allocation. Phase 1: every letter gets a minimum quota
-    // so even the shortest letter renders recognisably. Phase 2: the
-    // remaining budget is distributed by perimeter share. Without phase
-    // 1, very long phrases (W..with..Smile, 17 letters) starve short
-    // letters when the cap kicks in — sample-0 of long letters take
-    // precedence in round-robin, and short letters get cut off entirely.
-    const MIN_PER_LETTER = Math.max(20, Math.floor(opts.count * 0.4 / opts.tracePaths.length));
-    const minBudget = MIN_PER_LETTER * opts.tracePaths.length;
-    const shareBudget = Math.max(0, opts.count - minBudget);
+    const samplesPerPath = Math.ceil(opts.count / opts.tracePaths.length);
     const perPath: { x: number; y: number }[][] = [];
-    const sampleCounts: number[] = [];
-    for (let i = 0; i < opts.tracePaths.length; i++) {
-      const share = lengths[i] / totalLen;
-      const n = MIN_PER_LETTER + Math.round(shareBudget * share);
-      sampleCounts.push(n);
-      perPath.push(samplePath(opts.tracePaths[i], n, offsetX, offsetY, traceFrame).points);
+    for (const pathData of opts.tracePaths) {
+      const sampled = samplePath(pathData, samplesPerPath, offsetX, offsetY, traceFrame);
+      perPath.push(sampled.points);
     }
-
-    // Interleave so every letter contributes its first samples before
-    // any letter gets its second batch — ensures full word legibility
-    // even if particles run out mid-fill.
-    const maxSamples = Math.max(...sampleCounts);
-    for (let i = 0; i < maxSamples; i++) {
+    // Round-robin interleave so partial particle counts (e.g. eviction
+    // mid-fill, or cap chopping the tail) still cover every letter.
+    for (let i = 0; i < samplesPerPath; i++) {
       for (let path = 0; path < perPath.length; path++) {
         const pt = perPath[path][i];
         if (pt) traceDests.push(pt);
