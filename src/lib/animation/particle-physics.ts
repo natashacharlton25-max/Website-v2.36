@@ -788,11 +788,18 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       }
 
       // Gravity branched by mode. Persistent trace-released particles
-      // (scrollytelling swarm) get sinusoidal drift like float mode so
-      // they wander in space between sections instead of falling.
+      // (scrollytelling swarm) usually get sinusoidal drift like float
+      // mode so they wander in space between sections instead of falling.
+      // Fall-to-edges release style is the exception: those particles
+      // get real gravity so they cascade out of the word like spilled
+      // beads, not float.
       if (p.persistent) {
-        p.vx += Math.sin(now / 700 + p.driftSeed) * 0.05;
-        p.vy += Math.cos(now / 900 + p.driftSeed * 1.3) * 0.05;
+        if (p.releaseStyle === 'fall-to-edges') {
+          p.vy += 0.4; // gravity
+        } else {
+          p.vx += Math.sin(now / 700 + p.driftSeed) * 0.05;
+          p.vy += Math.cos(now / 900 + p.driftSeed * 1.3) * 0.05;
+        }
       } else if (opts.mode === 'float') {
         // Negative gravity (rise) + sinusoidal horizontal drift seeded
         // per-particle so they don't sway in unison.
@@ -846,11 +853,16 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       // axis so they slide along the edge while sinusoidal drift keeps
       // them alive. Margin keeps them visible (not clipped).
       if (p.persistent) {
-        const margin = 8;
-        if (p.x < margin) { p.x = margin; p.vx = Math.abs(p.vx) * 0.3; }
-        else if (p.x > vw - margin) { p.x = vw - margin; p.vx = -Math.abs(p.vx) * 0.3; }
-        if (p.y < margin) { p.y = margin; p.vy = Math.abs(p.vy) * 0.3; }
-        else if (p.y > vh - margin) { p.y = vh - margin; p.vy = -Math.abs(p.vy) * 0.3; }
+        // fall-to-edges particles skip the wall clamp — they're meant
+        // to cascade past the bottom edge and disappear, like beads
+        // dropping off-screen. Re-snatch will pick survivors back up.
+        if (p.releaseStyle !== 'fall-to-edges') {
+          const margin = 8;
+          if (p.x < margin) { p.x = margin; p.vx = Math.abs(p.vx) * 0.3; }
+          else if (p.x > vw - margin) { p.x = vw - margin; p.vx = -Math.abs(p.vx) * 0.3; }
+          if (p.y < margin) { p.y = margin; p.vy = Math.abs(p.vy) * 0.3; }
+          else if (p.y > vh - margin) { p.y = vh - margin; p.vy = -Math.abs(p.vy) * 0.3; }
+        }
       } else if (p.y > vh - 4) {
         // Non-persistent: original floor-settle behaviour
         p.y = vh - 4; p.vx = 0; p.vy = 0;
