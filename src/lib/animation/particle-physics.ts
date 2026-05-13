@@ -306,9 +306,11 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
   const rect = originEl.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
-  // Cap concurrent particles before adding more — keeps DOM cost bounded
-  // under click-spam.
-  evictOldestParticles(opts.count);
+  // Eviction deferred — for tracePath bursts we want to REUSE existing
+  // isTracing particles via the re-snatch path below. Evicting first
+  // would remove the very particles we want to reuse (count + existing
+  // ~= 2x cap forces ~half of existing isTracing to be evicted before
+  // re-snatch can see them). Defer to the spawn-new fallback below.
   const particles: Particle[] = [];
   const startTime = performance.now();
 
@@ -323,20 +325,31 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
 
   // tracePath sampling — each particle gets a sampled outline point as
   // its destination, so the swarm forms letters/logos instead of
-  // clumping at one point. Cyclic across N paths × count particles:
-  // for a phrase with 7 letters and 200 particles, each letter receives
-  // ~29 dots distributed along its perimeter.
+  // clumping at one point.
+  //
+  // Order matters: traceDests is INTERLEAVED across paths so that
+  // particles[0..numPaths-1] hit one point in each letter, then
+  // particles[numPaths..2*numPaths-1] hit the next point per letter,
+  // etc. This way a partial slice of particles (e.g., 200 out of 1000)
+  // still covers every letter — without interleaving, the first 200
+  // would all clump on the first letter.
   let traceDests: { x: number; y: number }[] = [];
   if (opts.tracePaths.length > 0) {
     const traceFrame = computeTraceFrame(opts.tracePaths, opts.traceSize);
     const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
     const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
-    // Distribute particles across paths proportionally to count.
-    // Each path gets ~count/numPaths samples.
     const samplesPerPath = Math.ceil(opts.count / opts.tracePaths.length);
+    const perPath: { x: number; y: number }[][] = [];
     for (const pathData of opts.tracePaths) {
       const sampled = samplePath(pathData, samplesPerPath, offsetX, offsetY, traceFrame);
-      traceDests.push(...sampled.points);
+      perPath.push(sampled.points);
+    }
+    // Interleave: round-robin across letters
+    for (let i = 0; i < samplesPerPath; i++) {
+      for (let path = 0; path < perPath.length; path++) {
+        const pt = perPath[path][i];
+        if (pt) traceDests.push(pt);
+      }
     }
   }
 
@@ -377,6 +390,11 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     // particle creation loop doesn't double-spawn fresh dots on top.
     return;
   }
+
+  // No isTracing particles to reuse — fresh spawn. Cap concurrent
+  // particles before adding more (kept DOM cost bounded under click-
+  // spam from the original code path).
+  evictOldestParticles(opts.count);
 
   for (let i = 0; i < opts.count; i++) {
     const el = document.createElement('div');
