@@ -160,6 +160,11 @@ interface Particle {
    *  the animation. */
   destOffsetX: number;
   destOffsetY: number;
+  /** Origin element this particle currently tracks. Stored per-particle
+   *  because in scrollytelling re-snatch, a hero-spawned particle gets
+   *  reassigned to a card section's burst — its live-origin rect must
+   *  follow the new section, not the hero. Re-snatch swaps this. */
+  originEl: HTMLElement;
 }
 
 // Global registry of all live particles across all bursts. Lets the scroll
@@ -384,6 +389,10 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       // as user keeps scrolling past the viewport trigger point.
       p.destOffsetX = dest.x - cx;
       p.destOffsetY = dest.y - cy;
+      // Reassign origin element so live-origin tracking in the tick loop
+      // reads THIS burst's rect, not the burst that originally spawned
+      // the particle (hero's tick loop owns these particles).
+      p.originEl = originEl;
       p.spawnX = p.x; // re-spawn from current swarm position
       p.spawnY = p.y;
       p.born = now;   // reset age so convergence lerp restarts
@@ -528,6 +537,7 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       isTracing,
       destOffsetX: dX - cx,
       destOffsetY: dY - cy,
+      originEl,
     };
     particles.push(particle);
     allParticles.push(particle);
@@ -538,18 +548,11 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     const rects = opts.collide ? getCollisionRects() : [];
     let anyAlive = false;
 
-    // Read live origin centre ONCE per tick so tracePath particles can
-    // re-aim destination at the section's CURRENT viewport position.
-    // For card-and-letters layouts the section scrolls through viewport
-    // during the animation — letters need to track it so they stay
-    // next to the card.
-    let liveOriginCx = cx;
-    let liveOriginCy = cy;
-    if (opts.tracePaths.length > 0) {
-      const r = originEl.getBoundingClientRect();
-      liveOriginCx = r.left + r.width / 2;
-      liveOriginCy = r.top + r.height / 2;
-    }
+    // Live-origin tracking moves per-particle: each particle reads its
+    // own originEl (assigned at spawn, swapped on re-snatch). Cache
+    // rects in this tick so we don't re-measure the same DOM node N
+    // times for N particles sharing an originEl.
+    const originRectCache = new Map<HTMLElement, { cx: number; cy: number }>();
 
     for (const p of particles) {
       if (!p.alive) continue;
@@ -611,10 +614,18 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
         // Re-aim dest at live origin centre + stored offset so letters
         // track the section while it scrolls. Non-trace converge bursts
         // stay anchored to spawn-time dest (origin is static, e.g.
-        // button click).
+        // button click). Each particle reads its OWN originEl so a
+        // re-snatched particle tracks the new section, not the burst
+        // that originally spawned it.
         if (p.isTracing) {
-          p.destX = liveOriginCx + p.destOffsetX;
-          p.destY = liveOriginCy + p.destOffsetY;
+          let cached = originRectCache.get(p.originEl);
+          if (!cached) {
+            const r = p.originEl.getBoundingClientRect();
+            cached = { cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+            originRectCache.set(p.originEl, cached);
+          }
+          p.destX = cached.cx + p.destOffsetX;
+          p.destY = cached.cy + p.destOffsetY;
         }
         p.x = p.spawnX + (p.destX - p.spawnX) * ease;
         p.y = p.spawnY + (p.destY - p.spawnY) * ease;
