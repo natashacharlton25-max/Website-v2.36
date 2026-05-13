@@ -413,8 +413,18 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       const pts: { x: number; y: number }[] = [];
       // SVGPoint for isPointInFill — created via root SVG, mutated per cell
       const svgPt = (tmpSvg as unknown as SVGSVGElement).createSVGPoint();
-      for (let py = bbox.y; py <= bbox.y + bbox.height; py += step) {
-        for (let px = bbox.x; px <= bbox.x + bbox.width; px += step) {
+      // Centre the grid on the bbox so symmetric letterforms (H, T, A)
+      // get symmetric dot patterns. If we started the grid at bbox.x,
+      // the right stroke of an H might catch a different number of
+      // columns than the left depending on bbox.width % step.
+      const cellsX = Math.floor(bbox.width / step) + 1;
+      const cellsY = Math.floor(bbox.height / step) + 1;
+      const startX = bbox.x + bbox.width / 2 - (cellsX - 1) * step / 2;
+      const startY = bbox.y + bbox.height / 2 - (cellsY - 1) * step / 2;
+      for (let iy = 0; iy < cellsY; iy++) {
+        const py = startY + iy * step;
+        for (let ix = 0; ix < cellsX; ix++) {
+          const px = startX + ix * step;
           svgPt.x = px;
           svgPt.y = py;
           if (pe.isPointInFill(svgPt)) {
@@ -1101,13 +1111,13 @@ export function initParticlePhysics(): void {
         ScrollTrigger.create({
           trigger: htmlEl,
           scroller: osScroller || undefined,
-          // Fire when the burst element's centre is at 80% down the
-          // viewport — by then the section's mostly visible, so the
-          // word forms IN the viewport instead of at the bottom edge.
-          // Previously 'top bottom' fired the moment the section started
-          // entering, which left the destination at viewport-bottom
-          // (or below) and dots formed off-screen.
-          start: 'center 80%',
+          // Fire when burst element's top hits 70% down viewport — i.e.
+          // section is ~30% scrolled into view, enough that the dest
+          // calc lands inside viewport. 'top bottom' fired the moment
+          // the section started entering, leaving dest at viewport edge.
+          // 'center 80%' was too late on tall sections (centre might
+          // never reach 80% until section is exiting the top).
+          start: 'top 70%',
           onEnter: () => fire(new Event('viewport')),
           onEnterBack: () => fire(new Event('viewport')),
         });
