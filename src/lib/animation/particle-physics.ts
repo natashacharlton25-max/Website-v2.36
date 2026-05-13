@@ -472,10 +472,13 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       if (age < 0) continue;
       // lifespan === 0 means persistent — particle never auto-removes
       // (still subject to active-particle cap eviction).
-      // Also skip removal for scroll-release-persistent particles
-      // (scrollytelling loop) — they swarm between sections and get
-      // re-snatched on viewport-trigger.
-      if (opts.lifespan > 0 && age > opts.lifespan && !p.persistent) {
+      // Also skip removal for:
+      //   - scroll-release-persistent particles (scrollytelling swarm)
+      //   - tracePath particles (they stay at their letter outline
+      //     until the user scrolls and releases them — without this,
+      //     the lifespan timer fires before the user has had time to
+      //     read the formed word and scroll)
+      if (opts.lifespan > 0 && age > opts.lifespan && !p.persistent && !p.isTracing) {
         p.el.remove();
         p.alive = false;
         const gIdx = allParticles.indexOf(p);
@@ -493,21 +496,40 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       // sitting visibly at the destination.
       if (p.converge) {
         const scaleNorm = Math.min(Math.max((p.scale - 0.6) / 0.7, 0), 1); // 0..1
-        // Wider parallax spread — big particles arrive at 40% of lifespan
-        // (much faster, snappier), small ones still at 85% (slow background
-        // drift). The 45-point gap reads as real depth: foreground stars
-        // crash in fast, background stars float in late.
-        const arrivalFrac = 0.85 - 0.45 * scaleNorm; // big=0.40 (fast), small=0.85 (slow)
-        const baseOpacity = 0.55 + 0.45 * scaleNorm; // big=1.0, small=0.55
-        const arrivalAge = opts.lifespan * arrivalFrac;
+        let arrivalAge: number;
+        let baseOpacity: number;
+        let fadeAfterArrival: boolean;
+        if (p.isTracing) {
+          // Tracing dots (scrollytelling): fast random arrival, no
+          // post-arrival fade — they stay until scroll-release. Each
+          // particle gets a random arrivalAge in 400–1600ms so the
+          // swarm reads as chaotic (not a synchronised marching wave).
+          // driftSeed (already per-particle random) is reused as the
+          // jitter source.
+          const jitter = (Math.sin(p.driftSeed * 13.37) + 1) * 0.5; // 0..1
+          arrivalAge = 400 + jitter * 1200;
+          baseOpacity = 1;
+          fadeAfterArrival = false;
+        } else {
+          // Non-trace converge (original stellar-parallax behaviour):
+          // big particles arrive fast + opaque, small ones slow + faded.
+          // Fade kicks in at arrival → particles dissolve into the target.
+          const arrivalFrac = 0.85 - 0.45 * scaleNorm; // big=0.40 (fast), small=0.85 (slow)
+          baseOpacity = 0.55 + 0.45 * scaleNorm; // big=1.0, small=0.55
+          arrivalAge = opts.lifespan * arrivalFrac;
+          fadeAfterArrival = true;
+        }
         const t = Math.min(age / arrivalAge, 1);
         const ease = 1 - (1 - t) * (1 - t); // ease-out quad
         p.x = p.spawnX + (p.destX - p.spawnX) * ease;
         p.y = p.spawnY + (p.destY - p.spawnY) * ease;
         p.rotation += p.spin * (1 - t * 0.7); // spin slows as particle arrives
-        const fadeWindow = Math.min(opts.lifespan - arrivalAge, 600);
-        const fadeProgress = age < arrivalAge ? 0 : Math.min((age - arrivalAge) / fadeWindow, 1);
-        const opacity = baseOpacity * (1 - fadeProgress);
+        let opacity = baseOpacity;
+        if (fadeAfterArrival) {
+          const fadeWindow = Math.min(opts.lifespan - arrivalAge, 600);
+          const fadeProgress = age < arrivalAge ? 0 : Math.min((age - arrivalAge) / fadeWindow, 1);
+          opacity = baseOpacity * (1 - fadeProgress);
+        }
         p.el.style.opacity = String(opacity);
         p.el.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) rotate(${p.rotation}deg) scale(${p.scale})`;
         continue;
