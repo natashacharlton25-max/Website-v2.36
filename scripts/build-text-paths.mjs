@@ -74,6 +74,11 @@ for (const phrase of registry.phrases || []) {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   let x = 0;
   const sizeScale = phrase.size / font.unitsPerEm;
+  // letterSpacing is fraction of font size added between every glyph
+  // advance — e.g. 0.15 at size 200 = +30px gap per letter. Mirrors
+  // CSS letter-spacing semantics but baked into the path layout so
+  // downstream consumers (Burst tracePath) don't need to know about it.
+  const extraSpacing = (phrase.letterSpacing || 0) * phrase.size;
   for (const ch of phrase.text) {
     const glyph = font.charToGlyph(ch);
     const advance = (glyph.advanceWidth || 0) * sizeScale;
@@ -86,7 +91,7 @@ for (const phrase of registry.phrases || []) {
       if (bb.x2 > maxX) maxX = bb.x2;
       if (bb.y2 > maxY) maxY = bb.y2;
     }
-    x += advance;
+    x += advance + extraSpacing;
   }
   generated[phrase.key] = paths;
   // Pad the viewBox slightly so strokes don't clip at the edges. The
