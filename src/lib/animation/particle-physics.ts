@@ -61,6 +61,10 @@ interface PhysicsOptions {
   /** outline = bead chain along path perimeter (default).
    *  fill = halftone grid across path's filled area. */
   traceMode: 'outline' | 'fill';
+  /** radial = release fires on first scroll, fly outward (default).
+   *  fall-to-edges = release fires only when origin top crosses viewport
+   *  top, downward-biased angle. */
+  releaseStyle: 'radial' | 'fall-to-edges';
 }
 
 const DEFAULTS: PhysicsOptions = {
@@ -86,6 +90,7 @@ const DEFAULTS: PhysicsOptions = {
   traceOffsetX: 0,
   traceOffsetY: 0,
   traceMode: 'outline',
+  releaseStyle: 'radial',
 };
 
 // Pick a per-particle spawn position based on the `from` enum. Edge values
@@ -169,6 +174,11 @@ interface Particle {
    *  reassigned to a card section's burst — its live-origin rect must
    *  follow the new section, not the hero. Re-snatch swaps this. */
   originEl: HTMLElement;
+  /** Release style copied from the spawning burst (or updated on
+   *  re-snatch). Hero bursts use 'fall-to-edges' so the word scrolls
+   *  naturally before releasing; card bursts use 'radial' so dots
+   *  scatter immediately on scroll. */
+  releaseStyle: 'radial' | 'fall-to-edges';
 }
 
 // Global registry of all live particles across all bursts. Lets the scroll
@@ -246,6 +256,17 @@ function onPhysicsScroll() {
   }
   if (cnt > 0) { cx /= cnt; cy /= cnt; }
 
+  // Cache origin top per element so we measure each unique originEl once
+  const originTopCache = new Map<HTMLElement, number>();
+  const getOriginTop = (el: HTMLElement) => {
+    let t = originTopCache.get(el);
+    if (t === undefined) {
+      t = el.getBoundingClientRect().top;
+      originTopCache.set(el, t);
+    }
+    return t;
+  };
+
   for (const p of allParticles) {
     if (!p.alive) continue;
     // Stuck-on-text release (original behaviour) — drop onto floor
@@ -254,40 +275,41 @@ function onPhysicsScroll() {
       p.collide = false;
       p.vy = 1;
     }
-    // Trace-particle release → fly out from word centre to viewport
-    // edges, then drift. Each particle gets a strong velocity pointing
-    // AWAY from the word centroid at release, so they scatter radially
-    // in all directions (not biased to one edge by the word's vertical
-    // offset on screen).
-    //
-    // Only the FIRST scroll event applies the kick — !p.persistent
-    // means "not yet released". Subsequent scroll events skip the
-    // already-released particle, so the fly-out animation runs at
-    // its own pace from the initial kick rather than being re-driven
-    // by every scroll wheel tick.
-    // Skip particles within 3s of a re-snatch (the same scroll that
-    // triggered the viewport entry shouldn't immediately re-release).
     if (p.isTracing && !p.persistent && p.relaunchedAt < now - 3000) {
+      // Gate per release style:
+      //   radial: release immediately on the first scroll after forming
+      //   fall-to-edges: hold release until the origin element's top has
+      //     crossed the viewport top — the word scrolls naturally up
+      //     with the page first, then disperses once it would otherwise
+      //     leave screen.
+      if (p.releaseStyle === 'fall-to-edges' && getOriginTop(p.originEl) > 0) {
+        continue;
+      }
       p.converge = false;
       p.persistent = true;
       p.collide = false;
-      // Position-based direction (from word centroid) BLENDED with a
-      // wide random jitter (±90° = π/2). Position alone clusters all
-      // dots on the left/right because the formed word is ~5x wider
-      // than it is tall — outward-from-centroid vectors strongly favour
-      // the horizontal axis. Adding random spread disperses them
-      // evenly across all four edges while keeping a soft bias toward
-      // "outward from where you are now".
       const dx = p.x - cx;
       const dy = p.y - cy;
-      const positionAngle = Math.atan2(dy, dx);
-      const jitter = (Math.random() - 0.5) * Math.PI;
-      const angle = positionAngle + jitter;
-      // 14–20 px/frame outward — strong enough that air drag (0.99/f)
-      // still gets particles across the viewport before they decay
-      // into the drift phase. The sin/cos drift in the tick loop then
-      // keeps them alive at the edges.
-      const flySpeed = 14 + Math.random() * 6;
+      let angle: number;
+      let flySpeed: number;
+      if (p.releaseStyle === 'fall-to-edges') {
+        // Downward-biased angle: pick from the lower half of the circle
+        // (π/4 to 3π/4 in atan2 space = downward arc). Particles spray
+        // out the bottom + bottom-corners, drifting down + outward as
+        // gravity carries them. Slightly higher speed so they actually
+        // reach the viewport bottom edge before drag decays them.
+        angle = Math.PI / 4 + Math.random() * (Math.PI / 2);
+        flySpeed = 12 + Math.random() * 8;
+      } else {
+        // Radial fly-out from the word centroid, with ±90° random jitter
+        // so all four viewport edges get particles even though the word's
+        // wide horizontal extent biases position-angle to ±x. The drift
+        // phase in the tick loop keeps them alive at the edges.
+        const positionAngle = Math.atan2(dy, dx);
+        const jitter = (Math.random() - 0.5) * Math.PI;
+        angle = positionAngle + jitter;
+        flySpeed = 14 + Math.random() * 6;
+      }
       p.vx = Math.cos(angle) * flySpeed;
       p.vy = Math.sin(angle) * flySpeed;
     }
@@ -510,6 +532,7 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       // reads THIS burst's rect, not the burst that originally spawned
       // the particle (hero's tick loop owns these particles).
       p.originEl = originEl;
+      p.releaseStyle = opts.releaseStyle;
       p.spawnX = p.x; // re-spawn from current swarm position
       p.spawnY = p.y;
       p.born = now;   // reset age so convergence lerp restarts
@@ -660,6 +683,7 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       destOffsetX: dX - cx,
       destOffsetY: dY - cy,
       originEl,
+      releaseStyle: opts.releaseStyle,
     };
     particles.push(particle);
     allParticles.push(particle);
@@ -946,6 +970,8 @@ function readOptions(el: Element): PhysicsOptions {
   if (get('trace-offset-y')) opts.traceOffsetY = parseFloat(get('trace-offset-y')!);
   const traceModeAttr = get('trace-mode');
   if (traceModeAttr === 'fill') opts.traceMode = 'fill';
+  const releaseStyleAttr = get('release-style');
+  if (releaseStyleAttr === 'fall-to-edges') opts.releaseStyle = 'fall-to-edges';
 
   // Mode-specific defaults — explode/float/orbit ignore collision entirely
   // (the motion shape doesn't want particles snagging on text). For "land
