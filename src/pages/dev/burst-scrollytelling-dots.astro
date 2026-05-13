@@ -25,9 +25,10 @@ const sharedBurstProps = {
   from: 'edges',
   to: 'origin',
   traceSize: 1500,
-  // Anchor is centred in the section's middle 50vh zone (no nearby
-  // text), so letters form right at it — no offset needed.
-  traceOffsetY: 0,
+  // Letters form ~350px ABOVE the burst anchor. Each section's anchor
+  // sits at the bottom of the section (button or invisible spacer);
+  // letters land in the empty space above, clear of any text.
+  traceOffsetY: -350,
   particle: { component: 'Shape', shape: 'circle', size: 'xs' },
 };
 
@@ -129,27 +130,28 @@ const data = {
 </BaseLayout>
 
 <style is:global>
+  /* Section layout: heading + caption at top, big empty zone in the
+     middle (where the letters form), anchor/button at the bottom.
+     traceOffsetY: -350 pushes the dots up from the anchor into the
+     empty middle zone. */
   .scrolly-section {
     min-height: 100vh;
     display: grid;
-    grid-template-rows: auto auto 1fr;
-    align-items: start;
+    grid-template-rows: auto auto 1fr auto;
     padding: var(--space-xl, 4rem) var(--space-lg, 2rem);
     gap: var(--space-md, 1.5rem);
     text-align: center;
     justify-items: center;
+    align-items: start;
   }
-  /* Burst wrapper itself takes the middle empty space — anchor lives
-     inside it, gets its centre from the section grid row 3 (1fr). */
   .scrolly-section .burst {
-    align-self: center;
+    grid-row: 4;
+    align-self: end;
     justify-self: center;
-    grid-row: 3;
-    min-width: 100px;
-    min-height: 100px;
+    margin-bottom: var(--space-xl, 4rem);
   }
-  /* Invisible anchor — gives getBoundingClientRect something to measure
-     without rendering a visible centre element where the letters will be. */
+  /* Invisible anchor — gives getBoundingClientRect a stable measurement
+     in the section's grid row 4 without rendering visible content. */
   .scrolly-anchor {
     min-width: 100px;
     min-height: 100px;
