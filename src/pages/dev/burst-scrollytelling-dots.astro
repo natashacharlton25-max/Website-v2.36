@@ -123,9 +123,11 @@ const data = {
     gap: var(--space-lg, 2rem);
     padding: var(--space-xl, 4rem) var(--space-lg, 2rem);
   }
-  /* Each pinned section is just a centred Burst wrapper that
-     ScrollTrigger pins for 800px of scroll. The wrapper's centre is
-     the pinned-position-on-screen where letters form. */
+  /* Each pinned section is centred on viewport. The Burst wrapper +
+     anchor child both need REAL block dimensions so getBoundingClientRect
+     gives a centred rect for the pinned position. Text spans default to
+     inline → 0 width → engine reads rect at the LEFT edge. Forcing
+     inline-block + explicit size fixes that. */
   .scrolly-pin {
     min-height: 50vh;
     display: flex;
@@ -133,14 +135,14 @@ const data = {
     align-items: center;
   }
   .scrolly-pin .burst {
-    display: block;
-    width: 1px;
-    height: 1px;
+    display: inline-block;
+    width: 100px;
+    height: 100px;
   }
   .scrolly-anchor {
-    display: block;
-    width: 1px;
-    height: 1px;
+    display: inline-block;
+    width: 100px;
+    height: 100px;
   }
   .scrolly-outro {
     min-height: 50vh;

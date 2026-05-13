@@ -1362,7 +1362,7 @@ export function initParticleString(): void {
         ]);
         gsap.registerPlugin(ScrollTrigger);
         const osScroller = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]');
-        const dwellMs = 2000;
+        const dwellMs = 1000;
         let dwellTimer: ReturnType<typeof setTimeout> | null = null;
         let inPin = false;
         const startDwell = () => {
