@@ -350,14 +350,40 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     const traceFrame = computeTraceFrame(opts.tracePaths, opts.traceSize);
     const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
     const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
-    const samplesPerPath = Math.ceil(opts.count / opts.tracePaths.length);
-    const perPath: { x: number; y: number }[][] = [];
-    for (const pathData of opts.tracePaths) {
-      const sampled = samplePath(pathData, samplesPerPath, offsetX, offsetY, traceFrame);
-      perPath.push(sampled.points);
+
+    // Per-letter sample counts must be proportional to each letter's
+    // outline perimeter — otherwise a wide 'm' and a thin 'i' both get
+    // the same N dots, so 'm' reads sparse while 'i' reads dense.
+    // Measure each path's length once, then allocate samples by share
+    // of total perimeter (min 8 so even tiny letters trace).
+    const lengths: number[] = [];
+    const tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    tmpSvg.style.position = 'absolute';
+    tmpSvg.style.left = '-9999px';
+    document.body.appendChild(tmpSvg);
+    for (const d of opts.tracePaths) {
+      const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pe.setAttribute('d', d);
+      tmpSvg.appendChild(pe);
+      lengths.push(pe.getTotalLength());
     }
-    // Interleave: round-robin across letters
-    for (let i = 0; i < samplesPerPath; i++) {
+    document.body.removeChild(tmpSvg);
+    const totalLen = lengths.reduce((a, b) => a + b, 0) || 1;
+
+    const perPath: { x: number; y: number }[][] = [];
+    const sampleCounts: number[] = [];
+    for (let i = 0; i < opts.tracePaths.length; i++) {
+      const share = lengths[i] / totalLen;
+      const n = Math.max(8, Math.round(opts.count * share));
+      sampleCounts.push(n);
+      perPath.push(samplePath(opts.tracePaths[i], n, offsetX, offsetY, traceFrame).points);
+    }
+
+    // Interleave by round-robin so partial particle counts (e.g. eviction
+    // mid-fill) still cover every letter. Keeps drawing each letter at
+    // roughly equal pace as particles get assigned.
+    const maxSamples = Math.max(...sampleCounts);
+    for (let i = 0; i < maxSamples; i++) {
       for (let path = 0; path < perPath.length; path++) {
         const pt = perPath[path][i];
         if (pt) traceDests.push(pt);
