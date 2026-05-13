@@ -231,9 +231,15 @@ function onPhysicsScroll() {
     // them as they travel; sinusoidal drift in the gravity branch
     // takes over once they've slowed, keeping them gently wandering
     // at the edges until re-snatched by the next viewport-trigger.
+    //
+    // Only the FIRST scroll event applies the kick — !p.persistent
+    // means "not yet released". Subsequent scroll events skip the
+    // already-released particle, so the fly-out animation runs at
+    // its own pace from the initial kick rather than being re-driven
+    // by every scroll wheel tick.
     // Skip particles within 3s of a re-snatch (the same scroll that
     // triggered the viewport entry shouldn't immediately re-release).
-    if (p.isTracing && p.relaunchedAt < now - 3000) {
+    if (p.isTracing && !p.persistent && p.relaunchedAt < now - 3000) {
       p.converge = false;
       p.persistent = true;
       p.collide = false;
