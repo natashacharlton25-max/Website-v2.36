@@ -351,11 +351,9 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
     const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
 
-    // Per-letter sample counts must be proportional to each letter's
-    // outline perimeter — otherwise a wide 'm' and a thin 'i' both get
-    // the same N dots, so 'm' reads sparse while 'i' reads dense.
-    // Measure each path's length once, then allocate samples by share
-    // of total perimeter (min 8 so even tiny letters trace).
+    // Measure each letter's outline perimeter so we can allocate samples
+    // proportionally — wide letters need more dots than narrow ones to
+    // keep per-pixel density constant across the word.
     const lengths: number[] = [];
     const tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     tmpSvg.style.position = 'absolute';
@@ -370,18 +368,27 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     document.body.removeChild(tmpSvg);
     const totalLen = lengths.reduce((a, b) => a + b, 0) || 1;
 
+    // Two-phase allocation. Phase 1: every letter gets a minimum quota
+    // so even the shortest letter renders recognisably. Phase 2: the
+    // remaining budget is distributed by perimeter share. Without phase
+    // 1, very long phrases (W..with..Smile, 17 letters) starve short
+    // letters when the cap kicks in — sample-0 of long letters take
+    // precedence in round-robin, and short letters get cut off entirely.
+    const MIN_PER_LETTER = Math.max(20, Math.floor(opts.count * 0.4 / opts.tracePaths.length));
+    const minBudget = MIN_PER_LETTER * opts.tracePaths.length;
+    const shareBudget = Math.max(0, opts.count - minBudget);
     const perPath: { x: number; y: number }[][] = [];
     const sampleCounts: number[] = [];
     for (let i = 0; i < opts.tracePaths.length; i++) {
       const share = lengths[i] / totalLen;
-      const n = Math.max(8, Math.round(opts.count * share));
+      const n = MIN_PER_LETTER + Math.round(shareBudget * share);
       sampleCounts.push(n);
       perPath.push(samplePath(opts.tracePaths[i], n, offsetX, offsetY, traceFrame).points);
     }
 
-    // Interleave by round-robin so partial particle counts (e.g. eviction
-    // mid-fill) still cover every letter. Keeps drawing each letter at
-    // roughly equal pace as particles get assigned.
+    // Interleave so every letter contributes its first samples before
+    // any letter gets its second batch — ensures full word legibility
+    // even if particles run out mid-fill.
     const maxSamples = Math.max(...sampleCounts);
     for (let i = 0; i < maxSamples; i++) {
       for (let path = 0; path < perPath.length; path++) {
