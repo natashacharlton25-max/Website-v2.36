@@ -397,7 +397,15 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     const sampleCounts: number[] = [];
     for (const d of opts.tracePaths) {
       const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      pe.setAttribute('d', d);
+      // opentype.js emits paths WITHOUT Z (close) markers — TrueType
+      // contours are inherently closed but SVG fill detection wants
+      // explicit closure. Without Z, isPointInFill on the implicit
+      // closing edge behaves inconsistently — some cells along the
+      // edge that should be "inside" return false, leaving gaps in the
+      // fill. Insert a Z before every subpath's M so each contour is
+      // properly closed.
+      const closed = d.replace(/(?<!^)(?=[Mm])/g, 'Z') + 'Z';
+      pe.setAttribute('d', closed);
       // Even-odd fill rule so inner counters (a, e, o) read as holes
       pe.setAttribute('fill-rule', 'evenodd');
       tmpSvg.appendChild(pe);
