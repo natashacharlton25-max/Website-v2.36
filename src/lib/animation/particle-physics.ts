@@ -140,6 +140,19 @@ interface Particle {
   spawnY: number;
   destX: number;
   destY: number;
+  /** True if the particle should NOT auto-remove via its age check.
+   *  Set by the scroll-release handler on tracePath physics bursts so
+   *  the swarm persists between sections of the scrollytelling loop. */
+  persistent: boolean;
+  /** performance.now() when this particle was re-snatched. Scroll
+   *  handler skips release for 3s after re-snatch so the same scroll
+   *  that triggered the viewport doesn't immediately re-release them. */
+  relaunchedAt: number;
+  /** True when this particle is a tracePath particle (forms letters).
+   *  Tracked separately from converge because converge gets cleared
+   *  on scroll-release for swarm mode but we still need to know
+   *  this particle belongs to a trace burst (so re-snatch can find it). */
+  isTracing: boolean;
 }
 
 // Global registry of all live particles across all bursts. Lets the scroll
@@ -200,12 +213,31 @@ window.addEventListener('resize', () => { rectsCachedAt = 0; });
 // Site uses OverlayScrollbars: the scroll element is
 // [data-overlayscrollbars-viewport], NOT window. Bind both.
 function onPhysicsScroll() {
-  if (!allParticles.some(p => p.alive && p.stuckOnText)) return;
+  if (!allParticles.some(p => p.alive && (p.stuckOnText || p.isTracing))) return;
+  const now = performance.now();
   for (const p of allParticles) {
-    if (!p.alive || !p.stuckOnText) continue;
-    p.stuckOnText = false;
-    p.collide = false;
-    p.vy = 1; // small downward kick so gravity takes over instantly
+    if (!p.alive) continue;
+    // Stuck-on-text release (original behaviour) — drop onto floor
+    if (p.stuckOnText) {
+      p.stuckOnText = false;
+      p.collide = false;
+      p.vy = 1;
+    }
+    // Trace-particle release → swarm. Mirrors the string-engine
+    // scrollytelling loop: dots that just formed a letter detach into
+    // a free-drifting cloud, persistent so they wait between sections
+    // ready to be re-snatched by the next viewport-trigger burst.
+    // Skip particles within 3s of a re-snatch (the same scroll that
+    // triggered the viewport entry shouldn't immediately re-release).
+    if (p.isTracing && p.relaunchedAt < now - 3000) {
+      p.converge = false;
+      p.persistent = true;
+      p.collide = false;
+      // Small random velocity → drifts naturally instead of stopping
+      // dead. ±0.8 px/frame each axis = gentle wander.
+      p.vx = (Math.random() - 0.5) * 1.6;
+      p.vy = (Math.random() - 0.5) * 1.6;
+    }
   }
 }
 window.addEventListener('scroll', onPhysicsScroll, { passive: true });
@@ -269,6 +301,38 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       const sampled = samplePath(pathData, samplesPerPath, offsetX, offsetY, traceFrame);
       traceDests.push(...sampled.points);
     }
+  }
+
+  // Scrollytelling re-snatch: if there are persistent trace particles
+  // from a previous scroll-release, repurpose them instead of spawning
+  // new. Same physical dots travel through the narrative — form word 1,
+  // swarm, form word 2, swarm, form word 3...
+  const persistentParticles = traceDests.length > 0
+    ? allParticles.filter(p => p.alive && p.persistent && p.isTracing)
+    : [];
+  if (persistentParticles.length > 0) {
+    const now = performance.now();
+    for (let i = 0; i < persistentParticles.length; i++) {
+      const p = persistentParticles[i];
+      const dest = traceDests[i % traceDests.length];
+      p.destX = dest.x;
+      p.destY = dest.y;
+      p.spawnX = p.x; // re-spawn from current swarm position
+      p.spawnY = p.y;
+      p.born = now;   // reset age so convergence lerp restarts
+      p.converge = true;
+      p.persistent = false;
+      p.relaunchedAt = now;
+      // Re-aim velocity at the new dest. The convergence branch lerps
+      // from spawn to dest regardless of vx/vy, so this is mostly for
+      // any non-converge frames during the transition.
+      const travelFrames = Math.max(20, (opts.lifespan / 1000) * 60 * 0.7);
+      p.vx = (dest.x - p.x) / travelFrames;
+      p.vy = (dest.y - p.y) / travelFrames;
+    }
+    // Re-snatch is a full replacement — return early so the normal
+    // particle creation loop doesn't double-spawn fresh dots on top.
+    return;
   }
 
   for (let i = 0; i < opts.count; i++) {
@@ -387,6 +451,9 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       spawnY,
       destX: dX,
       destY: dY,
+      persistent: false,
+      relaunchedAt: 0,
+      isTracing,
     };
     particles.push(particle);
     allParticles.push(particle);
@@ -405,7 +472,10 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       if (age < 0) continue;
       // lifespan === 0 means persistent — particle never auto-removes
       // (still subject to active-particle cap eviction).
-      if (opts.lifespan > 0 && age > opts.lifespan) {
+      // Also skip removal for scroll-release-persistent particles
+      // (scrollytelling loop) — they swarm between sections and get
+      // re-snatched on viewport-trigger.
+      if (opts.lifespan > 0 && age > opts.lifespan && !p.persistent) {
         p.el.remove();
         p.alive = false;
         const gIdx = allParticles.indexOf(p);
@@ -443,8 +513,13 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
         continue;
       }
 
-      // Gravity branched by mode
-      if (opts.mode === 'float') {
+      // Gravity branched by mode. Persistent trace-released particles
+      // (scrollytelling swarm) get sinusoidal drift like float mode so
+      // they wander in space between sections instead of falling.
+      if (p.persistent) {
+        p.vx += Math.sin(now / 700 + p.driftSeed) * 0.05;
+        p.vy += Math.cos(now / 900 + p.driftSeed * 1.3) * 0.05;
+      } else if (opts.mode === 'float') {
         // Negative gravity (rise) + sinusoidal horizontal drift seeded
         // per-particle so they don't sway in unison.
         p.vy -= opts.gravity * 0.4;
@@ -637,7 +712,27 @@ export function initParticlePhysics(): void {
       }
     };
 
-    if (opts.trigger === 'hover') {
+    if (opts.trigger === 'viewport') {
+      // Fire on viewport entry via GSAP ScrollTrigger. Same pattern as
+      // the string engine's viewport trigger — onEnter + onEnterBack
+      // both call fire() so the scrollytelling loop works in either
+      // scroll direction.
+      (async () => {
+        const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ]);
+        gsap.registerPlugin(ScrollTrigger);
+        const osScroller = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]');
+        ScrollTrigger.create({
+          trigger: htmlEl,
+          scroller: osScroller || undefined,
+          start: 'top 80%',
+          onEnter: () => fire(new Event('viewport')),
+          onEnterBack: () => fire(new Event('viewport')),
+        });
+      })();
+    } else if (opts.trigger === 'hover') {
       let cooldown = false;
       htmlEl.addEventListener('mouseenter', (e) => {
         if (cooldown) return;

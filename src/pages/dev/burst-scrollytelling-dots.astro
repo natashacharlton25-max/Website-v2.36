@@ -1,0 +1,143 @@
+---
+/**
+ * Burst scrollytelling — DOTS variant.
+ *
+ * Same loop pattern as /dev/burst-scrollytelling but with the physics
+ * engine instead of strings. Each particle is a small CSS circle (or
+ * any Shape). On click → particles converge to letter-outline points,
+ * forming the word. On scroll → particles release and SWARM (drift in
+ * space, not fall to floor — different from the string variant). On
+ * next viewport entry → same particles re-aim at new outline points.
+ *
+ * Tests:
+ *   - tracePath sampling on physics engine
+ *   - trigger='viewport' via GSAP ScrollTrigger on physics
+ *   - persistent + relaunchedAt + re-snatch logic mirroring strings
+ *   - Swarm-between-sections via sinusoidal drift in tick loop
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Renderer from '../../components/Renderer.astro';
+
+const sharedBurstProps = {
+  engine: 'physics',
+  palette: 'rainbow',
+  count: 220,
+  spread: 100,
+  gravity: 0,
+  lifespan: 8000,
+  collide: false,
+  from: 'edges',
+  to: 'origin',
+  traceSize: 500,
+  traceOffsetY: -120,
+  particle: { component: 'Shape', shape: 'circle', size: 'xs' },
+};
+
+const data = {
+  component: 'Page',
+  children: [
+    // Section 1 — click to start
+    {
+      component: 'Section',
+      container: '7xl',
+      gap: 'lg',
+      class: 'scrolly-section scrolly-start',
+      children: [
+        { component: 'Heading', level: 1, contentHeading: 'Scrollytelling dot loop', size: 'xl' },
+        {
+          component: 'Text',
+          contentText: 'Click the button. ~220 rainbow dots fly in from viewport edges and converge on letter-outline points to form "WELCOME". Scroll down → dots release and swarm freely. Next section → same dots fly to form "Hello". Loop.',
+        },
+        {
+          ...sharedBurstProps,
+          component: 'Burst',
+          tracePath: 'phrase:welcome',
+          trigger: 'click',
+          children: [
+            { component: 'Button', contentButton: 'Begin', variant: 'fill', brandColor: 'primary', size: 'lg' },
+          ],
+        },
+      ],
+    },
+    // Section 2 — auto-fire on viewport entry → form "Hello"
+    {
+      component: 'Section',
+      container: '7xl',
+      gap: 'lg',
+      class: 'scrolly-section',
+      children: [
+        { component: 'Heading', level: 2, contentHeading: 'Scroll triggered →', size: 'lg' },
+        { component: 'Text', contentText: 'The same dots swarm in from wherever they were and re-form around "Hello".' },
+        {
+          ...sharedBurstProps,
+          component: 'Burst',
+          tracePath: 'phrase:hello',
+          trigger: 'viewport',
+          children: [
+            { component: 'Text', contentText: '(target)', size: 'sm' },
+          ],
+        },
+      ],
+    },
+    // Section 3 — back to "WELCOME"
+    {
+      component: 'Section',
+      container: '7xl',
+      gap: 'lg',
+      class: 'scrolly-section',
+      children: [
+        { component: 'Heading', level: 2, contentHeading: 'Loop continues →', size: 'lg' },
+        { component: 'Text', contentText: 'Same physical dots, re-aimed at each new letter outline.' },
+        {
+          ...sharedBurstProps,
+          component: 'Burst',
+          tracePath: 'phrase:welcome',
+          trigger: 'viewport',
+          children: [
+            { component: 'Text', contentText: '(target)', size: 'sm' },
+          ],
+        },
+      ],
+    },
+    // Section 4 — form "Hello" again
+    {
+      component: 'Section',
+      container: '7xl',
+      gap: 'lg',
+      class: 'scrolly-section',
+      children: [
+        { component: 'Heading', level: 2, contentHeading: 'And again →', size: 'lg' },
+        { component: 'Text', contentText: 'Scroll back up — onEnterBack re-fires earlier sections too.' },
+        {
+          ...sharedBurstProps,
+          component: 'Burst',
+          tracePath: 'phrase:hello',
+          trigger: 'viewport',
+          children: [
+            { component: 'Text', contentText: '(target)', size: 'sm' },
+          ],
+        },
+      ],
+    },
+  ],
+};
+---
+
+<BaseLayout title="Burst scrollytelling — Dots demo">
+  <Renderer node={data} />
+</BaseLayout>
+
+<style is:global>
+  .scrolly-section {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-lg, 2rem);
+  }
+  .scrolly-start {
+    min-height: 100vh;
+  }
+</style>
