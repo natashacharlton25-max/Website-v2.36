@@ -1371,7 +1371,11 @@ export function initParticleString(): void {
         ScrollTrigger.create({
           trigger: htmlEl,
           scroller: osScroller || undefined,
-          start: 'top 80%',
+          // Fire EARLY — when the section is just entering viewport
+          // from below. Gives the fly-in / re-snatch flight time to
+          // complete before the user has fully scrolled into the
+          // section.
+          start: 'top bottom',
           onEnter: () => fire(new Event('viewport')),
           onEnterBack: () => fire(new Event('viewport')),
         });
