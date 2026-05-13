@@ -1348,8 +1348,48 @@ export function initParticleString(): void {
     const trigger = triggerVal === 'hover' ? 'hover'
                   : triggerVal === 'hover-hold' ? 'hover-hold'
                   : triggerVal === 'viewport' ? 'viewport'
+                  : triggerVal === 'pin' ? 'pin'
                   : 'click';
-    if (trigger === 'viewport') {
+    if (trigger === 'pin') {
+      // Scrollytelling pin: same pattern as particle-physics. Wrapper
+      // pins at top of viewport for a scroll range, fires after 2s
+      // dwell, releases on leave. Letters always form at the SAME
+      // pinned viewport position.
+      (async () => {
+        const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ]);
+        gsap.registerPlugin(ScrollTrigger);
+        const osScroller = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]');
+        const dwellMs = 2000;
+        let dwellTimer: ReturnType<typeof setTimeout> | null = null;
+        let inPin = false;
+        const startDwell = () => {
+          inPin = true;
+          if (dwellTimer) clearTimeout(dwellTimer);
+          dwellTimer = setTimeout(() => {
+            if (inPin) fire(new Event('pin'));
+          }, dwellMs);
+        };
+        const cancelDwell = () => {
+          inPin = false;
+          if (dwellTimer) { clearTimeout(dwellTimer); dwellTimer = null; }
+        };
+        ScrollTrigger.create({
+          trigger: htmlEl,
+          scroller: osScroller || undefined,
+          start: 'top top',
+          end: '+=800',
+          pin: true,
+          pinSpacing: true,
+          onEnter: startDwell,
+          onEnterBack: startDwell,
+          onLeave: cancelDwell,
+          onLeaveBack: cancelDwell,
+        });
+      })();
+    } else if (trigger === 'viewport') {
       // Fire on viewport entry via GSAP ScrollTrigger. onEnter fires the
       // first time the wrapper scrolls into view from below; onEnterBack
       // fires when the user scrolls back UP to it from a section below.

@@ -1,15 +1,13 @@
 ---
 /**
- * Burst scrollytelling — DOTS variant.
+ * Burst scrollytelling — DOTS variant, PIN model.
  *
- * Layout: each section is 100vh tall. Top 30vh = heading + caption.
- * Middle 50vh = empty zone for the Burst (anchor div centred there
- * with no visible content of its own — letters form around it).
- * Bottom 20vh = breathing room before next section.
- *
- * The anchor div has display:block + min-height so getBoundingClientRect
- * gives sensible centre for the convergence target. Each section's
- * anchor sits in a known empty space → letters don't overlap text.
+ * Each scrollytelling Burst pins at the top of viewport for an 800px
+ * scroll range. After a 2s dwell (so fast-scrolling past doesn't
+ * trigger), the animation fires and dots converge to form the word
+ * at the pinned position. When the user scrolls past the pin range,
+ * dots release and fly out to viewport edges. Next pinned Burst
+ * picks them up and re-forms the next word at ITS pinned position.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Renderer from '../../components/Renderer.astro';
@@ -25,36 +23,23 @@ const sharedBurstProps = {
   from: 'edges',
   to: 'origin',
   traceSize: 1500,
-  // Letters form ~350px ABOVE the burst anchor. Each section's anchor
-  // sits at the bottom of the section (button or invisible spacer);
-  // letters land in the empty space above, clear of any text.
-  traceOffsetY: -350,
   particle: { component: 'Shape', shape: 'circle', size: 'xs' },
-};
-
-// Reusable anchor — invisible centred block that gives the Burst a
-// stable rect for the convergence target. min-height + visibility:
-// hidden makes it take up space without rendering content.
-const anchor = {
-  component: 'Section',
-  class: 'scrolly-anchor',
-  children: [{ component: 'Text', contentText: '·', class: 'scrolly-anchor-dot' }],
 };
 
 const data = {
   component: 'Page',
   children: [
-    // Section 1 — click to start
+    // Intro section — explainer + click to start
     {
       component: 'Section',
       container: '7xl',
       gap: 'lg',
-      class: 'scrolly-section',
+      class: 'scrolly-intro',
       children: [
         { component: 'Heading', level: 1, contentHeading: 'Scrollytelling dot loop', size: 'xl' },
         {
           component: 'Text',
-          contentText: 'Click Begin. 1000 dots converge to form WELCOME below. Scroll → dots scatter to edges. Each new section → dots re-form the next word in the empty zone.',
+          contentText: 'Click Begin to form WELCOME. Then scroll down — each pinned section dwells 2s, fires the burst, holds for the scroll range, releases dots into a swarm at the edges. The same 1000 physical dots travel through the whole narrative.',
         },
         {
           ...sharedBurstProps,
@@ -67,58 +52,56 @@ const data = {
         },
       ],
     },
-    // Section 2 — auto-fire on viewport → "Hello"
+    // Pinned scrollytelling sections — each pins, dwells, fires
     {
       component: 'Section',
       container: '7xl',
-      gap: 'md',
-      class: 'scrolly-section',
+      class: 'scrolly-pin',
       children: [
-        { component: 'Heading', level: 2, contentHeading: 'Scroll triggered →', size: 'lg' },
-        { component: 'Text', contentText: 'The same 1000 dots fly in and re-form around "Hello".' },
         {
           ...sharedBurstProps,
           component: 'Burst',
           tracePath: 'phrase:hello',
-          trigger: 'viewport',
-          children: [anchor],
+          trigger: 'pin',
+          children: [{ component: 'Text', contentText: ' ', class: 'scrolly-anchor' }],
         },
       ],
     },
-    // Section 3 — back to "WELCOME"
     {
       component: 'Section',
       container: '7xl',
-      gap: 'md',
-      class: 'scrolly-section',
+      class: 'scrolly-pin',
       children: [
-        { component: 'Heading', level: 2, contentHeading: 'Loop continues →', size: 'lg' },
-        { component: 'Text', contentText: 'Same physical dots, re-aimed at each new letter outline.' },
         {
           ...sharedBurstProps,
           component: 'Burst',
           tracePath: 'phrase:welcome',
-          trigger: 'viewport',
-          children: [anchor],
+          trigger: 'pin',
+          children: [{ component: 'Text', contentText: ' ', class: 'scrolly-anchor' }],
         },
       ],
     },
-    // Section 4 — form "Hello" again
     {
       component: 'Section',
       container: '7xl',
-      gap: 'md',
-      class: 'scrolly-section',
+      class: 'scrolly-pin',
       children: [
-        { component: 'Heading', level: 2, contentHeading: 'And again →', size: 'lg' },
-        { component: 'Text', contentText: 'Scroll back up — onEnterBack re-fires earlier sections too.' },
         {
           ...sharedBurstProps,
           component: 'Burst',
           tracePath: 'phrase:hello',
-          trigger: 'viewport',
-          children: [anchor],
+          trigger: 'pin',
+          children: [{ component: 'Text', contentText: ' ', class: 'scrolly-anchor' }],
         },
+      ],
+    },
+    // Outro — give the page some scroll room after the last pin
+    {
+      component: 'Section',
+      container: '7xl',
+      class: 'scrolly-outro',
+      children: [
+        { component: 'Text', contentText: 'End of narrative.' },
       ],
     },
   ],
@@ -130,32 +113,41 @@ const data = {
 </BaseLayout>
 
 <style is:global>
-  /* Section layout: heading + caption at top, big empty zone in the
-     middle (where the letters form), anchor/button at the bottom.
-     traceOffsetY: -350 pushes the dots up from the anchor into the
-     empty middle zone. */
-  .scrolly-section {
+  .scrolly-intro {
     min-height: 100vh;
-    display: grid;
-    grid-template-rows: auto auto 1fr auto;
-    padding: var(--space-xl, 4rem) var(--space-lg, 2rem);
-    gap: var(--space-md, 1.5rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    justify-items: center;
-    align-items: start;
+    gap: var(--space-lg, 2rem);
+    padding: var(--space-xl, 4rem) var(--space-lg, 2rem);
   }
-  .scrolly-section .burst {
-    grid-row: 4;
-    align-self: end;
-    justify-self: center;
-    margin-bottom: var(--space-xl, 4rem);
+  /* Each pinned section is just a centred Burst wrapper that
+     ScrollTrigger pins for 800px of scroll. The wrapper's centre is
+     the pinned-position-on-screen where letters form. */
+  .scrolly-pin {
+    min-height: 50vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
-  /* Invisible anchor — gives getBoundingClientRect a stable measurement
-     in the section's grid row 4 without rendering visible content. */
-  .scrolly-anchor {
-    min-width: 100px;
-    min-height: 100px;
+  .scrolly-pin .burst {
     display: block;
-    visibility: hidden;
+    width: 1px;
+    height: 1px;
+  }
+  .scrolly-anchor {
+    display: block;
+    width: 1px;
+    height: 1px;
+  }
+  .scrolly-outro {
+    min-height: 50vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--neutral-700, #555);
+    text-align: center;
   }
 </style>

@@ -43,7 +43,7 @@ interface PhysicsOptions {
    *  clumping on the nearest one. 1 = original "stick on first contact". */
   stickiness: number;
   templates: HTMLTemplateElement[];
-  trigger: 'click' | 'hover' | 'hover-hold' | 'viewport';
+  trigger: 'click' | 'hover' | 'hover-hold' | 'viewport' | 'pin';
   from: SpawnFrom;
   to: SpawnTo;
   /** Element matched by `target` selector (resolved at spawn time). When
@@ -153,13 +153,6 @@ interface Particle {
    *  on scroll-release for swarm mode but we still need to know
    *  this particle belongs to a trace burst (so re-snatch can find it). */
   isTracing: boolean;
-  /** Dest position stored as an OFFSET from the burst origin element's
-   *  centre, so the actual destX/destY can be recomputed each tick as
-   *  the page scrolls. Without this, letters formed at a fixed viewport
-   *  position based on where the section was at trigger time — and as
-   *  the user kept scrolling, the letters drifted off the section. */
-  destOffsetX: number;
-  destOffsetY: number;
 }
 
 // Global registry of all live particles across all bursts. Lets the scroll
@@ -380,10 +373,6 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       const dest = traceDests[i % traceDests.length];
       p.destX = dest.x;
       p.destY = dest.y;
-      // Offset from the NEW burst's origin centre — tick will re-track
-      // this section's position as the user keeps scrolling.
-      p.destOffsetX = dest.x - cx;
-      p.destOffsetY = dest.y - cy;
       p.spawnX = p.x; // re-spawn from current swarm position
       p.spawnY = p.y;
       p.born = now;   // reset age so convergence lerp restarts
@@ -526,11 +515,6 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       persistent: false,
       relaunchedAt: 0,
       isTracing,
-      // Offset of dest from the burst origin centre — tick re-computes
-      // destX/destY each frame from origin's CURRENT position so letters
-      // track the section as the user scrolls past the trigger point.
-      destOffsetX: dX - cx,
-      destOffsetY: dY - cy,
     };
     particles.push(particle);
     allParticles.push(particle);
@@ -540,18 +524,6 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
   function tick(now: number) {
     const rects = opts.collide ? getCollisionRects() : [];
     let anyAlive = false;
-
-    // Read live origin centre ONCE per tick so all tracePath particles
-    // can re-aim their destination at the section's CURRENT viewport
-    // position. Without this, letters formed where the section happened
-    // to be at trigger time and drifted off as the user kept scrolling.
-    let liveOriginCx = cx;
-    let liveOriginCy = cy;
-    if (opts.tracePaths.length > 0) {
-      const r = originEl.getBoundingClientRect();
-      liveOriginCx = r.left + r.width / 2;
-      liveOriginCy = r.top + r.height / 2;
-    }
 
     for (const p of particles) {
       if (!p.alive) continue;
@@ -610,14 +582,6 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
         }
         const t = Math.min(age / arrivalAge, 1);
         const ease = 1 - (1 - t) * (1 - t); // ease-out quad
-        // For tracePath particles, re-aim dest at the LIVE origin
-        // centre + stored offset every frame so letters track the
-        // section as the user scrolls. For other converge modes the
-        // origin is static (button click), no change in dest.
-        if (p.isTracing) {
-          p.destX = liveOriginCx + p.destOffsetX;
-          p.destY = liveOriginCy + p.destOffsetY;
-        }
         p.x = p.spawnX + (p.destX - p.spawnX) * ease;
         p.y = p.spawnY + (p.destY - p.spawnY) * ease;
         p.rotation += p.spin * (1 - t * 0.7); // spin slows as particle arrives
@@ -803,6 +767,7 @@ function readOptions(el: Element): PhysicsOptions {
   if (triggerAttr === 'hover') opts.trigger = 'hover';
   else if (triggerAttr === 'hover-hold') opts.trigger = 'hover-hold';
   else if (triggerAttr === 'viewport') opts.trigger = 'viewport';
+  else if (triggerAttr === 'pin') opts.trigger = 'pin';
 
   // tracePath sampling — same data-attribute shape as the string engine
   // (pipe-joined SVG paths via data-particle-trace, scale via -size,
@@ -852,7 +817,59 @@ export function initParticlePhysics(): void {
       }
     };
 
-    if (opts.trigger === 'viewport') {
+    if (opts.trigger === 'pin') {
+      // Scrollytelling pin: the burst wrapper sticks at top of viewport
+      // for a scroll range, the burst fires AFTER a dwell period (so
+      // fast-scrolling past doesn't trigger the animation), and the
+      // dots release on leave (user scrolls past the pin range).
+      //
+      // This is the canonical scrollytelling pattern — letters always
+      // form at the SAME pinned viewport position, no chasing moving
+      // sections, no per-Burst layout choreography.
+      (async () => {
+        const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+          import('gsap'),
+          import('gsap/ScrollTrigger'),
+        ]);
+        gsap.registerPlugin(ScrollTrigger);
+        const osScroller = document.querySelector<HTMLElement>('[data-overlayscrollbars-viewport]');
+        const dwellMs = 2000;
+        let dwellTimer: ReturnType<typeof setTimeout> | null = null;
+        let inPin = false;
+        const startDwell = () => {
+          inPin = true;
+          if (dwellTimer) clearTimeout(dwellTimer);
+          dwellTimer = setTimeout(() => {
+            if (inPin) fire(new Event('pin'));
+          }, dwellMs);
+        };
+        const cancelDwell = () => {
+          inPin = false;
+          if (dwellTimer) { clearTimeout(dwellTimer); dwellTimer = null; }
+        };
+        ScrollTrigger.create({
+          trigger: htmlEl,
+          scroller: osScroller || undefined,
+          start: 'top top',
+          end: '+=800',
+          pin: true,
+          pinSpacing: true,
+          onEnter: startDwell,
+          onEnterBack: startDwell,
+          onLeave: () => {
+            cancelDwell();
+            // Fire a synthetic scroll to release dots into swarm — the
+            // scroll handler picks up isTracing particles and applies
+            // the outward kick.
+            onPhysicsScroll();
+          },
+          onLeaveBack: () => {
+            cancelDwell();
+            onPhysicsScroll();
+          },
+        });
+      })();
+    } else if (opts.trigger === 'viewport') {
       // Fire on viewport entry via GSAP ScrollTrigger. Same pattern as
       // the string engine's viewport trigger — onEnter + onEnterBack
       // both call fire() so the scrollytelling loop works in either
