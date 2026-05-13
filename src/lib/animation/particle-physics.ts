@@ -371,13 +371,20 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
   // still covers every letter — without interleaving, the first 200
   // would all clump on the first letter.
   let traceDests: { x: number; y: number }[] = [];
-  if (opts.tracePaths.length > 0 && opts.traceMode === 'fill') {
+  // Trace frame is computed once for any trace burst — both fill and
+  // outline modes use it. Hoisted out so the spawn loop can also read
+  // traceFrame.scale to size particles relative to the rendered letter
+  // height (bigger letters need bigger dots to keep dot-pitch full).
+  let traceFrame: ReturnType<typeof computeTraceFrame> | null = null;
+  if (opts.tracePaths.length > 0) {
+    traceFrame = computeTraceFrame(opts.tracePaths, opts.traceSize);
+  }
+  if (opts.tracePaths.length > 0 && opts.traceMode === 'fill' && traceFrame) {
     // Dot-matrix font detection: if glyphs have many subpaths (>5
     // per letter), the font itself is built from dot-shaped contours
     // (e.g. Doto). In that case use one particle per subpath centroid
     // — 1:1 with the font's design, no grid sampling. Otherwise fall
     // through to halftone grid scan for continuous-stroke fonts.
-    const traceFrame = computeTraceFrame(opts.tracePaths, opts.traceSize);
     const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
     const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
 
@@ -471,7 +478,7 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       }
       traceDests = thinned;
     }
-  } else if (opts.tracePaths.length > 0) {
+  } else if (opts.tracePaths.length > 0 && traceFrame) {
     // OUTLINE MODE (default): bead chain along path perimeter.
     // Dot density should be constant per unit of RENDERED path length.
     // The string engine gets away with equal-N-per-letter because it
@@ -483,8 +490,7 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     // Compute total RENDERED perimeter (path-space length × frame.scale =
     // screen-space length), then allocate samples = totalRenderedLen ×
     // DOTS_PER_PIXEL. Each letter's share is proportional to its share
-    // of rendered length.
-    const traceFrame = computeTraceFrame(opts.tracePaths, opts.traceSize);
+    // of rendered length. traceFrame hoisted to outer scope.
     const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
     const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
 
@@ -693,12 +699,16 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       vy: vy0,
       rotation: Math.random() * 360,
       spin: (Math.random() - 0.5) * 14,
-      // Trace particles render as a uniform bead chain — all dots same
-      // size for clean outline. Scale 0.8 makes them ~10px (xs Shape is
-      // ~12px). Big enough to fill the natural dot-pitch of dot-matrix
-      // fonts like Doto without leaving visible gaps between particles.
+      // Trace particles: scale tied to the path-to-screen scale of THIS
+      // burst so dots fill the natural dot-pitch regardless of phrase
+      // length. Long phrases get clamped to viewport-max → smaller
+      // traceFrame.scale → smaller dots. Short phrases render larger →
+      // bigger dots fill the wider gap. Multiplier 1.0 maps traceFrame
+      // scale directly to dot scale; clamps keep it sane.
       // Non-trace bursts keep the stellar-parallax scale variance.
-      scale: isTracing ? 0.8 : 0.6 + Math.random() * 0.7,
+      scale: isTracing && traceFrame
+        ? Math.max(0.4, Math.min(1.2, traceFrame.scale * 0.7))
+        : 0.6 + Math.random() * 0.7,
       alive: true,
       born: startTime + emitDelay,
       driftSeed: Math.random() * Math.PI * 2,
