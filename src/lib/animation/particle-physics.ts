@@ -625,8 +625,13 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       }
 
       // Fade in last 400ms of life. lifespan=0 (persistent) → no fade.
+      // Scrollytelling persistent + isTracing particles ALSO skip fade
+      // — they stay visible while swarming between sections and wait
+      // for re-snatch. Without this skip, the original 8s lifespan
+      // would trigger opacity = 0 and the dots would just vanish
+      // when the user scrolls.
       const fadeStart = opts.lifespan - 400;
-      const opacity = opts.lifespan === 0 ? 1
+      const opacity = (opts.lifespan === 0 || p.persistent || p.isTracing) ? 1
                     : age < fadeStart ? 1
                     : Math.max(0, 1 - (age - fadeStart) / 400);
       p.el.style.opacity = String(opacity);
