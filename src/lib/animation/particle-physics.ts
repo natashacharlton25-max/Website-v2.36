@@ -224,20 +224,30 @@ function onPhysicsScroll() {
       p.collide = false;
       p.vy = 1;
     }
-    // Trace-particle release → swarm. Mirrors the string-engine
-    // scrollytelling loop: dots that just formed a letter detach into
-    // a free-drifting cloud, persistent so they wait between sections
-    // ready to be re-snatched by the next viewport-trigger burst.
+    // Trace-particle release → fly out to viewport edges, then drift.
+    // Each particle gets a strong velocity pointing AWAY from screen
+    // centre at release, so they scatter outward from the formed word
+    // and end up flying around the edges. Air drag (0.99/frame) slows
+    // them as they travel; sinusoidal drift in the gravity branch
+    // takes over once they've slowed, keeping them gently wandering
+    // at the edges until re-snatched by the next viewport-trigger.
     // Skip particles within 3s of a re-snatch (the same scroll that
     // triggered the viewport entry shouldn't immediately re-release).
     if (p.isTracing && p.relaunchedAt < now - 3000) {
       p.converge = false;
       p.persistent = true;
       p.collide = false;
-      // Small random velocity → drifts naturally instead of stopping
-      // dead. ±0.8 px/frame each axis = gentle wander.
-      p.vx = (Math.random() - 0.5) * 1.6;
-      p.vy = (Math.random() - 0.5) * 1.6;
+      const screenCx = window.innerWidth / 2;
+      const screenCy = window.innerHeight / 2;
+      const dx = p.x - screenCx;
+      const dy = p.y - screenCy;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      // 10–16 px/frame outward — fast enough to clearly fly out,
+      // slow enough that the trip across the viewport is visible
+      // (not an instant teleport).
+      const flySpeed = 10 + Math.random() * 6;
+      p.vx = (dx / dist) * flySpeed;
+      p.vy = (dy / dist) * flySpeed;
     }
   }
 }
