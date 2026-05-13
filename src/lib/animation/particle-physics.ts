@@ -372,74 +372,85 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
   // would all clump on the first letter.
   let traceDests: { x: number; y: number }[] = [];
   if (opts.tracePaths.length > 0 && opts.traceMode === 'fill') {
-    // FILL MODE: halftone grid across the letter's filled area. Walk a
-    // uniform grid over each letter's screen-space bbox, test each cell
-    // against isPointInFill, keep the inside cells. Result reads as a
-    // solid filled-letter shape made of beads, not just the outline.
+    // Dot-matrix font detection: if glyphs have many subpaths (>5
+    // per letter), the font itself is built from dot-shaped contours
+    // (e.g. Doto). In that case use one particle per subpath centroid
+    // — 1:1 with the font's design, no grid sampling. Otherwise fall
+    // through to halftone grid scan for continuous-stroke fonts.
     const traceFrame = computeTraceFrame(opts.tracePaths, opts.traceSize);
     const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
     const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
 
-    const tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    tmpSvg.style.position = 'absolute';
-    tmpSvg.style.left = '-9999px';
-    document.body.appendChild(tmpSvg);
-
-    // Grid step in path-space coords. 10px screen-space ≈ 1.7× the
-    // trace dot diameter (scale 0.5 of xs 12px = ~6px) — leaves a small
-    // gap between beads so the fill reads as a halftone pattern, not a
-    // solid block. Divide by frame scale to get the equivalent step in
-    // path-space.
-    const SCREEN_STEP_PX = 10;
-    const step = SCREEN_STEP_PX / traceFrame.scale;
+    const firstSubpaths = opts.tracePaths[0].split(/(?=[Mm])/).filter(s => s.trim().length > 0);
+    const isDotMatrix = firstSubpaths.length > 5;
 
     const perPath: { x: number; y: number }[][] = [];
     const sampleCounts: number[] = [];
-    for (const d of opts.tracePaths) {
-      const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      // opentype.js emits paths WITHOUT Z (close) markers — TrueType
-      // contours are inherently closed but SVG fill detection wants
-      // explicit closure. Without Z, isPointInFill on the implicit
-      // closing edge behaves inconsistently — some cells along the
-      // edge that should be "inside" return false, leaving gaps in the
-      // fill. Insert a Z before every subpath's M so each contour is
-      // properly closed.
-      const closed = d.replace(/(?<!^)(?=[Mm])/g, 'Z') + 'Z';
-      pe.setAttribute('d', closed);
-      // Even-odd fill rule so inner counters (a, e, o) read as holes
-      pe.setAttribute('fill-rule', 'evenodd');
-      tmpSvg.appendChild(pe);
-      const bbox = pe.getBBox();
-      const pts: { x: number; y: number }[] = [];
-      // SVGPoint for isPointInFill — created via root SVG, mutated per cell
-      const svgPt = (tmpSvg as unknown as SVGSVGElement).createSVGPoint();
-      // Centre the grid on the bbox so symmetric letterforms (H, T, A)
-      // get symmetric dot patterns. If we started the grid at bbox.x,
-      // the right stroke of an H might catch a different number of
-      // columns than the left depending on bbox.width % step.
-      const cellsX = Math.floor(bbox.width / step) + 1;
-      const cellsY = Math.floor(bbox.height / step) + 1;
-      const startX = bbox.x + bbox.width / 2 - (cellsX - 1) * step / 2;
-      const startY = bbox.y + bbox.height / 2 - (cellsY - 1) * step / 2;
-      for (let iy = 0; iy < cellsY; iy++) {
-        const py = startY + iy * step;
-        for (let ix = 0; ix < cellsX; ix++) {
-          const px = startX + ix * step;
-          svgPt.x = px;
-          svgPt.y = py;
-          if (pe.isPointInFill(svgPt)) {
-            // Transform path-space → screen-space using same frame math
-            pts.push({
-              x: (px - traceFrame.cx) * traceFrame.scale + offsetX,
-              y: (py - traceFrame.cy) * traceFrame.scale + offsetY,
-            });
+
+    if (isDotMatrix) {
+      // Per-subpath centroid mode — one particle per font-dot
+      const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      tmp.style.position = 'absolute'; tmp.style.left = '-9999px';
+      document.body.appendChild(tmp);
+      for (const pathData of opts.tracePaths) {
+        const subs = pathData.split(/(?=[Mm])/).filter(s => s.trim().length > 0);
+        const pts: { x: number; y: number }[] = [];
+        for (const sub of subs) {
+          const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          pe.setAttribute('d', sub);
+          tmp.appendChild(pe);
+          const bb = pe.getBBox();
+          const px = bb.x + bb.width / 2;
+          const py = bb.y + bb.height / 2;
+          pts.push({
+            x: (px - traceFrame.cx) * traceFrame.scale + offsetX,
+            y: (py - traceFrame.cy) * traceFrame.scale + offsetY,
+          });
+        }
+        perPath.push(pts);
+        sampleCounts.push(pts.length);
+      }
+      document.body.removeChild(tmp);
+    } else {
+      // Halftone grid scan for continuous-stroke fonts
+      const tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      tmpSvg.style.position = 'absolute';
+      tmpSvg.style.left = '-9999px';
+      document.body.appendChild(tmpSvg);
+      const SCREEN_STEP_PX = 10;
+      const step = SCREEN_STEP_PX / traceFrame.scale;
+      for (const d of opts.tracePaths) {
+        const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const closed = d.replace(/(?<!^)(?=[Mm])/g, 'Z') + 'Z';
+        pe.setAttribute('d', closed);
+        pe.setAttribute('fill-rule', 'evenodd');
+        tmpSvg.appendChild(pe);
+        const bbox = pe.getBBox();
+        const pts: { x: number; y: number }[] = [];
+        const svgPt = (tmpSvg as unknown as SVGSVGElement).createSVGPoint();
+        const cellsX = Math.floor(bbox.width / step) + 1;
+        const cellsY = Math.floor(bbox.height / step) + 1;
+        const startX = bbox.x + bbox.width / 2 - (cellsX - 1) * step / 2;
+        const startY = bbox.y + bbox.height / 2 - (cellsY - 1) * step / 2;
+        for (let iy = 0; iy < cellsY; iy++) {
+          const py = startY + iy * step;
+          for (let ix = 0; ix < cellsX; ix++) {
+            const px = startX + ix * step;
+            svgPt.x = px;
+            svgPt.y = py;
+            if (pe.isPointInFill(svgPt)) {
+              pts.push({
+                x: (px - traceFrame.cx) * traceFrame.scale + offsetX,
+                y: (py - traceFrame.cy) * traceFrame.scale + offsetY,
+              });
+            }
           }
         }
+        perPath.push(pts);
+        sampleCounts.push(pts.length);
       }
-      perPath.push(pts);
-      sampleCounts.push(pts.length);
+      document.body.removeChild(tmpSvg);
     }
-    document.body.removeChild(tmpSvg);
 
     // Round-robin interleave so partial particle counts cover every letter
     const maxSamples = Math.max(...sampleCounts);
@@ -450,7 +461,7 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       }
     }
 
-    // If total fill exceeds opts.count, decimate uniformly so all letters
+    // If total exceeds opts.count, decimate uniformly so all letters
     // share the reduction (instead of cap chopping the tail letters).
     if (traceDests.length > opts.count) {
       const stride = traceDests.length / opts.count;
