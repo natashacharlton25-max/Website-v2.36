@@ -347,26 +347,58 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
   // would all clump on the first letter.
   let traceDests: { x: number; y: number }[] = [];
   if (opts.tracePaths.length > 0) {
-    // Same approach as the string engine: each letter gets the SAME N
-    // outline samples regardless of perimeter. samplePath handles the
-    // per-subpath distribution internally — outer contour + inner
-    // counters all get traced. The string engine connects samples with
-    // line segments (so the shape reads even at low N); the dot engine
-    // shows just the points, so we want a count tuned to give discrete-
-    // dot-outline legibility (not so dense it blobs, not so sparse it
-    // loses the letter shape).
+    // Dot density should be constant per unit of RENDERED path length.
+    // The string engine gets away with equal-N-per-letter because it
+    // connects samples with line segments — the eye reads the segments
+    // as continuous outline, density variance is invisible. The dot
+    // engine shows only the points, so a big letter at 40 dots looks
+    // sparse while a small letter at 40 dots looks blobby.
+    //
+    // Compute total RENDERED perimeter (path-space length × frame.scale =
+    // screen-space length), then allocate samples = totalRenderedLen ×
+    // DOTS_PER_PIXEL. Each letter's share is proportional to its share
+    // of rendered length.
     const traceFrame = computeTraceFrame(opts.tracePaths, opts.traceSize);
     const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
     const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
-    const samplesPerPath = Math.ceil(opts.count / opts.tracePaths.length);
-    const perPath: { x: number; y: number }[][] = [];
-    for (const pathData of opts.tracePaths) {
-      const sampled = samplePath(pathData, samplesPerPath, offsetX, offsetY, traceFrame);
-      perPath.push(sampled.points);
+
+    // Measure each letter's path-space perimeter
+    const lengths: number[] = [];
+    const tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    tmpSvg.style.position = 'absolute';
+    tmpSvg.style.left = '-9999px';
+    document.body.appendChild(tmpSvg);
+    for (const d of opts.tracePaths) {
+      const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pe.setAttribute('d', d);
+      tmpSvg.appendChild(pe);
+      lengths.push(pe.getTotalLength());
     }
-    // Round-robin interleave so partial particle counts (e.g. eviction
-    // mid-fill, or cap chopping the tail) still cover every letter.
-    for (let i = 0; i < samplesPerPath; i++) {
+    document.body.removeChild(tmpSvg);
+    const totalRenderedLen = lengths.reduce((a, b) => a + b, 0) * traceFrame.scale;
+
+    // dotsPerPixel chosen empirically: 0.08 = one dot every ~12px of
+    // outline (matches the dot diameter at size=xs, giving touching-not-
+    // overlapping spacing). The author-supplied opts.count is treated as
+    // a CAP — if the computed total exceeds it, scale density down to
+    // fit; otherwise use the computed total.
+    const DOTS_PER_PX = 0.08;
+    const idealTotal = Math.round(totalRenderedLen * DOTS_PER_PX);
+    const effectiveTotal = Math.min(idealTotal, opts.count);
+    const densityScale = effectiveTotal / idealTotal || 1;
+
+    const perPath: { x: number; y: number }[][] = [];
+    const sampleCounts: number[] = [];
+    for (let i = 0; i < opts.tracePaths.length; i++) {
+      const renderedLen = lengths[i] * traceFrame.scale;
+      const n = Math.max(8, Math.round(renderedLen * DOTS_PER_PX * densityScale));
+      sampleCounts.push(n);
+      perPath.push(samplePath(opts.tracePaths[i], n, offsetX, offsetY, traceFrame).points);
+    }
+
+    // Round-robin so eviction / cap doesn't bias toward early letters
+    const maxSamples = Math.max(...sampleCounts);
+    for (let i = 0; i < maxSamples; i++) {
       for (let path = 0; path < perPath.length; path++) {
         const pt = perPath[path][i];
         if (pt) traceDests.push(pt);
