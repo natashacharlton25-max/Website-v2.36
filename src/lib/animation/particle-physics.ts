@@ -385,12 +385,12 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     tmpSvg.style.left = '-9999px';
     document.body.appendChild(tmpSvg);
 
-    // Grid step in path-space coords. 7px screen-space ≈ 1.7× the
-    // trace dot diameter (scale 0.3 of xs 12px = ~4px) — leaves a small
+    // Grid step in path-space coords. 10px screen-space ≈ 1.7× the
+    // trace dot diameter (scale 0.5 of xs 12px = ~6px) — leaves a small
     // gap between beads so the fill reads as a halftone pattern, not a
     // solid block. Divide by frame scale to get the equivalent step in
     // path-space.
-    const SCREEN_STEP_PX = 7;
+    const SCREEN_STEP_PX = 10;
     const step = SCREEN_STEP_PX / traceFrame.scale;
 
     const perPath: { x: number; y: number }[][] = [];
@@ -474,12 +474,12 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     document.body.removeChild(tmpSvg);
     const totalRenderedLen = lengths.reduce((a, b) => a + b, 0) * traceFrame.scale;
 
-    // dotsPerPixel = one dot per ~3px of outline arc-length. Trace dots
-    // render at scale 0.3 of xs Shape ≈ 4px diameter; 3px arc-length
+    // dotsPerPixel = one dot per ~5px of outline arc-length. Trace dots
+    // render at scale 0.5 of xs Shape ≈ 6px diameter; 5px arc-length
     // spacing keeps them as a fine bead chain just touching neighbours.
     // opts.count acts as a CAP: if computed total exceeds it, density
     // scales down so all letters share the reduction.
-    const DOTS_PER_PX = 0.33;
+    const DOTS_PER_PX = 0.20;
     const idealTotal = Math.round(totalRenderedLen * DOTS_PER_PX);
     const effectiveTotal = Math.min(idealTotal, opts.count);
     const densityScale = effectiveTotal / idealTotal || 1;
@@ -665,12 +665,10 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       rotation: Math.random() * 360,
       spin: (Math.random() - 0.5) * 14,
       // Trace particles render as a uniform bead chain — all dots same
-      // size for clean outline. Scale 0.3 makes them ~4px (xs Shape is
-      // ~12px). Smaller beads keep thin-stroke letters (l, i, t) from
-      // reading as two parallel columns of dots, and give a finer-
-      // grained typography look overall. Non-trace bursts keep the
-      // stellar-parallax scale variance (depth illusion via size jitter).
-      scale: isTracing ? 0.3 : 0.6 + Math.random() * 0.7,
+      // size for clean outline. Scale 0.5 makes them ~6px (xs Shape is
+      // ~12px). Non-trace bursts keep the stellar-parallax scale
+      // variance (depth illusion via size jitter).
+      scale: isTracing ? 0.5 : 0.6 + Math.random() * 0.7,
       alive: true,
       born: startTime + emitDelay,
       driftSeed: Math.random() * Math.PI * 2,
