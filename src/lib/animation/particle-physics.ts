@@ -597,7 +597,23 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
 
       // Floor: viewport bottom — settle (don't bounce off-screen)
       const vh = window.innerHeight;
-      if (p.y > vh - 4) { p.y = vh - 4; p.vx = 0; p.vy = 0; }
+      const vw = window.innerWidth;
+      // Persistent particles (scrollytelling swarm) get all four walls
+      // — they fly out from letter positions toward edges, then drift
+      // ALONG the edges instead of escaping off-screen. Soft clamp:
+      // dampen velocity in the axis that hit, leave the perpendicular
+      // axis so they slide along the edge while sinusoidal drift keeps
+      // them alive. Margin keeps them visible (not clipped).
+      if (p.persistent) {
+        const margin = 8;
+        if (p.x < margin) { p.x = margin; p.vx = Math.abs(p.vx) * 0.3; }
+        else if (p.x > vw - margin) { p.x = vw - margin; p.vx = -Math.abs(p.vx) * 0.3; }
+        if (p.y < margin) { p.y = margin; p.vy = Math.abs(p.vy) * 0.3; }
+        else if (p.y > vh - margin) { p.y = vh - margin; p.vy = -Math.abs(p.vy) * 0.3; }
+      } else if (p.y > vh - 4) {
+        // Non-persistent: original floor-settle behaviour
+        p.y = vh - 4; p.vx = 0; p.vy = 0;
+      }
 
       // AABB collision — only when falling (vy > 0). Particles flying up
       // pass cleanly through any text on the way out. On a top-edge contact,
