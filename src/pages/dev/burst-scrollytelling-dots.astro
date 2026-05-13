@@ -79,8 +79,15 @@ const PHRASES = ['hello', 'welcome', 'brand', 'hello', 'welcome'];
 
 // Build a card section. side='left' = card-left/dots-right;
 // 'right' = card-right/dots-left. layout='centre' overrides side and
-// stacks card-above-dots full-width.
-function cardSection(side: 'left' | 'right', phrase: string, cardTitle: string, cardBody: string) {
+// stacks card-above-dots full-width. traceMode='fill' renders dots
+// as a halftone grid filling the letter shape (vs default outline).
+function cardSection(
+  side: 'left' | 'right',
+  phrase: string,
+  cardTitle: string,
+  cardBody: string,
+  traceMode: 'outline' | 'fill' = 'outline',
+) {
   const { layout, traceSize, count } = layoutFor(phrase);
   const card = {
     component: 'Card',
@@ -101,6 +108,7 @@ function cardSection(side: 'left' | 'right', phrase: string, cardTitle: string, 
     trigger: 'viewport',
     traceSize,
     count,
+    traceMode,
     class: 'scrolly-dots',
     children: [
       { component: 'Text', contentText: ' ', class: 'scrolly-anchor' },
@@ -157,7 +165,7 @@ const data = {
     cardSection('right', PHRASES[1], 'Card two',   'Card flipped to the right, dots on the left.'),
     cardSection('left',  PHRASES[2], 'Card three', 'And back — card left, dots right.'),
     cardSection('right', PHRASES[3], 'Card four',  'Card right, dots left.'),
-    cardSection('left',  PHRASES[4], 'Card five',  'Final beat — card left, dots right.'),
+    cardSection('left',  PHRASES[4], 'Card five',  'Final beat — fill mode: dots tile the letter shape instead of tracing the outline.', 'fill'),
   ],
 };
 ---

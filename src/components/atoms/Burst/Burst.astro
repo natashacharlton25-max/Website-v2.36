@@ -183,6 +183,9 @@ interface Props {
    *    'heavy'   — 6px, pronounced silly-string flailing
    *  Pure aesthetic knob; letter readability stays intact through 'soft'. */
   traceWiggle?: 'off' | 'subtle' | 'soft' | 'heavy';
+  /** [physics only] outline = bead chain along path perimeter (default).
+   *  fill = halftone grid filling path's filled area. */
+  traceMode?: 'outline' | 'fill';
   /** [string only] After emit completes, every live point applies a
    *  soft per-frame pull toward the live cursor. The strand becomes a
    *  Verlet-rope swarm-cloud that follows the cursor as it moves.
@@ -242,6 +245,7 @@ const {
   traceOffsetX = 0,
   traceOffsetY = 0,
   traceWiggle = 'subtle',
+  traceMode = 'outline',
   magnetCursor,
   inheritAnchorColour = false,
   class: className = '',
@@ -396,6 +400,7 @@ const templateIds = variants.map((_, i) => `${burstId}-tpl-${i}`);
   data-particle-trace-offset-x={(engine === 'string' || engine === 'physics') && resolvedTracePaths.length && traceOffsetX !== 0 ? String(traceOffsetX) : undefined}
   data-particle-trace-offset-y={(engine === 'string' || engine === 'physics') && resolvedTracePaths.length && traceOffsetY !== 0 ? String(traceOffsetY) : undefined}
   data-particle-trace-wiggle={engine === 'string' && resolvedTracePaths.length ? String(({ off: 0, subtle: 1.5, soft: 3, heavy: 6 } as Record<string, number>)[traceWiggle]) : undefined}
+  data-particle-trace-mode={engine === 'physics' && resolvedTracePaths.length && traceMode !== 'outline' ? traceMode : undefined}
   data-particle-magnet-cursor={
     engine === 'string' && magnetCursor
       ? (magnetCursor === 'repel' ? 'repel' : 'attract')

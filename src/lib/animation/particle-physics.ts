@@ -58,6 +58,9 @@ interface PhysicsOptions {
   traceSize: number;
   traceOffsetX: number;
   traceOffsetY: number;
+  /** outline = bead chain along path perimeter (default).
+   *  fill = halftone grid across path's filled area. */
+  traceMode: 'outline' | 'fill';
 }
 
 const DEFAULTS: PhysicsOptions = {
@@ -82,6 +85,7 @@ const DEFAULTS: PhysicsOptions = {
   traceSize: 240,
   traceOffsetX: 0,
   traceOffsetY: 0,
+  traceMode: 'outline',
 };
 
 // Pick a per-particle spawn position based on the `from` enum. Edge values
@@ -346,7 +350,79 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
   // still covers every letter — without interleaving, the first 200
   // would all clump on the first letter.
   let traceDests: { x: number; y: number }[] = [];
-  if (opts.tracePaths.length > 0) {
+  if (opts.tracePaths.length > 0 && opts.traceMode === 'fill') {
+    // FILL MODE: halftone grid across the letter's filled area. Walk a
+    // uniform grid over each letter's screen-space bbox, test each cell
+    // against isPointInFill, keep the inside cells. Result reads as a
+    // solid filled-letter shape made of beads, not just the outline.
+    const traceFrame = computeTraceFrame(opts.tracePaths, opts.traceSize);
+    const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
+    const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
+
+    const tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    tmpSvg.style.position = 'absolute';
+    tmpSvg.style.left = '-9999px';
+    document.body.appendChild(tmpSvg);
+
+    // Grid step in path-space coords. 10px screen-space ≈ 1.7× the
+    // trace dot diameter (scale 0.5 of xs 12px = ~6px) — leaves a small
+    // gap between beads so the fill reads as a halftone pattern, not a
+    // solid block. Divide by frame scale to get the equivalent step in
+    // path-space.
+    const SCREEN_STEP_PX = 10;
+    const step = SCREEN_STEP_PX / traceFrame.scale;
+
+    const perPath: { x: number; y: number }[][] = [];
+    const sampleCounts: number[] = [];
+    for (const d of opts.tracePaths) {
+      const pe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pe.setAttribute('d', d);
+      // Even-odd fill rule so inner counters (a, e, o) read as holes
+      pe.setAttribute('fill-rule', 'evenodd');
+      tmpSvg.appendChild(pe);
+      const bbox = pe.getBBox();
+      const pts: { x: number; y: number }[] = [];
+      // SVGPoint for isPointInFill — created via root SVG, mutated per cell
+      const svgPt = (tmpSvg as unknown as SVGSVGElement).createSVGPoint();
+      for (let py = bbox.y; py <= bbox.y + bbox.height; py += step) {
+        for (let px = bbox.x; px <= bbox.x + bbox.width; px += step) {
+          svgPt.x = px;
+          svgPt.y = py;
+          if (pe.isPointInFill(svgPt)) {
+            // Transform path-space → screen-space using same frame math
+            pts.push({
+              x: (px - traceFrame.cx) * traceFrame.scale + offsetX,
+              y: (py - traceFrame.cy) * traceFrame.scale + offsetY,
+            });
+          }
+        }
+      }
+      perPath.push(pts);
+      sampleCounts.push(pts.length);
+    }
+    document.body.removeChild(tmpSvg);
+
+    // Round-robin interleave so partial particle counts cover every letter
+    const maxSamples = Math.max(...sampleCounts);
+    for (let i = 0; i < maxSamples; i++) {
+      for (let path = 0; path < perPath.length; path++) {
+        const pt = perPath[path][i];
+        if (pt) traceDests.push(pt);
+      }
+    }
+
+    // If total fill exceeds opts.count, decimate uniformly so all letters
+    // share the reduction (instead of cap chopping the tail letters).
+    if (traceDests.length > opts.count) {
+      const stride = traceDests.length / opts.count;
+      const thinned: { x: number; y: number }[] = [];
+      for (let i = 0; i < opts.count; i++) {
+        thinned.push(traceDests[Math.floor(i * stride)]);
+      }
+      traceDests = thinned;
+    }
+  } else if (opts.tracePaths.length > 0) {
+    // OUTLINE MODE (default): bead chain along path perimeter.
     // Dot density should be constant per unit of RENDERED path length.
     // The string engine gets away with equal-N-per-letter because it
     // connects samples with line segments — the eye reads the segments
@@ -868,6 +944,8 @@ function readOptions(el: Element): PhysicsOptions {
   if (get('trace-size')) opts.traceSize = parseFloat(get('trace-size')!);
   if (get('trace-offset-x')) opts.traceOffsetX = parseFloat(get('trace-offset-x')!);
   if (get('trace-offset-y')) opts.traceOffsetY = parseFloat(get('trace-offset-y')!);
+  const traceModeAttr = get('trace-mode');
+  if (traceModeAttr === 'fill') opts.traceMode = 'fill';
 
   // Mode-specific defaults — explode/float/orbit ignore collision entirely
   // (the motion shape doesn't want particles snagging on text). For "land
