@@ -161,8 +161,9 @@ const allParticles: Particle[] = [];
 
 // Hard cap on concurrent particles. Each particle's tick is cheap (no
 // O(n²)) but DOM count adds up — 50 click-spammed bursts of 80 each =
-// 4000 DOM nodes. Cap at 400; evict oldest when a burst would exceed it.
-const MAX_ACTIVE_PARTICLES = 400;
+// 4000 DOM nodes. Cap at 1200 to support dense dot-typography bursts
+// (scrollytelling form-letters-from-dots needs ~700+ for legibility).
+const MAX_ACTIVE_PARTICLES = 1200;
 function evictOldestParticles(toMake: number) {
   while (allParticles.length + toMake > MAX_ACTIVE_PARTICLES) {
     const oldest = allParticles[0];
