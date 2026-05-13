@@ -16,6 +16,7 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Renderer from '../../components/Renderer.astro';
+import { TEXT_PATHS_META } from '../../lib/text-paths/generated';
 
 const sharedBurstProps = {
   engine: 'physics',
@@ -27,18 +28,39 @@ const sharedBurstProps = {
   collide: false,
   from: 'edges',
   to: 'origin',
-  traceSize: 800,
   particle: { component: 'Shape', shape: 'circle', size: 'xs' },
 };
 
-// Short phrases only — long phrases (e.g. 'brand' = "Walking with a
-// Smile") squash unreadably when forced into a fixed traceSize. Add
-// more short keys to registry.json + npm run build:text-paths to vary.
-const PHRASES = ['hello', 'welcome', 'hello', 'welcome', 'hello'];
+// Layout knobs — change these to retune the whole demo.
+//   TARGET_LETTER_HEIGHT: visual height we'd LIKE letters to render at.
+//     Used to compute the rendered word width per phrase.
+//   HALF_COLUMN_WIDTH:    approx width of one column in a side-by-side
+//     section (7xl container ~= 1280px, minus gap, halved).
+//   FULL_WIDTH:           target traceSize for the centred fallback.
+const TARGET_LETTER_HEIGHT = 120;
+const HALF_COLUMN_WIDTH = 560;
+const FULL_WIDTH = 1100;
+
+/** Decide layout + traceSize for a phrase. Long phrases that won't fit
+ *  half a column fall back to centred full-width below the card. */
+function layoutFor(phrase: string) {
+  const meta = TEXT_PATHS_META[phrase];
+  if (!meta) return { layout: 'side' as const, traceSize: 600 };
+  const aspect = meta.width / meta.height;
+  const renderedW = TARGET_LETTER_HEIGHT * aspect;
+  if (renderedW > HALF_COLUMN_WIDTH) {
+    return { layout: 'centre' as const, traceSize: FULL_WIDTH };
+  }
+  return { layout: 'side' as const, traceSize: renderedW };
+}
+
+const PHRASES = ['hello', 'welcome', 'brand', 'hello', 'welcome'];
 
 // Build a card section. side='left' = card-left/dots-right;
-// 'right' = card-right/dots-left.
+// 'right' = card-right/dots-left. layout='centre' overrides side and
+// stacks card-above-dots full-width.
 function cardSection(side: 'left' | 'right', phrase: string, cardTitle: string, cardBody: string) {
+  const { layout, traceSize } = layoutFor(phrase);
   const card = {
     component: 'Card',
     variant: 'default',
@@ -56,16 +78,22 @@ function cardSection(side: 'left' | 'right', phrase: string, cardTitle: string, 
     component: 'Burst',
     tracePath: `phrase:${phrase}`,
     trigger: 'viewport',
+    traceSize,
     class: 'scrolly-dots',
     children: [
       { component: 'Text', contentText: ' ', class: 'scrolly-anchor' },
     ],
   };
+  const klass = layout === 'centre'
+    ? 'scrolly-card-section layout-centre'
+    : `scrolly-card-section layout-side card-${side}`;
   return {
     component: 'Section',
     container: '7xl',
-    class: `scrolly-card-section card-${side}`,
-    children: side === 'left' ? [card, dots] : [dots, card],
+    class: klass,
+    children: layout === 'centre'
+      ? [card, dots]                                     // stacked
+      : (side === 'left' ? [card, dots] : [dots, card]), // side-by-side
   };
 }
 
@@ -91,7 +119,9 @@ const data = {
           component: 'Burst',
           tracePath: 'phrase:welcome',
           trigger: 'viewport',
-          traceSize: 800,
+          // Hero always gets the full-width treatment — it's the centred
+          // headline shot, no card to share space with.
+          traceSize: FULL_WIDTH,
           class: 'scrolly-hero-stage',
           children: [
             { component: 'Text', contentText: ' ', class: 'scrolly-anchor' },
@@ -133,17 +163,37 @@ const data = {
     margin-top: var(--space-lg, 2rem);
   }
 
-  /* Two-column grid. Card on one side, dots area on the other.
+  /* Side-by-side: two-column grid, card on one side dots on the other.
      Higher-specificity selector to beat .section-atom base layout. */
-  .section-atom.scrolly-card-section {
+  .section-atom.scrolly-card-section.layout-side {
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: var(--space-xl, 4rem);
   }
   /* Cancel Section's > * + * margin-top so grid columns sit side-by-side */
-  .section-atom.scrolly-card-section > * + * {
+  .section-atom.scrolly-card-section.layout-side > * + * {
     margin-top: 0;
+  }
+
+  /* Centred: card stacked on top, dots span full container width below.
+     Used when the phrase is too wide to fit half a column readably. */
+  .section-atom.scrolly-card-section.layout-centre {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: var(--space-xl, 4rem);
+  }
+  .section-atom.scrolly-card-section.layout-centre > * + * {
+    margin-top: 0;
+  }
+  .section-atom.scrolly-card-section.layout-centre .scrolly-card {
+    max-width: 60ch;
+    align-self: center;
+  }
+  .section-atom.scrolly-card-section.layout-centre .scrolly-dots {
+    min-height: 280px;
   }
 
   /* Hero stage: a dedicated empty row below the heading/text. The Burst
