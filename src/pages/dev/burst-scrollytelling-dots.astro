@@ -2,18 +2,14 @@
 /**
  * Burst scrollytelling — DOTS variant.
  *
- * Same loop pattern as /dev/burst-scrollytelling but with the physics
- * engine instead of strings. Each particle is a small CSS circle (or
- * any Shape). On click → particles converge to letter-outline points,
- * forming the word. On scroll → particles release and SWARM (drift in
- * space, not fall to floor — different from the string variant). On
- * next viewport entry → same particles re-aim at new outline points.
+ * Layout: each section is 100vh tall. Top 30vh = heading + caption.
+ * Middle 50vh = empty zone for the Burst (anchor div centred there
+ * with no visible content of its own — letters form around it).
+ * Bottom 20vh = breathing room before next section.
  *
- * Tests:
- *   - tracePath sampling on physics engine
- *   - trigger='viewport' via GSAP ScrollTrigger on physics
- *   - persistent + relaunchedAt + re-snatch logic mirroring strings
- *   - Swarm-between-sections via sinusoidal drift in tick loop
+ * The anchor div has display:block + min-height so getBoundingClientRect
+ * gives sensible centre for the convergence target. Each section's
+ * anchor sits in a known empty space → letters don't overlap text.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Renderer from '../../components/Renderer.astro';
@@ -28,12 +24,20 @@ const sharedBurstProps = {
   collide: false,
   from: 'edges',
   to: 'origin',
-  // Bigger trace so letters are large enough that 'xs' dots don't
-  // over-fill the outline. 1500 width / 7 letters = ~215px per letter,
-  // ~50 dots each.
   traceSize: 1500,
-  traceOffsetY: -150,
+  // Anchor is centred in the section's middle 50vh zone (no nearby
+  // text), so letters form right at it — no offset needed.
+  traceOffsetY: 0,
   particle: { component: 'Shape', shape: 'circle', size: 'xs' },
+};
+
+// Reusable anchor — invisible centred block that gives the Burst a
+// stable rect for the convergence target. min-height + visibility:
+// hidden makes it take up space without rendering content.
+const anchor = {
+  component: 'Section',
+  class: 'scrolly-anchor',
+  children: [{ component: 'Text', contentText: '·', class: 'scrolly-anchor-dot' }],
 };
 
 const data = {
@@ -44,12 +48,12 @@ const data = {
       component: 'Section',
       container: '7xl',
       gap: 'lg',
-      class: 'scrolly-section scrolly-start',
+      class: 'scrolly-section',
       children: [
         { component: 'Heading', level: 1, contentHeading: 'Scrollytelling dot loop', size: 'xl' },
         {
           component: 'Text',
-          contentText: 'Click the button. ~220 rainbow dots fly in from viewport edges and converge on letter-outline points to form "WELCOME". Scroll down → dots release and swarm freely. Next section → same dots fly to form "Hello". Loop.',
+          contentText: 'Click Begin. 1000 dots converge to form WELCOME below. Scroll → dots scatter to edges. Each new section → dots re-form the next word in the empty zone.',
         },
         {
           ...sharedBurstProps,
@@ -62,23 +66,21 @@ const data = {
         },
       ],
     },
-    // Section 2 — auto-fire on viewport entry → form "Hello"
+    // Section 2 — auto-fire on viewport → "Hello"
     {
       component: 'Section',
       container: '7xl',
-      gap: 'lg',
+      gap: 'md',
       class: 'scrolly-section',
       children: [
         { component: 'Heading', level: 2, contentHeading: 'Scroll triggered →', size: 'lg' },
-        { component: 'Text', contentText: 'The same dots swarm in from wherever they were and re-form around "Hello".' },
+        { component: 'Text', contentText: 'The same 1000 dots fly in and re-form around "Hello".' },
         {
           ...sharedBurstProps,
           component: 'Burst',
           tracePath: 'phrase:hello',
           trigger: 'viewport',
-          children: [
-            { component: 'Text', contentText: '(target)', size: 'sm' },
-          ],
+          children: [anchor],
         },
       ],
     },
@@ -86,7 +88,7 @@ const data = {
     {
       component: 'Section',
       container: '7xl',
-      gap: 'lg',
+      gap: 'md',
       class: 'scrolly-section',
       children: [
         { component: 'Heading', level: 2, contentHeading: 'Loop continues →', size: 'lg' },
@@ -96,9 +98,7 @@ const data = {
           component: 'Burst',
           tracePath: 'phrase:welcome',
           trigger: 'viewport',
-          children: [
-            { component: 'Text', contentText: '(target)', size: 'sm' },
-          ],
+          children: [anchor],
         },
       ],
     },
@@ -106,7 +106,7 @@ const data = {
     {
       component: 'Section',
       container: '7xl',
-      gap: 'lg',
+      gap: 'md',
       class: 'scrolly-section',
       children: [
         { component: 'Heading', level: 2, contentHeading: 'And again →', size: 'lg' },
@@ -116,9 +116,7 @@ const data = {
           component: 'Burst',
           tracePath: 'phrase:hello',
           trigger: 'viewport',
-          children: [
-            { component: 'Text', contentText: '(target)', size: 'sm' },
-          ],
+          children: [anchor],
         },
       ],
     },
@@ -132,15 +130,30 @@ const data = {
 
 <style is:global>
   .scrolly-section {
-    min-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    gap: var(--space-lg, 2rem);
-  }
-  .scrolly-start {
     min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    align-items: start;
+    padding: var(--space-xl, 4rem) var(--space-lg, 2rem);
+    gap: var(--space-md, 1.5rem);
+    text-align: center;
+    justify-items: center;
+  }
+  /* Burst wrapper itself takes the middle empty space — anchor lives
+     inside it, gets its centre from the section grid row 3 (1fr). */
+  .scrolly-section .burst {
+    align-self: center;
+    justify-self: center;
+    grid-row: 3;
+    min-width: 100px;
+    min-height: 100px;
+  }
+  /* Invisible anchor — gives getBoundingClientRect something to measure
+     without rendering a visible centre element where the letters will be. */
+  .scrolly-anchor {
+    min-width: 100px;
+    min-height: 100px;
+    display: block;
+    visibility: hidden;
   }
 </style>
