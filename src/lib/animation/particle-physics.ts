@@ -216,6 +216,20 @@ window.addEventListener('resize', () => { rectsCachedAt = 0; });
 function onPhysicsScroll() {
   if (!allParticles.some(p => p.alive && (p.stuckOnText || p.isTracing))) return;
   const now = performance.now();
+
+  // Compute the centroid of release-eligible trace particles so the
+  // fly-out radiates from the WORD's centre (not screen centre).
+  // Screen-centre version biased everything upward when the word sat
+  // above viewport mid (traceOffsetY: -150 etc.), so dots clustered
+  // on the top edge instead of distributing radially in all directions.
+  let cx = 0, cy = 0, cnt = 0;
+  for (const p of allParticles) {
+    if (p.alive && p.isTracing && !p.persistent && p.relaunchedAt < now - 3000) {
+      cx += p.x; cy += p.y; cnt++;
+    }
+  }
+  if (cnt > 0) { cx /= cnt; cy /= cnt; }
+
   for (const p of allParticles) {
     if (!p.alive) continue;
     // Stuck-on-text release (original behaviour) — drop onto floor
@@ -224,13 +238,11 @@ function onPhysicsScroll() {
       p.collide = false;
       p.vy = 1;
     }
-    // Trace-particle release → fly out to viewport edges, then drift.
-    // Each particle gets a strong velocity pointing AWAY from screen
-    // centre at release, so they scatter outward from the formed word
-    // and end up flying around the edges. Air drag (0.99/frame) slows
-    // them as they travel; sinusoidal drift in the gravity branch
-    // takes over once they've slowed, keeping them gently wandering
-    // at the edges until re-snatched by the next viewport-trigger.
+    // Trace-particle release → fly out from word centre to viewport
+    // edges, then drift. Each particle gets a strong velocity pointing
+    // AWAY from the word centroid at release, so they scatter radially
+    // in all directions (not biased to one edge by the word's vertical
+    // offset on screen).
     //
     // Only the FIRST scroll event applies the kick — !p.persistent
     // means "not yet released". Subsequent scroll events skip the
@@ -243,17 +255,25 @@ function onPhysicsScroll() {
       p.converge = false;
       p.persistent = true;
       p.collide = false;
-      const screenCx = window.innerWidth / 2;
-      const screenCy = window.innerHeight / 2;
-      const dx = p.x - screenCx;
-      const dy = p.y - screenCy;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      // 10–16 px/frame outward — fast enough to clearly fly out,
-      // slow enough that the trip across the viewport is visible
-      // (not an instant teleport).
-      const flySpeed = 10 + Math.random() * 6;
-      p.vx = (dx / dist) * flySpeed;
-      p.vy = (dy / dist) * flySpeed;
+      // Position-based direction (from word centroid) BLENDED with a
+      // wide random jitter (±90° = π/2). Position alone clusters all
+      // dots on the left/right because the formed word is ~5x wider
+      // than it is tall — outward-from-centroid vectors strongly favour
+      // the horizontal axis. Adding random spread disperses them
+      // evenly across all four edges while keeping a soft bias toward
+      // "outward from where you are now".
+      const dx = p.x - cx;
+      const dy = p.y - cy;
+      const positionAngle = Math.atan2(dy, dx);
+      const jitter = (Math.random() - 0.5) * Math.PI;
+      const angle = positionAngle + jitter;
+      // 14–20 px/frame outward — strong enough that air drag (0.99/f)
+      // still gets particles across the viewport before they decay
+      // into the drift phase. The sin/cos drift in the tick loop then
+      // keeps them alive at the edges.
+      const flySpeed = 14 + Math.random() * 6;
+      p.vx = Math.cos(angle) * flySpeed;
+      p.vy = Math.sin(angle) * flySpeed;
     }
   }
 }
