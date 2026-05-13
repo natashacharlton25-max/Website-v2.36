@@ -119,26 +119,60 @@ export function samplePath(
   const points: { x: number; y: number }[] = [];
   const breaks: number[] = [];
   for (let i = 0; i < subpaths.length; i++) {
-    const len = lengths[i];
-    if (len < 0.5) continue;                   // skip degenerate subpaths
+    const drawnLen = lengths[i];
+    if (drawnLen < 0.5) continue;              // skip degenerate subpaths
     if (points.length > 0) breaks.push(points.length);
     // Distribute interiorBudget proportionally across subpaths by length,
     // min 3 per subpath so even tiny features get a triangle of points.
-    const subN = Math.max(3, Math.round(interiorBudget * len / totalLen));
+    const subN = Math.max(3, Math.round(interiorBudget * drawnLen / totalLen));
     const pe = pathEls[i];
+
+    // Closing-edge handling. opentype.js (and most font-to-path tools)
+    // emit paths WITHOUT Z markers — TrueType contours are inherently
+    // closed but getPointAtLength only walks the drawn segments. So
+    // getPointAtLength(len) might NOT equal getPointAtLength(0).
+    //
+    // Treat the contour as a CLOSED loop spanning the drawn path PLUS
+    // the implicit closing edge from end-back-to-start. Distribute
+    // samples uniformly across this full perimeter so the closing
+    // edge gets dots too.
+    //
+    // For the string engine this also worked — the renderer drew an L
+    // from the last interior sample to the closure sample, which IS
+    // the closing edge. But the dot engine has no inter-sample lines,
+    // so if the closing edge happens to be one of the letter's
+    // strokes (e.g. the top of an E), that stroke renders with no
+    // dots between its endpoints. This fix samples the closing edge
+    // directly.
+    const startPt = pe.getPointAtLength(0);
+    const endPt = pe.getPointAtLength(drawnLen);
+    const closingDx = startPt.x - endPt.x;
+    const closingDy = startPt.y - endPt.y;
+    const closingLen = Math.sqrt(closingDx * closingDx + closingDy * closingDy);
+    const fullLen = drawnLen + closingLen;
+
+    // Match original total point count per subpath (subN + 1) — subN
+    // distributed samples along the full closed perimeter, plus 1
+    // closure point at the start.
     for (let j = 0; j < subN; j++) {
-      const t = subN === 1 ? 0 : j / (subN - 1);
-      const p = pe.getPointAtLength(t * len);
-      points.push(xform(p.x, p.y));
+      const distAlong = (j / subN) * fullLen;
+      let pt: { x: number; y: number };
+      if (distAlong <= drawnLen) {
+        pt = pe.getPointAtLength(distAlong);
+      } else {
+        // Interpolate along the closing edge — straight line from
+        // endPt back to startPt.
+        const closingProgress = (distAlong - drawnLen) / closingLen;
+        pt = {
+          x: endPt.x + closingDx * closingProgress,
+          y: endPt.y + closingDy * closingProgress,
+        };
+      }
+      points.push(xform(pt.x, pt.y));
     }
-    // Force closure on every subpath. opentype.js (and most font-to-path
-    // tools) emit paths WITHOUT Z markers — TrueType contours are
-    // inherently closed but the closure isn't always written. Always
-    // appending the start position as a closing sample handles both:
-    // explicit-Z paths (the closure is redundant, harmless) and
-    // implicit-closed glyphs (the closure was missing, now drawn).
-    const p0 = pe.getPointAtLength(0);
-    points.push(xform(p0.x, p0.y));
+    // Final closure point at start position — keeps the closed loop
+    // visually complete for the string engine's L-segment renderer.
+    points.push(xform(startPt.x, startPt.y));
   }
 
   document.body.removeChild(tmpSvg);
