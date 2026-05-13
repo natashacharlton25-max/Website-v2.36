@@ -21,7 +21,6 @@ import { TEXT_PATHS_META } from '../../lib/text-paths/generated';
 const sharedBurstProps = {
   engine: 'physics',
   palette: 'rainbow',
-  count: 600,
   spread: 100,
   gravity: 0,
   lifespan: 8000,
@@ -37,21 +36,30 @@ const sharedBurstProps = {
 //   HALF_COLUMN_WIDTH:    approx width of one column in a side-by-side
 //     section (7xl container ~= 1280px, minus gap, halved).
 //   FULL_WIDTH:           target traceSize for the centred fallback.
+//   DOTS_PER_LETTER:      how many particles each letter outline gets.
+//     Total count = letters × this. Long phrases need a higher total so
+//     each letter still reads cleanly.
 const TARGET_LETTER_HEIGHT = 120;
 const HALF_COLUMN_WIDTH = 560;
 const FULL_WIDTH = 1100;
+const DOTS_PER_LETTER = 90;
+const MAX_COUNT = 1200; // engine cap is 1200; respect it
 
-/** Decide layout + traceSize for a phrase. Long phrases that won't fit
- *  half a column fall back to centred full-width below the card. */
+/** Decide layout, traceSize, and count for a phrase. Long phrases that
+ *  won't fit half a column fall back to centred full-width below the
+ *  card. Particle count scales with letter count so density per letter
+ *  stays constant. */
 function layoutFor(phrase: string) {
   const meta = TEXT_PATHS_META[phrase];
-  if (!meta) return { layout: 'side' as const, traceSize: 600 };
+  if (!meta) return { layout: 'side' as const, traceSize: 600, count: 600 };
+  const letterCount = meta.paths.length;
+  const count = Math.min(MAX_COUNT, letterCount * DOTS_PER_LETTER);
   const aspect = meta.width / meta.height;
   const renderedW = TARGET_LETTER_HEIGHT * aspect;
   if (renderedW > HALF_COLUMN_WIDTH) {
-    return { layout: 'centre' as const, traceSize: FULL_WIDTH };
+    return { layout: 'centre' as const, traceSize: FULL_WIDTH, count };
   }
-  return { layout: 'side' as const, traceSize: renderedW };
+  return { layout: 'side' as const, traceSize: renderedW, count };
 }
 
 const PHRASES = ['hello', 'welcome', 'brand', 'hello', 'welcome'];
@@ -60,7 +68,7 @@ const PHRASES = ['hello', 'welcome', 'brand', 'hello', 'welcome'];
 // 'right' = card-right/dots-left. layout='centre' overrides side and
 // stacks card-above-dots full-width.
 function cardSection(side: 'left' | 'right', phrase: string, cardTitle: string, cardBody: string) {
-  const { layout, traceSize } = layoutFor(phrase);
+  const { layout, traceSize, count } = layoutFor(phrase);
   const card = {
     component: 'Card',
     variant: 'default',
@@ -79,6 +87,7 @@ function cardSection(side: 'left' | 'right', phrase: string, cardTitle: string, 
     tracePath: `phrase:${phrase}`,
     trigger: 'viewport',
     traceSize,
+    count,
     class: 'scrolly-dots',
     children: [
       { component: 'Text', contentText: ' ', class: 'scrolly-anchor' },
@@ -122,6 +131,7 @@ const data = {
           // Hero always gets the full-width treatment — it's the centred
           // headline shot, no card to share space with.
           traceSize: FULL_WIDTH,
+          count: layoutFor('welcome').count,
           class: 'scrolly-hero-stage',
           children: [
             { component: 'Text', contentText: ' ', class: 'scrolly-anchor' },
