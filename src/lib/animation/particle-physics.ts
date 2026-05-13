@@ -1093,10 +1093,13 @@ export function initParticlePhysics(): void {
         ScrollTrigger.create({
           trigger: htmlEl,
           scroller: osScroller || undefined,
-          // Fire EARLY — when the burst element is just entering the
-          // viewport from below. Gives the fly-in / re-snatch flight
-          // time to complete before the user has fully scrolled past.
-          start: 'top bottom',
+          // Fire when the burst element's centre is at 80% down the
+          // viewport — by then the section's mostly visible, so the
+          // word forms IN the viewport instead of at the bottom edge.
+          // Previously 'top bottom' fired the moment the section started
+          // entering, which left the destination at viewport-bottom
+          // (or below) and dots formed off-screen.
+          start: 'center 80%',
           onEnter: () => fire(new Event('viewport')),
           onEnterBack: () => fire(new Event('viewport')),
         });
