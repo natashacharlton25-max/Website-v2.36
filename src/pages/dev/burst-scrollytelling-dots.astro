@@ -42,8 +42,12 @@ const sharedBurstProps = {
 const TARGET_LETTER_HEIGHT = 120;
 const HALF_COLUMN_WIDTH = 560;
 const FULL_WIDTH = 1100;
-const DOTS_PER_LETTER = 40;
-const MAX_COUNT = 1200; // engine cap is 1200; respect it
+// DOTS_PER_LETTER now informs the COUNT CAP — engine's density-per-px
+// allocator decides actual sample count; this just sets the upper bound
+// per letter so long phrases don't exceed the active-particle cap.
+const DOTS_PER_LETTER = 100;
+const MAX_COUNT = 1500; // bumped from engine cap 1200 — long phrases need more
+                        // dots for fine-grained bead chain
 
 /** Decide layout, traceSize, and count for a phrase. Long phrases that
  *  won't fit half a column fall back to centred full-width below the

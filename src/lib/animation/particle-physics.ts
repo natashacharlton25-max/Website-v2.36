@@ -175,7 +175,7 @@ const allParticles: Particle[] = [];
 // O(n²)) but DOM count adds up — 50 click-spammed bursts of 80 each =
 // 4000 DOM nodes. Cap at 1200 to support dense dot-typography bursts
 // (scrollytelling form-letters-from-dots needs ~700+ for legibility).
-const MAX_ACTIVE_PARTICLES = 1200;
+const MAX_ACTIVE_PARTICLES = 1800;
 function evictOldestParticles(toMake: number) {
   while (allParticles.length + toMake > MAX_ACTIVE_PARTICLES) {
     const oldest = allParticles[0];
@@ -377,13 +377,12 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     document.body.removeChild(tmpSvg);
     const totalRenderedLen = lengths.reduce((a, b) => a + b, 0) * traceFrame.scale;
 
-    // dotsPerPixel = one dot per ~10px of outline arc-length. The xs
-    // dot is ~12px wide; arc-length spacing of 10px gives a chord
-    // distance of ~10-12px depending on curvature — neighbouring dots
-    // just touch, forming a clean bead chain. opts.count acts as a
-    // CAP: if computed total exceeds it, density scales down so all
-    // letters share the reduction.
-    const DOTS_PER_PX = 0.10;
+    // dotsPerPixel = one dot per ~5px of outline arc-length. Trace dots
+    // render at scale 0.5 of xs Shape ≈ 6px diameter; 5px arc-length
+    // spacing keeps them as a fine bead chain just touching neighbours.
+    // opts.count acts as a CAP: if computed total exceeds it, density
+    // scales down so all letters share the reduction.
+    const DOTS_PER_PX = 0.20;
     const idealTotal = Math.round(totalRenderedLen * DOTS_PER_PX);
     const effectiveTotal = Math.min(idealTotal, opts.count);
     const densityScale = effectiveTotal / idealTotal || 1;
@@ -563,9 +562,11 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       rotation: Math.random() * 360,
       spin: (Math.random() - 0.5) * 14,
       // Trace particles render as a uniform bead chain — all dots same
-      // size for clean outline. Non-trace bursts keep the stellar-parallax
+      // size for clean outline. Scale 0.5 makes them ~6px instead of
+      // ~12px (xs Shape default) so the chain reads as a fine outline,
+      // not a chunky one. Non-trace bursts keep the stellar-parallax
       // scale variance (depth illusion via per-particle size jitter).
-      scale: isTracing ? 1.0 : 0.6 + Math.random() * 0.7,
+      scale: isTracing ? 0.5 : 0.6 + Math.random() * 0.7,
       alive: true,
       born: startTime + emitDelay,
       driftSeed: Math.random() * Math.PI * 2,
