@@ -1,13 +1,18 @@
 ---
 /**
- * Burst scrollytelling — DOTS variant, PIN model.
+ * Burst scrollytelling — DOTS variant.
  *
- * Each scrollytelling Burst pins at the top of viewport for an 800px
- * scroll range. After a 2s dwell (so fast-scrolling past doesn't
- * trigger), the animation fires and dots converge to form the word
- * at the pinned position. When the user scrolls past the pin range,
- * dots release and fly out to viewport edges. Next pinned Burst
- * picks them up and re-forms the next word at ITS pinned position.
+ * Layout:
+ *   1. Hero section — dots form a word at viewport centre on click.
+ *   2. Five card sections — each has a card on one side and the dots
+ *      forming a word on the opposite side. Layout alternates
+ *      (card-left/dots-right, card-right/dots-left, ...).
+ *
+ * Each card section uses trigger='viewport' so the dots fire when
+ * the section enters viewport. Live-origin tracking in the engine
+ * keeps the letters next to the card as the section scrolls. When
+ * the section exits, scroll-release sends the dots into a swarm at
+ * the edges; the next card section picks them up.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Renderer from '../../components/Renderer.astro';
@@ -22,88 +27,79 @@ const sharedBurstProps = {
   collide: false,
   from: 'edges',
   to: 'origin',
-  traceSize: 1500,
+  traceSize: 600,
   particle: { component: 'Shape', shape: 'circle', size: 'xs' },
 };
+
+// Phrases cycle through the 3 we have in registry.json — user can add
+// more phrases there + run npm run build:text-paths to extend.
+const PHRASES = ['hello', 'welcome', 'brand', 'hello', 'welcome'];
+
+// Build a card section. side='left' = card-left/dots-right;
+// 'right' = card-right/dots-left.
+function cardSection(side: 'left' | 'right', phrase: string, cardTitle: string, cardBody: string) {
+  const card = {
+    component: 'Card',
+    variant: 'fill',
+    brandColor: 'primary',
+    class: 'scrolly-card',
+    children: [
+      { component: 'Heading', level: 3, contentHeading: cardTitle, size: 'md' },
+      { component: 'Text', contentText: cardBody },
+    ],
+  };
+  const dots = {
+    ...sharedBurstProps,
+    component: 'Burst',
+    tracePath: `phrase:${phrase}`,
+    trigger: 'viewport',
+    class: 'scrolly-dots',
+    children: [
+      { component: 'Text', contentText: ' ', class: 'scrolly-anchor' },
+    ],
+  };
+  return {
+    component: 'Section',
+    container: '7xl',
+    class: `scrolly-card-section card-${side}`,
+    children: side === 'left' ? [card, dots] : [dots, card],
+  };
+}
 
 const data = {
   component: 'Page',
   children: [
-    // Intro section — explainer + click to start
+    // Hero — click to start, dots form WELCOME at viewport centre
     {
       component: 'Section',
       container: '7xl',
       gap: 'lg',
-      class: 'scrolly-intro',
+      class: 'scrolly-hero',
       children: [
         { component: 'Heading', level: 1, contentHeading: 'Scrollytelling dot loop', size: 'xl' },
         {
           component: 'Text',
-          contentText: 'Click Begin to form WELCOME. Then scroll down — each pinned section dwells 2s, fires the burst, holds for the scroll range, releases dots into a swarm at the edges. The same 1000 physical dots travel through the whole narrative.',
+          contentText: 'Click Begin to form the hero word. Then scroll — each card section forms its word next to the card on the opposite side.',
         },
         {
           ...sharedBurstProps,
           component: 'Burst',
           tracePath: 'phrase:welcome',
           trigger: 'click',
+          traceSize: 1200,
+          traceOffsetY: -100,
           children: [
             { component: 'Button', contentButton: 'Begin', variant: 'fill', brandColor: 'primary', size: 'lg' },
           ],
         },
       ],
     },
-    // Pinned scrollytelling sections — each pins, dwells, fires
-    {
-      component: 'Section',
-      container: '7xl',
-      class: 'scrolly-pin',
-      children: [
-        {
-          ...sharedBurstProps,
-          component: 'Burst',
-          tracePath: 'phrase:hello',
-          trigger: 'pin',
-          children: [{ component: 'Text', contentText: ' ', class: 'scrolly-anchor' }],
-        },
-      ],
-    },
-    {
-      component: 'Section',
-      container: '7xl',
-      class: 'scrolly-pin',
-      children: [
-        {
-          ...sharedBurstProps,
-          component: 'Burst',
-          tracePath: 'phrase:welcome',
-          trigger: 'pin',
-          children: [{ component: 'Text', contentText: ' ', class: 'scrolly-anchor' }],
-        },
-      ],
-    },
-    {
-      component: 'Section',
-      container: '7xl',
-      class: 'scrolly-pin',
-      children: [
-        {
-          ...sharedBurstProps,
-          component: 'Burst',
-          tracePath: 'phrase:hello',
-          trigger: 'pin',
-          children: [{ component: 'Text', contentText: ' ', class: 'scrolly-anchor' }],
-        },
-      ],
-    },
-    // Outro — give the page some scroll room after the last pin
-    {
-      component: 'Section',
-      container: '7xl',
-      class: 'scrolly-outro',
-      children: [
-        { component: 'Text', contentText: 'End of narrative.' },
-      ],
-    },
+    // Five card sections alternating left/right
+    cardSection('left',  PHRASES[0], 'Card one',   'Body copy on the left, dots forming the word on the right.'),
+    cardSection('right', PHRASES[1], 'Card two',   'Card flipped to the right, dots on the left.'),
+    cardSection('left',  PHRASES[2], 'Card three', 'And back — card left, dots right.'),
+    cardSection('right', PHRASES[3], 'Card four',  'Card right, dots left.'),
+    cardSection('left',  PHRASES[4], 'Card five',  'Final beat — card left, dots right.'),
   ],
 };
 ---
@@ -113,7 +109,7 @@ const data = {
 </BaseLayout>
 
 <style is:global>
-  .scrolly-intro {
+  .scrolly-hero {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -123,33 +119,33 @@ const data = {
     gap: var(--space-lg, 2rem);
     padding: var(--space-xl, 4rem) var(--space-lg, 2rem);
   }
-  /* Each pinned section is centred on viewport. The Burst wrapper +
-     anchor child both need REAL block dimensions so getBoundingClientRect
-     gives a centred rect for the pinned position. Text spans default to
-     inline → 0 width → engine reads rect at the LEFT edge. Forcing
-     inline-block + explicit size fixes that. */
-  .scrolly-pin {
-    min-height: 50vh;
+  /* Card section: two-column grid. Card on one side, dots area on the
+     other. Each takes ~50%. Min-height 100vh so each section gets a
+     full screen of focus. */
+  .scrolly-card-section {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: var(--space-xl, 4rem);
+    padding: var(--space-xl, 4rem) var(--space-lg, 2rem);
+  }
+  .scrolly-card {
+    padding: var(--space-lg, 2rem);
+    text-align: center;
+  }
+  /* The dots area: just a centred anchor that gives the burst a
+     measurable rect. Letters form at this anchor's centre — i.e.
+     centred in the OPPOSITE-from-card column. */
+  .scrolly-dots {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  .scrolly-pin .burst {
-    display: inline-block;
-    width: 100px;
-    height: 100px;
+    min-height: 200px;
   }
   .scrolly-anchor {
     display: inline-block;
-    width: 100px;
-    height: 100px;
-  }
-  .scrolly-outro {
-    min-height: 50vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: var(--neutral-700, #555);
-    text-align: center;
+    width: 1px;
+    height: 1px;
   }
 </style>

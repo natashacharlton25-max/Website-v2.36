@@ -153,6 +153,13 @@ interface Particle {
    *  on scroll-release for swarm mode but we still need to know
    *  this particle belongs to a trace burst (so re-snatch can find it). */
   isTracing: boolean;
+  /** Dest stored as OFFSET from the burst origin centre. Each tick
+   *  recomputes the live destX/destY from the origin's CURRENT rect
+   *  so letters track the section as it scrolls. Needed for card-and-
+   *  letters layouts where the section moves through viewport during
+   *  the animation. */
+  destOffsetX: number;
+  destOffsetY: number;
 }
 
 // Global registry of all live particles across all bursts. Lets the scroll
@@ -373,6 +380,10 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       const dest = traceDests[i % traceDests.length];
       p.destX = dest.x;
       p.destY = dest.y;
+      // Store offset for live-origin tracking — letters follow section
+      // as user keeps scrolling past the viewport trigger point.
+      p.destOffsetX = dest.x - cx;
+      p.destOffsetY = dest.y - cy;
       p.spawnX = p.x; // re-spawn from current swarm position
       p.spawnY = p.y;
       p.born = now;   // reset age so convergence lerp restarts
@@ -515,6 +526,8 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       persistent: false,
       relaunchedAt: 0,
       isTracing,
+      destOffsetX: dX - cx,
+      destOffsetY: dY - cy,
     };
     particles.push(particle);
     allParticles.push(particle);
@@ -524,6 +537,19 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
   function tick(now: number) {
     const rects = opts.collide ? getCollisionRects() : [];
     let anyAlive = false;
+
+    // Read live origin centre ONCE per tick so tracePath particles can
+    // re-aim destination at the section's CURRENT viewport position.
+    // For card-and-letters layouts the section scrolls through viewport
+    // during the animation — letters need to track it so they stay
+    // next to the card.
+    let liveOriginCx = cx;
+    let liveOriginCy = cy;
+    if (opts.tracePaths.length > 0) {
+      const r = originEl.getBoundingClientRect();
+      liveOriginCx = r.left + r.width / 2;
+      liveOriginCy = r.top + r.height / 2;
+    }
 
     for (const p of particles) {
       if (!p.alive) continue;
@@ -582,6 +608,14 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
         }
         const t = Math.min(age / arrivalAge, 1);
         const ease = 1 - (1 - t) * (1 - t); // ease-out quad
+        // Re-aim dest at live origin centre + stored offset so letters
+        // track the section while it scrolls. Non-trace converge bursts
+        // stay anchored to spawn-time dest (origin is static, e.g.
+        // button click).
+        if (p.isTracing) {
+          p.destX = liveOriginCx + p.destOffsetX;
+          p.destY = liveOriginCy + p.destOffsetY;
+        }
         p.x = p.spawnX + (p.destX - p.spawnX) * ease;
         p.y = p.spawnY + (p.destY - p.spawnY) * ease;
         p.rotation += p.spin * (1 - t * 0.7); // spin slows as particle arrives
