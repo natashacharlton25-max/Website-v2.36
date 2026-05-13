@@ -385,13 +385,12 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     tmpSvg.style.left = '-9999px';
     document.body.appendChild(tmpSvg);
 
-    // Grid step in path-space coords. 7px screen-space ≈ 1.15× the
-    // trace dot diameter (scale 0.5 of xs 12px = ~6px). Tighter step
-    // than the dot diameter would suggest, because thin strokes need
-    // multiple grid cells across their width to render — otherwise the
-    // grid alignment misses entire strokes that fall between cells.
-    // Divide by frame scale to get the equivalent step in path-space.
-    const SCREEN_STEP_PX = 7;
+    // Grid step in path-space coords. 10px screen-space ≈ 1.7× the
+    // trace dot diameter (scale 0.5 of xs 12px = ~6px) — leaves a small
+    // gap between beads so the fill reads as a halftone pattern, not a
+    // solid block. Divide by frame scale to get the equivalent step in
+    // path-space.
+    const SCREEN_STEP_PX = 10;
     const step = SCREEN_STEP_PX / traceFrame.scale;
 
     const perPath: { x: number; y: number }[][] = [];
