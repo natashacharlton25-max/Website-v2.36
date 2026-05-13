@@ -694,10 +694,11 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
       rotation: Math.random() * 360,
       spin: (Math.random() - 0.5) * 14,
       // Trace particles render as a uniform bead chain — all dots same
-      // size for clean outline. Scale 0.5 makes them ~6px (xs Shape is
-      // ~12px). Non-trace bursts keep the stellar-parallax scale
-      // variance (depth illusion via size jitter).
-      scale: isTracing ? 0.5 : 0.6 + Math.random() * 0.7,
+      // size for clean outline. Scale 0.8 makes them ~10px (xs Shape is
+      // ~12px). Big enough to fill the natural dot-pitch of dot-matrix
+      // fonts like Doto without leaving visible gaps between particles.
+      // Non-trace bursts keep the stellar-parallax scale variance.
+      scale: isTracing ? 0.8 : 0.6 + Math.random() * 0.7,
       alive: true,
       born: startTime + emitDelay,
       driftSeed: Math.random() * Math.PI * 2,

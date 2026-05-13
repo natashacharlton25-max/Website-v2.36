@@ -62,16 +62,17 @@ function layoutFor(phrase: string) {
   const letterCount = meta.paths.length;
   const count = Math.min(MAX_COUNT, letterCount * DOTS_PER_LETTER);
   const aspect = meta.width / meta.height;
-  // Always render at the target letter height. traceSize = aspect-
-  // scaled WIDTH so that rendered HEIGHT (= traceSize / aspect) hits
-  // TARGET_LETTER_HEIGHT consistently. Dot-matrix fonts (Doto) need
-  // this — clamping width "to viewport" squashes the height and
-  // breaks the font's natural dot grid spacing.
-  const traceSize = TARGET_LETTER_HEIGHT * aspect;
-  if (traceSize > HALF_COLUMN_WIDTH) {
+  const renderedW = TARGET_LETTER_HEIGHT * aspect;
+  if (renderedW > HALF_COLUMN_WIDTH) {
+    // Centre layout: clamp width to viewport-max so long phrases don't
+    // overflow the edges. Dots are sized via scale (in the engine) to
+    // match the rendered letter height, so squashing the height is OK
+    // — bigger dots compensate.
+    const VIEWPORT_MAX = 1400;
+    const traceSize = Math.min(VIEWPORT_MAX, Math.max(FULL_WIDTH, renderedW));
     return { layout: 'centre' as const, traceSize, count };
   }
-  return { layout: 'side' as const, traceSize, count };
+  return { layout: 'side' as const, traceSize: renderedW, count };
 }
 
 const PHRASES = ['hello', 'welcome', 'brand', 'hello', 'welcome'];
