@@ -48,7 +48,10 @@ const MAX_COUNT = 1200; // engine cap is 1200; respect it
 /** Decide layout, traceSize, and count for a phrase. Long phrases that
  *  won't fit half a column fall back to centred full-width below the
  *  card. Particle count scales with letter count so density per letter
- *  stays constant. */
+ *  stays constant. traceSize is the rendered WIDTH — long phrases get
+ *  proportionally larger traceSize so letter height stays at the target
+ *  (computeTraceFrame scales by max(width, height), so we feed it the
+ *  width we want and rely on the natural aspect ratio for height). */
 function layoutFor(phrase: string) {
   const meta = TEXT_PATHS_META[phrase];
   if (!meta) return { layout: 'side' as const, traceSize: 600, count: 600 };
@@ -57,7 +60,13 @@ function layoutFor(phrase: string) {
   const aspect = meta.width / meta.height;
   const renderedW = TARGET_LETTER_HEIGHT * aspect;
   if (renderedW > HALF_COLUMN_WIDTH) {
-    return { layout: 'centre' as const, traceSize: FULL_WIDTH, count };
+    // Centre layout: traceSize = the width we want to render at, scaled
+    // up if needed so letters keep their target height even for long
+    // phrases. Cap at viewport width minus margin so the word never
+    // overflows the screen.
+    const VIEWPORT_MAX = 1400;
+    const traceSize = Math.min(VIEWPORT_MAX, Math.max(FULL_WIDTH, renderedW));
+    return { layout: 'centre' as const, traceSize, count };
   }
   return { layout: 'side' as const, traceSize: renderedW, count };
 }
