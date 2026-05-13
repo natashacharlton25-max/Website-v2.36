@@ -340,12 +340,18 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     }
   }
 
-  // Scrollytelling re-snatch: if there are persistent trace particles
-  // from a previous scroll-release, repurpose them instead of spawning
-  // new. Same physical dots travel through the narrative — form word 1,
+  // Scrollytelling re-snatch: if there are existing trace particles
+  // from a previous burst, repurpose them instead of spawning new.
+  // Same physical dots travel through the narrative — form word 1,
   // swarm, form word 2, swarm, form word 3...
+  //
+  // Filter by isTracing alone (not also p.persistent) — ScrollTrigger
+  // can race with the scroll release handler. If the viewport trigger
+  // fires before scroll has marked particles persistent, we'd miss
+  // them and spawn a fresh batch on top. Catching any alive isTracing
+  // particle handles both ordering cases.
   const persistentParticles = traceDests.length > 0
-    ? allParticles.filter(p => p.alive && p.persistent && p.isTracing)
+    ? allParticles.filter(p => p.alive && p.isTracing)
     : [];
   if (persistentParticles.length > 0) {
     const now = performance.now();
