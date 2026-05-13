@@ -23,6 +23,7 @@
  */
 
 import { getAnimationConfig } from './animation-config';
+import { computeTraceFrame, samplePath } from './trace-path';
 
 export type PhysicsMode = 'fall' | 'explode' | 'float' | 'orbit' | 'shake';
 export type SpawnFrom = 'origin' | 'top' | 'bottom' | 'left' | 'right' | 'edges' | 'viewport';
@@ -42,12 +43,21 @@ interface PhysicsOptions {
    *  clumping on the nearest one. 1 = original "stick on first contact". */
   stickiness: number;
   templates: HTMLTemplateElement[];
-  trigger: 'click' | 'hover' | 'hover-hold';
+  trigger: 'click' | 'hover' | 'hover-hold' | 'viewport';
   from: SpawnFrom;
   to: SpawnTo;
   /** Element matched by `target` selector (resolved at spawn time). When
    *  `to === 'target'`, particles aim at this element's centre. */
   targetEl: Element | null;
+  /** Trace path data — one or more SVG path strings. When set, each
+   *  particle's destination is a sampled point along these paths
+   *  (cyclically distributed across N paths × count particles).
+   *  Particles converge to form letter outlines instead of clumping
+   *  at a single destination. Mirrors the string engine's tracePath. */
+  tracePaths: string[];
+  traceSize: number;
+  traceOffsetX: number;
+  traceOffsetY: number;
 }
 
 const DEFAULTS: PhysicsOptions = {
@@ -68,6 +78,10 @@ const DEFAULTS: PhysicsOptions = {
   from: 'origin',
   to: 'away',
   targetEl: null,
+  tracePaths: [],
+  traceSize: 240,
+  traceOffsetX: 0,
+  traceOffsetY: 0,
 };
 
 // Pick a per-particle spawn position based on the `from` enum. Edge values
@@ -238,6 +252,25 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     targetY = tr.top + tr.height / 2;
   }
 
+  // tracePath sampling — each particle gets a sampled outline point as
+  // its destination, so the swarm forms letters/logos instead of
+  // clumping at one point. Cyclic across N paths × count particles:
+  // for a phrase with 7 letters and 200 particles, each letter receives
+  // ~29 dots distributed along its perimeter.
+  let traceDests: { x: number; y: number }[] = [];
+  if (opts.tracePaths.length > 0) {
+    const traceFrame = computeTraceFrame(opts.tracePaths, opts.traceSize);
+    const offsetX = (opts.to === 'target' ? targetX : cx) + opts.traceOffsetX;
+    const offsetY = (opts.to === 'target' ? targetY : cy) + opts.traceOffsetY;
+    // Distribute particles across paths proportionally to count.
+    // Each path gets ~count/numPaths samples.
+    const samplesPerPath = Math.ceil(opts.count / opts.tracePaths.length);
+    for (const pathData of opts.tracePaths) {
+      const sampled = samplePath(pathData, samplesPerPath, offsetX, offsetY, traceFrame);
+      traceDests.push(...sampled.points);
+    }
+  }
+
   for (let i = 0; i < opts.count; i++) {
     const el = document.createElement('div');
     el.className = 'particle-physics';
@@ -264,11 +297,24 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     // Per-particle spawn position from the `from` enum
     const { x: spawnX, y: spawnY } = pickSpawnPos(opts.from, cx, cy);
 
+    // Per-particle destination — tracePath overrides shared dest with
+    // its own sampled outline point so particles form letters.
+    const isTracing = traceDests.length > 0;
+    const traceDest = isTracing ? traceDests[i % traceDests.length] : null;
+
     // Initial velocity. When `to !== 'away'`, particles AIM at a destination
     // (origin / cursor / target element) — convergence pattern. Otherwise
     // the existing per-mode angle/speed logic gives radial-outward motion.
     let vx0: number, vy0: number;
-    if (opts.to !== 'away') {
+    if (isTracing) {
+      // Trace mode: aim at this particle's specific letter-outline point.
+      const travelFrames = Math.max(20, (opts.lifespan / 1000) * 60 * 0.7);
+      vx0 = (traceDest!.x - spawnX) / travelFrames;
+      vy0 = (traceDest!.y - spawnY) / travelFrames;
+      const jitter = 0.6;
+      vx0 += (Math.random() - 0.5) * jitter;
+      vy0 += (Math.random() - 0.5) * jitter;
+    } else if (opts.to !== 'away') {
       const destX = opts.to === 'cursor' ? cursorX
                   : opts.to === 'target' ? targetX
                   : cx; // 'origin'
@@ -314,11 +360,12 @@ function spawnBurst(origin: HTMLElement, opts: PhysicsOptions): void {
     // Stagger emit ~10ms per particle so the burst doesn't look like
     // they all came out at once. born+i*delay → tick skips them until ready.
     const emitDelay = i * 10;
-    // Convergence destination — origin/target use a fixed point. Cursor
-    // stays in vx/vy mode (continuous attraction would be nicer; deferring).
-    const converge = opts.to === 'origin' || opts.to === 'target';
-    const dX = opts.to === 'target' ? targetX : cx;
-    const dY = opts.to === 'target' ? targetY : cy;
+    // Convergence destination — trace mode uses per-particle sampled
+    // point so the swarm forms a letter outline. origin/target use a
+    // shared point. Cursor stays in vx/vy mode.
+    const converge = isTracing || opts.to === 'origin' || opts.to === 'target';
+    const dX = isTracing ? traceDest!.x : (opts.to === 'target' ? targetX : cx);
+    const dY = isTracing ? traceDest!.y : (opts.to === 'target' ? targetY : cy);
 
     const particle: Particle = {
       el,
@@ -540,6 +587,16 @@ function readOptions(el: Element): PhysicsOptions {
   const triggerAttr = get('trigger');
   if (triggerAttr === 'hover') opts.trigger = 'hover';
   else if (triggerAttr === 'hover-hold') opts.trigger = 'hover-hold';
+  else if (triggerAttr === 'viewport') opts.trigger = 'viewport';
+
+  // tracePath sampling — same data-attribute shape as the string engine
+  // (pipe-joined SVG paths via data-particle-trace, scale via -size,
+  // offset via -offset-x/y).
+  const tracePath = get('trace');
+  if (tracePath) opts.tracePaths = tracePath.split('|');
+  if (get('trace-size')) opts.traceSize = parseFloat(get('trace-size')!);
+  if (get('trace-offset-x')) opts.traceOffsetX = parseFloat(get('trace-offset-x')!);
+  if (get('trace-offset-y')) opts.traceOffsetY = parseFloat(get('trace-offset-y')!);
 
   // Mode-specific defaults — explode/float/orbit ignore collision entirely
   // (the motion shape doesn't want particles snagging on text). For "land
