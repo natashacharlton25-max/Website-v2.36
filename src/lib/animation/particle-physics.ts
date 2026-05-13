@@ -918,14 +918,10 @@ export function initParticlePhysics(): void {
         ScrollTrigger.create({
           trigger: htmlEl,
           scroller: osScroller || undefined,
-          // Fire when section's top reaches 90% line of viewport — i.e.
-          // user has scrolled ~10vh into the section. Sections that sit
-          // flush below the hero won't fire at page load (their top is
-          // at viewport bottom on load, below the 90% line). Hero
-          // itself sits at the top of the page so its top is above
-          // the 90% line on load — fires immediately, which is what
-          // a load-triggered hero word wants.
-          start: 'top 90%',
+          // Fire EARLY — when the burst element is just entering the
+          // viewport from below. Gives the fly-in / re-snatch flight
+          // time to complete before the user has fully scrolled past.
+          start: 'top bottom',
           onEnter: () => fire(new Event('viewport')),
           onEnterBack: () => fire(new Event('viewport')),
         });
