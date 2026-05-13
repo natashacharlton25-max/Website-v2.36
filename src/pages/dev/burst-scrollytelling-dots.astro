@@ -71,7 +71,9 @@ function cardSection(side: 'left' | 'right', phrase: string, cardTitle: string, 
 const data = {
   component: 'Page',
   children: [
-    // Hero — click to start, dots form WELCOME at viewport centre
+    // Hero — viewport trigger fires on load (hero at top of page). The
+    // Burst wrapper has its own stage row below the heading/text so the
+    // letter centre lands in clear space, not on top of the copy.
     {
       component: 'Section',
       container: '7xl',
@@ -81,17 +83,17 @@ const data = {
         { component: 'Heading', level: 1, contentHeading: 'Scrollytelling dot loop', size: 'xl' },
         {
           component: 'Text',
-          contentText: 'Click Begin to form the hero word. Then scroll — each card section forms its word next to the card on the opposite side.',
+          contentText: 'The first word forms here. Scroll down — each card section forms its word next to the card on the opposite side, reusing the same dots.',
         },
         {
           ...sharedBurstProps,
           component: 'Burst',
           tracePath: 'phrase:welcome',
-          trigger: 'click',
-          traceSize: 1200,
-          traceOffsetY: -100,
+          trigger: 'viewport',
+          traceSize: 600,
+          class: 'scrolly-hero-stage',
           children: [
-            { component: 'Button', contentButton: 'Begin', variant: 'fill', brandColor: 'primary', size: 'lg' },
+            { component: 'Text', contentText: ' ', class: 'scrolly-anchor' },
           ],
         },
       ],
@@ -111,34 +113,55 @@ const data = {
 </BaseLayout>
 
 <style is:global>
-  .scrolly-hero {
+  /* Section atom adds margin-top via > * + *. Kill it for our demo
+     so grid placement isn't fought by margin offsets. */
+  .section-atom.scrolly-hero,
+  .section-atom.scrolly-card-section {
     min-height: 100vh;
+    padding-top: var(--space-xl, 4rem);
+    padding-bottom: var(--space-xl, 4rem);
+  }
+  .section-atom.scrolly-hero {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    gap: var(--space-lg, 2rem);
-    padding: var(--space-xl, 4rem) var(--space-lg, 2rem);
   }
-  /* Card section: two-column grid. Card on one side, dots area on the
-     other. Each takes ~50%. Min-height 100vh so each section gets a
-     full screen of focus. */
-  .scrolly-card-section {
-    min-height: 100vh;
+  .section-atom.scrolly-hero > * + * {
+    margin-top: var(--space-lg, 2rem);
+  }
+
+  /* Two-column grid. Card on one side, dots area on the other.
+     Higher-specificity selector to beat .section-atom base layout. */
+  .section-atom.scrolly-card-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: var(--space-xl, 4rem);
-    padding: var(--space-xl, 4rem) var(--space-lg, 2rem);
   }
+  /* Cancel Section's > * + * margin-top so grid columns sit side-by-side */
+  .section-atom.scrolly-card-section > * + * {
+    margin-top: 0;
+  }
+
+  /* Hero stage: a dedicated empty row below the heading/text. The Burst
+     wrapper's getBoundingClientRect centre is THIS rect's centre —
+     letters form here, not over the heading. */
+  .scrolly-hero-stage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 300px;
+  }
+
   .scrolly-card {
     padding: var(--space-lg, 2rem);
     text-align: center;
   }
   /* The dots area: just a centred anchor that gives the burst a
-     measurable rect. Letters form at this anchor's centre — i.e.
-     centred in the OPPOSITE-from-card column. */
+     measurable rect. */
   .scrolly-dots {
     display: flex;
     justify-content: center;

@@ -918,13 +918,14 @@ export function initParticlePhysics(): void {
         ScrollTrigger.create({
           trigger: htmlEl,
           scroller: osScroller || undefined,
-          // Fire EARLY — when the section is just entering viewport
-          // from below. Gives the fly-in / re-snatch flight time to
-          // complete before the user has fully scrolled into the
-          // section. Previously 'top 80%' fired after the section was
-          // already 20% in view, so the dots were still mid-air when
-          // the user expected to see the formed word.
-          start: 'top bottom',
+          // Fire when section's top reaches 90% line of viewport — i.e.
+          // user has scrolled ~10vh into the section. Sections that sit
+          // flush below the hero won't fire at page load (their top is
+          // at viewport bottom on load, below the 90% line). Hero
+          // itself sits at the top of the page so its top is above
+          // the 90% line on load — fires immediately, which is what
+          // a load-triggered hero word wants.
+          start: 'top 90%',
           onEnter: () => fire(new Event('viewport')),
           onEnterBack: () => fire(new Event('viewport')),
         });
