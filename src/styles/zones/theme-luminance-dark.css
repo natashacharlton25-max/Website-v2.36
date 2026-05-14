@@ -86,50 +86,16 @@
 
 /* ── Card-select dark ── */
 /* Default: primary border, transparent bg, primary icons/checks */
-/* Hover: adds primary-900 bg */
-/* Checked: all switch to secondary */
-[data-mode="dark"] .form-field__card-face {
-  --_card-select-border: var(--primary-base);
-  --_card-select-bg: transparent;
-  border-color: var(--primary-base);
-  background: transparent;
-}
+/* Dark mode card-select — uses canonical --_color / --_on-color / --_tier-*
+   so cards respect their brandColor / rainbowColor / colorTier. The colour
+   mixin tokens are theme-aware so light-mode rules largely work in dark too;
+   only dark-mode-specific tweaks live here. */
 
+/* Rest: transparent bg (rule inherited from light mode). No override needed. */
+
+/* Hover: stronger fill than light mode for visibility on dark bg. */
 [data-mode="dark"] .form-field__card-face:hover {
-  border-color: var(--primary-base);
-  background: var(--primary-emphasis);
-}
-
-[data-mode="dark"] .form-field__card-input:checked + .form-field__card-face {
-  border-color: var(--secondary-base);
-  background: var(--secondary-emphasis);
-  box-shadow: none;
-}
-
-[data-mode="dark"] .form-field__card-check {
-  border-color: var(--primary-base);
-}
-
-[data-mode="dark"] .form-field__card-check--toggle {
-  background: var(--primary-base);
-}
-
-[data-mode="dark"] .form-field__card-icon {
-  color: var(--primary-base);
-}
-
-[data-mode="dark"] .form-field__card-input:checked + .form-field__card-face .form-field__card-check--checkbox,
-[data-mode="dark"] .form-field__card-input:checked + .form-field__card-face .form-field__card-check--radio {
-  background: var(--secondary-base);
-  border-color: var(--secondary-base);
-}
-
-[data-mode="dark"] .form-field__card-input:checked + .form-field__card-face .form-field__card-check--toggle {
-  background: var(--secondary-base);
-}
-
-[data-mode="dark"] .form-field__card-input:checked + .form-field__card-face .form-field__card-icon {
-  color: var(--secondary-base);
+  background: color-mix(in oklch, var(--_tier-base) 15%, transparent);
 }
 
 /* ── BlogCard dark — override internal tokens ── */
@@ -186,8 +152,8 @@
 /* Brand Glow — dark mode: coloured shadow */
 [data-mode="dark"] .btn--glow {
   box-shadow:
-    0 4px 12px color-mix(in oklch, var(--_btn-brand) 25%, transparent),
-    0 2px 4px color-mix(in oklch, var(--_btn-brand) 15%, transparent);
+    0 4px 12px color-mix(in oklch, var(--_color) 25%, transparent),
+    0 2px 4px color-mix(in oklch, var(--_color) 15%, transparent);
 }
 
 /* FlipCard hover fills — dark mode (animated only) */
@@ -281,11 +247,15 @@
   box-shadow: inset 2px 2px 15px color-mix(in oklch, var(--_field-brand) 50%, transparent);
 }
 
-/* Glow style — outer + inner glow on dark */
+/* Glow style — outer + inner glow on dark.
+   Inner = soft inset glow on focus. Outer = brand-coloured halo, sized to
+   match light mode's --glow-spread so the effect reads clearly against the
+   dark page bg. */
 [data-mode="dark"] .form-field--glow .form-field__input:focus {
   box-shadow:
-    inset 2px 2px 10px color-mix(in oklch, var(--_field-brand) 30%, transparent),
-    0 0 20px color-mix(in oklch, var(--_field-brand) 30%, transparent);
+    inset 2px 2px 10px color-mix(in oklch, var(--_field-brand) 40%, transparent),
+    0 0 30px color-mix(in oklch, var(--_field-brand) 50%, transparent),
+    0 0 60px color-mix(in oklch, var(--_field-brand) 25%, transparent);
 }
 
 [data-mode="dark"] .form-field--glass .form-field__input {
@@ -397,10 +367,12 @@
     0 0.225em 0.375em 0 var(--primary-emphasis);
 }
 
-/* ── Neumorphic-inner dark — lighter static bg per colour ── */
-[data-mode="dark"] .btn--neumorphic-inner.btn--primary   { --_btn-brand-light: var(--primary-mid); }
-[data-mode="dark"] .btn--neumorphic-inner.btn--secondary { --_btn-brand-light: var(--secondary-mid); }
-[data-mode="dark"] .btn--neumorphic-inner.btn--neutral   { --_btn-brand-light: var(--neutral-mid); }
+/* ── Neumorphic-inner dark — shift --_tier-tint to -mid per colour so
+       the muted inner-bg has enough contrast against the dark surround.
+       Scoped to .btn--neumorphic-inner so it doesn't leak to other atoms. ── */
+[data-mode="dark"] .btn--neumorphic-inner.color--primary   { --_tier-tint: var(--primary-mid); }
+[data-mode="dark"] .btn--neumorphic-inner.color--secondary { --_tier-tint: var(--secondary-mid); }
+[data-mode="dark"] .btn--neumorphic-inner.color--neutral   { --_tier-tint: var(--neutral-mid); }
 
 /* ── Liquid glass dark — border + inner glow, hover intensifies ── */
 
@@ -432,27 +404,27 @@
 }
 
 /* Tech dark: fill/border swap on hover */
-[data-mode="dark"] .btn--tech.btn--primary { background-color: var(--primary-base); border-color: var(--primary-emphasis); color: var(--primary-mid); }
-[data-mode="dark"] .btn--tech.btn--primary::before { border-color: var(--primary-emphasis); }
-[data-mode="dark"] .btn--tech.btn--primary:hover { background-color: var(--primary-emphasis); border-color: var(--primary-base); color: var(--primary-mid); }
-[data-mode="dark"] .btn--tech.btn--primary:hover::before { border-color: var(--primary-base); }
+[data-mode="dark"] .btn--tech.color--primary { background-color: var(--primary-base); border-color: var(--primary-emphasis); color: var(--primary-mid); }
+[data-mode="dark"] .btn--tech.color--primary::before { border-color: var(--primary-emphasis); }
+[data-mode="dark"] .btn--tech.color--primary:hover { background-color: var(--primary-emphasis); border-color: var(--primary-base); color: var(--primary-mid); }
+[data-mode="dark"] .btn--tech.color--primary:hover::before { border-color: var(--primary-base); }
 
-[data-mode="dark"] .btn--tech.btn--secondary { background-color: var(--secondary-base); border-color: var(--secondary-emphasis); color: var(--secondary-mid); }
-[data-mode="dark"] .btn--tech.btn--secondary::before { border-color: var(--secondary-emphasis); }
-[data-mode="dark"] .btn--tech.btn--secondary:hover { background-color: var(--secondary-emphasis); border-color: var(--secondary-base); color: var(--secondary-mid); }
-[data-mode="dark"] .btn--tech.btn--secondary:hover::before { border-color: var(--secondary-base); }
+[data-mode="dark"] .btn--tech.color--secondary { background-color: var(--secondary-base); border-color: var(--secondary-emphasis); color: var(--secondary-mid); }
+[data-mode="dark"] .btn--tech.color--secondary::before { border-color: var(--secondary-emphasis); }
+[data-mode="dark"] .btn--tech.color--secondary:hover { background-color: var(--secondary-emphasis); border-color: var(--secondary-base); color: var(--secondary-mid); }
+[data-mode="dark"] .btn--tech.color--secondary:hover::before { border-color: var(--secondary-base); }
 
-[data-mode="dark"] .btn--tech.btn--neutral { background-color: var(--neutral-base); border-color: var(--neutral-emphasis); color: var(--neutral-mid); }
-[data-mode="dark"] .btn--tech.btn--neutral::before { border-color: var(--neutral-emphasis); }
-[data-mode="dark"] .btn--tech.btn--neutral:hover { background-color: var(--neutral-emphasis); border-color: var(--neutral-base); color: var(--neutral-mid); }
-[data-mode="dark"] .btn--tech.btn--neutral:hover::before { border-color: var(--neutral-base); }
+[data-mode="dark"] .btn--tech.color--neutral { background-color: var(--neutral-base); border-color: var(--neutral-emphasis); color: var(--neutral-mid); }
+[data-mode="dark"] .btn--tech.color--neutral::before { border-color: var(--neutral-emphasis); }
+[data-mode="dark"] .btn--tech.color--neutral:hover { background-color: var(--neutral-emphasis); border-color: var(--neutral-base); color: var(--neutral-mid); }
+[data-mode="dark"] .btn--tech.color--neutral:hover::before { border-color: var(--neutral-base); }
 
 /* Dropdown button dark — visible text + solid brand border */
 [data-mode="dark"] .btn.btn--dropdown {
-  --_field-text: var(--_btn-brand);
+  --_field-text: var(--_color);
   background: transparent;
-  color: var(--_btn-brand);
-  border: var(--border-width-2) solid var(--_btn-brand);
+  color: var(--_color);
+  border: var(--border-width-2) solid var(--_color);
 }
 
 /* Dropdown dark: inner glow using brand border colour */
@@ -479,13 +451,13 @@
 
 /* Colour-flow dark — more visible static bg */
 [data-mode="dark"] .btn--colour-flow {
-  background: color-mix(in oklch, var(--_btn-brand) 25%, transparent);
+  background: color-mix(in oklch, var(--_color) 25%, transparent);
 }
 
 [data-mode="dark"] .btn--fill:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):not(.gradient--animated):hover {
-  background-color: var(--_btn-brand-light);
-  color: var(--_btn-brand-dark);
-  border-color: var(--_btn-brand-dark);
+  background-color: var(--_tier-tint);
+  color: var(--_contrast);
+  border-color: var(--_contrast);
 }
 
 /* ── Heading dark — colour from global .color-- mixin, no override needed ── */

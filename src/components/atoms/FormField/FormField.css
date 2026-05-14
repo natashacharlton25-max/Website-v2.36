@@ -5,22 +5,26 @@
  *         number, tel, url, password, card-select
  * Label, description, error render through Text atom.
  * Card-select renders choices as pictogram/text cards with hidden native inputs.
- * Custom caret system — see src/lib/interaction/custom-caret.ts
+ * Custom caret + arrow-tab → src/components/atoms/Caret/ (atom barrel imported
+ * by FormField/index.ts so caret CSS loads alongside).
  *
- * Token system (all bridge via --field-* → --_field-*):
+ * Internal token system (all --_field-* set on .form-field):
  *   --_field-brand / -dark / -light      colour (variant-swapped)
  *   --_field-bg / -text / -label         surface + text
  *   --_field-placeholder / -error        states
  *   --_field-control-mark                tick/dot colour
  *   --_field-border                      border colour
  *   --_field-glass-bg / -blur / -border  glass variant
- *   --_field-shadow                      neumorphic/glass/toggle
+ *   --_field-shadow                      neumorphic + glass variants (large)
  *   --_field-control-size                checkbox/radio size
  *   --_field-toggle-w / -h / -thumb-size toggle dims
  *
  * Colour variants swap brand tokens: primary (default), secondary, neutral
- * Style variants: outlined (default), filled, underlined, glass, neumorphic, glow
+ * Style variants: outlined (default), filled, underlined, glass, inset,
+ *                 neumorphic, glow, bare
  * High contrast + dark mode: zone files (high-contrast.css, theme-luminance-dark.css)
+ * Hover behaviour (base + modes): src/styles/gates/hover-gate.css
+ * Render mode overrides: reduced-gate.css / assistive-gate.css / textonly.css
  */
 
 /* ==========================================================
@@ -31,29 +35,42 @@
   flex-direction: column;
   gap: var(--space-xs);
 
-  /* Colour tokens — default = primary */
-  --_field-brand: var(--primary-base);
-  --_field-brand-dark: var(--primary-emphasis);
-  --_field-brand-light: var(--primary-tint);
+  /* Colour tokens — read from the global .color--{name} mixin.
+     FormField.astro always emits .color--{name} (default primary) so
+     --_color / --_tier-emphasis / --_tier-tint are always defined
+     (src/styles/global/colour.css). */
+  --_field-brand: var(--_color);
+  --_field-brand-dark: var(--_tier-emphasis);
+  --_field-brand-light: var(--_tier-tint);
 
   /* Surface / text tokens */
   --_field-bg: var(--page-bg-raised);
   --_field-text: var(--neutral-emphasis);
   --_field-label: var(--neutral-emphasis);
+  /* Placeholder = --neutral-mid at full opacity. Readable but visibly lighter
+     than --neutral-emphasis body text so users can tell it's a hint.
+     Description + suggestion text use --_field-helper which is contrast-tested
+     against page-bg via theme tokens — fixes WCAG 1.4.3. */
   --_field-placeholder: var(--neutral-mid);
+  --_field-helper: var(--neutral-emphasis);
   --_field-error: var(--color-Error);
-  --_field-control-mark: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
+  /* control-mark = on-colour over --_field-brand (which equals --_color).
+     --_on-color is defined globally in colour.css via the * rule. */
+  --_field-control-mark: var(--_on-color);
 
-  /* Border / contrast token */
-  --_field-border: var(--neutral-mid);
+  /* Border / contrast token.
+     neutral-base (not neutral-mid) so the rest-state border + brand-tint mix
+     reaches 3:1 against page-bg. WCAG 1.4.11 non-text contrast. */
+  --_field-border: var(--neutral-base);
 
   /* Glass tokens — only consumed by .form-field--glass */
   --_field-glass-bg: var(--glass-bg);
   --_field-glass-blur: var(--glass-blur);
   --_field-glass-border: var(--glass-border);
 
-  /* Shadow token — consumed by neumorphic, glass, toggle */
-  --_field-shadow: var(--field-shadow, var(--shadow-neu-raised));
+  /* Shadow token — consumed by neumorphic + glass variants.
+     Toggle thumbs use --shadow-sm directly (different intent: small drop). */
+  --_field-shadow: var(--shadow-neu-raised);
 
   /* Control size tokens — rem so they scale with --base-font-pct */
   --_field-control-size: 1.375rem;   /* 22px at 16px base */
@@ -63,20 +80,20 @@
 }
 
 /* ==========================================================
-   COLOUR VARIANTS
-   ========================================================== */
-.form-field--secondary {
-  --_field-brand: var(--secondary-base);
-  --_field-brand-dark: var(--secondary-contrast);
-  --_field-brand-light: var(--secondary-tint);
-}
+   COLOUR — driven by the global .color--{name} mixin
+   ==========================================================
+   Colour comes from src/styles/global/colour.css. FormField.astro emits
+   .color--{brandColor|rainbowColor} on the wrapper so --_color, --_tier-tint,
+   --_tier-emphasis are defined. --_field-brand/-dark/-light bridge to them.
 
-.form-field--neutral {
-  --_field-brand: var(--neutral-base);
-  --_field-brand-dark: var(--neutral-emphasis);
-  --_field-brand-light: var(--neutral-mid);
+   Neutral variant has a special surface treatment: the input bg picks up a
+   subtle neutral tint and the border is stronger. Kept as a CSS-only
+   modifier scoped to the global neutral mixin so it activates whenever
+   brandColor='neutral' is set. */
+.form-field:where(.color--neutral) {
   --_field-bg: color-mix(in oklch, var(--neutral-mid) 8%, var(--page-bg-raised));
-  --_field-border: var(--neutral-base);
+  /* --_field-border already defaults to --neutral-base (base block) so neutral
+     variant inherits it; no override needed. */
 }
 
 /* Shape variants */
@@ -85,15 +102,6 @@
 .form-field--soft    .form-field__input { border-radius: var(--radius-md); }
 .form-field--rounded .form-field__input { border-radius: var(--radius-lg); }
 .form-field--pill    .form-field__input { border-radius: var(--radius-full); }
-
-/* Rainbow colour variants */
-.form-field--red     { --_field-brand: var(--rainbow-1);  --_field-brand-dark: var(--rainbow-1-emphasis);  --_field-brand-light: var(--rainbow-1-tint); }
-.form-field--orange  { --_field-brand: var(--rainbow-2);  --_field-brand-dark: var(--rainbow-2-emphasis);  --_field-brand-light: var(--rainbow-2-tint); }
-.form-field--yellow  { --_field-brand: var(--rainbow-3);  --_field-brand-dark: var(--rainbow-3-emphasis);  --_field-brand-light: var(--rainbow-3-tint); }
-.form-field--teal    { --_field-brand: var(--rainbow-4);  --_field-brand-dark: var(--rainbow-4-emphasis);  --_field-brand-light: var(--rainbow-4-tint); }
-.form-field--blue    { --_field-brand: var(--rainbow-5);  --_field-brand-dark: var(--rainbow-5-emphasis);  --_field-brand-light: var(--rainbow-5-tint); }
-.form-field--purple  { --_field-brand: var(--rainbow-6);  --_field-brand-dark: var(--rainbow-6-emphasis);  --_field-brand-light: var(--rainbow-6-tint); }
-.form-field--pink    { --_field-brand: var(--rainbow-7);  --_field-brand-dark: var(--rainbow-7-emphasis);  --_field-brand-light: var(--rainbow-7-tint); }
 
 /* High contrast + dark mode rules live in zone files:
    src/styles/zones/high-contrast.css
@@ -109,11 +117,11 @@
 
 .form-field__required {
   color: var(--_field-error);
-  margin-left: var(--space-hair, 2px);
+  margin-left: var(--space-2xs);
 }
 
 .form-field__desc {
-  color: var(--_field-placeholder);
+  color: var(--_field-helper);
 }
 
 /* ==========================================================
@@ -121,7 +129,7 @@
    ========================================================== */
 .form-field__input {
   padding: var(--space-sm) var(--space-md);
-  border: var(--border-width-2) solid color-mix(in oklch, var(--_field-brand) 30%, var(--_field-border));
+  border: var(--border-width-2) solid var(--_color);
   border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: var(--text-base);
@@ -132,29 +140,13 @@
 
 .form-field__input::placeholder {
   color: var(--_field-placeholder);
-  opacity: var(--opacity-subtle);
+  /* No opacity dimming: --neutral-mid at full opacity is readable but
+     clearly lighter than --neutral-emphasis body text. */
+  opacity: 1;
 }
 
-.form-field__input:hover {
-  background: color-mix(in oklch, var(--_field-brand) var(--_field-hover-tint, 5%), var(--_field-hover-base, transparent));
-}
-
-/* Hover-none: no visual change on any state */
-[data-hover="none"] .form-field__input:hover,
-[data-hover="none"] .form-field__input:focus,
-[data-hover="none"] .form-field__input:focus:hover {
-  background: transparent;
-  border-color: color-mix(in oklch, var(--_field-brand) 30%, var(--_field-border));
-}
-
-[data-hover="none"] .form-field.has-value .form-field__input:hover,
-[data-hover="none"] .form-field.has-value .form-field__input:focus,
-[data-hover="none"] .form-field.has-value .form-field__input:focus:hover {
-  border-color: var(--neutral-mid);
-  background: color-mix(in oklch, var(--neutral-mid) 8%, var(--_field-hover-base, transparent));
-}
-
-
+/* :hover styles for .form-field__input + [data-hover] mode rules
+   live in src/styles/gates/hover-gate.css. */
 
 .form-field__input:focus {
   border-color: var(--_field-brand);
@@ -162,10 +154,12 @@
   outline: none;
 }
 
-/* Filled state — neutral border + tint when not focused */
+/* Filled state — softer neutral border + tint when not focused.
+   Uses --neutral-mid directly (not --_field-border which is --neutral-base)
+   because the filled state is intentionally lighter than the default border. */
 .form-field.has-value .form-field__input:not(:focus) {
   border-color: var(--neutral-mid);
-  background: color-mix(in oklch, var(--neutral-mid) 8%, var(--_field-hover-base, transparent));
+  background: color-mix(in oklch, var(--neutral-mid) 8%, transparent);
 }
 
 .form-field__input:disabled {
@@ -187,7 +181,7 @@
 }
 
 .form-field__select-wrap .btn--dropdown {
-  width: 100% !important;
+  width: 100%;
   max-width: 100%;
   justify-content: space-between;
 }
@@ -235,10 +229,9 @@
    ========================================================== */
 .form-field--underlined .form-field__input {
   border: none;
-  border-bottom: 2px solid var(--_field-border);
+  border-bottom: var(--border-width-2) solid var(--_color);
   border-radius: 0;
-  padding-left: 0;
-  padding-right: 0;
+  /* Keep default horizontal padding so the input text aligns with other variants. */
   background: transparent;
 }
 
@@ -258,7 +251,7 @@
   background: var(--_field-glass-bg);
   backdrop-filter: var(--_field-glass-blur);
   -webkit-backdrop-filter: var(--_field-glass-blur);
-  border: 1px solid var(--_field-glass-border);
+  border: var(--border-width) solid var(--_field-glass-border);
   color: var(--_field-text);
   box-shadow: var(--_field-shadow);
 }
@@ -272,7 +265,7 @@
    STYLE VARIANT: INSET
    ========================================================== */
 .form-field--inset .form-field__input {
-  border: 1px solid color-mix(in oklch, var(--_field-border) 50%, transparent);
+  border: var(--border-width) solid color-mix(in oklch, var(--_field-border) 50%, transparent);
   background: color-mix(in oklch, var(--_field-bg) 80%, var(--color-Black) 5%);
   box-shadow: var(--shadow-neu-pressed);
 }
@@ -341,7 +334,7 @@
   width: var(--_field-control-size);
   height: var(--_field-control-size);
   flex-shrink: 0;
-  border: var(--border-width-2) solid color-mix(in oklch, var(--_field-brand) 30%, var(--_field-border));
+  border: var(--border-width-2) solid var(--_color);
   border-radius: var(--radius-sm);
   background: transparent;
   position: relative;
@@ -357,7 +350,7 @@
   width: calc(var(--_field-control-size) * 0.23);
   height: calc(var(--_field-control-size) * 0.46);
   border: solid var(--_field-control-mark);
-  border-width: 0 2px 2px 0;
+  border-width: 0 var(--border-width-2) var(--border-width-2) 0;
   transform: rotate(45deg);
 }
 
@@ -405,7 +398,7 @@
   width: var(--_field-control-size);
   height: var(--_field-control-size);
   flex-shrink: 0;
-  border: var(--border-width-2) solid color-mix(in oklch, var(--_field-brand) 30%, var(--_field-border));
+  border: var(--border-width-2) solid var(--_color);
   border-radius: 50%;
   background: transparent;
   position: relative;
@@ -466,7 +459,7 @@
   height: var(--_field-toggle-h);
   flex-shrink: 0;
   border-radius: var(--radius-full);
-  background: color-mix(in oklch, var(--_field-brand) 20%, var(--_field-border));
+  background: var(--_color);
   cursor: pointer;
   position: relative;
   display: block;
@@ -482,7 +475,8 @@
   background: var(--_field-control-mark);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: all var(--hover-duration-fast) var(--ease-default);
+  /* transition: belongs in src/styles/gates/hover-gate.css so motion-gate
+     can kill it. See: FormField toggle thumb slide. */
 }
 
 .form-field__toggle:checked + .form-field__toggle-track {
@@ -518,8 +512,8 @@
 }
 
 .form-field--error .form-field__toggle-track {
-  outline: 2px solid var(--_field-error);
-  outline-offset: 2px;
+  outline: var(--border-width-2) solid var(--_field-error);
+  outline-offset: var(--border-width-2);
 }
 
 .form-field__error {
@@ -528,9 +522,9 @@
 }
 
 .form-field__suggestion {
-  color: var(--text-muted);
-  font-style: italic;
+  color: var(--_field-helper);
   display: block;
+  /* No italic: dyslexia-unfriendly. Colour + role="alert" carry semantics. */
 }
 
 .form-field__feedback {
@@ -594,7 +588,7 @@
   gap: var(--space-sm);
   padding: var(--space-lg);
   padding-bottom: var(--space-xl);
-  border: var(--border-width-2) solid color-mix(in oklch, var(--_field-brand) 30%, var(--_field-border));
+  border: var(--border-width-2) solid var(--_color);
   border-radius: var(--radius-lg);
   background: transparent;
   color: var(--_field-text);
@@ -610,55 +604,14 @@
   border-radius: 0;
 }
 
-/* Hover */
-.form-field__card-face:hover {
-  border-color: var(--_field-brand);
-  background: var(--_field-brand-light);
-}
-
-/* ── Hover gate: none — card stays static, only check indicator changes ── */
-[data-hover="none"] .form-field__card-face {
-  transition: none;
-}
-
-[data-hover="none"] .form-field__card-face:hover {
-  border-color: color-mix(in oklch, var(--_field-brand) 30%, var(--_field-border));
-  background: transparent;
-}
-
-[data-hover="none"] .form-field__card-input:checked + .form-field__card-face {
-  border-color: var(--_field-brand);
-  background: var(--_field-brand);
-  color: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
-  box-shadow: none;
-  transition: none;
-}
-
-/* ── Hover gate: instant — everything snaps, no transition ── */
-[data-hover="instant"] .form-field__card-face,
-[data-hover="instant"] .form-field__card-check,
-[data-hover="instant"] .form-field__card-check--toggle,
-[data-hover="instant"] .form-field__card-check--toggle::before {
-  transition: none;
-}
-
-/* Instant: no hover bg change, only checked state */
-[data-hover="instant"] .form-field__card-face:hover {
-  border-color: var(--_field-border);
-  background: var(--_field-bg);
-}
-
-/* ── None mode: check indicators still animate ── */
-[data-hover="none"] .form-field__card-check--toggle,
-[data-hover="none"] .form-field__card-check--toggle::before {
-  transition: all var(--hover-duration-fast);
-}
+/* :hover for .form-field__card-face + [data-hover] mode rules live
+   in src/styles/gates/hover-gate.css. */
 
 /* Selected state — card fills with brand colour */
 .form-field__card-input:checked + .form-field__card-face {
   border-color: var(--_field-brand);
   background: var(--_field-brand);
-  color: oklch(from var(--_field-brand) round(1.21 - l) 0 0);
+  color: var(--_on-color);
   box-shadow: var(--shadow-md);
 }
 
@@ -668,8 +621,6 @@
 .form-field__card-input:checked + .form-field__card-face .form-field__card-simple {
   color: inherit;
 }
-
-/* ── Reduced render — hover-gate handles transition suppression globally ── */
 
 /* ── Card footer — label + check indicator inline ── */
 .form-field__card-footer {
@@ -702,7 +653,7 @@
   width: 0.25rem;
   height: 0.5rem;
   border: solid var(--color-White);
-  border-width: 0 2px 2px 0;
+  border-width: 0 var(--border-width-2) var(--border-width-2) 0;
   transform: rotate(45deg);
 }
 
@@ -790,105 +741,18 @@
   cursor: not-allowed;
 }
 
-/* Symbol image */
-.form-field__card-symbol {
-  width: 3em;
-  height: 3em;
-  object-fit: contain;
-}
-
 /* Card sizes */
 .form-field--card-size-sm .form-field__card-face { padding: var(--space-md); }
-.form-field--card-size-sm .form-field__card-symbol { width: 2em; height: 2em; }
-
 .form-field--card-size-lg .form-field__card-face { padding: var(--space-xl); }
-.form-field--card-size-lg .form-field__card-symbol { width: 4em; height: 4em; }
 
 /* ==========================================================
-   RENDER MODE OVERRIDES
+   RENDER MODE OVERRIDES — extracted 2026-05-14
    ========================================================== */
+/* data-render="reduced" rules   → src/styles/gates/reduced-gate.css
+   data-render="assistive" rules → src/styles/gates/assistive-gate.css
+   data-render="textonly" rules  → src/styles/textonly/textonly.css
+   Card-select is functional content — NOT stripped in textonly. */
 
-/* ── Reduced — all transitions instant, strip effects, enlarge controls ── */
-
-[data-render="reduced"] .form-field {
-  --_field-control-size: 1.75rem;    /* 28px at 16px base */
-  --_field-toggle-w: 3.25rem;       /* 52px at 16px base */
-  --_field-toggle-h: 1.75rem;       /* 28px at 16px base */
-  --_field-thumb-size: 1.25rem;     /* 20px at 16px base */
-}
-
-
-[data-render="reduced"] .form-field--glass .form-field__input {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  background: var(--_field-bg);
-  border: var(--border-width-2) solid var(--_field-border);
-  box-shadow: none;
-}
-
-[data-render="reduced"] .form-field--neumorphic .form-field__input {
-  box-shadow: none;
-  border: var(--border-width-2) solid var(--_field-border);
-}
-
-[data-render="reduced"] .form-field--glow .form-field__input:focus {
-  box-shadow: none;
-}
-
-
-/* ── Assistive — enlarged controls, thick focus, generous spacing ── */
-
-[data-render="assistive"] .form-field {
-  --_field-control-size: 2rem;       /* 32px at 16px base */
-  --_field-toggle-w: 3.75rem;       /* 60px at 16px base */
-  --_field-toggle-h: 2rem;          /* 32px at 16px base */
-  --_field-thumb-size: 1.5rem;      /* 24px at 16px base */
-  gap: var(--space-sm);
-}
-
-[data-render="assistive"] .form-field__input {
-  min-height: 4rem;                  /* 64px at 16px base */
-  padding: var(--space-md) var(--space-lg);
-  font-size: var(--text-body);
-}
-
-[data-render="assistive"] .form-field__checkmark,
-[data-render="assistive"] .form-field__radio-indicator {
-  min-width: 2rem;
-  min-height: 2rem;
-}
-
-[data-render="assistive"] .form-field__checkbox-wrap,
-[data-render="assistive"] .form-field__radio-wrap,
-[data-render="assistive"] .form-field__toggle-wrap {
-  gap: var(--space-md);
-  padding: var(--space-sm) 0;
-}
-
-[data-render="assistive"] .form-field__card-grid {
-  grid-template-columns: 1fr;
-}
-
-[data-render="assistive"] .form-field__card-face {
-  padding: var(--space-xl);
-  min-height: 4rem;
-  flex-direction: row;
-  gap: var(--space-lg);
-}
-
-[data-render="assistive"] .form-field__card-symbol {
-  width: 3em;
-  height: 3em;
-}
-
-/* Assistive focus → global focus-gate.css */
-
-/* Textonly → global textonly/structure.css */
-
-/* Card-select is functional content — NOT stripped in textonly.
-   Images are choices, toggles are form controls. */
-
-/* Neumorphic toggle removed — standard toggle with size variants covers all needs */
 
 /* ==========================================================
    XL TEXT MODE — form fields scale up + stack when text is enlarged
@@ -907,13 +771,11 @@
   min-height: 4.5rem;
 }
 
-/* Checkboxes/radios/toggles become card-style: big touch target */
+/* Checkboxes/radios/toggles become card-style: big touch target.
+   Assistive-render counterpart lives in assistive-gate.css. */
 [data-text-xl] .form-field__checkbox-wrap,
 [data-text-xl] .form-field__radio-wrap,
-[data-text-xl] .form-field__toggle-wrap,
-[data-render="assistive"] .form-field__checkbox-wrap,
-[data-render="assistive"] .form-field__radio-wrap,
-[data-render="assistive"] .form-field__toggle-wrap {
+[data-text-xl] .form-field__toggle-wrap {
   flex-direction: column;
   align-items: center;
   text-align: center;
@@ -926,37 +788,24 @@
   cursor: pointer;
 }
 
-/* Disabled card-style controls */
+/* Disabled card-style controls (XL only; assistive counterpart in gate file) */
 [data-text-xl] .form-field--disabled .form-field__checkbox-wrap,
 [data-text-xl] .form-field--disabled .form-field__radio-wrap,
-[data-text-xl] .form-field--disabled .form-field__toggle-wrap,
-[data-render="assistive"] .form-field--disabled .form-field__checkbox-wrap,
-[data-render="assistive"] .form-field--disabled .form-field__radio-wrap,
-[data-render="assistive"] .form-field--disabled .form-field__toggle-wrap {
+[data-text-xl] .form-field--disabled .form-field__toggle-wrap {
   opacity: var(--opacity-disabled);
   cursor: not-allowed;
   pointer-events: none;
 }
 
-/* Card icons/text scale up in XL + assistive */
-[data-text-xl] .form-field__card-face,
-[data-render="assistive"] .form-field__card-face {
-  font-size: var(--text-lg, 1.125rem);
+/* Card icons/text scale up in XL (assistive counterpart in gate file) */
+[data-text-xl] .form-field__card-face {
+  font-size: var(--text-lg);
 }
 
-[data-text-xl] .form-field__card-symbol,
-[data-render="assistive"] .form-field__card-symbol {
-  width: 4em;
-  height: 4em;
-}
-
-/* Card-select single column */
-[data-text-xl] .form-field__card-grid,
-[data-render="assistive"] .form-field__card-grid {
+/* Card-select single column (assistive counterpart in gate file) */
+[data-text-xl] .form-field__card-grid {
   grid-template-columns: 1fr;
 }
-
-/* ── Neumorphic toggle sizes ── */
 
 /* ==========================================================
    SIZE VARIANTS — applies to ALL form field styles
@@ -1008,157 +857,13 @@
 
 .form-field--xl .form-field__input {
   padding: var(--space-lg) var(--space-xl);
-  font-size: var(--text-lg, 1.125rem);
+  font-size: var(--text-lg);
   min-height: 4.5rem;
 }
 
 .form-field--xl .form-field__label {
-  font-size: var(--text-lg, 1.125rem);
+  font-size: var(--text-lg);
 }
 
-/* ==========================================================
-   CUSTOM CARET — hide OS caret, render our own
-   Activated by data-custom-caret on <html>
-   ========================================================== */
-
-/* Hide OS caret when custom caret is active */
-[data-custom-caret] .form-field__input,
-[data-custom-caret] .form-field__input--textarea {
-  caret-color: transparent;
-}
-
-/* Custom caret element (injected by JS) */
-.form-field__caret {
-  position: absolute;
-  width: var(--caret-width, 2px);
-  background: var(--caret-color, var(--focus-color, var(--primary-base)));
-  border-radius: var(--caret-radius, 1px);
-  pointer-events: none;
-  opacity: 0;
-  z-index: 2;
-  animation: caret-blink var(--caret-blink-speed, 1s) step-end infinite;
-}
-
-.form-field__caret--visible {
-  opacity: 1;
-}
-
-@keyframes caret-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-/* Measurer — hidden, used for position calculation */
-.form-field__caret-measurer {
-  position: absolute;
-  visibility: hidden;
-  pointer-events: none;
-  top: 0;
-  left: 0;
-}
-
-/* ── Gate: hover=full → standard blink ── */
-[data-hover="full"] .form-field__caret {
-  --caret-blink-speed: 1s;
-}
-
-/* ── Gate: hover=instant → solid, no blink (instant = no animation) ── */
-[data-hover="instant"] .form-field__caret {
-  animation: none;
-  opacity: 1;
-}
-
-/* ── Gate: hover=gentle → slow pulse ── */
-[data-hover="gentle"] .form-field__caret {
-  --caret-blink-speed: 2s;
-}
-
-/* ── Gate: hover=none → hide caret, fill IS the indicator ── */
-[data-hover="none"] .form-field__caret {
-  display: none;
-}
-
-/* ── Gate: enhanced focus → thicker caret ── */
-[data-enhanced-focus] .form-field__caret {
-  --caret-width: 4px;
-}
-
-/* ── Gate: assistive → extra thick ── */
-[data-render="assistive"] .form-field__caret {
-  --caret-width: 6px;
-}
-
-/* ── Gate: textonly → match text colour ── */
-[data-render="textonly"] .form-field__caret {
-  --caret-color: var(--neutral-emphasis);
-}
-
-/* ── Caret shape: block ── */
-[data-caret-shape="block"] .form-field__caret {
-  --caret-width: 0.6em;
-  opacity: 0.5;
-}
-
-/* ── Caret shape: circle ── */
-[data-caret-shape="circle"] .form-field__caret {
-  --caret-width: 0.5em;
-  border-radius: 50%;
-  aspect-ratio: 1;
-  height: auto !important;
-}
-
-/* ==========================================================
-   ARROW TAB — sticky "sign here" indicator on left edge
-   Points to the active form field
-   ========================================================== */
-
-.form-field__arrow-tab {
-  position: absolute;
-  left: 0;
-  transform: translateY(-50%);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: clamp(40px, 8vw, 70px);
-  height: clamp(40px, 8vw, 70px);
-  background: transparent;
-  color: var(--caret-color, var(--focus-color, var(--primary-base)));
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity var(--hover-duration-fast, 0.12s) ease-out,
-              top var(--hover-duration-fast, 0.12s) ease-out,
-              left var(--hover-duration-fast, 0.12s) ease-out;
-}
-
-.form-field__arrow-tab--visible {
-  opacity: 1;
-}
-
-.form-field__arrow-tab-arrow {
-  font-size: 2rem;
-  line-height: 1;
-  filter: drop-shadow(1px 1px 2px color-mix(in oklch, var(--color-Black) 30%, transparent));
-}
-
-/* ── Gate: hover=gentle → slow position transition ── */
-[data-hover="gentle"] .form-field__arrow-tab {
-  transition: opacity 0.5s ease-out, top 0.8s ease-out;
-}
-
-/* ── Gate: hover=none → no arrow tab ── */
-[data-hover="none"] .form-field__arrow-tab {
-  display: none;
-}
-
-/* ── Gate: enhanced focus → larger tab ── */
-[data-enhanced-focus] .form-field__arrow-tab {
-  padding: var(--space-sm) var(--space-md) var(--space-sm) var(--space-sm);
-  font-size: var(--text-small);
-}
-
-/* ── Gate: assistive → extra large tab ── */
-[data-render="assistive"] .form-field__arrow-tab {
-  padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-md);
-  font-size: var(--text-body);
-}
+/* Custom caret + arrow-tab rules extracted to atoms/Caret/Caret.css
+   (2026-05-14 audit). FormField barrel imports Caret. */

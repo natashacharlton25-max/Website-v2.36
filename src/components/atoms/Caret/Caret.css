@@ -1,0 +1,203 @@
+/**
+ * Caret — css
+ *
+ * PLACEHOLDER ATOM — extracted from FormField as part of validator audit
+ * (2026-05-14). Class names (.form-field__caret, .form-field__arrow-tab)
+ * stay coupled to src/lib/caret/custom-caret.ts for now. Future cleanup:
+ * rename to .caret / .caret-arrow, build proper .astro template, decouple
+ * JS string literals.
+ *
+ * Hides OS caret (caret-color: transparent via CSS) and renders a custom
+ * caret <span> injected at runtime by custom-caret.ts. The arrow tab is a
+ * sticky "sign here" indicator that points to the active form field.
+ *
+ * Activated by data-custom-caret on <html>.
+ *
+ * Token system (all defined once on .form-field, sites read bare var()):
+ *   --caret-width            stroke thickness
+ *   --caret-color            stroke colour
+ *   --caret-blink-speed      blink animation duration
+ *   --caret-radius           stroke corner radius
+ *
+ * Gate-aware:
+ *   data-hover="none"        → solid, no blink (or hidden when fill IS the indicator)
+ *   data-hover="instant"     → solid, no blink
+ *   data-hover="gentle"      → slow pulse (--duration-continuous-slow)
+ *   data-hover="full"        → standard blink (--duration-long)
+ *   data-focus-rainbow       → colour cycles with rainbow tokens (JS sets var)
+ *   data-enhanced-focus      → thicker (4px)
+ *   data-render="assistive"  → extra thick (6px)
+ *   data-render="textonly"   → match text colour
+ *   data-caret-shape="block" → block caret with reduced opacity
+ *   data-caret-shape="circle"→ circular caret
+ */
+
+
+/* ==========================================================
+   BASE — token defaults + caret defaults via :host (.form-field scope)
+   ========================================================== */
+
+/* Hide OS caret when custom caret is active */
+[data-custom-caret] .form-field__input,
+[data-custom-caret] .form-field__input--textarea {
+  caret-color: transparent;
+}
+
+/* Token defaults live on .form-field so caret/arrow-tab sites read bare var().
+   JS-set values (via _caretEl.style.setProperty) override these per-instance. */
+.form-field {
+  --caret-width: var(--border-width-2);
+  --caret-color: var(--focus-color);
+  --caret-radius: 1px;
+  --caret-blink-speed: var(--duration-long);
+}
+
+/* Custom caret element (injected by JS — see src/lib/caret/custom-caret.ts) */
+.form-field__caret {
+  position: absolute;
+  width: var(--caret-width);
+  background: var(--caret-color);
+  border-radius: var(--caret-radius);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 2;
+  animation: caret-blink var(--caret-blink-speed) step-end infinite;
+}
+
+.form-field__caret--visible {
+  opacity: 1;
+}
+
+@keyframes caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Measurer — hidden, used for position calculation by custom-caret.ts */
+.form-field__caret-measurer {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+}
+
+
+/* ==========================================================
+   CARET — HOVER GATE
+   ========================================================== */
+
+/* hover=full → standard blink */
+[data-hover="full"] .form-field__caret {
+  --caret-blink-speed: var(--duration-long);
+}
+
+/* hover=instant → solid, no blink */
+[data-hover="instant"] .form-field__caret {
+  animation: none;
+  opacity: 1;
+}
+
+/* hover=gentle → slow pulse */
+[data-hover="gentle"] .form-field__caret {
+  --caret-blink-speed: var(--duration-continuous-slow);
+}
+
+/* hover=none → fill IS the indicator, hide caret */
+[data-hover="none"] .form-field__caret {
+  display: none;
+}
+
+
+/* ==========================================================
+   CARET — FOCUS GATE
+   ========================================================== */
+
+[data-enhanced-focus] .form-field__caret {
+  --caret-width: 4px;
+}
+
+/* data-render="assistive" caret thickness → assistive-gate.css */
+/* data-render="textonly" caret colour → src/styles/textonly/textonly.css */
+
+
+/* ==========================================================
+   CARET — SHAPE VARIANTS
+   ========================================================== */
+
+[data-caret-shape="block"] .form-field__caret {
+  --caret-width: 0.6em;
+  /* Block caret is a wider, semi-transparent bar — same value as
+     --opacity-disabled (0.5). Reusing the token rather than minting a
+     new name for the same number. */
+  opacity: var(--opacity-disabled);
+}
+
+[data-caret-shape="circle"] .form-field__caret {
+  --caret-width: 0.5em;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  /* !important required: overrides JS-set inline height={lineHeight}px
+     in custom-caret.ts so circle caret stays square via aspect-ratio. */
+  height: auto !important;
+}
+
+
+/* ==========================================================
+   ARROW TAB — sticky "sign here" indicator pointing to active field
+   ========================================================== */
+
+.form-field__arrow-tab {
+  position: absolute;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Container-specific layout dimensions — not spacing tokens.
+     Same pattern as Grid gallery dimensions. */
+  width: clamp(40px, 8vw, 70px);
+  height: clamp(40px, 8vw, 70px);
+  background: transparent;
+  color: var(--caret-color);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--hover-duration-fast) var(--ease-out),
+              top var(--hover-duration-fast) var(--ease-out),
+              left var(--hover-duration-fast) var(--ease-out);
+}
+
+.form-field__arrow-tab--visible {
+  opacity: 1;
+}
+
+.form-field__arrow-tab-arrow {
+  font-size: 2rem;
+  line-height: 1;
+  filter: drop-shadow(1px 1px 2px color-mix(in oklch, var(--color-Black) 30%, transparent));
+}
+
+
+/* ==========================================================
+   ARROW TAB — GATES
+   ========================================================== */
+
+/* hover=gentle → slow position transition */
+[data-hover="gentle"] .form-field__arrow-tab {
+  transition: opacity var(--duration-slow) var(--ease-out),
+              top var(--duration-slower) var(--ease-out);
+}
+
+/* hover=none → no arrow tab */
+[data-hover="none"] .form-field__arrow-tab {
+  display: none;
+}
+
+/* enhanced focus → larger tab */
+[data-enhanced-focus] .form-field__arrow-tab {
+  padding: var(--space-sm) var(--space-md) var(--space-sm) var(--space-sm);
+  font-size: var(--text-small);
+}
+
+/* data-render="assistive" arrow-tab sizing → assistive-gate.css */

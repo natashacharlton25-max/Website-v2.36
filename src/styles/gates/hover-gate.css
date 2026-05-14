@@ -39,16 +39,90 @@
 }
 
 
+/* ══════════════════════════════════════════════════════════════
+   FormField hover — base + mode overrides (full authority here)
+   ══════════════════════════════════════════════════════════════ */
+
+/* Base (full) — hover SHIFTS rest tier to canonical base.
+   --_tier-base is the brand-family's canonical base regardless of which
+   colorTier class is on the element. So rest can be any tier and hover
+   always lands on the strongest "anchor" of the colour family. Fill is
+   barely-perceptible (2%) for minimal noise. */
+.form-field__input:hover {
+  border-color: var(--_tier-base);
+  background: color-mix(in oklch, var(--_tier-base) 2%, transparent);
+}
+
+/* Base (full) — card-select face hover: border → base, bg → tint */
+.form-field__card-face:hover {
+  border-color: var(--_tier-base);
+  background: color-mix(in oklch, var(--_tier-base) 8%, transparent);
+}
+
+/* Toggle thumb slide — transitions left position as the checkbox flips.
+   Lives here (not FormField.css) so motion-gate can zero the duration. */
+.form-field__toggle-thumb {
+  transition: all var(--hover-duration-fast) var(--ease-default);
+}
+
 /* Hover none: form field — no tint, no border change */
 [data-hover="none"] .form-field .form-field__input:hover,
 [data-hover="none"] .form-field .form-field__input:focus {
   background: transparent;
 }
 
+/* Hover none: input border resets to mid + base */
+[data-hover="none"] .form-field__input:hover,
+[data-hover="none"] .form-field__input:focus,
+[data-hover="none"] .form-field__input:focus:hover {
+  background: transparent;
+  border-color: var(--_tier-mid);
+}
+
 /* Hover none: filled inputs stay neutral */
-[data-hover="none"] .form-field.has-value .form-field__input:hover {
+[data-hover="none"] .form-field.has-value .form-field__input:hover,
+[data-hover="none"] .form-field.has-value .form-field__input:focus,
+[data-hover="none"] .form-field.has-value .form-field__input:focus:hover {
   border-color: var(--neutral-mid);
-  background: color-mix(in oklch, var(--neutral-mid) 8%, var(--_field-hover-base, transparent));
+  background: color-mix(in oklch, var(--neutral-mid) 8%, transparent);
+}
+
+/* Hover none: card-select face stays static, only check indicator changes */
+[data-hover="none"] .form-field__card-face {
+  transition: none;
+}
+
+[data-hover="none"] .form-field__card-face:hover {
+  border-color: var(--_tier-mid);
+  background: transparent;
+}
+
+[data-hover="none"] .form-field__card-input:checked + .form-field__card-face {
+  border-color: var(--_field-brand);
+  background: var(--_field-brand);
+  color: var(--_on-color);
+  box-shadow: none;
+  transition: none;
+}
+
+/* Hover none: check indicators still animate (toggle slider movement) */
+[data-hover="none"] .form-field__card-check--toggle,
+[data-hover="none"] .form-field__card-check--toggle::before {
+  transition: all var(--hover-duration-fast);
+}
+
+/* Hover instant: card-select face + check indicators snap, no transition */
+[data-hover="instant"] .form-field__card-face,
+[data-hover="instant"] .form-field__card-check,
+[data-hover="instant"] .form-field__card-check--toggle,
+[data-hover="instant"] .form-field__card-check--toggle::before {
+  transition: none;
+}
+
+/* Hover instant: no hover bg change, only checked state */
+[data-hover="instant"] .form-field__card-face:hover {
+  border-color: var(--_field-border);
+  background: var(--_field-bg);
 }
 
 /* Hover none: hide figcaption — suppress CSS hover show */
@@ -406,7 +480,7 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
    the rest text colour without my rule forcing oklch contrast on
    variants where rest text comes from .color--text or other tokens. */
 [data-hover="none"] .btn:hover {
-  background-color: var(--_btn-brand);
+  background-color: var(--_color);
   box-shadow: var(--btn-shadow);
   transform: none;
   filter: none;
@@ -418,8 +492,8 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
    secondary/neutral hold their rest fill in hover-none. (0,11,1) wins. */
 [data-hover="none"] .btn--fill:not(.btn--dropdown):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):not(.gradient--animated):not(:disabled):not([aria-disabled="true"]):hover,
 [data-hover="none"] .btn--fill:not(.btn--dropdown):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):not(.gradient--animated):not(:disabled):not([aria-disabled="true"]):active {
-  background-color: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background-color: var(--_color);
+  color: var(--_on-color);
   box-shadow: var(--btn-shadow);
   transform: none;
 }
@@ -430,8 +504,8 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
    rest's `border: 2px solid transparent` so the primary-contrast border
    doesn't appear on hover. */
 [data-hover="none"][data-mode="dark"] .btn--fill:not(.btn--comic):not(.btn--expand):not(.btn--colour-flow):not(.btn--split):not(.btn--tech):not(.gradient--animated):hover {
-  background-color: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background-color: var(--_color);
+  color: var(--_on-color);
   box-shadow: var(--btn-shadow);
   border-color: transparent;
   transform: none;
@@ -440,42 +514,42 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 /* Dark mode colour-flow — dark rest is `color-mix(brand 25%)`, my generic
    hover-none rule above uses 10% (light rest). Restate the 25% mix here. */
 [data-hover="none"][data-mode="dark"] .btn--colour-flow:hover {
-  background: color-mix(in oklch, var(--_btn-brand) 25%, transparent);
+  background: color-mix(in oklch, var(--_color) 25%, transparent);
 }
 
 /* Dark mode tech — theme-luminance-dark.css has per-colour rules at
-   (0,4,0) like `.btn--tech.btn--primary:hover { background-color:
+   (0,4,0) like `.btn--tech.color--primary:hover { background-color:
    var(--primary-emphasis); ... }` that change bg/border/colour on hover.
    Match each colour at (0,5,1) to restore rest values. The ::before
    pseudo (the offset frame) also has its own border-color hover change
    per colour — restore that to rest too at (0,5,2). */
-[data-hover="none"][data-mode="dark"] .btn--tech.btn--primary:hover {
+[data-hover="none"][data-mode="dark"] .btn--tech.color--primary:hover {
   background-color: var(--primary-base);
   border-color: var(--primary-emphasis);
   color: var(--primary-mid);
 }
 
-[data-hover="none"][data-mode="dark"] .btn--tech.btn--primary:hover::before {
+[data-hover="none"][data-mode="dark"] .btn--tech.color--primary:hover::before {
   border-color: var(--primary-emphasis);
 }
 
-[data-hover="none"][data-mode="dark"] .btn--tech.btn--secondary:hover {
+[data-hover="none"][data-mode="dark"] .btn--tech.color--secondary:hover {
   background-color: var(--secondary-base);
   border-color: var(--secondary-emphasis);
   color: var(--secondary-mid);
 }
 
-[data-hover="none"][data-mode="dark"] .btn--tech.btn--secondary:hover::before {
+[data-hover="none"][data-mode="dark"] .btn--tech.color--secondary:hover::before {
   border-color: var(--secondary-emphasis);
 }
 
-[data-hover="none"][data-mode="dark"] .btn--tech.btn--neutral:hover {
+[data-hover="none"][data-mode="dark"] .btn--tech.color--neutral:hover {
   background-color: var(--neutral-base);
   border-color: var(--neutral-emphasis);
   color: var(--neutral-mid);
 }
 
-[data-hover="none"][data-mode="dark"] .btn--tech.btn--neutral:hover::before {
+[data-hover="none"][data-mode="dark"] .btn--tech.color--neutral:hover::before {
   border-color: var(--neutral-emphasis);
 }
 
@@ -514,31 +588,31 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
    variant's :hover rule can't paint over them. */
 [data-hover="none"] .btn--outline:not(.gradient--animated):hover {
   background-color: transparent;
-  color: var(--_btn-brand);
-  border-color: var(--_btn-brand);
+  color: var(--_color);
+  border-color: var(--_color);
   box-shadow: none;
 }
 
 [data-hover="none"] .btn--ghost:not(.gradient--animated):hover {
-  background-color: var(--btn-ghost-bg, transparent);
-  color: var(--btn-ghost-text);
-  border-color: var(--btn-ghost-border);
+  background-color: transparent;
+  color: var(--neutral-emphasis);
+  border-color: var(--neutral-mid);
   box-shadow: none;
 }
 
 [data-hover="none"] .btn--glass:hover {
-  background: var(--btn-glass-bg);
-  color: var(--btn-glass-text);
-  border-color: var(--btn-glass-border);
+  background: var(--glass-bg);
+  color: var(--neutral-emphasis);
+  border-color: var(--glass-border);
 }
 
 [data-hover="none"] .btn--liquid-glass:not(.gradient--animated):hover {
-  color: var(--btn-glass-text);
-  border-color: color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
+  color: var(--neutral-emphasis);
+  border-color: color-mix(in oklch, var(--_color) 30%, var(--color-White));
 }
 
 [data-hover="none"] .btn--glassic:hover {
-  color: var(--btn-glass-text);
+  color: var(--neutral-emphasis);
   transform: none;
 }
 
@@ -546,18 +620,18 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
    variant :hover rule's pressed shadow doesn't paint over it. (0,3,0)
    beats variant :hover (0,2,0). */
 [data-hover="none"] .btn--neumorphic-3d:hover {
-  background: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background: var(--_color);
+  color: var(--_on-color);
   transform: none;
   box-shadow:
-    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
-    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    inset 0 0.0625em 0 0 oklch(from var(--_color) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6),
     8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
 }
 
@@ -566,7 +640,7 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
    box-shadow: var(--btn-shadow), which would overwrite the inset
    pressed shadow. Restate it. */
 [data-hover="none"] .btn--neumorphic-inner:not(.gradient--animated):hover {
-  background: var(--_btn-brand-light);
+  background: var(--_tier-tint);
   box-shadow: var(--shadow-neu-pressed);
 }
 
@@ -580,19 +654,19 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
     8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
     -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
     inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
-    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6);
 }
 
 /* Liquid-glass hover-none — restore rest bg/border/shadow. */
 [data-hover="none"] .btn--liquid-glass:not(.gradient--animated):hover {
   background: var(--liquid-tint);
-  border-color: color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
+  border-color: color-mix(in oklch, var(--_color) 30%, var(--color-White));
   box-shadow:
     var(--liquid-inner-shadow),
     var(--liquid-outer-shadow),
@@ -658,72 +732,72 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 [data-hover="none"] .btn--fill.btn--expand:hover,
 [data-hover="none"] .btn--fill.btn--expand:active,
 [data-hover="none"] .btn--fill.btn--expand:focus-visible {
-  background-color: var(--_btn-brand);
+  background-color: var(--_color);
 }
 
 [data-hover="none"] .btn--outline.btn--expand:hover,
 [data-hover="none"] .btn--outline.btn--expand:active,
 [data-hover="none"] .btn--outline.btn--expand:focus-visible {
   background-color: transparent;
-  color: var(--_btn-brand);
-  border-color: var(--_btn-brand);
+  color: var(--_color);
+  border-color: var(--_color);
 }
 
 [data-hover="none"] .btn--ghost.btn--expand:hover,
 [data-hover="none"] .btn--ghost.btn--expand:active,
 [data-hover="none"] .btn--ghost.btn--expand:focus-visible {
-  background-color: var(--btn-ghost-bg, transparent);
-  color: var(--btn-ghost-text);
-  border-color: var(--btn-ghost-border);
+  background-color: transparent;
+  color: var(--neutral-emphasis);
+  border-color: var(--neutral-mid);
 }
 
 [data-hover="none"] .btn--glass.btn--expand:hover,
 [data-hover="none"] .btn--glass.btn--expand:active,
 [data-hover="none"] .btn--glass.btn--expand:focus-visible {
-  background: var(--btn-glass-bg);
-  color: var(--btn-glass-text);
-  border-color: var(--btn-glass-border);
+  background: var(--glass-bg);
+  color: var(--neutral-emphasis);
+  border-color: var(--glass-border);
 }
 
 [data-hover="none"] .btn--liquid-glass.btn--expand:hover,
 [data-hover="none"] .btn--liquid-glass.btn--expand:active,
 [data-hover="none"] .btn--liquid-glass.btn--expand:focus-visible {
   background: var(--liquid-tint);
-  color: var(--btn-glass-text);
-  border-color: color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
+  color: var(--neutral-emphasis);
+  border-color: color-mix(in oklch, var(--_color) 30%, var(--color-White));
 }
 
 [data-hover="none"] .btn--glassic.btn--expand:hover,
 [data-hover="none"] .btn--glassic.btn--expand:active,
 [data-hover="none"] .btn--glassic.btn--expand:focus-visible {
   background: var(--glass-bg);
-  color: var(--btn-glass-text);
+  color: var(--neutral-emphasis);
 }
 
 [data-hover="none"] .btn--neumorphic.btn--expand:hover,
 [data-hover="none"] .btn--neumorphic.btn--expand:active,
 [data-hover="none"] .btn--neumorphic.btn--expand:focus-visible {
-  background-color: var(--_btn-brand);
+  background-color: var(--_color);
 }
 
 [data-hover="none"] .btn--neumorphic-3d.btn--expand:hover,
 [data-hover="none"] .btn--neumorphic-3d.btn--expand:active,
 [data-hover="none"] .btn--neumorphic-3d.btn--expand:focus-visible {
-  background: var(--_btn-brand);
+  background: var(--_color);
 }
 
 [data-hover="none"] .btn--neumorphic-inner.btn--expand:hover,
 [data-hover="none"] .btn--neumorphic-inner.btn--expand:active,
 [data-hover="none"] .btn--neumorphic-inner.btn--expand:focus-visible {
-  background: var(--_btn-brand-light);
+  background: var(--_tier-tint);
 }
 
 /* Glow hover-none — kill the gradient bg fill, animation, and the
    ::after halo. Match .btn rest's oklch contrast formula for color so
    variant :hover (which uses the same formula) is a no-op visually. */
 [data-hover="none"] .btn--glow:hover {
-  background: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background: var(--_color);
+  color: var(--_on-color);
   animation: none;
   box-shadow: none;
 }
@@ -744,7 +818,7 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
   box-shadow:
     0 4px 0.75em color-mix(in oklch, var(--neutral-emphasis) 25%, transparent),
     0 2px 4px color-mix(in oklch, var(--neutral-emphasis) 15%, transparent);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  color: var(--_on-color);
 }
 
 [data-hover="none"] .btn-rainbow-glow-wrap:hover::after {
@@ -756,7 +830,7 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
    and rest positions on the blob pseudos so they stay below the button.
    Color: oklch contrast against --_btn-brand matches rest formula —
    needed for outline+colour-flow combos where my outline hover-none
-   would otherwise set color to var(--_btn-brand) (brand instead of
+   would otherwise set color to var(--_color) (brand instead of
    contrast). colour-flow rule comes after outline in this file → wins
    source-order at tied (0,3,0) specificity. */
 /* .btn.btn--colour-flow chain bumps specificity to (0,3,1) so it ties
@@ -765,9 +839,9 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
    source order at line 721. Sets only bg/color/shadow — variant rules
    keep painting border-color so each variant's rest border is preserved. */
 [data-hover="none"] .btn.btn--colour-flow:hover {
-  background: color-mix(in oklch, var(--_btn-brand) 10%, transparent);
-  box-shadow: var(--shadow-btn);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background: color-mix(in oklch, var(--_color) 10%, transparent);
+  box-shadow: var(--btn-shadow);
+  color: var(--_on-color);
 }
 
 [data-hover="none"] .btn--colour-flow:hover::before {
@@ -778,7 +852,7 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 
 [data-hover="none"] .btn--colour-flow:hover::after {
   top: 180%;
-  background-color: color-mix(in oklch, var(--_btn-brand) 70%, transparent);
+  background-color: color-mix(in oklch, var(--_color) 70%, transparent);
   transform: translateX(-50%) scaleY(1) scaleX(1.45);
 }
 
@@ -828,37 +902,37 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 [data-hover="none"] .btn--neumorphic-inner.btn--split:focus-visible {
   box-shadow:
     var(--shadow-neu-pressed),
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent);
 }
 
 [data-hover="none"] .btn--neumorphic.btn--split:hover,
 [data-hover="none"] .btn--neumorphic.btn--split:focus-visible {
   box-shadow:
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
     var(--shadow-neu-raised);
 }
 
 [data-hover="none"] .btn--neumorphic-3d.btn--split:hover,
 [data-hover="none"] .btn--neumorphic-3d.btn--split:focus-visible {
-  background-color: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background-color: var(--_color);
+  color: var(--_on-color);
   transform: none;
   /* Restate full rest shadow stack — without this, the variant's
      :hover rule (50em inset panels + 3D stack) wins and the panels
      fill the button instantly. */
   box-shadow:
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
-    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0.0625em 0 0 oklch(from var(--_color) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6),
     8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
 }
 
@@ -866,19 +940,19 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 [data-hover="none"] .btn--glassic.btn--split:focus-visible {
   /* Restate full rest shadow stack — same reason as neu-3d above. */
   box-shadow:
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
     inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
     8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
     -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
     inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
-    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6);
 }
 
 /* Rainbow glow — freeze the continuous ring animation and hide halo. */
@@ -940,7 +1014,7 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 [data-hover="none"] .dropdown-btn:hover {
   background: transparent;
   color: var(--btn-dropdown-text);
-  border-color: var(--_btn-brand);
+  border-color: var(--_color);
 }
 
 [data-hover="none"] .form-field.has-value .dropdown-btn:hover {
@@ -1051,7 +1125,7 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
 
 /* Textonly + hover-none — no border/shadow shift, and reset background.
    The base [data-hover="none"] .btn:hover rule above forces bg to
-   var(--_btn-brand) (matching .btn's rest), but textonly's rest is
+   var(--_color) (matching .btn's rest), but textonly's rest is
    transparent — so the matched-spec hover-none rule paints the brand
    colour over textonly's transparent. Explicit transparent here wins. */
 [data-hover="none"][data-render="textonly"] .btn:hover {

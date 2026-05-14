@@ -1,0 +1,25 @@
+{
+  "component": "Caret",
+  "category": "atom",
+  "renders": { "full": "Caret.astro", "reduced": "Caret.astro", "textonly": "Caret.astro" },
+  "notes": "PLACEHOLDER ATOM (extracted 2026-05-14 from FormField). Custom text caret + sticky 'sign here' arrow tab pointing at the active form field. The caret <span> is injected at runtime by src/lib/caret/custom-caret.ts — there is no server-rendered markup. Caret.astro is a no-op placeholder that exists so the schema/renderer pipeline has a target. Class names (.form-field__caret, .form-field__arrow-tab) are still coupled to the JS string literals — future cleanup will rename to .caret / .caret__arrow and decouple. Activated by data-custom-caret on <html>. Gates: data-hover, data-render, data-enhanced-focus, data-caret-shape, data-focus-rainbow.",
+
+  "props": {
+    "content": {
+      "_description": "Caret has no content props — it's a visual indicator injected by JS based on focused input position."
+    },
+
+    "colour": {
+      "_description": "Caret colour bridges --caret-color (set on .form-field). JS sets it per-instance when data-focus-rainbow is on (custom-caret.ts line 96-101)."
+    },
+
+    "visual": {
+      "shape":        { "type": "string", "enum": ["line", "block", "circle"], "_description": "Caret shape variant. Set via data-caret-shape on <html>. 'line' = default thin vertical bar. 'block' = 0.6em wide with 0.5 opacity. 'circle' = circular dot.", "_note": "Implicit baseline is 'line' (no data-caret-shape attribute). Omit to use." },
+      "thickness":    { "type": "string", "enum": ["thin", "medium", "thick"], "_description": "Caret stroke width. Set via data-enhanced-focus (medium=4px) or data-render='assistive' (thick=6px). Default thin uses --border-width-2.", "_note": "No author prop — driven by accessibility gates, not per-instance config." }
+    },
+
+    "animation": {
+      "blink":        { "type": "string", "enum": ["standard", "gentle", "off"], "_description": "Blink speed. Driven by data-hover gate: full=standard (--duration-long), gentle=slow pulse (--duration-continuous-slow), instant/none=off.", "_note": "No author prop — driven by hover gate." }
+    }
+  }
+}

@@ -1,41 +1,68 @@
 /**
  * COLOUR MIXIN — global colour + tier classes
  *
- * Sets 4 tier tokens: --_tier-tint, --_tier-mid, --_color, --_tier-emphasis
+ * Sets tier tokens: --_tier-tint, --_tier-mid, --_color, --_tier-emphasis
  * Every atom adds .color--{name} + .color--tier-{tier} classes.
  * Every mixin (gradient, underline, text-shadow) reads these tokens.
  *
  * --_color is the active colour. Tier classes shift it.
  * Default = base. currentColor inherits from color property.
+ *
+ * --_on-color companion is defined ONCE at the * level below — every
+ * element re-evaluates it from its own --_color. Sites consume
+ * var(--_on-color) instead of repeating the oklch contrast formula.
  */
+
+/* ── On-colour — black-or-white pair, computed once for every element.
+       Sites paint TEXT/ICONS over a --_color surface by reading
+       var(--_on-color), or over --_contrast (the hover/accent pair) by
+       reading var(--_on-contrast). Formula lives ONLY here. ── */
+* {
+  --_on-color:    oklch(from var(--_color, currentColor) round(1.21 - l) 0 0);
+  --_on-contrast: oklch(from var(--_contrast, currentColor) round(1.21 - l) 0 0);
+}
 
 /* ── Brand colours ──
    --_contrast = the brand-paired hover/accent colour (theme-defined hex).
    Only brand families have contrast pairs; text + rainbow don't expose
    --_contrast, so atoms reading it should fall back to --_tier-emphasis
    via `var(--_contrast, var(--_tier-emphasis))`. */
-.color--primary   { --_tier-tint: var(--primary-tint); --_tier-mid: var(--primary-mid); --_color: var(--primary-base); --_tier-emphasis: var(--primary-emphasis); --_contrast: var(--primary-contrast); color: var(--_color); }
-.color--secondary { --_tier-tint: var(--secondary-tint); --_tier-mid: var(--secondary-mid); --_color: var(--secondary-base); --_tier-emphasis: var(--secondary-emphasis); --_contrast: var(--secondary-contrast); color: var(--_color); }
-.color--neutral   { --_tier-tint: var(--neutral-tint); --_tier-mid: var(--neutral-mid); --_color: var(--neutral-base); --_tier-emphasis: var(--neutral-emphasis); --_contrast: var(--neutral-contrast); color: var(--_color); }
+.color--primary   { --_tier-tint: var(--primary-tint); --_tier-mid: var(--primary-mid); --_tier-base: var(--primary-base); --_color: var(--_tier-base); --_tier-emphasis: var(--primary-emphasis); --_contrast: var(--primary-contrast); color: var(--_color); }
+.color--secondary { --_tier-tint: var(--secondary-tint); --_tier-mid: var(--secondary-mid); --_tier-base: var(--secondary-base); --_color: var(--_tier-base); --_tier-emphasis: var(--secondary-emphasis); --_contrast: var(--secondary-contrast); color: var(--_color); }
+.color--neutral   { --_tier-tint: var(--neutral-tint); --_tier-mid: var(--neutral-mid); --_tier-base: var(--neutral-base); --_color: var(--_tier-base); --_tier-emphasis: var(--neutral-emphasis); --_contrast: var(--neutral-contrast); color: var(--_color); }
 
 /* ── Text colour — body text scale (Heading + Text atoms only) ──
    --_contrast = primary emphasis (text emphasis is too close to text base
    for visible hover; defer to brand primary's loudest tier instead). */
-.color--text      { --_tier-tint: var(--text-tint); --_tier-mid: var(--text-mid); --_color: var(--text-base); --_tier-emphasis: var(--text-emphasis); --_contrast: var(--primary-emphasis); color: var(--_color); }
+.color--text      { --_tier-tint: var(--text-tint); --_tier-mid: var(--text-mid); --_tier-base: var(--text-base); --_color: var(--_tier-base); --_tier-emphasis: var(--text-emphasis); --_contrast: var(--primary-emphasis); color: var(--_color); }
 
 /* ── Rainbow colours — positional names matching --rainbow-N tokens ──
    Rest atoms render at --_color (the canonical base hex). Hover shifts
    to --_contrast = --_tier-emphasis (the brighter/different-luminance
    pair tier). Different luminance + same hue family = visible hover. */
-.color--rainbow-1 { --_tier-tint: var(--rainbow-1-tint); --_tier-mid: var(--rainbow-1-mid); --_color: var(--rainbow-1); --_tier-emphasis: var(--rainbow-1-emphasis); --_contrast: var(--rainbow-1-emphasis); color: var(--_color); }
-.color--rainbow-2 { --_tier-tint: var(--rainbow-2-tint); --_tier-mid: var(--rainbow-2-mid); --_color: var(--rainbow-2); --_tier-emphasis: var(--rainbow-2-emphasis); --_contrast: var(--rainbow-2-emphasis); color: var(--_color); }
-.color--rainbow-3 { --_tier-tint: var(--rainbow-3-tint); --_tier-mid: var(--rainbow-3-mid); --_color: var(--rainbow-3); --_tier-emphasis: var(--rainbow-3-emphasis); --_contrast: var(--rainbow-3-emphasis); color: var(--_color); }
-.color--rainbow-4 { --_tier-tint: var(--rainbow-4-tint); --_tier-mid: var(--rainbow-4-mid); --_color: var(--rainbow-4); --_tier-emphasis: var(--rainbow-4-emphasis); --_contrast: var(--rainbow-4-emphasis); color: var(--_color); }
-.color--rainbow-5 { --_tier-tint: var(--rainbow-5-tint); --_tier-mid: var(--rainbow-5-mid); --_color: var(--rainbow-5); --_tier-emphasis: var(--rainbow-5-emphasis); --_contrast: var(--rainbow-5-emphasis); color: var(--_color); }
-.color--rainbow-6 { --_tier-tint: var(--rainbow-6-tint); --_tier-mid: var(--rainbow-6-mid); --_color: var(--rainbow-6); --_tier-emphasis: var(--rainbow-6-emphasis); --_contrast: var(--rainbow-6-emphasis); color: var(--_color); }
-.color--rainbow-7 { --_tier-tint: var(--rainbow-7-tint); --_tier-mid: var(--rainbow-7-mid); --_color: var(--rainbow-7); --_tier-emphasis: var(--rainbow-7-emphasis); --_contrast: var(--rainbow-7-emphasis); color: var(--_color); }
+.color--rainbow-1 { --_tier-tint: var(--rainbow-1-tint); --_tier-mid: var(--rainbow-1-mid); --_tier-base: var(--rainbow-1); --_color: var(--_tier-base); --_tier-emphasis: var(--rainbow-1-emphasis); --_contrast: var(--rainbow-1-emphasis); color: var(--_color); }
+.color--rainbow-2 { --_tier-tint: var(--rainbow-2-tint); --_tier-mid: var(--rainbow-2-mid); --_tier-base: var(--rainbow-2); --_color: var(--_tier-base); --_tier-emphasis: var(--rainbow-2-emphasis); --_contrast: var(--rainbow-2-emphasis); color: var(--_color); }
+.color--rainbow-3 { --_tier-tint: var(--rainbow-3-tint); --_tier-mid: var(--rainbow-3-mid); --_tier-base: var(--rainbow-3); --_color: var(--_tier-base); --_tier-emphasis: var(--rainbow-3-emphasis); --_contrast: var(--rainbow-3-emphasis); color: var(--_color); }
+.color--rainbow-4 { --_tier-tint: var(--rainbow-4-tint); --_tier-mid: var(--rainbow-4-mid); --_tier-base: var(--rainbow-4); --_color: var(--_tier-base); --_tier-emphasis: var(--rainbow-4-emphasis); --_contrast: var(--rainbow-4-emphasis); color: var(--_color); }
+.color--rainbow-5 { --_tier-tint: var(--rainbow-5-tint); --_tier-mid: var(--rainbow-5-mid); --_tier-base: var(--rainbow-5); --_color: var(--_tier-base); --_tier-emphasis: var(--rainbow-5-emphasis); --_contrast: var(--rainbow-5-emphasis); color: var(--_color); }
+.color--rainbow-6 { --_tier-tint: var(--rainbow-6-tint); --_tier-mid: var(--rainbow-6-mid); --_tier-base: var(--rainbow-6); --_color: var(--_tier-base); --_tier-emphasis: var(--rainbow-6-emphasis); --_contrast: var(--rainbow-6-emphasis); color: var(--_color); }
+.color--rainbow-7 { --_tier-tint: var(--rainbow-7-tint); --_tier-mid: var(--rainbow-7-mid); --_tier-base: var(--rainbow-7); --_color: var(--_tier-base); --_tier-emphasis: var(--rainbow-7-emphasis); --_contrast: var(--rainbow-7-emphasis); color: var(--_color); }
 
 /* ── Tier overrides ── */
 .color--tier-tint     { --_color: var(--_tier-tint); color: var(--_color); }
 .color--tier-mid      { --_color: var(--_tier-mid); color: var(--_color); }
 .color--tier-emphasis { --_color: var(--_tier-emphasis); color: var(--_color); }
+
+
+/* ============================================================
+   ON-COLOUR HELPERS — for sources outside .color--{name}
+   ============================================================
+   Sites painting text/icons over a status-coloured surface (focus ring,
+   highlight bar, primary chip) need a contrast pair. These tokens
+   compute it once at :root — no per-site formula repetition. */
+
+:root {
+  --on-highlight-link-color: oklch(from var(--highlight-link-color) round(1.21 - l) 0 0);
+  --on-neutral-mid:          oklch(from var(--neutral-mid) round(1.21 - l) 0 0);
+  --on-primary-base:         oklch(from var(--primary-base) round(1.21 - l) 0 0);
+}

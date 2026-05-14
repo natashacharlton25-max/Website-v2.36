@@ -4,6 +4,19 @@ const path = require('path');
 /**
  * ATOM VALIDATOR — checks every atom against canonical-atom-pattern.md
  *
+ * SCHEMA GROUPS (canonical):
+ *   Required:  content, visual, animation, colour
+ *   Optional:  rainbow, typography, media, gradient
+ *   Optional (FormField+):  identity, state, behaviour, a11y
+ *     identity   — technical IDs (id, name, type)
+ *     state      — current values (value, checked, radioValue)
+ *     behaviour  — input constraints (required, disabled, min, max, pattern,
+ *                  autocomplete, inputMode, spellcheck, options, etc.)
+ *     a11y       — explicit accessibility flags (hideLabel)
+ *   New groups are tolerated — Rule 25 only checks the required four exist.
+ *   Rule 35 enforces enum/pattern on visual/animation/behaviour strings.
+ *
+ *
  * RULE LEGEND:
  *   CSS rules (scanned in component .css files)
  *     1   Nested var() fallback — var(--x, var(--y))
@@ -66,6 +79,15 @@ const path = require('path');
  *         on a prop but the .astro destructure either has no default or a
  *         different value. Schema documentation must match runtime behaviour
  *         or undefined slips through (see Shape.size invisible-render bug).
+ *    45   Phantom token reference — var(--name) where --name has no
+ *         definition anywhere in src/styles/ or the atom's own CSS files.
+ *         Catches typos (var(--space-hair) when --space-hairline is meant)
+ *         and stale references that survived a token rename. Runtime-only
+ *         tokens (set by JS via element.style.setProperty) are catalogued
+ *         in the runtimeTokens allowlist.
+ *
+ *   Rule 2b (no separate number): hardcoded 1-6px in border/outline
+ *         declarations — should use var(--border-width-*).
  *
  *   (Rule 15 — colour enum count in CSS — removed; superseded by Rule 40
  *    which forbids per-atom colour classes. Colour comes from the global
@@ -126,6 +148,44 @@ const radialExceptions = {
   Shape: true
 };
 
+// ── Token registry for Rule 45 (phantom token check) ───────────
+// Walk src/styles/** and collect every `--name:` definition.
+// Also collect tokens defined inside atom CSS (per-atom scope).
+// A token reference is "phantom" if it's not in this registry.
+function collectTokenDefs(dir) {
+  const defs = new Set();
+  if (!fs.existsSync(dir)) return defs;
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const e of entries) {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) {
+      for (const tok of collectTokenDefs(full)) defs.add(tok);
+    } else if (e.isFile() && e.name.endsWith('.css')) {
+      const content = fs.readFileSync(full, 'utf8');
+      // Match `--token-name:` at any position (custom property definition)
+      for (const m of content.matchAll(/--([a-zA-Z][\w-]*)\s*:/g)) {
+        defs.add(m[1]);
+      }
+    }
+  }
+  return defs;
+}
+const globalTokens = collectTokenDefs(path.join(__dirname, '..', 'src', 'styles'));
+
+// Tokens set programmatically at runtime (JS sets CSS custom properties on
+// elements via element.style.setProperty). These have no CSS-file definition
+// but are legitimate. Catalogued here so Rule 45 doesn't false-positive.
+const runtimeTokens = new Set([
+  // Caret system — custom-caret.ts sets these dynamically per-instance
+  'caret-color', 'caret-width', 'caret-radius', 'caret-blink-speed',
+  // Focus colour cycling — focus rainbow JS rotates --focus-color
+  // (defined in focus-gate.css, but listed here for safety)
+]);
+
+// CSS-builtin properties / keywords that look like custom props but aren't.
+// (None currently — kept as scaffolding for future additions.)
+const cssBuiltins = new Set([]);
+
 const summary = [];
 console.log('=== ATOM VALIDATOR ===\n');
 
@@ -162,6 +222,18 @@ for (const atom of atoms) {
   const cssFiles = fs.readdirSync(dir).filter(f => f.endsWith('.css'));
   const issues = [];
 
+  // Build per-atom token set: globals + atom-local --_* tokens + atom-local
+  // public tokens (atoms can publish their own). We do a pre-pass over all
+  // CSS files in the atom folder so a token defined in Component.css can
+  // be used in Component.responsive.css without false-flagging.
+  const atomTokens = new Set();
+  for (const file of cssFiles) {
+    const content = fs.readFileSync(path.join(dir, file), 'utf8');
+    for (const m of content.matchAll(/--([a-zA-Z][\w-]*)\s*:/g)) {
+      atomTokens.add(m[1]);
+    }
+  }
+
   for (const file of cssFiles) {
     const lines = fs.readFileSync(path.join(dir, file), 'utf8').split('\n');
 
@@ -196,7 +268,12 @@ for (const atom of atoms) {
       if (/@keyframes/.test(line)) isKeyframe = true;
       if (isKeyframe && /^\s*\}\s*$/.test(line)) { isKeyframe = false; return; }
 
-      // Rule 1: Nested var() fallback — var(--x, var(--y))
+      // Rule 1: Nested var() fallback — var(--x, var(--y)).
+      // Token-chain pattern is always wrong; tokens should be authoritative.
+      // Literal fallbacks (var(--x, 2px)) are NOT caught here because they
+      // include the legitimate "inline-style knob" pattern (e.g.
+      // var(--grid-columns, auto-fit)). Phantom literal fallbacks
+      // (var(--space-hair, 2px)) are caught by Rule 45 (phantom token check).
       if (/var\(--[^,)]*,.*var\(--/.test(line)) {
         if (!fallbackExceptions[atom]) {
           const m = line.match(/var\(--[^,)]*,\s*var\(--[^)]*\)/);
@@ -211,6 +288,34 @@ for (const atom of atoms) {
         if (v < 10 || v === 9999) continue;
         if (/border-width|border:\s/.test(codeOnly)) continue;
         issues.push({ rule: 2, ln, file, msg: `hardcoded px: ${m[0]}` });
+      }
+
+      // Rule 2b: Hardcoded px in border / border-* / outline declarations.
+      // Lower threshold than Rule 2 because borders use 1-3px values.
+      // Catches `border-bottom: 2px solid …`, `outline: 2px solid …`,
+      // `border-width: 0 2px 2px 0`, etc. — should be var(--border-width-*).
+      // The codeOnly check stops false hits on tokens like `--border-width-2`.
+      if (/\b(border(-(top|right|bottom|left|width))?|outline)\s*:/.test(codeOnly)) {
+        for (const m of codeOnly.matchAll(/\b(\d+)px\b/g)) {
+          const v = parseInt(m[1]);
+          // 0 is fine, 1-6px for borders should be tokenised
+          if (v === 0 || v > 6) continue;
+          issues.push({ rule: 2, ln, file, msg: `hardcoded border px: ${m[0]} (use var(--border-width-*))` });
+        }
+      }
+
+      // Rule 45: Phantom token references — var(--name) where --name is not
+      // defined anywhere in src/styles/ AND not in the atom's own CSS files
+      // AND not in the runtime-tokens allowlist.
+      // Catches typos and stale token references that survived a token rename.
+      // Skips token DEFINITIONS (--x:) — only checks token USES (var(--x)).
+      for (const m of line.matchAll(/var\(--([a-zA-Z][\w-]*)/g)) {
+        const tokenName = m[1];
+        if (atomTokens.has(tokenName)) continue;
+        if (globalTokens.has(tokenName)) continue;
+        if (runtimeTokens.has(tokenName)) continue;
+        if (cssBuiltins.has(tokenName)) continue;
+        issues.push({ rule: 45, ln, file, msg: `phantom token: var(--${tokenName}) — no definition found in src/styles/ or atom-local CSS` });
       }
 
       // Rule 3: Hardcoded hex (not in mask/gradient technical context)
@@ -344,9 +449,14 @@ for (const atom of atoms) {
       }
     });
 
-    // Rule 40: Per-atom colour classes — should use global .color--{name}
+    // Rule 40: Per-atom colour classes — should use global .color--{name}.
+    // Match both single-word (badge) and hyphenated (form-field) atom class
+    // prefixes. CamelCase atom names like "FormField" split into "form-field"
+    // for the class prefix; "LottieIcon" → "lottie-icon"; "TextEffect" → "text-effect".
     const atomLower = atom.toLowerCase();
-    const perAtomColorRe = new RegExp(`\\.${atomLower}--(?:primary|secondary|neutral|red|orange|yellow|teal|blue|purple|pink)\\b`);
+    const atomKebab = atom.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    const colourEnum = '(?:primary|secondary|neutral|red|orange|yellow|teal|blue|purple|pink|rainbow-[1-7])';
+    const perAtomColorRe = new RegExp(`\\.(?:${atomLower}|${atomKebab})--${colourEnum}\\b`);
     for (const f of cssFiles) {
       const cssContent = fs.readFileSync(path.join(dir, f), 'utf8').split('\n');
       cssContent.forEach((line, i) => {
@@ -546,18 +656,21 @@ for (const atom of atoms) {
         }
       }
 
-      // Rule 35: String props in visual/animation MUST have enum
-      // Content group is exempt — text, slugs, URLs are genuinely freeform
-      // JSON sends enums. No freeform strings in visual/animation.
+      // Rule 35: String props in visual/animation/behaviour MUST have enum
+      // (or "pattern" regex for technical IDs like input names).
+      // Content group is exempt — text, slugs, URLs are genuinely freeform.
+      // JSON sends enums. No freeform strings in visual/animation/behaviour.
       // Exempt: slug-type props (asset references like lottieIcon, maskShape)
-      const slugProps = /^(class|style|lottieIcon|icon|image|maskIcon|maskShape|morphTo|iconMorphTo)$/;
-      for (const group of ['visual', 'animation']) {
+      //         AND props that ARE themselves a regex pattern (e.g. HTML
+      //         input 'pattern' attr — freeform regex is the whole point).
+      const slugProps = /^(class|style|lottieIcon|icon|image|maskIcon|maskShape|morphTo|iconMorphTo|pattern)$/;
+      for (const group of ['visual', 'animation', 'behaviour']) {
         if (!props[group] || typeof props[group] !== 'object') continue;
         for (const [prop, def] of Object.entries(props[group])) {
           if (prop.startsWith('_')) continue;
           if (typeof def !== 'object' || def === null) continue;
-          if (def.type === 'string' && !def.enum && !slugProps.test(prop)) {
-            issues.push({ rule: 35, ln: '--', file: schemaFile, msg: `"${prop}" in ${group}{} is string without enum — add enum or change type` });
+          if (def.type === 'string' && !def.enum && !def.pattern && !slugProps.test(prop)) {
+            issues.push({ rule: 35, ln: '--', file: schemaFile, msg: `"${prop}" in ${group}{} is string without enum or pattern — add one or change type` });
           }
         }
       }

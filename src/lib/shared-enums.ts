@@ -470,3 +470,69 @@ export const GRADIENT_ANIMATE_DIRECTIONS = [
 ] as const;
 export type GradientAnimateDirection = typeof GRADIENT_ANIMATE_DIRECTIONS[number];
 
+
+/* ================================================================
+   BEHAVIOUR — input behaviour and HTML form attributes (WCAG)
+   Used by FormField (and future form atoms).
+   ================================================================ */
+
+// ── HTML input types (13 values) — what kind of field ────
+// Includes 'card-select' (FormField's pictogram-card alternative to radio/checkbox).
+export const INPUT_TYPES = [
+  'text', 'email', 'textarea', 'checkbox', 'radio', 'toggle', 'search',
+  'select', 'number', 'tel', 'url', 'password', 'card-select'
+] as const;
+export type InputType = typeof INPUT_TYPES[number];
+
+// ── inputmode (8 values) — mobile keyboard hint per WCAG 1.3.5 ──
+export const INPUT_MODES = [
+  'none', 'text', 'decimal', 'numeric', 'tel', 'search', 'email', 'url'
+] as const;
+export type InputMode = typeof INPUT_MODES[number];
+
+// ── Check indicator display (3 values) — card-select check style ──
+export const CHECK_DISPLAYS = [
+  'checkbox', 'radio', 'toggle'
+] as const;
+export type CheckDisplay = typeof CHECK_DISPLAYS[number];
+
+// ── autocomplete tokens (54 values) — per HTML5 spec, WCAG 1.3.5 ──
+// Reference: https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill
+// Browser autofill identifies field purpose for users with cognitive disabilities.
+export const AUTOCOMPLETE_TOKENS = [
+  'off', 'on',
+  // Names
+  'name', 'honorific-prefix', 'given-name', 'additional-name', 'family-name',
+  'honorific-suffix', 'nickname',
+  // Login + auth
+  'email', 'username', 'new-password', 'current-password', 'one-time-code',
+  // Organisation
+  'organization-title', 'organization',
+  // Address
+  'street-address',
+  'address-line1', 'address-line2', 'address-line3',
+  'address-level4', 'address-level3', 'address-level2', 'address-level1',
+  'country', 'country-name', 'postal-code',
+  // Payment
+  'cc-name', 'cc-given-name', 'cc-additional-name', 'cc-family-name',
+  'cc-number', 'cc-exp', 'cc-exp-month', 'cc-exp-year', 'cc-csc', 'cc-type',
+  'transaction-currency', 'transaction-amount',
+  // Misc personal
+  'language',
+  'bday', 'bday-day', 'bday-month', 'bday-year', 'sex',
+  // Phone
+  'tel', 'tel-country-code', 'tel-national', 'tel-area-code', 'tel-local', 'tel-extension',
+  // Other contact
+  'impp', 'url', 'photo'
+] as const;
+export type AutocompleteToken = typeof AUTOCOMPLETE_TOKENS[number];
+
+
+/* ================================================================
+   IDENTITY — patterns for technical identifiers (WCAG 4.1.1)
+   ================================================================ */
+
+// ── HTML id / name pattern — kebab-case, leading letter ──
+// Matches CSS-safe and HTML-id-safe naming. Used by FormField.id / .name.
+export const ID_PATTERN = '^[a-z][a-z0-9-]*$';
+

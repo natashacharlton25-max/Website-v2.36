@@ -185,6 +185,19 @@ After all atoms pass individually, run the **final cross-atom audit** using the 
 | PresetButton | pending | | Has a11y.css + recovery. |
 | Stepper | pending | | Has a11y.css + recovery. |
 
+---
+
+## atoms/Caret/
+
+| Component | Status | Date | Notes |
+|-----------|--------|------|-------|
+| Caret | PLACEHOLDER | 2026-05-14 | **Extracted from FormField during FormField audit (2026-05-14).** New atom folder created: Caret.astro (no-op placeholder — JS injects the <span> at runtime via src/lib/caret/custom-caret.ts), Caret.css (caret + arrow-tab rules), Caret.schema.json, index.ts barrel. FormField/index.ts imports Caret. Class names (.form-field__caret, .form-field__arrow-tab) still coupled to JS string literals — will rename to .caret/.caret__arrow when atom is properly built. data-render="assistive" rules moved to assistive-gate.css. data-render="textonly" rules moved to textonly.css. Remaining validator issues (9): keyframes-in-component, !important on height (overrides JS-set inline), hardcoded px in clamp(40px,8vw,70px) for arrow-tab. ALL DEFERRED to proper Caret atom build session. |
+
+**Cross-atom notes (Caret):**
+- Custom caret only renders inside .form-field (JS scopes via input.closest('.form-field'))
+- FormField barrel imports Caret to ensure CSS loads with FormField
+- Future build: decouple from .form-field selector, rename classes, build proper Caret.astro template, add to atom registry
+
 **Cross-atom notes:**
 - These are part of the a11y panel itself — special case for section 5 (purity) since they legitimately read a11y state
 - PresetButton + Stepper used only inside AccessibilityPanel organism
@@ -227,7 +240,7 @@ After all atoms pass individually, run the **final cross-atom audit** using the 
 
 | Component | Status | Date | Notes |
 |-----------|--------|------|-------|
-| FormField | PASS | 2026-03-10 | **Second-pass fixes (2026-03-10):** Variant colour flattening repaired (previous session broke secondary/neutral → all pointed to primary). Three-tier bridge tokens restored: `--_field-brand` / `--_field-brand-dark` / `--_field-brand-light` per variant. `contrast` prop removed (zone file handles HC). `aria-labelledby` bug fixed (label had no id). 6x transitions tokenised (`var(--transition-fast)`). 2x border widths tokenised (`var(--border-width-2)`). Dead `Button` import removed. `colour` group added to schema (10 tokens). Dark mode selectors migrated to `[data-mode="dark"]`. **Original audit (2026-03-06):** All 16 sections passed. Files moved to atoms/form/FormField/ subfolder. Schema: category → "atom", 4 render keys, card-select type. @layer removed. Legacy form utilities deleted. Dark/HC/highlight-links extracted to zone/global files. Label/desc/error through Text atom. Card-select with aacResolver symbols. Render mode CSS for reduced/assistive/textonly. DEFERRED: Save-draft for AAC users, input tolerance testing, print (global layer), consumer migration. |
+| FormField | PASS | 2026-05-14 | **Third-pass fixes (2026-05-14):** Caret + arrow-tab CSS extracted to new placeholder atom `atoms/Caret/` (barrel imported by FormField). All `[data-render="reduced"\|"assistive"\|"textonly"]` rules moved to gate files (reduced-gate.css, assistive-gate.css, textonly.css). All `:hover` rules (base + mode overrides) moved to `hover-gate.css` so the gate file is the single authority on hover behaviour. Phantom tokens stripped (`--field-shadow`, `--_field-hover-tint`, `--_field-hover-base`, `--text-lg` fallbacks — added `--text-lg: 1.125rem` to typography.css). `!important` on `.btn--dropdown` width removed (was unnecessary). Schema `assistive` render key dropped (now a zone, not a render). Schema `colour` group added (empty — variant prop drives internal tokens). Schema `class` removed from visual. Shape enum imported from shared-enums (Rule 37). `size = 'md'` destructure default added. `fieldStyle` filter pattern fixed to always emit class. **Second-pass fixes (2026-03-10):** Variant colour flattening repaired (previous session broke secondary/neutral → all pointed to primary). Three-tier bridge tokens restored: `--_field-brand` / `--_field-brand-dark` / `--_field-brand-light` per variant. `contrast` prop removed (zone file handles HC). `aria-labelledby` bug fixed (label had no id). 6x transitions tokenised (`var(--transition-fast)`). 2x border widths tokenised (`var(--border-width-2)`). Dead `Button` import removed. `colour` group added to schema (10 tokens). Dark mode selectors migrated to `[data-mode="dark"]`. **Original audit (2026-03-06):** All 16 sections passed. Files moved to atoms/form/FormField/ subfolder. Schema: category → "atom", 4 render keys, card-select type. @layer removed. Legacy form utilities deleted. Dark/HC/highlight-links extracted to zone/global files. Label/desc/error through Text atom. Card-select with aacResolver symbols. Render mode CSS for reduced/assistive/textonly. DEFERRED: Save-draft for AAC users, input tolerance testing, print (global layer), consumer migration. |
 
 **FormField v2 audit findings (2026-03-06):**
 - FIXED: Section 1: Files moved to `atoms/form/FormField/` subfolder. Re-export barrel at `atoms/form/index.ts` preserves consumer import path.

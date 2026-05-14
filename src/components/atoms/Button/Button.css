@@ -37,36 +37,20 @@
   margin: 0;
   overflow-wrap: normal;
 
-  /* ── Slot defaults ──
-     Each --btn-* slot is the public override surface (authors set via
-     inline style or higher-specificity class). Defaults set here at the
-     .btn level; .btn--secondary / .btn--neutral override the colour slots
-     by cascade. Internal --_btn-brand* names re-read the slots so any
-     override flows through. Single-level var() at usage sites — Rule 1
-     compliant. */
-  --btn-bg:           var(--primary-base);
-  --btn-hover-bg:     var(--primary-contrast);
-  --btn-light-bg:     var(--primary-tint);
+  /* Shadow slots — these ARE load-bearing (not 1:1 aliases):
+       .btn--neumorphic overrides the values, and hover-gate.css remaps
+       --btn-shadow-hover ↔ --btn-shadow in [data-hover="none"] to make
+       hover paint the rest shadow. Inlining the globals would break both.
+     Brand colour: global .color--{name} mixin (--_color, --_contrast,
+       --_tier-tint, --_on-color, --_on-contrast).
+     Glass: global --glass-bg / --glass-blur / --glass-border directly.
+     Ghost: transparent bg, --neutral-emphasis text, --neutral-mid border.
+     Spotlight: --_on-color (contrast-flipped against --_color). */
   --btn-shadow:       var(--shadow-btn);
   --btn-shadow-hover: var(--shadow-btn-hover);
-  --btn-ghost-bg:     transparent;
-  --btn-ghost-text:   var(--neutral-emphasis);
-  --btn-ghost-border: var(--neutral-mid);
-  --btn-glass-bg:     var(--glass-bg);
-  --btn-glass-text:   var(--neutral-emphasis);
-  --btn-glass-border: var(--glass-border);
-  --btn-glass-blur:   var(--glass-blur);
-  /* --btn-spotlight uses --shadow-White (always white, never flipped per
-     theme) so the spotlight halo stays light in dark mode. --color-White
-     flips to #1a1a1a in dark themes — wrong for highlight effects. */
-  --btn-spotlight:    var(--shadow-White);
 
-  --_btn-brand:       var(--btn-bg);
-  --_btn-brand-dark:  var(--btn-hover-bg);
-  --_btn-brand-light: var(--btn-light-bg);
-
-  background-color: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background-color: var(--_color);
+  color: var(--_on-color);
   box-shadow: var(--btn-shadow);
 }
 
@@ -95,8 +79,8 @@
 
 .btn:disabled:hover,
 .btn[aria-disabled="true"]:hover {
-  background-color: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background-color: var(--_color);
+  color: var(--_on-color);
   box-shadow: var(--btn-shadow);
   cursor: not-allowed;
   transform: none;
@@ -107,17 +91,17 @@
 .btn--outline:disabled:hover,
 .btn--outline[aria-disabled="true"]:hover {
   background-color: transparent;
-  color: var(--_btn-brand);
-  border-color: var(--_btn-brand);
+  color: var(--_color);
+  border-color: var(--_color);
   box-shadow: none;
   cursor: not-allowed;
 }
 
 .btn--ghost:disabled:hover,
 .btn--ghost[aria-disabled="true"]:hover {
-  background-color: var(--btn-ghost-bg, transparent);
-  color: var(--btn-ghost-text);
-  border-color: var(--btn-ghost-border);
+  background-color: transparent;
+  color: var(--neutral-emphasis);
+  border-color: var(--neutral-mid);
   box-shadow: none;
   cursor: not-allowed;
 }
@@ -213,39 +197,23 @@
    COLOUR VARIANTS — just swap tokens, base handles the rest
    ========================================================== */
 
-/* .btn--primary uses .btn defaults — declared explicitly here for cascade
-   safety against any future change to .btn that bumps specificity. */
-.btn--primary {
-  --btn-bg:       var(--primary-base);
-  --btn-hover-bg: var(--primary-contrast);
-  --btn-light-bg: var(--primary-tint);
-}
-
-.btn--secondary {
-  --btn-bg:       var(--secondary-base);
-  --btn-hover-bg: var(--secondary-contrast);
-  --btn-light-bg: var(--secondary-tint);
-}
-
-.btn--neutral {
-  --btn-bg:       var(--neutral-base);
-  --btn-hover-bg: var(--neutral-emphasis);
-  --btn-light-bg: var(--neutral-tint);
-}
+/* Per-colour overrides — DELETED. Button.astro emits `color--{name}` which
+   sets --_color / --_contrast / --_tier-tint via the global colour mixin
+   (src/styles/global/colour.css). No per-atom colour blocks needed. */
 
 /* Fill variant hovers — :not() chain excludes effect variants that own
    their own hover, plus disabled / aria-disabled so the hover-bg/lift
    doesn't fire on a button that can't be activated. */
 .btn--fill:not(.btn--dropdown):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):not(.gradient--animated):not(:disabled):not([aria-disabled="true"]):hover {
-  background-color: var(--_btn-brand-dark);
-  color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
+  background-color: var(--_contrast);
+  color: var(--_on-contrast);
   box-shadow: var(--btn-shadow-hover);
   transform: translateY(-1px);
 }
 
 .btn--fill:not(.btn--dropdown):not(.btn--expand):not(.btn--colour-flow):not(.btn--comic):not(.btn--tech):not(.btn--jump):not(.btn--split):not(.gradient--animated):not(:disabled):not([aria-disabled="true"]):active {
-  background-color: color-mix(in oklch, var(--_btn-brand-dark) 80%, var(--color-Black));
-  color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
+  background-color: color-mix(in oklch, var(--_contrast) 80%, var(--color-Black));
+  color: var(--_on-contrast);
   box-shadow: var(--btn-shadow);
   transform: translateY(1px);
 }
@@ -312,7 +280,7 @@
   background-position: var(--_btn-gpos-x) 50%;
 }
 
-/* neumorphic-inner — replace --_btn-brand-light bg, keep inset shadow */
+/* neumorphic-inner — replace --_tier-tint bg, keep inset shadow */
 .btn.gradient--animated.btn--neumorphic-inner {
   background: var(--_grad-computed);
   background-size: 400% 400%;
@@ -327,7 +295,7 @@
     var(--_grad-computed) border-box;
   background-size: auto, 400% 400%;
   background-position: 0 0, var(--_btn-gpos-x) 50%;
-  border: 2px solid transparent;
+  border: var(--border-width-2) solid transparent;
   color: var(--color-Text);
 }
 
@@ -375,71 +343,71 @@
 
 /* Dropdown hover — fill with brand colour */
 .btn--dropdown:hover {
-  background-color: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  border-color: var(--_btn-brand);
+  background-color: var(--_color);
+  color: var(--_on-color);
+  border-color: var(--_color);
 }
 
 /* ==========================================================
    STYLE VARIANTS — override base appearance, inherit colour
-   from --_btn-brand tokens set above
+   from --_color/--_contrast/--_tier-tint via global colour mixin
    ========================================================== */
 
 .btn--outline {
   background-color: transparent;
-  color: var(--_btn-brand);
-  border: 2px solid var(--_btn-brand);
+  color: var(--_color);
+  border: var(--border-width-2) solid var(--_color);
   box-shadow: none;
 }
 
 .btn--outline:not(.gradient--animated):hover {
-  background-color: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  border-color: var(--_btn-brand);
+  background-color: var(--_color);
+  color: var(--_on-color);
+  border-color: var(--_color);
 }
 
 .btn--outline:not(.gradient--animated):active {
-  background-color: var(--_btn-brand-dark);
+  background-color: var(--_contrast);
   box-shadow: none;
 }
 
 .btn--ghost {
-  background-color: var(--btn-ghost-bg, transparent);
-  color: var(--btn-ghost-text);
-  border: 1px solid var(--btn-ghost-border);
+  background-color: transparent;
+  color: var(--neutral-emphasis);
+  border: var(--border-width) solid var(--neutral-mid);
   box-shadow: none;
 }
 
 .btn--ghost:hover {
-  background-color: var(--_btn-brand-light);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  border-color: var(--_btn-brand-light);
+  background-color: var(--_tier-tint);
+  color: var(--_on-color);
+  /* border-color stays at rest (--neutral-mid) — ghost border doesn't shift. */
 }
 
 .btn--ghost:active {
-  background-color: var(--_btn-brand-light);
+  background-color: var(--_tier-tint);
   box-shadow: none;
 }
 
 .btn--glass {
-  background: var(--btn-glass-bg);
-  backdrop-filter: var(--btn-glass-blur);
-  -webkit-backdrop-filter: var(--btn-glass-blur);
-  border: 1px solid var(--btn-glass-border);
-  color: var(--btn-glass-text);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-width) solid var(--glass-border);
+  color: var(--neutral-emphasis);
   box-shadow: var(--btn-shadow);
 }
 
 .btn--glass:hover {
-  background: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  border-color: var(--_btn-brand);
+  background: var(--_color);
+  color: var(--_on-color);
+  /* border-color stays at rest (--glass-border) — glass border doesn't shift. */
   box-shadow: var(--btn-shadow-hover);
 }
 
 .btn--glass:active {
-  background: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background: var(--_color);
+  color: var(--_on-color);
   box-shadow: var(--btn-shadow);
 }
 
@@ -474,7 +442,7 @@
   background: var(--_grad-computed);
   background-size: 200% 200%;
   animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  color: var(--_on-color);
 }
 
 .btn--glow:hover::after {
@@ -506,8 +474,11 @@
 }
 
 .btn--rainbow-glow {
-  --_btn-brand: var(--page-bg);
-  --_btn-brand-dark: var(--page-bg);
+  /* Rainbow-glow paints page-bg as the inner fill (the rainbow gradient
+     traces the border, not the body). Override --_color so --_on-color
+     computes from page-bg, giving readable text. */
+  --_color: var(--page-bg);
+  --_contrast: var(--page-bg);
   --btn-text: var(--neutral-emphasis);
   /* Default rainbow gradient — matches gradient catalogue's rainbow blend.
      Authors can override via gradient + gradientBlend props (.gradient--blend-X
@@ -527,7 +498,7 @@
     linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
     var(--_grad-computed) border-box;
   background-size: auto, 200% 200%;
-  border: 2px solid transparent;
+  border: var(--border-width-2) solid transparent;
   border-radius: var(--radius-full);
   box-shadow: 0 4px 0.75em color-mix(in oklch, var(--neutral-emphasis) 25%, transparent), 0 2px 4px color-mix(in oklch, var(--neutral-emphasis) 15%, transparent);
   animation: btn-glowloop var(--duration-continuous-drift) var(--ease-linear) infinite;
@@ -565,14 +536,13 @@
    Reduced-render animation kill moved to src/styles/gates/reduced-gate.css. */
 
 .btn--neumorphic {
-  /* Override the .btn shadow slot defaults to use the neumorphic tokens.
+  /* Override the .btn shadow slots to use the neumorphic palette.
      --shadow-neu-* tokens are theme-aware (light values in BrandDefault,
-     dark values in zones/theme-luminance-dark.css) so dark mode picks up
-     the right shadow automatically via cascade — no per-mode override
-     needed in the component. */
+     dark values in zones/theme-luminance-dark.css). The slot cascade lets
+     hover-gate.css remap --btn-shadow-hover → --btn-shadow in [data-hover="none"]
+     so the neumorphic button holds its rest shadow on hover. */
   --btn-shadow:       var(--shadow-neu-raised);
   --btn-shadow-hover: var(--shadow-neu-hover);
-  box-shadow: var(--btn-shadow);
 }
 
 .btn--neumorphic:hover {
@@ -583,33 +553,37 @@
   box-shadow: var(--shadow-neu-pressed);
 }
 
+.btn--neumorphic:active {
+  box-shadow: var(--shadow-neu-pressed);
+}
+
 /* ── Neumorphic 3D (tray-style raised button with 3D layers) ── */
 
 .btn--neumorphic-3d {
-  background: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  text-shadow: 0 0.0625em 0 var(--_btn-brand-dark);
+  background: var(--_color);
+  color: var(--_on-color);
+  text-shadow: 0 0.0625em 0 var(--_contrast);
   border: none;
   letter-spacing: 0.15em;
   box-shadow:
     /* Inner highlight — lighter from fill */
-    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    inset 0 0.0625em 0 0 oklch(from var(--_color) calc(l + 0.15) calc(c * 0.5) h / 0.4),
     /* 3D layers — progressively darker from fill */
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
     /* Drop shadow */
-    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    0 0.425em 0.5em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6),
     /* Neumorphic outer */
     8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
 }
 
 .btn--neumorphic-3d:hover {
-  background: var(--_btn-brand-dark);
-  color: oklch(from var(--_btn-brand-dark) round(1.21 - l) 0 0);
+  background: var(--_contrast);
+  color: var(--_on-contrast);
   transform: translateY(0.125em);
   box-shadow:
     /* Inner pressed shadows */
@@ -618,23 +592,23 @@
     8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
     -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
     /* Compressed 3D layers */
-    inset 0 0.03em 0 0 color-mix(in oklch, var(--_btn-brand-light) 20%, transparent),
-    0 0.03em 0 0 var(--_btn-brand-dark),
-    0 0.0625em 0 0 var(--_btn-brand-dark),
-    0 0.125em 0 0 var(--_btn-brand-dark),
+    inset 0 0.03em 0 0 color-mix(in oklch, var(--_tier-tint) 20%, transparent),
+    0 0.03em 0 0 var(--_contrast),
+    0 0.0625em 0 0 var(--_contrast),
+    0 0.125em 0 0 var(--_contrast),
     0 0.225em 0 0 color-mix(in oklch, var(--color-Black) 25%, transparent),
-    0 0.225em 0.375em 0 var(--_btn-brand-dark);
+    0 0.225em 0.375em 0 var(--_contrast);
 }
 
 .btn--neumorphic-3d:active {
   transform: translateY(0.225em);
   box-shadow:
-    inset 0 0.03em 0 0 color-mix(in oklch, var(--_btn-brand-light) 20%, transparent),
-    0 0.03em 0 0 var(--_btn-brand-dark),
-    0 0.0625em 0 0 var(--_btn-brand-dark),
-    0 0.125em 0 0 var(--_btn-brand-dark),
+    inset 0 0.03em 0 0 color-mix(in oklch, var(--_tier-tint) 20%, transparent),
+    0 0.03em 0 0 var(--_contrast),
+    0 0.0625em 0 0 var(--_contrast),
+    0 0.125em 0 0 var(--_contrast),
     0 0.225em 0 0 color-mix(in oklch, var(--color-Black) 15%, transparent),
-    0 0.225em 0.375em 0 var(--_btn-brand-dark);
+    0 0.225em 0.375em 0 var(--_contrast);
 }
 
 /* ── Glassic (glass + 3D layers + neumorphic shadows) ── */
@@ -643,8 +617,8 @@
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  color: var(--btn-glass-text);
+  border: var(--border-width) solid var(--glass-border);
+  color: var(--neutral-emphasis);
   position: relative;
   overflow: hidden;
   box-shadow:
@@ -656,55 +630,55 @@
     /* Inner highlight */
     inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
     /* 3D layers — progressively darker from fill */
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
-    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6);
 }
 
 .btn--glassic:hover {
-  background: color-mix(in oklch, var(--_btn-brand) 30%, var(--glass-bg));
+  background: color-mix(in oklch, var(--_color) 30%, var(--glass-bg));
   transform: translateY(0.125em);
   box-shadow:
     inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
     8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
     -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
     inset 0 0.03em 0 0 color-mix(in oklch, var(--color-White) 10%, transparent),
-    0 0.03em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.225em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h / 0.85),
-    0 0.225em 0.375em 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h / 0.6);
+    0 0.03em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.225em 0 0 oklch(from var(--_color) calc(l - 0.25) c h / 0.85),
+    0 0.225em 0.375em 0 oklch(from var(--_color) calc(l - 0.25) c h / 0.6);
 }
 
 .btn--glassic:active {
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  color: var(--_on-color);
   transform: translateY(0.225em);
   box-shadow:
     inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
     inset 0 0.03em 0 0 color-mix(in oklch, var(--color-White) 10%, transparent),
-    0 0.03em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.225em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
-    0 0.225em 0.375em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+    0 0.03em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.225em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
+    0 0.225em 0.375em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6);
 }
 
 /* ── Neumorphic Inner (pressed/inset look) ── */
 
 .btn--neumorphic-inner {
-  background: var(--_btn-brand-light);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background: var(--_tier-tint);
+  color: var(--_on-color);
   border: none;
   box-shadow: var(--shadow-neu-pressed);
 }
 
 .btn--neumorphic-inner:not(.gradient--animated):hover {
   background: var(--secondary-mid);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  color: var(--_on-color);
   box-shadow: var(--shadow-neu-pressed);
 }
 
@@ -719,8 +693,8 @@
   background: var(--liquid-tint);
   backdrop-filter: blur(var(--liquid-blur));
   -webkit-backdrop-filter: blur(var(--liquid-blur));
-  border: 1px solid color-mix(in oklch, var(--_btn-brand) 30%, var(--color-White));
-  color: var(--btn-glass-text);
+  border: var(--border-width) solid color-mix(in oklch, var(--_color) 30%, var(--color-White));
+  color: var(--neutral-emphasis);
   box-shadow:
     var(--liquid-inner-shadow),
     var(--liquid-outer-shadow),
@@ -730,12 +704,12 @@
 }
 
 .btn--liquid-glass:not(.gradient--animated):hover {
-  background: color-mix(in oklch, var(--_btn-brand) 20%, var(--liquid-tint));
+  background: color-mix(in oklch, var(--_color) 20%, var(--liquid-tint));
   border-color: var(--liquid-inner-glow);
   box-shadow:
     var(--liquid-inner-shadow),
     var(--liquid-outer-shadow),
-    0 6px 1.25em color-mix(in oklch, var(--_btn-brand) 30%, transparent);
+    0 6px 1.25em color-mix(in oklch, var(--_color) 30%, transparent);
 }
 
 .btn--liquid-glass:not(.gradient--animated):active {
@@ -746,7 +720,7 @@
 /* ==========================================================
    EFFECT: COLOUR FLOW — opt-in via .btn--colour-flow
    Two translucent blobs rise from below on hover.
-   Inherits colour from --_btn-brand tokens.
+   Inherits colour from --_color/--_contrast via global colour mixin.
    ========================================================== */
 
 .btn--colour-flow::before,
@@ -770,7 +744,7 @@
 .btn--colour-flow::after {
   top: 180%;
   transform: translateX(-50%) scaleY(1) scaleX(1.45);
-  background-color: color-mix(in oklch, var(--_btn-brand) 70%, transparent);
+  background-color: color-mix(in oklch, var(--_color) 70%, transparent);
 }
 
 /* Speed variants — default is normal.
@@ -794,35 +768,35 @@
 
 /* Glass-like translucent base, text goes light on hover as blobs fill */
 .btn--colour-flow {
-  background: color-mix(in oklch, var(--_btn-brand) 10%, transparent);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background: color-mix(in oklch, var(--_color) 10%, transparent);
+  color: var(--_on-color);
   backdrop-filter: blur(var(--glass-blur, 8px));
   -webkit-backdrop-filter: blur(var(--glass-blur, 8px));
-  box-shadow: var(--shadow-btn);
+  box-shadow: var(--btn-shadow);
 }
 
 .btn--colour-flow:hover {
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
-  background: color-mix(in oklch, var(--_btn-brand) 25%, transparent);
+  color: var(--_on-color);
+  background: color-mix(in oklch, var(--_color) 25%, transparent);
   box-shadow:
-    0 6px 0.75em color-mix(in oklch, var(--_btn-brand) 30%, transparent),
+    0 6px 0.75em color-mix(in oklch, var(--_color) 30%, transparent),
     0 3px 6px color-mix(in oklch, var(--color-Black) 10%, transparent);
 }
 
 .btn--colour-flow:hover::before {
   top: -40%;
-  background-color: color-mix(in oklch, var(--_btn-brand) 70%, transparent);
+  background-color: color-mix(in oklch, var(--_color) 70%, transparent);
   transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
 }
 
 .btn--colour-flow:hover::after {
   top: -50%;
-  background-color: color-mix(in oklch, var(--_btn-brand) 70%, transparent);
+  background-color: color-mix(in oklch, var(--_color) 70%, transparent);
   transform: translateX(-50%) scaleY(1.3) scaleX(0.8);
 }
 
 .btn--colour-flow:active {
-  background: color-mix(in oklch, var(--_btn-brand) 35%, transparent);
+  background: color-mix(in oklch, var(--_color) 35%, transparent);
   box-shadow:
     inset 2px 2px 6px color-mix(in oklch, var(--color-Black) 15%, transparent);
 }
@@ -838,13 +812,13 @@
 .btn--jump:hover {
   transform: translateY(-0.625em);
   box-shadow:
-    0 7px 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, transparent);
+    0 7px 0 color-mix(in oklch, var(--_contrast) 80%, transparent);
 }
 
 .btn--jump:active {
   transform: translateY(4px);
   box-shadow:
-    0 1px 0 color-mix(in oklch, var(--_btn-brand-dark) 80%, transparent);
+    0 1px 0 color-mix(in oklch, var(--_contrast) 80%, transparent);
 }
 
 /* ==========================================================
@@ -864,7 +838,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  border: 1px solid var(--_btn-brand-dark);
+  border: var(--border-width) solid var(--_contrast);
   border-radius: inherit;
   background: none;
   transform: translate(-5px, -5px);
@@ -873,7 +847,7 @@
 
 .btn--tech:hover {
   transform: translate(-5px, -5px);
-  background-color: var(--_btn-brand);
+  background-color: var(--_color);
 }
 
 .btn--tech:hover::before {
@@ -997,7 +971,7 @@
   border-radius: inherit;
   background: radial-gradient(
     circle 5em at var(--_spot-x) var(--_spot-y),
-    color-mix(in oklch, var(--btn-spotlight) 25%, transparent),
+    color-mix(in oklch, var(--_on-color) 25%, transparent),
     transparent
   );
   opacity: 0;
@@ -1035,7 +1009,7 @@
   top: 0;
   bottom: 0;
   width: 0;
-  background: color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+  background: color-mix(in oklch, var(--_contrast) 70%, transparent);
   transition: width var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
   pointer-events: none;
   z-index: 0;
@@ -1077,7 +1051,7 @@
   opacity: 1;
   animation: none;
   filter: none;
-  background: color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+  background: color-mix(in oklch, var(--_contrast) 70%, transparent);
 }
 
 .btn--glow.btn--split:hover::after,
@@ -1109,8 +1083,8 @@
 .btn--neumorphic-inner.btn--split {
   box-shadow:
     var(--shadow-neu-pressed),
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent);
   transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
 }
 
@@ -1118,15 +1092,15 @@
 .btn--neumorphic-inner.btn--split:focus-visible {
   box-shadow:
     var(--shadow-neu-pressed),
-    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent);
+    inset 50em 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent);
 }
 
 /* neumorphic — drop only at rest, panels paint over cleanly */
 .btn--neumorphic.btn--split {
   box-shadow:
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
     var(--shadow-neu-raised);
   transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
 }
@@ -1134,8 +1108,8 @@
 .btn--neumorphic.btn--split:hover,
 .btn--neumorphic.btn--split:focus-visible {
   box-shadow:
-    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 50em 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
     var(--shadow-neu-raised);
 }
 
@@ -1145,74 +1119,74 @@
    colour as panels = invisible). */
 .btn--neumorphic-3d.btn--split {
   box-shadow:
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
-    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0.0625em 0 0 oklch(from var(--_color) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6),
     8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
   transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .btn--neumorphic-3d.btn--split:hover,
 .btn--neumorphic-3d.btn--split:focus-visible {
-  background-color: var(--_btn-brand);
-  color: oklch(from var(--_btn-brand) round(1.21 - l) 0 0);
+  background-color: var(--_color);
+  color: var(--_on-color);
   transform: none;
   box-shadow:
-    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l + 0.15) calc(c * 0.5) h / 0.4),
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
-    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6),
+    inset 50em 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0.0625em 0 0 oklch(from var(--_color) calc(l + 0.15) calc(c * 0.5) h / 0.4),
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6),
     8px 8px 1em color-mix(in oklch, var(--color-Black) 20%, transparent);
 }
 
 /* glassic — keep rest stack, panels grow on top */
 .btn--glassic.btn--split {
   box-shadow:
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset 0 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset 0 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
     inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
     8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
     -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
     inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
-    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6);
   transition: box-shadow var(--duration-slower) cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .btn--glassic.btn--split:hover,
 .btn--glassic.btn--split:focus-visible {
   box-shadow:
-    inset 50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
-    inset -50em 0 0 0 color-mix(in oklch, var(--_btn-brand-dark) 70%, transparent),
+    inset 50em 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
+    inset -50em 0 0 0 color-mix(in oklch, var(--_contrast) 70%, transparent),
     inset 8px 8px 1em color-mix(in oklch, var(--color-Black) 40%, transparent),
     8px 8px 1em color-mix(in oklch, var(--color-Black) 15%, transparent),
     -8px -8px 1em color-mix(in oklch, var(--color-White) 10%, transparent),
     inset 0 0.0625em 0 0 color-mix(in oklch, var(--color-White) 15%, transparent),
-    0 0.0625em 0 0 oklch(from var(--_btn-brand) calc(l - 0.05) c h),
-    0 0.125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.10) c h),
-    0 0.25em 0 0 oklch(from var(--_btn-brand) calc(l - 0.15) c h),
-    0 0.3125em 0 0 oklch(from var(--_btn-brand) calc(l - 0.20) c h),
-    0 0.375em 0 0 oklch(from var(--_btn-brand) calc(l - 0.25) c h),
-    0 0.425em 0 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.85),
-    0 0.425em 0.5em 0 oklch(from var(--_btn-brand) calc(l - 0.30) c h / 0.6);
+    0 0.0625em 0 0 oklch(from var(--_color) calc(l - 0.05) c h),
+    0 0.125em 0 0 oklch(from var(--_color) calc(l - 0.10) c h),
+    0 0.25em 0 0 oklch(from var(--_color) calc(l - 0.15) c h),
+    0 0.3125em 0 0 oklch(from var(--_color) calc(l - 0.20) c h),
+    0 0.375em 0 0 oklch(from var(--_color) calc(l - 0.25) c h),
+    0 0.425em 0 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.85),
+    0 0.425em 0.5em 0 oklch(from var(--_color) calc(l - 0.30) c h / 0.6);
 }
 
 /* ==========================================================
@@ -1329,7 +1303,7 @@
 .btn--dropdown {
   background: transparent;
   color: var(--btn-dropdown-text);
-  border: var(--border-width-2) solid var(--_btn-brand);
+  border: var(--border-width-2) solid var(--_color);
   border-radius: var(--radius-md);
   transition: border-radius var(--duration-fast) var(--ease-default),
               background-color var(--hover-duration) var(--ease-default),
@@ -1346,7 +1320,7 @@
 /* Dropdown selected — neutral border + tint */
 .form-field.has-value .btn--dropdown {
   border-color: var(--neutral-mid);
-  background: color-mix(in oklch, var(--neutral-mid) 8%, var(--_field-hover-base, transparent));
+  background: color-mix(in oklch, var(--neutral-mid) 8%, transparent);
 }
 
 /* Dropdown hover-none rules (click-only open, no colour change on hover)

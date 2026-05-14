@@ -34,6 +34,7 @@ import { Image as AstroImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { AacCard } from '../../molecules/aac/AacCard';
 import type { AacCardData } from '../../../data/load-alt-text';
+import type { TextColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
 
 interface Props {
   src: string | ImageMetadata;
@@ -48,7 +49,12 @@ interface Props {
   width?: number | string;
   height?: number | string;
   fit?: 'cover' | 'contain' | 'fill' | 'none';
-  color?: 'primary' | 'secondary' | 'neutral' | 'red' | 'orange' | 'yellow' | 'teal' | 'blue' | 'purple' | 'pink';
+  /** Brand colour family — primary/secondary/neutral/text. 'text' = body text scale. */
+  brandColor?: TextColour;
+  /** Rainbow colour family — overrides brandColor when set. */
+  rainbowColor?: RainbowColour;
+  /** Colour tier — shifts --_color to tint/mid/base/emphasis. Implicit baseline = base. */
+  colorTier?: ColourTier;
   radius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   shadow?: 'none' | 'sm' | 'md' | 'lg' | 'inset';
   border?: 'none' | 'thin' | 'medium' | 'thick';
@@ -76,11 +82,13 @@ const {
   altDescriptive,
   altAacCards,
   altAacHtml,
-  semanticRole,
+  semanticRole = 'decorative',
   width,
   height,
   fit,
-  color = 'primary',
+  brandColor = 'primary',
+  rainbowColor,
+  colorTier,
   radius,
   shadow,
   border: borderProp,
@@ -153,10 +161,16 @@ const imgClasses = [
   className,
 ];
 
+// Colour resolution — rainbowColor wins over brandColor (rainbow is more specific).
+// colorTier shifts --_color via .color--tier-{tier}. Base is the implicit default
+// (no class emitted) since .color--{name} mixin sets --_color = base by default.
+const colourName = rainbowColor || brandColor;
+
 // Figure wrapper classes — radius passed to figure so ::after can inherit
 const figureClasses = [
   'image',
-  `image--${color}`,
+  `color--${colourName}`,
+  colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,
   hasMotion && 'image--animate',
   radius && `image--radius-${radius}`,
   borderProp && borderProp !== 'none' && `image--border-${borderProp}`,
