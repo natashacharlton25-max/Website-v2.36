@@ -63,6 +63,12 @@
      reaches 3:1 against page-bg. WCAG 1.4.11 non-text contrast. */
   --_field-border: var(--neutral-base);
 
+  /* Rest-state tokens — consumed by hover-gate's [data-hover="none"]
+     suppression to "hold rest" without needing per-variant rules. Each
+     variant can re-declare these to its own rest values. */
+  --_field-rest-border: var(--_color);
+  --_field-rest-bg: transparent;
+
   /* Glass tokens — only consumed by .form-field--glass */
   --_field-glass-bg: var(--glass-bg);
   --_field-glass-blur: var(--glass-blur);
@@ -147,8 +153,30 @@
   opacity: 1;
 }
 
-/* :hover styles for .form-field__input + [data-hover] mode rules
-   live in src/styles/gates/hover-gate.css. */
+/* Hover feedback — border steps up to --_tier-emphasis (loudest chosen-colour
+   tier), bg fades to --page-bg-sunken. Three states: rest (--_color border,
+   transparent bg) → hover (--_tier-emphasis border, sunken bg) → focus
+   (--text-emphasis border, sunken bg).
+
+   `body` prefix + `.form-field` wrapper class lift specificity to (0, 3, 1)
+   so this beats zone rest rules at (0, 3, 0) for both border-color and
+   background without source-order guesswork.
+
+   Un-gated here — hover-gate.css holds the [data-hover="none"] suppression
+   that reverts these to --_field-rest-border / --_field-rest-bg. */
+body .form-field .form-field__input:hover,
+body .form-field .form-field__card-face:hover {
+  border-color: var(--_tier-emphasis);
+  background: var(--page-bg-sunken);
+}
+
+/* Exception: when author picked colorTier=emphasis, rest border is already
+   --_tier-emphasis — stepping up to emphasis on hover = no shift. Step DOWN
+   to --_tier-mid so feedback stays visible. */
+body .form-field.color--tier-emphasis .form-field__input:hover,
+body .form-field.color--tier-emphasis .form-field__card-face:hover {
+  border-color: var(--_tier-mid);
+}
 
 .form-field__input:focus {
   /* Focus = the user is actively inputting. Border shifts to --text-emphasis
@@ -221,8 +249,12 @@
    STYLE VARIANT: FILLED
    ========================================================== */
 .form-field--filled .form-field__input {
-  background: color-mix(in oklch, var(--_field-brand) 8%, var(--_field-bg));
-  border-color: transparent;
+  /* Declare rest tokens so hover-gate's [data-hover="none"] suppression
+     resolves to filled's actual rest values. */
+  --_field-rest-bg: color-mix(in oklch, var(--_field-brand) 8%, var(--_field-bg));
+  --_field-rest-border: transparent;
+  background: var(--_field-rest-bg);
+  border-color: var(--_field-rest-border);
 }
 
 .form-field--filled .form-field__input:focus {
@@ -254,10 +286,14 @@
    STYLE VARIANT: GLASS
    ========================================================== */
 .form-field--glass .form-field__input {
-  background: var(--_field-glass-bg);
+  /* Declare rest tokens so hover-gate's [data-hover="none"] suppression
+     resolves to glass's actual rest values. */
+  --_field-rest-bg: var(--_field-glass-bg);
+  --_field-rest-border: var(--_field-glass-border);
+  background: var(--_field-rest-bg);
   backdrop-filter: var(--_field-glass-blur);
   -webkit-backdrop-filter: var(--_field-glass-blur);
-  border: var(--border-width) solid var(--_field-glass-border);
+  border: var(--border-width) solid var(--_field-rest-border);
   color: var(--_field-text);
   box-shadow: var(--_field-shadow);
 }
@@ -271,8 +307,10 @@
    STYLE VARIANT: INSET
    ========================================================== */
 .form-field--inset .form-field__input {
-  border: var(--border-width) solid color-mix(in oklch, var(--_field-border) 50%, transparent);
-  background: color-mix(in oklch, var(--_field-bg) 80%, var(--color-Black) 5%);
+  --_field-rest-border: color-mix(in oklch, var(--_field-border) 50%, transparent);
+  --_field-rest-bg: color-mix(in oklch, var(--_field-bg) 80%, var(--color-Black) 5%);
+  border: var(--border-width) solid var(--_field-rest-border);
+  background: var(--_field-rest-bg);
   box-shadow: var(--shadow-neu-pressed);
 }
 
@@ -285,8 +323,9 @@
    STYLE VARIANT: NEUMORPHIC
    ========================================================== */
 .form-field--neumorphic .form-field__input {
+  --_field-rest-bg: var(--_field-bg);
   border: none;
-  background: var(--_field-bg);
+  background: var(--_field-rest-bg);
   box-shadow: var(--_field-shadow);
 }
 
@@ -465,8 +504,10 @@
   height: var(--_field-toggle-h);
   flex-shrink: 0;
   border-radius: var(--radius-full);
-  /* OFF = muted neutral so the ON→OFF state change is visible. */
-  background: var(--neutral-mid);
+  /* OFF = chosen tier (--_color from .color--{name} mixin). Same as input
+     rest border — neutral picks up neutral, brand colours pick up their
+     base tier. */
+  background: var(--_color);
   cursor: pointer;
   position: relative;
   display: block;
@@ -487,7 +528,16 @@
 }
 
 .form-field__toggle:checked + .form-field__toggle-track {
-  background: var(--_field-brand);
+  /* ON = step UP to emphasis tier. Same model as input :hover and
+     card-face hover — chosen colour at loudest tier. */
+  background: var(--_tier-emphasis);
+}
+
+/* Exception: when author picked colorTier=emphasis, static is already at
+   --_tier-emphasis. Step DOWN to --_tier-mid on ON so the OFF→ON change
+   stays visible. Mirrors the same exception on .form-field__input:hover. */
+.form-field.color--tier-emphasis .form-field__toggle:checked + .form-field__toggle-track {
+  background: var(--_tier-mid);
 }
 
 .form-field__toggle:checked + .form-field__toggle-track .form-field__toggle-thumb {

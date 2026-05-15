@@ -154,40 +154,41 @@
   background: color-mix(in oklch, var(--highlight-link-color) 60%, transparent);
 }
 
-/* ── Form fields — same as text-only + outline ring ── */
+/* ── Form fields — add highlight-link outline ring only.
+   Original variant border (--_color from .color--{name}) is preserved as
+   the first border; the outline is the "second border" using
+   --highlight-link-color. No border-colour override. */
 [data-highlight-links] .form-field__input {
   background: transparent;
-  border: 2px solid var(--primary-base);
   box-shadow: none;
   backdrop-filter: none;
-  outline: var(--btn-highlight-outline, 3px solid var(--secondary-base));
-  outline-offset: var(--btn-highlight-outline-offset, 3px);
+  outline: 3px solid var(--highlight-link-color);
+  outline-offset: 3px;
 }
 
 [data-highlight-links] .form-field__checkbox-wrap,
 [data-highlight-links] .form-field__radio-wrap,
 [data-highlight-links] .form-field__toggle-wrap {
-  border: 2px solid var(--primary-base);
   background: transparent;
-  outline: var(--btn-highlight-outline, 3px solid var(--secondary-base));
-  outline-offset: var(--btn-highlight-outline-offset, 3px);
+  outline: 3px solid var(--highlight-link-color);
+  outline-offset: 3px;
 }
 
 [data-highlight-links] .form-field__card-face {
   background: transparent;
-  border: 2px solid var(--primary-base);
-  outline: var(--btn-highlight-outline, 3px solid var(--secondary-base));
-  outline-offset: var(--btn-highlight-outline-offset, 3px);
+  outline: 3px solid var(--highlight-link-color);
+  outline-offset: 3px;
 }
 
-/* Hover — brand tint like text-only */
+/* Hover — brand tint background only. Border-color is left to the atom
+   :hover rule (--_tier-emphasis) so the chosen-colour tier pattern is
+   preserved in highlight-links mode. */
 [data-highlight-links] .form-field__input:hover,
 [data-highlight-links] .form-field__checkbox-wrap:hover,
 [data-highlight-links] .form-field__radio-wrap:hover,
 [data-highlight-links] .form-field__toggle-wrap:hover,
 [data-highlight-links] .form-field__card-face:hover {
   background: color-mix(in oklch, var(--_field-brand) var(--_field-hover-tint, 8%), var(--_field-hover-base, transparent));
-  border-color: var(--primary-base);
 }
 
 /* Strip custom controls to match text-only */
@@ -199,8 +200,9 @@
 }
 
 [data-highlight-links] .form-field__toggle-track {
-  border: 2px solid var(--primary-base);
-  background: transparent;
+  /* Keep the tiered toggle look (--_color OFF, --_tier-emphasis ON from
+     FormField.css). highlight-links adds its signal via the wrap outline
+     ring, not by overriding the track colour. */
   box-shadow: none;
 }
 

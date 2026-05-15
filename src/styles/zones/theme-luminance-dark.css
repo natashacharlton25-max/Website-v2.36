@@ -194,6 +194,10 @@
    and tier tokens. */
 
 [data-mode="dark"] .form-field--neumorphic .form-field__input {
+  /* Rest tokens — point hover-gate's [data-hover="none"] suppression at
+     dark neumorphic's actual rest values. */
+  --_field-rest-bg: transparent;
+  --_field-rest-border: var(--_field-border);
   box-shadow: none;
   border: var(--border-width-2) solid var(--_field-border);
   background: transparent;
@@ -220,10 +224,17 @@
 [data-mode="dark"] .form-field__card-input:checked + .form-field__card-face {
   background: var(--_field-brand-dark);
   border-color: var(--_field-brand);
+  /* Re-derive --_on-color against the actual fill (--_field-brand-dark, not
+     --_color) so the existing `color: var(--_on-color)` on the card-face
+     resolves to a correctly-contrasting tone. clamp(...) collapses to 0 on
+     light fills (black text) and 1 on dark fills (white text). */
+  --_on-color: oklch(from var(--_field-brand-dark) clamp(0, (0.5 - l) * 100, 1) 0 0);
 }
 
 /* Inset style — inner glow on dark */
 [data-mode="dark"] .form-field--inset .form-field__input {
+  --_field-rest-bg: transparent;
+  --_field-rest-border: var(--_field-border);
   background: transparent;
   border-color: var(--_field-border);
   box-shadow: inset 2px 2px 10px color-mix(in oklch, var(--_field-brand) 20%, transparent);
@@ -245,6 +256,8 @@
 }
 
 [data-mode="dark"] .form-field--glass .form-field__input {
+  --_field-rest-bg: var(--glass-bg-frosted);
+  --_field-rest-border: var(--glass-border-light);
   background: var(--glass-bg-frosted);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
