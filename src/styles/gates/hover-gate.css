@@ -43,20 +43,27 @@
    FormField hover — base + mode overrides (full authority here)
    ══════════════════════════════════════════════════════════════ */
 
-/* Base (full) — hover SHIFTS rest tier to canonical base.
-   --_tier-base is the brand-family's canonical base regardless of which
-   colorTier class is on the element. So rest can be any tier and hover
-   always lands on the strongest "anchor" of the colour family. Fill is
-   barely-perceptible (2%) for minimal noise. */
+/* Hover feedback — border steps up to --_tier-emphasis (chosen colour at
+   loudest tier), background fades to --page-bg-sunken. Three distinct
+   states: rest (--_color border, transparent bg) → hover (--_tier-emphasis
+   border, sunken bg) → focus (--text-emphasis border, sunken bg). */
 .form-field__input:hover {
-  border-color: var(--_tier-base);
-  background: color-mix(in oklch, var(--_tier-base) 2%, transparent);
+  border-color: var(--_tier-emphasis);
+  background: var(--page-bg-sunken);
 }
 
-/* Base (full) — card-select face hover: border → base, bg → tint */
+/* Card-select face hover — same progression */
 .form-field__card-face:hover {
-  border-color: var(--_tier-base);
-  background: color-mix(in oklch, var(--_tier-base) 8%, transparent);
+  border-color: var(--_tier-emphasis);
+  background: var(--page-bg-sunken);
+}
+
+/* Exception: when author picked colorTier=emphasis, rest = --_tier-emphasis
+   already. Stepping UP to emphasis on hover = no shift. Step DOWN to
+   --_tier-mid instead so the hover feedback stays visible. */
+.form-field.color--tier-emphasis .form-field__input:hover,
+.form-field.color--tier-emphasis .form-field__card-face:hover {
+  border-color: var(--_tier-mid);
 }
 
 /* Toggle thumb slide — transitions left position as the checkbox flips.
@@ -65,18 +72,12 @@
   transition: all var(--hover-duration-fast) var(--ease-default);
 }
 
-/* Hover none: form field — no tint, no border change */
-[data-hover="none"] .form-field .form-field__input:hover,
-[data-hover="none"] .form-field .form-field__input:focus {
+/* Hover none: input hover does nothing (no border change, no bg).
+   Focus is NOT scoped here — focus still applies normally so keyboard
+   users keep their accessibility cue. */
+[data-hover="none"] .form-field__input:hover {
   background: transparent;
-}
-
-/* Hover none: input border resets to mid + base */
-[data-hover="none"] .form-field__input:hover,
-[data-hover="none"] .form-field__input:focus,
-[data-hover="none"] .form-field__input:focus:hover {
-  background: transparent;
-  border-color: var(--_tier-mid);
+  border-color: var(--_color);
 }
 
 /* Hover none: filled inputs stay neutral */

@@ -13,8 +13,9 @@
  * inputs. Per-option media slot composes Image OR Icon atom (see SelectOption).
  *
  * Token system: --_field-brand / --_field-brand-dark / --_field-brand-light / --_field-border
- * Colour: brandColor (primary/secondary/neutral/text) + rainbowColor (rainbow-1..7) + colorTier (tint/mid/base/emphasis)
+ * Colour: brandColor (primary/secondary/neutral) + rainbowColor (rainbow-1..7) + colorTier (tint/mid/base/emphasis)
  *         consumed via the global .color--{name} mixin (src/styles/global/colour.css).
+ *         Border progression: rest = chosen colour at chosen tier → hover = --_tier-emphasis → focus = --text-emphasis.
  * Style variants: outlined (default), filled, underlined, glass, inset, neumorphic, glow, bare
  * High contrast + dark mode: gated by zone data attributes, not component props
  *
@@ -25,7 +26,7 @@ import { Text } from '../Text';
 import { Image } from '../Image';
 import { Icon } from '../Icon';
 import { Button } from '../Button';
-import type { Shape, InputType, InputMode, AutocompleteToken, IconWeight, TextColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
+import type { Shape, InputType, InputMode, AutocompleteToken, IconWeight, BrandColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
 
 // ── Per-option media slot — Image OR Icon atom (constrained subset) ──
 type SelectOptionMedia =
@@ -87,8 +88,8 @@ interface Props {
   hideLabel?: boolean;
 
   // visual
-  /** Brand colour family — primary/secondary/neutral/text. 'text' = body text scale. */
-  brandColor?: TextColour;
+  /** Brand colour family — primary/secondary/neutral. Drives focused/active state on text inputs + rest indicator on checkbox/radio/toggle/card-select. */
+  brandColor?: BrandColour;
   /** Rainbow colour family — overrides brandColor when set. */
   rainbowColor?: RainbowColour;
   /** Colour tier — shifts --_color to tint/mid/base/emphasis. Implicit baseline = base. */
@@ -136,7 +137,7 @@ const {
   // a11y
   hideLabel = false,
   // visual
-  brandColor = 'primary',
+  brandColor = 'neutral',
   rainbowColor,
   colorTier,
   fieldStyle = 'outlined',

@@ -91,12 +91,8 @@
    mixin tokens are theme-aware so light-mode rules largely work in dark too;
    only dark-mode-specific tweaks live here. */
 
-/* Rest: transparent bg (rule inherited from light mode). No override needed. */
-
-/* Hover: stronger fill than light mode for visibility on dark bg. */
-[data-mode="dark"] .form-field__card-face:hover {
-  background: color-mix(in oklch, var(--_tier-base) 15%, transparent);
-}
+/* Rest + hover for card-face are handled below (single source) and inherited
+   from light-mode hover-gate.css. No early override needed. */
 
 /* ── BlogCard dark — override internal tokens ── */
 [data-mode="dark"] .blog-card {
@@ -192,14 +188,10 @@
 }
 
 
-/* Rainbow form fields — dark: base colour for focus/brand */
-[data-mode="dark"] .form-field--red    { --_field-brand: var(--rainbow-1); --_field-brand-dark: var(--rainbow-1-emphasis); --_field-brand-light: var(--rainbow-1-tint); }
-[data-mode="dark"] .form-field--orange { --_field-brand: var(--rainbow-2); --_field-brand-dark: var(--rainbow-2-emphasis); --_field-brand-light: var(--rainbow-2-tint); }
-[data-mode="dark"] .form-field--yellow { --_field-brand: var(--rainbow-3); --_field-brand-dark: var(--rainbow-3-emphasis); --_field-brand-light: var(--rainbow-3-tint); }
-[data-mode="dark"] .form-field--teal   { --_field-brand: var(--rainbow-4); --_field-brand-dark: var(--rainbow-4-emphasis); --_field-brand-light: var(--rainbow-4-tint); }
-[data-mode="dark"] .form-field--blue   { --_field-brand: var(--rainbow-5); --_field-brand-dark: var(--rainbow-5-emphasis); --_field-brand-light: var(--rainbow-5-tint); }
-[data-mode="dark"] .form-field--purple { --_field-brand: var(--rainbow-6); --_field-brand-dark: var(--rainbow-6-emphasis); --_field-brand-light: var(--rainbow-6-tint); }
-[data-mode="dark"] .form-field--pink   { --_field-brand: var(--rainbow-7); --_field-brand-dark: var(--rainbow-7-emphasis); --_field-brand-light: var(--rainbow-7-tint); }
+/* Rainbow + brand colour mapping — handled by canonical .color--{name} mixin
+   in src/styles/global/colour.css (theme-aware tokens). No dark-mode override
+   needed; FormField.css derives --_field-brand / -dark / -light from --_color
+   and tier tokens. */
 
 [data-mode="dark"] .form-field--neumorphic .form-field__input {
   box-shadow: none;
@@ -218,18 +210,12 @@
   box-shadow: inset 2px 2px 15px color-mix(in oklch, var(--_field-brand) 60%, transparent);
 }
 
-[data-mode="dark"] .form-field--neumorphic .form-field__input:hover,
-[data-mode="dark"] .form-field--inset .form-field__input:hover,
-[data-mode="dark"] .form-field--glow .form-field__input:hover,
-[data-mode="dark"] .form-field--filled .form-field__input:hover {
-  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
-}
+/* Style-variant hover fills — follow the canonical model:
+   border = --_tier-emphasis (from hover-gate.css), bg = --page-bg-sunken.
+   No dark-mode override needed for these — light-mode rules carry through. */
 
-/* Card-select: darker fills in dark mode */
-[data-mode="dark"] .form-field__card-face:hover {
-  background: color-mix(in oklch, var(--_field-brand) 15%, transparent);
-  border-color: var(--_field-brand);
-}
+/* Card-select hover — handled by hover-gate.css (border = --_tier-emphasis,
+   bg = --page-bg-sunken). No dark-mode override needed. */
 
 [data-mode="dark"] .form-field__card-input:checked + .form-field__card-face {
   background: var(--_field-brand-dark);
@@ -254,8 +240,8 @@
 [data-mode="dark"] .form-field--glow .form-field__input:focus {
   box-shadow:
     inset 2px 2px 10px color-mix(in oklch, var(--_field-brand) 40%, transparent),
-    0 0 30px color-mix(in oklch, var(--_field-brand) 50%, transparent),
-    0 0 60px color-mix(in oklch, var(--_field-brand) 25%, transparent);
+    0 0 18px color-mix(in oklch, var(--_field-brand) 35%, transparent),
+    0 0 32px color-mix(in oklch, var(--_field-brand) 12%, transparent);
 }
 
 [data-mode="dark"] .form-field--glass .form-field__input {

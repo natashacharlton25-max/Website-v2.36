@@ -370,9 +370,11 @@ function generateDevCardsCSS(allFullTokens) {
 }
 `;
 
-    // Scale rows — 5 swatches per family × 4 families = 20 swatches
+    // Scale rows — primary/secondary expose 5 steps incl. contrast;
+    // neutral/text expose 4 (no contrast pair).
     for (const family of SCALE_FAMILIES) {
       for (const step of SCALE_STEPS) {
+        if (step === 'contrast' && (family === 'neutral' || family === 'text')) continue;
         const hex = tokens[`${family}-${step}`];
         if (!hex) continue;
         css += `.dt-card--${theme} .dt-swatch--${family}-${step} { background: ${hex}; }\n`;

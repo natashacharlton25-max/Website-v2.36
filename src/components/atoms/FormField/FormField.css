@@ -129,6 +129,8 @@
    ========================================================== */
 .form-field__input {
   padding: var(--space-sm) var(--space-md);
+  /* Rest border = author's chosen colour at chosen tier (--_color from the
+     .color--{name} mixin). Brand or rainbow + tier picked in JSON. */
   border: var(--border-width-2) solid var(--_color);
   border-radius: var(--radius-md);
   font-family: var(--font-body);
@@ -149,8 +151,12 @@
    live in src/styles/gates/hover-gate.css. */
 
 .form-field__input:focus {
-  border-color: var(--_field-brand);
-  background: color-mix(in oklch, var(--_field-brand) 3%, transparent);
+  /* Focus = the user is actively inputting. Border shifts to --text-emphasis
+     (neutral text colour) so it visibly differs from rest (chosen colour) and
+     hover (--_tier-emphasis). Background stays at --page-bg-sunken from hover
+     for continuity. Focus ring from gates/focus-gate.css sits on top. */
+  border-color: var(--text-emphasis);
+  background: var(--page-bg-sunken);
   outline: none;
 }
 
@@ -459,7 +465,8 @@
   height: var(--_field-toggle-h);
   flex-shrink: 0;
   border-radius: var(--radius-full);
-  background: var(--_color);
+  /* OFF = muted neutral so the ON→OFF state change is visible. */
+  background: var(--neutral-mid);
   cursor: pointer;
   position: relative;
   display: block;

@@ -48,9 +48,11 @@
 }
 
 
-/* Toggle track — visible contrast against thumb when off */
-[data-high-contrast] .form-field__toggle-track {
-  background: var(--neutral-emphasis);
+/* Toggle track — OFF inherits default (--neutral-mid). ON amplifies to
+   --_tier-emphasis (chosen colour at LOUDEST tier) so HC always shows a
+   bold state change regardless of brandColor (including neutral). */
+[data-high-contrast] .form-field__toggle:checked + .form-field__toggle-track {
+  background: var(--_tier-emphasis);
 }
 
 
@@ -181,9 +183,12 @@
   color: var(--neutral-emphasis);
 }
 
-/* FormField — enlarged controls, strip effects */
+/* FormField — enlarged controls, strip effects. Aligned to canonical
+   border model: rest = --_color, hover = --_tier-emphasis + bg-sunken,
+   focus = --text-emphasis + bg-sunken. --_field-border bridges variant
+   rest borders (glass/neumorphic/inset) to the chosen colour. */
 [data-high-contrast] .form-field {
-  --_field-border: var(--neutral-emphasis);
+  --_field-border: var(--_color);
   --_field-control-size: 28px;
   --_field-toggle-w: 52px;
   --_field-toggle-h: 28px;
@@ -206,7 +211,7 @@
 }
 
 [data-high-contrast] .form-field--neumorphic .form-field__input:focus {
-  border-color: var(--_field-brand);
+  border-color: var(--text-emphasis);
   box-shadow:
     inset 2px 2px 15px color-mix(in oklch, var(--_field-brand) 50%, transparent),
     0 0 20px color-mix(in oklch, var(--_field-brand) 25%, transparent);
@@ -222,18 +227,10 @@
               0 0 20px color-mix(in oklch, var(--_field-brand) 30%, transparent);
 }
 
-[data-high-contrast] .form-field--neumorphic .form-field__input:hover,
-[data-high-contrast] .form-field--inset .form-field__input:hover,
-[data-high-contrast] .form-field--glow .form-field__input:hover,
-[data-high-contrast] .form-field--filled .form-field__input:hover {
-  background: color-mix(in oklch, var(--_field-brand) 8%, transparent);
-}
-
-/* Card-select: darker fills in HC mode */
-[data-high-contrast] .form-field__card-face:hover {
-  background: color-mix(in oklch, var(--_field-brand) 15%, transparent);
-  border-color: var(--_field-brand);
-}
+/* Style-variant input :hover + card-face :hover — handled by hover-gate.css
+   (border = --_tier-emphasis, bg = --page-bg-sunken). No HC override needed
+   now that --_field-border = --_color (rest borders pick up the chosen colour
+   and hover-gate's :hover paints the same canonical transition). */
 
 [data-high-contrast] .form-field__card-input:checked + .form-field__card-face {
   background: var(--_field-brand-dark);
