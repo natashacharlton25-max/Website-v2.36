@@ -1,106 +1,101 @@
 {
   "component": "FormField",
   "category": "atom",
-  "renders": {
-    "full": "FormField.astro",
-    "reduced": "FormField.astro",
-    "textonly": "FormField.astro"
-  },
-  "notes": "The only atom allowed raw <input>, <select>, <textarea> elements. Label, description, and error render through Text atom. Native HTML controls for AT/AAC compatibility. Card-select renders choices as pictogram cards with hidden native inputs for low-cognitive-level scenarios. Assistive render applied via [data-render='assistive'] zone (assistive-gate.css), not a separate template. WCAG 2.2 AA audit: formfield-wcag-audit-2026-05-14.md.",
+  "renders": { "full": "FormField.astro", "reduced": "FormField.astro", "textonly": "FormField.astro" },
+  "notes": "Only atom allowed raw <input>/<select>/<textarea>. Author free-text lives in labelForm (primary) + contentForm* sub-content (Placeholder, Description, Error, Suggestion). Per-option content: contentOption, contentOptionSimple, contentOptionDescription. Card-select renders options as pictogram cards — child media atom owns its props. Assistive render applied via [data-render='assistive'] gate (assistive-gate.css).",
+
+  "_rules": [
+    { "rule": "value-array-multi-card-only",         "condition": "Array.isArray(value) && !(type === 'card-select' && maxSelections > 1)",                       "action": "value accepts string[] only for card-select with maxSelections > 1. All other types require string." },
+    { "rule": "options-required-for-select-types",   "condition": "(type === 'select' || type === 'card-select') && (!options || options.length === 0)",         "action": "options[] is required when type='select' or 'card-select'." },
+    { "rule": "radioValue-radio-only",               "condition": "radioValue !== undefined && type !== 'radio'",                                                  "action": "radioValue applies only to type='radio'; ignored on other types." },
+    { "rule": "checked-binary-types-only",           "condition": "checked === true && !['checkbox','radio','toggle'].includes(type)",                             "action": "checked applies only to checkbox | radio | toggle." },
+    { "rule": "min-max-step-number-only",            "condition": "(min !== undefined || max !== undefined || step !== undefined) && type !== 'number'",          "action": "min, max, step apply only to type='number'." },
+    { "rule": "min-less-than-max",                   "condition": "min !== undefined && max !== undefined && min >= max",                                          "action": "min must be strictly less than max." },
+    { "rule": "step-positive",                       "condition": "step !== undefined && step <= 0",                                                               "action": "step must be > 0." },
+    { "rule": "pattern-text-types-only",             "condition": "pattern !== undefined && !['text','email','tel','url','search','password'].includes(type)",    "action": "pattern (HTML5 regex) applies only to text-like types: text, email, tel, url, search, password." },
+    { "rule": "rows-textarea-only",                  "condition": "rows !== undefined && type !== 'textarea'",                                                     "action": "rows applies only to type='textarea'." },
+    { "rule": "length-text-types-only",              "condition": "(minLength !== undefined || maxLength !== undefined) && !['text','email','tel','url','search','password','textarea'].includes(type)", "action": "minLength, maxLength apply only to text-based types and textarea." },
+    { "rule": "minLength-not-greater-than-maxLength","condition": "minLength !== undefined && maxLength !== undefined && minLength > maxLength",                  "action": "minLength must be <= maxLength." },
+    { "rule": "card-props-card-select-only",         "condition": "((maxSelections !== undefined && maxSelections > 1) || cardSize !== undefined || cardColumns !== undefined) && type !== 'card-select'", "action": "maxSelections, cardSize, cardColumns apply only to type='card-select'." },
+    { "rule": "inputMode-no-effect-on-non-text",     "condition": "inputMode !== undefined && ['checkbox','radio','toggle','select','card-select'].includes(type)","action": "inputMode (mobile keyboard hint) has no effect on checkbox/radio/toggle/select/card-select." },
+    { "rule": "autocomplete-no-effect-on-non-input", "condition": "autocomplete !== undefined && ['select','card-select'].includes(type)",                          "action": "autocomplete applies to native inputs only; ignored on select/card-select." },
+    { "rule": "option-aacPhrase-card-select-only",   "condition": "options && options.some(o => o.aacPhrase !== undefined) && type !== 'card-select'",            "action": "Per-option aacPhrase applies only inside card-select options[]." },
+    { "rule": "option-media-card-select-only",       "condition": "options && options.some(o => o.media !== undefined) && type !== 'card-select'",                "action": "Per-option media applies only inside card-select options[]." },
+    { "rule": "option-contentOptionSimple-card-select-only", "condition": "options && options.some(o => o.contentOptionSimple !== undefined) && type !== 'card-select'", "action": "Per-option contentOptionSimple applies only inside card-select options[]." },
+    { "rule": "option-contentOptionDescription-card-select-only", "condition": "options && options.some(o => o.contentOptionDescription !== undefined) && type !== 'card-select'", "action": "Per-option contentOptionDescription applies only inside card-select options[]." },
+    { "rule": "option-media-content-symbol-needs-label", "condition": "options && options.some(o => o.media && (o.media.semanticRole || 'content-symbol') === 'content-symbol' && !(o.media.alt || o.media.labelIcon))", "action": "Each card option with media at semanticRole='content-symbol' (default) requires alt (Image) or labelIcon (Icon) — the label is composed into the card's accessible name as ', with <icon|image> <label>'. Set semanticRole='decorative' if the media is purely visual reinforcement." }
+  ],
 
   "props": {
-    "identity": {
-      "_description": "Technical identifiers — form submission and ARIA wiring.",
-      "id":   { "type": "string",  "required": true,  "pattern": "^[a-z][a-z0-9-]*$", "description": "Element ID. Kebab-case, leading letter (WCAG 4.1.1). Generates aria-describedby IDs (-error, -desc, -suggestion, -label)." },
-      "name": { "type": "string",  "required": false, "pattern": "^[a-z][a-z0-9-]*$", "default": null, "description": "Form field name for submission.", "_note": "Defaults to id if omitted." },
-      "type": { "type": "string",  "required": false, "default": "text", "enum": ["text", "email", "textarea", "checkbox", "radio", "toggle", "search", "select", "number", "tel", "url", "password", "card-select"], "description": "Input type. 'card-select' renders options as tappable pictogram/text cards (low-cognitive-level alternative to radio/checkbox)." }
-    },
-
     "content": {
-      "_description": "User-visible text. The 'what is being asked' surface — free strings authored per instance (WCAG 2.4.6).",
-      "label":       { "type": "string", "required": true, "description": "Visible label text.", "_note": "REQUIRED. Must visually describe the field's purpose (WCAG 2.4.6). Accessible name must match visible text (WCAG 2.5.3 Label in Name)." },
-      "placeholder": { "type": "string", "required": false, "default": null, "description": "Placeholder text shown inside the field when empty.", "_note": "NOT a label (WCAG 3.3.2). Disappears on input. Use label + description for instructions; placeholder is a hint only." },
-      "description": { "type": "string", "required": false, "default": null, "description": "Helper text shown below the label.", "_note": "Linked via aria-describedby. Use for input hints or format examples (WCAG 3.3.2)." },
-      "error":       { "type": "string", "required": false, "default": null, "description": "Error message shown when validation fails.", "_note": "Announced via role='alert' + aria-live='assertive' + aria-atomic='true' (WCAG 3.3.1, 4.1.3). Linked via aria-describedby + aria-invalid='true'." },
-      "suggestion":  { "type": "string", "required": false, "default": null, "description": "Correction hint shown alongside error.", "_note": "WCAG 3.3.3 — provide a suggestion when error is something the user can fix (e.g. 'Did you mean .com?')." }
+      "id":                            { "type": "string", "required": true, "pattern": "^[a-z][a-z0-9-]*$", "_note": "Kebab-case. Drives aria-describedby IDs (-error, -desc, -suggestion, -label)." },
+      "name":                          { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "_note": "Defaults to id if omitted." },
+      "type":                          { "type": "string", "default": "text", "enum": ["text", "email", "textarea", "checkbox", "radio", "toggle", "search", "select", "number", "tel", "url", "password", "card-select"] },
+      "labelForm":                { "type": "string", "required": true, "_note": "Primary label — must visually describe the field's purpose." },
+      "contentFormPlaceholder":   { "type": "string", "_note": "Hint only — not a label." },
+      "contentFormDescription":   { "type": "string", "_note": "Helper text below the label. Linked via aria-describedby." },
+      "contentFormError":         { "type": "string", "_note": "Announced via role='alert' + aria-live='assertive'." },
+      "contentFormSuggestion":    { "type": "string", "_note": "Correction hint shown alongside error." },
+      "hideLabel":                     { "type": "boolean", "default": false, "_note": "Visually hides label (sr-only); accessible name must still match visible text upstream." }
     },
 
     "state": {
-      "_description": "Current values. Server-rendered initial state; consumer JS controls updates.",
-      "value":      { "type": "string",  "required": false, "default": null, "description": "Current value. For checkbox/radio/toggle use 'checked' instead." },
-      "checked":    { "type": "boolean", "required": false, "default": false, "description": "Checked state for checkbox/radio/toggle.", "_note": "Toggle (type='toggle') has aria-checked synced via JS on change events." },
-      "radioValue": { "type": "string",  "required": false, "default": null, "description": "Submission value for radio inputs (separate from group 'value' for selection comparison)." }
+      "value":      { "type": ["string", "array"], "_note": "card-select multi-select (maxSelections > 1) accepts string[] of pre-ticked values; everything else is string." },
+      "checked":    { "type": "boolean", "default": false, "_note": "checkbox | radio | toggle." },
+      "radioValue": { "type": "string", "_note": "Submission value for radio (separate from group 'value' used for selection comparison)." }
     },
 
     "behaviour": {
-      "_description": "Input constraints and HTML form attributes. Restricts what the user can enter — WCAG 1.3.5 + 3.3.x.",
-      "required":     { "type": "boolean", "required": false, "default": false, "description": "Required field." },
-      "disabled":     { "type": "boolean", "required": false, "default": false, "description": "Disabled state. Use sparingly — disabled controls don't receive focus and aren't announced as 'disabled' consistently across AT." },
-      "rows":         { "type": "number",  "required": false, "default": 3, "minimum": 2, "description": "Textarea rows.", "_note": "Minimum 2 — single-row textareas should be type='text' instead (WCAG 1.4.10 Reflow)." },
-      "min":          { "type": "number",  "required": false, "default": null, "description": "Number/range min." },
-      "max":          { "type": "number",  "required": false, "default": null, "description": "Number/range max." },
-      "step":         { "type": "number",  "required": false, "default": null, "description": "Number/range step." },
-      "minLength":    { "type": "number",  "required": false, "default": null, "minimum": 0, "description": "Minimum character count for text/textarea/email/tel/url/search/password.", "_note": "WCAG 3.3.1 — communicate constraints via description prop too." },
-      "maxLength":    { "type": "number",  "required": false, "default": null, "minimum": 1, "description": "Maximum character count.", "_note": "WCAG 3.3.1 — communicate constraints via description prop too." },
-      "pattern":      { "type": "string",  "required": false, "default": null, "description": "Client-side validation regex (HTML 'pattern' attribute).", "_note": "WCAG 3.3.1 — pair with description prop to explain the format requirement in plain language. Pattern alone is not user-friendly." },
-      "inputMode":    { "type": "string",  "required": false, "default": null, "enum": ["none", "text", "decimal", "numeric", "tel", "search", "email", "url"], "description": "Mobile keyboard hint (WCAG 1.3.5).", "_note": "Smart default per type: email→email, tel→tel, number→decimal, search→search, url→url, password→text. Override only if needed." },
-      "autocomplete": { "type": "string",  "required": false, "default": null, "description": "Browser autofill purpose token (WCAG 1.3.5 Identify Input Purpose).", "enum": ["off", "on", "name", "honorific-prefix", "given-name", "additional-name", "family-name", "honorific-suffix", "nickname", "email", "username", "new-password", "current-password", "one-time-code", "organization-title", "organization", "street-address", "address-line1", "address-line2", "address-line3", "address-level4", "address-level3", "address-level2", "address-level1", "country", "country-name", "postal-code", "cc-name", "cc-given-name", "cc-additional-name", "cc-family-name", "cc-number", "cc-exp", "cc-exp-month", "cc-exp-year", "cc-csc", "cc-type", "transaction-currency", "transaction-amount", "language", "bday", "bday-day", "bday-month", "bday-year", "sex", "tel", "tel-country-code", "tel-national", "tel-area-code", "tel-local", "tel-extension", "impp", "url", "photo"], "_note": "Smart default per type: email→email, tel→tel, password→current-password, search/text/textarea/url→no default (author declares). 54 official HTML5 tokens. Browser autofill helps users with cognitive disabilities." },
-      "spellcheck":   { "type": "boolean", "required": false, "default": null, "description": "Enable browser spellcheck.", "_note": "Smart default per type: textarea/text/search→true, password/email/tel/url→false. Set explicitly only to override." },
-      "options":      { "type": "array",   "required": false, "default": [], "description": "Options for select or card-select. See SelectOption shape in _selectOptionShape." },
-      "maxSelections": { "type": "number", "required": false, "default": 1, "minimum": 1, "description": "Card-select: max number of selections. 1 = single-select (radio behaviour). >1 = multi-select (checkbox behaviour)." }
-    },
-
-    "a11y": {
-      "_description": "Explicit accessibility flags. Most a11y wiring is automatic via aria-* attrs.",
-      "hideLabel": { "type": "boolean", "required": false, "default": false, "description": "Visually hide label (keeps it in DOM via sr-only).", "_note": "Use sparingly. Visible labels preferred for cognitive accessibility (WCAG 3.3.2). Label MUST still match accessible name when visually hidden (WCAG 2.5.3)." }
-    },
-
-    "visual": {
-      "_description": "How the field looks. No content here — visual variants only.",
-      "fieldStyle":  { "type": "string", "required": false, "default": "outlined", "enum": ["outlined", "filled", "underlined", "glass", "inset", "neumorphic", "glow", "bare"], "description": "Visual style. 'outlined' is the baseline." },
-      "size":        { "type": "string", "required": false, "default": "md", "enum": ["sm", "md", "lg", "xl"], "description": "Field size variant." },
-      "shape":       { "type": "string", "required": false, "default": "soft", "enum": ["sharp", "subtle", "soft", "rounded", "pill"], "description": "Border radius shape." },
-      "cardSize":    { "type": "string", "required": false, "default": "md", "enum": ["sm", "md", "lg"], "description": "Card-select: card padding size." },
-      "cardColumns": { "type": "number", "required": false, "default": 3, "enum": [1, 2, 3, 4], "description": "Card-select: grid columns in full render. Assistive renders force 1 column regardless." }
+      "required":      { "type": "boolean", "default": false },
+      "disabled":      { "type": "boolean", "default": false },
+      "rows":          { "type": "number", "default": 3, "minimum": 2, "_note": "textarea only. <2 rows should be type='text'." },
+      "min":           { "type": "number" },
+      "max":           { "type": "number" },
+      "step":          { "type": "number" },
+      "minLength":     { "type": "number", "minimum": 0 },
+      "maxLength":     { "type": "number", "minimum": 1 },
+      "pattern":       { "type": "string" },
+      "inputMode":     { "type": "string", "enum": ["none", "text", "decimal", "numeric", "tel", "search", "email", "url"], "_note": "Smart default per type — override only if needed." },
+      "autocomplete":  { "type": "string", "enum": ["off", "on", "name", "honorific-prefix", "given-name", "additional-name", "family-name", "honorific-suffix", "nickname", "email", "username", "new-password", "current-password", "one-time-code", "organization-title", "organization", "street-address", "address-line1", "address-line2", "address-line3", "address-level4", "address-level3", "address-level2", "address-level1", "country", "country-name", "postal-code", "cc-name", "cc-given-name", "cc-additional-name", "cc-family-name", "cc-number", "cc-exp", "cc-exp-month", "cc-exp-year", "cc-csc", "cc-type", "transaction-currency", "transaction-amount", "language", "bday", "bday-day", "bday-month", "bday-year", "sex", "tel", "tel-country-code", "tel-national", "tel-area-code", "tel-local", "tel-extension", "impp", "url", "photo"], "_note": "Smart default per type." },
+      "spellcheck":    { "type": "boolean", "_note": "Smart default per type." },
+      "options":       { "type": "array", "default": [], "_note": "select | card-select only. See _selectOptionShape." },
+      "maxSelections": { "type": "number", "default": 1, "minimum": 1, "_note": "card-select: 1 = single (radio behaviour); >1 = multi (checkbox + limit enforcement)." }
     },
 
     "colour": {
-      "_description": "FormField consumes the global .color--{name} mixin via FormField.astro emitting `color--{name}` on the wrapper. Three border states: REST = author's chosen colour at chosen tier (--_color), HOVER = --_tier-emphasis + bg --page-bg-sunken, FOCUS = --text-emphasis + bg --page-bg-sunken. rainbowColor wins over brandColor when both are set. 'text' is NOT a valid value — text-emphasis is reserved for the focus state.",
-      "brandColor": { "type": "string", "required": false, "default": "neutral", "enum": ["primary", "secondary", "neutral"], "description": "Brand colour family. Drives the REST border on text inputs and the rest indicator on checkbox/radio/toggle/card-select. Hover steps up to --_tier-emphasis; focus shifts to --text-emphasis." }
+      "brandColor": { "type": "string", "default": "neutral", "enum": ["primary", "secondary", "neutral"] }
     },
 
     "rainbow": {
-      "rainbowColor": { "type": "string", "required": false, "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"], "description": "Rainbow colour family. Overrides brandColor when set." },
-      "colorTier":    { "type": "string", "required": false, "enum": ["tint", "mid", "base", "emphasis"], "_note": "Tier values: tint=faintest, mid=softer, base=full saturation, emphasis=loudest. Implicit baseline is 'base'. Omit to use." }
+      "rainbowColor": { "type": "string", "enum": ["rainbow-1", "rainbow-2", "rainbow-3", "rainbow-4", "rainbow-5", "rainbow-6", "rainbow-7"] },
+      "colorTier":    { "type": "string", "enum": ["tint", "mid", "base", "emphasis"], "_note": "Implicit baseline 'base' (no class emitted)." }
+    },
+
+    "visual": {
+      "fieldStyle":  { "type": "string", "default": "outlined", "enum": ["outlined", "filled", "underlined", "glass", "inset", "neumorphic", "glow", "bare"] },
+      "size":        { "type": "string", "default": "md", "enum": ["sm", "md", "lg", "xl"] },
+      "shape":       { "type": "string", "default": "soft", "enum": ["sharp", "subtle", "soft", "rounded", "pill"] },
+      "cardSize":    { "type": "string", "default": "md", "enum": ["sm", "md", "lg"] },
+      "cardColumns": { "type": "number", "default": 3, "enum": [1, 2, 3, 4], "_note": "Assistive render forces 1 column." }
     },
 
     "animation": {}
   },
 
   "_selectOptionShape": {
-    "_description": "Shape of each entry in options[] when type='select' or 'card-select'. Per-option media slot composes Image OR Icon atom (constrained subset of their props).",
-    "value":       { "type": "string", "required": true,  "description": "Form submission value." },
-    "label":       { "type": "string", "required": true,  "description": "Visible option label." },
-    "simple":      { "type": "string", "required": false, "description": "Simplified label for low-cognitive-level rendering. Falls back to 'label' when absent." },
-    "description": { "type": "string", "required": false, "description": "Helper text below the option label (card-select only)." },
-    "display":     { "type": "string", "required": false, "enum": ["checkbox", "radio", "toggle"], "description": "Check indicator style override (card-select only). Default: matches input type." },
-    "aacPhrase":   { "type": "string", "required": false, "description": "AAC keyword/phrase for build-time pictogram resolution.", "_note": "FORWARD-DECLARED — resolver wiring is deferred. Currently has NO runtime effect; only opt.media renders. When the AAC pipeline is wired, this will resolve via loadAllAltText() + resolveAACWord at build time → render as <Image> (or fall back to label text). Card-select only. If 'media' is also set, 'media' wins." },
-    "media":       {
-      "_description": "Per-option visual — Image or Icon atom (constrained subset of props). Card-select only. Wins over aacPhrase if both set.",
-      "_variants": {
-        "Image": {
-          "component":    { "type": "string", "required": true, "enum": ["Image"] },
-          "src":          { "type": "string", "required": true, "description": "Image URL or imported asset path." },
-          "alt":          { "type": "string", "required": true, "description": "Alt text.", "_note": "WCAG 1.1.1. Use '' ONLY when semanticRole='decorative' (the card label provides the accessible name). For semanticRole='content-symbol' the alt must describe the symbol's meaning (e.g. 'happy face' not 'icon')." },
-          "semanticRole": { "type": "string", "required": false, "default": "decorative", "enum": ["decorative", "content-symbol"] },
-          "fit":          { "type": "string", "required": false, "default": "cover", "enum": ["cover", "contain"] }
-        },
-        "Icon": {
-          "component": { "type": "string", "required": true, "enum": ["Icon"] },
-          "name":      { "type": "string", "required": true, "description": "Phosphor icon slug (e.g. 'heart', 'check-circle-fill')." },
-          "weight":    { "type": "string", "required": false, "enum": ["light", "regular", "bold", "fill", "duotone"], "_note": "Defaults to brand-config weight." },
-          "size":      { "type": "string", "required": false, "default": "md", "enum": ["sm", "md", "lg"] }
-        }
+    "_description": "Shape of each entry in options[] when type='select' or 'card-select'.",
+    "value":                     { "type": "string", "required": true },
+    "contentOption":             { "type": "string", "required": true, "_note": "Primary option text." },
+    "contentOptionSimple":       { "type": "string", "_note": "Simplified text for low-cognitive-level rendering. Falls back to contentOption." },
+    "contentOptionDescription":  { "type": "string", "_note": "Helper text below the option (card-select only)." },
+    "display":                   { "type": "string", "enum": ["checkbox", "radio", "toggle"], "_note": "card-select only. Default: matches input type." },
+    "aacPhrase":                 { "type": "string", "_note": "FORWARD-DECLARED — AAC pictogram resolver wiring deferred. No runtime effect today. card-select only. opt.media wins if both set." },
+    "media": {
+      "type": "object",
+      "_description": "Nested atom node — card-select only. Child atom owns its own props (size, weight, fit, src/alt, etc.); FormField only adds the layout class. semanticRole defaults to content-symbol — the icon/image reinforces the option meaning. Author may override to decorative for purely visual reinforcement (e.g. brand glyph).",
+      "properties": {
+        "component":    { "type": "string", "required": true, "enum": ["Image", "Icon"] },
+        "semanticRole": { "type": "string", "default": "content-symbol", "enum": ["decorative", "content-symbol"], "_note": "content-symbol: label appended to card's accessible name as ', with <icon|image> <label>'. decorative: icon/image hidden from SR (and stripped in textonly)." }
       }
     }
   }

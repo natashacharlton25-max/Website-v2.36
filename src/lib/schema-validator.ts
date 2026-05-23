@@ -33,11 +33,24 @@ interface SchemaProps {
   colour?: Record<string, SchemaField>;
 }
 
+// Declarative rule — evaluated against the JSON item. When `condition`
+// is true, `action` is emitted as a validation message at the given
+// severity. Conditions are JS expressions evaluated with the item's
+// props in scope (see evaluateRules below). 'info' rules are docs only
+// and never emit messages.
+interface SchemaRule {
+  rule: string;
+  condition: string;
+  action: string;
+  severity?: 'error' | 'warn' | 'info';
+}
+
 export interface ComponentSchema {
   component: string;
   category: string;
   renders: Record<string, string | null>;
   props: SchemaProps;
+  _rules?: SchemaRule[];
 }
 
 interface ValidationError {
@@ -64,8 +77,17 @@ interface ValidationResult {
 const isContentProp = (prop: string) =>
   prop.startsWith('content') || /^label[A-Z]/.test(prop);
 
-// Props that accept free strings — content text that doesn't need enum
-const FREE_STRING_PROPS = new Set(['label', 'subtitle', 'ariaLabel', 'placeholder', 'description', 'error', 'value', 'id', 'text']);
+// Props that accept free strings without an enum.
+// Two categories live here together:
+//   1. Legacy content props (label, placeholder, description, error) —
+//      kept for back-compat with pre-rename schemas.
+//   2. Data/wiring props (id, name, value, radioValue, pattern, text,
+//      subtitle, ariaLabel) — constrained by HTML semantics or by their
+//      own `pattern` field, not by an enum.
+const FREE_STRING_PROPS = new Set([
+  'label', 'subtitle', 'ariaLabel', 'placeholder', 'description', 'error',
+  'value', 'id', 'name', 'radioValue', 'pattern', 'text',
+]);
 
 // CSS values that must never appear in JSON content
 const CSS_PATTERNS = [
@@ -135,6 +157,67 @@ function flattenSchema(schema: ComponentSchema): Map<string, SchemaField & { gro
     }
   }
   return flat;
+}
+
+/**
+ * Evaluate schema._rules against the item. Each rule's `condition` is a
+ * JS expression evaluated with the item's props in scope (via `with`).
+ * When condition is true (and severity is not 'info'), the rule's
+ * `action` is pushed as a validation message at the declared severity.
+ *
+ * Conditions come from schema JSON in-repo (not user input), so
+ * arbitrary-code evaluation is safe in this context. Bad conditions
+ * (syntax errors, runtime errors) are caught and logged once per rule.
+ */
+const ruleEvalWarned = new Set<string>();
+function evaluateRules(
+  item: Record<string, any>,
+  schema: ComponentSchema,
+  errors: ValidationError[]
+): void {
+  if (!schema._rules || schema._rules.length === 0) return;
+  // Proxy lets the condition reference any prop name as a local var via
+  // `with(item)`. The `has` trap returns false for globals (Array, Object,
+  // Boolean, undefined, etc.) so they fall through to outer scope normally,
+  // and true for everything else so missing props resolve to `undefined`
+  // (via the get trap) instead of throwing ReferenceError.
+  const safeItem = new Proxy(item, {
+    has(_target, prop) {
+      if (typeof prop === 'string' && prop in globalThis) return false;
+      return true;
+    },
+    get(target, prop) {
+      return (target as Record<string | symbol, any>)[prop as any];
+    },
+  });
+  for (const rule of schema._rules) {
+    if (rule.severity === 'info') continue;
+    let conditionMet = false;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+      const fn = new Function('item', `with(item) { return Boolean(${rule.condition}); }`);
+      conditionMet = !!fn(safeItem);
+    } catch (e) {
+      const key = `${schema.component}:${rule.rule}`;
+      if (!ruleEvalWarned.has(key)) {
+        ruleEvalWarned.add(key);
+        console.warn(`[Schema] ${schema.component}: rule "${rule.rule}" failed to evaluate — ${(e as Error).message}`);
+      }
+      continue;
+    }
+    if (conditionMet) {
+      // Default severity is 'error' — rule violations are hard errors
+      // because the point of declarative rules is to prevent bad input.
+      // Opt-in to 'warn' explicitly when a rule is advisory (e.g.
+      // "this prop is a no-op for this type, not actually broken").
+      errors.push({
+        prop: rule.rule,
+        value: undefined,
+        message: rule.action,
+        severity: rule.severity === 'warn' ? 'warn' : 'error',
+      });
+    }
+  }
 }
 
 /**
@@ -297,6 +380,9 @@ export function validateComponent(
     // Passed all checks — include in sanitized output
     sanitized[key] = value;
   }
+
+  // Schema-level declarative rules (render rules + cross-prop validators)
+  evaluateRules(item, schema, errors);
 
   return {
     valid: errors.length === 0,

@@ -36,7 +36,7 @@
   gap: var(--space-xs);
 
   /* Colour tokens — read from the global .color--{name} mixin.
-     FormField.astro always emits .color--{name} (default primary) so
+     FormField.astro always emits .color--{name} (default neutral) so
      --_color / --_tier-emphasis / --_tier-tint are always defined
      (src/styles/global/colour.css). */
   --_field-brand: var(--_color);
@@ -164,10 +164,17 @@
 
    Un-gated here — hover-gate.css holds the [data-hover="none"] suppression
    that reverts these to --_field-rest-border / --_field-rest-bg. */
-body .form-field .form-field__input:hover,
-body .form-field .form-field__card-face:hover {
+body .form-field .form-field__input:hover {
   border-color: var(--_tier-emphasis);
   background: var(--page-bg-sunken);
+}
+
+/* Card-face hover (unselected) — border-only shift. Bg change here read as
+   jerky against the transparent rest; selected state owns the bg-fill
+   feedback, hover owns the border lift. Selected + hover still darkens the
+   bg (see L697-700) — that's a smaller intra-brand shift that reads softer. */
+body .form-field .form-field__card-face:hover {
+  border-color: var(--_tier-emphasis);
 }
 
 /* Exception: when author picked colorTier=emphasis, rest border is already
@@ -578,6 +585,16 @@ body .form-field.color--tier-emphasis .form-field__card-face:hover {
   font-weight: var(--font-medium);
 }
 
+/* Panel variant — coloured card around the error text. Opt in when error
+   needs more visual prominence (submit-level errors). Default plain-text
+   .form-field__error covers inline field validation. */
+.form-field__error--panel {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: color-mix(in oklch, var(--_field-error) 8%, var(--page-bg-raised));
+  border: var(--border-width) solid color-mix(in oklch, var(--_field-error) 30%, transparent);
+}
+
 .form-field__suggestion {
   color: var(--_field-helper);
   display: block;
@@ -677,6 +694,25 @@ body .form-field.color--tier-emphasis .form-field__card-face:hover {
 .form-field__card-input:checked + .form-field__card-face .form-field__card-label,
 .form-field__card-input:checked + .form-field__card-face .form-field__card-simple {
   color: inherit;
+}
+
+/* Selected + hover — bg + border darken to emphasis tier so the cursor still
+   gets visible feedback on an already-selected card. Without this, the base
+   hover rule (L167-171) overrides the checked bg with --page-bg-sunken,
+   making the card appear "unselected" while the cursor sits over it.
+   Specificity (0, 4, 1) beats the base hover's (0, 3, 1). */
+body .form-field .form-field__card-input:checked + .form-field__card-face:hover {
+  border-color: var(--_field-brand-dark);
+  background: var(--_field-brand-dark);
+}
+
+/* Exception: colorTier=emphasis already sits at --_tier-emphasis, so
+   --_field-brand-dark (=--_tier-emphasis) wouldn't shift. Step DOWN to
+   --_tier-mid for visible feedback — mirrors the same exception on
+   .form-field__input:hover (L176-179). */
+body .form-field.color--tier-emphasis .form-field__card-input:checked + .form-field__card-face:hover {
+  border-color: var(--_tier-mid);
+  background: var(--_tier-mid);
 }
 
 /* ── Card footer — label + check indicator inline ── */

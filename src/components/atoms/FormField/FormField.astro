@@ -1,23 +1,22 @@
 ---
 /**
- * FormField - Reusable Form Input Atom
+ * FormField — Reusable Form Input Atom
  *
  * Covers: text, email, textarea, checkbox, radio, toggle, search, select,
  *         number, tel, url, password, card-select.
  *
  * The only atom allowed raw <input>, <select>, <textarea> elements.
- * Label, description, and error render through Text atom.
- * Native HTML controls for AT/AAC compatibility.
+ * Author-facing text lives in labelForm (primary) + contentForm*
+ * sub-content props (Placeholder, Description, Error, Suggestion); all
+ * other props are enums/booleans/data per project schema rules.
  *
- * Card-select renders choices as pictogram/text cards with hidden native
- * inputs. Per-option media slot composes Image OR Icon atom (see SelectOption).
+ * Card-select renders choices as pictogram/text cards. Each option's media
+ * slot composes Image OR Icon — child atom owns its own props.
  *
  * Token system: --_field-brand / --_field-brand-dark / --_field-brand-light / --_field-border
  * Colour: brandColor (primary/secondary/neutral) + rainbowColor (rainbow-1..7) + colorTier (tint/mid/base/emphasis)
  *         consumed via the global .color--{name} mixin (src/styles/global/colour.css).
- *         Border progression: rest = chosen colour at chosen tier → hover = --_tier-emphasis → focus = --text-emphasis.
- * Style variants: outlined (default), filled, underlined, glass, inset, neumorphic, glow, bare
- * High contrast + dark mode: gated by zone data attributes, not component props
+ * High contrast + dark mode: gated by zone data attributes, not component props.
  *
  * WCAG 2.2 AA audit: formfield-wcag-audit-2026-05-14.md (repo root).
  */
@@ -26,27 +25,27 @@ import { Text } from '../Text';
 import { Image } from '../Image';
 import { Icon } from '../Icon';
 import { Button } from '../Button';
-import type { Shape, InputType, InputMode, AutocompleteToken, IconWeight, BrandColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
+import type { Shape, InputType, InputMode, AutocompleteToken, BrandColour, RainbowColour, ColourTier } from '../../../lib/shared-enums';
 
-// ── Per-option media slot — Image OR Icon atom (constrained subset) ──
+// ── Per-option media slot — Image OR Icon. Child atom owns its own props. ──
 type SelectOptionMedia =
-  | { component: 'Image'; src: string; alt: string; semanticRole?: 'decorative' | 'content-symbol'; fit?: 'cover' | 'contain' }
-  | { component: 'Icon'; name: string; weight?: IconWeight; size?: 'sm' | 'md' | 'lg' };
+  | ({ component: 'Image'; src: string; alt: string } & Record<string, any>)
+  | ({ component: 'Icon'; name: string } & Record<string, any>);
 
 interface SelectOption {
-  /** Form submission value */
+  /** Form submission value. */
   value: string;
-  /** Visible option label */
-  label: string;
-  /** Simplified label for low-cognitive-level rendering (card-select). Falls back to label. */
-  simple?: string;
-  /** Helper text below the option label (card-select only) */
-  description?: string;
-  /** Check indicator style override (card-select only) */
+  /** Primary option text. */
+  contentOption: string;
+  /** Simplified option text for low-cognitive-level rendering (card-select). Falls back to contentOption. */
+  contentOptionSimple?: string;
+  /** Helper text below the option (card-select only). */
+  contentOptionDescription?: string;
+  /** Check indicator style override (card-select only). */
   display?: 'checkbox' | 'radio' | 'toggle';
-  /** AAC keyword for build-time pictogram resolution (card-select only). Wins over nothing — overridden by media. */
+  /** AAC keyword for build-time pictogram resolution (card-select only). Overridden by media if both set. */
   aacPhrase?: string;
-  /** Explicit author-controlled visual atom (card-select only). Wins over aacPhrase if both set. */
+  /** Per-option visual atom (card-select only). */
   media?: SelectOptionMedia;
 }
 
@@ -56,15 +55,16 @@ interface Props {
   name?: string;
   type?: InputType;
 
-  // content
-  label: string;
-  placeholder?: string;
-  description?: string;
-  error?: string;
-  suggestion?: string;
+  // content (author free-text — all content* props are renderable copy)
+  labelForm: string;
+  contentFormPlaceholder?: string;
+  contentFormDescription?: string;
+  contentFormError?: string;
+  contentFormSuggestion?: string;
 
-  // state
-  value?: string;
+  // state — value accepts string[] for card-select multi-select pre-tick;
+  // string for everything else. Runtime is unaffected by the wider type.
+  value?: string | string[];
   checked?: boolean;
   radioValue?: string;
 
@@ -88,11 +88,8 @@ interface Props {
   hideLabel?: boolean;
 
   // visual
-  /** Brand colour family — primary/secondary/neutral. Drives focused/active state on text inputs + rest indicator on checkbox/radio/toggle/card-select. */
   brandColor?: BrandColour;
-  /** Rainbow colour family — overrides brandColor when set. */
   rainbowColor?: RainbowColour;
-  /** Colour tier — shifts --_color to tint/mid/base/emphasis. Implicit baseline = base. */
   colorTier?: ColourTier;
   fieldStyle?: 'outlined' | 'filled' | 'underlined' | 'glass' | 'inset' | 'neumorphic' | 'glow' | 'bare';
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -105,21 +102,17 @@ interface Props {
 }
 
 const {
-  // identity
   id,
   name,
   type = 'text',
-  // content
-  label,
-  placeholder,
-  description,
-  error,
-  suggestion,
-  // state
+  labelForm,
+  contentFormPlaceholder,
+  contentFormDescription,
+  contentFormError,
+  contentFormSuggestion,
   value,
   checked = false,
   radioValue,
-  // behaviour
   required = false,
   disabled = false,
   rows = 3,
@@ -134,9 +127,7 @@ const {
   spellcheck,
   options = [],
   maxSelections = 1,
-  // a11y
   hideLabel = false,
-  // visual
   brandColor = 'neutral',
   rainbowColor,
   colorTier,
@@ -145,7 +136,6 @@ const {
   shape = 'soft',
   cardSize = 'md',
   cardColumns = 3,
-  // Astro
   class: className,
 } = Astro.props;
 
@@ -161,9 +151,9 @@ const fieldName = name || id;
 // ── WCAG runtime guards ─────────────────────────────────────
 // 2.4.6 / 3.3.2 — label must be non-empty. TypeScript catches missing but
 // not whitespace strings. Throw at build so authoring errors surface in CI.
-if (!label || !label.trim()) {
+if (!labelForm || !labelForm.trim()) {
   throw new Error(
-    `FormField id="${id}" requires a non-empty label (WCAG 2.4.6 / 3.3.2). ` +
+    `FormField id="${id}" requires a non-empty labelForm (WCAG 2.4.6 / 3.3.2). ` +
     `Pass a descriptive label, or set hideLabel=true if the field is contextually labelled elsewhere.`
   );
 }
@@ -172,22 +162,19 @@ if (!label || !label.trim()) {
 const safeRows = Math.max(typeof rows === 'number' ? rows : 3, 2);
 
 // ── Smart per-type defaults (WCAG 1.3.5) ─────────────────────
-// Author-provided values always win. These fire only when the prop is undefined.
-
 const INPUT_MODE_DEFAULTS: Partial<Record<InputType, InputMode>> = {
   email: 'email',
   tel: 'tel',
   number: 'decimal',
   search: 'search',
   url: 'url',
-  password: 'text',  // keep text — numeric keyboard for passwords is a footgun
+  password: 'text',
 };
 
 const AUTOCOMPLETE_DEFAULTS: Partial<Record<InputType, AutocompleteToken>> = {
   email: 'email',
   tel: 'tel',
   password: 'current-password',
-  // search/text/textarea/url have no safe default — author must declare
 };
 
 const SPELLCHECK_DEFAULTS: Partial<Record<InputType, boolean>> = {
@@ -206,16 +193,12 @@ const resolvedAutocomplete = autocomplete ?? AUTOCOMPLETE_DEFAULTS[type] ?? unde
 const resolvedSpellcheck = spellcheck ?? SPELLCHECK_DEFAULTS[type];
 
 const describedBy = [
-  error && `${id}-error`,
-  suggestion && `${id}-suggestion`,
-  description && `${id}-desc`,
+  contentFormError && `${id}-error`,
+  contentFormSuggestion && `${id}-suggestion`,
+  contentFormDescription && `${id}-desc`,
 ].filter(Boolean).join(' ') || undefined;
 
-// Icon atom accepts a numeric px size; map sm/md/lg enum to px inline below.
-
 // Colour resolution — rainbowColor wins over brandColor (rainbow is more specific).
-// colorTier shifts --_color via .color--tier-{tier}. Base is the implicit default
-// (no class emitted) since .color--{name} mixin sets --_color = base by default.
 const colourName = rainbowColor || brandColor;
 ---
 
@@ -226,7 +209,7 @@ const colourName = rainbowColor || brandColor;
   isCheckbox && 'form-field--checkbox',
   isRadio && 'form-field--radio',
   isToggle && 'form-field--toggle',
-  error && 'form-field--error',
+  contentFormError && 'form-field--error',
   disabled && 'form-field--disabled',
   `form-field--${fieldStyle}`,
   shape !== 'soft' && `form-field--${shape}`,
@@ -250,11 +233,11 @@ const colourName = rainbowColor || brandColor;
         autocomplete={resolvedAutocomplete}
         class="form-field__checkbox"
         aria-describedby={describedBy}
-        aria-invalid={error ? 'true' : undefined}
+        aria-invalid={contentFormError ? 'true' : undefined}
         aria-required={required ? 'true' : undefined}
       />
       <span class="form-field__checkmark" aria-hidden="true"></span>
-      <Text as="span" class="form-field__label-text" flush>{label}</Text>
+      <Text as="span" class="form-field__label-text" flush>{labelForm}</Text>
     </label>
   ) : isRadio ? (
     <!-- Radio: input + label inline -->
@@ -270,11 +253,11 @@ const colourName = rainbowColor || brandColor;
         autocomplete={resolvedAutocomplete}
         class="form-field__radio"
         aria-describedby={describedBy}
-        aria-invalid={error ? 'true' : undefined}
+        aria-invalid={contentFormError ? 'true' : undefined}
         aria-required={required ? 'true' : undefined}
       />
       <span class="form-field__radio-indicator" aria-hidden="true"></span>
-      <Text as="span" class="form-field__label-text" flush>{label}</Text>
+      <Text as="span" class="form-field__label-text" flush>{labelForm}</Text>
     </label>
   ) : isToggle ? (
     <!-- Toggle: checkbox-backed switch.
@@ -292,13 +275,13 @@ const colourName = rainbowColor || brandColor;
         role="switch"
         aria-checked={checked ? 'true' : 'false'}
         aria-describedby={describedBy}
-        aria-invalid={error ? 'true' : undefined}
+        aria-invalid={contentFormError ? 'true' : undefined}
         aria-required={required ? 'true' : undefined}
       />
       <span class="form-field__toggle-track" aria-hidden="true">
         <span class="form-field__toggle-thumb"></span>
       </span>
-      <Text as="span" class="form-field__label-text" flush>{label}</Text>
+      <Text as="span" class="form-field__label-text" flush>{labelForm}</Text>
     </label>
   ) : (
     <Fragment>
@@ -308,13 +291,13 @@ const colourName = rainbowColor || brandColor;
         for={id}
         class:list={['form-field__label', hideLabel && 'sr-only']}
       >
-        <Text as="span" flush>{label}</Text>
+        <Text as="span" flush>{labelForm}</Text>
         {required && <span class="form-field__required" aria-hidden="true">*</span>}
       </label>
 
       <!-- Description -->
-      {description && (
-        <Text as="span" class="form-field__desc" id={`${id}-desc`} size="sm" flush>{description}</Text>
+      {contentFormDescription && (
+        <Text as="span" class="form-field__desc" id={`${id}-desc`} size="sm" flush>{contentFormDescription}</Text>
       )}
 
       <!-- Textarea -->
@@ -322,7 +305,7 @@ const colourName = rainbowColor || brandColor;
         <textarea
           id={id}
           name={fieldName}
-          placeholder={placeholder}
+          placeholder={contentFormPlaceholder}
           required={required}
           disabled={disabled}
           rows={safeRows}
@@ -332,7 +315,7 @@ const colourName = rainbowColor || brandColor;
           spellcheck={resolvedSpellcheck}
           class="form-field__input form-field__input--textarea"
           aria-describedby={describedBy}
-          aria-invalid={error ? 'true' : undefined}
+          aria-invalid={contentFormError ? 'true' : undefined}
           aria-required={required ? 'true' : undefined}
         >{value}</textarea>
       )}
@@ -347,11 +330,12 @@ const colourName = rainbowColor || brandColor;
             disabled={disabled}
             autocomplete={resolvedAutocomplete}
             class="form-field__select-native"
+            tabindex="-1"
             aria-describedby={describedBy}
-            aria-invalid={error ? 'true' : undefined}
+            aria-invalid={contentFormError ? 'true' : undefined}
           >
             {options.map((opt) => (
-              <option value={opt.value} selected={value === opt.value}>{opt.label}</option>
+              <option value={opt.value} selected={value === opt.value}>{opt.contentOption}</option>
             ))}
           </select>
           <Button
@@ -360,22 +344,41 @@ const colourName = rainbowColor || brandColor;
             disabled={disabled}
             class="form-field__select-btn"
             dropdownItems={options.filter(o => o.value !== '').map(o => ({
-              label: o.label,
+              label: o.contentOption,
               value: o.value,
             }))}
-          >{value ? (options.find(o => o.value === value)?.label || placeholder || label) : (placeholder || label || 'Select...')}</Button>
+          >{value ? (options.find(o => o.value === value)?.contentOption || contentFormPlaceholder || labelForm) : (contentFormPlaceholder || labelForm || 'Select...')}</Button>
         </div>
       )}
 
       {/* Card-select — pictogram/text cards for reflective inputs */}
       {isCardSelect && (
-        <div class="form-field__card-grid" role="group" aria-labelledby={`${id}-label`}>
+        <Fragment>
+        <div
+          class="form-field__card-grid"
+          role="group"
+          aria-labelledby={`${id}-label`}
+          data-max-selections={maxSelections}
+        >
           {options.map((opt, i) => {
             const cardId = `${id}-card-${i}`;
             const inputType = isSingleSelect ? 'radio' : 'checkbox';
-            // Media rendering priority: opt.media (explicit) > opt.aacPhrase (build-time AAC).
-            // aacPhrase resolution is deferred — wired when consumer pipeline passes resolved
-            // URL to media{component:'Image'} OR via future loadAllAltText integration.
+            // Composed accessible name: when media is content-symbol (default)
+            // and has a label, append it to the <label>'s text content via
+            // an sr-only span. The icon/image itself is wrapped in an
+            // aria-hidden span so it doesn't double-announce. Keeps the
+            // icon visible in textonly (semanticRole stays content-symbol),
+            // but a11y is owned by the label wrapper.
+            const mediaRole = (opt.media?.semanticRole as string | undefined) ?? 'content-symbol';
+            const mediaLabel = opt.media?.component === 'Image'
+              ? (opt.media as any).alt
+              : opt.media?.component === 'Icon'
+                ? (opt.media as any).labelIcon
+                : null;
+            const mediaTypeWord = opt.media?.component === 'Image' ? 'image' : 'icon';
+            const composedSuffix = (mediaRole === 'content-symbol' && mediaLabel)
+              ? `, with ${mediaTypeWord} ${mediaLabel}`
+              : null;
             return (
               <label class="form-field__card" for={cardId}>
                 <input
@@ -383,45 +386,44 @@ const colourName = rainbowColor || brandColor;
                   id={cardId}
                   name={fieldName}
                   value={opt.value}
-                  checked={isSingleSelect ? value === opt.value : false}
+                  checked={isSingleSelect
+                    ? value === opt.value
+                    : Array.isArray(value) && value.includes(opt.value)}
                   class="form-field__card-input"
                   aria-describedby={describedBy}
                 />
                 <span class="form-field__card-face">
-                  {opt.media?.component === 'Image' && (
-                    <Image
-                      src={opt.media.src}
-                      alt={opt.media.alt}
-                      class="form-field__card-image"
-                      semanticRole={opt.media.semanticRole ?? 'decorative'}
-                      fit={opt.media.fit ?? 'cover'}
-                    />
-                  )}
-                  {opt.media?.component === 'Icon' && (
-                    <span class="form-field__card-icon">
-                      <Icon
-                        name={opt.media.name}
-                        weight={opt.media.weight}
-                        size={opt.media.size === 'sm' ? 24 : opt.media.size === 'lg' ? 48 : 36}
-                      />
+                  {opt.media && (
+                    <span aria-hidden="true">
+                      {opt.media.component === 'Image' && (
+                        <Image {...(opt.media as any)} class="form-field__card-image" />
+                      )}
+                      {opt.media.component === 'Icon' && (
+                        <Icon {...(opt.media as any)} class="form-field__card-icon" />
+                      )}
                     </span>
                   )}
                   <span class="form-field__card-footer">
                     <span class:list={['form-field__card-check', `form-field__card-check--${opt.display || (isSingleSelect ? 'radio' : 'checkbox')}`]} aria-hidden="true"></span>
                     <Text as="span" class="form-field__card-label" weight="bold" flush>
-                      {opt.simple || opt.label}
+                      {opt.contentOptionSimple || opt.contentOption}
                     </Text>
                   </span>
-                  {opt.description && (
+                  {opt.contentOptionDescription && (
                     <Text as="span" size="sm" color="muted" class="form-field__card-desc" flush>
-                      {opt.description}
+                      {opt.contentOptionDescription}
                     </Text>
                   )}
+                  {composedSuffix && <span class="sr-only">{composedSuffix}</span>}
                 </span>
               </label>
             );
           })}
         </div>
+        {!isSingleSelect && (
+          <div class="sr-only" aria-live="polite" aria-atomic="true" data-card-limit-announcer></div>
+        )}
+        </Fragment>
       )}
 
       <!-- Standard input -->
@@ -431,7 +433,7 @@ const colourName = rainbowColor || brandColor;
           id={id}
           name={fieldName}
           value={value}
-          placeholder={placeholder}
+          placeholder={contentFormPlaceholder}
           required={required}
           disabled={disabled}
           min={min}
@@ -445,7 +447,7 @@ const colourName = rainbowColor || brandColor;
           spellcheck={resolvedSpellcheck}
           class="form-field__input"
           aria-describedby={describedBy}
-          aria-invalid={error ? 'true' : undefined}
+          aria-invalid={contentFormError ? 'true' : undefined}
           aria-required={required ? 'true' : undefined}
         />
       )}
@@ -453,13 +455,13 @@ const colourName = rainbowColor || brandColor;
   )}
 
   <!-- Error + suggestion — live region announces when errors appear/change (WCAG 3.3.1, 4.1.3) -->
-  {(error || suggestion) && (
+  {(contentFormError || contentFormSuggestion) && (
     <div class="form-field__feedback" aria-live="assertive" aria-atomic="true">
-      {error && (
-        <Text as="span" class="form-field__error" id={`${id}-error`} role="alert" size="sm" flush>{error}</Text>
+      {contentFormError && (
+        <Text as="span" class="form-field__error" id={`${id}-error`} role="alert" size="sm" flush>{contentFormError}</Text>
       )}
-      {suggestion && (
-        <Text as="span" class="form-field__suggestion" id={`${id}-suggestion`} size="sm" flush>{suggestion}</Text>
+      {contentFormSuggestion && (
+        <Text as="span" class="form-field__suggestion" id={`${id}-suggestion`} size="sm" flush>{contentFormSuggestion}</Text>
       )}
     </div>
   )}
@@ -489,7 +491,6 @@ const colourName = rainbowColor || brandColor;
     // Update button label — find the text node inside .btn__label
     const btnLabel = wrap.querySelector('.btn__label');
     if (btnLabel) {
-      // The Text atom wraps in <p class="text"> or <span class="text">
       const textEl = btnLabel.querySelector('.text') || btnLabel;
       textEl.textContent = item.textContent?.trim() || value;
     }
@@ -513,7 +514,7 @@ const colourName = rainbowColor || brandColor;
     };
     input.addEventListener('input', check);
     input.addEventListener('change', check);
-    check(); // initial state
+    check();
   });
 
   // Toggle has-value on dropdown selection
@@ -529,7 +530,66 @@ const colourName = rainbowColor || brandColor;
   document.querySelectorAll<HTMLInputElement>('.form-field__toggle').forEach((toggle) => {
     const sync = () => toggle.setAttribute('aria-checked', toggle.checked ? 'true' : 'false');
     toggle.addEventListener('change', sync);
-    // Initial sync in case server-rendered state drifted from prop
     sync();
   });
+
+  // Card-select multi-select: enforce maxSelections.
+  // Single-select (maxSelections=1, radio inputs) needs no JS — radio
+  // semantics already prevent multi-pick. For multi-select (checkbox
+  // inputs) we count checked, disable unchecked at limit, announce via
+  // sr-only live region. Initial pass also handles server pre-ticks.
+  function initCardSelectLimits() {
+    document.querySelectorAll<HTMLElement>('.form-field__card-grid:not([data-card-limit-bound])').forEach((grid) => {
+      const max = parseInt(grid.dataset.maxSelections || '1', 10);
+      if (max <= 1) return;
+      grid.dataset.cardLimitBound = '1';
+
+      const inputs = Array.from(grid.querySelectorAll<HTMLInputElement>('.form-field__card-input'));
+      const announcer = grid.parentElement?.querySelector<HTMLElement>('[data-card-limit-announcer]') || null;
+
+      const applyLimitState = () => {
+        const checkedCount = inputs.filter((i) => i.checked).length;
+        const atLimit = checkedCount >= max;
+        inputs.forEach((input) => {
+          const card = input.closest('.form-field__card') as HTMLElement | null;
+          if (!card) return;
+          const lockOut = atLimit && !input.checked;
+          input.disabled = lockOut;
+          if (lockOut) card.setAttribute('aria-disabled', 'true');
+          else card.removeAttribute('aria-disabled');
+        });
+      };
+
+      inputs.forEach((input) => {
+        input.addEventListener('change', () => {
+          applyLimitState();
+          if (!announcer) return;
+          const checkedCount = inputs.filter((i) => i.checked).length;
+          if (checkedCount >= max) {
+            announcer.textContent = `Limit reached. ${max} selections.`;
+          } else {
+            announcer.textContent = '';
+          }
+        });
+
+        // Click on a locked-out card lands on the <label>; native input
+        // is disabled so no change fires — announce why the click did
+        // nothing. Clear first to force AT re-announcement.
+        const card = input.closest('.form-field__card');
+        if (!card) return;
+        card.addEventListener('click', () => {
+          if (!input.disabled || !announcer) return;
+          announcer.textContent = '';
+          requestAnimationFrame(() => {
+            announcer.textContent = `Limit of ${max} reached. Uncheck a selection to add this one.`;
+          });
+        });
+      });
+
+      applyLimitState();
+    });
+  }
+
+  initCardSelectLimits();
+  document.addEventListener('astro:page-load', initCardSelectLimits);
 </script>

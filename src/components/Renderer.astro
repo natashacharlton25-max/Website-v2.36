@@ -38,14 +38,31 @@ interface Props {
 const { node } = Astro.props;
 const resolved = resolveNode(node, componentRegistry);
 
-// DEV: validate JSON against schema
+// DEV: validate JSON against schema. Errors are hard (bad input must
+// not silently render); warnings are advisory (no-op props, etc.).
 if (import.meta.env.DEV && schemaMap && node.component) {
   const schema = schemaMap.get(node.component);
   if (schema) {
     const result = validateComponent(node, schema);
     if (!result.valid) {
       for (const err of result.errors) {
-        console.warn(`[Validator] ${node.component}.${err.prop}: ${err.message}`);
+        const prefix = `[Validator] ${node.component}.${err.prop}:`;
+        if (err.severity === 'warn') {
+          console.warn(prefix, err.message);
+        } else {
+          console.error(prefix, err.message);
+        }
+      }
+      // Hard errors block rendering — throw so Astro's DEV overlay surfaces
+      // it in the browser. Author/AI can't miss it. Warnings keep rendering
+      // (they're advisory: no-op prop for the type, etc.).
+      const hardErrors = result.errors.filter((e) => e.severity !== 'warn');
+      if (hardErrors.length > 0) {
+        const ident = node.id ? `${node.component} id="${node.id}"` : node.component;
+        throw new Error(
+          `${ident} failed schema validation (${hardErrors.length} error${hardErrors.length === 1 ? '' : 's'}):\n` +
+            hardErrors.map((e) => `  • ${e.prop}: ${e.message}`).join('\n')
+        );
       }
     }
   }

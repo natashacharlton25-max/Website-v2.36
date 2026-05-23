@@ -77,23 +77,37 @@
 }
 
 /* Input + card-face transitions — border-color and background animate via
-   --hover-duration so hover-gate's per-mode tokens flow through:
-     full    → 200ms (default)
-     none    → 0s (instant suppression — no visible interpolation)
-     instant → 0s
-     gentle  → 1.2s
-   Lives here (not FormField.css) so motion-gate / hover-gate own the
-   timing axis. */
-.form-field__input,
+   hover-duration tokens so hover-gate's per-mode values flow through.
+   speed-gate (--anim-speed-mult) wraps the duration so all three gates
+   compose: hover-mode sets base timing, motion-mode can zero it, user
+   speed pref scales it (fast 0.75x / gentle 1.5x / slow 2x).
+   Lives here (not FormField.css) so motion-gate / hover-gate / speed-gate
+   own the timing axis.
+
+   Text input — snappy 200ms via --hover-duration (full mode).
+   full=200ms · none=0s · instant=0s · gentle=1.2s. */
+.form-field__input {
+  transition: border-color calc(var(--hover-duration) * var(--anim-speed-mult, 1)) var(--ease-default),
+              background calc(var(--hover-duration) * var(--anim-speed-mult, 1)) var(--ease-default);
+}
+
+/* Card-face — split timing by property:
+   - Border snaps at --hover-duration (200ms) so the unselected hover lift
+     feels responsive, since border is now the only unselected feedback.
+   - Bg eases at --hover-duration-slow (500ms) so the selected→hover bg
+     darken softens in. Unselected has no bg change, so the slow timing
+     is invisible there. */
 .form-field__card-face {
-  transition: border-color var(--hover-duration) var(--ease-default),
-              background var(--hover-duration) var(--ease-default);
+  transition: border-color calc(var(--hover-duration) * var(--anim-speed-mult, 1)) var(--ease-default),
+              background calc(var(--hover-duration-slow) * var(--anim-speed-mult, 1)) var(--ease-default);
 }
 
 /* Toggle thumb slide — transitions left position as the checkbox flips.
-   Lives here (not FormField.css) so motion-gate can zero the duration. */
+   Lives here (not FormField.css) so motion-gate can zero the duration.
+   speed-gate wraps the duration for the same compose-the-gates reason as
+   the card-face transition above. */
 .form-field__toggle-thumb {
-  transition: all var(--hover-duration-fast) var(--ease-default);
+  transition: all calc(var(--hover-duration-fast) * var(--anim-speed-mult, 1)) var(--ease-default);
 }
 
 /* Hover none: filled inputs stay neutral */
@@ -120,6 +134,27 @@
   color: var(--_on-color);
   box-shadow: none;
   transition: none;
+}
+
+/* Hover none + checked + hover: hold brand fill (suppress the darken added
+   in FormField.css — checked+hover normally steps bg to --_field-brand-dark
+   so the cursor still gets feedback on a selected card; in hover-none the
+   user has opted out of decorative feedback, so we hold the rest fill).
+
+   Specificity: FormField's selected+hover rule is `body .form-field ...:hover`
+   = (0, 5, 1). data-hover lives on <html> (per mode-readers.ts), so an
+   earlier `body[data-hover="none"]` prefix never matched. This selector
+   = (0, 6, 0) — 6 classes/pseudos beats 5+body on the class column. */
+[data-hover="none"] .form-field .form-field__card-input:checked + .form-field__card-face:hover {
+  border-color: var(--_field-brand);
+  background: var(--_field-brand);
+}
+
+/* Tier-emphasis exception — FormField's rule = (0, 6, 1). Adding
+   .color--tier-emphasis gives (0, 7, 0) which wins on the class column. */
+[data-hover="none"] .form-field.color--tier-emphasis .form-field__card-input:checked + .form-field__card-face:hover {
+  border-color: var(--_field-brand);
+  background: var(--_field-brand);
 }
 
 /* Hover none: check indicators still animate (toggle slider movement) */
@@ -1028,7 +1063,13 @@ body:not([data-hover="none"]) .image--animate .image--hover[class*="image--blur"
   border-bottom-right-radius: var(--radius-sm);
 }
 
-[data-hover="none"] .dropdown-btn:hover {
+/* Specificity bump (.btn.dropdown-btn) — the FormField select trigger has
+   .btn--outline AND .dropdown-btn. The [data-hover="none"] .btn--outline
+   rule above at (0, 4, 0) paints color: var(--_color) (brand) on hover,
+   beating a plain .dropdown-btn rule at (0, 3, 0). Matching .btn.dropdown-btn
+   ties at (0, 4, 0) and wins by source order so the placeholder text
+   holds --btn-dropdown-text instead of flashing to brand colour. */
+[data-hover="none"] .btn.dropdown-btn:hover {
   background: transparent;
   color: var(--btn-dropdown-text);
   border-color: var(--_color);
