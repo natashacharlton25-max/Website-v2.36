@@ -180,6 +180,12 @@ const runtimeTokens = new Set([
   'caret-color', 'caret-width', 'caret-radius', 'caret-blink-speed',
   // Focus colour cycling — focus rainbow JS rotates --focus-color
   // (defined in focus-gate.css, but listed here for safety)
+  // Grid spans — set as inline style by grid-layout.ts (`--span: N; --row-span: N`)
+  // on child elements that need to span multiple grid columns/rows.
+  'span', 'row-span',
+  // Nav height — measured + set on document root by GlassNav so pages can
+  // offset content below the fixed nav bar.
+  'nav-height',
 ]);
 
 // CSS-builtin properties / keywords that look like custom props but aren't.
