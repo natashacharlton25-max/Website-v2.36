@@ -1,0 +1,143 @@
+/* ==========================================================
+   ARCHIVE — legacy form validation utility classes
+   ==========================================================
+   Extracted from src/styles/base/utilities.css L500–626 on 2026-05-22.
+   Superseded by FormField atom — .form-field--error / .form-field__error
+   own this responsibility now (FormField.css L552–591). Panel variant
+   (.form-field__error--panel) added 2026-05-22 to absorb the only feature
+   FormField didn't already cover.
+
+   Decisions taken during the migration:
+   - No success state ported (FormField has none; error is the only signal).
+   - No warning state ported.
+   - No bg tint on error inputs ported (WCAG 1.4.1 + 3.3.1 satisfied by
+     border-colour change + .form-field__error text alone).
+
+   NOT IMPORTED. Reference only.
+   ========================================================== */
+
+/*
+ * Custom form validation styling
+ * Uses theme tokens - customize in your theme file:
+ * --color-Error, --color-Success, --color-Warning, --color-Info
+ *
+ * Usage: Add .has-error to parent, use .form-error for message
+ * <div class="form-field has-error">
+ *   <input type="text" />
+ *   <span class="form-error">Error message</span>
+ * </div>
+ */
+
+/* Error message - hidden by default */
+.form-error {
+  display: none;
+  font-size: 0.8125rem;
+  color: var(--color-Error, #dc2626);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+/* Show error when parent has .has-error or .show class on error */
+.has-error .form-error,
+.form-error.show {
+  display: block;
+}
+
+/* Inline error (no background, just text) */
+.form-error-inline {
+  display: none;
+  font-size: 0.8125rem;
+  color: var(--color-Error, #dc2626);
+  margin-top: 6px;
+}
+
+.has-error .form-error-inline,
+.form-error-inline.show {
+  display: block;
+}
+
+/* Input error states */
+.has-error input,
+.has-error textarea,
+.has-error select,
+input.has-error,
+textarea.has-error,
+select.has-error {
+  border-color: var(--color-Error, #dc2626) !important;
+  background-color: #fef2f2;
+}
+
+.has-error input:focus,
+.has-error textarea:focus,
+.has-error select:focus {
+  outline-color: var(--color-Error, #dc2626);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-Error, #dc2626) 10%, transparent);
+}
+
+/* Checkbox/Radio error state */
+.has-error input[type="checkbox"],
+.has-error input[type="radio"] {
+  outline: 2px solid var(--color-Error, #dc2626);
+  outline-offset: 2px;
+  background-color: transparent;
+}
+
+/* Success state */
+.has-success input,
+.has-success textarea,
+.has-success select,
+input.has-success,
+textarea.has-success,
+select.has-success {
+  border-color: var(--color-Success, var(--primary-base)) !important;
+  background-color: #f0fdfa;
+}
+
+.form-success {
+  display: none;
+  font-size: 0.8125rem;
+  color: var(--color-Success, var(--primary-emphasis));
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.has-success .form-success,
+.form-success.show {
+  display: block;
+}
+
+/* Warning state */
+.form-warning {
+  display: none;
+  font-size: 0.8125rem;
+  color: var(--color-Warning, var(--neutral-emphasis));
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.has-warning .form-warning,
+.form-warning.show {
+  display: block;
+}
+
+/* Required field indicator */
+.form-required::after {
+  content: ' *';
+  color: var(--color-Error, #dc2626);
+}
+
+/* Helper text */
+.form-help {
+  font-size: 0.75rem;
+  color: var(--neutral-mid);
+  margin-top: 4px;
+}

@@ -1,0 +1,275 @@
+/* ==========================================================
+   ARCHIVE — legacy [data-tooltip] CSS-only tooltip system
+   ==========================================================
+   Extracted from src/styles/base/utilities.css L230–498 on 2026-05-22.
+   Pre-dates the Tooltip atom. Reference material for the Tooltip atom
+   audit — use whichever themes still want to exist, then delete this file.
+
+   NOT IMPORTED. This file is not in the Tooltip barrel (index.ts) and is
+   not loaded by the build. Pulling content from here = explicit copy.
+
+   Original usage:
+     <span data-tooltip="Tooltip text">Hover me</span>
+     Positions: tooltip-top (default), tooltip-bottom, tooltip-left, tooltip-right
+     Themes: tooltip-professional (default), tooltip-glass, tooltip-neon,
+             tooltip-brutalist, tooltip-error, tooltip-success, tooltip-warning,
+             tooltip-info
+   ========================================================== */
+
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]::before,
+[data-tooltip]::after {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-base, 0.2s ease);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Tooltip bubble - matches toast-professional styling */
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  background: var(--neutral-mid);
+  color: var(--neutral-emphasis);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  line-height: var(--leading-relaxed, 1.5);
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  backdrop-filter: blur(4px);
+}
+
+/* Arrow - Hidden */
+[data-tooltip]::before {
+  content: '';
+  border: 6px solid transparent;
+  display: none;
+}
+
+/* Show on hover */
+[data-tooltip]:hover::before,
+[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ===== Top (Default) ===== */
+[data-tooltip]::after,
+[data-tooltip].tooltip-top::after {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  margin-bottom: 6px;
+}
+
+[data-tooltip]::before,
+[data-tooltip].tooltip-top::before {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top-color: var(--neutral-emphasis);
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip].tooltip-top:hover::after {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== Bottom ===== */
+[data-tooltip].tooltip-bottom::after {
+  bottom: auto;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  margin-bottom: 0;
+  margin-top: 6px;
+}
+
+[data-tooltip].tooltip-bottom::before {
+  bottom: auto;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top-color: transparent;
+  border-bottom-color: var(--neutral-emphasis);
+}
+
+[data-tooltip].tooltip-bottom:hover::after {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== Left ===== */
+[data-tooltip].tooltip-left::after {
+  bottom: auto;
+  top: 50%;
+  left: auto;
+  right: 100%;
+  transform: translateY(-50%) translateX(-4px);
+  margin-bottom: 0;
+  margin-right: 6px;
+}
+
+[data-tooltip].tooltip-left::before {
+  bottom: auto;
+  top: 50%;
+  left: auto;
+  right: 100%;
+  transform: translateY(-50%);
+  border-top-color: transparent;
+  border-left-color: var(--neutral-emphasis);
+}
+
+[data-tooltip].tooltip-left:hover::after {
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ===== Right ===== */
+[data-tooltip].tooltip-right::after {
+  bottom: auto;
+  top: 50%;
+  left: 100%;
+  right: auto;
+  transform: translateY(-50%) translateX(4px);
+  margin-bottom: 0;
+  margin-left: 6px;
+}
+
+[data-tooltip].tooltip-right::before {
+  bottom: auto;
+  top: 50%;
+  left: 100%;
+  right: auto;
+  transform: translateY(-50%);
+  border-top-color: transparent;
+  border-right-color: var(--neutral-emphasis);
+}
+
+[data-tooltip].tooltip-right:hover::after {
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ===== Tooltip Themes (matches Toast themes) ===== */
+
+/* Professional (default) - already defined above */
+
+/* Glass tooltip - matches toast-glass */
+[data-tooltip].tooltip-glass::after {
+  background: color-mix(in oklch, var(--page-bg) 85%, transparent);
+  color: var(--neutral-emphasis);
+  border: 1px solid color-mix(in oklch, var(--page-bg) 25%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+[data-tooltip].tooltip-glass::before {
+  border-top-color: color-mix(in oklch, var(--page-bg) 85%, transparent);
+}
+
+[data-tooltip].tooltip-glass.tooltip-bottom::before {
+  border-top-color: transparent;
+  border-bottom-color: color-mix(in oklch, var(--page-bg) 85%, transparent);
+}
+
+/* Neon tooltip - matches toast-neon */
+[data-tooltip].tooltip-neon::after {
+  background: var(--neutral-emphasis);
+  color: var(--primary-base);
+  border: 1.5px solid var(--primary-base);
+  text-shadow: 0 0 4px var(--primary-base);
+  box-shadow: 0 0 6px color-mix(in oklch, var(--primary-base) 15%, transparent),
+              0 0 12px color-mix(in oklch, var(--primary-base) 10%, transparent);
+}
+
+[data-tooltip].tooltip-neon::before {
+  border-top-color: var(--primary-base);
+}
+
+[data-tooltip].tooltip-neon.tooltip-bottom::before {
+  border-top-color: transparent;
+  border-bottom-color: var(--primary-base);
+}
+
+/* Brutalist tooltip - matches toast-brutalist */
+[data-tooltip].tooltip-brutalist::after {
+  background: var(--neutral-mid);
+  color: var(--neutral-emphasis);
+  border: 2px solid var(--neutral-emphasis);
+  font-family: monospace;
+  border-radius: 0;
+}
+
+[data-tooltip].tooltip-brutalist::before {
+  border-top-color: var(--neutral-emphasis);
+}
+
+[data-tooltip].tooltip-brutalist.tooltip-bottom::before {
+  border-top-color: transparent;
+  border-bottom-color: var(--neutral-emphasis);
+}
+
+/* Error tooltip */
+[data-tooltip].tooltip-error::after {
+  background: var(--color-Error, #ef4444);
+  color: var(--color-White);
+}
+
+[data-tooltip].tooltip-error::before {
+  border-top-color: var(--color-Error, #ef4444);
+}
+
+[data-tooltip].tooltip-error.tooltip-bottom::before {
+  border-top-color: transparent;
+  border-bottom-color: var(--color-Error, #ef4444);
+}
+
+/* Success tooltip */
+[data-tooltip].tooltip-success::after {
+  background: var(--color-Success, #22c55e);
+  color: var(--color-White);
+}
+
+[data-tooltip].tooltip-success::before {
+  border-top-color: var(--color-Success, #22c55e);
+}
+
+[data-tooltip].tooltip-success.tooltip-bottom::before {
+  border-top-color: transparent;
+  border-bottom-color: var(--color-Success, #22c55e);
+}
+
+/* Warning tooltip */
+[data-tooltip].tooltip-warning::after {
+  background: var(--color-Warning, #f59e0b);
+  color: var(--color-White);
+}
+
+[data-tooltip].tooltip-warning::before {
+  border-top-color: var(--color-Warning, #f59e0b);
+}
+
+[data-tooltip].tooltip-warning.tooltip-bottom::before {
+  border-top-color: transparent;
+  border-bottom-color: var(--color-Warning, #f59e0b);
+}
+
+/* Info tooltip */
+[data-tooltip].tooltip-info::after {
+  background: var(--color-Info, #3b82f6);
+  color: var(--color-White);
+}
+
+[data-tooltip].tooltip-info::before {
+  border-top-color: var(--color-Info, #3b82f6);
+}
+
+[data-tooltip].tooltip-info.tooltip-bottom::before {
+  border-top-color: transparent;
+  border-bottom-color: var(--color-Info, #3b82f6);
+}
