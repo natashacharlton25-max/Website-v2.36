@@ -33,15 +33,33 @@ interface SchemaProps {
   colour?: Record<string, SchemaField>;
 }
 
-// Declarative rule — evaluated against the JSON item. When `condition`
-// is true, `action` is emitted as a validation message at the given
-// severity. Conditions are JS expressions evaluated with the item's
-// props in scope (see evaluateRules below). 'info' rules are docs only
-// and never emit messages.
+// Declarative rule — evaluated against the JSON item. Multiple shapes
+// have grown across atoms; the validator recognises:
+//
+//   condition + action          → emit `action` if condition true
+//   condition + requires        → emit if condition true AND requires false
+//   condition + excludes        → emit if condition true AND excludes true
+//   condition + forbid/forbids  → emit if forbidden props appear in scope
+//   _runtime: true              → info (runtime handles; docs only)
+//   _action (underscore prefix) → info (docs about runtime behaviour)
+//   note only (no condition)    → info (pure docs)
+//
+// Severity:
+//   - explicit `severity` always wins
+//   - actions describing runtime behaviour (auto-strips, auto-injects,
+//     "runtime", "falls back") → info, even if `action` is set
+//   - otherwise: 'error' default
 interface SchemaRule {
   rule: string;
-  condition: string;
-  action: string;
+  condition?: string;
+  action?: string;
+  note?: string;
+  requires?: string;
+  excludes?: string;
+  forbid?: string[];
+  forbids?: string[];
+  scope?: 'root' | 'media' | string;
+  when?: string;
   severity?: 'error' | 'warn' | 'info';
 }
 
@@ -78,15 +96,21 @@ const isContentProp = (prop: string) =>
   prop.startsWith('content') || /^label[A-Z]/.test(prop);
 
 // Props that accept free strings without an enum.
+// Project rule: every schema prop is either an enum OR a free string
+// whose validation lives in the atom's runtime (.astro frontmatter).
+// This list names the legitimately free strings — atoms own their
+// runtime validation; the schema integrity check just stops warning.
+//
 // Two categories live here together:
 //   1. Legacy content props (label, placeholder, description, error) —
 //      kept for back-compat with pre-rename schemas.
 //   2. Data/wiring props (id, name, value, radioValue, pattern, text,
-//      subtitle, ariaLabel) — constrained by HTML semantics or by their
-//      own `pattern` field, not by an enum.
+//      subtitle, ariaLabel, href, role, download) — atom-side runtime
+//      validation, not a fixed enum.
 const FREE_STRING_PROPS = new Set([
   'label', 'subtitle', 'ariaLabel', 'placeholder', 'description', 'error',
   'value', 'id', 'name', 'radioValue', 'pattern', 'text',
+  'href', 'role', 'download',
 ]);
 
 // CSS values that must never appear in JSON content
@@ -170,6 +194,35 @@ function flattenSchema(schema: ComponentSchema): Map<string, SchemaField & { gro
  * (syntax errors, runtime errors) are caught and logged once per rule.
  */
 const ruleEvalWarned = new Set<string>();
+
+// Behaviour-description action text — keywords that mean "runtime does
+// this automatically", not "author violated something". Auto-detected
+// from `action` text so legacy rules don't need editing.
+const BEHAVIOUR_KEYWORDS = /\b(auto[- ](?:injects?|strips?|downgrades?|fix(?:es)?)|atom\s+(?:strips?|handles?|injects?|fix(?:es)?|guarantees?)|runtime\s+(?:guarantee|auto|handles?|injects?|strips?)|computed\s+at\s+runtime|falls?\s+back|stripped\s+at\s+runtime|runtime[- ]auto[- ]strip|overridden\b)/i;
+
+function isBehaviourRule(rule: SchemaRule): boolean {
+  const anyRule = rule as any;
+  if (anyRule._runtime === true) return true;
+  if (typeof anyRule._action === 'string') return true;
+  if (rule.action && BEHAVIOUR_KEYWORDS.test(rule.action)) return true;
+  return false;
+}
+
+function safeEval(condition: string, safeItem: Record<string, any>, schema: ComponentSchema, ruleName: string): boolean | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+    const fn = new Function('item', `with(item) { return Boolean(${condition}); }`);
+    return !!fn(safeItem);
+  } catch (e) {
+    const key = `${schema.component}:${ruleName}:${condition}`;
+    if (!ruleEvalWarned.has(key)) {
+      ruleEvalWarned.add(key);
+      console.warn(`[Schema] ${schema.component}: rule "${ruleName}" failed to evaluate "${condition}" — ${(e as Error).message}`);
+    }
+    return null;
+  }
+}
+
 function evaluateRules(
   item: Record<string, any>,
   schema: ComponentSchema,
@@ -190,31 +243,58 @@ function evaluateRules(
       return (target as Record<string | symbol, any>)[prop as any];
     },
   });
+
   for (const rule of schema._rules) {
-    if (rule.severity === 'info') continue;
-    let conditionMet = false;
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
-      const fn = new Function('item', `with(item) { return Boolean(${rule.condition}); }`);
-      conditionMet = !!fn(safeItem);
-    } catch (e) {
-      const key = `${schema.component}:${rule.rule}`;
-      if (!ruleEvalWarned.has(key)) {
-        ruleEvalWarned.add(key);
-        console.warn(`[Schema] ${schema.component}: rule "${rule.rule}" failed to evaluate — ${(e as Error).message}`);
+    // Severity: explicit wins; otherwise behaviour rules = info, else error.
+    const effectiveSeverity = rule.severity ?? (isBehaviourRule(rule) ? 'info' : 'error');
+    if (effectiveSeverity === 'info') continue;
+
+    // Rule without any condition or constraint is docs-only — skip.
+    if (!rule.condition && !rule.when) continue;
+
+    // Primary condition (or `when` precondition) must be true to fire.
+    const conditionExpr = rule.condition ?? rule.when;
+    if (!conditionExpr) continue;
+    const conditionMet = safeEval(conditionExpr, safeItem, schema, rule.rule);
+    if (conditionMet === null || !conditionMet) continue;
+
+    // Now check the rule's specific shape for a violation:
+    let violation: string | null = null;
+
+    if (rule.requires) {
+      // `requires` is itself a JS expression that must be true.
+      const reqMet = safeEval(rule.requires, safeItem, schema, rule.rule);
+      if (reqMet === false) {
+        violation = `${rule.rule}: requires ${rule.requires} (not met)${rule.note ? ` — ${rule.note}` : ''}`;
       }
-      continue;
+    } else if (rule.excludes) {
+      // `excludes` is a JS expression that must be false.
+      const excMet = safeEval(rule.excludes, safeItem, schema, rule.rule);
+      if (excMet === true) {
+        violation = `${rule.rule}: excludes ${rule.excludes} (present)${rule.note ? ` — ${rule.note}` : ''}`;
+      }
+    } else if (Array.isArray(rule.forbid) || Array.isArray(rule.forbids)) {
+      // `forbid`/`forbids` is a list of prop names that must not appear.
+      // Scope: 'root' = top-level item; 'media' = item.media; default 'root'.
+      const forbidden = (rule.forbid ?? rule.forbids)!;
+      const scopeObj = rule.scope === 'media' ? (item as any).media : item;
+      if (scopeObj && typeof scopeObj === 'object') {
+        const present = forbidden.filter((k) => k in scopeObj && (scopeObj as any)[k] !== undefined);
+        if (present.length > 0) {
+          violation = `${rule.rule}: forbidden ${rule.scope ?? 'root'} prop${present.length === 1 ? '' : 's'} ${present.join(', ')}${rule.note ? ` — ${rule.note}` : ''}`;
+        }
+      }
+    } else if (rule.action) {
+      // Plain action rule — condition true = violation, action describes fix.
+      violation = rule.action;
     }
-    if (conditionMet) {
-      // Default severity is 'error' — rule violations are hard errors
-      // because the point of declarative rules is to prevent bad input.
-      // Opt-in to 'warn' explicitly when a rule is advisory (e.g.
-      // "this prop is a no-op for this type, not actually broken").
+
+    if (violation) {
       errors.push({
         prop: rule.rule,
         value: undefined,
-        message: rule.action,
-        severity: rule.severity === 'warn' ? 'warn' : 'error',
+        message: violation,
+        severity: effectiveSeverity === 'warn' ? 'warn' : 'error',
       });
     }
   }
@@ -421,12 +501,14 @@ export function validatePage(
     }
   }
 
-  // Recurse into children and any nested objects
-  for (const [key, val] of Object.entries(node)) {
-    if (key === 'component') continue;
-    if (typeof val === 'object' && val !== null) {
-      errors.push(...validatePage(val, schemaMap, `${path}.${key}`));
-    }
+  // Recurse only into `children` — that's the canonical place for nested
+  // component instances. Other nested objects (media, dropdownItems,
+  // options[*].media, etc.) are parent-handled slots, not standalone
+  // atom instances; the parent's schema declares their shape and the
+  // parent's runtime supplies whatever defaults the inner atom needs.
+  // Recursing into them produces false "required prop missing" errors.
+  if (Array.isArray(node.children)) {
+    errors.push(...validatePage(node.children, schemaMap, `${path}.children`));
   }
 
   return errors;
