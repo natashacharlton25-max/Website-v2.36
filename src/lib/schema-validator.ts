@@ -223,26 +223,35 @@ function safeEval(condition: string, safeItem: Record<string, any>, schema: Comp
   }
 }
 
+/**
+ * Build the eval-context proxy for a rule's expressions.
+ * - `localScope` is the object whose props become local vars under `with`.
+ *   For `scope: "media"` rules this is `item.media`; otherwise it's `item`.
+ * - `root` is always the original item — exposed as `root.*` so rules
+ *   scoped to media can still reference the parent button/heading/etc.
+ * - Globals (Array, Object, Boolean, undefined…) fall through via `has`.
+ * - Missing props on localScope resolve to undefined (not ReferenceError).
+ */
+function makeRuleProxy(localScope: Record<string, any>, root: Record<string, any>): any {
+  return new Proxy(localScope, {
+    has(_target, prop) {
+      if (prop === 'root') return true;
+      if (typeof prop === 'string' && prop in globalThis) return false;
+      return true;
+    },
+    get(target, prop) {
+      if (prop === 'root') return root;
+      return (target as Record<string | symbol, any>)[prop as any];
+    },
+  });
+}
+
 function evaluateRules(
   item: Record<string, any>,
   schema: ComponentSchema,
   errors: ValidationError[]
 ): void {
   if (!schema._rules || schema._rules.length === 0) return;
-  // Proxy lets the condition reference any prop name as a local var via
-  // `with(item)`. The `has` trap returns false for globals (Array, Object,
-  // Boolean, undefined, etc.) so they fall through to outer scope normally,
-  // and true for everything else so missing props resolve to `undefined`
-  // (via the get trap) instead of throwing ReferenceError.
-  const safeItem = new Proxy(item, {
-    has(_target, prop) {
-      if (typeof prop === 'string' && prop in globalThis) return false;
-      return true;
-    },
-    get(target, prop) {
-      return (target as Record<string | symbol, any>)[prop as any];
-    },
-  });
 
   for (const rule of schema._rules) {
     // Severity: explicit wins; otherwise behaviour rules = info, else error.
@@ -251,6 +260,21 @@ function evaluateRules(
 
     // Rule without any condition or constraint is docs-only — skip.
     if (!rule.condition && !rule.when) continue;
+
+    // Resolve local eval scope per rule's `scope` field.
+    //   undefined / "root" → evaluate against item itself
+    //   "media"           → evaluate against item.media (with `root` pointing to item)
+    // Future scopes can extend this branch.
+    let localScope: Record<string, any>;
+    if (rule.scope === 'media') {
+      const media = (item as any).media;
+      // Rule is N/A when media isn't set — skip silently rather than misfire.
+      if (!media || typeof media !== 'object') continue;
+      localScope = media;
+    } else {
+      localScope = item;
+    }
+    const safeItem = makeRuleProxy(localScope, item);
 
     // Primary condition (or `when` precondition) must be true to fire.
     const conditionExpr = rule.condition ?? rule.when;
@@ -274,15 +298,12 @@ function evaluateRules(
         violation = `${rule.rule}: excludes ${rule.excludes} (present)${rule.note ? ` — ${rule.note}` : ''}`;
       }
     } else if (Array.isArray(rule.forbid) || Array.isArray(rule.forbids)) {
-      // `forbid`/`forbids` is a list of prop names that must not appear.
-      // Scope: 'root' = top-level item; 'media' = item.media; default 'root'.
+      // `forbid`/`forbids` is a list of prop names that must not appear
+      // in the local scope (already resolved per rule.scope above).
       const forbidden = (rule.forbid ?? rule.forbids)!;
-      const scopeObj = rule.scope === 'media' ? (item as any).media : item;
-      if (scopeObj && typeof scopeObj === 'object') {
-        const present = forbidden.filter((k) => k in scopeObj && (scopeObj as any)[k] !== undefined);
-        if (present.length > 0) {
-          violation = `${rule.rule}: forbidden ${rule.scope ?? 'root'} prop${present.length === 1 ? '' : 's'} ${present.join(', ')}${rule.note ? ` — ${rule.note}` : ''}`;
-        }
+      const present = forbidden.filter((k) => k in localScope && (localScope as any)[k] !== undefined);
+      if (present.length > 0) {
+        violation = `${rule.rule}: forbidden ${rule.scope ?? 'root'} prop${present.length === 1 ? '' : 's'} ${present.join(', ')}${rule.note ? ` — ${rule.note}` : ''}`;
       }
     } else if (rule.action) {
       // Plain action rule — condition true = violation, action describes fix.
