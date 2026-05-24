@@ -94,6 +94,73 @@ function flattenSchemaProps(schema: ComponentSchema): Set<string> {
 // concerns) and are never declared in schemas.
 const ASTRO_FRAMEWORK_PROPS = new Set(['class', 'style', 'slot', 'id']);
 
+/**
+ * Atom-side static checks. Verifies each audited atom's files exist
+ * and that its CSS/Astro contain no forbidden patterns (per CLAUDE.md
+ * canonical-atom rules). Complements the test-page data validation.
+ */
+async function checkAtomFiles(errors: string[]): Promise<void> {
+  const FORBIDDEN_CSS: { name: string; regex: RegExp }[] = [
+    { name: '@layer wrapper', regex: /@layer\b/ },
+    { name: '!important', regex: /!important/ },
+    { name: ':global() selector', regex: /:global\(/ },
+    { name: '.a11y-* class selector', regex: /\.a11y-[\w-]/ },
+    { name: '@media (prefers-reduced-motion)', regex: /@media\s*\([^)]*prefers-reduced-motion/ },
+  ];
+  const FORBIDDEN_ASTRO: { name: string; regex: RegExp }[] = [
+    { name: 'scoped <style> block (extract to .css)', regex: /<style(\s[^>]*)?>/ },
+    { name: ':global() selector', regex: /:global\(/ },
+  ];
+  const REQUIRED_FILES = (name: string) => [
+    `${name}.astro`,
+    `${name}.css`,
+    `${name}.responsive.css`,
+    `${name}.schema.json`,
+    'index.ts',
+  ];
+
+  for (const componentName of AUDITED_COMPONENTS) {
+    const dir = path.join(COMPONENTS_DIR, 'atoms', componentName);
+
+    // 1. File structure
+    for (const filename of REQUIRED_FILES(componentName)) {
+      try {
+        await readFile(path.join(dir, filename), 'utf-8');
+      } catch {
+        errors.push(`${componentName}: missing required file ${filename}`);
+      }
+    }
+
+    // 2. Forbidden CSS patterns (both main and responsive)
+    for (const cssFile of [`${componentName}.css`, `${componentName}.responsive.css`]) {
+      let content: string;
+      try {
+        content = await readFile(path.join(dir, cssFile), 'utf-8');
+      } catch {
+        continue; // already reported as missing
+      }
+      for (const p of FORBIDDEN_CSS) {
+        if (p.regex.test(content)) {
+          errors.push(`${componentName}/${cssFile}: forbidden ${p.name}`);
+        }
+      }
+    }
+
+    // 3. Forbidden Astro patterns
+    let astroContent: string;
+    try {
+      astroContent = await readFile(path.join(dir, `${componentName}.astro`), 'utf-8');
+    } catch {
+      continue;
+    }
+    for (const p of FORBIDDEN_ASTRO) {
+      if (p.regex.test(astroContent)) {
+        errors.push(`${componentName}.astro: forbidden ${p.name}`);
+      }
+    }
+  }
+}
+
 async function checkAstroVsSchema(
   schemas: Map<string, ComponentSchema>,
   errors: string[]
@@ -149,6 +216,16 @@ async function loadSchemas(): Promise<Map<string, ComponentSchema>> {
 async function main() {
   const schemas = await loadSchemas();
 
+  // Atom-side static checks — file structure + forbidden CSS/Astro
+  // patterns per CLAUDE.md canonical-atom rules. Catches structural
+  // bugs that data validation can't see.
+  const atomFileErrors: string[] = [];
+  await checkAtomFiles(atomFileErrors);
+  if (atomFileErrors.length > 0) {
+    console.error('\n[validate-data] Atom file/pattern errors:');
+    for (const err of atomFileErrors) console.error(`  ✗ ${err}`);
+  }
+
   // Astro-vs-schema drift check — every prop declared in the .astro
   // Props interface must also appear in the schema. Catches the reverse
   // direction of drift (schema falls behind .astro additions).
@@ -201,14 +278,17 @@ async function main() {
     }
   }
 
-  const totalProblems = totalErrors + astroDriftErrors.length;
+  const totalProblems = totalErrors + astroDriftErrors.length + atomFileErrors.length;
   if (totalProblems === 0) {
     console.log(`\n[validate-data] ✓ ${dataFiles.length} files valid, ${AUDITED_COMPONENTS.size} atoms in sync with schemas`);
     process.exit(0);
   } else {
-    const dataBit = totalErrors > 0 ? `${totalErrors} data error${totalErrors === 1 ? '' : 's'} across ${filesWithErrors} file${filesWithErrors === 1 ? '' : 's'}` : '';
-    const driftBit = astroDriftErrors.length > 0 ? `${astroDriftErrors.length} astro/schema drift${astroDriftErrors.length === 1 ? '' : 's'}` : '';
-    console.error(`\n[validate-data] ✗ ${[dataBit, driftBit].filter(Boolean).join(' + ')}`);
+    const bits = [
+      totalErrors > 0 && `${totalErrors} data error${totalErrors === 1 ? '' : 's'} across ${filesWithErrors} file${filesWithErrors === 1 ? '' : 's'}`,
+      astroDriftErrors.length > 0 && `${astroDriftErrors.length} astro/schema drift${astroDriftErrors.length === 1 ? '' : 's'}`,
+      atomFileErrors.length > 0 && `${atomFileErrors.length} atom file/pattern issue${atomFileErrors.length === 1 ? '' : 's'}`,
+    ].filter(Boolean);
+    console.error(`\n[validate-data] ✗ ${bits.join(' + ')}`);
     process.exit(1);
   }
 }
