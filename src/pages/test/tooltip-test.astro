@@ -11,20 +11,26 @@ import testData from '../../data/test/tooltip.json';
 <BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
   <Section container={testData.page.container} gap={testData.layout.sectionGap}>
 
-    <Heading level={testData.title.level as any} align={testData.title.align as any} flush={testData.title.flush}>{testData.title.text}</Heading>
+    <Heading
+      level={testData.title.level as any}
+      align={testData.title.align as any}
+      flush={testData.title.flush}
+      contentHeading={testData.title.contentHeading}
+    />
 
     {testData.sections.map((section: any) => (
-      <Section label={section.label} separator gap={testData.layout.itemGap}>
+      <Section separator gap={testData.layout.itemGap}>
+        <Heading level={3} contentHeading={section.contentHeading} />
         <div style="display:flex;flex-wrap:wrap;gap:var(--space-xl);align-items:center;padding:var(--space-2xl) 0;">
           {section.items.map((item: any) => (
             <div class="render-full">
               <Tooltip
-                text={item.text}
+                contentTooltip={item.contentTooltip}
                 aac={item.aac !== false}
                 purpose={item.purpose || "label"}
                 position={item.position || "top"}
               >
-                <Badge label={item.triggerLabel} variant="fill" />
+                <Badge contentBadge={item.contentBadge} variant="fill" />
               </Tooltip>
             </div>
           ))}
@@ -32,12 +38,12 @@ import testData from '../../data/test/tooltip.json';
         <div class="render-textonly">
           {section.items.map((item: any) => (
             <Tooltip
-              text={item.text}
+              contentTooltip={item.contentTooltip}
               aac={item.aac !== false}
               purpose={item.purpose || "label"}
               position={item.position || "top"}
             >
-              <span>{item.triggerLabel}</span>
+              <span>{item.contentBadge}</span>
             </Tooltip>
           ))}
         </div>

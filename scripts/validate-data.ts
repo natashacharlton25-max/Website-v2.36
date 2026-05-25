@@ -22,11 +22,13 @@ import { validatePage, type ComponentSchema } from '../src/lib/schema-validator.
 const AUDITED_COMPONENTS = new Set([
   'Badge',
   'Button',
+  'FigCaption',
   'FormField',
   'Heading',
   'Link',
   'List',
   'Text',
+  'Tooltip',
 ]);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -121,6 +123,15 @@ async function checkAtomFiles(errors: string[]): Promise<void> {
 
   for (const componentName of AUDITED_COMPONENTS) {
     const dir = path.join(COMPONENTS_DIR, 'atoms', componentName);
+
+    // Skip atoms with no .astro — they're CSS+JS-only infrastructure
+    // (e.g. FigCaption is styled+scripted but rendered via Image), so the
+    // canonical 5-file structure doesn't apply.
+    try {
+      await readFile(path.join(dir, `${componentName}.astro`), 'utf-8');
+    } catch {
+      continue;
+    }
 
     // 1. File structure
     for (const filename of REQUIRED_FILES(componentName)) {

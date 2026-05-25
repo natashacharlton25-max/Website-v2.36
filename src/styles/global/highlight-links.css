@@ -326,6 +326,26 @@
   outline-offset: var(--btn-highlight-outline-offset, 3px);
 }
 
+/* FigCaption + image alt-text highlight-links overrides — extracted from
+   FigCaption.css per Rule 12 (atom CSS owns no zone/mode overrides).
+   - Bar border picks up the highlight ring colour so the figcaption popup
+     matches the figure outline visually.
+   - Viewed-state figure outline collapses to neutral after the user has
+     seen the alt text (matches the dot indicator that also goes neutral).
+   - In highlight-links, the ? alt-text dot is redundant with the figure
+     outline ring, so hide it. */
+[data-highlight-links] {
+  --bar-border-color: var(--secondary-base);
+}
+
+[data-highlight-links] .image.alt-viewed {
+  outline-color: var(--neutral-mid);
+}
+
+[data-highlight-links] .image[data-role="content"]::after {
+  display: none;
+}
+
 /* LottieIcon — keeps animating in highlight mode, no swap needed */
 
 /* ── Link cards and block links — outline ring ── */

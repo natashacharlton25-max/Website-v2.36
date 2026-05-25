@@ -14,11 +14,11 @@
  * Styles: Tooltip.css | Tooltip.responsive.css
  *
  * Usage:
- *   <Tooltip text="Search" purpose="label">
+ *   <Tooltip contentTooltip="Search" purpose="label">
  *     <Button aria-label="Search"><Icon name="magnifying-glass" /></Button>
  *   </Tooltip>
  *
- *   <Tooltip text="We'll email your links" purpose="info" id="email-tip">
+ *   <Tooltip contentTooltip="We'll email your links" purpose="info" id="email-tip">
  *     <FormField label="Email" type="email" aria-describedby="email-tip" />
  *   </Tooltip>
  *
@@ -35,7 +35,7 @@ import { Text } from '../Text';
 import { aacInline } from '../../../lib/aac/aac-inline';
 
 interface Props {
-  text?: string;
+  contentTooltip?: string;
   aac?: boolean;
   purpose: 'label' | 'info';
   id?: string;
@@ -45,7 +45,7 @@ interface Props {
 }
 
 const {
-  text,
+  contentTooltip,
   aac = true,
   purpose,
   id = `tooltip-${Math.random().toString(36).slice(2, 8)}`,
@@ -56,11 +56,11 @@ const {
 
 const isLabel = purpose === 'label';
 
-// Build AAC HTML at build time if aac prop is true and text exists
+// Build AAC HTML at build time if aac prop is true and contentTooltip exists
 let aacHtml = '';
-if (aac && text) {
+if (aac && contentTooltip) {
   const apiBase = import.meta.env.PUBLIC_ASSET_API_URL || 'https://asset-library.natashacharlton25.workers.dev';
-  aacHtml = await aacInline(text, apiBase) || '';
+  aacHtml = await aacInline(contentTooltip, apiBase) || '';
 }
 
 const wrapperClasses = [
@@ -82,10 +82,10 @@ const wrapperClasses = [
     role="tooltip"
     {...(isLabel && { 'aria-hidden': 'true' })}
   >
-    {text ? (
+    {contentTooltip ? (
       <>
         <Text as="span" class="tooltip__text" textTone={textTone} flush>
-          {text}
+          {contentTooltip}
         </Text>
         {aacHtml && (
           <span class="tooltip__aac content-aac" aria-hidden="true">

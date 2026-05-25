@@ -1,0 +1,31 @@
+/* ===================================
+   BAR TOKENS
+   Shared visual treatment for tooltip-style floating bars —
+   used by Tooltip atom, FigCaption atom, AnimExplainer subtitle,
+   and the bottom-of-page fallback strip (src/lib/bar/shared-bar.ts).
+   "Bar" describes the visual look (bg + text + border + shadow),
+   not the position — whether rendered as a popover near a trigger
+   (Tooltip), a caption above a figure (FigCaption), or a fixed
+   bottom strip (shared-bar fallback), the styling is the same.
+   =================================== */
+
+:root {
+  /* Surface — both surface defaults map to semantic page surface tokens
+     (--page-bg-raised, --text-emphasis) so themes can repaint the
+     --neutral-* family freely without breaking bar readability. */
+  --bar-bg:     var(--page-bg-raised);
+  --bar-text:   var(--text-emphasis);
+  --bar-border: var(--primary-base);
+  --bar-shadow: var(--shadow-lg);
+
+  /* Accent — brand-coloured detail for neon / brutalist treatments. */
+  --bar-accent: var(--primary-base);
+
+  /* Readability cap — long text in a narrow floating bar.
+     Atoms apply via min(90vw, var(--bar-max-width)) so the cap
+     doesn't fight small viewports. */
+  --bar-max-width: 25rem;
+
+  /* Border colour alias — shared-bar.ts inline styles read this name. */
+  --bar-border-color: var(--bar-border);
+}

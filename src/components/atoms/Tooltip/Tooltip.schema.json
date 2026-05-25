@@ -1,27 +1,22 @@
 {
   "component": "Tooltip",
   "category": "atom",
-  "renders": {
-    "full": "Tooltip.astro",
-    "reduced": "Tooltip.astro",
-    "assistive": "Tooltip.astro",
-    "textonly": "Tooltip.astro"
-  },
-  "notes": "Passive contextual display. Label purpose = visual aid, aria-hidden, not rendered in assistive/textonly. Info purpose = real content, announced, always-visible bar in assistive, inlined in textonly. Uses Text atom for simple content, slot for rich content. Consumer owns aria-describedby on their focusable element — Tooltip provides id on content.",
+  "renders": { "full": "Tooltip.astro", "reduced": "Tooltip.astro", "textonly": "Tooltip.astro" },
+  "notes": "Passive contextual display. Label purpose = visual aid, aria-hidden, not rendered in textonly. Info purpose = real content, announced. Assistive render handled via [data-render='assistive'] in assistive-gate.css (info-purpose becomes always-visible bar, label-purpose hidden). Visual treatment shared with FigCaption + shared-bar via the --bar-* token family. Consumer owns aria-describedby on their focusable element — Tooltip provides id on content.",
 
   "props": {
     "content": {
-      "_description": "What the tooltip says",
-      "text":    { "type": "string",  "required": false, "description": "Simple text content. Renders through Text atom. Mutually exclusive with rich slot content." },
-      "aac":     { "type": "boolean", "required": false, "default": true, "description": "Build AAC inline HTML from text at build time. True by default." },
-      "purpose": { "type": "string",  "required": true,  "enum": ["label", "info"], "description": "Label = visual duplicate of trigger's aria-label (hidden from SR). Info = new information (announced via aria-describedby)." },
-      "id":      { "type": "string",  "required": false, "description": "Unique ID for aria-describedby linking. Auto-generated if not provided." }
+      "contentTooltip": { "type": "string", "_note": "Primary tooltip text. Renders through Text atom. Mutually exclusive with rich slot content." },
+      "aac":            { "type": "boolean", "default": true, "_note": "Build AAC inline HTML from contentTooltip at build time. True by default." },
+      "purpose":        { "type": "string", "required": true, "enum": ["label", "info"], "_note": "Label = visual duplicate of trigger's aria-label (hidden from SR). Info = new information (announced via aria-describedby)." },
+      "id":             { "type": "string", "_note": "Unique ID for aria-describedby linking. Auto-generated as `tooltip-<random6chars>` if not provided." }
     },
 
+    "colour": {},
+
     "visual": {
-      "_description": "How the tooltip looks",
-      "position": { "type": "string", "required": false, "default": "top", "enum": ["top", "bottom", "left", "right"], "description": "Tooltip position relative to trigger." },
-      "textTone": { "type": "string", "required": false, "enum": ["light", "dark"], "description": "Text tone override. Passed to Text atom." }
+      "position": { "type": "string", "default": "top", "enum": ["top", "bottom", "left", "right"] },
+      "textTone": { "type": "string", "enum": ["light", "dark"], "_note": "Text tone override; passed to Text atom." }
     },
 
     "animation": {}

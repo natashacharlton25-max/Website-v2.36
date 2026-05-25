@@ -34,9 +34,9 @@ export function getSharedBar(): HTMLElement {
     z-index: var(--z-tooltip, 9000);
     text-align: center; white-space: normal;
     padding: var(--space-lg, 16px) var(--space-2xl, 32px);
-    background: var(--page-bg-raised, #f5f5f5);
-    color: var(--neutral-800, #333);
-    border-top: 4px solid var(--bar-border-color, var(--primary-600, #666));
+    background: var(--bar-bg, #f5f5f5);
+    color: var(--bar-text, #333);
+    border-top: 4px solid var(--bar-border-color, #666);
     font-weight: 500;
     opacity: 0; visibility: hidden;
     transition: opacity var(--hover-duration, 0.2s) ease, visibility var(--hover-duration, 0.2s) ease;
@@ -69,9 +69,9 @@ export function showBar(html: string, options: ShowBarOptions = {}): void {
   if (permanent) {
     bar.innerHTML = `<span>${html}</span><button class="tooltip-bar__close" aria-label="Close" style="
       position: absolute; right: var(--space-lg, 16px); top: 50%; transform: translateY(-50%);
-      background: var(--page-bg, #fff); border: 2px solid var(--bar-border-color, var(--primary-600, #666));
+      background: var(--page-bg, #fff); border: 2px solid var(--bar-border-color, #666);
       cursor: pointer; font-size: 1em; font-weight: bold;
-      color: var(--neutral-800, #333); padding: var(--space-xs, 4px) var(--space-sm, 8px);
+      color: var(--bar-text, #333); padding: var(--space-xs, 4px) var(--space-sm, 8px);
       border-radius: var(--radius-sm, 4px); line-height: 1;
     ">&times;</button>`;
     bar.style.position = 'fixed';

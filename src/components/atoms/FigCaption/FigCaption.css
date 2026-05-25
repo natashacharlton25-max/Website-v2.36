@@ -23,24 +23,24 @@
 
 /* ── Base — hidden until tooltip mode active ── */
 .figcaption {
-  --_fc-bg: var(--tooltip-bg, var(--page-bg-raised));
-  --_fc-text: var(--tooltip-text, var(--neutral-emphasis));
-  --_fc-border: var(--tooltip-border, var(--primary-base));
-  --_fc-shadow: var(--tooltip-shadow, var(--shadow-lg));
+  --_bar-bg: var(--bar-bg);
+  --_bar-text: var(--bar-text);
+  --_bar-border: var(--bar-border);
+  --_bar-shadow: var(--bar-shadow);
 
   position: absolute;
   bottom: calc(100% + var(--space-xs));
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-tooltip);
-  max-width: min(90vw, 400px);
+  max-width: min(90vw, var(--bar-max-width));
   width: max-content;
   padding: var(--space-md) var(--space-lg);
-  background: var(--_fc-bg);
-  color: var(--_fc-text);
-  border: var(--border-width-2) solid var(--_fc-border);
+  background: var(--_bar-bg);
+  color: var(--_bar-text);
+  border: var(--border-width-2) solid var(--_bar-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--_fc-shadow);
+  box-shadow: var(--_bar-shadow);
   font-family: var(--font-body);
   font-weight: var(--font-medium);
   line-height: var(--leading-relaxed);
@@ -49,8 +49,8 @@
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: opacity var(--hover-duration, var(--duration-fast)) var(--ease-default),
-              visibility var(--hover-duration, var(--duration-fast)) var(--ease-default);
+  transition: opacity var(--hover-duration) var(--ease-default),
+              visibility var(--hover-duration) var(--ease-default);
 }
 
 /* Force text colour */
@@ -111,11 +111,6 @@
   mask: none;
 }
 
-/* Highlight-links — bar border matches highlight ring colour */
-[data-highlight-links] {
-  --bar-border-color: var(--secondary-base);
-}
-
 /* ── Viewed state — neutral after alt text has been seen ── */
 [data-alt-display-mode] .image.alt-viewed[data-role="content"]::after {
   background: var(--neutral-mid);
@@ -125,7 +120,7 @@
 
 /* Figcaption popup — neutral border after viewed */
 .image.alt-viewed > .figcaption {
-  --_fc-border: var(--neutral-mid);
+  --_bar-border: var(--neutral-mid);
 }
 
 /* Inline mode: viewed card border goes neutral */
@@ -133,15 +128,7 @@
   border-color: var(--neutral-mid);
 }
 
-/* Highlight-links: viewed figure outline goes neutral */
-[data-highlight-links] .image.alt-viewed {
-  outline-color: var(--neutral-mid);
-}
-
-/* Highlight-links — hide indicator, border on figure instead */
-[data-highlight-links] .image[data-role="content"]::after {
-  display: none;
-}
+/* Highlight-links overrides for figcaption / figure → src/styles/global/highlight-links.css */
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -158,7 +145,7 @@
    ══════════════════════════════════════════════════════════════ */
 
 .figcaption .aac-card {
-  font-size: var(--text-sm);
+  font-size: var(--text-small);
 }
 
 .figcaption__aac {

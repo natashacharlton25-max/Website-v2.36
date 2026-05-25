@@ -1,17 +1,17 @@
 /* ══════════════════════════════════════════════════════════════
    Tooltip — passive contextual display
 
-   Pipeline tokens (set by JSON or theme):
-     --tooltip-bg, --tooltip-text, --tooltip-border,
-     --tooltip-shadow, --tooltip-accent
+   Visual treatment shared with FigCaption + shared-bar fallback —
+   all read from the global --bar-* token family (src/styles/tokens/bars.css).
+   Theme overrides apply to bars uniformly across all three consumers.
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Base ── */
 .tooltip {
-  --_tooltip-bg: var(--tooltip-bg, var(--page-bg-raised));
-  --_tooltip-text: var(--tooltip-text, var(--neutral-emphasis));
-  --_tooltip-border: var(--tooltip-border, var(--primary-base));
-  --_tooltip-shadow: var(--tooltip-shadow, var(--shadow-lg));
+  --_bar-bg: var(--bar-bg);
+  --_bar-text: var(--bar-text);
+  --_bar-border: var(--bar-border);
+  --_bar-shadow: var(--bar-shadow);
 
   position: relative;
   display: inline-flex;
@@ -29,14 +29,14 @@
   z-index: var(--z-tooltip);
   left: var(--_tooltip-x, 0);
   top: var(--_tooltip-y, 0);
-  max-width: min(90vw, 400px);
+  max-width: min(90vw, var(--bar-max-width));
   width: max-content;
   padding: var(--space-md) var(--space-lg);
-  background: var(--_tooltip-bg);
-  color: var(--_tooltip-text);
-  border: 2px solid var(--_tooltip-border);
+  background: var(--_bar-bg);
+  color: var(--_bar-text);
+  border: var(--border-width-2) solid var(--_bar-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--_tooltip-shadow);
+  box-shadow: var(--_bar-shadow);
   font-weight: var(--font-medium);
   line-height: var(--leading-relaxed);
   text-align: center;
@@ -55,7 +55,7 @@
 }
 
 .tooltip__content .aac-card {
-  font-size: var(--text-sm);
+  font-size: var(--text-small);
 }
 
 /* Inline AAC cards (hover none) — grouped with primary border */
@@ -64,7 +64,7 @@
   flex-wrap: wrap;
   gap: var(--space-xs);
   padding: var(--space-xs) var(--space-sm);
-  border: 2px solid var(--_tooltip-border);
+  border: var(--border-width-2) solid var(--_bar-border);
   border-radius: var(--radius-md);
   vertical-align: middle;
   margin: 0 var(--space-xs);
@@ -150,32 +150,7 @@ dialog .tooltip--right .tooltip__content { left: 100%; top: 50%; }
 
 /* Reduced — hover-gate handles transition suppression globally */
 
-/* Assistive — info always visible as bar, label hidden */
-[data-render="assistive"] .tooltip--info .tooltip__content {
-  position: static;
-  max-width: 100%;
-  border-radius: 0;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  box-shadow: none;
-  transform: none;
-  white-space: normal;
-  text-align: left;
-  padding: var(--space-sm) var(--space-md);
-}
-
-[data-render="assistive"] .tooltip--label .tooltip__content {
-  display: none;
-}
-
-[data-render="assistive"] .tooltip__trigger {
-  min-width: 64px;
-  min-height: 64px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
+/* Assistive render rules → src/styles/gates/assistive-gate.css */
 
 /* Focus → global focus-gate.css */
 

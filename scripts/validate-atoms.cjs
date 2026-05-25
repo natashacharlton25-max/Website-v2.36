@@ -845,6 +845,16 @@ for (const atom of atoms) {
             const def = schemaProps.get(propName);
             if (!def || typeof def !== 'object') continue;
             if ('default' in def) continue; // forward direction handles this
+            // Dynamic defaults — template literals with ${...} interpolation,
+            // or expressions calling Math.random / crypto.randomUUID / Date.now
+            // — can't be expressed as a literal "default" in schema. Skip Rule 43
+            // for these; the schema's _note should document the runtime behaviour
+            // instead. (e.g. Tooltip's id auto-gen `tooltip-${Math.random()...}`)
+            const isDynamic = (
+              (astroDefault.startsWith('`') && astroDefault.includes('${')) ||
+              /\bMath\.random\b|\bcrypto\.randomUUID\b|\bDate\.now\b|\bcrypto\.getRandomValues\b/.test(astroDefault)
+            );
+            if (isDynamic) continue;
             // .astro has a default, schema doesn't claim one — overclaim/underclaim
             issues.push({ rule: 43, ln: '--', file: schemaFile, msg: `${propName}: .astro defaults to ${astroDefault} but schema declares no "default"` });
           }
