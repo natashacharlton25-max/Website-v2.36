@@ -1,54 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Tooltip } from '../../components/atoms/Tooltip';
-import { Badge } from '../../components/atoms/Badge';
-import { Heading } from '../../components/atoms/Heading';
-import { Section } from '../../components/atoms/Section';
-
-import testData from '../../data/test/tooltip.json';
+import Renderer from '../../components/Renderer.astro';
+import data from '../../data/test/tooltip.json';
 ---
 
-<BaseLayout title={testData.page.title} hideFooter={testData.page.hideFooter}>
-  <Section container={testData.page.container} gap={testData.layout.sectionGap}>
-
-    <Heading
-      level={testData.title.level as any}
-      align={testData.title.align as any}
-      flush={testData.title.flush}
-      contentHeading={testData.title.contentHeading}
-    />
-
-    {testData.sections.map((section: any) => (
-      <Section separator gap={testData.layout.itemGap}>
-        <Heading level={3} contentHeading={section.contentHeading} />
-        <div style="display:flex;flex-wrap:wrap;gap:var(--space-xl);align-items:center;padding:var(--space-2xl) 0;">
-          {section.items.map((item: any) => (
-            <div class="render-full">
-              <Tooltip
-                contentTooltip={item.contentTooltip}
-                aac={item.aac !== false}
-                purpose={item.purpose || "label"}
-                position={item.position || "top"}
-              >
-                <Badge contentBadge={item.contentBadge} variant="fill" />
-              </Tooltip>
-            </div>
-          ))}
-        </div>
-        <div class="render-textonly">
-          {section.items.map((item: any) => (
-            <Tooltip
-              contentTooltip={item.contentTooltip}
-              aac={item.aac !== false}
-              purpose={item.purpose || "label"}
-              position={item.position || "top"}
-            >
-              <span>{item.contentBadge}</span>
-            </Tooltip>
-          ))}
-        </div>
-      </Section>
-    ))}
-
-  </Section>
+<BaseLayout title="Tooltip Atom Test" hideFooter>
+  <Renderer node={data} />
 </BaseLayout>
