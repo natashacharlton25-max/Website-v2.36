@@ -129,7 +129,7 @@
 
 /* Focus + hover — same auto-flip text token. Keeps contrast across
    the highlight-link-color fill that gets applied below. */
-html:not([data-focus-rainbow]) body:not([data-hover="none"]) [data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card):not(.a11y-save-slot__name):not(.form-field):hover {
+html:not([data-focus-rainbow]):not([data-hover="none"]) body [data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card):not(.a11y-save-slot__name):not(.form-field):hover {
   color: var(--color-Black) !important;
 }
 
@@ -272,12 +272,12 @@ html:not([data-focus-rainbow]) select[data-focus-active]::after {
    user gets a visible "this is the focused element you're hovering"
    signal across both axes simultaneously. Only when hover is
    full/instant/gentle (data-hover="none" suppresses hover signals). */
-html:not([data-focus-rainbow]) body:not([data-hover="none"]) [data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card):not(.a11y-save-slot__name):not(.form-field):hover {
+html:not([data-focus-rainbow]):not([data-hover="none"]) body [data-focus-active]:not(.a11y-theme-card):not(.a11y-preset-btn):not(.a11y-toggle-card):not(.a11y-save-slot__name):not(.form-field):hover {
   background: color-mix(in oklch, var(--highlight-link-color) 10%, transparent) !important;
 }
 
 /* Ring also shifts to highlight-link-color on focus + hover */
-html:not([data-focus-rainbow]) body:not([data-hover="none"]) [data-focus-active]:not(.form-field):hover::after {
+html:not([data-focus-rainbow]):not([data-hover="none"]) body [data-focus-active]:not(.form-field):hover::after {
   box-shadow:
     0 0 0 var(--focus-thickness) var(--focus-bg),
     0 0 0 calc(var(--focus-thickness) * 2) var(--highlight-link-color) !important;
@@ -285,22 +285,34 @@ html:not([data-focus-rainbow]) body:not([data-hover="none"]) [data-focus-active]
 }
 
 /* Form fields: fill + token override to highlight-link-color on hover */
-html:not([data-focus-rainbow]) body:not([data-hover="none"]) .form-field[data-focus-active]:hover {
+html:not([data-focus-rainbow]):not([data-hover="none"]) body .form-field[data-focus-active]:hover {
   background: color-mix(in oklch, var(--highlight-link-color) 5%, transparent) !important;
   --_field-brand: var(--highlight-link-color);
   --_field-border: var(--highlight-link-color);
 }
 
-html:not([data-focus-rainbow]) body:not([data-hover="none"]) .form-field[data-focus-active]:hover .form-field__input {
-  border-color: var(--color-Success) !important;
+html:not([data-focus-rainbow]):not([data-hover="none"]) body .form-field[data-focus-active]:hover .form-field__input {
+  border-color: var(--neutral-mid) !important;
   background: var(--_field-bg) !important;
 }
 
-html:not([data-focus-rainbow]) body:not([data-hover="none"]) [data-focus-active]:hover::after {
+html:not([data-focus-rainbow]):not([data-hover="none"]) body [data-focus-active]:hover::after {
   background: transparent !important;
   box-shadow:
     0 0 0 var(--focus-thickness) var(--focus-bg),
     0 0 0 calc(var(--focus-thickness) * 2) var(--color-Success);
+}
+
+/* Form fields — focus + hover ring is NEUTRAL, not success green. The focus
+   ring at rest already signals focus (--focus-color); hovering a focused
+   field shouldn't add a status colour. Scoped to .form-field so buttons /
+   links keep their green focus-hover cue. Higher specificity than the
+   generic ::after rule above (adds .form-field), so it wins. */
+html:not([data-focus-rainbow]):not([data-hover="none"]) body .form-field[data-focus-active]:hover::after {
+  background: transparent !important;
+  box-shadow:
+    0 0 0 var(--focus-thickness) var(--focus-bg),
+    0 0 0 calc(var(--focus-thickness) * 2) var(--neutral-mid) !important;
 }
 
 /* Focus hover transitions gated by hover-gate.css */

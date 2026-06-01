@@ -133,6 +133,16 @@
 /* ==========================================================
    INPUT / TEXTAREA / SELECT — SHARED (outlined = default)
    ========================================================== */
+
+/* Standard-input wrapper — layout-transparent (full-width block) so the
+   input behaves exactly as a bare input did. position: relative anchors the
+   narrow-width placeholder "…" ::after marker (see responsive.css). */
+.form-field__input-wrap {
+  display: block;
+  position: relative;
+  width: 100%;
+}
+
 .form-field__input {
   padding: var(--space-sm) var(--space-md);
   /* Rest border = author's chosen colour at chosen tier (--_color from the
@@ -373,6 +383,10 @@ body .form-field.color--tier-emphasis .form-field__card-face:hover {
   gap: var(--space-sm);
   cursor: pointer;
   user-select: none;
+  /* WCAG 2.5.8 — explicit 24px target floor. The clickable target is the
+     whole label row; without this it relies on text line-height incidentally
+     clearing 24px, which can regress if type sizing changes. */
+  min-height: var(--target-min);
 }
 
 .form-field__checkbox {
@@ -437,6 +451,8 @@ body .form-field.color--tier-emphasis .form-field__card-face:hover {
   gap: var(--space-sm);
   cursor: pointer;
   user-select: none;
+  /* WCAG 2.5.8 — explicit 24px target floor (see checkbox-wrap). */
+  min-height: var(--target-min);
 }
 
 .form-field__radio {
@@ -497,6 +513,8 @@ body .form-field.color--tier-emphasis .form-field__card-face:hover {
   gap: var(--space-sm);
   cursor: pointer;
   user-select: none;
+  /* WCAG 2.5.8 — explicit 24px target floor (see checkbox-wrap). */
+  min-height: var(--target-min);
 }
 
 .form-field__toggle {

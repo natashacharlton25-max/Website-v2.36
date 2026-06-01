@@ -448,24 +448,21 @@
   box-shadow: none;
 }
 
-/* Dropdown — keep the popup behaviour but render it visually attached
-   to the trigger: menu has no top border, sharp top corners, rounded
-   bottom only; the trigger flattens its bottom corners when the menu
-   is open so the two share a clean seam. The base attached-corners
-   rule in Button.css uses .btn--dropdown (stripped in textonly), so
-   re-target the surviving .dropdown-btn class here. */
+/* Dropdown — trigger + menu both render as flat neutral squares matching
+   the form-field input treatment. Menu is a complete bordered box (full
+   border, sharp corners) rather than the "attached to trigger" pattern
+   used in other render modes. */
 [data-render="textonly"] .dropdown-menu {
   background: var(--page-bg);
   border: var(--border-width) solid var(--neutral-mid);
-  border-top: none;
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  border-radius: 0;
   box-shadow: none;
 }
 
 /* Dark-mode override: theme-luminance-dark.css paints the menu border in
    the brand colour + adds a glow box-shadow at specificity (0,3,0). Match
    that specificity with the .dropdown-theme--{x} chain so the textonly
-   neutral border wins on cascade order (textonly.css loads after dark). */
+   neutral border wins on cascade order. */
 [data-render="textonly"] .dropdown-menu.dropdown-theme--primary,
 [data-render="textonly"] .dropdown-menu.dropdown-theme--secondary,
 [data-render="textonly"] .dropdown-menu.dropdown-theme--neutral {
@@ -485,11 +482,40 @@
   margin: 0;
 }
 
-[data-render="textonly"] .dropdown-wrapper:hover .dropdown-btn,
-[data-render="textonly"] .dropdown-wrapper.open .dropdown-btn,
-[data-render="textonly"] .dropdown-wrapper:focus-within .dropdown-btn {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+/* ── Form-field select dropdown only — squared trigger + full-width
+   menu + neutral hover. Standalone Button dropdowns keep their default
+   rounded + highlight-link-color hover. Scoped to .form-field__select-wrap
+   so the standalone Button atom dropdown is untouched. */
+[data-render="textonly"] .form-field__select-wrap .dropdown-btn {
+  border-radius: 0;
+  width: 100%;
+  justify-content: space-between;
+}
+
+[data-render="textonly"] .form-field__select-wrap .dropdown-btn:hover {
+  border-color: var(--neutral-mid);
+  box-shadow: none;
+}
+
+[data-render="textonly"] .form-field__select-wrap .dropdown-menu {
+  width: 100%;
+}
+
+/* Last item radius reset — Button.css gives the last dropdown item a
+   rounded bottom (--radius-md) to match the rounded menu. The form-field
+   menu is squared, so the rounded item highlight looks wrong on hover.
+   Square it. */
+[data-render="textonly"] .form-field__select-wrap .dropdown-item:last-child {
+  border-radius: 0;
+}
+
+/* Hover stays neutral — the generic textonly .dropdown-item:hover rule
+   paints highlight-link-color, right for standalone Button dropdowns
+   (they're link-like) but wrong inside a form-field select (it's a
+   form control). Scope to form-field and use neutral. */
+[data-render="textonly"] .form-field__select-wrap .dropdown-item:hover {
+  color: var(--neutral-emphasis);
+  box-shadow: inset 0 0 0 var(--border-width) var(--neutral-emphasis);
 }
 
 [data-render="textonly"] .dropdown-item {
@@ -502,13 +528,6 @@
   border: none;
   border-radius: 0;
   padding: var(--space-sm) var(--space-md);
-}
-
-/* Match the menu's bottom-corner radius (Button.css gives the last item
-   --radius-md by default, which leaves the hover shadow more rounded than
-   the menu's outer --radius-sm border). */
-[data-render="textonly"] .dropdown-item:last-child {
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
 }
 
 /* Override the per-theme dropdown-hover rules from Button.css explicitly —
@@ -530,35 +549,97 @@
    FORM FIELDS — simple bordered inputs
    ========================================================== */
 
-[data-render="textonly"] .form-field__input {
+/* Textonly: literally apply the .color--neutral mixin at .form-field root.
+   Every FormField default rule reads these tokens (rest, hover, focus,
+   checked, indicators) and now resolves to neutral regardless of which
+   .color--{name} or .color--tier-{tier} class the author set.
+   Setting --_color explicitly here also beats the .color--tier-emphasis
+   override at (0,1,0) — author's tier choice can't pull --_color back to
+   --_tier-emphasis. Field-brand tokens bridge to --_color for the inner
+   indicators (checkmark/radio/toggle :checked fill). */
+[data-render="textonly"] .form-field {
+  --_tier-tint: var(--neutral-tint);
+  --_tier-mid: var(--neutral-mid);
+  --_tier-base: var(--neutral-base);
+  --_color: var(--_tier-base);
+  --_tier-emphasis: var(--neutral-emphasis);
+  --_contrast: var(--neutral-emphasis);
+  color: var(--_color);
+
+  --_field-brand: var(--_color);
+  --_field-brand-dark: var(--_tier-emphasis);
+  --_field-brand-light: var(--_tier-tint);
+}
+
+/* Force the outlined default visual on the input — strips variant chrome
+   (glass blur, neumorphic shadow + border:none, inset shadow, filled bg)
+   so every variant renders as the default outlined box. Colours come from
+   the neutral tokens above.
+
+   --_field-rest-* override here (not on .form-field wrapper) because
+   variants set these tokens ON .form-field__input itself
+   (`.form-field--glass .form-field__input { --_field-rest-bg: glass-bg }`),
+   so cascade resolves at element level and a wrapper-level override loses.
+   Setting them here matches hover-gate.css's [data-hover="none"] reset rule
+   (L57) so hover-none on filled/glass/inset/neumorphic all hold textonly
+   rest values instead of jumping to the variant's tinted/glass/recessed bg. */
+[data-render="textonly"] .form-field .form-field__input {
+  --_field-rest-bg: transparent;
+  --_field-rest-border: var(--_color);
+
   background: transparent;
-  border: var(--border-width) solid var(--neutral-mid);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: var(--border-width) solid var(--_color);
   border-radius: 0;
   box-shadow: none;
   font-family: var(--font-body);
   color: var(--text-emphasis);
 }
 
-[data-render="textonly"] .form-field__input:focus {
-  border-color: var(--secondary-base);
-  outline: none;
+/* Kill focus-state variant shadows + pin the focus border to the default
+   --text-emphasis. Neumorphic's :focus rule sets `border-color: transparent`
+   which would tie my base rule and win on load order (FormField loads after
+   textonly), leaving the input borderless on focus (page-bg shows through
+   as a "white" border). (0,4,0) beats every variant :focus rule at (0,3,0)
+   and matches the default `.form-field__input:focus` behaviour. */
+[data-render="textonly"] .form-field .form-field__input:focus {
+  border-color: var(--text-emphasis);
+  box-shadow: none;
+}
+
+/* Neumorphic explicit guard — zone rules in theme-luminance-dark.css and
+   high-contrast.css declare neumorphic borders at (0,3,0), which ties with
+   the generic textonly rule above and can win on load order. `html` prefix
+   bumps this to (0,3,1) so the textonly border holds across every zone.
+   Using border longhand declarations so a half-overridden shorthand
+   elsewhere can't strip border-style or border-width. */
+html[data-render="textonly"] .form-field--neumorphic .form-field__input {
+  border-width: var(--border-width);
+  border-style: solid;
+  border-color: var(--_color);
+}
+
+/* Tier-emphasis hover correction — FormField.css's exception rule
+   (L183-186) steps DOWN to --_tier-mid on hover because outside textonly,
+   rest is already at --_tier-emphasis so stepping up would show no shift.
+   In textonly, my token override above pins --_color to --_tier-base
+   (neutral-base) regardless of tier, so rest IS neutral-base — hover
+   should step UP to --_tier-emphasis (neutral-emphasis) like every other
+   tier. (0,5,0) beats the FormField exception at (0,4,1). */
+[data-render="textonly"] .form-field.color--tier-emphasis .form-field__input:hover,
+[data-render="textonly"] .form-field.color--tier-emphasis .form-field__card-face:hover {
+  border-color: var(--_tier-emphasis);
+}
+
+/* Squared controls — cards and checkboxes share the same flat-square
+   treatment as the input. Radios keep their circle. */
+[data-render="textonly"] .form-field .form-field__card-face,
+[data-render="textonly"] .form-field .form-field__checkmark {
+  border-radius: 0;
 }
 
 
-/* ==========================================================
-   FOCUS — outline ring only, no background tint
-   ========================================================== */
-
-[data-render="textonly"] :focus-visible {
-  outline: var(--border-width-md) solid var(--primary-base);
-  outline-offset: 2px;
-}
-
-[data-render="textonly"] [data-focus-active] {
-  background: transparent !important;
-  outline: var(--border-width-md) solid var(--focus-color, var(--primary-base));
-  outline-offset: 2px;
-}
 
 
 /* ==========================================================

@@ -54,10 +54,31 @@
    Specificity (0, 4, 0) beats atom :hover at (0, 3, 1) on the b component,
    so suppression always wins when data-hover="none". Focus and click states
    are NOT affected — only the :hover pseudo. */
-[data-hover="none"] .form-field .form-field__input:hover,
-[data-hover="none"] .form-field .form-field__card-face:hover {
+/* Excludes focus-active fields — a focused field should hold its focus
+   styling on hover in hover-none, not get reset to rest. Without the
+   :not([data-focus-active]) guard, hovering a focused field reverts its
+   focus border to the rest token (reads as "focus stops winning on hover").
+   Focus-gate's hover rules are themselves hover-none gated, so excluding
+   focus-active here leaves the focus rest styling untouched on hover. */
+[data-hover="none"] .form-field:not([data-focus-active]) .form-field__input:hover,
+[data-hover="none"] .form-field:not([data-focus-active]) .form-field__card-face:hover,
+[data-hover="none"] .form-field:not([data-focus-active]) .form-field__checkbox-wrap:hover,
+[data-hover="none"] .form-field:not([data-focus-active]) .form-field__radio-wrap:hover,
+[data-hover="none"] .form-field:not([data-focus-active]) .form-field__toggle-wrap:hover,
+[data-hover="none"] .form-field:not([data-focus-active]) .form-field__select-wrap:hover {
   border-color: var(--_field-rest-border);
   background: var(--_field-rest-bg);
+}
+
+/* Tier-emphasis exception suppression — FormField.css L183-186 paints
+   --_tier-mid on hover when colorTier=emphasis is set (steps DOWN for
+   visible feedback because rest is already at --_tier-emphasis). That
+   rule sits at (0,4,1) which beats the base suppression above (0,4,0),
+   so hover-none was still showing a colour change for emphasis-tier
+   fields. (0,5,0) beats FormField's (0,4,1) on the class column. */
+[data-hover="none"] .form-field.color--tier-emphasis .form-field__input:hover,
+[data-hover="none"] .form-field.color--tier-emphasis .form-field__card-face:hover {
+  border-color: var(--_field-rest-border);
 }
 
 /* Hover none: hide the browser-native number-input spinner buttons. They
@@ -116,6 +137,19 @@
 [data-hover="none"] .form-field.has-value .form-field__input:focus:hover {
   border-color: var(--neutral-mid);
   background: color-mix(in oklch, var(--neutral-mid) 8%, transparent);
+}
+
+/* Hover none: empty inputs hold rest state on focus too. FormField.css's
+   :focus rule paints --text-emphasis border + --page-bg-sunken bg; in
+   hover-none that creates a visible jump when the cursor leaves a focused
+   empty input (focused+hovered hits the (0,4,0) hover suppression above
+   and shows rest; focused-only hits the (0,2,0) :focus rule and shows
+   focus styling). Equalise both to rest so click-into-empty produces no
+   visible change. */
+[data-hover="none"] .form-field:not(.has-value) .form-field__input:focus,
+[data-hover="none"] .form-field:not(.has-value) .form-field__input:focus:hover {
+  border-color: var(--_field-rest-border);
+  background: var(--_field-rest-bg);
 }
 
 /* Hover none: card-select face stays static, only check indicator changes */

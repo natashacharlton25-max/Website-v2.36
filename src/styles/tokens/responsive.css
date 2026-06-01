@@ -227,15 +227,41 @@
 
 
 @media (max-width: 150px) {
-  /* Hide placeholder text — too narrow, JS replaces with ... */
-  .form-field__input::placeholder {
+  /* Horizontal breathing room so the focus ring + highlight-links outline
+     (3px outline + 3px offset = ~6px reach beyond the field edge) render
+     inside the field group instead of clipping at the viewport edge. The
+     outline paints into .form-field's padding box, which sits inside the
+     container, so the ring is never cut off. */
+  .form-field {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+
+  /* Hide the real placeholder text — too narrow to read; replaced with the
+     "…" marker below. `.form-field` ancestor lifts this to (0,2,1) so it
+     beats FormField.css's own `.form-field__input::placeholder` colour rule
+     (0,1,1), which loads later and would otherwise keep the cut-off text
+     visible behind the marker. */
+  .form-field .form-field__input::placeholder {
     color: transparent;
   }
 
-  .form-field__input:placeholder-shown {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='8' y='14' font-size='12' fill='%23999'%3E...%3C/text%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: left var(--space-sm) center;
+  /* Placeholder "…" marker — plain text in the body font, rendered via the
+     wrapper's ::after (native <input> can't host pseudo-elements). Shows only
+     when the input is empty (:placeholder-shown). Immune to the background:
+     shorthand wipes that broke the old SVG approach, since it's content, not
+     a background. */
+  .form-field__input-wrap:has(.form-field__input:placeholder-shown)::after {
+    content: "…";
+    position: absolute;
+    left: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: 1;
+    color: var(--_field-placeholder);
+    pointer-events: none;
   }
 
   /* Override XL text — too small for enlarged controls */
