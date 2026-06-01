@@ -357,10 +357,14 @@ function transformAnimExplainerInline(root: HTMLElement) {
 
 // ─── Mode registry ──────────────────────────────────────
 
+// Assistive ("Easy Click") is NOT a render mode — it's a CSS gate
+// (src/styles/gates/assistive-gate.css), toggled by data-render="assistive".
+// It has no JS transform: MODES["assistive"] is undefined, so the dispatch
+// below no-ops for it, which is correct — the gate does all the work.
+// See CLAUDE.md "Assistive Input (Easy Click) — a CSS gate, NOT a render mode".
 const MODES: Record<string, { transform: (root: HTMLElement) => void }> = {
   full:      { transform: () => {} },
   reduced:   { transform: transformReduced },
-  assistive: { transform: () => {} },
   textonly:  { transform: transformTextonly },
 };
 

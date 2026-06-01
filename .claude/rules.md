@@ -14,19 +14,20 @@
 | Document | Purpose |
 |----------|---------|
 | `render-refactor-phases-plan.md` | 11-phase refactor plan — phase order, Claude Code prompts, decision log |
-| `src/components/audit-log.md` | Per-component audit status — update after every component is completed |
+| `BUILD-STATUS.md` | **Live source of truth** — per-atom status (reconciled to validator output), validator/renderer state, and docs-vs-code drift. Update at the end of each session. Supersedes the archived `_reference/atom-audit-files/audit-log.md` (frozen history — do not edit). |
+| `COMPLIANCE-INVENTORY.md` | The flat list of every axis an atom must comply with — gates, zones, render modes, token families, validator rules, CLAUDE.md rules. The audit template's source of dimensions. |
 | `component-audit-checklist-v2.md` | **Current** — full per-component audit checklist (16 sections). Run against every component. |
 | `component-audit-spec.md` | Older audit spec — superseded by v2 checklist for per-component audits |
 | `component-audit-checklist.md` | Older checklist — superseded by v2 |
 | `image-alt-text-cdn-plan.md` | Alt text architecture, display modes, AAC resolver pipeline, CDN plan |
 | `AAC-Shim-Print-Traceability-Spec.md` | AAC form inputs, assistive tech layer, print traceability architecture |
 
-After completing any component: update `src/components/audit-log.md` with status and notes.
+After completing any component: update `BUILD-STATUS.md` (the live status doc) with status and notes. The old `_reference/atom-audit-files/audit-log.md` is archived history — do not edit it.
 
 ### Audit Workflow
 1. Audit each atom individually against `component-audit-checklist-v2.md`
 2. Fix issues specific to that atom only
-3. Log cross-atom dependencies as **deferred** in `src/components/audit-log.md` (e.g. "raw `<span>` should use Text atom")
+3. Log cross-atom dependencies as **deferred** in `BUILD-STATUS.md` (e.g. "raw `<span>` should use Text atom")
 4. After ALL atoms pass individually, run a **final atom render pass** to resolve all deferred cross-atom dependencies
 5. Print stylesheet is a global layer built after all atoms pass — not per-component
 
@@ -178,10 +179,17 @@ Every colour, spacing, radius, shadow, font size, transition, and breakpoint mus
 ### Schema Structure:
 - Every component schema uses canonical prop groups: `content`, `colour`, `gradient`, `visual`, `animation` (plus `rainbow`, `typography`, `media` where applicable)
 - The `"category"` field must be `"atom"` for all atoms — not subcategory paths like `"atoms/ui"` or `"atoms/icons"`
-- Plus a `renders` block: `{ full, reduced, assistive, textonly }` pointing to the .astro file or an atom name
+- Plus a `renders` block: `{ full, reduced, textonly }` pointing to the .astro file or an atom name. **There are three render modes — `assistive` is NOT one** (it was converted to a CSS gate; see "Assistive Input" below). Do not add an `assistive` key.
 - Empty `animation: {}` is correct for components with no motion
 - `textonly: null` = decorative component, skip entirely in text-only render
-- `assistive` render uses the same .astro but receives filtered props (no animation, stacked layout)
+
+### Free-text prop naming — `content*` / `label*` only:
+- Author free-text is allowed **only** in `content*` and `label*` props. Every other prop is an enum, or a free string with runtime validation in the `.astro` (add its name to `FREE_STRING_PROPS` in `src/lib/schema-validator.ts`). No raw CSS in any prop.
+- **Primary content** prop = `content<AtomName>` — e.g. `contentForm`, `contentHeading`, `contentText`, `contentBadge`, `contentLink`.
+- **Sub-content** props = `content<AtomName><Sub>` — e.g. `contentFormPlaceholder`, `contentFormError`.
+- **Labels** (accessible names / a11y) = `label<AtomName>` — e.g. `labelForm`.
+- `<AtomName>` is the **short** component name — drop secondary words (`Form`, not `FormField`).
+- Renames propagate through **schema + `.astro` Props + data JSON + every consumer** — never just one layer.
 
 ### Pipeline Routing — schemas that declare props for OTHER atoms:
 - A `renders` value can be an atom name (e.g. `"Icon"`, `"Text"`) instead of a `.astro` file
@@ -189,7 +197,7 @@ Every colour, spacing, radius, shadow, font size, transition, and breakpoint mus
 - Schema props marked as pipeline-only (e.g. `fallbackIcon`) never reach the component's `.astro` file
 - Example: LottieIcon schema declares `slug` (animation), `fallbackIcon` (static Icon), `label` (text):
   - `full` → LottieIcon.astro receives slug, label, visual/animation props
-  - `reduced/assistive` → pipeline passes `fallbackIcon` to Icon atom
+  - `reduced` → pipeline passes `fallbackIcon` to Icon atom
   - `textonly` → pipeline passes `label` to Text atom
 - No separate template files per render mode — the pipeline routes to existing atoms
 - Props can be optional — decorative instances may only declare the animation, no fallback or label
@@ -197,16 +205,17 @@ Every colour, spacing, radius, shadow, font size, transition, and breakpoint mus
 
 ---
 
-## Assistive-Input Render (Easy Click)
+## Assistive Input (Easy Click) — a CSS gate, NOT a render mode
 
-The platform has **four** render modes:
+There are **three** render modes (the schema `renders` block):
 
 | Render | User-facing name | What it does |
 |--------|-----------------|--------------|
 | `full` | Default | All CSS, animations, hover effects |
 | `reduced` | Calm Mode | Animation props stripped — no animation classes emitted |
-| `assistive` | Easy Click | Large targets, no hover-only interactions, single-column layout |
 | `textonly` | Reading Mode | Minimal CSS, content only |
+
+**Easy Click is a separate behavioural gate, not a fourth render.** It was deliberately converted from a render mode to a CSS-only gate at `src/styles/gates/assistive-gate.css`, toggled by `data-render="assistive"` on `<html>`. It re-styles (larger targets, single column) on top of whatever render mode is active — it does not re-render the page, and schemas do NOT declare an `assistive` key. Anywhere the docs count assistive as a fourth render is leftover from the render-mode days and is wrong.
 
 **OS-level AT handles input translation — no custom JS shim exists or is needed.**
 iOS Switch Control, Windows Eye Control, Android Switch Access, eye gaze trackers and head trackers all translate their input into standard `focus` / `click` / `keydown` events at the OS level before the browser sees them. Any properly focusable, keyboard-operable element works automatically.
@@ -216,16 +225,16 @@ iOS Switch Control, Windows Eye Control, Android Switch Access, eye gaze tracker
 - Has `:focus-within` equivalents for all hover-triggered interactions
 - Has `aria-hidden="true"` on decorative elements
 - Has `data-semantic-role` attribute for content-symbol images
-- Has sufficient touch target size (44×44px default, 64×64px in `assistive` render)
+- Has sufficient touch target size (44×44px default, 64×64px under the assistive gate)
 
-**CSS rules for assistive render:**
+**CSS rules for the assistive gate:**
 - No hover-only content without a `:focus-within` or click alternative
-- All touch targets scale via CSS when `data-render="assistive"` on body
+- All touch targets scale via CSS when `data-render="assistive"` on `<html>`
 - Grid layouts collapse to single column
 - Focus indicators enlarged (min 3px, high contrast)
-- Scoped to `[data-render="assistive"] .component { ... }` in `Component.css`
+- **These rules live in `src/styles/gates/assistive-gate.css` — never in component CSS.** The contract "no `[data-render]` selectors in component CSS" stays strict; assistive is no exception.
 
-**Component checklist for assistive render:** see `component-audit-checklist-v2.md` sections 7, 8, 10.
+**Component checklist for the assistive gate:** see `component-audit-checklist-v2.md` sections 7, 8, 10.
 
 ---
 
