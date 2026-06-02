@@ -74,17 +74,47 @@ The renderer computes how many columns a row gets from
 (container size × the weight of items in that row), capped by a capacity table
 so nothing overcrowds. The author never sees or sets this.
 
-Capacity table (STARTER VALUES — tune during build):
+Capacity table (LOCKED — "balanced", derived 2026-06-02, grounded in real
+`--container-*` tokens + repo min-widths, adversarially verified; see §7/D4):
 
-| Container size | large items | medium items | small items |
-|----------------|-------------|--------------|-------------|
-| small          | 1 col       | 1 col        | 2 cols      |
-| medium         | 1 col       | 2 cols       | 3 cols      |
-| large          | 2 cols      | 3 cols       | 3–4 cols    |
-| xl             | 3 cols      | 3–4 cols     | 4 cols      |
+| Container tier                  | small item | medium item | large item |
+|---------------------------------|------------|-------------|------------|
+| small  (~384px, `--container-sm`)  | 2 | 1 | 1 |
+| medium (~672px, `--container-2xl`) | 4 | 2 | 1 |
+| large  (~1024px, `--container-5xl`)| 6 | 3 | 2 |
+| xl     (~1280px, `--container-7xl`)| 6 | 4 | 3 |
 
-Reading: a row of `large` items in a `small` container gets 1 column (each large
-item takes the full width). The same row in an `xl` container gets up to 3 columns.
+Pre-collapse desktop/tablet capacity; `textonly` / `assistive` / ≤480px force
+one column regardless. Columns are DERIVED, not authored:
+`N = clamp(1, floor((T + gap) / (itemMin + gap)), 6)` — gap ≈ one `--space-md`
+(16px); cap of 6 = the existing Grid `columns` enum.
+
+**The dials** (change → columns re-derive):
+- Tier representative widths: 384 / 672 / 1024 / 1280 px (`--container-sm/-2xl/-5xl/-7xl`).
+- Comfort min item widths per weight: small 128px (FormField card-select),
+  medium 280px (Grid `--grid-min`), large 400px (RelatedGrid rich card).
+
+**Min item widths are COMFORT TARGETS that drive the column count — NOT hard
+pixel floors on atoms.** A hard `min-width` that overflows its cell is the
+"10000px image" abuse §2.6 forbids. Items always fit their cell (§3); the table
+only stops a row from packing in so many items that each drops below its comfort
+target.
+
+**Large-at-small clamp (render-time, not author-time):** container tier is
+resolved at render time from the cascade (viewport → page-row → section-row →
+card), so a `large`-weight item can land in a small-resolved container (e.g. a
+card squeezed small on mobile). There is no author-time "disallow" — nothing to
+block up front. The engine CLAMPS: the item lands at 1 column and fills the cell;
+§3's hard boundary guarantees it fits (rendering at the cell width, a touch under
+its comfort ideal in the rare squeezed case). That is the cascade constraining
+contents exactly as intended.
+
+Conservative table (one fewer column, roomier) is the fallback for image-heavy
+content. The "dense" candidate was NOT adversarially verified (it had an
+impossible cell) and is not carried forward.
+
+Reading: a row of `large` items in a `small` container gets 1 column (the item
+fills the width); the same row in an `xl` container gets up to 3 columns.
 
 ### 2.5 Responsive reflow (free)
 Because weight and columns are relative to container size, shrinking the
@@ -126,6 +156,10 @@ The cell is a hard boundary: even if an atom asks to be large, it fits within
 the cell the engine gave it. Constraint is structural (the cell bounds it),
 not a number anyone types.
 
+The §2.4 min item widths are COMFORT TARGETS used to compute column counts —
+NOT hard pixel floors on atoms. An item never overflows its cell; at worst it
+renders at the cell width, a touch under its comfort ideal.
+
 ---
 
 ## 4. Per-level configuration
@@ -136,8 +170,11 @@ The engine is shared. Each level configures it:
 - Rows: rows of sections — a row may hold one section or several side by side
   (the engine grids a multi-section row like any other).
 - Container size: the viewport (absolute, top of the cascade).
-- Cell-content enum: `[Section]` (a page holds sections; optionally a small
-  set of page-level chrome atoms — decide at build).
+- Cell-content enum (D2 resolved): `[Section]` only. Page-level chrome (nav,
+  footer) is NOT Page content — it's constant-across-pages chrome living in
+  `BaseLayout`, one level up. "Constant chrome, variable content": Page holds the
+  bands that change page to page; if something sits at the top of a page it's a
+  Section. Nav/footer stay in the layout.
 - Media modes: none.
 - Notes: Page currently is a generic `<main>` + `<slot/>` class-mapper
   (see investigation note). Retrofit onto the shared engine: rows of sections.
@@ -149,10 +186,19 @@ The engine is shared. Each level configures it:
   "grid section" vs a "flow section" — they add rows and put one or several
   items in each. The multi-item rows are the grids.
 - Container size: inherited — whatever the page's row allocated to it.
-  (Section may also expose an author width intent, e.g. via the existing
-  `container` prop + `--container-*` tokens — reconcile during build.)
-- Cell-content enum: `[Card, Heading, Text, Image, List, Badge, Button, ...]`
-  (a section holds cards and content atoms; possibly sub-sections — decide).
+- Width intent (D5 resolved): the author picks a SEMANTIC width, not a token.
+  Four named options, each mapped to a real `--container-*` token by the engine:
+  `prose` (reading width, ~800px / `--container-prose`), `standard` (default
+  content width, `--container-default` = `--container-7xl` ~1280px), `wide`
+  (`--container-full` ~1440px — galleries/feature content), `full`
+  (edge-to-edge / full-bleed, no max-width — hero bands + full-bleed media). The
+  name carries the meaning AND the a11y guarantee — `prose` is capped at a
+  readable line length because that's what `prose` *means*, not because the
+  author happened to pick a narrow token. The token follows the name.
+- Cell-content enum (D2 resolved — see §7): `[Card, Heading, Text, Image, List,
+  Badge, Button, Link, Icon, LottieIcon, Shape]` — cards + content atoms. **NO
+  sub-sections** — Card is the grouping container, Page is the banding container;
+  a section never nests another section.
 - Media modes: none (sections aren't image-backed in the card sense; a section
   background is a zone/theme concern, not a media mode).
 - Notes: Section currently a generic class-mapper with optional `container`
@@ -163,14 +209,26 @@ The engine is shared. Each level configures it:
 - Rows: rows of one-or-many atoms — a row may hold one image across the top, or
   a badge + icon split (several items gridded). Same row model as Section/Page,
   smallest scale.
-- Container size: AUTHOR-PICKED — `small | medium | large | xl` — OR inherited
-  from the section's allocation. DECISION NEEDED (see §6).
+- Container size: INHERITED (D1 resolved — see §7). A Card is an item in its
+  Section's row, so **"card size" IS the Card's weight there**. The author still
+  thinks "large card"; that resolves as `large` weight, not an absolute size.
+  The cell that weight allocates BECOMES the Card's own container-size context,
+  which its child atoms' weights resolve against. No second sizing path. (Weight
+  tiers are `small | medium | large`; the old `xl` was a container tier, not an
+  item weight — an xl-feel card is `large` weight in a large/xl section.)
 - Cell-content enum: the atom set — `[Image, Heading, Text, Badge, Icon,
   Button, Link, List, Shape, LottieIcon]`. NO Card-in-Card, no Section, no Page.
-- Media modes: media items additionally take a MODE:
-  `inline | fill | background | overlap-edge`
-  (still also take a relative weight). Match the existing Shape `mediaBg`
-  pattern for the background mode so the two are consistent.
+- Media modes (D3 resolved): media items additionally take a MODE:
+  `inline | fill | background | overlap-edge` (still also carry a relative
+  weight). The `background` mode is NOT a new invention — it reuses the
+  established background-media pattern already shared by Heading/List/Badge/
+  Shape: the parent carries `mediaBg` (boolean) + `mediaBgSize`
+  (`compact | normal | spacious`), and the engine auto-injects
+  `semanticRole='background'` onto the media child (wallpaper is aria-hidden;
+  the child atom owns meaning/label; `labelShape` forbidden). Same prop names,
+  same injection, same behaviour — not a second pattern that merely looks alike.
+  (A Shape-wallpaper child takes `semanticRole='background'`; a plain decorative
+  Image background is `semanticRole='decorative'` — both aria-hidden, same intent.)
 - Notes: this replaces the legacy `<slot/>` + dead `.card__*` CSS + in-component
   gate selectors. None of that exists in the new model.
 
@@ -178,10 +236,13 @@ The engine is shared. Each level configures it:
 
 ## 5. The complete vocabulary (all enums)
 
-1. **Container size**
+1. **Container size** (a container's own size context — never author-picked as an absolute)
    - Page: viewport (not an enum)
-   - Section: inherited (+ optional `container` width tokens)
-   - Card: `small | medium | large | xl`
+   - Section: inherited from its Page-row cell. Author also picks a SEMANTIC
+     width (D5): `prose | standard | wide | full`, each mapped to a real
+     `--container-*` token (`full` = full-bleed, no cap).
+   - Card: inherited from its Section-row cell. "Card size" is expressed as the
+     Card's WEIGHT in that row (`small | medium | large`), not a separate enum.
 2. **Item weight** (every item, every level): `small | medium | large` (1/2/3)
 3. **Cell-content enum** (per level — see §4): which atoms may sit in a cell
 4. **Media mode** (Card media items only): `inline | fill | background | overlap-edge`
@@ -205,27 +266,49 @@ R4. Cell-content is constrained per level by that level's enum; an atom not in
 
 ---
 
-## 7. Decisions still open (resolve at build)
+## 7. Decisions — ALL RESOLVED 2026-06-02
 
-D1. **Card size — absolute or inherited?** Does the author pick S/M/L/XL
-    (absolute), or does a card take "how much of my section's allocation do I
-    want" (inherited, like Section does from Page)? Leaning: author-picked
-    S/M/L/XL as a *max* that shrinks responsively, since cards are often placed
-    in galleries where the author wants a consistent card size.
+(Kept as a resolved-log, not an open-items list. Nothing here is outstanding;
+each entry records the call and the reasoning so the decision can't silently
+drift back open.)
 
-D2. **Does Section hold sub-sections?** And does Page hold anything besides
-    Sections? Defines the cell-content enums precisely.
+D1. **Card size — absolute or inherited?** RESOLVED 2026-06-02: **inherited.**
+    A Card is an item in its Section row; "card size" IS the Card's weight there
+    (`small | medium | large`), and the allocated cell becomes the Card's own
+    container-size context. Author-picked S/M/L/XL was rejected — it adds a
+    second sizing path outside the weight system (the core anti-abuse rule,
+    §2.1 / §2.3) and creates a two-sources-of-truth collision (a `large`-weight
+    card also set size `small`). The gallery case that motivated it is already
+    covered by weight (same weight → identical cards, reflowing freely). The
+    friendly vocabulary survives: "large card" = `large` weight, resolved
+    through the one system rather than as an absolute.
 
-D3. **Background media — item mode or container property?** Is `background` a
-    mode of a media item, or a property of the Card (card-has-a-background-media)?
-    Match whatever the Shape atom already does with `mediaBg` for consistency.
+D2. **Does Section hold sub-sections? / Does Page hold non-Sections?**
+    Section part RESOLVED 2026-06-02: **no sub-sections** — Card is the grouping
+    container, Page the banding container; a 4th nesting would overlap them (the
+    D1 discipline — don't build the overlapping primitive pre-need). A nested
+    full-width band = a sibling Section on the Page; a bounded group = a Card.
+    Page part RESOLVED 2026-06-02: Page holds `[Section]` only — nav/footer are
+    constant chrome in `BaseLayout`, not Page content ("constant chrome, variable
+    content"). D2 fully resolved.
 
-D4. **Capacity table numbers** — §2.4 values are starters; tune against real
-    layouts during build.
+D3. **Background media — item mode or container property?** RESOLVED 2026-06-02:
+    reuse the established pattern (Heading/List/Badge/Shape) — parent `mediaBg`
+    (boolean) + `mediaBgSize`, engine injects `semanticRole='background'` on the
+    media child. Same prop names + injection as the existing atoms, not a
+    look-alike second pattern (see §4.3).
 
-D5. **Section width intent** — reconcile the existing `container` prop +
-    `--container-*` tokens with the new "inherited container size" model. One
-    source of truth for how wide a section is.
+D4. **Capacity table numbers** — RESOLVED 2026-06-02: **"balanced"** table
+    locked in §2.4, grounded in real `--container-*` widths + repo min-widths and
+    adversarially verified (reflow monotonic; large-at-small handled by a
+    render-time clamp + §3 cell boundary, with min widths treated as comfort
+    targets, not hard floors). Dials (tier widths, comfort mins) recorded in §2.4
+    for future tuning. "Dense" candidate rejected (unverified, impossible cell).
+
+D5. **Section width intent** — RESOLVED 2026-06-02: author picks a SEMANTIC
+    width — `prose | standard | wide | full` — each mapped to a real
+    `--container-*` token by the engine (see §4.2). Semantic names carry meaning
+    + the a11y guarantee (prose = readable line length); not raw token picks.
 
 ---
 
@@ -233,9 +316,12 @@ D5. **Section width intent** — reconcile the existing `container` prop +
 
 1. Build the SHARED ENGINE first — size context, rows, weight resolution (R1),
    column computation + capacity table (R2), responsive reflow. Level-agnostic.
-2. Configure CARD on the engine — cell-content atom enum, media modes, S/M/L/XL
-   size. This is the legacy-slot rebuild; replaces `<slot/>` and dead CSS.
-3. Retrofit SECTION onto the engine — rows of cards/atoms, reconcile width.
+2. Configure CARD on the engine — cell-content atom enum, media modes (incl. the
+   `mediaBg` background pattern, D3), and inherited size (a card's size IS its
+   weight in the section row, D1 — no separate size pick). This is the
+   legacy-slot rebuild; replaces `<slot/>` and dead CSS.
+3. Retrofit SECTION onto the engine — rows of cards/atoms, with the semantic
+   width options (`prose | standard | wide | full`, D5).
 4. Retrofit PAGE onto the engine — rows of sections.
 
 One engine, three consumers. The whole platform gets a single coherent layout
