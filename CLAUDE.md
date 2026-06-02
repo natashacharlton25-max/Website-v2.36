@@ -16,6 +16,7 @@
 | `render-refactor-phases-plan.md` | 11-phase refactor plan — phase order, Claude Code prompts, decision log |
 | `BUILD-STATUS.md` | **Live source of truth** — per-atom status (reconciled to validator output), validator/renderer state, and docs-vs-code drift. Update at the end of each session. Supersedes the archived `_reference/atom-audit-files/audit-log.md` (frozen history — do not edit). |
 | `COMPLIANCE-INVENTORY.md` | The flat list of every axis an atom must comply with — gates, zones, render modes, token families, validator rules, CLAUDE.md rules. The audit template's source of dimensions. |
+| `LAYOUT-ENGINE-SPEC.md` | **Rebuild brief (DRAFT)** — one shared row engine for Page/Section/Card (rows of one-or-many weighted items; grid = multi-item row; renderer computes columns). Build this next; replaces Card's legacy slot. Investigation that fed it: `_reference/layout-rebuild/card-layout-investigation.md`. |
 | `component-audit-checklist-v2.md` | **Current** — full per-component audit checklist (16 sections). Run against every component. |
 | `component-audit-spec.md` | Older audit spec — superseded by v2 checklist for per-component audits |
 | `component-audit-checklist.md` | Older checklist — superseded by v2 |
