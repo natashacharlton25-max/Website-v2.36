@@ -241,6 +241,38 @@ This settles **E3 (how columns are computed):** auto-fit with the capacity table
 as the *cap* (not a hard fixed count) — matching the existing codebase idiom —
 rather than the engine emitting an exact column count per cell.
 
+### 2.9 The size cascade — each cell becomes the child's measured container (E4 resolved)
+The same operation runs at EVERY level: **measure my own width (E1), then divide
+it among my rows via the capacity table (§2.4).** Nobody passes a size down as a
+number. Walked down once, concretely:
+
+- **Page** measures the viewport, divides it among its rows of Sections.
+- **Section** is allocated a cell by the Page's row. It MEASURES that cell's width
+  (it is never *told* its size — E1), then divides its measured width among its
+  own rows of Cards/atoms.
+- **Card** is allocated a cell by the Section's row. It MEASURES that cell, then
+  divides among its rows of atoms.
+- **Atom** fills the cell its Card's row gave it.
+
+"Page sizes Sections" and "Card sizes atoms" are the IDENTICAL operation at
+different scales — that is what makes this one engine, not three.
+
+**Build-critical — two parts (this is why E4 is the keystone and why it's easy to
+build wrong):**
+1. **The allocated cell becomes the child's measured container.** The space a
+   parent's row hands to a child is exactly what the child measures and resolves
+   its own weights against — no number is passed down.
+2. **Each cell establishes a FRESH containment context** (`container-type:
+   inline-size` on the cell, per E1). The child must measure THAT cell, not some
+   ancestor higher up. If a level forgets to open a fresh context, the child
+   queries the wrong ancestor's width and "a card in a narrow column knows it's
+   narrow" silently fails. Every level down = a new "room" the child measures
+   itself against.
+
+This is simply E1 applied recursively: one rule — measure, then divide via the
+table — re-run at each smaller scale, with a fresh container-query context per
+cell. That recursion IS the cascade.
+
 ---
 
 ## 3. Items size themselves within their cell
@@ -480,14 +512,16 @@ decisions in §7). Resolved ones are written into §2 / §5; the last two are ne
 - **E3 — How columns are computed:** RESOLVED — auto-fit with the capacity table
   as the cap (not an exact emitted count), §2.8.
 - **E4 — How size cascades down the levels** (viewport → page-row → section-row →
-  card → atoms): **PENDING** — state the hand-down mechanism precisely; the bit
-  most likely to be built wrong if left vague.
+  card → atoms): RESOLVED — each allocated cell becomes the child's measured
+  container, with a FRESH containment context per cell, and the same engine
+  re-runs at each scale (E1 applied recursively), §2.9.
 - **E5 — The overflow-stopping mechanism** (what structurally clips/caps an item
-  to its cell): **PENDING** — the §5 consequence already holds (no bad input to
-  catch; enums prevent it); E5 specifies the structural backstop precisely.
+  to its cell): **PENDING (the last one)** — the §5 consequence already holds (no
+  bad input to catch; enums prevent it); E5 just names the structural backstop
+  precisely (the CSS that makes §3's "hard cell boundary" literally true).
 
 The validation contract (§5) is captured: every author-facing setting is a named
 enum; the schema + validator build straight from that list.
 
-**Next session:** pick up E4 then E5 — both are "state the mechanism precisely,"
-not hard judgment calls. ~20 minutes with a fresh head.
+**Next: only E5 left** — the small overflow backstop. State the mechanism, and
+the engine spec is build-ready.
