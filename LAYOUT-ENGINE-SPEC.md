@@ -71,6 +71,28 @@ the model or in the author's head — a grid is just a row with more than one
 item, and the engine treats the single-item row as the one-column degenerate
 case of the same logic. Per row, the author decides one thing or several.
 
+**Row data shape (E2 resolved):** weight lives on the ITEM — each item declares
+its own `small | medium | large`, so weight travels with the item wherever it's
+placed and is never re-specified per row. A row is stored as an extensible object
+holding its items plus ONE optional property:
+
+- `distribution` (enum, default `grid`):
+  - `grid` — equal, weight-driven columns, capacity-capped, arranged by auto-fit
+    (the §2.4 / §2.8 model). The DEFAULT; what cards-in-a-section and tile/gallery
+    rows use. Weight drives the columns. Within `grid`, a single-item row is the
+    one-column degenerate case (§2.7).
+  - `start | center | end | between` — CONTENT-SIZED arrangements (flex
+    justification): items size to their own content, weight is not used, and they
+    pack/justify along the row. For control bars and footers — e.g. a card footer
+    with a badge on the left and a button on the right = `between`.
+
+So `grid` is the weight engine (the vast majority of rows); the content-sized
+distributions are a deliberate per-row opt-in for control-bar/footer layouts. The
+§2.7 "one code path" and §2.8 "grid is just a multi-item row" statements describe
+the `grid` distribution specifically; the content-sized distributions are the
+explicit, author-chosen exception — not a flow-vs-grid mode you reason about for
+ordinary content.
+
 ### 2.3 Item weight
 Every item carries a relative weight: `small | medium | large` (1 / 2 / 3).
 Rendered size = container size × item weight, resolved at render time.
@@ -282,20 +304,38 @@ The engine is shared. Each level configures it:
 
 ---
 
-## 5. The complete vocabulary (all enums)
+## 5. The validation contract — every author-facing choice is a finite enum
 
-1. **Container size** (a container's own size context — never author-picked as an absolute)
-   - Page: viewport (not an enum)
-   - Section: inherited from its Page-row cell. Author also picks a SEMANTIC
-     width (D5): `prose | standard | wide | full`, each mapped to a real
-     `--container-*` token (`full` = full-bleed, no cap).
-   - Card: inherited from its Section-row cell. "Card size" is expressed as the
-     Card's WEIGHT in that row (`small | medium | large`), not a separate enum.
-2. **Item weight** (every item, every level): `small | medium | large` (1/2/3)
-3. **Cell-content enum** (per level — see §4): which atoms may sit in a cell
-4. **Media mode** (Card media items only): `inline | fill | background | overlap-edge`
-5. **Computed columns**: NOT an author enum — derived by the renderer from the
-   §2.4 capacity table.
+**Principle:** every author-facing layout choice is a finite enum; the engine
+computes everything else; nothing is free-form, so everything is validatable and
+**no invalid value is expressible**. There is no number field, no free string, no
+pixel value — nowhere to type `500000`, `cols: 47`, or an unknown component name.
+The validator checks each value against its enum and rejects anything outside it,
+exactly as it does for every other atom prop. **Build the engine's schema +
+validator straight from this list.**
+
+| Setting | Where | Enum (author-settable) |
+|---|---|---|
+| Container size — Page | Page | viewport — NOT authored |
+| Section width | Section | `prose \| standard \| wide \| full` (D5; maps to real `--container-*` tokens; replaces the legacy 13-value `container` enum) |
+| Card size | Card | none of its own — expressed as the Card's WEIGHT in its section row (uses the weight enum, no separate size enum) |
+| Item weight | every item, every level | `small \| medium \| large` |
+| Row distribution | every row | `grid` (default) \| `start \| center \| end \| between` (E2) |
+| Cell-content | per level | enum of allowed component NAMES — Page `[Section]`; Section `[Card, Heading, Text, Image, List, Badge, Button, Link, Icon, LottieIcon, Shape]`; Card `[Image, Heading, Text, Badge, Icon, Button, Link, List, Shape, LottieIcon]` |
+| Gap | row / container | `none \| xs \| sm \| md \| lg \| xl \| 2xl \| 3xl` (matches existing Section `gap`) |
+| Media mode | Card media items | `inline \| fill \| background \| overlap-edge` |
+| Media bg size | Card media (bg) | `compact \| normal \| spacious` (D3 pattern) |
+| Section colour | Section | `primary \| secondary \| neutral \| red \| orange \| yellow \| teal \| blue \| purple \| pink` (existing `color`) |
+| Section bg | Section | `none \| tint \| light \| solid` (existing) |
+| Section separator | Section | boolean + `separatorWeight` `thin \| medium \| thick` (existing) |
+| Computed columns | — | NOT authored — derived by the engine from the §2.4 capacity table; nothing to validate |
+
+**Consequence for E5 (overflow):** because there is no author-set size — only
+weights and enums — overflow-prevention is NOT about *catching bad input*. There
+is no bad input to catch: the author had no way to ask for a size that overflows.
+The enum is the first line of defence; the cell boundary (E5 — exact mechanism
+pending next session) is the structural backstop. Together they make "you can't
+put a giant image in a card" true *by construction*, not by runtime checking.
 
 ---
 
@@ -389,6 +429,36 @@ model from page down to atom.
   not a Layout atom. Card/Section/Page consume it.
 - Section/Page feeling unfinished — they're slotted; the engine makes them
   row-based like Card.
-- The "is a section a grid or a flow?" question — dissolved. Every container is
-  rows; a grid is simply a row with more than one item; a single-item row is the
-  one-column degenerate case. There is no mode to choose at any level.
+- The "is a section a grid or a flow?" question — dissolved for ordinary content:
+  the default (`grid`) distribution makes every container rows, a grid just a
+  multi-item row, a single-item row the one-column degenerate case. A row can
+  still opt into a content-sized `distribution` (`start|center|end|between`) for
+  control bars/footers — a deliberate per-row choice (E2 / §2.2), not a
+  flow-vs-grid mode the author reasons about for normal content.
+
+---
+
+## 10. Engine mechanics decisions (E-series) — status
+
+The five build-time mechanics decisions (distinct from the D-series vocabulary
+decisions in §7). Resolved ones are written into §2 / §5; the last two are next.
+
+- **E1 — How a box knows its size:** RESOLVED — measures its own rendered width
+  (container queries, `container-type: inline-size`), §2.1.
+- **E2 — Row data shape:** RESOLVED — weight on the item; row is an extensible
+  object with a `distribution` enum (`grid` default | `start|center|end|between`
+  content-sized), §2.2.
+- **E3 — How columns are computed:** RESOLVED — auto-fit with the capacity table
+  as the cap (not an exact emitted count), §2.8.
+- **E4 — How size cascades down the levels** (viewport → page-row → section-row →
+  card → atoms): **PENDING** — state the hand-down mechanism precisely; the bit
+  most likely to be built wrong if left vague.
+- **E5 — The overflow-stopping mechanism** (what structurally clips/caps an item
+  to its cell): **PENDING** — the §5 consequence already holds (no bad input to
+  catch; enums prevent it); E5 specifies the structural backstop precisely.
+
+The validation contract (§5) is captured: every author-facing setting is a named
+enum; the schema + validator build straight from that list.
+
+**Next session:** pick up E4 then E5 — both are "state the mechanism precisely,"
+not hard judgment calls. ~20 minutes with a fresh head.
