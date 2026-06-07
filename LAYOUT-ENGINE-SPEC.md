@@ -1,8 +1,9 @@
 # LAYOUT-ENGINE-SPEC
 
-Status: DRAFT for rebuild — reasoned 2026-06-02 (D1–D5, E1–E4) + 2026-06-07
-(engine↔preset split, content/fill, overlay position, weight demoted, vertical
-distribution, guarantee boundary). Not yet implemented.
+Status: **SPEC COMPLETE & BUILD-READY** (2026-06-07) — all decisions resolved:
+D1–D5, E1–E5, items 1–10, and the first preset (`card-horizontal`) locked.
+Not yet implemented — the next move is building the Card atom (§11 / §12), a
+fresh-session task (it's the Button pattern, done 11 times before).
 Scope: One shared layout engine used at three levels — Page, Section, Card.
 **Read §11 first** — the engine is the designer's machinery; an author builds
 nothing but picks a preset and fills content. "Card is an atom built like Button."
@@ -381,6 +382,28 @@ The §2.4 min item widths are COMFORT TARGETS used to compute column counts —
 NOT hard pixel floors on atoms. An item never overflows its cell; at worst it
 renders at the cell width, a touch under its comfort ideal.
 
+### 3.1 The overflow backstop — making the hard boundary literal (E5 resolved 2026-06-07)
+§5 already established there is no bad *input* to catch (enums make an oversized
+request inexpressible). E5 is the STRUCTURAL backstop that makes this section's
+"hard boundary" literally true even for content that is intrinsically large (a
+huge image, a long unbroken word). Layered, three lines plus the gotcha:
+
+1. **The cell is a grid/flex track with a computed max** (its column width). The
+   item lives inside that track.
+2. **`min-width: 0` (and `min-height: 0`) on every grid/flex item — THE gotcha.**
+   Grid/flex items default to `min-width: auto`, which lets their *content* force
+   the track wider than computed; that single default is the one thing that
+   silently breaks the guarantee. `min-width: 0` makes the item respect its track.
+3. **Media fits its cell:** `max-width: 100%` + `object-fit` (cover/contain) so
+   images/video scale *down* into the cell, never out of it.
+4. **Final backstop: `overflow: clip` on the cell** — anything that somehow still
+   exceeds is physically clipped, never spills.
+
+Layered guarantee: enums mean no oversized request exists (first line, §5);
+`min-width: 0` + `max-width: 100%` make content fit the track (structural);
+`overflow: clip` is the hard backstop. "You can't put a giant image in a card" is
+true *by construction* — E5's CSS is what makes it literal, not a runtime check.
+
 ---
 
 ## 4. Per-level configuration
@@ -635,10 +658,9 @@ decisions in §7). Resolved ones are written into §2 / §5; the last two are ne
   card → atoms): RESOLVED — each allocated cell becomes the child's measured
   container, with a FRESH containment context per cell, and the same engine
   re-runs at each scale (E1 applied recursively), §2.9.
-- **E5 — The overflow-stopping mechanism** (what structurally clips/caps an item
-  to its cell): **PENDING (the last one)** — the §5 consequence already holds (no
-  bad input to catch; enums prevent it); E5 just names the structural backstop
-  precisely (the CSS that makes §3's "hard cell boundary" literally true).
+- **E5 — The overflow-stopping mechanism:** RESOLVED 2026-06-07 — `min-width: 0`
+  on grid/flex items (the gotcha), `max-width: 100%` + `object-fit` on media,
+  `overflow: clip` cell backstop (§3.1). Layered with the §5 enum guarantee.
 
 The validation contract (§5) is captured: every author-facing setting is a named
 enum; the schema + validator build straight from that list.
@@ -649,18 +671,17 @@ cell sizing (§2.8), vertical distribution (§2.2), weight DEMOTED to optional
 (§2.3), balance-declared-not-computed (§2.8), the engine↔preset split + "Card is
 an atom" (§11), the honest guarantee boundary (§2.6).
 
-**Open sub-decision (item 10 — not yet made):** the default for an *unspecified*
-weight in a side-by-side row — `medium` (fixed middle) vs "even share of the
-space left after `content`-sized cells take theirs." Item 6 leans behaviour-driven
-(content/fill default, weight as override); confirm the exact rule when building
-the first preset.
+**Item 10 (default unspecified-weight rule) — RESOLVED 2026-06-07** by locking the
+first preset (§12): the default is behaviour-driven (content/fill, or equal
+`grid`), never a fixed `medium`. Weight is consulted only for an explicit unequal
+grid split.
 
-**E5 (overflow backstop)** is still the one open engine mechanic — small; the §5
-consequence already holds (no bad input to catch; enums prevent it).
+**E5 (overflow backstop) — RESOLVED 2026-06-07** (§3.1).
 
-**Next (per §11): don't add more engine surface — define the first preset,**
-`card-horizontal`, for real. That's the bridge to a buildable Card atom; E5 and
-the item-10 default both resolve naturally while building it.
+**The engine spec is now complete and build-ready** — D1–D5, E1–E5, items 1–10,
+and the first preset all resolved. **Next is the build, not more spec:** build the
+Card atom (§11) starting with the `card-horizontal` variant (§12), the Button
+pattern. A fresh-session task — the architecture is done.
 
 ---
 
@@ -709,3 +730,53 @@ slot — then the author's tiny input against it. That makes "specific rows" and
 buildable Card atom. Worked sketch: image left (`content`), meta-over-body middle
 (`fill`, nested rows), button right (`content`, `vertical: center`), equal-height
 row. See `horizontal-card-preset.jsonc`.
+
+---
+
+## 12. First preset — `card-horizontal` (LOCKED 2026-06-07)
+
+The bridge from engine-spec to a buildable Card atom — the first `cardType`
+variant. Defined once (Layer 1), filled with content by the author (Layer 2).
+Building this IS the start of the Card atom (§11).
+
+**Layer 1 — the preset (designer defines once, frozen).** One **equal-height**
+row, three cells, left → right; widths are `auto 1fr auto` via per-cell `sizing`
+(§2.8), NO weight:
+
+| Cell | `sizing` | `vertical` | accepts | notes |
+|------|----------|-----------|---------|-------|
+| image | `content` (hug) | — | `Image` | left; hugs its own width |
+| middle | `fill` (1fr) | `start` (top) | sub-container of rows | two stacked rows: **meta** (Text, small-muted) over **body** (Text) |
+| button | `content` (hug) | `center` | `Button` | right; centred against the tall image |
+
+`equalHeight: true` → all cells match the tallest (the image). Each slot is
+guarded by its `accepts` (Layer-1's per-slot atom enum) — the preset layer's
+equivalent of the cell-content enum.
+
+**Layer 2 — what the author / AI writes (every time).** Canonical form matches
+§11 ("Card is an atom; `cardType` is the variant enum; slots are props"):
+
+```json
+{ "component": "Card",
+  "cardType": "horizontal",
+  "image":  { "src": "…", "altWord": "Stoneware mug" },
+  "meta":   "In stock",
+  "body":   "Hand-thrown stoneware mug, glazed slate blue.",
+  "button": { "contentButton": "Add to cart", "href": "/cart/add/mug" } }
+```
+
+~Two choices: `cardType` + content. No sizing, no placement, no weight — Layer 1
+decided all of it. (Worked `.jsonc`: `horizontal-card-preset.jsonc` — note it
+uses `card: "card-horizontal"`; the canonical form is `component: Card` +
+`cardType: "horizontal"` per §5/§11. Real Image slot uses `altWord`/
+`altDescriptive`, not bare `alt`.)
+
+### Item 10 resolved — as the spec predicted
+Defining this preset answers the open default-weight sub-decision. `card-horizontal`
+uses per-cell `content`/`fill` and **no weight** — confirming the default for an
+unspecified weight in a side-by-side row is **behaviour-driven** (content/fill, or
+equal `grid` where cells declare no `sizing`), **never a fixed `medium`**. Weight
+is consulted ONLY when an author explicitly sets it for a deliberate unequal
+*grid* split. The "fixed middle = medium" alternative is rejected — it would
+re-introduce a sizing default the content/fill model already handles more
+honestly. **D-series + E-series + item 10 all resolved: the spec is build-ready.**
