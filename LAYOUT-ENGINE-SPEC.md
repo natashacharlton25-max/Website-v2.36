@@ -48,11 +48,19 @@ no freedom to break.
 The same engine runs at every level. Only its CONFIGURATION differs per level
 (see §4). The engine itself is:
 
-### 2.1 Container size context
-The container establishes an absolute size context (a `--container-scale` custom
-property or a container-query context). Every item weight inside resolves
-RELATIVE TO THIS CONTAINER — never relative to the row or cell. One scale per
-container; a weight of 3 means the same thing anywhere inside that container.
+### 2.1 Container size context (E1 resolved — measure own width)
+The container establishes its size context by MEASURING ITS OWN RENDERED WIDTH
+(a CSS container-query context — `container-type: inline-size` on each box), NOT
+by a value passed down. A box therefore knows how wide it actually is wherever
+it lands, so a card in a narrow column genuinely behaves as narrow with no
+per-breakpoint rules. Every item weight inside resolves RELATIVE TO THIS MEASURED
+WIDTH — never relative to the row or cell. One scale per container; a weight of 3
+means the same thing anywhere inside that container.
+
+This is the mechanism that makes **inherited size (D1) real**: a card is never
+*told* its size — it *measures* the cell it landed in. The rejected alternative
+(a passed-down `--container-scale` value) would require hand-written responsive
+rules to reflow, defeating §2.5; it is not used.
 
 ### 2.2 Rows
 An ordered array. Rows render top to bottom in array order. Each row holds ONE
@@ -91,8 +99,12 @@ one column regardless. Columns are DERIVED, not authored:
 
 **The dials** (change → columns re-derive):
 - Tier representative widths: 384 / 672 / 1024 / 1280 px (`--container-sm/-2xl/-5xl/-7xl`).
-- Comfort min item widths per weight: small 128px (FormField card-select),
-  medium 280px (Grid `--grid-min`), large 400px (RelatedGrid rich card).
+- Comfort min item widths per weight, in **REM not px** (so floors scale with
+  the user's font-size / zoom — the a11y floor is non-negotiable): small **8rem**
+  (~128px, = FormField card-select), medium **17.5rem** (~280px, = Grid
+  `--grid-min`), large **25rem** (~400px, = RelatedGrid rich card). FormField
+  already uses rem (8rem); Grid/RelatedGrid use px today — convert to rem in the
+  build. (See §2.8 for why rem.)
 
 **Min item widths are COMFORT TARGETS that drive the column count — NOT hard
 pixel floors on atoms.** A hard `min-width` that overflows its cell is the
@@ -141,6 +153,42 @@ paths reintroduce the flow-vs-grid split this whole model exists to remove, and
 they drift apart over time. There is one path; a single item is simply the
 one-column grid. If the rebuild ever needs a single-item branch, the model has
 been misunderstood.
+
+### 2.8 Sizing model — relative share between a rem floor and a capped ceiling (E1 cont. / E3 resolved)
+One line: **items are a relative share of their measured container, arranged by
+`auto-fit` between a rem-based minimum floor (never below readable/tappable) and a
+capacity-table ceiling — no fixed pixels, scales with container, screen, and user
+font size.**
+
+The pieces:
+- **Relative share = weight.** An item's size is its weight (1/2/3) resolving
+  against the measured container width (§2.1 / §2.3) — `%`/`fr` behaviour, not
+  pixels. Same weight = same relative size in any container.
+- **Floor = rem minimum.** An item never shrinks below its comfort minimum, and
+  never below the accessibility floor (readable text, 44px-equivalent targets).
+  Floors are in REM so they scale with the user's font/zoom — for an
+  accessibility-first platform this is the point, not an option (§2.4 dials).
+- **Ceiling = capacity table + container bound.** The table caps how many columns
+  (items can't multiply absurdly); the container bounds the width (a single item
+  can't run away) (§2.4).
+- **`auto-fit` arranges between them.** The engine uses
+  `repeat(auto-fit, minmax(min(100%, <rem floor>), 1fr))` — fit as many items as
+  fit at their floor (up to the cap) and let them grow to fill. As the container
+  shrinks, auto-fit drops columns when items hit their floor; as it grows they
+  expand. Automatic AND responsive from one declaration.
+
+Two build-critical notes (invisible until built wrong):
+- **Floors in REM, never px.** px ignores the user's font-size; rem honours it.
+- **`auto-fit`, NOT `auto-fill`.** They look identical but differ on a half-empty
+  row: `auto-fit` collapses empty tracks so a lone item fills its share;
+  `auto-fill` keeps phantom empty columns so a lone item stays small. The model
+  wants items to fill their share → `auto-fit`. The existing organism Grid +
+  FormField card-select already use the `auto-fit` idiom (grounding, §2.4) —
+  match it, don't reach for `auto-fill` out of habit.
+
+This settles **E3 (how columns are computed):** auto-fit with the capacity table
+as the *cap* (not a hard fixed count) — matching the existing codebase idiom —
+rather than the engine emitting an exact column count per cell.
 
 ---
 
