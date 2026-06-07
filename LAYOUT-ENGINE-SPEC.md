@@ -73,25 +73,54 @@ case of the same logic. Per row, the author decides one thing or several.
 
 **Row data shape (E2 resolved):** weight lives on the ITEM — each item declares
 its own `small | medium | large`, so weight travels with the item wherever it's
-placed and is never re-specified per row. A row is stored as an extensible object
-holding its items plus ONE optional property:
+placed and is never re-specified per row.
 
-- `distribution` (enum, default `grid`):
-  - `grid` — equal, weight-driven columns, capacity-capped, arranged by auto-fit
-    (the §2.4 / §2.8 model). The DEFAULT; what cards-in-a-section and tile/gallery
-    rows use. Weight drives the columns. Within `grid`, a single-item row is the
-    one-column degenerate case (§2.7).
-  - `start | center | end | between` — CONTENT-SIZED arrangements (flex
-    justification): items size to their own content, weight is not used, and they
-    pack/justify along the row. For control bars and footers — e.g. a card footer
-    with a badge on the left and a button on the right = `between`.
+**Canonical shape — a row is an OBJECT, not a bare array:**
+
+```json
+{ "items": [ <item>, <item> ], "distribution": "grid" }
+```
+
+- `items` — the ordered list of weighted items (required). Named `items`, not
+  `row`: "a row contains items," not "a row contains a row."
+- `distribution` — `grid | start | center | end | between` (optional, default
+  `grid`). It is a SIBLING of `items` — **never a `key: value` inside the array.**
+
+A container (Page / Section / Card) holds `rows`, an ordered array of these row
+objects:
+
+```json
+"rows": [
+  { "items": [ … ] },
+  { "items": [ … ], "distribution": "between" }
+]
+```
+
+An item is an object:
+
+```json
+{ "component": "<Name>", "weight": "small | medium | large", … componentProps }
+```
+
+How `distribution` behaves:
+- `grid` (default) — weight drives equal columns via the capacity table (§2.4 /
+  §2.8). Cards-in-a-section, tiles, galleries. Within `grid`, a single-item row is
+  the one-column degenerate case (§2.7).
+- `start | center | end | between` — CONTENT-SIZED (flex justification): items
+  size to their own content, **`weight` is ignored**, and they pack/justify along
+  the row. For control bars + footers — a card footer with a badge left and a
+  price right = `between`.
 
 So `grid` is the weight engine (the vast majority of rows); the content-sized
-distributions are a deliberate per-row opt-in for control-bar/footer layouts. The
-§2.7 "one code path" and §2.8 "grid is just a multi-item row" statements describe
-the `grid` distribution specifically; the content-sized distributions are the
-explicit, author-chosen exception — not a flow-vs-grid mode you reason about for
-ordinary content.
+distributions are a deliberate per-row opt-in. The §2.7 "one code path" and §2.8
+"grid is just a multi-item row" statements describe the `grid` distribution; the
+content-sized distributions are the explicit, author-chosen exception — not a
+flow-vs-grid mode you reason about for ordinary content.
+
+**Possible validator rule (backlog):** warn (not error) when an item carries
+`weight` inside a content-sized row (`start | center | end | between`) — weight
+does nothing there, so flagging it keeps the "every value is meaningful and
+checkable" contract honest.
 
 ### 2.3 Item weight
 Every item carries a relative weight: `small | medium | large` (1 / 2 / 3).
