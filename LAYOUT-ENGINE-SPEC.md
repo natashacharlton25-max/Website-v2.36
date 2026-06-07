@@ -1,7 +1,11 @@
 # LAYOUT-ENGINE-SPEC
 
-Status: DRAFT for rebuild — reasoned through 2026-06-02, not yet implemented.
+Status: DRAFT for rebuild — reasoned 2026-06-02 (D1–D5, E1–E4) + 2026-06-07
+(engine↔preset split, content/fill, overlay position, weight demoted, vertical
+distribution, guarantee boundary). Not yet implemented.
 Scope: One shared layout engine used at three levels — Page, Section, Card.
+**Read §11 first** — the engine is the designer's machinery; an author builds
+nothing but picks a preset and fills content. "Card is an atom built like Button."
 Companion to BUILD-STATUS.md (status) and COMPLIANCE-INVENTORY.md (axes).
 
 > Purpose: replace Card's legacy slot-based markup (and Section/Page's generic
@@ -15,10 +19,26 @@ Companion to BUILD-STATUS.md (status) and COMPLIANCE-INVENTORY.md (axes).
 
 ## 1. The core principle
 
-A container holds an ordered list of ROWS. Each row holds ONE OR MANY
-WEIGHTED ITEMS. The author NEVER picks columns. The renderer computes columns
-from (container size × item weight), wraps and reflows responsively, and caps
-capacity so a row can never overcrowd.
+A container holds an ordered list of ROWS. Each row holds ONE OR MANY ITEMS. The
+author NEVER picks columns or pixel sizes. The renderer computes columns, sizes,
+wrapping and reflow, and caps capacity so a row can never overcrowd.
+
+**Two spatial relationships only (item 1, 2026-06-07).** Every layout, at every
+level, is built from exactly two relationships — never confused:
+- **In-flow (rows):** items *beside* each other (a multi-item row) or *stacked*
+  (rows in sequence). Beside and stacked are the SAME mechanism — rows of items.
+- **Layered (overlay):** one item is the background, others float *on top* (the
+  media-mode mechanism — `background` / `fill` + an overlay position, §4.3). This
+  is NOT a row.
+Rows arrange *beside*; modes/layers arrange *on top*. A cell may hold a layered
+stack while itself sitting in a row.
+
+**Weight is an optional override, not the core (item 6, 2026-06-07 — supersedes
+the earlier "every item is weighted" framing).** The default needs no weight:
+a single-item row fills its width; a multi-item row is equal-share (`grid`) or
+content/fill (§2.8). Weight is set ONLY to force a deliberate *unequal* split
+(big image, narrow text). Unspecified weight is the default, never an error, and
+weight is NEVER inferred from content.
 
 **"Grid" is not a separate concept.** A row with one item fills the row (a
 single column); a row with several items becomes a grid whose columns the
@@ -33,7 +53,8 @@ same engine, every scale.
 Three author concepts only:
 1. Pick the container size.
 2. Add rows (ordered, top to bottom).
-3. Put one or many weighted items in each row.
+3. Put one or many items in each row (weight only if you want a deliberate
+   unequal split — see §2.3).
 
 Everything else — columns, actual pixel sizes, wrapping, responsive reflow —
 is derived by the renderer. The complexity lives in the engine, not the author's hands.
@@ -71,9 +92,13 @@ the model or in the author's head — a grid is just a row with more than one
 item, and the engine treats the single-item row as the one-column degenerate
 case of the same logic. Per row, the author decides one thing or several.
 
-**Row data shape (E2 resolved):** weight lives on the ITEM — each item declares
-its own `small | medium | large`, so weight travels with the item wherever it's
-placed and is never re-specified per row.
+**Row data shape (E2 resolved):** an item is EITHER an atom OR a **sub-container
+of rows** (item 2, 2026-06-07) — nesting one level deeper, the same Page→Section→
+Card principle. That nesting is what makes "image left, [meta over body] middle,
+button right" expressible: the middle cell holds two stacked rows. Weight is
+OPTIONAL on an item (item 6) — set it only for a deliberate unequal split; omit
+it for the default (equal-share / content-fill, §2.8), and it travels with the
+item when set.
 
 **Canonical shape — a row is an OBJECT, not a bare array:**
 
@@ -96,11 +121,25 @@ objects:
 ]
 ```
 
-An item is an object:
+An item is an object — either an atom or a sub-container of rows:
 
 ```json
-{ "component": "<Name>", "weight": "small | medium | large", … componentProps }
+// an atom
+{ "component": "<Name>",
+  "sizing": "content | fill"?,        // §2.8 — hug vs fill; optional
+  "weight": "small | medium | large"?, // §2.3 — optional unequal-split override
+  "vertical": "start | center | end"?, // §2.x — vertical placement in a tall cell
+  … componentProps }
+
+// OR a sub-container of rows (a cell holding its own stacked / side-by-side rows)
+{ "rows": [ <row>, <row> ],
+  "sizing": "content | fill"?,
+  "vertical": "start | center | end"? }
 ```
+
+(`?` = optional.) A cell with `rows` re-runs the whole engine inside itself — one
+level deeper. Every optional property has a safe default, so the minimal item is
+just `{ "component": "<Name>", …content }`.
 
 How `distribution` behaves:
 - `grid` (default) — weight drives equal columns via the capacity table (§2.4 /
@@ -117,16 +156,37 @@ distributions are a deliberate per-row opt-in. The §2.7 "one code path" and §2
 content-sized distributions are the explicit, author-chosen exception — not a
 flow-vs-grid mode you reason about for ordinary content.
 
+**Distribution applies on BOTH axes (item 5, 2026-06-07).** Horizontal (above):
+`grid | start | center | end | between` *across* a row. Vertical: a per-cell
+`vertical` (`start | center | end`) *down* a cell, for when a cell is taller than
+its content — which happens in an **equal-height row** (cells all match the
+tallest, e.g. a tall image). Example: in `image | [meta/body] | button`, the
+button sits `center` vertically against the tall image while the middle content
+sits `start` (top). Height-balance = equal-height row + vertical placement; the
+author declares the placement (an enum), the browser does the measuring.
+
 **Possible validator rule (backlog):** warn (not error) when an item carries
 `weight` inside a content-sized row (`start | center | end | between`) — weight
 does nothing there, so flagging it keeps the "every value is meaningful and
 checkable" contract honest.
 
-### 2.3 Item weight
-Every item carries a relative weight: `small | medium | large` (1 / 2 / 3).
-Rendered size = container size × item weight, resolved at render time.
-A `large` item in a `small` container is smaller in absolute terms than a
-`large` item in an `xl` container — because weight is relative to container.
+### 2.3 Item weight — OPTIONAL override (item 6, 2026-06-07)
+Weight is `small | medium | large` (1 / 2 / 3), **optional**, and exists for ONE
+case: a deliberate *unequal* side-by-side split (a big image beside narrow text).
+It is NOT required on every item — this supersedes the earlier "every item is
+weighted" framing.
+
+Defaults (no weight needed):
+- **single-item row** → full width; the item sizes itself (image fills the width,
+  height by aspect ratio).
+- **multi-item row** → equal share (`grid`, capacity-capped, §2.4) OR content/fill
+  per cell (§2.8) for hug-vs-fill rows.
+
+When set, weight resolves relative to the container: rendered size = container ×
+weight (a `large` item is bigger in an `xl` container than in a `small` one).
+**Unspecified weight is the default, never an error. Weight is NEVER inferred from
+content** — inference is unpredictable, unvalidatable, and makes the engine a
+judge, breaking the enum-only contract. The author sets weight only to emphasise.
 
 ### 2.4 Computed columns (the capacity table)
 The renderer computes how many columns a row gets from
@@ -185,13 +245,25 @@ container (e.g. xl → small on a narrow viewport via container queries)
 recomputes columns automatically. A 3-column row of large items collapses to
 1 column with no per-breakpoint rules. Reflow falls out of the model.
 
-### 2.6 What the engine guarantees
-- Count: a row holds exactly as many items as its computed columns allow;
-  overflow wraps to a new line, never overcrowds.
-- Size: there is no absolute pixel size for items — only weight × container.
-  A "10000px image" is inexpressible.
-- Coherence: everything in a container is on one relative scale, so sizes
-  relate by design rather than clashing absolutes.
+### 2.6 What the engine guarantees — the honest boundary (item 9, 2026-06-07)
+State this plainly; overclaiming is itself drift.
+
+**Hard guarantees (structural — impossible to violate):**
+- **No overflow.** No absolute sizes exist; every item is cell-bounded (§3). A
+  "10000px image" is inexpressible.
+- **No invalid composition.** Cell-content enums per level (§4) reject any atom
+  not allowed there.
+- **No sub-floor accessibility.** Rem floors, 44px-equivalent targets, prose
+  line-length (§2.8) — readable/tappable minimums can't be dropped below.
+- **Coherence of size.** Everything in a container is on one relative scale, so
+  sizes relate by design rather than clashing absolutes.
+
+**Soft (NOT guaranteed):**
+- **Good taste / ideal composition.** Relative sizing eliminates SIZE-clash
+  (proportional, one scale) but NOT content-driven imbalance — very short text
+  under a tall image, ragged heights from uneven content. Presets + equal-height
+  rows + content guidance handle the residual — **NOT the engine.** The engine
+  guarantees *safe + proportional*, never *tasteful*.
 
 ### 2.7 One code path — the single-item row is the degenerate grid
 The engine has exactly ONE column-computation path: `columns = lookup(container
@@ -240,6 +312,24 @@ Two build-critical notes (invisible until built wrong):
 This settles **E3 (how columns are computed):** auto-fit with the capacity table
 as the *cap* (not a hard fixed count) — matching the existing codebase idiom —
 rather than the engine emitting an exact column count per cell.
+
+**Two width-balance mechanisms (item 4, 2026-06-07).** A side-by-side row
+balances widths WITHOUT measuring, in one of two ways:
+- `grid` (default, weight-driven) — equal columns via the capacity table +
+  auto-fit (above). Optional `weight` (§2.3) skews it to a deliberate unequal split.
+- per-cell **`sizing`** — each cell is `content` (hug its content width, CSS
+  `auto` — images, buttons) or `fill` (take the remaining space, CSS `1fr` — the
+  flexible text/middle cell). A row like `image | middle | button` is
+  `auto 1fr auto`: image + button hug, middle fills. This is the hug-vs-fill
+  mechanism the `grid`/weight model alone can't express; it's an enum
+  (`content | fill`), and the `fill` cell absorbs/yields space as the container
+  changes — responsive for free.
+
+**Balance is DECLARED, not computed (item 7, 2026-06-07).** The author/designer
+never measures or computes balance. They declare BEHAVIOUR — content vs fill,
+equal-height, vertical placement, optional weight — and the browser's grid does
+the measuring continuously, at every screen size. The measuring happens in the
+browser, automatically; never by hand, never in the JSON.
 
 ### 2.9 The size cascade — each cell becomes the child's measured container (E4 resolved)
 The same operation runs at EVERY level: **measure my own width (E1), then divide
@@ -360,6 +450,13 @@ The engine is shared. Each level configures it:
   same injection, same behaviour — not a second pattern that merely looks alike.
   (A Shape-wallpaper child takes `semanticRole='background'`; a plain decorative
   Image background is `semanticRole='decorative'` — both aria-hidden, same intent.)
+- Overlay position (item 3, 2026-06-07 — THE gap this session found): media modes
+  say HOW an item layers (`background` / `fill` / `overlap-edge`) but nothing said
+  WHERE a layered item sits on the thing behind it (e.g. a "New" badge on an
+  image, top-left). Add **`overlayPosition`** for items in a layering mode — a
+  nine-point grid enum: `top-left | top | top-right | left | center | right |
+  bottom-left | bottom | bottom-right`. The author picks a named position, never
+  pixel coordinates — validatable, unbreakable.
 - Notes: this replaces the legacy `<slot/>` + dead `.card__*` CSS + in-component
   gate selectors. None of that exists in the new model.
 
@@ -380,11 +477,16 @@ validator straight from this list.**
 | Container size — Page | Page | viewport — NOT authored |
 | Section width | Section | `prose \| standard \| wide \| full` (D5; maps to real `--container-*` tokens; replaces the legacy 13-value `container` enum) |
 | Card size | Card | none of its own — expressed as the Card's WEIGHT in its section row (uses the weight enum, no separate size enum) |
-| Item weight | every item, every level | `small \| medium \| large` |
-| Row distribution | every row | `grid` (default) \| `start \| center \| end \| between` (E2) |
+| Card type (preset) | Card | `cardType` — `horizontal \| product \| profile \| feature \| …` (item 8; the author's MAIN Card choice — picks a designed arrangement; see §11) |
+| Item weight (OPTIONAL) | any item | `small \| medium \| large` — set only for a deliberate unequal split; omit for the default (item 6) |
+| Row distribution (horizontal) | every row | `grid` (default) \| `start \| center \| end \| between` (E2) |
+| Cell sizing | any cell | `content \| fill` — hug vs fill, `auto`/`1fr` (item 4) |
+| Vertical placement | any cell in an equal-height row | `start \| center \| end` (item 5) |
+| Equal-height row | any row | boolean (item 5) |
 | Cell-content | per level | enum of allowed component NAMES — Page `[Section]`; Section `[Card, Heading, Text, Image, List, Badge, Button, Link, Icon, LottieIcon, Shape]`; Card `[Image, Heading, Text, Badge, Icon, Button, Link, List, Shape, LottieIcon]` |
 | Gap | row / container | `none \| xs \| sm \| md \| lg \| xl \| 2xl \| 3xl` (matches existing Section `gap`) |
 | Media mode | Card media items | `inline \| fill \| background \| overlap-edge` |
+| Overlay position | a layered media item | `top-left \| top \| top-right \| left \| center \| right \| bottom-left \| bottom \| bottom-right` (item 3) |
 | Media bg size | Card media (bg) | `compact \| normal \| spacious` (D3 pattern) |
 | Section colour | Section | `primary \| secondary \| neutral \| red \| orange \| yellow \| teal \| blue \| purple \| pink` (existing `color`) |
 | Section bg | Section | `none \| tint \| light \| solid` (existing) |
@@ -463,12 +565,19 @@ D5. **Section width intent** — RESOLVED 2026-06-02: author picks a SEMANTIC
 
 ## 8. Build order
 
-1. Build the SHARED ENGINE first — size context, rows, weight resolution (R1),
-   column computation + capacity table (R2), responsive reflow. Level-agnostic.
-2. Configure CARD on the engine — cell-content atom enum, media modes (incl. the
-   `mediaBg` background pattern, D3), and inherited size (a card's size IS its
-   weight in the section row, D1 — no separate size pick). This is the
-   legacy-slot rebuild; replaces `<slot/>` and dead CSS.
+> Reframed 2026-06-07 (§11): this is NOT a separate "engine" project — it's the
+> **Card atom, built like Button** (`cardType` variants), whose CSS uses the
+> engine internally. Build the machinery, then the first real preset.
+
+1. Build the SHARED ENGINE machinery — size context (container queries), rows +
+   cells, content/fill, capacity table + auto-fit, vertical distribution,
+   overlay, optional weight, responsive reflow. Level-agnostic; it's the CSS the
+   presets are made of.
+2. Build CARD as an atom (the Button pattern): `cardType` variant enum, each
+   type's layout in `Card.css` keyed by its class, content slots as props (§11).
+   Ship ONE preset first — **`card-horizontal`** — as the first variant; it
+   replaces the legacy `<slot/>` + dead CSS. (incl. media modes + `mediaBg`, D3;
+   inherited size = weight, D1.)
 3. Retrofit SECTION onto the engine — rows of cards/atoms, with the semantic
    width options (`prose | standard | wide | full`, D5).
 4. Retrofit PAGE onto the engine — rows of sections.
@@ -496,6 +605,17 @@ model from page down to atom.
   still opt into a content-sized `distribution` (`start|center|end|between`) for
   control bars/footers — a deliberate per-row choice (E2 / §2.2), not a
   flow-vs-grid mode the author reasons about for normal content.
+- The hug-vs-fill gap (`image | middle | button` = `auto 1fr auto`) — closed by
+  per-cell `content | fill` sizing (item 4 / §2.8); the weight/grid model alone
+  couldn't express it.
+- The "where does a layered badge sit?" gap — closed by the `overlayPosition`
+  nine-point enum (item 3 / §4.3).
+- "Is this a big layout-engine *project* to build?" — no. It's the Card atom
+  built like Button (`cardType` variants), the pattern proven 11 times (item 8 /
+  §11). The engine is just how the preset CSS works internally.
+- AI-authoring safety — an AI fills a preset's content slots only, makes no
+  layout choices, so it cannot produce a broken design; worst case is awkward
+  text (item 8 / §11).
 
 ---
 
@@ -523,5 +643,69 @@ decisions in §7). Resolved ones are written into §2 / §5; the last two are ne
 The validation contract (§5) is captured: every author-facing setting is a named
 enum; the schema + validator build straight from that list.
 
-**Next: only E5 left** — the small overflow backstop. State the mechanism, and
-the engine spec is build-ready.
+**2026-06-07 additions** (items 1–9, integrated into §1–§6 + §11): two spatial
+relationships (§1), cell nesting (§2.2), `overlayPosition` (§4.3), `content/fill`
+cell sizing (§2.8), vertical distribution (§2.2), weight DEMOTED to optional
+(§2.3), balance-declared-not-computed (§2.8), the engine↔preset split + "Card is
+an atom" (§11), the honest guarantee boundary (§2.6).
+
+**Open sub-decision (item 10 — not yet made):** the default for an *unspecified*
+weight in a side-by-side row — `medium` (fixed middle) vs "even share of the
+space left after `content`-sized cells take theirs." Item 6 leans behaviour-driven
+(content/fill default, weight as override); confirm the exact rule when building
+the first preset.
+
+**E5 (overflow backstop)** is still the one open engine mechanic — small; the §5
+consequence already holds (no bad input to catch; enums prevent it).
+
+**Next (per §11): don't add more engine surface — define the first preset,**
+`card-horizontal`, for real. That's the bridge to a buildable Card atom; E5 and
+the item-10 default both resolve naturally while building it.
+
+---
+
+## 11. Engine vs presets — the two-layer model (item 8, 2026-06-07) — THE BIG ONE
+
+The session's key realisation. There are TWO layers, and earlier sections were
+mixing them:
+
+- **The ENGINE (general machinery):** rows, cells, content/fill, overlay +
+  position, vertical distribution, optional weight, the capacity table. Lots of
+  capability. Used by the **designer**. Everything in §1–§6 *is* this layer — it
+  is how the layout works *internally*.
+- **PRESETS / designed cards (specific):** "horizontal card", "product card",
+  "profile card", "feature card" — each a FIXED arrangement (which cells,
+  hug/fill, vertical placement, nested rows, overlay) defined ONCE on the engine
+  by the designer. This is the chrome-vs-designed-card distinction from the start
+  of the Card work.
+- **The AUTHOR / AI:** picks a preset and fills content slots. ~2 choices —
+  card type + content. No sizing, no placement, no weight: the preset already
+  decided all of it.
+
+### Card is an atom, built like Button.
+This is the reframe that makes the rebuild familiar, not intimidating:
+- `cardType` is the variant enum (`horizontal | product | profile | feature | …`)
+  — exactly as Button has `variant` (`fill | glass | glow | …`).
+- Each `cardType`'s layout lives in `Card.css` keyed by its class
+  (`.card--horizontal`), same as `.btn--fill` vs `.btn--glass`.
+- Content slots are props (`image`, `meta`, `body`, `button`), schema-validated
+  like `contentButton`.
+- **Same files, same enum pattern, same validation, same author experience** as
+  every other audited atom. There is no mysterious new "layout engine project" to
+  build — there is an **atom to build, using the pattern proven 11 times.** The
+  "engine" reasoning (§1–§6) is HOW the preset CSS works (rows + cells +
+  container queries); `cardType` is WHAT the author sees.
+
+### Consequence for AI generation (the safety win)
+An AI filling a preset's content slots CANNOT make a bad layout — it makes no
+layout choices, only content choices. Worst case is awkward *text*, never broken
+*design*. That is the strongest safety position the platform can hold.
+
+### Suggested next step (don't add more engine surface)
+Define the FIRST PRESET — `card-horizontal` — for real: which cells, hug/fill per
+cell, vertical placement, nested middle rows (meta over body), accepted atom per
+slot — then the author's tiny input against it. That makes "specific rows" and
+"not a lot of choice" concrete, and it's the bridge from engine-spec to a
+buildable Card atom. Worked sketch: image left (`content`), meta-over-body middle
+(`fill`, nested rows), button right (`content`, `vertical: center`), equal-height
+row. See `horizontal-card-preset.jsonc`.
