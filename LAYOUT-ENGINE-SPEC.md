@@ -753,6 +753,18 @@ row, three cells, left → right; widths are `auto 1fr auto` via per-cell `sizin
 guarded by its `accepts` (Layer-1's per-slot atom enum) — the preset layer's
 equivalent of the cell-content enum.
 
+> **Build-time decision — DUE at the media/image cell, do not skip.** Card's
+> `media.semanticRole` is `required: false` (matched from FormField), but the
+> child `Image`/`Icon` schemas declare `semanticRole` `required: true`. Under the
+> (B) Move 2 lock (`_lockProps`), the CHILD's requirement is authoritative — so an
+> Image media node WITHOUT `semanticRole` errors on the child's required check the
+> moment a card has an image. Resolve when wiring the media cell, not as a
+> surprise: **(a)** align Card's `media.semanticRole` to `required: true` (matches
+> `Heading.media`) so the author always declares intent — recommended, it's the
+> honest WCAG signal; or **(b)** have `Card.astro` inject the default
+> (`decorative`) into the media node before validation. Pick one HERE. See
+> BUILD-STATUS §2 (Card) + VALIDATOR-NESTED-SLOTS-SPEC.md.
+
 **Layer 2 — what the author / AI writes (every time).** Canonical form matches
 §11 ("Card is an atom; `cardType` is the variant enum; slots are props"):
 

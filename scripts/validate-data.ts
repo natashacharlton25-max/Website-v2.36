@@ -200,28 +200,32 @@ async function checkAstroVsSchema(
 
 async function loadSchemas(): Promise<Map<string, ComponentSchema>> {
   const schemaFiles = await walk(COMPONENTS_DIR, (p) => p.endsWith('.schema.json'));
-  const schemas = new Map<string, ComponentSchema>();
-  let skipped = 0;
+  // ALL schemas — so nested component-node validation (the media.component
+  // check + the `_lockProps` deep recursion in validateComponent, which read
+  // child schemas from globalThis.__schemaMap) can resolve a slot's child atom
+  // by `component` (e.g. Heading.media → Icon|Image|Shape). Without the full
+  // map the nested lock would silently skip every unaudited child = silent hole.
+  const allSchemas = new Map<string, ComponentSchema>();
+  // Audited subset — the TOP-LEVEL validation gate. validatePage only validates
+  // a node whose component is in THIS map, so non-audited top-level instances
+  // (Grid/Section/Page/…) still pass through unchecked. Decoupling the two maps
+  // is what lets the nested lock turn on without incidentally enforcing
+  // not-yet-audited atoms.
+  const auditedSchemas = new Map<string, ComponentSchema>();
   for (const file of schemaFiles) {
     try {
       const json = JSON.parse(await readFile(file, 'utf-8')) as ComponentSchema;
       if (!json.component) continue;
-      // Only load schemas for audited atoms — validatePage skips any
-      // component not in the map, so non-audited instances pass through.
-      if (!AUDITED_COMPONENTS.has(json.component)) {
-        skipped++;
-        continue;
-      }
-      schemas.set(json.component, json);
+      allSchemas.set(json.component, json);
+      if (AUDITED_COMPONENTS.has(json.component)) auditedSchemas.set(json.component, json);
     } catch (e) {
       console.error(`[validate-data] failed to parse schema ${file}: ${(e as Error).message}`);
       process.exit(1);
     }
   }
-  // _ref nested validation in validateComponent reads from globalThis.__schemaMap
-  (globalThis as any).__schemaMap = schemas;
-  console.log(`[validate-data] ${schemas.size} audited schemas loaded, ${skipped} non-audited skipped`);
-  return schemas;
+  (globalThis as any).__schemaMap = allSchemas;
+  console.log(`[validate-data] ${auditedSchemas.size} audited schemas (top-level gate), ${allSchemas.size} total loaded for nested-slot lookup`);
+  return auditedSchemas;
 }
 
 async function main() {

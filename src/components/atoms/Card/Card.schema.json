@@ -4,39 +4,47 @@
   "renders": {
     "full": "Card.astro",
     "reduced": "Card.astro",
-    "assistive": "Card.astro",
     "textonly": "Card.astro"
   },
-  "notes": "Pure container shell — visual chrome via CSS custom properties (--card-bg, --card-text, --card-border, --card-accent, --card-shadow). Children handle their own layout and content. Molecule cards use <Card> as outer wrapper. In textonly render, card becomes transparent bordered box. Children should use Heading/Text/Badge/Button atoms — legacy typography and element primitives deleted.",
+  "notes": "Layout-preset atom (LAYOUT-ENGINE-SPEC.md), built like Button. `cardType` is the variant enum — a designed layout, each living in Card.css keyed by `.card--{type}`. Slots are REAL ATOMS composed the way the other atoms compose them: the media cell uses the shared `media` node (Icon|LottieIcon|Image|Shape + mediaBg); the text slots are nested Heading/Text component nodes and the action a Button node — the author writes `{ component, …child props }` and the child atom owns its own props, exactly the FormField/Badge/Heading media pattern (no `_ref`). ATOM CHOSEN BY SEMANTICS, APPEARANCE CHOSEN FREELY ON TOP: each slot is typed to the atom the content STRUCTURALLY is — `title` is a Heading because it IS a heading (in the document outline, screen-reader navigable); `meta` is a Text because it is metadata, NOT a heading (never announced as one). The slot type GUARANTEES honest structure (an author can't downgrade a title to a non-heading, or make a caption announce as a heading); the preset CSS then styles each slot however it likes (a Heading can look small, a Text can look large) — visual freedom on top of fixed semantics. Textonly handling is CARD-LEVEL first: semanticRole='decorative' drops the whole card (it was chrome); 'content-symbol'/'ui-control' keeps it reduced; UNMARKED keeps the card fully (safe default — forgetting to tag never hides content from a reading-mode user). 'decorative' means the author has VERIFIED the card carries no information a reader needs — NOT merely that it 'looks visual'. Within a kept card, Heading/Text/Button slots are content-by-nature (kept); only media follows its own semanticRole. cardType=horizontal: media left (hug) | title + meta + body middle (fill, stacked) | Button right (hug, centred), equal-height row. Legacy variant/slot-children consumers are .astro-level (bypass this schema, pass no cardType) — Card.astro keeps a legacy fallback branch until each is rebuilt as a cardType and migrated to the JSON card test page.",
+
+  "_rules": [
+    { "rule": "mediaBg-shape-background", "condition": "mediaBg === true && media?.component === 'Shape'", "action": "Card auto-injects semanticRole='background' on the Shape (runtime guarantee; JSON value overridden) — same pattern as Heading/List/Badge.", "note": "Shape is wallpaper for the child atom; the child owns aria/label." }
+  ],
 
   "props": {
     "content": {
-      "_description": "What the card is and where it goes",
-      "as":         { "type": "string",  "required": false, "default": "div", "enum": ["div", "article", "section", "aside", "li"], "description": "HTML element." },
-      "href":       { "type": "string",  "required": false, "default": null, "description": "Makes card a link. Renders as <a>." },
-      "separator":  { "type": "boolean", "required": false, "default": false, "description": "Visible border between header/body/footer." },
-      "flush":      { "type": "boolean", "required": false, "default": false, "description": "Remove margin-bottom." }
+      "_description": "The atoms the chosen cardType arranges, plus the card-level reading-mode intent. Each slot is a nested component node (the FormField/Badge/Heading pattern, no `_ref`): the `component` enum names the child and the child atom owns its own props (Card only places the slot). Deep child-prop validation is the shared (B) nested pass (VALIDATOR-NESTED-SLOTS-SPEC.md), identical to every atom's media — not Card-specific.",
+      "title":  { "type": "object", "required": false, "_lockProps": true, "_description": "Title — middle cell. Heading because it IS a heading (document outline, screen-reader navigable). Semantics fixed by the component enum; preset CSS styles appearance freely.", "properties": { "component": { "type": "string", "required": true, "enum": ["Heading"] } } },
+      "meta":   { "type": "object", "required": false, "_lockProps": true, "_description": "Metadata line — top of the middle cell. Text because it is metadata, NOT a heading (never announced as one). Preset CSS styles it small/muted.", "properties": { "component": { "type": "string", "required": true, "enum": ["Text"] } } },
+      "body":   { "type": "object", "required": false, "_lockProps": true, "_description": "Body — middle cell, below title/meta. Text; preset CSS styles appearance.", "properties": { "component": { "type": "string", "required": true, "enum": ["Text"] } } },
+      "button": { "type": "object", "required": false, "_lockProps": true, "_description": "Action — right cell. Button.", "properties": { "component": { "type": "string", "required": true, "enum": ["Button"] } } },
+      "semanticRole": { "type": "string", "required": false, "enum": ["decorative", "ui-control", "content-symbol"], "_description": "Card-level reading-mode intent (same enum as the atoms). decorative = whole card dropped in textonly — author has VERIFIED it carries no information a reader needs (not just 'looks visual'). content-symbol / ui-control = card kept, reduced. OMITTED = card kept fully (safe default; never hides content). Heading/Text/Button slots are content-by-nature and kept; only media follows its own semanticRole." }
+    },
+
+    "media": {
+      "_description": "Media cell — the shared media-node pattern (identical to Heading/Button/List/Shape).",
+      "media": {
+        "type": "object",
+        "_lockProps": true,
+        "_description": "Nested atom node. Default: a single atom (Icon | LottieIcon | Image | Shape). mediaBg=true: a Shape wrapping a child atom as a background container.",
+        "properties": {
+          "component":    { "type": "string", "required": true, "enum": ["Icon", "LottieIcon", "Image", "Shape"] },
+          "semanticRole": { "type": "string", "required": false, "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] }
+        }
+      },
+      "mediaBg":     { "type": "boolean", "required": false, "default": false, "_description": "true = media is a Shape wrapping a child atom (background container)." },
+      "mediaBgSize": { "type": "string", "required": false, "enum": ["compact", "normal", "spacious"], "_note": "Forwarded to the Shape wrapper. Implicit baseline 'normal'. Omit to use." },
+      "mediaSize":   { "type": "string", "required": false, "enum": ["auto", "xs", "sm", "md", "lg", "xl", "base", "2xl", "3xl"], "_note": "Forwarded to the child atom. Implicit baseline 'auto'. Omit to use." }
     },
 
     "visual": {
-      "_description": "How the card looks",
-      "variant":    { "type": "string",  "required": false, "default": "default", "enum": ["default", "transparent", "outline", "glass", "liquid", "neumorphic", "pressed", "comic", "tech"], "description": "Visual style." },
-      "shadow":     { "type": "string",  "required": false, "default": null, "enum": ["none", "sm", "md", "lg", "xl"], "description": "Box shadow." },
-      "dropShadow": { "type": "string",  "required": false, "default": null, "enum": ["none", "sm", "md", "lg", "xl"], "description": "Filter drop-shadow for non-rect shapes." },
-      "radius":     { "type": "string",  "required": false, "default": null, "enum": ["none", "sm", "md", "lg", "xl", "full"], "description": "Border radius." },
-      "padding":    { "type": "string",  "required": false, "default": null, "enum": ["none", "xs", "sm", "md", "lg", "xl", "2xl"], "description": "Internal padding." },
-      "border":     { "type": "string",  "required": false, "default": null, "enum": ["none", "thin", "medium", "thick"], "description": "Border width." },
-      "layout":     { "type": "string",  "required": false, "default": null, "enum": ["masonry"], "description": "Layout context." },
-      "class":      { "type": "string",  "required": false, "default": "", "description": "Additional CSS classes." }
+      "_description": "How the card is arranged — the layout preset (the variant enum, exactly like Button's variant).",
+      "cardType": { "type": "string", "required": true, "enum": ["horizontal"], "description": "Designed layout preset. Picks a fixed arrangement; sizing/placement are the preset's job, not the author's. More types (product, profile, feature, …) added as each is built." }
     },
 
-    "animation": {
-      "_description": "Motion behaviour — stripped in reduced/assistive/textonly renders",
-      "hover": { "type": ["boolean", "string", "array"], "required": false, "default": null, "enum": [true, "border", "glow", "lift"], "description": "Hover effect: true=lift, 'border'=border-color change, 'glow'=box-shadow glow. Can be an array for multiple effects e.g. ['lift', 'glow']. Stripped in reduced render — card has no hover motion." }
-    }
-  },
+    "colour": {},
 
-  "slots": {
-    "default": "Card content — use Heading, Text, Badge, Button, Image atoms inside. Structure with .card__header / .card__body / .card__footer."
+    "animation": {}
   }
 }

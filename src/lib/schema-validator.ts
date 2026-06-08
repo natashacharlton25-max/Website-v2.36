@@ -441,18 +441,62 @@ export function validateComponent(
       }
     }
 
-    // Nested media object — validate component enum
-    if (key === 'media' && typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      const mediaComponent = value.component;
-      const mediaDef = def as any;
-      if (mediaDef.properties?.component?.enum && mediaComponent) {
-        if (!mediaDef.properties.component.enum.includes(mediaComponent)) {
-          errors.push({
-            prop: `${key}.component`,
-            value: mediaComponent,
-            message: `media component "${mediaComponent}" not in enum [${mediaDef.properties.component.enum.join(', ')}]`,
-            severity: 'error',
-          });
+    // Nested component-node slot — validate the child's `component` against
+    // the slot's accept-list. (B) Move 1: generalised off the old
+    // `key === 'media'` hardcode — ANY slot whose def declares
+    // `properties.component.enum` is a component node (media, and Card's
+    // title/meta/body/button). Behaviour is identical to the previous
+    // media-only check; it is just no longer tied to the prop name. Safe
+    // globally: existing media nodes already carry valid components, and no
+    // other atom has a non-media component-node slot yet.
+    const nodeDef = def as any;
+    const isComponentNode =
+      !!nodeDef.properties?.component?.enum &&
+      typeof value === 'object' && value !== null && !Array.isArray(value);
+    if (isComponentNode) {
+      const childComponent = (value as any).component;
+      if (childComponent && !nodeDef.properties.component.enum.includes(childComponent)) {
+        errors.push({
+          prop: `${key}.component`,
+          value: childComponent,
+          message: `component "${childComponent}" not in enum [${nodeDef.properties.component.enum.join(', ')}]`,
+          severity: 'error',
+        });
+      }
+    }
+
+    // Nested component-node DEEP validation — opt-in via `_lockProps` (D2).
+    // (B) Move 2: once `component` names the child atom, recurse the slot's
+    // value against the child atom's FULL schema (looked up by `component`) —
+    // the SAME recursion the `_ref` path uses, auto-targeted by `component`
+    // instead of a `_ref` key. The child's schema is the one source of truth
+    // for its own props; the parent never re-declares them. `component` is
+    // skipped by the child as a structural prop; every other node prop
+    // (semanticRole, …) is a forwarded prop the child owns and validates.
+    // Errors accumulate into the same array (no throw) and carry the dotted
+    // path (e.g. `title.level`). Opt-in keeps the blast radius to flagged
+    // slots — existing media nodes stay untouched until their own audit.
+    if (nodeDef._lockProps && isComponentNode) {
+      const childComponent = (value as any).component;
+      if (!childComponent) {
+        errors.push({
+          prop: `${key}.component`,
+          value: undefined,
+          message: `required prop "component" is missing`,
+          severity: 'error',
+        });
+      } else if (typeof globalThis !== 'undefined' && (globalThis as any).__schemaMap) {
+        const childSchema = (globalThis as any).__schemaMap.get(childComponent);
+        if (childSchema) {
+          const childResult = validateComponent(value, childSchema);
+          for (const err of childResult.errors) {
+            errors.push({
+              prop: `${key}.${err.prop}`,
+              value: err.value,
+              message: err.message,
+              severity: err.severity,
+            });
+          }
         }
       }
     }

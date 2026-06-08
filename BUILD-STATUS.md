@@ -1,6 +1,6 @@
 # BUILD-STATUS
 
-Last updated: 2026-06-01
+Last updated: 2026-06-08
 
 > Ground truth is the code: `validatorRun` output, the renderer/render-controller code, and the atom schemas. Where the audit log or CLAUDE.md disagrees with these, the code wins.
 
@@ -26,8 +26,9 @@ Last updated: 2026-06-01
 
 Notes on reconciliation:
 - **Section, Shape**: validator-clean but flagged `unaudited` by the readers and have no logged v2 pass — listed here because the validator passes, but treat them as not-formally-complete (see §2).
-- **Card** is the only registered atom marked PASS in the audit log that the atom validator reports as **FAIL (131 issues)** — it is NOT clean. Moved to §2. This is the single largest doc-vs-code reversal (see §6).
-- The data validator confirms: **8 audited schemas loaded, 9 audited-atom test pages valid, 9 atoms in sync with schemas.**
+- **Card** — schema **rebuilt to the new layout-preset model (clean; 7/7 lock proof)** 2026-06-08; the atom validator's remaining **124 issues** are all in the LEGACY `Card.css`/`Card.astro` design-reference files (this was the 131-issue doc-vs-code reversal). See §2 + §6 D1.
+- The data validator confirms: **9 audited-atom test pages valid, 9 atoms in sync** (8 audited schemas as the top-level gate, 39 total loaded for nested child-lookup, as of 2026-06-08).
+- **(B) nested-slot lock rolled out (2026-06-08):** Badge / Button / Heading / List `media` slots carry `_lockProps` — their media children (Icon / LottieIcon / Image / Shape) are now deep-validated against the child atom's own schema. Link / Text / Tooltip have **no** component-node slot; FigCaption has no schema (rendered via Image). **FormField** has per-option media (`options[*].media`, array-nested) — the flattened-prop lock can't reach it and `validatePage` doesn't recurse `options[]`; per-option media locking is a separate mechanism (DEFERRED). Existing media data was already clean (dry-run + live run both 0 errors). See VALIDATOR-NESTED-SLOTS-SPEC.md.
 
 ## 2. Unaudited / in-progress atoms
 
@@ -80,32 +81,34 @@ Ordered by remaining effort (lightest first, Card last).
 - Reconcile data JSON drift (`textShadow`/`dropShadow` keys the .astro doesn't accept); rename `text`→`labelText`/`contentText`.
 - Audit `Math.random` filterId for SSR/hydration stability.
 
-**Card** — validator: **FAIL (131 issues)** — largest remaining effort
-- Audit log says PASS; live code fails the validator hard. This is the top priority reconciliation.
-- Remove the `slots` block (violates no-slots Rule 39).
-- Reconcile `bg` prop drift: present in `Card.astro` (injects raw `--card-bg`), absent from schema — add to visual group / FREE_STRING_PROPS or remove.
-- Move gate-concern selectors out of `Card.css`: `[data-hover="none"|"instant"]` → `hover-gate.css`; `[data-render="reduced"|"assistive"]` → reduced/assistive gates; `[data-mode="dark"]`/`[data-high-contrast]` hover-border → zone files.
-- Delete empty no-op rule blocks; optional `--_card-*` internal-token consolidation (consistency, not correctness).
+**Card** — schema: NEW layout-preset model (clean); legacy CSS/astro: validator FAIL (124, was 131) — design-reference, INTENTIONAL
+- **Schema rebuilt** to the layout-preset atom model (LAYOUT-ENGINE-SPEC.md §11/§12, 2026-06-08): `cardType` variant enum (`["horizontal"]`), nested component-node slots (`title`/`meta`/`body`/`button`/`media` — `{ component, …child props }`, child owns its props), card-level `semanticRole` for textonly keep/drop. No `slots` block (Rule 39 satisfied). No `_ref` (uses the codebase-wide component-node pattern). Passed a 7/7 lock proof against the real `validateComponent`.
+- **(B) nested-slot validator pass LANDED** — see VALIDATOR-NESTED-SLOTS-SPEC.md. Move 1 (global): the nested `component` check is generalised off the `key === 'media'` hardcode to ANY component-node slot. Move 2 (opt-in via `_lockProps`): deep-validates a slot's child props against the CHILD's schema (looked up by `component`, reusing the `_ref` recursion engine). **D1 = error** (consistent with top level), **D2 = opt-in** (blast radius contained). `validate:data` stayed green (9/9) — no regression.
+- Card's five slots carry `_lockProps: true` (opted into the lock). Proven: wrong atom, bad child enum, and unknown/styling props all rejected; appearance freedom within the child's enums passes; errors accumulate (no throw-on-first).
+- **Remaining 124** = the LEGACY `Card.astro`/`Card.css`/`Card.responsive.css` (old molecule-card kept as design reference): Rule 45 phantom tokens (×49), Rule 1/2 hardcoded values (×65), Rule 29 hover (×16) — all CSS/astro, none from this pass. They clear when each `cardType` is built (`Card.css` keyed by `.card--{type}`) and legacy consumers migrate to the JSON card test page. **Elevated count is intentional until then.**
+- **Finding to resolve (logged, not fixed):** Card's `media.semanticRole` is `required:false` (matched FormField), but child `Image`/`Icon`/`Heading.media` declare `semanticRole` `required:true`. Under Move 2 the child's requirement is authoritative — an Image media node must carry `semanticRole`. Decide: align Card's node to `required:true` (like Heading.media), or have the renderer inject defaults before validation.
+- **Next (post-B build):** `Card.css .card--horizontal` (auto 1fr auto, equal-height, container-query context, E5 backstop) → `Card.astro` (cardType branch + legacy fallback + slot rendering; **at the media cell, resolve the `semanticRole required` fork — LAYOUT-ENGINE-SPEC §12 callout**) → JSON card test page → re-run validators.
 
 ## 3. Validators — what is and isn't checked
 
 ### `src/lib/schema-validator.ts` — runtime JSON-vs-schema engine
 - **Purpose**: validate authored JSON against per-atom schemas; used by DEV (`Renderer.astro`) and the Cloudflare Worker. Returns `{valid, errors, sanitized}`.
-- **Enforces**: required props; forbidden Astro-only props (`class`/`style`); unknown props; CSS-value strings (`var(--`, hex, rgb/hsl, px/rem/em) rejected; enum membership; runtime type; nested `media.component` enum; `_ref` nested-atom recursion; a declarative `_rules` engine (requires/excludes/forbid).
+- **Enforces**: required props; forbidden Astro-only props (`class`/`style`); unknown props; CSS-value strings (`var(--`, hex, rgb/hsl, px/rem/em) rejected; enum membership; runtime type; **any component-node slot's `component` enum** (Move 1 — generalised off the old `media`-only hardcode, 2026-06-08); **opt-in deep child-prop validation on `_lockProps` slots** (Move 2 — recurses the child's full schema looked up by `component`); legacy `_ref` recursion (present but unused — superseded by component-node + Move 2); a declarative `_rules` engine (requires/excludes/forbid).
 - **Gaps (blind spots)**:
   - Schema-integrity issues (string-without-enum, missing media `component`/`semanticRole` enum) are **`console.warn` only** — they do NOT set `valid=false`.
   - Behaviour/`_runtime`/info-severity rules and docs-only rules (no `condition`/`when`) are **skipped entirely** by design.
-  - `validatePage` recurses **only into `.children`** — nested `media`, `dropdownItems`, `options[*].media` are never validated for inner-atom required props.
+  - `validatePage` recurses **only into `.children`**. Component-node slots are now deep-validated when flagged `_lockProps` (Move 2, opt-in); un-flagged nested `media` nodes get only the `component` check (Move 1). `dropdownItems` and `options[*].media` (array-nested, not flattened props) are still not recursed for inner-atom props.
   - Components not in the supplied `schemaMap` pass through unchecked.
   - Numeric values in a `number|string` union skip the enum check (always free-form).
   - No check of `renders` keys/targets, no `category` check, no detection of bare colour-tier tokens (e.g. `neutral-400`).
   - `_rules` conditions are `eval`'d via `new Function` (trusted in-repo input, no sandbox beyond a `with`-proxy).
 
 ### `scripts/validate-data.ts` — build-time gate (`npm run validate:data`)
-- **Purpose**: fail the build (exit 1) before `astro build` if authored content breaks schema; runs the same engine plus two static atom checks. Confirmed run: **9 files valid, 9 atoms in sync, 32 non-audited skipped.**
-- **Enforces**: scope gate (only the 9 AUDITED_COMPONENTS); canonical 5-file existence; coarse FORBIDDEN_CSS/FORBIDDEN_ASTRO regex scan; `checkAstroVsSchema` (props in `.astro` missing from schema — reverse drift); data validation of `src/data/test/<name>.json`.
+- **Purpose**: fail the build (exit 1) before `astro build` if authored content breaks schema; runs the same engine plus two static atom checks. Confirmed run (2026-06-08): **9 files valid, 9 atoms in sync; 8 audited schemas as the top-level gate, 39 total loaded for nested-slot child lookup.**
+- **Enforces**: scope gate (top-level validation only for the 9 AUDITED_COMPONENTS); canonical 5-file existence; coarse FORBIDDEN_CSS/FORBIDDEN_ASTRO regex scan; `checkAstroVsSchema` (props in `.astro` missing from schema — reverse drift); data validation of `src/data/test/<name>.json`; **the (B) nested-slot lock on `_lockProps` media slots — Badge/Button/Heading/List media children are deep-validated against the child atom's own schema** (2026-06-08 rollout; dry-run + live run both 0 errors — existing media data was already clean).
 - **Gaps (blind spots)**:
-  - **Only 9 atoms checked** — Icon, Shape, and every molecule/organism are skipped; their instances pass `validatePage` unvalidated (schema not loaded).
+  - **Top-level gate is still the 9 audited atoms** — Icon, Shape, Grid, Section, Page, molecules/organisms pass `validatePage` unvalidated at the TOP level. (As of 2026-06-08 ALL 39 schemas ARE loaded into `__schemaMap`, but only for nested child-lookup; `validatePage` is handed the audited-only map, so non-audited top-level instances stay unchecked. This decoupling is what let the nested lock turn on without incidentally enforcing not-yet-audited atoms.)
+  - **Known latent bugs behind the gate (dry-run 2026-06-08):** were Grid/Section added to the top-level gate, **69 hard errors surface** — `Grid.variant` unknown prop (×67, the `cols`/`variant` drift) + `Section.gap "6xl"` not in enum (×2). Deferred to the Grid/Section audit; NOT triggered today (neither is in the gate).
   - File-header claims it "walks every `src/data/**`" — **the code only reads one conventional path per atom**. Production data, other test pages, `_archive`/`_reference` trees are NOT validated (overstated comment).
   - Only HARD errors fail the build; warn-severity errors are filtered out.
   - `checkAstroVsSchema` is **one-directional and name-only** (no types/enums/defaults; no schema-props-missing-from-.astro), relying on a regex Props-interface parse that returns `[]` if the shape doesn't match.
@@ -113,7 +116,7 @@ Ordered by remaining effort (lightest first, Card last).
   - File checks skipped entirely for audited atoms lacking a `.astro` (e.g. FigCaption).
 
 ### `scripts/validate-atoms.cjs` — atom-internal canonical-pattern check (report-only)
-- **Purpose**: scan every `src/components/atoms/*` dir line-by-line against ~40 numbered rules; print CLEAN/N-issues. Confirmed run: 13 clean, 4 warn (FigCaption 1, Tooltip 1, Caret 6, FormField 6), Burst 8, TextEffect 14, **Card FAIL 131**.
+- **Purpose**: scan every `src/components/atoms/*` dir line-by-line against ~40 numbered rules; print CLEAN/N-issues. Confirmed run: 13 clean, 4 warn (FigCaption 1, Tooltip 1, Caret 6, FormField 6), Burst 8, TextEffect 14, **Card 124** (all legacy CSS/astro; schema rebuilt + (B) lock landed — see §2).
 - **Enforces**: nested `var()` fallbacks (R1), hardcoded px/hex/rgb/opacity/duration/easing (R2–7), gate/zone selectors in component CSS routed to gates (R11/12), `@layer`/`!important`/prefers-reduced-motion/`.a11y-*`/`#a11y-content-wrapper` (R16–20), focus/hover/keyframes/animation gating (R21/22/29/31/32), phantom tokens (R45), per-atom colour classes (R40), inline-style/CSS-maps/rest-spread (R8–10), `:global`/scoped-style/inline-svg (R23/24/44), ungated animation-lib imports + legacy `prefersReducedMotion` (R34), hardcoded enum unions (R37), schema rules (R13/14/25–28/30/33/35/36/38/39/43), duplicate barrel imports (R42).
 - **Gaps (blind spots)**:
   - **Report-only — never exits non-zero**, so it cannot fail a build (only `validate-data.ts` does).
@@ -148,7 +151,7 @@ Ordered by remaining effort (lightest first, Card last).
 
 Respecting atoms → CSS → responsive → gates → render-mode. Contrast and keyboard/target-size items are deferred to the dedicated accessibility + Button audits, not done inline.
 
-1. **Card — fix the 131-issue FAIL first.** It is registered, logged PASS, and breaks the atom validator harder than every other atom combined; remove `slots`, reconcile `bg`, move gate/zone selectors out. (Largest correctness gap.)
+1. **Card — schema reconciliation DONE (2026-06-08).** New layout-preset model (no `slots`, no `_ref`, `cardType` enum) + (B) nested-slot validator lock landed (proof 7/7, `validate:data` 9/9). Remaining **124** are legacy `Card.css`/`Card.astro` design-reference files — cleared by building each `cardType` (`.card--{type}`) + migrating consumers to the JSON card test page. No longer the top correctness gap.
 2. **Caret — proper atom build.** FormField rides Caret's CSS load; until Caret is decoupled/renamed, FormField cannot be re-logged clean. (Blocks FormField.)
 3. **FormField — finalise once Caret lands.** Confirm assistive-as-zone, wire `aacPhrase`, reconcile colour-group log note.
 4. **Section — implement `bg` enum CSS + add render-mode decision.** Validator-clean but functionally incomplete (silent no-op classes). (Atom-CSS layer.)
@@ -165,7 +168,7 @@ Respecting atoms → CSS → responsive → gates → render-mode. Contrast and 
 
 Each item: what the DOC says vs what the CODE/validator actually does. Reconciliation direction is **fix the doc (or log a validator gap), never bulk-add validator rules**.
 
-**D1 — Card "PASS" vs validator FAIL (131).** Audit-log calls Card PASS (2026-03-10). The atom validator reports **FAIL, 131 issues**. CODE WINS: Card is not clean. → Fix the audit log to FAIL/in-progress; do the Card work in §2.
+**D1 — Card "PASS" vs validator FAIL (131). RESOLVED 2026-06-08.** Audit-log called Card PASS (2026-03-10); the atom validator reported FAIL. CODE WON: Card was not clean. Schema has since been rebuilt to the layout-preset model (no `slots`, no `_ref`, `cardType` enum) and the (B) nested-slot lock landed; the remaining **124** are legacy CSS/astro design-reference files (see §2). The doc-vs-code reversal is closed.
 
 **D2 — Four render modes claimed, three in nearly every schema.** CLAUDE.md mandates `{ full, reduced, assistive, textonly }`. CODE: Page, Section, Grid, Heading, Text, Badge, Button, Icon, Image, Link, List, LottieIcon, Tooltip, FormField, Shape all declare only `full/reduced/textonly` (Icon `textonly:null`). Only **Card** declares all four. → Either add `assistive` or document per-atom that assistive is gate-handled; the blanket "every schema has 4 keys" claim is overpromising.
 
