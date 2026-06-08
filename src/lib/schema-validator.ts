@@ -341,9 +341,13 @@ export function validateComponent(
     if (key in item) sanitized[key] = item[key];
   }
 
-  // Check required props
+  // Check required props. A prop that declares a `default` is satisfied by
+  // that default at runtime (the renderer/atom applies it), so an omitted
+  // required+default prop is NOT an error — this matches runtime behaviour and
+  // resolves the required-vs-default contradiction the media-node pattern uses
+  // (e.g. Image/Icon declare semanticRole as required:true + default).
   for (const [prop, def] of flat.entries()) {
-    if (def.required && !(prop in item)) {
+    if (def.required && !(prop in item) && (def as any).default === undefined) {
       errors.push({
         prop,
         value: undefined,
@@ -499,6 +503,55 @@ export function validateComponent(
           }
         }
       }
+    }
+
+    // Array-valued prop with a declared item shape (`def.items.properties`):
+    // validate each element against the item shape — required item-props,
+    // unknown item-props, and enums — and recurse component-nodes inside an
+    // item (Move 1 always; Move 2 deep when the item-node carries `_lockProps`).
+    // This is the array-nested counterpart of the per-prop loop above; it is
+    // what reaches FormField `options[*].media` and Button `dropdownItems[*]`
+    // (validatePage deliberately does NOT recurse arrays as standalone atoms —
+    // the parent validates its own array slot here, against its declared shape).
+    if (Array.isArray(value) && (def as any).items?.properties) {
+      const itemProps = (def as any).items.properties as Record<string, any>;
+      value.forEach((el: any, idx: number) => {
+        if (!el || typeof el !== 'object' || Array.isArray(el)) return;
+        // required item-props (default-aware, same as the top-level check)
+        for (const [ik, idef] of Object.entries(itemProps)) {
+          if ((idef as any).required && !(ik in el) && (idef as any).default === undefined) {
+            errors.push({ prop: `${key}[${idx}].${ik}`, value: undefined, message: `required prop "${ik}" is missing`, severity: 'error' });
+          }
+        }
+        for (const [ik, iv] of Object.entries(el)) {
+          if (ik.startsWith('_')) continue;
+          const idef = itemProps[ik] as any;
+          if (!idef) {
+            errors.push({ prop: `${key}[${idx}].${ik}`, value: iv, message: `unknown prop "${ik}" — not in schema`, severity: 'error' });
+            continue;
+          }
+          if (idef.enum && iv !== undefined && iv !== null && !idef.enum.includes(iv)) {
+            errors.push({ prop: `${key}[${idx}].${ik}`, value: iv, message: `"${iv}" not in enum [${idef.enum.join(', ')}]`, severity: 'error' });
+            continue;
+          }
+          // component-node inside the item (e.g. options[*].media): Move 1 + Move 2
+          if (idef.properties?.component?.enum && iv && typeof iv === 'object' && !Array.isArray(iv)) {
+            const childComp = (iv as any).component;
+            if (childComp && !idef.properties.component.enum.includes(childComp)) {
+              errors.push({ prop: `${key}[${idx}].${ik}.component`, value: childComp, message: `component "${childComp}" not in enum [${idef.properties.component.enum.join(', ')}]`, severity: 'error' });
+            }
+            if (idef._lockProps && childComp && (globalThis as any).__schemaMap) {
+              const childSchema = (globalThis as any).__schemaMap.get(childComp);
+              if (childSchema) {
+                const childResult = validateComponent(iv, childSchema);
+                for (const cErr of childResult.errors) {
+                  errors.push({ prop: `${key}[${idx}].${ik}.${cErr.prop}`, value: cErr.value, message: cErr.message, severity: cErr.severity });
+                }
+              }
+            }
+          }
+        }
+      });
     }
 
     // _ref objects — validate props against referenced atom schema.

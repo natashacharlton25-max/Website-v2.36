@@ -216,7 +216,19 @@ async function loadSchemas(): Promise<Map<string, ComponentSchema>> {
     try {
       const json = JSON.parse(await readFile(file, 'utf-8')) as ComponentSchema;
       if (!json.component) continue;
-      allSchemas.set(json.component, json);
+      // Child-lookup map = ATOM schemas only. Children of locked slots are
+      // always atoms (media → Icon/LottieIcon/Image/Shape; Card slots →
+      // Heading/Text/Button), and keying by bare `component` name would
+      // otherwise let a same-named non-atom clobber the atom — e.g. the
+      // organism Grid (no `variant`) overwriting the atom Grid (has it).
+      const isAtom = file.split(path.sep).includes('atoms');
+      if (isAtom) {
+        if (allSchemas.has(json.component)) {
+          console.error(`[validate-data] duplicate atom component name "${json.component}" — schema collision in ${file}`);
+          process.exit(1);
+        }
+        allSchemas.set(json.component, json);
+      }
       if (AUDITED_COMPONENTS.has(json.component)) auditedSchemas.set(json.component, json);
     } catch (e) {
       console.error(`[validate-data] failed to parse schema ${file}: ${(e as Error).message}`);

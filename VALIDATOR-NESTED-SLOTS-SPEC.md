@@ -114,8 +114,9 @@ the top-level enum check (one rule everywhere) + the loud lock. Safe because D2
 
 **D2 — scope → opt-in per slot. RESOLVED (default); ROLLED OUT 2026-06-08.** Move 2
 (deep child-prop check) fires only on slots flagged `_lockProps`. Now enforced on
-Card (5 slots) + Badge/Button/Heading/List media (see §5 rollout log); other atoms'
-media nodes stay untouched until their own audit opts them in. Move 1 (the
+Card (5 slots) + Badge/Button/Heading/List media + FormField `options[*].media`
+(array-nested) — see §5 rollout log; other atoms' media nodes stay untouched until
+their own audit opts them in. Move 1 (the
 `component`-accepts check) is global-safe regardless. Rationale retained:
 - **Opt-in** (CHOSEN): the nested check fires only on slots that mark
   themselves (e.g. a `_strict: true` / `_lockProps` flag on the prop def). The
@@ -130,26 +131,38 @@ media nodes stay untouched until their own audit opts them in. Move 1 (the
 
 ## 5. Blast radius + rollout
 
-### Rollout log — DONE 2026-06-08 (Card + all audited media atoms)
-The lock is now enforced on **Card** (5 slots) plus the audited atoms that have a
-component-node slot: **Badge.media, Button.media, Heading.media, List.media** —
-each opts in via `_lockProps: true`. (Link / Text / Tooltip have no component-node
-slot; FigCaption has no schema — rendered via Image. **FormField** has per-option
-media at `options[*].media` — array-nested, which the flattened-prop lock can't
-reach and `validatePage` doesn't recurse into `options[]`; locking per-option
-media needs a separate mechanism — DEFERRED.)
-- **Infra fix** (prerequisite — was a silent hole): `validate-data.ts` `loadSchemas`
-  now loads **ALL** schemas into `globalThis.__schemaMap` so Move 2 can resolve a
-  slot's child atom by `component` (Heading.media → Icon/Image/Shape). The
-  **top-level gate stays audited-only** — `validatePage` is handed an audited-only
-  map, so non-audited atoms (Grid/Section/…) are NOT incidentally enforced.
-- **Result**: deterministic dry-run AND live `validate:data` both report **0 new
-  errors** — every audited atom's media data was already clean against its child
-  schema. Build stays green.
-- **Side finding (logged, deferred):** loading non-audited schemas into the
-  *top-level* gate would surface **69 latent bugs** — `Grid.variant` unknown (×67,
-  the `cols`/`variant` drift) + `Section.gap "6xl"` not in enum (×2). Out of scope
-  (Grid/Section aren't audited); deferred to their audit. See BUILD-STATUS §3.
+### Rollout log — DONE 2026-06-08 (Card + all audited media atoms + FormField options)
+The lock is enforced on **Card** (5 slots), the audited atoms with a flat
+component-node slot — **Badge.media, Button.media, Heading.media, List.media** —
+and **FormField `options[*].media`** (array-nested, see below). Each opts in via
+`_lockProps: true`. (Link / Text / Tooltip have no component-node slot; FigCaption
+has no schema — rendered via Image.)
+- **Array-nested lock (FormField options):** the validator now validates array
+  props that declare an item shape (`def.items.properties`) — per-element
+  required/unknown/enum, plus Move 1 + Move 2 on component-nodes *inside* an item.
+  `FormField._selectOptionShape` was moved into `options.items` so the validator
+  sees it; the option media node carries `_lockProps`. Also covers Button
+  `dropdownItems[*]`. Proven 13/13 (good Image/Icon/decorative pass; wrong
+  component, bad child enum, unknown child/option prop, missing required all reject).
+- **Infra fix** (prerequisite — was a silent hole, then a collision bug):
+  `validate-data.ts` `loadSchemas` loads schemas into `globalThis.__schemaMap` so
+  Move 2 resolves a slot's child by `component`. It loads **atom schemas only**
+  (children of locked slots are atoms) and **hard-exits on any atom-name
+  collision** — because keying by bare `component` let the *organism* Grid clobber
+  the *atom* Grid. The **top-level gate stays audited-only** (`validatePage` gets an
+  audited-only map), so non-audited atoms (Grid/Section/…) are not enforced.
+- **Default-aware required check:** a `required` prop that declares a `default` is
+  satisfied by it (mirrors runtime). This legitimises the `required:true + default`
+  media-node pattern (Image/Icon semanticRole) so deep recursion doesn't
+  false-flag omitted-but-defaulted values.
+- **Result**: live `validate:data` reports **9/9 valid**; every atom's media data
+  was already clean against its child schema. Build stays green.
+- **Corrected finding (was "69 latent bugs"):** that figure was MOSTLY a probe
+  artifact of the Grid name-collision above — 67 were phantom `Grid.variant`
+  errors from the wrong (organism) Grid schema; the atom Grid has `variant` and the
+  data is valid. Only **2 were real** (`Section.gap "6xl"`), now FIXED in
+  figcaption/tooltip test data (Section gap maxes at `3xl`). Grid/Section remain
+  unaudited; their full audits are separate.
 
 ### Original rollout recipe (for the next atom that opts in)
 Turning on nested enforcement newly-validates data that has passed untouched.
