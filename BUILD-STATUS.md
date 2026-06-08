@@ -59,6 +59,7 @@ Ordered by remaining effort (lightest first, Card last).
 - Add `assistive` key; register in the atom registry. 9 issues all deferred to a proper build session.
 
 **FormField** — validator: warn (6 issues)
+- **(B) GAP — card-select per-option media is UNENFORCED.** `options[*].media` is array-nested, so the (B) flattened-prop lock can't reach it and `validatePage` does not recurse `options[]`. Those option icons carry `semanticRole` and compose into the card's accessible name — this is a meaningful accessibility enforcement gap, not a trivial one. Needs a SEPARATE array-recursion mechanism (lock the media node inside each `options[]` / `dropdownItems[]` entry). Track distinctly; do NOT blur into the general deferred pile.
 - Confirm `assistive` deliberately dropped to `assistive-gate.css` zone (diverges from 4-key contract).
 - Carries Caret's deferred load until Caret is rebuilt.
 - Wire per-option `aacPhrase` (forward-declared, no runtime effect).
