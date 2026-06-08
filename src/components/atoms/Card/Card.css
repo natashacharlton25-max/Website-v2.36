@@ -481,3 +481,104 @@
 
 
 /* Textonly → global textonly/structure.css */
+
+
+/* ==========================================================
+   14. LAYOUT PRESET — card-horizontal  (cardType="horizontal")
+   New-model preset (LAYOUT-ENGINE-SPEC §12). Clean: bare tokens,
+   no var(,fallback), no gate selectors, no @layer/!important.
+   One EQUAL-HEIGHT row: media (hug) | main (fill) | action (hug).
+   ========================================================== */
+
+.card--horizontal {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);   /* image ~40% | content ~60% (button lives inside content) */
+  align-items: stretch;                    /* equal-height row — cells match the tallest */
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--page-bg-raised);
+  color: var(--neutral-emphasis);
+  border-radius: var(--radius-lg);
+  /* E1 — the card responds to its OWN width, not the viewport. First @container
+     in the project (see responsive note below). */
+  container-type: inline-size;
+}
+
+/* E5 overflow backstop — grid items default to min-width:auto (can't shrink
+   below content → overflow). 0 lets the fill cell shrink; max-width caps it. */
+.card--horizontal > * {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;   /* media cell must not impose the image's intrinsic height — the content column drives the card height */
+}
+
+/* Icon/glyph media hugs its own width (no forced image column); content fills.
+   Image media keeps the default ~40/60 columns. */
+.card--horizontal.card--media-hug {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+/* Media cell — clips its child to rounded corners. Fill vs centre per media type. */
+.card__media {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+/* Image media — fills its column (grid-defined width ~1/3) at the full card
+   height (align-self stretch → row height, driven by the text). object-fit
+   cover comes from the Image atom's fit="cover" prop. NO aspect-ratio in the
+   wide layout — deriving width from the image's own height ballooned the card
+   and crushed the text column. The grid column owns the width; the text owns
+   the height. */
+.card__media--fill {
+  align-self: stretch;
+  display: grid;
+}
+/* Icon / LottieIcon / Shape media — a sized glyph, centred (not stretched). */
+.card__media--center {
+  align-self: center;
+  display: grid;
+  place-items: center;
+}
+
+/* Middle cell — fills remaining width, content top-aligned.
+   DOM order is title → meta → body (the heading precedes its metadata for
+   screen-reader/outline order). VISUAL order is meta → title → body via
+   `order` (meta reads as a small eyebrow above the title). a11y order ≠
+   visual order, deliberately. */
+.card__main {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+.card__meta {
+  order: -1;
+  color: var(--neutral-mid);
+}
+
+/* Action footer — sits at the bottom of the content column. */
+.card__footer {
+  margin-top: auto;
+  display: flex;
+}
+
+/* Responsive — stack to a single column when the CARD (not the viewport) is
+   narrow. NOTE: @container conditions cannot use var()/tokens (CSS spec), so
+   the 30rem threshold is a raw value, exactly like every @media breakpoint.
+   This is the project's FIRST @container; the pending responsive pass should
+   standardise the threshold across atoms. Until then the E5 backstop above
+   prevents overflow at any width. */
+@container (max-width: 30rem) {
+  .card--horizontal {
+    grid-template-columns: 1fr;
+  }
+  .card__media {
+    align-self: stretch;
+  }
+  /* Stacked: there's no sibling text row to derive the image height from, so
+     give the full-width image a banner aspect-ratio. */
+  .card__media--fill {
+    aspect-ratio: 16 / 9;
+  }
+}

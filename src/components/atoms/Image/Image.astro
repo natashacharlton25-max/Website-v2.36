@@ -45,6 +45,15 @@ interface Props {
   altAacCards?: AacCardData[];
   /** @deprecated Use altAacCards instead */
   altAacHtml?: string;
+  // Schema content-key names (post-rename). PREFERRED — these are what the
+  // schema declares and what nested media (Card/Heading) pass. The bare
+  // alt/altWord/altDescriptive above are back-compat fallbacks until the Image
+  // audit completes the rename and drops them.
+  contentAlt?: string;
+  contentAltWord?: string;
+  contentAltDescriptive?: string;
+  contentAltAacCards?: AacCardData[];
+  contentAltAacHtml?: string;
   semanticRole?: 'decorative' | 'ui-control' | 'content-symbol';
   width?: number | string;
   height?: number | string;
@@ -82,6 +91,11 @@ const {
   altDescriptive,
   altAacCards,
   altAacHtml,
+  contentAlt,
+  contentAltWord,
+  contentAltDescriptive,
+  contentAltAacCards,
+  contentAltAacHtml,
   semanticRole = 'decorative',
   width,
   height,
@@ -119,10 +133,20 @@ const dataAttrs = Object.fromEntries(
   Object.entries(rest).filter(([key]) => key.startsWith('data-'))
 );
 
+// Content-key names (schema, post-rename) take precedence; the bare
+// alt/altWord/altDescriptive props are back-compat fallbacks until the Image
+// audit finishes the rename. Card/Heading pass nested media as content* — these
+// resolved values are what let a nested image actually render its alt.
+const rAlt = contentAlt ?? alt;
+const rWord = contentAltWord ?? altWord;
+const rDescriptive = contentAltDescriptive ?? altDescriptive;
+const rAacCards = contentAltAacCards ?? altAacCards;
+const rAacHtml = contentAltAacHtml ?? altAacHtml;
+
 // Resolve alt text: richest description wins for screen readers
 const resolvedAlt = isDecorative
   ? ''
-  : (altDescriptive || altWord || alt || '');
+  : (rDescriptive || rWord || rAlt || '');
 
 // Fetch SVG for mask at build time — icons or shapes from Asset Library API
 let maskIconStyle = '';
@@ -207,7 +231,7 @@ const figureClasses = [
     )}
   </figure>
 ) : (
-  <figure class:list={figureClasses} data-role="content" data-semantic-role={semanticRole} tabindex={(altWord || altDescriptive || altAacCards) ? "0" : undefined}>
+  <figure class:list={figureClasses} data-role="content" data-semantic-role={semanticRole} tabindex={(rWord || rDescriptive || rAacCards) ? "0" : undefined}>
     {isOptimised ? (
       <AstroImage
         src={src as ImageMetadata}
@@ -231,15 +255,15 @@ const figureClasses = [
         {...dataAttrs}
       />
     )}
-    {altWord && (
-      <span class="image-alt-word" aria-hidden="true">{altWord}</span>
+    {rWord && (
+      <span class="image-alt-word" aria-hidden="true">{rWord}</span>
     )}
-    {altDescriptive && (
-      <span class="image-alt-descriptive" aria-hidden="true">{altDescriptive}</span>
+    {rDescriptive && (
+      <span class="image-alt-descriptive" aria-hidden="true">{rDescriptive}</span>
     )}
-    {altAacCards && altAacCards.length > 0 ? (
+    {rAacCards && rAacCards.length > 0 ? (
       <span class="image-alt-aac" aria-hidden="true">
-        {altAacCards.map((card) => (
+        {rAacCards.map((card) => (
           <AacCard
             word={card.word}
             bciIndex={card.bciIndex ?? undefined}
@@ -250,9 +274,9 @@ const figureClasses = [
           />
         ))}
       </span>
-    ) : altAacHtml ? (
+    ) : rAacHtml ? (
       <span class="image-alt-aac" aria-hidden="true">
-        <Fragment set:html={altAacHtml} />
+        <Fragment set:html={rAacHtml} />
       </span>
     ) : null}
   </figure>

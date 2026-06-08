@@ -733,58 +733,108 @@ row. See `horizontal-card-preset.jsonc`.
 
 ---
 
-## 12. First preset — `card-horizontal` (LOCKED 2026-06-07)
+## 12. First presets — `card-horizontal` + `card-vertical` (CONSOLIDATED SPEC 2026-06-08)
 
-The bridge from engine-spec to a buildable Card atom — the first `cardType`
-variant. Defined once (Layer 1), filled with content by the author (Layer 2).
-Building this IS the start of the Card atom (§11).
+The buildable Card. **Supersedes the original 3-cell `auto 1fr auto` sketch.**
+Grounded in a cross-system synthesis (Material 3, Tailwind/daisyUI, GOV.UK/SIS,
+Polaris, Flowbite — see `card-design-research` workflow) plus in-build iteration
+with screenshots. The two cardTypes are **ONE component reflowed** — the SAME
+slots, respaced.
 
-**Layer 1 — the preset (designer defines once, frozen).** One **equal-height**
-row, three cells, left → right; widths are `auto 1fr auto` via per-cell `sizing`
-(§2.8), NO weight:
+### 12.1 Shared slots (both cardTypes, mapped to our atoms)
+DOM order is **title → meta → body → footer** (the heading reads first for the
+document outline); meta is visually hoisted **above** the title via CSS `order:-1`.
 
-| Cell | `sizing` | `vertical` | accepts | notes |
-|------|----------|-----------|---------|-------|
-| image | `content` (hug) | — | `Image` | left; hugs its own width |
-| middle | `fill` (1fr) | `start` (top) | sub-container of rows | two stacked rows: **meta** (Text, small-muted) over **body** (Text) |
-| button | `content` (hug) | `center` | `Button` | right; centred against the tall image |
+| Slot | Atom(s) | Notes |
+|------|---------|-------|
+| media | Image (cover-fill) \| Icon/LottieIcon/Shape (hug glyph) | one media node; image covers, glyph hugs |
+| title | Heading (flush) | real semantic level (author sets it) — document outline |
+| meta | row of ≤4 Badge | default variant `meta` (borderless/muted); any badge style allowed |
+| body | Text (size sm, flush) | supporting copy |
+| footer | Button (size sm) | pinned to the bottom of the content column (`margin-top:auto`) |
 
-`equalHeight: true` → all cells match the tallest (the image). Each slot is
-guarded by its `accepts` (Layer-1's per-slot atom enum) — the preset layer's
-equivalent of the cell-content enum.
+The four content slots live in `.card__main` (flex column); `media` is its sibling.
+**Card.astro markup is IDENTICAL across cardTypes** — only the `.card--{type}` class
+(+ a `card--media-fill` / `card--media-hug` modifier derived from the media type)
+differs. (Default-weight sub-decision / old item 10 stays resolved: sizing is
+behaviour-driven content/fill, never a fixed weight.)
 
-> **RESOLVED 2026-06-08 (was a build-time decision at the media cell).** Card's
-> `media.semanticRole` is now `required: true` (matches Heading/Badge/List). The
-> validator's required-check is **default-aware** — a `required` prop that declares
-> a `default` is satisfied by it — so the `required:true + default` media pattern
-> does not false-flag an omitted `semanticRole` (the renderer applies the
-> `decorative` default). Nothing to decide when wiring the media cell. See
-> BUILD-STATUS §2 (Card) + VALIDATOR-NESTED-SLOTS-SPEC.md §5.
+### 12.2 Core layout rule (load-bearing)
+**Media keeps its WIDTH; content drives the HEIGHT.**
+- Media width = hug (glyph: its size; image: its grid column). Card height = the
+  CONTENT. The image **cover-fills** the content-driven height at its width — it
+  never imposes its own (square) height.
+- Mechanism: `min-height:0` on the cells (so the media cell can't push the row
+  taller than the content) + `object-fit:cover` (Image `fit="cover"`).
+- Kills both failure modes seen in build: a glyph stranded in a wide column, and a
+  short card with a giant image + a button floating at the bottom.
 
-**Layer 2 — what the author / AI writes (every time).** Canonical form matches
-§11 ("Card is an atom; `cardType` is the variant enum; slots are props"):
+### 12.3 `card-horizontal`
+`display:grid; align-items:stretch; container-type:inline-size`.
+- **Image media** → `grid-template-columns: minmax(0,2fr) minmax(0,3fr)` (~40/60,
+  the cross-system sweet spot — NOT 50/50). Class `card--media-fill`.
+- **Icon/glyph media** → `grid-template-columns: auto minmax(0,1fr)` (media hugs).
+  Class `card--media-hug`.
+- Content = `.card__main` (flex column, `justify-content:flex-start`); footer
+  `margin-top:auto` → bottom. E5 backstop `> * { min-width:0; max-width:100%; min-height:0 }`.
 
+### 12.4 `card-vertical` (same slots, respaced)
+`display:flex; flex-direction:column; container-type:inline-size`.
+- Media = full-width banner on top: `.card--vertical .card__media--fill {
+  aspect-ratio: var(--aspect-video); width:100% }` (reuse the token, no literal 16/9).
+- Content below; meta still `order:-1`; footer still `margin-top:auto`.
+- card-horizontal **collapses to this** under `@container (max-width: ~30rem)` —
+  vertical IS the narrow state of horizontal. Add `vertical` to the cardType enum.
+
+### 12.5 Cards in a Grid (adapt, never squish)
+`container-type:inline-size` means a card reflows at **its own cell width**, not the
+viewport. A horizontal card in a narrow Grid cell stacks (→ vertical); a vertical
+card fills its column and grows with content. The **Grid atom owns the columns;
+each card owns its internal reflow.**
+
+### 12.6 Meta = row of badges
+`.card__meta` = flex row (`order:-1; flex-wrap; gap:--space-sm`) of up to 4 Badge
+atoms. New Badge variant **`meta`**: no bg, no border, muted (`--neutral-mid`),
+`padding-inline:0`, sentence-case (`uppercase=false`), `size:sm`, optional leading
+Icon (inherits `currentColor` → never colour-alone). It is the slot DEFAULT; the
+author may override any badge to `fill`/`outline`/colour for a real pill ("In
+stock", a category). >4 ignored (meta stays one line, never pushes into the footer).
+
+### 12.7 Concentric radius correlation
+Inner radius ≤ outer so parts nest. Card outer = `--radius-lg`; nested
+image/button/badge = a step down (`--radius-md`); never larger than the card. The
+**preset sets the child radii** (derived from the card radius) — authors don't set
+clashing per-atom radii. The preset owns the radius + type scale so a card is
+internally consistent.
+
+### 12.8 Spacing (our tokens)
+Outer padding `--space-lg` (24px); media↔content gap `--space-lg` (h) / `--space-md`
+(v); inter-slot gap `--space-sm` (8px); meta-row + footer gap `--space-sm`. Card
+radius `--radius-lg`, media radius `--radius-md`. bg `--page-bg-raised`, text
+`--neutral-emphasis`, meta `--neutral-mid`.
+
+### 12.9 Accessibility floor
+Title is a real heading (DOM-first; visual meta-on-top via `order`). Image alt via
+`content*` props (Image.astro reads them). Badge meaning never by colour alone
+(text + optional icon). Whole-card link = one focusable target. 44px+ targets.
+Radius/spacing are tokens, never magic numbers.
+
+### 12.10 Layer 2 — what the author writes
 ```json
-{ "component": "Card",
-  "cardType": "horizontal",
-  "image":  { "src": "…", "altWord": "Stoneware mug" },
-  "meta":   "In stock",
-  "body":   "Hand-thrown stoneware mug, glazed slate blue.",
-  "button": { "contentButton": "Add to cart", "href": "/cart/add/mug" } }
+{ "component": "Card", "cardType": "horizontal",
+  "media": { "component": "Image", "src": "…", "contentAlt": "Stoneware mug", "semanticRole": "content-symbol" },
+  "meta":  [ { "component": "Badge", "contentBadge": "Stoneware" },
+             { "component": "Badge", "contentBadge": "350ml" } ],
+  "title": { "component": "Heading", "level": 3, "contentHeading": "Stoneware Mug" },
+  "body":  { "component": "Text", "contentText": "Hand-thrown, glazed slate blue." },
+  "button":{ "component": "Button", "contentButton": "Add to cart", "href": "/cart/add/mug", "variant": "fill" } }
 ```
+~Two choices: `cardType` + content. No sizing/placement/weight/radius — the preset owns them.
 
-~Two choices: `cardType` + content. No sizing, no placement, no weight — Layer 1
-decided all of it. (Worked `.jsonc`: `horizontal-card-preset.jsonc` — note it
-uses `card: "card-horizontal"`; the canonical form is `component: Card` +
-`cardType: "horizontal"` per §5/§11. Real Image slot uses `altWord`/
-`altDescriptive`, not bare `alt`.)
-
-### Item 10 resolved — as the spec predicted
-Defining this preset answers the open default-weight sub-decision. `card-horizontal`
-uses per-cell `content`/`fill` and **no weight** — confirming the default for an
-unspecified weight in a side-by-side row is **behaviour-driven** (content/fill, or
-equal `grid` where cells declare no `sizing`), **never a fixed `medium`**. Weight
-is consulted ONLY when an author explicitly sets it for a deliberate unequal
-*grid* split. The "fixed middle = medium" alternative is rejected — it would
-re-introduce a sizing default the content/fill model already handles more
-honestly. **D-series + E-series + item 10 all resolved: the spec is build-ready.**
+### 12.11 Implementation status (2026-06-08)
+- **DONE:** cardType=horizontal grid (40/60 image / hug icon), content-drives-height
+  (`min-height:0`), image cover-fill, button footer at bottom, `@container` stack,
+  legacy fallback branch, the (B) nested-slot lock + Card schema, `--space-sm` slot gap.
+- **PENDING:** meta-badge-row (Badge `meta` variant + meta slot → Badge array +
+  `.card__meta` row), `card-vertical` cardType, concentric radius correlation
+  (preset-set child radii), finish the spacing-token pass.

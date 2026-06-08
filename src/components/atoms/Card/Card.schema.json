@@ -9,7 +9,9 @@
   "notes": "Layout-preset atom (LAYOUT-ENGINE-SPEC.md), built like Button. `cardType` is the variant enum — a designed layout, each living in Card.css keyed by `.card--{type}`. Slots are REAL ATOMS composed the way the other atoms compose them: the media cell uses the shared `media` node (Icon|LottieIcon|Image|Shape + mediaBg); the text slots are nested Heading/Text component nodes and the action a Button node — the author writes `{ component, …child props }` and the child atom owns its own props, exactly the FormField/Badge/Heading media pattern (no `_ref`). ATOM CHOSEN BY SEMANTICS, APPEARANCE CHOSEN FREELY ON TOP: each slot is typed to the atom the content STRUCTURALLY is — `title` is a Heading because it IS a heading (in the document outline, screen-reader navigable); `meta` is a Text because it is metadata, NOT a heading (never announced as one). The slot type GUARANTEES honest structure (an author can't downgrade a title to a non-heading, or make a caption announce as a heading); the preset CSS then styles each slot however it likes (a Heading can look small, a Text can look large) — visual freedom on top of fixed semantics. Textonly handling is CARD-LEVEL first: semanticRole='decorative' drops the whole card (it was chrome); 'content-symbol'/'ui-control' keeps it reduced; UNMARKED keeps the card fully (safe default — forgetting to tag never hides content from a reading-mode user). 'decorative' means the author has VERIFIED the card carries no information a reader needs — NOT merely that it 'looks visual'. Within a kept card, Heading/Text/Button slots are content-by-nature (kept); only media follows its own semanticRole. cardType=horizontal: media left (hug) | title + meta + body middle (fill, stacked) | Button right (hug, centred), equal-height row. Legacy variant/slot-children consumers are .astro-level (bypass this schema, pass no cardType) — Card.astro keeps a legacy fallback branch until each is rebuilt as a cardType and migrated to the JSON card test page.",
 
   "_rules": [
-    { "rule": "mediaBg-shape-background", "condition": "mediaBg === true && media?.component === 'Shape'", "action": "Card auto-injects semanticRole='background' on the Shape (runtime guarantee; JSON value overridden) — same pattern as Heading/List/Badge.", "note": "Shape is wallpaper for the child atom; the child owns aria/label." }
+    { "rule": "mediaBg-shape-background", "condition": "mediaBg === true && media?.component === 'Shape'", "action": "Card auto-injects semanticRole='background' on the Shape (runtime guarantee; JSON value overridden) — same pattern as Heading/List/Badge.", "note": "Shape is wallpaper for the child atom; the child owns aria/label." },
+    { "rule": "slots-need-cardType", "condition": "(title || meta || body || media || button) && !cardType", "action": "Card slots (title/meta/body/media/button) are the NEW layout-preset model — set cardType (e.g. 'horizontal'). Without cardType the card renders the legacy container shell and the slots are silently ignored." },
+    { "rule": "media-content-symbol-needs-label", "condition": "media && !mediaBg && (media.semanticRole || 'content-symbol') === 'content-symbol' && !(media.contentAlt || media.contentAltWord || media.contentAltDescriptive || media.labelIcon || media.labelShape || media.label)", "action": "A card's media at semanticRole='content-symbol' (the default — a card image is usually meaningful) requires alt text: Image → contentAlt / contentAltWord / contentAltDescriptive; Icon → labelIcon; Shape → labelShape; LottieIcon → label. Mark semanticRole='decorative' if the media is purely visual reinforcement.", "note": "Mirrors FormField's option-media rule. Default content-symbol makes alt the forcing function for meaningful card images." }
   ],
 
   "props": {
@@ -30,7 +32,7 @@
         "_description": "Nested atom node. Default: a single atom (Icon | LottieIcon | Image | Shape). mediaBg=true: a Shape wrapping a child atom as a background container.",
         "properties": {
           "component":    { "type": "string", "required": true, "enum": ["Icon", "LottieIcon", "Image", "Shape"] },
-          "semanticRole": { "type": "string", "required": true, "default": "decorative", "enum": ["decorative", "ui-control", "content-symbol"] }
+          "semanticRole": { "type": "string", "required": true, "default": "content-symbol", "enum": ["decorative", "ui-control", "content-symbol"], "_note": "Default content-symbol — a card's media is usually meaningful (product photo, face). content-symbol requires alt/label (see media-content-symbol-needs-label rule); mark decorative for purely visual media." }
         }
       },
       "mediaBg":     { "type": "boolean", "required": false, "default": false, "_description": "true = media is a Shape wrapping a child atom (background container)." },
@@ -40,11 +42,28 @@
 
     "visual": {
       "_description": "How the card is arranged — the layout preset (the variant enum, exactly like Button's variant).",
-      "cardType": { "type": "string", "required": true, "enum": ["horizontal"], "description": "Designed layout preset. Picks a fixed arrangement; sizing/placement are the preset's job, not the author's. More types (product, profile, feature, …) added as each is built." }
+      "cardType": { "type": "string", "required": false, "enum": ["horizontal"], "description": "Designed layout preset (NEW model). Picks a fixed arrangement; sizing/placement are the preset's job. OMIT for the legacy container-shell mode (chrome props + <slot> children, see `legacy` group). Required in practice for the new model — the slots-need-cardType rule errors if you provide slots without it. More types (product, profile, …) added as each is built." }
     },
 
     "colour": {},
 
-    "animation": {}
+    "animation": {},
+
+    "legacy": {
+      "_description": "DEPRECATED container-shell model (cardType OMITTED). Pure box chrome + <slot> children — kept until each legacy consumer is rebuilt as a cardType and migrated to the JSON card test page. New cards use cardType + slots, NOT these. Declared here only so the live legacy consumers validate against the renderer.",
+      "as":         { "type": "string", "required": false, "default": "div", "enum": ["div", "article", "section", "aside", "li"] },
+      "variant":    { "type": "string", "required": false, "default": "default", "enum": ["default", "transparent", "outline", "glass", "liquid", "neumorphic", "pressed", "comic", "tech"] },
+      "hover":      { "type": ["boolean", "string", "array"], "required": false, "_note": "Legacy: true | 'border' | 'glow' | ('lift'|'border'|'glow')[]. Loose by design (deprecated)." },
+      "shadow":     { "type": "string", "required": false, "enum": ["none", "sm", "md", "lg", "xl"] },
+      "dropShadow": { "type": "string", "required": false, "enum": ["none", "sm", "md", "lg", "xl"] },
+      "radius":     { "type": "string", "required": false, "enum": ["none", "sm", "md", "lg", "xl", "full"] },
+      "padding":    { "type": "string", "required": false, "enum": ["none", "xs", "sm", "md", "lg", "xl", "2xl"] },
+      "border":     { "type": "string", "required": false, "enum": ["none", "thin", "medium", "thick"] },
+      "bg":         { "type": "string", "required": false, "_note": "DEPRECATED drift — injects raw --card-bg. Do not use in new cards." },
+      "layout":     { "type": "string", "required": false, "enum": ["masonry"] },
+      "flush":      { "type": "boolean", "required": false },
+      "href":       { "type": "string", "required": false },
+      "separator":  { "type": "boolean", "required": false }
+    }
   }
 }

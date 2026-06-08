@@ -1,34 +1,47 @@
 ---
 /**
- * Card — Atomic container shell
+ * Card — Atomic container shell + layout-preset atom
  *
- * Pure container with visual chrome (background, border, radius, shadow).
- * Children handle their own internal layout. Hover is animation — stripped in reduced render.
+ * TWO modes, selected by whether `cardType` is set:
  *
- * Molecule cards render <Card> as their outer wrapper.
- * Grid handles external layout. Card handles the box itself.
- * In textonly, card becomes transparent bordered box — child atoms handle their own visibility.
+ *  1. LAYOUT PRESET (cardType set) — the new model (LAYOUT-ENGINE-SPEC §11/§12).
+ *     A designed layout keyed by `.card--{cardType}` in Card.css. Content comes
+ *     in as nested component-node slots (title/meta/body/button/media) — each is
+ *     `{ component, …childProps }`; the child atom owns its own props. Composed
+ *     the same way Heading composes its media. Author picks cardType + fills
+ *     slots; the preset owns all sizing/placement.
  *
- * @param as          - HTML element: div | article | section | aside | li (default: div)
- * @param variant     - Visual style: default | transparent | outline | glass | liquid | neumorphic | pressed | comic | tech
- * @param hover       - Hover effect (animation group): true (lift), 'border', 'glow'. Stripped in reduced/assistive/textonly.
- * @param shadow      - Box shadow: none | sm | md | lg | xl
- * @param dropShadow  - Filter drop-shadow (better for non-rect shapes): none | sm | md | lg | xl
- * @param radius      - Border radius: none | sm | md | lg | xl | full
- * @param padding     - Internal padding: none | xs | sm | md | lg | xl | 2xl
- * @param border      - Border width: none | thin | medium | thick
- * @param layout      - Context: 'masonry' (break-inside:avoid, inline-block, width:100%)
- * @param flush       - Remove margin-bottom
- * @param href        - If set, renders as <a> with .card--link styles
- * @param separator   - Visible border between .card__header / .card__body / .card__footer
- *
- * Use Heading, Text, Badge, Button, Image atoms inside.
- * Structure with .card__header / .card__body / .card__footer.
+ *  2. LEGACY CONTAINER (cardType absent) — pure container shell with chrome
+ *     props + `<slot/>`. Molecule cards render <Card> as their outer wrapper.
+ *     Kept until each is rebuilt as a cardType and migrated to the JSON card
+ *     test page. UNTOUCHED by the preset work.
  *
  * Styles: Card.css | Card.responsive.css
  */
+import { Heading } from '../Heading';
+import { Text } from '../Text';
+import { Button } from '../Button';
+import { Icon } from '../Icon';
+import { LottieIcon } from '../LottieIcon';
+import { Image } from '../Image';
+import { Shape } from '../Shape';
 
 export interface Props {
+  // ── Layout-preset model (new) ──────────────────────────────
+  cardType?: 'horizontal';
+  /** Nested component nodes: { component, …childProps }. Child atom owns its props. */
+  title?: Record<string, any>;
+  meta?: Record<string, any>;
+  body?: Record<string, any>;
+  button?: Record<string, any>;
+  media?: Record<string, any>;
+  /** Card-level reading-mode intent (textonly keep/drop). */
+  semanticRole?: 'decorative' | 'ui-control' | 'content-symbol';
+  mediaBg?: boolean;
+  mediaBgSize?: 'compact' | 'normal' | 'spacious';
+  mediaSize?: 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'base' | '2xl' | '3xl';
+
+  // ── Legacy container model (cardType absent) ───────────────
   as?: 'div' | 'article' | 'section' | 'aside' | 'li';
   variant?: 'default' | 'transparent' | 'outline' | 'glass' | 'liquid' | 'neumorphic' | 'pressed' | 'comic' | 'tech';
   hover?: boolean | 'border' | 'glow' | ('lift' | 'border' | 'glow')[];
@@ -47,6 +60,13 @@ export interface Props {
 }
 
 const {
+  cardType,
+  title, meta, body, button, media,
+  semanticRole,
+  mediaBg = false,
+  mediaBgSize,
+  mediaSize,
+  // legacy
   as = 'div',
   variant = 'default',
   hover,
@@ -64,10 +84,27 @@ const {
   ...rest
 } = Astro.props;
 
-// Determine element: <a> if href provided, otherwise `as` prop
-const Tag = href ? 'a' : as;
+// ── Layout-preset model — split each component node into its child props ──
+// (mirrors Heading: const { component, ...rawProps } = media)
+const mediaComponent = media?.component;
+const { component: _mc, ...rawMediaProps } = media || {};
+// mediaBg=true → Shape is wallpaper for a child atom: auto-inject
+// semanticRole='background' (runtime guarantee, not authoring discipline) and
+// forward the padding size — same as Heading/List/Badge.
+const baseMediaProps = (mediaBg && mediaComponent === 'Shape')
+  ? { ...rawMediaProps, semanticRole: 'background', mediaBgSize: rawMediaProps.mediaBgSize ?? mediaBgSize }
+  : rawMediaProps;
+const mediaProps = (mediaSize && mediaSize !== 'auto' && baseMediaProps.size == null)
+  ? { ...baseMediaProps, size: mediaSize }
+  : baseMediaProps;
 
-// Build class list
+const { component: _tc, ...titleProps } = title || {};
+const { component: _mtc, ...metaProps } = meta || {};
+const { component: _bc, ...bodyProps } = body || {};
+const { component: _btc, ...buttonProps } = button || {};
+
+// ── Legacy container model ──
+const Tag = href ? 'a' : as;
 const classes = [
   'card',
   `card--${variant}`,
@@ -86,47 +123,68 @@ const classes = [
   className,
 ].filter(Boolean);
 
-// Link attributes
 const linkAttrs = href ? {
   href,
   ...(href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {}),
 } : {};
 ---
 
-{variant === 'liquid' && (
-  <svg width="0" height="0" style="position: absolute;" aria-hidden="true">
-    <defs>
-      <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
-        <feTurbulence
-          type="fractalNoise"
-          baseFrequency="0.02 0.02"
-          numOctaves="2"
-          seed="92"
-          result="noise"
-        />
-        <feGaussianBlur
-          in="noise"
-          stdDeviation="2"
-          result="blurred"
-        />
-        <feDisplacementMap
-          in="SourceGraphic"
-          in2="blurred"
-          scale="200"
-          xChannelSelector="R"
-          yChannelSelector="G"
-        />
-      </filter>
-    </defs>
-  </svg>
-)}
+{cardType ? (
+  /* ── Layout-preset model ── */
+  <div
+    class:list={['card', `card--${cardType}`, (media && mediaComponent === 'Image' && !mediaBg) ? 'card--media-fill' : 'card--media-hug', className]}
+    data-card
+    data-semantic-role={semanticRole || undefined}
+    {...rest}
+  >
+    {media && (
+      <div class:list={['card__media', (mediaComponent === 'Image' && !mediaBg) ? 'card__media--fill' : 'card__media--center']}>
+        {mediaBg && <Shape {...(mediaProps as any)} class="card__media-shape" />}
+        {!mediaBg && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="card__media-icon" />}
+        {!mediaBg && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="card__media-icon" />}
+        {/* Preset controls the fill: force fit="cover" + drop any authored width/height
+            so the image fills the cell and an author can't set a fixed width that breaks it. */}
+        {!mediaBg && mediaComponent === 'Image' && <Image {...(mediaProps as any)} width={undefined} height={undefined} fit="cover" class="card__media-img" />}
+        {!mediaBg && mediaComponent === 'Shape' && <Shape {...(mediaProps as any)} class="card__media-shape" />}
+      </div>
+    )}
 
-<Tag
-  class:list={classes}
-  data-card
-  style={bg ? `--card-bg: ${bg}` : undefined}
-  {...linkAttrs}
-  {...rest}
->
-  <slot />
-</Tag>
+    <div class="card__main">
+      {/* DOM order title → meta → body (document/screen-reader order); visual
+          order meta → title → body via CSS `order` on .card__meta. */}
+      {title && <Heading {...(titleProps as any)} flush class="card__title" />}
+      {meta && <Text size="sm" {...(metaProps as any)} flush class="card__meta" />}
+      {body && <Text size="sm" {...(bodyProps as any)} flush class="card__body-text" />}
+      {button && (
+        <div class="card__footer">
+          <Button size="sm" {...(buttonProps as any)} />
+        </div>
+      )}
+    </div>
+  </div>
+) : (
+  /* ── Legacy container model (untouched) ── */
+  <Fragment>
+    {variant === 'liquid' && (
+      <svg width="0" height="0" style="position: absolute;" aria-hidden="true">
+        <defs>
+          <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="2" seed="92" result="noise" />
+            <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+            <feDisplacementMap in="SourceGraphic" in2="blurred" scale="200" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+    )}
+
+    <Tag
+      class:list={classes}
+      data-card
+      style={bg ? `--card-bg: ${bg}` : undefined}
+      {...linkAttrs}
+      {...rest}
+    >
+      <slot />
+    </Tag>
+  </Fragment>
+)}

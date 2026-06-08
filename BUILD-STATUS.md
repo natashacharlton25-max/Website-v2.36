@@ -45,6 +45,7 @@ Ordered by remaining effort (lightest first, Card last).
 - Document render-mode contract: `figcaption.ts` only reads `data-alt-display-mode` + `data-hover`, never `data-render` — confirm gate files cover assistive/textonly.
 - Add audit-log entry (currently zero mentions).
 - Reconcile alt-display-mode value drift: code references `inline`/`enlarge` modes NOT in the documented 6-mode set; `shared-bar.ts` carries banned `var(--bar-bg,#hex)` fallbacks.
+- **Alt path (confirmed working 2026-06-08, clean in its audit):** the screen reader gets alt via `<img alt>` only; the caption spans are `aria-hidden` (visual). When FigCaption is audited, (a) confirm the caption markup stays `aria-hidden` so the SR never double-announces (img alt + a real `<figcaption>`), and (b) align its alt fields to the `content*` names (Image.astro now reads `contentAlt`/`contentAltWord`/`contentAltDescriptive`, falling back to the old `alt*`).
 
 **Section** — validator: clean but unaudited
 - Add missing `assistive` render key (or document gate handling).
