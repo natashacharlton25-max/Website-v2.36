@@ -144,7 +144,7 @@ const linkAttrs = href ? {
         {!mediaBg && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="card__media-icon" />}
         {/* Preset controls the fill: force fit="cover" + drop any authored width/height
             so the image fills the cell and an author can't set a fixed width that breaks it. */}
-        {!mediaBg && mediaComponent === 'Image' && <Image {...(mediaProps as any)} width={undefined} height={undefined} fit="cover" class="card__media-img" />}
+        {!mediaBg && mediaComponent === 'Image' && <Image {...(mediaProps as any)} width={undefined} height={undefined} cover fit="cover" class="card__media-img" />}
         {!mediaBg && mediaComponent === 'Shape' && <Shape {...(mediaProps as any)} class="card__media-shape" />}
       </div>
     )}
@@ -157,7 +157,10 @@ const linkAttrs = href ? {
       {body && <Text size="sm" {...(bodyProps as any)} flush class="card__body-text" />}
       {button && (
         <div class="card__footer">
-          <Button size="sm" {...(buttonProps as any)} />
+          {/* shape="soft" (--radius-md) = the inner radius, matching the image; a
+              step inside the card's --radius-lg (concentric, §12.7). Default —
+              author can still override the shape. */}
+          <Button size="sm" shape="soft" {...(buttonProps as any)} />
         </div>
       )}
     </div>

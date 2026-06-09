@@ -69,6 +69,11 @@ interface Props {
   border?: 'none' | 'thin' | 'medium' | 'thick';
   hover?: boolean;
   responsive?: boolean;
+  /** Cover-fill mode for nested media (Card/Heading): the figure ABSOLUTELY fills
+   *  its positioned container and the image crops (object-fit:cover). Being out of
+   *  flow, it can't grow the container — so the container's height governs and the
+   *  image conforms to it, never the reverse. */
+  cover?: boolean;
   /** @deprecated Use role="decorative" instead */
   decorative?: boolean;
   loading?: 'lazy' | 'eager';
@@ -108,6 +113,7 @@ const {
   border: borderProp,
   hover = false,
   responsive = false,
+  cover = false,
   decorative = false,
   loading = 'lazy',
   sepia,
@@ -193,6 +199,7 @@ const colourName = rainbowColor || brandColor;
 // Figure wrapper classes — radius passed to figure so ::after can inherit
 const figureClasses = [
   'image',
+  cover && 'image--cover',
   `color--${colourName}`,
   colorTier && colorTier !== 'base' && `color--tier-${colorTier}`,
   hasMotion && 'image--animate',

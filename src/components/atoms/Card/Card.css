@@ -523,15 +523,14 @@
   overflow: hidden;
   border-radius: var(--radius-md);
 }
-/* Image media — fills its column (grid-defined width ~1/3) at the full card
-   height (align-self stretch → row height, driven by the text). object-fit
-   cover comes from the Image atom's fit="cover" prop. NO aspect-ratio in the
-   wide layout — deriving width from the image's own height ballooned the card
-   and crushed the text column. The grid column owns the width; the text owns
-   the height. */
+/* Image media — the image COVER-FILLS this cell absolutely (Image `cover` mode),
+   so the figure is OUT OF FLOW and cannot grow the row. The grid column owns the
+   WIDTH (~40%); the TEXT column owns the HEIGHT (align-self stretch → row =
+   text); the image crops to that height (object-fit:cover). A tall image is
+   cropped, never allowed to balloon the card or leave a void beside short text. */
 .card__media--fill {
+  position: relative;
   align-self: stretch;
-  display: grid;
 }
 /* Icon / LottieIcon / Shape media — a sized glyph, centred (not stretched). */
 .card__media--center {
@@ -576,9 +575,9 @@
   .card__media {
     align-self: stretch;
   }
-  /* Stacked: there's no sibling text row to derive the image height from, so
-     give the full-width image a banner aspect-ratio. */
+  /* Stacked: no sibling text row to govern height, so give the full-width
+     banner a defined aspect (the absolute cover image fills it). */
   .card__media--fill {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: var(--aspect-video);
   }
 }
