@@ -517,6 +517,25 @@ export function validateComponent(
       const itemProps = (def as any).items.properties as Record<string, any>;
       value.forEach((el: any, idx: number) => {
         if (!el || typeof el !== 'object' || Array.isArray(el)) return;
+        // (b) array elements that are THEMSELVES component-nodes (e.g. Card meta
+        // = Badge[]): the item def's `component` is an enum. Move 1 (accept-list)
+        // + Move 2 (deep-validate the element against the child atom's schema).
+        if (itemProps.component?.enum) {
+          const elComp = (el as any).component;
+          if (elComp && !itemProps.component.enum.includes(elComp)) {
+            errors.push({ prop: `${key}[${idx}].component`, value: elComp, message: `component "${elComp}" not in enum [${itemProps.component.enum.join(', ')}]`, severity: 'error' });
+          }
+          if ((def as any)._lockProps && elComp && (globalThis as any).__schemaMap) {
+            const childSchema = (globalThis as any).__schemaMap.get(elComp);
+            if (childSchema) {
+              const childResult = validateComponent(el, childSchema);
+              for (const cErr of childResult.errors) {
+                errors.push({ prop: `${key}[${idx}].${cErr.prop}`, value: cErr.value, message: cErr.message, severity: cErr.severity });
+              }
+            }
+          }
+          return;
+        }
         // required item-props (default-aware, same as the top-level check)
         for (const [ik, idef] of Object.entries(itemProps)) {
           if ((idef as any).required && !(ik in el) && (idef as any).default === undefined) {
@@ -550,6 +569,16 @@ export function validateComponent(
               }
             }
           }
+        }
+      });
+    }
+
+    // Array of scalar enums (e.g. Card.stack = ['meta','title','body']).
+    if (Array.isArray(value) && (def as any).items?.enum) {
+      const allowed = (def as any).items.enum as any[];
+      value.forEach((el: any, idx: number) => {
+        if (el != null && !allowed.includes(el)) {
+          errors.push({ prop: `${key}[${idx}]`, value: el, message: `"${el}" not in enum [${allowed.join(', ')}]`, severity: 'error' });
         }
       });
     }

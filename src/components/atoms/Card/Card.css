@@ -512,10 +512,11 @@
   min-height: 0;   /* media cell must not impose the image's intrinsic height — the content column drives the card height */
 }
 
-/* Icon/glyph media hugs its own width (no forced image column); content fills.
-   Image media keeps the default ~40/60 columns. */
+/* Icon/glyph media — a narrower column than the image's 40% (an icon contains-to-fit
+   rather than crop-fills, so a wide column leaves space around the square glyph).
+   ~25% keeps the glyph snug while it scales to the text-governed row height. */
 .card--horizontal.card--media-hug {
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
 }
 
 /* Media cell — clips its child to rounded corners. Fill vs centre per media type. */
@@ -531,12 +532,27 @@
 .card__media--fill {
   position: relative;
   align-self: stretch;
+  box-shadow: var(--shadow-md);
 }
-/* Icon / LottieIcon / Shape media — a sized glyph, centred (not stretched). */
+/* Icon / LottieIcon media — SAME pattern as the image's cover: the glyph is taken
+   OUT OF FLOW (absolute) so it can't govern the row height. The TEXT governs the
+   height; the glyph fills the text-sized container, scaling to fit (svg
+   preserveAspectRatio keeps it square + centred, never distorts). Transparent box. */
 .card__media--center {
-  align-self: center;
-  display: grid;
-  place-items: center;
+  position: relative;
+  align-self: stretch;
+}
+/* Any vector media (icon, lottie, shape) — taken out of flow so the TEXT governs the
+   cell height, then filled; the svg contains (preserveAspectRatio) so it stays
+   aspect-true and centred. The card governs the size, same as it governs the other
+   slots. (Box-shapes — circle/square via border-radius, no svg — would stretch to the
+   cell; svg-shapes/icons/lottie are aspect-safe.) */
+.card__media--center .card__media-icon,
+.card__media--center .card__media-shape {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* Middle cell — fills remaining width, content top-aligned.
@@ -552,13 +568,30 @@
   min-width: 0;
 }
 .card__meta {
-  order: -1;
-  color: var(--neutral-mid);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);            /* frames the middot separators symmetrically (badge internal padding isn't author-controllable) */
+  margin-bottom: var(--space-lg);  /* separate the meta row from the next slot (matches the body↔button gap) */
 }
 
-/* Action footer — sits at the bottom of the content column. */
+/* Middot separator between meta badges — decorative (aria-hidden), so screen
+   readers read "Stoneware 350ml Handmade", not the dots. The flex gap frames it
+   on both sides; user-select keeps it out of copy-paste. */
+.card__meta-sep {
+  color: var(--neutral-emphasis);
+  user-select: none;
+}
+.card__meta-sep::before {
+  content: "·";
+}
+
+/* Action footer — sits at the bottom of the content column, with breathing room
+   above the button so it separates from the body (a section break, not just the
+   8px inter-slot gap). margin-top:auto still pins it down when media is taller. */
 .card__footer {
   margin-top: auto;
+  padding-top: var(--space-lg);
   display: flex;
 }
 
@@ -579,5 +612,13 @@
      banner a defined aspect (the absolute cover image fills it). */
   .card__media--fill {
     aspect-ratio: var(--aspect-video);
+  }
+  /* Stacked: no sibling text row to govern height — drop the icon back to a fixed,
+     centred glyph (in-flow) so its absolute fill doesn't collapse to zero height. */
+  .card__media--center .card__media-icon {
+    position: static;
+    width: var(--media-3xl);
+    height: var(--media-3xl);
+    margin-inline: auto;
   }
 }

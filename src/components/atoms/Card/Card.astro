@@ -20,6 +20,7 @@
  */
 import { Heading } from '../Heading';
 import { Text } from '../Text';
+import { Badge } from '../Badge';
 import { Button } from '../Button';
 import { Icon } from '../Icon';
 import { LottieIcon } from '../LottieIcon';
@@ -31,7 +32,10 @@ export interface Props {
   cardType?: 'horizontal';
   /** Nested component nodes: { component, …childProps }. Child atom owns its props. */
   title?: Record<string, any>;
-  meta?: Record<string, any>;
+  /** Meta row — array of Badge nodes (the eyebrow above the title by default). */
+  meta?: Record<string, any>[];
+  /** Vertical order of the stacked text slots. Default ['meta','title','body']. */
+  stack?: ('meta' | 'title' | 'body')[];
   body?: Record<string, any>;
   button?: Record<string, any>;
   media?: Record<string, any>;
@@ -61,7 +65,7 @@ export interface Props {
 
 const {
   cardType,
-  title, meta, body, button, media,
+  title, meta, body, button, media, stack,
   semanticRole,
   mediaBg = false,
   mediaBgSize,
@@ -99,9 +103,16 @@ const mediaProps = (mediaSize && mediaSize !== 'auto' && baseMediaProps.size == 
   : baseMediaProps;
 
 const { component: _tc, ...titleProps } = title || {};
-const { component: _mtc, ...metaProps } = meta || {};
 const { component: _bc, ...bodyProps } = body || {};
 const { component: _btc, ...buttonProps } = button || {};
+
+// Stacked text slots render in author order (`stack`); DOM order === visual order
+// === reading order (no CSS reorder), so WCAG meaningful-sequence holds for any
+// arrangement. Unlisted slots fall back to default position. Button is always the
+// bottom action (not part of the stack).
+const STACK_SLOTS = ['meta', 'title', 'body'] as const;
+const requestedStack = Array.isArray(stack) ? stack.filter((s: any) => (STACK_SLOTS as readonly string[]).includes(s)) : [];
+const stackOrder = [...new Set([...requestedStack, ...STACK_SLOTS])];
 
 // ── Legacy container model ──
 const Tag = href ? 'a' : as;
@@ -140,27 +151,51 @@ const linkAttrs = href ? {
     {media && (
       <div class:list={['card__media', (mediaComponent === 'Image' && !mediaBg) ? 'card__media--fill' : 'card__media--center']}>
         {mediaBg && <Shape {...(mediaProps as any)} class="card__media-shape" />}
-        {!mediaBg && mediaComponent === 'Icon' && <Icon {...(mediaProps as any)} class="card__media-icon" />}
-        {!mediaBg && mediaComponent === 'LottieIcon' && <LottieIcon {...(mediaProps as any)} class="card__media-icon" />}
+        {/* brandColor="primary" = card default; author's brandColor on the node overrides (spread after) */}
+        {!mediaBg && mediaComponent === 'Icon' && <Icon brandColor="primary" {...(mediaProps as any)} class="card__media-icon" />}
+        {!mediaBg && mediaComponent === 'LottieIcon' && <LottieIcon brandColor="primary" {...(mediaProps as any)} class="card__media-icon" />}
         {/* Preset controls the fill: force fit="cover" + drop any authored width/height
             so the image fills the cell and an author can't set a fixed width that breaks it. */}
         {!mediaBg && mediaComponent === 'Image' && <Image {...(mediaProps as any)} width={undefined} height={undefined} cover fit="cover" class="card__media-img" />}
-        {!mediaBg && mediaComponent === 'Shape' && <Shape {...(mediaProps as any)} class="card__media-shape" />}
+        {!mediaBg && mediaComponent === 'Shape' && <Shape brandColor="primary" {...(mediaProps as any)} class="card__media-shape" />}
       </div>
     )}
 
     <div class="card__main">
-      {/* DOM order title → meta → body (document/screen-reader order); visual
-          order meta → title → body via CSS `order` on .card__meta. */}
-      {title && <Heading {...(titleProps as any)} flush class="card__title" />}
-      {meta && <Text size="sm" {...(metaProps as any)} flush class="card__meta" />}
-      {body && <Text size="sm" {...(bodyProps as any)} flush class="card__body-text" />}
+      {/* Stacked text slots in author order (`stack`). DOM order === visual order
+          === reading order, so WCAG meaningful-sequence holds for any arrangement.
+          Default ['meta','title','body']. Button is always the bottom action. */}
+      {stackOrder.map((slot) => {
+        if (slot === 'title') return title && (
+          /* title = neutral at emphasis tier (default — author can override colour) */
+          <Heading brandColor="neutral" colorTier="emphasis" {...(titleProps as any)} flush class="card__title" />
+        );
+        if (slot === 'meta') return (Array.isArray(meta) && meta.length > 0) && (
+          /* meta = a row of Badges separated by middots. variant="meta" default per
+             badge (brand-coloured text); author can override any to a real pill. Max 4. */
+          <div class="card__meta">
+            {meta.slice(0, 4).map((m: any, i: number) => {
+              const { component: _mc2, ...mProps } = m || {};
+              return (
+                <Fragment>
+                  {i > 0 && <span class="card__meta-sep" aria-hidden="true" />}
+                  <Badge variant="meta" {...(mProps as any)} />
+                </Fragment>
+              );
+            })}
+          </div>
+        );
+        if (slot === 'body') return body && (
+          <Text size="sm" {...(bodyProps as any)} flush class="card__body-text" />
+        );
+        return null;
+      })}
       {button && (
         <div class="card__footer">
           {/* shape="soft" (--radius-md) = the inner radius, matching the image; a
               step inside the card's --radius-lg (concentric, §12.7). Default —
               author can still override the shape. */}
-          <Button size="sm" shape="soft" {...(buttonProps as any)} />
+          <Button brandColor="primary" size="sm" shape="soft" {...(buttonProps as any)} />
         </div>
       )}
     </div>

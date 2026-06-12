@@ -61,7 +61,7 @@ function expectPage(label: string, page: any, want: 'valid' | 'invalid', msg?: s
 const card = (slots: any) => ({ component: 'Card', cardType: 'horizontal', ...slots });
 expectComp('Card good (title size/weight = appearance freedom)', 'Card', card({
   title: { component: 'Heading', contentHeading: 'Hi', level: 2, size: 'h2', weight: 'bold' },
-  meta: { component: 'Text', contentText: 'meta', size: 'sm' },
+  meta: [{ component: 'Badge', contentBadge: 'meta' }, { component: 'Badge', contentBadge: 'icon', media: { component: 'Icon', name: 'clock', semanticRole: 'decorative' } }],
   body: { component: 'Text', contentText: 'body' },
   button: { component: 'Button', contentButton: 'Go', variant: 'fill' },
   media: { component: 'Image', src: 'x.jpg', semanticRole: 'content-symbol', contentAltWord: 'cat' },
@@ -69,7 +69,10 @@ expectComp('Card good (title size/weight = appearance freedom)', 'Card', card({
 expectComp('Card title wrong atom', 'Card', card({ title: { component: 'Paragraph', contentHeading: 'x', level: 2 } }), 'invalid', 'title.component');
 expectComp('Card title bad child enum (level 99)', 'Card', card({ title: { component: 'Heading', contentHeading: 'x', level: 99 } }), 'invalid', 'title.level');
 expectComp('Card title unknown child prop (LOCK)', 'Card', card({ title: { component: 'Heading', contentHeading: 'x', level: 2, fontSize: 'huge' } }), 'invalid', 'title.fontSize');
-expectComp('Card meta wrong atom', 'Card', card({ meta: { component: 'Span', contentText: 'm' } }), 'invalid', 'meta.component');
+expectComp('Card meta wrong atom (row element)', 'Card', card({ meta: [{ component: 'Span', contentText: 'm' }] }), 'invalid', 'meta[0].component');
+expectComp('Card meta badge unknown child prop (row deep-LOCK)', 'Card', card({ meta: [{ component: 'Badge', contentBadge: 'm', bogusProp: 'x' }] }), 'invalid', 'meta[0].bogusProp');
+expectComp('Card stack good (reorder slots)', 'Card', card({ stack: ['body', 'meta', 'title'], title: { component: 'Heading', contentHeading: 'h', level: 2 }, meta: [{ component: 'Badge', contentBadge: 'm' }], body: { component: 'Text', contentText: 'b' } }), 'valid');
+expectComp('Card stack bad slot name', 'Card', card({ stack: ['body', 'footer'] }), 'invalid', 'stack[1]');
 expectComp('Card body missing required (contentText)', 'Card', card({ body: { component: 'Text' } }), 'invalid', 'body.contentText');
 expectComp('Card button wrong atom', 'Card', card({ button: { component: 'Link', contentButton: 'x' } }), 'invalid', 'button.component');
 
