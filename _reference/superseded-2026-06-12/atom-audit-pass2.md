@@ -1,3 +1,6 @@
+> ⚠️ **SUPERSEDED (2026-06-12)** — historical record only. Do NOT treat as current truth.
+> Current rules live in `atom-spec-v0.3.md`. Last verified accurate: March 2026.
+
 # Atom Audit — Pass 2 Reference
 
 **What this document is:** The canonical checklist for pass 2 (post-theme-token restructure), per-atom status tracker, and consolidated deferred items from pass 1. Paste this into any Claude conversation or Claude Code session for full context.

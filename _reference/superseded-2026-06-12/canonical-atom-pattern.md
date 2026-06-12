@@ -1,3 +1,6 @@
+> ⚠️ **SUPERSEDED (2026-06-12)** — historical record only. Do NOT treat as current truth.
+> Current rules live in `atom-spec-v0.3.md`. Last verified accurate: March 2026.
+
 # Canonical Atom Pattern
 
 This is the ONE pattern. Every atom follows it. No exceptions unless documented here.
