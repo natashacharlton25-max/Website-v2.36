@@ -10,6 +10,8 @@
  * Morph: GSAP MorphSVGPlugin (hover toggle).
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
 import { AnimExplainer } from '../../molecules/aac/AnimExplainer';
 import { Tooltip } from '../Tooltip';
 import phosphorMeta from '../../../../phosphor-meta.json';
@@ -217,18 +219,39 @@ function resolveSlug(iconName: string, weightOverride?: string, stripWeight?: bo
   return `${resolved}-${w}`;
 }
 
-// ─── Fetch icon from Asset Library API ──────────────────
+// ─── Fetch icon from node_modules ─────────────────────────
 
 async function fetchIcon(slug: string): Promise<string | null> {
   try {
-    const headers: Record<string, string> = {};
-    if (ASSET_API_TOKEN) {
-      headers['Authorization'] = `Bearer ${ASSET_API_TOKEN}`;
+    // Determine the weight from the slug
+    // Phosphor core folder structure: node_modules/@phosphor-icons/core/assets/{weight}/{baseName}-{weight}.svg
+    // Note: the "regular" weight files in the assets/regular folder don't always have a -regular suffix, but our slug does.
+    const parts = slug.split('-');
+    // GSAP morphed versions might have -flat, which Phosphor npm package doesn't have.
+    // We'll strip -flat and just load the normal SVG. GSAP MorphSVG can handle it.
+    const isFlat = slug.endsWith('-flat');
+    const baseSlug = isFlat ? slug.replace('-flat', '') : slug;
+    
+    let weight = 'regular';
+    const weights = ['light', 'regular', 'bold', 'fill', 'duotone', 'thin'];
+    for (const w of weights) {
+      if (baseSlug.endsWith(`-${w}`)) {
+        weight = w;
+        break;
+      }
     }
-    const res = await fetch(`${ASSET_API_URL}/v1/assets/${slug}`, { headers });
-    if (!res.ok) return null;
-    return await res.text();
-  } catch {
+    
+    // In @phosphor-icons/core/assets/regular, the files don't have -regular suffix.
+    const fileName = weight === 'regular' ? `${baseSlug.replace('-regular', '')}.svg` : `${baseSlug}.svg`;
+    
+    const filePath = path.join(process.cwd(), 'node_modules', '@phosphor-icons', 'core', 'assets', weight, fileName);
+    
+    if (fs.existsSync(filePath)) {
+      return fs.readFileSync(filePath, 'utf-8');
+    }
+    return null;
+  } catch (err) {
+    console.error(`[Icon] Error reading SVG for slug ${slug}:`, err);
     return null;
   }
 }

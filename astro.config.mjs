@@ -5,7 +5,7 @@ import cloudflare from '@astrojs/cloudflare';
 // https://astro.build/config
 export default defineConfig({
   // Site configuration
-  site: 'https://yourdomain.com',
+  site: 'https://stelladore.uk',
 
   // Output configuration - server mode for API routes
   output: 'server',
