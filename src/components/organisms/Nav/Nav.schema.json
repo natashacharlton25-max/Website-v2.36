@@ -1,0 +1,54 @@
+{
+  "component": "Nav",
+  "category": "organism",
+  "renders": {
+    "full": "Nav.astro",
+    "reduced": "Nav.astro"
+  },
+  "notes": "Main navigation bar for the site, dynamically generated.",
+  "props": {
+    "content": {
+      "logo": {
+        "type": "string",
+        "description": "Path to the brand logo"
+      },
+      "links": {
+        "type": "array",
+        "required": true,
+        "items": {
+          "type": "object",
+          "properties": {
+            "label": { "type": "string", "required": true },
+            "url": { "type": "string", "required": true }
+          }
+        }
+      },
+      "actions": {
+        "type": "array",
+        "required": false,
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": { 
+              "type": "string", 
+              "enum": ["search", "accessibility", "contact", "cart"], 
+              "required": true 
+            },
+            "ariaLabel": { "type": "string", "required": true }
+          }
+        }
+      }
+    },
+    "colour": {
+      "brandColor": { "type": "string", "default": "neutral", "enum": ["primary", "secondary", "neutral"] }
+    },
+    "rainbow": {
+      "rainbowColor": { "type": "string", "enum": ["red", "orange", "yellow", "teal", "blue", "purple", "pink"] },
+      "colorTier":    { "type": "string", "enum": ["tint", "mid", "base", "emphasis"] }
+    },
+    "visual": {
+      "variant": { "type": "string", "default": "glass", "enum": ["fill", "outline", "glass", "liquid-glass"] },
+      "shadow":  { "type": "string", "enum": ["none", "out", "drop", "in", "elevated", "glow", "glow-intense", "glow-inner"] }
+    }
+  }
+}

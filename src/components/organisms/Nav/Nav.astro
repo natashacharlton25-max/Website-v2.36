@@ -1,0 +1,106 @@
+---
+// JSON Schema-driven Navigation Component
+import CartIcon from '../../molecules/shop/CartIcon.astro';
+import { Icon } from '../../atoms/Icon';
+import { LottieIcon } from '../../atoms/LottieIcon';
+import type {
+  BrandColour, RainbowColour, ColourTier,
+  Variant, Shadow
+} from '../../../lib/shared-enums';
+import './Nav.css';
+
+export interface Props {
+  logo?: string;
+  links?: Array<{
+    label: string;
+    url: string;
+  }>;
+  actions?: Array<{
+    type: "search" | "accessibility" | "contact" | "cart";
+    ariaLabel: string;
+  }>;
+  brandColor?: BrandColour;
+  rainbowColor?: RainbowColour;
+  colorTier?: ColourTier;
+  variant?: Variant;
+  shadow?: Shadow;
+}
+
+const {
+  logo = '/Logo/BrandLogoFooter.png',
+  links = [],
+  actions = [],
+  brandColor = 'neutral',
+  rainbowColor,
+  colorTier,
+  variant = 'glass',
+  shadow
+} = Astro.props;
+
+const color = rainbowColor || brandColor;
+---
+
+<nav 
+  class:list={[
+    'nav-container',
+    color && `color--${color}`,
+    variant && `variant-${variant}`,
+    shadow && `shadow-${shadow}`,
+  ]} 
+  id="main-nav"
+>
+  <div class="nav-content">
+    <!-- Mobile Hamburger Menu -->
+    <button class="hamburger-menu mobile-only" id="hamburger-btn" aria-label="Toggle menu">
+      <svg viewBox="0 0 64 48">
+        <path d="M19,15 L45,15 C70,15 58,-2 49.0177126,7 L19,37"></path>
+        <path d="M19,24 L45,24 C61.2371586,24 57,49 41,33 L32,24"></path>
+        <path d="M45,33 L19,33 C-8,33 6,-2 22,14 L45,37"></path>
+      </svg>
+    </button>
+
+    <!-- Logo -->
+    <a href="/" class="nav-logo">
+      <img src={logo} alt="Brand Logo" class="logo-image" />
+    </a>
+
+    <!-- Desktop Navigation Links -->
+    <ul class="nav-links desktop-only">
+      {links.map((link) => (
+        <li class="nav-item">
+          <a href={link.url} class="nav-link">{link.label}</a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Action Icons -->
+    <div class="nav-actions desktop-only">
+      <div class="nav-icons">
+        <button class="nav-icon-btn nav-icon-btn--lottie" aria-label="Search">
+          <LottieIcon slug="lottie-search" size={24} class="nav-lottie-icon" />
+          <Icon name="magnifying-glass" size={24} class="nav-static-icon" />
+        </button>
+        <button class="nav-icon-btn nav-icon-btn--lottie" aria-label="Accessibility settings" id="a11y-trigger">
+          <LottieIcon slug="lottie-a11y" size={24} class="nav-lottie-icon" />
+          <Icon name="eye-fill" size={24} class="nav-static-icon" />
+        </button>
+        <a href="/contact" class="nav-icon-btn nav-icon-btn--lottie" aria-label="Contact Us">
+          <LottieIcon slug="lottie-mail" size={24} class="nav-lottie-icon" />
+          <Icon name="envelope-fill" size={24} class="nav-static-icon" />
+        </a>
+      </div>
+      <CartIcon />
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Setup mobile menu toggle logic here if needed
+  const btn = document.getElementById('hamburger-btn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('active');
+      // Add mobile menu logic
+    });
+  }
+</script>
