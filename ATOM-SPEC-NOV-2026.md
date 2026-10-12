@@ -15,7 +15,7 @@ Older documents (atom-spec v1.0, BUILD-STATUS, COMPLIANCE-INVENTORY, LAYOUT-ENGI
 
 ## Platform rules (to confirm)
 
-These come from `.claude/rules.md` and from what the code does. Each one becomes **Confirmed** only once Natasha says so.
+These come from `.claude/CLAUDE.md` and from what the code does. Each one becomes **Confirmed** only once Natasha says so.
 
 | Rule | Status |
 |---|---|
