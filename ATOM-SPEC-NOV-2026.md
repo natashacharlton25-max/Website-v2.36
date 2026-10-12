@@ -59,12 +59,22 @@ These come from `.claude/CLAUDE.md` and from what the code does. Each one become
 | tooltip | Pass — hidden at rest with a `?` badge; styled pop-up on hover and focus |
 | subtitle | Pass — solid full-width bar along the bottom of the screen (shared bar); Natasha confirmed it looks right |
 | hidden | Pass — no captions |
+| `?` badge read state | Pass — black before reading, grey (neutral) after the caption has been seen |
+| inline | Pass — thumbnail with alt text beside it |
+| enlarge | Pass — click opens the image large with its alt text underneath |
+| hover switched off | Pass — hovering shows nothing; clicking shows the pop-up and greys the `?` |
+| phone (390px), subtitle | Pass — tap shows the bottom bar |
+| phone (390px), tooltip | **Question** — tap shows the pop-up AND the bottom bar at the same time |
+| dark (vivid-dark), calm (cloudcalm), high contrast (mono-pure-hc) | Pass — pop-up readable in all three |
+| word alt text | Pass |
 
-**Not yet tested:** the `?` badge changing colour once read; inline; enlarge; word and AAC text modes; mobile (bar mode under 640px); hover switched off; dark, calm and high-contrast themes.
+**Not yet tested:** AAC alt text (needs the Asset Library API, which can't be reached from the test workspace); screen reader announcement; keyboard-only tab order across many images.
 
 **Fixed:**
 - 2026-10-12 — the caption styles never loaded, so captions showed as plain text all the time. Fix: the barrel now loads both the styles and the script, and BaseLayout imports the barrel. Commit `0714c36`.
 
 **Known issues:**
 - The test page sets tooltip mode itself, but Your View immediately sets it back to its saved value. The page shows nothing unless Your View is set to tooltip or subtitle.
+- On phones in tooltip mode, the pop-up and the bottom bar both appear at once. Waiting on Natasha's ruling.
+- Inline mode with "descriptive" chosen shows nothing beside an image that only has word-level alt text. Tooltip mode falls back to the word instead. Waiting on Natasha's ruling.
 - FigCaption's display code largely duplicates the animation explainer's. See fix list decision 7, which is to extend the animation explainer with slots after launch.
