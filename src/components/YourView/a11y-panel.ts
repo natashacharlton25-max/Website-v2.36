@@ -305,13 +305,20 @@ export function applySettings(settings: A11ySettings): void {
   target.classList.toggle('a11y-screen-reader-mode', settings.screenReaderMode);
   target.classList.toggle('a11y-scrollbar-enhanced', settings.scrollbarEnhanced);
 
+  // Reading mode (textonly render) always shows image alt text inline —
+  // ruling 2026-10-12. The saved settings are not changed, so the person's own
+  // choices come back when Reading mode is turned off. If no alt text type was
+  // ever picked, descriptive is used (inline with "none" would show nothing).
+  const readingMode = settings.textOnly;
+
   // Alt Text Mode - apply as data attribute
-  const altMode = settings.altTextMode || 'none';
+  const savedAltMode = settings.altTextMode || 'none';
+  const altMode = readingMode && savedAltMode === 'none' ? 'descriptive' : savedAltMode;
   (target as HTMLElement).dataset.altTextMode = altMode;
   document.documentElement.dataset.altTextMode = altMode;
 
-  // Alt Display Mode - how alt text is shown (caption, overlay, etc.)
-  const displayMode = settings.altDisplayMode || 'hidden';
+  // Alt Display Mode - how alt text is shown (hidden / subtitle / tooltip / inline / enlarge)
+  const displayMode = readingMode ? 'inline' : (settings.altDisplayMode || 'hidden');
   (target as HTMLElement).dataset.altDisplayMode = displayMode;
   document.documentElement.dataset.altDisplayMode = displayMode;
 
