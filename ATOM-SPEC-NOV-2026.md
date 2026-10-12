@@ -71,6 +71,12 @@ These come from `.claude/CLAUDE.md` and from what the code does. Each one become
 | phone (390px), tooltip | Pass (after fix) — tap shows the bottom bar only |
 | dark (vivid-dark), calm (cloudcalm), high contrast (mono-pure-hc) | Pass — pop-up readable in all three |
 | word alt text | Pass |
+| Calm Mode (reduced render) | Pass — same as default |
+| Highlight links | Pass — images get the highlight outline; caption works |
+| No-colour mode | Pass — image greyed; caption readable |
+| Motion off | Pass |
+| Easy Click (set directly; the Your View switch is a known bug) | Pass — picture goes full width, caption reported as showing but sits above the picture, off the screenshot |
+| Reading mode (text-only render) | **Question** — the full picture and pop-up show exactly as in default mode |
 
 **Not yet tested:** AAC alt text (needs the Asset Library API, which can't be reached from the test workspace); screen reader announcement; keyboard-only tab order across many images.
 
