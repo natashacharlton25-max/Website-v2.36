@@ -9,6 +9,19 @@
 
 ---
 
+## Talking to Natasha (added 2026-10-12)
+
+Natasha doesn't read code. Explain everything in plain words, with no code or jargon in explanations. When you bring her a problem, always use this shape:
+
+- **What's wrong:** one plain sentence about what a visitor sees or what goes wrong.
+- **Why it matters:** who it affects.
+- **The options:** usually two or three, each in plain words.
+- **Recommended:** which option you'd pick, and why, in one sentence.
+
+Then wait for her yes, her choice of another option, or her question. Show screenshots instead of describing visual results where you can.
+
+---
+
 ## Key Documents
 
 **`ATOM-SPEC-NOV-2026.md` (repo root) is the one current spec** (set 2026-10-12). It is built atom by atom from tested code plus dated rulings. Read it first. After completing any atom, add or update that atom's section there. The documents below are history: the ones listed here now live in `_reference/superseded-2026-06-12/` or `_reference/atom-audit-files/`. Use them only as background, never as truth.
