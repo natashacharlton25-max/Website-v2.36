@@ -35,7 +35,7 @@ After completing any component: update `BUILD-STATUS.md` (the live status doc) w
 ### Known v2 checklist corrections (apply when auditing):
 - **Section 9.2** — checklist expects `altAacPhrase` as Image prop. WRONG. `alt_aac_phrase` is a D1 field consumed by the resolver at build time. Image receives `altAacHtml` (pre-rendered). Not a component prop.
 - **Section 9.3** — checklist expects `altSymbolId` as Image prop. WRONG. `alt_symbol_id` is a D1 FK used at the data layer. Never reaches the component.
-- **Section 9.4** — checklist lists display modes as `hover | overlay | underneath | replace | off`. STALE. Actual CSS modes are `hidden | caption | overlay | tooltip | subtitle | replace` (6 modes, not 5). See Alt Text Architecture below for the correct mapping.
+- **Section 9.4** — checklist lists display modes as `hover | overlay | underneath | replace | off`. STALE. Actual modes are `hidden | subtitle | tooltip | inline | enlarge` (5 modes). See Alt Text Architecture below for the correct mapping.
 
 ---
 
@@ -269,12 +269,13 @@ Both axes set as `data-*` attributes on `<html>`, controlled by the Your View pa
 **How to show it** (`data-alt-display-mode`):
 | Value | Behaviour |
 |-------|-----------|
-| `hidden` | `display: none` (default) |
-| `caption` | Block below image |
-| `overlay` | Positioned over image bottom (solid background) |
-| `tooltip` | Visible on hover + focus-within |
-| `subtitle` | Image shrinks via flex, text below |
-| `replace` | Image visually-hidden, text shown (img stays in a11y tree) |
+| `hidden` | Nothing shown (default) |
+| `subtitle` | Solid full-width bar along the bottom of the screen (shared bar), on hover / focus |
+| `tooltip` | Pop-up caption on the image, on hover + focus-within; `?` badge marks images with alt text |
+| `inline` | Thumbnail + alt text side by side |
+| `enlarge` | Click to open the image and its alt text in a modal |
+
+Source of truth for these five: `src/styles/gates/alt-text-gate.css` and the Your View panel (`a11y-panel.ts`). Updated 2026-10-12 — the previous list (caption / overlay / replace) was stale.
 
 ### Component requirements:
 - `tabindex="0"` on the `<figure>` element — makes it focusable for switch/keyboard
