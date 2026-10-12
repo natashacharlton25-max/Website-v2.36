@@ -29,6 +29,10 @@ These come from `.claude/CLAUDE.md` and from what the code does. Each one become
 | Atoms are imported through their barrel (`index.ts`) so their CSS loads with them | To confirm |
 | Component CSS uses design tokens only; no hard-coded values, no `!important`, no render/motion/theme selectors | To confirm |
 
+### Platform questions (open)
+
+- **Phone-size rules were removed from 120 style files.** Each removal is marked `@media-stripped-N`, and backups are listed in `_reference/responsive-media-queries/manifest.json` (136 entries). Was this deliberate, for example to be replaced by the layout engine, and what replaces it? Asked 2026-10-12.
+
 ---
 
 ## FigCaption
@@ -75,6 +79,6 @@ These come from `.claude/CLAUDE.md` and from what the code does. Each one become
 
 **Known issues:**
 - The test page sets tooltip mode itself, but Your View immediately sets it back to its saved value. The page shows nothing unless Your View is set to tooltip or subtitle.
-- On phones in tooltip mode, the pop-up and the bottom bar both appear at once. Waiting on Natasha's ruling.
-- Inline mode with "descriptive" chosen shows nothing beside an image that only has word-level alt text. Tooltip mode falls back to the word instead. Waiting on Natasha's ruling.
+- On phones in tooltip mode, the pop-up and the bottom bar both appear at once. `Ruling 2026-10-12:` on phones, tooltip mode shows the bottom bar only (the original intention). Not yet fixed — the fix depends on the phone-size rules question (see Platform questions).
+- Inline mode with "descriptive" chosen shows nothing beside an image that only has word-level alt text. `Ruling 2026-10-12:` no fallback needed. Every image that carries information gets all three (word, descriptive and AAC), written by the content pipeline, and the checker must refuse an image that's missing any of them before the site builds. To be built during the Image audit. The FigCaption test page's sample images will need all three as well.
 - FigCaption's display code largely duplicates the animation explainer's. See fix list decision 7, which is to extend the animation explainer with slots after launch.
