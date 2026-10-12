@@ -31,7 +31,7 @@ These come from `.claude/CLAUDE.md` and from what the code does. Each one become
 
 ### Platform questions (open)
 
-- **Phone-size rules were removed from 120 style files.** Each removal is marked `@media-stripped-N`, and backups are listed in `_reference/responsive-media-queries/manifest.json` (136 entries). Was this deliberate, for example to be replaced by the layout engine, and what replaces it? Asked 2026-10-12.
+- **Phone-size rules.** `Ruling 2026-10-12:` all phone and responsive rules live in one central file, `src/styles/tokens/responsive.css`, not in each atom's own files. They were removed from 120 atom files (marked `@media-stripped-N`; backups listed in `_reference/responsive-media-queries/manifest.json`). Not every removed rule has been re-added centrally yet: FigCaption's is now done; Tooltip and the site header still need checking.
 
 ---
 
@@ -68,7 +68,7 @@ These come from `.claude/CLAUDE.md` and from what the code does. Each one become
 | enlarge | Pass — click opens the image large with its alt text underneath |
 | hover switched off | Pass — hovering shows nothing; clicking shows the pop-up and greys the `?` |
 | phone (390px), subtitle | Pass — tap shows the bottom bar |
-| phone (390px), tooltip | **Question** — tap shows the pop-up AND the bottom bar at the same time |
+| phone (390px), tooltip | Pass (after fix) — tap shows the bottom bar only |
 | dark (vivid-dark), calm (cloudcalm), high contrast (mono-pure-hc) | Pass — pop-up readable in all three |
 | word alt text | Pass |
 
@@ -76,9 +76,10 @@ These come from `.claude/CLAUDE.md` and from what the code does. Each one become
 
 **Fixed:**
 - 2026-10-12 — the caption styles never loaded, so captions showed as plain text all the time. Fix: the barrel now loads both the styles and the script, and BaseLayout imports the barrel. Commit `0714c36`.
+- 2026-10-12 — on phones, tooltip mode showed the pop-up and the bar together. Fix: a 640px rule in the central phone file `src/styles/tokens/responsive.css` hides the pop-up, so only the bar shows. Tested at phone and desktop sizes.
 
 **Known issues:**
 - The test page sets tooltip mode itself, but Your View immediately sets it back to its saved value. The page shows nothing unless Your View is set to tooltip or subtitle.
-- On phones in tooltip mode, the pop-up and the bottom bar both appear at once. `Ruling 2026-10-12:` on phones, tooltip mode shows the bottom bar only (the original intention). Not yet fixed — the fix depends on the phone-size rules question (see Platform questions).
+- On phones in tooltip mode, the pop-up and the bottom bar both appear at once. `Ruling 2026-10-12:` on phones, tooltip mode shows the bottom bar only (the original intention). Fixed — see below.
 - Inline mode with "descriptive" chosen shows nothing beside an image that only has word-level alt text. `Ruling 2026-10-12:` no fallback needed. Every image that carries information gets all three (word, descriptive and AAC), written by the content pipeline, and the checker must refuse an image that's missing any of them before the site builds. To be built during the Image audit. The FigCaption test page's sample images will need all three as well.
 - FigCaption's display code largely duplicates the animation explainer's. See fix list decision 7, which is to extend the animation explainer with slots after launch.
