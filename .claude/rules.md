@@ -11,10 +11,13 @@
 
 ## Key Documents
 
+**`ATOM-SPEC-NOV-2026.md` (repo root) is the one current spec** (set 2026-10-12). It is built atom by atom from tested code plus dated rulings. Read it first. After completing any atom, add or update that atom's section there. The documents below are history: the ones listed here now live in `_reference/superseded-2026-06-12/` or `_reference/atom-audit-files/`. Use them only as background, never as truth.
+
 | Document | Purpose |
 |----------|---------|
+| `ATOM-SPEC-NOV-2026.md` | **Live source of truth** — per-atom tested status, options, rulings, known issues |
 | `render-refactor-phases-plan.md` | 11-phase refactor plan — phase order, Claude Code prompts, decision log |
-| `BUILD-STATUS.md` | **Live source of truth** — per-atom status (reconciled to validator output), validator/renderer state, and docs-vs-code drift. Update at the end of each session. Supersedes the archived `_reference/atom-audit-files/audit-log.md` (frozen history — do not edit). |
+| `BUILD-STATUS.md` | Former live status doc (superseded by `ATOM-SPEC-NOV-2026.md`) |
 | `COMPLIANCE-INVENTORY.md` | The flat list of every axis an atom must comply with — gates, zones, render modes, token families, validator rules, CLAUDE.md rules. The audit template's source of dimensions. |
 | `LAYOUT-ENGINE-SPEC.md` | **Rebuild brief (DRAFT)** — one shared row engine for Page/Section/Card (rows of one-or-many weighted items; grid = multi-item row; renderer computes columns). Build this next; replaces Card's legacy slot. Investigation that fed it: `_reference/layout-rebuild/card-layout-investigation.md`. |
 | `component-audit-checklist-v2.md` | **Current** — full per-component audit checklist (16 sections). Run against every component. |
@@ -23,12 +26,12 @@
 | `image-alt-text-cdn-plan.md` | Alt text architecture, display modes, AAC resolver pipeline, CDN plan |
 | `AAC-Shim-Print-Traceability-Spec.md` | AAC form inputs, assistive tech layer, print traceability architecture |
 
-After completing any component: update `BUILD-STATUS.md` (the live status doc) with status and notes. The old `_reference/atom-audit-files/audit-log.md` is archived history — do not edit it.
+After completing any component: update its section in `ATOM-SPEC-NOV-2026.md` with status, what was tested, and notes. The old `_reference/atom-audit-files/audit-log.md` is archived history — do not edit it.
 
 ### Audit Workflow
 1. Audit each atom individually against `component-audit-checklist-v2.md`
 2. Fix issues specific to that atom only
-3. Log cross-atom dependencies as **deferred** in `BUILD-STATUS.md` (e.g. "raw `<span>` should use Text atom")
+3. Log cross-atom dependencies as **deferred** in that atom's section of `ATOM-SPEC-NOV-2026.md` (e.g. "raw `<span>` should use Text atom")
 4. After ALL atoms pass individually, run a **final atom render pass** to resolve all deferred cross-atom dependencies
 5. Print stylesheet is a global layer built after all atoms pass — not per-component
 
