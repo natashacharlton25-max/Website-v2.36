@@ -76,13 +76,14 @@ These come from `.claude/CLAUDE.md` and from what the code does. Each one become
 | No-colour mode | Pass — image greyed; caption readable |
 | Motion off | Pass |
 | Easy Click (set directly; the Your View switch is a known bug) | Pass — picture goes full width, caption reported as showing but sits above the picture, off the screenshot |
-| Reading mode (text-only render) | **Question** — the full picture and pop-up show exactly as in default mode |
+| Reading mode (text-only render) | Pass (after fix) — alt text always shown inline; descriptive if no type picked; own choice returns when Reading mode is off |
 
 **Not yet tested:** AAC alt text (needs the Asset Library API, which can't be reached from the test workspace); screen reader announcement; keyboard-only tab order across many images.
 
 **Fixed:**
 - 2026-10-12 — the caption styles never loaded, so captions showed as plain text all the time. Fix: the barrel now loads both the styles and the script, and BaseLayout imports the barrel. Commit `0714c36`.
 - 2026-10-12 — on phones, tooltip mode showed the pop-up and the bar together. Fix: a 640px rule in the central phone file `src/styles/tokens/responsive.css` hides the pop-up, so only the bar shows. Tested at phone and desktop sizes.
+- 2026-10-12 — Reading mode showed pictures with pop-ups like normal mode. `Ruling 2026-10-12:` Reading mode is easy-read and only renders information, so image alt text always shows inline. Fix in the Your View panel (`a11y-panel.ts`); saved settings untouched.
 
 **Known issues:**
 - The test page sets tooltip mode itself, but Your View immediately sets it back to its saved value. The page shows nothing unless Your View is set to tooltip or subtitle.
